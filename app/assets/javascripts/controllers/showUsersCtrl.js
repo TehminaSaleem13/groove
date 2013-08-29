@@ -1,0 +1,239 @@
+groovepacks_controllers.
+controller('showUsersCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$location', '$route', '$cookies',
+    function( $scope, $http, $timeout, $routeParams, $location, $route, $q, $cookies) {
+    	$http.get('/home/userinfo.json').success(function(data){
+    		$scope.username = data.username;
+    	});
+
+    	$http.get('/user_settings/userslist.json').success(function(data) {
+    		$scope.users = data;
+
+
+    		$scope.reverse = false;
+            $scope.newUser = {};
+    	}).error(function(data) {
+    		$scope.error_msg = "There was a problem retrieving users list";
+    		$scope.show_error = true;
+    	});
+
+    	$scope.submit = function(newUser) {
+
+    		console.log($scope.newUser);
+    		$http.post('/user_settings/createUser.json', this.newUser).success(function(data) {
+    			console.log(data);
+    			if(!data.result)
+    			{
+    				$scope.error_msgs = data.messages;
+    				$scope.show_error_msgs = true;
+
+    			}
+    			else
+    			{
+    				$scope.show_error_msgs = false;
+    				$scope.newUser = {};
+    				$('#createUser').modal('hide');
+
+    				$http.get('/user_settings/userslist.json').success(function(data) {
+						    		var usersScope = angular.element($("#userstbl")).scope();
+								      usersScope.users = data;
+								      if(!$scope.$$phase) {
+								        usersScope.$apply();
+								      }
+						    	}).error(function(data) {
+						    		$scope.error_msg = "There was a problem retrieving users list.";
+						    		$scope.show_error = true;
+						    	});
+                    $scope.edit_status = false;
+    			}
+    		})
+    	}
+
+    	$scope.handlesort = function(predicate) {
+    		$scope.predicate = predicate;
+    		if ($scope.reverse == false)
+    		{
+    			$scope.reverse = true;
+    		}
+    		else
+    		{
+    			$scope.reverse = false;
+    		}
+
+    	}
+
+        $scope.handle_change_status = function(event) {
+
+            userArray = [];
+
+            /* get user objects of checked items */
+            for( var user_index=0; user_index<= $scope.users.length-1; user_index++)
+            {
+                if ($scope.users[user_index].checked == 1)
+                {
+                    var user = new Object();
+                    user.id = $scope.users[user_index].id;
+                    user.index = user_index;
+                    if(event=='active')
+                    {
+                        user.active = 1;
+                    }
+                    else
+                    {
+                        user.active = 0;
+                    }
+                    userArray.push(user);
+                }
+            }
+            console.log(userArray);
+            /* update the server with the changed status */
+            $http.put('/user_settings/changeuserstatus.json', userArray).success(function(data){
+                if (data.status)
+                {
+                    for(i=0; i<= userArray.length -1; i++)
+                    {
+                        $scope.users[userArray[i].index].active = userArray[i].active;
+                        $scope.users[userArray[i].index].checked = false;
+                    }                         
+                }
+                else
+                {
+                    $scope.error_msg = "There was a problem changing users status";
+                    $scope.show_error = true;
+                }
+                }).error(function(data){
+                            $scope.error_msg = "There was a problem changing users status";
+                            $scope.show_error = true;
+                    });
+        }
+
+        $scope.handle_user_delete_event = function(event) {
+
+            userArray = [];
+            /* get user objects of checked items */
+            for( var user_index=0; user_index<= $scope.users.length-1; user_index++)
+            {
+                if ($scope.users[user_index].checked == 1)
+                {
+                    var user = new Object();
+                    user.id = $scope.users[user_index].id;
+                    user.index = user_index;
+                    if(event=='active')
+                    {
+                        user.active = 1;
+                    }
+                    else
+                    {
+                        user.active = 0;
+                    }
+                    userArray.push(user);
+                }
+            }
+            console.log(userArray);
+            /* update the server with the changed status */
+            $http.put('/user_settings/deleteuser.json', userArray).success(function(data){
+                        if (data.status)
+                        { 
+                            $http.get('/user_settings/userslist.json').success(function(data) {
+                                $scope.users = data;
+                                $scope.reverse = false;
+                            }).error(function(data) {
+                                $scope.error_msg = "There was a problem retrieving users list";
+                                $scope.show_error = true;
+                            });                         
+                        }
+                        else
+                        {
+                            $scope.error_msg = "There was a problem deleting users";
+                            $scope.show_error = true;
+                        }
+                        }).error(function(data){
+                            $scope.error_msg = "There was a problem changing users status";
+                            $scope.show_error = true;
+                        });
+        }
+
+        $scope.handle_user_duplicate_event = function(event) {
+
+            userArray = [];
+            /* get user objects of checked items */
+            for( var user_index=0; user_index<= $scope.users.length-1; user_index++)
+            {
+                if ($scope.users[user_index].checked)
+                {
+                    var user = new Object();
+                    user.id = $scope.users[user_index].id;
+                    user.index = user_index;
+                    if(event=='active')
+                    {
+                        user.active = 1;
+                    }
+                    else
+                    {
+                        user.active = 0;
+                    }
+                    userArray.push(user);
+                }
+            }
+            console.log(userArray);
+            /* update the server with the changed status */
+            $http.put('/user_settings/duplicateuser.json', userArray).success(function(data){
+                        if (data.status)
+                        { 
+                            $http.get('/user_settings/userslist.json').success(function(data) {
+                                $scope.users = data;
+                                $scope.reverse = false;
+                            }).error(function(data) {
+                                $scope.error_msg = "There was a problem retrieving users list";
+                                $scope.show_error = true;
+                            });                         
+                        }
+                        else
+                        {
+                            $scope.error_msg = "There was a problem duplicating users";
+                            $scope.show_error = true;
+                        }
+                        }).error(function(data){
+                            $scope.error_msg = "There was a problem duplicating users";
+                            $scope.show_error = true;
+                        });
+        }
+
+    $scope.getuserinfo = function(id) {
+            /* update the server with the changed status */
+            $http.get('/user_settings/getuserinfo.json?id='+id).success(function(data){
+                        if (data.status)
+                        { 
+                            $scope.newUser = data.user;
+                            $scope.newUser.other1 = data.user.other;
+                            $scope.newUser.createEdit_packer = data.user.createEdit_from_packer;
+                            $scope.edit_status = true;
+                            
+                            $('#createUser').modal('show');                
+                        }
+                        else
+                        {
+                            $scope.error_msg = "There was a problem getting user information";
+                            $scope.show_error = true;
+                        }
+                        }).error(function(data){
+                            $scope.error_msg = "There was a problem getting user information";
+                            $scope.show_error = true;
+                        });
+    }
+
+    $scope.select_deselectall_event = function() {
+        /* get user objects of checked items */
+        for( var user_index=0; user_index<= $scope.users.length-1; user_index++)
+        {
+            $scope.users[user_index].checked = $scope.select_deselectall;
+            //console.log($scope.select_deselectall);
+        }
+    }
+
+    $scope.create_user = function() {
+        $scope.edit_status = false;
+        $scope.newUser = {};
+        $('#createUser').modal('show'); 
+    }
+
+    }]);

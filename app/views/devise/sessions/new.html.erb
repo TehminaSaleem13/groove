@@ -1,0 +1,17 @@
+
+           <div class="row form-row">
+            <div class="span4">
+				<h2>Login</h2>
+
+				<%= simple_form_for(resource, :as => resource_name, :url => session_path(resource_name)) do |f| %>
+				  <div class="form-inputs">
+				    <%= f.input :username, :required => false, :autofocus => true %>
+				    <%= f.input :password, :required => false %>
+				  </div>
+				  <br/>
+				    <%= f.button :submit, "Login", :class => "btn btn-success" %>
+				<% end %>
+
+			</div>
+		</div>
+

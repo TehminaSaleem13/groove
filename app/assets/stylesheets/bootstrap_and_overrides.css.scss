@@ -1,0 +1,111 @@
+@import "bootstrap";
+
+@import "bootstrap-responsive";
+html, body {
+	height:100%;
+}
+
+body { 
+ padding-top: 20px;
+ background-color: #555;
+ }
+
+#wrap
+{
+min-height: 100%;
+}
+
+#main
+{
+overflow:auto;
+padding-bottom:80px; /* this needs to be bigger than footer height*/
+}
+.app-container 
+{
+	background-color: #f5f5f5;
+}
+
+.footer {
+background-color: #f5f5f5;
+position: relative;
+margin-top: -20px; /* negative value of footer height */
+height: 40px;
+clear:both;
+padding-top:20px;
+}
+
+.form-row{
+	margin-left : 40px;
+	margin-bottom: 40px;
+	margin-top: 40px;
+}
+
+.navigation-row, .home-row {
+	margin-left: 40px;
+	margin-top:20px;
+	margin-bottom: 20px;
+	margin-right: 40px;
+}
+
+.left-menu {
+	margin-left: 0px;
+}
+
+span.active {
+display: block;
+overflow: hidden;
+width: 16px;
+height: 16px;
+text-indent: -5000px;
+background: url('/assets/active.png') left top no-repeat;
+}
+span.inactive {
+display: block;
+overflow: hidden;
+width: 16px;
+height: 16px;
+text-indent: -5000px;
+background: url('/assets/inactive.png') left top no-repeat;
+}
+
+#createUser {
+	width: 800px;
+	max-height: 800px;
+}
+#createUser-body {
+	max-height: 600px;
+}
+
+#createForm {
+	margin-bottom: 0px;
+}
+.sorting_asc {
+background: url('/assets/sort_asc.png') no-repeat center right;
+}
+.sorting_desc {
+background: url('/assets/sort_desc.png') no-repeat center right;
+}
+#mainMenu li a:hover {background-color: #95BCF2; text-shadow:none;}
+#mainMenu li a {
+	text-shadow: 0px;
+	color: black;
+}
+#mainMenu li {
+	border-left: 1px solid black;
+	border-top: 1px solid black;
+	border-bottom: 1px solid black;
+}
+
+#mainMenu li:last-child {
+	border-right: 1px solid black;
+}
+
+#mainMenu {
+	border: none;
+	background: none;
+	background-color: none;
+}
+#mainNavbar {
+	border: none;
+	background: none;
+}

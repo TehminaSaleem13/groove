@@ -1,0 +1,367 @@
+<div class="row navigation-row">
+<div ng-include="'/assets/partials/navigation.html'"></div>
+</div>
+<div  class="row home-row">
+<div class="alert alert-danger" ng-show="show_error">
+  <button type="button" class="close" data-dismiss="alert">&times;</button>
+  <p>{{error_msg}}</p>
+</div>
+</div>
+
+
+<div class="row home-row">
+<div ng-include="'/assets/partials/settings.html'"></div>
+
+<div class="span8">
+<div class="well">
+<div class="row-fluid">
+  <div class="span7">
+    <form class="form-search">
+      <input type="text" ng-model="usernameFilter" class="input-medium search-query" placeholder="Search">
+    </form>
+  </div>
+  <div class="span5">
+  <ul class="nav nav-pills">
+    <li class="dropdown">
+      <a class="dropdown-toggle" id="drop4" role="button" data-toggle="dropdown" href="#">Change Status
+         <b class="caret"></b></a>
+      <ul id="menu1" class="dropdown-menu" role="menu" aria-labelledby="drop4">
+        <li role="presentation"><a role="menuitem" tabindex="-1" ng-click="handle_change_status('active')">Active</a></li>
+        <li role="presentation"><a role="menuitem" tabindex="-1" ng-click="handle_change_status('inactive')">Inactive</a></li>
+      </ul>
+    </li>
+    <li class="dropdown">
+      <a class="dropdown-toggle" id="drop5" role="button" data-toggle="dropdown" href="#">Edit <b class="caret"></b></a>
+      <ul id="menu2" class="dropdown-menu" role="menu" aria-labelledby="drop5">
+        <li role="presentation"><a role="menuitem" tabindex="-1" ng-click="handle_user_delete_event()">Delete</a></li>
+        <li role="presentation"><a role="menuitem" tabindex="-1" ng-click="handle_user_duplicate_event()">Duplicate</a></li>
+      </ul>
+    </li>
+  </ul>
+  </div>
+</div>
+
+	<table id="userstbl" class="table table-hover table-bordered">
+      <thead>
+        <tr>
+          <th><input ng-model="select_deselectall" type="checkbox" ng-change='select_deselectall_event()'></input></th>
+          <th><a href="" ng-click="handlesort('username')">Username</a></th>
+          <th><a href="" ng-click="handlesort('active')">Status</a></th>
+          <th><a href="" ng-click="handlesort('last_sign_in_at')">Last Login</a></th>
+          <th><a href="" ng-click="handlesort('online')">Online</a></th>
+          <th><a href="" ng-click="handlesort('is_super_admin')">Type</a></th>
+        </tr>
+      </thead>
+      <tbody>
+      <tr ng-repeat="user in users | filter: usernameFilter | orderBy:predicate:reverse">
+      	<td><input type="checkbox" ng-model="user.checked"/></td>
+      	<td><a href="" role="button" data-toggle="modal" ng-click="getuserinfo(user.id)">{{user.username}}</a></td>
+      	<td>
+      		<span ng-show="user.active" class="active">Active</span>
+      		<span ng-hide="user.active" class="inactive">Inactive</span>      		
+      	</td>
+      	<td>{{user.last_sign_in_at}}</td>
+      	<td>
+      		<span ng-show="user.online" class="active">Online</span>
+      		<span ng-hide="user.online" class="inactive">Not Online</span>  
+      	</td>
+      	<td>
+      		<span ng-show="user.is_super_admin">Administrator</span>
+      		<span ng-hide="user.is_super_admin">User</span>
+      	</td>
+      </tr>
+
+      </tbody>
+	</table>
+</form>
+</div>
+ 
+<!-- Modal popup for creating user -->
+<div id="createUser" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="createUser" 
+aria-hidden="true">
+
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h3 id="createUserheader" ng-show="edit_status">Update User</h3>
+    <h3 id="createUserheader" ng-hide="edit_status">Create User</h3
+  </div>
+ 
+ 
+ <div class="form-horizontal form-horizontal-create" >
+  <fieldset>
+  <div class="modal-body" id="createUser-body">
+  <ul class="nav nav-tabs" id="myTab">
+    <li class="active"><a href="#userinfotab" data-toggle="tab">User Info</a></li>
+    <li><a href="#productstab" data-toggle="tab">Products</a></li>
+    <li><a href="#orderstab" data-toggle="tab">Orders</a></li>
+    <li><a href="#usertab" data-toggle="tab">User</a></li>
+    <li><a href="#systemtab" data-toggle="tab">System</a></li>
+  </ul>
+
+                  
+
+ <div class="tab-content">
+    <div class="alert alert-danger" ng-show="show_error_msgs">
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+      <p ng-repeat="message in error_msgs">{{message}}</p>
+    </div>
+  <div class="tab-pane active" id="userinfotab">
+  <input type="hidden" ng-model="newUser.id" ng-show="edit_status"/>
+    <div class="control-group">
+      <label class="control-label">Username</label>
+      <div class="controls">
+        <input name="username" xs-input-sync ng-model="newUser.username" type="text" value="" required/>
+       </div>
+    </div> 
+
+    <div class="control-group">
+      <label class="control-label">Name</label>
+      <div class="controls">
+        <input name="name" xs-input-sync ng-model="newUser.name" type="text" required/>
+       </div>
+    </div> 
+
+    <div class="control-group">
+      <label class="control-label">Password</label>
+      <div class="controls">
+        <input name="password" xs-input-sync ng-model="newUser.password" type="password" />
+       </div>
+    </div> 
+
+    <div class="control-group">
+      <label class="control-label">Email</label>
+      <div class="controls">
+        <input name="email" xs-input-sync ng-model="newUser.email" type="text"/>
+       </div>
+    </div> 
+
+    <div class="control-group">
+      <label class="control-label">Other</label>
+      <div class="controls">
+        <input name="other1" xs-input-sync ng-model="newUser.other1" type="text"/>
+       </div>
+    </div> 
+
+    <div class="control-group">
+      <label class="control-label">Active</label>
+      <div class="controls">
+        <input name="active" ng-model="newUser.active" type="checkbox"/>
+        <span> User is active</span>
+       </div>
+    </div>         
+                    
+  </div>
+  <div class="tab-pane createuser-tab" id="productstab">
+    <div class="control-group">
+      <label class="control-label">
+      User can activate/deactivate channels & edit additional product details </label>
+      <div class="controls">        
+      	<input name="edit_product_details" ng-model="newUser.edit_product_details" type="checkbox" checked/>
+      </div>
+    </div> 
+
+    <div class="control-group">
+      <label class="control-label">Add new products</label>
+      <div class="controls">
+        <input name="add_products" ng-model="newUser.add_products" type="checkbox" />
+       </div>
+    </div> 
+
+    <div class="control-group">
+      <label class="control-label">Edit products</label>
+      <div class="controls">
+        <input name="edit_products" ng-model="newUser.edit_products" type="checkbox" />
+       </div>
+    </div> 
+
+    <div class="control-group">
+      <label class="control-label">Delete products</label>
+      <div class="controls">
+        <input name="delete_products" ng-model="newUser.delete_products" type="checkbox" />
+       </div>
+    </div> 
+
+    <div class="control-group">
+      <label class="control-label">Import products</label>
+      <div class="controls">
+        <input name="import_products" ng-model="newUser.import_products" type="checkbox"/>
+       </div>
+    </div> 
+
+    <div class="control-group">
+      <label class="control-label">Edit product import settings</label>
+      <div class="controls">
+        <input name="edit_product_import" ng-model="newUser.edit_product_import" type="checkbox" checked/>
+       </div>
+    </div>    
+  </div>
+
+  <div class="tab-pane createuser-tab" id="orderstab">
+  <div class="row-fluid">
+  <div class="span6">
+  <legend>Order Settings</legend>
+    <div class="control-group">
+      <label class="control-label">Update orders </label>
+      <div class="controls">        
+      	<input name="import_orders" ng-model="newUser.import_orders" type="checkbox" checked/>
+      </div>
+    </div> 
+
+    <div class="control-group">
+      <label class="control-label">Change Order Status</label>
+      <div class="controls">
+        <input name="change_order_status" ng-model="newUser.change_order_status" type="checkbox" />
+       </div>
+    </div> 
+
+    <div class="control-group">
+      <label class="control-label">Create/edit notes from Packer</label>
+      <div class="controls">
+        <input name="createEdit_packer" ng-model="newUser.createEdit_packer" type="checkbox" />
+       </div>
+    </div> 
+
+    <div class="control-group">
+      <label class="control-label">Add/edit order items</label>
+      <div class="controls">
+        <input name="add_order_items_ALL" ng-model="newUser.add_order_items_ALL" type="checkbox" />
+       </div>
+    </div> 
+    <div class="control-group">
+      <label class="control-label">Add order items</label>
+      <div class="controls">
+        <input name="add_order_items" ng-model="newUser.add_order_items" type="checkbox"/>
+       </div>
+    </div> 
+
+    <div class="control-group">
+      <label class="control-label">Remove order items</label>
+      <div class="controls">
+        <input name="remove_order_items" ng-model="newUser.remove_order_items" type="checkbox" checked/>
+       </div>
+    </div> 
+    </div>
+    <div class="span6">
+
+    <div class="control-group">
+      <label class="control-label">Change order items quantity</label>
+      <div class="controls">
+        <input name="change_quantity_items" ng-model="newUser.change_quantity_items" type="checkbox" checked/>
+       </div>
+    </div>
+    <legend>Order activity & Packing exceptions</legend>
+    <div class="control-group">
+      <label class="control-label">User can view packing exceptions</label>
+      <div class="controls">
+        <input name="view_packing_ex" ng-model="newUser.view_packing_ex" type="checkbox"/>
+       </div>
+    </div> 
+
+    <div class="control-group">
+      <label class="control-label">User can create/enter packing</label>
+      <div class="controls">
+        <input name="create_packing_ex" ng-model="newUser.create_packing_ex" type="checkbox" checked/>
+       </div>
+    </div> 
+    <div class="control-group">
+      <label class="control-label">User can edit existing packing</label>
+      <div class="controls">
+        <input name="edit_packing_ex" ng-model="newUser.edit_packing_ex" type="checkbox" checked/>
+       </div>
+    </div>
+    </div>
+  </div>
+  </div>
+  <div class="tab-pane createuser-tab" id="usertab">
+	<div class="row-fluid">
+	<div class="span4">
+	<legend>User status &amp; info</legend>
+    
+    <div class="control-group">
+      <label class="control-label">Edit user info</label>
+      <div class="controls">
+        <input name="edit_user_info" ng-model="newUser.edit_user_info" type="checkbox" checked/>
+       </div>
+    </div> 
+    
+    <div class="control-group">
+      <label class="control-label">Edit user status</label>
+      <div class="controls">
+        <input name="edit_user_status" ng-model="newUser.edit_user_status" type="checkbox" checked/>
+       </div>
+    </div>
+    </div>
+	<div class="span4">
+	<legend>Super Admin</legend>
+    <div class="control-group">
+      <label class="control-label">User is Super Admin</label>
+      <div class="controls">
+        <input name="is_super_admin" ng-model="newUser.is_super_admin" type="checkbox" checked/>
+       </div>
+    </div> 
+
+    <div class="control-group">
+      <label class="control-label">Create, duplicate and remove users</label>
+      <div class="controls">
+        <input name="create_users" ng-model="newUser.create_users" type="checkbox" checked/>
+       </div>
+    </div>
+    <div class="control-group">
+      <label class="control-label">Edit user permissions</label>
+      <div class="controls">
+        <input name="edit_user_permissions" ng-model="newUser.edit_user_permissions" type="checkbox" checked/>
+       </div>
+    </div>
+    </div>
+    <div class="span4">
+	<legend>Section access</legend>
+    <div class="control-group">
+      <label class="control-label">Scan &amp; Pack</label>
+      <div class="controls">
+        <input name="access_scanpack" ng-model="newUser.access_scanpack" type="checkbox" checked/>
+       </div>
+    </div> 
+    
+    <div class="control-group">
+      <label class="control-label">Orders</label>
+      <div class="controls">
+        <input name="access_orders" ng-model="newUser.access_orders" type="checkbox" checked/>
+       </div>
+    </div>
+    <div class="control-group">
+      <label class="control-label">Products</label>
+      <div class="controls">
+        <input name="access_products" ng-model="newUser.access_products" type="checkbox" checked/>
+       </div>
+    </div>	
+    </div>
+  </div>
+  </div>
+  <div class="tab-pane createuser-tab" id="systemtab">
+				<legend>System settings permissions</legend>
+    <div class="control-group">
+      <label class="control-label">User can edit General Preferences</label>
+      <div class="controls">
+        <input name="edit_general_prefs" ng-model="newUser.edit_general_prefs" type="checkbox" checked/>
+       </div>
+    </div>
+    <div class="control-group">
+      <label class="control-label">User can edit Scanning Preferences</label>
+      <div class="controls">
+        <input name="edit_scanning_prefs" ng-model="newUser.edit_scanning_prefs" type="checkbox" checked/>
+       </div>
+    </div>	
+  </div>
+  </div>
+</div>
+
+  <div class="modal-footer">
+        <button ng-click="submit()"class="btn btn-primary" ng-hide="edit_status">Add User</button>
+        <button ng-click="submit()"class="btn btn-primary" ng-show="edit_status">Update User</button>
+        <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+  </div>
+
+</fieldset>
+</div>
+</div>
+</div>

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= content_for?(:title) ? yield(:title) : "Groovepacks" %></title>
+     <meta name="description" content="<%= content_for?(:description) ? yield(:description) : "Groovepacks" %>">
+    <%= stylesheet_link_tag "application", :media => "all" %>
+    <%= javascript_include_tag "application" %>
+    <%= csrf_meta_tags %>
+    <%= yield(:head) %>
+  </head>
+  <body>
+    <div id="wrap">
+    <div class="container"><%= render 'layouts/messages' %> </div>
+    <div id="main" role="main">
+      <div class="container app-container">
+        <%= yield %>
+      </div>
+    </div> <!--! end of #main -->
+    </div>
+      <section class="footer">
+      <div class="container">
+        <p class="muted credit">Copyright &copy; Groovepacks. All rights reserved.</p>
+      </div>
+    </section>
+  </body>
+
+</html>
