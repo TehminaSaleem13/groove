@@ -11,7 +11,59 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130828115509) do
+ActiveRecord::Schema.define(:version => 20130830155409) do
+
+  create_table "amazon_credentials", :force => true do |t|
+    t.string   "access_key_id",                               :null => false
+    t.string   "secret_access_key",                           :null => false
+    t.string   "app_name",                                    :null => false
+    t.string   "app_version",                                 :null => false
+    t.string   "merchant_id",                                 :null => false
+    t.string   "marketplace_id",                              :null => false
+    t.integer  "store_id"
+    t.datetime "created_at",                                  :null => false
+    t.datetime "updated_at",                                  :null => false
+    t.string   "productaccess_key_id",     :default => "",    :null => false
+    t.string   "productsecret_access_key", :default => "",    :null => false
+    t.string   "productapp_name",          :default => "",    :null => false
+    t.string   "productapp_version",       :default => "",    :null => false
+    t.string   "productmerchant_id",       :default => "",    :null => false
+    t.string   "productmarketplace_id",    :default => "",    :null => false
+    t.boolean  "import_products",          :default => false, :null => false
+    t.boolean  "import_images",            :default => false, :null => false
+  end
+
+  create_table "ebay_credentials", :force => true do |t|
+    t.string   "dev_id",                               :null => false
+    t.string   "app_id",                               :null => false
+    t.string   "cert_id",                              :null => false
+    t.string   "auth_token",                           :null => false
+    t.integer  "store_id"
+    t.datetime "created_at",                           :null => false
+    t.datetime "updated_at",                           :null => false
+    t.string   "productdev_id",     :default => "",    :null => false
+    t.string   "productapp_id",     :default => "",    :null => false
+    t.string   "productcert_id",    :default => "",    :null => false
+    t.string   "productauth_token", :default => "",    :null => false
+    t.boolean  "import_products",   :default => false, :null => false
+    t.boolean  "import_images",     :default => false, :null => false
+  end
+
+  create_table "magento_credentials", :force => true do |t|
+    t.string   "host",                               :null => false
+    t.string   "username",                           :null => false
+    t.string   "password",                           :null => false
+    t.integer  "store_id",                           :null => false
+    t.datetime "created_at",                         :null => false
+    t.datetime "updated_at",                         :null => false
+    t.string   "api_key",         :default => "",    :null => false
+    t.string   "producthost",     :default => "",    :null => false
+    t.string   "productusername", :default => "",    :null => false
+    t.string   "productpassword", :default => "",    :null => false
+    t.string   "productapi_key",  :default => "",    :null => false
+    t.boolean  "import_products", :default => false, :null => false
+    t.boolean  "import_images",   :default => false, :null => false
+  end
 
   create_table "roles", :force => true do |t|
     t.string   "name"
@@ -23,6 +75,15 @@ ActiveRecord::Schema.define(:version => 20130828115509) do
 
   add_index "roles", ["name", "resource_type", "resource_id"], :name => "index_roles_on_name_and_resource_type_and_resource_id"
   add_index "roles", ["name"], :name => "index_roles_on_name"
+
+  create_table "stores", :force => true do |t|
+    t.string   "name",                          :null => false
+    t.boolean  "status",     :default => false, :null => false
+    t.string   "store_type",                    :null => false
+    t.date     "order_date"
+    t.datetime "created_at",                    :null => false
+    t.datetime "updated_at",                    :null => false
+  end
 
   create_table "users", :force => true do |t|
     t.string   "encrypted_password",     :default => "",    :null => false

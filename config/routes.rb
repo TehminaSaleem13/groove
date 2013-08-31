@@ -1,4 +1,14 @@
 Groovepacks::Application.routes.draw do
+  get "store_settings/createStore"
+
+  get "store_settings/changestorestatus"
+
+  get "store_settings/editstore"
+
+  get "store_settings/duplicatestore"
+
+  get "store_settings/deletestore"
+
   get "user_settings/userslist"
 
   get "user_settings/createUser"

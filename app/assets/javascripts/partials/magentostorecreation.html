@@ -1,0 +1,118 @@
+  <div class="row">
+    <div class="span3">
+    <h5>Order Import</h5>
+
+      <label class="radio inline">
+        <input type="radio" ng-model="orderimport_type" value="apiimport"/>  API Import
+      </label>
+
+      <label class="radio inline">
+        <input type="radio" ng-model="orderimport_type" value="csvimport"> CSV Import
+      </label>
+      <br/>
+      <br/>
+      <div ng-show="orderimport_type=='apiimport'">
+      <div class="control-group">
+        <label class="control-label">Host</label>
+        <div class="controls">
+          <input name="host" xs-input-sync ng-model="newStore.host" type="text" value="" required/>
+         </div>
+      </div> 
+
+      <div class="control-group">
+        <label class="control-label">Username</label>
+        <div class="controls">
+          <input name="username" xs-input-sync ng-model="newStore.username" type="text" value="" required/>
+         </div>
+      </div>
+      
+      <div class="control-group">
+        <label class="control-label">Password</label>
+        <div class="controls">
+          <input name="password" xs-input-sync ng-model="newStore.password" type="text" value="" required/>
+         </div>
+      </div>
+
+      <div class="control-group">
+        <label class="control-label">API Key</label>
+        <div class="controls">
+          <input name="apikey" xs-input-sync ng-model="newStore.api_key" type="text" value="" required/>
+         </div>
+      </div>
+      </div>
+      <div ng-show="orderimport_type=='csvimport'">
+      <div class="control-group">
+          <input name="csvfile" xs-input-sync ng-model="csvfile" type="file" value="" required/>
+      </div> 
+      </div>
+    </div>
+
+  </div>
+
+    <div class="row">
+    <div class="span">
+    <h5>Product Import</h5>
+
+      <label class="radio inline">
+        <input type="radio" ng-model="productimport_type" value="apiimport"/>  API Import
+      </label>
+
+      <label class="radio inline">
+        <input type="radio" ng-model="productimport_type" value="csvimport"> CSV Import
+      </label>
+      <br/>
+      <br/>
+      <div ng-show="productimport_type=='apiimport'">
+      <label class="checkbox">
+        <input type="checkbox"
+               ng-model="copyfromabove"
+               name="copy" 
+               ng-change="copydata(copyfromabove)"/> Copy data from above<br/>
+      </label>
+       <label class="checkbox">
+        <input type="checkbox"
+               ng-model="newStore.import_images"
+               name="import_images" /> Import Images <br/>
+      </label>
+      <label class="checkbox">
+        <input type="checkbox"
+               ng-model="newStore.import_products"
+               name="import_products" /> Import Product Categories<br/>
+      </label>
+      <div class="control-group">
+        <label class="control-label">Host</label>
+        <div class="controls">
+          <input name="producthost" xs-input-sync ng-model="newStore.producthost" type="text" value="" required/>
+         </div>
+      </div> 
+
+      <div class="control-group">
+        <label class="control-label">Username</label>
+        <div class="controls">
+          <input name="productusername" xs-input-sync ng-model="newStore.productusername" type="text" value="" required/>
+         </div>
+      </div>
+      
+      <div class="control-group">
+        <label class="control-label">Password</label>
+        <div class="controls">
+          <input name="productpassword" xs-input-sync ng-model="newStore.productpassword" type="text" value="" required/>
+         </div>
+      </div>
+
+      <div class="control-group">
+        <label class="control-label">API Key</label>
+        <div class="controls">
+          <input name="productapikey" xs-input-sync ng-model="newStore.productapi_key" type="text" value="" required/>
+         </div>
+      </div>
+      </div>
+
+      <div ng-show="productimport_type=='csvimport'">
+      <div class="control-group">
+          <input name="csvfile" xs-input-sync ng-model="productcsvfile" type="file" value="" required/>
+      </div> 
+      </div> 
+      </div>
+    </div>
+  </div>

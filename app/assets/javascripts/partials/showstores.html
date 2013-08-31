@@ -1,0 +1,144 @@
+<div class="row navigation-row">
+<div ng-include="'/assets/partials/navigation.html'"></div>
+</div>
+<div  class="row home-row">
+<div class="alert alert-danger" ng-show="show_error">
+  <button type="button" class="close" data-dismiss="alert">&times;</button>
+  <p>{{error_msg}}</p>
+</div>
+</div>
+
+
+<div class="row home-row">
+<div ng-include="'/assets/partials/settings.html'"></div>
+
+<div class="span8">
+<div class="well">
+<div class="row-fluid">
+  <div class="span7">
+    <form class="form-search">
+      <input type="text" ng-model="nameFilter" class="input-medium search-query" placeholder="Search">
+    </form>
+  </div>
+  <div class="span5">
+  <ul class="nav nav-pills">
+    <li class="dropdown">
+      <a class="dropdown-toggle" id="drop4" role="button" data-toggle="dropdown" href="#">Change Status
+         <b class="caret"></b></a>
+      <ul id="menu1" class="dropdown-menu" role="menu" aria-labelledby="drop4">
+        <li role="presentation"><a role="menuitem" tabindex="-1" ng-click="handle_change_status('active')">Active</a></li>
+        <li role="presentation"><a role="menuitem" tabindex="-1" ng-click="handle_change_status('inactive')">Inactive</a></li>
+      </ul>
+    </li>
+    <li class="dropdown">
+      <a class="dropdown-toggle" id="drop5" role="button" data-toggle="dropdown" href="#">Edit <b class="caret"></b></a>
+      <ul id="menu2" class="dropdown-menu" role="menu" aria-labelledby="drop5">
+        <li role="presentation"><a role="menuitem" tabindex="-1" ng-click="handle_store_delete_event()">Delete</a></li>
+        <li role="presentation"><a role="menuitem" tabindex="-1" ng-click="handle_store_duplicate_event()">Duplicate</a></li>
+      </ul>
+    </li>
+  </ul>
+  </div>
+</div>
+  <div ng-show="stores.length==0"><span class="label label-info"> There are no stores in the system</span></div>
+	<table id="storestbl" class="table table-hover table-bordered" ng-show ="stores.length>0">
+      <thead>
+        <tr>
+          <th><input ng-model="select_deselectall" type="checkbox" ng-change='select_deselectall_event()'></input></th>
+          <th><a href="" ng-click="handlesort('name')">Name</a></th>
+          <th><a href="" ng-click="handlesort('status')">Status</a></th>
+          <th><a href="" ng-click="handlesort('store_type')">Type</a></th>
+        </tr>
+      </thead>
+      <tbody>
+
+      <tr ng-repeat="store in stores | filter: nameFilter | orderBy:predicate:reverse">
+      	<td><input type="checkbox" ng-model="store.checked"/></td>
+      	<td><a href="" role="button" data-toggle="modal" ng-click="getstoreinfo(store.id)">{{store.name}}</a></td>
+      	<td>
+      		<span ng-show="store.status" class="active">Active</span>
+      		<span ng-hide="store.status" class="inactive">Inactive</span>      		
+      	</td>
+      	<td>
+      		<span>{{store.store_type}}</span>
+      	</td>
+      </tr>
+
+      </tbody>
+	</table>
+</form>
+</div>
+ 
+<!-- Modal popup for creating user -->
+<div id="createStore" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="createStore" 
+aria-hidden="true">
+
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h3 id="createUserheader" ng-show="edit_status">Update Store</h3>
+    <h3 id="createUserheader" ng-hide="edit_status">Create Store</h3>
+  </div>
+ 
+ 
+ <div class="form-horizontal form-horizontal-create" >
+  <fieldset>
+  <div class="modal-body" id="createStore-body">
+  <div class="alert alert-danger" ng-show="show_error_msgs">
+    <button type="button" class="close" data-dismiss="alert">&times;</button>
+    <p ng-repeat="message in error_msgs">{{message}}</p>
+  </div>
+  <div class="row">
+    <div class="span8">
+    <h5>Store Information</h5>
+      <div class="control-group">
+        <label class="control-label">Store Name</label>
+        <div class="controls">
+          <input name="name" xs-input-sync ng-model="newStore.name" type="text" value="" required/>
+         </div>
+      </div> 
+
+      <div class="control-group">
+        <label class="control-label">Store Status</label>
+        <div class="controls">
+        <label class="radio inline">
+          <input type="radio" ng-model="newStore.status" value="1"/>  Active
+        </label>
+        <label class="radio inline">
+          <input type="radio" ng-model="newStore.status" value="0"> Inactive
+        </label>
+         </div>
+      </div>
+
+      <div class="control-group">
+        <label class="control-label">Store Type</label>
+        <div class="controls">
+            <select class="selectpicker" ng-model="newStore.store_type">
+              <option value="Amazon">Amazon</option>
+              <option value="Ebay">Ebay</option>
+              <option value="Magento">Magento</option>
+            </select>
+         </div>
+      </div>
+    </div>
+  </div>
+
+  <div ng-include="'/assets/partials/magentostorecreation.html'" 
+      ng-show="newStore.store_type =='Magento'"></div>
+
+  <div ng-include="'/assets/partials/ebaystorecreation.html'" 
+      ng-show="newStore.store_type =='Ebay'"></div>
+
+  <div ng-include="'/assets/partials/amazonstorecreation.html'" 
+      ng-show="newStore.store_type =='Amazon'"></div>
+  </div>
+  
+  <div class="modal-footer">
+        <button ng-click="submit()"class="btn btn-primary" ng-hide="edit_status">Add Store</button>
+        <button ng-click="submit()"class="btn btn-primary" ng-show="edit_status">Update Store</button>
+        <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+  </div>
+
+</fieldset>
+</div>
+</div>
+</div>

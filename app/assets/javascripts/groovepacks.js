@@ -7,9 +7,11 @@ angular.module('groovepacks', ['groovepacks.filters', 'groovepacks.services', 'g
     	{templateUrl: '/assets/partials/showusers.html', controller: 'showUsersCtrl'});
     $routeProvider.when('/settings/showusers', 
     	{templateUrl: '/assets/partials/showusers.html', controller: 'showUsersCtrl'});
+    $routeProvider.when('/settings/showstores', 
+        {templateUrl: '/assets/partials/showstores.html', controller: 'showStoresCtrl'});
     $routeProvider.when('/products', 
     	{templateUrl: '/assets/partials/products.html', controller: 'productsCtrl'});
-    $routeProvider.otherwise({redirectTo: '/settings/showusers'});
+    $routeProvider.otherwise({redirectTo: '/settings/showstores'});
   }]).directive('xsInputSync', function() {
     return {
         restrict: "A",
@@ -23,7 +25,7 @@ angular.module('groovepacks', ['groovepacks.filters', 'groovepacks.services', 'g
                     });
                 }
                 //console.log(scope);
-            }, 300);
+            }, 100);
         }
     };
 });

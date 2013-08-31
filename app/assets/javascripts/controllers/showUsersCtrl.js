@@ -4,11 +4,9 @@ controller('showUsersCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$l
     	$http.get('/home/userinfo.json').success(function(data){
     		$scope.username = data.username;
     	});
-
+        $scope.current_page="show_users";
     	$http.get('/user_settings/userslist.json').success(function(data) {
     		$scope.users = data;
-
-
     		$scope.reverse = false;
             $scope.newUser = {};
     	}).error(function(data) {
