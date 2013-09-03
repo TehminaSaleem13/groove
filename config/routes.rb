@@ -1,6 +1,8 @@
 Groovepacks::Application.routes.draw do
   get "store_settings/createStore"
 
+  get "store_settings/csvImportData"
+
   get "store_settings/changestorestatus"
 
   get "store_settings/editstore"

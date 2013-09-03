@@ -20,6 +20,8 @@ class StoreSettingsController < ApplicationController
     @store.store_type = params[:store_type]
     @store.status = params[:status]
     @result['status'] = true
+    @result['store_id'] = 0
+    @result['csv_import'] = false
 
     if @result['status']
 
@@ -150,10 +152,127 @@ class StoreSettingsController < ApplicationController
               @result['messages'] = [e.message]
         end
       end
+
+      if @store.store_type == 'CSV'
+        begin
+          @store.save!
+        rescue ActiveRecord::RecordInvalid => e
+          @result['status'] = false
+          @result['messages'] = [@store.errors.full_messages]
+
+        rescue ActiveRecord::StatementInvalid => e
+          @result['status'] = false
+          @result['messages'] = [e.message]
+        end
+
+        if @store.id
+          @result["store_id"] = @store.id
+          csv_directory = "uploads/csv"
+          unless params[:orderfile].nil?
+            path = File.join(csv_directory, "#{@store.id}.order.csv")
+            File.open(path, "wb") { |f| f.write(params[:orderfile].read) }
+            @result['csv_import'] = true
+          end
+          unless params[:productfile].nil?
+            path = File.join(csv_directory, "#{@store.id}.product.csv")
+            File.open(path, "wb") { |f| f.write(params[:productfile].read) }
+            @result['csv_import'] = true
+          end
+        end
+
+
+      end
     end
     
     respond_to do |format|
         format.json { render json: @result}
+    end
+  end
+
+  def csvImportData
+    @result = Hash.new
+    @result["status"] = true
+    if !params[:id].nil?
+      @store = Store.find(params[:id])
+    else
+      @result["status"] = false
+    end
+
+    if @result["status"]
+      if !@store.nil?
+        if params[:type].nil? || !["both","order","product"].include?(params[:type])
+          params[:type] = "both"
+        end
+        @result["store_id"] = @store.id
+        @result["order"] = Hash.new
+        @result["product"] = Hash.new
+        #check if previous mapping exists
+        #else fill in defaults
+        csvmap = CsvMapping.find_or_create_by_store_id(@store.id)
+=begin
+         @result["product"]["map_options"] = [
+            [ value:"sku" , name:"SKU"],
+            [ value: "product_name", name: "Product Name"],
+            [ value: "category_name", name: "Category Name"],
+            [ value: "inv_wh1", name: "Inventory"],
+            [ value: "product_images", name: "Product Images"],
+            [ value: "location_primary", name: "Location/Bin"],
+            [ value: "barcode", name: "Barcode Value"]
+        ]
+
+        @result["order"]["map_options"] = [
+            [ value: "increment_id", name: "Order number"],
+            [ value: "order_placed_time", name: "Order placed"],
+            [ value: "sku", name: "SKU"],
+            [ value: "customer_comments", name: "Customer Comments"],
+            [ value: "qty", name: "Qty"],
+            [ value: "price", name: "Price"],
+            [ value: "firstname", name: "First name"],
+            [ value: "lastname", name: "Last name"],
+            [ value: "email", name: "Email"],
+            [ value: "address_1", name: "Address 1"],
+            [ value: "address_2", name: "Address 2"],
+            [ value: "city", name: "City"],
+            [ value: "state", name: "State"],
+            [ value: "postcode", name: "Postal Code"],
+            [ value: "country", name: "Country"],
+            [ value: "method", name: "Shipping Method"]
+        ]
+=end
+        if csvmap.order_map.nil?
+          @result["order"]["settings"] = Hash.new
+        else
+          @result["order"]["settings"] = csv.order_map
+        end
+        if csvmap.product_map.nil?
+          @result["product"]["settings"] = Hash.new
+        else
+          @result["product"]["settings"] = csv.product_map
+        end
+
+        csv_directory = "uploads/csv"
+        if ["both","order"].include?(params[:type])
+          order_file_path = File.join(csv_directory, "#{@store.id}.order.csv")
+          if File.exists? order_file_path
+            # read 4 mb data
+            order_file_data = IO.read(order_file_path,4194304)
+            @result["order"]["data"] = order_file_data
+          end
+        end
+        if ["both","product"].include?(params[:type])
+          product_file_path = File.join(csv_directory, "#{@store.id}.product.csv")
+          if File.exists? product_file_path
+            product_file_data = IO.read(product_file_path,4194304)
+            @result["product"]["data"] = product_file_data
+          end
+        end
+      else
+        @result["status"] = false
+      end
+    end
+
+    respond_to do |format|
+      format.json { render json: @result}
     end
   end
 

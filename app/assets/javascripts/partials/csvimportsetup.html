@@ -1,0 +1,72 @@
+<div class="row">
+    <div class="span8">
+        <h5>Import Options</h5>
+        <div class="control-group">
+            <label class="control-label">From Row</label>
+            <div class="controls">
+                <input type="number" min="1" ng-change="parse()"  ng-model="current.rows" />
+            </div>
+        </div>
+        <h5>Separator Options</h5>
+        <div class="control-group">
+            <label class="radio">
+                <input type="radio" name="fixed_width" ng-model="current.fix_width" ng-change="parse()" value="1"/>  Fixed width
+            </label>
+                <div class="control-group" ng-show="current.fix_width == '1'">
+                    <label class="control-label">Width</label>
+                    <div class="controls">
+                        <input xs-input-sync type="number" ng-change="parse()" ng-model="current.fixed_width" min="1" />
+                    </div>
+                </div>
+
+            <label class="radio">
+                <input type="radio" name="fixed_width" ng-model="current.fix_width" ng-change="parse()" value="0"  > Separated by
+            </label>
+            <div class="control-group" ng-show="current.fix_width == '0'" >
+                <div class="controls">
+                    <label class="radio inline">
+                        <input type="radio" ng-model="current.separator" ng-change="parse()" value="comma" /> Comma
+                    </label>
+                    <label class="radio inline">
+                        <input type="radio" ng-model="current.separator" ng-change="parse()" value="semicolon" /> Semi-colon
+                    </label>
+                    <label class="radio inline">
+                            <input type="radio" ng-model="current.separator" ng-change="parse()" value="tab" /> Tab
+                    </label>
+                    <br/>
+                    <label class="radio inline">
+                        <input type="radio" ng-model="current.separator" ng-change="parse()" value="space" /> Space
+                    </label>
+
+                    <label class="radio inline">
+                        <input type="radio" ng-model="current.separator" value="other" /> Other <input type="text" ng-model="current.custom_separator" ng-show="current.separator == 'other'" ng-change="parse()" />
+                    </label>
+                </div>
+            </div>
+        </div>
+        <h5>Delimiter</h5>
+        <div class="control-group">
+            <div class="controls">
+                Text delimiter <input type="text" ng-model="current.delimiter" ng-change="parse()" />
+            </div>
+        </div>
+        <h5>Preview</h5>
+        <div id="csv-preview">
+            <table class="table table-hover table-bordered table-striped table-condensed">
+                <thead>
+                    <tr>
+                        <th ng-repeat="column in current.empty_cols">
+                            <select ng-model="current.map[column]" name="{{'map_'+column}}" ng-options="opt.value as opt.name for opt in csvimporter.current_type.map_options">
+                                <option value="">-blank-</option>
+                        </select></th>
+                    </tr>
+                </thead>
+
+                <tr ng-repeat="(row_number, preview_row) in current.data">
+                    <td ng-repeat="column_number in current.empty_cols"> {{column(row_number,column_number)}} </td>
+                </tr>
+
+            </table>
+        </div>
+    </div>
+</div>

@@ -1,16 +1,8 @@
   <div class="row">
     <div class="span4">
     <h5>Order Import</h5>
-      <label class="radio inline">
-        <input type="radio" ng-model="orderimport_type" value="apiimport"/>  API Import
-      </label>
-
-      <label class="radio inline">
-        <input type="radio" ng-model="orderimport_type" value="csvimport"> CSV Import
-      </label>
       <br/>
       <br/>
-      <div ng-show="orderimport_type=='apiimport'">
       <div class="control-group">
         <label class="control-label">App ID</label>
         <div class="controls">
@@ -38,29 +30,16 @@
           <input name="ebay_dev_id" xs-input-sync ng-model="newStore.ebay_dev_id" type="text" value="" required/>
          </div>
       </div>
-      </div>
 
-      <div ng-show="orderimport_type=='csvimport'">
-      <div class="control-group">
-          <input name="csvfile" xs-input-sync ng-model="ordercsvfile" type="file" value="" required/>
-      </div> 
-      </div> 
+
     </div>
   </div>
 
   <div class="row">
     <div class="span4">
     <h5>Product Import</h5>
-      <label class="radio inline">
-        <input type="radio" ng-model="productimport_type" value="apiimport"/>  API Import
-      </label>
-
-      <label class="radio inline">
-        <input type="radio" ng-model="productimport_type" value="csvimport"> CSV Import
-      </label>
       <br/>
       <br/>
-      <div ng-show="productimport_type=='apiimport'">
       <label class="checkbox">
         <input type="checkbox"
                ng-model="copyfromabove"
@@ -114,12 +93,6 @@
       </div>
       
       </div>
-
-      <div ng-show="productimport_type=='csvimport'">
-      <div class="control-group">
-          <input name="productcsvfile" xs-input-sync ng-model="productcsvfile" type="file" value="" required/>
-      </div> 
-      </div> 
 
     </div>
   </div>

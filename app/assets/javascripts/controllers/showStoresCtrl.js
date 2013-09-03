@@ -3,7 +3,11 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
     function( $scope, $http, $timeout, $routeParams, $location, $route, $q, $cookies) {
 
         $scope.current_page="show_stores";
-
+        $scope.$on("fileSelected", function (event, args) {
+            $scope.$apply(function () {
+                $scope.newStore[args.name] = args.file;
+            });
+        });
 
     	$http.get('/home/userinfo.json').success(function(data){
     		$scope.username = data.username;
@@ -18,14 +22,23 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
     		$scope.show_error = true;
     	});
 
-        $scope.orderimport_type = 'apiimport';
-        $scope.productimport_type = 'apiimport';
-
 
     	$scope.submit = function() {
 
-    		$http.post('/store_settings/createStore.json', $scope.newStore).success(function(data) {
-    			if(!data.status)
+            $http({
+                method: 'POST',
+                headers: { 'Content-Type': false },
+                url:'/store_settings/createStore.json',
+                transformRequest: function (data) {
+                    var request = new FormData();
+                    for (var key in data) {
+                        request.append(key,data[key]);
+                    }
+                    return request;
+                },
+                 data: $scope.newStore
+            }).success(function(data) {
+                if(!data.status)
     			{
     				$scope.error_msgs = data.messages;
     				$scope.show_error_msgs = true;
@@ -33,6 +46,7 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
     			else
     			{
     				$scope.show_error_msgs = false;
+                    $scope.error_msgs = {};
     				$scope.newStore = {};
     				$('#createStore').modal('hide');
 
@@ -47,6 +61,18 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
 						    		$scope.show_error = true;
 						    	});
                     $scope.edit_status = false;
+
+                    //Use FileReader API here if it exists (post prototype feature)
+                    if(data.csv_import && data.store_id) {
+                        $http.get('/store_settings/csvImportData.json?id='+data.store_id).success(function(data) {
+                            $scope.csv_init(data);
+                            $('#importCsv').modal('show');
+
+                        }).error(function(data) {
+                            $scope.error_msg = "There was a problem retrieving stores list.";
+                            $scope.show_error = true;
+                        })
+                    }
     			}
     		})
     	}
@@ -323,6 +349,7 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
         }
     }
 
+
     $scope.import_products = function() {
             $scope.importproduct_status = "Import in progress";
             $scope.importproductstatus_show = true;
@@ -340,6 +367,124 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
             }).error(function(data) {
 
             });      
+
+    $scope.csv_init = function(data) {
+        $scope.csvimporter = {};
+        $scope.current = {};
+        $scope.current.rows = 1;
+        $scope.current.fix_width = 0;
+        $scope.current.delimiter = '"';
+        $scope.current.fixed_width = 4;
+        $scope.current.separator = "comma";
+        $scope.current.map = {};
+        $scope.current.custom_separator = ""
+        $scope.csvimporter.separator_map = {
+            comma: ',' ,
+            semicolon: ';' ,
+            tab: '\t',
+            space: ' ',
+            other: $scope.current.custom_separator
+        };
+        if("product" in data) {
+            $scope.csvimporter.product = data["product"];
+            $scope.csvimporter.product.map_options = [
+                { value:"sku" , name:"SKU"},
+                { value: "product_name", name: "Product Name"},
+                { value: "category_name", name: "Category Name"},
+                { value: "inv_wh1", name: "Inventory"},
+                { value: "product_images", name: "Product Images"},
+                { value: "location_primary", name: "Location/Bin"},
+                { value: "barcode", name: "Barcode Value"}
+            ]
+            $scope.csvimporter.current_type = data["product"];
+            $scope.csvimporter.type = "product";
+        }
+        if("order" in data) {
+            $scope.csvimporter.order = data["order"];
+            $scope.csvimporter.order.map_options = [
+                { value: "increment_id", name: "Order number"},
+                { value: "order_placed_time", name: "Order placed"},
+                { value: "sku", name: "SKU"},
+                { value: "customer_comments", name: "Customer Comments"},
+                { value: "qty", name: "Qty"},
+                { value: "price", name: "Price"},
+                { value: "firstname", name: "First name"},
+                { value: "lastname", name: "Last name"},
+                { value: "email", name: "Email"},
+                { value: "address_1", name: "Address 1"},
+                { value: "address_2", name: "Address 2"},
+                { value: "city", name: "City"},
+                { value: "state", name: "State"},
+                { value: "postcode", name: "Postal Code"},
+                { value: "country", name: "Country"},
+                { value: "method", name: "Shipping Method"}
+            ]
+            $scope.csvimporter.current_type = data["order"];
+            $scope.csvimporter.type = "order";
+        }
+        $scope.parse();
+    }
+
+    $scope.parse = function() {
+        $scope.current.data = [];
+        $scope.current.empty_cols = [];
+        in_entry = false;
+        secondary_split = [];
+        initial_split = $scope.csvimporter.current_type.data.split(/\r?\n/g);
+        tmp_record = '';
+        row_array = [];
+        $scope.csvimporter.separator_map.other=$scope.current.custom_separator;
+        separator = $scope.csvimporter.separator_map[$scope.current.separator];
+        final_record = [];
+        maxcolumns = 0;
+        for( i in initial_split) {
+            if($scope.current.fix_width == 1) {
+                $scope.current.data.push($.map(initial_split[i].chunk($scope.current.fixed_width),function(val,ind) {return val.trimmer($scope.current.delimiter);} ));
+            } else {
+                secondary_split = initial_split[i].split(separator);
+                for(j in secondary_split) {
+                    if(secondary_split[j].charAt(0) == $scope.current.delimiter && secondary_split[j].charAt(secondary_split[j].length -1) != $scope.current.delimiter) {
+                        in_entry = true;
+                    } else if(secondary_split[j].charAt(secondary_split[j].length -1) == $scope.current.delimiter) {
+                        in_entry = false;
+                    }
+
+                    if(in_entry) {
+                        tmp_record += secondary_split[j]+separator;
+                    } else {
+                        row_array.push((tmp_record + secondary_split[j]).trimmer($scope.current.delimiter));
+                        tmp_record =$scope.current.delimiter;
+                    }
+                }
+                if(!in_entry) {
+                    if(maxcolumns < row_array.length) {
+                        maxcolumns = row_array.length;
+                    }
+                    final_record.push(row_array);
+                    row_array = [];
+                } else {
+                    tmp_record += "\r\n";
+                }
+            }
+        }
+        for(i = 0; i< maxcolumns; i++) {
+            $scope.current.empty_cols.push(i);
+        }
+        $scope.current.data = final_record.slice($scope.current.rows-1);
+        $scope.current.data.pop(1);
+        final_record = [];
+        row_array = [];
+    }
+
+    $scope.strip_char = function(data) {
+        return data.replace(new RegExp('^'+$scope.current.delimiter+'+|'+$scope.current.delimiter+'+$', 'g'), '');
+    }
+    $scope.column = function(row,col) {
+        if( row in $scope.current.data && col in $scope.current.data[row]) {
+            return $scope.current.data[row][col];
+        }
+        return "";
+
     }
 
     }]);

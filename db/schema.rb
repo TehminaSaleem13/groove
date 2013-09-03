@@ -11,8 +11,8 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130908132106) do
 
+ActiveRecord::Schema.define(:version => 20130908132106) do
   create_table "amazon_credentials", :force => true do |t|
     t.string   "access_key_id",                               :null => false
     t.string   "secret_access_key",                           :null => false
@@ -31,6 +31,14 @@ ActiveRecord::Schema.define(:version => 20130908132106) do
     t.string   "productmarketplace_id",    :default => "",    :null => false
     t.boolean  "import_products",          :default => false, :null => false
     t.boolean  "import_images",            :default => false, :null => false
+  end
+
+  create_table "csv_mappings", :force => true do |t|
+    t.integer  "store_id"
+    t.text     "order_map"
+    t.text     "product_map"
+    t.datetime "created_at",  :null => false
+    t.datetime "updated_at",  :null => false
   end
 
   create_table "ebay_credentials", :force => true do |t|
@@ -94,6 +102,28 @@ ActiveRecord::Schema.define(:version => 20130908132106) do
   end
 
   add_index "products", ["store_id"], :name => "index_products_on_store_id"
+
+  create_table "orders", :force => true do |t|
+    t.integer  "increment_id"
+    t.datetime "order_placed_time"
+    t.string   "sku"
+    t.text     "customer_comments"
+    t.integer  "store_id"
+    t.integer  "qty"
+    t.decimal  "price",             :precision => 10, :scale => 0
+    t.string   "firstname"
+    t.string   "lastname"
+    t.string   "email"
+    t.text     "address_1"
+    t.text     "address_2"
+    t.string   "city"
+    t.string   "state"
+    t.string   "postcode"
+    t.string   "country"
+    t.string   "method"
+    t.datetime "created_at",                                       :null => false
+    t.datetime "updated_at",                                       :null => false
+  end
 
   create_table "roles", :force => true do |t|
     t.string   "name"

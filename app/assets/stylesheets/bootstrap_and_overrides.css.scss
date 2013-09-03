@@ -67,12 +67,95 @@ height: 16px;
 text-indent: -5000px;
 background: url('/assets/inactive.png') left top no-repeat;
 }
-
-#createUser, #createStore {
-	width: 800px;
+#createUser, #createStore, #importCsv {
+  top: 5%;
 }
-#createUser-body, #createStore-body {
-	max-height: 420px;
+@media (max-width: 979px) {
+  #createUser, #createStore, #importCsv {
+      width: 800px;
+      margin-left:-400px;
+  }
+  #csv-preview {
+    overflow-x: scroll;
+    width:770px;
+  }
+}
+@media (min-width: 980px) and (max-width:1199px) {
+  #createUser, #createStore, #importCsv {
+    width: 940px;
+    margin-left:-470px;
+  }
+  #csv-preview {
+    overflow-x: scroll;
+    width:910px;
+  }
+}
+@media (min-width: 1200px) and (max-width:1499px) {
+  #createUser, #createStore, #importCsv {
+    width: 1150px;
+    margin-left:-575px;
+  }
+  #csv-preview {
+    overflow-x: scroll;
+    width: 1120px;
+  }
+}
+@media (min-width: 1500px) and (max-width:1699px) {
+  #createUser, #createStore, #importCsv {
+    width: 1450px;
+    margin-left:-725px;
+  }
+  #csv-preview {
+    overflow-x: scroll;
+    width: 1420px;
+  }
+}
+@media (min-width: 1700px) {
+  #createUser, #createStore, #importCsv {
+    width: 1650px;
+    margin-left:-825px;
+  }
+  #csv-preview {
+    overflow-x: scroll;
+    width: 1620px;
+  }
+}
+
+@media (min-height: 650px) and  (max-height: 699px) {
+  #createUser-body, #createStore-body, #importCsv-body {
+    max-height: 450px;
+  }
+}
+@media (min-height: 700px) and  (max-height: 749px) {
+  #createUser-body, #createStore-body, #importCsv-body {
+    max-height: 500px;
+  }
+}
+@media (min-height: 750px) and  (max-height: 799px) {
+  #createUser-body, #createStore-body, #importCsv-body {
+    max-height: 550px;
+  }
+}
+@media (min-height: 800px) and (max-height: 849px) {
+  #createUser-body, #createStore-body, #importCsv-body {
+    max-height: 600px;
+  }
+}
+
+@media (min-height: 850px) and (max-height: 899px) {
+  #createUser-body, #createStore-body, #importCsv-body {
+    max-height: 650px;
+  }
+}
+@media (min-height: 900px) and (max-height: 949px) {
+  #createUser-body, #createStore-body, #importCsv-body {
+    max-height: 700px;
+  }
+}
+@media (min-height: 950px) {
+  #createUser-body, #createStore-body, #importCsv-body {
+    max-height: 750px;
+  }
 }
 
 #createForm {
@@ -108,4 +191,11 @@ background: url('/assets/sort_desc.png') no-repeat center right;
 #mainNavbar {
 	border: none;
 	background: none;
+}
+
+
+#csv-preview thead, #csv-preview select, #csv-preview select option {
+  width:auto;
+  background:#95BCF2;
+  font-family: Arial;
 }
