@@ -10,7 +10,7 @@ angular.module('groovepacks', ['groovepacks.filters', 'groovepacks.services', 'g
     $routeProvider.when('/settings/showstores', 
         {templateUrl: '/assets/partials/showstores.html', controller: 'showStoresCtrl'});
     $routeProvider.when('/products', 
-    	{templateUrl: '/assets/partials/products.html', controller: 'productsCtrl'});
+    	{templateUrl: '/assets/partials/showproducts.html', controller: 'showProductsCtrl'});
     $routeProvider.otherwise({redirectTo: '/settings/showstores'});
   }]).directive('xsInputSync', function() {
     return {

@@ -106,6 +106,14 @@
           <input name="productapikey" xs-input-sync ng-model="newStore.productapi_key" type="text" value="" required/>
          </div>
       </div>
+      <div class="control-group">
+        <div class="controls">
+          <button ng-click="import_products()"class="btn btn-primary" ng-show="edit_status">Import Products</button>
+        </div>
+      </div>
+      <div class="control-group">
+      <label class="alert alert-info" ng-show="importproductstatus_show">{{importproduct_status}}</label>
+      </div>
       </div>
 
       <div ng-show="productimport_type=='csvimport'">

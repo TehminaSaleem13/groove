@@ -323,4 +323,23 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
         }
     }
 
+    $scope.import_products = function() {
+            $scope.importproduct_status = "Import in progress";
+            $scope.importproductstatus_show = true;
+            $http.get('/products/importproducts/'+$scope.newStore.id+'.json').success(function(data){
+                console.log(data);
+                if (data.status)
+                {
+                $scope.importproduct_status="Successfully imported "+data.success_imported+" of "+data.total_imported+" products";
+                }
+                else
+                {
+                $scope.importproduct_status = "Import failed."
+                }
+            //$scope.importproduct_status = "Import completed";
+            }).error(function(data) {
+
+            });      
+    }
+
     }]);

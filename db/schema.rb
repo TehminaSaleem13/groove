@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130830155409) do
+ActiveRecord::Schema.define(:version => 20130908132106) do
 
   create_table "amazon_credentials", :force => true do |t|
     t.string   "access_key_id",                               :null => false
@@ -37,16 +37,16 @@ ActiveRecord::Schema.define(:version => 20130830155409) do
     t.string   "dev_id",                               :null => false
     t.string   "app_id",                               :null => false
     t.string   "cert_id",                              :null => false
-    t.string   "auth_token",                           :null => false
     t.integer  "store_id"
     t.datetime "created_at",                           :null => false
     t.datetime "updated_at",                           :null => false
     t.string   "productdev_id",     :default => "",    :null => false
     t.string   "productapp_id",     :default => "",    :null => false
     t.string   "productcert_id",    :default => "",    :null => false
-    t.string   "productauth_token", :default => "",    :null => false
     t.boolean  "import_products",   :default => false, :null => false
     t.boolean  "import_images",     :default => false, :null => false
+    t.text     "auth_token",                           :null => false
+    t.text     "productauth_token",                    :null => false
   end
 
   create_table "magento_credentials", :force => true do |t|
@@ -64,6 +64,36 @@ ActiveRecord::Schema.define(:version => 20130830155409) do
     t.boolean  "import_products", :default => false, :null => false
     t.boolean  "import_images",   :default => false, :null => false
   end
+
+  create_table "product_cats", :force => true do |t|
+    t.string   "category"
+    t.integer  "product_id"
+    t.datetime "created_at", :null => false
+    t.datetime "updated_at", :null => false
+  end
+
+  add_index "product_cats", ["product_id"], :name => "index_product_cats_on_product_id"
+
+  create_table "product_skus", :force => true do |t|
+    t.string   "sku"
+    t.string   "purpose"
+    t.integer  "product_id"
+    t.datetime "created_at", :null => false
+    t.datetime "updated_at", :null => false
+  end
+
+  add_index "product_skus", ["product_id"], :name => "index_product_skus_on_product_id"
+
+  create_table "products", :force => true do |t|
+    t.string   "store_product_id", :null => false
+    t.string   "name",             :null => false
+    t.string   "product_type"
+    t.integer  "store_id",         :null => false
+    t.datetime "created_at",       :null => false
+    t.datetime "updated_at",       :null => false
+  end
+
+  add_index "products", ["store_id"], :name => "index_products_on_store_id"
 
   create_table "roles", :force => true do |t|
     t.string   "name"

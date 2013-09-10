@@ -53,6 +53,7 @@ gem 'excon'
 gem "mocha", :group => :test
 gem "country_select", "~> 1.2.0"
 gem "clamp"
-
-
-
+gem "savon"
+gem "ebay", "~> 1.1"
+gem "xmlparser"
+gem "soap4r"

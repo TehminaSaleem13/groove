@@ -7,6 +7,6 @@
   encoding: utf8
   database: <%= rubber_env.db_name %>
   username: <%= 'root' %>
-  password: <%= rubber_env.db_pass %>
-  host: <%= rubber_instances.for_role('db', 'primary' => true).first.full_name %>
+  password: <%= 'password' %>
+  host: <%= 'localhost' %>
   pool: 5

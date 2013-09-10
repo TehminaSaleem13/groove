@@ -1,0 +1,28 @@
+<div class="row navigation-row">
+<div ng-include="'/assets/partials/navigation.html'"></div>
+</div>
+<div  class="row home-row">
+<div class="alert alert-danger" ng-show="show_error">
+  <button type="button" class="close" data-dismiss="alert">&times;</button>
+  <p>{{error_msg}}</p>
+</div>
+</div>
+
+<div class="row home-row">
+	<table id="productstbl" class="table table-hover table-bordered">
+      <thead>
+        <tr>
+          <th><a href="" ng-click="handlesort('name')">Name</a></th>
+          <th><a href="" ng-click="handlesort('sku')">Sku</a></th>
+          <th><a href="" ng-click="handlesort('store_type')">Store Type</a></th>
+        </tr>
+      </thead>
+      <tbody>
+      <tr ng-repeat="product in products | filter: nameFilter | orderBy:predicate:reverse">
+      	<td>{{product.name}}</td>
+      	<td>{{product.sku}}</td>
+      	<td>{{product.store_type}} </td>
+      </tr>
+      </tbody>
+	</table>
+</div>
