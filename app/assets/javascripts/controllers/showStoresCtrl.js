@@ -367,7 +367,7 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
             }).error(function(data) {
 
             });      
-
+    }
     $scope.csv_init = function(data) {
         $scope.csvimporter = {};
         $scope.current = {};
