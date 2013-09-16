@@ -194,8 +194,27 @@ background: url('/assets/sort_desc.png') no-repeat center right;
 }
 
 
-#csv-preview thead, #csv-preview select, #csv-preview select option {
+#csv-preview thead {
   width:auto;
-  background:#95BCF2;
+  background:#0088cc;
   font-family: Arial;
+}
+
+#csv-preview .dropdown-menu li {
+  display: block;
+  padding: 3px 20px;
+  clear: both;
+  font-weight: normal;
+  line-height: 20px;
+  color: #333333;
+  white-space: nowrap;
+  cursor: pointer;
+}
+#csv-preview .dropdown-menu li.disabled {
+  color: #999999;
+}
+#csv-preview .csv-preview-fix-height {
+  height:20px;
+  overflow:hidden;
+  overflow-y:auto;
 }

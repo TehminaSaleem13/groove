@@ -385,6 +385,7 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
             space: ' ',
             other: $scope.current.custom_separator
         };
+        $scope.csvimporter.default_map = {value:'none', name:"Unmapped"};
         if("product" in data) {
             $scope.csvimporter.product = data["product"];
             $scope.csvimporter.product.map_options = [
@@ -485,6 +486,28 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
         }
         return "";
 
+    }
+    $scope.column_map = function(col,option) {
+        map = true;
+        for(var prop in $scope.current.map) {
+            if($scope.current.map[prop] === option) {
+                if(confirm("Are you sure you want to change the mapping for "+option.name+" to current column?")) {
+                    $scope.column_unmap(prop,option);
+                } else {
+                    map = false;
+                }
+                break;
+            }
+        }
+        if(map) {
+            $scope.current.map[col] = option;
+            $(".csv-preview-" + option.value).addClass("disabled");
+        }
+    }
+
+    $scope.column_unmap = function(col,option) {
+        $scope.current.map[col] = $scope.csvimporter.default_map;
+        $(".csv-preview-" + option.value).removeClass("disabled");
     }
 
     }]);

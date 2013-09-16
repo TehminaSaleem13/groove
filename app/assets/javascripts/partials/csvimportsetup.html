@@ -56,14 +56,18 @@
                 <thead>
                     <tr>
                         <th ng-repeat="column in current.empty_cols">
-                            <select ng-model="current.map[column]" name="{{'map_'+column}}" ng-options="opt.value as opt.name for opt in csvimporter.current_type.map_options">
-                                <option value="">-blank-</option>
-                        </select></th>
+                            <div class="btn-group">
+                                <button class="btn" ng-init="current.map[column] = csvimporter.default_map"> {{current.map[column].name}} </button> <button class="btn dropdown-toggle" data-toggle="dropdown" ng-click="column_unmap(column,current.map[column])"><span ng-show="current.map[column].value == csvimporter.default_map.value" class="caret"></span> <span ng-show="current.map[column].value != csvimporter.default_map.value" >x</span></button>
+                                <ul class="dropdown-menu">
+                                    <li ng-repeat="opt in csvimporter.current_type.map_options" class="{{'csv-preview-'+opt.value}}" ng-click="column_map(column,opt)">{{opt.name}}</li>
+                                </ul>
+                            </div>
+                        </th>
                     </tr>
                 </thead>
 
                 <tr ng-repeat="(row_number, preview_row) in current.data">
-                    <td ng-repeat="column_number in current.empty_cols"> {{column(row_number,column_number)}} </td>
+                    <td ng-repeat="column_number in current.empty_cols"> <div class="csv-preview-fix-height"> {{column(row_number,column_number)}}</div> </td>
                 </tr>
 
             </table>
