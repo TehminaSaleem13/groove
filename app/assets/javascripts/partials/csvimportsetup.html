@@ -57,7 +57,7 @@
                     <tr>
                         <th ng-repeat="column in current.empty_cols">
                             <div class="btn-group">
-                                <button class="btn" ng-init="current.map[column] = csvimporter.default_map"> {{current.map[column].name}} </button> <button class="btn dropdown-toggle" data-toggle="dropdown" ng-click="column_unmap(column,current.map[column])"><span ng-show="current.map[column].value == csvimporter.default_map.value" class="caret"></span> <span ng-show="current.map[column].value != csvimporter.default_map.value" >x</span></button>
+                                <button class="btn"> {{current.map[column].name}} </button> <button class="btn dropdown-toggle" data-toggle="dropdown" ng-click="column_unmap(column,current.map[column])"><span ng-show="current.map[column].value == csvimporter.default_map.value" class="caret"></span> <span ng-show="current.map[column].value != csvimporter.default_map.value" >x</span></button>
                                 <ul class="dropdown-menu">
                                     <li ng-repeat="opt in csvimporter.current_type.map_options" class="{{'csv-preview-'+opt.value}}" ng-click="column_map(column,opt)">{{opt.name}}</li>
                                 </ul>

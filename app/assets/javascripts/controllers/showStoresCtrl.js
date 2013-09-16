@@ -7,6 +7,7 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
             $scope.$apply(function () {
                 $scope.newStore[args.name] = args.file;
             });
+            $("input[type='file']").val('');
         });
 
     	$http.get('/home/userinfo.json').success(function(data){
@@ -470,6 +471,7 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
         }
         for(i = 0; i< maxcolumns; i++) {
             $scope.current.empty_cols.push(i);
+            $scope.current.map[i] = $scope.csvimporter.default_map;
         }
         $scope.current.data = final_record.slice($scope.current.rows-1);
         $scope.current.data.pop(1);
@@ -488,18 +490,18 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
 
     }
     $scope.column_map = function(col,option) {
-        map = true;
+        map_overwrite = true;
         for(var prop in $scope.current.map) {
             if($scope.current.map[prop] === option) {
                 if(confirm("Are you sure you want to change the mapping for "+option.name+" to current column?")) {
                     $scope.column_unmap(prop,option);
                 } else {
-                    map = false;
+                    map_overwrite = false;
                 }
                 break;
             }
         }
-        if(map) {
+        if(map_overwrite) {
             $scope.current.map[col] = option;
             $(".csv-preview-" + option.value).addClass("disabled");
         }
