@@ -1,3 +1,9 @@
+<div id="csv_parsing">
+    <div class="csv_parsing_text">
+        Parsing Csv....
+        <!-- Replace with image later -->
+    </div>
+</div>
 <div class="row">
     <div class="span8">
         <h5>Import Options</h5>
@@ -25,27 +31,27 @@
             <div class="control-group" ng-show="current.fix_width == '0'" >
                 <div class="controls">
                     <label class="radio inline">
-                        <input type="radio" ng-model="current.separator" ng-change="parse()" value="comma" /> Comma
+                        <input type="radio" ng-model="current.sep" ng-click="current.other_sep = 0" ng-change="parse()" value="," /> Comma
                     </label>
                     <label class="radio inline">
-                        <input type="radio" ng-model="current.separator" ng-change="parse()" value="semicolon" /> Semi-colon
+                        <input type="radio" ng-model="current.sep" ng-click="current.other_sep = 0"  ng-change="parse()" value=";" /> Semi-colon
                     </label>
                     <label class="radio inline">
-                            <input type="radio" ng-model="current.separator" ng-change="parse()" value="tab" /> Tab
+                            <input type="radio" ng-model="current.sep" ng-click="current.other_sep = 0"  ng-change="parse()" value="\t" /> Tab
                     </label>
                     <br/>
                     <label class="radio inline">
-                        <input type="radio" ng-model="current.separator" ng-change="parse()" value="space" /> Space
+                        <input type="radio" ng-model="current.sep" ng-click="current.other_sep = 0"  ng-change="parse()" value=" " /> Space
                     </label>
 
                     <label class="radio inline">
-                        <input type="radio" ng-model="current.separator" value="other" /> Other <input type="text" ng-model="current.custom_separator" ng-show="current.separator == 'other'" ng-change="parse()" />
+                        <input type="radio" ng-model="current.other_sep" value="1" /> Other <input type="text" ng-model="current.sep" ng-show="current.separator == '1'" ng-change="parse()" />
                     </label>
                 </div>
             </div>
         </div>
-        <h5>Delimiter</h5>
-        <div class="control-group">
+        <h5 ng-show="current.fix_width == '0'">Delimiter</h5>
+        <div class="control-group" ng-show="current.fix_width == '0'">
             <div class="controls">
                 Text delimiter <input type="text" ng-model="current.delimiter" ng-change="parse()" />
             </div>
@@ -55,19 +61,20 @@
             <table class="table table-hover table-bordered table-striped table-condensed">
                 <thead>
                     <tr>
-                        <th ng-repeat="column in current.empty_cols">
+                        <th ng-repeat="column in empty_cols">
                             <div class="btn-group">
-                                <button class="btn"> {{current.map[column].name}} </button> <button class="btn dropdown-toggle" data-toggle="dropdown" ng-click="column_unmap(column,current.map[column])"><span ng-show="current.map[column].value == csvimporter.default_map.value" class="caret"></span> <span ng-show="current.map[column].value != csvimporter.default_map.value" >x</span></button>
+                                <button class="btn"> {{current.map[column].name}} </button> <button class="btn dropdown-toggle" data-toggle="dropdown" ng-click="column_unmap(column)"><span ng-show="current.map[column].value == csvimporter.default_map.value" class="caret"></span> <span ng-show="current.map[column].value != csvimporter.default_map.value" >x</span></button>
                                 <ul class="dropdown-menu">
-                                    <li ng-repeat="opt in csvimporter.current_type.map_options" class="{{'csv-preview-'+opt.value}}" ng-click="column_map(column,opt)">{{opt.name}}</li>
+                                    <li ng-repeat="opt in csvimporter[csvimporter.type]['map_options']" class="{{'csv-preview-'+opt.value}}" ng-click="column_map(column,opt)">{{opt.name}}</li>
                                 </ul>
+
                             </div>
                         </th>
                     </tr>
                 </thead>
 
                 <tr ng-repeat="(row_number, preview_row) in current.data">
-                    <td ng-repeat="column_number in current.empty_cols"> <div class="csv-preview-fix-height"> {{column(row_number,column_number)}}</div> </td>
+                    <td ng-repeat="column_number in empty_cols"> <div class="csv-preview-fix-height"> {{current.data[row_number][column_number]}}</div> </td>
                 </tr>
 
             </table>
