@@ -8,5 +8,5 @@
   database: <%= rubber_env.db_name %>
   username: <%= 'root' %>
   password: <%= 'password' %>
-  host: <%= 'localhost' %>
+  host: <%= '54.234.22.126' %>
   pool: 5

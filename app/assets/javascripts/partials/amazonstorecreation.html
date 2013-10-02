@@ -1,43 +1,8 @@
   <div class="row">
     <div class="span4">
     <h5>Order Import</h5>
-      
-      <label class="radio inline">
-        <input type="radio" ng-model="orderimport_type" value="apiimport"/>  API Import
-      </label>
-
-      <label class="radio inline">
-        <input type="radio" ng-model="orderimport_type" value="csvimport"> CSV Import
-      </label>
-      <br/>
       <br/>
       <div ng-show="orderimport_type=='apiimport' ">
-      <div class="control-group">
-        <label class="control-label">Access Key ID</label>
-        <div class="controls">
-          <input name="access_key_id" xs-input-sync ng-model="newStore.access_key_id" type="text" value="" required/>
-         </div>
-      </div> 
-
-      <div class="control-group">
-        <label class="control-label">App Name</label>
-        <div class="controls">
-          <input name="app_name" xs-input-sync ng-model="newStore.app_name" type="text" value="" required/>
-         </div>
-      </div>
-      <div class="control-group">
-        <label class="control-label">App Version</label>
-        <div class="controls">
-          <input name="app_version" xs-input-sync ng-model="newStore.app_version" type="text" value="" required/>
-         </div>
-      </div>
-
-      <div class="control-group">
-        <label class="control-label">Marketplace ID</label>
-        <div class="controls">
-          <input name="marketplace_id" xs-input-sync ng-model="newStore.marketplace_id" type="text" value="" required/>
-         </div>
-      </div>
 
       <div class="control-group">
         <label class="control-label">Merchant ID</label>
@@ -47,11 +12,39 @@
       </div>
 
       <div class="control-group">
-        <label class="control-label">Secret Access Key</label>
+        <label class="control-label">Marketplace ID</label>
         <div class="controls">
-          <input name="secret_access_key" xs-input-sync ng-model="newStore.secret_access_key" type="text" value="" required/>
+          <input name="marketplace_id" xs-input-sync ng-model="newStore.marketplace_id" type="text" value="" required/>
          </div>
       </div>
+      <div class="control-group">
+      <p><a href="https://developer.amazonservices.com/" target="_blank">Click here</a> to grant GroovePacker access to your Amazon Seller account.</p>
+      <p>Sign Up for MWS and Choose Option 2:  Use an application to access my Amazon Seller Account. Provide the following details of Groovepacker</p>
+      </div>
+
+      <div class="control-group">
+        <label class="control-label">Developer Account Number</label>
+        <div class="controls">
+          <p>3632-2901-3625</p>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label class="control-label">Application Name</label>
+        <div class="controls">
+          <p>GroovePacker</p>
+         </div>
+      </div>
+
+      <div class="control-group">
+        <div class="controls">
+          <button ng-click="import_orders()"class="btn btn-primary" ng-show="edit_status">Import Orders</button>
+        </div>
+      </div>
+      <div class="control-group">
+      <label class="alert alert-info" ng-show="importorderstatus_show">{{importorder_status}}</label>
+      </div>
+
       </div>
 
       <div ng-show="orderimport_type=='csvimport'">
@@ -66,14 +59,6 @@
   <div class="row">
     <div class="span4">
     <h5>Product Import</h5>
-      <label class="radio inline">
-        <input type="radio" ng-model="productimport_type" value="apiimport"/>  API Import
-      </label>
-
-      <label class="radio inline">
-        <input type="radio" ng-model="productimport_type" value="csvimport"> CSV Import
-      </label>
-      <br/>
       <br/>
       <label class="checkbox">
         <input type="checkbox"
@@ -92,31 +77,6 @@
                name="import_products" /> Import Product Categories<br/>
       </label>
       <div ng-show="productimport_type=='apiimport'">
-      <div class="control-group">
-        <label class="control-label">Access Key ID</label>
-        <div class="controls">
-          <input name="access_key_id" xs-input-sync ng-model="newStore.productaccess_key_id" type="text" value="" required/>
-         </div>
-      </div> 
-
-      <div class="control-group">
-        <label class="control-label">App Name</label>
-        <div class="controls">
-          <input name="productapp_name" xs-input-sync ng-model="newStore.productapp_name" type="text" value="" required/>
-         </div>
-      </div>
-      <div class="control-group">
-        <label class="control-label">App Version</label>
-        <div class="controls">
-          <input name="productapp_version" xs-input-sync ng-model="newStore.productapp_version" type="text" value="" required/>
-         </div>
-      </div>
-      <div class="control-group">
-        <label class="control-label">Marketplace ID</label>
-        <div class="controls">
-          <input name="productmarketplace_id" xs-input-sync ng-model="newStore.productmarketplace_id" type="text" value="" required/>
-         </div>
-      </div>
 
       <div class="control-group">
         <label class="control-label">Merchant ID</label>
@@ -126,10 +86,30 @@
       </div>
 
       <div class="control-group">
-        <label class="control-label">Secret Access Key</label>
+        <label class="control-label">Marketplace ID</label>
         <div class="controls">
-          <input name="productsecret_access_key" xs-input-sync ng-model="newStore.productsecret_access_key" type="text" value="" required/>
+          <input name="productmarketplace_id" xs-input-sync ng-model="newStore.productmarketplace_id" type="text" value="" required/>
          </div>
+      </div>
+
+
+      <div class="control-group">
+        <div class="controls">
+          <button ng-click="request_import_products()"class="btn btn-primary" ng-show="edit_status">Request Product Import</button>
+        </div>
+      </div>
+      <div class="control-group" ng-show="newStore.productreport_id!='' && !newStore.productgenerated_report_id">
+        <div class="controls">
+          <button ng-click="check_request_import_products()"class="btn" ng-show="edit_status">Check Report Status</button>
+        </div>
+      </div>
+      <div class="control-group" ng-show="newStore.productgenerated_report_id">
+        <div class="controls">
+          <button ng-click="import_products(newStore.productgenerated_report_id)"class="btn" ng-show="edit_status">Import Products</button>
+        </div>
+      </div>
+      <div class="control-group">
+      <label class="alert alert-info" ng-show="importproductstatus_show">{{importproduct_status}}</label>
       </div>
       </div>
       <div ng-show="productimport_type=='csvimport'">

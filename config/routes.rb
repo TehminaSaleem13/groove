@@ -1,4 +1,7 @@
 Groovepacks::Application.routes.draw do
+  resources :orders
+
+
   get "store_settings/createStore"
 
   get "store_settings/changestorestatus"

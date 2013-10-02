@@ -37,7 +37,7 @@ production:
   reconnect: false
   database: groovepacks_production
   pool: 5
-  host: localhost
+  host: 54.234.22.126
   username: root
   password: password
-  socket: /tmp/mysql.sock
+  socket: /var/run/mysqld/mysqld.sock
