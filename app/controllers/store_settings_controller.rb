@@ -113,8 +113,8 @@ class StoreSettingsController < ApplicationController
           @ebay = @ebay.first
         end
 
-        @ebay.auth_token = session[:ebay_auth_token]
-        @ebay.productauth_token = session[:ebay_auth_token]
+        @ebay.auth_token = session[:ebay_auth_token] if !session[:ebay_auth_token].nil?
+        @ebay.productauth_token = session[:ebay_auth_token] if !session[:ebay_auth_token].nil?
         @ebay.ebay_auth_expiration = session[:ebay_auth_expiration]
 
         @ebay.import_products = params[:import_products]
@@ -135,6 +135,7 @@ class StoreSettingsController < ApplicationController
               @result['status'] = false
               @result['messages'] = [e.message]
         end
+        @result['storeid'] = @store.id
       end
     end
     
@@ -247,7 +248,12 @@ class StoreSettingsController < ApplicationController
     appName = ENV['EBAY_APP_ID']
     certName = ENV['EBAY_CERT_ID']
     @result['status'] = false
-    url = URI.parse("https://api.sandbox.ebay.com/ws/api.dll")
+    if ENV['EBAY_SANDBOX_MODE'] == 'YES'
+      url = "https://api.sandbox.ebay.com/ws/api.dll"
+    else
+      url = "https://api.ebay.com/ws/api.dll"
+    end
+    url = URI.parse(url)
 
     req = Net::HTTP::Post.new(url.path)
     req.add_field("X-EBAY-API-REQUEST-CONTENT-TYPE", 'text/xml')
@@ -287,7 +293,12 @@ class StoreSettingsController < ApplicationController
     appName = ENV['EBAY_APP_ID']
     certName = ENV['EBAY_CERT_ID']
     @result['status'] = false
-    url = URI.parse("https://api.sandbox.ebay.com/ws/api.dll")
+    if ENV['EBAY_SANDBOX_MODE'] == 'YES'
+      url = "https://api.sandbox.ebay.com/ws/api.dll"
+    else
+      url = "https://api.ebay.com/ws/api.dll"
+    end
+    url = URI.parse(url)
     @store = EbayCredentials.where(:store_id=>params[:storeid])
 
     if !@store.nil? && @store.length > 0

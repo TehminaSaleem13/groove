@@ -45,4 +45,5 @@ Groovepacks::Application.configure do
   ENV['EBAY_CERT_ID'] = "86380834-e449-4dd9-b19f-748b4625533d"
   ENV['EBAY_DEV_ID'] = "568a739c-a13d-40e5-922a-6e3ecc652d9d"
   ENV['EBAY_RU_NAME'] = "Navaratan_Techn-Navarata-607d-4-ltqij"
+  ENV['EBAY_SANDBOX_MODE'] = "YES"
 end

@@ -69,10 +69,11 @@ background: url('/assets/inactive.png') left top no-repeat;
 }
 
 #createUser, #createStore {
-	width: 800px;
+	width: 920px;
+	left: 35%;
 }
 #createUser-body, #createStore-body {
-	max-height: 420px;
+	max-height: 480px;
 }
 
 #createForm {

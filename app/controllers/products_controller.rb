@@ -86,9 +86,14 @@ class ProductsController < ApplicationController
 		if @ebay_credentials.length > 0 
 			@credential = @ebay_credentials.first
 			require 'eBayAPI'
+			if ENV['EBAY_SANDBOX_MODE'] == 'YES'
+				sandbox = true
+			else
+				sandbox = false
+			end
 			@eBay = EBay::API.new(@credential.productauth_token, 
 				        ENV['EBAY_DEV_ID'], ENV['EBAY_APP_ID'], 
-        				ENV['EBAY_CERT_ID'], :sandbox=>true)
+        				ENV['EBAY_CERT_ID'], :sandbox=>sandbox)
 			
 			seller_list =@eBay.GetSellerList(:startTimeFrom=> (Date.today - 3.months).to_datetime,
 				 :startTimeTo =>(Date.today + 1.day).to_datetime)

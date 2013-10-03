@@ -43,17 +43,17 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
             }
             else
             {   
-            $http.get('/store_settings/getebaysigninurl.json').success(function(data) {
-                if (data.ebay_signin_url_status)
-                {
-                $scope.ebay_signin_url = data.ebay_signin_url;
-                $scope.ebay_signin_url_status = data.ebay_signin_url_status;
-                $scope.ebay_sessionid = data.ebay_sessionid;
-                }
+            // $http.get('/store_settings/getebaysigninurl.json').success(function(data) {
+            //     if (data.ebay_signin_url_status)
+            //     {
+            //     $scope.ebay_signin_url = data.ebay_signin_url;
+            //     $scope.ebay_signin_url_status = data.ebay_signin_url_status;
+            //     $scope.ebay_sessionid = data.ebay_sessionid;
+            //     }
 
-                }).error(function(data) {
-                    $scope.ebay_signin_url_status = false;
-                });
+            //     }).error(function(data) {
+            //         $scope.ebay_signin_url_status = false;
+            //     });
             }
     	}).error(function(data) {
     		$scope.error_msg = "There was a problem retrieving stores list";
@@ -99,7 +99,7 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
 						    	});
                     $scope.edit_status = false;
     			}
-    		})
+    		});
     	}
 
     	$scope.handlesort = function(predicate) {
@@ -239,7 +239,19 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
         $http.get('/store_settings/ebayuserfetchtoken.json').success(function(data){
             if (data.status)
             {
-            $scope.ebay_show_signin_url = false;           
+            $scope.ebay_show_signin_url = false;
+            $http.post('/store_settings/createStore.json', $scope.newStore).success(function(data) {
+                if(!data.status)
+                {
+                    $scope.error_msgs = data.messages;
+                    $scope.show_error_msgs = true;
+                }
+                else
+                {
+                    $scope.newStore.id = data.storeid
+                    $scope.edit_status = true;
+                }
+            });           
             }
             //console.log(data);
         });
@@ -352,6 +364,7 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
         $scope.redirect = false;
         $scope.newStore = {};
         $scope.ebay_show_signin_url = true;
+        $scope.newStore.status = 1;
         $http.get('/store_settings/getebaysigninurl.json').success(function(data) {
             if (data.ebay_signin_url_status)
             {
