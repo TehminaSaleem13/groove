@@ -4,4 +4,6 @@ class Product < ActiveRecord::Base
 
   has_many :product_skus
   has_many :product_cats
+  has_many :product_barcodes
+  has_many :product_images
 end

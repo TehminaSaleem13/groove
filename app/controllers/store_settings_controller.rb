@@ -261,6 +261,7 @@ class StoreSettingsController < ApplicationController
               { value: "category_name", name: "Category Name"},
               { value: "inv_wh1", name: "Inventory"},
               { value: "product_images", name: "Product Images"},
+              { value: "product_type", name: "Product Type"},
               { value: "location_primary", name: "Location/Bin"},
               { value: "barcode", name: "Barcode Value"}
           ]
@@ -352,7 +353,23 @@ class StoreSettingsController < ApplicationController
           end
         end
 
-        order_map = ["address_1","address_2","city","country","customer_comments","email","firstname","increment_id","lastname","method","postcode","sku","state","price","qty"]
+        order_map = [
+          "address_1",
+          "address_2",
+          "city",
+          "country",
+          "customer_comments",
+          "email",
+          "firstname",
+          "increment_id",
+          "lastname",
+          "method",
+          "postcode",
+          "sku",
+          "state",
+          "price",
+          "qty"
+        ]
         final_record.each_with_index do |single_row,index|
           if params[:type] == "order"
             order = Order.new
@@ -397,6 +414,74 @@ class StoreSettingsController < ApplicationController
             end
           else
             #product import code here
+            product = Product.new
+            product.store = @store
+            product.store_product_id = 0
+            product.name = ""
+            if !mapping['product_name'].nil? && mapping['product_name'] > 0
+              product.name = single_row[mapping['product_name']]
+            end
+            if !mapping['product_type'].nil? && mapping['product_type'] > 0
+              product.product_type = single_row[mapping['product_type']]
+            end
+            if !mapping['inv_wh1'].nil? && mapping['inv_wh1'] > 0
+              product.inv_wh1 = single_row[mapping['inv_wh1']]
+            end
+            if !mapping['location_primary'].nil? && mapping['location_primary'] > 0
+              product.location_primary = single_row[mapping['location_primary']]
+            end
+            if !mapping['category_name'].nil? && mapping['category_name'] > 0
+              unless single_row[mapping['category_name']].nil?
+                cats = single_row[mapping['category_name']].split(",")
+                cats.each do |single_cat|
+                  product_cat = ProductCat.new
+                  product_cat.category = single_cat
+                  product.product_cats << product_cat
+                end
+              end
+            end
+            if !mapping['product_images'].nil? && mapping['product_images'] > 0
+              unless single_row[mapping['product_images']].nil?
+                images = single_row[mapping['product_images']].split(",")
+                images.each do |single_image|
+                  product_image = ProductImage.new
+                  product_image.image = single_image
+                  product.product_images << product_image
+                end
+              end
+            end
+            if !mapping['sku'].nil? && mapping['sku'] > 0
+              unless single_row[mapping['sku']].nil?
+                skus = single_row[mapping['sku']].split(",")
+                skus.each do |single_sku|
+                  product_sku = ProductSku.new
+                  product_sku.sku = single_sku
+                  product_sku.purpose = "primary"
+                  product.product_skus << product_sku
+                end
+              end
+            end
+            if !mapping['barcode'].nil? && mapping['barcode'] > 0
+              unless single_row[mapping['barcode']].nil?
+                barcodes = single_row[mapping['barcode']].split(",")
+                barcodes.each do |single_barcode|
+                  product_barcode = ProductBarcode.new
+                  product_barcode.barcode = single_barcode
+                  product.product_barcodes << product_barcode
+                end
+              end
+            end
+            if @result["status"]
+              begin
+                product.save!
+              rescue ActiveRecord::RecordInvalid => e
+                @result['status'] = false
+                @result['messages'].push(product.errors.full_messages)
+              rescue ActiveRecord::StatementInvalid => e
+                @result['status'] = false
+                @result['messages'].push(e.message)
+              end
+            end
           end
           unless @result["status"]
             @result["last_row"] = index

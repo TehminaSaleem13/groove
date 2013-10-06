@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130924022829) do
+ActiveRecord::Schema.define(:version => 20131006131225) do
 
   create_table "amazon_credentials", :force => true do |t|
     t.string   "access_key_id",                               :null => false
@@ -95,6 +95,15 @@ ActiveRecord::Schema.define(:version => 20130924022829) do
     t.datetime "updated_at",        :null => false
   end
 
+  create_table "product_barcodes", :force => true do |t|
+    t.integer  "product_id"
+    t.string   "barcode"
+    t.datetime "created_at", :null => false
+    t.datetime "updated_at", :null => false
+  end
+
+  add_index "product_barcodes", ["product_id"], :name => "index_product_barcodes_on_product_id"
+
   create_table "product_cats", :force => true do |t|
     t.string   "category"
     t.integer  "product_id"
@@ -103,6 +112,15 @@ ActiveRecord::Schema.define(:version => 20130924022829) do
   end
 
   add_index "product_cats", ["product_id"], :name => "index_product_cats_on_product_id"
+
+  create_table "product_images", :force => true do |t|
+    t.integer  "product_id"
+    t.string   "image"
+    t.datetime "created_at", :null => false
+    t.datetime "updated_at", :null => false
+  end
+
+  add_index "product_images", ["product_id"], :name => "index_product_images_on_product_id"
 
   create_table "product_skus", :force => true do |t|
     t.string   "sku"
@@ -121,6 +139,8 @@ ActiveRecord::Schema.define(:version => 20130924022829) do
     t.integer  "store_id",         :null => false
     t.datetime "created_at",       :null => false
     t.datetime "updated_at",       :null => false
+    t.string   "inv_wh1"
+    t.string   "location_primary"
   end
 
   add_index "products", ["store_id"], :name => "index_products_on_store_id"

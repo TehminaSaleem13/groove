@@ -384,6 +384,9 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
         $scope.current.store_id = data["store_id"];
         $scope.current.type = $scope.csvimporter.type;
         $scope.parse();
+        for(i in $scope.current.map) {
+          $(".csv-preview-" + $scope.current.map[i].value).addClass("disabled");
+        }
     }
 
     $scope.import_csv = function() {
@@ -486,7 +489,7 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
     $scope.column_map = function(col,option) {
         map_overwrite = true;
         for(var prop in $scope.current.map) {
-            if($scope.current.map[prop] === option) {
+            if($scope.current.map[prop].value === option.value) {
                 if(confirm("Are you sure you want to change the mapping for "+option.name+" to current column?")) {
                     $scope.column_unmap(prop,option);
                 } else {
