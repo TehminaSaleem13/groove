@@ -3,7 +3,12 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
     function( $scope, $http, $timeout, $routeParams, $location, $route, $q, $cookies) {
 
         $scope.current_page="show_stores";
-
+        $scope.$on("fileSelected", function (event, args) {
+            $scope.$apply(function () {
+                $scope.newStore[args.name] = args.file;
+            });
+            $("input[type='file']").val('');
+        });
 
     	$http.get('/home/userinfo.json').success(function(data){
     		$scope.username = data.username;
@@ -75,8 +80,20 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
 
     	$scope.submit = function() {
 
-    		$http.post('/store_settings/createStore.json', $scope.newStore).success(function(data) {
-    			if(!data.status)
+            $http({
+                method: 'POST',
+                headers: { 'Content-Type': false },
+                url:'/store_settings/createStore.json',
+                transformRequest: function (data) {
+                    var request = new FormData();
+                    for (var key in data) {
+                        request.append(key,data[key]);
+                    }
+                    return request;
+                },
+                 data: $scope.newStore
+            }).success(function(data) {
+                if(!data.status)
     			{
     				$scope.error_msgs = data.messages;
     				$scope.show_error_msgs = true;
@@ -84,6 +101,7 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
     			else
     			{
     				$scope.show_error_msgs = false;
+                    $scope.error_msgs = {};
     				$scope.newStore = {};
     				$('#createStore').modal('hide');
 
@@ -98,6 +116,18 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
 						    		$scope.show_error = true;
 						    	});
                     $scope.edit_status = false;
+
+                    //Use FileReader API here if it exists (post prototype feature)
+                    if(data.csv_import && data.store_id) {
+                        $http.get('/store_settings/csvImportData.json?id='+data.store_id).success(function(data) {
+                            $scope.csv_init(data);
+                            $('#importCsv').modal('show');
+
+                        }).error(function(data) {
+                            $scope.error_msg = "There was a problem retrieving stores list.";
+                            $scope.show_error = true;
+                        })
+                    }
     			}
     		});
     	}
@@ -186,7 +216,7 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
                             }).error(function(data) {
                                 $scope.error_msg = "There was a problem retrieving stores list";
                                 $scope.show_error = true;
-                            });                         
+                            });
                         }
                         else
                         {
@@ -554,6 +584,149 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
             }).error(function(data) {
                 $scope.message = "Getting active stores failed.";
             });  
+    }
+    $scope.csv_init = function(data) {
+        $scope.csvimporter = {};
+        $scope.csvimporter.default_map = {value:'none', name:"Unmapped"};
+        if("product" in data && "data" in data["product"]) {
+            $scope.csvimporter.product = data["product"];
+            $scope.csvimporter.type = "product";
+        }
+        if("order" in data && "data" in data["order"]) {
+            $scope.csvimporter.order = data["order"];
+            $scope.csvimporter.type = "order";
+        }
+        $scope.current = $scope.csvimporter[$scope.csvimporter.type]["settings"];
+        $scope.current.store_id = data["store_id"];
+        $scope.current.type = $scope.csvimporter.type;
+        $scope.parse();
+        for(i in $scope.current.map) {
+          $(".csv-preview-" + $scope.current.map[i].value).addClass("disabled");
+        }
+    }
+
+    $scope.import_csv = function() {
+        $http.post('store_settings/csvDoImport.json',$scope.current).success(function(data){
+            if(!data.status) {
+                $scope.error_msgs = data.messages;
+                $scope.show_error_msgs = true;
+                $scope.current.rows = $scope.current.rows + data.last_row
+            } else {
+                $scope.show_error_msgs = false;
+                $scope.error_msgs = {};
+                $scope.current = {};
+                $scope.csvimporter = {};
+                $('#importCsv').modal('hide');
+            }
+        });
+
+    }
+    $scope.parse = function() {
+        //Show loading sign
+        //This needs WebWorkers to work for real, apply in post-prototype version
+        $("#csv_parsing").show();
+        $scope.current.data = [];
+        $scope.empty_cols = [];
+        in_entry = false;
+        secondary_split = [];
+        initial_split = $scope.csvimporter[$scope.csvimporter.type]["data"].split(/\r?\n/g);
+        tmp_record = '';
+        row_array = [];
+        separator = $scope.current.sep;
+        if(separator == '') {
+            separator = " ";
+        }
+        final_record = [];
+        maxcolumns = 0;
+        for( i in initial_split) {
+            if($scope.current.fix_width == 1) {
+                row_array = initial_split[i].chunk($scope.current.fixed_width);
+                if(maxcolumns < row_array.length) {
+                    maxcolumns = row_array.length;
+                }
+                final_record.push(row_array);
+                row_array = [];
+            } else {
+                secondary_split = initial_split[i].split(separator);
+                for(j in secondary_split) {
+                    if(secondary_split[j].charAt(0) == $scope.current.delimiter && secondary_split[j].charAt(secondary_split[j].length -1) != $scope.current.delimiter) {
+                        in_entry = true;
+                    } else if(secondary_split[j].charAt(secondary_split[j].length -1) == $scope.current.delimiter) {
+                        in_entry = false;
+                    }
+
+                    if(in_entry) {
+                        if( j == secondary_split.length -1) {
+                            tmp_record += secondary_split[j];
+                        } else {
+                            tmp_record += secondary_split[j]+separator;
+                        }
+                    } else {
+                        row_array.push((tmp_record + secondary_split[j]).trimmer($scope.current.delimiter));
+                        if( j == secondary_split.length -1) {
+                            tmp_record = "";
+                        } else {
+                            tmp_record = $scope.current.delimiter;
+                        }
+                    }
+                }
+                if(in_entry) {
+                    tmp_record += "\r\n";
+
+                } else {
+                    if(maxcolumns < row_array.length) {
+                        maxcolumns = row_array.length;
+                    }
+                    final_record.push(row_array);
+                    row_array = [];
+                }
+            }
+        }
+        for(i = 0; i< maxcolumns; i++) {
+            $scope.empty_cols.push(i);
+            if((i in $scope.current.map && 'name' in $scope.current.map[i] && 'value' in $scope.current.map[i]) ) {
+                //$scope.column_map(i,$scope.current.map[i]);
+                $(".csv-preview-" + $scope.current.map[i].value).addClass("disabled");
+            } else {
+                $scope.current.map[i] = $scope.csvimporter.default_map;
+            }
+        }
+        $scope.current.data = final_record.slice($scope.current.rows-1);
+        $scope.current.data.pop(1);
+        final_record = [];
+        row_array = [];
+        //remove loading sign
+        $("#csv_parsing").hide();
+    }
+
+    $scope.strip_char = function(data) {
+        return data.replace(new RegExp('^'+$scope.current.delimiter+'+|'+$scope.current.delimiter+'+$', 'g'), '');
+    }
+    $scope.column_map = function(col,option) {
+        map_overwrite = true;
+        for(var prop in $scope.current.map) {
+            if($scope.current.map[prop].value === option.value) {
+                if(confirm("Are you sure you want to change the mapping for "+option.name+" to current column?")) {
+                    $scope.column_unmap(prop,option);
+                } else {
+                    map_overwrite = false;
+                }
+                break;
+            }
+        }
+        if(map_overwrite) {
+            $scope.current.map[col] = option;
+            $(".csv-preview-" + option.value).addClass("disabled");
+        }
+    }
+
+    $scope.column_unmap = function(col) {
+        value = "";
+        if("value" in $scope.current.map[col]) {
+            value = $scope.current.map[col].value;
+        }
+        $scope.current.map[col] = $scope.csvimporter.default_map;
+        $(".csv-preview-" + value).removeClass("disabled");
     }
 
     }]);

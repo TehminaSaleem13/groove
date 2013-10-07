@@ -28,6 +28,14 @@ ActiveRecord::Schema.define(:version => 20131007185756) do
     t.datetime "productgenerated_report_date"
   end
 
+  create_table "csv_mappings", :force => true do |t|
+    t.integer  "store_id"
+    t.text     "order_map"
+    t.text     "product_map"
+    t.datetime "created_at",  :null => false
+    t.datetime "updated_at",  :null => false
+  end
+
   create_table "ebay_credentials", :force => true do |t|
     t.integer  "store_id"
     t.datetime "created_at",                              :null => false
@@ -102,11 +110,38 @@ ActiveRecord::Schema.define(:version => 20131007185756) do
     t.boolean  "status"
     t.string   "error_message"
     t.integer  "store_id"
+  end
+  create_table "orders", :force => true do |t|
+    t.string   "increment_id"
+    t.datetime "order_placed_time"
+    t.string   "sku"
+    t.text     "customer_comments"
+    t.integer  "store_id"
+    t.integer  "qty"
+    t.string   "price"
+    t.string   "firstname"
+    t.string   "lastname"
+    t.string   "email"
+    t.text     "address_1"
+    t.text     "address_2"
+    t.string   "city"
+    t.string   "state"
+    t.string   "postcode"
+    t.string   "country"
+    t.string   "method"
     t.datetime "created_at",        :null => false
     t.datetime "updated_at",        :null => false
   end
 
   add_index "orders_import_summaries", ["store_id"], :name => "index_orders_import_summaries_on_store_id"
+  create_table "product_barcodes", :force => true do |t|
+    t.integer  "product_id"
+    t.string   "barcode"
+    t.datetime "created_at", :null => false
+    t.datetime "updated_at", :null => false
+  end
+
+  add_index "product_barcodes", ["product_id"], :name => "index_product_barcodes_on_product_id"
 
   create_table "product_cats", :force => true do |t|
     t.string   "category"
@@ -116,6 +151,15 @@ ActiveRecord::Schema.define(:version => 20131007185756) do
   end
 
   add_index "product_cats", ["product_id"], :name => "index_product_cats_on_product_id"
+
+  create_table "product_images", :force => true do |t|
+    t.integer  "product_id"
+    t.string   "image"
+    t.datetime "created_at", :null => false
+    t.datetime "updated_at", :null => false
+  end
+
+  add_index "product_images", ["product_id"], :name => "index_product_images_on_product_id"
 
   create_table "product_skus", :force => true do |t|
     t.string   "sku"
@@ -160,6 +204,9 @@ ActiveRecord::Schema.define(:version => 20131007185756) do
     t.integer  "inv_alert_wh6"
     t.integer  "inv_wh7_qty"
     t.integer  "inv_alert_wh7"
+    t.datetime "created_at",       :null => false
+    t.datetime "updated_at",       :null => false
+    t.string   "inv_wh1"
   end
 
   add_index "products", ["store_id"], :name => "index_products_on_store_id"

@@ -20,17 +20,19 @@ class StoreSettingsController < ApplicationController
 
   def createStore
     @result = Hash.new
-    
+
     if !params[:id].nil?
       @store = Store.find(params[:id])
     else
       @store = Store.new
     end
-    
+
     @store.name= params[:name]
     @store.store_type = params[:store_type]
     @store.status = params[:status]
     @result['status'] = true
+    @result['store_id'] = 0
+    @result['csv_import'] = false
 
     if @result['status']
 
@@ -72,7 +74,7 @@ class StoreSettingsController < ApplicationController
               end
               rescue ActiveRecord::RecordInvalid => e
                 @result['status'] = false
-                @result['messages'] = [@store.errors.full_messages, @store.magento_credentials.errors.full_messages] 
+                @result['messages'] = [@store.errors.full_messages, @store.magento_credentials.errors.full_messages]
 
               rescue ActiveRecord::StatementInvalid => e
                 @result['status'] = false
@@ -107,7 +109,7 @@ class StoreSettingsController < ApplicationController
             end
             rescue ActiveRecord::RecordInvalid => e
               @result['status'] = false
-              @result['messages'] = [@store.errors.full_messages, @store.amazon_credentials.errors.full_messages] 
+              @result['messages'] = [@store.errors.full_messages, @store.amazon_credentials.errors.full_messages]
 
             rescue ActiveRecord::StatementInvalid => e
               @result['status'] = false
@@ -127,7 +129,6 @@ class StoreSettingsController < ApplicationController
         @ebay.auth_token = session[:ebay_auth_token] if !session[:ebay_auth_token].nil?
         @ebay.productauth_token = session[:ebay_auth_token] if !session[:ebay_auth_token].nil?
         @ebay.ebay_auth_expiration = session[:ebay_auth_expiration]
-
         @ebay.import_products = params[:import_products]
         @ebay.import_images = params[:import_images]
 
@@ -140,7 +141,7 @@ class StoreSettingsController < ApplicationController
             end
             rescue ActiveRecord::RecordInvalid => e
               @result['status'] = false
-              @result['messages'] = [@store.errors.full_messages, @store.ebay_credentials.errors.full_messages] 
+              @result['messages'] = [@store.errors.full_messages, @store.ebay_credentials.errors.full_messages]
 
             rescue ActiveRecord::StatementInvalid => e
               @result['status'] = false
@@ -148,10 +149,352 @@ class StoreSettingsController < ApplicationController
         end
         @result['storeid'] = @store.id
       end
+
+      if @store.store_type == 'CSV'
+        begin
+          @store.save!
+        rescue ActiveRecord::RecordInvalid => e
+          @result['status'] = false
+          @result['messages'] = [@store.errors.full_messages]
+
+        rescue ActiveRecord::StatementInvalid => e
+          @result['status'] = false
+          @result['messages'] = [e.message]
+        end
+
+        if @store.id
+          @result["store_id"] = @store.id
+          csv_directory = "uploads/csv"
+          unless params[:orderfile].nil?
+            path = File.join(csv_directory, "#{@store.id}.order.csv")
+            File.open(path, "wb") { |f| f.write(params[:orderfile].read) }
+            @result['csv_import'] = true
+          end
+          unless params[:productfile].nil?
+            path = File.join(csv_directory, "#{@store.id}.product.csv")
+            File.open(path, "wb") { |f| f.write(params[:productfile].read) }
+            @result['csv_import'] = true
+          end
+        end
+
+
+      end
     end
-    
+
     respond_to do |format|
         format.json { render json: @result}
+    end
+  end
+
+  def csvImportData
+    @result = Hash.new
+    @result["status"] = true
+    if !params[:id].nil?
+      @store = Store.find(params[:id])
+    else
+      @result["status"] = false
+      @result["messages"] = ["No store selected"]
+    end
+
+    if @result["status"]
+      if !@store.nil?
+        if params[:type].nil? || !["both","order","product"].include?(params[:type])
+          params[:type] = "both"
+        end
+        @result["store_id"] = @store.id
+
+        #check if previous mapping exists
+        #else fill in defaults
+        default_csv_map = {:rows => 1, :sep => ',' , :other_sep => 0, :delimiter=>'"', :fix_width => 0, :fixed_width =>4, :map => {} }
+        csv_map = CsvMapping.find_or_create_by_store_id(@store.id)
+        csv_map_save = false
+        if csv_map.order_map.blank?
+          csv_map.order_map = default_csv_map
+          csv_map_save = true
+        end
+        if csv_map.product_map.blank?
+          csv_map.product_map = default_csv_map
+          csv_map_save = true
+        end
+        if csv_map_save
+          csv_map.save
+        end
+        # end check for mapping
+
+        csv_directory = "uploads/csv"
+        if ["both","order"].include?(params[:type])
+          @result["order"] = Hash.new
+          @result["order"]["map_options"] = [
+              { value: "increment_id", name: "Order number"},
+              { value: "order_placed_time", name: "Order placed"},
+              { value: "sku", name: "SKU"},
+              { value: "customer_comments", name: "Customer Comments"},
+              { value: "qty", name: "Qty"},
+              { value: "price", name: "Price"},
+              { value: "firstname", name: "First name"},
+              { value: "lastname", name: "Last name"},
+              { value: "email", name: "Email"},
+              { value: "address_1", name: "Address 1"},
+              { value: "address_2", name: "Address 2"},
+              { value: "city", name: "City"},
+              { value: "state", name: "State"},
+              { value: "postcode", name: "Postal Code"},
+              { value: "country", name: "Country"},
+              { value: "method", name: "Shipping Method"}
+          ]
+          @result["order"]["settings"] = csv_map.order_map
+          order_file_path = File.join(csv_directory, "#{@store.id}.order.csv")
+          if File.exists? order_file_path
+            # read 4 mb data
+            order_file_data = IO.read(order_file_path,4194304)
+            @result["order"]["data"] = order_file_data
+          end
+        end
+        if ["both","product"].include?(params[:type])
+          @result["product"] = Hash.new
+          @result["product"]["map_options"] = [
+              { value:"sku" , name:"SKU"},
+              { value: "product_name", name: "Product Name"},
+              { value: "category_name", name: "Category Name"},
+              { value: "inv_wh1", name: "Inventory"},
+              { value: "product_images", name: "Product Images"},
+              { value: "product_type", name: "Product Type"},
+              { value: "location_primary", name: "Location/Bin"},
+              { value: "barcode", name: "Barcode Value"}
+          ]
+          @result["product"]["settings"] = csv_map.product_map
+          product_file_path = File.join(csv_directory, "#{@store.id}.product.csv")
+          if File.exists? product_file_path
+            product_file_data = IO.read(product_file_path,4194304)
+            @result["product"]["data"] = product_file_data
+          end
+        end
+      else
+        @result["status"] = false
+      end
+    end
+
+    respond_to do |format|
+      format.json { render json: @result}
+    end
+  end
+
+  def csvDoImport
+    @result = Hash.new
+    @result["status"] = true
+    @result["last_row"] = 0
+    @result["messages"] = []
+
+    if params[:store_id]
+      @store = Store.find_by_id params[:store_id]
+      if @store.nil?
+        @result["status"] = false
+        @result["messages"].push("Store doesn't exist")
+      end
+    else
+      @result["status"] = false
+      @result["messages"].push("No store selected")
+    end
+
+    if params[:type].nil? || !["order","product"].include?(params[:type])
+      @result["status"] = false
+      @result["messages"].push("No Type specified to import")
+    end
+
+    if @result["status"]
+      #store mapping for later
+      csv_map = CsvMapping.find_by_store_id(@store.id)
+      csv_map["#{params[:type]}_map"] = {
+          :rows => params[:rows],
+          :sep => params[:sep] ,
+          :other_sep => params[:other_sep],
+          :delimiter=> params[:delimiter],
+          :fix_width => params[:fix_width],
+          :fixed_width => params[:fixed_width],
+          :map => params[:map]
+      }
+      begin
+        csv_map.save!
+      rescue ActiveRecord::RecordInvalid => e
+        @result['status'] = false
+        @result['messages'].push(csv_map.errors.full_messages)
+      rescue ActiveRecord::StatementInvalid => e
+        @result['status'] = false
+        @result['messages'].push(e.message)
+      end
+    end
+
+    if @result["status"]
+      csv_directory = "uploads/csv"
+      file_path = File.join(csv_directory, "#{params[:store_id]}.#{params[:type]}.csv")
+      if File.exists? file_path
+        final_record = []
+        if params[:fix_width] == 1
+          initial_split = IO.readlines(file_path)
+          initial_split.each do |single|
+            final_record.push(single.scan(/.{1,#{params[:fixed_width]}}/m))
+          end
+        else
+          require 'csv'
+          CSV.foreach(file_path,:col_sep => params[:sep], :quote_char => params[:delimiter] ) do |single|
+            final_record.push(single)
+          end
+        end
+        if params[:rows].to_i && params[:rows].to_i > 1
+          final_record.shift(params[:rows].to_i - 1)
+        end
+        mapping = {}
+        params[:map].each do |map_single|
+          if map_single[1][:value] != 'none'
+            mapping[map_single[1][:value]] = map_single[0].to_i
+          end
+        end
+
+        order_map = [
+          "address_1",
+          "address_2",
+          "city",
+          "country",
+          "customer_comments",
+          "email",
+          "firstname",
+          "increment_id",
+          "lastname",
+          "method",
+          "postcode",
+          "sku",
+          "state",
+          "price",
+          "qty"
+        ]
+        final_record.each_with_index do |single_row,index|
+          if params[:type] == "order"
+            order = Order.new
+            #order_placed_time,price,qty
+            order_required = ["qty","sku","increment_id"]
+            order_map.each do |single_map|
+              if !mapping[single_map].nil? && mapping[single_map] > 0
+                order[single_map] = single_row[mapping[single_map]]
+                if order_required.include? single_map
+                  order_required.delete(single_map)
+                end
+              end
+            end
+            if order_required.length
+              @result["status"] = false
+              order_required.each do |required_element|
+                @result["messages"].push("#{required_element} is missing.")
+              end
+            end
+            if @result["status"]
+              if !mapping["order_placed_time"].nil? && mapping["order_placed_time"] > 0
+                begin
+                  require 'time'
+                  time = Time.parse(single_row[mapping["order_placed_time"]])
+                  order["order_placed_time"] = time
+                rescue ArgumentError => e
+                  @result["status"] = false
+                  @result["messages"].push("Order Placed has bad parameter - #{single_row[mapping['order_placed_time']]}")
+                end
+              end
+              if @result["status"]
+                begin
+                  order.save!
+                rescue ActiveRecord::RecordInvalid => e
+                  @result['status'] = false
+                  @result['messages'].push(order.errors.full_messages)
+                rescue ActiveRecord::StatementInvalid => e
+                  @result['status'] = false
+                  @result['messages'].push(e.message)
+                end
+              end
+            end
+          else
+            #product import code here
+            product = Product.new
+            product.store = @store
+            product.store_product_id = 0
+            product.name = ""
+            if !mapping['product_name'].nil? && mapping['product_name'] > 0
+              product.name = single_row[mapping['product_name']]
+            end
+            if !mapping['product_type'].nil? && mapping['product_type'] > 0
+              product.product_type = single_row[mapping['product_type']]
+            end
+            if !mapping['inv_wh1'].nil? && mapping['inv_wh1'] > 0
+              product.inv_wh1 = single_row[mapping['inv_wh1']]
+            end
+            if !mapping['location_primary'].nil? && mapping['location_primary'] > 0
+              product.location_primary = single_row[mapping['location_primary']]
+            end
+            if !mapping['category_name'].nil? && mapping['category_name'] > 0
+              unless single_row[mapping['category_name']].nil?
+                cats = single_row[mapping['category_name']].split(",")
+                cats.each do |single_cat|
+                  product_cat = ProductCat.new
+                  product_cat.category = single_cat
+                  product.product_cats << product_cat
+                end
+              end
+            end
+            if !mapping['product_images'].nil? && mapping['product_images'] > 0
+              unless single_row[mapping['product_images']].nil?
+                images = single_row[mapping['product_images']].split(",")
+                images.each do |single_image|
+                  product_image = ProductImage.new
+                  product_image.image = single_image
+                  product.product_images << product_image
+                end
+              end
+            end
+            if !mapping['sku'].nil? && mapping['sku'] > 0
+              unless single_row[mapping['sku']].nil?
+                skus = single_row[mapping['sku']].split(",")
+                skus.each do |single_sku|
+                  product_sku = ProductSku.new
+                  product_sku.sku = single_sku
+                  product_sku.purpose = "primary"
+                  product.product_skus << product_sku
+                end
+              end
+            end
+            if !mapping['barcode'].nil? && mapping['barcode'] > 0
+              unless single_row[mapping['barcode']].nil?
+                barcodes = single_row[mapping['barcode']].split(",")
+                barcodes.each do |single_barcode|
+                  product_barcode = ProductBarcode.new
+                  product_barcode.barcode = single_barcode
+                  product.product_barcodes << product_barcode
+                end
+              end
+            end
+            if @result["status"]
+              begin
+                product.save!
+              rescue ActiveRecord::RecordInvalid => e
+                @result['status'] = false
+                @result['messages'].push(product.errors.full_messages)
+              rescue ActiveRecord::StatementInvalid => e
+                @result['status'] = false
+                @result['messages'].push(e.message)
+              end
+            end
+          end
+          unless @result["status"]
+            @result["last_row"] = index
+            if index != 0
+              @result["messages"].push("Import halted because of errors, we have adjusted rows to the ones already imported.")
+            end
+            break
+          end
+        end
+      else
+        @result["messages"].push("No file present to import #{params[:type]}")
+      end
+    end
+
+    respond_to do |format|
+      format.json { render json: @result}
     end
   end
 
@@ -187,7 +530,7 @@ class StoreSettingsController < ApplicationController
       index = 0
       @newstore.name = @store.name+"(duplicate"+index.to_s+")"
       @storeslist = Store.where(:name=>@newstore.name)
-      begin 
+      begin
         index = index + 1
         @newstore.name = @store.name+"(duplicate"+index.to_s+")"
         @storeslist = Store.where(:name=>@newstore.name)
@@ -226,7 +569,7 @@ class StoreSettingsController < ApplicationController
   def getstoreinfo
     @store = Store.find(params[:id])
     @result = Hash.new
-    
+
     if !@store.nil? then
       @result['status'] = true
       @result['store'] = @store

@@ -1,9 +1,8 @@
   <div class="row">
     <div class="span4">
     <h5>Order Import</h5>
-      <br/>
       <div ng-show="orderimport_type=='apiimport' ">
-
+      <br/>
       <div class="control-group">
         <label class="control-label">Merchant ID</label>
         <div class="controls">
@@ -45,13 +44,6 @@
       <label class="alert alert-info" ng-show="importorderstatus_show">{{importorder_status}}</label>
       </div>
 
-      </div>
-
-      <div ng-show="orderimport_type=='csvimport'">
-      <div class="control-group">
-          <input name="csvfile" xs-input-sync ng-model="ordercsvfile" type="file" value="" required/>
-      </div> 
-      </div> 
 
     </div>
   </div>
@@ -59,6 +51,10 @@
   <div class="row">
     <div class="span4">
     <h5>Product Import</h5>
+<<<<<<< HEAD
+=======
+      <br/>
+>>>>>>> master
       <br/>
       <label class="checkbox">
         <input type="checkbox"
@@ -76,7 +72,16 @@
                ng-model="newStore.import_products"
                name="import_products" /> Import Product Categories<br/>
       </label>
+<<<<<<< HEAD
       <div ng-show="productimport_type=='apiimport'">
+=======
+      <div class="control-group">
+        <label class="control-label">Access Key ID</label>
+        <div class="controls">
+          <input name="access_key_id" xs-input-sync ng-model="newStore.productaccess_key_id" type="text" value="" required/>
+         </div>
+      </div> 
+>>>>>>> master
 
       <div class="control-group">
         <label class="control-label">Merchant ID</label>
@@ -111,11 +116,7 @@
       <div class="control-group">
       <label class="alert alert-info" ng-show="importproductstatus_show">{{importproduct_status}}</label>
       </div>
-      </div>
-      <div ng-show="productimport_type=='csvimport'">
-      <div class="control-group">
-          <input name="productcsvfile" xs-input-sync ng-model="productcsvfile" type="file" value="" required/>
-      </div> 
-      </div> 
+
+
     </div>
   </div>

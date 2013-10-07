@@ -150,6 +150,7 @@ aria-hidden="true">
               <option value="Amazon">Amazon</option>
               <option value="Ebay">Ebay</option>
               <option value="Magento">Magento</option>
+              <option value="CSV">CSV</option>
             </select>
          </div>
       </div>
@@ -164,6 +165,9 @@ aria-hidden="true">
 
   <div ng-include="'/assets/partials/amazonstorecreation.html'" 
       ng-show="newStore.store_type =='Amazon'"></div>
+
+  <div ng-include="'/assets/partials/csvstorecreation.html'"
+           ng-show="newStore.store_type =='CSV'"></div>
   </div>
   
 
@@ -175,6 +179,41 @@ aria-hidden="true">
   </div>
 
 </fieldset>
+ </div>
+</div>
+
+
+<!-- Modal for importing orders etc -->
+<div id="importCsv" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="importCsv"
+     aria-hidden="true">
+
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <h3 id="importHeader" ng-show="csvimporter.type == 'order'" >Import Orders from CSV</h3>
+        <h3 id="importHeader" ng-show="csvimporter.type == 'product'" >Import Products from CSV</h3>
+    </div>
+
+
+    <div class="form-horizontal form-horizontal-create" >
+        <fieldset>
+            <div class="modal-body" id="importCsv-body">
+                <div class="alert alert-danger" ng-show="show_error_msgs">
+                    <button type="button" class="close" data-dismiss="alert">&times;</button>
+                    <p ng-repeat="message in error_msgs">{{message}}</p>
+                </div>
+
+
+                <div ng-include="'/assets/partials/csvimportsetup.html'"></div>
+
+
+    <div class="modal-footer">
+        <button ng-click="import_csv()"class="btn btn-primary" >Import</button>
+        <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+    </div>
+
+    </fieldset>
+
+    </div>
 </div>
 </div>
 </div>

@@ -2,7 +2,6 @@
     <div class="span4">
     <h5>Order Import</h5>
       <br/>
-      <div ng-show="orderimport_type=='apiimport'">
       <div class="control-group">
         <label class="control-label">Host</label>
         <div class="controls">
@@ -48,11 +47,12 @@
 
   </div>
 
-    <div class="row">
+  <div class="row">
     <div class="span">
     <h5>Product Import</h5>
+
       <br/>
-      <div ng-show="productimport_type=='apiimport'">
+      <br/>
       <label class="checkbox">
         <input type="checkbox"
                ng-model="copyfromabove"
@@ -104,13 +104,6 @@
       <div class="control-group">
       <label class="alert alert-info" ng-show="importproductstatus_show">{{importproduct_status}}</label>
       </div>
-      </div>
-
-      <div ng-show="productimport_type=='csvimport'">
-      <div class="control-group">
-          <input name="csvfile" xs-input-sync ng-model="productcsvfile" type="file" value="" required/>
-      </div> 
-      </div> 
       </div>
     </div>
   </div>
