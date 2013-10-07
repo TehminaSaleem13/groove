@@ -7,6 +7,17 @@ class StoreSettingsController < ApplicationController
     end
   end
 
+
+  def getactivestores
+    @result = Hash.new
+    @result['status'] = true
+    @result['stores'] = Store.where(:status=>'1')
+
+    respond_to do |format|
+      format.json { render json: @result}
+    end
+  end
+
   def createStore
     @result = Hash.new
     
@@ -55,9 +66,9 @@ class StoreSettingsController < ApplicationController
         @store.magento_credentials = @magento
 
           begin
-              @store.save!
+              @store.save
               if !new_record
-                @store.magento_credentials.save!
+                @store.magento_credentials.save
               end
               rescue ActiveRecord::RecordInvalid => e
                 @result['status'] = false
@@ -90,9 +101,9 @@ class StoreSettingsController < ApplicationController
         @store.amazon_credentials = @amazon
 
         begin
-            @store.save!
+            @store.save
             if !new_record
-              @store.amazon_credentials.save!
+              @store.amazon_credentials.save
             end
             rescue ActiveRecord::RecordInvalid => e
               @result['status'] = false
@@ -125,7 +136,7 @@ class StoreSettingsController < ApplicationController
         begin
             @store.save!
             if !new_record
-              @store.ebay_credentials.save!
+              @store.ebay_credentials.save
             end
             rescue ActiveRecord::RecordInvalid => e
               @result['status'] = false

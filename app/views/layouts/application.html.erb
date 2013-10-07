@@ -5,6 +5,9 @@
     <title><%= content_for?(:title) ? yield(:title) : "Groovepacks" %></title>
      <meta name="description" content="<%= content_for?(:description) ? yield(:description) : "Groovepacks" %>">
     <%= stylesheet_link_tag "application", :media => "all" %>
+    <!--[if lt IE 8]>
+    <%= stylesheet_link_tag "font-awesome-ie7.min.css", media: "all" %>
+    <![endif]-->
     <%= javascript_include_tag "application" %>
     <%= csrf_meta_tags %>
     <%= yield(:head) %>

@@ -7,9 +7,6 @@ class Store < ActiveRecord::Base
 
   validates_presence_of :name
   validates_uniqueness_of :name
-  validates_associated :magento_credentials
-  validates_associated :amazon_credentials
-  validates_associated :ebay_credentials
 
   def get_store_credentials
   	@result = Hash.new
@@ -148,7 +145,11 @@ class Store < ActiveRecord::Base
   ebaysession_resp = MultiXml.parse(res.body)
   if ebaysession_resp['GetSessionIDResponse']['Ack'] == "Success"
     session_id = ebaysession_resp['GetSessionIDResponse']['SessionID']
+    if ENV['EBAY_SANDBOX_MODE'] == 'YES'
     @result['ebay_signin_url'] = "https://signin.sandbox.ebay.com/ws/eBayISAPI.dll?SignIn&RuName="+ENV['EBAY_RU_NAME']+"&SessID="+session_id
+    else
+    @result['ebay_signin_url'] = "https://signin.ebay.com/ws/eBayISAPI.dll?SignIn&RuName="+ENV['EBAY_RU_NAME']+"&SessID="+session_id
+    end
     @result['ebay_signin_url_status'] = true
     @result['ebay_sessionid'] = session_id
   else

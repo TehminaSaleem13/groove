@@ -1,6 +1,7 @@
 @import "bootstrap";
 
 @import "bootstrap-responsive";
+@import "font-awesome";
 html, body {
 	height:100%;
 }
@@ -68,11 +69,11 @@ text-indent: -5000px;
 background: url('/assets/inactive.png') left top no-repeat;
 }
 
-#createUser, #createStore {
+#createUser, #createStore,#importOrders {
 	width: 920px;
 	left: 35%;
 }
-#createUser-body, #createStore-body {
+#createUser-body, #createStore-body, #importOrders-body {
 	max-height: 480px;
 }
 
@@ -109,4 +110,8 @@ background: url('/assets/sort_desc.png') no-repeat center right;
 #mainNavbar {
 	border: none;
 	background: none;
+}
+.table.importtable td {
+	border-top: none;
+    line-height: 40px;
 }

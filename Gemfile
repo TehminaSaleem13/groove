@@ -61,3 +61,4 @@ gem "soap4r"
 #gem "nokogiri", "~> 1.5.5"
 gem 'ruby-mws', :git=>'https://github.com/radicaled/ruby-mws.git'
 gem'multi_xml'
+gem "font-awesome-rails"

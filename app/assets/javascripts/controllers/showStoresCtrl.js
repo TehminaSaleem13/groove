@@ -501,5 +501,59 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
                 $scope.importproduct_status = "Error checking status. Please try again later"
             });  
     }
+    /* Import orders from all the active stores */
+    $scope.import_orders =function() {
+            $('#importOrders').modal('show');
+            /* Get all the active stores */
+            $http.get('/store_settings/getactivestores.json').success(function(data) {
+                if (data.status)
+                {
+                    //console.log("data status");
+                    $scope.active_stores = [];
+
+                    for (var i = 0; i < data.stores.length; i++)
+                    {
+                            var activeStore = new Object();
+                            activeStore.info = data.stores[i];
+                            activeStore.message="";
+                            activeStore.status="in_progress";
+                            $scope.active_stores.push(activeStore); 
+                    }
+                    /* for each store send a import request */
+                    for (var i = 0; i < $scope.active_stores.length; i++)
+                    {
+                       //$scope.active_stores[i].status="in_progress";
+
+                        $http.get('/orders/importorders/'+$scope.active_stores[i].info.id+'.json?activestoreindex='+i).success(
+                            function(orderdata){
+
+                            if (orderdata.status)
+                            {
+                            $scope.active_stores[orderdata.activestoreindex].status="completed";
+                            $scope.active_stores[orderdata.activestoreindex].message = "Successfully imported "+orderdata.success_imported+
+                                    " of "+orderdata.total_imported+" orders. "
+                                +orderdata.previous_imported+" orders were previously imported";
+                            }
+                            else
+                            {
+                            $scope.active_stores[orderdata.activestoreindex].status="failed";
+                            $scope.active_stores[orderdata.activestoreindex].message = "Import failed. Please check your credentials."
+                            }
+                        }).error(function(data) {
+                            $scope.active_stores[i].status="failed";
+                            $scope.active_stores[i].message = orderdata.messages;
+                            });    
+                    }
+                     
+                }
+                else
+                {
+                    console.log("data status false");
+                $scope.message = "Getting active stores returned error.";
+                }
+            }).error(function(data) {
+                $scope.message = "Getting active stores failed.";
+            });  
+    }
 
     }]);

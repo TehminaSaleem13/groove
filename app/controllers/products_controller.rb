@@ -271,23 +271,183 @@ class ProductsController < ApplicationController
 	      format.json { render json: @result}
 	    end
 	end
-
+	# Get list of products based on limit and offset. It is by default sorted by updated_at field
+	# If sort parameter is passed in then the corresponding sort filter will be used to sort the list
+	# The expected parameters in params[:sort] are 'updated_at', name', 'sku', 'status', 'barcode', 'location_primary'
+	# and quantity. The API supports to provide order of sorting namely ascending or descending. The parameter can be 
+	# passed in using params[:order] = 'ASC' or params[:order] ='DESC' [Note: Caps letters] By default, if no order is mentioned,
+	# then the API considers order to be descending.The API also supports a product status filter. 
+	# The filter expects one of the following parameters in params[:filter] 'all', 'active', 'inactive', 'new'. 
+	# If no filter is passed, then the API will default to 'active' 
 	def getproducts
-		@products = Product.where('id < 10')
+		@result = Hash.new
+		@result[:status] = true
+		sort_key = 'updated_at'
+		sort_order = 'DESC'
+		status_filter = 'active'
+		limit = 10
+		offset = 0
+		supported_sort_keys = ['updated_at', 'name', 'sku', 
+								'status', 'barcode', 'location_primary' ]
+		supported_order_keys = ['ASC', 'DESC' ] #Caps letters only
+		supported_status_filters = ['all', 'active', 'inactive', 'new']
+
+
+		# Get passed in parameter variables if they are valid.
+		limit = params[:limit] if !params[:limit].nil? && params[:limit].to_i > 0
+
+		offset = params[:offset] if !params[:offset].nil? && params[:offset].to_i >= 0
+
+		sort_key = params[:sort] if !params[:sort].nil? && 
+			supported_sort_keys.include?(params[:sort])
+
+		sort_order = params[:order] if !params[:order].nil? && 
+			supported_order_keys.include?(params[:order])
+
+		status_filter = params[:filter] if !params[:filter].nil? && 
+			supported_status_filters.include?(params[:filter])
+		
+		#hack to bypass for now and enable client development
+		sort_key = 'name' if sort_key == 'sku'
+
+		#todo status filters to be implemented
+
+		@products = Product.limit(limit).offset(offset).order(sort_key+" "+sort_order)
 		@products_result = []
 
 		@products.each do |product|
 		@product_hash = Hash.new
-
+		@product_hash['id'] = product.id
 		@product_hash['name'] = product.name
-		@product_hash['sku'] = 'SKU1'
+		@product_hash['status'] = product.status
+		@product_hash['barcode'] = product.barcode
+		@product_hash['location'] = product.location_primary
+		@product_hash['qty'] = product.inv_wh1_qty
+		if product.product_skus.length > 0
+			@product_hash['sku'] = product.product_skus.first
+		else
+			@product_hash['sku'] = 'not_available'
+		end
+		if product.product_cats.length > 0
+			@product_hash['cat'] = product.product_cats.first
+		else
+			@product_hash['cat'] = 'not_available'
+		end
 		@product_hash['store_type'] = product.store.store_type
 
 		@products_result.push(@product_hash)
 		end
+		
+		@result['products'] = @products_result
 
 		respond_to do |format|
-      		format.json { render json: @products_result}
+      		format.json { render json: @result}
     	end
 	end
+
+  def duplicateproduct
+
+    @result = Hash.new
+    @result['status'] = true
+    params['_json'].each do|product|
+
+      @product = Product.find(product["id"])
+
+      @newproduct = @product.dup
+      index = 0
+      @newproduct.name = @product.name+"(duplicate"+index.to_s+")"
+      @productslist = Store.where(:name=>@newproduct.name)
+      begin 
+        index = index + 1
+        @newproduct.name = @product.name+"(duplicate"+index.to_s+")"
+        @productslist = Product.where(:name=>@newproduct.name)
+      end while(!@productslist.nil? && @productslist.length > 0)
+
+      if !@newproduct.save(:validate => false)
+        @result['status'] = false
+        @result['messages'] = @newproduct.errors.full_messages
+      end
+    end
+
+    respond_to do |format|
+        format.html # show.html.erb
+        format.json { render json: @result }
+    end
+  end
+
+  def deleteproduct
+    @result = Hash.new
+    @result['status'] = false
+    
+    params['_json'].each do|product|
+      @product = Product.find(product["id"])
+      if @product.destroy
+        @result['status'] &= true
+      else
+      	@result['status'] &= false
+        @result['messages'] = @product.errors.full_messages
+      end
+    end
+
+    respond_to do |format|
+        format.html # show.html.erb
+        format.json { render json: @result }
+    end
+  end
+  # For search pass in parameter params[:search] and a params[:limit] and params[:offset].
+  # If limit and offset are not passed, then it will be default to 10 and 0
+  def search
+  	@result = Hash.new
+  	@result['status'] = true
+	limit = 10
+	offset = 0
+	# Get passed in parameter variables if they are valid.
+	limit = params[:limit] if !params[:limit].nil? && params[:limit].to_i > 0
+
+	offset = params[:offset] if !params[:offset].nil? && params[:offset].to_i >= 0
+
+	if !params[:search].nil? && params[:search] != ''
+		search = params[:search]
+		
+		#todo: include sku in search as well in future.
+		@products = Product.find_by_sql("SELECT * from PRODUCTS WHERE name like '%"+search+"%' OR 
+										barcode like '%"+search+"%' OR location_primary like '%"+search+"%' LIMIT #{limit} 
+										OFFSET #{offset}")
+		@products_result = []
+
+		@products.each do |product|
+		@product_hash = Hash.new
+		@product_hash['id'] = product.id
+		@product_hash['name'] = product.name
+		@product_hash['status'] = product.status
+		@product_hash['barcode'] = product.barcode
+		@product_hash['location'] = product.location_primary
+		@product_hash['qty'] = product.inv_wh1_qty
+		if product.product_skus.length > 0
+			@product_hash['sku'] = product.product_skus.first
+		else
+			@product_hash['sku'] = 'not_available'
+		end
+		if product.product_cats.length > 0
+			@product_hash['cat'] = product.product_cats.first
+		else
+			@product_hash['cat'] = 'not_available'
+		end
+		@product_hash['store_type'] = product.store.store_type
+
+		@products_result.push(@product_hash)
+		end
+		
+		@result['products'] = @products_result
+	else
+		@result['status'] = false
+		@result['message'] = 'Improper search string'
+	end
+
+
+    respond_to do |format|
+        format.html # show.html.erb
+        format.json { render json: @result }
+    end
+  end
 end

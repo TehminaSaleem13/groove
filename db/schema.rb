@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20131002055449) do
+ActiveRecord::Schema.define(:version => 20131007185756) do
 
   create_table "amazon_credentials", :force => true do |t|
     t.string   "merchant_id",                                     :null => false
@@ -95,6 +95,19 @@ ActiveRecord::Schema.define(:version => 20131002055449) do
 
   add_index "orders", ["store_id"], :name => "index_orders_on_store_id"
 
+  create_table "orders_import_summaries", :force => true do |t|
+    t.integer  "total_retrieved"
+    t.integer  "success_imported"
+    t.integer  "previous_imported"
+    t.boolean  "status"
+    t.string   "error_message"
+    t.integer  "store_id"
+    t.datetime "created_at",        :null => false
+    t.datetime "updated_at",        :null => false
+  end
+
+  add_index "orders_import_summaries", ["store_id"], :name => "index_orders_import_summaries_on_store_id"
+
   create_table "product_cats", :force => true do |t|
     t.string   "category"
     t.integer  "product_id"
@@ -115,12 +128,38 @@ ActiveRecord::Schema.define(:version => 20131002055449) do
   add_index "product_skus", ["product_id"], :name => "index_product_skus_on_product_id"
 
   create_table "products", :force => true do |t|
-    t.string   "store_product_id", :null => false
-    t.string   "name",             :null => false
+    t.string   "store_product_id",                :null => false
+    t.string   "name",                            :null => false
     t.string   "product_type"
-    t.integer  "store_id",         :null => false
-    t.datetime "created_at",       :null => false
-    t.datetime "updated_at",       :null => false
+    t.integer  "store_id",                        :null => false
+    t.datetime "created_at",                      :null => false
+    t.datetime "updated_at",                      :null => false
+    t.string   "status"
+    t.text     "spl_instructions_4_packer"
+    t.text     "spl_instructions_4_confirmation"
+    t.text     "alternate_location"
+    t.text     "barcode"
+    t.boolean  "is_skippable"
+    t.integer  "packing_placement"
+    t.integer  "pack_time_adj"
+    t.boolean  "is_kit"
+    t.text     "kit_skus"
+    t.string   "kit_parsing"
+    t.string   "location_primary"
+    t.integer  "inv_wh1_qty"
+    t.integer  "inv_alert_wh1"
+    t.integer  "inv_wh2_qty"
+    t.integer  "inv_alert_wh2"
+    t.integer  "inv_wh3_qty"
+    t.integer  "inv_alert_wh3"
+    t.integer  "inv_wh4_qty"
+    t.integer  "inv_alert_wh4"
+    t.integer  "inv_wh5_qty"
+    t.integer  "inv_alert_wh5"
+    t.integer  "inv_wh6_qty"
+    t.integer  "inv_alert_wh6"
+    t.integer  "inv_wh7_qty"
+    t.integer  "inv_alert_wh7"
   end
 
   add_index "products", ["store_id"], :name => "index_products_on_store_id"

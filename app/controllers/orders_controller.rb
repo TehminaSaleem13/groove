@@ -19,8 +19,14 @@ class OrdersController < ApplicationController
   @result['messages'] = []
   @result['total_imported'] = 0
   @result['success_imported'] = 0
-  @result['previous_imported'] = 0  
+  @result['previous_imported'] = 0 
+  @result['activestoreindex'] = 0
 
+  if !params[:activestoreindex].nil? 
+    @result['activestoreindex'] = params[:activestoreindex]
+  end
+
+begin
   #import if magento products
   if @store.store_type == 'Magento'
     @magento_credentials = MagentoCredentials.where(:store_id => @store.id)
@@ -244,7 +250,10 @@ class OrdersController < ApplicationController
       @result['response'] = response
     end
   end
-
+  rescue Exception => msg 
+   @result['status'] = false 
+   @result['messages'] = msg
+  end
     respond_to do |format|
       format.json { render json: @result}
     end
