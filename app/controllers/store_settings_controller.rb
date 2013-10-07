@@ -7,6 +7,17 @@ class StoreSettingsController < ApplicationController
     end
   end
 
+
+  def getactivestores
+    @result = Hash.new
+    @result['status'] = true
+    @result['stores'] = Store.where(:status=>'1')
+
+    respond_to do |format|
+      format.json { render json: @result}
+    end
+  end
+
   def createStore
     @result = Hash.new
 
@@ -57,9 +68,9 @@ class StoreSettingsController < ApplicationController
         @store.magento_credentials = @magento
 
           begin
-              @store.save!
+              @store.save
               if !new_record
-                @store.magento_credentials.save!
+                @store.magento_credentials.save
               end
               rescue ActiveRecord::RecordInvalid => e
                 @result['status'] = false
@@ -80,19 +91,11 @@ class StoreSettingsController < ApplicationController
         else
           @amazon = @amazon.first
         end
-        @amazon.access_key_id = params[:access_key_id]
-        @amazon.app_name = params[:app_name]
-        @amazon.app_version = params[:app_version]
         @amazon.marketplace_id = params[:marketplace_id]
         @amazon.merchant_id = params[:merchant_id]
-        @amazon.secret_access_key = params[:secret_access_key]
 
-        @amazon.productaccess_key_id = params[:productaccess_key_id]
-        @amazon.productapp_name = params[:productapp_name]
-        @amazon.productapp_version = params[:productapp_version]
         @amazon.productmarketplace_id = params[:productmarketplace_id]
         @amazon.productmerchant_id = params[:productmerchant_id]
-        @amazon.productsecret_access_key = params[:productsecret_access_key]
 
         @amazon.import_products = params[:import_products]
         @amazon.import_images = params[:import_images]
@@ -100,9 +103,9 @@ class StoreSettingsController < ApplicationController
         @store.amazon_credentials = @amazon
 
         begin
-            @store.save!
+            @store.save
             if !new_record
-              @store.amazon_credentials.save!
+              @store.amazon_credentials.save
             end
             rescue ActiveRecord::RecordInvalid => e
               @result['status'] = false
@@ -123,16 +126,9 @@ class StoreSettingsController < ApplicationController
           @ebay = @ebay.first
         end
 
-        @ebay.app_id = params[:ebay_app_id]
-        @ebay.auth_token = params[:ebay_auth_token]
-        @ebay.cert_id = params[:ebay_cert_id]
-        @ebay.dev_id = params[:ebay_dev_id]
-
-        @ebay.productapp_id = params[:productebay_app_id]
-        @ebay.productauth_token = params[:productebay_auth_token]
-        @ebay.productcert_id = params[:productebay_cert_id]
-        @ebay.productdev_id = params[:productebay_dev_id]
-
+        @ebay.auth_token = session[:ebay_auth_token] if !session[:ebay_auth_token].nil?
+        @ebay.productauth_token = session[:ebay_auth_token] if !session[:ebay_auth_token].nil?
+        @ebay.ebay_auth_expiration = session[:ebay_auth_expiration]
         @ebay.import_products = params[:import_products]
         @ebay.import_images = params[:import_images]
 
@@ -141,7 +137,7 @@ class StoreSettingsController < ApplicationController
         begin
             @store.save!
             if !new_record
-              @store.ebay_credentials.save!
+              @store.ebay_credentials.save
             end
             rescue ActiveRecord::RecordInvalid => e
               @result['status'] = false
@@ -151,6 +147,7 @@ class StoreSettingsController < ApplicationController
               @result['status'] = false
               @result['messages'] = [e.message]
         end
+        @result['storeid'] = @store.id
       end
 
       if @store.store_type == 'CSV'
@@ -585,6 +582,148 @@ class StoreSettingsController < ApplicationController
         format.html # show.html.erb
         format.json { render json: @result }
     end
+  end
 
+  def getebaysigninurl
+    @store = Store.new
+    @result = @store.get_ebay_signin_url
+    session[:ebay_session_id] = @result['ebay_sessionid']
+    respond_to do |format|
+        format.html # show.html.erb
+        format.json { render json: @result }
+    end
+  end
+
+  def ebayuserfetchtoken
+    require "net/http"
+    require "uri"
+    @result = Hash.new
+    devName = ENV['EBAY_DEV_ID']
+    appName = ENV['EBAY_APP_ID']
+    certName = ENV['EBAY_CERT_ID']
+    @result['status'] = false
+    if ENV['EBAY_SANDBOX_MODE'] == 'YES'
+      url = "https://api.sandbox.ebay.com/ws/api.dll"
+    else
+      url = "https://api.ebay.com/ws/api.dll"
+    end
+    url = URI.parse(url)
+
+    req = Net::HTTP::Post.new(url.path)
+    req.add_field("X-EBAY-API-REQUEST-CONTENT-TYPE", 'text/xml')
+    req.add_field("X-EBAY-API-COMPATIBILITY-LEVEL", "675")
+    req.add_field("X-EBAY-API-DEV-NAME", devName)
+    req.add_field("X-EBAY-API-APP-NAME", appName)
+    req.add_field("X-EBAY-API-CERT-NAME", certName)
+    req.add_field("X-EBAY-API-SITEID", 0)
+    req.add_field("X-EBAY-API-CALL-NAME", "FetchToken")
+
+    req.body ='<?xml version="1.0" encoding="utf-8"?>'+
+              '<FetchTokenRequest xmlns="urn:ebay:apis:eBLBaseComponents">'+
+                '<SessionID>'+session[:ebay_session_id]+'</SessionID>' +
+              '</FetchTokenRequest>'
+    http = Net::HTTP.new(url.host, url.port)
+    http.use_ssl = true
+    res = http.start do |http_runner|
+      http_runner.request(req)
+    end
+    ebaytoken_resp = MultiXml.parse(res.body)
+    @result['response'] = ebaytoken_resp
+    if ebaytoken_resp['FetchTokenResponse']['Ack'] == 'Success'
+      session[:ebay_auth_token] = ebaytoken_resp['FetchTokenResponse']['eBayAuthToken']
+      session[:ebay_auth_expiration] = ebaytoken_resp['FetchTokenResponse']['HardExpirationTime']
+      @result['status'] = true
+    end
+    respond_to do |format|
+        format.html # show.html.erb
+        format.json { render json: @result }
+    end
+  end
+  def updateebayusertoken
+    require "net/http"
+    require "uri"
+    @result = Hash.new
+    devName = ENV['EBAY_DEV_ID']
+    appName = ENV['EBAY_APP_ID']
+    certName = ENV['EBAY_CERT_ID']
+    @result['status'] = false
+    if ENV['EBAY_SANDBOX_MODE'] == 'YES'
+      url = "https://api.sandbox.ebay.com/ws/api.dll"
+    else
+      url = "https://api.ebay.com/ws/api.dll"
+    end
+    url = URI.parse(url)
+    @store = EbayCredentials.where(:store_id=>params[:storeid])
+
+    if !@store.nil? && @store.length > 0
+      @store = @store.first 
+      req = Net::HTTP::Post.new(url.path)
+      req.add_field("X-EBAY-API-REQUEST-CONTENT-TYPE", 'text/xml')
+      req.add_field("X-EBAY-API-COMPATIBILITY-LEVEL", "675")
+      req.add_field("X-EBAY-API-DEV-NAME", devName)
+      req.add_field("X-EBAY-API-APP-NAME", appName)
+      req.add_field("X-EBAY-API-CERT-NAME", certName)
+      req.add_field("X-EBAY-API-SITEID", 0)
+      req.add_field("X-EBAY-API-CALL-NAME", "FetchToken")
+
+      req.body ='<?xml version="1.0" encoding="utf-8"?>'+
+                '<FetchTokenRequest xmlns="urn:ebay:apis:eBLBaseComponents">'+
+                  '<SessionID>'+session[:ebay_session_id]+'</SessionID>' +
+                '</FetchTokenRequest>'
+      http = Net::HTTP.new(url.host, url.port)
+      http.use_ssl = true
+      res = http.start do |http_runner|
+        http_runner.request(req)
+      end
+      ebaytoken_resp = MultiXml.parse(res.body)
+      @result['response'] = ebaytoken_resp
+      if ebaytoken_resp['FetchTokenResponse']['Ack'] == 'Success'
+        @store.auth_token = 
+          ebaytoken_resp['FetchTokenResponse']['eBayAuthToken']
+        @store.productauth_token = 
+          ebaytoken_resp['FetchTokenResponse']['eBayAuthToken']
+        @store.ebay_auth_expiration = 
+          ebaytoken_resp['FetchTokenResponse']['HardExpirationTime']
+        if @store.save
+          @result['status'] = true
+        end
+      end
+    else
+      @result['status'] = false;
+    end
+    respond_to do |format|
+        format.html # show.html.erb
+        format.json { render json: @result }
+    end
+  end
+  def deleteebaytoken
+    @result = Hash.new
+    @result['status'] = false
+
+    if params[:storeid] == 'undefined'
+        session[:ebay_auth_token] = nil
+        session[:ebay_auth_expiration] = nil
+        @result['status'] = true
+    else
+      @store = Store.find(params[:storeid])
+      if @store.store_type == 'Ebay'
+        @ebaycredentials = EbayCredentials.where(:store_id=>params[:storeid])
+        @ebaycredentials = @ebaycredentials.first
+        @ebaycredentials.auth_token = ''
+        @ebaycredentials.productauth_token = ''
+        @ebaycredentials.ebay_auth_expiration = ''
+        session[:ebay_auth_token] = nil
+        session[:ebay_auth_expiration] = nil
+        if @ebaycredentials.save
+          @result['status'] = true
+        end
+      end
+    end
+    respond_to do |format|
+        format.html # show.html.erb
+        format.json { render json: @result }
+    end
   end
 end
+
+

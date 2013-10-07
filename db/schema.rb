@@ -11,26 +11,21 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20131006131225) do
+ActiveRecord::Schema.define(:version => 20131007185756) do
 
   create_table "amazon_credentials", :force => true do |t|
-    t.string   "access_key_id",                               :null => false
-    t.string   "secret_access_key",                           :null => false
-    t.string   "app_name",                                    :null => false
-    t.string   "app_version",                                 :null => false
-    t.string   "merchant_id",                                 :null => false
-    t.string   "marketplace_id",                              :null => false
+    t.string   "merchant_id",                                     :null => false
+    t.string   "marketplace_id",                                  :null => false
     t.integer  "store_id"
-    t.datetime "created_at",                                  :null => false
-    t.datetime "updated_at",                                  :null => false
-    t.string   "productaccess_key_id",     :default => "",    :null => false
-    t.string   "productsecret_access_key", :default => "",    :null => false
-    t.string   "productapp_name",          :default => "",    :null => false
-    t.string   "productapp_version",       :default => "",    :null => false
-    t.string   "productmerchant_id",       :default => "",    :null => false
-    t.string   "productmarketplace_id",    :default => "",    :null => false
-    t.boolean  "import_products",          :default => false, :null => false
-    t.boolean  "import_images",            :default => false, :null => false
+    t.datetime "created_at",                                      :null => false
+    t.datetime "updated_at",                                      :null => false
+    t.string   "productmerchant_id",           :default => "",    :null => false
+    t.string   "productmarketplace_id",        :default => "",    :null => false
+    t.boolean  "import_products",              :default => false, :null => false
+    t.boolean  "import_images",                :default => false, :null => false
+    t.string   "productreport_id"
+    t.string   "productgenerated_report_id"
+    t.datetime "productgenerated_report_date"
   end
 
   create_table "csv_mappings", :force => true do |t|
@@ -42,19 +37,14 @@ ActiveRecord::Schema.define(:version => 20131006131225) do
   end
 
   create_table "ebay_credentials", :force => true do |t|
-    t.string   "dev_id",                               :null => false
-    t.string   "app_id",                               :null => false
-    t.string   "cert_id",                              :null => false
     t.integer  "store_id"
-    t.datetime "created_at",                           :null => false
-    t.datetime "updated_at",                           :null => false
-    t.string   "productdev_id",     :default => "",    :null => false
-    t.string   "productapp_id",     :default => "",    :null => false
-    t.string   "productcert_id",    :default => "",    :null => false
-    t.boolean  "import_products",   :default => false, :null => false
-    t.boolean  "import_images",     :default => false, :null => false
-    t.text     "auth_token",                           :null => false
-    t.text     "productauth_token",                    :null => false
+    t.datetime "created_at",                              :null => false
+    t.datetime "updated_at",                              :null => false
+    t.boolean  "import_products",      :default => false, :null => false
+    t.boolean  "import_images",        :default => false, :null => false
+    t.date     "ebay_auth_expiration"
+    t.text     "productauth_token"
+    t.text     "auth_token"
   end
 
   create_table "magento_credentials", :force => true do |t|
@@ -73,6 +63,54 @@ ActiveRecord::Schema.define(:version => 20131006131225) do
     t.boolean  "import_images",   :default => false, :null => false
   end
 
+  create_table "order_items", :force => true do |t|
+    t.string   "sku"
+    t.integer  "qty"
+    t.decimal  "price",      :precision => 10, :scale => 0
+    t.decimal  "row_total",  :precision => 10, :scale => 0
+    t.integer  "order_id"
+    t.datetime "created_at",                                :null => false
+    t.datetime "updated_at",                                :null => false
+  end
+
+  add_index "order_items", ["order_id"], :name => "index_order_items_on_order_id"
+
+  create_table "order_shippings", :force => true do |t|
+    t.string   "firstname"
+    t.string   "lastname"
+    t.string   "email"
+    t.string   "streetaddress1"
+    t.string   "streetaddress2"
+    t.string   "city"
+    t.string   "region"
+    t.string   "postcode"
+    t.string   "country"
+    t.string   "description"
+    t.integer  "order_id"
+    t.datetime "created_at",     :null => false
+    t.datetime "updated_at",     :null => false
+  end
+
+  create_table "orders", :force => true do |t|
+    t.string   "status"
+    t.string   "storename"
+    t.string   "customercomments"
+    t.integer  "store_id"
+    t.datetime "created_at",       :null => false
+    t.datetime "updated_at",       :null => false
+    t.string   "store_order_id"
+  end
+
+  add_index "orders", ["store_id"], :name => "index_orders_on_store_id"
+
+  create_table "orders_import_summaries", :force => true do |t|
+    t.integer  "total_retrieved"
+    t.integer  "success_imported"
+    t.integer  "previous_imported"
+    t.boolean  "status"
+    t.string   "error_message"
+    t.integer  "store_id"
+  end
   create_table "orders", :force => true do |t|
     t.string   "increment_id"
     t.datetime "order_placed_time"
@@ -95,6 +133,7 @@ ActiveRecord::Schema.define(:version => 20131006131225) do
     t.datetime "updated_at",        :null => false
   end
 
+  add_index "orders_import_summaries", ["store_id"], :name => "index_orders_import_summaries_on_store_id"
   create_table "product_barcodes", :force => true do |t|
     t.integer  "product_id"
     t.string   "barcode"
@@ -133,14 +172,41 @@ ActiveRecord::Schema.define(:version => 20131006131225) do
   add_index "product_skus", ["product_id"], :name => "index_product_skus_on_product_id"
 
   create_table "products", :force => true do |t|
-    t.string   "store_product_id", :null => false
-    t.string   "name",             :null => false
+    t.string   "store_product_id",                :null => false
+    t.string   "name",                            :null => false
     t.string   "product_type"
-    t.integer  "store_id",         :null => false
+    t.integer  "store_id",                        :null => false
+    t.datetime "created_at",                      :null => false
+    t.datetime "updated_at",                      :null => false
+    t.string   "status"
+    t.text     "spl_instructions_4_packer"
+    t.text     "spl_instructions_4_confirmation"
+    t.text     "alternate_location"
+    t.text     "barcode"
+    t.boolean  "is_skippable"
+    t.integer  "packing_placement"
+    t.integer  "pack_time_adj"
+    t.boolean  "is_kit"
+    t.text     "kit_skus"
+    t.string   "kit_parsing"
+    t.string   "location_primary"
+    t.integer  "inv_wh1_qty"
+    t.integer  "inv_alert_wh1"
+    t.integer  "inv_wh2_qty"
+    t.integer  "inv_alert_wh2"
+    t.integer  "inv_wh3_qty"
+    t.integer  "inv_alert_wh3"
+    t.integer  "inv_wh4_qty"
+    t.integer  "inv_alert_wh4"
+    t.integer  "inv_wh5_qty"
+    t.integer  "inv_alert_wh5"
+    t.integer  "inv_wh6_qty"
+    t.integer  "inv_alert_wh6"
+    t.integer  "inv_wh7_qty"
+    t.integer  "inv_alert_wh7"
     t.datetime "created_at",       :null => false
     t.datetime "updated_at",       :null => false
     t.string   "inv_wh1"
-    t.string   "location_primary"
   end
 
   add_index "products", ["store_id"], :name => "index_products_on_store_id"

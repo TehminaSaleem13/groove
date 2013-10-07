@@ -1,51 +1,63 @@
+
   <div class="row">
     <div class="span4">
-    <h5>Order Import</h5>
+
+    <h5>Import Orders and Products</h5>
       <br/>
-      <br/>
-      <div class="control-group">
-        <label class="control-label">App ID</label>
+      <!-- for api import with a valid state -->
+      <div ng-show="orderimport_type=='apiimport'">
+
+      <div class="control-group" ng-show="ebay_show_signin_url==true && ebay_signin_url_status==true">
+        <label class="control-label"></label>
         <div class="controls">
-          <input name="ebay_app_id" xs-input-sync ng-model="newStore.ebay_app_id" type="text" value="" required/>
+          <a href="{{ebay_signin_url}}&ruparams=redirect%3Dtrue%26editstatus%3D{{edit_status}}%26name%3D{{newStore.name}}%26status%3D{{newStore.status}}%26storetype%3D{{newStore.store_type}}%26storeid%3D{{newStore.id}}">Click here to access ebay</a>
          </div>
+      </div>
+      <div ng-hide="ebay_show_signin_url">
+      <p class="alert alert-success">Auth Token is successfully retrieved and hidden for security reasons.</p>
+
+      <div>
+        <a href="" ng-click="disconnect_ebay_seller()">Disconnect from seller account</a>
+      </div>
+
+
+      <div>
+        <div class="control-group">
+          <div class="controls">
+            <button ng-click="import_orders()"class="btn btn-primary" ng-show="edit_status">Import Orders</button>
+          </div>
+        </div>
+        <div class="control-group">
+        <label class="alert alert-info" ng-show="importorderstatus_show">{{importorder_status}}</label>
+        </div>
+      </div>
+
+      <div>
+        <div class="control-group">
+          <div class="controls">
+            <button ng-click="import_products()"class="btn btn-primary" ng-show="edit_status">Import Products</button>
+          </div>
+        </div>
+        <div class="control-group">
+        <label class="alert alert-info" ng-show="importproductstatus_show">{{importproduct_status}}</label>
+        </div>
+      </div>
+      </div>
+
+      <div ng-show="orderimport_type=='csvimport'">
+      <div class="control-group">
+          <input name="csvfile" xs-input-sync ng-model="ordercsvfile" type="file" value="" required/>
       </div> 
-
-      <div class="control-group">
-        <label class="control-label">Auth Token</label>
-        <div class="controls">
-          <input name="ebay_auth_token" xs-input-sync ng-model="newStore.ebay_auth_token" type="text" value="" required/>
-         </div>
       </div>
-      
-      <div class="control-group">
-        <label class="control-label">Certificate ID</label>
-        <div class="controls">
-          <input name="ebay_cert_id" xs-input-sync ng-model="newStore.ebay_cert_id" type="text" value="" required/>
-         </div>
-      </div>
-
-      <div class="control-group">
-        <label class="control-label">Dev ID</label>
-        <div class="controls">
-          <input name="ebay_dev_id" xs-input-sync ng-model="newStore.ebay_dev_id" type="text" value="" required/>
-         </div>
-      </div>
-
 
     </div>
   </div>
 
-  <div class="row">
+  <div class="row" ng-hide="true">
     <div class="span4">
     <h5>Product Import</h5>
       <br/>
       <br/>
-      <label class="checkbox">
-        <input type="checkbox"
-               ng-model="copyfromabove"
-               name="copy" 
-               ng-change="copydata(copyfromabove)"/> Copy data from above<br/>
-      </label>
        <label class="checkbox">
         <input type="checkbox"
                ng-model="newStore.import_images"
@@ -56,42 +68,7 @@
                ng-model="newStore.import_products"
                name="import_products" /> Import Product Categories<br/>
       </label>
-      <div class="control-group">
-        <label class="control-label">App ID</label>
-        <div class="controls">
-          <input name="productebay_app_id" xs-input-sync ng-model="newStore.productebay_app_id" type="text" value="" required/>
-         </div>
-      </div> 
 
-      <div class="control-group">
-        <label class="control-label">Auth Token</label>
-        <div class="controls">
-          <input name="productebay_auth_token" xs-input-sync ng-model="newStore.productebay_auth_token" type="text" value="" required/>
-         </div>
-      </div>
-      
-      <div class="control-group">
-        <label class="control-label">Certificate ID</label>
-        <div class="controls">
-          <input name="productebay_cert_id" xs-input-sync ng-model="newStore.productebay_cert_id" type="text" value="" required/>
-         </div>
-      </div>
-
-      <div class="control-group">
-        <label class="control-label">Dev ID</label>
-        <div class="controls">
-          <input name="productebay_dev_id" xs-input-sync ng-model="newStore.productebay_dev_id" type="text" value="" required/>
-         </div>
-      </div>
-      <div class="control-group">
-        <div class="controls">
-          <button ng-click="import_products()"class="btn btn-primary" ng-show="edit_status">Import Products</button>
-        </div>
-      </div>
-      <div class="control-group">
-      <label class="alert alert-info" ng-show="importproductstatus_show">{{importproduct_status}}</label>
-      </div>
-      
       </div>
 
     </div>

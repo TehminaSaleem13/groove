@@ -64,4 +64,17 @@ Groovepacks::Application.configure do
   # Log the query plan for queries taking more than this (works
   # with SQLite, MySQL, and PostgreSQL)
   # config.active_record.auto_explain_threshold_in_seconds = 0.5
+  ENV['AMAZON_MWS_ACCESS_KEY_ID'] = "AKIAJRXZUVPLLINJ2EUQ"
+  ENV['AMAZON_MWS_SECRET_ACCESS_KEY'] = "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"
+
+  ENV['EBAY_APP_ID'] = "Navarata-c04e-41cb-a923-77755ae59a0f"
+  ENV['EBAY_CERT_ID'] = "596cd688-b754-49b1-8b92-a3c393caed49"
+  ENV['EBAY_DEV_ID'] = "568a739c-a13d-40e5-922a-6e3ecc652d9d"
+  ENV['EBAY_RU_NAME'] = "Navaratan_Techn-Navarata-c04e-4-kglxwbl"
+  ENV['EBAY_SANDBOX_MODE'] = "NO"
+  # ENV['EBAY_APP_ID'] = "Navarata-607d-4a45-8a42-51c735a57026"
+  # ENV['EBAY_CERT_ID'] = "86380834-e449-4dd9-b19f-748b4625533d"
+  # ENV['EBAY_DEV_ID'] = "568a739c-a13d-40e5-922a-6e3ecc652d9d"
+  # ENV['EBAY_RU_NAME'] = "Navaratan_Techn-Navarata-607d-4-ltqij"
+  # ENV['EBAY_SANDBOX_MODE'] = "YES"
 end

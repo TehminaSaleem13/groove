@@ -2,6 +2,10 @@
 
 FactoryGirl.define do
   factory :order do
+    status "MyString"
+    storename "MyString"
+    customercomments "MyString"
+    store nil
     increment_id 1
     order_placed_time "2013-09-03 23:21:02"
     sku "MyString"

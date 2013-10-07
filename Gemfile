@@ -21,7 +21,7 @@ group :assets do
 end
 
 gem 'jquery-rails'
-gem "rspec-rails", ">= 2.11.4", :group => [:development, :test]
+gem "rspec-rails", ">= 2.13.2", :group => [:development, :test]
 gem "database_cleaner", ">= 0.9.1", :group => :test
 gem "email_spec", ">= 1.4.0", :group => :test
 gem "cucumber-rails", ">= 1.3.0", :group => :test, :require => false
@@ -57,3 +57,8 @@ gem "savon"
 gem "ebay", "~> 1.1"
 gem "xmlparser"
 gem "soap4r"
+#gem 'mws-connect'
+#gem "nokogiri", "~> 1.5.5"
+gem 'ruby-mws', :git=>'https://github.com/radicaled/ruby-mws.git'
+gem'multi_xml'
+gem "font-awesome-rails"
