@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20131007185756) do
+ActiveRecord::Schema.define(:version => 20131008064301) do
 
   create_table "amazon_credentials", :force => true do |t|
     t.string   "merchant_id",                                     :null => false
@@ -92,26 +92,6 @@ ActiveRecord::Schema.define(:version => 20131007185756) do
   end
 
   create_table "orders", :force => true do |t|
-    t.string   "status"
-    t.string   "storename"
-    t.string   "customercomments"
-    t.integer  "store_id"
-    t.datetime "created_at",       :null => false
-    t.datetime "updated_at",       :null => false
-    t.string   "store_order_id"
-  end
-
-  add_index "orders", ["store_id"], :name => "index_orders_on_store_id"
-
-  create_table "orders_import_summaries", :force => true do |t|
-    t.integer  "total_retrieved"
-    t.integer  "success_imported"
-    t.integer  "previous_imported"
-    t.boolean  "status"
-    t.string   "error_message"
-    t.integer  "store_id"
-  end
-  create_table "orders", :force => true do |t|
     t.string   "increment_id"
     t.datetime "order_placed_time"
     t.string   "sku"
@@ -129,11 +109,27 @@ ActiveRecord::Schema.define(:version => 20131007185756) do
     t.string   "postcode"
     t.string   "country"
     t.string   "method"
+    t.datetime "created_at",         :null => false
+    t.datetime "updated_at",         :null => false
+    t.string   "notes_internal"
+    t.string   "notes_toPacker"
+    t.string   "notes_fromPacker"
+    t.boolean  "tracking_processed"
+  end
+
+  create_table "orders_import_summaries", :force => true do |t|
+    t.integer  "total_retrieved"
+    t.integer  "success_imported"
+    t.integer  "previous_imported"
+    t.boolean  "status"
+    t.string   "error_message"
+    t.integer  "store_id"
     t.datetime "created_at",        :null => false
     t.datetime "updated_at",        :null => false
   end
 
   add_index "orders_import_summaries", ["store_id"], :name => "index_orders_import_summaries_on_store_id"
+
   create_table "product_barcodes", :force => true do |t|
     t.integer  "product_id"
     t.string   "barcode"
@@ -204,8 +200,6 @@ ActiveRecord::Schema.define(:version => 20131007185756) do
     t.integer  "inv_alert_wh6"
     t.integer  "inv_wh7_qty"
     t.integer  "inv_alert_wh7"
-    t.datetime "created_at",       :null => false
-    t.datetime "updated_at",       :null => false
     t.string   "inv_wh1"
   end
 
