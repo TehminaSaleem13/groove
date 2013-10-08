@@ -144,11 +144,11 @@ background: url('/assets/inactive.png') left top no-repeat;
 }
 
 #createUser, #createStore,#importOrders {
-	width: 920px;
-	left: 35%;
+
 }
 #createUser-body, #createStore-body, #importOrders-body {
 	max-height: 480px;
+  }
 @media (min-height: 850px) and (max-height: 899px) {
   #createUser-body, #createStore-body, #importCsv-body {
     max-height: 650px;
