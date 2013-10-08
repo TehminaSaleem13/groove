@@ -532,7 +532,7 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
             });  
     }
     /* Import orders from all the active stores */
-    $scope.import_orders =function() {
+    $scope.import_all_orders =function() {
             $('#importOrders').modal('show');
             /* Get all the active stores */
             $http.get('/store_settings/getactivestores.json').success(function(data) {

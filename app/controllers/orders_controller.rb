@@ -64,11 +64,11 @@ begin
                 message:{sessionId: session, orderIncrementId: item[:increment_id]})
 
               order_info = order_info.body[:sales_order_info_response][:result]
-              if Order.where(:store_order_id=>item[:order_id]).length == 0
+              if Order.where(:increment_id=>item[:order_id]).length == 0
                 @order = Order.new
-                @order.store_order_id = item[:order_id]
+                @order.increment_id = item[:order_id]
                 @order.status = item[:status]
-                @order.storename = item[:store_name]
+                #@order.storename = item[:store_name]
                 @order.store = @store
                 line_items = order_info[:items]
                 if line_items[:item].is_a?(Hash)
@@ -148,12 +148,11 @@ begin
       #@result['seller_list'] = seller_list.transactionArray
       #@result['app_id'] = @credential
       seller_list.transactionArray.each do |transaction|
-        if Order.where(:store_order_id=>transaction.transactionID).length == 0
+        if Order.where(:increment_id=>transaction.transactionID).length == 0
           @order = Order.new
           @order.status = transaction.status.completeStatus
-          @order.storename = @store.name
           @order.store = @store
-          @order.store_order_id = transaction.transactionID
+          @order.increment_id = transaction.transactionID
 
           @order_item = OrderItem.new
           @order_item.price = transaction.item.sellingStatus.currentPrice
@@ -162,20 +161,22 @@ begin
           @order_item.sku = transaction.item.itemID
 
           @order.order_items << @order_item
+# address_1, :address_2, :city, :country, :customer_comments, :email, :firstname, :increment_id, :lastname, 
+#           @order.address_1 = 
 
-          @shipping = OrderShipping.new
+          #@shipping = OrderShipping.new
 
-          @shipping.streetaddress1 = transaction.buyer.buyerInfo.shippingAddress.street1
-          @shipping.city = transaction.buyer.buyerInfo.shippingAddress.cityName
-          @shipping.region = transaction.buyer.buyerInfo.shippingAddress.stateOrProvince
-          @shipping.country = transaction.buyer.buyerInfo.shippingAddress.country
-          @shipping.postcode = transaction.buyer.buyerInfo.shippingAddress.postalCode
+          @order.address_1  = transaction.buyer.buyerInfo.shippingAddress.street1
+          @order.city = transaction.buyer.buyerInfo.shippingAddress.cityName
+          #@shipping.region = transaction.buyer.buyerInfo.shippingAddress.stateOrProvince
+          @order.country = transaction.buyer.buyerInfo.shippingAddress.country
+          @order.postcode = transaction.buyer.buyerInfo.shippingAddress.postalCode
           if @order.status != 'Complete'
-            @shipping.email = transaction.buyer.staticAlias
+            @order.email = transaction.buyer.staticAlias
           end
-          @shipping.lastname = transaction.buyer.buyerInfo.shippingAddress.name
+          @order.lastname = transaction.buyer.buyerInfo.shippingAddress.name
 
-          @order.order_shipping = @shipping
+          #@order.order_shipping = @shipping
           if @order.save
             @result['success_imported'] = @result['success_imported'] + 1
           end
@@ -205,10 +206,10 @@ begin
       if !@orders.nil?
         @result['total_imported'] = @orders.length
         @orders.each do |order|
-        if Order.where(:store_order_id=>order.amazon_order_id).length == 0
+        if Order.where(:increment_id=>order.amazon_order_id).length == 0
           @order = Order.new
           @order.status = order.order_status
-          @order.store_order_id = order.amazon_order_id
+          @order.increment_id = order.amazon_order_id
           @order.storename = @store.name
           @order.store = @store
           
@@ -250,9 +251,7 @@ begin
       @result['response'] = response
     end
   end
-  rescue Exception => msg 
-   @result['status'] = false 
-   @result['messages'] = msg
+
   end
     respond_to do |format|
       format.json { render json: @result}
@@ -312,6 +311,173 @@ begin
     respond_to do |format|
       format.html { redirect_to orders_url }
       format.json { head :no_content }
+    end
+  end
+
+  # Get list of orders based on limit and offset. It is by default sorted by updated_at field
+  # If sort parameter is passed in then the corresponding sort filter will be used to sort the list
+  # The expected parameters in params[:sort] are 
+  # . The API supports to provide order of sorting namely ascending or descending. The parameter can be 
+  # passed in using params[:order] = 'ASC' or params[:order] ='DESC' [Note: Caps letters] By default, if no order is mentioned,
+  # then the API considers order to be descending.The API also supports a product status filter. 
+  # The filter expects one of the following parameters in params[:filter] 'all', 'active', 'inactive', 'new'. 
+  # If no filter is passed, then the API will default to 'active' 
+  def getorders
+    @result = Hash.new
+    @result[:status] = true
+    sort_key = 'updated_at'
+    sort_order = 'DESC'
+    status_filter = 'active'
+    limit = 10
+    offset = 0
+    supported_sort_keys = ['updated_at', 'store', 'notes', 
+                'store_order_id', 'order_date', 'items', 'recipient', 'status' ]
+    supported_order_keys = ['ASC', 'DESC' ] #Caps letters only
+    supported_status_filters = ['awaiting', 'onhold', 'cancelled', 'scanned']
+
+
+    # Get passed in parameter variables if they are valid.
+    limit = params[:limit] if !params[:limit].nil? && params[:limit].to_i > 0
+
+    offset = params[:offset] if !params[:offset].nil? && params[:offset].to_i >= 0
+
+    sort_key = params[:sort] if !params[:sort].nil? && 
+      supported_sort_keys.include?(params[:sort])
+
+    sort_order = params[:order] if !params[:order].nil? && 
+      supported_order_keys.include?(params[:order])
+
+    status_filter = params[:filter] if !params[:filter].nil? && 
+      supported_status_filters.include?(params[:filter])
+    
+    #hack to bypass for now and enable client development
+    #sort_key = 'updated_at' if sort_key == 'sku'
+
+    #todo status filters to be implemented
+
+    @orders = Order.limit(limit).offset(offset).order(sort_key+" "+sort_order)
+    @orders_result = []
+
+    @orders.each do |order|
+    @order_hash = Hash.new
+    @order_hash['id'] = order.id
+    if !order.store_id.nil?
+      @order_hash['store_name'] = Store.find(order.store_id).name
+    else
+      @order_hash['store_name'] = ''
+    end
+    @order_hash['notes'] = order.notes_internal
+    @order_hash['ordernum'] = order.increment_id
+    @order_hash['orderdate'] = order.order_placed_time
+    @order_hash['itemslength'] = OrderItem.where(:order_id=>order.id).length
+    @order_hash['status'] = order.status
+    @order_hash['firstname'] = order.firstname 
+    @order_hash['lastname'] = order.lastname 
+    @orders_result.push(@order_hash)
+    end
+    
+    @result['orders'] = @orders_result
+
+    respond_to do |format|
+          format.json { render json: @result}
+      end
+  end
+
+  def duplicateorder
+
+    @result = Hash.new
+    @result['status'] = true
+    params['_json'].each do|order|
+
+      @order = Order.find(order["id"])
+
+      @neworder = @order.dup
+      index = 0
+      @order.increment_id = @order.increment_id+"(duplicate"+index.to_s+")"
+      @orderlist = Order.where(:increment_id=>@order.increment_id)
+      begin 
+        index = index + 1
+        @neworder.increment_id = @order.increment_id+"(duplicate"+index.to_s+")"
+        @orderslist = Order.where(:increment_id=>@neworder.increment_id)
+      end while(!@orderslist.nil? && @orderslist.length > 0)
+
+      if !@neworder.save(:validate => false)
+        @result['status'] = false
+        @result['messages'] = @neworder.errors.full_messages
+      end
+    end
+
+    respond_to do |format|
+        format.html # show.html.erb
+        format.json { render json: @result }
+    end
+  end
+
+  def deleteorder
+    @result = Hash.new
+    @result['status'] = false
+    
+    params['_json'].each do|order|
+      @order = Order.find(order["id"])
+      if @order.destroy
+        @result['status'] &= true
+      else
+        @result['status'] &= false
+        @result['messages'] = @order.errors.full_messages
+      end
+    end
+
+    respond_to do |format|
+        format.html # show.html.erb
+        format.json { render json: @result }
+    end
+  end
+  # For search pass in parameter params[:search] and a params[:limit] and params[:offset].
+  # If limit and offset are not passed, then it will be default to 10 and 0
+  def search
+    @result = Hash.new
+    @result['status'] = true
+    limit = 10
+    offset = 0
+    # Get passed in parameter variables if they are valid.
+    limit = params[:limit] if !params[:limit].nil? && params[:limit].to_i > 0
+
+    offset = params[:offset] if !params[:offset].nil? && params[:offset].to_i >= 0
+
+    if !params[:search].nil? && params[:search] != ''
+      search = params[:search]
+      
+      #todo: include sku in search as well in future.
+      @products = Order.find_by_sql("SELECT * from ORDERS WHERE storename like '%"+search+"%' OR 
+                      increment_id like '%"+search+"%' OR status like '%"+search+"%' LIMIT #{limit} 
+                      OFFSET #{offset}")
+
+      @orders_result = []
+
+      @orders.each do |order|
+      @order_hash = Hash.new
+      @order_hash['id'] = order.id
+      @order_hash['store_name'] = order.name
+      @order_hash['notes'] = order.notes_internal
+      @order_hash['ordernum'] = order.increment_id
+      @order_hash['orderdate'] = order.order_placed_time
+      @order_hash['itemslength'] = order.order_items
+      @order_hash['status'] = order.status
+      @order_hash['recipient'] = order.firstname +" "+order.lastname
+      @orders_result.push(@order_hash)
+      end
+      
+      
+      @result['orders'] = @orders_result
+    else
+      @result['status'] = false
+      @result['message'] = 'Improper search string'
+    end
+
+
+    respond_to do |format|
+        format.html # show.html.erb
+        format.json { render json: @result }
     end
   end
 end
