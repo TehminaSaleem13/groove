@@ -349,23 +349,32 @@ class ProductsController < ApplicationController
 
     @result = Hash.new
     @result['status'] = true
-    params['_json'].each do|product|
+    if params[:select_all]
+      #todo: implement search and filter by status
+      @products = params[:productArray]
+    else
+      @products = params[:productArray]
+    end
+    unless @products.nil?
+      @products.each do|product|
 
-      @product = Product.find(product["id"])
+        @product = Product.find(product["id"])
 
-      @newproduct = @product.dup
-      index = 0
-      @newproduct.name = @product.name+"(duplicate"+index.to_s+")"
-      @productslist = Store.where(:name=>@newproduct.name)
-      begin 
-        index = index + 1
+        @newproduct = @product.dup
+        index = 0
         @newproduct.name = @product.name+"(duplicate"+index.to_s+")"
         @productslist = Product.where(:name=>@newproduct.name)
-      end while(!@productslist.nil? && @productslist.length > 0)
+        begin
+          index = index + 1
+          #todo: duplicate sku, images, categories associated with product too.
+          @newproduct.name = @product.name+"(duplicate"+index.to_s+")"
+          @productslist = Product.where(:name=>@newproduct.name)
+        end while(!@productslist.nil? && @productslist.length > 0)
 
-      if !@newproduct.save(:validate => false)
-        @result['status'] = false
-        @result['messages'] = @newproduct.errors.full_messages
+        if !@newproduct.save(:validate => false)
+          @result['status'] = false
+          @result['messages'] = @newproduct.errors.full_messages
+        end
       end
     end
 
@@ -377,15 +386,23 @@ class ProductsController < ApplicationController
 
   def deleteproduct
     @result = Hash.new
-    @result['status'] = false
-    
-    params['_json'].each do|product|
-      @product = Product.find(product["id"])
-      if @product.destroy
-        @result['status'] &= true
-      else
-      	@result['status'] &= false
-        @result['messages'] = @product.errors.full_messages
+    @result['status'] = true
+    if params[:select_all]
+      #todo: implement search and filter by status
+      @products = params[:productArray]
+    else
+      @products = params[:productArray]
+    end
+    unless @products.nil?
+      @products.each do|product|
+        @product = Product.find(product["id"])
+        #todo: delete sku, images, categories associated with product too.
+        if @product.destroy
+          @result['status'] &= true
+        else
+          @result['status'] &= false
+          @result['messages'] = @product.errors.full_messages
+        end
       end
     end
 
@@ -448,6 +465,30 @@ class ProductsController < ApplicationController
     respond_to do |format|
         format.html # show.html.erb
         format.json { render json: @result }
+    end
+  end
+
+  def changeproductstatus
+    @result = Hash.new
+    @result['status'] = true
+    if params[:select_all]
+      #todo: implement search and filter by status
+      @products = params[:productArray]
+    else
+      @products = params[:productArray]
+    end
+    unless @products.nil?
+      @products.each do|product|
+        @product = Product.find(product["id"])
+        @product.status = product["status"]
+        unless @product.save
+          @result['status'] = false
+        end
+      end
+    end
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json: @result }
     end
   end
 end

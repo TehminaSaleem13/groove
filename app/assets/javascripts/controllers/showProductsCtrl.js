@@ -54,10 +54,114 @@ controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$routeParams', 
             $scope.product_setup.sort = "updated_at";
             $scope.product_setup.order = "DESC";
             $scope.product_setup.filter = "active";
+            $scope.product_setup.select_all = false;
             $scope.product_setup.limit = 10;
             $scope.product_setup.offset = 0;
             $(".product_setup-filter-active").addClass("active");
             $scope.get_products();
+        }
+        $scope.select_all_toggle = function() {
+            //$scope.product_setup.select_all = !$scope.product_setup.select_all;
+            for (i in $scope.products) {
+                $scope.products[i].checked =  $scope.product_setup.select_all;
+            }
+        }
+        $scope.product_change_status = function(status) {
+
+            $scope.product_setup.productArray = [];
+
+            /* get user objects of checked items */
+            for( i in $scope.products)
+            {
+                if ($scope.products[i].checked == true) {
+                    var product = {};
+                    product.id = $scope.products[i].id;
+                    product.status = status;
+                    $scope.product_setup.productArray.push(product);
+                }
+            }
+            /* update the server with the changed status */
+            $http.put('/products/changeproductstatus.json', $scope.product_setup).success(function(data){
+                if (data.status)
+                {
+                    $scope.product_setup.select_all = false;
+
+                }
+                else
+                {
+                    $scope.error_msg = "There was a problem changing products status";
+                    $scope.show_error = true;
+                }
+                $scope.get_products();
+            }).error(function(data){
+                    $scope.error_msg = "There was a problem changing products status";
+                    $scope.show_error = true;
+                    $scope.get_products();
+                });
+        }
+        $scope.product_delete = function() {
+
+            $scope.product_setup.productArray = [];
+
+            /* get user objects of checked items */
+            for( i in $scope.products)
+            {
+                if ($scope.products[i].checked == true) {
+                    var product = {};
+                    product.id = $scope.products[i].id;
+                    $scope.product_setup.productArray.push(product);
+                }
+            }
+            /* update the server with the changed status */
+            $http.put('/products/deleteproduct.json', $scope.product_setup).success(function(data){
+                $scope.get_products();
+                if (data.status)
+                {
+                    $scope.product_setup.select_all = false;
+                    $scope.get_products();
+                }
+                else
+                {
+                    $scope.error_msg = data.message;
+                    $scope.show_error = true;
+                }
+
+            }).error(function(data){
+                    $scope.error_msg = data.message;
+                    $scope.show_error = true;
+                    $scope.get_products();
+                });
+        }
+        $scope.product_duplicate = function() {
+
+            $scope.product_setup.productArray = [];
+
+            /* get user objects of checked items */
+            for( i in $scope.products)
+            {
+                if ($scope.products[i].checked == true) {
+                    var product = {};
+                    product.id = $scope.products[i].id;
+                    $scope.product_setup.productArray.push(product);
+                }
+            }
+            /* update the server with the changed status */
+            $http.put('/products/duplicateproduct.json', $scope.product_setup).success(function(data){
+                $scope.get_products();
+                if (data.status)
+                {
+                    $scope.product_setup.select_all = false;
+                }
+                else
+                {
+                    $scope.error_msg = data.message;
+                    $scope.show_error = true;
+                }
+            }).error(function(data){
+                    $scope.error_msg = data.message;
+                    $scope.show_error = true;
+                    $scope.get_products();
+                });
         }
         $scope.set_defaults();
     }]);

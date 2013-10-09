@@ -1,7 +1,7 @@
 angular.module('groovepacks', ['groovepacks.filters', 'groovepacks.services', 'groovepacks.directives', 'groovepacks.controllers', 'ngCookies']).
   config(['$routeProvider', function($routeProvider) {
     $routeProvider.when('/orders', 
-    	{templateUrl: '/assets/partials/orders.html', controller: 'ordersCtrl'});
+    	{templateUrl: '/assets/partials/showorders.html', controller: 'showOrdersCtrl'});
 
     $routeProvider.when('/settings', 
     	{templateUrl: '/assets/partials/showusers.html', controller: 'showUsersCtrl'});

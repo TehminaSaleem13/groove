@@ -62,27 +62,55 @@
 
     </div>
 
+    <div class="span8">
+        <div class="well">
+            <div class="row-fluid">
 
-    <table id="productstbl" class="table table-hover table-bordered span8" infinite-scroll="product_next()">
-        <thead>
-        <tr>
-            <th class="product_setup-sort product_setup-sort-name"><a href="" ng-click="product_setup_opt('sort','name')">Item Name<span class="{{'product-caret-'+product_setup.order}}"></span></a></th>
-            <th class="product_setup-sort product_setup-sort-sku"><a href="" ng-click="product_setup_opt('sort','sku')">Sku<span class="{{'product-caret-'+product_setup.order}}"></span></a></th>
-            <th class="product_setup-sort product_setup-sort-status"><a href="" ng-click="product_setup_opt('sort','status')">Status<span class="{{'product-caret-'+product_setup.order}}"></span></a></th>
-            <th class="product_setup-sort product_setup-sort-barcode"><a href="" ng-click="product_setup_opt('sort','barcode')">Barcode<span class="{{'product-caret-'+product_setup.order}}"></span></a></th>
-            <th class="product_setup-sort product_setup-sort-location_primary"><a href="" ng-click="product_setup_opt('sort','location_primary')">Location<span class="{{'product-caret-'+product_setup.order}}"></span></a></th>
-            <th><a href="">Store Type</a></th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr ng-repeat="product in products">
-            <td>{{product.name}}</td>
-            <td>{{product.sku.sku}}</td>
-            <td>{{product.status}}</td>
-            <td>{{product.barcode}}</td>
-            <td>{{product.location}} </td>
-            <td>{{product.store_type}} </td>
-        </tr>
-        </tbody>
-    </table>
+                <div class="span4 pull-right">
+                    <ul class="nav nav-pills">
+                        <li class="dropdown">
+                            <a class="dropdown-toggle" id="drop4" role="button" data-toggle="dropdown" href="#">Edit <b class="caret"></b></a>
+                            <ul id="menu2" class="dropdown-menu" role="menu" aria-labelledby="drop4">
+                                <li role="presentation"><a role="menuitem" tabindex="-1" ng-click="product_delete()">Delete</a></li>
+                                <li role="presentation"><a role="menuitem" tabindex="-1" ng-click="product_duplicate()">Duplicate</a></li>
+                            </ul>
+                        </li>
+                        <li class="dropdown">
+                            <a class="dropdown-toggle" id="drop5" role="button" data-toggle="dropdown" href="#">Change Status
+                                <b class="caret"></b></a>
+                            <ul id="menu1" class="dropdown-menu" role="menu" aria-labelledby="drop5">
+                                <li role="presentation"><a role="menuitem" tabindex="-1" ng-click="product_change_status('active')">Active</a></li>
+                                <li role="presentation"><a role="menuitem" tabindex="-1" ng-click="product_change_status('inactive')">Inactive</a></li>
+                                <li role="presentation"><a role="menuitem" tabindex="-1" ng-click="product_change_status('new')">New</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <table id="productstbl" class="table table-hover table-bordered" infinite-scroll="product_next()">
+                <thead>
+                <tr>
+                    <th><input ng-model="product_setup.select_all" type="checkbox" ng-change='select_all_toggle()'></input></th>
+                    <th class="product_setup-sort product_setup-sort-name"><a href="" ng-click="product_setup_opt('sort','name')">Item Name<span class="{{'caret-'+product_setup.order}}"></span></a></th>
+                    <th class="product_setup-sort product_setup-sort-sku"><a href="" ng-click="product_setup_opt('sort','sku')">Sku<span class="{{'caret-'+product_setup.order}}"></span></a></th>
+                    <th class="product_setup-sort product_setup-sort-status"><a href="" ng-click="product_setup_opt('sort','status')">Status<span class="{{'caret-'+product_setup.order}}"></span></a></th>
+                    <th class="product_setup-sort product_setup-sort-barcode"><a href="" ng-click="product_setup_opt('sort','barcode')">Barcode<span class="{{'caret-'+product_setup.order}}"></span></a></th>
+                    <th class="product_setup-sort product_setup-sort-location_primary"><a href="" ng-click="product_setup_opt('sort','location_primary')">Location<span class="{{'caret-'+product_setup.order}}"></span></a></th>
+                    <th>Store</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="product in products">
+                    <td><input type="checkbox" ng-model="product.checked"/></td>
+                    <td>{{product.name}}</td>
+                    <td>{{product.sku.sku}}</td>
+                    <td>{{product.status}}</td>
+                    <td>{{product.barcode}}</td>
+                    <td>{{product.location}} </td>
+                    <td>{{product.store_type}} </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>

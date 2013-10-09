@@ -1,0 +1,92 @@
+<div class="row navigation-row">
+    <div ng-include="'/assets/partials/navigation.html'"></div>
+</div>
+
+<div  class="row home-row">
+    <div class="alert alert-danger" ng-show="show_error">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <p>{{error_msg}}</p>
+    </div>
+</div>
+
+<div class="row home-row">
+    <div class="span3 left-menu">
+        <div class="accordion" id="accordion2">
+            <div class="accordion-group">
+                <div class="accordion-heading">
+                    <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" href="#collapseOne">
+                        Orders
+                    </a>
+                </div>
+                <div id="collapseOne" class="accordion-body collapse in">
+                    <div class="accordion-inner">
+                        <ul class="nav nav-pills nav-stacked">
+                            <li class="order_setup-filter order_setup-filter-awaiting" ><a href="" ng-click="order_setup_opt('filter','awaiting')">Awaiting</a></li>
+                            <li class="order_setup-filter order_setup-filter-onhold"><a href="" ng-click="order_setup_opt('filter','onhold')">On Hold</a></li>
+                            <li class="order_setup-filter order_setup-filter-cancelled"><a href="" ng-click="order_setup_opt('filter','cancelled')">Cancelled</a></li>
+                            <li class="order_setup-filter order_setup-filter-scanned"><a href="" ng-click="order_setup_opt('filter','scanned')">Scanned</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="span8">
+        <div class="well">
+            <div class="row-fluid">
+
+                <div class="span4 pull-right">
+                    <ul class="nav nav-pills">
+                        <li class="dropdown">
+                            <a class="dropdown-toggle" id="drop4" role="button" data-toggle="dropdown" href="#">Edit <b class="caret"></b></a>
+                            <ul id="menu2" class="dropdown-menu" role="menu" aria-labelledby="drop4">
+                                <li role="presentation"><a role="menuitem" tabindex="-1" ng-click="order_delete()">Delete</a></li>
+                                <li role="presentation"><a role="menuitem" tabindex="-1" ng-click="order_duplicate()">Duplicate</a></li>
+                            </ul>
+                        </li>
+                        <li class="dropdown">
+                            <a class="dropdown-toggle" id="drop5" role="button" data-toggle="dropdown" href="#">Change Status
+                                <b class="caret"></b></a>
+                            <ul id="menu1" class="dropdown-menu" role="menu" aria-labelledby="drop5">
+                                <li role="presentation"><a role="menuitem" tabindex="-1" ng-click="order_change_status('awaiting')">Awaiting</a></li>
+                                <li role="presentation"><a role="menuitem" tabindex="-1" ng-click="order_change_status('onhold')">On Hold</a></li>
+                                <li role="presentation"><a role="menuitem" tabindex="-1" ng-click="order_change_status('cancelled')">Cancelled</a></li>
+                                <li role="presentation"><a role="menuitem" tabindex="-1" ng-click="order_change_status('scanned')">Scanned</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <table id="orderstbl" class="table table-hover table-bordered" infinite-scroll="order_next()">
+                <thead>
+                <tr>
+                    <th><input ng-model="order_setup.select_all" type="checkbox" ng-change='select_all_toggle()'></input></th>
+                    <th>Tags</th>
+                    <th class="order_setup-sort order_setup-sort-store"><a href="" ng-click="order_setup_opt('sort','store')">Store<span class="{{'caret-'+order_setup.order}}"></span></a></th>
+                    <th class="order_setup-sort order_setup-sort-notes"><a href="" ng-click="order_setup_opt('sort','notes')">Notes<span class="{{'caret-'+order_setup.order}}"></span></a></th>
+                    <th class="order_setup-sort order_setup-sort-store_order_id"><a href="" ng-click="order_setup_opt('sort','store_order_id')">Order #<span class="{{'caret-'+order_setup.order}}"></span></a></th>
+                    <th class="order_setup-sort order_setup-sort-order_date"><a href="" ng-click="order_setup_opt('sort','order_date')">Order Date<span class="{{'caret-'+order_setup.order}}"></span></a></th>
+                    <th class="order_setup-sort order_setup-sort-items"><a href="" ng-click="order_setup_opt('sort','items')">Items<span class="{{'caret-'+order_setup.order}}"></span></a></th>
+                    <th class="order_setup-sort order_setup-sort-recipient"><a href="" ng-click="order_setup_opt('sort','recipient')">Recipient<span class="{{'caret-'+order_setup.order}}"></span></a></th>
+                    <th class="order_setup-sort order_setup-sort-status"><a href="" ng-click="order_setup_opt('sort','status')">Status<span class="{{'caret-'+order_setup.order}}"></span></a></th>
+
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="order in orders">
+                    <td><input type="checkbox" ng-model="order.checked"/></td>
+                    <td></td>
+                    <td>{{order.store_name}}</td>
+                    <td>{{order.notes}}</td>
+                    <td>{{order.ordernum}}</td>
+                    <td>{{order.orderdate}}</td>
+                    <td>{{order.itemslength}}</td>
+                    <td>{{order.recipient}}</td>
+                    <td>{{order.status}}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
