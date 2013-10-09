@@ -66,11 +66,11 @@
     <table id="productstbl" class="table table-hover table-bordered span8" infinite-scroll="product_next()">
         <thead>
         <tr>
-            <th><a href="" ng-click="product_setup_opt('sort','name')">Item Name<span ng-show="product_setup.sort=='name'"><span ng-show="product_setup.order=='DESC'" class="product-down-caret"></span><span ng-show="product_setup.order=='ASC'" class="product-up-caret"></span></span></a></th>
-            <th><a href="" ng-click="product_setup_opt('sort','sku')">Sku<span ng-show="product_setup.sort=='sku'"><span ng-show="product_setup.order=='DESC'" class="product-down-caret"></span><span ng-show="product_setup.order=='ASC'" class="product-up-caret"></span></span></a></th>
-            <th><a href="" ng-click="product_setup_opt('sort','status')">Status<span ng-show="product_setup.sort=='status'"><span ng-show="product_setup.order=='DESC'" class="product-down-caret"></span><span ng-show="product_setup.order=='ASC'" class="product-up-caret"></span></span></a></th>
-            <th><a href="" ng-click="product_setup_opt('sort','barcode')">Barcode<span ng-show="product_setup.sort=='barcode'"><span ng-show="product_setup.order=='DESC'" class="product-down-caret"></span><span ng-show="product_setup.order=='ASC'" class="product-up-caret"></span></span></a></th>
-            <th><a href="" ng-click="product_setup_opt('sort','location_primary')">Location<span ng-show="product_setup.sort=='location_primary'"><span ng-show="product_setup.order=='DESC'" class="product-down-caret"></span><span ng-show="product_setup.order=='ASC'" class="product-up-caret"></span></span></a></th>
+            <th class="product_setup-sort product_setup-sort-name"><a href="" ng-click="product_setup_opt('sort','name')">Item Name<span class="{{'product-caret-'+product_setup.order}}"></span></a></th>
+            <th class="product_setup-sort product_setup-sort-sku"><a href="" ng-click="product_setup_opt('sort','sku')">Sku<span class="{{'product-caret-'+product_setup.order}}"></span></a></th>
+            <th class="product_setup-sort product_setup-sort-status"><a href="" ng-click="product_setup_opt('sort','status')">Status<span class="{{'product-caret-'+product_setup.order}}"></span></a></th>
+            <th class="product_setup-sort product_setup-sort-barcode"><a href="" ng-click="product_setup_opt('sort','barcode')">Barcode<span class="{{'product-caret-'+product_setup.order}}"></span></a></th>
+            <th class="product_setup-sort product_setup-sort-location_primary"><a href="" ng-click="product_setup_opt('sort','location_primary')">Location<span class="{{'product-caret-'+product_setup.order}}"></span></a></th>
             <th><a href="">Store Type</a></th>
         </tr>
         </thead>
