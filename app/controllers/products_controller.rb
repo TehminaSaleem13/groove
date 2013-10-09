@@ -322,7 +322,7 @@ class ProductsController < ApplicationController
 		@product_hash['status'] = product.status
 		@product_hash['barcode'] = product.barcode
 		@product_hash['location'] = product.location_primary
-		@product_hash['qty'] = product.inv_wh1_qty
+		@product_hash['qty'] = product.inv_wh1
 		if product.product_skus.length > 0
 			@product_hash['sku'] = product.product_skus.first
 		else
@@ -427,7 +427,7 @@ class ProductsController < ApplicationController
 		search = params[:search]
 		
 		#todo: include sku in search as well in future.
-		@products = Product.find_by_sql("SELECT * from PRODUCTS WHERE name like '%"+search+"%' OR 
+		@products = Product.find_by_sql("SELECT * from products WHERE name like '%"+search+"%' OR
 										barcode like '%"+search+"%' OR location_primary like '%"+search+"%' LIMIT #{limit} 
 										OFFSET #{offset}")
 		@products_result = []
@@ -439,7 +439,7 @@ class ProductsController < ApplicationController
 		@product_hash['status'] = product.status
 		@product_hash['barcode'] = product.barcode
 		@product_hash['location'] = product.location_primary
-		@product_hash['qty'] = product.inv_wh1_qty
+		@product_hash['qty'] = product.inv_wh1
 		if product.product_skus.length > 0
 			@product_hash['sku'] = product.product_skus.first
 		else

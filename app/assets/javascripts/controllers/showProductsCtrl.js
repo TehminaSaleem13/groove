@@ -11,7 +11,12 @@ controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$routeParams', 
                 $scope.product_setup.limit = 10;
                 $scope.product_setup.offset = 0;
             }
-            $http.get('/products/getproducts.json?filter='+$scope.product_setup.filter+'&sort='+$scope.product_setup.sort+'&order='+$scope.product_setup.order+'&limit='+$scope.product_setup.limit+'&offset='+$scope.product_setup.offset).success(function(data) {
+            if($scope.product_setup.search == '') {
+                url = '/products/getproducts.json?filter='+$scope.product_setup.filter+'&sort='+$scope.product_setup.sort+'&order='+$scope.product_setup.order+'&limit='+$scope.product_setup.limit+'&offset='+$scope.product_setup.offset;
+            } else {
+                url = '/products/search.json?search='+$scope.product_setup.search+'&limit='+$scope.product_setup.limit+'&offset='+$scope.product_setup.offset;
+            }
+            $http.get(url).success(function(data) {
                 if(data.status) {
                     console.log($scope.product_setup);
                     if(!next) {
@@ -54,6 +59,7 @@ controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$routeParams', 
             $scope.product_setup.sort = "updated_at";
             $scope.product_setup.order = "DESC";
             $scope.product_setup.filter = "active";
+            $scope.product_setup.search = '';
             $scope.product_setup.select_all = false;
             $scope.product_setup.limit = 10;
             $scope.product_setup.offset = 0;

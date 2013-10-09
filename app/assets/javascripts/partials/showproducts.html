@@ -58,6 +58,34 @@
                     </div>
                 </div>
             </div>
+            <div class="accordion-group">
+                <div class="accordion-heading">
+                    <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" href="#collapseFour">
+                        Product Search
+                    </a>
+                </div>
+                <div id="collapseFour" class="accordion-body collapse in">
+                    <div class="accordion-inner">
+                        <form class="form-search">
+                            <table>
+                                <tr>
+                                    <td colspan="2">
+                                        <input type="text" ng-model="product_setup.search" class="input-large search-query" placeholder="Search term" /><br/><br/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <button ng-click="get_products()"class="btn btn-primary" >Search</button>
+                                    </td>
+                                    <td>
+                                        <button class="btn" ng-click="product_setup.search='';get_products()">Clear</button>
+                                    </td>
+                                </tr>
+                            </table>
+                        </form>
+                    </div>
+                </div>
+            </div>
         </div>
 
     </div>
