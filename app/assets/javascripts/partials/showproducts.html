@@ -1,28 +1,144 @@
 <div class="row navigation-row">
-<div ng-include="'/assets/partials/navigation.html'"></div>
+    <div ng-include="'/assets/partials/navigation.html'"></div>
 </div>
+
 <div  class="row home-row">
-<div class="alert alert-danger" ng-show="show_error">
-  <button type="button" class="close" data-dismiss="alert">&times;</button>
-  <p>{{error_msg}}</p>
-</div>
+    <div class="alert alert-danger" ng-show="show_error">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <p>{{error_msg}}</p>
+    </div>
 </div>
 
 <div class="row home-row">
-	<table id="productstbl" class="table table-hover table-bordered">
-      <thead>
-        <tr>
-          <th><a href="" ng-click="handlesort('name')">Name</a></th>
-          <th><a href="" ng-click="handlesort('sku')">Sku</a></th>
-          <th><a href="" ng-click="handlesort('store_type')">Store Type</a></th>
-        </tr>
-      </thead>
-      <tbody>
-      <tr ng-repeat="product in products | filter: nameFilter | orderBy:predicate:reverse">
-      	<td>{{product.name}}</td>
-      	<td>{{product.sku}}</td>
-      	<td>{{product.store_type}} </td>
-      </tr>
-      </tbody>
-	</table>
+    <div class="span3 left-menu">
+        <div class="accordion" id="accordion2">
+            <div class="accordion-group">
+                <div class="accordion-heading">
+                    <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" href="#collapseOne">
+                        Products
+                    </a>
+                </div>
+                <div id="collapseOne" class="accordion-body collapse in">
+                    <div class="accordion-inner">
+                        <ul class="nav nav-pills nav-stacked">
+                            <li class="product_setup-filter product_setup-filter-all" ><a href="" ng-click="product_setup_opt('filter','all')">Show All</a></li>
+                            <li class="product_setup-filter product_setup-filter-active"><a href="" ng-click="product_setup_opt('filter','active')">Active Products</a></li>
+                            <li class="product_setup-filter product_setup-filter-inactive"><a href="" ng-click="product_setup_opt('filter','inactive')">Inactive Products</a></li>
+                            <li class="product_setup-filter product_setup-filter-new"><a href="" ng-click="product_setup_opt('filter','new')">New</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-group">
+                <div class="accordion-heading">
+                    <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" href="#collapseTwo">
+                       Kit
+                    </a>
+                </div>
+                <div id="collapseTwo" class="accordion-body collapse in">
+                    <div class="accordion-inner">
+                        <ul class="nav nav-pills nav-stacked">
+                            <li>Not Available</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="accordion-group">
+                <div class="accordion-heading">
+                    <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" href="#collapseThree">
+                        Categories
+                    </a>
+                </div>
+                <div id="collapseThree" class="accordion-body collapse in">
+                    <div class="accordion-inner">
+                        <ul class="nav nav-pills nav-stacked">
+                            <li>Not Available</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="accordion-group">
+                <div class="accordion-heading">
+                    <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" href="#collapseFour">
+                        Product Search
+                    </a>
+                </div>
+                <div id="collapseFour" class="accordion-body collapse in">
+                    <div class="accordion-inner">
+                        <form class="form-search">
+                            <table>
+                                <tr>
+                                    <td colspan="2">
+                                        <input type="text" ng-model="product_setup.search" class="input-large search-query" placeholder="Search term" /><br/><br/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <button ng-click="get_products()"class="btn btn-primary" >Search</button>
+                                    </td>
+                                    <td>
+                                        <button class="btn" ng-click="product_setup.search='';get_products()">Clear</button>
+                                    </td>
+                                </tr>
+                            </table>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="span8">
+        <div class="well">
+            <div class="row-fluid">
+
+                <div class="span4 pull-right">
+                    <ul class="nav nav-pills">
+                        <li class="dropdown">
+                            <a class="dropdown-toggle" id="drop4" role="button" data-toggle="dropdown" href="#">Edit <b class="caret"></b></a>
+                            <ul id="menu2" class="dropdown-menu" role="menu" aria-labelledby="drop4">
+                                <li role="presentation"><a role="menuitem" tabindex="-1" ng-click="product_delete()">Delete</a></li>
+                                <li role="presentation"><a role="menuitem" tabindex="-1" ng-click="product_duplicate()">Duplicate</a></li>
+                            </ul>
+                        </li>
+                        <li class="dropdown">
+                            <a class="dropdown-toggle" id="drop5" role="button" data-toggle="dropdown" href="#">Change Status
+                                <b class="caret"></b></a>
+                            <ul id="menu1" class="dropdown-menu" role="menu" aria-labelledby="drop5">
+                                <li role="presentation"><a role="menuitem" tabindex="-1" ng-click="product_change_status('active')">Active</a></li>
+                                <li role="presentation"><a role="menuitem" tabindex="-1" ng-click="product_change_status('inactive')">Inactive</a></li>
+                                <li role="presentation"><a role="menuitem" tabindex="-1" ng-click="product_change_status('new')">New</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <table id="productstbl" class="table table-hover table-bordered" infinite-scroll="product_next()">
+                <thead>
+                <tr>
+                    <th><input ng-model="product_setup.select_all" type="checkbox" ng-change='select_all_toggle()'></input></th>
+                    <th class="product_setup-sort product_setup-sort-name"><a href="" ng-click="product_setup_opt('sort','name')">Item Name<span class="{{'caret-'+product_setup.order}}"></span></a></th>
+                    <th class="product_setup-sort product_setup-sort-sku"><a href="" ng-click="product_setup_opt('sort','sku')">Sku<span class="{{'caret-'+product_setup.order}}"></span></a></th>
+                    <th class="product_setup-sort product_setup-sort-status"><a href="" ng-click="product_setup_opt('sort','status')">Status<span class="{{'caret-'+product_setup.order}}"></span></a></th>
+                    <th class="product_setup-sort product_setup-sort-barcode"><a href="" ng-click="product_setup_opt('sort','barcode')">Barcode<span class="{{'caret-'+product_setup.order}}"></span></a></th>
+                    <th class="product_setup-sort product_setup-sort-location_primary"><a href="" ng-click="product_setup_opt('sort','location_primary')">Location<span class="{{'caret-'+product_setup.order}}"></span></a></th>
+                    <th>Store</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="product in products">
+                    <td><input type="checkbox" ng-model="product.checked"/></td>
+                    <td>{{product.name}}</td>
+                    <td>{{product.sku.sku}}</td>
+                    <td>{{product.status}}</td>
+                    <td>{{product.barcode}}</td>
+                    <td>{{product.location}} </td>
+                    <td>{{product.store_type}} </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>

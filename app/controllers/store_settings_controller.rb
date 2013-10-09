@@ -370,6 +370,7 @@ class StoreSettingsController < ApplicationController
         final_record.each_with_index do |single_row,index|
           if params[:type] == "order"
             order = Order.new
+            order.store = @store
             #order_placed_time,price,qty
             order_required = ["qty","sku","increment_id"]
             order_map.each do |single_map|
@@ -380,7 +381,7 @@ class StoreSettingsController < ApplicationController
                 end
               end
             end
-            if order_required.length
+            if order_required.length > 0
               @result["status"] = false
               order_required.each do |required_element|
                 @result["messages"].push("#{required_element} is missing.")

@@ -8,6 +8,12 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
                 $scope.newStore[args.name] = args.file;
             });
             $("input[type='file']").val('');
+            if(args.name == 'orderfile') {
+                $scope.newStore.type = 'order'
+            } else {
+                $scope.newStore.type = 'product'
+            }
+            $scope.submit();
         });
 
     	$http.get('/home/userinfo.json').success(function(data){
@@ -102,7 +108,9 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
     			{
     				$scope.show_error_msgs = false;
                     $scope.error_msgs = {};
-    				$scope.newStore = {};
+    				var type = $scope.newStore.type;
+                    $scope.newStore = {};
+
     				$('#createStore').modal('hide');
 
     				$http.get('/store_settings/storeslist.json').success(function(data) {
@@ -119,7 +127,7 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
 
                     //Use FileReader API here if it exists (post prototype feature)
                     if(data.csv_import && data.store_id) {
-                        $http.get('/store_settings/csvImportData.json?id='+data.store_id).success(function(data) {
+                        $http.get('/store_settings/csvImportData.json?id='+data.store_id+'&type='+type).success(function(data) {
                             $scope.csv_init(data);
                             $('#importCsv').modal('show');
 
@@ -600,8 +608,13 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
         $scope.current.store_id = data["store_id"];
         $scope.current.type = $scope.csvimporter.type;
         $scope.parse();
+        $scope.check_disable();
+    }
+
+    $scope.check_disable = function () {
+        $(".csv-preview-option").removeClass("disabled");
         for(i in $scope.current.map) {
-          $(".csv-preview-" + $scope.current.map[i].value).addClass("disabled");
+            $(".csv-preview-" + $scope.current.map[i].value).addClass("disabled");
         }
     }
 
@@ -716,7 +729,7 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
         }
         if(map_overwrite) {
             $scope.current.map[col] = option;
-            $(".csv-preview-" + option.value).addClass("disabled");
+            $scope.check_disable();
         }
     }
 
@@ -726,7 +739,6 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
             value = $scope.current.map[col].value;
         }
         $scope.current.map[col] = $scope.csvimporter.default_map;
-        $(".csv-preview-" + value).removeClass("disabled");
+        $scope.check_disable();
     }
-
     }]);

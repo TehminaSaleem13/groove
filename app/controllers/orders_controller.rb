@@ -49,7 +49,7 @@ begin
           item['key'] = 'status'
           item['value'] = 'processing'
           @filter['item'] = item
-          @filters ['filter']  = @filter
+          @filters['filter']  = @filter
           @filters_array = []
           @filters_array << @filters
 
@@ -371,8 +371,7 @@ begin
     @order_hash['orderdate'] = order.order_placed_time
     @order_hash['itemslength'] = OrderItem.where(:order_id=>order.id).length
     @order_hash['status'] = order.status
-    @order_hash['firstname'] = order.firstname 
-    @order_hash['lastname'] = order.lastname 
+    @order_hash['recipient'] = "#{order.firstname} #{order.lastname}"
     @orders_result.push(@order_hash)
     end
     
@@ -387,23 +386,31 @@ begin
 
     @result = Hash.new
     @result['status'] = true
-    params['_json'].each do|order|
+    if params[:select_all]
+      #todo: implement search and filter by status
+      @orders = params[:orderArray]
+    else
+      @orders = params[:orderArray]
+    end
+    unless @orders.nil?
+      @orders.each do|order|
 
-      @order = Order.find(order["id"])
+        @order = Order.find(order["id"])
 
-      @neworder = @order.dup
-      index = 0
-      @order.increment_id = @order.increment_id+"(duplicate"+index.to_s+")"
-      @orderlist = Order.where(:increment_id=>@order.increment_id)
-      begin 
-        index = index + 1
-        @neworder.increment_id = @order.increment_id+"(duplicate"+index.to_s+")"
-        @orderslist = Order.where(:increment_id=>@neworder.increment_id)
-      end while(!@orderslist.nil? && @orderslist.length > 0)
+        @neworder = @order.dup
+        index = 0
+        @order.increment_id = @order.increment_id+"(duplicate"+index.to_s+")"
+        @orderlist = Order.where(:increment_id=>@order.increment_id)
+        begin
+          index = index + 1
+          @neworder.increment_id = @order.increment_id+"(duplicate"+index.to_s+")"
+          @orderslist = Order.where(:increment_id=>@neworder.increment_id)
+        end while(!@orderslist.nil? && @orderslist.length > 0)
 
-      if !@neworder.save(:validate => false)
-        @result['status'] = false
-        @result['messages'] = @neworder.errors.full_messages
+        if !@neworder.save(:validate => false)
+          @result['status'] = false
+          @result['messages'] = @neworder.errors.full_messages
+        end
       end
     end
 
@@ -415,15 +422,22 @@ begin
 
   def deleteorder
     @result = Hash.new
-    @result['status'] = false
-    
-    params['_json'].each do|order|
-      @order = Order.find(order["id"])
-      if @order.destroy
-        @result['status'] &= true
-      else
-        @result['status'] &= false
-        @result['messages'] = @order.errors.full_messages
+    @result['status'] = true
+    if params[:select_all]
+      #todo: implement search and filter by status
+      @orders = params[:orderArray]
+    else
+      @orders = params[:orderArray]
+    end
+    unless @orders.nil?
+      @orders.each do|order|
+        @order = Order.find(order["id"])
+        if @order.destroy
+          @result['status'] &= true
+        else
+          @result['status'] &= false
+          @result['messages'] = @order.errors.full_messages
+        end
       end
     end
 
@@ -478,6 +492,30 @@ begin
     respond_to do |format|
         format.html # show.html.erb
         format.json { render json: @result }
+    end
+  end
+
+  def changeorderstatus
+    @result = Hash.new
+    @result['status'] = true
+    if params[:select_all]
+      #todo: implement search and filter by status
+      @orders = params[:orderArray]
+    else
+      @orders = params[:orderArray]
+    end
+    unless @orders.nil?
+      @orders.each do|order|
+        @order = Order.find(order["id"])
+        @order.status = order["status"]
+        unless @order.save
+          @result['status'] = false
+        end
+      end
+    end
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json: @result }
     end
   end
 end
