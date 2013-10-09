@@ -600,8 +600,13 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
         $scope.current.store_id = data["store_id"];
         $scope.current.type = $scope.csvimporter.type;
         $scope.parse();
+        $scope.check_disable();
+    }
+
+    $scope.check_disable = function () {
+        $(".csv-preview-option").removeClass("disabled");
         for(i in $scope.current.map) {
-          $(".csv-preview-" + $scope.current.map[i].value).addClass("disabled");
+            $(".csv-preview-" + $scope.current.map[i].value).addClass("disabled");
         }
     }
 
@@ -716,7 +721,7 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
         }
         if(map_overwrite) {
             $scope.current.map[col] = option;
-            $(".csv-preview-" + option.value).addClass("disabled");
+            $scope.check_disable();
         }
     }
 
@@ -726,7 +731,6 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
             value = $scope.current.map[col].value;
         }
         $scope.current.map[col] = $scope.csvimporter.default_map;
-        $(".csv-preview-" + value).removeClass("disabled");
+        $scope.check_disable();
     }
-
     }]);
