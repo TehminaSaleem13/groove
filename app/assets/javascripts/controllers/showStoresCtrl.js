@@ -330,6 +330,8 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
                         { 
                             $scope.newStore = data.store;
                             $scope.edit_status = true;
+                            if (data.credentials.status == true)
+                            {
                             if (data.store.store_type == 'Magento')
                             {
                                 $scope.newStore.host = data.credentials.magento_credentials.host;
@@ -374,6 +376,8 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
                                 $scope.newStore.import_images = data.credentials.amazon_credentials.import_images;
                                 $scope.newStore.productreport_id = data.credentials.amazon_credentials.productreport_id;
                                 $scope.newStore.productgenerated_report_id = data.credentials.amazon_credentials.productgenerated_report_id   
+                            }
+
                             }
                             $('#createStore').modal('show');                
                         }

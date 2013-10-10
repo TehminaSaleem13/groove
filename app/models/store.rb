@@ -10,10 +10,12 @@ class Store < ActiveRecord::Base
 
   def get_store_credentials
   	@result = Hash.new
+    @result['status'] =false
   	if self.store_type == 'Amazon'
   		@credentials = AmazonCredentials.where(:store_id => self.id)
   		if !@credentials.nil? && @credentials.length > 0
   			@result['amazon_credentials'] = @credentials.first
+        @result['status'] =true
   		end
   	end
   	if self.store_type == 'Ebay'
@@ -21,12 +23,14 @@ class Store < ActiveRecord::Base
 
   		if !@credentials.nil? && @credentials.length > 0
   			@result['ebay_credentials'] = @credentials.first
+        @result['status'] =true
   		end
   	end
   	if self.store_type == 'Magento'
   		@credentials = MagentoCredentials.where(:store_id => self.id)
   		if !@credentials.nil? && @credentials.length > 0
   			@result['magento_credentials'] = @credentials.first
+        @result['status'] =true
   		end
   	end
   	@result

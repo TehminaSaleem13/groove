@@ -46,6 +46,7 @@ class ProductsController < ApplicationController
 								@productdb.store_product_id = result_product['product_id']
 								@productdb.product_type = result_product['type']
 								@productdb.store = @store
+								@productdb.status = 'Active'
 
 								#add productdb sku
 								@productdbsku = ProductSku.new
@@ -105,22 +106,24 @@ class ProductsController < ApplicationController
 			if Product.where(:store_product_id=>item.itemID).length  == 0
 				@productdb = Product.new
 				@item = @eBay.getItem(:ItemID => item.itemID).item
-				@sku = "not_used"
 				@productdb.name = @item.title
 				@productdb.store_product_id = item.itemID
 				@productdb.product_type = 'not_used'
+				@productdb.status = 'Active'
 				@productdb.store = @store
 
 				#add productdb sku
 				@productdbsku = ProductSku.new
-		
-					@productdbsku.sku = @sku
+				if  @item.sKU.nil?
+					@productdbsku.sku = "not_available"
+				else
+					@productdbsku.sku = @item.sKU
+				end
 
 				@productdbsku.purpose = 'primary'
 
 				#publish the sku to the product record
 				@productdb.product_skus << @productdbsku
-
 				#save
 				if @productdb.save
 					@result['success_imported'] = @result['success_imported'] + 1
@@ -160,6 +163,7 @@ class ProductsController < ApplicationController
 						end
 
 						@productdb.product_type = 'not_used'
+						@productdb.status = 'Active'
 						@productdb.store = @store
 
 						#add productdb sku
@@ -311,8 +315,11 @@ class ProductsController < ApplicationController
 		sort_key = 'name' if sort_key == 'sku'
 
 		#todo status filters to be implemented
-
-		@products = Product.limit(limit).offset(offset).order(sort_key+" "+sort_order)
+		if status_filter == 'all'
+			@products = Product.limit(limit).offset(offset).order(sort_key+" "+sort_order)
+		else
+			@products = Product.limit(limit).offset(offset).order(sort_key+" "+sort_order).where(:status=>status_filter.capitalize)
+		end
 		@products_result = []
 
 		@products.each do |product|
@@ -323,17 +330,20 @@ class ProductsController < ApplicationController
 		@product_hash['barcode'] = product.barcode
 		@product_hash['location'] = product.location_primary
 		@product_hash['qty'] = product.inv_wh1
-		if product.product_skus.length > 0
-			@product_hash['sku'] = product.product_skus.first
+		@product_skus  = ProductSku.where(:product_id=>product.id) 
+		if @product_skus.length > 0
+			@product_hash['sku'] = @product_skus.first
 		else
 			@product_hash['sku'] = 'not_available'
 		end
-		if product.product_cats.length > 0
-			@product_hash['cat'] = product.product_cats.first
+				@product_cats  = ProductCat.where(:product_id=>product.id) 
+		if @product_cats.length > 0
+			@product_hash['cat'] = @product_cats.first
 		else
 			@product_hash['cat'] = 'not_available'
 		end
-		@product_hash['store_type'] = product.store.store_type
+		@store = Store.find(product.store_id)
+		@product_hash['store_type'] = @store.store_type
 
 		@products_result.push(@product_hash)
 		end

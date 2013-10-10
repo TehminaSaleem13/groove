@@ -67,7 +67,7 @@ begin
               if Order.where(:increment_id=>item[:order_id]).length == 0
                 @order = Order.new
                 @order.increment_id = item[:order_id]
-                @order.status = item[:status]
+                @order.status = 'Awaiting'
                 #@order.storename = item[:store_name]
                 @order.store = @store
                 line_items = order_info[:items]
@@ -88,19 +88,27 @@ begin
                     @order.order_items << @order_item
                   end
                 end
+              
+              @order.address_1  = order_info[:shipping_address][:street]
+              @order.city = order_info[:shipping_address][:city]
+              @order.country = order_info[:shipping_address][:country_id]
+              @order.postcode = order_info[:shipping_address][:postcode]
+              @order.email = item[:customer_email]
+              @order.lastname = order_info[:shipping_address][:lastname]
+              @order.firstname = order_info[:shipping_address][:firstname]
 
-                @shipping = OrderShipping.new
+                # @shipping = OrderShipping.new
 
-                @shipping.streetaddress1 =  order_info[:shipping_address][:street]
-                @shipping.city = order_info[:shipping_address][:city]
-                @shipping.region = order_info[:shipping_address][:region]
-                @shipping.country = order_info[:shipping_address][:country_id]
-                @shipping.postcode = order_info[:shipping_address][:postcode]
-                @shipping.email = item[:customer_email]
-                @shipping.lastname = order_info[:shipping_address][:firstname]
-                @shipping.firstname = order_info[:shipping_address][:lastname]
+                # @shipping.streetaddress1 =  order_info[:shipping_address][:street]
+                # @shipping.city = order_info[:shipping_address][:city]
+                # @shipping.region = order_info[:shipping_address][:region]
+                # @shipping.country = order_info[:shipping_address][:country_id]
+                # @shipping.postcode = order_info[:shipping_address][:postcode]
+                # @shipping.email = item[:customer_email]
+                # @shipping.lastname = order_info[:shipping_address][:lastname]
+                # @shipping.firstname = order_info[:shipping_address][:firstname]
 
-                @order.order_shipping = @shipping
+                # @order.order_shipping = @shipping
                 if @order.save
                   @result['success_imported'] = @result['success_imported'] + 1
                 end
@@ -140,7 +148,7 @@ begin
         ENV['EBAY_DEV_ID'], ENV['EBAY_APP_ID'], 
         ENV['EBAY_CERT_ID'], :sandbox=>sandbox)
 
-      seller_list =@eBay.GetSellerTransactions(:orderRole=> 'Seller', :orderStatus=>'All', 
+      seller_list =@eBay.GetSellerTransactions(:orderRole=> 'Seller', :orderStatus=>'Paid', 
         :createTimeFrom=> (Date.today - 3.months).to_datetime,
          :createTimeTo =>(Date.today + 1.day).to_datetime)
       if (seller_list.transactionArray != nil)
@@ -150,7 +158,7 @@ begin
       seller_list.transactionArray.each do |transaction|
         if Order.where(:increment_id=>transaction.transactionID).length == 0
           @order = Order.new
-          @order.status = transaction.status.completeStatus
+          @order.status = 'Awaiting'
           @order.store = @store
           @order.increment_id = transaction.transactionID
 
@@ -166,14 +174,12 @@ begin
 
           #@shipping = OrderShipping.new
 
+
           @order.address_1  = transaction.buyer.buyerInfo.shippingAddress.street1
           @order.city = transaction.buyer.buyerInfo.shippingAddress.cityName
           #@shipping.region = transaction.buyer.buyerInfo.shippingAddress.stateOrProvince
           @order.country = transaction.buyer.buyerInfo.shippingAddress.country
           @order.postcode = transaction.buyer.buyerInfo.shippingAddress.postalCode
-          if @order.status != 'Complete'
-            @order.email = transaction.buyer.staticAlias
-          end
           @order.lastname = transaction.buyer.buyerInfo.shippingAddress.name
 
           #@order.order_shipping = @shipping
@@ -199,7 +205,7 @@ begin
 
       #@result['aws-response'] = mws.reports.request_report :report_type=>'_GET_MERCHANT_LISTINGS_DATA_'
       #@result['aws-rewuest_status'] = mws.reports.get_report_request_list
-      response = mws.orders.list_orders :last_updated_after => 2.months.ago, :order_status => 'Pending'
+      response = mws.orders.list_orders :last_updated_after => 2.months.ago, :order_status => ['Unshipped', 'PartiallyShipped']
             #@result['report_id'] = response.body
       
       @orders = response.orders
@@ -208,9 +214,9 @@ begin
         @orders.each do |order|
         if Order.where(:increment_id=>order.amazon_order_id).length == 0
           @order = Order.new
-          @order.status = order.order_status
+          @order.status = 'Awaiting'
           @order.increment_id = order.amazon_order_id
-          @order.storename = @store.name
+          #@order.storename = @store.name
           @order.store = @store
           
           order_items  = mws.orders.list_order_items :amazon_order_id => order.amazon_order_id
@@ -226,17 +232,23 @@ begin
 
           @order.order_items << @order_item
 
-          @shipping = OrderShipping.new
+              @order.address_1  = order.shipping_address.address_line1
+              @order.city = order.shipping_address.city
+              @order.country = order.shipping_address.country
+              @order.postcode = order.shipping_address.postal_code
+              @order.email = order.buyer_email
+              @order.lastname = order.shipping_address.name
+          # @shipping = OrderShipping.new
 
-          @shipping.streetaddress1 = order.shipping_address.address_line1
-          @shipping.city = order.shipping_address.city
-          @shipping.region = order.shipping_address.state_or_region
-          @shipping.country = order.shipping_address.country
-          @shipping.postcode = order.shipping_address.postal_code
-          @shipping.email = order.buyer_email
-          @shipping.lastname = order.shipping_address.name
+          # @shipping.streetaddress1 = order.shipping_address.address_line1
+          # @shipping.city = order.shipping_address.city
+          # @shipping.region = order.shipping_address.state_or_region
+          # @shipping.country = order.shipping_address.country
+          # @shipping.postcode = order.shipping_address.postal_code
+          # @shipping.email = order.buyer_email
+          # @shipping.lastname = order.shipping_address.name
           
-          @order.order_shipping = @shipping
+          # @order.order_shipping = @shipping
 
 
           if @order.save
@@ -327,7 +339,7 @@ begin
     @result[:status] = true
     sort_key = 'updated_at'
     sort_order = 'DESC'
-    status_filter = 'active'
+    status_filter = 'Awaiting'
     limit = 10
     offset = 0
     supported_sort_keys = ['updated_at', 'store', 'notes', 
@@ -354,8 +366,11 @@ begin
     #sort_key = 'updated_at' if sort_key == 'sku'
 
     #todo status filters to be implemented
-
-    @orders = Order.limit(limit).offset(offset).order(sort_key+" "+sort_order)
+    if status_filter == 'all'
+      @orders = Order.limit(limit).offset(offset).order(sort_key+" "+sort_order)
+    else
+      @orders = Order.limit(limit).offset(offset).order(sort_key+" "+sort_order).where(:status=>status_filter)
+    end
     @orders_result = []
 
     @orders.each do |order|
@@ -461,8 +476,8 @@ begin
     if !params[:search].nil? && params[:search] != ''
       search = params[:search]
       
-      #todo: include sku in search as well in future.
-      @products = Order.find_by_sql("SELECT * from ORDERS WHERE storename like '%"+search+"%' OR 
+      #todo: include sku and storename in search as well in future.
+      @products = Order.find_by_sql("SELECT * from ORDERS WHERE 
                       increment_id like '%"+search+"%' OR status like '%"+search+"%' LIMIT #{limit} 
                       OFFSET #{offset}")
 
