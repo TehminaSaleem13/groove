@@ -1,7 +1,7 @@
 groovepacks_controllers.
 controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$location', '$route', '$cookies',
     function( $scope, $http, $timeout, $routeParams, $location, $route, $q, $cookies) {
-
+    $('.modal-backdrop').remove();
         $scope.current_page="show_stores";
         $scope.$on("fileSelected", function (event, args) {
             $scope.$apply(function () {

@@ -4,7 +4,7 @@ groovepacks_controllers.
             $http.get('/home/userinfo.json').success(function(data){
                 $scope.username = data.username;
             });
-
+            $('.modal-backdrop').remove();
             $scope.get_orders = function(next) {
                 next = typeof next !== 'undefined' ? next : false;
                 if(!next) {
