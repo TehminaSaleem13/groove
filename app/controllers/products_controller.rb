@@ -501,4 +501,23 @@ class ProductsController < ApplicationController
       format.json { render json: @result }
     end
   end
+
+  def getdetails
+  	@result = Hash.new
+  	@product = Product.find(params[:id])
+
+  	if !@product.nil?
+  		@result['product'] = Hash.new
+  		@result['product']['basicinfo'] = @product
+  		@result['product']['skus'] = @product.product_skus
+  		@result['product']['cats'] = @product.product_cats
+    	@result['product']['images'] = @product.product_images
+  		@result['product']['barcodes'] = @product.product_barcodes
+  	end
+  	
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json: @result }
+    end
+  end
 end
