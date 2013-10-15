@@ -108,10 +108,15 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
     			{
     				$scope.show_error_msgs = false;
                     $scope.error_msgs = {};
+                    $scope.showstoreupdate_status = true;
+                    $scope.storeupdate_message = 'Store has been successfully updated.';
     				var type = $scope.newStore.type;
-                    $scope.newStore = {};
+                    if ($scope.newStore.store_type == 'CSV')
+                    {
+                        $scope.newStore = {};
+                        $('#createStore').modal('hide');
+                    }
 
-    				$('#createStore').modal('hide');
 
     				$http.get('/store_settings/storeslist.json').success(function(data) {
 						    		var storesScope = angular.element($("#storestbl")).scope();
@@ -123,7 +128,7 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
 						    		$scope.error_msg = "There was a problem retrieving stores list.";
 						    		$scope.show_error = true;
 						    	});
-                    $scope.edit_status = false;
+                    $scope.edit_status = true;
 
                     //Use FileReader API here if it exists (post prototype feature)
                     if(data.csv_import && data.store_id) {
@@ -134,7 +139,7 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
                         }).error(function(data) {
                             $scope.error_msg = "There was a problem retrieving stores list.";
                             $scope.show_error = true;
-                        })
+                        });
                     }
     			}
     		});
@@ -744,5 +749,12 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
         }
         $scope.current.map[col] = $scope.csvimporter.default_map;
         $scope.check_disable();
+    }
+
+    $scope.close_modal = function() {
+        $scope.newStore = {};
+        $('#createStore').modal('hide');
+        $scope.showstoreupdate_status = false;
+        $scope.storeupdate_message = '';
     }
     }]);
