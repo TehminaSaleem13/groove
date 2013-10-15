@@ -1,7 +1,6 @@
   <div class="row">
-    <div class="span4">
-    <h5>Order Import</h5>
-      <br/>
+    <div class="span6">
+    <h5>Magento Credentials</h5>
       <div class="control-group">
         <label class="control-label">Host</label>
         <div class="controls">
@@ -29,81 +28,48 @@
           <input name="apikey" xs-input-sync ng-model="newStore.api_key" type="text" value="" required/>
          </div>
       </div>
-      </div>
-      <div ng-show="orderimport_type=='csvimport'">
-      <div class="control-group">
-          <input name="csvfile" xs-input-sync ng-model="csvfile" type="file" value="" required/>
-      </div> 
-      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="span6">
+    <h5>Import Orders</h5>
       <div class="control-group">
         <div class="controls">
           <button ng-click="import_orders()"class="btn btn-primary" ng-show="edit_status">Import Orders</button>
         </div>
       </div>
       <div class="control-group">
-      <label class="alert alert-info" ng-show="importorderstatus_show">{{importorder_status}}</label>
+        <label class="alert alert-info" ng-show="importorderstatus_show">{{importorder_status}}</label>
       </div>
     </div>
-
   </div>
 
   <div class="row">
     <div class="span">
-    <h5>Product Import</h5>
+    <h5>Import Products</h5>
 
-      <br/>
-      <br/>
-      <label class="checkbox">
-        <input type="checkbox"
-               ng-model="copyfromabove"
-               name="copy" 
-               ng-change="copydata(copyfromabove)"/> Copy data from above<br/>
-      </label>
        <label class="checkbox">
         <input type="checkbox"
                ng-model="newStore.import_images"
                name="import_images" /> Import Images <br/>
       </label>
+
       <label class="checkbox">
         <input type="checkbox"
                ng-model="newStore.import_products"
                name="import_products" /> Import Product Categories<br/>
       </label>
-      <div class="control-group">
-        <label class="control-label">Host</label>
-        <div class="controls">
-          <input name="producthost" xs-input-sync ng-model="newStore.producthost" type="text" value="" required/>
-         </div>
-      </div> 
 
-      <div class="control-group">
-        <label class="control-label">Username</label>
-        <div class="controls">
-          <input name="productusername" xs-input-sync ng-model="newStore.productusername" type="text" value="" required/>
-         </div>
-      </div>
-      
-      <div class="control-group">
-        <label class="control-label">Password</label>
-        <div class="controls">
-          <input name="productpassword" xs-input-sync ng-model="newStore.productpassword" type="text" value="" required/>
-         </div>
-      </div>
-
-      <div class="control-group">
-        <label class="control-label">API Key</label>
-        <div class="controls">
-          <input name="productapikey" xs-input-sync ng-model="newStore.productapi_key" type="text" value="" required/>
-         </div>
-      </div>
       <div class="control-group">
         <div class="controls">
           <button ng-click="import_products()"class="btn btn-primary" ng-show="edit_status">Import Products</button>
         </div>
       </div>
+
       <div class="control-group">
       <label class="alert alert-info" ng-show="importproductstatus_show">{{importproduct_status}}</label>
       </div>
-      </div>
     </div>
   </div>
+

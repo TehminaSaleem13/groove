@@ -19,8 +19,8 @@ class ProductsController < ApplicationController
 			
 			if !client.nil?
 				
-				response = client.call(:login,  message: { apiUser: @magento_credentials.first.productusername, 
-					apikey: @magento_credentials.first.productapi_key })
+				response = client.call(:login,  message: { apiUser: @magento_credentials.first.username, 
+					apikey: @magento_credentials.first.api_key })
 
 				if response.success?
 					session =  response.body[:login_response][:login_return]
@@ -141,8 +141,8 @@ class ProductsController < ApplicationController
 			@credential = @amazon_credentials.first
 			mws = MWS.new(:aws_access_key_id => ENV['AMAZON_MWS_ACCESS_KEY_ID'],
 			  :secret_access_key => ENV['AMAZON_MWS_SECRET_ACCESS_KEY'],
-			  :seller_id => @credential.productmerchant_id,
-			  :marketplace_id => @credential.productmarketplace_id)
+			  :seller_id => @credential.merchant_id,
+			  :marketplace_id => @credential.marketplace_id)
 			#@result['aws-response'] = mws.reports.request_report :report_type=>'_GET_MERCHANT_LISTINGS_DATA_'
 			#@result['aws-rewuest_status'] = mws.reports.get_report_request_list
 			response = mws.reports.get_report :report_id=> params[:reportid]
@@ -203,8 +203,8 @@ class ProductsController < ApplicationController
 			
 			mws = MWS.new(:aws_access_key_id => ENV['AMAZON_MWS_ACCESS_KEY_ID'],
 			  :secret_access_key => ENV['AMAZON_MWS_SECRET_ACCESS_KEY'],
-		  	  :seller_id => @credential.productmerchant_id,
-			  :marketplace_id => @credential.productmarketplace_id)
+		  	  :seller_id => @credential.merchant_id,
+			  :marketplace_id => @credential.marketplace_id)
 
 			response = mws.reports.request_report :report_type=>'_GET_MERCHANT_LISTINGS_DATA_'
 			@credential.productreport_id = response.report_request_info.report_request_id
@@ -233,8 +233,8 @@ class ProductsController < ApplicationController
 			
 			mws = MWS.new(:aws_access_key_id => ENV['AMAZON_MWS_ACCESS_KEY_ID'],
 			  :secret_access_key => ENV['AMAZON_MWS_SECRET_ACCESS_KEY'],
-			  :seller_id => @credential.productmerchant_id,
-			  :marketplace_id => @credential.productmarketplace_id)
+			  :seller_id => @credential.merchant_id,
+			  :marketplace_id => @credential.marketplace_id)
 
 			@report_list = mws.reports.get_report_request_list
 			@report_list.report_request_info.each do |report_request|
@@ -496,6 +496,25 @@ class ProductsController < ApplicationController
         end
       end
     end
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json: @result }
+    end
+  end
+
+  def getdetails
+  	@result = Hash.new
+  	@product = Product.find(params[:id])
+
+  	if !@product.nil?
+  		@result['product'] = Hash.new
+  		@result['product']['basicinfo'] = @product
+  		@result['product']['skus'] = @product.product_skus
+  		@result['product']['cats'] = @product.product_cats
+    	@result['product']['images'] = @product.product_images
+  		@result['product']['barcodes'] = @product.product_barcodes
+  	end
+  	
     respond_to do |format|
       format.html # show.html.erb
       format.json { render json: @result }

@@ -94,9 +94,6 @@ class StoreSettingsController < ApplicationController
         @amazon.marketplace_id = params[:marketplace_id]
         @amazon.merchant_id = params[:merchant_id]
 
-        @amazon.productmarketplace_id = params[:productmarketplace_id]
-        @amazon.productmerchant_id = params[:productmerchant_id]
-
         @amazon.import_products = params[:import_products]
         @amazon.import_images = params[:import_images]
 

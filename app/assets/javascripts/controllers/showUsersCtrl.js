@@ -4,6 +4,7 @@ controller('showUsersCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$l
     	$http.get('/home/userinfo.json').success(function(data){
     		$scope.username = data.username;
     	});
+        $('.modal-backdrop').remove();
         $scope.current_page="show_users";
     	$http.get('/user_settings/userslist.json').success(function(data) {
     		$scope.users = data;

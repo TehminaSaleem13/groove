@@ -173,9 +173,18 @@ aria-hidden="true">
 
   
   <div class="modal-footer">
+  <div class="row-fluid">
+    <div class="span6">
+      <span class="label label-info" ng-show="showstoreupdate_status">{{storeupdate_message}}</span>
+    </div>
+    <div class="span6">
+      <div class="pull-right">
         <button ng-click="submit()"class="btn btn-primary" ng-hide="edit_status">Add Store</button>
         <button ng-click="submit()"class="btn btn-primary" ng-show="edit_status">Update Store</button>
-        <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+        <button ng-click="close_modal()" class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+      </div>
+    </div>
+  </div>
   </div>
 
 </fieldset>
