@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20131015052803) do
+ActiveRecord::Schema.define(:version => 20131015092424) do
 
   create_table "amazon_credentials", :force => true do |t|
     t.string   "merchant_id",                                     :null => false
@@ -148,6 +148,7 @@ ActiveRecord::Schema.define(:version => 20131015052803) do
     t.string   "image"
     t.datetime "created_at", :null => false
     t.datetime "updated_at", :null => false
+    t.string   "caption"
   end
 
   add_index "product_images", ["product_id"], :name => "index_product_images_on_product_id"
@@ -169,6 +170,8 @@ ActiveRecord::Schema.define(:version => 20131015052803) do
     t.integer  "store_id",                        :null => false
     t.datetime "created_at",                      :null => false
     t.datetime "updated_at",                      :null => false
+    t.string   "inv_wh1"
+    t.string   "location_primary"
     t.string   "status"
     t.text     "spl_instructions_4_packer"
     t.text     "spl_instructions_4_confirmation"
@@ -180,8 +183,6 @@ ActiveRecord::Schema.define(:version => 20131015052803) do
     t.boolean  "is_kit"
     t.text     "kit_skus"
     t.string   "kit_parsing"
-    t.string   "location_primary"
-    t.integer  "inv_wh1_qty"
     t.integer  "inv_alert_wh1"
     t.integer  "inv_wh2_qty"
     t.integer  "inv_alert_wh2"
@@ -195,7 +196,6 @@ ActiveRecord::Schema.define(:version => 20131015052803) do
     t.integer  "inv_alert_wh6"
     t.integer  "inv_wh7_qty"
     t.integer  "inv_alert_wh7"
-    t.string   "inv_wh1"
   end
 
   add_index "products", ["store_id"], :name => "index_products_on_store_id"

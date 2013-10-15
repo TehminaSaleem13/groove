@@ -15,7 +15,7 @@ class ProductsController < ApplicationController
 		@magento_credentials = MagentoCredentials.where(:store_id => @store.id)
 
 		if @magento_credentials.length > 0
-			client = Savon.client(wsdl: @magento_credentials.first.producthost+"/index.php/api/soap/index/wsdl/1")
+			client = Savon.client(wsdl: @magento_credentials.first.host+"/index.php/api/soap/index/wsdl/1")
 			
 			if !client.nil?
 				
@@ -55,6 +55,34 @@ class ProductsController < ApplicationController
 
 								#publish the sku to the product record
 								@productdb.product_skus << @productdbsku
+
+								#get images and categories
+								# getimages = client.call(:call, message: {session: session, 
+								# 	method: 'catalog_product_attribute_media.list', product: result_product['sku']})
+								# if getimages.success?
+								# 	@images = getimages.body[:call_response][:call_return][:item]
+									
+								# 	@images[:item].each do |image|
+								# 											re12
+								# 		image.each do |itemhash|
+								# 			@productimage = ProductImage.new
+								# 			if itemhash[1] == 'url'
+								# 				@productimage.image = itemhash[:value]
+								# 			end
+
+								# 			if itemhash[1] == 'label'
+								# 				@productimage.caption = itemhash[:value]
+								# 			end
+											
+								# 			@productdb.product_images << @productimage
+								# 		end
+								# 	end
+
+								# else
+								# 	@result12['test']
+								# end
+								# result_product['']
+
 
 								#save
 								if @productdb.save
@@ -513,8 +541,14 @@ class ProductsController < ApplicationController
   		@result['product']['cats'] = @product.product_cats
     	@result['product']['images'] = @product.product_images
   		@result['product']['barcodes'] = @product.product_barcodes
+  		if @product.product_skus.length > 0
+  			@result['product']['pendingorders'] = Order.where(:status=>'Awaiting').where(:status=>'onhold').
+  				where(:sku=>@product.product_skus.first.sku)
+  		else
+  			@result['product']['pendingorders'] = nil
+  		end
   	end
-  	
+
     respond_to do |format|
       format.html # show.html.erb
       format.json { render json: @result }
