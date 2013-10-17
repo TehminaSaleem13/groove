@@ -116,7 +116,10 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
                         $scope.newStore = {};
                         $('#createStore').modal('hide');
                     }
-
+                    if ($scope.edit_status)
+                    {
+                        $('#createStore').modal('hide');
+                    }
 
     				$http.get('/store_settings/storeslist.json').success(function(data) {
 						    		var storesScope = angular.element($("#storestbl")).scope();

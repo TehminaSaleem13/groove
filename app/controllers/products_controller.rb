@@ -57,32 +57,59 @@ class ProductsController < ApplicationController
 								@productdb.product_skus << @productdbsku
 
 								#get images and categories
+								# begin
 								# getimages = client.call(:call, message: {session: session, 
-								# 	method: 'catalog_product_attribute_media.list', product: result_product['sku']})
+								# 	method: 'catalog_product_attribute_media.list', 
+								# 	product: result_product['sku']})
 								# if getimages.success?
 								# 	@images = getimages.body[:call_response][:call_return][:item]
-									
-								# 	@images[:item].each do |image|
-								# 											re12
-								# 		image.each do |itemhash|
-								# 			@productimage = ProductImage.new
-								# 			if itemhash[1] == 'url'
-								# 				@productimage.image = itemhash[:value]
-								# 			end
+								# 	if !@images.nil?
+								# 		if @images.length != 2
+								# 			@images.each do |image|
+								# 				image[:item].each do |itemhash|
+								# 					@productimage = ProductImage.new
+								# 					if itemhash[:key] == 'url'
+								# 						@productimage.image = itemhash[:value]
+								# 					end
 
-								# 			if itemhash[1] == 'label'
-								# 				@productimage.caption = itemhash[:value]
+								# 					if itemhash[:key] == 'label'
+								# 						@productimage.caption = itemhash[:value]
+								# 					end
+													
+								# 					@productdb.product_images << @productimage
+								# 				end
 								# 			end
-											
-								# 			@productdb.product_images << @productimage
 								# 		end
 								# 	end
-
-								# else
-								# 	@result12['test']
 								# end
-								# result_product['']
+								# rescue
 
+								# end
+
+								# begin 
+
+								if !result_product['category_ids'][:item].nil? && 
+									result_product['category_ids'][:item].kind_of?(Array)
+									result_product['category_ids'][:item].each do|category_id|
+										
+										get_categories = client.call(:call, message: {session: session, 
+											method: 'catalog_category.info', 
+											categoryId: category_id})
+										
+										if get_categories.success?
+											@categories = get_categories.body[:call_response][:call_return][:item]
+											@categories.each do |category|
+												if category[:key] == 'name'
+													@product_cat = ProductCat.new
+													@product_cat.category = category[:value]
+													@productdb.product_cats << @product_cat
+												end
+											end
+										end
+									end
+								end
+								# rescue
+								# end
 
 								#save
 								if @productdb.save
