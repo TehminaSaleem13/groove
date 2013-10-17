@@ -57,36 +57,36 @@ class ProductsController < ApplicationController
 								@productdb.product_skus << @productdbsku
 
 								#get images and categories
-								# begin
-								# getimages = client.call(:call, message: {session: session, 
-								# 	method: 'catalog_product_attribute_media.list', 
-								# 	product: result_product['sku']})
-								# if getimages.success?
-								# 	@images = getimages.body[:call_response][:call_return][:item]
-								# 	if !@images.nil?
-								# 		if @images.length != 2
-								# 			@images.each do |image|
-								# 				image[:item].each do |itemhash|
-								# 					@productimage = ProductImage.new
-								# 					if itemhash[:key] == 'url'
-								# 						@productimage.image = itemhash[:value]
-								# 					end
+								begin
+								getimages = client.call(:call, message: {session: session, 
+									method: 'catalog_product_attribute_media.list', 
+									product: result_product['sku']})
+								if getimages.success?
+									@images = getimages.body[:call_response][:call_return][:item]
+									if !@images.nil?
+										if @images.length != 2
+											@images.each do |image|
+												image[:item].each do |itemhash|
+													@productimage = ProductImage.new
+													if itemhash[:key] == 'url'
+														@productimage.image = itemhash[:value]
+													end
 
-								# 					if itemhash[:key] == 'label'
-								# 						@productimage.caption = itemhash[:value]
-								# 					end
+													if itemhash[:key] == 'label'
+														@productimage.caption = itemhash[:value]
+													end
 													
-								# 					@productdb.product_images << @productimage
-								# 				end
-								# 			end
-								# 		end
-								# 	end
-								# end
-								# rescue
+													@productdb.product_images << @productimage
+												end
+											end
+										end
+									end
+								end
+								rescue
 
-								# end
+								end
 
-								# begin 
+								begin 
 
 								if !result_product['category_ids'][:item].nil? && 
 									result_product['category_ids'][:item].kind_of?(Array)
@@ -108,8 +108,8 @@ class ProductsController < ApplicationController
 										end
 									end
 								end
-								# rescue
-								# end
+								rescue
+								end
 
 								#save
 								if @productdb.save
