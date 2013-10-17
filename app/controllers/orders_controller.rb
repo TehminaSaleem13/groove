@@ -362,15 +362,52 @@ begin
     status_filter = params[:filter] if !params[:filter].nil? && 
       supported_status_filters.include?(params[:filter])
     
+      #overrides
+
+    if sort_key == 'store_order_id'
+      sort_key = 'increment_id'
+    end
+
+    if sort_key == 'order_date'
+      sort_key = 'order_placed_time'
+    end
+
+    if sort_key == 'notes'
+      sort_key = 'notes_toPacker'
+    end
+
+    if sort_key == 'recipient'
+      sort_key = 'firstname '+sort_order+', lastname'
+    end
+
     #hack to bypass for now and enable client development
     #sort_key = 'updated_at' if sort_key == 'sku'
 
     #todo status filters to be implemented
     if status_filter == 'all'
+      if sort_key == 'store'
+      @orders = Order.find_by_sql("SELECT orders.* FROM orders, stores ORDER BY stores.name "+
+        "AND orders.store_id = stores.id "+sort_order+" LIMIT "+limit+" OFFSET "+offset)
+      elsif sort_key == 'items'
+        @orders = Order.find_by_sql("SELECT orders.* FROM orders, order_items"+ 
+            " WHERE order_items.order_id = orders.id GROUP BY order_items.order_id ORDER BY count "+sort_order+" LIMIT "+limit+" OFFSET "+offset)
+      else
       @orders = Order.limit(limit).offset(offset).order(sort_key+" "+sort_order)
+      end
     else
+      if sort_key == 'store'
+      @orders = Order.find_by_sql("SELECT orders.* FROM orders, stores WHERE orders.status='"+status_filter+
+        "' AND orders.store_id = stores.id ORDER BY stores.name "+
+        sort_order+" LIMIT "+limit+" OFFSET "+offset)
+      elsif sort_key == 'items'
+        @orders = Order.find_by_sql("SELECT orders.*, count(order_items.id) AS count FROM orders, order_items"+ 
+            " WHERE orders.status='"+status_filter+"' AND order_items.order_id = orders.id GROUP BY order_items.order_id "+
+            "ORDER BY count "+sort_order+" LIMIT "+limit+" OFFSET "+offset)
+      else
       @orders = Order.limit(limit).offset(offset).order(sort_key+" "+sort_order).where(:status=>status_filter)
+      end
     end
+
     @orders_result = []
 
     @orders.each do |order|

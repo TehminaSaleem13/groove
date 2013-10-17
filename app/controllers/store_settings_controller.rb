@@ -57,11 +57,6 @@ class StoreSettingsController < ApplicationController
         @magento.password = params[:password]
         @magento.api_key  = params[:api_key]
 
-        @magento.producthost = params[:producthost]
-        @magento.productusername = params[:productusername]
-        @magento.productpassword = params[:productpassword]
-        @magento.productapi_key  = params[:productapi_key]
-
         @magento.import_products = params[:import_products]
         @magento.import_images = params[:import_images]
 
