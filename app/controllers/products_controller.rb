@@ -190,6 +190,12 @@ class ProductsController < ApplicationController
 					end
 				end
 
+				if !@item.primaryCategory.nil?
+					@product_cat = ProductCat.new
+					@product_cat.category = @item.primaryCategory.categoryName
+					@productdb.product_cats << @product_cat
+				end
+
 				#save
 				if @productdb.save
 					@result['success_imported'] = @result['success_imported'] + 1
