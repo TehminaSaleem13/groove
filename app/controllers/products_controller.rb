@@ -179,6 +179,17 @@ class ProductsController < ApplicationController
 
 				#publish the sku to the product record
 				@productdb.product_skus << @productdbsku
+
+				
+				if !@item.pictureDetails.nil?
+					if @item.pictureDetails.pictureURL.length > 0
+						@productimage = ProductImage.new
+						@productimage.image = "http://i.ebayimg.com" + 
+							@item.pictureDetails.pictureURL.first.request_uri()
+						@productdb.product_images << @productimage
+					end
+				end
+
 				#save
 				if @productdb.save
 					@result['success_imported'] = @result['success_imported'] + 1
