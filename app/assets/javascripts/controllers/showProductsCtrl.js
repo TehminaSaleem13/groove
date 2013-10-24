@@ -180,7 +180,8 @@ controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$routeParams', 
             $scope.tmp_options = {
                 sku: 'skus',
                 barcode: 'barcodes',
-                category:'cats'
+                category:'cats',
+                image:'images'
             };
             $http.get('/products/getdetails/'+ id+'.json').success(function(data) {
                 console.log(data);
@@ -235,10 +236,12 @@ controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$routeParams', 
         $scope.remove_node = function(name,index) {
             prop = $scope.tmp_options[name];
             $scope.single_product[prop].splice(index,1);
-            $("#"+name+"-input").prepend($(".input-text input[name='"+name+"']"));
-            $scope.focus_input(name);
-            $scope.tmp.editing = -1;
-            $scope.tmp.editing_var = -1;
+            if(name !=="image") {
+                $("#"+name+"-input").prepend($(".input-text input[name='"+name+"']"));
+                $scope.focus_input(name);
+                $scope.tmp.editing = -1;
+                $scope.tmp.editing_var = -1;
+            }
         }
 
         $scope.edit_node = function(name,index) {

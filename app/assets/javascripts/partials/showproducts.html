@@ -183,7 +183,7 @@
                             <div ui-sortable ng-model="single_product.images">
                                 <div class="single-image" ng-repeat="image in single_product.images">
                                     <img ng-src="{{ image.image }}" class="img-polaroid img-thumb"/>
-                                    <i class="icon-remove"></i>
+                                    <i class="icon-remove" ng-click="remove_node('image',$index)"></i>
                                 </div>
                             </div>
                         </div>
