@@ -190,6 +190,12 @@ class ProductsController < ApplicationController
 					end
 				end
 
+				if !@item.primaryCategory.nil?
+					@product_cat = ProductCat.new
+					@product_cat.category = @item.primaryCategory.categoryName
+					@productdb.product_cats << @product_cat
+				end
+
 				#save
 				if @productdb.save
 					@result['success_imported'] = @result['success_imported'] + 1
@@ -218,6 +224,7 @@ class ProductsController < ApplicationController
 			csv = CSV.parse(response.body,:quote_char => "|")
 			@result['total_imported']  = csv.length - 1
 			csv.each_with_index do | row, index|
+				index1
 				if index > 0
 					product_row = row.first.split(/\t/)
 					if Product.where(:store_product_id=>product_row[2]).length  == 0
