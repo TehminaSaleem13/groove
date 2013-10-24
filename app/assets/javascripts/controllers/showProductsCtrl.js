@@ -18,7 +18,7 @@ controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$routeParams', 
             }
             $http.get(url).success(function(data) {
                 if(data.status) {
-                    console.log($scope.product_setup);
+                    //console.log($scope.product_setup);
                     if(!next) {
                         $scope.products = data.products;
                     } else {
@@ -26,7 +26,7 @@ controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$routeParams', 
                             $scope.products.push(data.products[key]);
                         }
                     }
-                    console.log($scope.products);
+                    //console.log($scope.products);
                 }
             }).error(function(data) {
 
@@ -169,5 +169,132 @@ controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$routeParams', 
                     $scope.get_products();
                 });
         }
+        $scope.product_single_details = function(id) {
+            $scope.single_product = {};
+            $scope.tmp = {
+                sku: "",
+                barcode: "",
+                category: "",
+                editing: -1
+            };
+            $scope.tmp_options = {
+                sku: 'skus',
+                barcode: 'barcodes',
+                category:'cats'
+            };
+            $http.get('/products/getdetails/'+ id+'.json').success(function(data) {
+                console.log(data);
+                if(data.product) {
+                    $scope.single_product = data.product;
+                    $('#showProduct').modal('show');
+                }
+            }).error(function(data) {
+
+                });
+        }
+        $scope.handle_key_event =  function(event) {
+            //console.log(event);
+            name = event.currentTarget.name;
+            if(event.keyCode == 13 || event.keyCode == 188 || event.type == "focusout") {
+                event.preventDefault();
+                if($scope.tmp[name] != "") {
+                    $scope.save_node(name,event.type == "focusout");
+                }
+            }
+            if(event.keyCode == 8) {
+                if($scope.tmp[name] == "") {
+                    index = $scope.tmp.editing;
+                    if(index != -1) {
+                        $scope.remove_node(name,index);
+                        index = index - 1;
+                    }
+                    $scope.edit_node(name,index);
+                }
+            }
+        }
+        $scope.save_node = function(name,blur) {
+            prop = $scope.tmp_options[name];
+            if($scope.tmp[name] != "") {
+                if($scope.tmp.editing == -1) {
+                    mytemp = {};
+                    mytemp[name] = $scope.tmp[name];
+                    $scope.single_product[prop].push(mytemp);
+                } else {
+                    $scope.single_product[prop][$scope.tmp.editing][name] = $scope.tmp[name];
+                }
+            }
+            $scope.tmp[name] = "";
+            $scope.tmp.editing = -1;
+            $scope.tmp.editing_var = -1;
+            $("#"+name+"-input").prepend($(".input-text input[name='"+name+"']"));
+            if(!blur) {
+                $scope.focus_input(name);
+            }
+        }
+
+        $scope.remove_node = function(name,index) {
+            prop = $scope.tmp_options[name];
+            $scope.single_product[prop].splice(index,1);
+            $("#"+name+"-input").prepend($(".input-text input[name='"+name+"']"));
+            $scope.focus_input(name);
+            $scope.tmp.editing = -1;
+            $scope.tmp.editing_var = -1;
+        }
+
+        $scope.edit_node = function(name,index) {
+            prop = $scope.tmp_options[name];
+            if(index == -1) {
+                index = $scope.single_product[prop].length-1;
+            }
+            $scope.save_node(name);
+            $scope.tmp.editing = index;
+            $scope.tmp.editing_var = name;
+            $("#"+name+"-"+index).prepend($(".input-text input[name='"+name+"']"));
+            $scope.focus_input(name);
+            $scope.tmp[name] =  $scope.single_product[prop][index][name];
+            $scope.single_product[prop][index][name] = "";
+
+        }
+
+        $scope.focus_input = function(name){
+            $(".input-text input[name='"+name+"']").focus();
+        }
+        $scope.blur_input = function(name) {
+            $("#name").removeClass("input-text-hover");
+            $("#"+name+"-input").addClass("false-tag-bubble");
+            $scope.tmp[name] = "";
+        }
+        $scope.update_single_product = function() {
+            $http.post('/products/updateproduct.json', $scope.single_product).success(function(data){
+                if(data.status) {
+                    console.log(data);
+                    
+                }
+            });
+        }
+
+        //Main code ends here. Rest is function calls etc to init
         $scope.set_defaults();
+        $('.icon-question-sign').popover({trigger: 'hover focus'});
+        input_text_selector = $('.input-text input');
+        input_text_selector.keydown($scope.handle_key_event);
+        input_text_selector.focusout(
+            function(event) {
+                $scope.handle_key_event(event);
+                if(event.currentTarget.parentElement.id.slice(-6) == "-input") {
+                    $("#"+event.currentTarget.parentElement.parentElement.id).removeClass("input-text-hover");
+                    $("#"+event.currentTarget.parentElement.id).addClass("false-tag-bubble");
+                }
+            }
+        );
+        input_text_selector.focus(
+            function(event) {
+                if(event.currentTarget.parentElement.id.slice(-6) == "-input") {
+                    $("#"+event.currentTarget.parentElement.parentElement.id).addClass("input-text-hover");
+                    $("#"+event.currentTarget.parentElement.id).removeClass("false-tag-bubble");
+                } else {
+                    $("#"+event.currentTarget.parentElement.parentElement.parentElement.id).addClass("input-text-hover");
+                }
+            }
+        );
     }]);
