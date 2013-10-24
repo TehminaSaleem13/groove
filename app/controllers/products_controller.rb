@@ -356,6 +356,8 @@ class ProductsController < ApplicationController
 	# then the API considers order to be descending.The API also supports a product status filter. 
 	# The filter expects one of the following parameters in params[:filter] 'all', 'active', 'inactive', 'new'. 
 	# If no filter is passed, then the API will default to 'active' 
+	# if you would like to get Kits, specify params[:iskit] to 1. it will return product kits and the corresponding skus
+	#
 	def getproducts
 		@result = Hash.new
 		@result[:status] = true
@@ -364,11 +366,12 @@ class ProductsController < ApplicationController
 		status_filter = 'active'
 		limit = 10
 		offset = 0
+		is_kit = 0
 		supported_sort_keys = ['updated_at', 'name', 'sku', 
 								'status', 'barcode', 'location_primary' ]
 		supported_order_keys = ['ASC', 'DESC' ] #Caps letters only
 		supported_status_filters = ['all', 'active', 'inactive', 'new']
-
+		supported_kit_params = ['0', '1']
 
 		# Get passed in parameter variables if they are valid.
 		limit = params[:limit] if !params[:limit].nil? && params[:limit].to_i > 0
@@ -383,15 +386,19 @@ class ProductsController < ApplicationController
 
 		status_filter = params[:filter] if !params[:filter].nil? && 
 			supported_status_filters.include?(params[:filter])
+
+		is_kit = params[:iskit] if !params[:iskit].nil?  &&
+			supported_kit_params.include?(params[:iskit])
 		
 		#hack to bypass for now and enable client development
 		sort_key = 'name' if sort_key == 'sku'
 
 		#todo status filters to be implemented
 		if status_filter == 'all'
-			@products = Product.limit(limit).offset(offset).order(sort_key+" "+sort_order)
+			@products = Product.limit(limit).offset(offset).order(sort_key+" "+sort_order).where(:is_kit=> is_kit)
 		else
-			@products = Product.limit(limit).offset(offset).order(sort_key+" "+sort_order).where(:status=>status_filter.capitalize)
+			@products = Product.limit(limit).offset(offset).order(sort_key+" "+sort_order).
+			where(:status=>status_filter.capitalize).where(:is_kit=>is_kit)
 		end
 		@products_result = []
 
@@ -417,7 +424,13 @@ class ProductsController < ApplicationController
 		end
 		@store = Store.find(product.store_id)
 		@product_hash['store_type'] = @store.store_type
-
+		@product_kit_skus = ProductKitSkus.where(:product_id=>product.id)
+		if @product_kit_skus.length > 0
+			@product_hash['productkitskus'] = []
+			@product_kit_skus.each do |kitsku|
+				@product_hash['productkitskus'].push(kitsku.sku)
+			end
+		end
 		@products_result.push(@product_hash)
 		end
 		
@@ -586,6 +599,34 @@ class ProductsController < ApplicationController
   		@result['product']['cats'] = @product.product_cats
     	@result['product']['images'] = @product.product_images
   		@result['product']['barcodes'] = @product.product_barcodes
+  		if @product.product_skus.length > 0
+  			@result['product']['pendingorders'] = Order.where(:status=>'Awaiting').where(:status=>'onhold').
+  				where(:sku=>@product.product_skus.first.sku)
+  		else
+  			@result['product']['pendingorders'] = nil
+  		end
+  	end
+
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json: @result }
+    end
+  end
+
+  def getproductkits
+	@result = Hash.new
+  	@product = Product.find(params[:id])
+
+  	if !@product.nil?
+  		@result['product'] = Hash.new
+  		@result['product']['basicinfo'] = @product
+  		@result['product']['skus'] = @product.product_skus
+  		@result['product']['cats'] = @product.product_cats
+    	@result['product']['images'] = @product.product_images
+  		@result['product']['barcodes'] = @product.product_barcodes
+  		if @product.is_kit == 1
+  			@result['product']['productkitskus'] = @product.product_kit_skus
+  		end
   		if @product.product_skus.length > 0
   			@result['product']['pendingorders'] = Order.where(:status=>'Awaiting').where(:status=>'onhold').
   				where(:sku=>@product.product_skus.first.sku)

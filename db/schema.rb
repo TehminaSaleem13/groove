@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20131015092424) do
+ActiveRecord::Schema.define(:version => 20131024150207) do
 
   create_table "amazon_credentials", :force => true do |t|
     t.string   "merchant_id",                                     :null => false
@@ -153,6 +153,15 @@ ActiveRecord::Schema.define(:version => 20131015092424) do
 
   add_index "product_images", ["product_id"], :name => "index_product_images_on_product_id"
 
+  create_table "product_kit_skus", :force => true do |t|
+    t.integer  "product_id"
+    t.string   "sku"
+    t.datetime "created_at", :null => false
+    t.datetime "updated_at", :null => false
+  end
+
+  add_index "product_kit_skus", ["product_id"], :name => "index_product_kit_skus_on_product_id"
+
   create_table "product_skus", :force => true do |t|
     t.string   "sku"
     t.string   "purpose"
@@ -164,12 +173,12 @@ ActiveRecord::Schema.define(:version => 20131015092424) do
   add_index "product_skus", ["product_id"], :name => "index_product_skus_on_product_id"
 
   create_table "products", :force => true do |t|
-    t.string   "store_product_id",                :null => false
-    t.string   "name",                            :null => false
+    t.string   "store_product_id",                               :null => false
+    t.string   "name",                                           :null => false
     t.string   "product_type"
-    t.integer  "store_id",                        :null => false
-    t.datetime "created_at",                      :null => false
-    t.datetime "updated_at",                      :null => false
+    t.integer  "store_id",                                       :null => false
+    t.datetime "created_at",                                     :null => false
+    t.datetime "updated_at",                                     :null => false
     t.string   "inv_wh1"
     t.string   "location_primary"
     t.string   "status"
@@ -180,8 +189,6 @@ ActiveRecord::Schema.define(:version => 20131015092424) do
     t.boolean  "is_skippable"
     t.integer  "packing_placement"
     t.integer  "pack_time_adj"
-    t.boolean  "is_kit"
-    t.text     "kit_skus"
     t.string   "kit_parsing"
     t.integer  "inv_alert_wh1"
     t.integer  "inv_wh2_qty"
@@ -196,6 +203,7 @@ ActiveRecord::Schema.define(:version => 20131015092424) do
     t.integer  "inv_alert_wh6"
     t.integer  "inv_wh7_qty"
     t.integer  "inv_alert_wh7"
+    t.integer  "is_kit",                          :default => 0
   end
 
   add_index "products", ["store_id"], :name => "index_products_on_store_id"
