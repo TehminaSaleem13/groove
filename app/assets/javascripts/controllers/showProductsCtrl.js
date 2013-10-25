@@ -12,9 +12,9 @@ controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$routeParams', 
                 $scope.product_setup.offset = 0;
             }
             if($scope.product_setup.search == '') {
-                url = '/products/getproducts.json?filter='+$scope.product_setup.filter+'&sort='+$scope.product_setup.sort+'&order='+$scope.product_setup.order+'&limit='+$scope.product_setup.limit+'&offset='+$scope.product_setup.offset;
+                url = '/products/getproducts.json?filter='+$scope.product_setup.filter+'&iskit='+$scope.product_setup.is_kit+'&sort='+$scope.product_setup.sort+'&order='+$scope.product_setup.order+'&limit='+$scope.product_setup.limit+'&offset='+$scope.product_setup.offset;
             } else {
-                url = '/products/search.json?search='+$scope.product_setup.search+'&limit='+$scope.product_setup.limit+'&offset='+$scope.product_setup.offset;
+                url = '/products/search.json?search='+$scope.product_setup.search+'&iskit='+$scope.product_setup.is_kit+'&limit='+$scope.product_setup.limit+'&offset='+$scope.product_setup.offset;
             }
             $http.get(url).success(function(data) {
                 if(data.status) {
@@ -33,6 +33,12 @@ controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$routeParams', 
             });
         }
         $scope.product_setup_opt = function(type,value) {
+            $scope.common_setup_opt(type,value,0);
+        }
+        $scope.kit_setup_opt = function(type,value) {
+            $scope.common_setup_opt(type,value,1);
+        }
+        $scope.common_setup_opt = function(type,value,is_kit) {
             if(type =='sort') {
                 if($scope.product_setup[type] == value) {
                     if($scope.product_setup.order == "DESC") {
@@ -43,12 +49,16 @@ controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$routeParams', 
                 } else {
                     $scope.product_setup.order = "DESC";
                 }
+            } else {
+                $scope.product_setup.is_kit = is_kit;
             }
             $scope.product_setup[type] = value;
             $(".product_setup-"+type).removeClass("active");
-            $(".product_setup-"+type+"-"+value).addClass("active");
+            $(".kit_setup-"+type).removeClass("active");
+            $('.'+((is_kit)? 'kit' : 'product') + '_setup-'+type+'-'+value).addClass("active");
             $scope.get_products();
         }
+
         $scope.product_next = function() {
             $scope.product_setup.offset = $scope.product_setup.offset + $scope.product_setup.limit;
             $scope.get_products(true);
@@ -61,6 +71,7 @@ controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$routeParams', 
             $scope.product_setup.filter = "active";
             $scope.product_setup.search = '';
             $scope.product_setup.select_all = false;
+            $scope.product_setup.is_kit = 0;
             $scope.product_setup.limit = 10;
             $scope.product_setup.offset = 0;
             $(".product_setup-filter-active").addClass("active");

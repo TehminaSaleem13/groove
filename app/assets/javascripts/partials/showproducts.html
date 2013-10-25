@@ -39,7 +39,10 @@
                 <div id="collapseTwo" class="accordion-body collapse in">
                     <div class="accordion-inner">
                         <ul class="nav nav-pills nav-stacked">
-                            <li>Not Available</li>
+                            <li class="kit_setup-filter kit_setup-filter-all" ><a href="" ng-click="kit_setup_opt('filter','all')">Show All</a></li>
+                            <li class="kit_setup-filter kit_setup-filter-active"><a href="" ng-click="kit_setup_opt('filter','active')">Active Kits</a></li>
+                            <li class="kit_setup-filter kit_setup-filter-inactive"><a href="" ng-click="kit_setup_opt('filter','inactive')">Inactive Kits</a></li>
+                            <li class="kit_setup-filter kit_setup-filter-new"><a href="" ng-click="kit_setup_opt('filter','new')">New Kits</a></li>
                         </ul>
                     </div>
                 </div>
@@ -181,7 +184,7 @@
                         <h5>Product Images</h5>
                         <div class="control-group">
                             <div ui-sortable ng-model="single_product.images">
-                                <div class="single-image" ng-repeat="image in single_product.images">
+                                <div class="single-image" ng-class="{'primary-image': $index==0}" ng-repeat="image in single_product.images">
                                     <img ng-src="{{ image.image }}" class="img-polaroid img-thumb"/>
                                     <i class="icon-remove" ng-click="remove_node('image',$index)"></i>
                                 </div>
