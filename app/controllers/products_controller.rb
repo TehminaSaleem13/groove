@@ -391,15 +391,29 @@ class ProductsController < ApplicationController
 			supported_kit_params.include?(params[:iskit])
 		
 		#hack to bypass for now and enable client development
-		sort_key = 'name' if sort_key == 'sku'
+		# sort_key = 'name' if sort_key == 'sku'
 
 		#todo status filters to be implemented
-		if status_filter == 'all'
-			@products = Product.limit(limit).offset(offset).order(sort_key+" "+sort_order).where(:is_kit=> is_kit)
+		if sort_key == 'sku'
+			if status_filter == 'all'
+				@products = Product.find_by_sql('SELECT products.* FROM products, product_skus WHERE '+
+				'products.id = product_skus.product_id  AND products.is_kit='+is_kit+
+				' ORDER BY product_skus.sku '+sort_order+' LIMIT '+limit+' OFFSET '+offset)
+			else
+				@products = Product.find_by_sql('SELECT products.* FROM products, product_skus WHERE '+
+				'products.id = product_skus.product_id AND products.is_kit='+is_kit+
+				' AND products.status=\''+status_filter.capitalize+
+				'\' ORDER BY product_skus.sku '+sort_order+' LIMIT '+limit+' OFFSET '+offset)
+			end
 		else
-			@products = Product.limit(limit).offset(offset).order(sort_key+" "+sort_order).
-			where(:status=>status_filter.capitalize).where(:is_kit=>is_kit)
+			if status_filter == 'all'
+				@products = Product.limit(limit).offset(offset).order(sort_key+" "+sort_order).where(:is_kit=> is_kit)
+			else
+				@products = Product.limit(limit).offset(offset).order(sort_key+" "+sort_order).
+				where(:status=>status_filter.capitalize).where(:is_kit=>is_kit)
+			end
 		end
+
 		@products_result = []
 
 		@products.each do |product|
