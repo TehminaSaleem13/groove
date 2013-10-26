@@ -386,8 +386,9 @@ begin
     #todo status filters to be implemented
     if status_filter == 'all'
       if sort_key == 'store'
-      @orders = Order.find_by_sql("SELECT orders.* FROM orders, stores ORDER BY stores.name "+
-        "AND orders.store_id = stores.id "+sort_order+" LIMIT "+limit+" OFFSET "+offset)
+        @orders = Order.find_by_sql("SELECT orders.* FROM orders, stores WHERE "+
+        "orders.store_id = stores.id ORDER BY stores.name "+
+        sort_order+" LIMIT "+limit+" OFFSET "+offset)
       elsif sort_key == 'items'
         @orders = Order.find_by_sql("SELECT orders.* FROM orders, order_items"+ 
             " WHERE order_items.order_id = orders.id GROUP BY order_items.order_id ORDER BY count "+sort_order+" LIMIT "+limit+" OFFSET "+offset)
