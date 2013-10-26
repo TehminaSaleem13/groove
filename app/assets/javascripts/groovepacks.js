@@ -1,4 +1,4 @@
-angular.module('groovepacks', ['groovepacks.filters', 'groovepacks.services', 'groovepacks.directives', 'groovepacks.controllers', 'ngCookies']).
+angular.module('groovepacks', ['groovepacks.filters', 'groovepacks.services', 'groovepacks.directives', 'groovepacks.controllers','ui.sortable', 'ngCookies']).
   config(['$routeProvider', function($routeProvider) {
     $routeProvider.when('/orders', 
     	{templateUrl: '/assets/partials/showorders.html', controller: 'showOrdersCtrl'});

@@ -407,23 +407,24 @@ class ProductsController < ApplicationController
 		@product_hash['id'] = product.id
 		@product_hash['name'] = product.name
 		@product_hash['status'] = product.status
-		@product_hash['barcode'] = product.barcode
 		@product_hash['location'] = product.location_primary
 		@product_hash['qty'] = product.inv_wh1
-		@product_skus  = ProductSku.where(:product_id=>product.id) 
-		if @product_skus.length > 0
-			@product_hash['sku'] = @product_skus.first
+    if product.product_barcodes.length > 0
+      @product_hash['barcode'] = product.product_barcodes.first.barcode
+    else
+      @product_hash['barcode'] = 'not_available'
+    end
+		if product.product_skus.length > 0
+			@product_hash['sku'] = product.product_skus.first.sku
 		else
 			@product_hash['sku'] = 'not_available'
 		end
-				@product_cats  = ProductCat.where(:product_id=>product.id) 
-		if @product_cats.length > 0
-			@product_hash['cat'] = @product_cats.first
+		if product.product_cats.length > 0
+			@product_hash['cat'] = product.product_cats.first.category
 		else
 			@product_hash['cat'] = 'not_available'
 		end
-		@store = Store.find(product.store_id)
-		@product_hash['store_type'] = @store.store_type
+		@product_hash['store_type'] = product.store.store_type
 		@product_kit_skus = ProductKitSkus.where(:product_id=>product.id)
 		if @product_kit_skus.length > 0
 			@product_hash['productkitskus'] = []
@@ -533,16 +534,20 @@ class ProductsController < ApplicationController
 		@product_hash['id'] = product.id
 		@product_hash['name'] = product.name
 		@product_hash['status'] = product.status
-		@product_hash['barcode'] = product.barcode
 		@product_hash['location'] = product.location_primary
 		@product_hash['qty'] = product.inv_wh1
+    if product.product_barcodes.length > 0
+      @product_hash['barcode'] = product.product_barcodes.first.barcode
+    else
+      @product_hash['barcode'] = 'not_available'
+    end
 		if product.product_skus.length > 0
-			@product_hash['sku'] = product.product_skus.first
+			@product_hash['sku'] = product.product_skus.first.sku
 		else
 			@product_hash['sku'] = 'not_available'
 		end
 		if product.product_cats.length > 0
-			@product_hash['cat'] = product.product_cats.first
+			@product_hash['cat'] = product.product_cats.first.category
 		else
 			@product_hash['cat'] = 'not_available'
 		end
@@ -590,7 +595,7 @@ class ProductsController < ApplicationController
 
   def getdetails
   	@result = Hash.new
-  	@product = Product.find(params[:id])
+  	@product = Product.find_by_id(params[:id])
 
   	if !@product.nil?
   		@result['product'] = Hash.new
