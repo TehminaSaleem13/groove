@@ -118,7 +118,7 @@
                     </ul>
                 </div>
             </div>
-            <table id="productstbl" class="table table-hover table-bordered" infinite-scroll="product_next()">
+            <table id="productstbl" class="table table-hover table-bordered" infinite-scroll="product_next()" infinite-scroll-disabled="{{new_products}}">
                 <thead>
                 <tr>
                     <th><input ng-model="product_setup.select_all" type="checkbox" ng-change='select_all_toggle()' /></th>
@@ -133,7 +133,7 @@
                 <tbody>
                 <tr ng-repeat="product in products" >
                     <td><input type="checkbox" ng-model="product.checked"/></td>
-                    <td> <a href="" role="button" data-toggle="modal" ng-click="product_single_details(product.id)"class="ng-binding">{{product.name}}</a></td>
+                    <td> <a href="#showProduct" role="button" data-toggle="modal" ng-click="product_single_details(product.id)" class="ng-binding">{{product.name}}</a></td>
                     <td>{{product.sku}}</td>
                     <td>{{product.status}}</td>
                     <td>{{product.barcode}}</td>
@@ -142,9 +142,12 @@
                 </tr>
                 </tbody>
             </table>
+            <button ng-show="new_products" class="btn btn-large" style="width:100%;" ng-click="product_next()">Load More</button>
         </div>
 
-        <!-- Modal for importing orders etc -->
+
+
+        <!-- Modal for product and kit details -->
         <div id="showProduct" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="showProduct"
              aria-hidden="true">
 
@@ -168,9 +171,10 @@
                                     <h4>{{single_product.basicinfo.name}}</h4>
                                     <h4>SKU# {{single_product.skus[0].sku}}</h4>
                                 </td>
-                                <td>
-                                    <p><i class="icon-large icon-suitcase"></i> <a href= "" ng-click="product_to_kit(single_product.basicinfo.id)">Change this product to a kit</a> </p>
-                                    <p><i class="icon-large icon-paste"></i> <a href= "" ng-click="product_alias(single_product.basicinfo.id)">Make this product an alias of another product</a></p>
+                                <td class="span6">
+                                    <p ng-show="single_product.basicinfo.is_kit==0"><i class="icon-large icon-suitcase"></i> <a href= "" ng-click="single_product.basicinfo.is_kit=1;update_single_product();">Change this product to a kit</a> </p>
+                                    <p ng-show="single_product.basicinfo.is_kit==1"><i class="icon-large icon-reply"></i> <a href= "" ng-click="single_product.basicinfo.is_kit=0;update_single_product();">Change this kit back to a product</a> </p>
+                                    <p ng-show="single_product.basicinfo.is_kit==0"><i class="icon-large icon-paste"></i> <a href= "" ng-click="product_alias()">Make this product an alias of another product</a></p>
                                 </td>
                                 <td>
                                     <h5>Status </h5>
@@ -189,6 +193,10 @@
                                     <i class="icon-remove" ng-click="remove_node('image',$index)"></i>
                                 </div>
                             </div>
+                            <div ng-hide="true">
+                                <input name="product_image" id="product_image" file-upload type="file" value="Add Image" required/>
+                            </div>
+                            <button class="btn" ng-click="add_image()" >Add Image</button>
                         </div>
 
                         <h5>Product Details</h5>
@@ -313,9 +321,53 @@
                     </div>
                 </fieldset>
                 <div class="modal-footer">
-                    <button ng-click="update_single_product()"class="btn btn-primary" >Save</button>
-                    <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+                    <div class="row-fluid">
+                        <div class="span6">
+                            <span class="label label-info" id="product_update_status" ng-show="product_update_status">{{product_update_message}}</span>
+                        </div>
+                        <div class="span6">
+                            <div class="pull-right">
+                                <button ng-click="update_single_product()" class="btn btn-primary" >Save</button>
+                                <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
+            </div>
+        </div>
+        <!-- Kit product modal ends -->
+
+        <!-- Aliasing Modal -->
+        <div id="showAliasOptions" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="showAliasOptions"
+             aria-hidden="true">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h3 id="showAliasOptionsHeader" >Select Product to <span ng-show="single_product.basicinfo.is_kit">add to Kit</span><span ng-hide="single_product.basicinfo.is_kit">Alias</span></h3>
+            </div>
+            <div class="modal-body" id="showAliasOptions-body">
+                <table id="aliasproductstbl" class="table table-hover table-bordered">
+                    <thead>
+                    <tr>
+                        <th class="alias_setup-sort alias_setup-sort-name"><a href="" ng-click="alias_setup_opt('sort','name')">Item Name<span class="{{'caret-'+alias.product_setup.order}}"></span></a></th>
+                        <th class="alias_setup-sort alias_setup-sort-sku"><a href="" ng-click="alias_setup_opt('sort','sku')">Primary Sku<span class="{{'caret-'+alias.product_setup.order}}"></span></a></th>
+                        <th class="alias_setup-sort alias_setup-sort-status"><a href="" ng-click="alias_setup_opt('sort','status')">Status<span class="{{'caret-'+alias.product_setup.order}}"></span></a></th>
+                        <th class="alias_setup-sort alias_setup-sort-barcode"><a href="" ng-click="alias_setup_opt('sort','barcode')">Barcode<span class="{{'caret-'+alias.product_setup.order}}"></span></a></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-click="add_alias_product(alias_product.id)" ng-repeat="alias_product in alias.products">
+                        <td>{{alias_product.name}}</td>
+                        <td>{{alias_product.sku}}</td>
+                        <td>{{alias_product.status}}</td>
+                        <td>{{alias_product.barcode}}</td>
+                    </tr>
+                    </tbody>
+                </table>
+                <button ng-show="new_products" class="btn btn-info btn-large" style="width:100%;" ng-click="product_next()">Load More</button>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
             </div>
         </div>
     </div>
