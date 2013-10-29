@@ -659,4 +659,237 @@ class ProductsController < ApplicationController
       format.json { render json: @result }
     end
   end
+
+  def updateproduct
+  	@result = Hash.new
+  	@product = Product.find(params[:basicinfo][:id])
+  	@result['status'] = true
+  	@result['params'] = params
+  	if !@product.nil?
+  		
+  		#Update Basic Info
+  		@product.alternate_location = params[:basicinfo][:alternate_location]
+  		@product.barcode = params[:basicinfo][:barcode]
+  		@product.inv_alert_wh1 = params[:basicinfo][:inv_alert_wh1]
+  		@product.inv_alert_wh2 = params[:basicinfo][:inv_alert_wh2]
+  		@product.inv_alert_wh3 = params[:basicinfo][:inv_alert_wh3]
+  		@product.inv_alert_wh4 = params[:basicinfo][:inv_alert_wh4]
+  		@product.inv_alert_wh5 = params[:basicinfo][:inv_alert_wh5]
+  		@product.inv_alert_wh6 = params[:basicinfo][:inv_alert_wh6]
+  		@product.inv_alert_wh7 = params[:basicinfo][:inv_alert_wh7]
+
+  		@product.inv_wh1 = params[:basicinfo][:inv_wh1]
+  		@product.inv_wh2_qty = params[:basicinfo][:inv_wh2_qty]
+  		@product.inv_wh3_qty = params[:basicinfo][:inv_wh3_qty]
+  		@product.inv_wh4_qty = params[:basicinfo][:inv_wh4_qty]
+  		@product.inv_wh5_qty = params[:basicinfo][:inv_wh5_qty]
+  		@product.inv_wh6_qty = params[:basicinfo][:inv_wh6_qty]
+  		@product.inv_wh7_qty = params[:basicinfo][:inv_wh7_qty]
+
+  		@product.is_kit = params[:basicinfo][:is_kit]
+  		@product.is_skippable = params[:basicinfo][:is_skippable]
+  		@product.kit_parsing = params[:basicinfo][:kit_parsing]
+  		@product.location_primary = params[:basicinfo][:location_primary]
+  		@product.name = params[:basicinfo][:name]
+  		@product.pack_time_adj = params[:basicinfo][:pack_time_adj]
+  		@product.packing_placement = params[:basicinfo][:packing_placement]
+  		@product.product_type = params[:basicinfo][:product_type]
+  		@product.spl_instructions_4_confirmation = 
+  			params[:basicinfo][:spl_instructions_4_confirmation]
+  		@product.spl_instructions_4_packer = params[:basicinfo][:spl_instructions_4_packer]
+  		@product.status = params[:basicinfo][:status]
+  		@product.store_id = params[:basicinfo][:store_id]
+  		@product.store_product_id = params[:basicinfo][:store_product_id]
+
+  		if !@product.save
+  			@result['status'] &= false
+  		end
+  		#Update product categories
+  		#check if a product category is defined.
+  		product_cats = ProductCat.where(:product_id=>@product.id)
+
+  		if product_cats.length > 0
+	  		product_cats.each do |productcat|
+	  			found_cat = false
+	  			
+	  			if !params[:cats].nil?
+		  			params[:cats].each do |cat|
+			  			if cat["id"] == productcat.id
+			  				found_cat = true
+			  			end
+		  			end
+	  			end
+
+	  			if found_cat == false
+	  				if !productcat.destroy
+	  					@result['status'] &= false
+	  				end
+	  			end
+	  		end
+  		end
+
+  		if !params[:cats].nil?
+	  		params[:cats].each do |category|
+	  			if !category["id"].nil?
+	  				product_cat = ProductCat.find(category["id"])
+	  				product_cat.category = category["category"]
+			  		if !product_cat.save
+			  			@result['status'] &= false
+			  		end
+			  	else
+			  		product_cat = ProductCat.new
+			  		product_cat.category = category["category"]
+			  		product_cat.product_id = @product.id
+			  		if !product_cat.save
+			  			@result['status'] &= false
+			  		end
+	  			end
+	  		end
+  		end
+
+  		#Update product skus
+  		#check if a product sku is defined.
+
+  		product_skus = ProductSku.where(:product_id=>@product.id)
+
+  		if product_skus.length > 0
+	  		product_skus.each do |productsku|
+	  			found_sku = false
+	  			
+	  			if !params[:skus].nil?
+		  			params[:skus].each do |sku|
+			  			if sku["id"] == productsku.id
+			  				found_sku = true
+			  			end
+		  			end
+	  			end
+	  			if found_sku == false
+	  				if !productsku.destroy
+	  					@result['status'] &= false
+	  				end
+	  			end
+	  		end
+  		end
+	  	if !params[:skus].nil?
+	  		params[:skus].each do |sku|
+	  			if !sku["id"].nil?
+	  				product_sku = ProductSku.find(sku["id"])
+	  				product_sku.sku = sku["sku"]
+	  				product_sku.purpose = sku["purpose"]
+			  		if !product_sku.save
+			  			@result['status'] &= false
+			  		end
+			  	else
+			  		product_sku = ProductSku.new
+	  				product_sku.sku = sku["sku"]
+	  				product_sku.purpose = sku["purpose"]
+	  				product_sku.product_id = @product.id
+			  		if !product_sku.save
+			  			@result['status'] &= false
+			  		end
+	  			end
+	  		end
+  		end
+
+  		#Update product barcodes
+  		#check if a product barcode is defined.
+  		product_barcodes = ProductBarcode.where(:product_id=>@product.id)
+
+  		if product_barcodes.length > 0
+	  		product_barcodes.each do |productbarcode|
+	  			found_barcode = false
+	  			
+	  			if !params[:barcodes].nil?
+		  			params[:barcodes].each do |barcode|
+			  			if barcode["id"] == productbarcode.id
+			  				found_barcode = true
+			  			end
+		  			end
+	  			end
+	  			
+	  			if found_barcode == false
+	  				if !productbarcode.destroy
+	  					@result['status'] &= false
+	  				end
+	  			end
+	  		end
+  		end
+
+  		#Update product barcodes
+  		#check if a product barcode is defined
+  		if !params[:barcodes].nil?
+	  		params[:barcodes].each do |barcode|
+	  			if !barcode["id"].nil?
+	  				product_barcode = ProductBarcode.find(barcode["id"])
+	  				product_barcode.barcode = barcode["barcode"]
+			  		if !product_barcode.save
+			  			@result['status'] &= false
+			  		end
+			  	else
+			  		product_barcode = ProductBarcode.new
+			  		product_barcode.barcode = barcode["barcode"]
+			  		product_barcode.product_id = @product.id
+			  		if !product_barcode.save
+			  			@result['status'] &= false
+			  		end
+	  			end
+	  		end
+  		end
+
+  		#Update product barcodes
+  		#check if a product barcode is defined.
+  		product_images = ProductImage.where(:product_id=>@product.id)
+
+  		if product_images.length > 0
+	  		product_images.each do |productimage|
+	  			found_image = false
+	  			
+	  			if !params[:images].nil?
+		  			params[:images].each do |image|
+			  			if image["id"] == productimage.id
+			  				found_image = true
+			  			end
+		  			end
+	  			end
+	  			
+	  			if found_image == false
+	  				if !productimage.destroy
+	  					@result['status'] &= false
+	  				end
+	  			end
+	  		end
+  		end
+
+  		#Update product barcodes
+  		#check if a product barcode is defined
+  		if !params[:images].nil?
+	  		params[:images].each do |image|
+	  			if !image["id"].nil?
+	  				product_image = ProductImage.find(image["id"])
+	  				product_image.image = image["image"]
+	  				product_image.caption = image["caption"]
+			  		if !product_image.save
+			  			@result['status'] &= false
+			  		end
+			  	else
+			  		product_image = ProductImage.new
+			  		product_image.image = image["image"]
+			  		product_image.caption = image["caption"]
+			  		product_image.product_id = @product.id
+			  		if !product_image.save
+			  			@result['status'] &= false
+			  		end
+	  			end
+	  		end
+  		end
+  	else
+  		@result['status'] = false
+  		@result['message'] = 'Cannot find product information.'
+  	end	
+
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json: @result }
+    end
+  end
 end
