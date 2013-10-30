@@ -571,4 +571,52 @@ begin
       format.json { render json: @result }
     end
   end
+
+  def getdetails
+    @result = Hash.new
+    @order = Order.find_by_id(params[:id])
+    @result['status'] = true
+
+    if !@order.nil?
+      @result['order'] = Hash.new
+      @result['order']['basicinfo'] = @order
+      
+      #Retrieve order items
+      @result['order']['items'] = []
+      @order.order_items.each do |orderitem|
+        @orderitem = Hash.new
+        @orderitem['iteminfo'] = orderitem
+        productsku = ProductSku.where(:sku => orderitem.sku)
+        if productsku.length > 0
+          @orderitem['productinfo'] = Product.find(productsku.product_id)
+          @orderitem['productimages'] = ProductImage.where(:product_id=>productsku.product_id)
+        else
+          @orderitem['productinfo'] = nil
+          @orderitem['productimages'] = nil
+        end
+        @result['order']['items'].push(@orderitem)
+      end
+      @result['order']['storeinfo'] = @order.store
+
+      #setting user permissions
+      @result['order']['add_items_permitted'] = current_user.add_order_items
+      @result['order']['remove_items_permitted'] = current_user.remove_order_items
+    else
+      @result['status'] = false
+      @result['error_message'] = "Could not find order"
+    end
+
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json: @result }
+    end
+  end
+
+  def addItem
+    @result = Hash.new
+  end
+
+  def removeItem
+  end
+
 end

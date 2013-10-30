@@ -670,6 +670,7 @@ class ProductsController < ApplicationController
   		#Update Basic Info
   		@product.alternate_location = params[:basicinfo][:alternate_location]
   		@product.barcode = params[:basicinfo][:barcode]
+  		@product.disable_conf_req = params[:basicinfo][:disable_conf_req]
   		@product.inv_alert_wh1 = params[:basicinfo][:inv_alert_wh1]
   		@product.inv_alert_wh2 = params[:basicinfo][:inv_alert_wh2]
   		@product.inv_alert_wh3 = params[:basicinfo][:inv_alert_wh3]

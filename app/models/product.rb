@@ -26,7 +26,8 @@ class Product < ActiveRecord::Base
 					:inv_wh6_qty,
 					:inv_alert_wh6,
 					:inv_wh7_qty,
-					:inv_alert_wh7
+					:inv_alert_wh7,
+					:disable_conf_req
 
   has_many :product_skus
   has_many :product_cats

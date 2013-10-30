@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20131024150207) do
+ActiveRecord::Schema.define(:version => 20131030131430) do
 
   create_table "amazon_credentials", :force => true do |t|
     t.string   "merchant_id",                                     :null => false
@@ -110,6 +110,9 @@ ActiveRecord::Schema.define(:version => 20131024150207) do
     t.string   "notes_fromPacker"
     t.boolean  "tracking_processed"
     t.string   "status"
+    t.date     "scanned_on"
+    t.string   "tracking_num"
+    t.string   "company"
   end
 
   create_table "orders_import_summaries", :force => true do |t|
@@ -173,12 +176,12 @@ ActiveRecord::Schema.define(:version => 20131024150207) do
   add_index "product_skus", ["product_id"], :name => "index_product_skus_on_product_id"
 
   create_table "products", :force => true do |t|
-    t.string   "store_product_id",                               :null => false
-    t.string   "name",                                           :null => false
+    t.string   "store_product_id",                                   :null => false
+    t.string   "name",                                               :null => false
     t.string   "product_type"
-    t.integer  "store_id",                                       :null => false
-    t.datetime "created_at",                                     :null => false
-    t.datetime "updated_at",                                     :null => false
+    t.integer  "store_id",                                           :null => false
+    t.datetime "created_at",                                         :null => false
+    t.datetime "updated_at",                                         :null => false
     t.string   "inv_wh1"
     t.string   "location_primary"
     t.string   "status"
@@ -204,6 +207,7 @@ ActiveRecord::Schema.define(:version => 20131024150207) do
     t.integer  "inv_wh7_qty"
     t.integer  "inv_alert_wh7"
     t.integer  "is_kit",                          :default => 0
+    t.boolean  "disable_conf_req",                :default => false
   end
 
   add_index "products", ["store_id"], :name => "index_products_on_store_id"
