@@ -80,7 +80,7 @@
                     <td></td>
                     <td>{{order.store_name}}</td>
                     <td>{{order.notes}}</td>
-                    <td>{{order.ordernum}}</td>
+                    <td><a href="#showOrder" role="button" data-toggle="modal" ng-click="order_single_details(order.id)" class="ng-binding">{{order.ordernum}}</a></td>
                     <td>{{order.orderdate}}</td>
                     <td>{{order.itemslength}}</td>
                     <td>{{order.recipient}}</td>
@@ -88,6 +88,50 @@
                 </tr>
                 </tbody>
             </table>
+
+        </div>
+        <!-- show order modal -->
+        <div id="showOrder" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="showOrder"
+             aria-hidden="true">
+
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+            <h3 id="showOrder-header">Order Details</h3>
+        </div>
+
+
+        <div class="form-horizontal form-horizontal-create" >
+        <fieldset>
+            <div class="modal-body" id="showOrder-body">
+                <ul class="nav nav-tabs" id="myTab">
+                    <li class="active"><a href="#infotab" data-toggle="tab">Information</a></li>
+                    <li><a href="#itemstab" data-toggle="tab">Items</a></li>
+                    <li><a href="#notestab" data-toggle="tab">Notes</a></li>
+                    <li><a href="#actexceptab" data-toggle="tab">Activity & exceptions</a></li>
+
+                </ul>
+
+
+
+                <div class="tab-content">
+                    <div class="alert alert-danger" ng-show="show_error_msgs">
+                        <button type="button" class="close" data-dismiss="alert">&times;</button>
+                        <span ng-repeat="message in error_msgs">{{message}}</span>
+                    </div>
+                    <div class="tab-pane active" id="infotab">
+
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-primary">Save</button>
+                <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+            </div>
+
+        </fieldset>
+        </div>
         </div>
     </div>
 </div>

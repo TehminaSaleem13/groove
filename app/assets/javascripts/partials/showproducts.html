@@ -127,7 +127,7 @@
                     <th class="product_setup-sort product_setup-sort-status"><a href="" ng-click="product_setup_opt('sort','status')">Status<span class="{{'caret-'+product_setup.order}}"></span></a></th>
                     <th class="product_setup-sort product_setup-sort-barcode"><a href="" ng-click="product_setup_opt('sort','barcode')">Barcode<span class="{{'caret-'+product_setup.order}}"></span></a></th>
                     <th class="product_setup-sort product_setup-sort-location_primary"><a href="" ng-click="product_setup_opt('sort','location_primary')">Location<span class="{{'caret-'+product_setup.order}}"></span></a></th>
-                    <th>Store</th>
+                    <th class="product_setup-sort product_setup-sort-store"><a href="" ng-click="product_setup_opt('sort','store')">Store<span class="{{'caret-'+product_setup.order}}"></span></a></th>
                 </tr>
                 </thead>
                 <tbody>
@@ -178,16 +178,16 @@
                                 </td>
                                 <td>
                                     <h5>Status </h5>
-                                    <label class="radio"><input type="radio" ng-model="single_product.basicinfo.status" value="active"> Active </label>
-                                    <label class="radio"><input type="radio" ng-model="single_product.basicinfo.status" value="inactive"> Inactive </label>
-                                    <label class="radio"><input type="radio" ng-model="single_product.basicinfo.status" value="new"> New  </label>
+                                    <label class="radio"><input type="radio" ng-click="update_single_product()" ng-model="single_product.basicinfo.status" value="active"> Active </label>
+                                    <label class="radio"><input type="radio" ng-click="update_single_product()" ng-model="single_product.basicinfo.status" value="inactive"> Inactive </label>
+                                    <label class="radio"><input type="radio" ng-click="update_single_product()" ng-model="single_product.basicinfo.status" value="new"> New  </label>
                                 </td>
                             </tr>
                         </table>
 
                         <h5>Product Images</h5>
                         <div class="control-group">
-                            <div ui-sortable ng-model="single_product.images">
+                            <div ui-sortable="sortableOptions" ng-model="single_product.images">
                                 <div class="single-image" ng-class="{'primary-image': $index==0}" ng-repeat="image in single_product.images">
                                     <img ng-src="{{ image.image }}" class="img-polaroid img-thumb"/>
                                     <i class="icon-remove" ng-click="remove_node('image',$index)"></i>
@@ -203,14 +203,14 @@
                         <div class="control-group">
                             <label class="control-label">Name</label>
                             <div class="controls">
-                                <input xs-input-sync type="text" ng-model="single_product.basicinfo.name" class="span8" />
+                                <input xs-input-sync type="text" ng-model="single_product.basicinfo.name" class="regular-input span8" />
                             </div>
                         </div>
                         <div class="control-group">
                             <label class="control-label">SKUs</label>
                             <div class="controls">
                                 <div id="sku" ng-click="focus_input('sku')" class="input-text uneditable-input span8">
-                                    <div ui-sortable ng-model="single_product.skus">
+                                    <div ui-sortable="sortableOptions" ng-model="single_product.skus">
                                         <div class="tag-bubble" id="sku-{{$index}}" ng-dblclick="edit_node('sku',$index)" ng-repeat="sku in single_product.skus">
                                             {{sku.sku}}
                                             <i ng-show="tmp.editing_var == 'sku' && tmp.editing == $index && tmp.sku != ''" class="icon-ok" ng-click="save_node('sku')"></i>
@@ -230,17 +230,17 @@
                         <div class="control-group">
                             <label class="control-label">Special instructions for Packer</label>
                             <div class="controls">
-                                <textarea xs-input-sync ng-model="single_product.basicinfo.spl_instructions_4_packer" class="span8" rows="4"></textarea>
+                                <textarea xs-input-sync ng-model="single_product.basicinfo.spl_instructions_4_packer" class="span8 regular-input" rows="4"></textarea>
                             </div>
                         </div>
                         <div class="control-group">
                             <label class="control-label">Packer Confirmation</label>
                             <div class="controls">
                                 <label class="radio inline">
-                                    <input type="radio" ng-model="single_product.basicinfo.spl_instructions_4_confirmation" value="1" /> Required
+                                    <input type="radio" ng-click="update_single_product()" ng-model="single_product.basicinfo.spl_instructions_4_confirmation" value="1" /> Required
                                 </label>
                                 <label class="radio inline">
-                                    <input type="radio" ng-model="single_product.basicinfo.spl_instructions_4_confirmation" value="0" /> Not Required
+                                    <input type="radio" ng-click="update_single_product()" ng-model="single_product.basicinfo.spl_instructions_4_confirmation" value="0" /> Not Required
                                 </label>
                             </div>
                         </div>
@@ -248,7 +248,7 @@
                             <label class="control-label">Barcodes</label>
                             <div class="controls">
                                 <div id="barcode" ng-click="focus_input('barcode')"  class="input-text uneditable-input span8">
-                                    <div ui-sortable ng-model="single_product.barcodes">
+                                    <div ng-model="single_product.barcodes">
                                         <div class="tag-bubble" id="barcode-{{$index}}" ng-dblclick="edit_node('barcode',$index)" ng-repeat="barcode in single_product.barcodes">
                                             {{barcode.barcode}}
                                             <i ng-show="tmp.editing_var == 'barcode' && tmp.editing == $index && tmp.barcode != ''" class="icon-ok" ng-click="save_node('barcode')"></i>
@@ -263,7 +263,7 @@
                                     </div>
                                 </div>
                                 <label ng-show="single_product.barcodes == '' && tmp.barcode == '' " class="checkbox inline">
-                                    <input xs-input-sync type="checkbox" ng-model="single_product.basicinfo.disable_conf_req" /> Disable Confirmation Requests
+                                    <input type="checkbox" ng-click="update_single_product()" ng-model="single_product.basicinfo.disable_conf_req" /> Disable Confirmation Requests
                                 </label>
                             </div>
                         </div>
@@ -271,10 +271,10 @@
                             <label class="control-label">Product can be skipped</label>
                             <div class="controls">
                                 <label class="radio inline">
-                                    <input type="radio" ng-model="single_product.basicinfo.is_skippable" value="1" /> Yes
+                                    <input type="radio" ng-click="update_single_product()" ng-model="single_product.basicinfo.is_skippable" value="1" /> Yes
                                 </label>
                                 <label class="radio inline">
-                                    <input type="radio" ng-model="single_product.basicinfo.is_skippable" value="0" /> No
+                                    <input type="radio" ng-click="update_single_product()" ng-model="single_product.basicinfo.is_skippable" value="0" /> No
                                 </label>
                             </div>
                         </div>
@@ -282,7 +282,7 @@
                             <label class="control-label">Categories</label>
                             <div class="controls">
                                 <div id="category" ng-click="focus_input('category')" class="input-text uneditable-input span8">
-                                    <div ui-sortable ng-model="single_product.cats">
+                                    <div ng-model="single_product.cats">
                                         <div class="tag-bubble" id="category-{{$index}}" ng-dblclick="edit_node('category',$index)" ng-repeat="category in single_product.cats">
                                             {{category.category}}
                                             <i ng-show="tmp.editing_var == 'category' && tmp.editing == $index && tmp.category != ''" class="icon-ok" ng-click="save_node('category')"></i>
@@ -312,12 +312,54 @@
                         </div>
                         <h5>Inventory and Location by Warehouses</h5>
                         <table class="table table-hover table-bordered table-striped table-condensed">
-                            <thead><tr><th>Warehouse Name</th><th>Quantity On Hand</th><th>Primary Location</th><th>Secondary Location</th></tr></thead>
+                            <thead>
+                                <tr>
+                                    <th>Warehouse Name</th>
+                                    <th>Quantity on Hand</th>
+                                    <th>Primary Location</th>
+                                    <th>Secondary Location</th>
+                                </tr>
+                            </thead>
                             <tbody>
                                 <!-- need more data for here -->
                             </tbody>
                         </table>
 
+                        <fieldset ng-show="single_product.basicinfo.is_kit==1">
+                            <legend>Kit Options</legend>
+                            <table class="table table-hover table-bordered table-striped table-condensed">
+                                <thead>
+                                    <tr>
+                                        <th>Item Name</th>
+                                        <th>Item SKU</th>
+                                        <th>Quantity in Kit</th>
+                                        <th>Quantity on Hand</th>
+                                        <th>Packing Order</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                <!-- need more data for here -->
+                                </tbody>
+                            </table>
+
+
+                            <button class="btn btn-success" ng-click="product_alias()">Add product to kit</button>
+                            <button ng-click="update_single_product()" class="btn btn-danger" >Remove selected</button>
+                            <h5>This Kit Should</h5>
+                            <div class="control-group">
+                                <div class="controls">
+                                    <label class="radio">
+                                        <input type="radio" ng-click="update_single_product()" ng-model="unknown_var" value="single" /> Always be scanned as single SKU
+                                    </label>
+                                    <label class="radio">
+                                        <input type="radio" ng-click="update_single_product()" ng-model="unknown_var"  value="individual" /> Always be scanned as individual part SKUs
+                                    </label>
+                                    <label class="radio">
+                                        <input type="radio" ng-click="update_single_product()" ng-model="unknown_var"  value="depends" /> Automatically switch as needed when part SKUs are scanned
+                                    </label>
+                                </div>
+                            </div>
+                        </fieldset>
                     </div>
                 </fieldset>
                 <div class="modal-footer">

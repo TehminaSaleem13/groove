@@ -251,22 +251,26 @@ controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$routeParams', 
             };
             $http.get('/products/getdetails/'+ id+'.json').success(function(data) {
                 if(data.product) {
-                    if(!('basicinfo' in $scope.single_product)) {
-                        $scope.$watch('single_product.basicinfo.status', $scope.update_single_product);
-                        $scope.$watch('single_product.basicinfo.spl_instructions_4_confirmation', $scope.update_single_product);
-                        $scope.$watch('single_product.basicinfo.is_skippable', $scope.update_single_product);
-                        $scope.$watch('single_product.basicinfo.disable_conf_req', $scope.update_single_product);
-                        $scope.$watch('single_product.basicinfo.packing_placement', $scope.update_single_product);
-                        $scope.$watch('single_product.basicinfo.pack_time_adj', $scope.update_single_product);
-
-                        $scope.$watch('single_product.barcodes', $scope.update_single_product,true);
-                        $scope.$watch('single_product.skus', $scope.update_single_product,true);
-                        $scope.$watch('single_product.cats', $scope.update_single_product,true);
-                        $scope.$watch('single_product.images', $scope.update_single_product,true);
-                    }
                     $scope.single_product = data.product;
+                    update = false;
+                    if(typeof $scope.single_product.basicinfo.is_skippable == 'undefined' ||
+                        ($scope.single_product.basicinfo.is_skippable != true && $scope.single_product.basicinfo.is_skippable != false)
+                    ) {
+                        $scope.single_product.basicinfo.is_skippable = false;
+                        update = true;
+                    }
+                    if(typeof $scope.single_product.basicinfo.spl_instructions_4_confirmation == 'undefined' ||
+                        ($scope.single_product.basicinfo.spl_instructions_4_confirmation != true && $scope.single_product.basicinfo.spl_instructions_4_confirmation != false)
+                        ) {
+                        $scope.single_product.basicinfo.spl_instructions_4_confirmation = false;
+                        update = true;
+                    }
+                    if(update) {
+                        $scope.update_single_product();
+                    }
                     $('#showProduct').modal('show');
                 }
+                //console.log($scope.single_product);
             }).error(function(data) {
 
                 });
@@ -352,7 +356,7 @@ controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$routeParams', 
             $("#product_image").click();
         }
         $scope.update_single_product = function() {
-            $http.post('/products/updateproduct.json', $scope.single_product).success(function(data){
+            $http.post('/products/updateproduct.json', $scope.single_product).success(function(data) {
                 if(data.status) {
                     $scope.product_update_status = true;
                     $scope.product_update_message = "Successfully Updated";
@@ -360,7 +364,9 @@ controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$routeParams', 
                     $scope.show_error_msgs = true;
                     $scope.error_msgs = ["Some error Occurred"];
                 }
-
+            }).error(function() {
+                $scope.show_error_msgs = true;
+                $scope.error_msgs = ["Some error Occurred"];
             });
         }
         $scope.product_alias = function () {
@@ -371,26 +377,42 @@ controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$routeParams', 
             $scope.get_products();
         }
         $scope.add_alias_product = function(id) {
-            if($scope.single_product.basicinfo.is_kit) {
-                //Add to Kit code call
-            } else {
-                $('#showAliasOptions').modal("hide");
-                $http.post("products/setalias.json",{product_orig_id: id , product_alias_id: $scope.single_product.basicinfo.id}).success(
-                    function(data) {
-                        if(data.status) {
-                            $scope.product_update_status = true;
-                            $scope.product_update_message = "Successfully Updated";
-                            $scope.product_single_details(id);
-                        } else {
+            if(confirm("Are you sure? This can not be undone!")) {
+                if($scope.single_product.basicinfo.is_kit) {
+                    $http.post("products/addproducttokit.json",{product_id: id , kit_id: $scope.single_product.basicinfo.id}).success(
+                        function(data) {
+                            if(data.status) {
+                                $scope.product_update_status = true;
+                                $scope.product_update_message = "Successfully Added";
+                            } else {
+                                $scope.show_error_msgs = true;
+                                $scope.error_msgs = ["Some error Occurred"];
+                            }
+                        }
+                    ).error(function(data){
                             $scope.show_error_msgs = true;
                             $scope.error_msgs = ["Some error Occurred"];
+                        });
+                } else {
+
+                    $http.post("products/setalias.json",{product_orig_id: id , product_alias_id: $scope.single_product.basicinfo.id}).success(
+                        function(data) {
+                            if(data.status) {
+                                $scope.product_update_status = true;
+                                $scope.product_update_message = "Successfully Updated";
+                                $scope.product_single_details(id);
+                            } else {
+                                $scope.show_error_msgs = true;
+                                $scope.error_msgs = ["Some error Occurred"];
+                            }
                         }
-                    }
-                ).error(function(data){
-                        $scope.show_error_msgs = true;
-                        $scope.error_msgs = ["Some error Occurred"];
-                    });
+                    ).error(function(data){
+                            $scope.show_error_msgs = true;
+                            $scope.error_msgs = ["Some error Occurred"];
+                        });
+                }
             }
+            $('#showAliasOptions').modal("hide");
         }
         $scope.$on("fileSelected", function (event, args) {
             $("input[type='file']").val('');
@@ -430,8 +452,10 @@ controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$routeParams', 
         //Main code ends here. Rest is function calls etc to init
         $scope.set_defaults();
 
-
-
+        $scope.sortableOptions = {
+            update:$scope.update_single_product,
+            remove:$scope.update_single_product
+        };
         $scope.$watch('product_update_status',function() {
             if($scope.product_update_status) {
                 $("#product_update_status").fadeTo("fast",1,function() {
@@ -452,8 +476,10 @@ controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$routeParams', 
                     $("#"+event.currentTarget.parentElement.parentElement.id).removeClass("input-text-hover");
                     $("#"+event.currentTarget.parentElement.id).addClass("false-tag-bubble");
                 }
+                $scope.update_single_product();
             }
         );
+        $('.regular-input').focusout($scope.update_single_product);
         input_text_selector.focus(
             function(event) {
                 if(event.currentTarget.parentElement.id.slice(-6) == "-input") {
