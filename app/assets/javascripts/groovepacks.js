@@ -64,6 +64,7 @@ groovepacks_directives.directive('infiniteScroll', [
                 checkWhenEnabled = false;
                 if (attrs.infiniteScrollDisabled != null) {
                     scope.$watch(attrs.infiniteScrollDisabled, function(value) {
+
                         scrollEnabled = !value;
                         if (scrollEnabled && checkWhenEnabled) {
                             checkWhenEnabled = false;
