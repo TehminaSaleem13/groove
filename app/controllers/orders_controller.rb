@@ -598,7 +598,7 @@ begin
       end
       @result['order']['storeinfo'] = @order.store
 
-      #setting user permissions
+      #setting user permissions for add and remove items permitted
       @result['order']['add_items_permitted'] = current_user.add_order_items
       @result['order']['remove_items_permitted'] = current_user.remove_order_items
     else
@@ -618,5 +618,5 @@ begin
 
   def removeItem
   end
-
+  
 end

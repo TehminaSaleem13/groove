@@ -893,4 +893,40 @@ class ProductsController < ApplicationController
       format.json { render json: @result }
     end
   end
+
+	#This action will remove the entry for this product (the Alias) and the SKU of this new 
+	#product will be added to the list of skus for the existing product that the user is linking it to. 
+	#Any product can be turned into an alias, it doesn’t have to have the status of new, although most if the time it probably will. 
+	#The operation can not be undone.
+	#If you had a situation where the newly imported product was actually the one you wanted to keep you could 
+	#find the original product and make it an alias of the new product...
+  def setalias
+  	@result = Hash.new
+  	@result['status'] = true
+  	@result['messages'] = []
+
+  	@product_orig = Product.find(params[:product_orig_id])
+  	@product_alias = Product.find(params[:product_alias_id])
+
+  	#all SKUs of the alias will
+  	@product_alias.product_skus.each do |alias_sku|
+  		alias_sku.product_id = @product_orig.id
+  		if !alias_sku.save
+  			result['status'] &= false
+  			result['messages'].push('Error saving Sku for sku id'+alias_sku.id)
+  		end
+  	end
+
+  	#destroy the aliased object
+  	if !@product_alias.destroy
+  		result['status'] &= false
+  		result['messages'].push('Error deleting the product alias id:'+@product_alias.id)
+  	end
+
+  	respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json: @result }
+    end
+  end
+
 end
