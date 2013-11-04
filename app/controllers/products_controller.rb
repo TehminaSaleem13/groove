@@ -373,7 +373,7 @@ class ProductsController < ApplicationController
 		offset = 0
 		is_kit = 0
 		supported_sort_keys = ['updated_at', 'name', 'sku', 
-								'status', 'barcode', 'location_primary' ]
+								'status', 'barcode', 'location_primary', 'store' ]
 		supported_order_keys = ['ASC', 'DESC' ] #Caps letters only
 		supported_status_filters = ['all', 'active', 'inactive', 'new']
 		supported_kit_params = ['0', '1']
@@ -410,9 +410,21 @@ class ProductsController < ApplicationController
 				' AND products.status=\''+status_filter.capitalize+
 				'\' ORDER BY product_skus.sku '+sort_order+' LIMIT '+limit+' OFFSET '+offset)
 			end
+		elsif sort_key == 'store'
+			if status_filter == 'all'
+				@products = Product.find_by_sql('SELECT products.* FROM products, stores WHERE '+
+				'products.store_id = stores.id  AND products.is_kit='+is_kit+
+				' ORDER BY stores.name '+sort_order+' LIMIT '+limit+' OFFSET '+offset)
+			else
+				@products = Product.find_by_sql('SELECT products.* FROM products, stores WHERE '+
+				'products.store_id = stores.id AND products.is_kit='+is_kit+
+				' AND products.status=\''+status_filter.capitalize+
+				'\' ORDER BY stores.name '+sort_order+' LIMIT '+limit+' OFFSET '+offset)
+			end
 		else
 			if status_filter == 'all'
-				@products = Product.limit(limit).offset(offset).order(sort_key+" "+sort_order).where(:is_kit=> is_kit)
+				@products = Product.limit(limit).offset(offset).order(sort_key+" "+sort_order).
+				where(:is_kit=> is_kit)
 			else
 				@products = Product.limit(limit).offset(offset).order(sort_key+" "+sort_order).
 				where(:status=>status_filter.capitalize).where(:is_kit=>is_kit)
@@ -428,22 +440,27 @@ class ProductsController < ApplicationController
 		@product_hash['status'] = product.status
 		@product_hash['location'] = product.location_primary
 		@product_hash['qty'] = product.inv_wh1
-    if product.product_barcodes.length > 0
-      @product_hash['barcode'] = product.product_barcodes.first.barcode
-    else
-      @product_hash['barcode'] = 'not_available'
-    end
-		if product.product_skus.length > 0
-			@product_hash['sku'] = product.product_skus.first.sku
-		else
-			@product_hash['sku'] = 'not_available'
+
+		@product_barcodes = ProductBarcode.where(:product_id=>product.id)
+
+		@product_barcodes.each do |barcode|
+			@product_hash['barcode'] = barcode.first.barcode
 		end
-		if product.product_cats.length > 0
-			@product_hash['cat'] = product.product_cats.first.category
-		else
-			@product_hash['cat'] = 'not_available'
+		
+		@product_skus = ProductSku.where(:product_id=>product.id)
+		@product_skus.each do |sku|
+			@product_hash['sku'] = sku.sku
 		end
-		@product_hash['store_type'] = product.store.store_type
+		
+		@product_cats = ProductCat.where(:product_id=>product.id)
+		@product_cats.each do |cat|
+			@product_hash['cat'] = cat.category
+		end
+
+		@store = Store.find(product.store_id)
+		if !@store.nil?		
+			@product_hash['store_type'] = @store.store_type
+		end
 		@product_kit_skus = ProductKitSkus.where(:product_id=>product.id)
 		if @product_kit_skus.length > 0
 			@product_hash['productkitskus'] = []
@@ -451,6 +468,7 @@ class ProductsController < ApplicationController
 				@product_hash['productkitskus'].push(kitsku.sku)
 			end
 		end
+		
 		@products_result.push(@product_hash)
 		end
 		
