@@ -76,7 +76,9 @@ class ProductsController < ApplicationController
 														@productimage.caption = itemhash[:value]
 													end
 													
-													@productdb.product_images << @productimage
+													if !@productimage.image.nil?
+														@productdb.product_images << @productimage
+													end
 												end
 											end
 										end
@@ -102,7 +104,10 @@ class ProductsController < ApplicationController
 												if category[:key] == 'name'
 													@product_cat = ProductCat.new
 													@product_cat.category = category[:value]
-													@productdb.product_cats << @product_cat
+
+													if !@product_cat.category.nil?
+														@productdb.product_cats << @product_cat
+													end
 												end
 											end
 										end

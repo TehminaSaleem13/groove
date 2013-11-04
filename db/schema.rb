@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20131030131430) do
+ActiveRecord::Schema.define(:version => 20131104122602) do
 
   create_table "amazon_credentials", :force => true do |t|
     t.string   "merchant_id",                                     :null => false
@@ -184,12 +184,12 @@ ActiveRecord::Schema.define(:version => 20131030131430) do
     t.datetime "updated_at",                                         :null => false
     t.string   "inv_wh1"
     t.string   "location_primary"
-    t.string   "status"
+    t.string   "status",                          :default => "New"
     t.text     "spl_instructions_4_packer"
-    t.text     "spl_instructions_4_confirmation"
+    t.boolean  "spl_instructions_4_confirmation", :default => false
     t.text     "alternate_location"
     t.text     "barcode"
-    t.boolean  "is_skippable"
+    t.boolean  "is_skippable",                    :default => false
     t.integer  "packing_placement"
     t.integer  "pack_time_adj"
     t.string   "kit_parsing"
