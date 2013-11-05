@@ -421,12 +421,33 @@ class ProductsController < ApplicationController
 				' AND products.status=\''+status_filter.capitalize+
 				'\' ORDER BY stores.name '+sort_order+' LIMIT '+limit+' OFFSET '+offset)
 			end
+		elsif sort_key == 'location_primary'
+			if status_filter == 'all'
+				@products = Product.find_by_sql('SELECT products.* FROM products, product_inventory_warehouses WHERE '+
+				'products.id = product_inventory_warehouses.product_id  AND products.is_kit='+is_kit+
+				' ORDER BY product_inventory_warehouses.location_primary '+sort_order+' LIMIT '+limit+' OFFSET '+offset)
+			else
+				@products = Product.find_by_sql('SELECT products.* FROM products, product_inventory_warehouses WHERE '+
+				'products.id = product_inventory_warehouses.product_id AND products.is_kit='+is_kit+
+				' AND products.status=\''+status_filter.capitalize+
+				'\' ORDER BY product_inventory_warehouses.location_primary '+sort_order+' LIMIT '+limit+' OFFSET '+offset)
+			end
 		else
 			if status_filter == 'all'
 				@products = Product.limit(limit).offset(offset).order(sort_key+" "+sort_order).
 				where(:is_kit=> is_kit)
 			else
 				@products = Product.limit(limit).offset(offset).order(sort_key+" "+sort_order).
+				where(:status=>status_filter.capitalize).where(:is_kit=>is_kit)
+			end
+		end
+
+		if @products.length==0
+			if status_filter == 'all'
+				@products = Product.limit(limit).offset(offset).
+				where(:is_kit=> is_kit)
+			else
+				@products = Product.limit(limit).offset(offset).
 				where(:status=>status_filter.capitalize).where(:is_kit=>is_kit)
 			end
 		end
@@ -438,11 +459,11 @@ class ProductsController < ApplicationController
 		@product_hash['id'] = product.id
 		@product_hash['name'] = product.name
 		@product_hash['status'] = product.status
-		@product_hash['location'] = product.location_primary
-		@product_hash['qty'] = product.inv_wh1
+		
+		@inv_whs = ProductInventoryWarehouses.where(:product_id=>product.id)
+		@product_hash['inventory_warehouses'] = @inv_whs
 
 		@product_barcodes = ProductBarcode.where(:product_id=>product.id)
-
 		@product_barcodes.each do |barcode|
 			@product_hash['barcode'] = barcode.first.barcode
 		end
@@ -571,13 +592,15 @@ class ProductsController < ApplicationController
 		@product_hash['id'] = product.id
 		@product_hash['name'] = product.name
 		@product_hash['status'] = product.status
-		@product_hash['location'] = product.location_primary
-		@product_hash['qty'] = product.inv_wh1
-    if product.product_barcodes.length > 0
-      @product_hash['barcode'] = product.product_barcodes.first.barcode
-    else
-      @product_hash['barcode'] = 'not_available'
-    end
+
+		@inv_whs = ProductInventoryWarehouses.where(:product_id=>product.id)
+		@product_hash["inventory_warehouses"] = @inv_whs
+
+	    if product.product_barcodes.length > 0
+	      @product_hash['barcode'] = product.product_barcodes.first.barcode
+	    else
+	      @product_hash['barcode'] = 'not_available'
+	    end
 		if product.product_skus.length > 0
 			@product_hash['sku'] = product.product_skus.first.sku
 		else
@@ -641,6 +664,10 @@ class ProductsController < ApplicationController
   		@result['product']['cats'] = @product.product_cats
     	@result['product']['images'] = @product.product_images
   		@result['product']['barcodes'] = @product.product_barcodes
+		
+		@inv_whs = ProductInventoryWarehouses.where(:product_id=>@product.id)
+		@result['product']['inventory_warehouses'] = @inv_whs
+
   		if @product.product_skus.length > 0
   			@result['product']['pendingorders'] = Order.where(:status=>'Awaiting').where(:status=>'onhold').
   				where(:sku=>@product.product_skus.first.sku)
@@ -666,6 +693,10 @@ class ProductsController < ApplicationController
   		@result['product']['cats'] = @product.product_cats
     	@result['product']['images'] = @product.product_images
   		@result['product']['barcodes'] = @product.product_barcodes
+		
+		@inv_whs = ProductInventoryWarehouses.where(:product_id=>@product.id)
+		@result['product']['inventory_warehouses'] = @inv_whs
+
   		if @product.is_kit == 1
   			@result['product']['productkitskus'] = @product.product_kit_skus
   		end
@@ -675,6 +706,39 @@ class ProductsController < ApplicationController
   		else
   			@result['product']['pendingorders'] = nil
   		end
+  	end
+
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json: @result }
+    end
+  end
+
+  def addskustokit
+  	@result = Hash.new
+  	@result['status'] = true
+
+  	@product = Product.find(params[:id])
+
+  	if !@product.is_kit
+  		@result['messages'].push("Product with id="+id+"is not a kit")
+  		@result['status'] &= false
+  	else
+  		if !params[:kit_skus].nil?
+	  		params[:kit_skus].each do |sku|
+	  			@productkitsku = ProductKitSku.new
+	  			@productkitsku.sku = sku.sku
+	  			@productkitsku.id = @product.id
+	  			@product.product_kit_skus << @productkitsku
+	  			if !@product.save
+			  		@result['messages'].push("Could not save kit with sku: "+sku.sku)
+			  		@result['status'] &= false
+	  			end
+	  		end
+	  	else
+	  		@result['messages'].push("No kit Skus sent in the request")
+			@result['status'] &= false
+  		end 
   	end
 
     respond_to do |format|
@@ -694,26 +758,10 @@ class ProductsController < ApplicationController
   		@product.alternate_location = params[:basicinfo][:alternate_location]
   		@product.barcode = params[:basicinfo][:barcode]
   		@product.disable_conf_req = params[:basicinfo][:disable_conf_req]
-  		@product.inv_alert_wh1 = params[:basicinfo][:inv_alert_wh1]
-  		@product.inv_alert_wh2 = params[:basicinfo][:inv_alert_wh2]
-  		@product.inv_alert_wh3 = params[:basicinfo][:inv_alert_wh3]
-  		@product.inv_alert_wh4 = params[:basicinfo][:inv_alert_wh4]
-  		@product.inv_alert_wh5 = params[:basicinfo][:inv_alert_wh5]
-  		@product.inv_alert_wh6 = params[:basicinfo][:inv_alert_wh6]
-  		@product.inv_alert_wh7 = params[:basicinfo][:inv_alert_wh7]
-
-  		@product.inv_wh1 = params[:basicinfo][:inv_wh1]
-  		@product.inv_wh2_qty = params[:basicinfo][:inv_wh2_qty]
-  		@product.inv_wh3_qty = params[:basicinfo][:inv_wh3_qty]
-  		@product.inv_wh4_qty = params[:basicinfo][:inv_wh4_qty]
-  		@product.inv_wh5_qty = params[:basicinfo][:inv_wh5_qty]
-  		@product.inv_wh6_qty = params[:basicinfo][:inv_wh6_qty]
-  		@product.inv_wh7_qty = params[:basicinfo][:inv_wh7_qty]
 
   		@product.is_kit = params[:basicinfo][:is_kit]
   		@product.is_skippable = params[:basicinfo][:is_skippable]
   		@product.kit_parsing = params[:basicinfo][:kit_parsing]
-  		@product.location_primary = params[:basicinfo][:location_primary]
   		@product.name = params[:basicinfo][:name]
   		@product.pack_time_adj = params[:basicinfo][:pack_time_adj]
   		@product.packing_placement = params[:basicinfo][:packing_placement]
@@ -728,6 +776,60 @@ class ProductsController < ApplicationController
   		if !@product.save
   			@result['status'] &= false
   		end
+
+  		#Update product inventory warehouses
+  		#check if a product inventory warehouse is defined.
+  		product_inv_whs = ProductInventoryWarehouses.where(:product_id=>@product.id)
+
+  		if product_inv_whs.length > 0
+	  		product_inv_whs.each do |inv_wh|
+	  			found_inv_wh = false
+	  			
+	  			if !params[:inventory_warehouses].nil?
+		  			params[:inventory_warehouses].each do |wh|
+			  			if wh["id"] == inv_wh.id
+			  				found_inv_wh = true
+			  			end
+		  			end
+	  			end
+
+	  			if found_inv_wh == false
+	  				if !inv_wh.destroy
+	  					@result['status'] &= false
+	  				end
+	  			end
+	  		end
+  		end
+
+  		#Update product inventory warehouses
+  		#check if a product category is defined.
+  		if !params[:inventory_warehouses].nil?
+	  		params[:inventory_warehouses].each do |wh|
+	  			if !wh["id"].nil?
+	  				product_inv_wh = ProductInventoryWarehouses.find(wh["id"])
+	  				product_inv_wh.qty = wh["qty"]
+	  				product_inv_wh.location_primary = wh["location_primary"]
+	  				product_inv_wh.location_secondary = wh["location_secondary"]
+	  				product_inv_wh.alert = wh["alert"]
+	  				product_inv_wh.name = wh["name"]
+			  		if !product_inv_wh.save
+			  			@result['status'] &= false
+			  		end
+			  	else
+			  		product_inv_wh = ProductInventoryWarehouses.new
+	  				product_inv_wh.qty = wh["qty"]
+	  				product_inv_wh.location_primary = wh["location_primary"]
+	  				product_inv_wh.location_secondary = wh["location_secondary"]
+	  				product_inv_wh.alert = wh["alert"]
+	  				product_inv_wh.name = wh["name"]
+			  		if !product_inv_wh.save
+			  			@result['status'] &= false
+			  		end
+	  			end
+	  		end
+  		end
+
+
   		#Update product categories
   		#check if a product category is defined.
   		product_cats = ProductCat.where(:product_id=>@product.id)

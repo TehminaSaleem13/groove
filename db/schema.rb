@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20131104122602) do
+ActiveRecord::Schema.define(:version => 20131105121552) do
 
   create_table "amazon_credentials", :force => true do |t|
     t.string   "merchant_id",                                     :null => false
@@ -156,6 +156,20 @@ ActiveRecord::Schema.define(:version => 20131104122602) do
 
   add_index "product_images", ["product_id"], :name => "index_product_images_on_product_id"
 
+  create_table "product_inventory_warehouses", :force => true do |t|
+    t.string   "location"
+    t.integer  "qty"
+    t.integer  "product_id"
+    t.datetime "created_at",         :null => false
+    t.datetime "updated_at",         :null => false
+    t.string   "alert"
+    t.string   "location_primary"
+    t.string   "location_secondary"
+    t.string   "name"
+  end
+
+  add_index "product_inventory_warehouses", ["product_id"], :name => "index_product_inventory_warehouses_on_product_id"
+
   create_table "product_kit_skus", :force => true do |t|
     t.integer  "product_id"
     t.string   "sku"
@@ -183,7 +197,6 @@ ActiveRecord::Schema.define(:version => 20131104122602) do
     t.datetime "created_at",                                         :null => false
     t.datetime "updated_at",                                         :null => false
     t.string   "inv_wh1"
-    t.string   "location_primary"
     t.string   "status",                          :default => "New"
     t.text     "spl_instructions_4_packer"
     t.boolean  "spl_instructions_4_confirmation", :default => false
@@ -193,19 +206,6 @@ ActiveRecord::Schema.define(:version => 20131104122602) do
     t.integer  "packing_placement"
     t.integer  "pack_time_adj"
     t.string   "kit_parsing"
-    t.integer  "inv_alert_wh1"
-    t.integer  "inv_wh2_qty"
-    t.integer  "inv_alert_wh2"
-    t.integer  "inv_wh3_qty"
-    t.integer  "inv_alert_wh3"
-    t.integer  "inv_wh4_qty"
-    t.integer  "inv_alert_wh4"
-    t.integer  "inv_wh5_qty"
-    t.integer  "inv_alert_wh5"
-    t.integer  "inv_wh6_qty"
-    t.integer  "inv_alert_wh6"
-    t.integer  "inv_wh7_qty"
-    t.integer  "inv_alert_wh7"
     t.integer  "is_kit",                          :default => 0
     t.boolean  "disable_conf_req",                :default => false
   end
