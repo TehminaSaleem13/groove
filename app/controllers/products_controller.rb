@@ -1054,4 +1054,29 @@ class ProductsController < ApplicationController
     end
   end
 
+  def addimage
+  	@result = Hash.new
+  	@result['status'] = true
+
+  	@product = Product.find(params[:id])
+  	if !@product.nil? && params[:image] .nil?
+	  	@image = ProductImage.new
+	  	@image.image = params[:image]
+	  	@image.caption = params[:caption] if !params[:caption].nil?
+	  	@product.product_images << @image
+
+	  	if !@product.save
+	  		@result['status'] = false
+	  		@result['messages'].push("Adding image failed")
+	  	end
+	else
+	  	@result['status'] = false
+	  	@result['messages'].push("Invalid data sent to server")		
+	end
+  	respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json: @result }
+    end
+  end
+
 end
