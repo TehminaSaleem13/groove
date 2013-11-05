@@ -465,7 +465,7 @@ class ProductsController < ApplicationController
 
 		@product_barcodes = ProductBarcode.where(:product_id=>product.id)
 		@product_barcodes.each do |barcode|
-			@product_hash['barcode'] = barcode.first.barcode
+			@product_hash['barcode'] = barcode.barcode
 		end
 		
 		@product_skus = ProductSku.where(:product_id=>product.id)
