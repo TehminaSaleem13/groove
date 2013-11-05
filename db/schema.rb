@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20131105121552) do
+ActiveRecord::Schema.define(:version => 20131105164529) do
 
   create_table "amazon_credentials", :force => true do |t|
     t.string   "merchant_id",                                     :null => false
@@ -56,6 +56,31 @@ ActiveRecord::Schema.define(:version => 20131105121552) do
     t.boolean  "import_products", :default => false, :null => false
     t.boolean  "import_images",   :default => false, :null => false
   end
+
+  create_table "order_activities", :force => true do |t|
+    t.datetime "activitytime"
+    t.integer  "order_id"
+    t.integer  "user_id"
+    t.string   "action"
+    t.datetime "created_at",   :null => false
+    t.datetime "updated_at",   :null => false
+    t.string   "username"
+  end
+
+  add_index "order_activities", ["order_id"], :name => "index_order_activities_on_order_id"
+  add_index "order_activities", ["user_id"], :name => "index_order_activities_on_user_id"
+
+  create_table "order_exceptions", :force => true do |t|
+    t.string   "reason"
+    t.string   "description"
+    t.integer  "user_id"
+    t.datetime "created_at",  :null => false
+    t.datetime "updated_at",  :null => false
+    t.integer  "order_id"
+  end
+
+  add_index "order_exceptions", ["order_id"], :name => "index_order_exceptions_on_order_id"
+  add_index "order_exceptions", ["user_id"], :name => "index_order_exceptions_on_user_id"
 
   create_table "order_items", :force => true do |t|
     t.string   "sku"

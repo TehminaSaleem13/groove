@@ -96,7 +96,6 @@ begin
               @order.email = item[:customer_email]
               @order.lastname = order_info[:shipping_address][:lastname]
               @order.firstname = order_info[:shipping_address][:firstname]
-
                 # @shipping = OrderShipping.new
 
                 # @shipping.streetaddress1 =  order_info[:shipping_address][:street]
@@ -110,6 +109,10 @@ begin
 
                 # @order.order_shipping = @shipping
                 if @order.save
+                  @order.addactivity("Order Import", @store.name+" Import")
+                  @order.order_items.each do |item|
+                    @order.addactivity("Item with SKU: "+item.sku+" Added", @store.name+" Import")
+                  end
                   @result['success_imported'] = @result['success_imported'] + 1
                 end
               else
@@ -184,6 +187,10 @@ begin
 
           #@order.order_shipping = @shipping
           if @order.save
+            @order.addactivity("Order Import", @store.name+" Import")
+            @order.order_items.each do |item|
+              @order.addactivity("Item with SKU: "+item.sku+" Added", @store.name+" Import")
+            end
             @result['success_imported'] = @result['success_imported'] + 1
           end
         else
@@ -252,6 +259,10 @@ begin
 
 
           if @order.save
+            @order.addactivity("Order Import", @store.name+" Import")
+            @order.order_items.each do |item|
+              @order.addactivity("Item with SKU: "+item.sku+" Added", @store.name+" Import")
+            end
             @result['success_imported'] = @result['success_imported'] + 1
           end
         else
@@ -588,8 +599,11 @@ begin
         @orderitem['iteminfo'] = orderitem
         productsku = ProductSku.where(:sku => orderitem.sku)
         if productsku.length > 0
-          @orderitem['productinfo'] = Product.find(productsku.product_id)
-          @orderitem['productimages'] = ProductImage.where(:product_id=>productsku.product_id)
+           @products = Product.where(productsku.first.product_id)
+           if @products.length > 0
+            @orderitem['productinfo'] =@products.first
+           end
+          @orderitem['productimages'] = ProductImage.where(:product_id=>productsku.first.product_id)
         else
           @orderitem['productinfo'] = nil
           @orderitem['productimages'] = nil
@@ -601,6 +615,8 @@ begin
       #setting user permissions for add and remove items permitted
       @result['order']['add_items_permitted'] = current_user.add_order_items
       @result['order']['remove_items_permitted'] = current_user.remove_order_items
+      @result['order']['activities'] = @order.order_activities
+      @result['order']['exception'] = @order.order_exceptions
     else
       @result['status'] = false
       @result['error_message'] = "Could not find order"
@@ -612,11 +628,66 @@ begin
     end
   end
 
-  def addItem
+  def additem
     @result = Hash.new
   end
 
-  def removeItem
+  def removeitem
   end
   
+  def recordexception
+    @result = Hash.new
+    @result['status'] = true
+
+    @order = Order.find(params[:id])
+
+    if @order.order_exceptions.nil? 
+      @exception = OrderExceptions.new
+    else
+      @exception = @order.order_exceptions
+    end
+
+    @exception.reason = params[:reason]
+    @exception.description = params[:description]
+    @exception.user_id = params[:user_id]
+    
+    @order.order_exceptions = @exception
+
+    if @order.save
+      @order.addactivity("Order Exception Recorded", current_user.name)
+    else
+      @result['status'] &= false
+      @result['messages'].push('Could not save order with exception')
+    end
+
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json: @result }
+    end
+  end
+
+  def clearexception
+    @result = Hash.new
+    @result['status'] = true
+
+    @order = Order.find(params[:id])
+
+    if @order.order_exceptions.nil? 
+      @result['status'] &= false
+      @result['messages'].push('Order does not have exception to clear')
+    else
+      if @order.order_exceptions.destroy
+        @order.addactivity("Order Exception Cleared", current_user.name)
+      else
+        @result['status'] &= false
+        @result['messages'].push('Error clearing exceptions')
+      end
+    end
+
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json: @result }
+    end
+  end
+
 end
