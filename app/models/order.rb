@@ -6,4 +6,19 @@ class Order < ActiveRecord::Base
   		:notes_toPacker, :notes_fromPacker, :tracking_processed, :scanned_on, :tracking_num, :company
   has_many :order_items
   has_one :order_shipping
+  has_one :order_exceptions
+  has_many :order_activities
+
+  def addactivity (order_activity_message, username)
+  	@activity = OrderActivity.new
+  	@activity.order_id = self.id
+  	@activity.action = order_activity_message
+  	@activity.username = username
+  	if @activity.save
+  		true
+  	else
+  		false
+  	end
+  end
+
 end
