@@ -643,6 +643,7 @@ begin
 
     if @order.order_exceptions.nil? 
       @exception = OrderExceptions.new
+      @exception.order_id = @order.id
     else
       @exception = @order.order_exceptions
     end
@@ -650,10 +651,8 @@ begin
     @exception.reason = params[:reason]
     @exception.description = params[:description]
     @exception.user_id = params[:user_id]
-    
-    @order.order_exceptions = @exception
 
-    if @order.save
+    if @exception.save
       @order.addactivity("Order Exception Recorded", current_user.name)
     else
       @result['status'] &= false
@@ -690,4 +689,56 @@ begin
     end
   end
 
+  def additemtoorder
+    @result = Hash.new
+    @result['status'] = true
+
+    @order = Order.find(params[:id])
+    @product = Product.find(params[:productid])
+
+    @skus = ProductSku.where(:product_id=>@product.id).where(:purpose=>'primary')
+    if @skus.length > 0
+      @orderitem = OrderItem.new
+      @orderitem.price = params[:price]
+      @orderitem.qty = params[:qty]
+      @orderitem.row_total = params[:price].to_f * params[:qty].to_f
+      @orderitem.sku = @skus.first.sku
+      @order.order_items << @orderitem
+
+      if !@order.save
+        @result['status'] &= false
+        @result['messages'].push("Adding item to order failed")
+      end
+    else
+        @result['status'] &= false
+        @result['messages'].push("Could not find any SKU with product id:"+@productid)
+    end
+
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json: @result }
+    end
+  end
+
+  def removeitemfromorder
+    @result = Hash.new
+    @result['status'] = true
+
+    @orderitem = OrderItem.find(params[:orderitem])
+
+    if !@orderitem.nil?
+      if !@orderitem.destroy
+        @result['status'] &= false
+        @result['messages'].push("Remove item from order")
+      end
+    else
+      @result['status'] &= false
+      @result['messages'].push("Could not find order item")
+    end
+
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json: @result }
+    end
+  end
 end
