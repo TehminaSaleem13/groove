@@ -121,13 +121,27 @@
             <table id="productstbl" class="table table-hover table-bordered" infinite-scroll="product_next()" infinite-scroll-disabled="{{new_products}}">
                 <thead>
                 <tr>
-                    <th><input ng-model="product_setup.select_all" type="checkbox" ng-change='select_all_toggle()' /></th>
-                    <th class="product_setup-sort product_setup-sort-name"><a href="" ng-click="product_setup_opt('sort','name')">Item Name<span class="{{'caret-'+product_setup.order}}"></span></a></th>
-                    <th class="product_setup-sort product_setup-sort-sku"><a href="" ng-click="product_setup_opt('sort','sku')">Sku<span class="{{'caret-'+product_setup.order}}"></span></a></th>
-                    <th class="product_setup-sort product_setup-sort-status"><a href="" ng-click="product_setup_opt('sort','status')">Status<span class="{{'caret-'+product_setup.order}}"></span></a></th>
-                    <th class="product_setup-sort product_setup-sort-barcode"><a href="" ng-click="product_setup_opt('sort','barcode')">Barcode<span class="{{'caret-'+product_setup.order}}"></span></a></th>
-                    <th class="product_setup-sort product_setup-sort-location_primary"><a href="" ng-click="product_setup_opt('sort','location_primary')">Location<span class="{{'caret-'+product_setup.order}}"></span></a></th>
-                    <th class="product_setup-sort product_setup-sort-store"><a href="" ng-click="product_setup_opt('sort','store')">Store<span class="{{'caret-'+product_setup.order}}"></span></a></th>
+                    <th>
+                        <input ng-model="product_setup.select_all" type="checkbox" ng-change='select_all_toggle()' />
+                    </th>
+                    <th class="product_setup-sort product_setup-sort-name">
+                        <a href="" ng-click="product_setup_opt('sort','name')">Item Name<span class="{{'caret-'+product_setup.order}}"></span></a>
+                    </th>
+                    <th class="product_setup-sort product_setup-sort-sku">
+                        <a href="" ng-click="product_setup_opt('sort','sku')">Sku<span class="{{'caret-'+product_setup.order}}"></span></a>
+                    </th>
+                    <th class="product_setup-sort product_setup-sort-status">
+                        <a href="" ng-click="product_setup_opt('sort','status')">Status<span class="{{'caret-'+product_setup.order}}"></span></a>
+                    </th>
+                    <th class="product_setup-sort product_setup-sort-barcode">
+                        <a href="" ng-click="product_setup_opt('sort','barcode')">Barcode<span class="{{'caret-'+product_setup.order}}"></span></a>
+                    </th>
+                    <th class="product_setup-sort product_setup-sort-location_primary">
+                        <a href="" ng-click="product_setup_opt('sort','location_primary')">Location<span class="{{'caret-'+product_setup.order}}"></span></a>
+                    </th>
+                    <th class="product_setup-sort product_setup-sort-store">
+                        <a href="" ng-click="product_setup_opt('sort','store')">Store<span class="{{'caret-'+product_setup.order}}"></span></a>
+                    </th>
                 </tr>
                 </thead>
                 <tbody>
@@ -152,7 +166,7 @@
              aria-hidden="true">
 
             <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="icon-remove"></i></button>
                 <h3 id="showProductHeader" >Editing: {{single_product.skus[0].sku}}  - ID #{{single_product.basicinfo.id}}</h3>
             </div>
 
@@ -161,7 +175,7 @@
                 <fieldset>
                     <div class="modal-body" id="showProduct-body">
                         <div class="alert alert-danger" ng-show="show_error_msgs">
-                            <button type="button" class="close" data-dismiss="alert">&times;</button>
+                            <button type="button" class="close" data-dismiss="alert"><i class="icon-remove"></i></button>
                             <p ng-repeat="message in error_msgs">{{message}}</p>
                         </div>
 
@@ -172,9 +186,18 @@
                                     <h4>SKU# {{single_product.skus[0].sku}}</h4>
                                 </td>
                                 <td class="span6">
-                                    <p ng-show="single_product.basicinfo.is_kit==0"><i class="icon-large icon-suitcase"></i> <a href= "" ng-click="single_product.basicinfo.is_kit=1;update_single_product();">Change this product to a kit</a> </p>
-                                    <p ng-show="single_product.basicinfo.is_kit==1"><i class="icon-large icon-reply"></i> <a href= "" ng-click="single_product.basicinfo.is_kit=0;update_single_product();">Change this kit back to a product</a> </p>
-                                    <p ng-show="single_product.basicinfo.is_kit==0"><i class="icon-large icon-paste"></i> <a href= "" ng-click="product_alias()">Make this product an alias of another product</a></p>
+                                    <p ng-show="single_product.basicinfo.is_kit==0">
+                                        <i class="icon-large icon-suitcase"></i>
+                                        <a href= "" ng-click="single_product.basicinfo.is_kit=1;update_single_product();">Change this product to a kit</a>
+                                    </p>
+                                    <p ng-show="single_product.basicinfo.is_kit==1">
+                                        <i class="icon-large icon-reply"></i>
+                                        <a href= "" ng-click="single_product.basicinfo.is_kit=0;update_single_product();">Change this kit back to a product</a>
+                                    </p>
+                                    <p ng-show="single_product.basicinfo.is_kit==0">
+                                        <i class="icon-large icon-paste"></i>
+                                        <a href= "" ng-click="product_alias()">Make this product an alias of another product</a>
+                                    </p>
                                 </td>
                                 <td>
                                     <h5>Status </h5>
@@ -224,7 +247,8 @@
                                         <i ng-show="tmp.editing == -1" class="icon-remove" ng-click="blur_input('sku')"></i>
                                     </div>
                                 </div>
-                                 <i class="icon-large  icon-question-sign" data-toggle="popover" data-placement="top" data-content="The first SKU listed is the Primary SKU. It will be displayed during packing. Additional alias SKUs can be added by comma or enter."  data-original-title=""></i>
+                                <i class="icon-large  icon-question-sign" data-toggle="popover" data-placement="top" data-content="The first SKU listed is the Primary SKU.
+                                 It will be displayed during packing. Additional alias SKUs can be added by comma or enter."  data-original-title=""></i>
                             </div>
                         </div>
                         <div class="control-group">
@@ -391,10 +415,18 @@
                 <table id="aliasproductstbl" class="table table-hover table-bordered">
                     <thead>
                     <tr>
-                        <th class="alias_setup-sort alias_setup-sort-name"><a href="" ng-click="alias_setup_opt('sort','name')">Item Name<span class="{{'caret-'+alias.product_setup.order}}"></span></a></th>
-                        <th class="alias_setup-sort alias_setup-sort-sku"><a href="" ng-click="alias_setup_opt('sort','sku')">Primary Sku<span class="{{'caret-'+alias.product_setup.order}}"></span></a></th>
-                        <th class="alias_setup-sort alias_setup-sort-status"><a href="" ng-click="alias_setup_opt('sort','status')">Status<span class="{{'caret-'+alias.product_setup.order}}"></span></a></th>
-                        <th class="alias_setup-sort alias_setup-sort-barcode"><a href="" ng-click="alias_setup_opt('sort','barcode')">Barcode<span class="{{'caret-'+alias.product_setup.order}}"></span></a></th>
+                        <th class="alias_setup-sort alias_setup-sort-name">
+                            <a href="" ng-click="alias_setup_opt('sort','name')">Item Name<span class="{{'caret-'+alias.product_setup.order}}"></span></a>
+                        </th>
+                        <th class="alias_setup-sort alias_setup-sort-sku">
+                            <a href="" ng-click="alias_setup_opt('sort','sku')">Primary Sku<span class="{{'caret-'+alias.product_setup.order}}"></span></a>
+                        </th>
+                        <th class="alias_setup-sort alias_setup-sort-status">
+                            <a href="" ng-click="alias_setup_opt('sort','status')">Status<span class="{{'caret-'+alias.product_setup.order}}"></span></a>
+                        </th>
+                        <th class="alias_setup-sort alias_setup-sort-barcode">
+                            <a href="" ng-click="alias_setup_opt('sort','barcode')">Barcode<span class="{{'caret-'+alias.product_setup.order}}"></span></a>
+                        </th>
                     </tr>
                     </thead>
                     <tbody>

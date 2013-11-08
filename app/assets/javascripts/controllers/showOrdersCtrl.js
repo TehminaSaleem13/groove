@@ -13,7 +13,7 @@ groovepacks_controllers.
                 }
                 $http.get('/orders/getorders.json?filter='+$scope.order_setup.filter+'&sort='+$scope.order_setup.sort+'&order='+$scope.order_setup.order+'&limit='+$scope.order_setup.limit+'&offset='+$scope.order_setup.offset).success(function(data) {
                     if(data.status) {
-                        console.log($scope.order_setup);
+                        //console.log($scope.order_setup);
                         if(!next) {
                             $scope.orders = data.orders;
                         } else {
@@ -21,7 +21,7 @@ groovepacks_controllers.
                                 $scope.orders.push(data.orders[key]);
                             }
                         }
-                        console.log($scope.orders);
+                        //console.log($scope.orders);
                     }
                 }).error(function(data) {
 
@@ -57,6 +57,7 @@ groovepacks_controllers.
                 $scope.order_setup.select_all = false;
                 $scope.order_setup.limit = 10;
                 $scope.order_setup.offset = 0;
+                $scope.single_order = {};
                 $(".order_setup-filter-awaiting").addClass("active");
                 $scope.get_orders();
             }
@@ -162,5 +163,17 @@ groovepacks_controllers.
                         $scope.get_orders();
                     });
             }
+
+            $scope.order_single_details = function(id) {
+                $http.get('/orders/getdetails.json?id='+id).success(function(data) {
+                    console.log(data.order);
+                    if(data.status) {
+                        $scope.single_order = data.order;
+                    }
+                });
+
+
+            }
+
             $scope.set_defaults();
         }]);

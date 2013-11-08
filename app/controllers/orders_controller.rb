@@ -599,7 +599,7 @@ begin
         @orderitem['iteminfo'] = orderitem
         productsku = ProductSku.where(:sku => orderitem.sku)
         if productsku.length > 0
-           @products = Product.where(productsku.first.product_id)
+           @products = Product.where(:id => productsku.first.product_id)
            if @products.length > 0
             @orderitem['productinfo'] =@products.first
            end
