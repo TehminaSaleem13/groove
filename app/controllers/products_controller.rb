@@ -187,7 +187,8 @@ class ProductsController < ApplicationController
 
 				
 				if !@item.pictureDetails.nil?
-					if @item.pictureDetails.pictureURL.length > 0
+					if !@item.pictureDetails.pictureURL.nil? && 
+						@item.pictureDetails.pictureURL.length > 0
 						@productimage = ProductImage.new
 						@productimage.image = "http://i.ebayimg.com" + 
 							@item.pictureDetails.pictureURL.first.request_uri()
