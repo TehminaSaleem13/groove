@@ -174,6 +174,28 @@ groovepacks_controllers.
 
 
             }
+            $scope.update_order_exception = function() {
+                $http.post(
+                    '/orders/recordexception.json',
+                    {
+                        id: $scope.single_order.basicinfo.id,
+                        reason: $scope.single_order.exception.reason,
+                        description: $scope.single_order.exception.description,
+                        assoc:$scope.single_order.exception.assoc
+                    }
+                ).success(function(data) {
+                    if(data.status) {
+                        $scope.order_single_details($scope.single_order.basicinfo.id);
+                    }
+                })
+            }
+            $scope.clear_order_exception = function() {
+                $http.post('/orders/clearexception.json', {id: $scope.single_order.basicinfo.id}).success(function(data) {
+                    if(data.status) {
+                        $scope.order_single_details($scope.single_order.basicinfo.id);
+                    }
+                })
+            }
 
             $scope.set_defaults();
         }]);

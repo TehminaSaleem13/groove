@@ -14,6 +14,7 @@ class Order < ActiveRecord::Base
   	@activity.order_id = self.id
   	@activity.action = order_activity_message
   	@activity.username = username
+    @activity.activitytime = current_time_from_proper_timezone
   	if @activity.save
   		true
   	else
