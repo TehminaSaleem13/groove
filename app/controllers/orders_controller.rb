@@ -727,9 +727,11 @@ begin
     @orderitem = OrderItem.find(params[:orderitem])
 
     if !@orderitem.nil?
-      if !@orderitem.destroy
-        @result['status'] &= false
-        @result['messages'].push("Remove item from order")
+      @orderitem.each do |item|
+        unless item.destroy
+          @result['status'] &= false
+          @result['messages'].push("Removed items from order")
+        end
       end
     else
       @result['status'] &= false

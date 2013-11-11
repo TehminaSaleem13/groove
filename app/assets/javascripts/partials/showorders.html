@@ -252,14 +252,15 @@
                         <div class="tab-pane" id="itemstab">
                             <div class="control-group pull-right" ng-show="single_order.remove_items_permitted">
                                 <div class="controls">
-                                    <button class="btn btn-danger">Remove selected Items</button>
+                                    <button class="btn btn-danger" ng-click="item_remove_selected()">Remove selected Items</button>
                                 </div>
                             </div>
 
 
                             <table class="table table-hover table-bordered" >
                                 <thead>
-                                <tr>
+                                <tr >
+                                    <th><input ng-model="items_select" type="checkbox" ng-change='item_select_all_toggle()' /></th>
                                     <th>Product</th>
                                     <th>Primary Image</th>
                                     <th>Primary SKU</th>
@@ -270,7 +271,8 @@
                                 </tr>
                                 </thead>
                                 <tbody>
-                                <tr ng-repeat="item in single_order.items">
+                                <tr ng-repeat="item in single_order.items" ng-click="item.checked = !item.checked">
+                                    <td><input type="checkbox" ng-model="item.checked"/></td>
                                     <td>{{ item.productinfo.name }}</td>
                                     <td> <div class="single-image"><img class="img-thumb" ng-src="{{item.productimages[0].image}}" /></div></td>
                                     <td>{{item.iteminfo.sku}}</td>
@@ -283,7 +285,7 @@
                             </table>
                             <div class="control-group pull-right"  ng-show="single_order.add_items_permitted">
                                 <div class="controls">
-                                    <button class="btn ">Add Item</button>
+                                    <button class="btn" ng-click="item_order()">Add Item</button>
                                 </div>
                             </div>
                         </div>
@@ -374,8 +376,17 @@
                 </div>
 
                 <div class="modal-footer">
-                    <button class="btn btn-primary">Save</button>
-                    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+                    <div class="row-fluid">
+                        <div class="span6">
+                            <span class="label label-info" id="order_update_status" ng-show="order_update_status">{{order_update_message}}</span>
+                        </div>
+                        <div class="span6">
+                            <div class="pull-right">
+                                <button class="btn btn-primary" ng-click="update_single_order()">Save</button>
+                                <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
             </fieldset>
@@ -394,25 +405,25 @@
                     <thead>
                     <tr>
                         <th class="item_setup-sort item_setup-sort-name">
-                            <a href="" ng-click="item_setup_opt('sort','name')">Item Name<span class="{{'caret-'+item.product_setup.order}}"></span></a>
+                            <a href="" ng-click="item_setup_opt('sort','name')">Item Name<span class="{{'caret-'+product_setup.order}}"></span></a>
                         </th>
-                        <th class="alias_setup-sort alias_setup-sort-sku">
-                            <a href="" ng-click="item_setup_opt('sort','sku')">Primary Sku<span class="{{'caret-'+item.product_setup.order}}"></span></a>
+                        <th class="item_setup-sort item_setup-sort-sku">
+                            <a href="" ng-click="item_setup_opt('sort','sku')">Primary Sku<span class="{{'caret-'+product_setup.order}}"></span></a>
                         </th>
-                        <th class="alias_setup-sort alias_setup-sort-status">
-                            <a href="" ng-click="item_setup_opt('sort','status')">Status<span class="{{'caret-'+item.product_setup.order}}"></span></a>
+                        <th class="item_setup-sort item_setup-sort-status">
+                            <a href="" ng-click="item_setup_opt('sort','status')">Status<span class="{{'caret-'+product_setup.order}}"></span></a>
                         </th>
-                        <th class="alias_setup-sort alias_setup-sort-barcode">
-                            <a href="" ng-click="item_setup_opt('sort','barcode')">Barcode<span class="{{'caret-'+item.product_setup.order}}"></span></a>
+                        <th class="item_setup-sort item_setup-sort-barcode">
+                            <a href="" ng-click="item_setup_opt('sort','barcode')">Barcode<span class="{{'caret-'+product_setup.order}}"></span></a>
                         </th>
                     </tr>
                     </thead>
                     <tbody>
-                    <tr ng-click="add_item_order(item_product.id)" ng-repeat="item_product in item.products">
-                        <td>{{item_product.name}}</td>
-                        <td>{{item_product.sku}}</td>
-                        <td>{{item_product.status}}</td>
-                        <td>{{item_product.barcode}}</td>
+                    <tr ng-click="add_item_order(product.id)" ng-repeat="product in products">
+                        <td>{{product.name}}</td>
+                        <td>{{product.sku}}</td>
+                        <td>{{product.status}}</td>
+                        <td>{{product.barcode}}</td>
                     </tr>
                     </tbody>
                 </table>
