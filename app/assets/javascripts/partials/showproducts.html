@@ -412,6 +412,7 @@
                 <h3 id="showAliasOptionsHeader" >Select Product to <span ng-show="single_product.basicinfo.is_kit">add to Kit</span><span ng-hide="single_product.basicinfo.is_kit">Alias</span></h3>
             </div>
             <div class="modal-body" id="showAliasOptions-body">
+                <input type="text" ng-model="alias.product_setup.search" class="input-large search-query" placeholder="Search term" /> <button class="btn" ng-click="alias.product_setup.search='';get_products()">Clear</button><br/><br/>
                 <table id="aliasproductstbl" class="table table-hover table-bordered">
                     <thead>
                     <tr>
