@@ -584,7 +584,7 @@ class ProductsController < ApplicationController
 		
 		#todo: include sku in search as well in future.
 		@products = Product.find_by_sql("SELECT * from products WHERE name like '%"+search+"%' OR
-										barcode like '%"+search+"%' OR location_primary like '%"+search+"%' LIMIT #{limit} 
+										barcode like '%"+search+"%'  LIMIT #{limit}
 										OFFSET #{offset}")
 		@products_result = []
 
