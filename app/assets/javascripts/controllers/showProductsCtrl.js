@@ -384,6 +384,7 @@ controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$routeParams', 
                             if(data.status) {
                                 $scope.product_update_status = true;
                                 $scope.product_update_message = "Successfully Added";
+                                $scope.product_single_details($scope.single_product.basicinfo.id);
                             } else {
                                 $scope.show_error_msgs = true;
                                 $scope.error_msgs = ["Some error Occurred"];

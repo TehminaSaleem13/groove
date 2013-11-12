@@ -599,7 +599,7 @@ begin
         @orderitem['iteminfo'] = orderitem
         productsku = ProductSku.where(:sku => orderitem.sku)
         if productsku.length > 0
-           @products = Product.where(productsku.first.product_id)
+           @products = Product.where(:id => productsku.first.product_id)
            if @products.length > 0
             @orderitem['productinfo'] =@products.first
            end
@@ -727,9 +727,11 @@ begin
     @orderitem = OrderItem.find(params[:orderitem])
 
     if !@orderitem.nil?
-      if !@orderitem.destroy
-        @result['status'] &= false
-        @result['messages'].push("Remove item from order")
+      @orderitem.each do |item|
+        unless item.destroy
+          @result['status'] &= false
+          @result['messages'].push("Removed items from order")
+        end
       end
     else
       @result['status'] &= false
