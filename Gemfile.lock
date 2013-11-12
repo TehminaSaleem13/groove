@@ -6,6 +6,13 @@ GIT
       gelf (~> 1.3)
 
 GIT
+  remote: https://github.com/felipec/soap4r.git
+  revision: 375e8b1c048506a9e964c69a1f1d0de36e74c70c
+  specs:
+    soap2r (1.5.8)
+      httpclient (>= 2.1.1)
+
+GIT
   remote: https://github.com/radicaled/ruby-mws.git
   revision: 02565bbb6605263df0f492c7d5b1c0e29feba7bc
   specs:
@@ -296,8 +303,6 @@ GEM
       rack (~> 1.4)
       rack-protection (~> 1.4)
       tilt (~> 1.3, >= 1.3.4)
-    soap4r (1.5.8)
-      httpclient (>= 2.1.1)
     sprockets (2.2.2)
       hike (~> 1.2)
       multi_json (~> 1.0)
@@ -379,7 +384,7 @@ DEPENDENCIES
   savon
   sidekiq
   simple_form (>= 2.0.4)
-  soap4r
+  soap2r!
   therubyracer
   uglifier (>= 1.0.3)
   xmlparser

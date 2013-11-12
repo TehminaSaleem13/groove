@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20131105164529) do
+ActiveRecord::Schema.define(:version => 20131111134814) do
 
   create_table "amazon_credentials", :force => true do |t|
     t.string   "merchant_id",                                     :null => false
@@ -88,8 +88,9 @@ ActiveRecord::Schema.define(:version => 20131105164529) do
     t.decimal  "price",      :precision => 10, :scale => 0
     t.decimal  "row_total",  :precision => 10, :scale => 0
     t.integer  "order_id"
-    t.datetime "created_at",                                :null => false
-    t.datetime "updated_at",                                :null => false
+    t.datetime "created_at",                                                :null => false
+    t.datetime "updated_at",                                                :null => false
+    t.string   "name",                                      :default => "", :null => false
   end
 
   add_index "order_items", ["order_id"], :name => "index_order_items_on_order_id"

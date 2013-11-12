@@ -76,6 +76,7 @@ begin
                     @order_item.price = line_items[:item][:price]
                     @order_item.qty = line_items[:item][:qty_ordered]
                     @order_item.row_total= line_items[:item][:row_total]
+                    @order_item.name = line_items[:item][:name]
                     @order_item.sku = line_items[:item][:sku] 
                     @order.order_items << @order_item
                 else
@@ -84,6 +85,7 @@ begin
                     @order_item.price = line_item[:price]
                     @order_item.qty = line_item[:qty_ordered]
                     @order_item.row_total= line_item[:row_total]
+                    @order_item.name = line_item[:name]
                     @order_item.sku = line_item[:sku]
                     @order.order_items << @order_item
                   end
@@ -109,6 +111,10 @@ begin
 
                 # @order.order_shipping = @shipping
                 if @order.save
+                  if !@order.addnewitems
+                    @result['status'] &= false
+                    @result['messages'].push('Problem adding new items')  
+                  end
                   @order.addactivity("Order Import", @store.name+" Import")
                   @order.order_items.each do |item|
                     @order.addactivity("Item with SKU: "+item.sku+" Added", @store.name+" Import")
@@ -170,6 +176,11 @@ begin
           @order_item.qty = transaction.quantityPurchased
           @order_item.row_total= transaction.transactionPrice
           @order_item.sku = transaction.item.itemID
+          if !transaction.item.title.nil?
+            @order_item.name = transaction.item.title
+          else
+            @order_item.name = ""
+          end
 
           @order.order_items << @order_item
 # address_1, :address_2, :city, :country, :customer_comments, :email, :firstname, :increment_id, :lastname, 
@@ -187,6 +198,10 @@ begin
 
           #@order.order_shipping = @shipping
           if @order.save
+            if !@order.addnewitems
+              @result['status'] &= false
+              @result['messages'].push('Problem adding new items')  
+            end
             @order.addactivity("Order Import", @store.name+" Import")
             @order.order_items.each do |item|
               @order.addactivity("Item with SKU: "+item.sku+" Added", @store.name+" Import")
@@ -235,6 +250,7 @@ begin
             @order_item.qty = item.quantity_ordered
             @order_item.row_total= item.item_price.amount.to_i * item.quantity_ordered.to_i
             @order_item.sku = item.seller_sku
+            @order_item.name = item.title
           end
 
           @order.order_items << @order_item
@@ -245,20 +261,12 @@ begin
               @order.postcode = order.shipping_address.postal_code
               @order.email = order.buyer_email
               @order.lastname = order.shipping_address.name
-          # @shipping = OrderShipping.new
-
-          # @shipping.streetaddress1 = order.shipping_address.address_line1
-          # @shipping.city = order.shipping_address.city
-          # @shipping.region = order.shipping_address.state_or_region
-          # @shipping.country = order.shipping_address.country
-          # @shipping.postcode = order.shipping_address.postal_code
-          # @shipping.email = order.buyer_email
-          # @shipping.lastname = order.shipping_address.name
-          
-          # @order.order_shipping = @shipping
-
 
           if @order.save
+            if !@order.addnewitems
+              @result['status'] &= false
+              @result['messages'].push('Problem adding new items')  
+            end
             @order.addactivity("Order Import", @store.name+" Import")
             @order.order_items.each do |item|
               @order.addactivity("Item with SKU: "+item.sku+" Added", @store.name+" Import")

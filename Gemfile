@@ -57,7 +57,7 @@ gem "clamp"
 gem "savon"
 gem "ebay", "~> 1.1"
 gem "xmlparser"
-gem "soap4r"
+gem "soap2r", :git=> 'https://github.com/felipec/soap4r.git'
 #gem 'mws-connect'
 #gem "nokogiri", "~> 1.5.5"
 gem 'ruby-mws', :git=>'https://github.com/radicaled/ruby-mws.git'
