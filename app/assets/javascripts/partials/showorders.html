@@ -99,7 +99,7 @@
                     <td>{{order.store_name}}</td>
                     <td>{{order.notes}}</td>
                     <td><a href="#showOrder" role="button" data-toggle="modal" ng-click="order_single_details(order.id)" class="ng-binding">{{order.ordernum}}</a></td>
-                    <td>{{order.orderdate}}</td>
+                    <td>{{order.orderdate | date:'EEEE MM/dd/yyyy hh:mm:ss a'}}</td>
                     <td>{{order.itemslength}}</td>
                     <td>{{order.recipient}}</td>
                     <td>{{order.status}}</td>
