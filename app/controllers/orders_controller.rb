@@ -68,6 +68,7 @@ begin
                 @order = Order.new
                 @order.increment_id = item[:order_id]
                 @order.status = 'Awaiting'
+                @order.order_placed_time = item[:created_at]
                 #@order.storename = item[:store_name]
                 @order.store = @store
                 line_items = order_info[:items]
@@ -170,6 +171,7 @@ begin
           @order.status = 'Awaiting'
           @order.store = @store
           @order.increment_id = transaction.transactionID
+          @order.order_placed_time = transaction.createdDate
 
           @order_item = OrderItem.new
           @order_item.price = transaction.item.sellingStatus.currentPrice
@@ -239,6 +241,8 @@ begin
           @order.status = 'Awaiting'
           @order.increment_id = order.amazon_order_id
           #@order.storename = @store.name
+          @order.order_placed_time = order.purchase_date
+
           @order.store = @store
           
           order_items  = mws.orders.list_order_items :amazon_order_id => order.amazon_order_id
