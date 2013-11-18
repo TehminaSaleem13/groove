@@ -99,19 +99,8 @@ begin
               @order.email = item[:customer_email]
               @order.lastname = order_info[:shipping_address][:lastname]
               @order.firstname = order_info[:shipping_address][:firstname]
-                # @shipping = OrderShipping.new
 
-                # @shipping.streetaddress1 =  order_info[:shipping_address][:street]
-                # @shipping.city = order_info[:shipping_address][:city]
-                # @shipping.region = order_info[:shipping_address][:region]
-                # @shipping.country = order_info[:shipping_address][:country_id]
-                # @shipping.postcode = order_info[:shipping_address][:postcode]
-                # @shipping.email = item[:customer_email]
-                # @shipping.lastname = order_info[:shipping_address][:lastname]
-                # @shipping.firstname = order_info[:shipping_address][:firstname]
-
-                # @order.order_shipping = @shipping
-                if @order.save
+              if @order.save
                   if !@order.addnewitems
                     @result['status'] &= false
                     @result['messages'].push('Problem adding new items')  

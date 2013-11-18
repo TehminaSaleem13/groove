@@ -9,7 +9,7 @@ class ProductsController < ApplicationController
 	@result['total_imported'] = 0
 	@result['success_imported'] = 0
 	@result['previous_imported'] = 0
-
+	begin
 	#import if magento products
 	if @store.store_type == 'Magento' then
 		@magento_credentials = MagentoCredentials.where(:store_id => @store.id)
@@ -25,6 +25,7 @@ class ProductsController < ApplicationController
 				if response.success?
 					session =  response.body[:login_response][:login_return]
 					response = client.call(:call, message: {session: session, method: 'product.list'})
+					
 					# fetching all products
 					if response.success?
 					  # listing found products
@@ -46,7 +47,10 @@ class ProductsController < ApplicationController
 								@productdb.store_product_id = result_product['product_id']
 								@productdb.product_type = result_product['type']
 								@productdb.store = @store
-								@productdb.status = 'Active'
+								# Magento product api does not provide a barcode, so all
+								# magento products should be marked with a status new as t
+								#they cannot be scanned.
+								@productdb.status = 'New'
 
 								#add productdb sku
 								@productdbsku = ProductSku.new
@@ -179,7 +183,7 @@ class ProductsController < ApplicationController
 				else
 					@productdbsku.sku = @item.sKU
 				end
-
+				#@item.productListingType.uPC
 				@productdbsku.purpose = 'primary'
 
 				#publish the sku to the product record
@@ -199,6 +203,12 @@ class ProductsController < ApplicationController
 				if !@item.primaryCategory.nil?
 					@product_cat = ProductCat.new
 					@product_cat.category = @item.primaryCategory.categoryName
+					@productdb.product_cats << @product_cat
+				end
+
+				if !@item.secondaryCategory.nil?
+					@product_cat = ProductCat.new
+					@product_cat.category = @item.secondaryCategory.categoryName
 					@productdb.product_cats << @product_cat
 				end
 
@@ -224,13 +234,40 @@ class ProductsController < ApplicationController
 			#@result['aws-response'] = mws.reports.request_report :report_type=>'_GET_MERCHANT_LISTINGS_DATA_'
 			#@result['aws-rewuest_status'] = mws.reports.get_report_request_list
 			response = mws.reports.get_report :report_id=> params[:reportid]
-			 			#@result['report_id'] = response.body
-			
+
+			# _GET_MERCHANT_LISTINGS_DATA_
+			# item-name
+			# item-description
+			# listing-id
+			# seller-sku
+			# price
+			# quantity
+			# open-date
+			# image-url
+			# item-is-marketplace
+			# product-id-type
+			# zshop-shipping-fee
+			# item-note
+			# item-condition
+			# zshop-category1
+			# zshop-browse-path
+			# zshop-storefront-feature
+			# asin1
+			# asin2
+			# asin3
+			# will-ship-internationally
+			# expedited-shipping
+			# zshop-boldface
+			# product-id
+			# bid-for-featured-placement
+			# add-delete
+			# pending-quantity
+			# fulfillment-channel
+
 			require 'csv'    
 			csv = CSV.parse(response.body,:quote_char => "|")
 			@result['total_imported']  = csv.length - 1
 			csv.each_with_index do | row, index|
-				index1
 				if index > 0
 					product_row = row.first.split(/\t/)
 					if Product.where(:store_product_id=>product_row[2]).length  == 0
@@ -242,7 +279,7 @@ class ProductsController < ApplicationController
 						end
 
 						@productdb.product_type = 'not_used'
-						@productdb.status = 'Active'
+						@productdb.status = 'New'
 						@productdb.store = @store
 
 						#add productdb sku
@@ -252,6 +289,13 @@ class ProductsController < ApplicationController
 
 						#publish the sku to the product record
 						@productdb.product_skus << @productdbsku
+
+						@productimage = ProductImage.new
+						@productimage.image = product_row[7]
+						if !@productimage.image.nil? && @productimage.image != ""
+							@productdb.product_images << @productimage
+						end
+
 						#save
 						if @productdb.save
 							@result['success_imported'] = @result['success_imported'] + 1
@@ -262,8 +306,10 @@ class ProductsController < ApplicationController
 			  	end
 			end
 		end
-
-
+	end
+	rescue Exception => e
+		@result['status'] = false
+		@result['messages'].push(e.message)
 	end
 
     respond_to do |format|
