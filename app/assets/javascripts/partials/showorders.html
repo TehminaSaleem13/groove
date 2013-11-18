@@ -401,6 +401,7 @@
                 <h3 id="addItemHeader" >Select Item to add to Order</h3>
             </div>
             <div class="modal-body" id="addItem-body">
+                <input type="text" ng-model="product_setup.search" class="input-large search-query" placeholder="Search term" /> <button class="btn" ng-click="product_setup.search='';get_products()">Clear</button><br/><br/>
                 <table id="itemstbl" class="table table-hover table-bordered">
                     <thead>
                     <tr>

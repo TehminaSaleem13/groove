@@ -7,6 +7,7 @@ controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$routeParams', 
         $('.modal-backdrop').remove();
 
     	$scope.get_products = function(next) {
+            $scope.can_get_products = false;
             next = typeof next !== 'undefined' ? next : false;
             alias = ($scope.trigger_alias || $('#showAliasOptions')[0].clientHeight > 0) ? true : false;
             $scope.trigger_alias = false;
@@ -53,8 +54,9 @@ controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$routeParams', 
                         $scope.products = $scope.temp.products;
                     }
                 }
+                $scope.can_get_products = true;
             }).error(function(data) {
-
+                $scope.can_get_products = true;
             });
         }
         $scope.product_setup_opt = function(type,value) {
@@ -114,6 +116,8 @@ controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$routeParams', 
         $scope.set_defaults = function() {
             $scope.product_update_status = false;
             $scope.product_update_message = "";
+            $scope.do_get_products = false;
+            $scope.can_get_products = true;
             $scope.product_setup = {};
             $scope.new_products = false;
             $scope.products = [];
@@ -464,6 +468,21 @@ controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$routeParams', 
                         $scope.product_update_status = false;
                     });
                 });
+            }
+        });
+
+        $scope.$watch('alias.product_setup.search',function() {
+            if($scope.can_get_products) {
+                $scope.get_products();
+            } else {
+                $scope.do_get_products = true;
+            }
+        });
+
+        $scope.$watch('do_get_products',function() {
+            if($scope.do_get_products) {
+                $scope.get_products();
+                $scope.do_get_products = false;
             }
         });
 

@@ -228,6 +228,7 @@ groovepacks_controllers.
                 $scope.get_products(true);
             }
             $scope.get_products = function(next) {
+                $scope.can_get_products = false;
                 if(!next) {
                     $scope.product_setup.offset = 0;
                 }
@@ -247,13 +248,16 @@ groovepacks_controllers.
                             }
                         }
                     }
+                    $scope.can_get_products = true;
                 }).error(function(data) {
-
+                        $scope.can_get_products = true;
                     });
             }
             $scope.item_defaults = function() {
                 $scope.product_setup = {};
                 $scope.products = [];
+                $scope.can_get_products = true;
+                $scope.do_get_products = false;
                 $scope.product_setup.sort = "updated_at";
                 $scope.product_setup.order = "DESC";
                 $scope.product_setup.filter = "all";
@@ -347,7 +351,20 @@ groovepacks_controllers.
             }
 
             $scope.set_defaults();
+            $scope.$watch('product_setup.search',function() {
+                if($scope.can_get_products) {
+                    $scope.get_products();
+                } else {
+                    $scope.do_get_products = true;
+                }
+            });
 
+            $scope.$watch('do_get_products',function() {
+                if($scope.do_get_products) {
+                    $scope.get_products();
+                    $scope.do_get_products = false;
+                }
+            });
             $scope.$watch('order_update_status',function() {
                 if($scope.order_update_status) {
                     $("#order_update_status").fadeTo("fast",1,function() {
