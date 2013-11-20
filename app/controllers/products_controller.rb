@@ -1088,6 +1088,15 @@ class ProductsController < ApplicationController
   			result['messages'].push('Error saving Sku for sku id'+alias_sku.id)
   		end
   	end
+  	
+  	@product_barcodes = ProductBarcode.where(:product_id=>@product_alias.id)
+  	@product_barcodes.each do |alias_barcode|
+  		alias_barcode.product_id = @product_orig.id
+  		if !alias_barcode.save
+  			result['status'] &= false
+  			result['messages'].push('Error saving Barcode for barcode id'+alias_barcode.id)
+  		end
+  	end
 
   	#destroy the aliased object
   	if !@product_alias.destroy
