@@ -586,12 +586,13 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
                             }
                             else
                             {
-                            $scope.active_stores[orderdata.activestoreindex].status="failed";
-                            $scope.active_stores[orderdata.activestoreindex].message = "Import failed. Please check your credentials."
+                                $scope.active_stores[orderdata.activestoreindex].status="failed";
+                                for (var j=0; j< orderdata.messages.length; j++) {
+                                    $scope.active_stores[orderdata.activestoreindex].message += orderdata.messages[j];
+                                }
                             }
                         }).error(function(data) {
-                            $scope.active_stores[i].status="failed";
-                            $scope.active_stores[i].message = orderdata.messages;
+                            console.log(data);
                             });    
                     }
                      

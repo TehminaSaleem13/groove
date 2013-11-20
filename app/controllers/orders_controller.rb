@@ -275,7 +275,9 @@ begin
       @result['response'] = response
     end
   end
-
+  rescue Exception => e
+    @result['status'] = false
+    @result['messages'].push(e.message)
   end
     respond_to do |format|
       format.json { render json: @result}
