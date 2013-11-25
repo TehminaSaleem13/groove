@@ -151,7 +151,7 @@
                 <tr ng-repeat="product in products" >
                     <td data-header="checkbox" ><input type="checkbox" ng-model="product.checked"/></td>
                     <td data-header="name" id="{{'products_name_'+$index}}" ng-dblclick="edit_single_node($index,product.id,'name')">
-                        <a href="#showProduct" role="button" data-toggle="modal" ng-click="product_single_details(product.id)" class="ng-binding">{{product.name}}</a>
+                        <a href="#showProduct" role="button" data-toggle="modal" ng-click="product_single_details(product.id,$index)" class="ng-binding">{{product.name}}</a>
                         <div id="{{'products_name_input_'+$index}}" ng-show="products_edit_tmp.editing == $index && products_edit_tmp.editing_var == 'name'" class="tag-bubble tag-bubble-input span3 input-text">
                             <input xs-input-sync class="span3" name="{{'products_name_'+$index}}" ng-model="products_edit_tmp.name" type="text" placeholder="Edit..." />
                             <i ng-show="products_edit_tmp.editing != -1 && products_edit_tmp.name != ''" class="icon-ok" ng-click="save_single_node()"></i>
@@ -168,7 +168,6 @@
                         {{product.status}}
                         <div id="{{'products_status_input_'+$index}}" ng-show="products_edit_tmp.editing == $index && products_edit_tmp.editing_var == 'status' " class="input-text">
                             <select class="span2" name="{{'products_status_'+$index}}" ng-model="products_edit_tmp.status" ng-click="save_single_node()">
-                                <option value="" >--None--</option>
                                 <option value="active">Active</option>
                                 <option value="inactive" >Inactive</option>
                                 <option value="new">New</option>

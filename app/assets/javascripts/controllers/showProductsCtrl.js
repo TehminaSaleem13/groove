@@ -45,6 +45,7 @@ controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$routeParams', 
             }
             $http.get(url).success(function(data) {
                 if(data.status) {
+                    $scope.show_error = false;
                     $scope.new_products = (data.products.length > 0);
                     if(!next) {
                         $scope.temp.products = data.products;
@@ -64,12 +65,17 @@ controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$routeParams', 
                         }
                         $scope.products = $scope.temp.products;
                     }
+                } else {
+                    $scope.show_error = true;
+                    $scope.error_msg = "Can't load list of products";
                 }
                 $scope.can_get_products = true;
                 $timeout($scope.checkSwapNodes,20);
                 $timeout($scope.showHideField,25);
                 $scope.showHideField();
             }).error(function(data) {
+                    $scope.show_error = true;
+                    $scope.error_msg = "Can't load list of products";
                 $scope.can_get_products = true;
                 $timeout($scope.checkSwapNodes,20);
             });
@@ -136,6 +142,7 @@ controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$routeParams', 
             $scope.can_get_products = true;
             $scope.product_setup = {};
             $scope.new_products = false;
+            $scope.currently_open = 0;
             $scope.products = [];
             $scope.temp = {};
             $scope.temp.products = [];
@@ -255,7 +262,11 @@ controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$routeParams', 
                     $scope.get_products();
                 });
         }
-        $scope.product_single_details = function(id) {
+        $scope.product_single_details = function(id,index) {
+            if(typeof index !== 'undefined'){
+                $scope.currently_open = index;
+            }
+            //console.log($scope.currently_open);
             $scope.single_product = {};
             $scope.tmp = {
                 sku: "",
@@ -365,7 +376,7 @@ controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$routeParams', 
             $timeout(function() {$scope.focus_input('products_'+name+"_"+index);},10);
         }
 
-        $scope.save_single_node = function() { console.log("called");
+        $scope.save_single_node = function() {
             if($scope.products_edit_tmp.editing != -1 ) {
                 $scope.products[$scope.products_edit_tmp.editing][$scope.products_edit_tmp.editing_var] = $scope.products_edit_tmp[$scope.products_edit_tmp.editing_var];
                 $scope.update_product_list(
@@ -383,9 +394,18 @@ controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$routeParams', 
 
         $scope.update_product_list = function(obj) {
             $http.post('/products/updateproductlist.json',obj).success(function(data){
-                console.log(data);
+                if(data.status) {
+                    $scope.show_error = false;
+                    $scope.get_products();
+                } else {
+                    $scope.show_error = true;
+                    $scope.error_msg = data.error_msg;
+                    $scope.get_products();
+                }
             }).error(function(data) {
-
+                    $scope.show_error = true;
+                    $scope.error_msg = "Couldn't save product info";
+                    $scope.get_products();
             });
         }
 
@@ -536,6 +556,30 @@ controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$routeParams', 
             }
         }
 
+        $scope.keyboard_nav_event = function(event) {
+            if($('#showProduct')[0].clientHeight > 0 &&  $('#showAliasOptions')[0].clientHeight == 0) {
+                //console.log("keypress "+event.which);
+                //console.log("Product Len");
+                //console.log($scope.products.length);
+                //console.log("Current Open");
+                //console.log($scope.currently_open);
+                if(event.which == 38) {//up key
+                    if($scope.currently_open > 0) {
+                        $scope.product_single_details($scope.products[$scope.currently_open -1].id, $scope.currently_open - 1);
+                    } else {
+                        alert("Already at the top of the list");
+                    }
+                } else if(event.which == 40) { //down key
+                    if($scope.currently_open < $scope.products.length -1) {
+                        $scope.product_single_details($scope.products[$scope.currently_open + 1].id, $scope.currently_open + 1);
+                    } else {
+                        alert("Already at the bottom of the list");
+                    }
+                }
+
+            }
+        }
+
         $scope.checkSwapNodes = function() {
             var node_order_array = [];
             $('#productstbl thead tr').children('th').each(function(index){node_order_array[this.getAttribute('data-header')] = index;});
@@ -564,12 +608,7 @@ controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$routeParams', 
             update:$scope.update_single_product,
             remove:$scope.update_single_product
         };
-        $scope.tableSortOptions = {
-            start: function (event,ui) {
-                console.log(ui.item.sortable.index);
-            },
-            axis:'x'
-        }
+
         $scope.$watch('product_update_status',function() {
             if($scope.product_update_status) {
                 $("#product_update_status").fadeTo("fast",1,function() {
@@ -595,7 +634,7 @@ controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$routeParams', 
                 }
             }
         });
-
+        $('body').keydown($scope.keyboard_nav_event);
         $('.icon-question-sign').popover({trigger: 'hover focus'});
         input_text_selector = $('.input-text input');
         input_text_selector.keydown($scope.handle_key_event);
