@@ -483,7 +483,9 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
                 }
                 else
                 {
-                $scope.importorder_status = "Import failed. Please check your credentials."
+                    for (var j=0; j< data.messages.length; j++) {
+                        $scope.importorder_status += data.messages[j]+" ";
+                    }
                 }
             //$scope.importproduct_status = "Import completed";
             }).error(function(data) {
@@ -503,7 +505,9 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
                 }
                 else
                 {
-                $scope.importproduct_status = "Import failed. Please check your credentials"
+                for (var j=0; j< data.messages.length; j++) {
+                    $scope.importproduct_status += data.messages[j]+" ";
+                }
                 }
             //$scope.importproduct_status = "Import completed";
             }).error(function(data) {
