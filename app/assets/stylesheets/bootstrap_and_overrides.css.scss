@@ -308,6 +308,7 @@ background: url('/assets/sort_desc.png') no-repeat center right;
   margin:2px;
   margin-right:5px;
   padding:4px;
+  background:#fff;
 }
 .false-tag-bubble {
   border:0px;
@@ -350,4 +351,7 @@ background: url('/assets/sort_desc.png') no-repeat center right;
 #aliasproductstbl tr:hover td {
   background:#0088cc;
   color:#fff;
+}
+#productstbl th:hover, #orderstbl th:hover {
+  cursor:pointer;
 }

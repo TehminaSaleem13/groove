@@ -121,38 +121,81 @@
             <table id="productstbl" class="table table-hover table-bordered" infinite-scroll="product_next()" infinite-scroll-disabled="{{new_products}}">
                 <thead>
                 <tr>
-                    <th>
+                    <th class="span1" data-header="checkbox">
                         <input ng-model="product_setup.select_all" type="checkbox" ng-change='select_all_toggle()' />
                     </th>
-                    <th class="product_setup-sort product_setup-sort-name">
+                    <th class="span3 product_setup-sort product_setup-sort-name " data-header="name">
                         <a href="" ng-click="product_setup_opt('sort','name')">Item Name<span class="{{'caret-'+product_setup.order}}"></span></a>
                     </th>
-                    <th class="product_setup-sort product_setup-sort-sku">
+                    <th class="span2 product_setup-sort product_setup-sort-sku" data-header="sku">
                         <a href="" ng-click="product_setup_opt('sort','sku')">Sku<span class="{{'caret-'+product_setup.order}}"></span></a>
                     </th>
-                    <th class="product_setup-sort product_setup-sort-status">
+                    <th class="span1 product_setup-sort product_setup-sort-status" data-header="status">
                         <a href="" ng-click="product_setup_opt('sort','status')">Status<span class="{{'caret-'+product_setup.order}}"></span></a>
                     </th>
-                    <th class="product_setup-sort product_setup-sort-barcode">
+                    <th class="span2 product_setup-sort product_setup-sort-barcode" data-header="barcode">
                         <a href="" ng-click="product_setup_opt('sort','barcode')">Barcode<span class="{{'caret-'+product_setup.order}}"></span></a>
                     </th>
-                    <th class="product_setup-sort product_setup-sort-location_primary">
+                    <th class="span2 product_setup-sort product_setup-sort-location_primary" data-header="location">
                         <a href="" ng-click="product_setup_opt('sort','location_primary')">Location<span class="{{'caret-'+product_setup.order}}"></span></a>
                     </th>
-                    <th class="product_setup-sort product_setup-sort-store">
+                    <th class="span1 product_setup-sort product_setup-sort-store" data-header="store">
                         <a href="" ng-click="product_setup_opt('sort','store')">Store<span class="{{'caret-'+product_setup.order}}"></span></a>
+                    </th>
+                    <th class="span1" data-header="cat">
+                        Category
                     </th>
                 </tr>
                 </thead>
                 <tbody>
                 <tr ng-repeat="product in products" >
-                    <td><input type="checkbox" ng-model="product.checked"/></td>
-                    <td> <a href="#showProduct" role="button" data-toggle="modal" ng-click="product_single_details(product.id)" class="ng-binding">{{product.name}}</a></td>
-                    <td>{{product.sku}}</td>
-                    <td>{{product.status}}</td>
-                    <td>{{product.barcode}}</td>
-                    <td>{{product.location}} </td>
-                    <td>{{product.store_type}} </td>
+                    <td data-header="checkbox" ><input type="checkbox" ng-model="product.checked"/></td>
+                    <td data-header="name" id="{{'products_name_'+$index}}" ng-dblclick="edit_single_node($index,product.id,'name')">
+                        <a href="#showProduct" role="button" data-toggle="modal" ng-click="product_single_details(product.id)" class="ng-binding">{{product.name}}</a>
+                        <div id="{{'products_name_input_'+$index}}" ng-show="products_edit_tmp.editing == $index && products_edit_tmp.editing_var == 'name'" class="tag-bubble tag-bubble-input span3 input-text">
+                            <input xs-input-sync class="span3" name="{{'products_name_'+$index}}" ng-model="products_edit_tmp.name" type="text" placeholder="Edit..." />
+                            <i ng-show="products_edit_tmp.editing != -1 && products_edit_tmp.name != ''" class="icon-ok" ng-click="save_single_node()"></i>
+                        </div>
+                    </td>
+                    <td data-header="sku" id="{{'products_sku_'+$index}}" ng-dblclick="edit_single_node($index,product.id,'sku')">
+                        {{product.sku}}
+                        <div id="{{'products_sku_input_'+$index}}" ng-show="products_edit_tmp.editing == $index && products_edit_tmp.editing_var == 'sku' " class="tag-bubble tag-bubble-input span3 input-text">
+                            <input xs-input-sync class="span3" name="{{'products_sku_'+$index}}" ng-model="products_edit_tmp.sku" type="text" placeholder="Edit..." />
+                            <i ng-show="products_edit_tmp.editing != -1 && products_edit_tmp.sku != ''" class="icon-ok" ng-click="save_single_node()"></i>
+                        </div>
+                    </td>
+                    <td data-header="status" id="{{'products_status_'+$index}}" ng-dblclick="edit_single_node($index,product.id,'status')">
+                        {{product.status}}
+                        <div id="{{'products_status_input_'+$index}}" ng-show="products_edit_tmp.editing == $index && products_edit_tmp.editing_var == 'status' " class="input-text">
+                            <select class="span2" name="{{'products_status_'+$index}}" ng-model="products_edit_tmp.status" ng-click="save_single_node()">
+                                <option value="" >--None--</option>
+                                <option value="active">Active</option>
+                                <option value="inactive" >Inactive</option>
+                                <option value="new">New</option>
+                            </select>
+                        </div>
+                    </td>
+                    <td data-header="barcode" id="{{'products_barcode_'+$index}}" ng-dblclick="edit_single_node($index,product.id,'barcode')">
+                        {{product.barcode}}
+                        <div id="{{'products_barcode_input_'+$index}}" ng-show="products_edit_tmp.editing == $index && products_edit_tmp.editing_var == 'barcode' " class="tag-bubble tag-bubble-input span3 input-text">
+                            <input xs-input-sync class="span3" name="{{'products_barcode_'+$index}}" ng-model="products_edit_tmp.barcode" type="text" placeholder="Edit..." />
+                            <i ng-show="products_edit_tmp.editing != -1 && products_edit_tmp.barcode != ''" class="icon-ok" ng-click="save_single_node()"></i>
+                        </div>
+                    </td>
+                    <td data-header="location" id="{{'products_location_'+$index}}" ng-dblclick="edit_single_node($index,product.id,'location')">
+                        {{product.location}}
+                        <div id="{{'products_location_input_'+$index}}" ng-show="products_edit_tmp.editing == $index && products_edit_tmp.editing_var == 'location' " class="tag-bubble tag-bubble-input span3 input-text">
+                            <input xs-input-sync class="span3" name="{{'products_location_'+$index}}" ng-model="products_edit_tmp.location" type="text" placeholder="Edit..." />
+                            <i ng-show="products_edit_tmp.editing != -1 && products_edit_tmp.location != ''" class="icon-ok" ng-click="save_single_node()"></i>
+                        </div>
+                    </td>
+                    <td data-header="store">{{product.store_type}} </td>
+                    <td data-header="cat" id="{{'products_cat_'+$index}}" ng-dblclick="edit_single_node($index,product.id,'cat')">
+                        {{product.cat}}
+                        <div id="{{'products_cat_input_'+$index}}" ng-show="products_edit_tmp.editing == $index && products_edit_tmp.editing_var == 'cat' " class="tag-bubble tag-bubble-input span3 input-text">
+                            <input xs-input-sync class="span3" name="{{'products_cat_'+$index}}" ng-model="products_edit_tmp.cat" type="text" placeholder="Edit..." />
+                            <i ng-show="products_edit_tmp.editing != -1 && products_edit_tmp.cat != ''" class="icon-ok" ng-click="save_single_node()"></i>
+                        </div></td>
                 </tr>
                 </tbody>
             </table>
