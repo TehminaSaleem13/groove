@@ -414,14 +414,14 @@ class StoreSettingsController < ApplicationController
             if !mapping['product_type'].nil? && mapping['product_type'] > 0
               product.product_type = single_row[mapping['product_type']]
             end
-            product_inventory = ProductInventoryWarehouse.new
+            product_inventory = ProductInventoryWarehouses.new
             if !mapping['inv_wh1'].nil? && mapping['inv_wh1'] > 0
               product_inventory.qty = single_row[mapping['inv_wh1']]
             end
             if !mapping['location_primary'].nil? && mapping['location_primary'] > 0
-              product_inventory.location_primary = single_row[mapping['location_primary']]
+              product_inventory.location = single_row[mapping['location_primary']]
             end
-            product.product_inventory_warehouses << product_inventory
+            product.product_inventory_warehousess << product_inventory
             if !mapping['category_name'].nil? && mapping['category_name'] > 0
               unless single_row[mapping['category_name']].nil?
                 cats = single_row[mapping['category_name']].split(",")

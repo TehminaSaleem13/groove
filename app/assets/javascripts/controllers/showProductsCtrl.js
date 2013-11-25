@@ -341,7 +341,6 @@ controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$routeParams', 
             $scope.focus_input(name);
             $scope.tmp[name] =  $scope.single_product[prop][index][name];
             $scope.single_product[prop][index][name] = "";
-
         }
 
         $scope.focus_input = function(name){
@@ -364,11 +363,6 @@ controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$routeParams', 
             $scope.products_edit_tmp[name] = $scope.products[index][name];
             $scope.products[index][name] = "";
             $timeout(function() {$scope.focus_input('products_'+name+"_"+index);},10);
-            //$scope.focus_input('products_'+name+"-"+index);
-
-            console.log(id);
-            console.log(index);
-            console.log(name);
         }
 
         $scope.save_single_node = function() { console.log("called");
@@ -523,7 +517,6 @@ controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$routeParams', 
         });
 
         $scope.handle_key_event =  function(event) {
-            console.log(event.which);
             name = event.currentTarget.name;
             if(event.which == 13 || event.which == 188 || event.type == "focusout") {
                 event.preventDefault();

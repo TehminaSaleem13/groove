@@ -34,5 +34,5 @@ class Product < ActiveRecord::Base
   has_many :product_barcodes
   has_many :product_images
   has_many :product_kit_skus
-  has_many :product_inventory_warehouses
+  has_many :product_inventory_warehousess
 end
