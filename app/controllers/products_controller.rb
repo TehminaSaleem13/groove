@@ -718,6 +718,7 @@ class ProductsController < ApplicationController
     	@result['product']['images'] = @product.product_images
   		@result['product']['barcodes'] = @product.product_barcodes
       @result['product']['inventory_warehouses'] = @product.product_inventory_warehousess
+      @result['product']['productkitskus'] = @product.product_kit_skuss
 
   		if @product.product_skus.length > 0
   			@result['product']['pendingorders'] = Order.where(:status=>'Awaiting').where(:status=>'onhold').
@@ -733,60 +734,46 @@ class ProductsController < ApplicationController
     end
   end
 
-  def getproductkits
-	@result = Hash.new
-  	@product = Product.find(params[:id])
-
-  	if !@product.nil?
-  		@result['product'] = Hash.new
-  		@result['product']['basicinfo'] = @product
-  		@result['product']['skus'] = @product.product_skus
-  		@result['product']['cats'] = @product.product_cats
-    	@result['product']['images'] = @product.product_images
-  		@result['product']['barcodes'] = @product.product_barcodes
-      @result['product']['inventory_warehouses'] = @product.product_inventory_warehousess
-
-  		if @product.is_kit == 1
-  			@result['product']['productkitskus'] = @product.product_kit_skus
-  		end
-  		if @product.product_skus.length > 0
-  			@result['product']['pendingorders'] = Order.where(:status=>'Awaiting').where(:status=>'onhold').
-  				where(:sku=>@product.product_skus.first.sku)
-  		else
-  			@result['product']['pendingorders'] = nil
-  		end
-  	end
-
-    respond_to do |format|
-      format.html # show.html.erb
-      format.json { render json: @result }
-    end
-  end
-
-  def addskustokit
+  def addskutokit
   	@result = Hash.new
   	@result['status'] = true
+    @result['messages'] = []
 
-  	@product = Product.find(params[:id])
+  	@kit = Product.find_by_id(params[:kit_id])
 
-  	if !@product.is_kit
-  		@result['messages'].push("Product with id="+id+"is not a kit")
+  	if !@kit.is_kit
+  		@result['messages'].push("Product with id="+@kit.id+"is not a kit")
   		@result['status'] &= false
   	else
-  		if !params[:kit_skus].nil?
-	  		params[:kit_skus].each do |sku|
-	  			@productkitsku = ProductKitSku.new
-	  			@productkitsku.sku = sku.sku
-	  			@productkitsku.id = @product.id
-	  			@product.product_kit_skus << @productkitsku
-	  			if !@product.save
-			  		@result['messages'].push("Could not save kit with sku: "+sku.sku)
-			  		@result['status'] &= false
-	  			end
-	  		end
+  		if !params[:product_id].nil?
+        item = Product.find_by_id(params[:product_id])
+        if item.nil?
+          @result['messages'].push("Item does not exist")
+          @result['status'] &= false
+        else
+        @product_skus = item.product_skus
+          if @product_skus.nil?
+            @result['messages'].push("No sku found in item")
+            @result['status'] &= false
+          else
+            product_kit_sku = ProductKitSkus.find_by_sku_and_product_id(@product_skus.first.sku,@kit.id)
+            if product_kit_sku.nil?
+              @productkitsku = ProductKitSkus.new
+              @productkitsku.sku = @product_skus.first.sku
+              @kit.product_kit_skuss << @productkitsku
+              unless @kit.save
+                @result['messages'].push("Could not save kit with sku: "+@product_skus.first.sku)
+                @result['status'] &= false
+              end
+            else
+              @result['messages'].push("The sku "+@product_skus.first.sku+" has already been added to the kit")
+              @result['status'] &= false
+            end
+          end
+        end
 	  	else
-	  		@result['messages'].push("No kit Skus sent in the request")
-			@result['status'] &= false
+	  		@result['messages'].push("No item sent in the request")
+			  @result['status'] &= false
   		end 
   	end
 
@@ -796,6 +783,44 @@ class ProductsController < ApplicationController
     end
   end
 
+  def removeskusfromkit
+    @result = Hash.new
+    @result['status'] = true
+    @result['messages'] = []
+    @result['asddddd'] = []
+    @kit = Product.find_by_id(params[:kit_id])
+
+    if @kit.is_kit
+      if params[:kit_skus].nil?
+        @result['messages'].push("No sku sent in the request")
+        @result['status'] &= false
+      else
+        params[:kit_skus].reject!{|a| a==""}
+        params[:kit_skus].each do |kit_sku|
+          product_kit_sku = ProductKitSkus.find_by_sku_and_product_id(kit_sku,@kit.id)
+          if product_kit_sku.nil?
+            @result['messages'].push("Sku "+kit_sku+" not found in item")
+            @result['status'] &= false
+          else
+            @result["asddddd"].push( product_kit_sku);
+              unless product_kit_sku.destroy
+                @result['messages'].push("sku "+kit_sku+"could not be removed fron kit")
+                @result['status'] &= false
+              end
+
+          end
+        end
+      end
+    else
+      @result['messages'].push("Product with id="+@kit.id+"is not a kit")
+      @result['status'] &= false
+    end
+
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json: @result }
+    end
+  end
   def updateproduct
   	@result = Hash.new
   	@product = Product.find(params[:basicinfo][:id])

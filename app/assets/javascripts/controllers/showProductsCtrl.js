@@ -268,6 +268,7 @@ controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$routeParams', 
             }
             //console.log($scope.currently_open);
             $scope.single_product = {};
+            $scope.selected_skus = [];
             $scope.tmp = {
                 sku: "",
                 barcode: "",
@@ -301,7 +302,7 @@ controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$routeParams', 
                     }
                     $('#showProduct').modal('show');
                 }
-                //console.log($scope.single_product);
+               // console.log($scope.single_product);
             }).error(function(data) {
 
                 });
@@ -396,6 +397,7 @@ controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$routeParams', 
             $http.post('/products/updateproductlist.json',obj).success(function(data){
                 if(data.status) {
                     $scope.show_error = false;
+                    $scope.show_error_msgs = false;
                     $scope.get_products();
                 } else {
                     $scope.show_error = true;
@@ -446,6 +448,7 @@ controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$routeParams', 
             $http.post('/products/updateproduct.json', $scope.single_product).success(function(data) {
                 if(data.status) {
                     $scope.product_update_status = true;
+                    $scope.show_error_msgs = false;
                     $scope.product_update_message = "Successfully Updated";
                 } else {
                     $scope.show_error_msgs = true;
@@ -466,15 +469,17 @@ controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$routeParams', 
         $scope.add_alias_product = function(id) {
             if(confirm("Are you sure? This can not be undone!")) {
                 if($scope.single_product.basicinfo.is_kit) {
-                    $http.post("products/addproducttokit.json",{product_id: id , kit_id: $scope.single_product.basicinfo.id}).success(
+                    $http.post("/products/addskutokit.json",{product_id: id , kit_id: $scope.single_product.basicinfo.id}).success(
                         function(data) {
+                            //console.log(data);
                             if(data.status) {
                                 $scope.product_update_status = true;
+                                $scope.show_error_msgs = false;
                                 $scope.product_update_message = "Successfully Added";
                                 $scope.product_single_details($scope.single_product.basicinfo.id);
                             } else {
                                 $scope.show_error_msgs = true;
-                                $scope.error_msgs = ["Some error Occurred"];
+                                $scope.error_msgs = data.messages;
                             }
                         }
                     ).error(function(data){
@@ -487,6 +492,7 @@ controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$routeParams', 
                         function(data) {
                             if(data.status) {
                                 $scope.product_update_status = true;
+                                $scope.show_error_msgs = false;
                                 $scope.product_update_message = "Successfully Updated";
                                 $scope.product_single_details(id);
                             } else {
@@ -501,6 +507,39 @@ controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$routeParams', 
                 }
             }
             $('#showAliasOptions').modal("hide");
+        }
+        $scope.select_deselect_kit_sku = function(sku,index){
+            var array_position = $scope.selected_skus.indexOf(sku);
+            $(".kit_sku").removeClass("info");
+            if(array_position > -1) {
+                $scope.selected_skus[index] = "";
+            } else {
+                $scope.selected_skus[index] = sku;
+            }
+            //console.log($scope.selected_skus);
+            for(i in $scope.selected_skus) {
+                if($scope.selected_skus[i] !=="") {
+                    $(".kit_sku_"+i).addClass("info");
+                }
+            }
+        }
+        $scope.remove_skus_from_kit = function () {
+
+            $http.post('/products/removeskusfromkit.json',{kit_id: $scope.single_product.basicinfo.id, kit_skus: $scope.selected_skus }).success(function(data){
+                if(data.status) {
+                    $scope.product_update_status = true;
+                    $scope.show_error_msgs = false;
+                    $scope.product_update_message = "Successfully Removed";
+                    $scope.product_single_details($scope.single_product.basicinfo.id);
+                } else {
+                    $scope.show_error_msgs = true;
+                    $scope.error_msgs = data.messages;
+                }
+            }).error(function(data){
+                    $scope.show_error_msgs = true;
+                    $scope.error_msgs = ["Some error Occurred"];
+            });
+
         }
         $scope.$on("fileSelected", function (event, args) {
             $("input[type='file']").val('');
@@ -606,7 +645,8 @@ controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$routeParams', 
         $('#productstbl').dragtable({dragaccept:'.product_setup-sort',clickDelay:250});
         $scope.sortableOptions = {
             update:$scope.update_single_product,
-            remove:$scope.update_single_product
+            remove:$scope.update_single_product,
+            axis: 'x'
         };
 
         $scope.$watch('product_update_status',function() {
