@@ -1113,21 +1113,26 @@ class ProductsController < ApplicationController
   def addimage
   	@result = Hash.new
   	@result['status'] = true
+  	@result['messages'] = []
 
-  	@product = Product.find(params[:id])
-  	if !@product.nil? && params[:image] .nil?
+  	@product = Product.find(params[:product_id])
+  	if !@product.nil? && !params[:product_image].nil?
 	  	@image = ProductImage.new
-	  	@image.image = params[:image]
+        
+        csv_directory = "public/images"
+        file_name = Time.now.to_s+params[:product_image].original_filename
+        path = File.join(csv_directory, file_name )
+        File.open(path, "wb") { |f| f.write(params[:product_image].read) }
+       	@image.image = "/images/"+file_name
 	  	@image.caption = params[:caption] if !params[:caption].nil?
 	  	@product.product_images << @image
-
 	  	if !@product.save
 	  		@result['status'] = false
 	  		@result['messages'].push("Adding image failed")
 	  	end
 	else
 	  	@result['status'] = false
-	  	@result['messages'].push("Invalid data sent to server")		
+	  	@result['messages'].push("Invalid data sent to the server")		
 	end
   	respond_to do |format|
       format.html # show.html.erb
