@@ -62,31 +62,31 @@
             <table id="orderstbl" class="table table-hover table-bordered" infinite-scroll="order_next()">
                 <thead>
                 <tr>
-                    <th>
+                    <th class="span1" data-header="checkbox">
                         <input ng-model="order_setup.select_all" type="checkbox" ng-change='select_all_toggle()' />
                     </th>
-                    <th>
+                    <th class="span1 order_setup-sort" data-header="tags">
                         Tags
                     </th>
-                    <th class="order_setup-sort order_setup-sort-store">
+                    <th class="order_setup-sort order_setup-sort-store span1" data-header="store_name">
                         <a href="" ng-click="order_setup_opt('sort','store')">Store<span class="{{'caret-'+order_setup.order}}"></span></a>
                     </th>
-                    <th class="order_setup-sort order_setup-sort-notes">
+                    <th class="order_setup-sort order_setup-sort-notes span1" data-header="notes">
                         <a href="" ng-click="order_setup_opt('sort','notes')">Notes<span class="{{'caret-'+order_setup.order}}"></span></a>
                     </th>
-                    <th class="order_setup-sort order_setup-sort-store_order_id">
+                    <th class="order_setup-sort order_setup-sort-store_order_id span2" data-header="ordernum">
                         <a href="" ng-click="order_setup_opt('sort','store_order_id')">Order #<span class="{{'caret-'+order_setup.order}}"></span></a>
                     </th>
-                    <th class="order_setup-sort order_setup-sort-order_date">
+                    <th class="order_setup-sort order_setup-sort-order_date span2" data-header="orderdate">
                         <a href="" ng-click="order_setup_opt('sort','order_date')">Order Date<span class="{{'caret-'+order_setup.order}}"></span></a>
                     </th>
-                    <th class="order_setup-sort order_setup-sort-items">
+                    <th class="order_setup-sort order_setup-sort-items span1" data-header="itemslength">
                         <a href="" ng-click="order_setup_opt('sort','items')">Items<span class="{{'caret-'+order_setup.order}}"></span></a>
                     </th>
-                    <th class="order_setup-sort order_setup-sort-recipient">
+                    <th class="order_setup-sort order_setup-sort-recipient span2" data-header="recipient">
                         <a href="" ng-click="order_setup_opt('sort','recipient')">Recipient<span class="{{'caret-'+order_setup.order}}"></span></a>
                     </th>
-                    <th class="order_setup-sort order_setup-sort-status">
+                    <th class="order_setup-sort order_setup-sort-status span1" data-header="status">
                         <a href="" ng-click="order_setup_opt('sort','status')">Status<span class="{{'caret-'+order_setup.order}}"></span></a>
                     </th>
 
@@ -94,15 +94,53 @@
                 </thead>
                 <tbody>
                 <tr ng-repeat="order in orders">
-                    <td><input type="checkbox" ng-model="order.checked"/></td>
-                    <td></td>
-                    <td>{{order.store_name}}</td>
-                    <td>{{order.notes}}</td>
-                    <td><a href="#showOrder" role="button" data-toggle="modal" ng-click="order_single_details(order.id)" class="ng-binding">{{order.ordernum}}</a></td>
-                    <td>{{order.orderdate | date:'EEEE MM/dd/yyyy hh:mm:ss a'}}</td>
-                    <td>{{order.itemslength}}</td>
-                    <td>{{order.recipient}}</td>
-                    <td>{{order.status}}</td>
+                    <td data-header="checkbox"><input type="checkbox" ng-model="order.checked"/></td>
+                    <td data-header="tags"></td>
+                    <td data-header="store_name">
+                        {{order.store_name}}
+                    </td>
+                    <td data-header="notes" id="{{'orders_notes_'+$index}}" ng-dblclick="edit_single_node($index,order.id,'notes')">
+                        {{order.notes}}
+                        <div id="{{'orders_notes_input_'+$index}}" ng-show="orders_edit_tmp.editing == $index && orders_edit_tmp.editing_var == 'notes'" class="tag-bubble tag-bubble-input span3 input-text">
+                            <input xs-input-sync class="span3" name="{{'orders_notes_'+$index}}" ng-model="orders_edit_tmp.notes" type="text" placeholder="Edit..." />
+                            <i ng-show="orders_edit_tmp.editing != -1" class="icon-ok" ng-click="save_single_node()"></i>
+                        </div>
+                    </td>
+                    <td data-header="ordernum" id="{{'orders_ordernum_'+$index}}" ng-dblclick="edit_single_node($index,order.id,'ordernum')">
+                        <a href="#showOrder" role="button" data-toggle="modal" ng-click="order_single_details(order.id,$index)" class="ng-binding">{{order.ordernum}}</a>
+                        <div id="{{'orders_ordernum_input_'+$index}}" ng-show="orders_edit_tmp.editing == $index && orders_edit_tmp.editing_var == 'ordernum'" class="tag-bubble tag-bubble-input span3 input-text">
+                            <input xs-input-sync class="span3" name="{{'orders_ordernum_'+$index}}" ng-model="orders_edit_tmp.ordernum" type="text" placeholder="Edit..." />
+                            <i ng-show="orders_edit_tmp.editing != -1 && orders_edit_tmp.ordernum != ''" class="icon-ok" ng-click="save_single_node()"></i>
+                        </div>
+                    </td>
+                    <td data-header="orderdate" id="{{'orders_orderdate_'+$index}}" ng-dblclick="edit_single_node($index,order.id,'orderdate')">
+                        {{order.orderdate | date:'EEEE MM/dd/yyyy hh:mm:ss a'}}
+                        <div id="{{'orders_orderdate_input_'+$index}}" ng-show="orders_edit_tmp.editing == $index && orders_edit_tmp.editing_var == 'orderdate'" class="tag-bubble tag-bubble-input span3 input-text">
+                            <input xs-input-sync class="span3" name="{{'orders_orderdate_'+$index}}" ng-model="orders_edit_tmp.orderdate" type="text" placeholder="Edit..." />
+                            <i ng-show="orders_edit_tmp.editing != -1" class="icon-ok" ng-click="save_single_node()"></i>
+                        </div>
+                    </td>
+                    <td data-header="itemslength">
+                        {{order.itemslength}}
+                    </td>
+                    <td data-header="recipient" id="{{'orders_recipient_'+$index}}" ng-dblclick="edit_single_node($index,order.id,'recipient')">
+                        {{order.recipient}}
+                        <div id="{{'orders_recipient_input_'+$index}}" ng-show="orders_edit_tmp.editing == $index && orders_edit_tmp.editing_var == 'recipient'" class="tag-bubble tag-bubble-input span3 input-text">
+                            <input xs-input-sync class="span3" name="{{'orders_recipient_'+$index}}" ng-model="orders_edit_tmp.recipient" type="text" placeholder="Edit..." />
+                            <i ng-show="orders_edit_tmp.editing != -1" class="icon-ok" ng-click="save_single_node()"></i>
+                        </div>
+                    </td>
+                    <td data-header="status" id="{{'orders_status_'+$index}}" ng-dblclick="edit_single_node($index,order.id,'status')">
+                        {{order.status}}
+                        <div id="{{'orders_status_input_'+$index}}" ng-show="orders_edit_tmp.editing == $index && orders_edit_tmp.editing_var == 'status' " class="input-text">
+                            <select class="span2" name="{{'orders_status_'+$index}}" ng-model="orders_edit_tmp.status" ng-click="save_single_node()">
+                                <option value="awaiting">Awaiting</option>
+                                <option value="onhold" >On Hold</option>
+                                <option value="cancelled">Cancelled</option>
+                                <option value="scanned">Scanned</option>
+                            </select>
+                        </div>
+                    </td>
                 </tr>
                 </tbody>
             </table>
@@ -273,7 +311,7 @@
                                 <tbody>
                                 <tr ng-repeat="item in single_order.items" ng-click="item.checked = !item.checked">
                                     <td><input type="checkbox" ng-model="item.checked"/></td>
-                                    <td>{{ item.productinfo.name }}</td>
+                                    <td>{{ item.iteminfo.name }}</td>
                                     <td> <div class="single-image"><img class="img-thumb" ng-src="{{item.productimages[0].image}}" /></div></td>
                                     <td>{{item.iteminfo.sku}}</td>
                                     <td>{{item.productinfo.alternate_location}}</td>

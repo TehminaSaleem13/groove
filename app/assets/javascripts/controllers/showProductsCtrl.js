@@ -20,7 +20,7 @@ controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$routeParams', 
             };
             $scope.can_get_products = false;
             next = typeof next !== 'undefined' ? next : false;
-            alias = ($scope.trigger_alias || $('#showAliasOptions')[0].clientHeight > 0) ? true : false;
+            alias = ($scope.trigger_alias || $('#showAliasOptions').hasClass("in")) ? true : false;
             $scope.trigger_alias = false;
             if(alias) {
                 $scope.temp.alias = true;
@@ -113,7 +113,7 @@ controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$routeParams', 
         }
 
         $scope.product_next = function() {
-            alias = ($('#showAliasOptions')[0].clientHeight > 0)?  true: false;
+            alias = ($('#showAliasOptions').hasClass("in"))?  true: false;
             if(alias) {
                 $scope.alias.product_setup.offset = $scope.alias.product_setup.offset + $scope.alias.product_setup.limit;
             } else {
@@ -596,7 +596,7 @@ controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$routeParams', 
         }
 
         $scope.keyboard_nav_event = function(event) {
-            if($('#showProduct')[0].clientHeight > 0 &&  $('#showAliasOptions')[0].clientHeight == 0) {
+            if($('#showProduct').hasClass("in") &&  !$('#showAliasOptions').hasClass("in")) {
                 //console.log("keypress "+event.which);
                 //console.log("Product Len");
                 //console.log($scope.products.length);
