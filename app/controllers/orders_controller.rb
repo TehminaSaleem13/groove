@@ -149,7 +149,7 @@ begin
 
       seller_list =@eBay.GetSellerTransactions(:orderRole=> 'Seller', :orderStatus=>'Paid', 
         :createTimeFrom=> (Date.today - 3.months).to_datetime,
-         :createTimeTo =>(Date.today + 1.day).to_datetime)
+         :createTimeTo =>(Date.today + 1.day).to_datetime, :detailLevel=>'ReturnAll')
       if (seller_list.transactionArray != nil)
         @result['total_imported']  = seller_list.transactionArray.size
       #@result['seller_list'] = seller_list.transactionArray

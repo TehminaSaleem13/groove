@@ -483,6 +483,7 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
                 }
                 else
                 {
+                    $scope.importorder_status = "";
                     for (var j=0; j< data.messages.length; j++) {
                         $scope.importorder_status += data.messages[j]+" ";
                     }
@@ -505,6 +506,7 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
                 }
                 else
                 {
+                $scope.importproduct_status = "";
                 for (var j=0; j< data.messages.length; j++) {
                     $scope.importproduct_status += data.messages[j]+" ";
                 }
