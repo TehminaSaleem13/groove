@@ -6,6 +6,19 @@ groovepacks_controllers.
             });
             $('.modal-backdrop').remove();
             $scope.get_orders = function(next) {
+                $scope.orders_edit_tmp = {
+                    tags:"",
+                    store_name: "",
+                    notes:"",
+                    ordernum:"",
+                    orderdate:"",
+                    itemslength:"",
+                    recipient:"",
+                    status:"",
+                    editing:-1,
+                    editing_var: "",
+                    editing_id:""
+                };
                 next = typeof next !== 'undefined' ? next : false;
                 if(!next) {
                     $scope.order_setup.limit = 10;
@@ -22,9 +35,12 @@ groovepacks_controllers.
                             }
                         }
                         //console.log($scope.orders);
+                        $timeout($scope.checkSwapNodes,20);
+                        $timeout($scope.showHideField,25);
                     }
                 }).error(function(data) {
-
+                        $timeout($scope.checkSwapNodes,20);
+                        $timeout($scope.showHideField,25);
                     });
             }
             $scope.order_setup_opt = function(type,value) {
@@ -70,6 +86,7 @@ groovepacks_controllers.
             $scope.set_defaults = function() {
                 $scope.order_setup = {};
                 $scope.orders = [];
+                $scope.currently_open = 0;
                 $scope.order_setup.sort = "updated_at";
                 $scope.order_setup.order = "DESC";
                 $scope.order_setup.filter = "awaiting";
@@ -188,9 +205,12 @@ groovepacks_controllers.
                     });
             }
 
-            $scope.order_single_details = function(id) {
+            $scope.order_single_details = function(id,index) {
+                if(typeof index !== 'undefined'){
+                    $scope.currently_open = index;
+                }
                 $http.get('/orders/getdetails.json?id='+id).success(function(data) {
-                    console.log(data.order);
+                    //console.log(data.order);
                     if(data.status) {
                         $scope.single_order = data.order;
                     }
@@ -309,7 +329,6 @@ groovepacks_controllers.
 
             $scope.add_item_order = function(id) {
                 if(confirm("Are you sure?")) {
-
                         $http.post("orders/additemtoorder.json",{productid: id , id: $scope.single_order.basicinfo.id}).success(
                             function(data) {
                                 if(data.status) {
@@ -330,6 +349,88 @@ groovepacks_controllers.
                 }
                 $('#addItem').modal("hide");
             }
+            $scope.focus_input = function(name){
+                $(".input-text [name='"+name+"']").focus();
+            }
+            $scope.edit_single_node = function(index,id,name) {
+                $scope.save_single_node();
+                $scope.orders_edit_tmp.editing_var = name;
+                $scope.orders_edit_tmp.editing = index;
+                $scope.orders_edit_tmp.editing_id = id;
+                $scope.orders_edit_tmp[name] = $scope.orders[index][name];
+                $scope.orders[index][name] = "";
+                $timeout(function() {$scope.focus_input('orders_'+name+"_"+index);},10);
+            }
+
+            $scope.save_single_node = function() {
+                if($scope.orders_edit_tmp.editing != -1 ) {
+                    $scope.orders[$scope.orders_edit_tmp.editing][$scope.orders_edit_tmp.editing_var] = $scope.orders_edit_tmp[$scope.orders_edit_tmp.editing_var];
+                    $scope.update_order_list(
+                        {
+                            id: $scope.orders_edit_tmp.editing_id,
+                            var:$scope.orders_edit_tmp.editing_var,
+                            value: $scope.orders[$scope.orders_edit_tmp.editing][$scope.orders_edit_tmp.editing_var]
+                        }
+                    );
+                }
+                $scope.orders_edit_tmp.editing_var = "";
+                $scope.orders_edit_tmp.editing = -1;
+                $scope.orders_edit_tmp.editing_id = -1;
+            }
+
+            $scope.update_order_list = function(obj) {
+                $http.post('/orders/updateorderlist.json',obj).success(function(data){
+                    console.log(data);
+                    if(data.status) {
+                        $scope.show_error = false;
+                        $scope.show_error_msgs = false;
+                        $scope.get_orders();
+                    } else {
+                        $scope.show_error = true;
+                        $scope.error_msg = data.error_msg;
+                        $scope.get_orders();
+                    }
+                }).error(function(data) {
+                        $scope.show_error = true;
+                        $scope.error_msg = "Couldn't save Order info";
+                        $scope.get_orders();
+                    });
+            }
+
+            $scope.all_fields = {
+                tags:{name:"<i class='icon icon-ok'></i> Tags", className:"rt_field_tags"},
+                store_name: {name:"<i class='icon icon-ok'></i> Store Name", className:"rt_field_store_name"},
+                notes:{name:"<i class='icon icon-ok'></i> Notes", className:"rt_field_notes"},
+                order_date:{name:"<i class='icon icon-ok'></i> Order Date", className:"rt_field_orderdate"},
+                itemslength:{name:"<i class='icon icon-ok'></i> Items Length", className:"rt_field_itemslength"},
+                recipient:{name:"<i class='icon icon-ok'></i> Recipient", className:"rt_field_recipient"},
+                status:{name:"<i class='icon icon-ok'></i> Status", className:"rt_field_status"}
+            };
+            $scope.shown_fields = ["checkbox","ordernum","tags","store_name","notes","orderdate","itemslength","recipient","status"];
+
+            $scope.showHideField = function(key,options) {
+                $(".context-menu-item i").removeClass("icon-ok").addClass("icon-remove");
+                $("#orderstbl th, #orderstbl td").hide();
+                var array_position = $scope.shown_fields.indexOf(key);
+                if(array_position > -1) {
+                    $scope.shown_fields.splice( array_position, 1 );
+                } else {
+                    $scope.shown_fields.push(key);
+                }
+                for (i in $scope.shown_fields) {
+                    $(".rt_field_"+$scope.shown_fields[i]+" i").removeClass("icon-remove").addClass("icon-ok");
+                    $("[data-header='"+$scope.shown_fields[i]+"']").show();
+                }
+            }
+
+            $.contextMenu({
+                // define which elements trigger this menu
+                selector: "#orderstbl thead",
+                // define the elements of the menu
+                items: $scope.all_fields,
+                // there's more, have a look at the demos and docs...
+                callback: $scope.showHideField
+            });
             $scope.update_single_order = function() {
                 order_data = {};
                 for(i in $scope.single_order.basicinfo) {
@@ -350,7 +451,68 @@ groovepacks_controllers.
                 });
             }
 
+            $scope.keyboard_nav_event = function(event) {
+                if($('#showOrder').hasClass("in") &&  !$('#addItem').hasClass("in")) {
+                    if(event.which == 38) {//up key
+                        if($scope.currently_open > 0) {
+                            $scope.order_single_details($scope.orders[$scope.currently_open -1].id, $scope.currently_open - 1);
+                        } else {
+                            alert("Already at the top of the list");
+                        }
+                    } else if(event.which == 40) { //down key
+                        if($scope.currently_open < $scope.orders.length -1) {
+                            $scope.order_single_details($scope.orders[$scope.currently_open + 1].id, $scope.currently_open + 1);
+                        } else {
+                            alert("Already at the bottom of the list");
+                        }
+                    } else {
+                        //Horizontal movement
+                        var mytab = $("#myTab li");
+                        var count = mytab.length;
+                        var active_index = $("#myTab li.active").index();
+                        var next_index = 1;
+                        var prev_index = count;
+
+                        if(event.which == 39) { //right key
+                            if(active_index+1 < count) {
+                                next_index = active_index+2;
+                            }
+                            $("#myTab li:nth-child("+next_index+") a").click();
+                        } else if(event.which == 37) { //left key
+
+                            if(active_index > 0) {
+                                prev_index = active_index;
+                            }
+                            $("#myTab li:nth-child("+prev_index+") a").click();
+                        }
+                    }
+
+                }
+            }
+
+            $scope.checkSwapNodes = function() {
+                var node_order_array = [];
+                $('#orderstbl thead tr').children('th').each(function(index){node_order_array[this.getAttribute('data-header')] = index;});
+                $('#orderstbl tbody tr ').each(
+                    function(index){
+                        var children = this.children;
+                        for (i=0; i <children.length; i++) {
+                            if( node_order_array[children[i].getAttribute('data-header')] != i) {
+                                $scope.doRealSwap(children[i],children[node_order_array[children[i].getAttribute('data-header')]]);
+                            }
+                        }
+                    }
+                );
+            }
+            $scope.doRealSwap = function swapNodes(a, b) {
+                var aparent = a.parentNode;
+                var asibling = a.nextSibling === b ? a : a.nextSibling;
+                b.parentNode.insertBefore(a, b);
+                aparent.insertBefore(b, asibling);
+            }
+
             $scope.set_defaults();
+            $('#orderstbl').dragtable({dragaccept:'.order_setup-sort',clickDelay:250});
             $scope.$watch('product_setup.search',function() {
                 if($scope.can_get_products) {
                     $scope.get_products();
@@ -358,7 +520,7 @@ groovepacks_controllers.
                     $scope.do_get_products = true;
                 }
             });
-
+            $('body').keydown($scope.keyboard_nav_event);
             $scope.$watch('do_get_products',function() {
                 if($scope.do_get_products) {
                     $scope.get_products();

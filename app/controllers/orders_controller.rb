@@ -602,10 +602,7 @@ begin
         @orderitem['iteminfo'] = orderitem
         productsku = ProductSku.where(:sku => orderitem.sku)
         if productsku.length > 0
-           @products = Product.where(:id => productsku.first.product_id)
-           if @products.length > 0
-            @orderitem['productinfo'] =@products.first
-           end
+          @orderitem['productinfo'] = Product.find_by_id(productsku.first.product_id)
           @orderitem['productimages'] = ProductImage.where(:product_id=>productsku.first.product_id)
         else
           @orderitem['productinfo'] = nil
@@ -702,6 +699,7 @@ begin
     @skus = ProductSku.where(:product_id=>@product.id).where(:purpose=>'primary')
     if @skus.length > 0
       @orderitem = OrderItem.new
+      @orderitem.name = @product.name
       @orderitem.price = params[:price]
       @orderitem.qty = params[:qty]
       @orderitem.row_total = params[:price].to_f * params[:qty].to_f
@@ -746,5 +744,43 @@ begin
       format.json { render json: @result }
     end
   end
-  
+
+  def updateorderlist
+    @result = Hash.new
+    @result['status'] = true
+    @order = Order.find_by_id(params[:id])
+    if @order.nil?
+      @result['status'] = false
+      @result['error_msg'] = "Cannot find Order"
+    else
+      accepted_data = {
+          "ordernum" => "increment_id",
+          "orderdate" => "order_placed_time",
+          "recipient" => 1,
+          "notes" => "notes_internal",
+          "status" => "status"
+      }
+      if accepted_data.has_key?(params[:var])
+        if params[:var] == "recipient"
+          arr = params[:value].blank? ? [] : params[:value].split(" ")
+          @order.lastname = arr.pop()
+          @order.firstname = arr.join(" ")
+        else
+          key = accepted_data[params[:var]]
+          @order[key] = params[:value]
+        end
+        unless @order.save
+          @result['status'] &= false
+          @result['error_msg'] = "Could not save order info"
+        end
+      else
+        @result['status'] &= false
+        @result['error_msg'] = "Unknown field"
+      end
+    end
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json: @result }
+    end
+  end
 end

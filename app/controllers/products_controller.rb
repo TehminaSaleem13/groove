@@ -506,29 +506,34 @@ class ProductsController < ApplicationController
 		@product_hash['id'] = product.id
 		@product_hash['name'] = product.name
 		@product_hash['status'] = product.status
-		
-		@inv_whs = ProductInventoryWarehouses.where(:product_id=>product.id)
-		@product_hash['inventory_warehouses'] = @inv_whs
+    @product_hash['location'] = ""
+    @product_hash['barcode'] = ""
+    @product_hash['sku'] = ""
+    @product_hash['cat'] = ""
 
-		@product_barcodes = ProductBarcode.where(:product_id=>product.id)
-		@product_barcodes.each do |barcode|
-			@product_hash['barcode'] = barcode.barcode
-		end
-		
-		@product_skus = ProductSku.where(:product_id=>product.id)
-		@product_skus.each do |sku|
-			@product_hash['sku'] = sku.sku
-		end
-		
-		@product_cats = ProductCat.where(:product_id=>product.id)
-		@product_cats.each do |cat|
-			@product_hash['cat'] = cat.category
-		end
+    @product_location = product.product_inventory_warehousess.first
+    unless @product_location.nil?
+      @product_hash['location'] = @product_location.location
+    end
 
-		@store = Store.find(product.store_id)
-		if !@store.nil?		
-			@product_hash['store_type'] = @store.store_type
-		end
+    @product_barcode = product.product_barcodes.first
+    unless @product_barcode.nil?
+      @product_hash['barcode'] = @product_barcode.barcode
+    end
+
+    @product_sku = product.product_skus.first
+    unless @product_sku.nil?
+      @product_hash['sku'] = @product_sku.sku
+    end
+
+    @product_cat = product.product_cats.first
+    unless @product_cat.nil?
+      @product_hash['cat'] = @product_cat.category
+    end
+    unless product.store.nil?
+      @product_hash['store_type'] = product.store.store_type
+    end
+
 		@product_kit_skus = ProductKitSkus.where(:product_id=>product.id)
 		if @product_kit_skus.length > 0
 			@product_hash['productkitskus'] = []
@@ -629,8 +634,7 @@ class ProductsController < ApplicationController
 		search = params[:search]
 		
 		#todo: include sku in search as well in future.
-		@products = Product.find_by_sql("SELECT * from products WHERE name like '%"+search+"%' OR
-										barcode like '%"+search+"%'  LIMIT #{limit}
+		@products = Product.find_by_sql("SELECT * from products WHERE name like '%"+search+"%'  LIMIT #{limit}
 										OFFSET #{offset}")
 		@products_result = []
 
@@ -639,24 +643,26 @@ class ProductsController < ApplicationController
 		@product_hash['id'] = product.id
 		@product_hash['name'] = product.name
 		@product_hash['status'] = product.status
+    if product.product_inventory_warehousess.length > 0
+      @product_hash['location'] = product.product_inventory_warehousess.first.location
+    else
+      @product_hash['location'] = ''
+    end
 
-		@inv_whs = ProductInventoryWarehouses.where(:product_id=>product.id)
-		@product_hash["inventory_warehouses"] = @inv_whs
-
-	    if product.product_barcodes.length > 0
-	      @product_hash['barcode'] = product.product_barcodes.first.barcode
-	    else
-	      @product_hash['barcode'] = 'not_available'
-	    end
+    if product.product_barcodes.length > 0
+      @product_hash['barcode'] = product.product_barcodes.first.barcode
+    else
+      @product_hash['barcode'] = ''
+    end
 		if product.product_skus.length > 0
 			@product_hash['sku'] = product.product_skus.first.sku
 		else
-			@product_hash['sku'] = 'not_available'
+			@product_hash['sku'] = ''
 		end
 		if product.product_cats.length > 0
 			@product_hash['cat'] = product.product_cats.first.category
 		else
-			@product_hash['cat'] = 'not_available'
+			@product_hash['cat'] = ''
 		end
 		@product_hash['store_type'] = product.store.store_type
 
@@ -711,9 +717,8 @@ class ProductsController < ApplicationController
   		@result['product']['cats'] = @product.product_cats
     	@result['product']['images'] = @product.product_images
   		@result['product']['barcodes'] = @product.product_barcodes
-		
-		@inv_whs = ProductInventoryWarehouses.where(:product_id=>@product.id)
-		@result['product']['inventory_warehouses'] = @inv_whs
+      @result['product']['inventory_warehouses'] = @product.product_inventory_warehousess
+      @result['product']['productkitskus'] = @product.product_kit_skuss
 
   		if @product.product_skus.length > 0
   			@result['product']['pendingorders'] = Order.where(:status=>'Awaiting').where(:status=>'onhold').
@@ -729,62 +734,46 @@ class ProductsController < ApplicationController
     end
   end
 
-  def getproductkits
-	@result = Hash.new
-  	@product = Product.find(params[:id])
-
-  	if !@product.nil?
-  		@result['product'] = Hash.new
-  		@result['product']['basicinfo'] = @product
-  		@result['product']['skus'] = @product.product_skus
-  		@result['product']['cats'] = @product.product_cats
-    	@result['product']['images'] = @product.product_images
-  		@result['product']['barcodes'] = @product.product_barcodes
-		
-		@inv_whs = ProductInventoryWarehouses.where(:product_id=>@product.id)
-		@result['product']['inventory_warehouses'] = @inv_whs
-
-  		if @product.is_kit == 1
-  			@result['product']['productkitskus'] = @product.product_kit_skus
-  		end
-  		if @product.product_skus.length > 0
-  			@result['product']['pendingorders'] = Order.where(:status=>'Awaiting').where(:status=>'onhold').
-  				where(:sku=>@product.product_skus.first.sku)
-  		else
-  			@result['product']['pendingorders'] = nil
-  		end
-  	end
-
-    respond_to do |format|
-      format.html # show.html.erb
-      format.json { render json: @result }
-    end
-  end
-
-  def addskustokit
+  def addskutokit
   	@result = Hash.new
   	@result['status'] = true
+    @result['messages'] = []
 
-  	@product = Product.find(params[:id])
+  	@kit = Product.find_by_id(params[:kit_id])
 
-  	if !@product.is_kit
-  		@result['messages'].push("Product with id="+id+"is not a kit")
+  	if !@kit.is_kit
+  		@result['messages'].push("Product with id="+@kit.id+"is not a kit")
   		@result['status'] &= false
   	else
-  		if !params[:kit_skus].nil?
-	  		params[:kit_skus].each do |sku|
-	  			@productkitsku = ProductKitSku.new
-	  			@productkitsku.sku = sku.sku
-	  			@productkitsku.id = @product.id
-	  			@product.product_kit_skus << @productkitsku
-	  			if !@product.save
-			  		@result['messages'].push("Could not save kit with sku: "+sku.sku)
-			  		@result['status'] &= false
-	  			end
-	  		end
+  		if !params[:product_id].nil?
+        item = Product.find_by_id(params[:product_id])
+        if item.nil?
+          @result['messages'].push("Item does not exist")
+          @result['status'] &= false
+        else
+        @product_skus = item.product_skus
+          if @product_skus.nil?
+            @result['messages'].push("No sku found in item")
+            @result['status'] &= false
+          else
+            product_kit_sku = ProductKitSkus.find_by_sku_and_product_id(@product_skus.first.sku,@kit.id)
+            if product_kit_sku.nil?
+              @productkitsku = ProductKitSkus.new
+              @productkitsku.sku = @product_skus.first.sku
+              @kit.product_kit_skuss << @productkitsku
+              unless @kit.save
+                @result['messages'].push("Could not save kit with sku: "+@product_skus.first.sku)
+                @result['status'] &= false
+              end
+            else
+              @result['messages'].push("The sku "+@product_skus.first.sku+" has already been added to the kit")
+              @result['status'] &= false
+            end
+          end
+        end
 	  	else
-	  		@result['messages'].push("No kit Skus sent in the request")
-			@result['status'] &= false
+	  		@result['messages'].push("No item sent in the request")
+			  @result['status'] &= false
   		end 
   	end
 
@@ -794,6 +783,44 @@ class ProductsController < ApplicationController
     end
   end
 
+  def removeskusfromkit
+    @result = Hash.new
+    @result['status'] = true
+    @result['messages'] = []
+    @result['asddddd'] = []
+    @kit = Product.find_by_id(params[:kit_id])
+
+    if @kit.is_kit
+      if params[:kit_skus].nil?
+        @result['messages'].push("No sku sent in the request")
+        @result['status'] &= false
+      else
+        params[:kit_skus].reject!{|a| a==""}
+        params[:kit_skus].each do |kit_sku|
+          product_kit_sku = ProductKitSkus.find_by_sku_and_product_id(kit_sku,@kit.id)
+          if product_kit_sku.nil?
+            @result['messages'].push("Sku "+kit_sku+" not found in item")
+            @result['status'] &= false
+          else
+            @result["asddddd"].push( product_kit_sku);
+              unless product_kit_sku.destroy
+                @result['messages'].push("sku "+kit_sku+"could not be removed fron kit")
+                @result['status'] &= false
+              end
+
+          end
+        end
+      end
+    else
+      @result['messages'].push("Product with id="+@kit.id+"is not a kit")
+      @result['status'] &= false
+    end
+
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json: @result }
+    end
+  end
   def updateproduct
   	@result = Hash.new
   	@product = Product.find(params[:basicinfo][:id])
@@ -1060,6 +1087,72 @@ class ProductsController < ApplicationController
   		@result['message'] = 'Cannot find product information.'
   	end	
 
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json: @result }
+    end
+  end
+
+  def updateproductlist
+    @result = Hash.new
+    @result['status'] = true
+    @product = Product.find_by_id(params[:id])
+    if @product.nil?
+      @result['status'] = false
+      @result['error_msg'] ="Cannot find Product"
+    else
+      if ["name","status"].include?(params[:var])
+        @product[params[:var]] = params[:value]
+        unless @product.save
+          @result['status'] &= false
+          @result['error_msg'] = "Couldn't save product info"
+        end
+      elsif params[:var] ==  "sku"
+        @product_sku = @product.product_skus.first
+        if @product_sku.nil?
+          @product_sku = ProductSku.new
+          @product_sku.product_id = params[:id]
+        end
+        @product_sku.sku = params[:value]
+        unless @product_sku.save
+          @result['status'] &= false
+          @result['error_msg'] = "Couldn't save product info"
+        end
+      elsif params[:var] ==  "cat"
+        @product_cat = @product.product_cats.first
+        if @product_cat.nil?
+          @product_cat = ProductCat.new
+          @product_cat.product_id = params[:id]
+        end
+        @product_cat.category = params[:value]
+        unless @product_cat.save
+          @result['status'] &= false
+          @result['error_msg'] = "Couldn't save product info"
+        end
+      elsif params[:var] ==  "barcode"
+        @product_barcode = @product.product_barcodes.first
+        if @product_barcode.nil?
+          @product_barcode = ProductBarcode.new
+          @product_barcode.product_id = params[:id]
+        end
+        @product_barcode.barcode = params[:value]
+        unless @product_barcode.save
+          @result['status'] &= false
+          @result['error_msg'] = "Couldn't save product info"
+        end
+      elsif params[:var] ==  "location"
+        @product_location = @product.product_inventory_warehousess.first
+        if @product_location.nil?
+          @product_location = ProductInventoryWarehouses.new
+          @product_location.product_id = params[:id]
+        end
+        @product_location.location = params[:value]
+        unless @product_location.save
+          @result['status'] &= false
+          @result['error_msg'] = "Couldn't save product info"
+        end
+      end
+    end
     respond_to do |format|
       format.html # show.html.erb
       format.json { render json: @result }

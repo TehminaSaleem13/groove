@@ -282,6 +282,7 @@ background: url('/assets/sort_desc.png') no-repeat center right;
 .input-text {
   height:auto;
   overflow:visible;
+  background:#fff;
 }
 .input-text-hover {
   border-color: rgba(82, 168, 236, 0.8);
@@ -350,4 +351,7 @@ background: url('/assets/sort_desc.png') no-repeat center right;
 #aliasproductstbl tr:hover td {
   background:#0088cc;
   color:#fff;
+}
+#productstbl th:hover, #orderstbl th:hover {
+  cursor:pointer;
 }

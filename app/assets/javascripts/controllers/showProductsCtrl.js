@@ -5,11 +5,22 @@ controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$routeParams', 
     		$scope.username = data.username;
     	});
         $('.modal-backdrop').remove();
-
     	$scope.get_products = function(next) {
+            $scope.products_edit_tmp = {
+                name:"",
+                sku: "",
+                status:"",
+                barcode:"",
+                location:"",
+                store:"",
+                cat:"",
+                editing:-1,
+                editing_var: "",
+                editing_id:""
+            };
             $scope.can_get_products = false;
             next = typeof next !== 'undefined' ? next : false;
-            alias = ($scope.trigger_alias || $('#showAliasOptions')[0].clientHeight > 0) ? true : false;
+            alias = ($scope.trigger_alias || $('#showAliasOptions').hasClass("in")) ? true : false;
             $scope.trigger_alias = false;
             if(alias) {
                 $scope.temp.alias = true;
@@ -34,6 +45,7 @@ controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$routeParams', 
             }
             $http.get(url).success(function(data) {
                 if(data.status) {
+                    $scope.show_error = false;
                     $scope.new_products = (data.products.length > 0);
                     if(!next) {
                         $scope.temp.products = data.products;
@@ -53,11 +65,21 @@ controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$routeParams', 
                         }
                         $scope.products = $scope.temp.products;
                     }
+                } else {
+                    $scope.show_error = true;
+                    $scope.error_msg = "Can't load list of products";
                 }
                 $scope.can_get_products = true;
+                $timeout($scope.checkSwapNodes,20);
+                $timeout($scope.showHideField,25);
+                $scope.showHideField();
             }).error(function(data) {
+                    $scope.show_error = true;
+                    $scope.error_msg = "Can't load list of products";
                 $scope.can_get_products = true;
+                $timeout($scope.checkSwapNodes,20);
             });
+
         }
         $scope.product_setup_opt = function(type,value) {
             $scope.common_setup_opt(type,value,'product');
@@ -91,7 +113,7 @@ controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$routeParams', 
         }
 
         $scope.product_next = function() {
-            alias = ($('#showAliasOptions')[0].clientHeight > 0)?  true: false;
+            alias = ($('#showAliasOptions').hasClass("in"))?  true: false;
             if(alias) {
                 $scope.alias.product_setup.offset = $scope.alias.product_setup.offset + $scope.alias.product_setup.limit;
             } else {
@@ -120,6 +142,7 @@ controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$routeParams', 
             $scope.can_get_products = true;
             $scope.product_setup = {};
             $scope.new_products = false;
+            $scope.currently_open = 0;
             $scope.products = [];
             $scope.temp = {};
             $scope.temp.products = [];
@@ -239,8 +262,13 @@ controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$routeParams', 
                     $scope.get_products();
                 });
         }
-        $scope.product_single_details = function(id) {
+        $scope.product_single_details = function(id,index) {
+            if(typeof index !== 'undefined'){
+                $scope.currently_open = index;
+            }
+            //console.log($scope.currently_open);
             $scope.single_product = {};
+            $scope.selected_skus = [];
             $scope.tmp = {
                 sku: "",
                 barcode: "",
@@ -274,30 +302,10 @@ controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$routeParams', 
                     }
                     $('#showProduct').modal('show');
                 }
-                //console.log($scope.single_product);
+               // console.log($scope.single_product);
             }).error(function(data) {
 
                 });
-        }
-        $scope.handle_key_event =  function(event) {
-            //console.log(event);
-            name = event.currentTarget.name;
-            if(event.keyCode == 13 || event.keyCode == 188 || event.type == "focusout") {
-                event.preventDefault();
-                if($scope.tmp[name] != "") {
-                    $scope.save_node(name,event.type == "focusout");
-                }
-            }
-            if(event.keyCode == 8) {
-                if($scope.tmp[name] == "") {
-                    index = $scope.tmp.editing;
-                    if(index != -1) {
-                        $scope.remove_node(name,index);
-                        index = index - 1;
-                    }
-                    $scope.edit_node(name,index);
-                }
-            }
         }
         $scope.save_node = function(name,blur) {
             prop = $scope.tmp_options[name];
@@ -345,11 +353,10 @@ controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$routeParams', 
             $scope.focus_input(name);
             $scope.tmp[name] =  $scope.single_product[prop][index][name];
             $scope.single_product[prop][index][name] = "";
-
         }
 
         $scope.focus_input = function(name){
-            $(".input-text input[name='"+name+"']").focus();
+            $(".input-text [name='"+name+"']").focus();
         }
         $scope.blur_input = function(name) {
             $("#name").removeClass("input-text-hover");
@@ -359,10 +366,89 @@ controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$routeParams', 
         $scope.add_image = function (){
             $("#product_image").click();
         }
+
+        $scope.edit_single_node = function(index,id,name) {
+            $scope.save_single_node();
+            $scope.products_edit_tmp.editing_var = name;
+            $scope.products_edit_tmp.editing = index;
+            $scope.products_edit_tmp.editing_id = id;
+            $scope.products_edit_tmp[name] = $scope.products[index][name];
+            $scope.products[index][name] = "";
+            $timeout(function() {$scope.focus_input('products_'+name+"_"+index);},10);
+        }
+
+        $scope.save_single_node = function() {
+            if($scope.products_edit_tmp.editing != -1 ) {
+                $scope.products[$scope.products_edit_tmp.editing][$scope.products_edit_tmp.editing_var] = $scope.products_edit_tmp[$scope.products_edit_tmp.editing_var];
+                $scope.update_product_list(
+                    {
+                        id: $scope.products_edit_tmp.editing_id,
+                        var:$scope.products_edit_tmp.editing_var,
+                        value: $scope.products[$scope.products_edit_tmp.editing][$scope.products_edit_tmp.editing_var]
+                    }
+                );
+            }
+            $scope.products_edit_tmp.editing_var = "";
+            $scope.products_edit_tmp.editing = -1;
+            $scope.products_edit_tmp.editing_id = -1;
+        }
+
+        $scope.update_product_list = function(obj) {
+            $http.post('/products/updateproductlist.json',obj).success(function(data){
+                if(data.status) {
+                    $scope.show_error = false;
+                    $scope.show_error_msgs = false;
+                    $scope.get_products();
+                } else {
+                    $scope.show_error = true;
+                    $scope.error_msg = data.error_msg;
+                    $scope.get_products();
+                }
+            }).error(function(data) {
+                    $scope.show_error = true;
+                    $scope.error_msg = "Couldn't save product info";
+                    $scope.get_products();
+            });
+        }
+
+        $scope.all_fields = {
+            sku: {name:"<i class='icon icon-ok'></i> Sku", className:"rt_field_sku"},
+            status:{name:"<i class='icon icon-ok'></i> Status", className:"rt_field_status"},
+            barcode:{name:"<i class='icon icon-ok'></i> Barcode", className:"rt_field_barcode"},
+            location:{name:"<i class='icon icon-ok'></i> Location", className:"rt_field_location"},
+            store:{name:"<i class='icon icon-ok'></i> Store", className:"rt_field_store"},
+            cat:{name:"<i class='icon icon-ok'></i> Category", className:"rt_field_cat"}
+        };
+        $scope.shown_fields = ["checkbox","name","sku","status","barcode","location","store"];
+
+        $scope.showHideField = function(key,options) {
+            $(".context-menu-item i").removeClass("icon-ok").addClass("icon-remove");
+            $("#productstbl th, #productstbl td").hide();
+            var array_position = $scope.shown_fields.indexOf(key);
+            if(array_position > -1) {
+                $scope.shown_fields.splice( array_position, 1 );
+            } else {
+                $scope.shown_fields.push(key);
+            }
+            for (i in $scope.shown_fields) {
+                $(".rt_field_"+$scope.shown_fields[i]+" i").removeClass("icon-remove").addClass("icon-ok");
+                $("[data-header='"+$scope.shown_fields[i]+"']").show();
+            }
+        }
+
+        $.contextMenu({
+            // define which elements trigger this menu
+            selector: "#productstbl thead",
+            // define the elements of the menu
+            items: $scope.all_fields,
+            // there's more, have a look at the demos and docs...
+            callback: $scope.showHideField
+        });
         $scope.update_single_product = function() {
             $http.post('/products/updateproduct.json', $scope.single_product).success(function(data) {
                 if(data.status) {
                     $scope.product_update_status = true;
+                    $scope.show_error_msgs = false;
                     $scope.product_update_message = "Successfully Updated";
                 } else {
                     $scope.show_error_msgs = true;
@@ -383,15 +469,17 @@ controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$routeParams', 
         $scope.add_alias_product = function(id) {
             if(confirm("Are you sure? This can not be undone!")) {
                 if($scope.single_product.basicinfo.is_kit) {
-                    $http.post("products/addproducttokit.json",{product_id: id , kit_id: $scope.single_product.basicinfo.id}).success(
+                    $http.post("/products/addskutokit.json",{product_id: id , kit_id: $scope.single_product.basicinfo.id}).success(
                         function(data) {
+                            //console.log(data);
                             if(data.status) {
                                 $scope.product_update_status = true;
+                                $scope.show_error_msgs = false;
                                 $scope.product_update_message = "Successfully Added";
                                 $scope.product_single_details($scope.single_product.basicinfo.id);
                             } else {
                                 $scope.show_error_msgs = true;
-                                $scope.error_msgs = ["Some error Occurred"];
+                                $scope.error_msgs = data.messages;
                             }
                         }
                     ).error(function(data){
@@ -404,6 +492,7 @@ controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$routeParams', 
                         function(data) {
                             if(data.status) {
                                 $scope.product_update_status = true;
+                                $scope.show_error_msgs = false;
                                 $scope.product_update_message = "Successfully Updated";
                                 $scope.product_single_details(id);
                             } else {
@@ -418,6 +507,39 @@ controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$routeParams', 
                 }
             }
             $('#showAliasOptions').modal("hide");
+        }
+        $scope.select_deselect_kit_sku = function(sku,index){
+            var array_position = $scope.selected_skus.indexOf(sku);
+            $(".kit_sku").removeClass("info");
+            if(array_position > -1) {
+                $scope.selected_skus[index] = "";
+            } else {
+                $scope.selected_skus[index] = sku;
+            }
+            //console.log($scope.selected_skus);
+            for(i in $scope.selected_skus) {
+                if($scope.selected_skus[i] !=="") {
+                    $(".kit_sku_"+i).addClass("info");
+                }
+            }
+        }
+        $scope.remove_skus_from_kit = function () {
+
+            $http.post('/products/removeskusfromkit.json',{kit_id: $scope.single_product.basicinfo.id, kit_skus: $scope.selected_skus }).success(function(data){
+                if(data.status) {
+                    $scope.product_update_status = true;
+                    $scope.show_error_msgs = false;
+                    $scope.product_update_message = "Successfully Removed";
+                    $scope.product_single_details($scope.single_product.basicinfo.id);
+                } else {
+                    $scope.show_error_msgs = true;
+                    $scope.error_msgs = data.messages;
+                }
+            }).error(function(data){
+                    $scope.show_error_msgs = true;
+                    $scope.error_msgs = ["Some error Occurred"];
+            });
+
         }
         $scope.$on("fileSelected", function (event, args) {
             $("input[type='file']").val('');
@@ -453,14 +575,80 @@ controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$routeParams', 
             }
         });
 
+        $scope.handle_key_event =  function(event) {
+            name = event.currentTarget.name;
+            if(event.which == 13 || event.which == 188 || event.type == "focusout") {
+                event.preventDefault();
+                if($scope.tmp[name] != "") {
+                    $scope.save_node(name,event.type == "focusout");
+                }
+            }
+            if(event.which == 8) {
+                if($scope.tmp[name] == "") {
+                    index = $scope.tmp.editing;
+                    if(index != -1) {
+                        $scope.remove_node(name,index);
+                        index = index - 1;
+                    }
+                    $scope.edit_node(name,index);
+                }
+            }
+        }
+
+        $scope.keyboard_nav_event = function(event) {
+            if($('#showProduct').hasClass("in") &&  !$('#showAliasOptions').hasClass("in")) {
+                //console.log("keypress "+event.which);
+                //console.log("Product Len");
+                //console.log($scope.products.length);
+                //console.log("Current Open");
+                //console.log($scope.currently_open);
+                if(event.which == 38) {//up key
+                    if($scope.currently_open > 0) {
+                        $scope.product_single_details($scope.products[$scope.currently_open -1].id, $scope.currently_open - 1);
+                    } else {
+                        alert("Already at the top of the list");
+                    }
+                } else if(event.which == 40) { //down key
+                    if($scope.currently_open < $scope.products.length -1) {
+                        $scope.product_single_details($scope.products[$scope.currently_open + 1].id, $scope.currently_open + 1);
+                    } else {
+                        alert("Already at the bottom of the list");
+                    }
+                }
+
+            }
+        }
+
+        $scope.checkSwapNodes = function() {
+            var node_order_array = [];
+            $('#productstbl thead tr').children('th').each(function(index){node_order_array[this.getAttribute('data-header')] = index;});
+            $('#productstbl tbody tr ').each(
+                function(index){
+                    var children = this.children;
+                    for (i=0; i <children.length; i++) {
+                        if( node_order_array[children[i].getAttribute('data-header')] != i) {
+                           $scope.doRealSwap(children[i],children[node_order_array[children[i].getAttribute('data-header')]]);
+                        }
+                    }
+                }
+            );
+        }
+        $scope.doRealSwap = function swapNodes(a, b) {
+            var aparent = a.parentNode;
+            var asibling = a.nextSibling === b ? a : a.nextSibling;
+            b.parentNode.insertBefore(a, b);
+            aparent.insertBefore(b, asibling);
+        }
 
         //Main code ends here. Rest is function calls etc to init
         $scope.set_defaults();
-
+        $('#productstbl').dragtable({dragaccept:'.product_setup-sort',clickDelay:250});
         $scope.sortableOptions = {
             update:$scope.update_single_product,
-            remove:$scope.update_single_product
+            remove:$scope.update_single_product,
+            axis: 'x'
         };
+
         $scope.$watch('product_update_status',function() {
             if($scope.product_update_status) {
                 $("#product_update_status").fadeTo("fast",1,function() {
@@ -478,14 +666,15 @@ controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$routeParams', 
                 $scope.do_get_products = true;
             }
         });
-
-        $scope.$watch('do_get_products',function() {
-            if($scope.do_get_products) {
-                $scope.get_products();
-                $scope.do_get_products = false;
+        $scope.$watch('can_get_products',function() {
+            if($scope.can_get_products) {
+                if($scope.do_get_products) {
+                    $scope.do_get_products = false;
+                    $scope.get_products();
+                }
             }
         });
-
+        $('body').keydown($scope.keyboard_nav_event);
         $('.icon-question-sign').popover({trigger: 'hover focus'});
         input_text_selector = $('.input-text input');
         input_text_selector.keydown($scope.handle_key_event);
