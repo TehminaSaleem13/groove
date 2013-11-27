@@ -16,21 +16,21 @@ class ProductsController < ApplicationController
 
 		if @magento_credentials.length > 0
 			client = Savon.client(wsdl: @magento_credentials.first.host+"/index.php/api/soap/index/wsdl/1")
-			
+
 			if !client.nil?
-				
-				response = client.call(:login,  message: { apiUser: @magento_credentials.first.username, 
+
+				response = client.call(:login,  message: { apiUser: @magento_credentials.first.username,
 					apikey: @magento_credentials.first.api_key })
 
 				if response.success?
 					session =  response.body[:login_response][:login_return]
 					response = client.call(:call, message: {session: session, method: 'product.list'})
-					
+
 					# fetching all products
 					if response.success?
 					  # listing found products
 					  @products  = response.body[:call_response][:call_return][:item]
-						@products .each do |product| 
+						@products .each do |product|
 							product = product[:item]
 							result_product = Hash.new
 
@@ -62,8 +62,8 @@ class ProductsController < ApplicationController
 
 								#get images and categories
 								begin
-								getimages = client.call(:call, message: {session: session, 
-									method: 'catalog_product_attribute_media.list', 
+								getimages = client.call(:call, message: {session: session,
+									method: 'catalog_product_attribute_media.list',
 									product: result_product['sku']})
 								if getimages.success?
 									@images = getimages.body[:call_response][:call_return][:item]
@@ -79,7 +79,7 @@ class ProductsController < ApplicationController
 													if itemhash[:key] == 'label'
 														@productimage.caption = itemhash[:value]
 													end
-													
+
 													if !@productimage.image.nil?
 														@productdb.product_images << @productimage
 													end
@@ -92,16 +92,16 @@ class ProductsController < ApplicationController
 
 								end
 
-								begin 
+								begin
 
-								if !result_product['category_ids'][:item].nil? && 
+								if !result_product['category_ids'][:item].nil? &&
 									result_product['category_ids'][:item].kind_of?(Array)
 									result_product['category_ids'][:item].each do|category_id|
-										
-										get_categories = client.call(:call, message: {session: session, 
-											method: 'catalog_category.info', 
+
+										get_categories = client.call(:call, message: {session: session,
+											method: 'catalog_category.info',
 											categoryId: category_id})
-										
+
 										if get_categories.success?
 											@categories = get_categories.body[:call_response][:call_return][:item]
 											@categories.each do |category|
@@ -130,15 +130,15 @@ class ProductsController < ApplicationController
 						end
 					else
 						@result['status'] = false
-						@result['messages'].push('Problem retrieving products list')					 
+						@result['messages'].push('Problem retrieving products list')
 					end
 				else
 					@result['status'] = false
-					@result['messages'].push('Problem connecting to Magento API. Authentication failed')	
+					@result['messages'].push('Problem connecting to Magento API. Authentication failed')
 				end
 			else
 				@result['status'] = false
-				@result['messages'].push('Problem connecting to Magento API. Check the hostname of the server')	
+				@result['messages'].push('Problem connecting to Magento API. Check the hostname of the server')
 			end
 		else
 			@result['status'] = false
@@ -148,7 +148,7 @@ class ProductsController < ApplicationController
 		#do ebay connect.
 		@ebay_credentials = EbayCredentials.where(:store_id => @store.id)
 
-		if @ebay_credentials.length > 0 
+		if @ebay_credentials.length > 0
 			@credential = @ebay_credentials.first
 			require 'eBayAPI'
 			if ENV['EBAY_SANDBOX_MODE'] == 'YES'
@@ -156,13 +156,13 @@ class ProductsController < ApplicationController
 			else
 				sandbox = false
 			end
-			@eBay = EBay::API.new(@credential.productauth_token, 
-				        ENV['EBAY_DEV_ID'], ENV['EBAY_APP_ID'], 
+			@eBay = EBay::API.new(@credential.productauth_token,
+				        ENV['EBAY_DEV_ID'], ENV['EBAY_APP_ID'],
         				ENV['EBAY_CERT_ID'], :sandbox=>sandbox)
-			
+
 			seller_list =@eBay.GetSellerList(:startTimeFrom=> (Date.today - 3.months).to_datetime,
 				 :startTimeTo =>(Date.today + 1.day).to_datetime)
-			
+
 			@result['total_imported']  = seller_list.itemArray.length
 
 			seller_list.itemArray.each do |item|
@@ -189,12 +189,12 @@ class ProductsController < ApplicationController
 				#publish the sku to the product record
 				@productdb.product_skus << @productdbsku
 
-				
+
 				if !@item.pictureDetails.nil?
-					if !@item.pictureDetails.pictureURL.nil? && 
+					if !@item.pictureDetails.pictureURL.nil? &&
 						@item.pictureDetails.pictureURL.length > 0
 						@productimage = ProductImage.new
-						@productimage.image = "http://i.ebayimg.com" + 
+						@productimage.image = "http://i.ebayimg.com" +
 							@item.pictureDetails.pictureURL.first.request_uri()
 						@productdb.product_images << @productimage
 					end
@@ -225,7 +225,7 @@ class ProductsController < ApplicationController
 	elsif @store.store_type == 'Amazon'
 		@amazon_credentials = AmazonCredentials.where(:store_id => @store.id)
 
-		if @amazon_credentials.length > 0 
+		if @amazon_credentials.length > 0
 			@credential = @amazon_credentials.first
 			mws = MWS.new(:aws_access_key_id => ENV['AMAZON_MWS_ACCESS_KEY_ID'],
 			  :secret_access_key => ENV['AMAZON_MWS_SECRET_ACCESS_KEY'],
@@ -264,7 +264,7 @@ class ProductsController < ApplicationController
 			# pending-quantity
 			# fulfillment-channel
 
-			require 'csv'    
+			require 'csv'
 			csv = CSV.parse(response.body,:quote_char => "|")
 			@result['total_imported']  = csv.length - 1
 			csv.each_with_index do | row, index|
@@ -322,10 +322,10 @@ class ProductsController < ApplicationController
 		@amazon_credentials = AmazonCredentials.where(:store_id => params[:id])
 		@result = Hash.new
 		@result['status'] = false
-		if @amazon_credentials.length > 0 
-			
+		if @amazon_credentials.length > 0
+
 			@credential = @amazon_credentials.first
-			
+
 			mws = MWS.new(:aws_access_key_id => ENV['AMAZON_MWS_ACCESS_KEY_ID'],
 			  :secret_access_key => ENV['AMAZON_MWS_SECRET_ACCESS_KEY'],
 		  	  :seller_id => @credential.merchant_id,
@@ -337,7 +337,7 @@ class ProductsController < ApplicationController
 
 			if @credential.save
 				@result['status'] = true
-				@result['requestedreport_id'] = @credential.productreport_id 
+				@result['requestedreport_id'] = @credential.productreport_id
 			end
 
 		end
@@ -352,10 +352,10 @@ class ProductsController < ApplicationController
 		@result = Hash.new
 		@result['status'] = false
 		report_found = false
-		if @amazon_credentials.length > 0 
-			
+		if @amazon_credentials.length > 0
+
 			@credential = @amazon_credentials.first
-			
+
 			mws = MWS.new(:aws_access_key_id => ENV['AMAZON_MWS_ACCESS_KEY_ID'],
 			  :secret_access_key => ENV['AMAZON_MWS_SECRET_ACCESS_KEY'],
 			  :seller_id => @credential.merchant_id,
@@ -376,20 +376,20 @@ class ProductsController < ApplicationController
 						@credential.productgenerated_report_date = report_request.completed_date
 						if @credential.save
 							@result['status'] = true
-							@result['requestedreport_id'] = @credential.productreport_id 
+							@result['requestedreport_id'] = @credential.productreport_id
 							@result['generated_report_id'] = report_request.generated_report_id
 							@result['generated_report_date'] = report_request.completed_date
 						end
 					elsif report_request.report_processing_status == '_INPROGRESS_'
 						@result['status'] = true
-						@result['report_status'] = 'Report is in progress. It will be ready in few moments.'						
+						@result['report_status'] = 'Report is in progress. It will be ready in few moments.'
 					else
 						@result['response'] = report_request
 						#store generated report id
 					end
 				end
 			end
-			
+
 			if !report_found
 				@result['status'] = true
 				@result['report_status'] = 'Report is not found. Please check back in few moments.'
@@ -403,11 +403,11 @@ class ProductsController < ApplicationController
 	# Get list of products based on limit and offset. It is by default sorted by updated_at field
 	# If sort parameter is passed in then the corresponding sort filter will be used to sort the list
 	# The expected parameters in params[:sort] are 'updated_at', name', 'sku', 'status', 'barcode', 'location_primary'
-	# and quantity. The API supports to provide order of sorting namely ascending or descending. The parameter can be 
+	# and quantity. The API supports to provide order of sorting namely ascending or descending. The parameter can be
 	# passed in using params[:order] = 'ASC' or params[:order] ='DESC' [Note: Caps letters] By default, if no order is mentioned,
-	# then the API considers order to be descending.The API also supports a product status filter. 
-	# The filter expects one of the following parameters in params[:filter] 'all', 'active', 'inactive', 'new'. 
-	# If no filter is passed, then the API will default to 'active' 
+	# then the API considers order to be descending.The API also supports a product status filter.
+	# The filter expects one of the following parameters in params[:filter] 'all', 'active', 'inactive', 'new'.
+	# If no filter is passed, then the API will default to 'active'
 	# if you would like to get Kits, specify params[:iskit] to 1. it will return product kits and the corresponding skus
 	#
 	def getproducts
@@ -419,7 +419,7 @@ class ProductsController < ApplicationController
 		limit = 10
 		offset = 0
 		is_kit = 0
-		supported_sort_keys = ['updated_at', 'name', 'sku', 
+		supported_sort_keys = ['updated_at', 'name', 'sku',
 								'status', 'barcode', 'location_primary', 'store' ]
 		supported_order_keys = ['ASC', 'DESC' ] #Caps letters only
 		supported_status_filters = ['all', 'active', 'inactive', 'new']
@@ -430,18 +430,18 @@ class ProductsController < ApplicationController
 
 		offset = params[:offset] if !params[:offset].nil? && params[:offset].to_i >= 0
 
-		sort_key = params[:sort] if !params[:sort].nil? && 
+		sort_key = params[:sort] if !params[:sort].nil? &&
 			supported_sort_keys.include?(params[:sort])
 
-		sort_order = params[:order] if !params[:order].nil? && 
+		sort_order = params[:order] if !params[:order].nil? &&
 			supported_order_keys.include?(params[:order])
 
-		status_filter = params[:filter] if !params[:filter].nil? && 
+		status_filter = params[:filter] if !params[:filter].nil? &&
 			supported_status_filters.include?(params[:filter])
 
 		is_kit = params[:iskit] if !params[:iskit].nil?  &&
 			supported_kit_params.include?(params[:iskit])
-		
+
 		#hack to bypass for now and enable client development
 		# sort_key = 'name' if sort_key == 'sku'
 
@@ -513,7 +513,7 @@ class ProductsController < ApplicationController
 
     @product_location = product.product_inventory_warehousess.first
     unless @product_location.nil?
-      @product_hash['location'] = @product_location.location
+      @product_hash['location'] = @product_location.location_primary
     end
 
     @product_barcode = product.product_barcodes.first
@@ -541,10 +541,10 @@ class ProductsController < ApplicationController
 				@product_hash['productkitskus'].push(kitsku.sku)
 			end
 		end
-		
+
 		@products_result.push(@product_hash)
 		end
-		
+
 		@result['products'] = @products_result
 
 		respond_to do |format|
@@ -632,7 +632,7 @@ class ProductsController < ApplicationController
 
 	if !params[:search].nil? && params[:search] != ''
 		search = params[:search]
-		
+
 		#todo: include sku in search as well in future.
 		@products = Product.find_by_sql("SELECT * from products WHERE name like '%"+search+"%'  LIMIT #{limit}
 										OFFSET #{offset}")
@@ -644,7 +644,7 @@ class ProductsController < ApplicationController
 		@product_hash['name'] = product.name
 		@product_hash['status'] = product.status
     if product.product_inventory_warehousess.length > 0
-      @product_hash['location'] = product.product_inventory_warehousess.first.location
+      @product_hash['location'] = product.product_inventory_warehousess.first.location_primary
     else
       @product_hash['location'] = ''
     end
@@ -668,7 +668,7 @@ class ProductsController < ApplicationController
 
 		@products_result.push(@product_hash)
 		end
-		
+
 		@result['products'] = @products_result
 	else
 		@result['status'] = false
@@ -774,7 +774,7 @@ class ProductsController < ApplicationController
 	  	else
 	  		@result['messages'].push("No item sent in the request")
 			  @result['status'] &= false
-  		end 
+  		end
   	end
 
     respond_to do |format|
@@ -827,7 +827,7 @@ class ProductsController < ApplicationController
   	@result['status'] = true
   	@result['params'] = params
   	if !@product.nil?
-  		
+
   		#Update Basic Info
   		@product.alternate_location = params[:basicinfo][:alternate_location]
   		@product.barcode = params[:basicinfo][:barcode]
@@ -840,7 +840,7 @@ class ProductsController < ApplicationController
   		@product.pack_time_adj = params[:basicinfo][:pack_time_adj]
   		@product.packing_placement = params[:basicinfo][:packing_placement]
   		@product.product_type = params[:basicinfo][:product_type]
-  		@product.spl_instructions_4_confirmation = 
+  		@product.spl_instructions_4_confirmation =
   			params[:basicinfo][:spl_instructions_4_confirmation]
   		@product.spl_instructions_4_packer = params[:basicinfo][:spl_instructions_4_packer]
   		@product.status = params[:basicinfo][:status]
@@ -858,7 +858,7 @@ class ProductsController < ApplicationController
   		if product_inv_whs.length > 0
 	  		product_inv_whs.each do |inv_wh|
 	  			found_inv_wh = false
-	  			
+
 	  			if !params[:inventory_warehouses].nil?
 		  			params[:inventory_warehouses].each do |wh|
 			  			if wh["id"] == inv_wh.id
@@ -891,6 +891,7 @@ class ProductsController < ApplicationController
 			  		end
 			  	else
 			  		product_inv_wh = ProductInventoryWarehouses.new
+            product_inv_wh.product_id = @product.id
 	  				product_inv_wh.qty = wh["qty"]
 	  				product_inv_wh.location_primary = wh["location_primary"]
 	  				product_inv_wh.location_secondary = wh["location_secondary"]
@@ -911,7 +912,7 @@ class ProductsController < ApplicationController
   		if product_cats.length > 0
 	  		product_cats.each do |productcat|
 	  			found_cat = false
-	  			
+
 	  			if !params[:cats].nil?
 		  			params[:cats].each do |cat|
 			  			if cat["id"] == productcat.id
@@ -955,7 +956,7 @@ class ProductsController < ApplicationController
   		if product_skus.length > 0
 	  		product_skus.each do |productsku|
 	  			found_sku = false
-	  			
+
 	  			if !params[:skus].nil?
 		  			params[:skus].each do |sku|
 			  			if sku["id"] == productsku.id
@@ -998,7 +999,7 @@ class ProductsController < ApplicationController
   		if product_barcodes.length > 0
 	  		product_barcodes.each do |productbarcode|
 	  			found_barcode = false
-	  			
+
 	  			if !params[:barcodes].nil?
 		  			params[:barcodes].each do |barcode|
 			  			if barcode["id"] == productbarcode.id
@@ -1006,7 +1007,7 @@ class ProductsController < ApplicationController
 			  			end
 		  			end
 	  			end
-	  			
+
 	  			if found_barcode == false
 	  				if !productbarcode.destroy
 	  					@result['status'] &= false
@@ -1043,7 +1044,7 @@ class ProductsController < ApplicationController
   		if product_images.length > 0
 	  		product_images.each do |productimage|
 	  			found_image = false
-	  			
+
 	  			if !params[:images].nil?
 		  			params[:images].each do |image|
 			  			if image["id"] == productimage.id
@@ -1051,7 +1052,7 @@ class ProductsController < ApplicationController
 			  			end
 		  			end
 	  			end
-	  			
+
 	  			if found_image == false
 	  				if !productimage.destroy
 	  					@result['status'] &= false
@@ -1085,7 +1086,7 @@ class ProductsController < ApplicationController
   	else
   		@result['status'] = false
   		@result['message'] = 'Cannot find product information.'
-  	end	
+  	end
 
     respond_to do |format|
       format.html # show.html.erb
@@ -1146,7 +1147,7 @@ class ProductsController < ApplicationController
           @product_location = ProductInventoryWarehouses.new
           @product_location.product_id = params[:id]
         end
-        @product_location.location = params[:value]
+        @product_location.location_primary = params[:value]
         unless @product_location.save
           @result['status'] &= false
           @result['error_msg'] = "Couldn't save product info"
@@ -1159,11 +1160,11 @@ class ProductsController < ApplicationController
     end
   end
 
-	#This action will remove the entry for this product (the Alias) and the SKU of this new 
-	#product will be added to the list of skus for the existing product that the user is linking it to. 
-	#Any product can be turned into an alias, it doesn’t have to have the status of new, although most if the time it probably will. 
+	#This action will remove the entry for this product (the Alias) and the SKU of this new
+	#product will be added to the list of skus for the existing product that the user is linking it to.
+	#Any product can be turned into an alias, it doesn’t have to have the status of new, although most if the time it probably will.
 	#The operation can not be undone.
-	#If you had a situation where the newly imported product was actually the one you wanted to keep you could 
+	#If you had a situation where the newly imported product was actually the one you wanted to keep you could
 	#find the original product and make it an alias of the new product...
   def setalias
   	@result = Hash.new
@@ -1181,7 +1182,7 @@ class ProductsController < ApplicationController
   			result['messages'].push('Error saving Sku for sku id'+alias_sku.id)
   		end
   	end
-  	
+
   	@product_barcodes = ProductBarcode.where(:product_id=>@product_alias.id)
   	@product_barcodes.each do |alias_barcode|
   		alias_barcode.product_id = @product_orig.id
@@ -1211,7 +1212,7 @@ class ProductsController < ApplicationController
   	@product = Product.find(params[:product_id])
   	if !@product.nil? && !params[:product_image].nil?
 	  	@image = ProductImage.new
-        
+
         csv_directory = "public/images"
         file_name = Time.now.to_s+params[:product_image].original_filename
         path = File.join(csv_directory, file_name )
@@ -1225,7 +1226,7 @@ class ProductsController < ApplicationController
 	  	end
 	else
 	  	@result['status'] = false
-	  	@result['messages'].push("Invalid data sent to the server")		
+	  	@result['messages'].push("Invalid data sent to the server")
 	end
   	respond_to do |format|
       format.html # show.html.erb
