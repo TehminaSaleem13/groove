@@ -262,10 +262,21 @@ controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$routeParams', 
                     $scope.get_products();
                 });
         }
-        $scope.product_single_details = function(id,index) {
+        $scope.product_single_details = function(id,index,post_fn) {
             if(typeof index !== 'undefined'){
                 $scope.currently_open = index;
             }
+            $scope.warehouse_edit_tmp = {
+                alert: "",
+                location: "",
+                name:"",
+                qty: 0,
+                location_primary:"",
+                location_secondary:"",
+                editing:-1,
+                editing_var: "",
+                editing_id:""
+            };
             //console.log($scope.currently_open);
             $scope.single_product = {};
             $scope.selected_skus = [];
@@ -284,28 +295,17 @@ controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$routeParams', 
             $http.get('/products/getdetails/'+ id+'.json').success(function(data) {
                 if(data.product) {
                     $scope.single_product = data.product;
-                    update = false;
-                    if(typeof $scope.single_product.basicinfo.is_skippable == 'undefined' ||
-                        ($scope.single_product.basicinfo.is_skippable != true && $scope.single_product.basicinfo.is_skippable != false)
-                    ) {
-                        $scope.single_product.basicinfo.is_skippable = false;
-                        update = true;
-                    }
-                    if(typeof $scope.single_product.basicinfo.spl_instructions_4_confirmation == 'undefined' ||
-                        ($scope.single_product.basicinfo.spl_instructions_4_confirmation != true && $scope.single_product.basicinfo.spl_instructions_4_confirmation != false)
-                        ) {
-                        $scope.single_product.basicinfo.spl_instructions_4_confirmation = false;
-                        update = true;
-                    }
-                    if(update) {
-                        $scope.update_single_product();
-                    }
                     $('#showProduct').modal('show');
                 }
-               // console.log($scope.single_product);
+                console.log($scope.single_product);
+                if(typeof post_fn !== 'undefined' ) {
+                    $timeout(post_fn,20);
+                }
             }).error(function(data) {
-
-                });
+                if(typeof post_fn !== 'undefined' ) {
+                    $timeout(post_fn,20);
+                }
+            });
         }
         $scope.save_node = function(name,blur) {
             prop = $scope.tmp_options[name];
@@ -338,7 +338,7 @@ controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$routeParams', 
                 $scope.tmp.editing = -1;
                 $scope.tmp.editing_var = -1;
             }
-            //$scope.update_single_product();
+            $scope.update_single_product();
         }
 
         $scope.edit_node = function(name,index) {
@@ -393,6 +393,62 @@ controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$routeParams', 
             $scope.products_edit_tmp.editing_id = -1;
         }
 
+        $scope.edit_warehouse_node = function(index,id,name) {
+
+            $scope.save_warehouse_node();
+            $scope.warehouse_edit_tmp.editing_var = name;
+            $scope.warehouse_edit_tmp.editing = index;
+            $scope.warehouse_edit_tmp.editing_id = id;
+            $scope.warehouse_edit_tmp[name] = $scope.single_product.inventory_warehouses[index][name];
+            $scope.single_product.inventory_warehouses[index][name] = "";
+            $timeout(function(){$scope.focus_input('warehouse_'+name+"_"+index);},20);
+        }
+
+        $scope.save_warehouse_node = function() {
+            if($scope.warehouse_edit_tmp.editing != -1 ) {
+                $scope.single_product.inventory_warehouses[$scope.warehouse_edit_tmp.editing][$scope.warehouse_edit_tmp.editing_var] = $scope.warehouse_edit_tmp[$scope.warehouse_edit_tmp.editing_var];
+                $scope.update_single_product();
+                //$scope.single_product.inventory_warehouses[$scope.warehouse_edit_tmp.editing].checked = !$scope.single_product.inventory_warehouses[$scope.warehouse_edit_tmp.editing].checked;
+            }
+            $scope.warehouse_edit_tmp.editing_var = "";
+            $scope.warehouse_edit_tmp.editing = -1;
+            $scope.warehouse_edit_tmp.editing_id = -1;
+
+        }
+        $scope.add_warehouse = function() {
+            var new_warehouse = {
+                alert: "",
+                location: "",
+                name:"",
+                qty: 0,
+                location_primary:"",
+                location_secondary:""
+            }
+            $scope.single_product.inventory_warehouses.push(new_warehouse);
+            $scope.update_single_product(
+                function() {
+                    $scope.product_single_details($scope.single_product.basicinfo.id,$scope.currently_open,
+                    function() {
+                        var warehouses = $scope.single_product.inventory_warehouses;
+                        var last_warehouse = warehouses.length-1;
+                        $scope.edit_warehouse_node(last_warehouse,$scope.single_product.inventory_warehouses[last_warehouse].id,'name');
+                    });
+                }
+            );
+        }
+        $scope.remove_warehouses = function() {
+            for(i in $scope.single_product.inventory_warehouses) {
+                if($scope.single_product.inventory_warehouses[i].checked) {
+                    $scope.single_product.inventory_warehouses.splice(i,1);
+                }
+            }
+            $scope.update_single_product();
+        }
+        $scope.select_deselect_warehouse = function(warehouse) {
+            if($scope.warehouse_edit_tmp.editing == -1 ) {
+                warehouse.checked = !warehouse.checked
+            }
+        }
         $scope.update_product_list = function(obj) {
             $http.post('/products/updateproductlist.json',obj).success(function(data){
                 if(data.status) {
@@ -444,19 +500,27 @@ controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$routeParams', 
             // there's more, have a look at the demos and docs...
             callback: $scope.showHideField
         });
-        $scope.update_single_product = function() {
+        $scope.update_single_product = function(post_fn) {
             $http.post('/products/updateproduct.json', $scope.single_product).success(function(data) {
                 if(data.status) {
                     $scope.product_update_status = true;
                     $scope.show_error_msgs = false;
                     $scope.product_update_message = "Successfully Updated";
+
                 } else {
                     $scope.show_error_msgs = true;
                     $scope.error_msgs = ["Some error Occurred"];
                 }
+                if(typeof post_fn !== 'undefined' ) {
+                    $timeout(post_fn,20);
+                }
+
             }).error(function() {
                 $scope.show_error_msgs = true;
                 $scope.error_msgs = ["Some error Occurred"];
+                if(typeof post_fn !== 'undefined' ) {
+                    $timeout(post_fn,20);
+                }
             });
         }
         $scope.product_alias = function () {
@@ -595,6 +659,7 @@ controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$routeParams', 
             }
         }
 
+
         $scope.keyboard_nav_event = function(event) {
             if($('#showProduct').hasClass("in") &&  !$('#showAliasOptions').hasClass("in")) {
                 //console.log("keypress "+event.which);
@@ -645,7 +710,6 @@ controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$routeParams', 
         $('#productstbl').dragtable({dragaccept:'.product_setup-sort',clickDelay:250});
         $scope.sortableOptions = {
             update:$scope.update_single_product,
-            remove:$scope.update_single_product,
             axis: 'x'
         };
 

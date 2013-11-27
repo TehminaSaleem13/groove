@@ -419,7 +419,7 @@ class StoreSettingsController < ApplicationController
               product_inventory.qty = single_row[mapping['inv_wh1']]
             end
             if !mapping['location_primary'].nil? && mapping['location_primary'] > 0
-              product_inventory.location = single_row[mapping['location_primary']]
+              product_inventory.location_primary = single_row[mapping['location_primary']]
             end
             product.product_inventory_warehousess << product_inventory
             if !mapping['category_name'].nil? && mapping['category_name'] > 0
@@ -651,7 +651,7 @@ class StoreSettingsController < ApplicationController
     @store = EbayCredentials.where(:store_id=>params[:storeid])
 
     if !@store.nil? && @store.length > 0
-      @store = @store.first 
+      @store = @store.first
       req = Net::HTTP::Post.new(url.path)
       req.add_field("X-EBAY-API-REQUEST-CONTENT-TYPE", 'text/xml')
       req.add_field("X-EBAY-API-COMPATIBILITY-LEVEL", "675")
@@ -673,11 +673,11 @@ class StoreSettingsController < ApplicationController
       ebaytoken_resp = MultiXml.parse(res.body)
       @result['response'] = ebaytoken_resp
       if ebaytoken_resp['FetchTokenResponse']['Ack'] == 'Success'
-        @store.auth_token = 
+        @store.auth_token =
           ebaytoken_resp['FetchTokenResponse']['eBayAuthToken']
-        @store.productauth_token = 
+        @store.productauth_token =
           ebaytoken_resp['FetchTokenResponse']['eBayAuthToken']
-        @store.ebay_auth_expiration = 
+        @store.ebay_auth_expiration =
           ebaytoken_resp['FetchTokenResponse']['HardExpirationTime']
         if @store.save
           @result['status'] = true

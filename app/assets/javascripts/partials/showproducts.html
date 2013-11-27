@@ -381,23 +381,49 @@
                             <thead>
                                 <tr>
                                     <th>Warehouse Name</th>
-                                    <th>Location</th>
                                     <th>Quantity on Hand</th>
                                     <th>Primary Location</th>
                                     <th>Secondary Location</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr ng-repeat="warehouse in single_product.inventory_warehouses">
-                                    <td>{{warehouse.name}}</td>
-                                    <td>{{warehouse.location}}</td>
-                                    <td>{{warehouse.qty}}</td>
-                                    <td>{{warehouse.location_primary}}</td>
-                                    <td>{{warehouse.location_secondary}}</td>
+                                <tr ng-repeat="warehouse in single_product.inventory_warehouses" ng-class="{info:warehouse.checked}" ng-click="select_deselect_warehouse(warehouse)">
+                                    <td ng-dblclick="edit_warehouse_node($index,warehouse.id,'name')">
+                                        {{warehouse.name}}
+                                        <div ng-show="warehouse_edit_tmp.editing == $index && warehouse_edit_tmp.editing_var == 'name'" class="tag-bubble tag-bubble-input span3 input-text">
+                                            <input xs-input-sync class="span3" name="{{'warehouse_name_'+$index}}" ng-model="warehouse_edit_tmp.name" type="text" placeholder="Edit..." />
+                                            <i ng-show="warehouse_edit_tmp.editing != -1" class="icon-ok" ng-click="save_warehouse_node()"></i>
+                                        </div>
+                                    </td>
+
+                                    <td ng-dblclick="edit_warehouse_node($index,warehouse.id,'qty')">
+                                        {{warehouse.qty}}
+                                        <div ng-show="warehouse_edit_tmp.editing == $index && warehouse_edit_tmp.editing_var == 'qty'" class="tag-bubble tag-bubble-input span3 input-text">
+                                            <input type="number" min="0" class="span3" name="{{'warehouse_qty_'+$index}}" ng-model="warehouse_edit_tmp.qty" />
+
+                                            <i class="icon-ok" ng-click="save_warehouse_node()"></i>
+                                        </div>
+                                    </td>
+
+                                    <td ng-dblclick="edit_warehouse_node($index,warehouse.id,'location_primary')">
+                                        {{warehouse.location_primary}}
+                                        <div ng-show="warehouse_edit_tmp.editing == $index && warehouse_edit_tmp.editing_var == 'location_primary'" class="tag-bubble tag-bubble-input span3 input-text">
+                                            <input xs-input-sync class="span3" name="{{'warehouse_location_primary_'+$index}}" ng-model="warehouse_edit_tmp.location_primary" type="text" placeholder="Edit..." />
+                                            <i class="icon-ok" ng-click="save_warehouse_node()"></i>
+                                        </div>
+                                    </td>
+                                    <td ng-dblclick="edit_warehouse_node($index,warehouse.id,'location_secondary')">
+                                        {{warehouse.location_secondary}}
+                                        <div ng-show="warehouse_edit_tmp.editing == $index && warehouse_edit_tmp.editing_var == 'location_secondary'" class="tag-bubble tag-bubble-input span3 input-text">
+                                            <input xs-input-sync class="span3" name="{{'warehouse_location_secondary_'+$index}}" ng-model="warehouse_edit_tmp.location_secondary" type="text" placeholder="Edit..." />
+                                            <i class="icon-ok" ng-click="save_warehouse_node()"></i>
+                                        </div>
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
-
+                        <button class="btn btn-success" ng-click="add_warehouse()">Add warehouse</button>
+                        <button ng-click="remove_warehouses()" class="btn btn-danger" >Remove selected</button>
                         <fieldset ng-show="single_product.basicinfo.is_kit==1">
                             <legend>Kit Options</legend>
                             <table class="table table-hover table-bordered table-striped table-condensed">
