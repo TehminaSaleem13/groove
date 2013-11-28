@@ -31,7 +31,7 @@ class Order < ActiveRecord::Base
     @order_items.each do |item|
       #add new product if item is not added.
       if ProductSku.where(:sku=>item.sku).length == 0 && 
-        !item.name.nil? && item.name != ''
+        !item.name.nil? && item.name != '' && !item.sku.nil?
         product = Product.new
         product.name = item.name
         product.status = 'New'

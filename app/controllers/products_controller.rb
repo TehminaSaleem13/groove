@@ -120,9 +120,13 @@ class ProductsController < ApplicationController
 								rescue
 								end
 
-								#save
-								if @productdb.save
-									@result['success_imported'] = @result['success_imported'] + 1
+								if ProductSku.where(:sku=>@productdbsku.sku).length == 1
+									#save
+									if @productdb.save
+										@result['success_imported'] = @result['success_imported'] + 1
+									end
+								else
+									@result['previous_imported'] = @result['previous_imported'] + 1
 								end
 							else
 								@result['previous_imported'] = @result['previous_imported'] + 1
@@ -162,64 +166,80 @@ class ProductsController < ApplicationController
 			
 			seller_list =@eBay.GetSellerList(:startTimeFrom=> (Date.today - 3.months).to_datetime,
 				 :startTimeTo =>(Date.today + 1.day).to_datetime)
+
+			# seller_list =@eBay.GetSellerList(:startTimeFrom=> (Date.today - 3.months).to_datetime,
+			# 	 :startTimeTo =>(Date.today + 1.day).to_datetime, :detailLevel=>'ReturnAll', 
+			# 	 :pagination=>{:entriesPerPage=> '10', :pageNumber=>'1'})
 			
 			@result['total_imported']  = seller_list.itemArray.length
+			total_pages = (@result['total_imported'] / 10) +1
+			page_num = 1
+			begin
 
+			seller_list =@eBay.GetSellerList(:startTimeFrom=> (Date.today - 3.months).to_datetime,
+			 	 :startTimeTo =>(Date.today + 1.day).to_datetime, :detailLevel=>'ReturnAll', 
+				 :pagination=>{:entriesPerPage=> '10', :pageNumber=>page_num})
+			page_num = page_num+1
 			seller_list.itemArray.each do |item|
 				#add product to the database
-			if Product.where(:store_product_id=>item.itemID).length  == 0
-				@productdb = Product.new
-				@item = @eBay.getItem(:ItemID => item.itemID).item
-				@productdb.name = @item.title
-				@productdb.store_product_id = item.itemID
-				@productdb.product_type = 'not_used'
-				@productdb.status = 'Active'
-				@productdb.store = @store
+				if Product.where(:store_product_id=>item.itemID).length  == 0
+					@productdb = Product.new
+					@item = @eBay.getItem(:ItemID => item.itemID).item
+					@productdb.name = @item.title
+					@productdb.store_product_id = item.itemID
+					@productdb.product_type = 'not_used'
+					@productdb.status = 'Active'
+					@productdb.store = @store
 
-				#add productdb sku
-				@productdbsku = ProductSku.new
-				if  @item.sKU.nil?
-					@productdbsku.sku = "not_available"
-				else
-					@productdbsku.sku = @item.sKU
-				end
-				#@item.productListingType.uPC
-				@productdbsku.purpose = 'primary'
-
-				#publish the sku to the product record
-				@productdb.product_skus << @productdbsku
-
-				
-				if !@item.pictureDetails.nil?
-					if !@item.pictureDetails.pictureURL.nil? && 
-						@item.pictureDetails.pictureURL.length > 0
-						@productimage = ProductImage.new
-						@productimage.image = "http://i.ebayimg.com" + 
-							@item.pictureDetails.pictureURL.first.request_uri()
-						@productdb.product_images << @productimage
+					#add productdb sku
+					@productdbsku = ProductSku.new
+					if  @item.sKU.nil?
+						@productdbsku.sku = "not_available"
+					else
+						@productdbsku.sku = @item.sKU
 					end
-				end
+					#@item.productListingType.uPC
+					@productdbsku.purpose = 'primary'
 
-				if !@item.primaryCategory.nil?
-					@product_cat = ProductCat.new
-					@product_cat.category = @item.primaryCategory.categoryName
-					@productdb.product_cats << @product_cat
-				end
+					#publish the sku to the product record
+					@productdb.product_skus << @productdbsku
 
-				if !@item.secondaryCategory.nil?
-					@product_cat = ProductCat.new
-					@product_cat.category = @item.secondaryCategory.categoryName
-					@productdb.product_cats << @product_cat
-				end
+					
+					if !@item.pictureDetails.nil?
+						if !@item.pictureDetails.pictureURL.nil? && 
+							@item.pictureDetails.pictureURL.length > 0
+							@productimage = ProductImage.new
+							@productimage.image = "http://i.ebayimg.com" + 
+								@item.pictureDetails.pictureURL.first.request_uri()
+							@productdb.product_images << @productimage
+						end
+					end
 
-				#save
-				if @productdb.save
-					@result['success_imported'] = @result['success_imported'] + 1
+					if !@item.primaryCategory.nil?
+						@product_cat = ProductCat.new
+						@product_cat.category = @item.primaryCategory.categoryName
+						@productdb.product_cats << @product_cat
+					end
+
+					if !@item.secondaryCategory.nil?
+						@product_cat = ProductCat.new
+						@product_cat.category = @item.secondaryCategory.categoryName
+						@productdb.product_cats << @product_cat
+					end
+
+					if ProductSku.where(:sku=>@item.sKU).length == 1
+						#save
+						if @productdb.save
+							@result['success_imported'] = @result['success_imported'] + 1
+						end
+					else
+						@result['previous_imported'] = @result['previous_imported'] + 1
+					end
+				else
+					@result['previous_imported'] = @result['previous_imported'] + 1
 				end
-			else
-				@result['previous_imported'] = @result['previous_imported'] + 1
-			end
-			end
+			end 
+		end while(page_num <= total_pages)
 
 		end
 	elsif @store.store_type == 'Amazon'
@@ -297,8 +317,13 @@ class ProductsController < ApplicationController
 						end
 
 						#save
-						if @productdb.save
-							@result['success_imported'] = @result['success_imported'] + 1
+						if ProductSku.where(:sku=>@productdbsku.sku).length == 1
+							#save
+							if @productdb.save
+								@result['success_imported'] = @result['success_imported'] + 1
+							end
+						else
+							@result['previous_imported'] = @result['previous_imported'] + 1
 						end
 					else
 						@result['previous_imported'] = @result['previous_imported'] + 1

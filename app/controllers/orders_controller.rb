@@ -166,7 +166,9 @@ begin
           @order_item.price = transaction.item.sellingStatus.currentPrice
           @order_item.qty = transaction.quantityPurchased
           @order_item.row_total= transaction.transactionPrice
-          @order_item.sku = transaction.item.itemID
+          if !transaction.item.sKU.nil?
+            @order_item.sku = transaction.item.sKU
+          end
           if !transaction.item.title.nil?
             @order_item.name = transaction.item.title
           else
@@ -174,10 +176,6 @@ begin
           end
 
           @order.order_items << @order_item
-# address_1, :address_2, :city, :country, :customer_comments, :email, :firstname, :increment_id, :lastname, 
-#           @order.address_1 = 
-
-          #@shipping = OrderShipping.new
 
 
           @order.address_1  = transaction.buyer.buyerInfo.shippingAddress.street1
