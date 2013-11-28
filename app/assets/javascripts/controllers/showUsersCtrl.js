@@ -6,6 +6,7 @@ controller('showUsersCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$l
     	});
         $('.modal-backdrop').remove();
         $scope.current_page="show_users";
+        $scope.currently_open = 0;
     	$http.get('/user_settings/userslist.json').success(function(data) {
     		$scope.users = data;
     		$scope.reverse = false;
@@ -92,7 +93,7 @@ controller('showUsersCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$l
                     {
                         $scope.users[userArray[i].index].active = userArray[i].active;
                         $scope.users[userArray[i].index].checked = false;
-                    }                         
+                    }
                 }
                 else
                 {
@@ -131,14 +132,14 @@ controller('showUsersCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$l
             /* update the server with the changed status */
             $http.put('/user_settings/deleteuser.json', userArray).success(function(data){
                         if (data.status)
-                        { 
+                        {
                             $http.get('/user_settings/userslist.json').success(function(data) {
                                 $scope.users = data;
                                 $scope.reverse = false;
                             }).error(function(data) {
                                 $scope.error_msg = "There was a problem retrieving users list";
                                 $scope.show_error = true;
-                            });                         
+                            });
                         }
                         else
                         {
@@ -177,14 +178,14 @@ controller('showUsersCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$l
             /* update the server with the changed status */
             $http.put('/user_settings/duplicateuser.json', userArray).success(function(data){
                         if (data.status)
-                        { 
+                        {
                             $http.get('/user_settings/userslist.json').success(function(data) {
                                 $scope.users = data;
                                 $scope.reverse = false;
                             }).error(function(data) {
                                 $scope.error_msg = "There was a problem retrieving users list";
                                 $scope.show_error = true;
-                            });                         
+                            });
                         }
                         else
                         {
@@ -197,27 +198,33 @@ controller('showUsersCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$l
                         });
         }
 
-    $scope.getuserinfo = function(id) {
-            /* update the server with the changed status */
-            $http.get('/user_settings/getuserinfo.json?id='+id).success(function(data){
-                        if (data.status)
-                        { 
-                            $scope.newUser = data.user;
-                            $scope.newUser.other1 = data.user.other;
-                            $scope.newUser.createEdit_packer = data.user.createEdit_from_packer;
-                            $scope.edit_status = true;
-                            
-                            $('#createUser').modal('show');                
-                        }
-                        else
-                        {
-                            $scope.error_msg = "There was a problem getting user information";
-                            $scope.show_error = true;
-                        }
-                        }).error(function(data){
-                            $scope.error_msg = "There was a problem getting user information";
-                            $scope.show_error = true;
-                        });
+    $scope.getuserinfo = function(id,index) {
+        if(typeof index !== 'undefined'){
+            $scope.currently_open = index;
+        }
+        $scope.loading = true;
+        /* update the server with the changed status */
+        $http.get('/user_settings/getuserinfo.json?id='+id).success(function(data){
+            if (data.status)
+            {
+                $scope.newUser = data.user;
+                $scope.newUser.other1 = data.user.other;
+                $scope.newUser.createEdit_packer = data.user.createEdit_from_packer;
+                $scope.edit_status = true;
+
+                $('#createUser').modal('show');
+            }
+            else
+            {
+                $scope.error_msg = "There was a problem getting user information";
+                $scope.show_error = true;
+            }
+            $scope.loading = false;
+        }).error(function(data){
+            $scope.error_msg = "There was a problem getting user information";
+            $scope.show_error = true;
+            $scope.loading = false;
+        });
     }
 
     $scope.select_deselectall_event = function() {
@@ -232,7 +239,46 @@ controller('showUsersCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$l
     $scope.create_user = function() {
         $scope.edit_status = false;
         $scope.newUser = {};
-        $('#createUser').modal('show'); 
+        $('#createUser').modal('show');
     }
 
+        $scope.keyboard_nav_event = function(event) {
+            if($('#createUser').hasClass("in") &&  $scope.edit_status) {
+                if(event.which == 38) {//up key
+                    if($scope.currently_open > 0) {
+                        $scope.getuserinfo($scope.users[$scope.currently_open -1].id, $scope.currently_open - 1);
+                    } else {
+                        alert("Already at the top of the list");
+                    }
+                } else if(event.which == 40) { //down key
+                    if($scope.currently_open < $scope.users.length - 1) {
+                        $scope.getuserinfo($scope.users[$scope.currently_open + 1].id, $scope.currently_open + 1);
+                    } else {
+                        alert("Already at the bottom of the list");
+                    }
+                } else if(event.which == 39 || event.which == 37) {
+                    //Horizontal movement
+                    var mytab = $("#myTab li");
+                    var count = mytab.length;
+                    var active_index = $("#myTab li.active").index();
+                    var next_index = 1;
+                    var prev_index = count;
+
+                    if(event.which == 39) { //right key
+                        if(active_index+1 < count) {
+                            next_index = active_index+2;
+                        }
+                        $("#myTab li:nth-child("+next_index+") a").click();
+                    } else if(event.which == 37) { //left key
+
+                        if(active_index > 0) {
+                            prev_index = active_index;
+                        }
+                        $("#myTab li:nth-child("+prev_index+") a").click();
+                    }
+                }
+
+            }
+        }
+        $('body').keydown($scope.keyboard_nav_event);
     }]);

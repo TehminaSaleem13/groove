@@ -54,10 +54,10 @@
 
       <tr ng-repeat="store in stores | filter: nameFilter | orderBy:predicate:reverse">
       	<td><input type="checkbox" ng-model="store.checked"/></td>
-      	<td><a href="" role="button" data-toggle="modal" ng-click="getstoreinfo(store.id)">{{store.name}}</a></td>
+      	<td><a href="" role="button" data-toggle="modal" ng-click="getstoreinfo(store.id,$index)">{{store.name}}</a></td>
       	<td>
       		<span ng-show="store.status" class="active">Active</span>
-      		<span ng-hide="store.status" class="inactive">Inactive</span>      		
+      		<span ng-hide="store.status" class="inactive">Inactive</span>
       	</td>
       	<td>
       		<span>{{store.store_type}}</span>
@@ -68,7 +68,7 @@
 	</table>
 </form>
 </div>
- <div id="importOrders" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="importOrders" 
+ <div id="importOrders" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="importOrders"
 aria-hidden="true">
 
   <div class="modal-header">
@@ -104,7 +104,7 @@ aria-hidden="true">
   </div>
 </div>
 <!-- Modal popup for creating user -->
-<div id="createStore" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="createStore" 
+<div id="createStore" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="createStore"
 aria-hidden="true">
 
   <div class="modal-header">
@@ -112,8 +112,8 @@ aria-hidden="true">
     <h3 id="createUserheader" ng-show="edit_status">Update Store</h3>
     <h3 id="createUserheader" ng-hide="edit_status">Create Store</h3>
   </div>
- 
- 
+
+
  <div class="form-horizontal form-horizontal-create" >
   <fieldset>
   <div class="modal-body" id="createStore-body">
@@ -129,7 +129,7 @@ aria-hidden="true">
         <div class="controls">
           <input name="name" xs-input-sync ng-model="newStore.name" type="text" value="" required/>
          </div>
-      </div> 
+      </div>
 
       <div class="control-group">
         <label class="control-label">Store Status</label>
@@ -157,25 +157,25 @@ aria-hidden="true">
     </div>
   </div>
 
-  <div ng-include="'/assets/partials/magentostorecreation.html'" 
+  <div ng-include="'/assets/partials/magentostorecreation.html'"
       ng-show="newStore.store_type =='Magento'"></div>
 
-  <div ng-include="'/assets/partials/ebaystorecreation.html'" 
+  <div ng-include="'/assets/partials/ebaystorecreation.html'"
       ng-show="newStore.store_type =='Ebay'"></div>
 
-  <div ng-include="'/assets/partials/amazonstorecreation.html'" 
+  <div ng-include="'/assets/partials/amazonstorecreation.html'"
       ng-show="newStore.store_type =='Amazon'"></div>
 
   <div ng-include="'/assets/partials/csvstorecreation.html'"
            ng-show="newStore.store_type =='CSV'"></div>
   </div>
-  
 
-  
+
+
   <div class="modal-footer">
   <div class="row-fluid">
     <div class="span6">
-      <span class="label label-info" ng-show="showstoreupdate_status">{{storeupdate_message}}</span>
+      <span class="label label-info" id="showstoreupdate_status" ng-show="showstoreupdate_status">{{storeupdate_message}}</span>
     </div>
     <div class="span6">
       <div class="pull-right">
@@ -204,24 +204,18 @@ aria-hidden="true">
 
 
     <div class="form-horizontal form-horizontal-create" >
-        <fieldset>
-            <div class="modal-body" id="importCsv-body">
-                <div class="alert alert-danger" ng-show="show_error_msgs">
-                    <button type="button" class="close" data-dismiss="alert">&times;</button>
-                    <p ng-repeat="message in error_msgs">{{message}}</p>
-                </div>
 
-
-                <div ng-include="'/assets/partials/csvimportsetup.html'"></div>
-
-
+        <div class="modal-body" id="importCsv-body">
+            <div class="alert alert-danger" ng-show="show_error_msgs">
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                <p ng-repeat="message in error_msgs">{{message}}</p>
+            </div>
+            <div ng-include="'/assets/partials/csvimportsetup.html'"></div>
+        </div>
+    </div>
     <div class="modal-footer">
         <button ng-click="import_csv()"class="btn btn-primary" >Import</button>
         <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-    </div>
-
-    </fieldset>
-
     </div>
 </div>
 </div>

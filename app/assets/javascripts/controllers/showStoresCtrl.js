@@ -1,6 +1,6 @@
 groovepacks_controllers.
 controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$location', '$route', '$cookies',
-    function( $scope, $http, $timeout, $routeParams, $location, $route, $q, $cookies) {
+function( $scope, $http, $timeout, $routeParams, $location, $route, $q, $cookies) {
     $('.modal-backdrop').remove();
         $scope.current_page="show_stores";
         $scope.$on("fileSelected", function (event, args) {
@@ -19,28 +19,30 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
     	$http.get('/home/userinfo.json').success(function(data){
     		$scope.username = data.username;
     	});
-        
+        $scope.currently_open = 0;
         $scope.orderimport_type = 'apiimport';
         $scope.productimport_type = 'apiimport';
         $scope.ebay_show_signin_url = true;
+        $scope.loading = true;
     	$http.get('/store_settings/storeslist.json').success(function(data) {
     		$scope.stores = data;
     		$scope.reverse = false;
             $scope.newUser = {};
             $scope.redirect = $routeParams.redirect;
-            console.log($routeParams);
+           // console.log($routeParams);
             if ($scope.redirect)
             {
                 if ($routeParams.editstatus=='true')
                 {
-                    $scope.edit_status = $routeParams.editstatus; 
-                    $scope.retrieveandupdateusertoken($routeParams.storeid); 
+                    $scope.edit_status = $routeParams.editstatus;
+                    $scope.retrieveandupdateusertoken($routeParams.storeid);
                     $scope.newStore = new Object();
                     $scope.newStore.id = $routeParams.storeid;
                     $scope.newStore.name = $routeParams.name;
                     $scope.newStore.status = $routeParams.status;
                     $scope.newStore.store_type = $routeParams.storetype;
-                    $('#createStore').modal('show');   
+                    $('#createStore').modal('show');
+                    $scope.loading = false;
                 }
                 else
                 {
@@ -49,11 +51,12 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
                     $scope.newStore.name = $routeParams.name;
                     $scope.newStore.status = $routeParams.status;
                     $scope.newStore.store_type = $routeParams.storetype;
-                    $('#createStore').modal('show');   
+                    $('#createStore').modal('show');
+                    $scope.loading = false;
                 }
             }
             else
-            {   
+            {
             // $http.get('/store_settings/getebaysigninurl.json').success(function(data) {
             //     if (data.ebay_signin_url_status)
             //     {
@@ -66,9 +69,11 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
             //         $scope.ebay_signin_url_status = false;
             //     });
             }
+            $scope.loading = false;
     	}).error(function(data) {
     		$scope.error_msg = "There was a problem retrieving stores list";
     		$scope.show_error = true;
+            $scope.loading = false;
     	});
 
         $scope.retrieveandupdateusertoken = function(id) {
@@ -85,7 +90,7 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
 
 
     	$scope.submit = function() {
-
+            $scope.loading = true;
             $http({
                 method: 'POST',
                 headers: { 'Content-Type': false },
@@ -103,6 +108,7 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
     			{
     				$scope.error_msgs = data.messages;
     				$scope.show_error_msgs = true;
+                    $scope.loading = false;
     			}
     			else
     			{
@@ -120,32 +126,40 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
                     {
                         $('#createStore').modal('hide');
                     }
-
+                    $scope.loading = true;
     				$http.get('/store_settings/storeslist.json').success(function(data) {
 						    		var storesScope = angular.element($("#storestbl")).scope();
 								      storesScope.stores = data;
 								      if(!$scope.$$phase) {
 								        storesScope.$apply();
 								      }
-						    	}).error(function(data) {
+
+                        $scope.loading = false;
+                    }).error(function(data) {
 						    		$scope.error_msg = "There was a problem retrieving stores list.";
 						    		$scope.show_error = true;
-						    	});
+                            $scope.loading = false;
+                    });
                     $scope.edit_status = true;
 
                     //Use FileReader API here if it exists (post prototype feature)
                     if(data.csv_import && data.store_id) {
+                        $scope.loading = true;
                         $http.get('/store_settings/csvImportData.json?id='+data.store_id+'&type='+type).success(function(data) {
                             $scope.csv_init(data);
                             $('#importCsv').modal('show');
-
+                            $scope.loading = false;
                         }).error(function(data) {
                             $scope.error_msg = "There was a problem retrieving stores list.";
                             $scope.show_error = true;
+                            $scope.loading = false;
                         });
                     }
     			}
-    		});
+                    $scope.loading = false;
+    		}).error(function(){
+                    $scope.loading = false;
+                });
     	}
 
     	$scope.handlesort = function(predicate) {
@@ -162,7 +176,7 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
     	}
 
         $scope.handle_change_status = function(event) {
-
+            $scope.loading = true;
             storeArray = [];
 
             /* get user objects of checked items */
@@ -194,21 +208,23 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
                         $scope.stores[storeArray[i].index].checked = false;
                     }
 
-                    $scope.select_deselectall = false;                         
+                    $scope.select_deselectall = false;
                 }
                 else
                 {
                     $scope.error_msg = "There was a problem changing stores status";
                     $scope.show_error = true;
                 }
+                $scope.loading = false;
                 }).error(function(data){
                             $scope.error_msg = "There was a problem changing stores status";
                             $scope.show_error = true;
+                    $scope.loading = false;
                     });
         }
 
         $scope.handle_store_delete_event = function(event) {
-
+            $scope.loading = true;
             storeArray = [];
             /* get user objects of checked items */
             for( var store_index=0; store_index<= $scope.stores.length-1; store_index++)
@@ -221,11 +237,11 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
                     storeArray.push(store);
                 }
             }
-            console.log(storeArray);
+           // console.log(storeArray);
             /* update the server with the changed status */
             $http.put('/store_settings/deletestore.json', storeArray).success(function(data){
                         if (data.status)
-                        { 
+                        {
                             $http.get('/store_settings/storeslist.json').success(function(data) {
                                 $scope.stores = data;
                                 $scope.reverse = false;
@@ -239,14 +255,16 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
                             $scope.error_msg = "There was a problem deleting stores";
                             $scope.show_error = true;
                         }
+                $scope.loading = false;
                         }).error(function(data){
                             $scope.error_msg = "There was a problem changing stores status";
                             $scope.show_error = true;
+                    $scope.loading = false;
                         });
         }
 
         $scope.handle_store_duplicate_event = function(event) {
-
+            $scope.loading = true;
             storeArray = [];
             /* get user objects of checked items */
             for( var store_index=0; store_index<= $scope.stores.length-1; store_index++)
@@ -261,25 +279,31 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
             }
             /* update the server with the changed status */
             $http.put('/store_settings/duplicatestore.json', storeArray).success(function(data){
-                        if (data.status)
-                        { 
-                            $http.get('/store_settings/storeslist.json').success(function(data) {
-                                $scope.stores = data;
-                                $scope.reverse = false;
-                            }).error(function(data) {
-                                $scope.error_msg = "There was a problem retrieving stores list";
-                                $scope.show_error = true;
-                            });                         
-                        }
-                        else
-                        {
-                            $scope.error_msg = "There was a problem duplicating stores";
-                            $scope.show_error = true;
-                        }
-                        }).error(function(data){
-                            $scope.error_msg = "There was a problem duplicating stores";
-                            $scope.show_error = true;
-                        });
+                if (data.status)
+                {
+                    $scope.loading = true;
+                    $http.get('/store_settings/storeslist.json').success(function(data) {
+                        $scope.stores = data;
+                        $scope.reverse = false;
+                        $scope.loading = false;
+                    }).error(function(data) {
+                        $scope.error_msg = "There was a problem retrieving stores list";
+                        $scope.show_error = true;
+                            $scope.loading = false;
+                    });
+                }
+                else
+                {
+                    $scope.error_msg = "There was a problem duplicating stores";
+                    $scope.show_error = true;
+                    $scope.loading = false;
+                }
+                $scope.loading = false;
+            }).error(function(data){
+                $scope.error_msg = "There was a problem duplicating stores";
+                $scope.show_error = true;
+                $scope.loading = false;
+            });
         }
     $scope.ebayuserfetchtoken = function(session_id) {
         $http.get('/store_settings/ebayuserfetchtoken.json').success(function(data){
@@ -297,7 +321,7 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
                     $scope.newStore.id = data.storeid
                     $scope.edit_status = true;
                 }
-            });           
+            });
             }
             //console.log(data);
         });
@@ -307,7 +331,7 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
         $http.get('/store_settings/deleteebaytoken.json?storeid='+$scope.newStore.id).success(function(data){
                     if (data.status)
                     {
-                        $scope.getebaysigninurl();      
+                        $scope.getebaysigninurl();
                     }
                     //console.log(data);
                 });
@@ -325,79 +349,85 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
 
                         }).error(function(data) {
                             $scope.ebay_signin_url_status = false;
-                        });       
-    }
-    $scope.getstoreinfo = function(id) {
-            /* update the server with the changed status */
-            $http.get('/store_settings/getstoreinfo.json?id='+id).success(function(data){
-                $scope.importproduct_status ="";
-                $scope.importorder_status ="";
-                $scope.importproductstatus_show = false;
-                $scope.importorderstatus_show = false;
-                        if (data.status)
-                        { 
-                            $scope.newStore = data.store;
-                            $scope.edit_status = true;
-                            if (data.credentials.status == true)
-                            {
-                            if (data.store.store_type == 'Magento')
-                            {
-                                $scope.newStore.host = data.credentials.magento_credentials.host;
-                                $scope.newStore.username = data.credentials.magento_credentials.username;  
-                                $scope.newStore.password = data.credentials.magento_credentials.password;
-                                $scope.newStore.api_key = data.credentials.magento_credentials.api_key;
-
-                                $scope.newStore.producthost = data.credentials.magento_credentials.producthost;
-                                $scope.newStore.productusername = data.credentials.magento_credentials.productusername;  
-                                $scope.newStore.productpassword = data.credentials.magento_credentials.productpassword;
-                                $scope.newStore.productapi_key = data.credentials.magento_credentials.productapi_key;
-                                $scope.newStore.import_products = data.credentials.magento_credentials.import_products; 
-                                $scope.newStore.import_images = data.credentials.magento_credentials.import_images;              
-
-                            }
-                            if (data.store.store_type == 'Ebay')
-                            {
-                                $scope.newStore.ebay_auth_token = data.credentials.ebay_credentials.auth_token;  
-                                $scope.newStore.productebay_auth_token = data.credentials.ebay_credentials.productauth_token;  
-                                $scope.newStore.import_products = data.credentials.ebay_credentials.import_products; 
-                                $scope.newStore.import_images = data.credentials.ebay_credentials.import_images;
-                                if($scope.newStore.ebay_auth_token != '')
-                                {
-                                    $scope.ebay_show_signin_url = false; 
-                                }
-                                else
-                                {
-                                    $scope.ebay_show_signin_url = true; 
-                                    $scope.getebaysigninurl(); 
-                                }
-
-                            }
-                            if (data.store.store_type == 'Amazon')
-                            {
-                                $scope.newStore.marketplace_id = data.credentials.amazon_credentials.marketplace_id; 
-                                $scope.newStore.merchant_id = data.credentials.amazon_credentials.merchant_id;
-
-
-                                $scope.newStore.productmarketplace_id = data.credentials.amazon_credentials.productmarketplace_id; 
-                                $scope.newStore.productmerchant_id = data.credentials.amazon_credentials.productmerchant_id;        
-                                $scope.newStore.import_products = data.credentials.amazon_credentials.import_products; 
-                                $scope.newStore.import_images = data.credentials.amazon_credentials.import_images;
-                                $scope.newStore.productreport_id = data.credentials.amazon_credentials.productreport_id;
-                                $scope.newStore.productgenerated_report_id = data.credentials.amazon_credentials.productgenerated_report_id   
-                            }
-
-                            }
-                            $('#createStore').modal('show');                
-                        }
-                        else
-                        {
-                            $scope.error_msg = "There was a problem getting store information";
-                            $scope.show_error = true;
-                        }
-                        }).error(function(data){
-                            $scope.error_msg = "There was a problem getting store information";
-                            $scope.show_error = true;
                         });
+    }
+    $scope.getstoreinfo = function(id,index) {
+        $scope.loading = true;
+        if(typeof index !== 'undefined'){
+            $scope.currently_open = index;
+        }
+        /* update the server with the changed status */
+        $http.get('/store_settings/getstoreinfo.json?id='+id).success(function(data){
+            $scope.importproduct_status ="";
+            $scope.importorder_status ="";
+            $scope.importproductstatus_show = false;
+            $scope.importorderstatus_show = false;
+            if (data.status)
+            {
+                $scope.newStore = data.store;
+                $scope.edit_status = true;
+                if (data.credentials.status == true)
+                {
+                if (data.store.store_type == 'Magento')
+                {
+                    $scope.newStore.host = data.credentials.magento_credentials.host;
+                    $scope.newStore.username = data.credentials.magento_credentials.username;
+                    $scope.newStore.password = data.credentials.magento_credentials.password;
+                    $scope.newStore.api_key = data.credentials.magento_credentials.api_key;
+
+                    $scope.newStore.producthost = data.credentials.magento_credentials.producthost;
+                    $scope.newStore.productusername = data.credentials.magento_credentials.productusername;
+                    $scope.newStore.productpassword = data.credentials.magento_credentials.productpassword;
+                    $scope.newStore.productapi_key = data.credentials.magento_credentials.productapi_key;
+                    $scope.newStore.import_products = data.credentials.magento_credentials.import_products;
+                    $scope.newStore.import_images = data.credentials.magento_credentials.import_images;
+
+                }
+                if (data.store.store_type == 'Ebay')
+                {
+                    $scope.newStore.ebay_auth_token = data.credentials.ebay_credentials.auth_token;
+                    $scope.newStore.productebay_auth_token = data.credentials.ebay_credentials.productauth_token;
+                    $scope.newStore.import_products = data.credentials.ebay_credentials.import_products;
+                    $scope.newStore.import_images = data.credentials.ebay_credentials.import_images;
+                    if($scope.newStore.ebay_auth_token != '')
+                    {
+                        $scope.ebay_show_signin_url = false;
+                    }
+                    else
+                    {
+                        $scope.ebay_show_signin_url = true;
+                        $scope.getebaysigninurl();
+                    }
+
+                }
+                if (data.store.store_type == 'Amazon')
+                {
+                    $scope.newStore.marketplace_id = data.credentials.amazon_credentials.marketplace_id;
+                    $scope.newStore.merchant_id = data.credentials.amazon_credentials.merchant_id;
+
+
+                    $scope.newStore.productmarketplace_id = data.credentials.amazon_credentials.productmarketplace_id;
+                    $scope.newStore.productmerchant_id = data.credentials.amazon_credentials.productmerchant_id;
+                    $scope.newStore.import_products = data.credentials.amazon_credentials.import_products;
+                    $scope.newStore.import_images = data.credentials.amazon_credentials.import_images;
+                    $scope.newStore.productreport_id = data.credentials.amazon_credentials.productreport_id;
+                    $scope.newStore.productgenerated_report_id = data.credentials.amazon_credentials.productgenerated_report_id
+                }
+
+                }
+                $('#createStore').modal('show');
+            }
+            else
+            {
+                $scope.error_msg = "There was a problem getting store information";
+                $scope.show_error = true;
+            }
+            $scope.loading = false;
+        }).error(function(data){
+            $scope.error_msg = "There was a problem getting store information";
+            $scope.show_error = true;
+            $scope.loading = false;
+        });
     }
 
     $scope.select_deselectall_event = function() {
@@ -415,6 +445,7 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
         $scope.newStore = {};
         $scope.ebay_show_signin_url = true;
         $scope.newStore.status = 1;
+        $scope.loading = false;
         $http.get('/store_settings/getebaysigninurl.json').success(function(data) {
             if (data.ebay_signin_url_status)
             {
@@ -425,8 +456,9 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
 
             }).error(function(data) {
                 $scope.ebay_signin_url_status = false;
+
             });
-        $('#createStore').modal('show'); 
+        $('#createStore').modal('show');
     }
 
     $scope.copydata =function(event) {
@@ -436,18 +468,18 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
             if ($scope.newStore.store_type == 'Magento')
                 {
                     $scope.newStore.producthost = $scope.newStore.host;
-                    $scope.newStore.productusername = $scope.newStore.username;  
+                    $scope.newStore.productusername = $scope.newStore.username;
                     $scope.newStore.productpassword = $scope.newStore.password;
-                    $scope.newStore.productapi_key = $scope.newStore.api_key;       
+                    $scope.newStore.productapi_key = $scope.newStore.api_key;
                 }
                 if ($scope.newStore.store_type == 'Ebay')
                 {
-                    $scope.newStore.productebay_auth_token = $scope.newStore.ebay_auth_token;        
+                    $scope.newStore.productebay_auth_token = $scope.newStore.ebay_auth_token;
                 }
                 if ($scope.newStore.store_type == 'Amazon')
                 {
-                    $scope.newStore.productmarketplace_id = $scope.newStore.marketplace_id; 
-                    $scope.newStore.productmerchant_id = $scope.newStore.merchant_id;      
+                    $scope.newStore.productmarketplace_id = $scope.newStore.marketplace_id;
+                    $scope.newStore.productmerchant_id = $scope.newStore.merchant_id;
                 }
         }
         else
@@ -455,18 +487,18 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
                 if ($scope.newStore.store_type == 'Magento')
                 {
                     $scope.newStore.producthost = "";
-                    $scope.newStore.productusername = "";  
+                    $scope.newStore.productusername = "";
                     $scope.newStore.productpassword = "";
-                    $scope.newStore.productapi_key = "";       
+                    $scope.newStore.productapi_key = "";
                 }
                 if ($scope.newStore.store_type == 'Ebay')
                 {
-                    $scope.newStore.productebay_auth_token = "";    
+                    $scope.newStore.productebay_auth_token = "";
                 }
                 if ($scope.newStore.store_type == 'Amazon')
                 {
-                    $scope.newStore.productmarketplace_id = ""; 
-                    $scope.newStore.productmerchant_id = "";      
+                    $scope.newStore.productmarketplace_id = "";
+                    $scope.newStore.productmerchant_id = "";
                 }
         }
     }
@@ -489,9 +521,11 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
                     }
                 }
             //$scope.importproduct_status = "Import completed";
+                $scope.loading = false;
             }).error(function(data) {
-                $scope.importorder_status = "Import failed. Please check your credentials."
-            });      
+                $scope.importorder_status = "Import failed. Please check your credentials.";
+                    $scope.loading = false;
+            });
     }
 
     $scope.import_products = function(report_id) {
@@ -512,16 +546,19 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
                 }
                 }
             //$scope.importproduct_status = "Import completed";
+                $scope.loading = false;
             }).error(function(data) {
-                $scope.importproduct_status = "Import failed. Please check your credentials"
-            });      
+                $scope.importproduct_status = "Import failed. Please check your credentials";
+                    $scope.loading = false;
+            });
     }
 
     $scope.request_import_products = function() {
+        $scope.loading = true;
             $scope.importproduct_status = "Import request in progress";
             $scope.importproductstatus_show = true;
             $http.get('/products/requestamazonreport/'+$scope.newStore.id+'.json').success(function(data){
-                console.log(data);
+               // console.log(data);
                 if (data.status)
                 {
                 $scope.importproduct_status="Report for product import has been submitted. "+
@@ -534,11 +571,14 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
                 $scope.importproduct_status = "Report request failed. Please check your credentials."
                 }
             //$scope.importproduct_status = "Import completed";
+                $scope.loading = false;
             }).error(function(data) {
-                $scope.importproduct_status = "Report request failed. Please check your credentials."
-            });  
+                $scope.importproduct_status = "Report request failed. Please check your credentials.";
+                    $scope.loading = false;
+            });
     }
     $scope.check_request_import_products =function() {
+        $scope.loading = true;
             $scope.importproduct_status = "Checking status of the request";
             $scope.importproductstatus_show = true;
             $http.get('/products/checkamazonreportstatus/'+$scope.newStore.id+'.json').success(function(data){
@@ -552,13 +592,16 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
                 {
                 $scope.importproduct_status = "Error checking status."
                 }
+                $scope.loading = false;
             //$scope.importproduct_status = "Import completed";
             }).error(function(data) {
-                $scope.importproduct_status = "Error checking status. Please try again later"
-            });  
+                $scope.importproduct_status = "Error checking status. Please try again later";
+                    $scope.loading = false;
+            });
     }
     /* Import orders from all the active stores */
     $scope.import_all_orders =function() {
+        $scope.loading = true;
             $('#importOrders').modal('show');
             /* Get all the active stores */
             $http.get('/store_settings/getactivestores.json').success(function(data) {
@@ -573,13 +616,13 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
                             activeStore.info = data.stores[i];
                             activeStore.message="";
                             activeStore.status="in_progress";
-                            $scope.active_stores.push(activeStore); 
+                            $scope.active_stores.push(activeStore);
                     }
                     /* for each store send a import request */
                     for (var i = 0; i < $scope.active_stores.length; i++)
                     {
                        //$scope.active_stores[i].status="in_progress";
-
+                        $scope.loading = true;
                         $http.get('/orders/importorders/'+$scope.active_stores[i].info.id+'.json?activestoreindex='+i).success(
                             function(orderdata){
 
@@ -597,20 +640,24 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
                                     $scope.active_stores[orderdata.activestoreindex].message += orderdata.messages[j];
                                 }
                             }
+                                $scope.loading = false;
                         }).error(function(data) {
-                            console.log(data);
-                            });    
+                                $scope.loading = false;
+                           // console.log(data);
+                            });
                     }
-                     
+
                 }
                 else
                 {
-                    console.log("data status false");
+                   // console.log("data status false");
                 $scope.message = "Getting active stores returned error.";
                 }
+                $scope.loading = false;
             }).error(function(data) {
                 $scope.message = "Getting active stores failed.";
-            });  
+                    $scope.loading = false;
+            });
     }
     $scope.csv_init = function(data) {
         $scope.csvimporter = {};
@@ -628,6 +675,7 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
         $scope.current.type = $scope.csvimporter.type;
         $scope.parse();
         $scope.check_disable();
+        $scope.loading = false;
     }
 
     $scope.check_disable = function () {
@@ -638,6 +686,7 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
     }
 
     $scope.import_csv = function() {
+        $scope.loading = true;
         $http.post('store_settings/csvDoImport.json',$scope.current).success(function(data){
             if(!data.status) {
                 $scope.error_msgs = data.messages;
@@ -650,13 +699,21 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
                 $scope.csvimporter = {};
                 $('#importCsv').modal('hide');
             }
+            $scope.loading = false;
+        }).error(function(){
+                $scope.show_error_msgs = true;
+                $scope.error_msgs = ["Some Error Occurred"];
+                $scope.loading = false;
         });
-
     }
+
     $scope.parse = function() {
         //Show loading sign
-        //This needs WebWorkers to work for real, apply in post-prototype version
-        $("#csv_parsing").show();
+        $scope.loading = true;
+        $timeout($scope.doparse,2);
+    }
+
+    $scope.doparse = function(){
         $scope.current.data = [];
         $scope.empty_cols = [];
         in_entry = false;
@@ -727,8 +784,7 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
         $scope.current.data.pop(1);
         final_record = [];
         row_array = [];
-        //remove loading sign
-        $("#csv_parsing").hide();
+        $scope.loading = false;
     }
 
     $scope.strip_char = function(data) {
@@ -767,4 +823,33 @@ controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$
         $scope.showstoreupdate_status = false;
         $scope.storeupdate_message = '';
     }
-    }]);
+    $scope.$watch('showstoreupdate_status',function() {
+        if($scope.showstoreupdate_status) {
+            $("#showstoreupdate_status").fadeTo("fast",1,function() {
+                $("#showstoreupdate_status").fadeTo("slow", 0 ,function() {
+                    $scope.showstoreupdate_status = false;
+                });
+            });
+        }
+    });
+
+    $scope.keyboard_nav_event = function(event) {
+        if($('#createStore').hasClass("in") && $scope.edit_status) {
+            if(event.which == 38) {//up key
+                if($scope.currently_open > 0) {
+                    $scope.getstoreinfo($scope.stores[$scope.currently_open -1].id, $scope.currently_open - 1);
+                } else {
+                    alert("Already at the top of the list");
+                }
+            } else if(event.which == 40) { //down key
+                if($scope.currently_open < $scope.stores.length - 1) {
+                    $scope.getstoreinfo($scope.stores[$scope.currently_open + 1].id, $scope.currently_open + 1);
+                } else {
+                    alert("Already at the bottom of the list");
+                }
+            }
+
+        }
+    }
+    $('body').keydown($scope.keyboard_nav_event);
+}]);

@@ -19,10 +19,10 @@ class OrdersController < ApplicationController
   @result['messages'] = []
   @result['total_imported'] = 0
   @result['success_imported'] = 0
-  @result['previous_imported'] = 0 
+  @result['previous_imported'] = 0
   @result['activestoreindex'] = 0
 
-  if !params[:activestoreindex].nil? 
+  if !params[:activestoreindex].nil?
     @result['activestoreindex'] = params[:activestoreindex]
   end
 
@@ -36,7 +36,7 @@ begin
 
       if !client.nil?
                  # @result['client'] = client
-        response = client.call(:login,  message: { apiUser: @magento_credentials.first.username, 
+        response = client.call(:login,  message: { apiUser: @magento_credentials.first.username,
           apikey: @magento_credentials.first.api_key })
 
           #@result['response'] = response
@@ -60,7 +60,7 @@ begin
             @result['total_imported'] =  response.body[:sales_order_list_response][:result][:item].length
 
             response.body[:sales_order_list_response][:result][:item].each do |item|
-              order_info = client.call(:sales_order_info, 
+              order_info = client.call(:sales_order_info,
                 message:{sessionId: session, orderIncrementId: item[:increment_id]})
 
               order_info = order_info.body[:sales_order_info_response][:result]
@@ -78,7 +78,7 @@ begin
                     @order_item.qty = line_items[:item][:qty_ordered]
                     @order_item.row_total= line_items[:item][:row_total]
                     @order_item.name = line_items[:item][:name]
-                    @order_item.sku = line_items[:item][:sku] 
+                    @order_item.sku = line_items[:item][:sku]
                     @order.order_items << @order_item
                 else
                   line_items[:item].each do |line_item|
@@ -91,7 +91,7 @@ begin
                     @order.order_items << @order_item
                   end
                 end
-              
+
               @order.address_1  = order_info[:shipping_address][:street]
               @order.city = order_info[:shipping_address][:city]
               @order.country = order_info[:shipping_address][:country_id]
@@ -103,7 +103,7 @@ begin
               if @order.save
                   if !@order.addnewitems
                     @result['status'] &= false
-                    @result['messages'].push('Problem adding new items')  
+                    @result['messages'].push('Problem adding new items')
                   end
                   @order.addactivity("Order Import", @store.name+" Import")
                   @order.order_items.each do |item|
@@ -117,15 +117,15 @@ begin
             end
           else
             @result['status'] = false
-            @result['messages'].push('Problem retrieving products list')           
+            @result['messages'].push('Problem retrieving products list')
           end
         else
           @result['status'] = false
-          @result['messages'].push('Problem connecting to Magento API. Authentication failed')  
+          @result['messages'].push('Problem connecting to Magento API. Authentication failed')
         end
       else
         @result['status'] = false
-        @result['messages'].push('Problem connecting to Magento API. Check the hostname of the server') 
+        @result['messages'].push('Problem connecting to Magento API. Check the hostname of the server')
       end
     else
       @result['status'] = false
@@ -135,7 +135,7 @@ begin
     #do ebay connect.
     @ebay_credentials = EbayCredentials.where(:store_id => @store.id)
 
-    if @ebay_credentials.length > 0 
+    if @ebay_credentials.length > 0
       @credential = @ebay_credentials.first
       require 'eBayAPI'
       if ENV['EBAY_SANDBOX_MODE'] == 'YES'
@@ -143,11 +143,11 @@ begin
       else
         sandbox = false
       end
-      @eBay = EBay::API.new(@credential.auth_token, 
-        ENV['EBAY_DEV_ID'], ENV['EBAY_APP_ID'], 
+      @eBay = EBay::API.new(@credential.auth_token,
+        ENV['EBAY_DEV_ID'], ENV['EBAY_APP_ID'],
         ENV['EBAY_CERT_ID'], :sandbox=>sandbox)
 
-      seller_list =@eBay.GetSellerTransactions(:orderRole=> 'Seller', :orderStatus=>'Paid', 
+      seller_list =@eBay.GetSellerTransactions(:orderRole=> 'Seller', :orderStatus=>'Paid',
         :createTimeFrom=> (Date.today - 3.months).to_datetime,
          :createTimeTo =>(Date.today + 1.day).to_datetime, :detailLevel=>'ReturnAll')
       if (seller_list.transactionArray != nil)
@@ -178,6 +178,7 @@ begin
           @order.order_items << @order_item
 
 
+
           @order.address_1  = transaction.buyer.buyerInfo.shippingAddress.street1
           @order.city = transaction.buyer.buyerInfo.shippingAddress.cityName
           #@shipping.region = transaction.buyer.buyerInfo.shippingAddress.stateOrProvince
@@ -189,7 +190,7 @@ begin
           if @order.save
             if !@order.addnewitems
               @result['status'] &= false
-              @result['messages'].push('Problem adding new items')  
+              @result['messages'].push('Problem adding new items')
             end
             @order.addactivity("Order Import", @store.name+" Import")
             @order.order_items.each do |item|
@@ -202,12 +203,12 @@ begin
         end
       end
     end
-    
+
     end
   elsif @store.store_type == 'Amazon'
     @amazon_credentials = AmazonCredentials.where(:store_id => @store.id)
 
-    if @amazon_credentials.length > 0 
+    if @amazon_credentials.length > 0
       @credential = @amazon_credentials.first
       mws = MWS.new(:aws_access_key_id => ENV['AMAZON_MWS_ACCESS_KEY_ID'],
         :secret_access_key => ENV['AMAZON_MWS_SECRET_ACCESS_KEY'],
@@ -218,7 +219,7 @@ begin
       #@result['aws-rewuest_status'] = mws.reports.get_report_request_list
       response = mws.orders.list_orders :last_updated_after => 2.months.ago, :order_status => ['Unshipped', 'PartiallyShipped']
             #@result['report_id'] = response.body
-      
+
       @orders = response.orders
       if !@orders.nil?
         @result['total_imported'] = @orders.length
@@ -231,7 +232,7 @@ begin
           @order.order_placed_time = order.purchase_date
 
           @order.store = @store
-          
+
           order_items  = mws.orders.list_order_items :amazon_order_id => order.amazon_order_id
           @result['orderitem'] = order_items
 
@@ -256,7 +257,7 @@ begin
           if @order.save
             if !@order.addnewitems
               @result['status'] &= false
-              @result['messages'].push('Problem adding new items')  
+              @result['messages'].push('Problem adding new items')
             end
             @order.addactivity("Order Import", @store.name+" Import")
             @order.order_items.each do |item|
@@ -340,12 +341,12 @@ begin
 
   # Get list of orders based on limit and offset. It is by default sorted by updated_at field
   # If sort parameter is passed in then the corresponding sort filter will be used to sort the list
-  # The expected parameters in params[:sort] are 
-  # . The API supports to provide order of sorting namely ascending or descending. The parameter can be 
+  # The expected parameters in params[:sort] are
+  # . The API supports to provide order of sorting namely ascending or descending. The parameter can be
   # passed in using params[:order] = 'ASC' or params[:order] ='DESC' [Note: Caps letters] By default, if no order is mentioned,
-  # then the API considers order to be descending.The API also supports a product status filter. 
-  # The filter expects one of the following parameters in params[:filter] 'all', 'active', 'inactive', 'new'. 
-  # If no filter is passed, then the API will default to 'active' 
+  # then the API considers order to be descending.The API also supports a product status filter.
+  # The filter expects one of the following parameters in params[:filter] 'all', 'active', 'inactive', 'new'.
+  # If no filter is passed, then the API will default to 'active'
   def getorders
     @result = Hash.new
     @result[:status] = true
@@ -354,8 +355,8 @@ begin
     status_filter = 'Awaiting'
     limit = 10
     offset = 0
-    supported_sort_keys = ['updated_at', 'store', 'notes', 
-                'store_order_id', 'order_date', 'items', 'recipient', 'status' ]
+    supported_sort_keys = ['updated_at', 'store', 'notes',
+                'store_order_id', 'order_date', 'items', 'recipient', 'status','email','tracking_num','city','state','postcode','country' ]
     supported_order_keys = ['ASC', 'DESC' ] #Caps letters only
     supported_status_filters = ['all', 'awaiting', 'onhold', 'cancelled', 'scanned']
 
@@ -365,15 +366,15 @@ begin
 
     offset = params[:offset] if !params[:offset].nil? && params[:offset].to_i >= 0
 
-    sort_key = params[:sort] if !params[:sort].nil? && 
+    sort_key = params[:sort] if !params[:sort].nil? &&
       supported_sort_keys.include?(params[:sort])
 
-    sort_order = params[:order] if !params[:order].nil? && 
+    sort_order = params[:order] if !params[:order].nil? &&
       supported_order_keys.include?(params[:order])
 
-    status_filter = params[:filter] if !params[:filter].nil? && 
+    status_filter = params[:filter] if !params[:filter].nil? &&
       supported_status_filters.include?(params[:filter])
-    
+
       #overrides
 
     if sort_key == 'store_order_id'
@@ -402,7 +403,7 @@ begin
         "orders.store_id = stores.id ORDER BY stores.name "+
         sort_order+" LIMIT "+limit+" OFFSET "+offset)
       elsif sort_key == 'items'
-        @orders = Order.find_by_sql("SELECT orders.* FROM orders, order_items"+ 
+        @orders = Order.find_by_sql("SELECT orders.*, count(order_items.id) AS count FROM orders, order_items"+
             " WHERE order_items.order_id = orders.id GROUP BY order_items.order_id ORDER BY count "+sort_order+" LIMIT "+limit+" OFFSET "+offset)
       else
       @orders = Order.limit(limit).offset(offset).order(sort_key+" "+sort_order)
@@ -413,7 +414,7 @@ begin
         "' AND orders.store_id = stores.id ORDER BY stores.name "+
         sort_order+" LIMIT "+limit+" OFFSET "+offset)
       elsif sort_key == 'items'
-        @orders = Order.find_by_sql("SELECT orders.*, count(order_items.id) AS count FROM orders, order_items"+ 
+        @orders = Order.find_by_sql("SELECT orders.*, count(order_items.id) AS count FROM orders, order_items"+
             " WHERE orders.status='"+status_filter+"' AND order_items.order_id = orders.id GROUP BY order_items.order_id "+
             "ORDER BY count "+sort_order+" LIMIT "+limit+" OFFSET "+offset)
       else
@@ -437,9 +438,15 @@ begin
     @order_hash['itemslength'] = OrderItem.where(:order_id=>order.id).length
     @order_hash['status'] = order.status
     @order_hash['recipient'] = "#{order.firstname} #{order.lastname}"
+    @order_hash['email'] = order.email
+    @order_hash['tracking_num'] = order.tracking_num
+    @order_hash['city'] = order.city
+    @order_hash['state'] = order.state
+    @order_hash['postcode'] =order.postcode
+    @order_hash['country'] = order.country
     @orders_result.push(@order_hash)
     end
-    
+
     @result['orders'] = @orders_result
 
     respond_to do |format|
@@ -525,10 +532,10 @@ begin
 
     if !params[:search].nil? && params[:search] != ''
       search = params[:search]
-      
+
       #todo: include sku and storename in search as well in future.
-      @products = Order.find_by_sql("SELECT * from ORDERS WHERE 
-                      increment_id like '%"+search+"%' OR status like '%"+search+"%' LIMIT #{limit} 
+      @products = Order.find_by_sql("SELECT * from ORDERS WHERE
+                      increment_id like '%"+search+"%' OR status like '%"+search+"%' LIMIT #{limit}
                       OFFSET #{offset}")
 
       @orders_result = []
@@ -543,10 +550,16 @@ begin
       @order_hash['itemslength'] = order.order_items
       @order_hash['status'] = order.status
       @order_hash['recipient'] = order.firstname +" "+order.lastname
+      @order_hash['email'] = order.email
+      @order_hash['tracking_num'] = order.tracking_num
+      @order_hash['city'] = order.city
+      @order_hash['state'] = order.state
+      @order_hash['postcode'] =order.postcode
+      @order_hash['country'] = order.country
       @orders_result.push(@order_hash)
       end
-      
-      
+
+
       @result['orders'] = @orders_result
     else
       @result['status'] = false
@@ -592,7 +605,7 @@ begin
     if !@order.nil?
       @result['order'] = Hash.new
       @result['order']['basicinfo'] = @order
-      
+
       #Retrieve order items
       @result['order']['items'] = []
       @order.order_items.each do |orderitem|
@@ -600,10 +613,7 @@ begin
         @orderitem['iteminfo'] = orderitem
         productsku = ProductSku.where(:sku => orderitem.sku)
         if productsku.length > 0
-           @products = Product.where(:id => productsku.first.product_id)
-           if @products.length > 0
-            @orderitem['productinfo'] =@products.first
-           end
+          @orderitem['productinfo'] = Product.find_by_id(productsku.first.product_id)
           @orderitem['productimages'] = ProductImage.where(:product_id=>productsku.first.product_id)
         else
           @orderitem['productinfo'] = nil
@@ -635,14 +645,14 @@ begin
 
   def removeitem
   end
-  
+
   def recordexception
     @result = Hash.new
     @result['status'] = true
 
     @order = Order.find(params[:id])
 
-    if @order.order_exceptions.nil? 
+    if @order.order_exceptions.nil?
       @exception = OrderExceptions.new
       @exception.order_id = @order.id
     else
@@ -672,7 +682,7 @@ begin
 
     @order = Order.find(params[:id])
 
-    if @order.order_exceptions.nil? 
+    if @order.order_exceptions.nil?
       @result['status'] &= false
       @result['messages'].push('Order does not have exception to clear')
     else
@@ -700,6 +710,7 @@ begin
     @skus = ProductSku.where(:product_id=>@product.id).where(:purpose=>'primary')
     if @skus.length > 0
       @orderitem = OrderItem.new
+      @orderitem.name = @product.name
       @orderitem.price = params[:price]
       @orderitem.qty = params[:qty]
       @orderitem.row_total = params[:price].to_f * params[:qty].to_f
@@ -744,5 +755,49 @@ begin
       format.json { render json: @result }
     end
   end
-  
+
+  def updateorderlist
+    @result = Hash.new
+    @result['status'] = true
+    @order = Order.find_by_id(params[:id])
+    if @order.nil?
+      @result['status'] = false
+      @result['error_msg'] = "Cannot find Order"
+    else
+      accepted_data = {
+          "ordernum" => "increment_id",
+          "orderdate" => "order_placed_time",
+          "recipient" => 1,
+          "notes" => "notes_internal",
+          "status" => "status",
+          "email" => "email",
+          "tracking_num" => "tracking_num",
+          "city"=>"city",
+          "state"=>"state",
+          "postcode"=>"postcode",
+          "country"=>"country"
+      }
+      if accepted_data.has_key?(params[:var])
+        if params[:var] == "recipient"
+          arr = params[:value].blank? ? [] : params[:value].split(" ")
+          @order.lastname = arr.pop()
+          @order.firstname = arr.join(" ")
+        else
+          key = accepted_data[params[:var]]
+          @order[key] = params[:value]
+        end
+        unless @order.save
+          @result['status'] &= false
+          @result['error_msg'] = "Could not save order info"
+        end
+      else
+        @result['status'] &= false
+        @result['error_msg'] = "Unknown field"
+      end
+    end
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json: @result }
+    end
+  end
 end
