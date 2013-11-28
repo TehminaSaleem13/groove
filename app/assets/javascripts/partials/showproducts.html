@@ -211,8 +211,6 @@
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="icon-remove"></i></button>
                 <h3 id="showProductHeader" >Editing: {{single_product.skus[0].sku}}  - ID #{{single_product.basicinfo.id}}</h3>
             </div>
-
-
             <div class="form-horizontal form-horizontal-create" >
                 <fieldset>
                     <div class="modal-body" id="showProduct-body">
@@ -493,6 +491,7 @@
                 <h3 id="showAliasOptionsHeader" >Select Product to <span ng-show="single_product.basicinfo.is_kit">add to Kit</span><span ng-hide="single_product.basicinfo.is_kit">Alias</span></h3>
             </div>
             <div class="modal-body" id="showAliasOptions-body">
+
                 <input type="text" ng-model="alias.product_setup.search" class="input-large search-query" placeholder="Search term" /> <button class="btn" ng-click="alias.product_setup.search='';get_products()">Clear</button><br/><br/>
                 <table id="aliasproductstbl" class="table table-hover table-bordered">
                     <thead>
@@ -526,5 +525,6 @@
                 <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
             </div>
         </div>
+        <!-- Aliasing Modal ends-->
     </div>
 </div>

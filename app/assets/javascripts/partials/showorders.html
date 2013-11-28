@@ -89,7 +89,24 @@
                     <th class="order_setup-sort order_setup-sort-status span1" data-header="status">
                         <a href="" ng-click="order_setup_opt('sort','status')">Status<span class="{{'caret-'+order_setup.order}}"></span></a>
                     </th>
-
+                    <th class="order_setup-sort order_setup-sort-email span2" data-header="email">
+                        <a href="" ng-click="order_setup_opt('sort','email')">Email<span class="{{'caret-'+order_setup.order}}"></span></a>
+                    </th>
+                    <th class="order_setup-sort order_setup-sort-tracking_num span2" data-header="tracking_num">
+                        <a href="" ng-click="order_setup_opt('sort','tracking_num')">Tracking Id<span class="{{'caret-'+order_setup.order}}"></span></a>
+                    </th>
+                    <th class="order_setup-sort order_setup-sort-city span2" data-header="city">
+                        <a href="" ng-click="order_setup_opt('sort','city')">City<span class="{{'caret-'+order_setup.order}}"></span></a>
+                    </th>
+                    <th class="order_setup-sort order_setup-sort-state span1" data-header="state">
+                        <a href="" ng-click="order_setup_opt('sort','state')">State<span class="{{'caret-'+order_setup.order}}"></span></a>
+                    </th>
+                    <th class="order_setup-sort order_setup-sort-postcode span2" data-header="postcode">
+                        <a href="" ng-click="order_setup_opt('sort','postcode')">Zip<span class="{{'caret-'+order_setup.order}}"></span></a>
+                    </th>
+                    <th class="order_setup-sort order_setup-sort-country span3" data-header="country">
+                        <a href="" ng-click="order_setup_opt('sort','country')">Country<span class="{{'caret-'+order_setup.order}}"></span></a>
+                    </th>
                 </tr>
                 </thead>
                 <tbody>
@@ -139,6 +156,48 @@
                                 <option value="cancelled">Cancelled</option>
                                 <option value="scanned">Scanned</option>
                             </select>
+                        </div>
+                    </td>
+                    <td data-header="email" id="{{'orders_email_'+$index}}" ng-dblclick="edit_single_node($index,order.id,'email')">
+                        {{order.email}}
+                        <div id="{{'orders_email_input_'+$index}}" ng-show="orders_edit_tmp.editing == $index && orders_edit_tmp.editing_var == 'email'" class="tag-bubble tag-bubble-input span3 input-text">
+                            <input xs-input-sync class="span3" name="{{'orders_email_'+$index}}" ng-model="orders_edit_tmp.email" type="text" placeholder="Edit..." />
+                            <i class="icon-ok" ng-click="save_single_node()"></i>
+                        </div>
+                    </td>
+                    <td data-header="tracking_num" id="{{'orders_tracking_num_'+$index}}" ng-dblclick="edit_single_node($index,order.id,'tracking_num')">
+                        {{order.tracking_num}}
+                        <div id="{{'orders_tracking_num_input_'+$index}}" ng-show="orders_edit_tmp.editing == $index && orders_edit_tmp.editing_var == 'tracking_num'" class="tag-bubble tag-bubble-input span3 input-text">
+                            <input xs-input-sync class="span3" name="{{'orders_tracking_num_'+$index}}" ng-model="orders_edit_tmp.tracking_num" type="text" placeholder="Edit..." />
+                            <i class="icon-ok" ng-click="save_single_node()"></i>
+                        </div>
+                    </td>
+                    <td data-header="city" id="{{'orders_city_'+$index}}" ng-dblclick="edit_single_node($index,order.id,'city')">
+                        {{order.city}}
+                        <div id="{{'orders_city_input_'+$index}}" ng-show="orders_edit_tmp.editing == $index && orders_edit_tmp.editing_var == 'city'" class="tag-bubble tag-bubble-input span3 input-text">
+                            <input xs-input-sync class="span3" name="{{'orders_city_'+$index}}" ng-model="orders_edit_tmp.city" type="text" placeholder="Edit..." />
+                            <i class="icon-ok" ng-click="save_single_node()"></i>
+                        </div>
+                    </td>
+                    <td data-header="state" id="{{'orders_state_'+$index}}" ng-dblclick="edit_single_node($index,order.id,'state')">
+                        {{order.state}}
+                        <div id="{{'orders_state_input_'+$index}}" ng-show="orders_edit_tmp.editing == $index && orders_edit_tmp.editing_var == 'state'" class="tag-bubble tag-bubble-input span3 input-text">
+                            <input xs-input-sync class="span3" name="{{'orders_state_'+$index}}" ng-model="orders_edit_tmp.state" type="text" placeholder="Edit..." />
+                            <i class="icon-ok" ng-click="save_single_node()"></i>
+                        </div>
+                    </td>
+                    <td data-header="postcode" id="{{'orders_postcode_'+$index}}" ng-dblclick="edit_single_node($index,order.id,'postcode')">
+                        {{order.postcode}}
+                        <div id="{{'orders_postcode_input_'+$index}}" ng-show="orders_edit_tmp.editing == $index && orders_edit_tmp.editing_var == 'postcode'" class="tag-bubble tag-bubble-input span3 input-text">
+                            <input xs-input-sync class="span3" name="{{'orders_postcode_'+$index}}" ng-model="orders_edit_tmp.postcode" type="text" placeholder="Edit..." />
+                            <i class="icon-ok" ng-click="save_single_node()"></i>
+                        </div>
+                    </td>
+                    <td data-header="country" id="{{'orders_country_'+$index}}" ng-dblclick="edit_single_node($index,order.id,'country')">
+                        {{order.country}}
+                        <div id="{{'orders_country_input_'+$index}}" ng-show="orders_edit_tmp.editing == $index && orders_edit_tmp.editing_var == 'country'" class="tag-bubble tag-bubble-input span3 input-text">
+                            <input xs-input-sync class="span3" name="{{'orders_country_'+$index}}" ng-model="orders_edit_tmp.country" type="text" placeholder="Edit..." />
+                            <i class="icon-ok" ng-click="save_single_node()"></i>
                         </div>
                     </td>
                 </tr>
