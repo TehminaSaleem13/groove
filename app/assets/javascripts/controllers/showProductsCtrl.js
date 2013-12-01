@@ -15,6 +15,9 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $q, $cookies
             location:"",
             store:"",
             cat:"",
+            location_secondary:"",
+            location_name:"",
+            qty:"",
             editing:-1,
             editing_var: "",
             editing_id:""
@@ -484,9 +487,12 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $q, $cookies
         sku: {name:"<i class='icon icon-ok'></i> Sku", className:"rt_field_sku"},
         status:{name:"<i class='icon icon-ok'></i> Status", className:"rt_field_status"},
         barcode:{name:"<i class='icon icon-ok'></i> Barcode", className:"rt_field_barcode"},
-        location:{name:"<i class='icon icon-ok'></i> Location", className:"rt_field_location"},
+        location:{name:"<i class='icon icon-ok'></i> Primary Location", className:"rt_field_location"},
         store:{name:"<i class='icon icon-ok'></i> Store", className:"rt_field_store"},
-        cat:{name:"<i class='icon icon-ok'></i> Category", className:"rt_field_cat"}
+        cat:{name:"<i class='icon icon-ok'></i> Category", className:"rt_field_cat"},
+        location_secondary:{name:"<i class='icon icon-ok'></i> Secondary Location", className:"rt_field_location_secondary"},
+        location_name:{name:"<i class='icon icon-ok'></i> Warehouse Name", className:"rt_field_location_name"},
+        qty:{name:"<i class='icon icon-ok'></i> Quantity", className:"rt_field_qty"}
     };
     $scope.shown_fields = ["checkbox","name","sku","status","barcode","location","store"];
 
