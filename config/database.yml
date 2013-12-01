@@ -28,7 +28,7 @@ test:
   database: groovepacks_test
   pool: 5
   username: root
-  password:
+  password: password
   socket: /tmp/mysql.sock
 
 production:

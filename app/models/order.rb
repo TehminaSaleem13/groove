@@ -53,4 +53,9 @@ class Order < ActiveRecord::Base
     result
   end
 
+  def set_order_to_scanned_state
+    self.status = 'Scanned'
+    self.scanned_on = Time.now
+    self.save
+  end
 end
