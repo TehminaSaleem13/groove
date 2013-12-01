@@ -137,13 +137,22 @@
                         <a href="" ng-click="product_setup_opt('sort','barcode')">Barcode<span class="{{'caret-'+product_setup.order}}"></span></a>
                     </th>
                     <th class="span2 product_setup-sort product_setup-sort-location_primary" data-header="location">
-                        <a href="" ng-click="product_setup_opt('sort','location_primary')">Location<span class="{{'caret-'+product_setup.order}}"></span></a>
+                        <a href="" ng-click="product_setup_opt('sort','location_primary')">Primary Location<span class="{{'caret-'+product_setup.order}}"></span></a>
                     </th>
                     <th class="span1 product_setup-sort product_setup-sort-store" data-header="store">
                         <a href="" ng-click="product_setup_opt('sort','store')">Store<span class="{{'caret-'+product_setup.order}}"></span></a>
                     </th>
                     <th class="span1 product_setup-sort" data-header="cat">
                         Category
+                    </th>
+                    <th class="span1 product_setup-sort" data-header="location_secondary">
+                        Secondary Location
+                    </th>
+                    <th class="span1 product_setup-sort" data-header="location_name">
+                        Warehouse Name
+                    </th>
+                    <th class="span1 product_setup-sort" data-header="qty">
+                        Quantity
                     </th>
                 </tr>
                 </thead>
@@ -194,7 +203,29 @@
                         <div id="{{'products_cat_input_'+$index}}" ng-show="products_edit_tmp.editing == $index && products_edit_tmp.editing_var == 'cat' " class="tag-bubble tag-bubble-input span3 input-text">
                             <input xs-input-sync class="span3" name="{{'products_cat_'+$index}}" ng-model="products_edit_tmp.cat" type="text" placeholder="Edit..." />
                             <i ng-show="products_edit_tmp.editing != -1 && products_edit_tmp.cat != ''" class="icon-ok" ng-click="save_single_node()"></i>
-                        </div></td>
+                        </div>
+                    </td>
+                    <td data-header="location_secondary" id="{{'products_location_secondary_'+$index}}" ng-dblclick="edit_single_node($index,product.id,'location_secondary')">
+                        {{product.location_secondary}}
+                        <div id="{{'products_location_secondary_input_'+$index}}" ng-show="products_edit_tmp.editing == $index && products_edit_tmp.editing_var == 'location_secondary' " class="tag-bubble tag-bubble-input span3 input-text">
+                            <input xs-input-sync class="span3" name="{{'products_location_secondary_'+$index}}" ng-model="products_edit_tmp.location_secondary" type="text" placeholder="Edit..." />
+                            <i ng-show="products_edit_tmp.editing != -1 && products_edit_tmp.location_secondary != ''" class="icon-ok" ng-click="save_single_node()"></i>
+                        </div>
+                    </td>
+                    <td data-header="location_name" id="{{'products_location_name_'+$index}}" ng-dblclick="edit_single_node($index,product.id,'location_name')">
+                        {{product.location_name}}
+                        <div id="{{'products_location_name_input_'+$index}}" ng-show="products_edit_tmp.editing == $index && products_edit_tmp.editing_var == 'location_name' " class="tag-bubble tag-bubble-input span3 input-text">
+                            <input xs-input-sync class="span3" name="{{'products_location_name_'+$index}}" ng-model="products_edit_tmp.location_name" type="text" placeholder="Edit..." />
+                            <i ng-show="products_edit_tmp.editing != -1 && products_edit_tmp.location_name != ''" class="icon-ok" ng-click="save_single_node()"></i>
+                        </div>
+                    </td>
+                    <td data-header="qty" id="{{'products_qty_'+$index}}" ng-dblclick="edit_single_node($index,product.id,'qty')">
+                        {{product.qty}}
+                        <div id="{{'products_qty_input_'+$index}}" ng-show="products_edit_tmp.editing == $index && products_edit_tmp.editing_var == 'qty' " class="tag-bubble tag-bubble-input span3 input-text">
+                            <input class="span3" name="{{'products_qty_'+$index}}" ng-model="products_edit_tmp.qty" type="number" min="0" placeholder="Edit..." />
+                            <i ng-show="products_edit_tmp.editing != -1 && products_edit_tmp.qty != ''" class="icon-ok" ng-click="save_single_node()"></i>
+                        </div>
+                    </td>
                 </tr>
                 </tbody>
             </table>

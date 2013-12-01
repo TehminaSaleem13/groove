@@ -172,7 +172,7 @@ class ProductsController < ApplicationController
 			page_num = 1
 			begin
 				seller_list =@eBay.GetSellerList(:startTimeFrom=> (Date.today - 3.months).to_datetime,
-				 	 :startTimeTo =>(Date.today + 1.day).to_datetime, :detailLevel=>'ReturnAll', 
+				 	 :startTimeTo =>(Date.today + 1.day).to_datetime, :detailLevel=>'ReturnAll',
 					 :pagination=>{:entriesPerPage=> '10', :pageNumber=>page_num})
 				page_num = page_num+1
 				seller_list.itemArray.each do |item|
@@ -234,7 +234,7 @@ class ProductsController < ApplicationController
 					else
 						@result['previous_imported'] = @result['previous_imported'] + 1
 					end
-				end 
+				end
 			end while(page_num <= total_pages)
 
 		end
@@ -528,6 +528,9 @@ class ProductsController < ApplicationController
 		@product_hash['name'] = product.name
 		@product_hash['status'] = product.status
     @product_hash['location'] = ""
+    @product_hash['location_secondary'] = ""
+    @product_hash['location_name'] = ""
+    @product_hash['qty'] = ""
     @product_hash['barcode'] = ""
     @product_hash['sku'] = ""
     @product_hash['cat'] = ""
@@ -535,6 +538,9 @@ class ProductsController < ApplicationController
     @product_location = product.product_inventory_warehousess.first
     unless @product_location.nil?
       @product_hash['location'] = @product_location.location_primary
+      @product_hash['location_secondary'] = @product_location.location_secondary
+      @product_hash['location_name'] = @product_location.name
+      @product_hash["qty"] = @product_location.qty
     end
 
     @product_barcode = product.product_barcodes.first
@@ -1162,13 +1168,21 @@ class ProductsController < ApplicationController
           @result['status'] &= false
           @result['error_msg'] = "Couldn't save product info"
         end
-      elsif params[:var] ==  "location"
+      elsif ["location" ,"location_secondary","location_name","qty"].include?(params[:var])
         @product_location = @product.product_inventory_warehousess.first
         if @product_location.nil?
           @product_location = ProductInventoryWarehouses.new
           @product_location.product_id = params[:id]
         end
-        @product_location.location_primary = params[:value]
+        if params[:var] == "location"
+          @product_location.location_primary = params[:value]
+        elsif params[:var] == "location_secondary"
+          @product_location.location_secondary = params[:value]
+        elsif params[:var] == "location_name"
+          @product_location.name = params[:value]
+        elsif params[:var] == "qty"
+          @product_location.qty = params[:value]
+        end
         unless @product_location.save
           @result['status'] &= false
           @result['error_msg'] = "Couldn't save product info"
