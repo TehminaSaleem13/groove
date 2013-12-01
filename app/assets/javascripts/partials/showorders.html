@@ -118,22 +118,22 @@
                     </td>
                     <td data-header="notes" id="{{'orders_notes_'+$index}}" ng-dblclick="edit_single_node($index,order.id,'notes')">
                         {{order.notes}}
-                        <div id="{{'orders_notes_input_'+$index}}" ng-show="orders_edit_tmp.editing == $index && orders_edit_tmp.editing_var == 'notes'" class="tag-bubble tag-bubble-input span3 input-text">
-                            <input xs-input-sync class="span3" name="{{'orders_notes_'+$index}}" ng-model="orders_edit_tmp.notes" type="text" placeholder="Edit..." />
+                        <div id="{{'orders_notes_input_'+$index}}" ng-show="orders_edit_tmp.editing == $index && orders_edit_tmp.editing_var == 'notes'" class="tag-bubble tag-bubble-input span2 input-text">
+                            <input xs-input-sync class="span2" name="{{'orders_notes_'+$index}}" ng-model="orders_edit_tmp.notes" type="text" placeholder="Edit..." />
                             <i ng-show="orders_edit_tmp.editing != -1" class="icon-ok" ng-click="save_single_node()"></i>
                         </div>
                     </td>
                     <td data-header="ordernum" id="{{'orders_ordernum_'+$index}}" ng-dblclick="edit_single_node($index,order.id,'ordernum')">
                         <a href="#showOrder" role="button" data-toggle="modal" ng-click="order_single_details(order.id,$index)" class="ng-binding">{{order.ordernum}}</a>
-                        <div id="{{'orders_ordernum_input_'+$index}}" ng-show="orders_edit_tmp.editing == $index && orders_edit_tmp.editing_var == 'ordernum'" class="tag-bubble tag-bubble-input span3 input-text">
-                            <input xs-input-sync class="span3" name="{{'orders_ordernum_'+$index}}" ng-model="orders_edit_tmp.ordernum" type="text" placeholder="Edit..." />
+                        <div id="{{'orders_ordernum_input_'+$index}}" ng-show="orders_edit_tmp.editing == $index && orders_edit_tmp.editing_var == 'ordernum'" class="tag-bubble tag-bubble-input span2 input-text">
+                            <input xs-input-sync class="span2" name="{{'orders_ordernum_'+$index}}" ng-model="orders_edit_tmp.ordernum" type="text" placeholder="Edit..." />
                             <i ng-show="orders_edit_tmp.editing != -1 && orders_edit_tmp.ordernum != ''" class="icon-ok" ng-click="save_single_node()"></i>
                         </div>
                     </td>
                     <td data-header="orderdate" id="{{'orders_orderdate_'+$index}}" ng-dblclick="edit_single_node($index,order.id,'orderdate')">
                         {{order.orderdate | date:'EEEE MM/dd/yyyy hh:mm:ss a'}}
-                        <div id="{{'orders_orderdate_input_'+$index}}" ng-show="orders_edit_tmp.editing == $index && orders_edit_tmp.editing_var == 'orderdate'" class="tag-bubble tag-bubble-input span3 input-text">
-                            <input xs-input-sync class="span3" name="{{'orders_orderdate_'+$index}}" ng-model="orders_edit_tmp.orderdate" type="text" placeholder="Edit..." />
+                        <div id="{{'orders_orderdate_input_'+$index}}" ng-show="orders_edit_tmp.editing == $index && orders_edit_tmp.editing_var == 'orderdate'" class="tag-bubble tag-bubble-input span2 input-text">
+                            <input xs-input-sync class="span2" name="{{'orders_orderdate_'+$index}}" ng-model="orders_edit_tmp.orderdate" type="text" placeholder="Edit..." />
                             <i ng-show="orders_edit_tmp.editing != -1" class="icon-ok" ng-click="save_single_node()"></i>
                         </div>
                     </td>
@@ -142,8 +142,8 @@
                     </td>
                     <td data-header="recipient" id="{{'orders_recipient_'+$index}}" ng-dblclick="edit_single_node($index,order.id,'recipient')">
                         {{order.recipient}}
-                        <div id="{{'orders_recipient_input_'+$index}}" ng-show="orders_edit_tmp.editing == $index && orders_edit_tmp.editing_var == 'recipient'" class="tag-bubble tag-bubble-input span3 input-text">
-                            <input xs-input-sync class="span3" name="{{'orders_recipient_'+$index}}" ng-model="orders_edit_tmp.recipient" type="text" placeholder="Edit..." />
+                        <div id="{{'orders_recipient_input_'+$index}}" ng-show="orders_edit_tmp.editing == $index && orders_edit_tmp.editing_var == 'recipient'" class="tag-bubble tag-bubble-input span2 input-text">
+                            <input xs-input-sync class="span2" name="{{'orders_recipient_'+$index}}" ng-model="orders_edit_tmp.recipient" type="text" placeholder="Edit..." />
                             <i ng-show="orders_edit_tmp.editing != -1" class="icon-ok" ng-click="save_single_node()"></i>
                         </div>
                     </td>
@@ -160,22 +160,22 @@
                     </td>
                     <td data-header="email" id="{{'orders_email_'+$index}}" ng-dblclick="edit_single_node($index,order.id,'email')">
                         {{order.email}}
-                        <div id="{{'orders_email_input_'+$index}}" ng-show="orders_edit_tmp.editing == $index && orders_edit_tmp.editing_var == 'email'" class="tag-bubble tag-bubble-input span3 input-text">
-                            <input xs-input-sync class="span3" name="{{'orders_email_'+$index}}" ng-model="orders_edit_tmp.email" type="text" placeholder="Edit..." />
+                        <div id="{{'orders_email_input_'+$index}}" ng-show="orders_edit_tmp.editing == $index && orders_edit_tmp.editing_var == 'email'" class="tag-bubble tag-bubble-input span2 input-text">
+                            <input xs-input-sync class="span2" name="{{'orders_email_'+$index}}" ng-model="orders_edit_tmp.email" type="text" placeholder="Edit..." />
                             <i class="icon-ok" ng-click="save_single_node()"></i>
                         </div>
                     </td>
                     <td data-header="tracking_num" id="{{'orders_tracking_num_'+$index}}" ng-dblclick="edit_single_node($index,order.id,'tracking_num')">
                         {{order.tracking_num}}
-                        <div id="{{'orders_tracking_num_input_'+$index}}" ng-show="orders_edit_tmp.editing == $index && orders_edit_tmp.editing_var == 'tracking_num'" class="tag-bubble tag-bubble-input span3 input-text">
-                            <input xs-input-sync class="span3" name="{{'orders_tracking_num_'+$index}}" ng-model="orders_edit_tmp.tracking_num" type="text" placeholder="Edit..." />
+                        <div id="{{'orders_tracking_num_input_'+$index}}" ng-show="orders_edit_tmp.editing == $index && orders_edit_tmp.editing_var == 'tracking_num'" class="tag-bubble tag-bubble-input span2 input-text">
+                            <input xs-input-sync class="span2" name="{{'orders_tracking_num_'+$index}}" ng-model="orders_edit_tmp.tracking_num" type="text" placeholder="Edit..." />
                             <i class="icon-ok" ng-click="save_single_node()"></i>
                         </div>
                     </td>
                     <td data-header="city" id="{{'orders_city_'+$index}}" ng-dblclick="edit_single_node($index,order.id,'city')">
                         {{order.city}}
-                        <div id="{{'orders_city_input_'+$index}}" ng-show="orders_edit_tmp.editing == $index && orders_edit_tmp.editing_var == 'city'" class="tag-bubble tag-bubble-input span3 input-text">
-                            <input xs-input-sync class="span3" name="{{'orders_city_'+$index}}" ng-model="orders_edit_tmp.city" type="text" placeholder="Edit..." />
+                        <div id="{{'orders_city_input_'+$index}}" ng-show="orders_edit_tmp.editing == $index && orders_edit_tmp.editing_var == 'city'" class="tag-bubble tag-bubble-input span2 input-text">
+                            <input xs-input-sync class="span2" name="{{'orders_city_'+$index}}" ng-model="orders_edit_tmp.city" type="text" placeholder="Edit..." />
                             <i class="icon-ok" ng-click="save_single_node()"></i>
                         </div>
                     </td>
@@ -389,19 +389,19 @@
                         <div class="tab-pane" id="notestab">
                             <fieldset>
                                 <legend>Internal Notes</legend>
-                                <textarea xs-input-sync ng-model="single_order.basicinfo.notes_internal" class="regular-input span12" rows="4"></textarea>
+                                <textarea xs-input-sync ng-model="single_order.basicinfo.notes_internal" class="regular-input span8" rows="4"></textarea>
                             </fieldset>
                             <fieldset>
                                 <legend>Notes to Packer</legend>
-                                <textarea xs-input-sync size="span8" ng-model="single_order.basicinfo.notes_toPacker" class="regular-input span12" rows="4"></textarea>
+                                <textarea xs-input-sync ng-model="single_order.basicinfo.notes_toPacker" class="regular-input span8" rows="4"></textarea>
                             </fieldset>
                             <fieldset>
                                 <legend>Notes from Packer</legend>
-                                <textarea xs-input-sync ng-model="single_order.basicinfo.notes_fromPacker" class="regular-input span12" rows="4"></textarea>
+                                <textarea xs-input-sync ng-model="single_order.basicinfo.notes_fromPacker" class="regular-input span8" rows="4"></textarea>
                             </fieldset>
                             <fieldset>
                                 <legend>Customer Comments</legend>
-                                <textarea xs-input-sync ng-model="single_order.basicinfo.customer_comments" class="regular-input span12" rows="4"></textarea>
+                                <textarea xs-input-sync ng-model="single_order.basicinfo.customer_comments" class="regular-input span8" rows="4"></textarea>
                             </fieldset>
                         </div>
                         <div class="tab-pane" id="actexceptab">
