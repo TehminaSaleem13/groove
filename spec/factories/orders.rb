@@ -17,6 +17,7 @@ FactoryGirl.define do
     country "India"
     status "Awaiting Scanning"
     scanned_on ""
+
 # varchar(255)
 # lastname
 # varchar(255)

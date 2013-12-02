@@ -58,4 +58,36 @@ class Order < ActiveRecord::Base
     self.scanned_on = Time.now
     self.save
   end
+
+  def has_inactive_or_new_products
+    result = false
+
+    self.order_items.each do |order_item|
+      product_sku = ProductSku.where(:sku => order_item.sku)
+      if product_sku.length > 0
+        product = Product.find(product_sku.first.product_id)
+        if product.status == "New" or product.status == "Inactive"
+          result = true
+        end
+      end
+    end
+
+    result
+  end
+
+  def get_inactive_or_new_products
+    products_list = []
+
+    self.order_items.each do |order_item|
+      product_sku = ProductSku.where(:sku => order_item.sku)
+      if product_sku.length > 0
+        product = Product.find(product_sku.first.product_id)
+        if product.status == "New" or product.status == "Inactive"
+            products_list << @product
+        end
+      end
+    end
+
+    products_list
+  end
 end

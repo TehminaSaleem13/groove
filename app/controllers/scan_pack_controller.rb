@@ -24,8 +24,22 @@ class ScanPackController < ApplicationController
 			 		@result['notice_messages'].push('This order has already been scanned')
 			 	end
 
-
 				#search in orders that have status of On Hold
+				if @order.status == 'On Hold'
+					if @order.has_inactive_or_new_products
+						#get list of inactive_or_new_products
+						@order_result['inactive_or_new_products'] = @order.get_inactive_or_new_products
+						@order_result['next_state'] = 'edit_product_info'
+						@result['notice_messages'].push("The following items in this order are not Active."+
+							"They may need a barcode or other product info before their status can be changed to Active")
+					else
+						@order_result['order_edit_permission'] = current_user.import_orders
+						@order_result['next_state'] = 'request_for_confirmation_code_with_order_edit'
+						@result['notice_messages'].push('This order is currently on Hold. Please scan or enter '+
+								'confirmation code with order edit permission to continue scanning this order or '+
+								'scan a different order')
+					end
+				end
 
 
 			  	#search in orders that have status of Cancelled
