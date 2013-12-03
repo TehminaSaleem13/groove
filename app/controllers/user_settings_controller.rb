@@ -46,6 +46,7 @@ class UserSettingsController < ApplicationController
     @user.view_packing_ex = params[:view_packing_ex]
     @user.create_packing_ex = params[:create_packing_ex]
     @user.edit_packing_ex = params[:edit_packing_ex]
+    @user.order_edit_confirmation_code = params[:order_edit_confirmation_code]
 
     #add user details permissions
     @user.edit_user_info = params[:edit_user_info]

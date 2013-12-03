@@ -31,7 +31,8 @@ class ScanPackController < ApplicationController
 						@order_result['inactive_or_new_products'] = @order.get_inactive_or_new_products
 						@order_result['next_state'] = 'edit_product_info'
 						@result['notice_messages'].push("The following items in this order are not Active."+
-							"They may need a barcode or other product info before their status can be changed to Active")
+							"They may need a barcode or other product info before their status can be changed"+
+							" to Active")
 					else
 						@order_result['order_edit_permission'] = current_user.import_orders
 						@order_result['next_state'] = 'request_for_confirmation_code_with_order_edit'
@@ -69,8 +70,47 @@ class ScanPackController < ApplicationController
 	      format.json { render json: @result }
 	    end
 	end
+	# input is confirmation_code and order_id no.
+	def order_edit_confirmation_code
+		@result = Hash.new
+	    @result['status'] = true
+	    @result['error_messages'] = []
+	    @result['success_messages'] = [] 
+	    @result['notice_messages'] = []
+	    @result['data'] = Hash.new
 
-	# def method_name
-		
-	# end
+	    if !params[:order_id].nil? || !params[:confirmation_code].nil?
+			#check if order status is On Hold
+			@order = Order.find(params[:order_id])
+			if !@order.nil?
+				if @order.status == "On Hold" && !@order.has_inactive_or_new_products
+					if current_user.order_edit_confirmation_code == params[:confirmation_code]
+						@result['data']['order_edit_matched'] = true
+						@result['data']['next_state'] = 'ready_for_product'
+						session[:order_edit_matched_for_current_user] = true
+					else
+						@result['data']['order_edit_matched'] = false
+						@result['data']['next_state'] = 'request_for_confirmation_code_with_order_edit'
+					end
+				else
+					@result['status'] &= false
+					@result['error_messages'].push("Only orders with status On Hold and has inactive or new products "+ 
+						"can use edit confirmation code.")
+				end
+			else
+				@result['status'] &= false
+				@result['error_messages'].push("Could not find order with id:"+params[:order_id])	
+			end
+			
+			#check if current user edit confirmation code is same as that entered
+	    else
+			@result['status'] &= false
+			@result['error_messages'].push("Please specify confirmation code and order id to confirm purchase code")	    	
+	    end
+
+	    respond_to do |format|
+	      format.html # show.html.erb
+	      format.json { render json: @result }
+	    end
+	end
 end
