@@ -1,6 +1,6 @@
 # Order Scan
 
-## Simple order scan by barcode
+## Order scan by barcode
 
 input is barcode which is increment_id in the orders table
 
