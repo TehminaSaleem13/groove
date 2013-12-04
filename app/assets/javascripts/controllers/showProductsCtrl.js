@@ -763,7 +763,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $q, $cookies
             }
         }
     });
-    $('body').keydown($scope.keyboard_nav_event);
+    $('#showProduct').keydown($scope.keyboard_nav_event);
     $('.icon-question-sign').popover({trigger: 'hover focus'});
     input_text_selector = $('.input-text input');
     input_text_selector.keydown($scope.handle_key_event);

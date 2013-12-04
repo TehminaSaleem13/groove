@@ -280,5 +280,5 @@ controller('showUsersCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$l
 
             }
         }
-        $('body').keydown($scope.keyboard_nav_event);
+        $('#createUser').keydown($scope.keyboard_nav_event);
     }]);

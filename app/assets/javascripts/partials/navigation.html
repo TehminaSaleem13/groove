@@ -1,48 +1,42 @@
-
-    <header class="navbar">
-        <div class="container">
+<header class="navbar">
+    <div class="container">
         <div class="span2">
-        <a href="#" class="brand">Company Logo</a>
+            <a href="#" class="brand">Company Logo</a>
         </div>
         <div class="span5">
-<ul class="nav" id="mainMenu">
-        <li><a href="#/orders">Orders</a></li>
-        <li><a href="#/products">Products</a></li>
-        <li><a href="#/settings">Settings</a></li>
-  </ul>
-  </div>
-  <div class="span3 pull-right">
-    <div class="row-fluid">
-    <ul class="nav pull-right">
-    <li><a href="#">Home</a></li>
-    <li><a href="#">Help</a></li>
-    </ul>
+            <ul class="nav" id="mainMenu">
+                <li><a href="#/orders">Orders</a></li>
+                <li><a href="#/products">Products</a></li>
+                <li><a href="#/settings">Settings</a></li>
+            </ul>
+        </div>
+        <div class="span3 pull-right">
+            <div class="row-fluid">
+                <ul class="nav pull-right">
+                    <li><a href="#">Home</a></li>
+                    <li><a href="#">Help</a></li>
+                </ul>
+            </div>
+            <div class="row-fluid">
+
+                <ul class="nav pull-right">
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">{{username}}<b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a href="/users/sign_out" data-method="delete" rel="nofollow">Sign Out</a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li><a href="#">Profile</a></li>
+                </ul>
+            </div>
+        </div>
     </div>
-  <div class="row-fluid">
-
-  <ul class="nav pull-right">
-      <li class="dropdown">
-      <a href="#" class="dropdown-toggle" data-toggle="dropdown">{{username}}<b class="caret"></b></a>
-      <ul class="dropdown-menu">
-        <li>
-          <a href="/users/sign_out" data-method="delete" rel="nofollow">Sign Out</a>
-        </li>
-
-      </ul>
-    </li>
-    <li><a href="#">Profile</a></li>
-    </ul>
-    </div>
-
-  </div>
-  </div>
-
-  </header>
+</header>
 <div class="loading" ng-show="loading">
     <div class="loading-body row-fluid">
-        <p>
-        Processing...
-        </p>
+        <p>Processing...</p>
         <button class="btn" ng-click="loading = false" aria-hidden="true">Dismiss</button>
     </div>
 </div>
