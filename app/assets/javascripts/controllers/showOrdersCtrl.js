@@ -549,7 +549,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $q, $cookies
             $scope.do_get_products = true;
         }
     });
-    $('body').keydown($scope.keyboard_nav_event);
+    $('#showOrder').keydown($scope.keyboard_nav_event);
     $scope.$watch('do_get_products',function() {
         if($scope.do_get_products) {
             $scope.get_products();
