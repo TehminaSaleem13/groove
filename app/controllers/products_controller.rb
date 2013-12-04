@@ -1263,10 +1263,12 @@ class ProductsController < ApplicationController
 	  	@result['status'] = false
 	  	@result['messages'].push("Invalid data sent to the server")
 	end
+
   	respond_to do |format|
       format.html # show.html.erb
       format.json { render json: @result }
     end
+  
   end
 
 end

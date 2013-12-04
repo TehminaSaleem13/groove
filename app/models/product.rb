@@ -1,5 +1,6 @@
 class Product < ActiveRecord::Base
   belongs_to :store
+  
   attr_accessible :name, :product_type, :store_product_id,
 				    :status,
 					:spl_instructions_4_packer,
@@ -35,4 +36,22 @@ class Product < ActiveRecord::Base
   has_many :product_images
   has_many :product_kit_skuss
   has_many :product_inventory_warehousess
+
+  def update_product_status
+  	if self.status == "Inactive" or self.status == "New"
+	  	result = true
+	  	@skus = ProductSku.where(:product_id=>self.id)
+	  	result &= false if @skus.length == 0
+
+	  	@barcodes = ProductBarcode.where(:product_id=>self.id)
+	  	result &= false if @barcodes.length == 0
+
+	  	if result
+	  		self.status = 'Active'
+	  		self.save
+	  	end
+	end
+  end
+
+
 end

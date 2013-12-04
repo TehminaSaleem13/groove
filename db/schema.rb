@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20131203171854) do
+ActiveRecord::Schema.define(:version => 20131203214447) do
 
   create_table "amazon_credentials", :force => true do |t|
     t.string   "merchant_id",                                     :null => false
@@ -259,52 +259,53 @@ ActiveRecord::Schema.define(:version => 20131203171854) do
   end
 
   create_table "users", :force => true do |t|
-    t.string   "encrypted_password",           :default => "",    :null => false
+    t.string   "encrypted_password",             :default => "",    :null => false
     t.string   "reset_password_token"
     t.datetime "reset_password_sent_at"
     t.datetime "remember_created_at"
-    t.integer  "sign_in_count",                :default => 0
+    t.integer  "sign_in_count",                  :default => 0
     t.datetime "current_sign_in_at"
     t.datetime "last_sign_in_at"
     t.string   "current_sign_in_ip"
     t.string   "last_sign_in_ip"
-    t.datetime "created_at",                                      :null => false
-    t.datetime "updated_at",                                      :null => false
-    t.string   "username",                     :default => "",    :null => false
-    t.string   "email",                        :default => "",    :null => false
-    t.boolean  "access_scanpack",              :default => false, :null => false
-    t.boolean  "access_orders",                :default => false, :null => false
-    t.boolean  "access_products",              :default => false, :null => false
-    t.boolean  "access_settings",              :default => false, :null => false
-    t.boolean  "active",                       :default => false, :null => false
-    t.boolean  "edit_product_details",         :default => false, :null => false
-    t.boolean  "add_products",                 :default => false, :null => false
-    t.boolean  "edit_products",                :default => false, :null => false
-    t.boolean  "delete_products",              :default => false, :null => false
-    t.boolean  "import_products",              :default => false, :null => false
-    t.boolean  "edit_product_import",          :default => false, :null => false
-    t.boolean  "import_orders",                :default => false, :null => false
-    t.boolean  "change_order_status",          :default => false, :null => false
-    t.boolean  "createEdit_from_packer",       :default => false, :null => false
-    t.boolean  "createEdit_to_packer",         :default => false, :null => false
-    t.boolean  "add_order_items",              :default => false, :null => false
-    t.boolean  "remove_order_items",           :default => false, :null => false
-    t.boolean  "change_quantity_items",        :default => false, :null => false
-    t.boolean  "view_packing_ex",              :default => false, :null => false
-    t.boolean  "create_packing_ex",            :default => false, :null => false
-    t.boolean  "edit_packing_ex",              :default => false, :null => false
-    t.boolean  "create_users",                 :default => false, :null => false
-    t.boolean  "remove_users",                 :default => false, :null => false
-    t.boolean  "edit_user_info",               :default => false, :null => false
-    t.boolean  "edit_user_permissions",        :default => false, :null => false
-    t.boolean  "is_super_admin",               :default => false, :null => false
-    t.boolean  "edit_general_prefs",           :default => false, :null => false
-    t.boolean  "edit_scanning_prefs",          :default => false, :null => false
-    t.boolean  "edit_user_status",             :default => false, :null => false
-    t.boolean  "add_order_items_ALL",          :default => false, :null => false
+    t.datetime "created_at",                                        :null => false
+    t.datetime "updated_at",                                        :null => false
+    t.string   "username",                       :default => "",    :null => false
+    t.string   "email",                          :default => "",    :null => false
+    t.boolean  "access_scanpack",                :default => false, :null => false
+    t.boolean  "access_orders",                  :default => false, :null => false
+    t.boolean  "access_products",                :default => false, :null => false
+    t.boolean  "access_settings",                :default => false, :null => false
+    t.boolean  "active",                         :default => false, :null => false
+    t.boolean  "edit_product_details",           :default => false, :null => false
+    t.boolean  "add_products",                   :default => false, :null => false
+    t.boolean  "edit_products",                  :default => false, :null => false
+    t.boolean  "delete_products",                :default => false, :null => false
+    t.boolean  "import_products",                :default => false, :null => false
+    t.boolean  "edit_product_import",            :default => false, :null => false
+    t.boolean  "import_orders",                  :default => false, :null => false
+    t.boolean  "change_order_status",            :default => false, :null => false
+    t.boolean  "createEdit_from_packer",         :default => false, :null => false
+    t.boolean  "createEdit_to_packer",           :default => false, :null => false
+    t.boolean  "add_order_items",                :default => false, :null => false
+    t.boolean  "remove_order_items",             :default => false, :null => false
+    t.boolean  "change_quantity_items",          :default => false, :null => false
+    t.boolean  "view_packing_ex",                :default => false, :null => false
+    t.boolean  "create_packing_ex",              :default => false, :null => false
+    t.boolean  "edit_packing_ex",                :default => false, :null => false
+    t.boolean  "create_users",                   :default => false, :null => false
+    t.boolean  "remove_users",                   :default => false, :null => false
+    t.boolean  "edit_user_info",                 :default => false, :null => false
+    t.boolean  "edit_user_permissions",          :default => false, :null => false
+    t.boolean  "is_super_admin",                 :default => false, :null => false
+    t.boolean  "edit_general_prefs",             :default => false, :null => false
+    t.boolean  "edit_scanning_prefs",            :default => false, :null => false
+    t.boolean  "edit_user_status",               :default => false, :null => false
+    t.boolean  "add_order_items_ALL",            :default => false, :null => false
     t.string   "other"
     t.string   "name"
-    t.string   "order_edit_confirmation_code", :default => ""
+    t.string   "order_edit_confirmation_code",   :default => ""
+    t.string   "product_edit_confirmation_code", :default => ""
   end
 
   add_index "users", ["reset_password_token"], :name => "index_users_on_reset_password_token", :unique => true

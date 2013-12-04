@@ -156,5 +156,6 @@ describe ScanPackController do
       expect(result["status"]).to eq(true)
       expect(result["data"]["order_edit_matched"]).to eq(false)
       expect(result["data"]["next_state"]).to eq("request_for_confirmation_code_with_order_edit")
+      expect(session[:order_edit_matched_for_current_user]).to eq(nil)
   end
 end

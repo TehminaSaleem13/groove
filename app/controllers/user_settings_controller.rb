@@ -34,6 +34,7 @@ class UserSettingsController < ApplicationController
     @user.other = params[:other1]
     @user.import_products = params[:import_products]
     @user.edit_product_import = params[:edit_product_import]
+    @user.product_edit_confirmation_code = params[:product_edit_confirmation_code]
 
     #add order details
     @user.import_orders = params[:import_orders]

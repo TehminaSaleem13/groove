@@ -800,4 +800,35 @@ begin
       format.json { render json: @result }
     end
   end
+
+  def update_order_status
+    @result = Hash.new
+    @result['status'] = true
+    @result['error_messages'] = []
+    @result['success_messages'] = [] 
+    @result['notice_messages'] = []
+    @result['data'] = Hash.new
+
+    if !params[:order_id].nil?
+    #check if order status is On Hold
+    @order = Order.find(params[:order_id])
+    if !@order.nil?
+      @order.update_order_status
+    else
+      @result['status'] &= false
+      @result['error_messages'].push("Could not find order with id:"+params[:order_id]) 
+    end
+    
+    #check if current user edit confirmation code is same as that entered
+    else
+    @result['status'] &= false
+    @result['error_messages'].push("Please specify order id to update order status")        
+    end
+
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json: @result }
+    end
+  end
+
 end
