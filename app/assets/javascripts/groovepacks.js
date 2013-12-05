@@ -1,17 +1,17 @@
 angular.module('groovepacks', ['groovepacks.filters', 'groovepacks.services', 'groovepacks.directives', 'groovepacks.controllers','ui.sortable', 'ngCookies']).
   config(['$routeProvider', function($routeProvider) {
-    $routeProvider.when('/orders', 
+    $routeProvider.when('/orders',
     	{templateUrl: '/assets/partials/showorders.html', controller: 'showOrdersCtrl'});
 
-    $routeProvider.when('/settings', 
+    $routeProvider.when('/settings',
     	{templateUrl: '/assets/partials/showusers.html', controller: 'showUsersCtrl'});
-    $routeProvider.when('/settings/showusers', 
+    $routeProvider.when('/settings/showusers',
     	{templateUrl: '/assets/partials/showusers.html', controller: 'showUsersCtrl'});
-    $routeProvider.when('/settings/showstores', 
+    $routeProvider.when('/settings/showstores',
         {templateUrl: '/assets/partials/showstores.html', controller: 'showStoresCtrl'});
-    $routeProvider.when('/products', 
+    $routeProvider.when('/products',
     	{templateUrl: '/assets/partials/showproducts.html', controller: 'showProductsCtrl'});
-    $routeProvider.when('/importorders', 
+    $routeProvider.when('/importorders',
         {templateUrl: '/assets/partials/importorders.html', controller: 'importOrdersCtrl'});
     $routeProvider.otherwise({redirectTo: '/settings/showstores'});
   }]).directive('xsInputSync', function() {
