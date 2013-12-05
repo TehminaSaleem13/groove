@@ -182,6 +182,7 @@ begin
           @order.address_1  = transaction.buyer.buyerInfo.shippingAddress.street1
           @order.city = transaction.buyer.buyerInfo.shippingAddress.cityName
           #@shipping.region = transaction.buyer.buyerInfo.shippingAddress.stateOrProvince
+          @order.state = transaction.buyer.buyerInfo.shippingAddress.stateOrProvince
           @order.country = transaction.buyer.buyerInfo.shippingAddress.country
           @order.postcode = transaction.buyer.buyerInfo.shippingAddress.postalCode
           @order.lastname = transaction.buyer.buyerInfo.shippingAddress.name
@@ -196,6 +197,8 @@ begin
             @order.order_items.each do |item|
               @order.addactivity("Item with SKU: "+item.sku+" Added", @store.name+" Import")
             end
+
+            @order.set_order_status
             @result['success_imported'] = @result['success_imported'] + 1
           end
         else
@@ -277,6 +280,7 @@ begin
   rescue Exception => e
     @result['status'] = false
     @result['messages'].push(e.message)
+    puts e.backtrace
   end
     respond_to do |format|
       format.json { render json: @result}

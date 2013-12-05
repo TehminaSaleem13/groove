@@ -110,7 +110,29 @@ class Order < ActiveRecord::Base
         self.save
       end
     end
+  end
 
+  def set_order_status
+    result = true
+    
+    self.order_items.each do |order_item|
+      product_sku = ProductSku.where(:sku => order_item.sku)
+      if product_sku.length > 0
+        product = Product.find(product_sku.first.product_id)
+        if product.status == "New" or product.status == "Inactive"
+            result &= false
+        end
+      end
+    end
+
+
+    if result
+      self.status = "Awaiting Scanning"
+    else
+      self.status = "On Hold"
+    end
+
+    self.save
   end
 
 end

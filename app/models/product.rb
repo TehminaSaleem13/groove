@@ -1,6 +1,6 @@
 class Product < ActiveRecord::Base
   belongs_to :store
-  
+
   attr_accessible :name, :product_type, :store_product_id,
 				    :status,
 					:spl_instructions_4_packer,
@@ -52,6 +52,25 @@ class Product < ActiveRecord::Base
 	  	end
 	end
   end
+
+  def set_product_status
+  	result = true
+
+	@skus = ProductSku.where(:product_id=>self.id)
+  	result &= false if @skus.length == 0
+
+  	@barcodes = ProductBarcode.where(:product_id=>self.id)
+  	result &= false if @barcodes.length == 0
+
+  	if result
+  		self.status = 'Active'
+  	else
+  		self.status = 'New'
+  	end
+  	self.save
+  end
+
+
 
 
 end

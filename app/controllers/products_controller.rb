@@ -183,7 +183,7 @@ class ProductsController < ApplicationController
 						@productdb.name = @item.title
 						@productdb.store_product_id = item.itemID
 						@productdb.product_type = 'not_used'
-						@productdb.status = 'Active'
+						@productdb.status = 'Inactive'
 						@productdb.store = @store
 
 						#add productdb sku
@@ -226,6 +226,7 @@ class ProductsController < ApplicationController
 						if ProductSku.where(:sku=>@item.sKU).length == 0
 							#save
 							if @productdb.save
+								@productdb.set_product_status
 								@result['success_imported'] = @result['success_imported'] + 1
 							end
 						else
