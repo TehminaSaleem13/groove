@@ -34,7 +34,7 @@ class Order < ActiveRecord::Base
         !item.name.nil? && item.name != '' && !item.sku.nil?
         product = Product.new
         product.name = item.name
-        product.status = 'New'
+        product.status = 'new'
         product.store_id = self.store_id
         product.store_product_id = 0
         

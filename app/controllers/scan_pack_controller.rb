@@ -18,14 +18,14 @@ class ScanPackController < ApplicationController
 			 	@order_result['status'] = @order.status
 			  	
 			  	#search in orders that have status of Scanned
-			 	if @order.status == 'Scanned'
+			 	if @order.status == 'scanned'
 			 		@order_result['scanned_on'] = @order.scanned_on
 			 		@order_result['next_state'] = 'ready_for_order'
 			 		@result['notice_messages'].push('This order has already been scanned')
 			 	end
 
 				#search in orders that have status of On Hold
-				if @order.status == 'On Hold'
+				if @order.status == 'onhold'
 					if @order.has_inactive_or_new_products
 						#get list of inactive_or_new_products
 						@order_result['next_state'] = 'request_for_confirmation_code_with_product_edit'
@@ -43,13 +43,13 @@ class ScanPackController < ApplicationController
 
 
 			  	#search in orders that have status of Cancelled
-			 	if @order.status == 'Cancelled'
+			 	if @order.status == 'cancelled'
 			 		@order_result['next_state'] = 'ready_for_order'
 			 		@result['notice_messages'].push('This order has been cancelled')
 			 	end
 
 			 	#if order has status of Awaiting Scanning
-			 	if @order.status == 'Awaiting Scanning'
+			 	if @order.status == 'awaiting'
 			 		@order.set_order_to_scanned_state
 			 		@order_result['scanned_on'] = @order.scanned_on
 			 		@order_result['next_state'] = 'ready_for_product'
@@ -82,7 +82,7 @@ class ScanPackController < ApplicationController
 			#check if order status is On Hold
 			@order = Order.find(params[:order_id])
 			if !@order.nil?
-				if @order.status == "On Hold" && !@order.has_inactive_or_new_products
+				if @order.status == "onhold" && !@order.has_inactive_or_new_products
 					if current_user.order_edit_confirmation_code == params[:confirmation_code]
 						@result['data']['order_edit_matched'] = true
 				 		@order.set_order_to_scanned_state
@@ -127,7 +127,7 @@ class ScanPackController < ApplicationController
 			#check if order status is On Hold
 			@order = Order.find(params[:order_id])
 			if !@order.nil?
-				if @order.status == "On Hold" && @order.has_inactive_or_new_products
+				if @order.status == "onhold" && @order.has_inactive_or_new_products
 					if current_user.product_edit_confirmation_code == params[:confirmation_code]
 						@result['data']['product_edit_matched'] = true
 						@result['data']['inactive_or_new_products'] = @order.get_inactive_or_new_products
@@ -160,6 +160,6 @@ class ScanPackController < ApplicationController
 	end
 
 	def scan_product_by_barcode
-		
+
 	end
 end

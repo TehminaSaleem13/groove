@@ -50,7 +50,7 @@ class ProductsController < ApplicationController
 								# Magento product api does not provide a barcode, so all
 								# magento products should be marked with a status new as t
 								#they cannot be scanned.
-								@productdb.status = 'New'
+								@productdb.status = 'new'
 
 								#add productdb sku
 								@productdbsku = ProductSku.new
@@ -296,7 +296,7 @@ class ProductsController < ApplicationController
 						end
 
 						@productdb.product_type = 'not_used'
-						@productdb.status = 'New'
+						@productdb.status = 'new'
 						@productdb.store = @store
 
 						#add productdb sku
@@ -748,7 +748,7 @@ class ProductsController < ApplicationController
       @result['product']['productkitskus'] = @product.product_kit_skuss
 
   		if @product.product_skus.length > 0
-  			@result['product']['pendingorders'] = Order.where(:status=>'Awaiting').where(:status=>'onhold').
+  			@result['product']['pendingorders'] = Order.where(:status=>'awaiting').where(:status=>'onhold').
   				where(:sku=>@product.product_skus.first.sku)
   		else
   			@result['product']['pendingorders'] = nil

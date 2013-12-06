@@ -67,7 +67,7 @@ begin
               if Order.where(:increment_id=>item[:order_id]).length == 0
                 @order = Order.new
                 @order.increment_id = item[:order_id]
-                @order.status = 'Awaiting'
+                @order.status = 'awaiting'
                 @order.order_placed_time = item[:created_at]
                 #@order.storename = item[:store_name]
                 @order.store = @store
@@ -157,7 +157,7 @@ begin
       seller_list.transactionArray.each do |transaction|
         if Order.where(:increment_id=>transaction.transactionID).length == 0
           @order = Order.new
-          @order.status = 'Awaiting'
+          @order.status = 'awaiting'
           @order.store = @store
           @order.increment_id = transaction.transactionID
           @order.order_placed_time = transaction.createdDate
@@ -229,7 +229,7 @@ begin
         @orders.each do |order|
         if Order.where(:increment_id=>order.amazon_order_id).length == 0
           @order = Order.new
-          @order.status = 'Awaiting'
+          @order.status = 'awaiting'
           @order.increment_id = order.amazon_order_id
           #@order.storename = @store.name
           @order.order_placed_time = order.purchase_date
@@ -266,6 +266,7 @@ begin
             @order.order_items.each do |item|
               @order.addactivity("Item with SKU: "+item.sku+" Added", @store.name+" Import")
             end
+            @order.set_order_status
             @result['success_imported'] = @result['success_imported'] + 1
           end
         else
@@ -356,7 +357,7 @@ begin
     @result[:status] = true
     sort_key = 'updated_at'
     sort_order = 'DESC'
-    status_filter = 'Awaiting'
+    status_filter = 'awaiting'
     limit = 10
     offset = 0
     supported_sort_keys = ['updated_at', 'store', 'notes',
