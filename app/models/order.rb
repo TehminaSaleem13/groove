@@ -54,7 +54,7 @@ class Order < ActiveRecord::Base
   end
 
   def set_order_to_scanned_state
-    self.status = 'Scanned'
+    self.status = 'scanned'
     self.scanned_on = Time.now
     self.save
   end
@@ -66,7 +66,7 @@ class Order < ActiveRecord::Base
       product_sku = ProductSku.where(:sku => order_item.sku)
       if product_sku.length > 0
         product = Product.find(product_sku.first.product_id)
-        if product.status == "New" or product.status == "Inactive"
+        if product.status == "new" or product.status == "inactive"
           result = true
         end
       end
@@ -82,7 +82,7 @@ class Order < ActiveRecord::Base
       product_sku = ProductSku.where(:sku => order_item.sku)
       if product_sku.length > 0
         product = Product.find(product_sku.first.product_id)
-        if product.status == "New" or product.status == "Inactive"
+        if product.status == "new" or product.status == "inactive"
             products_list << @product
         end
       end
@@ -94,19 +94,19 @@ class Order < ActiveRecord::Base
   def update_order_status
     result = true
     
-    if self.status == "On Hold"
+    if self.status == "onhold"
       self.order_items.each do |order_item|
         product_sku = ProductSku.where(:sku => order_item.sku)
         if product_sku.length > 0
           product = Product.find(product_sku.first.product_id)
-          if product.status == "New" or product.status == "Inactive"
+          if product.status == "new" or product.status == "inactive"
               result &= false
           end
         end
       end
 
       if result
-        self.status = "Awaiting Scanning"
+        self.status = "awaiting"
         self.save
       end
     end
@@ -119,7 +119,7 @@ class Order < ActiveRecord::Base
       product_sku = ProductSku.where(:sku => order_item.sku)
       if product_sku.length > 0
         product = Product.find(product_sku.first.product_id)
-        if product.status == "New" or product.status == "Inactive"
+        if product.status == "new" or product.status == "inactive"
             result &= false
         end
       end
@@ -127,9 +127,9 @@ class Order < ActiveRecord::Base
 
 
     if result
-      self.status = "Awaiting Scanning"
+      self.status = "awaiting"
     else
-      self.status = "On Hold"
+      self.status = "onhold"
     end
 
     self.save

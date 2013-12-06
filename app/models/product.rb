@@ -30,15 +30,15 @@ class Product < ActiveRecord::Base
 					:inv_alert_wh7,
 					:disable_conf_req
 
-  has_many :product_skus
-  has_many :product_cats
-  has_many :product_barcodes
-  has_many :product_images
-  has_many :product_kit_skuss
-  has_many :product_inventory_warehousess
+  has_many :product_skus, :dependent => :destroy
+  has_many :product_cats, :dependent => :destroy
+  has_many :product_barcodes, :dependent => :destroy
+  has_many :product_images, :dependent => :destroy
+  has_many :product_kit_skuss, :dependent => :destroy
+  has_many :product_inventory_warehousess, :dependent => :destroy
 
   def update_product_status
-  	if self.status == "Inactive" or self.status == "New"
+  	if self.status == "inactive" or self.status == "new"
 	  	result = true
 	  	@skus = ProductSku.where(:product_id=>self.id)
 	  	result &= false if @skus.length == 0
@@ -47,7 +47,7 @@ class Product < ActiveRecord::Base
 	  	result &= false if @barcodes.length == 0
 
 	  	if result
-	  		self.status = 'Active'
+	  		self.status = 'active'
 	  		self.save
 	  	end
 	end
@@ -63,9 +63,9 @@ class Product < ActiveRecord::Base
   	result &= false if @barcodes.length == 0
 
   	if result
-  		self.status = 'Active'
+  		self.status = 'active'
   	else
-  		self.status = 'New'
+  		self.status = 'new'
   	end
   	self.save
   end
