@@ -163,9 +163,9 @@ begin
           @order.order_placed_time = transaction.createdDate
 
           @order_item = OrderItem.new
-          @order_item.price = transaction.item.sellingStatus.currentPrice
+          @order_item.price = transaction.transactionPrice
           @order_item.qty = transaction.quantityPurchased
-          @order_item.row_total= transaction.transactionPrice
+          @order_item.row_total= transaction.amountPaid
           if !transaction.item.sKU.nil?
             @order_item.sku = transaction.item.sKU
           end
