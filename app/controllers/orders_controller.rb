@@ -619,6 +619,10 @@ begin
         productsku = ProductSku.where(:sku => orderitem.sku)
         if productsku.length > 0
           @orderitem['productinfo'] = Product.find_by_id(productsku.first.product_id)
+          @orderitem['qty_on_hand'] = 0
+          @orderitem['productinfo'].product_inventory_warehousess.each do |inventory|
+            @orderitem['qty_on_hand'] +=  inventory.qty
+          end
           @orderitem['productimages'] = ProductImage.where(:product_id=>productsku.first.product_id)
         else
           @orderitem['productinfo'] = nil
@@ -740,7 +744,6 @@ begin
   def removeitemfromorder
     @result = Hash.new
     @result['status'] = true
-
     @orderitem = OrderItem.find(params[:orderitem])
 
     if !@orderitem.nil?
@@ -755,6 +758,28 @@ begin
       @result['messages'].push("Could not find order item")
     end
 
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json: @result }
+    end
+  end
+
+  def updateiteminorder
+    @result = Hash.new
+    @result['status'] = true
+    @result['messages'] = []
+    @orderitem = OrderItem.find_by_id(params[:orderitem])
+    if @orderitem.nil?
+      @result['status'] &= false
+      @result['messages'].push("Could not find order item")
+    else
+      @orderitem.qty = params[:qty]
+
+      unless @orderitem.save
+        @result['status'] &= false
+        @result['messages'].push("Could not update order item")
+      end
+    end
     respond_to do |format|
       format.html # show.html.erb
       format.json { render json: @result }
@@ -810,7 +835,7 @@ begin
     @result = Hash.new
     @result['status'] = true
     @result['error_messages'] = []
-    @result['success_messages'] = [] 
+    @result['success_messages'] = []
     @result['notice_messages'] = []
     @result['data'] = Hash.new
 
@@ -821,13 +846,13 @@ begin
       @order.update_order_status
     else
       @result['status'] &= false
-      @result['error_messages'].push("Could not find order with id:"+params[:order_id]) 
+      @result['error_messages'].push("Could not find order with id:"+params[:order_id])
     end
-    
+
     #check if current user edit confirmation code is same as that entered
     else
     @result['status'] &= false
-    @result['error_messages'].push("Please specify order id to update order status")        
+    @result['error_messages'].push("Please specify order id to update order status")
     end
 
     respond_to do |format|

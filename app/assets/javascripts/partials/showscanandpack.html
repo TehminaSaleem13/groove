@@ -1,0 +1,184 @@
+<div class="row navigation-row">
+    <div ng-include="'/assets/partials/navigation.html'"></div>
+</div>
+
+<div  class="row home-row">
+    <div class="alert alert-danger" ng-show="show_error">
+        <i class="icon icon-remove close pull-right" ng-click="show_error = false"></i>
+        <p ng-repeat="msg in error_msg">{{msg}}</p>
+    </div>
+    <div class="alert alert-notice" ng-show="show_notice">
+        <i class="icon icon-remove close pull-right" ng-click="show_notice = false"></i>
+        <p ng-repeat="msg in notice_msg">{{msg}}</p>
+    </div>
+    <div class="alert alert-success" ng-show="show_success">
+        <i class="icon icon-remove close pull-right" ng-click="show_success = false"></i>
+        <p ng-repeat="msg in success_msg">{{msg}}</p>
+    </div>
+</div>
+
+<div class="row home-row">
+    <div class="row-fluid">
+        <div class="span9">
+            <div class="row-fluid">
+                <div class="span5">
+                    <div class="well small-well">
+                        <h5> Ready for {{rf_state_text}} scan!</h5>
+                        <input id="rf_input" type="text" ng-model="rf_input" class="span12" placeholder="{{ 'Scan '+rf_state_text +'...' }}"/>
+                        <div class="text-center">
+                            <h4 ng-show="rf_state=='ready_for_order'">Ready!</h4>
+                            <h4 ng-show="rf_state=='ready_for_product'">{{ order_details.items_to_scan }} items left to scan</h4>
+                        </div>
+                        <div class="scan_table">
+                            <table class="table table-hover">
+                                <thead>
+                                <tr>
+                                    <th>Image</th>
+                                    <th>Product</th>
+                                    <th>Qty</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr ng-repeat="item in order_details.items">
+                                    <td><div class="single-image"><img class="img-thumb" ng-src="{{ item.images[0].image }}" /></div></td>
+                                    <td>{{ item.name }}</td>
+                                    <td>{{item.qty}}</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="span7">
+                    <div class="well small-well">
+                        <div class="text-center">
+                            <div ng-show="rf_state=='ready_for_order'">
+                                <h3>Please scan an Order to begin</h3>
+                                <div class="pack_image"></div>
+                                <div class="pack_image"> RFO back ground space</div>
+                                <div class="pack_image"></div>
+                                <div class="pack_image"></div>
+                            </div>
+
+
+                            <div ng-show="rf_state=='ready_for_product'">
+                                <h3 ng-show="next_item.scanned ==0">Please scan this product next</h3>
+                                <h3 ng-show="next_item.scanned !=0">{{next_item.scanned}} of {{next_item.qty }} have been scanned</h3>
+                                <div class="text-left">
+                                    <p><strong>Name: </strong>{{next_item.name}}</p>
+                                    <p><strong>SKU:</strong> {{next_item.sku}}</p>
+                                    <p><strong>{{next_item.qty - next_item.scanned}} more to scan.</strong></p>
+                                </div>
+                                <img class="img-thumb" ng-src="{{ next_item.images[0].image }}" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row-fluid">
+                <div class="span6">
+                    <div class="well small-well">
+                        <fieldset>
+                            <legend>Handling Instructions for this Order</legend>
+                            <p>{{ order_details.instructions}}</p>
+                        </fieldset>
+                    </div>
+                </div>
+                <div class="span6">
+                    <div class="well small-well">
+                        <fieldset>
+                            <legend>Special Instructions for this Product</legend>
+                            <p>{{ next_item.instructions}}</p>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="span3">
+            <div class="well small-well">
+                <div class="text-center">
+                    <div class="pack_image">
+                        <h4 ng-show="rf_state=='ready_for_product'">{{ order_details.total_items - order_details.items_to_scan }} items scanned</h4>
+                    </div>
+                </div>
+                <div class="scan_table">
+                    <table class="table table-hover" >
+                        <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Scanned</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr ng-repeat="item in scanned_details.items">
+                            <td>{{ item.name }}</td>
+                            <td>{{item.scanned}}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <fieldset>
+                    <legend>Packing Stats</legend>
+                    <p>Current Order Bonus : {{cur_order_bonus}}</p>
+                    <p>Session Bonus : {{session_bonus}}</p>
+                    <p>Scan Accuracy : {{scan_accuracy}}</p>
+                    <p>Last Product Time : {{last_product_time}}</p>
+                </fieldset>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="showOrderConfirmation" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="showOrderConfirmation"
+     aria-hidden="true">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="icon-remove"></i></button>
+        <h3 id="showOrderConfirmationHeader" >Scan Confirmation Code with 'Order edit' permission</h3>
+    </div>
+    <div class="form-horizontal form-horizontal-create" >
+        <fieldset>
+            <div class="modal-body" id="showOrderConfirmation-body">
+                <div class="alert alert-danger" ng-show="show_error_msgs">
+                    <button type="button" class="close" data-dismiss="alert"><i class="icon-remove"></i></button>
+                    <p ng-repeat="message in error_msgs">{{message}}</p>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">Confirmation Code</label>
+                    <div class="controls">
+                        <input id="order_edit_confirmation_code" type="text" ng-model="order_confirmation_code" />
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+    </div>
+    <div class="modal-footer">
+        <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+    </div>
+</div>
+
+<div id="showProductConfirmation" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="showProductConfirmation"
+     aria-hidden="true">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="icon-remove"></i></button>
+        <h3 id="showProductConfirmationHeader" >Scan Confirmation Code with 'Product edit' permission</h3>
+    </div>
+    <div class="form-horizontal form-horizontal-create" >
+        <fieldset>
+            <div class="modal-body" id="showProductConfirmation-body">
+                <div class="alert alert-danger" ng-show="show_error_msgs">
+                    <button type="button" class="close" data-dismiss="alert"><i class="icon-remove"></i></button>
+                    <p ng-repeat="message in error_msgs">{{message}}</p>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">Confirmation Code</label>
+                    <div class="controls">
+                        <input id="product_edit_confirmation_code" type="text" ng-model="product_confirmation_code" />
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+    </div>
+    <div class="modal-footer">
+        <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+    </div>
+</div>

@@ -3,7 +3,7 @@
 </div>
 <div  class="row home-row">
 <div class="alert alert-danger" ng-show="show_error">
-  <button type="button" class="close" data-dismiss="alert">&times;</button>
+    <i class="icon icon-remove close pull-right" ng-click="show_error = false"></i>
   <p>{{error_msg}}</p>
 </div>
 </div>
@@ -44,7 +44,7 @@
 	<table id="storestbl" class="table table-hover table-bordered" ng-show ="stores.length>0">
       <thead>
         <tr>
-          <th><input ng-model="select_deselectall" type="checkbox" ng-change='select_deselectall_event()'></input></th>
+          <th><input ng-model="select_deselectall" type="checkbox" ng-change='select_deselectall_event()' /></th>
           <th><a href="" ng-click="handlesort('name')">Name</a></th>
           <th><a href="" ng-click="handlesort('status')">Status</a></th>
           <th><a href="" ng-click="handlesort('store_type')">Type</a></th>

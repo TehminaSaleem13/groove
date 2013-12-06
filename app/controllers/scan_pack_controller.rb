@@ -6,75 +6,77 @@ class ScanPackController < ApplicationController
 		@result = Hash.new
 	    @result['status'] = true
 	    @result['error_messages'] = []
-	    @result['success_messages'] = [] 
+	    @result['success_messages'] = []
 	    @result['notice_messages'] = []
 
-	    if !params[:barcode].nil?
+	    if !params[:barcode].nil? && params[:barcode] != ""
 		    @order = Order.where(:increment_id=>params[:barcode])
 
 		    if @order.length > 0
 		    	@order = @order.first
 		    	@order_result = Hash.new
-			 	@order_result['status'] = @order.status
-			  	
-			  	#search in orders that have status of Scanned
-			 	if @order.status == 'scanned'
-			 		@order_result['scanned_on'] = @order.scanned_on
-			 		@order_result['next_state'] = 'ready_for_order'
-			 		@result['notice_messages'].push('This order has already been scanned')
-			 	end
 
-				#search in orders that have status of On Hold
-				if @order.status == 'onhold'
-					if @order.has_inactive_or_new_products
-						#get list of inactive_or_new_products
-						@order_result['next_state'] = 'request_for_confirmation_code_with_product_edit'
-						@result['notice_messages'].push("The following items in this order are not Active."+
-							"They may need a barcode or other product info before their status can be changed"+
-							" to Active")
-					else
-						@order_result['order_edit_permission'] = current_user.import_orders
-						@order_result['next_state'] = 'request_for_confirmation_code_with_order_edit'
-						@result['notice_messages'].push('This order is currently on Hold. Please scan or enter '+
-								'confirmation code with order edit permission to continue scanning this order or '+
-								'scan a different order')
-					end
-				end
+          @order_result['status'] = @order.status
+          @order_result["id"] = @order.id
+
+            #search in orders that have status of Scanned
+          if @order.status == 'scanned'
+            @order_result['scanned_on'] = @order.scanned_on
+            @order_result['next_state'] = 'ready_for_order'
+            @result['notice_messages'].push('This order has already been scanned')
+          end
+
+          #search in orders that have status of On Hold
+          if @order.status == 'onhold'
+            if @order.has_inactive_or_new_products
+              #get list of inactive_or_new_products
+              @order_result['next_state'] = 'request_for_confirmation_code_with_product_edit'
+              @result['notice_messages'].push("The following items in this order are not Active."+
+                "They may need a barcode or other product info before their status can be changed"+
+                " to Active")
+            else
+              @order_result['order_edit_permission'] = current_user.import_orders
+              @order_result['next_state'] = 'request_for_confirmation_code_with_order_edit'
+              @result['notice_messages'].push('This order is currently on Hold. Please scan or enter '+
+                  'confirmation code with order edit permission to continue scanning this order or '+
+                  'scan a different order')
+            end
+          end
 
 
-			  	#search in orders that have status of Cancelled
-			 	if @order.status == 'cancelled'
-			 		@order_result['next_state'] = 'ready_for_order'
-			 		@result['notice_messages'].push('This order has been cancelled')
-			 	end
 
-			 	#if order has status of Awaiting Scanning
-			 	if @order.status == 'awaiting'
-			 		@order.set_order_to_scanned_state
-			 		@order_result['scanned_on'] = @order.scanned_on
-			 		@order_result['next_state'] = 'ready_for_product'
-			 	end
+            #search in orders that have status of Cancelled
+          if @order.status == 'cancelled'
+            @order_result['next_state'] = 'ready_for_order'
+            @result['notice_messages'].push('This order has been cancelled')
+          end
+
+          #if order has status of Awaiting Scanning
+          if @order.status == 'awaiting'
+            @order.set_order_to_scanned_state
+            @order_result['scanned_on'] = @order.scanned_on
+            @order_result['next_state'] = 'ready_for_product'
+          end
 		    else
 		    	@result['notice_messages'].push('This order cannot be found. It may not have been imported yet')
 		    end
-		else
-			@result['status'] &= false
-			@result['error_messages'].push("Please specify a barcode to scan the order")
-		end
-	 	
-	 	@result['data'] = @order_result
+		  else
+			  @result['status'] &= false
+			  @result['error_messages'].push("Please specify a barcode to scan the order")
+      end
+    @result['data'] = @order_result
 
-	    respond_to do |format|
-	      format.html # show.html.erb
-	      format.json { render json: @result }
-	    end
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json: @result }
+    end
 	end
 	# input is confirmation_code and order_id no.
 	def order_edit_confirmation_code
 		@result = Hash.new
 	    @result['status'] = true
 	    @result['error_messages'] = []
-	    @result['success_messages'] = [] 
+	    @result['success_messages'] = []
 	    @result['notice_messages'] = []
 	    @result['data'] = Hash.new
 
@@ -95,18 +97,18 @@ class ScanPackController < ApplicationController
 					end
 				else
 					@result['status'] &= false
-					@result['error_messages'].push("Only orders with status On Hold and has inactive or new products "+ 
+					@result['error_messages'].push("Only orders with status On Hold and has inactive or new products "+
 						"can use edit confirmation code.")
 				end
 			else
 				@result['status'] &= false
-				@result['error_messages'].push("Could not find order with id:"+params[:order_id])	
+				@result['error_messages'].push("Could not find order with id:"+params[:order_id])
 			end
-			
+
 			#check if current user edit confirmation code is same as that entered
 	    else
 			@result['status'] &= false
-			@result['error_messages'].push("Please specify confirmation code and order id to confirm purchase code")	    	
+			@result['error_messages'].push("Please specify confirmation code and order id to confirm purchase code")
 	    end
 
 	    respond_to do |format|
@@ -119,7 +121,7 @@ class ScanPackController < ApplicationController
 		@result = Hash.new
 	    @result['status'] = true
 	    @result['error_messages'] = []
-	    @result['success_messages'] = [] 
+	    @result['success_messages'] = []
 	    @result['notice_messages'] = []
 	    @result['data'] = Hash.new
 
@@ -139,18 +141,18 @@ class ScanPackController < ApplicationController
 					end
 				else
 					@result['status'] &= false
-					@result['error_messages'].push("Only orders with status On Hold and has inactive or new products "+ 
+					@result['error_messages'].push("Only orders with status On Hold and has inactive or new products "+
 						"can use edit confirmation code.")
 				end
 			else
 				@result['status'] &= false
-				@result['error_messages'].push("Could not find order with id:"+params[:order_id])	
+				@result['error_messages'].push("Could not find order with id:"+params[:order_id])
 			end
-			
+
 			#check if current user edit confirmation code is same as that entered
 	    else
 			@result['status'] &= false
-			@result['error_messages'].push("Please specify confirmation code and order id to confirm purchase code")	    	
+			@result['error_messages'].push("Please specify confirmation code and order id to confirm purchase code")
 	    end
 
 	    respond_to do |format|
