@@ -6,10 +6,10 @@ class Order < ActiveRecord::Base
   		:method, :order_placed_time, :postcode, :price, :qty, :sku, :state, :store_id, :notes_internal, 
   		:notes_toPacker, :notes_fromPacker, :tracking_processed, :scanned_on, :tracking_num, :company
 
-  has_many :order_items
-  has_one :order_shipping
-  has_one :order_exceptions
-  has_many :order_activities
+  has_many :order_items, :dependent => :destroy
+  has_one :order_shipping, :dependent => :destroy
+  has_one :order_exceptions, :dependent => :destroy
+  has_many :order_activities, :dependent => :destroy
 
   def addactivity (order_activity_message, username)
   	@activity = OrderActivity.new

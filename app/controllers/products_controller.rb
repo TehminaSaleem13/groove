@@ -631,7 +631,6 @@ class ProductsController < ApplicationController
     unless @products.nil?
       @products.each do|product|
         @product = Product.find(product["id"])
-        #todo: delete sku, images, categories associated with product too.
         if @product.destroy
           @result['status'] &= true
         else
