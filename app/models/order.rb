@@ -38,7 +38,8 @@ class Order < ActiveRecord::Base
         product.store_id = self.store_id
         product.store_product_id = 0
         
-        if product.save            
+        if product.save
+          product.set_product_status            
           #now add skus
           @sku = ProductSku.new
           @sku.sku = item.sku

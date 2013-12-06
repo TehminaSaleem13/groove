@@ -199,29 +199,32 @@ class ProductsController < ApplicationController
 						#publish the sku to the product record
 						@productdb.product_skus << @productdbsku
 
+						if @credential.import_images
+							if !@item.pictureDetails.nil?
+								if !@item.pictureDetails.pictureURL.nil? &&
+									@item.pictureDetails.pictureURL.length > 0
+									@productimage = ProductImage.new
+									@productimage.image = "http://i.ebayimg.com" +
+										@item.pictureDetails.pictureURL.first.request_uri()
+									@productdb.product_images << @productimage
 
-					if !@item.pictureDetails.nil?
-						if !@item.pictureDetails.pictureURL.nil? &&
-							@item.pictureDetails.pictureURL.length > 0
-							@productimage = ProductImage.new
-							@productimage.image = "http://i.ebayimg.com" +
-								@item.pictureDetails.pictureURL.first.request_uri()
-							@productdb.product_images << @productimage
-
+								end
+							end
 						end
 
-						if !@item.primaryCategory.nil?
-							@product_cat = ProductCat.new
-							@product_cat.category = @item.primaryCategory.categoryName
-							@productdb.product_cats << @product_cat
-						end
+						if @credential.import_products
+							if !@item.primaryCategory.nil?
+								@product_cat = ProductCat.new
+								@product_cat.category = @item.primaryCategory.categoryName
+								@productdb.product_cats << @product_cat
+							end
 
-						if !@item.secondaryCategory.nil?
-							@product_cat = ProductCat.new
-							@product_cat.category = @item.secondaryCategory.categoryName
-							@productdb.product_cats << @product_cat
+							if !@item.secondaryCategory.nil?
+								@product_cat = ProductCat.new
+								@product_cat.category = @item.secondaryCategory.categoryName
+								@productdb.product_cats << @product_cat
+							end
 						end
-					end
 
 						if ProductSku.where(:sku=>@item.sKU).length == 0
 							#save
