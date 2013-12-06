@@ -11,6 +11,8 @@ angular.module('groovepacks', ['groovepacks.filters', 'groovepacks.services', 'g
         {templateUrl: '/assets/partials/showstores.html', controller: 'showStoresCtrl'});
     $routeProvider.when('/products',
     	{templateUrl: '/assets/partials/showproducts.html', controller: 'showProductsCtrl'});
+    $routeProvider.when('/scanandpack',
+        {templateUrl: '/assets/partials/showscanandpack.html', controller: 'showScanPackCtrl'});
     $routeProvider.when('/importorders',
         {templateUrl: '/assets/partials/importorders.html', controller: 'importOrdersCtrl'});
     $routeProvider.otherwise({redirectTo: '/settings/showstores'});

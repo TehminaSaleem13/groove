@@ -225,9 +225,13 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $q, $cookies
             $scope.currently_open = index;
         }
         $http.get('/orders/getdetails.json?id='+id).success(function(data) {
-            //console.log(data.order);
+            console.log(data.order);
             if(data.status) {
                 $scope.single_order = data.order;
+                $scope.item_edit = {
+                    index: -1,
+                    qty: 0
+                };
             }
         });
 
@@ -344,7 +348,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $q, $cookies
 
     $scope.add_item_order = function(id) {
         if(confirm("Are you sure?")) {
-                $http.post("orders/additemtoorder.json",{productid: id , id: $scope.single_order.basicinfo.id}).success(
+                $http.post("orders/additemtoorder.json",{productid: id , id: $scope.single_order.basicinfo.id, qty:0}).success(
                     function(data) {
                         if(data.status) {
                             $scope.show_error_msgs = false;
@@ -363,6 +367,32 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $q, $cookies
 
         }
         $('#addItem').modal("hide");
+    }
+    $scope.save_item = function(){
+
+        if($scope.item_edit.index != -1) {
+
+            $http.post('/orders/updateiteminorder.json',{orderitem: $scope.single_order.items[$scope.item_edit.index].iteminfo.id, qty: $scope.item_edit.qty}).success(function(data) {
+                if(data.status) {
+                    $scope.order_single_details($scope.single_order.basicinfo.id);
+                } else {
+                    $scope.show_error_msgs = true;
+                    $scope.error_msgs = data.messages;
+                }
+            }).error(function(data){
+                $scope.show_error_msgs = true;
+                $scope.error_msgs = ["Some error Occurred"];
+            });
+        }
+
+    }
+    $scope.edit_qty = function(index) {
+        $scope.item_edit.index = index;
+        if(typeof $scope.single_order.items[index].iteminfo.qty == "number" ) {
+            $scope.item_edit.qty = $scope.single_order.items[index].iteminfo.qty;
+        }
+        $scope.single_order.items[index].iteminfo.qty = "";
+        $timeout(function() {$scope.focus_input('item_qty_'+index);},500);
     }
     $scope.focus_input = function(name){
         $(".input-text [name='"+name+"']").focus();
@@ -395,7 +425,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $q, $cookies
 
     $scope.update_order_list = function(obj) {
         $http.post('/orders/updateorderlist.json',obj).success(function(data){
-            console.log(data);
+            //console.log(data);
             if(data.status) {
                 $scope.show_error = false;
                 $scope.show_error_msgs = false;
