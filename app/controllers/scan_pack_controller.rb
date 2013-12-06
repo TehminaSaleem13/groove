@@ -53,8 +53,6 @@ class ScanPackController < ApplicationController
 
           #if order has status of Awaiting Scanning
           if @order.status == 'awaiting'
-            @order.set_order_to_scanned_state
-            @order_result['scanned_on'] = @order.scanned_on
             @order_result['next_state'] = 'ready_for_product'
           end
 		    else
@@ -160,8 +158,65 @@ class ScanPackController < ApplicationController
 	      format.json { render json: @result }
 	    end
 	end
-	#input is barcode, order id, 
+	#input is barcode, order id
 	def scan_product_by_barcode
+		@result = Hash.new
+	    @result['status'] = true
+	    @result['error_messages'] = []
+	    @result['success_messages'] = []
+	    @result['notice_messages'] = []
+	    @result['data'] = Hash.new
 
+	    if !params[:order_id].nil? || !params[:barcode].nil?
+			#check if order status is On Hold
+			@order = Order.find(params[:order_id])
+			if !@order.nil?
+				if @order.has_unscanned_items
+					barcode_found = false
+					@order.order_items.each do |order_item|
+						if ProductSku.where(:sku=>order_item.sku).length > 0
+							sku = ProductSku.where(:sku=>order_item.sku).first
+							if !sku.nil?
+								barcodes = ProductBarcode.where(:product_id => sku.product_id)
+								if barcodes.length > 0
+									barcode = barcodes.first
+									if barcode.barcode == params[:barcode]
+										barcode_found = true
+										order_item.scanned_qty = order_item.scanned_qty + 1
+										if order_item.scanned_qty == order_item.qty
+											order_item.scannned_status = 'scanned'
+										else
+											order_item.scannned_status = 'partially_scanned'
+										end
+										if !@order.has_unscanned_items
+								            @order.set_order_to_scanned_state
+										end
+									end
+								end
+
+								if barcode_found == false
+									@result['status'] &= false
+									@result['error_messages'].push("There are no barcodes that match items in this order")				
+								end
+							end
+						end
+					end
+				else
+					@result['status'] &= false
+					@result['error_messages'].push("There are no unscanned items in this order")
+				end
+			else
+				@result['status'] &= false
+				@result['error_messages'].push("Could not find order with id:"+params[:order_id])
+			end
+	    else
+			@result['status'] &= false
+			@result['error_messages'].push("Please specify barcode and order id to confirm purchase code")
+	    end
+
+	    respond_to do |format|
+	      format.html # show.html.erb
+	      format.json { render json: @result }
+	    end
 	end
 end

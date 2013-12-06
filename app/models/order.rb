@@ -135,4 +135,17 @@ class Order < ActiveRecord::Base
     self.save
   end
 
+  def has_unscanned_items
+    result = true
+
+    self.order_items.each do |order_item|
+      if order_item.scanned_status != 'scanned'
+        result &= false
+        break
+      end
+    end
+
+    result
+  end
+
 end
