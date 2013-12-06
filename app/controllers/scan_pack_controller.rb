@@ -160,7 +160,7 @@ class ScanPackController < ApplicationController
 	      format.json { render json: @result }
 	    end
 	end
-
+	#input is barcode, order id, 
 	def scan_product_by_barcode
 
 	end

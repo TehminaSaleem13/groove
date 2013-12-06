@@ -175,6 +175,59 @@ begin
             @order_item.name = ""
           end
 
+          if ProductSku.where(:sku=> transaction.item.sKU).length == 0
+            @productdb = Product.new
+            @item = @eBay.getItem(:ItemID => transaction.item.itemID).item
+            @productdb.name = @item.title
+            @productdb.store_product_id = @item.itemID
+            @productdb.product_type = 'not_used'
+            @productdb.status = 'inactive'
+            @productdb.store = @store
+
+            #add productdb sku
+            @productdbsku = ProductSku.new
+            if  @item.sKU.nil?
+              @productdbsku.sku = "not_available"
+            else
+              @productdbsku.sku = @item.sKU
+            end
+            #@item.productListingType.uPC
+            @productdbsku.purpose = 'primary'
+
+            #publish the sku to the product record
+            @productdb.product_skus << @productdbsku
+
+            if @credential.import_images
+              if !@item.pictureDetails.nil?
+                if !@item.pictureDetails.pictureURL.nil? &&
+                  @item.pictureDetails.pictureURL.length > 0
+                  @productimage = ProductImage.new
+                  @productimage.image = "http://i.ebayimg.com" +
+                    @item.pictureDetails.pictureURL.first.request_uri()
+                  @productdb.product_images << @productimage
+
+                end
+              end
+            end
+
+            if @credential.import_products
+              if !@item.primaryCategory.nil?
+                @product_cat = ProductCat.new
+                @product_cat.category = @item.primaryCategory.categoryName
+                @productdb.product_cats << @product_cat
+              end
+
+              if !@item.secondaryCategory.nil?
+                @product_cat = ProductCat.new
+                @product_cat.category = @item.secondaryCategory.categoryName
+                @productdb.product_cats << @product_cat
+              end
+            end
+
+            @productdb.save
+            @productdb.set_product_status
+          end
+
           @order.order_items << @order_item
 
 
@@ -189,10 +242,6 @@ begin
 
           #@order.order_shipping = @shipping
           if @order.save
-            if !@order.addnewitems
-              @result['status'] &= false
-              @result['messages'].push('Problem adding new items')
-            end
             @order.addactivity("Order Import", @store.name+" Import")
             @order.order_items.each do |item|
               @order.addactivity("Item with SKU: "+item.sku+" Added", @store.name+" Import")
@@ -619,10 +668,6 @@ begin
         productsku = ProductSku.where(:sku => orderitem.sku)
         if productsku.length > 0
           @orderitem['productinfo'] = Product.find_by_id(productsku.first.product_id)
-          @orderitem['qty_on_hand'] = 0
-          @orderitem['productinfo'].product_inventory_warehousess.each do |inventory|
-            @orderitem['qty_on_hand'] +=  inventory.qty
-          end
           @orderitem['productimages'] = ProductImage.where(:product_id=>productsku.first.product_id)
         else
           @orderitem['productinfo'] = nil
@@ -744,6 +789,7 @@ begin
   def removeitemfromorder
     @result = Hash.new
     @result['status'] = true
+
     @orderitem = OrderItem.find(params[:orderitem])
 
     if !@orderitem.nil?
@@ -758,28 +804,6 @@ begin
       @result['messages'].push("Could not find order item")
     end
 
-    respond_to do |format|
-      format.html # show.html.erb
-      format.json { render json: @result }
-    end
-  end
-
-  def updateiteminorder
-    @result = Hash.new
-    @result['status'] = true
-    @result['messages'] = []
-    @orderitem = OrderItem.find_by_id(params[:orderitem])
-    if @orderitem.nil?
-      @result['status'] &= false
-      @result['messages'].push("Could not find order item")
-    else
-      @orderitem.qty = params[:qty]
-
-      unless @orderitem.save
-        @result['status'] &= false
-        @result['messages'].push("Could not update order item")
-      end
-    end
     respond_to do |format|
       format.html # show.html.erb
       format.json { render json: @result }
@@ -835,7 +859,7 @@ begin
     @result = Hash.new
     @result['status'] = true
     @result['error_messages'] = []
-    @result['success_messages'] = []
+    @result['success_messages'] = [] 
     @result['notice_messages'] = []
     @result['data'] = Hash.new
 
@@ -846,13 +870,13 @@ begin
       @order.update_order_status
     else
       @result['status'] &= false
-      @result['error_messages'].push("Could not find order with id:"+params[:order_id])
+      @result['error_messages'].push("Could not find order with id:"+params[:order_id]) 
     end
-
+    
     #check if current user edit confirmation code is same as that entered
     else
     @result['status'] &= false
-    @result['error_messages'].push("Please specify order id to update order status")
+    @result['error_messages'].push("Please specify order id to update order status")        
     end
 
     respond_to do |format|

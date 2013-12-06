@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20131206015333) do
+ActiveRecord::Schema.define(:version => 20131206091244) do
 
   create_table "amazon_credentials", :force => true do |t|
     t.string   "merchant_id",                                     :null => false
@@ -85,13 +85,14 @@ ActiveRecord::Schema.define(:version => 20131206015333) do
   create_table "order_items", :force => true do |t|
     t.string   "sku"
     t.integer  "qty"
-    t.decimal  "price",      :precision => 10, :scale => 0
-    t.decimal  "row_total",  :precision => 10, :scale => 0
+    t.decimal  "price",          :precision => 10, :scale => 0
+    t.decimal  "row_total",      :precision => 10, :scale => 0
     t.integer  "order_id"
-    t.datetime "created_at",                                                :null => false
-    t.datetime "updated_at",                                                :null => false
-    t.string   "name",                                      :default => "", :null => false
+    t.datetime "created_at",                                                              :null => false
+    t.datetime "updated_at",                                                              :null => false
+    t.string   "name",                                          :default => "",           :null => false
     t.integer  "product_id"
+    t.string   "scanned_status",                                :default => "notscanned"
   end
 
   add_index "order_items", ["order_id"], :name => "index_order_items_on_order_id"
@@ -132,7 +133,6 @@ ActiveRecord::Schema.define(:version => 20131206015333) do
     t.string   "method"
     t.datetime "created_at",         :null => false
     t.datetime "updated_at",         :null => false
-    t.string   "store_order_id"
     t.string   "notes_internal"
     t.string   "notes_toPacker"
     t.string   "notes_fromPacker"
