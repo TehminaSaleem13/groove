@@ -183,7 +183,7 @@ class ProductsController < ApplicationController
 						@productdb.name = @item.title
 						@productdb.store_product_id = item.itemID
 						@productdb.product_type = 'not_used'
-						@productdb.status = 'Inactive'
+						@productdb.status = 'inactive'
 						@productdb.store = @store
 
 						#add productdb sku
