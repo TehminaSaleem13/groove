@@ -83,7 +83,7 @@ class ScanPackController < ApplicationController
 			@order = Order.find(params[:order_id])
 			if !@order.nil?
 				if @order.status == "onhold" && !@order.has_inactive_or_new_products
-					if current_user.order_edit_confirmation_code == params[:confirmation_code]
+					if User.where(:order_edit_confirmation_code => params[:confirmation_code]).length > 0
 						@result['data']['order_edit_matched'] = true
 				 		@order.set_order_to_scanned_state
 				 		@result['data']['scanned_on'] = @order.scanned_on
@@ -128,7 +128,7 @@ class ScanPackController < ApplicationController
 			@order = Order.find(params[:order_id])
 			if !@order.nil?
 				if @order.status == "onhold" && @order.has_inactive_or_new_products
-					if current_user.product_edit_confirmation_code == params[:confirmation_code]
+					if User.where(:product_edit_confirmation_code => params[:confirmation_code]).length > 0
 						@result['data']['product_edit_matched'] = true
 						@result['data']['inactive_or_new_products'] = @order.get_inactive_or_new_products
 				 		@result['data']['next_state'] = 'product_edit'

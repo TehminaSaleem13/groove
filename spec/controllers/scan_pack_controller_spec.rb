@@ -109,8 +109,10 @@ describe ScanPackController do
   it "should check for confirmation code when order status is on hold" do
       request.accept = "application/json"
       
-      @user.order_edit_confirmation_code = '1234567890'
-      @user.save
+      @other_user = FactoryGirl.create(:user, :email=>'test_other@groovepacks.com', :username=>'test_user')
+      
+      @other_user.order_edit_confirmation_code = '1234567890'
+      @other_user.save
 
       @order = FactoryGirl.create(:order, :status=>'onhold')
 
@@ -126,9 +128,10 @@ describe ScanPackController do
 
   it "should not check for confirmation code when order status is not on hold" do
       request.accept = "application/json"
+      @other_user = FactoryGirl.create(:user, :email=>'test_other@groovepacks.com', :username=>'test_user')
       
-      @user.order_edit_confirmation_code = '1234567890'
-      @user.save
+      @other_user.order_edit_confirmation_code = '1234567890'
+      @other_user.save
 
       @order = FactoryGirl.create(:order, :status=>'awaiting')
 
@@ -143,9 +146,11 @@ describe ScanPackController do
 
   it "should not set session variable and return false when confirmation code does not match" do
       request.accept = "application/json"
+
+      @other_user = FactoryGirl.create(:user, :email=>'test_other@groovepacks.com', :username=>'test_user')
       
-      @user.order_edit_confirmation_code = '1234567890'
-      @user.save
+      @other_user.order_edit_confirmation_code = '1234567890'
+      @other_user.save
 
       @order = FactoryGirl.create(:order, :status=>'onhold')
 
@@ -158,6 +163,71 @@ describe ScanPackController do
       expect(result["data"]["next_state"]).to eq("request_for_confirmation_code_with_order_edit")
       expect(session[:order_edit_matched_for_current_user]).to eq(nil)
   end
+
+  it "should check for product confirmation code when order status is on hold and has inactive or new products" do
+      request.accept = "application/json"
+      
+      @other_user = FactoryGirl.create(:user, :email=>'test_other@groovepacks.com', :username=>'test_user')
+      
+      @other_user.product_edit_confirmation_code = '1234567890'
+      @other_user.save
+
+      @order = FactoryGirl.create(:order, :status=>'onhold')
+      @orderitem = FactoryGirl.create(:order_item, :order=>@order)
+      @order.addnewitems
+
+      get :product_edit_confirmation_code, { :confirmation_code => '1234567890', :order_id => @order.id }
+
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["status"]).to eq(true)
+      expect(result["data"]["product_edit_matched"]).to eq(true)
+      expect(result["data"]["next_state"]).to eq("product_edit")
+      expect(session[:product_edit_matched_for_current_user]).to eq(true)
+  end
+
+  it "should not check for product confirmation code when order status is not on hold" do
+      request.accept = "application/json"
+      @other_user = FactoryGirl.create(:user, :email=>'test_other@groovepacks.com', :username=>'test_user')
+      
+      @other_user.product_edit_confirmation_code = '1234567890'
+      @other_user.save
+
+      @order = FactoryGirl.create(:order, :status=>'awaiting')
+      @orderitem = FactoryGirl.create(:order_item, :order=>@order)
+      @order.addnewitems
+
+      get :product_edit_confirmation_code, { :confirmation_code => '1234567890', :order_id => @order.id }
+
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["status"]).to eq(false)
+      expect(result["error_messages"][0]).to eq("Only orders with status On Hold and has inactive or new products "+ 
+            "can use edit confirmation code.")
+  end
+
+  it "should not set session variable and return false when confirmation code does not match" do
+      request.accept = "application/json"
+
+      @other_user = FactoryGirl.create(:user, :email=>'test_other@groovepacks.com', :username=>'test_user')
+      
+      @other_user.product_edit_confirmation_code = '1234567890'
+      @other_user.save
+
+      @order = FactoryGirl.create(:order, :status=>'onhold')
+      @orderitem = FactoryGirl.create(:order_item, :order=>@order)
+      @order.addnewitems
+
+      get :product_edit_confirmation_code, { :confirmation_code => '123456789', :order_id => @order.id }
+
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["status"]).to eq(true)
+      expect(result["data"]["product_edit_matched"]).to eq(false)
+      expect(result["data"]["next_state"]).to eq("request_for_confirmation_code_with_product_edit")
+      expect(session[:product_edit_matched_for_current_user]).to eq(nil)
+  end
+
 
   it "should scan product by barcode and order status should be in scanned status when all items are scanned" do
       request.accept = "application/json"
