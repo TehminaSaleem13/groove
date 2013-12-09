@@ -188,6 +188,7 @@ class ScanPackController < ApplicationController
 									else
 										order_item.scanned_status = 'partially_scanned'
 									end
+									order_item.save
 									if !@order.has_unscanned_items
 							            @order.set_order_to_scanned_state
 									end

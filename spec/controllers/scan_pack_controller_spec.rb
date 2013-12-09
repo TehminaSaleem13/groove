@@ -214,5 +214,56 @@ describe ScanPackController do
       expect(order.status).to eq("awaiting")
   end
 
+  it "should scan product by barcode and order status should still be in awaiting status when there are unscanned items of the same product" do
+      request.accept = "application/json"
+      
+      order = FactoryGirl.create(:order, :status=>'awaiting')
+      
+      product = FactoryGirl.create(:product)
+      product_sku = FactoryGirl.create(:product_sku, :product=> product)
+      product_barcode = FactoryGirl.create(:product_barcode, :product=> product)
+
+      order_item = FactoryGirl.create(:order_item, :sku=>product_sku.sku, 
+                    :qty=>3, :price=>"10", :row_total=>"10", :order=>order, :name=>product.name)
+
+      get :scan_product_by_barcode, { :barcode => '1234567890', :order_id => order.id }
+      get :scan_product_by_barcode, { :barcode => '1234567890', :order_id => order.id }
+
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["status"]).to eq(true)
+      order.reload
+      expect(order.status).to eq("awaiting")
+      order_item.reload
+      expect(order_item.scanned_qty).to eq(2)
+      expect(order_item.scanned_status).to eq("partially_scanned")
+  end
+
+  it "should scan product by barcode and order status should still be in scanned status when there are no unscanned items"+
+     " of the same product" do
+      request.accept = "application/json"
+      
+      order = FactoryGirl.create(:order, :status=>'awaiting')
+      
+      product = FactoryGirl.create(:product)
+      product_sku = FactoryGirl.create(:product_sku, :product=> product)
+      product_barcode = FactoryGirl.create(:product_barcode, :product=> product)
+
+      order_item = FactoryGirl.create(:order_item, :sku=>product_sku.sku, 
+                    :qty=>3, :price=>"10", :row_total=>"10", :order=>order, :name=>product.name)
+
+      get :scan_product_by_barcode, { :barcode => '1234567890', :order_id => order.id }
+      get :scan_product_by_barcode, { :barcode => '1234567890', :order_id => order.id }
+      get :scan_product_by_barcode, { :barcode => '1234567890', :order_id => order.id }
+
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["status"]).to eq(true)
+      order.reload
+      expect(order.status).to eq("scanned")
+      order_item.reload
+      expect(order_item.scanned_qty).to eq(3)
+      expect(order_item.scanned_status).to eq("scanned")
+  end
 end
 
