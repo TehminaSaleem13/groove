@@ -177,29 +177,28 @@ class ScanPackController < ApplicationController
 						if ProductSku.where(:sku=>order_item.sku).length > 0
 							sku = ProductSku.where(:sku=>order_item.sku).first
 							if !sku.nil?
-								barcodes = ProductBarcode.where(:product_id => sku.product_id)
+								barcodes = ProductBarcode.where(:product_id => sku.product_id).
+									where(:barcode=>params[:barcode])
 								if barcodes.length > 0
-									barcode = barcodes.first
-									if barcode.barcode == params[:barcode]
-										barcode_found = true
-										order_item.scanned_qty = order_item.scanned_qty + 1
-										if order_item.scanned_qty == order_item.qty
-											order_item.scannned_status = 'scanned'
-										else
-											order_item.scannned_status = 'partially_scanned'
-										end
-										if !@order.has_unscanned_items
-								            @order.set_order_to_scanned_state
-										end
-									end
-								end
+									barcode_found = true
 
-								if barcode_found == false
-									@result['status'] &= false
-									@result['error_messages'].push("There are no barcodes that match items in this order")				
+									order_item.scanned_qty = order_item.scanned_qty + 1
+									if order_item.scanned_qty == order_item.qty
+										order_item.scanned_status = 'scanned'
+									else
+										order_item.scanned_status = 'partially_scanned'
+									end
+									if !@order.has_unscanned_items
+							            @order.set_order_to_scanned_state
+									end
+									break
 								end
 							end
 						end
+					end
+					if barcode_found == false
+						@result['status'] &= false
+						@result['error_messages'].push("There are no barcodes that match items in this order")				
 					end
 				else
 					@result['status'] &= false

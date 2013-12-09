@@ -15,7 +15,7 @@ FactoryGirl.define do
     state "Andhra Pradesh"
     postcode "500016"
     country "India"
-    status "Awaiting Scanning"
+    status "awaiting"
     scanned_on ""
 
 # varchar(255)

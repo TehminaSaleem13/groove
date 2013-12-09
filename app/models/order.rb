@@ -136,11 +136,11 @@ class Order < ActiveRecord::Base
   end
 
   def has_unscanned_items
-    result = true
+    result = false
 
     self.order_items.each do |order_item|
       if order_item.scanned_status != 'scanned'
-        result &= false
+        result |= true
         break
       end
     end

@@ -2,8 +2,8 @@
 
 FactoryGirl.define do
   factory :product_sku do
-    sku "MyString"
-    purpose "MyString"
+    sku "IPHONE5S"
+    purpose "primary"
     product nil
   end
 end

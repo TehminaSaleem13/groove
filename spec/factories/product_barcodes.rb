@@ -3,6 +3,6 @@
 FactoryGirl.define do
   factory :product_barcode do
     product nil
-    barcode "MyString"
+    barcode "1234567890"
   end
 end
