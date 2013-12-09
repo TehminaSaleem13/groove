@@ -123,6 +123,10 @@ describe ScanPackController do
       expect(result["status"]).to eq(true)
       expect(result["data"]["order_edit_matched"]).to eq(true)
       expect(result["data"]["next_state"]).to eq("ready_for_product")
+      @order.reload
+      expect(@order.status).to eq("awaiting")
+      expect(@order.order_activities.last.action).to eq("Status changed from onhold to awaiting")
+      expect(@order.order_activities.last.username).to eq(@other_user.username)
       expect(session[:order_edit_matched_for_current_user]).to eq(true)
   end
 

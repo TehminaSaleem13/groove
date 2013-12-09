@@ -85,7 +85,10 @@ class ScanPackController < ApplicationController
 				if @order.status == "onhold" && !@order.has_inactive_or_new_products
 					if User.where(:order_edit_confirmation_code => params[:confirmation_code]).length > 0
 						@result['data']['order_edit_matched'] = true
-				 		@order.set_order_to_scanned_state
+						@order.status = 'awaiting'
+						@order.addactivity("Status changed from onhold to awaiting",
+							User.where(:order_edit_confirmation_code => params[:confirmation_code]).first.username)
+						@order.save
 				 		@result['data']['scanned_on'] = @order.scanned_on
 				 		@result['data']['next_state'] = 'ready_for_product'
 						session[:order_edit_matched_for_current_user] = true
