@@ -9,7 +9,7 @@ class ProductsController < ApplicationController
 	@result['total_imported'] = 0
 	@result['success_imported'] = 0
 	@result['previous_imported'] = 0
-	begin
+	# begin
 	#import if magento products
 	if @store.store_type == 'Magento' then
 		@magento_credentials = MagentoCredentials.where(:store_id => @store.id)
@@ -51,18 +51,20 @@ class ProductsController < ApplicationController
 								# magento products should be marked with a status new as t
 								#they cannot be scanned.
 								@productdb.status = 'new'
-
-								#add productdb sku
+								
 								@productdbsku = ProductSku.new
-								@productdbsku.sku = result_product['sku']
-								@productdbsku.purpose = 'primary'
+								#add productdb sku
+								if result_product['sku'] != {:"@xsi:type"=>"xsd:string"}
+									@productdbsku.sku = result_product['sku']
+									@productdbsku.purpose = 'primary'
 
-								#publish the sku to the product record
-								@productdb.product_skus << @productdbsku
+									#publish the sku to the product record
+									@productdb.product_skus << @productdbsku
+								end
 
 								#get images and categories
 								begin
-								if !result_product['sku'].nil?
+								if !result_product['sku'].nil? && @magento_credentials.first.import_images
 									getimages = client.call(:call, message: {session: session,
 										method: 'catalog_product_attribute_media.list',
 										product: result_product['sku']})
@@ -132,7 +134,7 @@ class ProductsController < ApplicationController
 
 								begin
 
-								if !result_product['category_ids'][:item].nil? &&
+								if @magento_credentials.first.import_products && !result_product['category_ids'][:item].nil? &&
 									result_product['category_ids'][:item].kind_of?(Array)
 									result_product['category_ids'][:item].each do|category_id|
 
@@ -158,7 +160,8 @@ class ProductsController < ApplicationController
 								rescue
 								end
 
-								if ProductSku.where(:sku=>@productdbsku.sku).length == 0
+								if !@productdbsku.sku.nil? && 
+									ProductSku.where(:sku=>@productdbsku.sku).length == 0
 									#save
 									if @productdb.save
 										# if @productdb.product_images.length == 0 && !getimages.nil?
@@ -375,10 +378,10 @@ class ProductsController < ApplicationController
 			end
 		end
 	end
-	rescue Exception => e
-		@result['status'] = false
-		@result['messages'].push(e.message)
-	end
+	# rescue Exception => e
+	# 	@result['status'] = false
+	# 	@result['messages'].push(e.message)
+	# end
 
     respond_to do |format|
       format.json { render json: @result}
