@@ -62,26 +62,63 @@ class ProductsController < ApplicationController
 
 								#get images and categories
 								begin
-								getimages = client.call(:call, message: {session: session,
-									method: 'catalog_product_attribute_media.list',
-									product: result_product['sku']})
-								if getimages.success?
-									@images = getimages.body[:call_response][:call_return][:item]
-									if !@images.nil?
-										if @images.length != 2
-											@images.each do |image|
-												image[:item].each do |itemhash|
-													@productimage = ProductImage.new
-													if itemhash[:key] == 'url'
-														@productimage.image = itemhash[:value]
-													end
+								if !result_product['sku'].nil?
+									getimages = client.call(:call, message: {session: session,
+										method: 'catalog_product_attribute_media.list',
+										product: result_product['sku']})
+									if getimages.success?
 
-													if itemhash[:key] == 'label'
-														@productimage.caption = itemhash[:value]
-													end
+										@images = getimages.body[:call_response][:call_return][:item]
+										if !@images.nil?
+											if @images.length != 2
+												@images.each do |image|
+													image[:item].each do |itemhash|
+														@productimage = ProductImage.new
+														if itemhash[:key] == 'url'
+															@productimage.image = itemhash[:value]
+														end
 
-													if !@productimage.image.nil?
-														@productdb.product_images << @productimage
+														if itemhash[:key] == 'label'
+															@productimage.caption = itemhash[:value]
+														end
+
+														if !@productimage.image.nil?
+															@productdb.product_images << @productimage
+														end
+													end
+												end
+											else
+												if @images.kind_of?(Array)
+													@images.each do |image|
+														image[:item].each do |itemhash|
+															@productimage = ProductImage.new
+															if itemhash[:key] == 'url'
+																@productimage.image = itemhash[:value]
+															end
+
+															if itemhash[:key] == 'label'
+																@productimage.caption = itemhash[:value]
+															end
+
+															if !@productimage.image.nil?
+																@productdb.product_images << @productimage
+															end
+														end
+													end
+												else
+													@images[:item].each do |itemhash|
+														@productimage = ProductImage.new
+														if itemhash[:key] == 'url'
+															@productimage.image = itemhash[:value]
+														end
+
+														if itemhash[:key] == 'label'
+															@productimage.caption = itemhash[:value]
+														end
+
+														if !@productimage.image.nil?
+															@productdb.product_images << @productimage
+														end
 													end
 												end
 											end
@@ -91,6 +128,7 @@ class ProductsController < ApplicationController
 								rescue
 
 								end
+
 
 								begin
 
@@ -123,6 +161,11 @@ class ProductsController < ApplicationController
 								if ProductSku.where(:sku=>@productdbsku.sku).length == 0
 									#save
 									if @productdb.save
+										# if @productdb.product_images.length == 0 && !getimages.nil?
+										# 	raise getimages.inspect
+										# else
+										# 	raise getimages.inspect
+										# end
 										@result['success_imported'] = @result['success_imported'] + 1
 									end
 								else
