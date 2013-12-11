@@ -123,6 +123,7 @@ class OrdersController < ApplicationController
                   @order.order_items.each do |item|
                     @order.addactivity("Item with SKU: "+item.sku+" Added", @store.name+" Import")
                   end
+                  @order.set_order_status
                   @result['success_imported'] = @result['success_imported'] + 1
                 end
               else
