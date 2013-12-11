@@ -29,7 +29,7 @@ class OrdersController < ApplicationController
     @result['activestoreindex'] = params[:activestoreindex]
   end
 
-#begin
+begin
   #import if magento products
   if @store.store_type == 'Magento'
     @magento_credentials = MagentoCredentials.where(:store_id => @store.id)
@@ -342,11 +342,11 @@ class OrdersController < ApplicationController
       @result['response'] = response
     end
   end
-  # rescue Exception => e
-  #   @result['status'] = false
-  #   @result['messages'].push(e.message)
-  #   puts e.backtrace
-  # end
+  rescue Exception => e
+    @result['status'] = false
+    @result['messages'].push(e.message)
+    puts e.backtrace
+  end
     respond_to do |format|
       format.json { render json: @result}
     end
