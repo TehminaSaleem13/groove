@@ -1,4 +1,7 @@
 class OrdersController < ApplicationController
+  
+  include OrdersHelper
+  
   # GET /orders
   # GET /orders.json
   def index
@@ -26,7 +29,7 @@ class OrdersController < ApplicationController
     @result['activestoreindex'] = params[:activestoreindex]
   end
 
-begin
+#begin
   #import if magento products
   if @store.store_type == 'Magento'
     @magento_credentials = MagentoCredentials.where(:store_id => @store.id)
@@ -80,6 +83,10 @@ begin
                     @order_item.name = line_items[:item][:name]
                     @order_item.sku = line_items[:item][:sku]
                     @order.order_items << @order_item
+                    if ProductSku.where(:sku=>@order_item.sku).length == 0
+                      import_magento_product(client, session, @order_item.sku, @store.id, 
+                        @magento_credentials.first.import_images, @magento_credentials.first.import_products)
+                    end
                 else
                   line_items[:item].each do |line_item|
                     @order_item = OrderItem.new
@@ -89,8 +96,15 @@ begin
                     @order_item.name = line_item[:name]
                     @order_item.sku = line_item[:sku]
                     @order.order_items << @order_item
+                    if ProductSku.where(:sku=>@order_item.sku).length == 0
+                      import_magento_product(client, session, @order_item.sku, @store.id, 
+                        @magento_credentials.first.import_images, @magento_credentials.first.import_products)
+                    end
                   end
                 end
+
+                #if product does not exist import product using product.info
+
 
               @order.address_1  = order_info[:shipping_address][:street]
               @order.city = order_info[:shipping_address][:city]
@@ -327,11 +341,11 @@ begin
       @result['response'] = response
     end
   end
-  rescue Exception => e
-    @result['status'] = false
-    @result['messages'].push(e.message)
-    puts e.backtrace
-  end
+  # rescue Exception => e
+  #   @result['status'] = false
+  #   @result['messages'].push(e.message)
+  #   puts e.backtrace
+  # end
     respond_to do |format|
       format.json { render json: @result}
     end
