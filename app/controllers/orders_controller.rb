@@ -113,7 +113,7 @@ begin
               @order.email = item[:customer_email]
               @order.lastname = order_info[:shipping_address][:lastname]
               @order.firstname = order_info[:shipping_address][:firstname]
-
+              @order.state = order_info[:shipping_address][:region]
               if @order.save
                   if !@order.addnewitems
                     @result['status'] &= false
