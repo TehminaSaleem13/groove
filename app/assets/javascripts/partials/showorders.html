@@ -361,7 +361,7 @@
                                     <th>Product</th>
                                     <th>Primary Image</th>
                                     <th>Primary SKU</th>
-                                    <th>Location</th>
+                                    <th>Primary Warehouse</th>
                                     <th>Qty ordered</th>
                                     <th>On hand</th>
                                     <th>Is Skippable</th>
@@ -372,8 +372,8 @@
                                     <td><input type="checkbox" ng-model="item.checked"/></td>
                                     <td>{{ item.iteminfo.name }}</td>
                                     <td> <div class="single-image"><img class="img-thumb" ng-src="{{item.productimages[0].image}}" /></div></td>
-                                    <td>{{item.iteminfo.sku}}</td>
-                                    <td>{{item.productinfo.alternate_location}}</td>
+                                    <td>{{item.sku}}</td>
+                                    <td>{{item.location}}</td>
                                     <td ng-dblclick="edit_qty($index)">{{item.iteminfo.qty}}
                                         <div ng-show="item_edit.index==$index" class="tag-bubble tag-bubble-input span3 input-text">
                                             <input xs-input-sync class="span3" name="{{'item_qty_' +$index}}" type="number" min="0" ng-model="item_edit.qty" />

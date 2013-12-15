@@ -160,7 +160,40 @@ class ScanPackController < ApplicationController
 	      format.html # show.html.erb
 	      format.json { render json: @result }
 	    end
-	end
+  end
+
+  def inactive_or_new
+    @result = Hash.new
+    @result['status'] = true
+    @result['error_messages'] = []
+    @result['success_messages'] = []
+    @result['notice_messages'] = []
+    @result['data'] = Hash.new
+
+    if params[:order_id].nil?
+      @result['status'] &= false
+      @result['error_messages'].push("Please specify order id")
+    else
+      @order = Order.find_by_id(params[:order_id])
+      if @order.nil?
+        @result['status'] &= false
+        @result['error_messages'].push("Could not find order with id:"+params[:order_id])
+      elsif @order.has_inactive_or_new_products
+        @result['data']['inactive_or_new_products'] = @order.get_inactive_or_new_products
+        @result['data']['next_state'] = 'product_edit'
+      else
+        @result['data']['inactive_or_new_products'] = []
+        @result['data']['next_state'] = 'order_clicked'
+        @result['data']['barcode'] = @order.increment_id
+      end
+    end
+
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json: @result }
+    end
+  end
+
 	#input is barcode, order id
 	def scan_product_by_barcode
 		@result = Hash.new
@@ -177,32 +210,30 @@ class ScanPackController < ApplicationController
 				if @order.has_unscanned_items
 					barcode_found = false
 					@order.order_items.each do |order_item|
-						if ProductSku.where(:sku=>order_item.sku).length > 0
-							sku = ProductSku.where(:sku=>order_item.sku).first
-							if !sku.nil?
-								barcodes = ProductBarcode.where(:product_id => sku.product_id).
-									where(:barcode=>params[:barcode])
-								if barcodes.length > 0
-									barcode_found = true
+            product = Product.find_by_id(order_item.product_id)
+						unless product.nil?
+							sku = product.product_skus.first
+              barcodes = product.product_barcodes
+              if barcodes.length > 0
+                barcode_found = true
 
-									order_item.scanned_qty = order_item.scanned_qty + 1
-									if order_item.scanned_qty == order_item.qty
-										order_item.scanned_status = 'scanned'
-									else
-										order_item.scanned_status = 'partially_scanned'
-									end
-									order_item.save
-									if !@order.has_unscanned_items
-							            @order.set_order_to_scanned_state
-									end
-									break
-								end
-							end
+                order_item.scanned_qty = order_item.scanned_qty + 1
+                if order_item.scanned_qty == order_item.qty
+                  order_item.scanned_status = 'scanned'
+                else
+                  order_item.scanned_status = 'partially_scanned'
+                end
+                order_item.save
+                if !@order.has_unscanned_items
+                        @order.set_order_to_scanned_state
+                end
+                break
+              end
 						end
 					end
 					if barcode_found == false
 						@result['status'] &= false
-						@result['error_messages'].push("There are no barcodes that match items in this order")				
+						@result['error_messages'].push("There are no barcodes that match items in this order")
 					end
 				else
 					@result['status'] &= false

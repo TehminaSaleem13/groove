@@ -225,7 +225,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $q, $cookies
             $scope.currently_open = index;
         }
         $http.get('/orders/getdetails.json?id='+id).success(function(data) {
-            console.log(data.order);
+            //console.log(data.order);
             if(data.status) {
                 $scope.single_order = data.order;
                 $scope.item_edit = {
