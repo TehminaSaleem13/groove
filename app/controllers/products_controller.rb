@@ -51,7 +51,7 @@ class ProductsController < ApplicationController
 								# magento products should be marked with a status new as t
 								#they cannot be scanned.
 								@productdb.status = 'new'
-								
+
 								@productdbsku = ProductSku.new
 								#add productdb sku
 								if result_product['sku'] != {:"@xsi:type"=>"xsd:string"}
@@ -160,7 +160,7 @@ class ProductsController < ApplicationController
 								rescue
 								end
 
-								if !@productdbsku.sku.nil? && 
+								if !@productdbsku.sku.nil? &&
 									ProductSku.where(:sku=>@productdbsku.sku).length == 0
 									#save
 									if @productdb.save
@@ -1317,7 +1317,7 @@ class ProductsController < ApplicationController
       format.html # show.html.erb
       format.json { render json: @result }
     end
-  
+
   end
 
 end

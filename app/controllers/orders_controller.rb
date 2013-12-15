@@ -1,7 +1,7 @@
 class OrdersController < ApplicationController
-  
+
   include OrdersHelper
-  
+
   # GET /orders
   # GET /orders.json
   def index
@@ -84,7 +84,7 @@ begin
                     @order_item.sku = line_items[:item][:sku]
                     @order.order_items << @order_item
                     if ProductSku.where(:sku=>@order_item.sku).length == 0
-                      import_magento_product(client, session, @order_item.sku, @store.id, 
+                      import_magento_product(client, session, @order_item.sku, @store.id,
                         @magento_credentials.first.import_images, @magento_credentials.first.import_products)
                     end
                 else
@@ -97,7 +97,7 @@ begin
                     @order_item.sku = line_item[:sku]
                     @order.order_items << @order_item
                     if ProductSku.where(:sku=>@order_item.sku).length == 0
-                      import_magento_product(client, session, @order_item.sku, @store.id, 
+                      import_magento_product(client, session, @order_item.sku, @store.id,
                         @magento_credentials.first.import_images, @magento_credentials.first.import_products)
                     end
                   end
@@ -680,13 +680,20 @@ begin
       @order.order_items.each do |orderitem|
         @orderitem = Hash.new
         @orderitem['iteminfo'] = orderitem
-        productsku = ProductSku.where(:sku => orderitem.sku)
-        if productsku.length > 0
-          @orderitem['productinfo'] = Product.find_by_id(productsku.first.product_id)
-          @orderitem['productimages'] = ProductImage.where(:product_id=>productsku.first.product_id)
-        else
+        product = Product.find_by_id(orderitem.product_id)
+        if product.nil?
           @orderitem['productinfo'] = nil
           @orderitem['productimages'] = nil
+        else
+          @orderitem['productinfo'] = product
+          @orderitem['qty_on_hand'] = 0
+          product.product_inventory_warehousess.each do |inventory|
+            @orderitem['qty_on_hand'] +=  inventory.qty
+          end
+          @orderitem["location"] = product.product_inventory_warehousess.first.name
+          @orderitem['sku'] = product.product_skus.first.sku
+          @orderitem['productimages'] = product.product_images
+
         end
         @result['order']['items'].push(@orderitem)
       end
@@ -776,25 +783,46 @@ begin
     @order = Order.find(params[:id])
     @product = Product.find(params[:productid])
 
-    @skus = ProductSku.where(:product_id=>@product.id).where(:purpose=>'primary')
-    if @skus.length > 0
+    if @product.nil?
+      @result['status'] &= false
+      @result['messages'].push("Could not find any Item with product id:"+@productid)
+    else
       @orderitem = OrderItem.new
       @orderitem.name = @product.name
       @orderitem.price = params[:price]
       @orderitem.qty = params[:qty]
       @orderitem.row_total = params[:price].to_f * params[:qty].to_f
-      @orderitem.sku = @skus.first.sku
+      @orderitem.product_id = @product.id
       @order.order_items << @orderitem
 
       if !@order.save
         @result['status'] &= false
         @result['messages'].push("Adding item to order failed")
       end
-    else
-        @result['status'] &= false
-        @result['messages'].push("Could not find any SKU with product id:"+@productid)
     end
 
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json: @result }
+    end
+  end
+
+  def updateiteminorder
+    @result = Hash.new
+    @result['status'] = true
+    @result['messages'] = []
+    @orderitem = OrderItem.find_by_id(params[:orderitem])
+    if @orderitem.nil?
+      @result['status'] &= false
+      @result['messages'].push("Could not find order item")
+    else
+      @orderitem.qty = params[:qty]
+
+      unless @orderitem.save
+        @result['status'] &= false
+        @result['messages'].push("Could not update order item")
+      end
+    end
     respond_to do |format|
       format.html # show.html.erb
       format.json { render json: @result }
@@ -874,7 +902,7 @@ begin
     @result = Hash.new
     @result['status'] = true
     @result['error_messages'] = []
-    @result['success_messages'] = [] 
+    @result['success_messages'] = []
     @result['notice_messages'] = []
     @result['data'] = Hash.new
 
@@ -885,13 +913,13 @@ begin
       @order.update_order_status
     else
       @result['status'] &= false
-      @result['error_messages'].push("Could not find order with id:"+params[:order_id]) 
+      @result['error_messages'].push("Could not find order with id:"+params[:order_id])
     end
-    
+
     #check if current user edit confirmation code is same as that entered
     else
     @result['status'] &= false
-    @result['error_messages'].push("Please specify order id to update order status")        
+    @result['error_messages'].push("Please specify order id to update order status")
     end
 
     respond_to do |format|

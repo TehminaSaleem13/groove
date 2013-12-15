@@ -64,9 +64,8 @@ class Order < ActiveRecord::Base
     result = false
 
     self.order_items.each do |order_item|
-      product_sku = ProductSku.where(:sku => order_item.sku)
-      if product_sku.length > 0
-        product = Product.find(product_sku.first.product_id)
+      product = Product.find_by_id(order_item.product_id)
+      unless product.nil?
         if product.status == "new" or product.status == "inactive"
           result = true
         end
@@ -80,11 +79,10 @@ class Order < ActiveRecord::Base
     products_list = []
 
     self.order_items.each do |order_item|
-      product_sku = ProductSku.where(:sku => order_item.sku)
-      if product_sku.length > 0
-        product = Product.find(product_sku.first.product_id)
+      product = Product.find_by_id(order_item.product_id)
+      unless product.nil?
         if product.status == "new" or product.status == "inactive"
-            products_list << @product
+            products_list << product
         end
       end
     end
@@ -96,9 +94,8 @@ class Order < ActiveRecord::Base
     result = true
     if self.status == "onhold"
       self.order_items.each do |order_item|
-        product_sku = ProductSku.where(:sku => order_item.sku)
-        if product_sku.length > 0
-          product = Product.find(product_sku.first.product_id)
+        product = Product.find_by_id(order_item.product_id)
+        unless product.nil?
           if product.status == "new" or product.status == "inactive"
               result &= false
           end
@@ -116,9 +113,8 @@ class Order < ActiveRecord::Base
     result = true
 
     self.order_items.each do |order_item|
-      product_sku = ProductSku.where(:sku => order_item.sku)
-      if product_sku.length > 0
-        product = Product.find(product_sku.first.product_id)
+      product = Product.find_by_id(order_item.product_id)
+      unless product.nil?
         if product.status == "new" or product.status == "inactive"
             result &= false
         end
