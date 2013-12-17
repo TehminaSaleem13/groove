@@ -58,7 +58,6 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $q, $cookies
             request_for_confirmation_code_with_product_edit: $scope._product_edit_confirmation_code_state,
             product_edit: $scope._product_edit_state,
             order_clicked: $scope._order_clicked_state,
-            next_item: $scope._next_item_state,
             default: "ready_for_order"
         }
         $scope._rf_inputObj = $('input#rf_input');
@@ -100,18 +99,11 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $q, $cookies
         $scope._next_states[state](data);
     }
 
-    $scope._next_item_state = function(data) {
-        //console.log("next_item");
-        //console.log(data);
+    $scope._next_item = function() {
         $scope.order_details.items_to_scan = 0;
         $scope.order_details.total_items = 0;
         var next_item_set = false;
         for(i in $scope.order_details.items) {
-            if(typeof data != "undefined") {
-                if(data.just_scanned.id == $scope.order_details.items[i].id) {
-                    $scope.order_details.items[i].scanned++;
-                }
-            }
             $scope.order_details.total_items += $scope.order_details.items[i].qty;
             $scope.order_details.items_to_scan -= $scope.order_details.items[i].scanned;
             if(!next_item_set && ($scope.order_details.items[i].scanned < $scope.order_details.items[i].qty)) {
@@ -174,7 +166,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $q, $cookies
                 //Sort here to have exact next item as needed
                 neworderdetails.items.sort(function(a,b) {return ((a.packing_placement*100 - a.qty) > (b.packing_placement*100 - b.qty));});
                 $scope.order_details = neworderdetails;
-                $scope._next_item_state();
+                $scope._next_item();
                 $scope.scanned_details = $scope.order_details;
                 //console.log($scope.order_details);
             } else {

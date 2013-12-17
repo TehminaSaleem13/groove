@@ -55,10 +55,7 @@
                         <div class="text-center">
                             <div ng-show="rf_state=='ready_for_order'">
                                 <h3>Please scan an Order to begin</h3>
-                                <div class="pack_image"></div>
-                                <div class="pack_image"> RFO back ground space</div>
-                                <div class="pack_image"></div>
-                                <div class="pack_image"></div>
+                                <div class="pack_image"> <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>RFO back ground space<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/></div>
                             </div>
 
 
@@ -100,6 +97,7 @@
                 <div class="text-center">
                     <div class="pack_image">
                         <h4 ng-show="rf_state=='ready_for_product'">{{ order_details.total_items - order_details.items_to_scan }} items scanned</h4>
+                        <img src="/images/bcqc_box.png" alt="products to scan" />
                     </div>
                 </div>
                 <div class="scan_table">
