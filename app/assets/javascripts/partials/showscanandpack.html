@@ -39,10 +39,10 @@
                                 </tr>
                                 </thead>
                                 <tbody>
-                                <tr ng-repeat="item in order_details.items">
+                                <tr ng-repeat="item in order_details.items" ng-show="item.qty-item.scanned > 0">
                                     <td><div class="single-image"><img class="img-thumb" ng-src="{{ item.images[0].image }}" /></div></td>
                                     <td>{{ item.name }}</td>
-                                    <td>{{item.qty}}</td>
+                                    <td>{{item.qty - item.scanned}}</td>
                                 </tr>
                                 </tbody>
                             </table>
@@ -111,7 +111,7 @@
                         </tr>
                         </thead>
                         <tbody>
-                        <tr ng-repeat="item in scanned_details.items">
+                        <tr ng-repeat="item in scanned_details.items" ng-show="item.scanned > 0" >
                             <td>{{ item.name }}</td>
                             <td>{{item.scanned}}</td>
                         </tr>
