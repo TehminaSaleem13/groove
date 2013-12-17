@@ -224,7 +224,7 @@ class ScanPackController < ApplicationController
                 end
                 order_item.save
                 if @order.has_unscanned_items
-                    @result['data']['next_state'] = 'next_item'
+                    @result['data']['next_state'] = 'ready_for_product'
                     @result['data']['just_scanned'] = product
                 else
                    @order.set_order_to_scanned_state
