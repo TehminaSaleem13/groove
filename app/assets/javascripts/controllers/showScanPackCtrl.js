@@ -78,6 +78,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $q, $cookies
             $scope._focus_input($scope._order_confirmation_inputObj);
         });
         $("#showProduct").on('hidden',$scope._refresh_inactive_list);
+        $(".scan_product_times").disableSelection();
         $scope._next_state({next_state:"default"});
         $scope.set_products_defaults();
     }
@@ -107,8 +108,12 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $q, $cookies
             $scope.order_details.total_items += $scope.order_details.items[i].qty;
             $scope.order_details.items_to_scan -= $scope.order_details.items[i].scanned;
             if(!next_item_set && ($scope.order_details.items[i].scanned < $scope.order_details.items[i].qty)) {
-                $scope.next_item = $scope.order_details.items[i];
                 next_item_set = true;
+                if($scope.next_item.id != $scope.order_details.items[i].id) {
+                    $scope.item_image_index = 0;
+                    $scope.next_item = $scope.order_details.items[i];
+                }
+
             }
         }
         $scope.order_details.items_to_scan += $scope.order_details.total_items;

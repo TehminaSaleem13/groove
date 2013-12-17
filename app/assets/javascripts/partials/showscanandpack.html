@@ -67,7 +67,14 @@
                                     <p><strong>SKU:</strong> {{next_item.sku}}</p>
                                     <p><strong>{{next_item.qty - next_item.scanned}} more to scan.</strong></p>
                                 </div>
-                                <img class="img-thumb" ng-src="{{ next_item.images[0].image }}" />
+                                <div class="scan_product_images">
+                                    <div class="scan_product_times img-rounded" ng-show="next_item.qty > 1">
+                                        <div class="text-center pull-left"><i class="icon icon-5x icon-remove"></i><br/>TIMES</div> <div class="times_number pull-right">{{next_item.qty}}</div>
+                                    </div>
+                                    <div ng-click="item_image_index = item_image_index + 1" ng-show="item_image_index < next_item.images.length - 1" class="nav-right img-circle"><i class="icon icon-2x icon-arrow-right"></i></div>
+                                    <div ng-click="item_image_index = item_image_index - 1" ng-show="item_image_index > 0" class="nav-left img-circle"><i class="icon icon-2x icon-arrow-left"></i></div>
+                                    <img ng-repeat="image in next_item.images" ng-show="item_image_index == $index" class="img-thumb" ng-src="{{ image.image }}" />
+                                </div>
                             </div>
                         </div>
                     </div>
