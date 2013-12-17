@@ -212,8 +212,7 @@ class ScanPackController < ApplicationController
 					@order.order_items.each do |order_item|
             product = Product.find_by_id(order_item.product_id)
 						unless product.nil?
-							sku = product.product_skus.first
-              barcodes = product.product_barcodes
+              barcodes = product.product_barcodes.where(:barcode=>params[:barcode])
               if barcodes.length > 0
                 barcode_found = true
 
@@ -224,8 +223,12 @@ class ScanPackController < ApplicationController
                   order_item.scanned_status = 'partially_scanned'
                 end
                 order_item.save
-                if !@order.has_unscanned_items
-                        @order.set_order_to_scanned_state
+                if @order.has_unscanned_items
+                    @result['data']['next_state'] = 'next_item'
+                    @result['data']['just_scanned'] = product
+                else
+                   @order.set_order_to_scanned_state
+                   @result['data']['next_state'] = 'ready_for_order'
                 end
                 break
               end

@@ -58,6 +58,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $q, $cookies
             request_for_confirmation_code_with_product_edit: $scope._product_edit_confirmation_code_state,
             product_edit: $scope._product_edit_state,
             order_clicked: $scope._order_clicked_state,
+            next_item: $scope._next_item_state,
             default: "ready_for_order"
         }
         $scope._rf_inputObj = $('input#rf_input');
@@ -99,22 +100,32 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $q, $cookies
         $scope._next_states[state](data);
     }
 
-    $scope._next_item = function() {
-        if($scope.next_item.scanned < $scope.next_item.qty) {
-            $scope.next_item.scanned++;
-            $scope.order_details.items_to_scan--;
-        } else {
-            if($scope.next_item_index in $scope.order_details.items) {
-                //
+    $scope._next_item_state = function(data) {
+        //console.log("next_item");
+        //console.log(data);
+        $scope.order_details.items_to_scan = 0;
+        $scope.order_details.total_items = 0;
+        var next_item_set = false;
+        for(i in $scope.order_details.items) {
+            if(typeof data != "undefined") {
+                if(data.just_scanned.id == $scope.order_details.items[i].id) {
+                    $scope.order_details.items[i].scanned++;
+                }
+            }
+            $scope.order_details.total_items += $scope.order_details.items[i].qty;
+            $scope.order_details.items_to_scan -= $scope.order_details.items[i].scanned;
+            if(!next_item_set && ($scope.order_details.items[i].scanned < $scope.order_details.items[i].qty)) {
+                $scope.next_item = $scope.order_details.items[i];
+                next_item_set = true;
             }
         }
+        $scope.order_details.items_to_scan += $scope.order_details.total_items;
     }
 
     $scope._ready_for_order_state = function (data) {
         $scope.order_details = {};
         $scope.scanned_details = {};
         $scope.order_id = 0;
-        $scope.next_item_index = 0;
         $scope.next_item = {};
         $scope.inactive_new_products = [];
         $scope._set_rf_state('ready_for_order');
@@ -142,7 +153,6 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $q, $cookies
                 neworderdetails.instructions = data.order.basicinfo.notes_toPacker;
 
                 for( i in  data.order.items) {
-                    neworderdetails.total_items +=  data.order.items[i].iteminfo.qty;
                     if(data.order.items[i].productinfo.packing_placement == null) {
                         data.order.items[i].productinfo.packing_placement = 50;
                     }
@@ -150,23 +160,21 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $q, $cookies
                     neworderdetails.items.push( {
                         id: data.order.items[i].productinfo.id,
                         name: data.order.items[i].iteminfo.name,
-                        placement: parseInt((data.order.items[i].productinfo.packing_placement * 10100) - (data.order.items[i].iteminfo.qty * 100) + i),
                         packing_placement: data.order.items[i].productinfo.packing_placement,
                         images: data.order.items[i].productimages,
                         qty: data.order.items[i].iteminfo.qty,
-                        scanned: 0,
+                        scanned: data.order.items[i].iteminfo.scanned_qty,
                         instructions: data.order.items[i].productinfo.spl_instructions_4_packer,
                         confirmation: data.order.items[i].productinfo.spl_instructions_4_confirmation,
                         sku: data.order.items[i].iteminfo.sku,
                         time_adj: data.order.items[i].productinfo.pack_time_adj
                     });
                 }
-                neworderdetails.items_to_scan = neworderdetails.total_items;
+
                 //Sort here to have exact next item as needed
-                neworderdetails.items.sort(function(a,b) {return (a.placement > b.placement);});
+                neworderdetails.items.sort(function(a,b) {return ((a.packing_placement*100 - a.qty) > (b.packing_placement*100 - b.qty));});
                 $scope.order_details = neworderdetails;
-                $scope.next_item_index = 0;
-                $scope.next_item = $scope.order_details.items[0];
+                $scope._next_item_state();
                 $scope.scanned_details = $scope.order_details;
                 //console.log($scope.order_details);
             } else {
@@ -323,10 +331,34 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $q, $cookies
     }
 
     $scope._handle_ready_for_product_enter_event = function() {
-        //console.log("Product enter event occurred");
-        $scope.show_alert(["Product Scanning is yet to be implemented"],0);
+        $http.post('/scan_pack/scan_product_by_barcode.json',{barcode:$scope.rf_input,order_id:$scope.order_id}).success(function(data){
+
+            //console.log(data);
+            $scope.hide_alert(-1);
+            if(data.status) {
+                if(data.notice_messages.length) {
+                    $scope.show_alert(data.notice_messages,2);
+                }
+                if(data.success_messages.length) {
+                    $scope.show_alert(data.success_messages,1);
+                }
+                if(data.data != null) {
+                    $scope.rf_input = "";
+                    $scope._next_state(data.data);
+                }
+            } else {
+                $scope.show_alert(data.error_messages,0);
+            }
+
+        }).error(function(data){
+                $scope.show_alert(["A server error was encountered"],0);
+            });
 
     }
+
+
+
+
 
     /** products methods **/
     $scope.edit_warehouse_node = function(index,id,name) {
