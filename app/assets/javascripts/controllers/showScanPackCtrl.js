@@ -339,12 +339,12 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $q, $cookies
                 if(data.success_messages.length) {
                     $scope.show_alert(data.success_messages,1);
                 }
-                if(data.data != null) {
-                    $scope.rf_input = "";
-                    $scope._next_state(data.data);
-                }
             } else {
                 $scope.show_alert(data.error_messages,0);
+            }
+            if(data.data != null) {
+                $scope.rf_input = "";
+                $scope._next_state(data.data);
             }
 
         }).error(function(data){
