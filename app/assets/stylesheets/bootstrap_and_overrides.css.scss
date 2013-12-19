@@ -389,9 +389,50 @@ background: url('/assets/sort_desc.png') no-repeat center right;
   overflow-y:scroll;
   background:#fff;
 }
-.pack_image {
-  height:100px;
+.scan_product_images {
+  position:relative;
+  min-height:250px;
 }
+.scan_product_images .nav-right, .scan_product_images .nav-left {
+  cursor: pointer;
+  color:#0088cc;
+  background:rgba(255,255,255,0.6);
+  padding:5px;
+  width:2em;
+  position:absolute;
+  top:50%;
+  z-index:10;
+}
+
+.scan_product_images .nav-right {
+  right:10px;
+}
+.scan_product_images .nav-left {
+  left:10px;
+}
+
+.scan_product_times {
+  position:absolute;
+  z-index:0;
+  cursor:default;
+  top:10px;
+  right:10px;
+  padding:0px 10px;
+  line-height:normal;
+  font-size:16px;
+  color:#888;
+  background:rgba(255,255,255,0.85);
+}
+
+.scan_product_times .text-center {
+  font-weight:bold;
+}
+
+.scan_product_times .times_number {
+  font-size:100px;
+  color:green;
+}
+
 .small-well {
   padding-top:3px;
 }

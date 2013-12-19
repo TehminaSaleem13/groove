@@ -39,10 +39,10 @@
                                 </tr>
                                 </thead>
                                 <tbody>
-                                <tr ng-repeat="item in order_details.items">
+                                <tr ng-repeat="item in order_details.items" ng-show="item.qty-item.scanned > 0">
                                     <td><div class="single-image"><img class="img-thumb" ng-src="{{ item.images[0].image }}" /></div></td>
                                     <td>{{ item.name }}</td>
-                                    <td>{{item.qty}}</td>
+                                    <td>{{item.qty - item.scanned}}</td>
                                 </tr>
                                 </tbody>
                             </table>
@@ -55,10 +55,7 @@
                         <div class="text-center">
                             <div ng-show="rf_state=='ready_for_order'">
                                 <h3>Please scan an Order to begin</h3>
-                                <div class="pack_image"></div>
-                                <div class="pack_image"> RFO back ground space</div>
-                                <div class="pack_image"></div>
-                                <div class="pack_image"></div>
+                                <div class="pack_image"> <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>RFO back ground space<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/></div>
                             </div>
 
 
@@ -70,7 +67,14 @@
                                     <p><strong>SKU:</strong> {{next_item.sku}}</p>
                                     <p><strong>{{next_item.qty - next_item.scanned}} more to scan.</strong></p>
                                 </div>
-                                <img class="img-thumb" ng-src="{{ next_item.images[0].image }}" />
+                                <div class="scan_product_images">
+                                    <div class="scan_product_times img-rounded" ng-show="next_item.qty > 1">
+                                        <div class="text-center pull-left"><i class="icon icon-5x icon-remove"></i><br/>TIMES</div> <div class="times_number pull-right">{{next_item.qty}}</div>
+                                    </div>
+                                    <div ng-click="item_image_index = item_image_index + 1" ng-show="item_image_index < next_item.images.length - 1" class="nav-right img-circle"><i class="icon icon-2x icon-arrow-right"></i></div>
+                                    <div ng-click="item_image_index = item_image_index - 1" ng-show="item_image_index > 0" class="nav-left img-circle"><i class="icon icon-2x icon-arrow-left"></i></div>
+                                    <img ng-repeat="image in next_item.images" ng-show="item_image_index == $index" class="img-thumb" ng-src="{{ image.image }}" />
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -100,6 +104,7 @@
                 <div class="text-center">
                     <div class="pack_image">
                         <h4 ng-show="rf_state=='ready_for_product'">{{ order_details.total_items - order_details.items_to_scan }} items scanned</h4>
+                        <img src="/images/bcqc_box.png" alt="products to scan" />
                     </div>
                 </div>
                 <div class="scan_table">
@@ -111,7 +116,7 @@
                         </tr>
                         </thead>
                         <tbody>
-                        <tr ng-repeat="item in scanned_details.items">
+                        <tr ng-repeat="item in scanned_details.items" ng-show="item.scanned > 0" >
                             <td>{{ item.name }}</td>
                             <td>{{item.scanned}}</td>
                         </tr>
