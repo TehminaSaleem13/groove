@@ -71,6 +71,7 @@ module OrdersHelper
 			end
 			@productdb.save
 			@productdb.set_product_status
+		@productdb.id
 		end
 	end
 end

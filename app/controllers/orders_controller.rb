@@ -82,11 +82,14 @@ begin
                     @order_item.row_total= line_items[:item][:row_total]
                     @order_item.name = line_items[:item][:name]
                     @order_item.sku = line_items[:item][:sku]
-                    @order.order_items << @order_item
                     if ProductSku.where(:sku=>@order_item.sku).length == 0
-                      import_magento_product(client, session, @order_item.sku, @store.id,
+                      product_id = import_magento_product(client, session, @order_item.sku, @store.id,
                         @magento_credentials.first.import_images, @magento_credentials.first.import_products)
+                    else
+                      product_id = ProductSku.where(:sku=>@order_item.sku).first.product_id
                     end
+                    @order_item.product_id = product_id
+                    @order.order_items << @order_item
                 else
                   line_items[:item].each do |line_item|
                     @order_item = OrderItem.new
@@ -95,11 +98,15 @@ begin
                     @order_item.row_total= line_item[:row_total]
                     @order_item.name = line_item[:name]
                     @order_item.sku = line_item[:sku]
-                    @order.order_items << @order_item
+
                     if ProductSku.where(:sku=>@order_item.sku).length == 0
-                      import_magento_product(client, session, @order_item.sku, @store.id,
+                      product_id = import_magento_product(client, session, @order_item.sku, @store.id,
                         @magento_credentials.first.import_images, @magento_credentials.first.import_products)
+                    else
+                      product_id = ProductSku.where(:sku=>@order_item.sku).first.product_id
                     end
+                    @order_item.product_id = product_id
+                    @order.order_items << @order_item
                   end
                 end
 
@@ -241,6 +248,9 @@ begin
 
             @productdb.save
             @productdb.set_product_status
+            @order_item.product_id = @productdb.id
+          else
+            @order_item.product_id  = ProductSku.where(:sku=> transaction.item.sKU).first.product_id
           end
 
           @order.order_items << @order_item
@@ -690,7 +700,9 @@ begin
           product.product_inventory_warehousess.each do |inventory|
             @orderitem['qty_on_hand'] +=  inventory.qty
           end
-          @orderitem["location"] = product.product_inventory_warehousess.first.name
+          if product.product_inventory_warehousess.length > 0
+            @orderitem["location"] = product.product_inventory_warehousess.first.name
+          end
           @orderitem['sku'] = product.product_skus.first.sku
           @orderitem['productimages'] = product.product_images
 

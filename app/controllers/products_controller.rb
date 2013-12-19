@@ -1,5 +1,6 @@
 class ProductsController < ApplicationController
 
+  include ProductsHelper
 	def importproducts
 	@store = Store.find(params[:id])
 	@result = Hash.new
@@ -366,6 +367,7 @@ class ProductsController < ApplicationController
 						if ProductSku.where(:sku=>@productdbsku.sku).length == 0
 							#save
 							if @productdb.save
+								#import_amazon_product_details(mws, @credential, @productdb.id)
 								@result['success_imported'] = @result['success_imported'] + 1
 							end
 						else
@@ -387,6 +389,28 @@ class ProductsController < ApplicationController
       format.json { render json: @result}
     end
 
+	end
+
+	def import_product_details
+		@store = Store.find(params[:store_id])
+		@amazon_credentials = AmazonCredentials.where(:store_id => @store.id)
+
+		if @amazon_credentials.length > 0
+			@credential = @amazon_credentials.first
+			mws = MWS.new(:aws_access_key_id => ENV['AMAZON_MWS_ACCESS_KEY_ID'],
+			  :secret_access_key => ENV['AMAZON_MWS_SECRET_ACCESS_KEY'],
+			  :seller_id => @credential.merchant_id,
+			  :marketplace_id => @credential.marketplace_id)
+			response = mws.orders.get_matching_product_for_id :id_type=>'SellerSKU', :seller_sku => ["12345678"],
+				:marketplace_id => @credential.marketplace_id
+			# response = mws.orders.list_orders :last_updated_after => 2.months.ago, 
+			# 	:order_status => ['Unshipped', 'PartiallyShipped']
+			response.products
+			@products = Product.where(:store_id => params[:store_id])
+			@products.each do |product|
+				#import_amazon_product_details(mws, @credential, product.id)
+			end
+		end
 	end
 
 	def requestamazonreport

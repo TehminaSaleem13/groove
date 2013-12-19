@@ -60,6 +60,6 @@ gem "xmlparser"
 gem "soap2r", :git=> 'https://github.com/felipec/soap4r.git'
 #gem 'mws-connect'
 #gem "nokogiri", "~> 1.5.5"
-gem 'ruby-mws', :git=>'https://github.com/radicaled/ruby-mws.git'
+gem 'ruby-mws', '~> 0.0.8', :git=>'https://github.com/navaratan-tech/ruby-mws.git'
 gem 'multi_xml'
 gem "font-awesome-rails"

@@ -49,6 +49,11 @@ class Order < ActiveRecord::Base
             result &= false
           end
         end
+        item.product_id = product.id
+        item.save
+      else
+        item.product_id = ProductSku.where(:sku=>item.sku).first.product_id
+        item.save
       end
     end
     result
@@ -114,11 +119,14 @@ class Order < ActiveRecord::Base
 
     self.order_items.each do |order_item|
       product = Product.find_by_id(order_item.product_id)
-      unless product.nil?
+      if !product.nil?
         if product.status == "new" or product.status == "inactive"
             result &= false
         end
+      else
+        result &= false
       end
+
     end
 
 

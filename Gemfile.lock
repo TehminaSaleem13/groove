@@ -13,10 +13,10 @@ GIT
       httpclient (>= 2.1.1)
 
 GIT
-  remote: https://github.com/radicaled/ruby-mws.git
-  revision: 02565bbb6605263df0f492c7d5b1c0e29feba7bc
+  remote: https://github.com/navaratan-tech/ruby-mws.git
+  revision: 6e52b2217e685dcfde60e764e680d97a6faecd99
   specs:
-    ruby-mws (0.0.3)
+    ruby-mws (0.0.8)
       hashie
       httparty
       nokogiri
@@ -167,8 +167,8 @@ GEM
     hashie (2.0.5)
     highline (1.6.19)
     hike (1.2.3)
-    httparty (0.11.0)
-      multi_json (~> 1.0)
+    httparty (0.12.0)
+      json (~> 1.8)
       multi_xml (>= 0.5.2)
     httpclient (2.3.4.1)
     httpi (2.0.2)
@@ -379,7 +379,7 @@ DEPENDENCIES
   rolify (>= 3.2.0)
   rspec-rails (>= 2.13.2)
   rubber
-  ruby-mws!
+  ruby-mws (~> 0.0.8)!
   sass-rails (~> 3.2.3)
   savon
   sidekiq
