@@ -331,7 +331,7 @@
             }
             var _this = this;
             this.bindTo.mousedown(function(evt) {
-                if(evt.which !=1) return false;
+                if(evt.which !=1) evt.preventDefault();
                 clearTimeout(this.downTimer);
                 this.downTimer = setTimeout(function() {
                     _this.originalTable.selectedHandle = $(this);
