@@ -851,5 +851,6 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $q, $cookies
 
         }
     }
-    $('body').keydown($scope.keyboard_nav_event);
+    $('#createStore').keydown($scope.keyboard_nav_event);
+    $("#store-search-query").focus();
 }]);

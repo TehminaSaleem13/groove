@@ -6,7 +6,8 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $q, $cookies
     });
     $('.modal-backdrop').remove();
     $scope.get_orders = function(next,post_fn) {
-        $scope.loading = true;
+        //$scope.loading = true;
+        $scope.can_get_orders = false;
         $scope.orders_edit_tmp = {
             tags:"",
             store_name: "",
@@ -31,7 +32,18 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $q, $cookies
             $scope.order_setup.limit = 10;
             $scope.order_setup.offset = 0;
         }
-        $http.get('/orders/getorders.json?filter='+$scope.order_setup.filter+'&sort='+$scope.order_setup.sort+'&order='+$scope.order_setup.order+'&limit='+$scope.order_setup.limit+'&offset='+$scope.order_setup.offset).success(function(data) {
+
+        if($scope.order_setup.search == "") {
+            url = '/orders/getorders.json?filter='+$scope.order_setup.filter+'&sort='+$scope.order_setup.sort
+                +'&order='+$scope.order_setup.order+'&limit='+$scope.order_setup.limit
+                +'&offset='+$scope.order_setup.offset;
+        } else {
+            url = '/orders/search.json?search='+$scope.order_setup.search+'&limit='+$scope.order_setup.limit
+                +'&offset='+$scope.order_setup.offset;
+
+        }
+
+        $http.get(url).success(function(data) {
             if(data.status) {
                 //console.log($scope.order_setup);
                 if(!next) {
@@ -49,6 +61,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $q, $cookies
                 $timeout($scope.showHideField,25);
             }
             $scope.loading = false;
+            $scope.can_get_orders = true;
         }).error(function(data) {
                 $timeout($scope.checkSwapNodes,20);
                 $timeout($scope.showHideField,25);
@@ -56,6 +69,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $q, $cookies
                     $timeout(post_fn,30);
                 }
                 $scope.loading = true;
+                $scope.can_get_orders = true;
             });
     }
     $scope.order_setup_opt = function(type,value) {
@@ -108,7 +122,9 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $q, $cookies
         $scope.order_setup.select_all = false;
         $scope.order_setup.limit = 10;
         $scope.order_setup.offset = 0;
+        $scope.order_setup.search = "";
         $scope.single_order = {};
+
         $scope.item_defaults();
         $scope.items_select = false;
         $(".order_setup-filter-awaiting").addClass("active");
@@ -579,13 +595,31 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $q, $cookies
             $scope.do_get_products = true;
         }
     });
-    $('#showOrder').keydown($scope.keyboard_nav_event);
-    $scope.$watch('do_get_products',function() {
-        if($scope.do_get_products) {
-            $scope.get_products();
-            $scope.do_get_products = false;
+    $scope.$watch('order_setup.search',function() {
+        if($scope.can_get_orders) {
+            $scope.get_orders();
+        } else {
+            $scope.do_get_orders = true;
         }
     });
+
+    $scope.$watch('can_get_products',function() {
+        if($scope.can_get_products) {
+            if($scope.do_get_products) {
+                $scope.do_get_products = false;
+                $scope.get_products();
+            }
+        }
+    });
+    $scope.$watch('can_get_orders',function() {
+        if($scope.can_get_orders) {
+            if($scope.do_get_orders) {
+                $scope.do_get_orders = false;
+                $scope.get_orders();
+            }
+        }
+    });
+    $('#showOrder').keydown($scope.keyboard_nav_event);
     $scope.$watch('order_update_status',function() {
         if($scope.order_update_status) {
             $("#order_update_status").fadeTo("fast",1,function() {
@@ -596,4 +630,5 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $q, $cookies
         }
     });
     $('.regular-input').focusout($scope.update_single_order);
+    $("#order-search-query").focus();
 }]);

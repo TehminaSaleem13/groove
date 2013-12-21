@@ -6,7 +6,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $q, $cookies
     });
     $('.modal-backdrop').remove();
     $scope.get_products = function(next,post_fn) {
-        $scope.loading = true;
+        //$scope.loading = true;
         $scope.products_edit_tmp = {
             name:"",
             sku: "",
@@ -755,6 +755,13 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $q, $cookies
             $scope.do_get_products = true;
         }
     });
+    $scope.$watch('product_setup.search',function() {
+        if($scope.can_get_products) {
+            $scope.get_products();
+        } else {
+            $scope.do_get_products = true;
+        }
+    });
     $scope.$watch('can_get_products',function() {
         if($scope.can_get_products) {
             if($scope.do_get_products) {
@@ -778,6 +785,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $q, $cookies
         }
     );
     $('.regular-input').focusout($scope.update_single_product);
+    $("#product-search-query").focus();
     input_text_selector.focus(
         function(event) {
             if(event.currentTarget.parentElement.id.slice(-6) == "-input") {
