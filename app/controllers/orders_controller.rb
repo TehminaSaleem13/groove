@@ -613,29 +613,33 @@ begin
       search = params[:search]
 
       #todo: include sku and storename in search as well in future.
-      @products = Order.find_by_sql("SELECT * from ORDERS WHERE
+      @orders = Order.find_by_sql("SELECT * from orders WHERE
                       increment_id like '%"+search+"%' OR status like '%"+search+"%' LIMIT #{limit}
                       OFFSET #{offset}")
 
       @orders_result = []
 
       @orders.each do |order|
-      @order_hash = Hash.new
-      @order_hash['id'] = order.id
-      @order_hash['store_name'] = order.name
-      @order_hash['notes'] = order.notes_internal
-      @order_hash['ordernum'] = order.increment_id
-      @order_hash['orderdate'] = order.order_placed_time
-      @order_hash['itemslength'] = order.order_items
-      @order_hash['status'] = order.status
-      @order_hash['recipient'] = order.firstname +" "+order.lastname
-      @order_hash['email'] = order.email
-      @order_hash['tracking_num'] = order.tracking_num
-      @order_hash['city'] = order.city
-      @order_hash['state'] = order.state
-      @order_hash['postcode'] =order.postcode
-      @order_hash['country'] = order.country
-      @orders_result.push(@order_hash)
+        @order_hash = Hash.new
+        @order_hash['id'] = order.id
+        if !order.store_id.nil?
+          @order_hash['store_name'] = Store.find(order.store_id).name
+        else
+          @order_hash['store_name'] = ''
+        end
+        @order_hash['notes'] = order.notes_internal
+        @order_hash['ordernum'] = order.increment_id
+        @order_hash['orderdate'] = order.order_placed_time
+        @order_hash['itemslength'] = OrderItem.where(:order_id=>order.id).length
+        @order_hash['status'] = order.status
+        @order_hash['recipient'] = "#{order.firstname} #{order.lastname}"
+        @order_hash['email'] = order.email
+        @order_hash['tracking_num'] = order.tracking_num
+        @order_hash['city'] = order.city
+        @order_hash['state'] = order.state
+        @order_hash['postcode'] =order.postcode
+        @order_hash['country'] = order.country
+        @orders_result.push(@order_hash)
       end
 
 

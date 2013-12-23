@@ -281,4 +281,5 @@ controller('showUsersCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$l
             }
         }
         $('#createUser').keydown($scope.keyboard_nav_event);
+        $("#user-search-query").focus();
     }]);
