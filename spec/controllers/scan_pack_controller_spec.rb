@@ -241,7 +241,6 @@ describe ScanPackController do
       product = FactoryGirl.create(:product)
       product_sku = FactoryGirl.create(:product_sku, :product=> product)
       product_barcode = FactoryGirl.create(:product_barcode, :product=> product)
-
       order_item = FactoryGirl.create(:order_item, :sku=>product_sku.sku, 
                     :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>product.name)
 

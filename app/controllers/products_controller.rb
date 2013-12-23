@@ -1282,8 +1282,9 @@ class ProductsController < ApplicationController
   	@product_orig = Product.find(params[:product_orig_id])
   	@product_alias = Product.find(params[:product_alias_id])
 
-  	#all SKUs of the alias will
-  	@product_alias.product_skus.each do |alias_sku|
+  	#all SKUs of the alias will be copied. dont use @product_alias.product_skus
+  	@product_skus = ProductSku.where(:product_id=>@product_alias.id)
+  	@product_skus.each do |alias_sku|
   		alias_sku.product_id = @product_orig.id
   		if !alias_sku.save
   			result['status'] &= false
