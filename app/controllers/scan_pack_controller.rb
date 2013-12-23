@@ -83,11 +83,11 @@ class ScanPackController < ApplicationController
 			@order = Order.find(params[:order_id])
 			if !@order.nil?
 				if @order.status == "onhold" && !@order.has_inactive_or_new_products
-					if User.where(:order_edit_confirmation_code => params[:confirmation_code]).length > 0
+					if User.where(:confirmation_code => params[:confirmation_code]).length > 0
 						@result['data']['order_edit_matched'] = true
 						@order.status = 'awaiting'
 						@order.addactivity("Status changed from onhold to awaiting",
-							User.where(:order_edit_confirmation_code => params[:confirmation_code]).first.username)
+							User.where(:confirmation_code => params[:confirmation_code]).first.username)
 						@order.save
 				 		@result['data']['scanned_on'] = @order.scanned_on
 				 		@result['data']['next_state'] = 'ready_for_product'
@@ -131,7 +131,7 @@ class ScanPackController < ApplicationController
 			@order = Order.find(params[:order_id])
 			if !@order.nil?
 				if @order.status == "onhold" && @order.has_inactive_or_new_products
-					if User.where(:product_edit_confirmation_code => params[:confirmation_code]).length > 0
+					if User.where(:confirmation_code => params[:confirmation_code]).length > 0
 						@result['data']['product_edit_matched'] = true
 						@result['data']['inactive_or_new_products'] = @order.get_inactive_or_new_products
 				 		@result['data']['next_state'] = 'product_edit'

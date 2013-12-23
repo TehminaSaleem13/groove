@@ -150,6 +150,13 @@ aria-hidden="true">
        </div>
     </div>
 
+    <div class="control-group">
+      <label class="control-label">Confirmation Code</label>
+      <div class="controls">
+        <input name="confirmation_code" ng-model="newUser.confirmation_code" type="text" checked/>
+      </div>
+    </div>
+
   </div>
   <div class="tab-pane createuser-tab" id="productstab">
     <div class="control-group">
@@ -171,13 +178,6 @@ aria-hidden="true">
       <label class="control-label">Edit products</label>
       <div class="controls">
         <input name="edit_products" ng-model="newUser.edit_products" type="checkbox" />
-       </div>
-    </div>
-
-    <div class="control-group">
-      <label class="control-label">Confirmation Code</label>
-      <div class="controls">
-        <input name="product_edit_confirmation_code" ng-model="newUser.product_edit_confirmation_code" type="text" />
        </div>
     </div>
 
@@ -211,13 +211,6 @@ aria-hidden="true">
       <label class="control-label">Update orders </label>
       <div class="controls">
       	<input name="import_orders" ng-model="newUser.import_orders" type="checkbox" checked/>
-      </div>
-    </div>
-
-    <div class="control-group">
-      <label class="control-label">Confirmation Code</label>
-      <div class="controls">
-        <input name="order_edit_confirmation_code" ng-model="newUser.order_edit_confirmation_code" type="text" checked/>
       </div>
     </div>
 

@@ -8,5 +8,6 @@ FactoryGirl.define do
     row_total "9.99"
     order nil
     name "E VEGAN EPIC"
+    product_id 1
   end
 end

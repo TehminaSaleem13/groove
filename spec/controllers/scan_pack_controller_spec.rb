@@ -111,7 +111,7 @@ describe ScanPackController do
       
       @other_user = FactoryGirl.create(:user, :email=>'test_other@groovepacks.com', :username=>'test_user')
       
-      @other_user.order_edit_confirmation_code = '1234567890'
+      @other_user.confirmation_code = '1234567890'
       @other_user.save
 
       @order = FactoryGirl.create(:order, :status=>'onhold')
@@ -134,7 +134,7 @@ describe ScanPackController do
       request.accept = "application/json"
       @other_user = FactoryGirl.create(:user, :email=>'test_other@groovepacks.com', :username=>'test_user')
       
-      @other_user.order_edit_confirmation_code = '1234567890'
+      @other_user.confirmation_code = '1234567890'
       @other_user.save
 
       @order = FactoryGirl.create(:order, :status=>'awaiting')
@@ -153,7 +153,7 @@ describe ScanPackController do
 
       @other_user = FactoryGirl.create(:user, :email=>'test_other@groovepacks.com', :username=>'test_user')
       
-      @other_user.order_edit_confirmation_code = '1234567890'
+      @other_user.confirmation_code = '1234567890'
       @other_user.save
 
       @order = FactoryGirl.create(:order, :status=>'onhold')
@@ -173,7 +173,7 @@ describe ScanPackController do
       
       @other_user = FactoryGirl.create(:user, :email=>'test_other@groovepacks.com', :username=>'test_user')
       
-      @other_user.product_edit_confirmation_code = '1234567890'
+      @other_user.confirmation_code = '1234567890'
       @other_user.save
 
       @order = FactoryGirl.create(:order, :status=>'onhold')
@@ -194,7 +194,7 @@ describe ScanPackController do
       request.accept = "application/json"
       @other_user = FactoryGirl.create(:user, :email=>'test_other@groovepacks.com', :username=>'test_user')
       
-      @other_user.product_edit_confirmation_code = '1234567890'
+      @other_user.confirmation_code = '1234567890'
       @other_user.save
 
       @order = FactoryGirl.create(:order, :status=>'awaiting')
@@ -215,7 +215,7 @@ describe ScanPackController do
 
       @other_user = FactoryGirl.create(:user, :email=>'test_other@groovepacks.com', :username=>'test_user')
       
-      @other_user.product_edit_confirmation_code = '1234567890'
+      @other_user.confirmation_code = '1234567890'
       @other_user.save
 
       @order = FactoryGirl.create(:order, :status=>'onhold')
@@ -241,13 +241,13 @@ describe ScanPackController do
       product = FactoryGirl.create(:product)
       product_sku = FactoryGirl.create(:product_sku, :product=> product)
       product_barcode = FactoryGirl.create(:product_barcode, :product=> product)
-      order_item = FactoryGirl.create(:order_item, :sku=>product_sku.sku, 
+      order_item = FactoryGirl.create(:order_item, :product_id=>product.id,
                     :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>product.name)
 
       product2 = FactoryGirl.create(:product, :name=>"Apple iPhone5C")
       product_sku2 = FactoryGirl.create(:product_sku, :product=> product2, :sku=>'iPhone5C')
       product_barcode2 = FactoryGirl.create(:product_barcode, :product=> product2, :barcode=>"2456789")
-      order_item2 = FactoryGirl.create(:order_item, :sku=>product_sku2.sku, 
+      order_item2 = FactoryGirl.create(:order_item, :product_id=>product2.id,
                     :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>product2.name)
 
 
@@ -269,13 +269,13 @@ describe ScanPackController do
       product_sku = FactoryGirl.create(:product_sku, :product=> product)
       product_barcode = FactoryGirl.create(:product_barcode, :product=> product)
 
-      order_item = FactoryGirl.create(:order_item, :sku=>product_sku.sku, 
+      order_item = FactoryGirl.create(:order_item, :product_id=>product.id,
                     :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>product.name)
 
       product = FactoryGirl.create(:product, :name=>"Apple iPhone5C")
       product_sku = FactoryGirl.create(:product_sku, :product=> product, :sku=>'iPhone5C')
       product_barcode = FactoryGirl.create(:product_barcode, :product=> product, :barcode=>'iPHONE5C1')
-      order_item = FactoryGirl.create(:order_item, :sku=>product_sku.sku, 
+      order_item = FactoryGirl.create(:order_item, :product_id=>product.id, :sku=>product_sku.sku, 
                     :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>product.name)
 
       get :scan_product_by_barcode, { :barcode => '1234567890', :order_id => order.id }
@@ -296,7 +296,7 @@ describe ScanPackController do
       product_sku = FactoryGirl.create(:product_sku, :product=> product)
       product_barcode = FactoryGirl.create(:product_barcode, :product=> product)
 
-      order_item = FactoryGirl.create(:order_item, :sku=>product_sku.sku, 
+      order_item = FactoryGirl.create(:order_item, :product_id=>product.id,
                     :qty=>3, :price=>"10", :row_total=>"10", :order=>order, :name=>product.name)
 
       get :scan_product_by_barcode, { :barcode => '1234567890', :order_id => order.id }
@@ -322,7 +322,7 @@ describe ScanPackController do
       product_sku = FactoryGirl.create(:product_sku, :product=> product)
       product_barcode = FactoryGirl.create(:product_barcode, :product=> product)
 
-      order_item = FactoryGirl.create(:order_item, :sku=>product_sku.sku, 
+      order_item = FactoryGirl.create(:order_item, :product_id=>product.id,
                     :qty=>3, :price=>"10", :row_total=>"10", :order=>order, :name=>product.name)
 
       get :scan_product_by_barcode, { :barcode => '1234567890', :order_id => order.id }
@@ -332,6 +332,7 @@ describe ScanPackController do
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
       expect(result["status"]).to eq(true)
+
       order.reload
       expect(order.status).to eq("scanned")
       order_item.reload

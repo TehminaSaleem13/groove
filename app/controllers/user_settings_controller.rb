@@ -25,6 +25,7 @@ class UserSettingsController < ApplicationController
     end
     @user.active = params[:active]
     @user.name = params[:name]
+    @user.confirmation_code = params[:confirmation_code]
 
     #add product details
     @user.edit_product_details = params[:edit_product_details]
@@ -34,7 +35,6 @@ class UserSettingsController < ApplicationController
     @user.other = params[:other1]
     @user.import_products = params[:import_products]
     @user.edit_product_import = params[:edit_product_import]
-    @user.product_edit_confirmation_code = params[:product_edit_confirmation_code]
 
     #add order details
     @user.import_orders = params[:import_orders]
@@ -47,7 +47,6 @@ class UserSettingsController < ApplicationController
     @user.view_packing_ex = params[:view_packing_ex]
     @user.create_packing_ex = params[:create_packing_ex]
     @user.edit_packing_ex = params[:edit_packing_ex]
-    @user.order_edit_confirmation_code = params[:order_edit_confirmation_code]
 
     #add user details permissions
     @user.edit_user_info = params[:edit_user_info]
@@ -58,7 +57,6 @@ class UserSettingsController < ApplicationController
     @user.access_scanpack = params[:access_scanpack]
     @user.access_orders = params[:access_orders]
     @user.access_products = params[:access_products]
-
 
     #add system settings permission
     @user.edit_general_prefs = params[:edit_general_prefs]
