@@ -67,9 +67,9 @@ begin
                 message:{sessionId: session, orderIncrementId: item[:increment_id]})
 
               order_info = order_info.body[:sales_order_info_response][:result]
-              if Order.where(:increment_id=>item[:order_id]).length == 0
+              if Order.where(:increment_id=>item[:increment_id]).length == 0
                 @order = Order.new
-                @order.increment_id = item[:order_id]
+                @order.increment_id = item[:increment_id]
                 @order.status = 'awaiting'
                 @order.order_placed_time = item[:created_at]
                 #@order.storename = item[:store_name]
