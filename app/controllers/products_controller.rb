@@ -403,7 +403,7 @@ class ProductsController < ApplicationController
 			  :marketplace_id => @credential.marketplace_id)
 			response = mws.orders.get_matching_product_for_id :id_type=>'SellerSKU', :seller_sku => ["12345678"],
 				:marketplace_id => @credential.marketplace_id
-			# response = mws.orders.list_orders :last_updated_after => 2.months.ago, 
+			# response = mws.orders.list_orders :last_updated_after => 2.months.ago,
 			# 	:order_status => ['Unshipped', 'PartiallyShipped']
 			response.products
 			@products = Product.where(:store_id => params[:store_id])
@@ -508,146 +508,8 @@ class ProductsController < ApplicationController
 	def getproducts
 		@result = Hash.new
 		@result[:status] = true
-		sort_key = 'updated_at'
-		sort_order = 'DESC'
-		status_filter = 'active'
-		limit = 10
-		offset = 0
-		is_kit = 0
-		supported_sort_keys = ['updated_at', 'name', 'sku',
-								'status', 'barcode', 'location_primary', 'store' ]
-		supported_order_keys = ['ASC', 'DESC' ] #Caps letters only
-		supported_status_filters = ['all', 'active', 'inactive', 'new']
-		supported_kit_params = ['0', '1']
-
-		# Get passed in parameter variables if they are valid.
-		limit = params[:limit] if !params[:limit].nil? && params[:limit].to_i > 0
-
-		offset = params[:offset] if !params[:offset].nil? && params[:offset].to_i >= 0
-
-		sort_key = params[:sort] if !params[:sort].nil? &&
-			supported_sort_keys.include?(params[:sort])
-
-		sort_order = params[:order] if !params[:order].nil? &&
-			supported_order_keys.include?(params[:order])
-
-		status_filter = params[:filter] if !params[:filter].nil? &&
-			supported_status_filters.include?(params[:filter])
-
-		is_kit = params[:iskit] if !params[:iskit].nil?  &&
-			supported_kit_params.include?(params[:iskit])
-
-		#hack to bypass for now and enable client development
-		# sort_key = 'name' if sort_key == 'sku'
-
-		#todo status filters to be implemented
-		if sort_key == 'sku'
-			if status_filter == 'all'
-				@products = Product.find_by_sql('SELECT products.* FROM products, product_skus WHERE '+
-				'products.id = product_skus.product_id  AND products.is_kit='+is_kit+
-				' ORDER BY product_skus.sku '+sort_order+' LIMIT '+limit+' OFFSET '+offset)
-			else
-				@products = Product.find_by_sql('SELECT products.* FROM products, product_skus WHERE '+
-				'products.id = product_skus.product_id AND products.is_kit='+is_kit+
-				' AND products.status=\''+status_filter.capitalize+
-				'\' ORDER BY product_skus.sku '+sort_order+' LIMIT '+limit+' OFFSET '+offset)
-			end
-		elsif sort_key == 'store'
-			if status_filter == 'all'
-				@products = Product.find_by_sql('SELECT products.* FROM products, stores WHERE '+
-				'products.store_id = stores.id  AND products.is_kit='+is_kit+
-				' ORDER BY stores.name '+sort_order+' LIMIT '+limit+' OFFSET '+offset)
-			else
-				@products = Product.find_by_sql('SELECT products.* FROM products, stores WHERE '+
-				'products.store_id = stores.id AND products.is_kit='+is_kit+
-				' AND products.status=\''+status_filter.capitalize+
-				'\' ORDER BY stores.name '+sort_order+' LIMIT '+limit+' OFFSET '+offset)
-			end
-		elsif sort_key == 'location_primary'
-			if status_filter == 'all'
-				@products = Product.find_by_sql('SELECT products.* FROM products, product_inventory_warehouses WHERE '+
-				'products.id = product_inventory_warehouses.product_id  AND products.is_kit='+is_kit+
-				' ORDER BY product_inventory_warehouses.location_primary '+sort_order+' LIMIT '+limit+' OFFSET '+offset)
-			else
-				@products = Product.find_by_sql('SELECT products.* FROM products, product_inventory_warehouses WHERE '+
-				'products.id = product_inventory_warehouses.product_id AND products.is_kit='+is_kit+
-				' AND products.status=\''+status_filter.capitalize+
-				'\' ORDER BY product_inventory_warehouses.location_primary '+sort_order+' LIMIT '+limit+' OFFSET '+offset)
-			end
-		else
-			if status_filter == 'all'
-				@products = Product.limit(limit).offset(offset).order(sort_key+" "+sort_order).
-				where(:is_kit=> is_kit)
-			else
-				@products = Product.limit(limit).offset(offset).order(sort_key+" "+sort_order).
-				where(:status=>status_filter.capitalize).where(:is_kit=>is_kit)
-			end
-		end
-
-		if @products.length==0
-			if status_filter == 'all'
-				@products = Product.limit(limit).offset(offset).
-				where(:is_kit=> is_kit)
-			else
-				@products = Product.limit(limit).offset(offset).
-				where(:status=>status_filter.capitalize).where(:is_kit=>is_kit)
-			end
-		end
-
-		@products_result = []
-
-		@products.each do |product|
-		@product_hash = Hash.new
-		@product_hash['id'] = product.id
-		@product_hash['name'] = product.name
-		@product_hash['status'] = product.status
-    @product_hash['location'] = ""
-    @product_hash['location_secondary'] = ""
-    @product_hash['location_name'] = ""
-    @product_hash['qty'] = ""
-    @product_hash['barcode'] = ""
-    @product_hash['sku'] = ""
-    @product_hash['cat'] = ""
-
-    @product_location = product.product_inventory_warehousess.first
-    unless @product_location.nil?
-      @product_hash['location'] = @product_location.location_primary
-      @product_hash['location_secondary'] = @product_location.location_secondary
-      @product_hash['location_name'] = @product_location.name
-      @product_hash["qty"] = @product_location.qty
-    end
-
-    @product_barcode = product.product_barcodes.first
-    unless @product_barcode.nil?
-      @product_hash['barcode'] = @product_barcode.barcode
-    end
-
-    @product_sku = product.product_skus.first
-    unless @product_sku.nil?
-      @product_hash['sku'] = @product_sku.sku
-    end
-
-    @product_cat = product.product_cats.first
-    unless @product_cat.nil?
-      @product_hash['cat'] = @product_cat.category
-    end
-    unless product.store.nil?
-      @product_hash['store_type'] = product.store.store_type
-    end
-
-		@product_kit_skus = ProductKitSkus.where(:product_id=>product.id)
-		if @product_kit_skus.length > 0
-			@product_hash['productkitskus'] = []
-			@product_kit_skus.each do |kitsku|
-				@product_hash['productkitskus'].push(kitsku.sku)
-			end
-		end
-
-		@products_result.push(@product_hash)
-		end
-
-		@result['products'] = @products_result
-
+    @products = do_getproducts
+		@result['products'] = make_products_list(@products)
 		respond_to do |format|
       		format.json { render json: @result}
     	end
@@ -657,12 +519,7 @@ class ProductsController < ApplicationController
 
     @result = Hash.new
     @result['status'] = true
-    if params[:select_all]
-      #todo: implement search and filter by status
-      @products = params[:productArray]
-    else
-      @products = params[:productArray]
-    end
+    @products = list_selected_products
     unless @products.nil?
       @products.each do|product|
 
@@ -695,12 +552,7 @@ class ProductsController < ApplicationController
   def deleteproduct
     @result = Hash.new
     @result['status'] = true
-    if params[:select_all]
-      #todo: implement search and filter by status
-      @products = params[:productArray]
-    else
-      @products = params[:productArray]
-    end
+    @products = list_selected_products
     unless @products.nil?
       @products.each do|product|
         @product = Product.find(product["id"])
@@ -723,53 +575,10 @@ class ProductsController < ApplicationController
   def search
   	@result = Hash.new
   	@result['status'] = true
-	limit = 10
-	offset = 0
-	# Get passed in parameter variables if they are valid.
-	limit = params[:limit] if !params[:limit].nil? && params[:limit].to_i > 0
-
-	offset = params[:offset] if !params[:offset].nil? && params[:offset].to_i >= 0
-
 	if !params[:search].nil? && params[:search] != ''
-		search = params[:search]
 
-		#todo: include sku in search as well in future.
-		@products = Product.find_by_sql("SELECT * from products WHERE name like '%"+search+"%'  LIMIT #{limit}
-										OFFSET #{offset}")
-		@products_result = []
-
-		@products.each do |product|
-		@product_hash = Hash.new
-		@product_hash['id'] = product.id
-		@product_hash['name'] = product.name
-		@product_hash['status'] = product.status
-    if product.product_inventory_warehousess.length > 0
-      @product_hash['location'] = product.product_inventory_warehousess.first.location_primary
-    else
-      @product_hash['location'] = ''
-    end
-
-    if product.product_barcodes.length > 0
-      @product_hash['barcode'] = product.product_barcodes.first.barcode
-    else
-      @product_hash['barcode'] = ''
-    end
-		if product.product_skus.length > 0
-			@product_hash['sku'] = product.product_skus.first.sku
-		else
-			@product_hash['sku'] = ''
-		end
-		if product.product_cats.length > 0
-			@product_hash['cat'] = product.product_cats.first.category
-		else
-			@product_hash['cat'] = ''
-		end
-		@product_hash['store_type'] = product.store.store_type
-
-		@products_result.push(@product_hash)
-		end
-
-		@result['products'] = @products_result
+		@products = do_search
+		@result['products'] = make_products_list(@products)
 	else
 		@result['status'] = false
 		@result['message'] = 'Improper search string'
@@ -785,16 +594,11 @@ class ProductsController < ApplicationController
   def changeproductstatus
     @result = Hash.new
     @result['status'] = true
-    if params[:select_all]
-      #todo: implement search and filter by status
-      @products = params[:productArray]
-    else
-      @products = params[:productArray]
-    end
+    @products = list_selected_products
     unless @products.nil?
       @products.each do|product|
         @product = Product.find(product["id"])
-        @product.status = product["status"]
+        @product.status = params[:status]
         unless @product.save
           @result['status'] = false
         end
@@ -1345,4 +1149,167 @@ class ProductsController < ApplicationController
 
   end
 
+  private
+
+  def do_search
+    limit = 10
+    offset = 0
+    # Get passed in parameter variables if they are valid.
+    limit = params[:limit] if !params[:limit].nil? && params[:limit].to_i > 0
+
+    offset = params[:offset] if !params[:offset].nil? && params[:offset].to_i >= 0
+    search = params[:search]
+    query_add = ""
+    unless params[:select_all]
+      query_add = " LIMIT "+limit+" OFFSET "+offset
+    end
+    #todo: include sku in search as well in future.
+    return Product.find_by_sql("SELECT * from products WHERE name like '%"+search+"%'" +query_add)
+
+  end
+
+  def do_getproducts
+    sort_key = 'updated_at'
+    sort_order = 'DESC'
+    status_filter = 'active'
+    limit = 10
+    offset = 0
+    query_add = ""
+    status_filter_text = ""
+    is_kit = 0
+    supported_sort_keys = ['updated_at', 'name', 'sku',
+                           'status', 'barcode', 'location_primary', 'store' ]
+    supported_order_keys = ['ASC', 'DESC' ] #Caps letters only
+    supported_status_filters = ['all', 'active', 'inactive', 'new']
+    supported_kit_params = ['0', '1']
+
+    # Get passed in parameter variables if they are valid.
+    limit = params[:limit] if !params[:limit].nil? && params[:limit].to_i > 0
+
+    offset = params[:offset] if !params[:offset].nil? && params[:offset].to_i >= 0
+
+    sort_key = params[:sort] if !params[:sort].nil? &&
+        supported_sort_keys.include?(params[:sort])
+
+    sort_order = params[:order] if !params[:order].nil? &&
+        supported_order_keys.include?(params[:order])
+
+    status_filter = params[:filter] if !params[:filter].nil? &&
+        supported_status_filters.include?(params[:filter])
+
+    is_kit = params[:iskit] if !params[:iskit].nil?  &&
+        supported_kit_params.include?(params[:iskit])
+
+    unless params[:select_all]
+      query_add = " LIMIT "+limit+" OFFSET "+offset
+    end
+
+    #hack to bypass for now and enable client development
+    # sort_key = 'name' if sort_key == 'sku'
+
+    #todo status filters to be implemented
+
+    unless status_filter == 'all'
+      status_filter_text = " AND products.status='"+status_filter+"'"
+    end
+
+    if sort_key == 'sku'
+      products = Product.find_by_sql("SELECT products.* FROM products, product_skus WHERE "+
+                                         "products.id = product_skus.product_id AND products.is_kit="+is_kit+
+                                         status_filter_text+" ORDER BY product_skus.sku "+sort_order+query_add)
+    elsif sort_key == 'store'
+      products = Product.find_by_sql("SELECT products.* FROM products, stores WHERE "+
+                                         "products.store_id = stores.id AND products.is_kit="+is_kit+
+                                         status_filter_text+" ORDER BY stores.name "+sort_order+query_add)
+    elsif sort_key == 'location_primary'
+     products = Product.find_by_sql("SELECT products.* FROM products, product_inventory_warehouses WHERE "+
+                                            "products.id = product_inventory_warehouses.product_id AND products.is_kit="+is_kit+
+                                            status_filter_text+" ORDER BY product_inventory_warehouses.location_primary "+sort_order+query_add)
+    else
+      products = Product.order(sort_key+" "+sort_order).where(:is_kit=> is_kit)
+      unless status_filter == 'all'
+          products = products.where(:status=>status_filter)
+      end
+      unless params[:select_all]
+        products =  products.limit(limit).offset(offset)
+      end
+    end
+
+    if products.length==0
+      products = Product.where(:is_kit=> is_kit)
+      unless status_filter == 'all'
+        products = products.where(:status=>status_filter)
+      end
+      unless params[:select_all]
+        products =  products.limit(limit).offset(offset)
+      end
+    end
+    return products
+  end
+
+  def make_products_list(products)
+    @products_result = []
+    products.each do |product|
+      @product_hash = Hash.new
+      @product_hash['id'] = product.id
+      @product_hash['name'] = product.name
+      @product_hash['status'] = product.status
+      @product_hash['location'] = ""
+      @product_hash['location_secondary'] = ""
+      @product_hash['location_name'] = ""
+      @product_hash['qty'] = ""
+      @product_hash['barcode'] = ""
+      @product_hash['sku'] = ""
+      @product_hash['cat'] = ""
+
+      @product_location = product.product_inventory_warehousess.first
+      unless @product_location.nil?
+        @product_hash['location'] = @product_location.location_primary
+        @product_hash['location_secondary'] = @product_location.location_secondary
+        @product_hash['location_name'] = @product_location.name
+        @product_hash["qty"] = @product_location.qty
+      end
+
+      @product_barcode = product.product_barcodes.first
+      unless @product_barcode.nil?
+        @product_hash['barcode'] = @product_barcode.barcode
+      end
+
+      @product_sku = product.product_skus.first
+      unless @product_sku.nil?
+        @product_hash['sku'] = @product_sku.sku
+      end
+
+      @product_cat = product.product_cats.first
+      unless @product_cat.nil?
+        @product_hash['cat'] = @product_cat.category
+      end
+      unless product.store.nil?
+        @product_hash['store_type'] = product.store.store_type
+      end
+
+      @product_kit_skus = ProductKitSkus.where(:product_id=>product.id)
+      if @product_kit_skus.length > 0
+        @product_hash['productkitskus'] = []
+        @product_kit_skus.each do |kitsku|
+          @product_hash['productkitskus'].push(kitsku.sku)
+        end
+      end
+
+      @products_result.push(@product_hash)
+    end
+    return @products_result
+  end
+
+  def list_selected_products
+    if params[:select_all]
+      if !params[:search].nil? && params[:search] != ''
+        return do_search
+      else
+        return do_getproducts
+      end
+    else
+      return params[:productArray]
+    end
+  end
 end

@@ -331,14 +331,15 @@
             }
             var _this = this;
             this.bindTo.mousedown(function(evt) {
-                if(evt.which !=1) evt.preventDefault();
-                clearTimeout(this.downTimer);
-                this.downTimer = setTimeout(function() {
-                    _this.originalTable.selectedHandle = $(this);
-                    _this.originalTable.selectedHandle.addClass('dragtable-handle-selected');
-                    _this.options.beforeStart(this.originalTable);
-                    _this._generateSortable(evt);
-                }, _this.options.clickDelay);
+                if(evt.which == 1) {
+                    clearTimeout(this.downTimer);
+                    this.downTimer = setTimeout(function() {
+                        _this.originalTable.selectedHandle = $(this);
+                        _this.originalTable.selectedHandle.addClass('dragtable-handle-selected');
+                        _this.options.beforeStart(this.originalTable);
+                        _this._generateSortable(evt);
+                    }, _this.options.clickDelay);
+                }
             }).mouseup(function(evt) {
                     clearTimeout(this.downTimer);
                 });
