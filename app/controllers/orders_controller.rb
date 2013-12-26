@@ -429,104 +429,10 @@ begin
   def getorders
     @result = Hash.new
     @result[:status] = true
-    sort_key = 'updated_at'
-    sort_order = 'DESC'
-    status_filter = 'awaiting'
-    limit = 10
-    offset = 0
-    supported_sort_keys = ['updated_at', 'store', 'notes',
-                'store_order_id', 'order_date', 'items', 'recipient', 'status','email','tracking_num','city','state','postcode','country' ]
-    supported_order_keys = ['ASC', 'DESC' ] #Caps letters only
-    supported_status_filters = ['all', 'awaiting', 'onhold', 'cancelled', 'scanned']
 
+    @orders = do_getorders
 
-    # Get passed in parameter variables if they are valid.
-    limit = params[:limit] if !params[:limit].nil? && params[:limit].to_i > 0
-
-    offset = params[:offset] if !params[:offset].nil? && params[:offset].to_i >= 0
-
-    sort_key = params[:sort] if !params[:sort].nil? &&
-      supported_sort_keys.include?(params[:sort])
-
-    sort_order = params[:order] if !params[:order].nil? &&
-      supported_order_keys.include?(params[:order])
-
-    status_filter = params[:filter] if !params[:filter].nil? &&
-      supported_status_filters.include?(params[:filter])
-
-      #overrides
-
-    if sort_key == 'store_order_id'
-      sort_key = 'increment_id'
-    end
-
-    if sort_key == 'order_date'
-      sort_key = 'order_placed_time'
-    end
-
-    if sort_key == 'notes'
-      sort_key = 'notes_toPacker'
-    end
-
-    if sort_key == 'recipient'
-      sort_key = 'firstname '+sort_order+', lastname'
-    end
-
-    #hack to bypass for now and enable client development
-    #sort_key = 'updated_at' if sort_key == 'sku'
-
-    #todo status filters to be implemented
-    if status_filter == 'all'
-      if sort_key == 'store'
-        @orders = Order.find_by_sql("SELECT orders.* FROM orders, stores WHERE "+
-        "orders.store_id = stores.id ORDER BY stores.name "+
-        sort_order+" LIMIT "+limit+" OFFSET "+offset)
-      elsif sort_key == 'items'
-        @orders = Order.find_by_sql("SELECT orders.*, count(order_items.id) AS count FROM orders, order_items"+
-            " WHERE order_items.order_id = orders.id GROUP BY order_items.order_id ORDER BY count "+sort_order+" LIMIT "+limit+" OFFSET "+offset)
-      else
-      @orders = Order.limit(limit).offset(offset).order(sort_key+" "+sort_order)
-      end
-    else
-      if sort_key == 'store'
-      @orders = Order.find_by_sql("SELECT orders.* FROM orders, stores WHERE orders.status='"+status_filter+
-        "' AND orders.store_id = stores.id ORDER BY stores.name "+
-        sort_order+" LIMIT "+limit+" OFFSET "+offset)
-      elsif sort_key == 'items'
-        @orders = Order.find_by_sql("SELECT orders.*, count(order_items.id) AS count FROM orders, order_items"+
-            " WHERE orders.status='"+status_filter+"' AND order_items.order_id = orders.id GROUP BY order_items.order_id "+
-            "ORDER BY count "+sort_order+" LIMIT "+limit+" OFFSET "+offset)
-      else
-      @orders = Order.limit(limit).offset(offset).order(sort_key+" "+sort_order).where(:status=>status_filter)
-      end
-    end
-
-    @orders_result = []
-
-    @orders.each do |order|
-    @order_hash = Hash.new
-    @order_hash['id'] = order.id
-    if !order.store_id.nil?
-      @order_hash['store_name'] = Store.find(order.store_id).name
-    else
-      @order_hash['store_name'] = ''
-    end
-    @order_hash['notes'] = order.notes_internal
-    @order_hash['ordernum'] = order.increment_id
-    @order_hash['orderdate'] = order.order_placed_time
-    @order_hash['itemslength'] = OrderItem.where(:order_id=>order.id).length
-    @order_hash['status'] = order.status
-    @order_hash['recipient'] = "#{order.firstname} #{order.lastname}"
-    @order_hash['email'] = order.email
-    @order_hash['tracking_num'] = order.tracking_num
-    @order_hash['city'] = order.city
-    @order_hash['state'] = order.state
-    @order_hash['postcode'] =order.postcode
-    @order_hash['country'] = order.country
-    @orders_result.push(@order_hash)
-    end
-
-    @result['orders'] = @orders_result
+    @result['orders'] = make_orders_list(@orders)
 
     respond_to do |format|
           format.json { render json: @result}
@@ -537,12 +443,7 @@ begin
 
     @result = Hash.new
     @result['status'] = true
-    if params[:select_all]
-      #todo: implement search and filter by status
-      @orders = params[:orderArray]
-    else
-      @orders = params[:orderArray]
-    end
+    @orders = list_selected_orders
     unless @orders.nil?
       @orders.each do|order|
 
@@ -574,12 +475,7 @@ begin
   def deleteorder
     @result = Hash.new
     @result['status'] = true
-    if params[:select_all]
-      #todo: implement search and filter by status
-      @orders = params[:orderArray]
-    else
-      @orders = params[:orderArray]
-    end
+    @orders = list_selected_orders
     unless @orders.nil?
       @orders.each do|order|
         @order = Order.find(order["id"])
@@ -602,48 +498,11 @@ begin
   def search
     @result = Hash.new
     @result['status'] = true
-    limit = 10
-    offset = 0
-    # Get passed in parameter variables if they are valid.
-    limit = params[:limit] if !params[:limit].nil? && params[:limit].to_i > 0
-
-    offset = params[:offset] if !params[:offset].nil? && params[:offset].to_i >= 0
-
     if !params[:search].nil? && params[:search] != ''
-      search = params[:search]
 
-      #todo: include sku and storename in search as well in future.
-      @orders = Order.find_by_sql("SELECT * from orders WHERE
-                      increment_id like '%"+search+"%' OR status like '%"+search+"%' LIMIT #{limit}
-                      OFFSET #{offset}")
+      @orders = do_search
 
-      @orders_result = []
-
-      @orders.each do |order|
-        @order_hash = Hash.new
-        @order_hash['id'] = order.id
-        if !order.store_id.nil?
-          @order_hash['store_name'] = Store.find(order.store_id).name
-        else
-          @order_hash['store_name'] = ''
-        end
-        @order_hash['notes'] = order.notes_internal
-        @order_hash['ordernum'] = order.increment_id
-        @order_hash['orderdate'] = order.order_placed_time
-        @order_hash['itemslength'] = OrderItem.where(:order_id=>order.id).length
-        @order_hash['status'] = order.status
-        @order_hash['recipient'] = "#{order.firstname} #{order.lastname}"
-        @order_hash['email'] = order.email
-        @order_hash['tracking_num'] = order.tracking_num
-        @order_hash['city'] = order.city
-        @order_hash['state'] = order.state
-        @order_hash['postcode'] =order.postcode
-        @order_hash['country'] = order.country
-        @orders_result.push(@order_hash)
-      end
-
-
-      @result['orders'] = @orders_result
+      @result['orders'] = make_orders_list(@orders)
     else
       @result['status'] = false
       @result['message'] = 'Improper search string'
@@ -659,16 +518,11 @@ begin
   def changeorderstatus
     @result = Hash.new
     @result['status'] = true
-    if params[:select_all]
-      #todo: implement search and filter by status
-      @orders = params[:orderArray]
-    else
-      @orders = params[:orderArray]
-    end
+    @orders = list_selected_orders
     unless @orders.nil?
       @orders.each do|order|
         @order = Order.find(order["id"])
-        @order.status = order["status"]
+        @order.status = params[:status]
         unless @order.save
           @result['status'] = false
         end
@@ -941,6 +795,142 @@ begin
     respond_to do |format|
       format.html # show.html.erb
       format.json { render json: @result }
+    end
+  end
+
+  private
+
+  def do_search
+    limit = 10
+    offset = 0
+    # Get passed in parameter variables if they are valid.
+    limit = params[:limit] if !params[:limit].nil? && params[:limit].to_i > 0
+
+    offset = params[:offset] if !params[:offset].nil? && params[:offset].to_i >= 0
+    search = params[:search]
+    query = "SELECT * from orders WHERE
+                      increment_id like '%"+search+"%' OR status like '%"+search+"%'"
+    unless params[:select_all]
+      query = query +" LIMIT #{limit} OFFSET #{offset}"
+    end
+    #todo: include sku and storename in search as well in future.
+    return  Order.find_by_sql(query)
+  end
+
+  def do_getorders
+    sort_key = 'updated_at'
+    sort_order = 'DESC'
+    status_filter = 'awaiting'
+    limit = 10
+    offset = 0
+    query_add = ""
+    status_filter_text = ""
+    supported_sort_keys = ['updated_at', 'store', 'notes',
+                           'store_order_id', 'order_date', 'items', 'recipient', 'status','email','tracking_num','city','state','postcode','country' ]
+    supported_order_keys = ['ASC', 'DESC' ] #Caps letters only
+    supported_status_filters = ['all', 'awaiting', 'onhold', 'cancelled', 'scanned']
+
+
+    # Get passed in parameter variables if they are valid.
+    limit = params[:limit] if !params[:limit].nil? && params[:limit].to_i > 0
+
+    offset = params[:offset] if !params[:offset].nil? && params[:offset].to_i >= 0
+
+    unless params[:select_all]
+      query_add = " LIMIT "+limit+" OFFSET "+offset
+    end
+
+    sort_key = params[:sort] if !params[:sort].nil? &&
+        supported_sort_keys.include?(params[:sort])
+
+    sort_order = params[:order] if !params[:order].nil? &&
+        supported_order_keys.include?(params[:order])
+
+    status_filter = params[:filter] if !params[:filter].nil? &&
+        supported_status_filters.include?(params[:filter])
+
+
+    #overrides
+
+    if sort_key == 'store_order_id'
+      sort_key = 'increment_id'
+    end
+
+    if sort_key == 'order_date'
+      sort_key = 'order_placed_time'
+    end
+
+    if sort_key == 'notes'
+      sort_key = 'notes_toPacker'
+    end
+
+    if sort_key == 'recipient'
+      sort_key = 'firstname '+sort_order+', lastname'
+    end
+
+    #hack to bypass for now and enable client development
+    #sort_key = 'updated_at' if sort_key == 'sku'
+
+    unless status_filter == 'all'
+      status_filter_text = " AND orders.status='"+status_filter+"'"
+    end
+    #todo status filters to be implemented
+    if sort_key == 'store'
+      orders = Order.find_by_sql("SELECT orders.* FROM orders, stores WHERE orders.store_id = stores.id"+status_filter_text+
+                                     " ORDER BY stores.name "+ sort_order+query_add)
+    elsif sort_key == 'items'
+      orders = Order.find_by_sql("SELECT orders.*, count(order_items.id) AS count FROM orders, order_items"+
+                                      " WHERE order_items.order_id = orders.id "+status_filter_text+" GROUP BY order_items.order_id "+
+                                      "ORDER BY count "+sort_order+query_add)
+    else
+      orders = Order.order(sort_key+" "+sort_order)
+      unless status_filter == "all"
+        orders = orders.where(:status=>status_filter)
+      end
+      unless params[:select_all]
+        orders = orders.limit(limit).offset(offset)
+      end
+    end
+    return orders
+  end
+
+  def make_orders_list(orders)
+    @orders_result = []
+
+    orders.each do |order|
+      @order_hash = Hash.new
+      @order_hash['id'] = order.id
+      if !order.store_id.nil?
+        @order_hash['store_name'] = Store.find(order.store_id).name
+      else
+        @order_hash['store_name'] = ''
+      end
+      @order_hash['notes'] = order.notes_internal
+      @order_hash['ordernum'] = order.increment_id
+      @order_hash['orderdate'] = order.order_placed_time
+      @order_hash['itemslength'] = OrderItem.where(:order_id=>order.id).length
+      @order_hash['status'] = order.status
+      @order_hash['recipient'] = "#{order.firstname} #{order.lastname}"
+      @order_hash['email'] = order.email
+      @order_hash['tracking_num'] = order.tracking_num
+      @order_hash['city'] = order.city
+      @order_hash['state'] = order.state
+      @order_hash['postcode'] =order.postcode
+      @order_hash['country'] = order.country
+      @orders_result.push(@order_hash)
+    end
+    return @orders_result
+  end
+
+  def list_selected_orders
+    if params[:select_all]
+      if !params[:search].nil? && params[:search] != ''
+        return do_search
+      else
+        return do_getorders
+      end
+    else
+      return params[:orderArray]
     end
   end
 
