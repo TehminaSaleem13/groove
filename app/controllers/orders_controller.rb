@@ -29,7 +29,7 @@ class OrdersController < ApplicationController
     @result['activestoreindex'] = params[:activestoreindex]
   end
 
-begin
+# begin
   #import if magento products
   if @store.store_type == 'Magento'
     @magento_credentials = MagentoCredentials.where(:store_id => @store.id)
@@ -74,6 +74,9 @@ begin
                 @order.order_placed_time = item[:created_at]
                 #@order.storename = item[:store_name]
                 @order.store = @store
+                if item[:increment_id] == '100015730'
+                  item.inspect
+                end
                 line_items = order_info[:items]
                 if line_items[:item].is_a?(Hash)
                     @order_item = OrderItem.new
@@ -352,11 +355,11 @@ begin
       @result['response'] = response
     end
   end
-  rescue Exception => e
-    @result['status'] = false
-    @result['messages'].push(e.message)
-    puts e.backtrace
-  end
+  # rescue Exception => e
+  #   @result['status'] = false
+  #   @result['messages'].push(e.message)
+  #   puts e.backtrace
+  # end
     respond_to do |format|
       format.json { render json: @result}
     end

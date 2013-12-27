@@ -1127,12 +1127,17 @@ class ProductsController < ApplicationController
 			  			@result['status'] &= false
 			  		end
 			  	else
-			  		product_barcode = ProductBarcode.new
-			  		product_barcode.barcode = barcode["barcode"]
-			  		product_barcode.product_id = @product.id
-			  		if !product_barcode.save
-			  			@result['status'] &= false
-			  		end
+			  		if ProductBarcode.where(:barcode => barcode["barcode"]).length == 0
+				  		product_barcode = ProductBarcode.new
+				  		product_barcode.barcode = barcode["barcode"]
+				  		product_barcode.product_id = @product.id
+				  		if !product_barcode.save
+				  			@result['status'] &= false
+				  		end
+				  	else
+				  		@result['status'] &= false
+				  		@result['message'] = "Barcode "+barcode["barcode"]+" already exists"
+				  	end
 	  			end
 	  		end
   		end
@@ -1231,16 +1236,21 @@ class ProductsController < ApplicationController
           @result['error_msg'] = "Couldn't save product info"
         end
       elsif params[:var] ==  "barcode"
-        @product_barcode = @product.product_barcodes.first
-        if @product_barcode.nil?
-          @product_barcode = ProductBarcode.new
-          @product_barcode.product_id = params[:id]
-        end
-        @product_barcode.barcode = params[:value]
-        unless @product_barcode.save
-          @result['status'] &= false
-          @result['error_msg'] = "Couldn't save product info"
-        end
+  		if ProductBarcode.where(:barcode => params[:value]).length == 0
+	        @product_barcode = @product.product_barcodes.first
+	        if @product_barcode.nil?
+	          @product_barcode = ProductBarcode.new
+	          @product_barcode.product_id = params[:id]
+	        end
+	        @product_barcode.barcode = params[:value]
+	        unless @product_barcode.save
+	          @result['status'] &= false
+	          @result['error_msg'] = "Couldn't save product info"
+	        end
+	  	else
+	  		@result['status'] &= false
+	  		@result['error_msg'] = "Barcode "+params[:value]+" already exists"
+	  	end
       elsif ["location" ,"location_secondary","location_name","qty"].include?(params[:var])
         @product_location = @product.product_inventory_warehousess.first
         if @product_location.nil?

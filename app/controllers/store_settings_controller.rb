@@ -457,9 +457,11 @@ class StoreSettingsController < ApplicationController
               unless single_row[mapping['barcode']].nil?
                 barcodes = single_row[mapping['barcode']].split(",")
                 barcodes.each do |single_barcode|
-                  product_barcode = ProductBarcode.new
-                  product_barcode.barcode = single_barcode
-                  product.product_barcodes << product_barcode
+                  if ProductBarcode.where(:barcode => single_barcode).length == 0
+                    product_barcode = ProductBarcode.new
+                    product_barcode.barcode = single_barcode
+                    product.product_barcodes << product_barcode
+                  end
                 end
               end
             end
