@@ -10,7 +10,7 @@ class ProductsController < ApplicationController
 	@result['total_imported'] = 0
 	@result['success_imported'] = 0
 	@result['previous_imported'] = 0
-	# begin
+	begin
 	#import if magento products
 	if @store.store_type == 'Magento' then
 		@magento_credentials = MagentoCredentials.where(:store_id => @store.id)
@@ -357,16 +357,11 @@ class ProductsController < ApplicationController
 						#publish the sku to the product record
 						@productdb.product_skus << @productdbsku
 
-						@productimage = ProductImage.new
-						@productimage.image = product_row[7]
-						if !@productimage.image.nil? && @productimage.image != ""
-							@productdb.product_images << @productimage
-						end
-
 						#save
 						if ProductSku.where(:sku=>@productdbsku.sku).length == 0
 							#save
 							if @productdb.save
+								import_amazon_product_details(@store.id, @productdbsku.sku, @productdb.id)
 								#import_amazon_product_details(mws, @credential, @productdb.id)
 								@result['success_imported'] = @result['success_imported'] + 1
 							end
@@ -380,10 +375,10 @@ class ProductsController < ApplicationController
 			end
 		end
 	end
-	# rescue Exception => e
-	# 	@result['status'] = false
-	# 	@result['messages'].push(e.message)
-	# end
+	rescue Exception => e
+		@result['status'] = false
+		@result['messages'].push(e.message)
+	end
 
     respond_to do |format|
       format.json { render json: @result}
@@ -397,15 +392,26 @@ class ProductsController < ApplicationController
 
 		if @amazon_credentials.length > 0
 			@credential = @amazon_credentials.first
-			mws = MWS.new(:aws_access_key_id => ENV['AMAZON_MWS_ACCESS_KEY_ID'],
-			  :secret_access_key => ENV['AMAZON_MWS_SECRET_ACCESS_KEY'],
-			  :seller_id => @credential.merchant_id,
-			  :marketplace_id => @credential.marketplace_id)
-			response = mws.orders.get_matching_product_for_id :id_type=>'SellerSKU', :seller_sku => ["12345678"],
-				:marketplace_id => @credential.marketplace_id
-			# response = mws.orders.list_orders :last_updated_after => 2.months.ago,
-			# 	:order_status => ['Unshipped', 'PartiallyShipped']
-			response.products
+
+			require 'mws-connect'
+
+			mws = Mws.connect(
+				  merchant: @credential.merchant_id, 
+				  access: ENV['AMAZON_MWS_ACCESS_KEY_ID'], 
+				  secret: ENV['AMAZON_MWS_SECRET_ACCESS_KEY']
+				)
+			products_api = mws.products.get_matching_products_for_id(:marketplace_id=>@credential.marketplace_id, 
+				:id_type=>'SellerSKU', :id_list=>['T-TOOL'])
+			require 'active_support/core_ext/hash/conversions'
+			product_hash = Hash.from_xml(products_api.to_s)
+			#product_hash = from_xml(products_api)
+			puts product_hash['GetMatchingProductForIdResult']['Products']['Product']['AttributeSets']['ItemAttributes']['SmallImage']['URL']
+			raise
+			# response = mws.orders.get_matching_product_for_id :id_type=>'SellerSKU', :seller_sku => ["12345678"],
+			# 	:marketplace_id => @credential.marketplace_id
+			# # response = mws.orders.list_orders :last_updated_after => 2.months.ago,
+			# # 	:order_status => ['Unshipped', 'PartiallyShipped']
+			# response.products
 			@products = Product.where(:store_id => params[:store_id])
 			@products.each do |product|
 				#import_amazon_product_details(mws, @credential, product.id)

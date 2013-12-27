@@ -10,7 +10,7 @@ class Order < ActiveRecord::Base
   has_one :order_shipping, :dependent => :destroy
   has_one :order_exceptions, :dependent => :destroy
   has_many :order_activities, :dependent => :destroy
-
+  include ProductsHelper
   def addactivity (order_activity_message, username)
   	@activity = OrderActivity.new
   	@activity.order_id = self.id
@@ -51,6 +51,7 @@ class Order < ActiveRecord::Base
         end
         item.product_id = product.id
         item.save
+        import_amazon_product_details(self.store_id, item.sku, item.product_id)
       else
         item.product_id = ProductSku.where(:sku=>item.sku).first.product_id
         item.save

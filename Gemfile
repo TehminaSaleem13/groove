@@ -63,3 +63,4 @@ gem "soap2r", :git=> 'https://github.com/felipec/soap4r.git'
 gem 'ruby-mws', '~> 0.0.8', :git=>'https://github.com/navaratan-tech/ruby-mws.git'
 gem 'multi_xml'
 gem "font-awesome-rails"
+gem 'mws-connect','~> 0.0.7', :git =>'https://github.com/svisamsetty/mws.git'
