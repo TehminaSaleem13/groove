@@ -329,8 +329,9 @@ class OrdersController < ApplicationController
 
               @order.address_1  = order.shipping_address.address_line1
               @order.city = order.shipping_address.city
-              @order.country = order.shipping_address.country
+              @order.country = order.shipping_address.country_code
               @order.postcode = order.shipping_address.postal_code
+              @order.state = order.shipping_address.state_or_region
               @order.email = order.buyer_email
               @order.lastname = order.shipping_address.name
 
