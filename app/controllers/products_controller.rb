@@ -1115,6 +1115,16 @@ class ProductsController < ApplicationController
   		end
   	end
 
+  	#update order items of aliased products to original products
+  	@order_items = OrderItem.where(:product_id=>@product_alias.id)
+  	@order_items.each do |order_item|
+  		order_item.product_id = @product_orig.id
+  		if !order_item.save
+  			result['status'] &= false
+  			result['messages'].push('Error saving order item with id'+order_item.id)
+  		end
+  	end
+
   	#destroy the aliased object
   	if !@product_alias.destroy
   		result['status'] &= false

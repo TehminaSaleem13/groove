@@ -7,7 +7,7 @@ describe ProductsController do
   end
   
   describe "SET product alias" do
-    it "sets an alias and copies skus and barcodes" do
+    it "sets an alias and copies skus and barcodes also updates order items" do
       request.accept = "application/json"
 
       product_orig = FactoryGirl.create(:product)
@@ -18,6 +18,10 @@ describe ProductsController do
       product_alias_sku = FactoryGirl.create(:product_sku, :product=> product_alias, :sku=>'iPhone5C')
       product_alias_barcode = FactoryGirl.create(:product_barcode, :product=> product_alias, :barcode=>"2456789")
 
+      order = FactoryGirl.create(:order, :status=>'awaiting')
+      order_item = FactoryGirl.create(:order_item, :product_id=>product_alias.id,
+                    :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>product_alias.name)
+
       put :setalias, { :product_orig_id => product_orig.id, :product_alias_id => product_alias.id }
 
       expect(response.status).to eq(200)
@@ -27,6 +31,8 @@ describe ProductsController do
       expect(product_orig.product_skus.length).to eq(2)
       expect(product_orig.product_barcodes.length).to eq(2)
       expect(Product.all.length).to eq(1)
+      order_item.reload
+      expect(order_item.product_id).to eq(product_orig.id)
     end
   end
 
