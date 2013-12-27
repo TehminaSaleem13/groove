@@ -123,6 +123,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $q, $cookies
         $scope.order_setup.limit = 10;
         $scope.order_setup.offset = 0;
         $scope.order_setup.search = "";
+        $scope.order_setup.status = "";
         $scope.single_order = {};
 
         $scope.item_defaults();
@@ -139,6 +140,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $q, $cookies
     $scope.order_change_status = function(status) {
 
         $scope.order_setup.orderArray = [];
+        $scope.order_setup.status = status;
 
         /* get user objects of checked items */
         for( i in $scope.orders)
@@ -146,12 +148,14 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $q, $cookies
             if ($scope.orders[i].checked == true) {
                 var order = {};
                 order.id = $scope.orders[i].id;
-                order.status = status;
                 $scope.order_setup.orderArray.push(order);
+
             }
         }
         /* update the server with the changed status */
         $http.put('/orders/changeorderstatus.json', $scope.order_setup).success(function(data){
+            //console.log(data);
+            $scope.order_setup.status = "";
             if (data.status)
             {
                 $scope.order_setup.select_all = false;
@@ -164,6 +168,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $q, $cookies
             }
             $scope.get_orders();
         }).error(function(data){
+                $scope.order_setup.status = "";
                 $scope.error_msg = "There was a problem changing orders status";
                 $scope.show_error = true;
                 $scope.get_orders();
@@ -185,6 +190,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $q, $cookies
         /* update the server with the changed status */
         $http.put('/orders/deleteorder.json', $scope.order_setup).success(function(data){
             $scope.get_orders();
+            //console.log(data);
             if (data.status)
             {
                 $scope.show_error = false;
@@ -219,6 +225,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $q, $cookies
         /* update the server with the changed status */
         $http.put('/orders/duplicateorder.json', $scope.order_setup).success(function(data){
             $scope.get_orders();
+            //console.log(data);
             if (data.status)
             {
                 $scope.show_error= false;

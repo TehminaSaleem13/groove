@@ -163,6 +163,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $q, $cookies
         $scope.product_setup.order = "DESC";
         $scope.product_setup.filter = "active";
         $scope.product_setup.search = '';
+        $scope.product_setup.status = '';
         $scope.product_setup.select_all = false;
         $scope.product_setup.is_kit = 0;
         $scope.product_setup.limit = 20;
@@ -180,6 +181,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $q, $cookies
     $scope.product_change_status = function(status) {
         $scope.loading = true;
         $scope.product_setup.productArray = [];
+        $scope.product_setup.status = status;
 
         /* get user objects of checked items */
         for( i in $scope.products)
@@ -187,12 +189,12 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $q, $cookies
             if ($scope.products[i].checked == true) {
                 var product = {};
                 product.id = $scope.products[i].id;
-                product.status = status;
                 $scope.product_setup.productArray.push(product);
             }
         }
         /* update the server with the changed status */
         $http.put('/products/changeproductstatus.json', $scope.product_setup).success(function(data){
+            $scope.product_setup.status = "";
             if (data.status)
             {
                 $scope.product_setup.select_all = false;
@@ -205,6 +207,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $q, $cookies
             }
             $scope.get_products();
         }).error(function(data){
+                $scope.product_setup.status = "";
                 $scope.error_msg = "There was a problem changing products status";
                 $scope.show_error = true;
                 $scope.get_products();
