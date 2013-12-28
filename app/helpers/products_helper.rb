@@ -33,6 +33,7 @@ module ProductsHelper
 				product.product_cats << category
 
 				product.save
+				product.update_product_status
 			end
 		rescue Exception => e
 		end

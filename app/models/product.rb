@@ -50,6 +50,12 @@ class Product < ActiveRecord::Base
 	  		self.status = 'active'
 	  		self.save
 	  	end
+
+	  	#update order items status from onhold to awaiting
+	  	@order_items = OrderItem.where(:product_id=>self.id)
+	  	@order_items.each do |item|
+	  		item.order.update_order_status
+	  	end
 	end
   end
 

@@ -998,6 +998,7 @@ class ProductsController < ApplicationController
 	  			end
 	  		end
   		end
+  		@product.update_product_status
   	else
   		@result['status'] = false
   		@result['message'] = 'Cannot find product information.'
@@ -1081,6 +1082,7 @@ class ProductsController < ApplicationController
           @result['error_msg'] = "Couldn't save product info"
         end
       end
+      @product.update_product_status
     end
     respond_to do |format|
       format.html # show.html.erb
