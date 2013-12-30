@@ -24,13 +24,17 @@ module ProductsHelper
 				product = Product.find(product_id)
 				product.store_product_id = product_hash['GetMatchingProductForIdResult']['Products']['Product']['Identifiers']['MarketplaceASIN']['ASIN']
 
-				image = ProductImage.new
-				image.image = product_hash['GetMatchingProductForIdResult']['Products']['Product']['AttributeSets']['ItemAttributes']['SmallImage']['URL']
-				product.product_images << image
+				if @credential.import_images
+					image = ProductImage.new
+					image.image = product_hash['GetMatchingProductForIdResult']['Products']['Product']['AttributeSets']['ItemAttributes']['SmallImage']['URL']
+					product.product_images << image
+				end
 
-				category = ProductCat.new
-				category.category =  product_hash['GetMatchingProductForIdResult']['Products']['Product']['AttributeSets']['ItemAttributes']['ProductGroup']
-				product.product_cats << category
+				if @credential.import_products
+					category = ProductCat.new
+					category.category =  product_hash['GetMatchingProductForIdResult']['Products']['Product']['AttributeSets']['ItemAttributes']['ProductGroup']
+					product.product_cats << category
+				end
 
 				product.save
 				product.update_product_status

@@ -74,48 +74,53 @@ class OrdersController < ApplicationController
                 @order.order_placed_time = item[:created_at]
                 #@order.storename = item[:store_name]
                 @order.store = @store
-                if item[:increment_id] == '100015730'
-                  item.inspect
-                end
                 line_items = order_info[:items]
                 if line_items[:item].is_a?(Hash)
-                    @order_item = OrderItem.new
-                    @order_item.price = line_items[:item][:price]
-                    @order_item.qty = line_items[:item][:qty_ordered]
-                    @order_item.row_total= line_items[:item][:row_total]
-                    @order_item.name = line_items[:item][:name]
-                    @order_item.sku = line_items[:item][:sku]
-                    if ProductSku.where(:sku=>@order_item.sku).length == 0
-                      product_id = import_magento_product(client, session, @order_item.sku, @store.id,
-                        @magento_credentials.first.import_images, @magento_credentials.first.import_products)
+                    if line_items[:item][:product_type] == 'simple'
+                      @order_item = OrderItem.new
+                      @order_item.price = line_items[:item][:price]
+                      @order_item.qty = line_items[:item][:qty_ordered]
+                      @order_item.row_total= line_items[:item][:row_total]
+                      @order_item.name = line_items[:item][:name]
+                      @order_item.sku = line_items[:item][:sku]
+                      if ProductSku.where(:sku=>@order_item.sku).length == 0
+                        product_id = import_magento_product(client, session, @order_item.sku, @store.id,
+                          @magento_credentials.first.import_images, @magento_credentials.first.import_products)
+                      else
+                        product_id = ProductSku.where(:sku=>@order_item.sku).first.product_id
+                      end
+                      @order_item.product_id = product_id
+                      @order.order_items << @order_item
                     else
-                      product_id = ProductSku.where(:sku=>@order_item.sku).first.product_id
+                      import_magento_product(client, session, line_items[:item][:sku], @store.id,
+                          @magento_credentials.first.import_images, @magento_credentials.first.import_products)
                     end
-                    @order_item.product_id = product_id
-                    @order.order_items << @order_item
                 else
                   line_items[:item].each do |line_item|
-                    @order_item = OrderItem.new
-                    @order_item.price = line_item[:price]
-                    @order_item.qty = line_item[:qty_ordered]
-                    @order_item.row_total= line_item[:row_total]
-                    @order_item.name = line_item[:name]
-                    @order_item.sku = line_item[:sku]
+                    if line_item[:product_type] == 'simple'
+                      @order_item = OrderItem.new
+                      @order_item.price = line_item[:price]
+                      @order_item.qty = line_item[:qty_ordered]
+                      @order_item.row_total= line_item[:row_total]
+                      @order_item.name = line_item[:name]
+                      @order_item.sku = line_item[:sku]
 
-                    if ProductSku.where(:sku=>@order_item.sku).length == 0
-                      product_id = import_magento_product(client, session, @order_item.sku, @store.id,
-                        @magento_credentials.first.import_images, @magento_credentials.first.import_products)
+                      if ProductSku.where(:sku=>@order_item.sku).length == 0
+                        product_id = import_magento_product(client, session, @order_item.sku, @store.id,
+                          @magento_credentials.first.import_images, @magento_credentials.first.import_products)
+                      else
+                        product_id = ProductSku.where(:sku=>@order_item.sku).first.product_id
+                      end
+                      @order_item.product_id = product_id
+                      @order.order_items << @order_item
                     else
-                      product_id = ProductSku.where(:sku=>@order_item.sku).first.product_id
+                      import_magento_product(client, session, line_item[:sku], @store.id,
+                          @magento_credentials.first.import_images, @magento_credentials.first.import_products)
                     end
-                    @order_item.product_id = product_id
-                    @order.order_items << @order_item
                   end
                 end
 
-                #if product does not exist import product using product.info
-
-
+              #if product does not exist import product using product.info
               @order.address_1  = order_info[:shipping_address][:street]
               @order.city = order_info[:shipping_address][:city]
               @order.country = order_info[:shipping_address][:country_id]

@@ -1,7 +1,7 @@
 module OrdersHelper
 	def import_magento_product(client, session, sku, store_id, import_images, import_products)
+		begin
 		response = client.call(:catalog_product_info, message: {session: session, productId: sku})
-
 		if response.success?
 		  	@product  = response.body[:catalog_product_info_response][:info]
 			
@@ -29,7 +29,7 @@ module OrdersHelper
 			#get images and categories
 			if !@product[:sku].nil? && import_images
 				getimages = client.call(:catalog_product_attribute_media_list, message: {session: session,
-					productId: @product[:sku]})
+					productId: sku})
 				if getimages.success?
 					@images = getimages.body[:catalog_product_attribute_media_list_response][:result][:item]
 					if !@images.nil?
@@ -72,6 +72,8 @@ module OrdersHelper
 			@productdb.save
 			@productdb.set_product_status
 		@productdb.id
+		end
+		rescue Exception => e
 		end
 	end
 end
