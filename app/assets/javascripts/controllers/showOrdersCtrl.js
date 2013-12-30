@@ -62,6 +62,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $q, $cookies
             }
             $scope.loading = false;
             $scope.can_get_orders = true;
+            $scope.select_all_toggle();
         }).error(function(data) {
                 $timeout($scope.checkSwapNodes,20);
                 $timeout($scope.showHideField,25);
@@ -70,6 +71,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $q, $cookies
                 }
                 $scope.loading = true;
                 $scope.can_get_orders = true;
+                $scope.select_all_toggle();
             });
     }
     $scope.order_setup_opt = function(type,value) {
@@ -626,7 +628,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $q, $cookies
             }
         }
     });
-    $('#showOrder').keydown($scope.keyboard_nav_event);
+    $('#showOrder').on('hidden',function(){$scope.get_orders()}).keydown($scope.keyboard_nav_event);
     $scope.$watch('order_update_status',function() {
         if($scope.order_update_status) {
             $("#order_update_status").fadeTo("fast",1,function() {
