@@ -239,47 +239,48 @@ controller('showUsersCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$l
     $scope.create_user = function() {
         $scope.edit_status = false;
         $scope.newUser = {};
+        $scope.newUser.active = true;
         $('#createUser').modal('show');
     }
 
-        $scope.keyboard_nav_event = function(event) {
-            if($('#createUser').hasClass("in") &&  $scope.edit_status) {
-                if(event.which == 38) {//up key
-                    if($scope.currently_open > 0) {
-                        $scope.getuserinfo($scope.users[$scope.currently_open -1].id, $scope.currently_open - 1);
-                    } else {
-                        alert("Already at the top of the list");
-                    }
-                } else if(event.which == 40) { //down key
-                    if($scope.currently_open < $scope.users.length - 1) {
-                        $scope.getuserinfo($scope.users[$scope.currently_open + 1].id, $scope.currently_open + 1);
-                    } else {
-                        alert("Already at the bottom of the list");
-                    }
-                } else if(event.which == 39 || event.which == 37) {
-                    //Horizontal movement
-                    var mytab = $("#myTab li");
-                    var count = mytab.length;
-                    var active_index = $("#myTab li.active").index();
-                    var next_index = 1;
-                    var prev_index = count;
-
-                    if(event.which == 39) { //right key
-                        if(active_index+1 < count) {
-                            next_index = active_index+2;
-                        }
-                        $("#myTab li:nth-child("+next_index+") a").click();
-                    } else if(event.which == 37) { //left key
-
-                        if(active_index > 0) {
-                            prev_index = active_index;
-                        }
-                        $("#myTab li:nth-child("+prev_index+") a").click();
-                    }
+    $scope.keyboard_nav_event = function(event) {
+        if($('#createUser').hasClass("in") &&  $scope.edit_status) {
+            if(event.which == 38) {//up key
+                if($scope.currently_open > 0) {
+                    $scope.getuserinfo($scope.users[$scope.currently_open -1].id, $scope.currently_open - 1);
+                } else {
+                    alert("Already at the top of the list");
                 }
+            } else if(event.which == 40) { //down key
+                if($scope.currently_open < $scope.users.length - 1) {
+                    $scope.getuserinfo($scope.users[$scope.currently_open + 1].id, $scope.currently_open + 1);
+                } else {
+                    alert("Already at the bottom of the list");
+                }
+            } else if(event.which == 39 || event.which == 37) {
+                //Horizontal movement
+                var mytab = $("#myTab li");
+                var count = mytab.length;
+                var active_index = $("#myTab li.active").index();
+                var next_index = 1;
+                var prev_index = count;
 
+                if(event.which == 39) { //right key
+                    if(active_index+1 < count) {
+                        next_index = active_index+2;
+                    }
+                    $("#myTab li:nth-child("+next_index+") a").click();
+                } else if(event.which == 37) { //left key
+
+                    if(active_index > 0) {
+                        prev_index = active_index;
+                    }
+                    $("#myTab li:nth-child("+prev_index+") a").click();
+                }
             }
+
         }
-        $('#createUser').keydown($scope.keyboard_nav_event);
-        $("#user-search-query").focus();
-    }]);
+    }
+    $('#createUser').keydown($scope.keyboard_nav_event);
+    $("#user-search-query").focus();
+}]);

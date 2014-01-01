@@ -62,13 +62,19 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $q, $cookies
                     for(i in $scope.temp.product_setup) {
                         $scope.alias.product_setup[i] = $scope.temp.product_setup[i];
                     }
-                    $scope.alias.products = $scope.temp.products;
+                    $scope.alias.products = [];
+                    for(i in $scope.temp.products) {
+                        if($scope.temp.products[i].id != $scope.single_product.basicinfo.id) {
+                            $scope.alias.products.push($scope.temp.products[i]);
+                        }
+                    }
                 } else {
                     for(i in $scope.temp.product_setup) {
                         $scope.product_setup[i] = $scope.temp.product_setup[i];
                     }
                     $scope.products = $scope.temp.products;
                 }
+
             } else {
                 $scope.show_error = true;
                 $scope.error_msg = "Can't load list of products";
@@ -81,6 +87,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $q, $cookies
             $timeout($scope.showHideField,25);
             $scope.showHideField();
             $scope.loading = false;
+            $scope.select_all_toggle();
         }).error(function(data) {
                 $scope.show_error = true;
                 $scope.error_msg = "Can't load list of products";
@@ -90,6 +97,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $q, $cookies
                 $timeout(post_fn,30);
             }
             $scope.loading = false;
+            $scope.select_all_toggle();
         });
 
     }
@@ -773,7 +781,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $q, $cookies
             }
         }
     });
-    $('#showProduct').keydown($scope.keyboard_nav_event);
+    $('#showProduct').on('hidden',function(){$scope.get_products()}).keydown($scope.keyboard_nav_event);
     $('.icon-question-sign').popover({trigger: 'hover focus'});
     input_text_selector = $('.input-text input');
     input_text_selector.keydown($scope.handle_key_event);
