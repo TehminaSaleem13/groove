@@ -98,7 +98,7 @@ class Order < ActiveRecord::Base
 
   def update_order_status
     result = true
-    if self.status == "onhold"
+    if true
       self.order_items.each do |order_item|
         product = Product.find_by_id(order_item.product_id)
         unless product.nil?
@@ -108,10 +108,13 @@ class Order < ActiveRecord::Base
         end
       end
 
-      if result
+      if result && self.status == "onhold"
         self.status = "awaiting"
-        self.save
+      elsif self.status == "awaiting"
+        self.status = "onhold"
       end
+      
+      self.save
     end
   end
 

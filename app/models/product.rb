@@ -38,7 +38,7 @@ class Product < ActiveRecord::Base
   has_many :product_inventory_warehousess, :dependent => :destroy
 
   def update_product_status
-  	if self.status == "new"
+  	if self.status != 'inactive'
 	  	result = true
 	  	@skus = ProductSku.where(:product_id=>self.id)
 	  	result &= false if @skus.length == 0
@@ -51,6 +51,12 @@ class Product < ActiveRecord::Base
 	  		self.save
 	  	end
 
+	  	#update order items status from onhold to awaiting
+	  	@order_items = OrderItem.where(:product_id=>self.id)
+	  	@order_items.each do |item|
+	  		item.order.update_order_status
+	  	end
+	else
 	  	#update order items status from onhold to awaiting
 	  	@order_items = OrderItem.where(:product_id=>self.id)
 	  	@order_items.each do |item|

@@ -605,7 +605,9 @@ class ProductsController < ApplicationController
       @products.each do|product|
         @product = Product.find(product["id"])
         @product.status = params[:status]
-        unless @product.save
+        if @product.save
+          @product.update_product_status
+        else
           @result['status'] = false
         end
       end
