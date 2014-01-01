@@ -177,37 +177,41 @@ class OrdersController < ApplicationController
         ENV['EBAY_DEV_ID'], ENV['EBAY_APP_ID'],
         ENV['EBAY_CERT_ID'], :sandbox=>sandbox)
 
-      seller_list =@eBay.GetSellerTransactions(:orderRole=> 'Seller', :orderStatus=>'Paid',
+      seller_list =@eBay.GetOrders(:orderRole=> 'Seller', :orderStatus=>'Completed',
         :createTimeFrom=> (Date.today - 3.months).to_datetime,
-         :createTimeTo =>(Date.today + 1.day).to_datetime, :detailLevel=>'ReturnAll')
-      if (seller_list.transactionArray != nil)
-        @result['total_imported']  = seller_list.transactionArray.size
+         :createTimeTo =>(Date.today + 1.day).to_datetime)
+      if (seller_list.orderArray != nil)
+        @result['total_imported']  = seller_list.orderArray.size
       #@result['seller_list'] = seller_list.transactionArray
       #@result['app_id'] = @credential
-      seller_list.transactionArray.each do |transaction|
-        if Order.where(:increment_id=>transaction.transactionID).length == 0
+      @ordercnt = 0
+      seller_list.orderArray.each do |order|
+        if order.checkoutStatus.status == 'Complete'
+          @ordercnt = @ordercnt + 1
+        end
+      end
+      seller_list.orderArray.each do |order|
+        if Order.where(:increment_id=>order.orderID).length == 0 && 
+            order.checkoutStatus.status == 'Complete'
           @order = Order.new
           @order.status = 'awaiting'
           @order.store = @store
-          @order.increment_id = transaction.transactionID
-          @order.order_placed_time = transaction.createdDate
+          @order.increment_id = order.orderID
+          @order.order_placed_time = order.createdTime
 
-          @order_item = OrderItem.new
-          @order_item.price = transaction.transactionPrice
-          @order_item.qty = transaction.quantityPurchased
-          @order_item.row_total= transaction.amountPaid
-          if !transaction.item.sKU.nil?
-            @order_item.sku = transaction.item.sKU
-          end
-          if !transaction.item.title.nil?
-            @order_item.name = transaction.item.title
-          else
-            @order_item.name = ""
-          end
+          order.transactionArray.each do |transaction|
+            @order_item = OrderItem.new
+            @order_item.price = transaction.transactionPrice
+            @order_item.qty = transaction.quantityPurchased
+            @order_item.row_total= transaction.amountPaid
+            if !transaction.item.sKU.nil?
+              @order_item.sku = transaction.item.sKU
+            end
+            @item = @eBay.getItem(:ItemID => transaction.item.itemID).item
+            @order_item.name = @item.title
 
           if ProductSku.where(:sku=> transaction.item.sKU).length == 0
             @productdb = Product.new
-            @item = @eBay.getItem(:ItemID => transaction.item.itemID).item
             @productdb.name = @item.title
             @productdb.store_product_id = @item.itemID
             @productdb.product_type = 'not_used'
@@ -262,16 +266,15 @@ class OrdersController < ApplicationController
           end
 
           @order.order_items << @order_item
+          end
 
-
-
-          @order.address_1  = transaction.buyer.buyerInfo.shippingAddress.street1
-          @order.city = transaction.buyer.buyerInfo.shippingAddress.cityName
+          @order.address_1  = order.shippingAddress.street1
+          @order.city = order.shippingAddress.cityName
           #@shipping.region = transaction.buyer.buyerInfo.shippingAddress.stateOrProvince
-          @order.state = transaction.buyer.buyerInfo.shippingAddress.stateOrProvince
-          @order.country = transaction.buyer.buyerInfo.shippingAddress.country
-          @order.postcode = transaction.buyer.buyerInfo.shippingAddress.postalCode
-          @order.lastname = transaction.buyer.buyerInfo.shippingAddress.name
+          @order.state = order.shippingAddress.stateOrProvince
+          @order.country = order.shippingAddress.country
+          @order.postcode = order.shippingAddress.postalCode
+          @order.lastname = order.shippingAddress.name
 
           #@order.order_shipping = @shipping
           if @order.save

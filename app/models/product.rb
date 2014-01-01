@@ -38,7 +38,7 @@ class Product < ActiveRecord::Base
   has_many :product_inventory_warehousess, :dependent => :destroy
 
   def update_product_status
-  	if self.status == "inactive" or self.status == "new"
+  	if self.status == "new"
 	  	result = true
 	  	@skus = ProductSku.where(:product_id=>self.id)
 	  	result &= false if @skus.length == 0
