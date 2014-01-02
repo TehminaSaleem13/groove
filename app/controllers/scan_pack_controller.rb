@@ -1,6 +1,6 @@
 class ScanPackController < ApplicationController
 	before_filter :authenticate_user!
-
+  	include ScanPackHelper
 	#input is barcode which is increment_id in the orders table
 	def scan_order_by_barcode
 		@result = Hash.new
@@ -197,49 +197,22 @@ class ScanPackController < ApplicationController
 	#input is barcode, order id
 	def scan_product_by_barcode
 		@result = Hash.new
-	    @result['status'] = true
-	    @result['error_messages'] = []
-	    @result['success_messages'] = []
-	    @result['notice_messages'] = []
-	    @result['data'] = Hash.new
-      @result['data']['next_state'] = 'ready_for_product'
+    @result['status'] = true
+    @result['error_messages'] = []
+    @result['success_messages'] = []
+    @result['notice_messages'] = []
+    @result['data'] = Hash.new
+    @result['data']['next_state'] = 'ready_for_product'
 
-	    if !params[:order_id].nil? || !params[:barcode].nil?
+    if !params[:order_id].nil? || !params[:barcode].nil?
 			#check if order status is On Hold
 			@order = Order.find(params[:order_id])
 			if !@order.nil?
 				if @order.has_unscanned_items
-					barcode_found = false
-					@order.order_items.each do |order_item|
-            product = Product.find_by_id(order_item.product_id)
-						unless product.nil?
-              barcodes = product.product_barcodes.where(:barcode=>params[:barcode])
-              if barcodes.length > 0
-                barcode_found = true
-
-                if order_item.scanned_status == 'scanned' || order_item.scanned_qty >= order_item.qty
-                  @result['status'] &= false
-                  @result['error_messages'].push("This item has already been scanned, Please scan another item")
-                else
-                  order_item.scanned_qty = order_item.scanned_qty + 1
-                  if order_item.scanned_qty == order_item.qty
-                    order_item.scanned_status = 'scanned'
-                  else
-                    order_item.scanned_status = 'partially_scanned'
-                  end
-                  order_item.save
-                end
-                unless @order.has_unscanned_items
-                   @order.set_order_to_scanned_state
-                   @result['data']['next_state'] = 'ready_for_order'
-                end
-                break
-              end
-						end
-					end
-					unless barcode_found
-						@result['status'] &= false
-						@result['error_messages'].push("There are no barcodes that match items in this order")
+					if @order.contains_kit
+						#call scan order with kit helper method
+					else
+						#call scan product helper method
 					end
 				else
 					@result['status'] &= false
@@ -249,14 +222,14 @@ class ScanPackController < ApplicationController
 				@result['status'] &= false
 				@result['error_messages'].push("Could not find order with id:"+params[:order_id])
 			end
-	    else
+	  else
 			@result['status'] &= false
 			@result['error_messages'].push("Please specify barcode and order id to confirm purchase code")
-	    end
+	  end
 
-	    respond_to do |format|
-	      format.html # show.html.erb
-	      format.json { render json: @result }
-	    end
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json: @result }
+    end
 	end
 end

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140102040601) do
+ActiveRecord::Schema.define(:version => 20140102082224) do
 
   create_table "amazon_credentials", :force => true do |t|
     t.string   "merchant_id",                                     :null => false
@@ -81,6 +81,30 @@ ActiveRecord::Schema.define(:version => 20140102040601) do
 
   add_index "order_exceptions", ["order_id"], :name => "index_order_exceptions_on_order_id"
   add_index "order_exceptions", ["user_id"], :name => "index_order_exceptions_on_user_id"
+
+  create_table "order_item_kit_product", :force => true do |t|
+    t.string   "scanned_status",      :default => "unscanned"
+    t.integer  "scanned_qty",         :default => 0
+    t.integer  "order_item_id"
+    t.integer  "product_kit_skus_id"
+    t.datetime "created_at",                                   :null => false
+    t.datetime "updated_at",                                   :null => false
+  end
+
+  add_index "order_item_kit_product", ["order_item_id"], :name => "index_order_item_kit_product_on_order_item_id"
+  add_index "order_item_kit_product", ["product_kit_skus_id"], :name => "index_order_item_kit_product_on_product_kit_skus_id"
+
+  create_table "order_item_kit_products", :force => true do |t|
+    t.integer  "order_item_id"
+    t.integer  "product_kit_skus_id"
+    t.string   "scanned_status",      :default => "unscanned"
+    t.integer  "scanned_qty",         :default => 0
+    t.datetime "created_at",                                   :null => false
+    t.datetime "updated_at",                                   :null => false
+  end
+
+  add_index "order_item_kit_products", ["order_item_id"], :name => "index_order_item_kit_products_on_order_item_id"
+  add_index "order_item_kit_products", ["product_kit_skus_id"], :name => "index_order_item_kit_products_on_product_kit_skus_id"
 
   create_table "order_items", :force => true do |t|
     t.string   "sku"
@@ -232,7 +256,7 @@ ActiveRecord::Schema.define(:version => 20140102040601) do
     t.text     "alternate_location"
     t.text     "barcode"
     t.boolean  "is_skippable",                    :default => false
-    t.integer  "packing_placement"
+    t.integer  "packing_placement",               :default => 50
     t.integer  "pack_time_adj"
     t.string   "kit_parsing"
     t.integer  "is_kit",                          :default => 0
