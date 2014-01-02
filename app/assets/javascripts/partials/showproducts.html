@@ -459,13 +459,13 @@
                             <div class="control-group">
                                 <div class="controls">
                                     <label class="radio">
-                                        <input type="radio" ng-click="update_single_product()" ng-model="unknown_var" value="single" /> Always be scanned as single SKU
+                                        <input type="radio" ng-click="update_single_product()" ng-model="single_product.basicinfo.kit_parsing" value="single" /> Always be scanned as single SKU
                                     </label>
                                     <label class="radio">
-                                        <input type="radio" ng-click="update_single_product()" ng-model="unknown_var"  value="individual" /> Always be scanned as individual part SKUs
+                                        <input type="radio" ng-click="update_single_product()" ng-model="single_product.basicinfo.kit_parsing"  value="individual" /> Always be scanned as individual part SKUs
                                     </label>
                                     <label class="radio">
-                                        <input type="radio" ng-click="update_single_product()" ng-model="unknown_var"  value="depends" /> Automatically switch as needed when part SKUs are scanned
+                                        <input type="radio" ng-click="update_single_product()" ng-model="single_product.basicinfo.kit_parsing"  value="depends" /> Automatically switch as needed when part SKUs are scanned
                                     </label>
                                 </div>
                             </div>
