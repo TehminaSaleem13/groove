@@ -630,7 +630,25 @@ class ProductsController < ApplicationController
     	@result['product']['images'] = @product.product_images
   		@result['product']['barcodes'] = @product.product_barcodes
       @result['product']['inventory_warehouses'] = @product.product_inventory_warehousess
-      @result['product']['productkitskus'] = @product.product_kit_skuss
+        #@result['product']['productkitskus'] = @product.product_kit_skuss
+
+      if @product.is_kit
+				@result['product']['productkitskus'] = []
+				@product.product_kit_skuss.each do |kit|
+					option_product = Product.find(kit.option_product_id)
+
+					kit_sku = Hash.new
+					kit_sku['name'] = option_product.name
+					if option_product.product_skus.length > 0
+						kit_sku['sku'] = option_product.product_skus.first.sku 
+					end
+					kit_sku['qty'] = 0
+					kit_sku['qty_on_hand'] = 0
+					kit_sku['packing_order'] = '-'
+					kit_sku['option_product_id'] = option_product.id
+					@result['product']['productkitskus'].push(kit_sku)
+				end
+      end
 
   		if @product.product_skus.length > 0
   			@result['product']['pendingorders'] = Order.where(:status=>'awaiting').where(:status=>'onhold').
@@ -646,7 +664,7 @@ class ProductsController < ApplicationController
     end
   end
 
-  def addskutokit
+  def addproducttokit
   	@result = Hash.new
   	@result['status'] = true
     @result['messages'] = []
@@ -663,25 +681,19 @@ class ProductsController < ApplicationController
           @result['messages'].push("Item does not exist")
           @result['status'] &= false
         else
-        @product_skus = item.product_skus
-          if @product_skus.nil?
-            @result['messages'].push("No sku found in item")
-            @result['status'] &= false
-          else
-            product_kit_sku = ProductKitSkus.find_by_sku_and_product_id(@product_skus.first.sku,@kit.id)
-            if product_kit_sku.nil?
-              @productkitsku = ProductKitSkus.new
-              @productkitsku.sku = @product_skus.first.sku
-              @kit.product_kit_skuss << @productkitsku
-              unless @kit.save
-                @result['messages'].push("Could not save kit with sku: "+@product_skus.first.sku)
-                @result['status'] &= false
-              end
-            else
-              @result['messages'].push("The sku "+@product_skus.first.sku+" has already been added to the kit")
-              @result['status'] &= false
-            end
-          end
+				  product_kit_sku = ProductKitSkus.find_by_option_product_id_and_product_id(params[:product_id], @kit.id)
+	        if product_kit_sku.nil?
+	          @productkitsku = ProductKitSkus.new
+	          @productkitsku.option_product_id = item.id
+	          @kit.product_kit_skuss << @productkitsku
+	          unless @kit.save
+	            @result['messages'].push("Could not save kit with sku: "+@product_skus.first.sku)
+	            @result['status'] &= false
+	          end
+	        else
+	          @result['messages'].push("The product with id #{item.id} has already been added to the kit")
+	          @result['status'] &= false
+	        end
         end
 	  	else
 	  		@result['messages'].push("No item sent in the request")
@@ -695,7 +707,7 @@ class ProductsController < ApplicationController
     end
   end
 
-  def removeskusfromkit
+  def removeproductsfromkit
     @result = Hash.new
     @result['status'] = true
     @result['messages'] = []
@@ -703,23 +715,22 @@ class ProductsController < ApplicationController
     @kit = Product.find_by_id(params[:kit_id])
 
     if @kit.is_kit
-      if params[:kit_skus].nil?
+      if params[:kit_products].nil?
         @result['messages'].push("No sku sent in the request")
         @result['status'] &= false
       else
-        params[:kit_skus].reject!{|a| a==""}
-        params[:kit_skus].each do |kit_sku|
-          product_kit_sku = ProductKitSkus.find_by_sku_and_product_id(kit_sku,@kit.id)
+        params[:kit_products].reject!{|a| a==""}
+        params[:kit_products].each do |kit_product|
+          product_kit_sku = ProductKitSkus.find_by_option_product_id_and_product_id(kit_product,@kit.id)
           if product_kit_sku.nil?
-            @result['messages'].push("Sku "+kit_sku+" not found in item")
+            @result['messages'].push("Product #{kit_product} not found in item")
             @result['status'] &= false
           else
-            @result["asddddd"].push( product_kit_sku);
+            @result["asddddd"].push(product_kit_sku);
               unless product_kit_sku.destroy
-                @result['messages'].push("sku "+kit_sku+"could not be removed fron kit")
+                @result['messages'].push("Product #{kit_product} could not be removed fronm kit")
                 @result['status'] &= false
               end
-
           end
         end
       end
@@ -1322,7 +1333,7 @@ class ProductsController < ApplicationController
       if @product_kit_skus.length > 0
         @product_hash['productkitskus'] = []
         @product_kit_skus.each do |kitsku|
-          @product_hash['productkitskus'].push(kitsku.sku)
+          @product_hash['productkitskus'].push(kitsku.id)
         end
       end
 

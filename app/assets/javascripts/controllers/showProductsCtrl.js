@@ -563,7 +563,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $q, $cookies
     $scope.add_alias_product = function(id) {
         if(confirm("Are you sure? This can not be undone!")) {
             if($scope.single_product.basicinfo.is_kit) {
-                $http.post("/products/addskutokit.json",{product_id: id , kit_id: $scope.single_product.basicinfo.id}).success(
+                $http.post("/products/addproducttokit.json",{product_id: id , kit_id: $scope.single_product.basicinfo.id}).success(
                     function(data) {
                         //console.log(data);
                         if(data.status) {
@@ -602,13 +602,13 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $q, $cookies
         }
         $('#showAliasOptions').modal("hide");
     }
-    $scope.select_deselect_kit_sku = function(sku,index){
-        var array_position = $scope.selected_skus.indexOf(sku);
+    $scope.select_deselect_kit_sku = function(option_product_id,index){
+        var array_position = $scope.selected_skus.indexOf(option_product_id);
         $(".kit_sku").removeClass("info");
         if(array_position > -1) {
             $scope.selected_skus[index] = "";
         } else {
-            $scope.selected_skus[index] = sku;
+            $scope.selected_skus[index] = option_product_id;
         }
         //console.log($scope.selected_skus);
         for(i in $scope.selected_skus) {
@@ -619,7 +619,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $q, $cookies
     }
     $scope.remove_skus_from_kit = function () {
 
-        $http.post('/products/removeskusfromkit.json',{kit_id: $scope.single_product.basicinfo.id, kit_skus: $scope.selected_skus }).success(function(data){
+        $http.post('/products/removeproductsfromkit.json',{kit_id: $scope.single_product.basicinfo.id, kit_products: $scope.selected_skus }).success(function(data){
             if(data.status) {
                 $scope.product_update_status = true;
                 $scope.show_error_msgs = false;

@@ -442,7 +442,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr ng-repeat="kit_sku in single_product.productkitskus" class="{{'kit_sku kit_sku_'+$index}}" ng-click="select_deselect_kit_sku(kit_sku.sku,$index)">
+                                    <tr ng-repeat="kit_sku in single_product.productkitskus" class="{{'kit_sku kit_sku_'+$index}}" ng-click="select_deselect_kit_sku(kit_sku.option_product_id,$index)">
                                         <td>{{kit_sku.name}}</td>
                                         <td>{{kit_sku.sku}}</td>
                                         <td>{{kit_sku.qty}}</td>
