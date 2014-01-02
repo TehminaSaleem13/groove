@@ -108,12 +108,16 @@ class Order < ActiveRecord::Base
         end
       end
 
-      if result && self.status == "onhold"
-        self.status = "awaiting"
-      elsif self.status == "awaiting"
-        self.status = "onhold"
+      if result
+        if self.status == "onhold"
+         self.status = "awaiting"
+        end
+      else
+        if self.status == "awaiting"
+         self.status = "onhold"
+        end
       end
-      
+
       self.save
     end
   end
@@ -153,6 +157,63 @@ class Order < ActiveRecord::Base
       end
     end
 
+    result
+  end
+
+  def contains_kit
+    result = false
+    self.order_items.each do |order_item|
+      if order_item.product.is_kit == 1
+        result = true
+        break
+      end
+    end
+    result
+  end
+
+  def contains_splittable_kit
+    result = false
+    self.order_items.each do |order_item|
+      if order_item.product.is_kit == 1 &&
+          order_item.product.kit_parsing == 'depends'
+        result = true
+        break
+      end
+    end
+    result
+  end
+
+  def should_the_kit_be_split(barcode)
+    result = false
+    barcode_found = false
+    product_inside_kit = false
+    matched_product_id = 0
+
+    product_barcode = ProductBarcode.where(:barcode=>barcode)
+    
+    if product_barcode.length > 0
+      product_barcode = product_barcode.first
+      self.order_items.each do |order_item|
+        if order_item.product_id == product_barcode.product.product_id
+          barcode_found = true
+          matched_product_id = order_item.product_id 
+        end
+      end
+    end
+
+    if barcode_found
+      self.order_items.each do |order_item|
+        if order_item.product.is_kit
+          order_item.product.product_kit_skuss.each do |kit_product|
+            if kit_product.product_id == matched_product_id
+              product_inside_kit = true
+              result = true
+              break
+            end
+          end
+        end
+      end
+    end
     result
   end
 
