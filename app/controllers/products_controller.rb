@@ -396,11 +396,11 @@ class ProductsController < ApplicationController
 			require 'mws-connect'
 
 			mws = Mws.connect(
-				  merchant: @credential.merchant_id, 
-				  access: ENV['AMAZON_MWS_ACCESS_KEY_ID'], 
+				  merchant: @credential.merchant_id,
+				  access: ENV['AMAZON_MWS_ACCESS_KEY_ID'],
 				  secret: ENV['AMAZON_MWS_SECRET_ACCESS_KEY']
 				)
-			products_api = mws.products.get_matching_products_for_id(:marketplace_id=>@credential.marketplace_id, 
+			products_api = mws.products.get_matching_products_for_id(:marketplace_id=>@credential.marketplace_id,
 				:id_type=>'SellerSKU', :id_list=>['T-TOOL'])
 			require 'active_support/core_ext/hash/conversions'
 			product_hash = Hash.from_xml(products_api.to_s)
@@ -1205,7 +1205,12 @@ class ProductsController < ApplicationController
       query_add = " LIMIT "+limit+" OFFSET "+offset
     end
     #todo: include sku in search as well in future.
-    return Product.find_by_sql("SELECT * from products WHERE name like '%"+search+"%'" +query_add)
+
+    return Product.find_by_sql("(SELECT * from products WHERE name like '%"+search+"%') UNION
+      (SELECT products.* from products, product_barcodes where products.id = product_barcodes.product_id AND product_barcodes.barcode like '%"+search+"%' ) UNION
+      (SELECT products.* from products, product_skus where products.id = product_skus.product_id AND product_skus.sku like '%"+search+"%' ) UNION
+      (SELECT products.* from products, product_cats where products.id = product_cats.product_id AND product_cats.category like '%"+search+"%' ) UNION
+      (SELECT products.* from products, product_inventory_warehouses where products.id = product_inventory_warehouses.product_id AND (product_inventory_warehouses.location_primary like '%"+search+"%' OR product_inventory_warehouses.location_secondary like '%"+search+"%') ) " +query_add)
 
   end
 
