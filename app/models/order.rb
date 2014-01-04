@@ -183,6 +183,32 @@ class Order < ActiveRecord::Base
     result
   end
 
+  def does_barcode_belong_to_individual_kit(barcode)
+    result = false
+    barcode_found = false
+    product_inside_kit = false
+    matched_product_id = 0
+
+    product_barcode = ProductBarcode.where(:barcode=>barcode)
+    
+    if product_barcode.length > 0
+      product_barcode = product_barcode.first
+      self.order_items.each do |order_item|
+        if order_item.product_id == product_barcode.product.id
+          barcode_found = true
+          matched_product_id = order_item.product_id 
+        end
+      end
+    end
+
+    if barcode_found
+      if Product.find(matched_product_id).kit_parsing == 'individual'
+        result = true
+      end
+    end
+    result
+  end
+
   def should_the_kit_be_split(barcode)
     result = false
     barcode_found = false
@@ -194,7 +220,7 @@ class Order < ActiveRecord::Base
     if product_barcode.length > 0
       product_barcode = product_barcode.first
       self.order_items.each do |order_item|
-        if order_item.product_id == product_barcode.product.product_id
+        if order_item.product_id == product_barcode.product.id
           barcode_found = true
           matched_product_id = order_item.product_id 
         end
@@ -203,7 +229,7 @@ class Order < ActiveRecord::Base
 
     if barcode_found
       self.order_items.each do |order_item|
-        if order_item.product.is_kit
+        if order_item.product.is_kit && order_item.product.kit_parsing == 'depends'
           order_item.product.product_kit_skuss.each do |kit_product|
             if kit_product.product_id == matched_product_id
               product_inside_kit = true

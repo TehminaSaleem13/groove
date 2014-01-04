@@ -339,5 +339,44 @@ describe ScanPackController do
       expect(order_item.scanned_qty).to eq(3)
       expect(order_item.scanned_status).to eq("scanned")
   end
+
+  describe "Product Kit Scan" do
+    it "should scan kits" do
+      request.accept = "application/json"
+      
+      order = FactoryGirl.create(:order, :status=>'awaiting')
+      
+      product = FactoryGirl.create(:product)
+      product_sku = FactoryGirl.create(:product_sku, :product=> product)
+      product_barcode = FactoryGirl.create(:product_barcode, :product=> product, :barcode => 'BARCODE1')
+
+      order_item = FactoryGirl.create(:order_item, :product_id=>product.id,
+                    :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>product.name)
+
+      product_kit = FactoryGirl.create(:product, :is_kit => 1, :name=>'iPhone Protection Kit', 
+                        :kit_parsing=>'single')
+      product_kit_sku = FactoryGirl.create(:product_sku, :product=> product_kit, :sku=> 'IPROTO')
+      product_kit_barcode = FactoryGirl.create(:product_barcode, :product=> product_kit, :barcode => 'IPROTOBAR')
+      order_item_kit = FactoryGirl.create(:order_item, :product_id=>product_kit.id,
+                    :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>product_kit.name)
+
+
+
+      get :scan_product_by_barcode, {:barcode => 'IPROTOBAR', :order_id => order.id }
+      get :scan_product_by_barcode, {:barcode => 'BARCODE1', :order_id => order.id }
+
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["status"]).to eq(true)
+      # order_item_kit.reload
+      # expect(order_item_kit.scanned_qty).to eq(1)
+      # expect(order_item_kit.scanned_status).to eq("scanned")
+      # order.reload
+      # expect(order.status).to eq("scanned")
+      # order_item.reload
+      # expect(order_item.scanned_qty).to eq(1)
+      # expect(order_item.scanned_status).to eq("scanned")
+    end
+  end
 end
 

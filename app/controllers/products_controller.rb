@@ -686,7 +686,10 @@ class ProductsController < ApplicationController
 	          @productkitsku = ProductKitSkus.new
 	          @productkitsku.option_product_id = item.id
 	          @kit.product_kit_skuss << @productkitsku
-	          unless @kit.save
+	          if @kit.save
+	          	@productkitsku.reload
+	          	@productkitsku.add_product_in_order_items
+	          else
 	            @result['messages'].push("Could not save kit with sku: "+@product_skus.first.sku)
 	            @result['status'] &= false
 	          end

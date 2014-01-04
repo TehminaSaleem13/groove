@@ -196,7 +196,7 @@ class ScanPackController < ApplicationController
 
 	#input is barcode, order id
 	def scan_product_by_barcode
-		@result = Hash.new
+	@result = Hash.new
     @result['status'] = true
     @result['error_messages'] = []
     @result['success_messages'] = []
@@ -210,10 +210,13 @@ class ScanPackController < ApplicationController
 			if !@order.nil?
 				if @order.has_unscanned_items
 					if @order.contains_kit
+						puts "order contains kit"
 						#if order contains a kit which is to be Scanned as either Kit or individual parts as needed
 						if @order.contains_splittable_kit
+							puts "order contains splittable kit"
 					  	#check if due to current barcode the kit needs to be split or not
 							if @order.should_the_kit_be_split(params[:barcode])
+								puts "kit should be split"
 								#@order.mark_order_item_kit_to_be_split
 						  	#if it needs to be split, then mark split as 1 in the order item
 						  	 #get scanned products and to be scanned products
@@ -222,8 +225,12 @@ class ScanPackController < ApplicationController
 						    #process the barcode scan
 						    #get scanned products and to be scanned products based on whether the kit is split or not
 						  end
-					  #else
-					  	#check for other states of kits
+						elsif @order.does_barcode_belong_to_individual_kit(params[:barcode])
+							@result = process_product_scan_for_kits(params, @result)
+					    else
+						  	#check for other states of kits
+						  	puts "belongs to single kit SKU "
+						  	@result = process_product_scan(params, @result)
 						end
 					else
 						#call scan product helper method
