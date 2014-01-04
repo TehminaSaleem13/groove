@@ -1,14 +1,17 @@
 <header class="navbar">
     <div class="container">
         <div class="span2">
-            <a href="#" class="brand">Company Logo</a>
+            <a href="#/orders" class="brand"><img src="images/logo.png"></a>
         </div>
-        <div class="span5">
+        <div class="span05">
             <ul class="nav" id="mainMenu">
                 <li><a href="#/orders">Orders</a></li>
                 <li><a href="#/products">Products</a></li>
                 <li><a href="#/settings">Settings</a></li>
                 <li><a href="#/scanandpack">Scan and Pack</a></li>
+            </ul>
+             <ul class="nav" id="mainMenu">
+                <li><a href="" role="button" data-toggle="modal" ng-click='import_all_orders()'>Import Orders</a></li>
             </ul>
         </div>
         <div class="span3 pull-right">
