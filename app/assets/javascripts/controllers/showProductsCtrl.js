@@ -60,7 +60,9 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $q, $cookies
                 }
                 if(alias) {
                     for(i in $scope.temp.product_setup) {
-                        $scope.alias.product_setup[i] = $scope.temp.product_setup[i];
+                        if(i !== 'search') {
+                            $scope.alias.product_setup[i] = $scope.temp.product_setup[i];
+                        }
                     }
                     $scope.alias.products = [];
                     for(i in $scope.temp.products) {
@@ -70,7 +72,9 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $q, $cookies
                     }
                 } else {
                     for(i in $scope.temp.product_setup) {
-                        $scope.product_setup[i] = $scope.temp.product_setup[i];
+                        if(i !== 'search') {
+                            $scope.product_setup[i] = $scope.temp.product_setup[i];
+                        }
                     }
                     $scope.products = $scope.temp.products;
                 }
