@@ -255,7 +255,7 @@ class Order < ActiveRecord::Base
 
   def get_unscanned_items
     unscanned_list = []
-
+    Order.connection.clear_query_cache
     self.order_items.each do |order_item|
       if order_item.scanned_status != 'scanned'
         if order_item.product.is_kit == 1
@@ -274,6 +274,27 @@ class Order < ActiveRecord::Base
     end
     unscanned_list
   end
+  def get_scanned_items
+    scanned_list = []
 
+    self.order_items.each do |order_item|
+      if order_item.scanned_status == 'scanned' ||
+          order_item.scanned_status == 'partially_scanned'
+        if order_item.product.is_kit == 1
+          if order_item.product.kit_parsing == 'single'
+            #if single, then add order item to unscanned list  
+            scanned_list.push(order_item.build_scanned_single_item)
+          elsif order_item.product.kit_parsing == 'individual'
+            #else if individual then add all order items as children to unscanned list
+            scanned_list.push(order_item.build_scanned_individual_kit)
+          end
+        else
+          # add order item to unscanned list
+          scanned_list.push(order_item.build_unscanned_single_item)
+        end
+      end
+    end
+    scanned_list
+  end
 
 end

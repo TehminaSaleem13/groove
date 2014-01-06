@@ -38,11 +38,41 @@
                                     <th>Qty</th>
                                 </tr>
                                 </thead>
-                                <tbody>
-                                <tr ng-repeat="item in order_details.items" ng-show="item.qty-item.scanned > 0">
-                                    <td><div class="single-image"><img class="img-thumb" ng-src="{{ item.images[0].image }}" /></div></td>
-                                    <td>{{ item.name }}</td>
-                                    <td>{{item.qty - item.scanned}}</td>
+                                <tbody ng-repeat="unscanned_item in unscanned_items">
+                                <tr ng-show= "unscanned_item.product_type =='single'">
+                                        
+                                        <td ng-show= "unscanned_item.product_type =='single'">
+                                        <div class="single-image">
+                                            <img class="img-thumb" ng-src="{{ unscanned_item.image.image }}" />
+                                        </div>
+                                        </td>
+                                        <td ng-show= "unscanned_item.product_type =='single'">
+                                        {{ unscanned_item.name }}</td>
+                                        <td ng-show= "unscanned_item.product_type =='single'">
+                                        {{unscanned_item.qty_remaining}}</td>
+                                </tr>
+
+                                <tr ng-show= "unscanned_item.product_type =='individual'">
+                                        <td class='scantable-greyedout'>
+                                        <div class="single-image">
+                                            <img class="img-thumb" ng-src="{{ unscanned_item.image.image }}" />
+                                        </div>
+                                        </td>
+                                        <td class='scantable-greyedout'>
+                                        {{ unscanned_item.name }}</td>
+                                        <td class='scantable-greyedout'>
+                                        {{unscanned_item.qty_remaining}}</td>
+                                        <tr ng-repeat = 'child_item in unscanned_item.child_items'>
+                                            <td>
+                                            <div class="single-image">
+                                                <img class="img-thumb" ng-src="{{ child_item.image.image }}" />
+                                            </div>
+                                            </td>
+                                            <td>
+                                            {{ child_item.name }}</td>
+                                            <td>
+                                            {{child_item.qty_remaining}}</td>
+                                        </tr>
                                 </tr>
                                 </tbody>
                             </table>
@@ -115,10 +145,27 @@
                             <th>Scanned</th>
                         </tr>
                         </thead>
-                        <tbody>
-                        <tr ng-repeat="item in scanned_details.items" ng-show="item.scanned > 0" >
-                            <td>{{ item.name }}</td>
-                            <td>{{item.scanned}}</td>
+                        <tbody ng-repeat="scanned_item in scanned_items">
+                        <tr ng-show= "scanned_item.product_type =='single'">
+                                
+                                <td ng-show= "scanned_item.product_type =='single'">
+                                {{ scanned_item.name }}</td>
+                                <td ng-show= "scanned_item.product_type =='single'">
+                                {{scanned_item.scanned_qty}}</td>
+                        </tr>
+
+                        <tr ng-show= "scanned_item.product_type =='individual'">
+
+                                <td class='scantable-greyedout'>
+                                {{ scanned_item.name }}</td>
+                                <td class='scantable-greyedout'>
+                                {{scanned_item.scanned_qty}}</td>
+                                <tr ng-repeat = 'child_item in scanned_item.child_items'>
+                                    <td>
+                                    {{ child_item.name }}</td>
+                                    <td>
+                                    {{child_item.scanned_qty}}</td>
+                                </tr>
                         </tr>
                         </tbody>
                     </table>

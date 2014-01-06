@@ -47,7 +47,7 @@ class OrderItemKitProduct < ActiveRecord::Base
 	  		end
 	  	end
 	  	if order_unscanned
-	  		self.order_item.order.status = 'partially_scanned'
+	  		self.order_item.order.status = 'awaiting'
 	  	else
         	self.order_item.order.set_order_to_scanned_state
 	  	end

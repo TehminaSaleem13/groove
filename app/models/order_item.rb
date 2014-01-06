@@ -35,6 +35,7 @@ class OrderItem < ActiveRecord::Base
       result['image'] = 
         self.product.product_images.first if self.product.product_images.length > 0
       result['qty_remaining'] = self.qty - self.scanned_qty
+      result['scanned_qty'] = self.scanned_qty
       result['packing_placement'] = self.product.packing_placement
       result['barcodes'] = self.product.product_barcodes
       result['product_id'] = self.product.id
@@ -52,20 +53,23 @@ class OrderItem < ActiveRecord::Base
       result['image'] = 
         self.product.product_images.first if self.product.product_images.length > 0
       result['qty_remaining'] = self.qty - self.scanned_qty
+      result['scanned_qty'] = self.scanned_qty
       result['packing_placement'] = self.product.packing_placement
       result['product_id'] = self.product.id
       result['order_item_id'] = self.id
       result['child_items'] = []
       self.order_item_kit_products.each do |kit_product|
-        if !kit_product.product_kit_skus.product.nil?
+        if !kit_product.product_kit_skus.product.nil? &&
+            kit_product.scanned_status != 'scanned'
           child_item = Hash.new
           child_item['name'] = kit_product.product_kit_skus.option_product.name
           if kit_product.product_kit_skus.option_product.product_images.length >0
             child_item['image'] = 
               kit_product.product_kit_skus.option_product.product_images.first 
           end
-          child_item['qty_remaining'] = kit_product.product_kit_skus.qty - 
+          child_item['qty_remaining'] = self.qty * kit_product.product_kit_skus.qty - 
             kit_product.scanned_qty
+          child_item['scanned_qty'] = kit_product.scanned_qty
           child_item['packing_placement'] = kit_product.product_kit_skus.option_product.packing_placement
 
           if kit_product.product_kit_skus.option_product.product_barcodes.length > 0
@@ -79,6 +83,66 @@ class OrderItem < ActiveRecord::Base
     end
     result
   end
+
+  def build_scanned_single_item
+    result = Hash.new
+
+    if !self.product.nil?
+      result['name'] = self.product.name
+      result['product_type'] = 'single'
+      result['image'] = 
+        self.product.product_images.first if self.product.product_images.length > 0
+      result['qty_remaining'] = self.qty - self.scanned_qty
+      result['scanned_qty'] = self.scanned_qty
+      result['packing_placement'] = self.product.packing_placement
+      result['barcodes'] = self.product.product_barcodes
+      result['product_id'] = self.product.id
+      result['order_item_id'] = self.id
+    end
+    result
+  end
+
+  def build_scanned_individual_kit
+    result = Hash.new
+
+    if !self.product.nil?
+      result['name'] = self.product.name
+      result['product_type'] = 'individual'
+      result['image'] = 
+        self.product.product_images.first if self.product.product_images.length > 0
+      result['qty_remaining'] = self.qty - self.scanned_qty
+      result['scanned_qty'] = self.scanned_qty
+      result['packing_placement'] = self.product.packing_placement
+      result['product_id'] = self.product.id
+      result['order_item_id'] = self.id
+      result['child_items'] = []
+      self.order_item_kit_products.each do |kit_product|
+        if !kit_product.product_kit_skus.product.nil? &&
+            (kit_product.scanned_status == 'scanned' or
+              kit_product.scanned_status == 'partially_scanned')
+          child_item = Hash.new
+          child_item['name'] = kit_product.product_kit_skus.option_product.name
+          if kit_product.product_kit_skus.option_product.product_images.length >0
+            child_item['image'] = 
+              kit_product.product_kit_skus.option_product.product_images.first 
+          end
+          child_item['qty_remaining'] = self.qty * kit_product.product_kit_skus.qty - 
+            kit_product.scanned_qty
+          child_item['scanned_qty'] = kit_product.scanned_qty
+          child_item['packing_placement'] = kit_product.product_kit_skus.option_product.packing_placement
+
+          if kit_product.product_kit_skus.option_product.product_barcodes.length > 0
+            child_item['barcodes'] = kit_product.product_kit_skus.option_product.product_barcodes
+          end
+
+          child_item['kit_product_id'] = kit_product.id
+          result['child_items'].push(child_item)
+        end
+      end
+    end
+    result
+  end
+
 
   def process_item
     order_unscanned = false
@@ -99,7 +163,7 @@ class OrderItem < ActiveRecord::Base
         end
       end
       if order_unscanned
-        self.order.status = 'partially_scanned'
+        self.order.status = 'awaiting'
       else
         self.order.set_order_to_scanned_state
       end

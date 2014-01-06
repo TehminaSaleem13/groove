@@ -441,6 +441,9 @@ describe ScanPackController do
 
       order.reload
       expect(order.status).to eq("scanned")
+      #puts result['data']['unscanned_items'].to_s
+      expect(result['data']['unscanned_items'].length).to eq(0)
+      expect(result['data']['scanned_items'].length).to eq(2)
       # order_item.reload
       # expect(order_item.scanned_qty).to eq(1)
       # expect(order_item.scanned_status).to eq("scanned")

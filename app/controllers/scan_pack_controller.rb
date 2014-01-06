@@ -54,6 +54,8 @@ class ScanPackController < ApplicationController
           #if order has status of Awaiting Scanning
           if @order.status == 'awaiting'
             @order_result['next_state'] = 'ready_for_product'
+			@order_result['unscanned_items'] = @order.get_unscanned_items
+			@order_result['scanned_items'] = @order.get_scanned_items
           end
 		    else
 		    	@result['notice_messages'].push('This order cannot be found. It may not have been imported yet')
@@ -91,6 +93,8 @@ class ScanPackController < ApplicationController
 						@order.save
 				 		@result['data']['scanned_on'] = @order.scanned_on
 				 		@result['data']['next_state'] = 'ready_for_product'
+						@result['unscanned_items'] = @order.get_unscanned_items
+						@result['scanned_items'] = @order.get_scanned_items
 						session[:order_edit_matched_for_current_user] = true
 					else
 						@result['data']['order_edit_matched'] = false
@@ -209,70 +213,70 @@ class ScanPackController < ApplicationController
 			@order = Order.find(params[:order_id])
 			if !@order.nil?
 				if @order.has_unscanned_items
-					if @order.contains_kit
+					if @order.contains_kit && @order.contains_splittable_kit
 						puts "order contains kit"
 						#if order contains a kit which is to be Scanned as either Kit or individual parts as needed
-						if @order.contains_splittable_kit
 							puts "order contains splittable kit"
 					  	#check if due to current barcode the kit needs to be split or not
-							if @order.should_the_kit_be_split(params[:barcode])
-								puts "kit should be split"
-								#@order.mark_order_item_kit_to_be_split
+						if @order.should_the_kit_be_split(params[:barcode])
+							puts "kit should be split"
+							#@order.mark_order_item_kit_to_be_split
 						  	#if it needs to be split, then mark split as 1 in the order item
 						  	 #get scanned products and to be scanned products
 						  	#end
-						  else
-						    #process the barcode scan
-						    #get scanned products and to be scanned products based on whether the kit is split or not
-						  end
-						else
-						  unscanned_items = @order.get_unscanned_items
-						  barcode_found = false
-						  puts unscanned_items.to_s
-						  #search if barcode exists
-						  unscanned_items.each do |item|
-						  	if item['product_type'] == 'individual'
+					   else
+					    #process the barcode scan
+					    #get scanned products and to be scanned products based on whether the kit is split or not
+					   end
+					else
+					  unscanned_items = @order.get_unscanned_items
+					  barcode_found = false
+					  #puts unscanned_items.to_s
+					  #search if barcode exists
+					  unscanned_items.each do |item|
+					  	if item['product_type'] == 'individual'
+					  		if item['child_items'].length > 0
 						  		item['child_items'].each do |child_item|
-						  			puts child_item.to_s
-
-						  			child_item['barcodes'].each do |barcode|
-						  				if barcode.barcode == params[:barcode]
-						  					barcode_found = true
-						  					#process product barcode scan
-						  					order_item_kit_product = 
-						  						OrderItemKitProduct.find(child_item['kit_product_id'])
-						  					order_item_kit_product.process_item if !order_item_kit_product.nil?
-						  					break
-						  				end
+						  			#puts child_item.to_s
+						  			if !child_item['barcodes'].nil?
+							  			child_item['barcodes'].each do |barcode|
+							  				if barcode.barcode == params[:barcode]
+							  					barcode_found = true
+							  					#process product barcode scan
+							  					order_item_kit_product = 
+							  						OrderItemKitProduct.find(child_item['kit_product_id'])
+							  					order_item_kit_product.process_item if !order_item_kit_product.nil?
+							  					break
+							  				end
+							  			end
 						  			end
 						  			break if barcode_found
 						  		end
-						  	elsif item['product_type'] == 'single'
-								item['barcodes'].each do |barcode|
-					  				if barcode.barcode == params[:barcode]
-					  					barcode_found = true
-					  					#process product barcode scan
-					  					order_item = OrderItem.find(item['order_item_id'])
-					  					order_item.process_item if !order_item.nil?
-					  					break
-					  				end
-						  		end
-						  	end
-						  	break if barcode_found
-						  end
-						end
-						puts "Barcode "+params[:barcode]+"found: "+barcode_found.to_s
-						# if @order.does_barcode_belong_to_individual_kit(params[:barcode])
-						# 	@result = process_product_scan_for_kits(params, @result)
-					 #    else
-						#   	#check for other states of kits
-						#   	puts "belongs to single kit SKU "
-						#   	@result = process_product_scan(params, @result)
-						# end
-					else
-						#call scan product helper method
-						@result = process_product_scan(params, @result)
-						#get scanned products and to be scanned products
+					  		end
+					  	elsif item['product_type'] == 'single'
+							item['barcodes'].each do |barcode|
+				  				if barcode.barcode == params[:barcode]
+				  					barcode_found = true
+				  					#process product barcode scan
+				  					order_item = OrderItem.find(item['order_item_id'])
+				  					order_item.process_item if !order_item.nil?
+				  					break
+				  				end
+					  		end
+					  	end
+					  	break if barcode_found
+					  end
+					  #puts "Barcode "+params[:barcode]+" found: "+barcode_found.to_s
+					  if barcode_found
+					  	@order.reload
+					  	@result['data']['unscanned_items'] = @order.get_unscanned_items
+					  	@result['data']['scanned_items'] = @order.get_scanned_items
+					  	#puts "Length of unscanned items:" + @result['data']['unscanned_items'].length.to_s
+					  	#puts @result['data']['unscanned_items'].to_s
+					  else
+						@result['status'] &= false
+						@result['error_messages'].push("No matching barcode found for this order")
+					  end
 					end
 				else
 					@result['status'] &= false
@@ -282,10 +286,10 @@ class ScanPackController < ApplicationController
 				@result['status'] &= false
 				@result['error_messages'].push("Could not find order with id:"+params[:order_id])
 			end
-	  else
-			@result['status'] &= false
-			@result['error_messages'].push("Please specify barcode and order id to confirm purchase code")
-	  end
+	else
+		@result['status'] &= false
+		@result['error_messages'].push("Please specify barcode and order id to confirm purchase code")
+	end
 
     respond_to do |format|
       format.html # show.html.erb

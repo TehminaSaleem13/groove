@@ -317,6 +317,9 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $q, $cookies
                 if(data.data != null) {
                     $scope.order_id = data.data.id;
                     $scope._next_state(data.data);
+                    $scope.unscanned_items = data.data.unscanned_items;
+                    $scope.scanned_items = data.data.scanned_items;
+                    
                 }
             } else {
                 $scope.show_alert(data.error_messages,0);
@@ -339,6 +342,10 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $q, $cookies
                 if(data.success_messages.length) {
                     $scope.show_alert(data.success_messages,1);
                 }
+                $scope.unscanned_items = data.data.unscanned_items;
+                $scope.scanned_items = data.data.scanned_items;
+                console.log($scope.unscanned_items);
+                console.log($scope.scanned_items);
             } else {
                 $scope.show_alert(data.error_messages,0);
             }
