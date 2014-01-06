@@ -1,6 +1,11 @@
 groovepacks_controllers.
-controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$location', '$route', '$cookies',
-function( $scope, $http, $timeout, $routeParams, $location, $route, $q, $cookies) {
+controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$location', '$route', '$cookies','import_all',
+function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,import_all) {
+    $scope.import_all_orders = function () {
+        $('#importOrders').modal('show');
+        import_all.do_import($scope);
+    }
+
     $('.modal-backdrop').remove();
         $scope.current_page="show_stores";
         $scope.$on("fileSelected", function (event, args) {
@@ -600,65 +605,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $q, $cookies
             });
     }
     /* Import orders from all the active stores */
-    $scope.import_all_orders =function() {
-        $scope.loading = true;
-            $('#importOrders').modal('show');
-            /* Get all the active stores */
-            $http.get('/store_settings/getactivestores.json').success(function(data) {
-                if (data.status)
-                {
-                    //console.log("data status");
-                    $scope.active_stores = [];
 
-                    for (var i = 0; i < data.stores.length; i++)
-                    {
-                            var activeStore = new Object();
-                            activeStore.info = data.stores[i];
-                            activeStore.message="";
-                            activeStore.status="in_progress";
-                            $scope.active_stores.push(activeStore);
-                    }
-                    /* for each store send a import request */
-                    for (var i = 0; i < $scope.active_stores.length; i++)
-                    {
-                       //$scope.active_stores[i].status="in_progress";
-                        $scope.loading = true;
-                        $http.get('/orders/importorders/'+$scope.active_stores[i].info.id+'.json?activestoreindex='+i).success(
-                            function(orderdata){
-
-                            if (orderdata.status)
-                            {
-                            $scope.active_stores[orderdata.activestoreindex].status="completed";
-                            $scope.active_stores[orderdata.activestoreindex].message = "Successfully imported "+orderdata.success_imported+
-                                    " of "+orderdata.total_imported+" orders. "
-                                +orderdata.previous_imported+" orders were previously imported";
-                            }
-                            else
-                            {
-                                $scope.active_stores[orderdata.activestoreindex].status="failed";
-                                for (var j=0; j< orderdata.messages.length; j++) {
-                                    $scope.active_stores[orderdata.activestoreindex].message += orderdata.messages[j];
-                                }
-                            }
-                                $scope.loading = false;
-                        }).error(function(data) {
-                                $scope.loading = false;
-                           // console.log(data);
-                            });
-                    }
-
-                }
-                else
-                {
-                   // console.log("data status false");
-                $scope.message = "Getting active stores returned error.";
-                }
-                $scope.loading = false;
-            }).error(function(data) {
-                $scope.message = "Getting active stores failed.";
-                    $scope.loading = false;
-            });
-    }
     $scope.csv_init = function(data) {
         $scope.csvimporter = {};
         $scope.csvimporter.default_map = {value:'none', name:"Unmapped"};

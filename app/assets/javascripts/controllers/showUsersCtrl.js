@@ -1,6 +1,10 @@
 groovepacks_controllers.
-controller('showUsersCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$location', '$route', '$cookies',
-    function( $scope, $http, $timeout, $routeParams, $location, $route, $q, $cookies) {
+controller('showUsersCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$location', '$route', '$cookies','import_all',
+    function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,import_all) {
+        $scope.import_all_orders = function () {
+            $('#importOrders').modal('show');
+            import_all.do_import($scope);
+        }
     	$http.get('/home/userinfo.json').success(function(data){
     		$scope.username = data.username;
     	});
