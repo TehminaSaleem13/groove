@@ -1,11 +1,15 @@
 groovepacks_controllers.
-controller('showScanPackCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$location', '$route', '$cookies',
-function( $scope, $http, $timeout, $routeParams, $location, $route, $q, $cookies) {
+controller('showScanPackCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$location', '$route', '$cookies','import_all',
+function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,import_all) {
     //Definitions
 
     /*
      * Public methods
      */
+    $scope.import_all_orders = function () {
+        $('#importOrders').modal('show');
+        import_all.do_import($scope);
+    }
 
     $scope.show_alert = function(msg,type) {
         $scope._set_alert(type,msg,true);
