@@ -395,7 +395,7 @@ describe ScanPackController do
       product_kit_sku = FactoryGirl.create(:product_sku, :product=> product_kit, :sku=> 'IPROTO')
       product_kit_barcode = FactoryGirl.create(:product_barcode, :product=> product_kit, :barcode => 'IPROTOBAR')
       order_item_kit = FactoryGirl.create(:order_item, :product_id=>product_kit.id,
-                    :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>product_kit.name)
+                    :qty=>2, :price=>"10", :row_total=>"10", :order=>order, :name=>product_kit.name)
 
       kit_product = FactoryGirl.create(:product)
       kit_product_sku = FactoryGirl.create(:product_sku, :product=> kit_product, :sku=> 'IPROTO1')
@@ -416,19 +416,29 @@ describe ScanPackController do
       get :scan_product_by_barcode, {:barcode => 'BARCODE1', :order_id => order.id }
       get :scan_product_by_barcode, {:barcode => 'KITITEM1', :order_id => order.id }
       get :scan_product_by_barcode, {:barcode => 'KITITEM2', :order_id => order.id }
+      get :scan_product_by_barcode, {:barcode => 'KITITEM1', :order_id => order.id }
+      get :scan_product_by_barcode, {:barcode => 'KITITEM2', :order_id => order.id }
 
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
       expect(result["status"]).to eq(true)
+      
       order_item.reload
       expect(order_item.scanned_status).to eq("scanned")
       expect(order_item.scanned_qty).to eq(1)
+
       order_item_kit_product.reload
-      expect(order_item_kit_product.scanned_qty).to eq(1)
+      expect(order_item_kit_product.scanned_qty).to eq(2)
       expect(order_item_kit_product.scanned_status).to eq("scanned")
+      
       order_item_kit_product2.reload
-      expect(order_item_kit_product2.scanned_qty).to eq(1)
+      expect(order_item_kit_product2.scanned_qty).to eq(2)
       expect(order_item_kit_product2.scanned_status).to eq("scanned")
+      
+      order_item_kit.reload
+      expect(order_item_kit.scanned_status).to eq("scanned")
+      expect(order_item_kit.scanned_qty).to eq(2)
+
       order.reload
       expect(order.status).to eq("scanned")
       # order_item.reload

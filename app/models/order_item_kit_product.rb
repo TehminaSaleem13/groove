@@ -7,28 +7,36 @@ class OrderItemKitProduct < ActiveRecord::Base
   	order_item_unscanned = false
   	order_unscanned = false
   	puts "Processng Kit product"+self.scanned_qty.to_s
-  	if self.scanned_qty < self.product_kit_skus.qty
+  	if self.scanned_qty < self.order_item.qty * self.product_kit_skus.qty
   		self.scanned_qty = self.scanned_qty + 1
-  		if self.scanned_qty == self.product_kit_skus.qty
+  		if self.scanned_qty ==  self.order_item.qty * self.product_kit_skus.qty
   			self.scanned_status = 'scanned'
   		else
   			self.scanned_status = 'partially_scanned'
   		end
   		self.save
   		puts "Status:"+self.scanned_status
-	  	#need to update order item quantity
-	  	
+
+
+	  	#need to update order item quantity,
+	  	# for this calculate minimum of order items
 	  	#update order item status
+	  	min = self.order_item.order_item_kit_products.first.scanned_qty
 	  	self.order_item.order_item_kit_products.each do |kit_product|
 	  		if kit_product.scanned_status != 'scanned'
 	  			order_item_unscanned = true
 	  		end
+	  		min = kit_product.scanned_qty if min > kit_product.scanned_qty
 	  	end
-
+	  	self.order_item.scanned_qty = min
 	  	if order_item_unscanned
 	  		self.order_item.scanned_status = 'partially_scanned'
 	  	else
-	  		self.order_item.scanned_status = 'scanned'
+	  		puts "Order Item Scanned Qty"+self.order_item.scanned_qty.to_s
+	  		#self.order_item.scanned_qty = self.order_item.scanned_qty + 1
+			if self.order_item.scanned_qty == self.order_item.qty
+	  			self.order_item.scanned_status = 'scanned'
+	  		end
 	  	end
 	  	self.order_item.save
 
