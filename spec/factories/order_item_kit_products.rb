@@ -3,8 +3,8 @@
 FactoryGirl.define do
   factory :order_item_kit_product do
     order_item nil
-    product_kit_sku nil
-    scanned_status "MyString"
-    scanned_qty 1
+    product_kit_skus nil
+    scanned_status "unscanned"
+    scanned_qty 0
   end
 end

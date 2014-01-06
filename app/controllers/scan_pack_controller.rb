@@ -225,13 +225,50 @@ class ScanPackController < ApplicationController
 						    #process the barcode scan
 						    #get scanned products and to be scanned products based on whether the kit is split or not
 						  end
-						elsif @order.does_barcode_belong_to_individual_kit(params[:barcode])
-							@result = process_product_scan_for_kits(params, @result)
-					    else
-						  	#check for other states of kits
-						  	puts "belongs to single kit SKU "
-						  	@result = process_product_scan(params, @result)
+						else
+						  unscanned_items = @order.get_unscanned_items
+						  barcode_found = false
+						  puts unscanned_items.to_s
+						  #search if barcode exists
+						  unscanned_items.each do |item|
+						  	if item['product_type'] == 'individual'
+						  		item['child_items'].each do |child_item|
+						  			puts child_item.to_s
+
+						  			child_item['barcodes'].each do |barcode|
+						  				if barcode.barcode == params[:barcode]
+						  					barcode_found = true
+						  					#process product barcode scan
+						  					order_item_kit_product = 
+						  						OrderItemKitProduct.find(child_item['kit_product_id'])
+						  					order_item_kit_product.process_item if !order_item_kit_product.nil?
+						  					break
+						  				end
+						  			end
+						  			break if barcode_found
+						  		end
+						  	elsif item['product_type'] == 'single'
+								item['barcodes'].each do |barcode|
+					  				if barcode.barcode == params[:barcode]
+					  					barcode_found = true
+					  					#process product barcode scan
+					  					order_item = OrderItem.find(item['order_item_id'])
+					  					order_item.process_item if !order_item.nil?
+					  					break
+					  				end
+						  		end
+						  	end
+						  	break if barcode_found
+						  end
 						end
+						puts "Barcode "+params[:barcode]+"found: "+barcode_found.to_s
+						# if @order.does_barcode_belong_to_individual_kit(params[:barcode])
+						# 	@result = process_product_scan_for_kits(params, @result)
+					 #    else
+						#   	#check for other states of kits
+						#   	puts "belongs to single kit SKU "
+						#   	@result = process_product_scan(params, @result)
+						# end
 					else
 						#call scan product helper method
 						@result = process_product_scan(params, @result)

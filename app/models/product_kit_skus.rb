@@ -22,4 +22,8 @@ class ProductKitSkus < ActiveRecord::Base
   		order_item_kit_product.save
   	end  	
   end
+
+  def option_product
+    Product.find(self.option_product_id)
+  end
 end

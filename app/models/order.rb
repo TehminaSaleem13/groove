@@ -198,6 +198,16 @@ class Order < ActiveRecord::Base
           barcode_found = true
           matched_product_id = order_item.product_id 
         end
+
+        if !barcode_found
+          order_item.order_item_kit_products.each do |kit|
+            if kit.product_kit_skus.product.id == product_barcode.product.id
+              barcode_found = true
+              matched_kit_id = product_kit_skus.product.id
+              matched_product_id = kit.id
+            end
+          end
+        end
       end
     end
 
@@ -242,5 +252,28 @@ class Order < ActiveRecord::Base
     end
     result
   end
+
+  def get_unscanned_items
+    unscanned_list = []
+
+    self.order_items.each do |order_item|
+      if order_item.scanned_status != 'scanned'
+        if order_item.product.is_kit == 1
+          if order_item.product.kit_parsing == 'single'
+            #if single, then add order item to unscanned list  
+            unscanned_list.push(order_item.build_unscanned_single_item)
+          elsif order_item.product.kit_parsing == 'individual'
+            #else if individual then add all order items as children to unscanned list
+            unscanned_list.push(order_item.build_unscanned_individual_kit)
+          end
+        else
+          # add order item to unscanned list
+          unscanned_list.push(order_item.build_unscanned_single_item)
+        end
+      end
+    end
+    unscanned_list
+  end
+
 
 end
