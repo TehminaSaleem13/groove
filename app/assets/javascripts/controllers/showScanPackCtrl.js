@@ -128,6 +128,8 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $q, $cookies
         $scope._set_rf_state('ready_for_order');
         $scope.hide_alert(-1);
         $scope._focus_input($scope._rf_inputObj);
+        $scope.unscanned_items = {};
+        $scope.scanned_items = {};
     }
 
     $scope._order_clicked_state = function(data) {
@@ -319,7 +321,8 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $q, $cookies
                     $scope._next_state(data.data);
                     $scope.unscanned_items = data.data.unscanned_items;
                     $scope.scanned_items = data.data.scanned_items;
-                    
+                    $scope._compute_unscanned_and_scanned_products();
+
                 }
             } else {
                 $scope.show_alert(data.error_messages,0);
@@ -346,6 +349,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $q, $cookies
                 $scope.scanned_items = data.data.scanned_items;
                 console.log($scope.unscanned_items);
                 console.log($scope.scanned_items);
+                $scope._compute_unscanned_and_scanned_products();
             } else {
                 $scope.show_alert(data.error_messages,0);
             }
@@ -636,7 +640,33 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $q, $cookies
 
         }
     }
+    $scope._compute_unscanned_and_scanned_products = function() {
+        $scope.unscanned_count = 0;
+        $scope.scanned_count = 0;
+        console.log($scope.unscanned_items.length);
+        console.log($scope.scanned_items.length);
 
+        for (i = 0;  i < $scope.unscanned_items.length; i++) {
+            if ($scope.unscanned_items[i].product_type == 'single'){
+                $scope.unscanned_count = $scope.unscanned_count + $scope.unscanned_items[i].qty_remaining;
+            }
+            else if ($scope.unscanned_items[i].product_type == 'individual') {
+                for (j=0; j< $scope.unscanned_items[i].child_items.length;  j++) {
+                    $scope.unscanned_count += $scope.unscanned_items[i].child_items[j].qty_remaining;
+                }
+            }
+        }
+        for (i = 0;  i < $scope.scanned_items.length; i++) {
+            if ($scope.scanned_items[i].product_type == 'single'){
+                $scope.scanned_count = $scope.scanned_count + $scope.scanned_items[i].qty_remaining;
+            }
+            else if ($scope.scanned_items[i].product_type == 'individual') {
+                for (j=0; j< $scope.scanned_items[i].child_items.length; j++) {
+                    $scope.scanned_count += $scope.scanned_items[i].child_items[j].qty_remaining;
+                }
+            }
+        }
+    }
 
     $scope.$watch('can_get_products',function() {
         if($scope.can_get_products) {

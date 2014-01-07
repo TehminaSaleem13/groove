@@ -27,7 +27,7 @@
                         <input id="rf_input" type="text" ng-model="rf_input" class="span12" placeholder="{{ 'Scan '+rf_state_text +'...' }}"/>
                         <div class="text-center">
                             <h4 ng-show="rf_state=='ready_for_order'">Ready!</h4>
-                            <h4 ng-show="rf_state=='ready_for_product'">{{ order_details.items_to_scan }} items left to scan</h4>
+                            <h4 ng-show="rf_state=='ready_for_product'">{{ unscanned_count }} items left to scan</h4>
                         </div>
                         <div class="scan_table">
                             <table class="table table-hover">

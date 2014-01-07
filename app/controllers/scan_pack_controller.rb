@@ -271,6 +271,9 @@ class ScanPackController < ApplicationController
 					  	@order.reload
 					  	@result['data']['unscanned_items'] = @order.get_unscanned_items
 					  	@result['data']['scanned_items'] = @order.get_scanned_items
+					  	if @order.status == 'scanned'
+					  		@result['data']['next_state'] = 'ready_for_order'
+					  	end
 					  	#puts "Length of unscanned items:" + @result['data']['unscanned_items'].length.to_s
 					  	#puts @result['data']['unscanned_items'].to_s
 					  else
