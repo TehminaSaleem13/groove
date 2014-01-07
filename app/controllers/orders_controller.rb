@@ -191,7 +191,7 @@ class OrdersController < ApplicationController
         end
       end
       seller_list.orderArray.each do |order|
-        if Order.where(:increment_id=>order.orderID).length == 0 && 
+        if Order.where(:increment_id=>order.orderID).length == 0 &&
             order.checkoutStatus.status == 'Complete'
           @order = Order.new
           @order.status = 'awaiting'
@@ -821,7 +821,7 @@ class OrdersController < ApplicationController
     offset = params[:offset] if !params[:offset].nil? && params[:offset].to_i >= 0
     search = params[:search]
     query = "SELECT * from orders WHERE
-                      increment_id like '%"+search+"%' OR email like '%"+search+"%' OR CONCAT(firstname,' ',lastname) like '%"+search+"%' OR postcode like '%"+search+"%'"
+                      increment_id like '%"+search+"%' OR email like '%"+search+"%' OR CONCAT(IFNULL(firstname,''),' ',IFNULL(lastname,'')) like '%"+search+"%' OR postcode like '%"+search+"%'"
     unless params[:select_all]
       query = query +" LIMIT #{limit} OFFSET #{offset}"
     end
