@@ -2,7 +2,7 @@ groovepacks_controllers.
 controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$location', '$route', '$cookies','import_all',
 function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,import_all) {
     $scope.import_all_orders = function () {
-
+        $('#importOrders').modal('show');
         import_all.do_import($scope);
     }
     $http.get('/home/userinfo.json').success(function(data){
