@@ -48,7 +48,6 @@ class OrderItem < ActiveRecord::Base
 
   def build_unscanned_individual_kit
     result = Hash.new
-
     if !self.product.nil?
       result['name'] = self.product.name
       result['product_type'] = 'individual'

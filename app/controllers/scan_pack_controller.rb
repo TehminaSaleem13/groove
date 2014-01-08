@@ -213,22 +213,19 @@ class ScanPackController < ApplicationController
 			@order = Order.find(params[:order_id])
 			if !@order.nil?
 				if @order.has_unscanned_items
+					kit_split = false
 					if @order.contains_kit && @order.contains_splittable_kit
 						puts "order contains kit"
 						#if order contains a kit which is to be Scanned as either Kit or individual parts as needed
-							puts "order contains splittable kit"
+						puts "order contains splittable kit"
 					  	#check if due to current barcode the kit needs to be split or not
 						if @order.should_the_kit_be_split(params[:barcode])
 							puts "kit should be split"
-							#@order.mark_order_item_kit_to_be_split
-						  	#if it needs to be split, then mark split as 1 in the order item
-						  	 #get scanned products and to be scanned products
-						  	#end
-					   else
-					    #process the barcode scan
-					    #get scanned products and to be scanned products based on whether the kit is split or not
+							#kit_split = true
+							#unscanned_items = @order.get_unscanned_split_item
 					   end
-					else
+					end
+					if !kit_split
 					  unscanned_items = @order.get_unscanned_items
 					  barcode_found = false
 					  #puts unscanned_items.to_s

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140104191342) do
+ActiveRecord::Schema.define(:version => 20140108122654) do
 
   create_table "amazon_credentials", :force => true do |t|
     t.string   "merchant_id",                                     :null => false
@@ -118,6 +118,7 @@ ActiveRecord::Schema.define(:version => 20140104191342) do
     t.integer  "product_id"
     t.string   "scanned_status",                                :default => "notscanned"
     t.integer  "scanned_qty",                                   :default => 0
+    t.boolean  "kit_split",                                     :default => false
   end
 
   add_index "order_items", ["order_id"], :name => "index_order_items_on_order_id"
