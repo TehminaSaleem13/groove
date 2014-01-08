@@ -34,6 +34,8 @@ class OrderItem < ActiveRecord::Base
       result['product_type'] = 'single'
       result['image'] = 
         self.product.product_images.first if self.product.product_images.length > 0
+      result['images'] = self.product.product_images
+      result['sku'] = self.product.product_skus.first.sku if self.product.product_skus.length > 0
       result['qty_remaining'] = self.qty - self.scanned_qty
       result['scanned_qty'] = self.scanned_qty
       result['packing_placement'] = self.product.packing_placement
@@ -52,6 +54,8 @@ class OrderItem < ActiveRecord::Base
       result['product_type'] = 'individual'
       result['image'] = 
         self.product.product_images.first if self.product.product_images.length > 0
+      result['images'] = self.product.product_images
+      result['sku'] = self.product.product_skus.first.sku if self.product.product_skus.length > 0
       result['qty_remaining'] = self.qty - self.scanned_qty
       result['scanned_qty'] = self.scanned_qty
       result['packing_placement'] = self.product.packing_placement
@@ -66,6 +70,10 @@ class OrderItem < ActiveRecord::Base
           if kit_product.product_kit_skus.option_product.product_images.length >0
             child_item['image'] = 
               kit_product.product_kit_skus.option_product.product_images.first 
+          end
+          child_item['images'] = kit_product.product_kit_skus.option_product.product_images
+          if kit_product.product_kit_skus.option_product.product_skus.length > 0
+            child_item['sku'] = kit_product.product_kit_skus.option_product.product_skus.first.sku 
           end
           child_item['qty_remaining'] = self.qty * kit_product.product_kit_skus.qty - 
             kit_product.scanned_qty
@@ -92,6 +100,8 @@ class OrderItem < ActiveRecord::Base
       result['product_type'] = 'single'
       result['image'] = 
         self.product.product_images.first if self.product.product_images.length > 0
+      result['images'] = self.product.product_images
+      result['sku'] = self.product.product_skus.first.sku if self.product.product_skus.length > 0
       result['qty_remaining'] = self.qty - self.scanned_qty
       result['scanned_qty'] = self.scanned_qty
       result['packing_placement'] = self.product.packing_placement
@@ -110,6 +120,8 @@ class OrderItem < ActiveRecord::Base
       result['product_type'] = 'individual'
       result['image'] = 
         self.product.product_images.first if self.product.product_images.length > 0
+      result['images'] = self.product.product_images
+      result['sku'] = self.product.product_skus.first.sku if self.product.product_skus.length > 0
       result['qty_remaining'] = self.qty - self.scanned_qty
       result['scanned_qty'] = self.scanned_qty
       result['packing_placement'] = self.product.packing_placement

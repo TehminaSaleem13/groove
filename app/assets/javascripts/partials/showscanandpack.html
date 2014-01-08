@@ -91,11 +91,11 @@
 
                             <div ng-show="rf_state=='ready_for_product'">
                                 <h3 ng-show="next_item.scanned ==0">Please scan this product next</h3>
-                                <h3 ng-show="next_item.scanned !=0">{{next_item.scanned}} of {{next_item.qty }} have been scanned</h3>
+                                <h3 ng-show="next_item.scanned !=0">{{next_item.scanned_qty}} of {{ next_item.qty }} have been scanned</h3>
                                 <div class="text-left">
                                     <p><strong>Name: </strong>{{next_item.name}}</p>
                                     <p><strong>SKU:</strong> {{next_item.sku}}</p>
-                                    <p><strong>{{next_item.qty - next_item.scanned}} more to scan.</strong></p>
+                                    <p><strong>{{next_item.qty_remaining}} more to scan.</strong></p>
                                 </div>
                                 <div class="scan_product_images">
                                     <div class="scan_product_times img-rounded" ng-show="next_item.qty > 1">

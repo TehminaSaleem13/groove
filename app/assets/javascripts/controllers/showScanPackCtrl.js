@@ -101,22 +101,46 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $q, $cookies
     }
 
     $scope._next_item = function() {
-        $scope.order_details.items_to_scan = 0;
-        $scope.order_details.total_items = 0;
-        var next_item_set = false;
-        for(i in $scope.order_details.items) {
-            $scope.order_details.total_items += $scope.order_details.items[i].qty;
-            $scope.order_details.items_to_scan -= $scope.order_details.items[i].scanned;
-            if(!next_item_set && ($scope.order_details.items[i].scanned < $scope.order_details.items[i].qty)) {
-                next_item_set = true;
-                if($scope.next_item.id != $scope.order_details.items[i].id) {
-                    $scope.item_image_index = 0;
-                    $scope.next_item = $scope.order_details.items[i];
-                }
-
+        $scope.item_image_index = 0;
+        for (i=0; i<$scope.unscanned_items.length; i++) {
+            if ($scope.unscanned_items[i].product_type == 'single') {
+                $scope.next_item.name = $scope.unscanned_items[i].name;
+                $scope.next_item.sku = $scope.unscanned_items[i].sku;
+                $scope.next_item.images = $scope.unscanned_items[i].images;
+                $scope.next_item.qty_remaining = $scope.unscanned_items[i].qty_remaining;
+                $scope.next_item.scanned_qty = $scope.unscanned_items[i].scanned_qty;
+                $scope.next_item.qty = $scope.unscanned_items[i].scanned_qty + 
+                    $scope.unscanned_items[i].qty_remaining;
+                break;
+            }
+            else if ($scope.unscanned_items[i].product_type == 'individual') {
+                $scope.next_item.name = $scope.unscanned_items[i].child_items[0].name;
+                $scope.next_item.sku = $scope.unscanned_items[i].child_items[0].sku;
+                $scope.next_item.images = $scope.unscanned_items[i].child_items[0].images;
+                $scope.next_item.qty_remaining = $scope.unscanned_items[i].child_items[0].qty_remaining;
+                $scope.next_item.scanned_qty = $scope.unscanned_items[i].child_items[0].scanned_qty;
+                $scope.next_item.qty = $scope.unscanned_items[i].scanned_qty + 
+                    $scope.unscanned_items[i].qty_remaining;
+                break;
             }
         }
-        $scope.order_details.items_to_scan += $scope.order_details.total_items;
+
+        // $scope.order_details.items_to_scan = 0;
+        // $scope.order_details.total_items = 0;
+        // var next_item_set = false;
+        // for(i in $scope.order_details.items) {
+        //     $scope.order_details.total_items += $scope.order_details.items[i].qty;
+        //     $scope.order_details.items_to_scan -= $scope.order_details.items[i].scanned;
+        //     if(!next_item_set && ($scope.order_details.items[i].scanned < $scope.order_details.items[i].qty)) {
+        //         next_item_set = true;
+        //         if($scope.next_item.id != $scope.order_details.items[i].id) {
+        //             $scope.item_image_index = 0;
+        //             $scope.next_item = $scope.order_details.items[i];
+        //         }
+
+        //     }
+        // }
+        // $scope.order_details.items_to_scan += $scope.order_details.total_items;
     }
 
     $scope._ready_for_order_state = function (data) {
