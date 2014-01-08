@@ -339,5 +339,202 @@ describe ScanPackController do
       expect(order_item.scanned_qty).to eq(3)
       expect(order_item.scanned_status).to eq("scanned")
   end
+
+  describe "Product Kit Scan" do
+    it "should scan single kits" do
+      request.accept = "application/json"
+      
+      order = FactoryGirl.create(:order, :status=>'awaiting')
+      
+      product = FactoryGirl.create(:product)
+      product_sku = FactoryGirl.create(:product_sku, :product=> product)
+      product_barcode = FactoryGirl.create(:product_barcode, :product=> product, :barcode => 'BARCODE1')
+
+      order_item = FactoryGirl.create(:order_item, :product_id=>product.id,
+                    :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>product.name)
+
+      product_kit = FactoryGirl.create(:product, :is_kit => 1, :name=>'iPhone Protection Kit', 
+                        :kit_parsing=>'single')
+      product_kit_sku = FactoryGirl.create(:product_sku, :product=> product_kit, :sku=> 'IPROTO')
+      product_kit_barcode = FactoryGirl.create(:product_barcode, :product=> product_kit, :barcode => 'IPROTOBAR')
+      order_item_kit = FactoryGirl.create(:order_item, :product_id=>product_kit.id,
+                    :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>product_kit.name)
+
+
+
+      get :scan_product_by_barcode, {:barcode => 'IPROTOBAR', :order_id => order.id }
+      get :scan_product_by_barcode, {:barcode => 'BARCODE1', :order_id => order.id }
+
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["status"]).to eq(true)
+      order_item_kit.reload
+      #expect(order_item_kit.scanned_qty).to eq(1)
+      expect(order_item_kit.scanned_status).to eq("scanned")
+      order.reload
+      expect(order.status).to eq("scanned")
+      order_item.reload
+      expect(order_item.scanned_qty).to eq(1)
+      expect(order_item.scanned_status).to eq("scanned")
+    end
+
+    it "should scan individual kits" do
+      request.accept = "application/json"
+      
+      order = FactoryGirl.create(:order, :status=>'awaiting')
+      
+      product = FactoryGirl.create(:product)
+      product_sku = FactoryGirl.create(:product_sku, :product=> product)
+      product_barcode = FactoryGirl.create(:product_barcode, :product=> product, :barcode => 'BARCODE1')
+
+      order_item = FactoryGirl.create(:order_item, :product_id=>product.id,
+                    :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>product.name)
+
+      product_kit = FactoryGirl.create(:product, :is_kit => 1, :name=>'iPhone Protection Kit', 
+                        :kit_parsing=>'individual')
+      product_kit_sku = FactoryGirl.create(:product_sku, :product=> product_kit, :sku=> 'IPROTO')
+      product_kit_barcode = FactoryGirl.create(:product_barcode, :product=> product_kit, :barcode => 'IPROTOBAR')
+      order_item_kit = FactoryGirl.create(:order_item, :product_id=>product_kit.id,
+                    :qty=>2, :price=>"10", :row_total=>"10", :order=>order, :name=>product_kit.name)
+
+      kit_product = FactoryGirl.create(:product)
+      kit_product_sku = FactoryGirl.create(:product_sku, :product=> kit_product, :sku=> 'IPROTO1')
+      kit_product_barcode = FactoryGirl.create(:product_barcode, :product=> kit_product, :barcode => 'KITITEM1')
+
+      product_kit_sku = FactoryGirl.create(:product_kit_sku, :product => product_kit, :option_product_id=>kit_product.id)
+      order_item_kit_product = FactoryGirl.create(:order_item_kit_product, :order_item => order_item_kit,   
+            :product_kit_skus=> product_kit_sku)
+
+      kit_product2 = FactoryGirl.create(:product)
+      kit_product2_sku = FactoryGirl.create(:product_sku, :product=> kit_product2, :sku=> 'IPROTO2')
+      kit_product2_barcode = FactoryGirl.create(:product_barcode, :product=> kit_product2, :barcode => 'KITITEM2')
+
+      product_kit_sku2 = FactoryGirl.create(:product_kit_sku, :product => product_kit, :option_product_id=>kit_product2.id)
+      order_item_kit_product2 = FactoryGirl.create(:order_item_kit_product, :order_item => order_item_kit,   
+            :product_kit_skus => product_kit_sku2)
+
+      get :scan_product_by_barcode, {:barcode => 'BARCODE1', :order_id => order.id }
+      get :scan_product_by_barcode, {:barcode => 'KITITEM1', :order_id => order.id }
+      get :scan_product_by_barcode, {:barcode => 'KITITEM2', :order_id => order.id }
+      get :scan_product_by_barcode, {:barcode => 'KITITEM1', :order_id => order.id }
+      get :scan_product_by_barcode, {:barcode => 'KITITEM2', :order_id => order.id }
+
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["status"]).to eq(true)
+      
+      order_item.reload
+      expect(order_item.scanned_status).to eq("scanned")
+      expect(order_item.scanned_qty).to eq(1)
+
+      order_item_kit_product.reload
+      expect(order_item_kit_product.scanned_qty).to eq(2)
+      expect(order_item_kit_product.scanned_status).to eq("scanned")
+      
+      order_item_kit_product2.reload
+      expect(order_item_kit_product2.scanned_qty).to eq(2)
+      expect(order_item_kit_product2.scanned_status).to eq("scanned")
+      
+      order_item_kit.reload
+      expect(order_item_kit.scanned_status).to eq("scanned")
+      expect(order_item_kit.scanned_qty).to eq(2)
+
+      order.reload
+      expect(order.status).to eq("scanned")
+      #puts result['data']['unscanned_items'].to_s
+      expect(result['data']['unscanned_items'].length).to eq(0)
+      expect(result['data']['scanned_items'].length).to eq(2)
+      # order_item.reload
+      # expect(order_item.scanned_qty).to eq(1)
+      # expect(order_item.scanned_status).to eq("scanned")
+    end
+
+    it "should split and scan kits" do
+      request.accept = "application/json"
+      
+      order = FactoryGirl.create(:order, :status=>'awaiting')
+      
+      product = FactoryGirl.create(:product)
+      product_sku = FactoryGirl.create(:product_sku, :product=> product)
+      product_barcode = FactoryGirl.create(:product_barcode, :product=> product, :barcode => 'BARCODE1')
+
+      order_item = FactoryGirl.create(:order_item, :product_id=>product.id,
+                    :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>product.name)
+
+      product_kit = FactoryGirl.create(:product, :is_kit => 1, :name=>'iPhone Protection Kit', 
+                        :kit_parsing=>'depends')
+      product_kit_sku = FactoryGirl.create(:product_sku, :product=> product_kit, :sku=> 'IPROTO')
+      product_kit_barcode = FactoryGirl.create(:product_barcode, :product=> product_kit, :barcode => 'IPROTOBAR')
+      order_item_kit = FactoryGirl.create(:order_item, :product_id=>product_kit.id,
+                    :qty=>2, :price=>"10", :row_total=>"10", :order=>order, :name=>product_kit.name)
+
+      kit_product = FactoryGirl.create(:product)
+      kit_product_sku = FactoryGirl.create(:product_sku, :product=> kit_product, :sku=> 'IPROTO1')
+      kit_product_barcode = FactoryGirl.create(:product_barcode, :product=> kit_product, :barcode => 'KITITEM1')
+
+      product_kit_sku = FactoryGirl.create(:product_kit_sku, :product => product_kit, :option_product_id=>kit_product.id)
+      order_item_kit_product = FactoryGirl.create(:order_item_kit_product, :order_item => order_item_kit,   
+            :product_kit_skus=> product_kit_sku)
+
+      kit_product2 = FactoryGirl.create(:product)
+      kit_product2_sku = FactoryGirl.create(:product_sku, :product=> kit_product2, :sku=> 'IPROTO2')
+      kit_product2_barcode = FactoryGirl.create(:product_barcode, :product=> kit_product2, :barcode => 'KITITEM2')
+
+      product_kit_sku2 = FactoryGirl.create(:product_kit_sku, :product => product_kit, :option_product_id=>kit_product2.id)
+      order_item_kit_product2 = FactoryGirl.create(:order_item_kit_product, :order_item => order_item_kit,   
+            :product_kit_skus => product_kit_sku2)
+
+      kit_product3 = FactoryGirl.create(:product)
+      kit_product3_sku = FactoryGirl.create(:product_sku, :product=> kit_product3, :sku=> 'IPROTO3')
+      kit_product3_barcode = FactoryGirl.create(:product_barcode, :product=> kit_product3, :barcode => 'KITITEM3')
+
+      product_kit_sku3 = FactoryGirl.create(:product_kit_sku, :product => product_kit, :option_product_id=>kit_product3.id)
+      order_item_kit_product3 = FactoryGirl.create(:order_item_kit_product, :order_item => order_item_kit,   
+            :product_kit_skus => product_kit_sku3)
+
+
+      order_item2 = FactoryGirl.create(:order_item, :product_id=>kit_product2.id,
+              :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>kit_product2.name)
+
+      get :scan_product_by_barcode, {:barcode => 'KITITEM2', :order_id => order.id }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['data']['unscanned_items'].length).to eq(2)
+      
+      get :scan_product_by_barcode, {:barcode => 'KITITEM2', :order_id => order.id }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["status"]).to eq(true)
+      expect(result['data']['unscanned_items'].length).to eq(2)
+      #expect(result['data']['unscanned_items'].length).to eq(2)
+      #expect(result['data']['scanned_items'].length).to eq(2)
+
+      # order_item.reload
+      # expect(order_item.scanned_status).to eq("scanned")
+      # expect(order_item.scanned_qty).to eq(1)
+
+      # order_item_kit_product.reload
+      # expect(order_item_kit_product.scanned_qty).to eq(2)
+      # expect(order_item_kit_product.scanned_status).to eq("scanned")
+      
+      # order_item_kit_product2.reload
+      # expect(order_item_kit_product2.scanned_qty).to eq(2)
+      # expect(order_item_kit_product2.scanned_status).to eq("scanned")
+      
+      # order_item_kit.reload
+      # expect(order_item_kit.scanned_status).to eq("scanned")
+      # expect(order_item_kit.scanned_qty).to eq(2)
+
+      # order.reload
+      # expect(order.status).to eq("scanned")
+      # #puts result['data']['unscanned_items'].to_s
+
+      # order_item.reload
+      # expect(order_item.scanned_qty).to eq(1)
+      # expect(order_item.scanned_status).to eq("scanned")
+    end
+
+
+  end
 end
 

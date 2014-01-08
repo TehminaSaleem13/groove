@@ -685,8 +685,12 @@ class ProductsController < ApplicationController
 	        if product_kit_sku.nil?
 	          @productkitsku = ProductKitSkus.new
 	          @productkitsku.option_product_id = item.id
+	          @productkitsku.qty = 1
 	          @kit.product_kit_skuss << @productkitsku
-	          unless @kit.save
+	          if @kit.save
+	          	@productkitsku.reload
+	          	@productkitsku.add_product_in_order_items
+	          else
 	            @result['messages'].push("Could not save kit with sku: "+@product_skus.first.sku)
 	            @result['status'] &= false
 	          end
@@ -721,17 +725,18 @@ class ProductsController < ApplicationController
       else
         params[:kit_products].reject!{|a| a==""}
         params[:kit_products].each do |kit_product|
-          product_kit_sku = ProductKitSkus.find_by_option_product_id_and_product_id(kit_product,@kit.id)
-          if product_kit_sku.nil?
-            @result['messages'].push("Product #{kit_product} not found in item")
+	    product_kit_sku = ProductKitSkus.find_by_option_product_id_and_product_id(kit_product,@kit.id)
+        
+        if product_kit_sku.nil?
+          @result['messages'].push("Product #{kit_product} not found in item")
+          @result['status'] &= false
+        else
+          @result["asddddd"].push(product_kit_sku);
+          unless product_kit_sku.destroy
+            @result['messages'].push("Product #{kit_product} could not be removed fronm kit")
             @result['status'] &= false
-          else
-            @result["asddddd"].push(product_kit_sku);
-              unless product_kit_sku.destroy
-                @result['messages'].push("Product #{kit_product} could not be removed fronm kit")
-                @result['status'] &= false
-              end
           end
+        end
         end
       end
     else

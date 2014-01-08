@@ -3,6 +3,7 @@
 FactoryGirl.define do
   factory :product_kit_sku, :class => 'ProductKitSkus' do
     product nil
-    sku "MyString"
+    option_product_id 0
+    qty 1
   end
 end

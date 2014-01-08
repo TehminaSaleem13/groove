@@ -105,22 +105,46 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
     }
 
     $scope._next_item = function() {
-        $scope.order_details.items_to_scan = 0;
-        $scope.order_details.total_items = 0;
-        var next_item_set = false;
-        for(i in $scope.order_details.items) {
-            $scope.order_details.total_items += $scope.order_details.items[i].qty;
-            $scope.order_details.items_to_scan -= $scope.order_details.items[i].scanned;
-            if(!next_item_set && ($scope.order_details.items[i].scanned < $scope.order_details.items[i].qty)) {
-                next_item_set = true;
-                if($scope.next_item.id != $scope.order_details.items[i].id) {
-                    $scope.item_image_index = 0;
-                    $scope.next_item = $scope.order_details.items[i];
-                }
-
+        $scope.item_image_index = 0;
+        for (i=0; i<$scope.unscanned_items.length; i++) {
+            if ($scope.unscanned_items[i].product_type == 'single') {
+                $scope.next_item.name = $scope.unscanned_items[i].name;
+                $scope.next_item.sku = $scope.unscanned_items[i].sku;
+                $scope.next_item.images = $scope.unscanned_items[i].images;
+                $scope.next_item.qty_remaining = $scope.unscanned_items[i].qty_remaining;
+                $scope.next_item.scanned_qty = $scope.unscanned_items[i].scanned_qty;
+                $scope.next_item.qty = $scope.unscanned_items[i].scanned_qty + 
+                    $scope.unscanned_items[i].qty_remaining;
+                break;
+            }
+            else if ($scope.unscanned_items[i].product_type == 'individual') {
+                $scope.next_item.name = $scope.unscanned_items[i].child_items[0].name;
+                $scope.next_item.sku = $scope.unscanned_items[i].child_items[0].sku;
+                $scope.next_item.images = $scope.unscanned_items[i].child_items[0].images;
+                $scope.next_item.qty_remaining = $scope.unscanned_items[i].child_items[0].qty_remaining;
+                $scope.next_item.scanned_qty = $scope.unscanned_items[i].child_items[0].scanned_qty;
+                $scope.next_item.qty = $scope.unscanned_items[i].scanned_qty + 
+                    $scope.unscanned_items[i].qty_remaining;
+                break;
             }
         }
-        $scope.order_details.items_to_scan += $scope.order_details.total_items;
+
+        // $scope.order_details.items_to_scan = 0;
+        // $scope.order_details.total_items = 0;
+        // var next_item_set = false;
+        // for(i in $scope.order_details.items) {
+        //     $scope.order_details.total_items += $scope.order_details.items[i].qty;
+        //     $scope.order_details.items_to_scan -= $scope.order_details.items[i].scanned;
+        //     if(!next_item_set && ($scope.order_details.items[i].scanned < $scope.order_details.items[i].qty)) {
+        //         next_item_set = true;
+        //         if($scope.next_item.id != $scope.order_details.items[i].id) {
+        //             $scope.item_image_index = 0;
+        //             $scope.next_item = $scope.order_details.items[i];
+        //         }
+
+        //     }
+        // }
+        // $scope.order_details.items_to_scan += $scope.order_details.total_items;
     }
 
     $scope._ready_for_order_state = function (data) {
@@ -132,6 +156,8 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
         $scope._set_rf_state('ready_for_order');
         $scope.hide_alert(-1);
         $scope._focus_input($scope._rf_inputObj);
+        $scope.unscanned_items = {};
+        $scope.scanned_items = {};
     }
 
     $scope._order_clicked_state = function(data) {
@@ -321,6 +347,10 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
                 if(data.data != null) {
                     $scope.order_id = data.data.id;
                     $scope._next_state(data.data);
+                    $scope.unscanned_items = data.data.unscanned_items;
+                    $scope.scanned_items = data.data.scanned_items;
+                    $scope._compute_unscanned_and_scanned_products();
+
                 }
             } else {
                 $scope.show_alert(data.error_messages,0);
@@ -343,6 +373,11 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
                 if(data.success_messages.length) {
                     $scope.show_alert(data.success_messages,1);
                 }
+                $scope.unscanned_items = data.data.unscanned_items;
+                $scope.scanned_items = data.data.scanned_items;
+                console.log($scope.unscanned_items);
+                console.log($scope.scanned_items);
+                $scope._compute_unscanned_and_scanned_products();
             } else {
                 $scope.show_alert(data.error_messages,0);
             }
@@ -633,7 +668,33 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
 
         }
     }
+    $scope._compute_unscanned_and_scanned_products = function() {
+        $scope.unscanned_count = 0;
+        $scope.scanned_count = 0;
+        console.log($scope.unscanned_items.length);
+        console.log($scope.scanned_items.length);
 
+        for (i = 0;  i < $scope.unscanned_items.length; i++) {
+            if ($scope.unscanned_items[i].product_type == 'single'){
+                $scope.unscanned_count = $scope.unscanned_count + $scope.unscanned_items[i].qty_remaining;
+            }
+            else if ($scope.unscanned_items[i].product_type == 'individual') {
+                for (j=0; j< $scope.unscanned_items[i].child_items.length;  j++) {
+                    $scope.unscanned_count += $scope.unscanned_items[i].child_items[j].qty_remaining;
+                }
+            }
+        }
+        for (i = 0;  i < $scope.scanned_items.length; i++) {
+            if ($scope.scanned_items[i].product_type == 'single'){
+                $scope.scanned_count = $scope.scanned_count + $scope.scanned_items[i].qty_remaining;
+            }
+            else if ($scope.scanned_items[i].product_type == 'individual') {
+                for (j=0; j< $scope.scanned_items[i].child_items.length; j++) {
+                    $scope.scanned_count += $scope.scanned_items[i].child_items[j].qty_remaining;
+                }
+            }
+        }
+    }
 
     $scope.$watch('can_get_products',function() {
         if($scope.can_get_products) {

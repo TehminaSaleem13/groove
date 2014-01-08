@@ -147,6 +147,7 @@ GEM
     factory_girl_rails (4.2.1)
       factory_girl (~> 4.2.0)
       railties (>= 3.0.0)
+    ffi (1.9.3)
     figaro (0.7.0)
       bundler (~> 1.0)
       rails (>= 3, < 5)
@@ -195,6 +196,10 @@ GEM
     launchy (2.3.0)
       addressable (~> 2.3)
     libv8 (3.16.14.3)
+    listen (2.0.0)
+      celluloid (>= 0.15.1)
+      rb-fsevent (>= 0.9.3)
+      rb-inotify (>= 0.9)
     little-plugger (1.1.3)
     logging (1.8.1)
       little-plugger (>= 1.1.3)
@@ -256,6 +261,9 @@ GEM
     rake (10.1.0)
     rash (0.4.0)
       hashie (~> 2.0.0)
+    rb-fsevent (0.9.4)
+    rb-inotify (0.9.3)
+      ffi (>= 0.5.0)
     rdoc (3.12.2)
       json (~> 1.4)
     redis (3.0.4)
@@ -315,6 +323,9 @@ GEM
       rack (~> 1.4)
       rack-protection (~> 1.4)
       tilt (~> 1.3, >= 1.3.4)
+    spring (1.0.0)
+    spring-commands-rspec (1.0.1)
+      spring (>= 0.9.1)
     sprockets (2.2.2)
       hike (~> 1.2)
       multi_json (~> 1.0)
@@ -381,6 +392,7 @@ DEPENDENCIES
   jquery-ui-rails
   json
   launchy (>= 2.1.2)
+  listen
   mocha
   momentjs-rails
   multi_xml
@@ -398,6 +410,7 @@ DEPENDENCIES
   sidekiq
   simple_form (>= 2.0.4)
   soap2r!
+  spring-commands-rspec
   therubyracer
   uglifier (>= 1.0.3)
   xmlparser

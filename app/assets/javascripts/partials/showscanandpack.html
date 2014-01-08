@@ -27,7 +27,7 @@
                         <input id="rf_input" type="text" ng-model="rf_input" class="span12" placeholder="{{ 'Scan '+rf_state_text +'...' }}"/>
                         <div class="text-center">
                             <h4 ng-show="rf_state=='ready_for_order'">Ready!</h4>
-                            <h4 ng-show="rf_state=='ready_for_product'">{{ order_details.items_to_scan }} items left to scan</h4>
+                            <h4 ng-show="rf_state=='ready_for_product'">{{ unscanned_count }} items left to scan</h4>
                         </div>
                         <div class="scan_table">
                             <table class="table table-hover">
@@ -38,11 +38,41 @@
                                     <th>Qty</th>
                                 </tr>
                                 </thead>
-                                <tbody>
-                                <tr ng-repeat="item in order_details.items" ng-show="item.qty-item.scanned > 0">
-                                    <td><div class="single-image"><img class="img-thumb" ng-src="{{ item.images[0].image }}" /></div></td>
-                                    <td>{{ item.name }}</td>
-                                    <td>{{item.qty - item.scanned}}</td>
+                                <tbody ng-repeat="unscanned_item in unscanned_items">
+                                <tr ng-show= "unscanned_item.product_type =='single'">
+                                        
+                                        <td ng-show= "unscanned_item.product_type =='single'">
+                                        <div class="single-image">
+                                            <img class="img-thumb" ng-src="{{ unscanned_item.image.image }}" />
+                                        </div>
+                                        </td>
+                                        <td ng-show= "unscanned_item.product_type =='single'">
+                                        {{ unscanned_item.name }}</td>
+                                        <td ng-show= "unscanned_item.product_type =='single'">
+                                        {{unscanned_item.qty_remaining}}</td>
+                                </tr>
+
+                                <tr ng-show= "unscanned_item.product_type =='individual'">
+                                        <td class='scantable-greyedout'>
+                                        <div class="single-image">
+                                            <img class="img-thumb" ng-src="{{ unscanned_item.image.image }}" />
+                                        </div>
+                                        </td>
+                                        <td class='scantable-greyedout'>
+                                        {{ unscanned_item.name }}</td>
+                                        <td class='scantable-greyedout'>
+                                        {{unscanned_item.qty_remaining}}</td>
+                                        <tr ng-repeat = 'child_item in unscanned_item.child_items'>
+                                            <td>
+                                            <div class="single-image">
+                                                <img class="img-thumb" ng-src="{{ child_item.image.image }}" />
+                                            </div>
+                                            </td>
+                                            <td>
+                                            {{ child_item.name }}</td>
+                                            <td>
+                                            {{child_item.qty_remaining}}</td>
+                                        </tr>
                                 </tr>
                                 </tbody>
                             </table>
@@ -61,11 +91,11 @@
 
                             <div ng-show="rf_state=='ready_for_product'">
                                 <h3 ng-show="next_item.scanned ==0">Please scan this product next</h3>
-                                <h3 ng-show="next_item.scanned !=0">{{next_item.scanned}} of {{next_item.qty }} have been scanned</h3>
+                                <h3 ng-show="next_item.scanned !=0">{{next_item.scanned_qty}} of {{ next_item.qty }} have been scanned</h3>
                                 <div class="text-left">
                                     <p><strong>Name: </strong>{{next_item.name}}</p>
                                     <p><strong>SKU:</strong> {{next_item.sku}}</p>
-                                    <p><strong>{{next_item.qty - next_item.scanned}} more to scan.</strong></p>
+                                    <p><strong>{{next_item.qty_remaining}} more to scan.</strong></p>
                                 </div>
                                 <div class="scan_product_images">
                                     <div class="scan_product_times img-rounded" ng-show="next_item.qty > 1">
@@ -115,10 +145,27 @@
                             <th>Scanned</th>
                         </tr>
                         </thead>
-                        <tbody>
-                        <tr ng-repeat="item in scanned_details.items" ng-show="item.scanned > 0" >
-                            <td>{{ item.name }}</td>
-                            <td>{{item.scanned}}</td>
+                        <tbody ng-repeat="scanned_item in scanned_items">
+                        <tr ng-show= "scanned_item.product_type =='single'">
+                                
+                                <td ng-show= "scanned_item.product_type =='single'">
+                                {{ scanned_item.name }}</td>
+                                <td ng-show= "scanned_item.product_type =='single'">
+                                {{scanned_item.scanned_qty}}</td>
+                        </tr>
+
+                        <tr ng-show= "scanned_item.product_type =='individual'">
+
+                                <td class='scantable-greyedout'>
+                                {{ scanned_item.name }}</td>
+                                <td class='scantable-greyedout'>
+                                {{scanned_item.scanned_qty}}</td>
+                                <tr ng-repeat = 'child_item in scanned_item.child_items'>
+                                    <td>
+                                    {{ child_item.name }}</td>
+                                    <td>
+                                    {{child_item.scanned_qty}}</td>
+                                </tr>
                         </tr>
                         </tbody>
                     </table>

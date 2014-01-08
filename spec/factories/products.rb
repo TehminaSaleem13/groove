@@ -7,5 +7,7 @@ FactoryGirl.define do
     product_type "Smartphone"
     store_id 1
     status "active"
+    is_kit 0
+    kit_parsing nil
   end
 end
