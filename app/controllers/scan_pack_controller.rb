@@ -43,8 +43,6 @@ class ScanPackController < ApplicationController
             end
           end
 
-
-
             #search in orders that have status of Cancelled
           if @order.status == 'cancelled'
             @order_result['next_state'] = 'ready_for_order'

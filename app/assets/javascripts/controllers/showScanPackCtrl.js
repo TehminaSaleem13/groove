@@ -686,11 +686,11 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
         }
         for (i = 0;  i < $scope.scanned_items.length; i++) {
             if ($scope.scanned_items[i].product_type == 'single'){
-                $scope.scanned_count = $scope.scanned_count + $scope.scanned_items[i].qty_remaining;
+                $scope.scanned_count = $scope.scanned_count + $scope.scanned_items[i].scanned_qty;
             }
             else if ($scope.scanned_items[i].product_type == 'individual') {
                 for (j=0; j< $scope.scanned_items[i].child_items.length; j++) {
-                    $scope.scanned_count += $scope.scanned_items[i].child_items[j].qty_remaining;
+                    $scope.scanned_count += $scope.scanned_items[i].child_items[j].scanned_qty;
                 }
             }
         }
