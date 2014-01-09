@@ -37,18 +37,57 @@ class Product < ActiveRecord::Base
   has_many :product_kit_skuss, :dependent => :destroy
   has_many :product_inventory_warehousess, :dependent => :destroy
 
-  def update_product_status
-  	if self.status != 'inactive'
+  def update_product_status (force_from_inactive_state = false)
+  	puts "Updating product status"
+  	if self.status != 'inactive' || force_from_inactive_state
 	  	result = true
-	  	@skus = ProductSku.where(:product_id=>self.id)
-	  	result &= false if @skus.length == 0
 
-	  	@barcodes = ProductBarcode.where(:product_id=>self.id)
-	  	result &= false if @barcodes.length == 0
+	  	result &= false if self.product_skus.length == 0
+
+	  	result &= false if self.product_barcodes.length == 0
+
+	  	#if kit it should contain kit products as well
+	  	if self.is_kit == 1 
+	  	  result &= false if self.product_kit_skuss.length == 0
+	  	  self.product_kit_skuss.each do |kit_product|
+	  	  	option_product = Product.find(kit_product.option_product_id)
+	  	  	if !option_product.nil? && 
+	  	  			option_product.status != 'active'
+	  	  		result &= false
+	  	  	end
+	  	  end
+	  	end
 
 	  	if result
 	  		self.status = 'active'
 	  		self.save
+	  	else 
+	  		self.status = 'new'
+	  		self.save
+	  	end
+
+	  	# for non kit products, update all kits product statuses where the 
+	  	# current product is an item of the kit
+	  	if self.is_kit == 0
+	  		@kit_products  = ProductKitSkus.where(:option_product_id => self.id)
+	  		result_kit = true
+	  		@kit_products.each do |kit_product|
+	  			if kit_product.product.status != 'inactive'
+		  			kit_product.product.product_kit_skuss.each do |kit_product1|
+		  				option_product = Product.find(kit_product1.option_product_id)
+				  	  	if !option_product.nil? && 
+				  	  			option_product.status != 'active'
+				  	  		result_kit &= false
+				  	  	end
+		  			end
+		  			if result_kit
+		  				kit_product.product.status = 'active'
+		  			else
+		  				kit_product.product.status = 'new'
+		  			end
+		  			kit_product.product.save
+	  			end
+	  		end
 	  	end
 
 	  	#update order items status from onhold to awaiting
@@ -63,6 +102,7 @@ class Product < ActiveRecord::Base
 	  		item.order.update_order_status
 	  	end
 	end
+	result
   end
 
   def set_product_status

@@ -600,15 +600,35 @@ class ProductsController < ApplicationController
   def changeproductstatus
     @result = Hash.new
     @result['status'] = true
+    @result['error_messages'] = []
+
     @products = list_selected_products
     unless @products.nil?
       @products.each do|product|
         @product = Product.find(product["id"])
+        current_status = @product.status
         @product.status = params[:status]
         if @product.save
-          @product.update_product_status
+           @product.reload
+          if @product.status !='inactive'
+          	if !@product.update_product_status && params[:status] == 'active'
+          		@result['status'] &= false
+          		if @product.is_kit == 1
+          			@result['error_messages'].push('There was a problem changing kit status for '+
+          			 @product.name + '. Reason: In order for a Kit to be Active it needs to '+
+          			 'have at least one item and every item in the Kit must be Active.')
+          		else
+          			@result['error_messages'].push('There was a problem changing product status for '+
+          			 @product.name + '. Reason: In order for a product to be Active it needs to '+
+          			 'have at least one SKU and one barcode.')			
+          		end
+          		@product.status = current_status 
+          		@product.save
+          	end
+          end
         else
-          @result['status'] = false
+          @result['status'] &= false
+          @result['error_messages'].push('There was a problem changing products status for '+@product.name)
         end
       end
     end
@@ -681,7 +701,7 @@ class ProductsController < ApplicationController
           @result['messages'].push("Item does not exist")
           @result['status'] &= false
         else
-				  product_kit_sku = ProductKitSkus.find_by_option_product_id_and_product_id(params[:product_id], @kit.id)
+			product_kit_sku = ProductKitSkus.find_by_option_product_id_and_product_id(params[:product_id], @kit.id)
 	        if product_kit_sku.nil?
 	          @productkitsku = ProductKitSkus.new
 	          @productkitsku.option_product_id = item.id
@@ -698,6 +718,7 @@ class ProductsController < ApplicationController
 	          @result['messages'].push("The product with id #{item.id} has already been added to the kit")
 	          @result['status'] &= false
 	        end
+	        item.update_product_status
         end
 	  	else
 	  		@result['messages'].push("No item sent in the request")
@@ -739,6 +760,7 @@ class ProductsController < ApplicationController
         end
         end
       end
+   	  @kit.update_product_status
     else
       @result['messages'].push("Product with id="+@kit.id+"is not a kit")
       @result['status'] &= false
@@ -755,7 +777,7 @@ class ProductsController < ApplicationController
   	@result['status'] = true
   	@result['params'] = params
   	if !@product.nil?
-
+  		@product.reload
   		#Update Basic Info
   		@product.alternate_location = params[:basicinfo][:alternate_location]
   		@product.barcode = params[:basicinfo][:barcode]
@@ -923,7 +945,7 @@ class ProductsController < ApplicationController
   		#Update product barcodes
   		#check if a product barcode is defined.
   		product_barcodes = ProductBarcode.where(:product_id=>@product.id)
-
+		product_barcodes.reload
   		if product_barcodes.length > 0
 	  		product_barcodes.each do |productbarcode|
 	  			found_barcode = false
