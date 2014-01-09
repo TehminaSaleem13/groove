@@ -295,4 +295,33 @@ class ScanPackController < ApplicationController
       format.json { render json: @result }
     end
 	end
+	# takes order_id as input and resets scan status if it is partially scanned.
+	def reset_order_scan
+		@result = Hash.new
+	    @result['status'] = true
+	    @result['error_messages'] = []
+	    @result['success_messages'] = []
+	    @result['notice_messages'] = []
+	    @result['data'] = Hash.new
+	    
+	   	@order = Order.find(params[:order_id])
+
+	   	if !@order.nil?
+	   		if @order.status != 'scanned'
+		   		@order.reset_scanned_status
+		    	@result['data']['next_state'] = 'ready_for_order'
+		    else
+				@result['status'] &= false
+				@result['error_messages'].push("Order with id: "+params[:order_id]+" is already in scanned state")
+		    end
+	   	else
+			@result['status'] &= false
+			@result['error_messages'].push("Could not find order with id: "+params[:order_id])
+	   	end
+
+	    respond_to do |format|
+	      format.html # show.html.erb
+	      format.json { render json: @result }
+	    end
+	end
 end

@@ -344,4 +344,24 @@ class Order < ActiveRecord::Base
     end
     scanned_list
   end
+
+  def reset_scanned_status
+    self.order_items.each do |order_item|
+      #if item is a kit then make all order item product skus as also unscanned
+      if order_item.product.is_kit == 1
+        order_item.order_item_kit_products.each do |kit_product|
+          kit_product.scanned_status = 'unscanned'
+          kit_product.scanned_qty = 0
+          kit_product.save
+        end
+      end
+
+      order_item.scanned_status = 'unscanned'
+      order_item.scanned_qty = 0
+      order_item.save
+    end
+
+    self.status = 'awaiting'
+    self.save
+  end
 end
