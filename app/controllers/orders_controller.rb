@@ -274,8 +274,11 @@ class OrdersController < ApplicationController
           @order.state = order.shippingAddress.stateOrProvince
           @order.country = order.shippingAddress.country
           @order.postcode = order.shippingAddress.postalCode
-          @order.lastname = order.shippingAddress.name
 
+          #split name separated by a space
+          split_name = order.shippingAddress.name.split(' ')
+          @order.lastname = split_name.pop
+          @order.firstname = split_name.join(' ')
           #@order.order_shipping = @shipping
           if @order.save
             @order.addactivity("Order Import", @store.name+" Import")
@@ -342,7 +345,10 @@ class OrdersController < ApplicationController
               @order.state = order.shipping_address.state_or_region
               @order.email = order.buyer_email
               @order.lastname = order.shipping_address.name
-
+              split_name = order.shipping_address.name.split(' ')
+              @order.lastname = split_name.pop
+              @order.firstname = split_name.join(' ')
+              
           if @order.save
             if !@order.addnewitems
               @result['status'] &= false
