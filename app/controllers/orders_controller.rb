@@ -310,8 +310,14 @@ class OrdersController < ApplicationController
       #@result['aws-rewuest_status'] = mws.reports.get_report_request_list
       response = mws.orders.list_orders :last_updated_after => 2.months.ago, :order_status => ['Unshipped', 'PartiallyShipped']
             #@result['report_id'] = response.body
+      @orders = []
 
-      @orders = response.orders
+      if !response.orders.kindof?(Array)
+        @orders.push(response.orders)
+      else
+        @orders = response.orders
+      end
+
       if !@orders.nil?
         @result['total_imported'] = @orders.length
         @orders.each do |order|
