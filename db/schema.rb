@@ -11,8 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-
-ActiveRecord::Schema.define(:version => 20140108122654) do
+ActiveRecord::Schema.define(:version => 20140109152245) do
 
   create_table "amazon_credentials", :force => true do |t|
     t.string   "merchant_id",                                     :null => false
@@ -82,6 +81,18 @@ ActiveRecord::Schema.define(:version => 20140108122654) do
 
   add_index "order_exceptions", ["order_id"], :name => "index_order_exceptions_on_order_id"
   add_index "order_exceptions", ["user_id"], :name => "index_order_exceptions_on_user_id"
+
+  create_table "order_item_kit_product", :force => true do |t|
+    t.string   "scanned_status",      :default => "unscanned"
+    t.integer  "scanned_qty",         :default => 0
+    t.integer  "order_item_id"
+    t.integer  "product_kit_skus_id"
+    t.datetime "created_at",                                   :null => false
+    t.datetime "updated_at",                                   :null => false
+  end
+
+  add_index "order_item_kit_product", ["order_item_id"], :name => "index_order_item_kit_product_on_order_item_id"
+  add_index "order_item_kit_product", ["product_kit_skus_id"], :name => "index_order_item_kit_product_on_product_kit_skus_id"
 
   create_table "order_item_kit_products", :force => true do |t|
     t.integer  "order_item_id"
@@ -234,12 +245,12 @@ ActiveRecord::Schema.define(:version => 20140108122654) do
   add_index "product_skus", ["product_id"], :name => "index_product_skus_on_product_id"
 
   create_table "products", :force => true do |t|
-    t.string   "store_product_id",                                   :null => false
-    t.string   "name",                                               :null => false
+    t.string   "store_product_id",                                       :null => false
+    t.string   "name",                                                   :null => false
     t.string   "product_type"
-    t.integer  "store_id",                                           :null => false
-    t.datetime "created_at",                                         :null => false
-    t.datetime "updated_at",                                         :null => false
+    t.integer  "store_id",                                               :null => false
+    t.datetime "created_at",                                             :null => false
+    t.datetime "updated_at",                                             :null => false
     t.string   "inv_wh1"
     t.string   "status",                          :default => "new"
     t.text     "spl_instructions_4_packer"
@@ -249,7 +260,7 @@ ActiveRecord::Schema.define(:version => 20140108122654) do
     t.boolean  "is_skippable",                    :default => false
     t.integer  "packing_placement",               :default => 50
     t.integer  "pack_time_adj"
-    t.string   "kit_parsing"
+    t.string   "kit_parsing",                     :default => "depends"
     t.integer  "is_kit",                          :default => 0
     t.boolean  "disable_conf_req",                :default => false
   end
