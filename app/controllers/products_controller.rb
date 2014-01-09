@@ -528,19 +528,83 @@ class ProductsController < ApplicationController
     @products = list_selected_products
     unless @products.nil?
       @products.each do|product|
-
+      	#copy product
         @product = Product.find(product["id"])
 
         @newproduct = @product.dup
         index = 0
-        @newproduct.name = @product.name+"(duplicate"+index.to_s+")"
+        @newproduct.name = @product.name+" "+index.to_s
         @productslist = Product.where(:name=>@newproduct.name)
         begin
           index = index + 1
           #todo: duplicate sku, images, categories associated with product too.
-          @newproduct.name = @product.name+"(duplicate"+index.to_s+")"
+          @newproduct.name = @product.name+" "+index.to_s
           @productslist = Product.where(:name=>@newproduct.name)
         end while(!@productslist.nil? && @productslist.length > 0)
+
+        #copy barcodes
+        @product.product_barcodes.each do |barcode|
+	        index = 0
+	        newbarcode = barcode.barcode+" "+index.to_s
+	        barcodeslist = ProductBarcode.where(:barcode=>newbarcode)
+	        begin
+	          index = index + 1
+	          #todo: duplicate sku, images, categories associated with product too.
+	          newbarcode = barcode.barcode+" "+index.to_s
+	          barcodeslist = ProductBarcode.where(:barcode=>newbarcode)
+	        end while(!barcodeslist.nil? && barcodeslist.length > 0)
+
+	        newbarcode_item = ProductBarcode.new
+	        newbarcode_item.barcode = newbarcode
+	        @newproduct.product_barcodes << newbarcode_item
+        end
+
+        #copy skus
+        @product.product_skus.each do |sku|
+	        index = 0
+	        newsku = sku.sku+" "+index.to_s
+	        skuslist = ProductSku.where(:sku=>newsku)
+	        begin
+	          index = index + 1
+	          #todo: duplicate sku, images, categories associated with product too.
+	          newsku = sku.sku+" "+index.to_s
+	          skuslist = ProductSku.where(:sku=>newsku)
+	        end while(!skuslist.nil? && skuslist.length > 0)
+
+	        newsku_item = ProductSku.new
+	        newsku_item.sku = newsku
+	        newsku_item.purpose = sku.purpose
+	        @newproduct.product_skus << newsku_item
+        end
+
+        #copy images
+        @product.product_images.each do |image|
+	        newimage = ProductImage.new
+	        newimage = image.dup
+	        @newproduct.product_images << newimage
+        end
+
+        #copy categories
+        @product.product_cats.each do |category|
+	        newcategory = ProductCat.new
+	        newcategory = category.dup
+	        @newproduct.product_cats << newcategory
+        end
+
+        #copy product kit items
+        @product.product_kit_skuss.each do |sku|
+	        new_kit_sku = ProductKitSkus.new
+	        new_kit_sku = sku.dup
+	        @newproduct.product_kit_skuss << new_kit_sku
+        end
+
+        #copy product inventory warehouses
+        @product.product_inventory_warehousess.each do |warehouse|
+	        new_warehouse = ProductInventoryWarehouses.new
+	        new_warehouse = warehouse.dup
+	        @newproduct.product_inventory_warehousess << new_warehouse
+        end
+
 
         if !@newproduct.save(:validate => false)
           @result['status'] = false
