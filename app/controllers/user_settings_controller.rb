@@ -24,43 +24,43 @@ class UserSettingsController < ApplicationController
       params[:active] = false
     end
     @user.active = params[:active]
-    @user.name = params[:name]
-    @user.confirmation_code = params[:confirmation_code]
+    @user.name = params[:name] 
+    @user.confirmation_code = params[:confirmation_code] if !params[:confirmation_code].nil?
 
     #add product details
-    @user.edit_product_details = params[:edit_product_details]
-    @user.add_products = params[:add_products]
-    @user.edit_products = params[:edit_products]
-    @user.delete_products = params[:delete_products]
-    @user.other = params[:other1]
-    @user.import_products = params[:import_products]
-    @user.edit_product_import = params[:edit_product_import]
+    @user.edit_product_details = params[:edit_product_details] if !params[:edit_product_details].nil?
+    @user.add_products = params[:add_products] if !params[:add_products].nil?
+    @user.edit_products = params[:edit_products] if !params[:edit_products].nil?
+    @user.delete_products = params[:delete_products] if !params[:delete_products].nil?
+    @user.other = params[:other1] if !params[:other1].nil?
+    @user.import_products = params[:import_products] if !params[:import_products].nil?
+    @user.edit_product_import = params[:edit_product_import] if !params[:edit_product_import].nil?
 
     #add order details
-    @user.import_orders = params[:import_orders]
-    @user.change_order_status = params[:change_order_status]
-    @user.createEdit_from_packer = params[:createEdit_packer]
-    @user.add_order_items_ALL = params[:add_order_items_ALL]
-    @user.add_order_items = params[:add_order_items]
-    @user.remove_order_items = params[:remove_order_items]
-    @user.change_quantity_items = params[:change_quantity_items]
-    @user.view_packing_ex = params[:view_packing_ex]
-    @user.create_packing_ex = params[:create_packing_ex]
-    @user.edit_packing_ex = params[:edit_packing_ex]
+    @user.import_orders = params[:import_orders] if !params[:import_orders].nil?
+    @user.change_order_status = params[:change_order_status] if !params[:change_order_status].nil?
+    @user.createEdit_from_packer = params[:createEdit_packer] if !params[:createEdit_packer].nil?
+    @user.add_order_items_ALL = params[:add_order_items_ALL] if !params[:add_order_items_ALL].nil?
+    @user.add_order_items = params[:add_order_items] if !params[:add_order_items].nil?
+    @user.remove_order_items = params[:remove_order_items] if !params[:remove_order_items].nil?
+    @user.change_quantity_items = params[:change_quantity_items] if !params[:change_quantity_items].nil?
+    @user.view_packing_ex = params[:view_packing_ex] if !params[:view_packing_ex].nil?
+    @user.create_packing_ex = params[:create_packing_ex] if !params[:create_packing_ex].nil?
+    @user.edit_packing_ex = params[:edit_packing_ex] if !params[:edit_packing_ex].nil?
 
     #add user details permissions
-    @user.edit_user_info = params[:edit_user_info]
-    @user.edit_user_status = params[:edit_user_status]
-    @user.is_super_admin = params[:is_super_admin]
-    @user.create_users = params[:create_users]
-    @user.edit_user_permissions = params[:edit_user_permissions]
-    @user.access_scanpack = params[:access_scanpack]
-    @user.access_orders = params[:access_orders]
-    @user.access_products = params[:access_products]
+    @user.edit_user_info = params[:edit_user_info] if !params[:edit_user_info].nil?
+    @user.edit_user_status = params[:edit_user_status] if !params[:edit_user_status].nil?
+    @user.is_super_admin = params[:is_super_admin] if !params[:is_super_admin].nil?
+    @user.create_users = params[:create_users] if !params[:create_users].nil?
+    @user.edit_user_permissions = params[:edit_user_permissions] if !params[:edit_user_permissions].nil?
+    @user.access_scanpack = params[:access_scanpack] if !params[:access_scanpack].nil?
+    @user.access_orders = params[:access_orders] if !params[:access_orders].nil?
+    @user.access_products = params[:access_products] if !params[:access_products].nil?
 
     #add system settings permission
-    @user.edit_general_prefs = params[:edit_general_prefs]
-    @user.edit_scanning_prefs = params[:edit_scanning_prefs]
+    @user.edit_general_prefs = params[:edit_general_prefs] if !params[:edit_general_prefs].nil?
+    @user.edit_scanning_prefs = params[:edit_scanning_prefs] if !params[:edit_scanning_prefs].nil?
 
     if @user.save
       @result['result'] = true
