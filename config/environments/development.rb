@@ -38,8 +38,8 @@ Groovepacks::Application.configure do
   #Default URL options for mailers
   config.action_mailer.default_url_options = { :host => 'localhost:3000' }
 
-  ENV['AMAZON_MWS_ACCESS_KEY_ID'] = "AKIAJRXZUVPLLINJ2EUQ"
-  ENV['AMAZON_MWS_SECRET_ACCESS_KEY'] = "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"
+  ENV['AMAZON_MWS_ACCESS_KEY_ID'] = "AKIAJ4VZ2GY7HZUL277Q"
+  ENV['AMAZON_MWS_SECRET_ACCESS_KEY'] = "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"
 
   # ENV['EBAY_APP_ID'] = "Navarata-607d-4a45-8a42-51c735a57026"
   # ENV['EBAY_CERT_ID'] = "86380834-e449-4dd9-b19f-748b4625533d"

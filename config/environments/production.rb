@@ -64,8 +64,8 @@ Groovepacks::Application.configure do
   # Log the query plan for queries taking more than this (works
   # with SQLite, MySQL, and PostgreSQL)
   # config.active_record.auto_explain_threshold_in_seconds = 0.5
-  ENV['AMAZON_MWS_ACCESS_KEY_ID'] = "AKIAJRXZUVPLLINJ2EUQ"
-  ENV['AMAZON_MWS_SECRET_ACCESS_KEY'] = "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"
+  ENV['AMAZON_MWS_ACCESS_KEY_ID'] = "AKIAJ4VZ2GY7HZUL277Q"
+  ENV['AMAZON_MWS_SECRET_ACCESS_KEY'] = "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"
 
   ENV['EBAY_APP_ID'] = "Navarata-c04e-41cb-a923-77755ae59a0f"
   ENV['EBAY_CERT_ID'] = "596cd688-b754-49b1-8b92-a3c393caed49"
