@@ -89,6 +89,7 @@ class OrderItem < ActiveRecord::Base
           result['child_items'].push(child_item)
         end
       end
+      result['child_items'] = result['child_items'].sort_by { |hsh| hsh['packing_placement'] }
     end
     result
   end

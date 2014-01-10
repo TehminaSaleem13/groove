@@ -314,7 +314,7 @@ class Order < ActiveRecord::Base
         end
       end
     end
-    unscanned_list
+    unscanned_list.sort_by { |hsh| hsh['packing_placement'] }
   end
   def get_scanned_items
     scanned_list = []
