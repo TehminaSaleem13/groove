@@ -414,14 +414,23 @@ class StoreSettingsController < ApplicationController
             if !mapping['product_type'].nil? && mapping['product_type'] > 0
               product.product_type = single_row[mapping['product_type']]
             end
-            product_inventory = ProductInventoryWarehouses.new
-            if !mapping['inv_wh1'].nil? && mapping['inv_wh1'] > 0
-              product_inventory.qty = single_row[mapping['inv_wh1']]
+
+            #add inventory warehouses
+            if !!mapping['location_primary'].nil? && !mapping['inv_wh1'].nil?
+              product_inventory = ProductInventoryWarehouses.new
+              valid_inventory = false
+              if !mapping['inv_wh1'].nil? && mapping['inv_wh1'] > 0
+                product_inventory.qty = single_row[mapping['inv_wh1']]
+                valid_inventory &= true
+              end
+              if !mapping['location_primary'].nil? && mapping['location_primary'] != ''
+                product_inventory.location_primary = single_row[mapping['location_primary']]
+                valid_inventory &= true
+              end
+              product.product_inventory_warehousess << product_inventory if valid_inventory
             end
-            if !mapping['location_primary'].nil? && mapping['location_primary'] > 0
-              product_inventory.location_primary = single_row[mapping['location_primary']]
-            end
-            product.product_inventory_warehousess << product_inventory
+
+            #add product categories
             if !mapping['category_name'].nil? && mapping['category_name'] > 0
               unless single_row[mapping['category_name']].nil?
                 cats = single_row[mapping['category_name']].split(",")
@@ -432,6 +441,7 @@ class StoreSettingsController < ApplicationController
                 end
               end
             end
+
             if !mapping['product_images'].nil? && mapping['product_images'] > 0
               unless single_row[mapping['product_images']].nil?
                 images = single_row[mapping['product_images']].split(",")
@@ -442,14 +452,17 @@ class StoreSettingsController < ApplicationController
                 end
               end
             end
+
             if !mapping['sku'].nil? && mapping['sku'] > 0
               unless single_row[mapping['sku']].nil?
                 skus = single_row[mapping['sku']].split(",")
                 skus.each do |single_sku|
-                  product_sku = ProductSku.new
-                  product_sku.sku = single_sku
-                  product_sku.purpose = "primary"
-                  product.product_skus << product_sku
+                  if ProductSku.where(:sku=>single_sku).length == 0
+                    product_sku = ProductSku.new
+                    product_sku.sku = single_sku
+                    product_sku.purpose = "primary"
+                    product.product_skus << product_sku
+                  end
                 end
               end
             end
@@ -467,7 +480,8 @@ class StoreSettingsController < ApplicationController
             end
             if @result["status"]
               begin
-                product.save!
+                product.save! if product.name != 'name'
+                product.update_product_status
               rescue ActiveRecord::RecordInvalid => e
                 @result['status'] = false
                 @result['messages'].push(product.errors.full_messages)
