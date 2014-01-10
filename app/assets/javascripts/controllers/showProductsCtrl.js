@@ -11,6 +11,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
     $('.modal-backdrop').remove();
     $scope.get_products = function(next,post_fn) {
         //$scope.loading = true;
+        $scope.single_product = {};
         $scope.products_edit_tmp = {
             name:"",
             sku: "",
@@ -293,8 +294,10 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
                 $scope.get_products();
             });
     }
-    $scope.product_single_details = function(id,index,post_fn) {
-        $scope.loading = true;
+    $scope.product_single_details = function(id,index,post_fn, show_loading) {
+        if(typeof show_loading == 'undefined' || show_loading == true){
+            $scope.loading = true;
+        }
         if(typeof index !== 'undefined'){
             $scope.currently_open = index;
         }
@@ -310,7 +313,6 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
             editing_id:""
         };
         //console.log($scope.currently_open);
-        $scope.single_product = {};
         $scope.selected_skus = [];
         $scope.tmp = {
             sku: "",
@@ -326,8 +328,12 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
         };
         $http.get('/products/getdetails/'+ id+'.json').success(function(data) {
             if(data.product) {
-                $scope.single_product = data.product;
+                for (i in data.product) {
+                    $scope.single_product[i] = data.product[i];
+                }
                 $('#showProduct').modal('show');
+            } else {
+                $scope.single_product = {};
             }
             //console.log($scope.single_product);
             if(typeof post_fn == 'function' ) {
@@ -547,18 +553,17 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
 
             } else {
                 $scope.show_error_msgs = true;
-                $scope.error_msgs = ["Some error Occurred"];
+                if(data.message) {
+                    $scope.error_msgs = [data.message];
+                } else {
+                    $scope.error_msgs = ["Some error Occurred"];
+                }
             }
-            if(typeof post_fn == 'function' ) {
-                $timeout(post_fn,20);
-            }
-
+            $scope.product_single_details($scope.single_product.basicinfo.id,$scope.currently_open,post_fn,false);
         }).error(function() {
             $scope.show_error_msgs = true;
             $scope.error_msgs = ["Some error Occurred"];
-            if(typeof post_fn == 'function' ) {
-                $timeout(post_fn,20);
-            }
+            $scope.product_single_details($scope.single_product.basicinfo.id,$scope.currently_open,post_fn,false);
         });
     }
     $scope.product_alias = function () {
@@ -578,7 +583,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
                             $scope.product_update_status = true;
                             $scope.show_error_msgs = false;
                             $scope.product_update_message = "Successfully Added";
-                            $scope.product_single_details($scope.single_product.basicinfo.id);
+                            $scope.product_single_details($scope.single_product.basicinfo.id,$scope.currently_open);
                         } else {
                             $scope.show_error_msgs = true;
                             $scope.error_msgs = data.messages;
@@ -815,4 +820,12 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
             }
         }
     );
+    //poll server for status etc updates
+    $scope._tick = function() {
+        if($('#showProduct').hasClass("in")) {
+            $scope.product_single_details($scope.single_product.basicinfo.id,$scope.currently_open);
+        }
+        $timeout($scope._tick,5000);
+    }
+    //$scope._tick();
 }]);
