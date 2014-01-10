@@ -6,7 +6,7 @@ class OrderItemKitProduct < ActiveRecord::Base
   def process_item
   	order_item_unscanned = false
   	order_unscanned = false
-  	puts "Processng Kit product"+self.scanned_qty.to_s
+  	#puts "Processng Kit product"+self.scanned_qty.to_s
   	if self.scanned_qty < self.order_item.qty * self.product_kit_skus.qty
   		self.scanned_qty = self.scanned_qty + 1
   		if self.scanned_qty ==  self.order_item.qty * self.product_kit_skus.qty
@@ -15,7 +15,7 @@ class OrderItemKitProduct < ActiveRecord::Base
   			self.scanned_status = 'partially_scanned'
   		end
   		self.save
-  		puts "Status:"+self.scanned_status
+  		#puts "Status:"+self.scanned_status
 
 
 	  	#need to update order item quantity,
@@ -32,7 +32,7 @@ class OrderItemKitProduct < ActiveRecord::Base
 	  	if order_item_unscanned
 	  		self.order_item.scanned_status = 'partially_scanned'
 	  	else
-	  		puts "Order Item Scanned Qty"+self.order_item.scanned_qty.to_s
+	  		#puts "Order Item Scanned Qty"+self.order_item.scanned_qty.to_s
 	  		#self.order_item.scanned_qty = self.order_item.scanned_qty + 1
 			if self.order_item.scanned_qty == self.order_item.qty
 	  			self.order_item.scanned_status = 'scanned'

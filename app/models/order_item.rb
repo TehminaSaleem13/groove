@@ -171,7 +171,7 @@ class OrderItem < ActiveRecord::Base
         self.scanned_status = 'partially_scanned'
       end
       self.save
-      puts "Order Item Status:" + self.scanned_status
+      #puts "Order Item Status:" + self.scanned_status
       #update order status
       self.order.order_items.each do |order_item|
         if order_item.scanned_status != 'scanned'

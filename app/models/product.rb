@@ -38,7 +38,7 @@ class Product < ActiveRecord::Base
   has_many :product_inventory_warehousess, :dependent => :destroy
 
   def update_product_status (force_from_inactive_state = false)
-  	puts "Updating product status"
+  	#puts "Updating product status"
   	if self.status != 'inactive' || force_from_inactive_state
 	  	result = true
 
@@ -73,13 +73,6 @@ class Product < ActiveRecord::Base
 	  		result_kit = true
 	  		@kit_products.each do |kit_product|
 	  			if kit_product.product.status != 'inactive'
-		  			# kit_product.product.product_kit_skuss.each do |kit_product1|
-		  			# 	option_product = Product.find(kit_product1.option_product_id)
-				  	#   	if !option_product.nil? && 
-				  	#   			option_product.status != 'active'
-				  	#   		result_kit &= false
-				  	#   	end
-		  			# end
 		  			kit_product.product.update_product_status
 	  			end
 	  		end
