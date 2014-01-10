@@ -63,7 +63,8 @@ class OrderItem < ActiveRecord::Base
       result['order_item_id'] = self.id
       result['child_items'] = []
       self.order_item_kit_products.each do |kit_product|
-        if !kit_product.product_kit_skus.product.nil? &&
+        if !kit_product.product_kit_skus.nil? &&
+           !kit_product.product_kit_skus.product.nil? &&
             kit_product.scanned_status != 'scanned'
           child_item = Hash.new
           child_item['name'] = kit_product.product_kit_skus.option_product.name
@@ -129,7 +130,8 @@ class OrderItem < ActiveRecord::Base
       result['order_item_id'] = self.id
       result['child_items'] = []
       self.order_item_kit_products.each do |kit_product|
-        if !kit_product.product_kit_skus.product.nil? &&
+        if !kit_product.product_kit_skus.nil? &&
+           !kit_product.product_kit_skus.product.nil? &&
             (kit_product.scanned_status == 'scanned' or
               kit_product.scanned_status == 'partially_scanned')
           child_item = Hash.new

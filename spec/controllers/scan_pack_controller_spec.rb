@@ -644,8 +644,6 @@ describe ScanPackController do
       result = JSON.parse(response.body)
       expect(result['status']).to eq(false)
     end
-
-
   end
 end
 
