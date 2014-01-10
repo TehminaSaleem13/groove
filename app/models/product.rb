@@ -73,19 +73,14 @@ class Product < ActiveRecord::Base
 	  		result_kit = true
 	  		@kit_products.each do |kit_product|
 	  			if kit_product.product.status != 'inactive'
-		  			kit_product.product.product_kit_skuss.each do |kit_product1|
-		  				option_product = Product.find(kit_product1.option_product_id)
-				  	  	if !option_product.nil? && 
-				  	  			option_product.status != 'active'
-				  	  		result_kit &= false
-				  	  	end
-		  			end
-		  			if result_kit
-		  				kit_product.product.status = 'active'
-		  			else
-		  				kit_product.product.status = 'new'
-		  			end
-		  			kit_product.product.save
+		  			# kit_product.product.product_kit_skuss.each do |kit_product1|
+		  			# 	option_product = Product.find(kit_product1.option_product_id)
+				  	#   	if !option_product.nil? && 
+				  	#   			option_product.status != 'active'
+				  	#   		result_kit &= false
+				  	#   	end
+		  			# end
+		  			kit_product.product.update_product_status
 	  			end
 	  		end
 	  	end
