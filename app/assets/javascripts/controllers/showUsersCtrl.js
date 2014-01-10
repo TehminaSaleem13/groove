@@ -20,6 +20,7 @@ controller('showUsersCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$l
     		$scope.show_error = true;
     	});
 
+        $scope.show_password = true;
     	$scope.submit = function(newUser) {
 
     		console.log($scope.newUser);
@@ -29,7 +30,6 @@ controller('showUsersCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$l
     			{
     				$scope.error_msgs = data.messages;
     				$scope.show_error_msgs = true;
-
     			}
     			else
     			{
@@ -48,10 +48,13 @@ controller('showUsersCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$l
 						    		$scope.show_error = true;
 						    	});
                     $scope.edit_status = false;
+                    $scope.show_password = true;
     			}
     		})
     	}
-
+        $scope.change_password = function() {
+            $scope.show_password = true;
+        }
     	$scope.handlesort = function(predicate) {
     		$scope.predicate = predicate;
     		if ($scope.reverse == false)
@@ -215,7 +218,7 @@ controller('showUsersCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$l
                 $scope.newUser.other1 = data.user.other;
                 $scope.newUser.createEdit_packer = data.user.createEdit_from_packer;
                 $scope.edit_status = true;
-
+                $scope.show_password = false;
                 $('#createUser').modal('show');
             }
             else
@@ -242,6 +245,7 @@ controller('showUsersCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$l
 
     $scope.create_user = function() {
         $scope.edit_status = false;
+        $scope.show_password = true;
         $scope.newUser = {};
         $scope.newUser.active = true;
         $('#createUser').modal('show');

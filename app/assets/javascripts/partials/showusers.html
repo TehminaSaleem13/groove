@@ -123,8 +123,11 @@ aria-hidden="true">
 
     <div class="control-group">
       <label class="control-label">Password</label>
-      <div class="controls">
+      <div class="controls" ng-show="show_password">
         <input name="password" xs-input-sync ng-model="newUser.password" type="password" />
+       </div>
+       <div class="controls" ng-hide="show_password">
+        <a href="" ng-click='change_password()'> Change Password</a>
        </div>
     </div>
 
@@ -153,7 +156,7 @@ aria-hidden="true">
     <div class="control-group">
       <label class="control-label">Confirmation Code</label>
       <div class="controls">
-        <input name="confirmation_code" ng-model="newUser.confirmation_code" type="text" checked/>
+        <input name="confirmation_code" ng-model="newUser.confirmation_code" type="text" required/>
       </div>
     </div>
 

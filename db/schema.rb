@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140109152245) do
+ActiveRecord::Schema.define(:version => 20140110092223) do
 
   create_table "amazon_credentials", :force => true do |t|
     t.string   "merchant_id",                                     :null => false
@@ -333,7 +333,7 @@ ActiveRecord::Schema.define(:version => 20140109152245) do
     t.boolean  "add_order_items_ALL",    :default => false, :null => false
     t.string   "other"
     t.string   "name"
-    t.string   "confirmation_code",      :default => ""
+    t.string   "confirmation_code",      :default => "",    :null => false
   end
 
   add_index "users", ["reset_password_token"], :name => "index_users_on_reset_password_token", :unique => true

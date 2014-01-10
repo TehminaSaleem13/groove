@@ -17,15 +17,15 @@ class UserSettingsController < ApplicationController
     end
 
     @user.email = params[:email]
-    @user.password = params[:password]
+    @user.password = params[:password] if !params[:password].nil? && params[:password] != ''
     @user.username = params[:username]
-    @user.password_confirmation = params[:password]
+    @user.password_confirmation = params[:password] if !params[:password].nil? && params[:password] != ''
     if params[:active].nil?
       params[:active] = false
     end
     @user.active = params[:active]
     @user.name = params[:name] 
-    @user.confirmation_code = params[:confirmation_code] if !params[:confirmation_code].nil?
+    @user.confirmation_code = params[:confirmation_code]
 
     #add product details
     @user.edit_product_details = params[:edit_product_details] if !params[:edit_product_details].nil?
