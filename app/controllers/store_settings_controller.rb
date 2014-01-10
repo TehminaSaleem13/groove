@@ -408,7 +408,8 @@ class StoreSettingsController < ApplicationController
             product.store = @store
             product.store_product_id = 0
             product.name = ""
-            if !mapping['product_name'].nil? && mapping['product_name'] > 0
+            if !mapping['product_name'].nil? && mapping['product_name'] > 0 &&
+              Product.where(:name=>single_row[mapping['product_name']]).length == 0
               product.name = single_row[mapping['product_name']]
             end
             if !mapping['product_type'].nil? && mapping['product_type'] > 0
@@ -480,8 +481,10 @@ class StoreSettingsController < ApplicationController
             end
             if @result["status"]
               begin
-                product.save! if product.name != 'name'
-                product.update_product_status
+                if product.name != 'name' && product.name != ''
+                  product.save! 
+                  product.update_product_status
+                end
               rescue ActiveRecord::RecordInvalid => e
                 @result['status'] = false
                 @result['messages'].push(product.errors.full_messages)
