@@ -728,10 +728,12 @@ class ProductsController < ApplicationController
 					end
 					kit_sku['qty'] = 0
 					kit_sku['qty_on_hand'] = 0
-					kit_sku['packing_order'] = '-'
+					kit_sku['packing_order'] = option_product.kit_packing_placement
 					kit_sku['option_product_id'] = option_product.id
 					@result['product']['productkitskus'].push(kit_sku)
 				end
+				@result['product']['productkitskus'] = 
+					@result['product']['productkitskus'].sort_by {|hsh| hsh['packing_order']}
       end
 
   		if @product.product_skus.length > 0
@@ -853,6 +855,7 @@ class ProductsController < ApplicationController
   		@product.name = params[:basicinfo][:name]
   		@product.pack_time_adj = params[:basicinfo][:pack_time_adj]
   		@product.packing_placement = params[:basicinfo][:packing_placement]
+  		@product.kit_packing_placement = params[:basicinfo][:kit_packing_placement]
   		@product.product_type = params[:basicinfo][:product_type]
   		@product.spl_instructions_4_confirmation =
   			params[:basicinfo][:spl_instructions_4_confirmation]

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140110092223) do
+ActiveRecord::Schema.define(:version => 20140110121208) do
 
   create_table "amazon_credentials", :force => true do |t|
     t.string   "merchant_id",                                     :null => false
@@ -263,6 +263,7 @@ ActiveRecord::Schema.define(:version => 20140110092223) do
     t.string   "kit_parsing",                     :default => "depends"
     t.integer  "is_kit",                          :default => 0
     t.boolean  "disable_conf_req",                :default => false
+    t.integer  "kit_packing_placement",           :default => 50
   end
 
   add_index "products", ["store_id"], :name => "index_products_on_store_id"

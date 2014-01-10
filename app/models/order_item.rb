@@ -80,6 +80,7 @@ class OrderItem < ActiveRecord::Base
             kit_product.scanned_qty
           child_item['scanned_qty'] = kit_product.scanned_qty
           child_item['packing_placement'] = kit_product.product_kit_skus.option_product.packing_placement
+          child_item['kit_packing_placement'] = kit_product.product_kit_skus.option_product.kit_packing_placement
 
           if kit_product.product_kit_skus.option_product.product_barcodes.length > 0
             child_item['barcodes'] = kit_product.product_kit_skus.option_product.product_barcodes
@@ -89,7 +90,7 @@ class OrderItem < ActiveRecord::Base
           result['child_items'].push(child_item)
         end
       end
-      result['child_items'] = result['child_items'].sort_by { |hsh| hsh['packing_placement'] }
+      result['child_items'] = result['child_items'].sort_by { |hsh| hsh['kit_packing_placement'] }
     end
     result
   end
@@ -145,7 +146,7 @@ class OrderItem < ActiveRecord::Base
             kit_product.scanned_qty
           child_item['scanned_qty'] = kit_product.scanned_qty
           child_item['packing_placement'] = kit_product.product_kit_skus.option_product.packing_placement
-
+          child_item['kit_packing_placement'] = kit_product.product_kit_skus.option_product.kit_packing_placement
           if kit_product.product_kit_skus.option_product.product_barcodes.length > 0
             child_item['barcodes'] = kit_product.product_kit_skus.option_product.product_barcodes
           end
