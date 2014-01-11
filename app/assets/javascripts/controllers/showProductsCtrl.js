@@ -11,7 +11,6 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
     $('.modal-backdrop').remove();
     $scope.get_products = function(next,post_fn) {
         //$scope.loading = true;
-        $scope.single_product = {};
         $scope.products_edit_tmp = {
             name:"",
             sku: "",
@@ -185,6 +184,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
         $scope.product_setup.is_kit = 0;
         $scope.product_setup.limit = 20;
         $scope.product_setup.offset = 0;
+        $scope.single_product = {};
         $scope.alias_defaults();
         $(".product_setup-filter-active").addClass("active");
         $scope.get_products();
