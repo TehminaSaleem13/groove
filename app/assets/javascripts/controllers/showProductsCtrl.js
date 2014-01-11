@@ -327,11 +327,10 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
             image:'images'
         };
         $http.get('/products/getdetails/'+ id+'.json').success(function(data) {
+            $scope.single_product = {};
             if(data.product) {
-                for (i in data.product) {
-                    $scope.single_product[i] = data.product[i];
-                }
-                $('#showProduct').modal('show');
+                $scope.single_product = data.product;
+                //$('#showProduct').modal('show');
             } else {
                 $scope.single_product = {};
             }
@@ -357,7 +356,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
             } else {
                 $scope.single_product[prop][$scope.tmp.editing][name] = $scope.tmp[name];
             }
-            //$scope.update_single_product();
+            $scope.update_single_product();
         }
         $scope.tmp[name] = "";
         $scope.tmp.editing = -1;
@@ -685,7 +684,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
     $scope.handle_key_event =  function(event) {
         name = event.currentTarget.name;
         if(event.which == 13 || event.which == 188 || event.type == "focusout") {
-            event.preventDefault();
+            //event.preventDefault();
             if($scope.tmp[name] != "") {
                 $scope.save_node(name,event.type == "focusout");
             }
@@ -820,12 +819,4 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
             }
         }
     );
-    //poll server for status etc updates
-    $scope._tick = function() {
-        if($('#showProduct').hasClass("in")) {
-            $scope.product_single_details($scope.single_product.basicinfo.id,$scope.currently_open);
-        }
-        $timeout($scope._tick,5000);
-    }
-    //$scope._tick();
 }]);
