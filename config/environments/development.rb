@@ -38,6 +38,9 @@ Groovepacks::Application.configure do
   #Default URL options for mailers
   config.action_mailer.default_url_options = { :host => 'localhost:3000' }
 
+  Rails.logger = Logger.new(STDOUT)
+  config.log_level = :warn
+  
   ENV['AMAZON_MWS_ACCESS_KEY_ID'] = "AKIAJ4VZ2GY7HZUL277Q"
   ENV['AMAZON_MWS_SECRET_ACCESS_KEY'] = "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"
 

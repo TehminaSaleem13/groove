@@ -315,7 +315,7 @@ class StoreSettingsController < ApplicationController
         @result['messages'].push(e.message)
       end
     end
-
+    logger.info "CSV Map stored."
     if @result["status"]
       csv_directory = "uploads/csv"
       file_path = File.join(csv_directory, "#{params[:store_id]}.#{params[:type]}.csv")
@@ -364,6 +364,7 @@ class StoreSettingsController < ApplicationController
             order = Order.new
             order.store = @store
             #order_placed_time,price,qty
+            logger.info mapping.to_s
             order_required = ["qty","sku","increment_id"]
             order_map.each do |single_map|
               if !mapping[single_map].nil? && mapping[single_map] > 0
@@ -373,6 +374,7 @@ class StoreSettingsController < ApplicationController
                 end
               end
             end
+            logger.info order_required.to_s
             if order_required.length > 0
               @result["status"] = false
               order_required.each do |required_element|
