@@ -42,16 +42,18 @@ class Product < ActiveRecord::Base
   	if self.status != 'inactive' || force_from_inactive_state
 	  	result = true
 
+      result &= false if (self.name.nil? or self.name == '')
+
 	  	result &= false if self.product_skus.length == 0
 
 	  	result &= false if self.product_barcodes.length == 0
 
 	  	#if kit it should contain kit products as well
-	  	if self.is_kit == 1 
+	  	if self.is_kit == 1
 	  	  result &= false if self.product_kit_skuss.length == 0
 	  	  self.product_kit_skuss.each do |kit_product|
 	  	  	option_product = Product.find(kit_product.option_product_id)
-	  	  	if !option_product.nil? && 
+	  	  	if !option_product.nil? &&
 	  	  			option_product.status != 'active'
 	  	  		result &= false
 	  	  	end
@@ -61,12 +63,12 @@ class Product < ActiveRecord::Base
 	  	if result
 	  		self.status = 'active'
 	  		self.save
-	  	else 
+	  	else
 	  		self.status = 'new'
 	  		self.save
 	  	end
 
-	  	# for non kit products, update all kits product statuses where the 
+	  	# for non kit products, update all kits product statuses where the
 	  	# current product is an item of the kit
 	  	if self.is_kit == 0
 	  		@kit_products  = ProductKitSkus.where(:option_product_id => self.id)

@@ -715,16 +715,15 @@ class ProductsController < ApplicationController
   		@result['product']['barcodes'] = @product.product_barcodes
       @result['product']['inventory_warehouses'] = @product.product_inventory_warehousess
         #@result['product']['productkitskus'] = @product.product_kit_skuss
-
+      @result['product']['productkitskus'] = []
       if @product.is_kit
-				@result['product']['productkitskus'] = []
 				@product.product_kit_skuss.each do |kit|
 					option_product = Product.find(kit.option_product_id)
 
 					kit_sku = Hash.new
 					kit_sku['name'] = option_product.name
 					if option_product.product_skus.length > 0
-						kit_sku['sku'] = option_product.product_skus.first.sku 
+						kit_sku['sku'] = option_product.product_skus.first.sku
 					end
 					kit_sku['qty'] = 0
 					kit_sku['qty_on_hand'] = 0
