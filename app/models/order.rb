@@ -273,7 +273,19 @@ class Order < ActiveRecord::Base
 
     if result 
       order_item = OrderItem.find(matched_order_item_id)
-      order_item.kit_split = true
+      if order_item.kit_split == true
+
+        #if current item does not belong to any of the unscanned items in the already split kits
+        if order_item.should_kit_split_qty_be_increased(matched_product_id)
+          if order_item.kit_split_qty <= order_item.qty
+            logger.info 'Kit is already split, incrementing quantity'
+            order_item.kit_split_qty = order_item.kit_split_qty + 1
+          end
+        end
+      else
+        order_item.kit_split = true
+        order_item.kit_split_qty = 1
+      end
       order_item.save
       #puts "Order Item"+order_item.id.to_s
       order_item.reload
@@ -316,6 +328,7 @@ class Order < ActiveRecord::Base
     end
     unscanned_list.sort_by { |hsh| hsh['packing_placement'] }
   end
+
   def get_scanned_items
     scanned_list = []
 

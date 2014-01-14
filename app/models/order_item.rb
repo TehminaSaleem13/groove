@@ -186,6 +186,34 @@ class OrderItem < ActiveRecord::Base
       self.order.save
     end
 
-
   end
+
+  def should_kit_split_qty_be_increased(product_id)
+    result = false
+    if self.product.is_kit == 1 && self.kit_split && 
+        self.product.kit_parsing == 'depends'
+        order_items = []
+        min_qty = 9999
+        self.order_item_kit_products.each do |kit_product|
+            item = Hash.new
+            item['id'] = kit_product.product_kit_skus.product.id
+            item['unscanned_qty'] = self.qty * kit_product.product_kit_skus.qty - 
+              kit_product.scanned_qty 
+            order_items.push(item)
+            min_qty = item['unscanned_qty'] if item['unscanned_qty'] < min_qty
+        end
+
+        if min_qty != 9999
+          order_items.each do |item|
+            if item['id'] == product_id &&
+              item['unscanned_qty'] == min_qty
+              result = true
+              break 
+            end
+          end
+        end
+
+    end
+    result
+  end 
 end
