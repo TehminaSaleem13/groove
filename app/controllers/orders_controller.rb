@@ -587,7 +587,7 @@ class OrdersController < ApplicationController
           end
           @orderitem['sku'] = product.product_skus.first.sku
           @orderitem['productimages'] = product.product_images
-
+          
         end
         @result['order']['items'].push(@orderitem)
       end

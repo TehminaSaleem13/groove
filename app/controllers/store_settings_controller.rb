@@ -433,7 +433,9 @@ class StoreSettingsController < ApplicationController
               if @result["status"]
                 begin
                 if Order.where(:increment_id=> order.increment_id).length == 0
+                  order.status = 'onhold'
                   order.save!
+                  order.update_order_status
                 end
                 rescue ActiveRecord::RecordInvalid => e
                   @result['status'] = false
