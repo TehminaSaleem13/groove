@@ -359,6 +359,7 @@ class StoreSettingsController < ApplicationController
           "price",
           "qty"
         ]
+        final_record.delete_at(0) if final_record.length > 0
         final_record.each_with_index do |single_row,index|
           if params[:type] == "order"
             order = Order.new
@@ -367,8 +368,45 @@ class StoreSettingsController < ApplicationController
             logger.info mapping.to_s
             order_required = ["qty","sku","increment_id"]
             order_map.each do |single_map|
-              if !mapping[single_map].nil? && mapping[single_map] > 0
+              if !mapping[single_map].nil? && mapping[single_map] >= 0
+                #if sku, create order item with product id, qty
+                if single_map == 'sku'
+                  product_skus = ProductSku.where(:sku => single_row[mapping[single_map]])
+                  if product_skus.length > 0
+                    order_item  = OrderItem.new
+                    order_item.product = product_skus.first.product
+                    order_item.sku = single_row[mapping['sku']]
+                    if !mapping['qty'].nil? && mapping['qty'] >= 0
+                      order_item.qty = single_row[mapping['qty']]
+                      order_required.delete('qty')
+                    end
+                    order.order_items << order_item
+                  else # no sku is found
+                    product = Product.new
+                    product.name = 'Product created from order import'
+
+                    sku = ProductSku.new
+                    sku.sku = single_row[mapping['sku']]
+                    product.product_skus << sku
+                    product.store_product_id = 0
+                    product.store = @store
+                    product.save
+
+                    order_item  = OrderItem.new
+                    order_item.product = product
+                    order_item.sku = single_row[mapping['sku']]
+                    if !mapping['qty'].nil? && mapping['qty'] >= 0
+                      order_item.qty = single_row[mapping['qty']]
+                      order_required.delete('qty')
+                    end
+                    order.order_items << order_item
+                  end  
+                end
+                  #if product id cannot be found with SKU, then create product with product name and SKU
+
+              
                 order[single_map] = single_row[mapping[single_map]]
+
                 if order_required.include? single_map
                   order_required.delete(single_map)
                 end
@@ -388,13 +426,15 @@ class StoreSettingsController < ApplicationController
                   time = Time.parse(single_row[mapping["order_placed_time"]])
                   order["order_placed_time"] = time
                 rescue ArgumentError => e
-                  @result["status"] = false
+                  #@result["status"] = true
                   @result["messages"].push("Order Placed has bad parameter - #{single_row[mapping['order_placed_time']]}")
                 end
               end
               if @result["status"]
                 begin
+                if Order.where(:increment_id=> order.increment_id).length == 0
                   order.save!
+                end
                 rescue ActiveRecord::RecordInvalid => e
                   @result['status'] = false
                   @result['messages'].push(order.errors.full_messages)

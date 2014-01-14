@@ -620,6 +620,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
         $scope.current = $scope.csvimporter[$scope.csvimporter.type]["settings"];
         $scope.current.store_id = data["store_id"];
         $scope.current.type = $scope.csvimporter.type;
+
         $scope.parse();
         $scope.check_disable();
         $scope.loading = false;
@@ -656,8 +657,11 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
 
     $scope.parse = function() {
         //Show loading sign
+        if ($scope.csvimporter[$scope.csvimporter.type] != null)
+        {
         $scope.loading = true;
         $timeout($scope.doparse,2);
+        }
     }
 
     $scope.doparse = function(){
