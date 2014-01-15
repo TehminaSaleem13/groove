@@ -526,7 +526,7 @@ describe ScanPackController do
       product_kit_sku = FactoryGirl.create(:product_sku, :product=> product_kit, :sku=> 'IPROTO')
       product_kit_barcode = FactoryGirl.create(:product_barcode, :product=> product_kit, :barcode => 'IPROTOBAR')
       order_item_kit = FactoryGirl.create(:order_item, :product_id=>product_kit.id,
-                    :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>product_kit.name)
+                    :qty=>2, :price=>"10", :row_total=>"10", :order=>order, :name=>product_kit.name)
 
       kit_product = FactoryGirl.create(:product, :name=>'Protection Sheet', :packing_placement=>30, :kit_packing_placement=>1)
       kit_product_sku = FactoryGirl.create(:product_sku, :product=> kit_product, :sku=> 'IPROTO1')
@@ -551,6 +551,7 @@ describe ScanPackController do
       product_kit_sku3 = FactoryGirl.create(:product_kit_sku, :product => product_kit, :option_product_id=>kit_product3.id)
       order_item_kit_product3 = FactoryGirl.create(:order_item_kit_product, :order_item => order_item_kit,   
             :product_kit_skus => product_kit_sku3)
+
       order_item2 = FactoryGirl.create(:order_item, :product_id=>kit_product2.id,
               :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>kit_product2.name)
 
@@ -574,9 +575,20 @@ describe ScanPackController do
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
       expect(result["status"]).to eq(true)
-      expect(result['data']['unscanned_items'].length).to eq(1)
+      expect(result['data']['unscanned_items'].length).to eq(2)
       expect(result['data']['unscanned_items'].first['child_items'].length).to eq(2)
       expect(result['data']['unscanned_items'].first['child_items'].first['name']).to eq('Protection Sheet')
+      expect(result['data']['unscanned_items'].last['product_type']).to eq('single')
+      expect(result['data']['unscanned_items'].last['child_items']).to eq(nil)
+      expect(result['data']['next_state']).to eq('ready_for_product')
+
+      get :scan_product_by_barcode, {:barcode => 'KITITEM1', :order_id => order.id }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["status"]).to eq(true)
+      expect(result['data']['unscanned_items'].length).to eq(2)
+      expect(result['data']['unscanned_items'].first['child_items'].length).to eq(1)
+      expect(result['data']['unscanned_items'].first['child_items'].first['name']).to eq('Instruction Manual')
       expect(result['data']['next_state']).to eq('ready_for_product')
 
       get :scan_product_by_barcode, {:barcode => 'KITITEM1', :order_id => order.id }
@@ -584,9 +596,27 @@ describe ScanPackController do
       result = JSON.parse(response.body)
       expect(result["status"]).to eq(true)
       expect(result['data']['unscanned_items'].length).to eq(1)
+      expect(result['data']['unscanned_items'].first['child_items'].length).to eq(2)
+      expect(result['data']['unscanned_items'].first['child_items'].first['name']).to eq('Screen Wiper')
+      expect(result['data']['next_state']).to eq('ready_for_product')
+
+
+      get :scan_product_by_barcode, {:barcode => 'KITITEM2', :order_id => order.id }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["status"]).to eq(true)
+      expect(result['data']['unscanned_items'].length).to eq(1)
       expect(result['data']['unscanned_items'].first['child_items'].length).to eq(1)
       expect(result['data']['unscanned_items'].first['child_items'].first['name']).to eq('Instruction Manual')
-      expect(result['data']['next_state']).to eq('ready_for_product')
+
+      get :scan_product_by_barcode, {:barcode => 'KITITEM3', :order_id => order.id }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["status"]).to eq(true)
+      expect(result['data']['unscanned_items'].length).to eq(1)
+      expect(result['data']['unscanned_items'].first['child_items'].length).to eq(1)
+      expect(result['data']['unscanned_items'].first['child_items'].first['name']).to eq('Instruction Manual')
+
 
       get :scan_product_by_barcode, {:barcode => 'KITITEM3', :order_id => order.id }
       expect(response.status).to eq(200)
