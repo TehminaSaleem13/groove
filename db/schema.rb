@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140114143505) do
+ActiveRecord::Schema.define(:version => 20140115092551) do
 
   create_table "amazon_credentials", :force => true do |t|
     t.string   "merchant_id",                                     :null => false
@@ -109,17 +109,19 @@ ActiveRecord::Schema.define(:version => 20140114143505) do
   create_table "order_items", :force => true do |t|
     t.string   "sku"
     t.integer  "qty"
-    t.decimal  "price",          :precision => 10, :scale => 0
-    t.decimal  "row_total",      :precision => 10, :scale => 0
+    t.decimal  "price",                 :precision => 10, :scale => 0
+    t.decimal  "row_total",             :precision => 10, :scale => 0
     t.integer  "order_id"
-    t.datetime "created_at",                                                              :null => false
-    t.datetime "updated_at",                                                              :null => false
-    t.string   "name",                                          :default => "",           :null => false
+    t.datetime "created_at",                                                                     :null => false
+    t.datetime "updated_at",                                                                     :null => false
+    t.string   "name",                                                 :default => "",           :null => false
     t.integer  "product_id"
-    t.string   "scanned_status",                                :default => "notscanned"
-    t.integer  "scanned_qty",                                   :default => 0
-    t.boolean  "kit_split",                                     :default => false
-    t.integer  "kit_split_qty",                                 :default => 0
+    t.string   "scanned_status",                                       :default => "notscanned"
+    t.integer  "scanned_qty",                                          :default => 0
+    t.boolean  "kit_split",                                            :default => false
+    t.integer  "kit_split_qty",                                        :default => 0
+    t.integer  "kit_split_scanned_qty",                                :default => 0
+    t.integer  "single_scanned_qty",                                   :default => 0
   end
 
   add_index "order_items", ["order_id"], :name => "index_order_items_on_order_id"

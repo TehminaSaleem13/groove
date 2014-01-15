@@ -27,7 +27,7 @@ class OrderItem < ActiveRecord::Base
   	result
   end
 
-  def build_unscanned_single_item
+  def build_unscanned_single_item(depends_kit = false)
     result = Hash.new
 
     if !self.product.nil?
@@ -37,7 +37,15 @@ class OrderItem < ActiveRecord::Base
         self.product.product_images.first if self.product.product_images.length > 0
       result['images'] = self.product.product_images
       result['sku'] = self.product.product_skus.first.sku if self.product.product_skus.length > 0
-      result['qty_remaining'] = self.qty - self.scanned_qty
+      
+      if depends_kit
+        result['qty_remaining'] = 
+          (self.qty - self.kit_split_qty) - (self.scanned_qty-self.kit_split_scanned_qty)
+      else
+        result['qty_remaining'] = 
+          self.qty - self.scanned_qty
+      end
+
       result['scanned_qty'] = self.scanned_qty
       result['packing_placement'] = self.product.packing_placement
       result['barcodes'] = self.product.product_barcodes
@@ -47,7 +55,7 @@ class OrderItem < ActiveRecord::Base
     result
   end
 
-  def build_unscanned_individual_kit
+  def build_unscanned_individual_kit (depends_kit = false)
     result = Hash.new
     if !self.product.nil?
       result['name'] = self.product.name
@@ -56,7 +64,11 @@ class OrderItem < ActiveRecord::Base
         self.product.product_images.first if self.product.product_images.length > 0
       result['images'] = self.product.product_images
       result['sku'] = self.product.product_skus.first.sku if self.product.product_skus.length > 0
-      result['qty_remaining'] = self.qty - self.scanned_qty
+      if depends_kit
+        result['qty_remaining'] = self.kit_split_qty - self.kit_split_scanned_qty
+      else
+        result['qty_remaining'] = self.qty - self.scanned_qty
+      end
       result['scanned_qty'] = self.scanned_qty
       result['packing_placement'] = self.product.packing_placement
       result['product_id'] = self.product.id
@@ -76,9 +88,15 @@ class OrderItem < ActiveRecord::Base
           if kit_product.product_kit_skus.option_product.product_skus.length > 0
             child_item['sku'] = kit_product.product_kit_skus.option_product.product_skus.first.sku 
           end
-          child_item['qty_remaining'] = self.qty * kit_product.product_kit_skus.qty - 
-            kit_product.scanned_qty
-          child_item['scanned_qty'] = kit_product.scanned_qty
+          if depends_kit
+            child_item['qty_remaining'] = self.kit_split_qty * kit_product.product_kit_skus.qty - 
+                          kit_product.scanned_qty
+            child_item['scanned_qty'] = kit_product.scanned_qty
+          else
+            child_item['qty_remaining'] = self.qty * kit_product.product_kit_skus.qty - 
+              kit_product.scanned_qty
+            child_item['scanned_qty'] = kit_product.scanned_qty
+          end
           child_item['packing_placement'] = kit_product.product_kit_skus.option_product.packing_placement
           child_item['kit_packing_placement'] = kit_product.product_kit_skus.option_product.kit_packing_placement
 
@@ -95,7 +113,7 @@ class OrderItem < ActiveRecord::Base
     result
   end
 
-  def build_scanned_single_item
+  def build_scanned_single_item(depends_kit = false)
     result = Hash.new
 
     if !self.product.nil?
@@ -105,8 +123,16 @@ class OrderItem < ActiveRecord::Base
         self.product.product_images.first if self.product.product_images.length > 0
       result['images'] = self.product.product_images
       result['sku'] = self.product.product_skus.first.sku if self.product.product_skus.length > 0
-      result['qty_remaining'] = self.qty - self.scanned_qty
-      result['scanned_qty'] = self.scanned_qty
+      if depends_kit
+        result['qty_remaining'] = 
+          (self.qty - self.kit_split_qty) - (self.scanned_qty-self.kit_split_scanned_qty)
+        result['scanned_qty'] = self.single_scanned_qty
+      else
+        result['qty_remaining'] = 
+          self.qty - self.scanned_qty
+        result['scanned_qty'] = self.scanned_qty
+      end
+
       result['packing_placement'] = self.product.packing_placement
       result['barcodes'] = self.product.product_barcodes
       result['product_id'] = self.product.id
@@ -115,7 +141,7 @@ class OrderItem < ActiveRecord::Base
     result
   end
 
-  def build_scanned_individual_kit
+  def build_scanned_individual_kit(depends_kit = false)
     result = Hash.new
 
     if !self.product.nil?
@@ -125,8 +151,13 @@ class OrderItem < ActiveRecord::Base
         self.product.product_images.first if self.product.product_images.length > 0
       result['images'] = self.product.product_images
       result['sku'] = self.product.product_skus.first.sku if self.product.product_skus.length > 0
-      result['qty_remaining'] = self.qty - self.scanned_qty
-      result['scanned_qty'] = self.scanned_qty
+      if depends_kit
+        result['qty_remaining'] = self.kit_split_qty - self.kit_split_scanned_qty
+        result['scanned_qty'] = self.kit_split_scanned_qty
+      else
+        result['qty_remaining'] = self.qty - self.scanned_qty
+        result['scanned_qty'] = self.scanned_qty
+      end
       result['packing_placement'] = self.product.packing_placement
       result['product_id'] = self.product.id
       result['order_item_id'] = self.id
@@ -142,6 +173,16 @@ class OrderItem < ActiveRecord::Base
             child_item['image'] = 
               kit_product.product_kit_skus.option_product.product_images.first 
           end
+          if depends_kit
+            child_item['qty_remaining'] = self.kit_split_qty * kit_product.product_kit_skus.qty - 
+                          kit_product.scanned_qty
+            child_item['scanned_qty'] = kit_product.scanned_qty
+          else
+            child_item['qty_remaining'] = self.qty * kit_product.product_kit_skus.qty - 
+              kit_product.scanned_qty
+            child_item['scanned_qty'] = kit_product.scanned_qty
+          end
+
           child_item['qty_remaining'] = self.qty * kit_product.product_kit_skus.qty - 
             kit_product.scanned_qty
           child_item['scanned_qty'] = kit_product.scanned_qty
@@ -164,7 +205,15 @@ class OrderItem < ActiveRecord::Base
     order_unscanned = false
     
     if self.scanned_qty < self.qty
-      self.scanned_qty = self.scanned_qty + 1
+      total_qty = 0
+      if self.product.kit_parsing == 'depends'
+        self.single_scanned_qty = self.single_scanned_qty + 1
+        self.scanned_qty = self.single_scanned_qty + self.kit_split_scanned_qty
+        total_qty = self.qty - self.kit_split_qty
+      else
+        self.scanned_qty = self.scanned_qty + 1
+        total_qty = self.qty - self.kit_split_qty
+      end
       if self.scanned_qty == self.qty
         self.scanned_status = 'scanned'
       else
@@ -196,12 +245,14 @@ class OrderItem < ActiveRecord::Base
         min_qty = 9999
         self.order_item_kit_products.each do |kit_product|
             item = Hash.new
-            item['id'] = kit_product.product_kit_skus.product.id
+            item['id'] = kit_product.product_kit_skus.option_product.id
             item['unscanned_qty'] = self.qty * kit_product.product_kit_skus.qty - 
               kit_product.scanned_qty 
             order_items.push(item)
             min_qty = item['unscanned_qty'] if item['unscanned_qty'] < min_qty
         end
+        
+        logger.info order_items.to_s
 
         if min_qty != 9999
           order_items.each do |item|
