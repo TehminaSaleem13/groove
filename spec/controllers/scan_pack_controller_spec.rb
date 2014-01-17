@@ -33,6 +33,22 @@ describe ScanPackController do
       result = JSON.parse(response.body)
       expect(result["status"]).to eq(true)
       expect(result["data"]["status"]).to eq("awaiting")
+      expect(result["data"]["next_state"]).to eq("ready_for_tracking_num")
+    end
+
+    it "should process order scan for orders having a status of Awaiting Scanning with some unscanned items" do
+      request.accept = "application/json"
+
+      @order = FactoryGirl.create(:order)
+      @orderitem = FactoryGirl.create(:order_item, :order=>@order)
+      @order.addnewitems
+
+      get :scan_order_by_barcode, { :barcode => 12345678 }
+
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["status"]).to eq(true)
+      expect(result["data"]["status"]).to eq("awaiting")
       expect(result["data"]["next_state"]).to eq("ready_for_product")
     end
 
@@ -334,7 +350,7 @@ describe ScanPackController do
       expect(result["status"]).to eq(true)
 
       order.reload
-      expect(order.status).to eq("scanned")
+      expect(order.status).to eq("awaiting")
       order_item.reload
       expect(order_item.scanned_qty).to eq(3)
       expect(order_item.scanned_status).to eq("scanned")
@@ -377,13 +393,13 @@ describe ScanPackController do
       result = JSON.parse(response.body)
       expect(result["status"]).to eq(true)
       expect(result['data']['unscanned_items'].length).to eq(0)
-      expect(result['data']['next_state']).to eq('ready_for_order')
+      expect(result['data']['next_state']).to eq('ready_for_tracking_num')
 
       order_item_kit.reload
       #expect(order_item_kit.scanned_qty).to eq(1)
       expect(order_item_kit.scanned_status).to eq("scanned")
       order.reload
-      expect(order.status).to eq("scanned")
+      expect(order.status).to eq("awaiting")
       order_item.reload
       expect(order_item.scanned_qty).to eq(1)
       expect(order_item.scanned_status).to eq("scanned")
@@ -480,7 +496,7 @@ describe ScanPackController do
       expect(result['data']['unscanned_items'].length).to eq(0)
       expect(result['data']['scanned_items'].length).to eq(2)
       expect(result['data']['scanned_items'].last['child_items'].length).to eq(2)
-      expect(result['data']['next_state']).to eq('ready_for_order')
+      expect(result['data']['next_state']).to eq('ready_for_tracking_num')
 
 
       order_item.reload
@@ -500,7 +516,7 @@ describe ScanPackController do
       expect(order_item_kit.scanned_qty).to eq(2)
 
       order.reload
-      expect(order.status).to eq("scanned")
+      expect(order.status).to eq("awaiting")
       #puts result['data']['unscanned_items'].to_s
       expect(result['data']['unscanned_items'].length).to eq(0)
       expect(result['data']['scanned_items'].length).to eq(2)
@@ -623,10 +639,10 @@ describe ScanPackController do
       result = JSON.parse(response.body)
       expect(result["status"]).to eq(true)
       expect(result['data']['unscanned_items'].length).to eq(0)
-      expect(result['data']['next_state']).to eq('ready_for_order')
+      expect(result['data']['next_state']).to eq('ready_for_tracking_num')
 
       order.reload
-      expect(order.status).to eq("scanned")
+      expect(order.status).to eq("awaiting")
     end
 
     it "should reset scanned status of order" do
@@ -738,6 +754,20 @@ describe ScanPackController do
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
       expect(result['status']).to eq(false)
+    end
+
+    it "should scan tracking number of an order" do
+      request.accept = "application/json"
+      order = FactoryGirl.create(:order, :status=>'awaiting')
+
+      put :scan_tracking_num, {:order_id => order.id, :tracking_num=>'1234567890' }
+
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['status']).to eq(true)
+      order.reload
+      expect(order.status).to eq('scanned')
+      #expect()
     end
   end
 end

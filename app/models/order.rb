@@ -60,9 +60,10 @@ class Order < ActiveRecord::Base
     result
   end
 
-  def set_order_to_scanned_state
+  def set_order_to_scanned_state(username)
     self.status = 'scanned'
-    self.scanned_on = Time.now
+    self.scanned_on = current_time_from_proper_timezone
+    self.addactivity('Order Scanning Complete', username)
     self.save
   end
 

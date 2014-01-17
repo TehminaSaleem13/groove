@@ -55,17 +55,17 @@ class OrderItemKitProduct < ActiveRecord::Base
 	  	self.order_item.save
 
 	  	#update order status
-	  	self.order_item.order.order_items.each do |order_item|
-	  		if order_item.scanned_status != 'scanned'
-	  			order_unscanned = true
-	  		end
-	  	end
-	  	if order_unscanned
-	  		self.order_item.order.status = 'awaiting'
-	  	else
-        	self.order_item.order.set_order_to_scanned_state
-	  	end
-	  	self.order_item.order.save
+	  	# self.order_item.order.order_items.each do |order_item|
+	  	# 	if order_item.scanned_status != 'scanned'
+	  	# 		order_unscanned = true
+	  	# 	end
+	  	# end
+	  	# if order_unscanned
+	  	# 	self.order_item.order.status = 'awaiting'
+	  	# else
+    #     	self.order_item.order.set_order_to_scanned_state
+	  	# end
+	  	# self.order_item.order.save
   	end
   end
 end

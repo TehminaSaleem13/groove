@@ -496,3 +496,33 @@
     </div>
 </div>
 <!-- Product list Modal ends-->
+
+<!-- Tracking number Scan modal -->
+<div id="trackingNumberScan" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="trackingNumberScan"
+     aria-hidden="true">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="icon-remove"></i></button>
+        <h3 id="trackingNumberScanHeader">Order is complete.</h3>
+    </div>
+    <div class="form-horizontal form-horizontal-create" >
+        <fieldset>
+            <div class="modal-body" id="trackingNumberScan-body">
+                <div class="alert alert-danger" ng-show="show_error_msgs">
+                    <button type="button" class="close" data-dismiss="alert"><i class="icon-remove"></i></button>
+                    <p ng-repeat="message in error_msgs">{{message}}</p>
+                </div>
+                <h4 id="trackingNumberScanHeader">Please create the shipping label, adhere it to the package, and scan the tracking number to continue.</h4>
+                <div class="control-group">
+                    <label class="control-label">Tracking Number</label>
+                    <div class="controls">
+                        <input id="tracking_num" type="text" ng-model="tracking_num" />
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+    </div>
+    <div class="modal-footer">
+        <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+    </div>
+</div>
+<!-- Tracking number Scan modal ends -->

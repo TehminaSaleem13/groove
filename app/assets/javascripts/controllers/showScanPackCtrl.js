@@ -62,12 +62,13 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
             request_for_confirmation_code_with_product_edit: $scope._product_edit_confirmation_code_state,
             product_edit: $scope._product_edit_state,
             order_clicked: $scope._order_clicked_state,
+            ready_for_tracking_num: $scope._ready_for_tracking_num,
             default: "ready_for_order"
         }
         $scope._rf_inputObj = $('input#rf_input');
         $scope._order_confirmation_inputObj = $('input#order_edit_confirmation_code');
         $scope._product_confirmation_inputObj = $('input#product_edit_confirmation_code');
-
+        $scope._tracking_num_inputObj = $('input#tracking_num');
         //Register events and make function calls
         $http.get('/home/userinfo.json').success(function(data){
             $scope.username = data.username;
@@ -75,6 +76,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
         $scope._rf_inputObj.keydown($scope._handle_rf_key_event);
         $scope._order_confirmation_inputObj.keydown($scope._handle_order_confirmation_code_key_event);
         $scope._product_confirmation_inputObj.keydown($scope._handle_product_confirmation_code_key_event);
+        $scope._tracking_num_inputObj.keydown($scope._scan_tracking_num_handle_event)
         $("#showProductConfirmation").on('shown',function() {
             $scope._focus_input($scope._product_confirmation_inputObj);
         });
@@ -212,7 +214,39 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
             $scope.show_alert(["Cannot load Order with id "+ $scope.order_id+". There was a server error"],0);
         });
     }
+    $scope._ready_for_tracking_num = function() {
+        //open modal and display input field for tracking number
+        $('#trackingNumberScan').modal('show');
+    }
+    $scope._scan_tracking_num_handle_event = function(event) {
+        //send request to server
+        if(event.which == 13) {
+            $http.post('/scan_pack/scan_tracking_num.json',{tracking_num:$scope.tracking_num,
+                    order_id:$scope.order_id}).success(function(data){
 
+                //console.log(data);
+                $scope.hide_alert(-1);
+                if(data.status) {
+                    if(data.notice_messages.length) {
+                        $scope.show_alert(data.notice_messages,2);
+                    }
+                    if(data.success_messages.length) {
+                        $scope.show_alert(data.success_messages,1);
+                    }
+                } else {
+                    $scope.show_alert(data.error_messages,0);
+                }
+                if(data.data != null) {
+                    $scope.rf_input = "";
+                    $('#trackingNumberScan').modal('hide');
+                    $scope._next_state(data.data);
+                }
+
+            }).error(function(data){
+                    $scope.show_alert(["A server error was encountered"],0);
+            });
+        }
+    }
     $scope._order_edit_confirmation_code_state =  function(data) {
         $("#showOrderConfirmation").modal('show');
     }
