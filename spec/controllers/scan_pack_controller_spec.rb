@@ -33,6 +33,22 @@ describe ScanPackController do
       result = JSON.parse(response.body)
       expect(result["status"]).to eq(true)
       expect(result["data"]["status"]).to eq("awaiting")
+      expect(result["data"]["next_state"]).to eq("ready_for_tracking_num")
+    end
+
+    it "should process order scan for orders having a status of Awaiting Scanning with some unscanned items" do
+      request.accept = "application/json"
+
+      @order = FactoryGirl.create(:order)
+      @orderitem = FactoryGirl.create(:order_item, :order=>@order)
+      @order.addnewitems
+
+      get :scan_order_by_barcode, { :barcode => 12345678 }
+
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["status"]).to eq(true)
+      expect(result["data"]["status"]).to eq("awaiting")
       expect(result["data"]["next_state"]).to eq("ready_for_product")
     end
 
