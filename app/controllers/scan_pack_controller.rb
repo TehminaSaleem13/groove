@@ -266,8 +266,8 @@ class ScanPackController < ApplicationController
 					  	@order.reload
 					  	@result['data']['unscanned_items'] = @order.get_unscanned_items
 					  	@result['data']['scanned_items'] = @order.get_scanned_items
-					  	if @order.status == 'scanned'
-					  		@result['data']['next_state'] = 'ready_for_order'
+					  	if !@order.has_unscanned_items
+					  		@result['data']['next_state'] = 'ready_for_tracking_num'
 					  	end
 					  	#puts "Length of unscanned items:" + @result['data']['unscanned_items'].length.to_s
 					  	#puts @result['data']['unscanned_items'].to_s
@@ -322,6 +322,42 @@ class ScanPackController < ApplicationController
 	    respond_to do |format|
 	      format.html # show.html.erb
 	      format.json { render json: @result }
+	    end
+	end
+
+	# takes order_id and tracking number as input.
+	def scan_tracking_num
+		result = Hash.new
+	    result['status'] = true
+	    result['error_messages'] = []
+	    result['success_messages'] = []
+	    result['notice_messages'] = []
+	    result['data'] = Hash.new
+	    
+	   	order = Order.find(params[:order_id])
+
+	   	if !order.nil? 
+	   		if order.status == 'awaiting'
+		   		if !params[:tracking_num].nil?
+			   		order.tracking_num =  params[:tracking_num]
+			   		order.set_order_to_scanned_state(current_user.username)
+			   		order.save
+			    else
+					result['status'] &= false
+					result['error_messages'].push("No tracking number is provided")
+			    end
+			else
+				result['status'] &= false
+				result['error_messages'].push("The order is not in awaiting state. Cannot scan the tracking number")
+			end
+	   	else
+			result['status'] &= false
+			result['error_messages'].push("Could not find order with id: "+params[:order_id])
+	   	end
+
+	    respond_to do |format|
+	      format.html # show.html.erb
+	      format.json { render json: result }
 	    end
 	end
 end
