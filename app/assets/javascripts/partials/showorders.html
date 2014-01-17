@@ -116,7 +116,9 @@
                 <tbody>
                 <tr ng-repeat="order in orders">
                     <td data-header="checkbox"><input type="checkbox" ng-model="order.checked"/></td>
-                    <td data-header="tags"></td>
+                    <td data-header="tags">
+                        <span ng-repeat = "tag in order.tags">{{tag.name}}</span>
+                    </td>
                     <td data-header="store_name">
                         {{order.store_name}}
                     </td>

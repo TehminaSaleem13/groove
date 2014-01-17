@@ -598,6 +598,7 @@ class OrdersController < ApplicationController
       @result['order']['remove_items_permitted'] = current_user.remove_order_items
       @result['order']['activities'] = @order.order_activities
       @result['order']['exception'] = @order.order_exceptions
+      @result['order']['tags'] = @order.order_tags
     else
       @result['status'] = false
       @result['error_message'] = "Could not find order"
@@ -941,6 +942,7 @@ class OrdersController < ApplicationController
       @order_hash['state'] = order.state
       @order_hash['postcode'] =order.postcode
       @order_hash['country'] = order.country
+      @order_hash['tags'] = order.order_tags
       @orders_result.push(@order_hash)
     end
     return @orders_result

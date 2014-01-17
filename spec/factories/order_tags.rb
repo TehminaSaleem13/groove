@@ -2,8 +2,8 @@
 
 FactoryGirl.define do
   factory :order_tag do
-    name "Contains New"
-    color "#FF0000"
+    name "Sample Tag"
+    color "#FFFFFF"
     mark_place "bottom"
   end
 end
