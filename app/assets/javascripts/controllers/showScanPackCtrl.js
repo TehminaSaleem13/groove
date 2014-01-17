@@ -217,8 +217,15 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
     }
     $scope._ready_for_tracking_num = function() {
         //open modal and display input field for tracking number
-        $('#trackingNumberScan').modal('show');
-        $scope._focus_input($scope._tracking_num_inputObj);
+        $http.get('/orders/getdetails.json?id='+$scope.order_id).success(function(data) {
+            if(data.status) {
+                $scope.order_increment_id = data.order.basicinfo.increment_id;
+                $('#trackingNumberScan').modal('show');
+                $scope._focus_input($scope._tracking_num_inputObj);
+            }
+        }).error(function(){
+            $scope.show_alert(["Cannot load Order with id "+ $scope.order_id+". There was a server error"],0);
+        });
     }
     $scope._scan_tracking_num_handle_event = function(event) {
         //send request to server
