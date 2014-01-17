@@ -68,7 +68,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
         $scope._rf_inputObj = $('input#rf_input');
         $scope._order_confirmation_inputObj = $('input#order_edit_confirmation_code');
         $scope._product_confirmation_inputObj = $('input#product_edit_confirmation_code');
-        $scope._tracking_num_inputObj = $('input#tracking_num');
+        $scope._tracking_num_inputObj = $('input#scantracking_num');
         //Register events and make function calls
         $http.get('/home/userinfo.json').success(function(data){
             $scope.username = data.username;
@@ -76,7 +76,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
         $scope._rf_inputObj.keydown($scope._handle_rf_key_event);
         $scope._order_confirmation_inputObj.keydown($scope._handle_order_confirmation_code_key_event);
         $scope._product_confirmation_inputObj.keydown($scope._handle_product_confirmation_code_key_event);
-        $scope._tracking_num_inputObj.keydown($scope._scan_tracking_num_handle_event)
+        $scope._tracking_num_inputObj.keydown($scope._scan_tracking_num_handle_event);
         $("#showProductConfirmation").on('shown',function() {
             $scope._focus_input($scope._product_confirmation_inputObj);
         });
@@ -84,6 +84,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
             $scope._focus_input($scope._order_confirmation_inputObj);
         });
         $("#showProduct").on('hidden',$scope._refresh_inactive_list);
+
         $(".scan_product_times").disableSelection();
         $scope._next_state({next_state:"default"});
         $scope.set_products_defaults();
@@ -217,6 +218,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
     $scope._ready_for_tracking_num = function() {
         //open modal and display input field for tracking number
         $('#trackingNumberScan').modal('show');
+        $scope._focus_input($scope._tracking_num_inputObj);
     }
     $scope._scan_tracking_num_handle_event = function(event) {
         //send request to server
@@ -381,10 +383,11 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
                 if(data.data != null) {
                     $scope.order_id = data.data.id;
                     $scope._next_state(data.data);
-                    $scope.unscanned_items = data.data.unscanned_items;
-                    $scope.scanned_items = data.data.scanned_items;
-                    $scope._compute_unscanned_and_scanned_products();
-
+                    if (data.data.unscanned_items != null && data.data.scanned_items != null) {
+                        $scope.unscanned_items = data.data.unscanned_items;
+                        $scope.scanned_items = data.data.scanned_items;
+                        $scope._compute_unscanned_and_scanned_products();   
+                    }
                 }
             } else {
                 $scope.show_alert(data.error_messages,0);
@@ -407,11 +410,11 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
                 if(data.success_messages.length) {
                     $scope.show_alert(data.success_messages,1);
                 }
-                $scope.unscanned_items = data.data.unscanned_items;
-                $scope.scanned_items = data.data.scanned_items;
-                console.log($scope.unscanned_items);
-                console.log($scope.scanned_items);
-                $scope._compute_unscanned_and_scanned_products();
+                if (data.data.unscanned_items != null && data.data.scanned_items != null) {
+                    $scope.unscanned_items = data.data.unscanned_items;
+                    $scope.scanned_items = data.data.scanned_items;
+                    $scope._compute_unscanned_and_scanned_products();   
+                }
             } else {
                 $scope.show_alert(data.error_messages,0);
             }
