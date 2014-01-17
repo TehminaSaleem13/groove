@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140115092551) do
+ActiveRecord::Schema.define(:version => 20140117092209) do
 
   create_table "amazon_credentials", :force => true do |t|
     t.string   "merchant_id",                                     :null => false
@@ -141,6 +141,21 @@ ActiveRecord::Schema.define(:version => 20140115092551) do
     t.datetime "created_at",     :null => false
     t.datetime "updated_at",     :null => false
   end
+
+  create_table "order_tags", :force => true do |t|
+    t.string   "name",                        :null => false
+    t.string   "color",                       :null => false
+    t.string   "mark_place", :default => "0"
+    t.datetime "created_at",                  :null => false
+    t.datetime "updated_at",                  :null => false
+  end
+
+  create_table "order_tags_orders", :id => false, :force => true do |t|
+    t.integer "order_id"
+    t.integer "order_tag_id"
+  end
+
+  add_index "order_tags_orders", ["order_id", "order_tag_id"], :name => "index_order_tags_orders_on_order_id_and_order_tag_id"
 
   create_table "orders", :force => true do |t|
     t.string   "increment_id"

@@ -10,6 +10,8 @@ class Order < ActiveRecord::Base
   has_one :order_shipping, :dependent => :destroy
   has_one :order_exceptions, :dependent => :destroy
   has_many :order_activities, :dependent => :destroy
+  has_and_belongs_to_many :order_tags
+
   include ProductsHelper
   def addactivity (order_activity_message, username)
   	@activity = OrderActivity.new
