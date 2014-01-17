@@ -51,9 +51,13 @@ class ScanPackController < ApplicationController
 
           #if order has status of Awaiting Scanning
           if @order.status == 'awaiting'
-            @order_result['next_state'] = 'ready_for_product'
-			@order_result['unscanned_items'] = @order.get_unscanned_items
-			@order_result['scanned_items'] = @order.get_scanned_items
+		  	if !@order.has_unscanned_items
+		  		@order_result['next_state'] = 'ready_for_tracking_num'
+		  	else
+	            @order_result['next_state'] = 'ready_for_product'
+				@order_result['unscanned_items'] = @order.get_unscanned_items
+				@order_result['scanned_items'] = @order.get_scanned_items
+			end
           end
 		    else
 		    	@result['notice_messages'].push('This order cannot be found. It may not have been imported yet')
@@ -341,6 +345,7 @@ class ScanPackController < ApplicationController
 		   		if !params[:tracking_num].nil?
 			   		order.tracking_num =  params[:tracking_num]
 			   		order.set_order_to_scanned_state(current_user.username)
+			   		#update inventory when inventory warehouses is implemented.
 			   		order.save
 			    else
 					result['status'] &= false
