@@ -500,7 +500,5 @@ class Order < ActiveRecord::Base
 
     self.save
 
-
-
   end
 end
