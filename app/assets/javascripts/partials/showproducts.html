@@ -2,19 +2,13 @@
     <div ng-include="'/assets/partials/navigation.html'"></div>
 </div>
 
-<div  class="row home-row">
-    <div class="alert alert-danger" ng-show="show_error">
-        <i class="icon icon-remove close pull-right" ng-click="show_error = false"></i>
-        <p>{{error_msg}}</p>
-    </div>
-</div>
 
 <div class="row home-row">
     <div class="span3 left-menu">
         <div class="accordion" id="accordion2">
             <div class="accordion-group">
                 <div class="accordion-heading">
-                    <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" href="#collapseOne">
+                    <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" data-target="#collapseOne" href="">
                         Products
                     </a>
                 </div>
@@ -32,7 +26,7 @@
 
             <div class="accordion-group">
                 <div class="accordion-heading">
-                    <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" href="#collapseTwo">
+                    <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" data-target="#collapseTwo" href="">
                        Kit
                     </a>
                 </div>
@@ -49,7 +43,7 @@
             </div>
             <div class="accordion-group">
                 <div class="accordion-heading">
-                    <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" href="#collapseThree">
+                    <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" data-target="#collapseThree" href="">
                         Categories
                     </a>
                 </div>
@@ -76,14 +70,14 @@
                 <div class="span4">
                     <ul class="nav nav-pills">
                         <li class="dropdown">
-                            <a class="dropdown-toggle" id="drop4" role="button" data-toggle="dropdown" href="#">Edit <b class="caret"></b></a>
+                            <a class="dropdown-toggle" id="drop4" role="button" data-toggle="dropdown" href="">Edit <b class="caret"></b></a>
                             <ul id="menu2" class="dropdown-menu" role="menu" aria-labelledby="drop4">
                                 <li role="presentation"><a role="menuitem" tabindex="-1" ng-click="product_delete()">Delete</a></li>
                                 <li role="presentation"><a role="menuitem" tabindex="-1" ng-click="product_duplicate()">Duplicate</a></li>
                             </ul>
                         </li>
                         <li class="dropdown">
-                            <a class="dropdown-toggle" id="drop5" role="button" data-toggle="dropdown" href="#">Change Status
+                            <a class="dropdown-toggle" id="drop5" role="button" data-toggle="dropdown" href="">Change Status
                                 <b class="caret"></b></a>
                             <ul id="menu1" class="dropdown-menu" role="menu" aria-labelledby="drop5">
                                 <li role="presentation"><a role="menuitem" tabindex="-1" ng-click="product_change_status('active')">Active</a></li>
@@ -136,7 +130,7 @@
                 <tr ng-repeat="product in products" >
                     <td data-header="checkbox" ><input type="checkbox" ng-model="product.checked"/></td>
                     <td data-header="name" id="{{'products_name_'+$index}}" ng-dblclick="edit_single_node($index,product.id,'name')">
-                        <a href="#showProduct" role="button" data-toggle="modal" ng-click="product_single_details(product.id,$index)" class="ng-binding">{{product.name}}</a>
+                        <a href="" role="button" data-toggle="modal" ng-click="product_single_details(product.id,$index,null,true)" class="ng-binding">{{product.name}}</a>
                         <div id="{{'products_name_input_'+$index}}" ng-show="products_edit_tmp.editing == $index && products_edit_tmp.editing_var == 'name'" class="tag-bubble tag-bubble-input span3 input-text">
                             <input xs-input-sync class="span3" name="{{'products_name_'+$index}}" ng-model="products_edit_tmp.name" type="text" placeholder="Edit..." />
                             <i ng-show="products_edit_tmp.editing != -1 && products_edit_tmp.name != ''" class="icon-ok" ng-click="save_single_node()"></i>
@@ -221,11 +215,6 @@
             <div class="form-horizontal form-horizontal-create" >
                 <fieldset>
                     <div class="modal-body" id="showProduct-body">
-                        <div class="alert alert-danger" ng-show="show_error_msgs">
-                            <button type="button" class="close" data-dismiss="alert"><i class="icon-remove"></i></button>
-                            <p ng-repeat="message in error_msgs">{{message}}</p>
-                        </div>
-
                         <table class="product_single_top_table">
                             <tr>
                                 <td>

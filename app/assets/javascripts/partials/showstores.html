@@ -1,13 +1,6 @@
 <div class="row navigation-row">
 <div ng-include="'/assets/partials/navigation.html'"></div>
 </div>
-<div  class="row home-row">
-<div class="alert alert-danger" ng-show="show_error">
-    <i class="icon icon-remove close pull-right" ng-click="show_error = false"></i>
-  <p>{{error_msg}}</p>
-</div>
-</div>
-
 
 <div class="row home-row">
 <div ng-include="'/assets/partials/settings.html'"></div>
@@ -23,7 +16,7 @@
   <div class="span5">
   <ul class="nav nav-pills">
     <li class="dropdown">
-      <a class="dropdown-toggle" id="drop4" role="button" data-toggle="dropdown" href="#">Change Status
+      <a class="dropdown-toggle" id="drop4" role="button" data-toggle="dropdown" href="">Change Status
          <b class="caret"></b></a>
       <ul id="menu1" class="dropdown-menu" role="menu" aria-labelledby="drop4">
         <li role="presentation"><a role="menuitem" tabindex="-1" ng-click="handle_change_status('active')">Active</a></li>
@@ -31,7 +24,7 @@
       </ul>
     </li>
     <li class="dropdown">
-      <a class="dropdown-toggle" id="drop5" role="button" data-toggle="dropdown" href="#">Edit <b class="caret"></b></a>
+      <a class="dropdown-toggle" id="drop5" role="button" data-toggle="dropdown" href="">Edit <b class="caret"></b></a>
       <ul id="menu2" class="dropdown-menu" role="menu" aria-labelledby="drop5">
         <li role="presentation"><a role="menuitem" tabindex="-1" ng-click="handle_store_delete_event()">Delete</a></li>
         <li role="presentation"><a role="menuitem" tabindex="-1" ng-click="handle_store_duplicate_event()">Duplicate</a></li>
@@ -83,10 +76,6 @@ aria-hidden="true">
  <div class="form-horizontal form-horizontal-create" >
   <fieldset>
   <div class="modal-body" id="createStore-body">
-  <div class="alert alert-danger" ng-show="show_error_msgs">
-    <button type="button" class="close" data-dismiss="alert">&times;</button>
-    <p ng-repeat="message in error_msgs">{{message}}</p>
-  </div>
   <div class="row">
     <div class="span8">
     <h5>Store Information</h5>
