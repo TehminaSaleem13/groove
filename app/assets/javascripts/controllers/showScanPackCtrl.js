@@ -450,7 +450,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
                 }).success(function(data) {
                         if(data.status) {
                             $scope.notify("Successfully Updated",1);
-                            $scope.product_single_details($scope.single_product.basicinfo.id,$scope.currently_open,post_fn, false);
+                            $scope.product_single_details($scope.single_product.basicinfo.id,$scope.currently_open,0, false);
                         } else {
                             $scope.notify("Some error Occurred",0);
                         }
@@ -676,13 +676,13 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
         if($('#showProduct').hasClass("in")) {
             if(event.which == 38) {//up key
                 if($scope.currently_open > 0) {
-                    $scope.product_single_details($scope.inactive_new_products[$scope.currently_open -1].id, $scope.currently_open - 1,post_fn,false);
+                    $scope.product_single_details($scope.inactive_new_products[$scope.currently_open -1].id, $scope.currently_open - 1,0,false);
                 } else {
                     alert("Already at the top of the list");
                 }
             } else if(event.which == 40) { //down key
                 if($scope.currently_open < $scope.inactive_new_products.length -1) {
-                    $scope.product_single_details($scope.inactive_new_products[$scope.currently_open + 1].id, $scope.currently_open + 1,post_fn,false);
+                    $scope.product_single_details($scope.inactive_new_products[$scope.currently_open + 1].id, $scope.currently_open + 1,0,false);
                 } else {
                     alert("Already at the bottom of the list");
                 }

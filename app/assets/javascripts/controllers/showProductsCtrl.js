@@ -325,8 +325,6 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
             $scope.single_product = {};
             if(data.product) {
                 $scope.single_product = data.product;
-            } else {
-                $scope.single_product = {};
             }
             //console.log($scope.single_product);
             if(typeof post_fn == 'function' ) {
@@ -566,7 +564,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
                         //console.log(data);
                         if(data.status) {
                             $scope.notify("Successfully Added",1);
-                            $scope.product_single_details($scope.single_product.basicinfo.id,$scope.currently_open,post_fn,false);
+                            $scope.product_single_details($scope.single_product.basicinfo.id,$scope.currently_open,0,false);
                         } else {
                             $scope.notify(data.messages,0);
                         }
@@ -580,7 +578,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
                     function(data) {
                         if(data.status) {
                             $scope.notify("Successfully Updated",1);
-                            $scope.product_single_details(id,null,post_fn,false);
+                            $scope.product_single_details(id,null,0,false);
                         } else {
                             $scope.notify("Some error Occurred",0);
                         }
@@ -612,7 +610,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
         $http.post('/products/removeproductsfromkit.json',{kit_id: $scope.single_product.basicinfo.id, kit_products: $scope.selected_skus }).success(function(data){
             if(data.status) {
                 $scope.notify("Successfully Removed",1);
-                $scope.product_single_details($scope.single_product.basicinfo.id,$scope.currently_open,post_fn,false);
+                $scope.product_single_details($scope.single_product.basicinfo.id,$scope.currently_open,0,false);
             } else {
                 $scope.notify(data.messages,0);
             }
@@ -627,7 +625,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
             $scope.$apply(function () {
                 $http({
                     method: 'POST',
-                    headers: { 'Content-Type': false },
+                    headers: { 'Content-Type': undefined },
                     url:'/products/addimage.json',
                     transformRequest: function (data) {
                         var request = new FormData();
@@ -640,7 +638,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
                 }).success(function(data) {
                     if(data.status) {
                         $scope.notify("Successfully Updated",1);
-                        $scope.product_single_details($scope.single_product.basicinfo.id,$scope.currently_open,post_fn, false);
+                        $scope.product_single_details($scope.single_product.basicinfo.id,$scope.currently_open,0, false);
                     } else {
                         $scope.notify("Some error Occurred",0);
                     }
@@ -682,17 +680,17 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
             //console.log($scope.currently_open);
             if(event.which == 38) {//up key
                 if($scope.currently_open > 0) {
-                    $scope.product_single_details($scope.products[$scope.currently_open -1].id, $scope.currently_open - 1,post_fn, false);
+                    $scope.product_single_details($scope.products[$scope.currently_open -1].id, $scope.currently_open - 1,0, false);
                 } else {
                     alert("Already at the top of the list");
                 }
             } else if(event.which == 40) { //down key
                 if($scope.currently_open < $scope.products.length -1) {
-                    $scope.product_single_details($scope.products[$scope.currently_open + 1].id, $scope.currently_open + 1,post_fn, false);
+                    $scope.product_single_details($scope.products[$scope.currently_open + 1].id, $scope.currently_open + 1,0, false);
                 } else {
                     $scope.product_next(function(){
                         if($scope.currently_open < $scope.products.length -1) {
-                            $scope.product_single_details($scope.products[$scope.currently_open + 1].id, $scope.currently_open + 1,post_fn, false);
+                            $scope.product_single_details($scope.products[$scope.currently_open + 1].id, $scope.currently_open + 1,0, false);
                         } else {
                             alert("Already at the bottom of the list");
                         }

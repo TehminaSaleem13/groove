@@ -95,9 +95,10 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
 
     	$scope.submit = function() {
             //$scope.loading = true;
+            //console.log($scope.newStore);
             $http({
                 method: 'POST',
-                headers: { 'Content-Type': false },
+                headers: { 'Content-Type': undefined },
                 url:'/store_settings/createStore.json',
                 transformRequest: function (data) {
                     var request = new FormData();
@@ -115,7 +116,6 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
     			else
     			{
 
-                    $scope.notify('Store has been successfully updated.',1);
     				var type = $scope.newStore.type;
                     if ($scope.newStore.store_type == 'CSV')
                     {
