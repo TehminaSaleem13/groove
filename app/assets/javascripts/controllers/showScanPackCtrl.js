@@ -1,6 +1,6 @@
 groovepacks_controllers.
-controller('showScanPackCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$location', '$route', '$cookies','import_all',
-function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,import_all) {
+controller('showScanPackCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$location', '$route', '$cookies','import_all','notification',
+function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,import_all,notification) {
     //Definitions
 
     /*
@@ -11,18 +11,8 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
         import_all.do_import($scope);
     }
 
-    $scope.show_alert = function(msg,type) {
-        $scope._set_alert(type,msg,true);
-    }
-
-    $scope.hide_alert = function(type) {
-        if(type === -1) {
-            for (i in $scope._alert_statuses) {
-                $scope._set_alert(i);
-            }
-        } else {
-            $scope._set_alert(type);
-        }
+    $scope.notify = function(msg,type) {
+        notification.notify(msg,type);
     }
 
     /*
@@ -43,12 +33,6 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
 
 
         //Private properties
-        $scope._alert_statuses = {
-            0: "error",
-            1: "success",
-            2: "notice",
-            default: 0
-        }
         $scope._rf_states = {
             ready_for_order: "Order",
             ready_for_product: "Product",
@@ -88,6 +72,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
         $(".scan_product_times").disableSelection();
         $scope._next_state({next_state:"default"});
         $scope.set_products_defaults();
+        notification.set_scope($scope);
     }
 
     $scope._set_rf_state = function(state) {
@@ -116,7 +101,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
                 $scope.next_item.images = $scope.unscanned_items[i].images;
                 $scope.next_item.qty_remaining = $scope.unscanned_items[i].qty_remaining;
                 $scope.next_item.scanned_qty = $scope.unscanned_items[i].scanned_qty;
-                $scope.next_item.qty = $scope.unscanned_items[i].scanned_qty + 
+                $scope.next_item.qty = $scope.unscanned_items[i].scanned_qty +
                     $scope.unscanned_items[i].qty_remaining;
                 break;
             }
@@ -126,7 +111,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
                 $scope.next_item.images = $scope.unscanned_items[i].child_items[0].images;
                 $scope.next_item.qty_remaining = $scope.unscanned_items[i].child_items[0].qty_remaining;
                 $scope.next_item.scanned_qty = $scope.unscanned_items[i].child_items[0].scanned_qty;
-                $scope.next_item.qty = $scope.unscanned_items[i].scanned_qty + 
+                $scope.next_item.qty = $scope.unscanned_items[i].scanned_qty +
                     $scope.unscanned_items[i].qty_remaining;
                 break;
             }
@@ -157,7 +142,6 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
         $scope.next_item = {};
         $scope.inactive_new_products = [];
         $scope._set_rf_state('ready_for_order');
-        $scope.hide_alert(-1);
         $scope._focus_input($scope._rf_inputObj);
         $scope.unscanned_items = {};
         $scope.scanned_items = {};
@@ -208,11 +192,11 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
                 $scope.scanned_details = $scope.order_details;
                 //console.log($scope.order_details);
             } else {
-                $scope.show_alert([data.error_message],0);
+                $scope.notify(data.error_message,0);
             }
 
         }).error(function(){
-            $scope.show_alert(["Cannot load Order with id "+ $scope.order_id+". There was a server error"],0);
+            $scope.notify(["Cannot load Order with id "+ $scope.order_id+". There was a server error"],0);
         });
     }
     $scope._ready_for_tracking_num = function() {
@@ -224,7 +208,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
                 $scope._focus_input($scope._tracking_num_inputObj);
             }
         }).error(function(){
-            $scope.show_alert(["Cannot load Order with id "+ $scope.order_id+". There was a server error"],0);
+            $scope.notify(["Cannot load Order with id "+ $scope.order_id+". There was a server error"],0);
         });
     }
     $scope._scan_tracking_num_handle_event = function(event) {
@@ -237,13 +221,13 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
                 $scope.hide_alert(-1);
                 if(data.status) {
                     if(data.notice_messages.length) {
-                        $scope.show_alert(data.notice_messages,2);
+                        $scope.notify(data.notice_messages,2);
                     }
                     if(data.success_messages.length) {
-                        $scope.show_alert(data.success_messages,1);
+                        $scope.notify(data.success_messages,1);
                     }
                 } else {
-                    $scope.show_alert(data.error_messages,0);
+                    $scope.notify(data.error_messages,0);
                 }
                 if(data.data != null) {
                     $scope.rf_input = "";
@@ -252,7 +236,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
                 }
 
             }).error(function(data){
-                    $scope.show_alert(["A server error was encountered"],0);
+                    $scope.notify(["A server error was encountered"],0);
             });
         }
     }
@@ -269,21 +253,6 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
         $("#showProductList").modal('show');
     }
 
-    $scope._set_alert = function(type,msg,status) {
-        if(typeof type != "number" ||  typeof $scope._alert_statuses[type] == "undefined") {
-            type = $scope._alert_statuses["default"];
-        }
-        if(typeof status != "boolean") {
-            status = false;
-        }
-        if(typeof msg == "undefined") {
-            msg = [];
-        }
-        var alert = $scope._alert_statuses[type];
-
-        $scope['show_'+alert] = status;
-        $scope[alert + '_msg'] = msg;
-    }
 
     $scope._focus_input = function(obj) {
         var object = obj;
@@ -301,29 +270,25 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
                if(data.status) {
                    //console.log(data);
                     if(data.data.order_edit_matched) {
-                        $scope.hide_alert(-1);
-                        $scope.show_error_msgs = false;
                         $scope._next_state(data.data);
                         $("#showOrderConfirmation").modal('hide').on('hidden',function() {
                             $scope._focus_input($scope._rf_inputObj);
                         });
 
                     } else {
-                        $scope.show_error_msgs = true;
-                        $scope.error_msgs = ["I’m sorry, the code you have scanned does not belong to a user who can scan orders that are On Hold.",
-                            "Please get assistance from someone with this permission, or press escape to scan another order"];
+                        $scope.notify(["I’m sorry, the code you have scanned does not belong to a user who can scan orders that are On Hold.",
+                            "Please get assistance from someone with this permission, or press escape to scan another order"],0);
                         $scope.order_confirmation_code = "";
                         $scope._focus_input($scope._order_confirmation_inputObj);
                     }
                } else {
-                   $scope.show_error_msgs = true;
-                   $scope.error_msgs = data.error_messages;
+                   $scope.notify(data.error_messages,0);
                    $scope.order_confirmation_code = "";
                    $scope._focus_input($scope._order_confirmation_inputObj);
                }
 
            }).error(function() {
-               $scope.show_alert(["There was a server error"],0);
+               $scope.notify(["There was a server error"],0);
            });
         }
     }
@@ -331,16 +296,13 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
     $scope._refresh_inactive_list = function () {
         $http.post('/scan_pack/inactive_or_new.json',{order_id:$scope.order_id}).success(function(data){
             if(data.status) {
-                $scope.hide_alert(-1);
-                $scope.show_error_msgs = false;
                 $scope._next_state(data.data);
             } else {
-                $scope.show_error_msgs = true;
-                $scope.error_msgs = data.error_messages;
+                $scope.notify(data.error_messages,0);
             }
 
         }).error(function(){
-            $scope.show_alert(["There was a server error"],0);
+            $scope.notify(["There was a server error"],0);
         });
     }
 
@@ -351,41 +313,35 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
                 //console.log(data);
                 if(data.status){
                     if(data.data.product_edit_matched) {
-                        $scope.hide_alert(-1);
-                        $scope.show_error_msgs = false;
                         var stuff =  data.data;
                         $("#showProductConfirmation").modal('hide');
                             $scope._next_state(stuff);
                     } else {
-                        $scope.show_error_msgs = true;
-                        $scope.error_msgs = ["I’m sorry, the code you have scanned does not belong to a user who can scan orders that are On Hold.",
-                            "Please get assistance from someone with this permission, or press escape to scan another order"];
+                        $scope.notify(["I’m sorry, the code you have scanned does not belong to a user who can scan orders that are On Hold.",
+                            "Please get assistance from someone with this permission, or press escape to scan another order"],0);
                         $scope.product_confirmation_code = "";
                         $scope._focus_input($scope._product_confirmation_inputObj);
 
                     }
                 } else {
-                    $scope.show_error_msgs = true;
-                    $scope.error_msgs = data.error_messages;
+                    $scope.notify(data.error_messages,0);
                     $scope.product_confirmation_code = "";
                     $scope._focus_input($scope._product_confirmation_inputObj);
                 }
             }).error(function(){
-                    $scope.show_alert(["There was a server error"],0);
+                    $scope.notify(["There was a server error"],0);
             });
         }
     }
 
     $scope._handle_ready_for_order_enter_event = function() {
         $http.get('/scan_pack/scan_order_by_barcode.json?barcode='+$scope.rf_input).success(function(data){
-            //console.log(data);
-            $scope.hide_alert(-1);
             if(data.status) {
                 if(data.notice_messages.length) {
-                    $scope.show_alert(data.notice_messages,2);
+                    $scope.notify(data.notice_messages,2);
                 }
                 if(data.success_messages.length) {
-                    $scope.show_alert(data.success_messages,1);
+                    $scope.notify(data.success_messages,1);
                 }
                 if(data.data != null) {
                     $scope.order_id = data.data.id;
@@ -393,37 +349,35 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
                     if (data.data.unscanned_items != null && data.data.scanned_items != null) {
                         $scope.unscanned_items = data.data.unscanned_items;
                         $scope.scanned_items = data.data.scanned_items;
-                        $scope._compute_unscanned_and_scanned_products();   
+                        $scope._compute_unscanned_and_scanned_products();
                     }
                 }
             } else {
-                $scope.show_alert(data.error_messages,0);
+                $scope.notify(data.error_messages,0);
             }
 
         }).error(function(data){
-                $scope.show_alert(["A server error was encountered"],0);
+                $scope.notify(["A server error was encountered"],0);
         });
     }
 
     $scope._handle_ready_for_product_enter_event = function() {
         $http.post('/scan_pack/scan_product_by_barcode.json',{barcode:$scope.rf_input,order_id:$scope.order_id}).success(function(data){
 
-            //console.log(data);
-            $scope.hide_alert(-1);
             if(data.status) {
                 if(data.notice_messages.length) {
-                    $scope.show_alert(data.notice_messages,2);
+                    $scope.notify(data.notice_messages,2);
                 }
                 if(data.success_messages.length) {
-                    $scope.show_alert(data.success_messages,1);
+                    $scope.notify(data.success_messages,1);
                 }
                 if (data.data.unscanned_items != null && data.data.scanned_items != null) {
                     $scope.unscanned_items = data.data.unscanned_items;
                     $scope.scanned_items = data.data.scanned_items;
-                    $scope._compute_unscanned_and_scanned_products();   
+                    $scope._compute_unscanned_and_scanned_products();
                 }
             } else {
-                $scope.show_alert(data.error_messages,0);
+                $scope.notify(data.error_messages,0);
             }
             if(data.data != null) {
                 $scope.rf_input = "";
@@ -431,12 +385,38 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
             }
 
         }).error(function(data){
-                $scope.show_alert(["A server error was encountered"],0);
+                $scope.notify(["A server error was encountered"],0);
             });
 
     }
 
+    $scope._compute_unscanned_and_scanned_products = function() {
+        $scope.unscanned_count = 0;
+        $scope.scanned_count = 0;
+        console.log($scope.unscanned_items.length);
+        console.log($scope.scanned_items.length);
 
+        for (i = 0;  i < $scope.unscanned_items.length; i++) {
+            if ($scope.unscanned_items[i].product_type == 'single'){
+                $scope.unscanned_count = $scope.unscanned_count + $scope.unscanned_items[i].qty_remaining;
+            }
+            else if ($scope.unscanned_items[i].product_type == 'individual') {
+                for (j=0; j< $scope.unscanned_items[i].child_items.length;  j++) {
+                    $scope.unscanned_count += $scope.unscanned_items[i].child_items[j].qty_remaining;
+                }
+            }
+        }
+        for (i = 0;  i < $scope.scanned_items.length; i++) {
+            if ($scope.scanned_items[i].product_type == 'single'){
+                $scope.scanned_count = $scope.scanned_count + $scope.scanned_items[i].scanned_qty;
+            }
+            else if ($scope.scanned_items[i].product_type == 'individual') {
+                for (j=0; j< $scope.scanned_items[i].child_items.length; j++) {
+                    $scope.scanned_count += $scope.scanned_items[i].child_items[j].scanned_qty;
+                }
+            }
+        }
+    }
 
 
 
@@ -469,17 +449,14 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
                     data: {product_id: $scope.single_product.basicinfo.id, product_image: args.file}
                 }).success(function(data) {
                         if(data.status) {
-                            $scope.product_update_status = true;
-                            $scope.product_update_message = "Successfully Updated";
-                            $scope.product_single_details($scope.single_product.basicinfo.id);
+                            $scope.notify("Successfully Updated",1);
+                            $scope.product_single_details($scope.single_product.basicinfo.id,$scope.currently_open,post_fn, false);
                         } else {
-                            $scope.show_error_msgs = true;
-                            $scope.error_msgs = ["Some error Occurred"];
+                            $scope.notify("Some error Occurred",0);
                         }
 
                     }).error(function() {
-                        $scope.show_error_msgs = true;
-                        $scope.error_msgs = ["Some error Occurred"];
+                        $scope.notify("Some error Occurred",0);
                     });
             });
         }
@@ -487,7 +464,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
     $scope.save_warehouse_node = function() {
         if($scope.warehouse_edit_tmp.editing != -1 ) {
             $scope.single_product.inventory_warehouses[$scope.warehouse_edit_tmp.editing][$scope.warehouse_edit_tmp.editing_var] = $scope.warehouse_edit_tmp[$scope.warehouse_edit_tmp.editing_var];
-            $scope.update_single_product();
+            $scope.update_single_product(0,true);
             //$scope.single_product.inventory_warehouses[$scope.warehouse_edit_tmp.editing].checked = !$scope.single_product.inventory_warehouses[$scope.warehouse_edit_tmp.editing].checked;
         }
         $scope.warehouse_edit_tmp.editing_var = "";
@@ -512,7 +489,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
                         var warehouses = $scope.single_product.inventory_warehouses;
                         var last_warehouse = warehouses.length-1;
                         $scope.edit_warehouse_node(last_warehouse,$scope.single_product.inventory_warehouses[last_warehouse].id,'name');
-                    });
+                    },false);
             }
         );
     }
@@ -530,8 +507,6 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
         }
     }
     $scope.set_products_defaults = function () {
-        $scope.product_update_status = false;
-        $scope.product_update_message = "";
         $scope.do_get_products = false;
         $scope.can_get_products = true;
         $scope.product_setup = {};
@@ -542,9 +517,11 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
         $scope.temp.products = [];
         $scope.temp.product_setup = {};
     }
-    $scope.product_single_details = function(id,index,post_fn) {
-        $scope.loading = true;
-        if(typeof index !== 'undefined'){
+    $scope.product_single_details = function(id,index,post_fn, open_modal) {
+        if(typeof open_modal == 'boolean' && open_modal ){
+            $('#showProduct').modal('show');
+        }
+        if(typeof index == 'number'){
             $scope.currently_open = index;
         }
         $scope.warehouse_edit_tmp = {
@@ -559,7 +536,6 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
             editing_id:""
         };
         //console.log($scope.currently_open);
-        $scope.single_product = {};
         $scope.selected_skus = [];
         $scope.tmp = {
             sku: "",
@@ -574,9 +550,11 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
             image:'images'
         };
         $http.get('/products/getdetails/'+ id+'.json').success(function(data) {
+            $scope.single_product = {};
             if(data.product) {
                 $scope.single_product = data.product;
-                $('#showProduct').modal('show');
+            } else {
+                $scope.single_product = {};
             }
             //console.log($scope.single_product);
             if(typeof post_fn == 'function' ) {
@@ -591,26 +569,26 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
             });
     }
 
-    $scope.update_single_product = function(post_fn) {
+    $scope.update_single_product = function(post_fn,auto) {
+        if(typeof auto !== "boolean") {
+            auto = false;
+        }
         $http.post('/products/updateproduct.json', $scope.single_product).success(function(data) {
             if(data.status) {
-                $scope.product_update_status = true;
-                $scope.show_error_msgs = false;
-                $scope.product_update_message = "Successfully Updated";
-
-            } else {
-                $scope.show_error_msgs = true;
-                $scope.error_msgs = ["Some error Occurred"];
-            }
-            if(typeof post_fn == 'function' ) {
-                $timeout(post_fn,20);
-            }
-        }).error(function() {
-                $scope.show_error_msgs = true;
-                $scope.error_msgs = ["Some error Occurred"];
-                if(typeof post_fn == 'function' ) {
-                    $timeout(post_fn,20);
+                if(!auto) {
+                    $scope.notify("Successfully Updated",1);
                 }
+            } else {
+                if(data.message) {
+                    $scope.notify(data.message,0);
+                } else {
+                    $scope.notify("Some error Occurred",0);
+                }
+            }
+            $scope.product_single_details($scope.single_product.basicinfo.id,$scope.currently_open,post_fn,false);
+        }).error(function() {
+                $scope.notify("Some error Occurred",0);
+                $scope.product_single_details($scope.single_product.basicinfo.id,$scope.currently_open,post_fn,false);
             });
     }
     $scope.save_node = function(name,blur) {
@@ -623,7 +601,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
             } else {
                 $scope.single_product[prop][$scope.tmp.editing][name] = $scope.tmp[name];
             }
-            //$scope.update_single_product();
+            $scope.update_single_product(0, true);
         }
         $scope.tmp[name] = "";
         $scope.tmp.editing = -1;
@@ -644,7 +622,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
             $scope.tmp.editing = -1;
             $scope.tmp.editing_var = -1;
         }
-        $scope.update_single_product();
+        $scope.update_single_product(0,true);
     }
 
     $scope.edit_node = function(name,index) {
@@ -698,13 +676,13 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
         if($('#showProduct').hasClass("in")) {
             if(event.which == 38) {//up key
                 if($scope.currently_open > 0) {
-                    $scope.product_single_details($scope.inactive_new_products[$scope.currently_open -1].id, $scope.currently_open - 1);
+                    $scope.product_single_details($scope.inactive_new_products[$scope.currently_open -1].id, $scope.currently_open - 1,post_fn,false);
                 } else {
                     alert("Already at the top of the list");
                 }
             } else if(event.which == 40) { //down key
                 if($scope.currently_open < $scope.inactive_new_products.length -1) {
-                    $scope.product_single_details($scope.inactive_new_products[$scope.currently_open + 1].id, $scope.currently_open + 1);
+                    $scope.product_single_details($scope.inactive_new_products[$scope.currently_open + 1].id, $scope.currently_open + 1,post_fn,false);
                 } else {
                     alert("Already at the bottom of the list");
                 }
@@ -712,33 +690,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
 
         }
     }
-    $scope._compute_unscanned_and_scanned_products = function() {
-        $scope.unscanned_count = 0;
-        $scope.scanned_count = 0;
-        console.log($scope.unscanned_items.length);
-        console.log($scope.scanned_items.length);
 
-        for (i = 0;  i < $scope.unscanned_items.length; i++) {
-            if ($scope.unscanned_items[i].product_type == 'single'){
-                $scope.unscanned_count = $scope.unscanned_count + $scope.unscanned_items[i].qty_remaining;
-            }
-            else if ($scope.unscanned_items[i].product_type == 'individual') {
-                for (j=0; j< $scope.unscanned_items[i].child_items.length;  j++) {
-                    $scope.unscanned_count += $scope.unscanned_items[i].child_items[j].qty_remaining;
-                }
-            }
-        }
-        for (i = 0;  i < $scope.scanned_items.length; i++) {
-            if ($scope.scanned_items[i].product_type == 'single'){
-                $scope.scanned_count = $scope.scanned_count + $scope.scanned_items[i].scanned_qty;
-            }
-            else if ($scope.scanned_items[i].product_type == 'individual') {
-                for (j=0; j< $scope.scanned_items[i].child_items.length; j++) {
-                    $scope.scanned_count += $scope.scanned_items[i].child_items[j].scanned_qty;
-                }
-            }
-        }
-    }
 
     $scope.$watch('can_get_products',function() {
         if($scope.can_get_products) {
@@ -746,15 +698,6 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
                 $scope.do_get_products = false;
                 $scope.get_products();
             }
-        }
-    });
-    $scope.$watch('product_update_status',function() {
-        if($scope.product_update_status) {
-            $("#product_update_status").fadeTo("fast",1,function() {
-                $("#product_update_status").fadeTo("slow", 0 ,function() {
-                    $scope.product_update_status = false;
-                });
-            });
         }
     });
 
@@ -769,10 +712,10 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
                 $("#"+event.currentTarget.parentElement.parentElement.id).removeClass("input-text-hover");
                 $("#"+event.currentTarget.parentElement.id).addClass("false-tag-bubble");
             }
-            $scope.update_single_product();
+            $scope.update_single_product(0,true);
         }
     );
-    $('.regular-input').focusout($scope.update_single_product);
+    $('.regular-input').focusout(function(){$scope.update_single_product(0,true);});
     input_text_selector.focus(
         function(event) {
             if(event.currentTarget.parentElement.id.slice(-6) == "-input") {

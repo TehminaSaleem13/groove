@@ -1,9 +1,14 @@
 groovepacks_controllers.
-    controller('showOrdersCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$location', '$route', '$cookies','import_all',
-function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,import_all) {
+    controller('showOrdersCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$location', '$route', '$cookies','import_all','notification',
+function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,import_all,notification) {
     $scope.import_all_orders = function () {
         $('#importOrders').modal('show');
         import_all.do_import($scope);
+    }
+    notification.set_scope($scope);
+
+    $scope.notify = function(msg,type) {
+        notification.notify(msg,type);
     }
     $http.get('/home/userinfo.json').success(function(data){
         $scope.username = data.username;
@@ -165,18 +170,16 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
             if (data.status)
             {
                 $scope.order_setup.select_all = false;
-                $scope.show_error = false;
+                $scope.notify("Status Updated Successfully",1);
             }
             else
             {
-                $scope.error_msg = "There was a problem changing orders status";
-                $scope.show_error = true;
+                $scope.notify("There was a problem changing orders status",0);
             }
             $scope.get_orders();
         }).error(function(data){
                 $scope.order_setup.status = "";
-                $scope.error_msg = "There was a problem changing orders status";
-                $scope.show_error = true;
+                $scope.notify("There was a problem changing orders status",0);
                 $scope.get_orders();
             });
     }
@@ -199,19 +202,17 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
             //console.log(data);
             if (data.status)
             {
-                $scope.show_error = false;
+                $scope.notify("Deleted Successfully",1);
                 $scope.order_setup.select_all = false;
                 $scope.get_orders();
             }
             else
             {
-                $scope.error_msg = data.message;
-                $scope.show_error = true;
+                $scope.notify(data.message,0);
             }
 
         }).error(function(data){
-                $scope.error_msg = data.message;
-                $scope.show_error = true;
+                $scope.notify(data.message,0);
                 $scope.get_orders();
             });
     }
@@ -234,23 +235,24 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
             //console.log(data);
             if (data.status)
             {
-                $scope.show_error= false;
+                $scope.notify("Duplicated Successfully",1);
                 $scope.order_setup.select_all = false;
             }
             else
             {
-                $scope.error_msg = data.message;
-                $scope.show_error = true;
+                $scope.notify(data.message,0);
             }
         }).error(function(data){
-                $scope.error_msg = data.message;
-                $scope.show_error = true;
+                $scope.notify(data.message,0);
                 $scope.get_orders();
             });
     }
 
-    $scope.order_single_details = function(id,index) {
-        if(typeof index !== 'undefined'){
+    $scope.order_single_details = function(id,index,open_modal) {
+        if(typeof open_modal === 'boolean' && open_modal) {
+            $("#showOrder").modal("show")
+        }
+        if(typeof index === 'number'){
             $scope.currently_open = index;
         }
         $http.get('/orders/getdetails.json?id='+id).success(function(data) {
@@ -277,8 +279,6 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
             }
         ).success(function(data) {
             if(data.status) {
-                $scope.show_error_msgs = false;
-
                 $scope.order_single_details($scope.single_order.basicinfo.id);
             }
         })
@@ -352,19 +352,16 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
         $http.post("orders/removeitemfromorder.json",{orderitem: ids}).success(
             function(data) {
                 if(data.status) {
-                    $scope.show_error_msgs = false;
-                    $scope.order_update_status = true;
-                    $scope.order_update_message = "Item Successfully Removed";
+                    $scope.notify("Item Successfully Removed",1);
                     $scope.items_select = false;
                     $scope.order_single_details($scope.single_order.basicinfo.id);
                 } else {
-                    $scope.show_error_msgs = true;
-                    $scope.error_msgs = ["Some error Occurred"];
+                    $scope.notify("Some error Occurred",0);
                 }
             }
         ).error(function(data){
-                $scope.show_error_msgs = true;
-                $scope.error_msgs = ["Some error Occurred"];
+                $scope.notify("Some error Occurred",0);
+
             });
 
     }
@@ -380,18 +377,14 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
                 $http.post("orders/additemtoorder.json",{productid: id , id: $scope.single_order.basicinfo.id, qty:0}).success(
                     function(data) {
                         if(data.status) {
-                            $scope.show_error_msgs = false;
-                            $scope.order_update_status = true;
-                            $scope.order_update_message = "Item Successfully Added";
+                            $scope.notify("Item Successfully Added",1);
                             $scope.order_single_details($scope.single_order.basicinfo.id);
                         } else {
-                            $scope.show_error_msgs = true;
-                            $scope.error_msgs = ["Some error Occurred"];
+                            $scope.notify("Some error Occurred",0);
                         }
                     }
                 ).error(function(data){
-                        $scope.show_error_msgs = true;
-                        $scope.error_msgs = ["Some error Occurred"];
+                        $scope.notify("Some error Occurred",0);
                     });
 
         }
@@ -405,12 +398,10 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
                 if(data.status) {
                     $scope.order_single_details($scope.single_order.basicinfo.id);
                 } else {
-                    $scope.show_error_msgs = true;
-                    $scope.error_msgs = data.messages;
+                    $scope.notify(data.messages,0);
                 }
             }).error(function(data){
-                $scope.show_error_msgs = true;
-                $scope.error_msgs = ["Some error Occurred"];
+                $scope.notify("Some error Occurred",0);
             });
         }
 
@@ -456,17 +447,14 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
         $http.post('/orders/updateorderlist.json',obj).success(function(data){
             //console.log(data);
             if(data.status) {
-                $scope.show_error = false;
-                $scope.show_error_msgs = false;
+                $scope.notify("Successfully updated",1);
                 $scope.get_orders();
             } else {
-                $scope.show_error = true;
-                $scope.error_msg = data.error_msg;
+                $scope.notify(data.error_msg,0);
                 $scope.get_orders();
             }
         }).error(function(data) {
-                $scope.show_error = true;
-                $scope.error_msg = "Couldn't save Order info";
+                $scope.notify("Couldn't save Order info",0);
                 $scope.get_orders();
             });
     }
@@ -511,7 +499,11 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
         // there's more, have a look at the demos and docs...
         callback: $scope.showHideField
     });
-    $scope.update_single_order = function() {
+    $scope.update_single_order = function(auto) {
+        if(typeof auto !="boolean") {
+            auto = false;
+        }
+
         order_data = {};
         for(i in $scope.single_order.basicinfo) {
             if(i != 'id' && i != 'created_at' && i!='updated_at') {
@@ -520,14 +512,13 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
         }
         $http.post("orders/update.json",{id: $scope.single_order.basicinfo.id , order: order_data}).success(
             function(data) {
-                $scope.show_error_msgs = false;
-                $scope.order_update_status = true;
-                $scope.order_update_message = "Order Updated";
+                if(!auto) {
+                    $scope.notify("Order Updated Successfully",1);
+                }
                 $scope.order_single_details($scope.single_order.basicinfo.id);
             }
         ).error(function(data){
-                $scope.show_error_msgs = true;
-                $scope.error_msgs = ["Some error Occurred"];
+                $scope.notify("Some error Occurred",0);
         });
     }
 
@@ -633,15 +624,6 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
         }
     });
     $('#showOrder').on('hidden',function(){$scope.get_orders()}).keydown($scope.keyboard_nav_event);
-    $scope.$watch('order_update_status',function() {
-        if($scope.order_update_status) {
-            $("#order_update_status").fadeTo("fast",1,function() {
-                $("#order_update_status").fadeTo("slow", 0 ,function() {
-                    $scope.order_update_status = false;
-                });
-            });
-        }
-    });
-    $('.regular-input').focusout($scope.update_single_order);
+    $('.regular-input').focusout(function() {$scope.update_single_order(true)});
     $("#order-search-query").focus();
 }]);

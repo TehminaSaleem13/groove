@@ -1,12 +1,6 @@
 <div class="row navigation-row">
 <div ng-include="'/assets/partials/navigation.html'"></div>
 </div>
-<div  class="row home-row">
-<div class="alert alert-danger" ng-show="show_error">
-    <i class="icon icon-remove close pull-right" ng-click="show_error = false"></i>
-  <p>{{error_msg}}</p>
-</div>
-</div>
 
 
 <div class="row home-row">
@@ -23,7 +17,7 @@
   <div class="span5">
   <ul class="nav nav-pills">
     <li class="dropdown">
-      <a class="dropdown-toggle" id="drop4" role="button" data-toggle="dropdown" href="#">Change Status
+      <a class="dropdown-toggle" id="drop4" role="button" data-toggle="dropdown" href="">Change Status
          <b class="caret"></b></a>
       <ul id="menu1" class="dropdown-menu" role="menu" aria-labelledby="drop4">
         <li role="presentation"><a role="menuitem" tabindex="-1" ng-click="handle_change_status('active')">Active</a></li>
@@ -31,7 +25,7 @@
       </ul>
     </li>
     <li class="dropdown">
-      <a class="dropdown-toggle" id="drop5" role="button" data-toggle="dropdown" href="#">Edit <b class="caret"></b></a>
+      <a class="dropdown-toggle" id="drop5" role="button" data-toggle="dropdown" href="">Edit <b class="caret"></b></a>
       <ul id="menu2" class="dropdown-menu" role="menu" aria-labelledby="drop5">
         <li role="presentation"><a role="menuitem" tabindex="-1" ng-click="handle_user_delete_event()">Delete</a></li>
         <li role="presentation"><a role="menuitem" tabindex="-1" ng-click="handle_user_duplicate_event()">Duplicate</a></li>
@@ -91,20 +85,16 @@ aria-hidden="true">
   <fieldset>
   <div class="modal-body" id="createUser-body">
   <ul class="nav nav-tabs" id="myTab">
-    <li class="active"><a href="#userinfotab" data-toggle="tab">User Info</a></li>
-    <li><a href="#productstab" data-toggle="tab">Products</a></li>
-    <li><a href="#orderstab" data-toggle="tab">Orders</a></li>
-    <li><a href="#usertab" data-toggle="tab">User</a></li>
-    <li><a href="#systemtab" data-toggle="tab">System</a></li>
+    <li class="active"><a href="" data-target="#userinfotab" data-toggle="tab">User Info</a></li>
+    <li><a href="" data-target="#productstab" data-toggle="tab">Products</a></li>
+    <li><a href="" data-target="#orderstab" data-toggle="tab">Orders</a></li>
+    <li><a href="" data-target="#usertab" data-toggle="tab">User</a></li>
+    <li><a href="" data-target="#systemtab" data-toggle="tab">System</a></li>
   </ul>
 
 
 
  <div class="tab-content">
-    <div class="alert alert-danger" ng-show="show_error_msgs">
-      <button type="button" class="close" data-dismiss="alert">&times;</button>
-      <p ng-repeat="message in error_msgs">{{message}}</p>
-    </div>
   <div class="tab-pane active" id="userinfotab">
   <input type="hidden" ng-model="newUser.id" ng-show="edit_status"/>
     <div class="control-group">

@@ -2,20 +2,6 @@
     <div ng-include="'/assets/partials/navigation.html'"></div>
 </div>
 
-<div  class="row home-row">
-    <div class="alert alert-danger" ng-show="show_error">
-        <i class="icon icon-remove close pull-right" ng-click="show_error = false"></i>
-        <p ng-repeat="msg in error_msg">{{msg}}</p>
-    </div>
-    <div class="alert alert-notice" ng-show="show_notice">
-        <i class="icon icon-remove close pull-right" ng-click="show_notice = false"></i>
-        <p ng-repeat="msg in notice_msg">{{msg}}</p>
-    </div>
-    <div class="alert alert-success" ng-show="show_success">
-        <i class="icon icon-remove close pull-right" ng-click="show_success = false"></i>
-        <p ng-repeat="msg in success_msg">{{msg}}</p>
-    </div>
-</div>
 
 <div class="row home-row">
     <div class="row-fluid">
@@ -40,7 +26,7 @@
                                 </thead>
                                 <tbody ng-repeat="unscanned_item in unscanned_items">
                                 <tr ng-show= "unscanned_item.product_type =='single'">
-                                        
+
                                         <td ng-show= "unscanned_item.product_type =='single'">
                                         <div class="single-image">
                                             <img class="img-thumb" ng-src="{{ unscanned_item.image.image }}" />
@@ -147,7 +133,7 @@
                         </thead>
                         <tbody ng-repeat="scanned_item in scanned_items">
                         <tr ng-show= "scanned_item.product_type =='single'">
-                                
+
                                 <td ng-show= "scanned_item.product_type =='single'">
                                 {{ scanned_item.name }}</td>
                                 <td ng-show= "scanned_item.product_type =='single'">
@@ -190,10 +176,6 @@
     <div class="form-horizontal form-horizontal-create" >
         <fieldset>
             <div class="modal-body" id="showOrderConfirmation-body">
-                <div class="alert alert-danger" ng-show="show_error_msgs">
-                    <button type="button" class="close" data-dismiss="alert"><i class="icon-remove"></i></button>
-                    <p ng-repeat="message in error_msgs">{{message}}</p>
-                </div>
                 <div class="control-group">
                     <label class="control-label">Confirmation Code</label>
                     <div class="controls">
@@ -217,10 +199,6 @@
     <div class="form-horizontal form-horizontal-create" >
         <fieldset>
             <div class="modal-body" id="showProductConfirmation-body">
-                <div class="alert alert-danger" ng-show="show_error_msgs">
-                    <button type="button" class="close" data-dismiss="alert"><i class="icon-remove"></i></button>
-                    <p ng-repeat="message in error_msgs">{{message}}</p>
-                </div>
                 <div class="control-group">
                     <label class="control-label">Confirmation Code</label>
                     <div class="controls">
@@ -245,11 +223,6 @@
     <div class="form-horizontal form-horizontal-create" >
         <fieldset>
             <div class="modal-body" id="showProduct-body">
-                <div class="alert alert-danger" ng-show="show_error_msgs">
-                    <button type="button" class="close" data-dismiss="alert"><i class="icon-remove"></i></button>
-                    <p ng-repeat="message in error_msgs">{{message}}</p>
-                </div>
-
                 <table class="product_single_top_table">
                     <tr>
                         <td>
@@ -470,10 +443,6 @@
         <h3 id="showProductListHeader" >Items in current Order</h3>
     </div>
     <div class="modal-body" id="showProductList-body">
-        <div class="alert alert-danger" ng-show="show_error_msgs">
-            <button type="button" class="close" data-dismiss="alert"><i class="icon-remove"></i></button>
-            <p ng-repeat="message in error_msgs">{{message}}</p>
-        </div>
         <table id="orderitemstbl" class="table table-hover table-bordered">
             <thead>
             <tr>
@@ -484,7 +453,7 @@
             <tbody>
 
             <tr ng-repeat="item in inactive_new_products">
-                <td><a href="#showProduct" role="button" data-toggle="modal" ng-click="product_single_details(item.id,$index)" class="ng-binding">{{item.name}}</a></td>
+                <td><a href="" data-target="#showProduct" role="button" data-toggle="modal" ng-click="product_single_details(item.id,$index)" class="ng-binding">{{item.name}}</a></td>
                 <td>{{item.status}}</td>
             </tr>
             </tbody>

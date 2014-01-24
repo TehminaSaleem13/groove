@@ -15,6 +15,8 @@
 //= require bootstrap
 //= require angular
 //= require angular-cookies
+//= require angular-route
+//= require angular-animate
 //= require jquery.ui.sortable
 //= require groovepacks
 //= require_tree .

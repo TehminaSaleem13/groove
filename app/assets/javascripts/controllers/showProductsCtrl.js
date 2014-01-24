@@ -1,10 +1,16 @@
 groovepacks_controllers.
-controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$location', '$route', '$cookies','import_all',
-function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,import_all) {
+controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$location', '$route', '$cookies','import_all','notification','$animate',
+function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,import_all,notification,$animate) {
     $scope.import_all_orders = function () {
         $('#importOrders').modal('show');
         import_all.do_import($scope);
     }
+    notification.set_scope($scope);
+
+    $scope.notify = function(msg,type) {
+        notification.notify(msg,type);
+    }
+
     $http.get('/home/userinfo.json').success(function(data){
         $scope.username = data.username;
     });
@@ -53,7 +59,6 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
         }
         $http.get(url).success(function(data) {
             if(data.status) {
-                $scope.show_error = false;
                 $scope.new_products = (data.products.length > 0);
                 if(!next) {
                     $scope.temp.products = data.products;
@@ -84,8 +89,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
                 }
 
             } else {
-                $scope.show_error = true;
-                $scope.error_msg = "Can't load list of products";
+                $scope.notify("Can't load list of products",0);
             }
             $scope.can_get_products = true;
             if(typeof post_fn == 'function' ) {
@@ -97,8 +101,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
             $scope.loading = false;
             $scope.select_all_toggle();
         }).error(function(data) {
-                $scope.show_error = true;
-                $scope.error_msg = "Can't load list of products";
+            $scope.notify("Can't load list of products",0);
             $scope.can_get_products = true;
             $timeout($scope.checkSwapNodes,20);
             if(typeof post_fn == 'function' ) {
@@ -164,8 +167,6 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
         $scope.alias.product_setup.offset = 0;
     }
     $scope.set_defaults = function() {
-        $scope.product_update_status = false;
-        $scope.product_update_message = "";
         $scope.do_get_products = false;
         $scope.can_get_products = true;
         $scope.product_setup = {};
@@ -196,7 +197,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
         }
     }
     $scope.product_change_status = function(status) {
-        $scope.loading = true;
+        //$scope.loading = true;
         $scope.product_setup.productArray = [];
         $scope.product_setup.status = status;
 
@@ -219,19 +220,17 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
             }
             else
             {
-                $scope.error_msg = "There was a problem changing products status";
-                $scope.show_error = true;
+                $scope.notify("There was a problem changing products status",0);
             }
             $scope.get_products();
         }).error(function(data){
                 $scope.product_setup.status = "";
-                $scope.error_msg = "There was a problem changing products status";
-                $scope.show_error = true;
+                $scope.notify("There was a problem changing products status",0);
                 $scope.get_products();
             });
     }
     $scope.product_delete = function() {
-        $scope.loading = true;
+        //$scope.loading = true;
         $scope.product_setup.productArray = [];
 
         /* get user objects of checked items */
@@ -253,18 +252,16 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
             }
             else
             {
-                $scope.error_msg = data.message;
-                $scope.show_error = true;
+                $scope.notify(data.message,0);
             }
 
         }).error(function(data){
-                $scope.error_msg = data.message;
-                $scope.show_error = true;
+                $scope.notify("There was an error contacting the server",0);
                 $scope.get_products();
             });
     }
     $scope.product_duplicate = function() {
-        $scope.loading = true;
+        //$scope.loading = true;
         $scope.product_setup.productArray = [];
 
         /* get user objects of checked items */
@@ -285,20 +282,18 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
             }
             else
             {
-                $scope.error_msg = data.message;
-                $scope.show_error = true;
+                $scope.notify(data.message,0);
             }
         }).error(function(data){
-                $scope.error_msg = data.message;
-                $scope.show_error = true;
+                $scope.notify(data.message,0);
                 $scope.get_products();
             });
     }
-    $scope.product_single_details = function(id,index,post_fn, show_loading) {
-        if(typeof show_loading == 'undefined' || show_loading == true){
-            $scope.loading = true;
+    $scope.product_single_details = function(id,index,post_fn, open_modal) {
+        if(typeof open_modal == 'boolean' && open_modal ){
+            $('#showProduct').modal('show');
         }
-        if(typeof index !== 'undefined'){
+        if(typeof index == 'number'){
             $scope.currently_open = index;
         }
         $scope.warehouse_edit_tmp = {
@@ -330,7 +325,6 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
             $scope.single_product = {};
             if(data.product) {
                 $scope.single_product = data.product;
-                //$('#showProduct').modal('show');
             } else {
                 $scope.single_product = {};
             }
@@ -356,7 +350,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
             } else {
                 $scope.single_product[prop][$scope.tmp.editing][name] = $scope.tmp[name];
             }
-            $scope.update_single_product();
+            $scope.update_single_product(0, true);
         }
         $scope.tmp[name] = "";
         $scope.tmp.editing = -1;
@@ -377,7 +371,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
             $scope.tmp.editing = -1;
             $scope.tmp.editing_var = -1;
         }
-        $scope.update_single_product();
+        $scope.update_single_product(0, true);
     }
 
     $scope.edit_node = function(name,index) {
@@ -446,7 +440,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
     $scope.save_warehouse_node = function() {
         if($scope.warehouse_edit_tmp.editing != -1 ) {
             $scope.single_product.inventory_warehouses[$scope.warehouse_edit_tmp.editing][$scope.warehouse_edit_tmp.editing_var] = $scope.warehouse_edit_tmp[$scope.warehouse_edit_tmp.editing_var];
-            $scope.update_single_product();
+            $scope.update_single_product(0, true);
             //$scope.single_product.inventory_warehouses[$scope.warehouse_edit_tmp.editing].checked = !$scope.single_product.inventory_warehouses[$scope.warehouse_edit_tmp.editing].checked;
         }
         $scope.warehouse_edit_tmp.editing_var = "";
@@ -464,16 +458,11 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
             location_secondary:""
         }
         $scope.single_product.inventory_warehouses.push(new_warehouse);
-        $scope.update_single_product(
-            function() {
-                $scope.product_single_details($scope.single_product.basicinfo.id,$scope.currently_open,
-                function() {
-                    var warehouses = $scope.single_product.inventory_warehouses;
-                    var last_warehouse = warehouses.length-1;
-                    $scope.edit_warehouse_node(last_warehouse,$scope.single_product.inventory_warehouses[last_warehouse].id,'name');
-                });
-            }
-        );
+        $scope.update_single_product(function() {
+            var warehouses = $scope.single_product.inventory_warehouses;
+            var last_warehouse = warehouses.length-1;
+            $scope.edit_warehouse_node(last_warehouse,$scope.single_product.inventory_warehouses[last_warehouse].id,'name');
+        });
     }
     $scope.remove_warehouses = function() {
         for(i in $scope.single_product.inventory_warehouses) {
@@ -489,20 +478,17 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
         }
     }
     $scope.update_product_list = function(obj) {
-        $scope.loading = true;
+        //$scope.loading = true;
         $http.post('/products/updateproductlist.json',obj).success(function(data){
             if(data.status) {
-                $scope.show_error = false;
-                $scope.show_error_msgs = false;
+                $scope.notify("Successfully Updated",1);
             } else {
-                $scope.show_error = true;
-                $scope.error_msg = data.error_msg;
+                $scope.notify(data.error_msg,0);
             }
             $scope.get_products();
 
         }).error(function(data) {
-            $scope.show_error = true;
-            $scope.error_msg = "Couldn't save product info";
+            $scope.notify("Couldn't save product info",0);
             $scope.get_products();
         });
     }
@@ -543,25 +529,25 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
         // there's more, have a look at the demos and docs...
         callback: $scope.showHideField
     });
-    $scope.update_single_product = function(post_fn) {
+    $scope.update_single_product = function(post_fn,auto) {
+        if(typeof auto !== "boolean") {
+            auto = false;
+        }
         $http.post('/products/updateproduct.json', $scope.single_product).success(function(data) {
             if(data.status) {
-                $scope.product_update_status = true;
-                $scope.show_error_msgs = false;
-                $scope.product_update_message = "Successfully Updated";
-
+                if(!auto) {
+                    $scope.notify("Successfully Updated",1);
+                }
             } else {
-                $scope.show_error_msgs = true;
                 if(data.message) {
-                    $scope.error_msgs = [data.message];
+                    $scope.notify(data.message,0);
                 } else {
-                    $scope.error_msgs = ["Some error Occurred"];
+                    $scope.notify("Some error Occurred",0);
                 }
             }
             $scope.product_single_details($scope.single_product.basicinfo.id,$scope.currently_open,post_fn,false);
         }).error(function() {
-            $scope.show_error_msgs = true;
-            $scope.error_msgs = ["Some error Occurred"];
+            $scope.notify("Some error Occurred",0);
             $scope.product_single_details($scope.single_product.basicinfo.id,$scope.currently_open,post_fn,false);
         });
     }
@@ -579,36 +565,28 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
                     function(data) {
                         //console.log(data);
                         if(data.status) {
-                            $scope.product_update_status = true;
-                            $scope.show_error_msgs = false;
-                            $scope.product_update_message = "Successfully Added";
-                            $scope.product_single_details($scope.single_product.basicinfo.id,$scope.currently_open);
+                            $scope.notify("Successfully Added",1);
+                            $scope.product_single_details($scope.single_product.basicinfo.id,$scope.currently_open,post_fn,false);
                         } else {
-                            $scope.show_error_msgs = true;
-                            $scope.error_msgs = data.messages;
+                            $scope.notify(data.messages,0);
                         }
                     }
                 ).error(function(data){
-                        $scope.show_error_msgs = true;
-                        $scope.error_msgs = ["Some error Occurred"];
+                        $scope.notify("Some error Occurred",0);
                     });
             } else {
 
                 $http.post("products/setalias.json",{product_orig_id: id , product_alias_id: $scope.single_product.basicinfo.id}).success(
                     function(data) {
                         if(data.status) {
-                            $scope.product_update_status = true;
-                            $scope.show_error_msgs = false;
-                            $scope.product_update_message = "Successfully Updated";
-                            $scope.product_single_details(id);
+                            $scope.notify("Successfully Updated",1);
+                            $scope.product_single_details(id,null,post_fn,false);
                         } else {
-                            $scope.show_error_msgs = true;
-                            $scope.error_msgs = ["Some error Occurred"];
+                            $scope.notify("Some error Occurred",0);
                         }
                     }
                 ).error(function(data){
-                        $scope.show_error_msgs = true;
-                        $scope.error_msgs = ["Some error Occurred"];
+                        $scope.notify("Some error Occurred",0);
                     });
             }
         }
@@ -633,17 +611,13 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
 
         $http.post('/products/removeproductsfromkit.json',{kit_id: $scope.single_product.basicinfo.id, kit_products: $scope.selected_skus }).success(function(data){
             if(data.status) {
-                $scope.product_update_status = true;
-                $scope.show_error_msgs = false;
-                $scope.product_update_message = "Successfully Removed";
-                $scope.product_single_details($scope.single_product.basicinfo.id);
+                $scope.notify("Successfully Removed",1);
+                $scope.product_single_details($scope.single_product.basicinfo.id,$scope.currently_open,post_fn,false);
             } else {
-                $scope.show_error_msgs = true;
-                $scope.error_msgs = data.messages;
+                $scope.notify(data.messages,0);
             }
         }).error(function(data){
-                $scope.show_error_msgs = true;
-                $scope.error_msgs = ["Some error Occurred"];
+                $scope.notify("Some error Occurred",0);
         });
 
     }
@@ -665,17 +639,14 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
                     data: {product_id: $scope.single_product.basicinfo.id, product_image: args.file}
                 }).success(function(data) {
                     if(data.status) {
-                        $scope.product_update_status = true;
-                        $scope.product_update_message = "Successfully Updated";
-                        $scope.product_single_details($scope.single_product.basicinfo.id);
+                        $scope.notify("Successfully Updated",1);
+                        $scope.product_single_details($scope.single_product.basicinfo.id,$scope.currently_open,post_fn, false);
                     } else {
-                        $scope.show_error_msgs = true;
-                        $scope.error_msgs = ["Some error Occurred"];
+                        $scope.notify("Some error Occurred",0);
                     }
 
                 }).error(function() {
-                        $scope.show_error_msgs = true;
-                        $scope.error_msgs = ["Some error Occurred"];
+                        $scope.notify("Some error Occurred",0);
                 });
             });
         }
@@ -711,17 +682,17 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
             //console.log($scope.currently_open);
             if(event.which == 38) {//up key
                 if($scope.currently_open > 0) {
-                    $scope.product_single_details($scope.products[$scope.currently_open -1].id, $scope.currently_open - 1);
+                    $scope.product_single_details($scope.products[$scope.currently_open -1].id, $scope.currently_open - 1,post_fn, false);
                 } else {
                     alert("Already at the top of the list");
                 }
             } else if(event.which == 40) { //down key
                 if($scope.currently_open < $scope.products.length -1) {
-                    $scope.product_single_details($scope.products[$scope.currently_open + 1].id, $scope.currently_open + 1);
+                    $scope.product_single_details($scope.products[$scope.currently_open + 1].id, $scope.currently_open + 1,post_fn, false);
                 } else {
                     $scope.product_next(function(){
                         if($scope.currently_open < $scope.products.length -1) {
-                            $scope.product_single_details($scope.products[$scope.currently_open + 1].id, $scope.currently_open + 1);
+                            $scope.product_single_details($scope.products[$scope.currently_open + 1].id, $scope.currently_open + 1,post_fn, false);
                         } else {
                             alert("Already at the bottom of the list");
                         }
@@ -761,16 +732,6 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
         axis: 'x'
     };
 
-    $scope.$watch('product_update_status',function() {
-        if($scope.product_update_status) {
-            $("#product_update_status").fadeTo("fast",1,function() {
-                $("#product_update_status").fadeTo("slow", 0 ,function() {
-                    $scope.product_update_status = false;
-                });
-            });
-        }
-    });
-
     $scope.$watch('alias.product_setup.search',function() {
         if($scope.can_get_products) {
             $scope.get_products();
@@ -804,7 +765,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
                 $("#"+event.currentTarget.parentElement.parentElement.id).removeClass("input-text-hover");
                 $("#"+event.currentTarget.parentElement.id).addClass("false-tag-bubble");
             }
-            $scope.update_single_product();
+            $scope.update_single_product(0,true);
         }
     );
     $('.regular-input').focusout($scope.update_single_product);

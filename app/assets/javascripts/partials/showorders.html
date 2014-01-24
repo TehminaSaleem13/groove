@@ -2,19 +2,13 @@
     <div ng-include="'/assets/partials/navigation.html'"></div>
 </div>
 
-<div  class="row home-row">
-    <div class="alert alert-danger" ng-show="show_error">
-        <i class="icon icon-remove close pull-right" ng-click="show_error = false"></i>
-        <p>{{error_msg}}</p>
-    </div>
-</div>
 
 <div class="row home-row">
     <div class="span3 left-menu">
         <div class="accordion" id="accordion2">
             <div class="accordion-group">
                 <div class="accordion-heading">
-                    <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" href="#collapseOne">
+                    <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" href="" data-target="#collapseOne">
                         Orders
                     </a>
                 </div>
@@ -44,14 +38,14 @@
                 <div class="span4">
                     <ul class="nav nav-pills">
                         <li class="dropdown">
-                            <a class="dropdown-toggle" id="drop4" role="button" data-toggle="dropdown" href="#">Edit <b class="caret"></b></a>
+                            <a class="dropdown-toggle" id="drop4" role="button" data-toggle="dropdown" href="">Edit <b class="caret"></b></a>
                             <ul id="menu2" class="dropdown-menu" role="menu" aria-labelledby="drop4">
                                 <li role="presentation"><a role="menuitem" tabindex="-1" ng-click="order_delete()">Delete</a></li>
                                 <li role="presentation"><a role="menuitem" tabindex="-1" ng-click="order_duplicate()">Duplicate</a></li>
                             </ul>
                         </li>
                         <li class="dropdown">
-                            <a class="dropdown-toggle" id="drop5" role="button" data-toggle="dropdown" href="#">Change Status
+                            <a class="dropdown-toggle" id="drop5" role="button" data-toggle="dropdown" href="">Change Status
                                 <b class="caret"></b></a>
                             <ul id="menu1" class="dropdown-menu" role="menu" aria-labelledby="drop5">
                                 <li role="presentation"><a role="menuitem" tabindex="-1" ng-click="order_change_status('awaiting')">Awaiting</a></li>
@@ -128,7 +122,7 @@
                         </div>
                     </td>
                     <td data-header="ordernum" id="{{'orders_ordernum_'+$index}}" ng-dblclick="edit_single_node($index,order.id,'ordernum')">
-                        <a href="#showOrder" role="button" data-toggle="modal" ng-click="order_single_details(order.id,$index)" class="ng-binding">{{order.ordernum}}</a>
+                        <a href="" role="button" data-toggle="modal" ng-click="order_single_details(order.id,$index,true)" class="ng-binding">{{order.ordernum}}</a>
                         <div id="{{'orders_ordernum_input_'+$index}}" ng-show="orders_edit_tmp.editing == $index && orders_edit_tmp.editing_var == 'ordernum'" class="tag-bubble tag-bubble-input span2 input-text">
                             <input xs-input-sync class="span2" name="{{'orders_ordernum_'+$index}}" ng-model="orders_edit_tmp.ordernum" type="text" placeholder="Edit..." />
                             <i ng-show="orders_edit_tmp.editing != -1 && orders_edit_tmp.ordernum != ''" class="icon-ok" ng-click="save_single_node()"></i>
@@ -223,18 +217,14 @@
             <fieldset>
                 <div class="modal-body" id="showOrder-body">
                     <ul class="nav nav-tabs" id="myTab">
-                        <li class="active"><a href="#infotab" data-toggle="tab">Information</a></li>
-                        <li><a href="#itemstab" data-toggle="tab">Items</a></li>
-                        <li><a href="#notestab" data-toggle="tab">Notes</a></li>
-                        <li><a href="#actexceptab" data-toggle="tab">Activity & exceptions</a></li>
+                        <li class="active"><a href="" data-target="#infotab" data-toggle="tab">Information</a></li>
+                        <li><a href="" data-target="#itemstab" data-toggle="tab">Items</a></li>
+                        <li><a href="" data-target="#notestab" data-toggle="tab">Notes</a></li>
+                        <li><a href="" data-target="#actexceptab" data-toggle="tab">Activity & exceptions</a></li>
                     </ul>
 
 
                     <div class="tab-content">
-                        <div class="alert alert-danger" ng-show="show_error_msgs">
-                            <button type="button" class="close" data-dismiss="alert"><i class="icon-remove"></i></button>
-                            <span ng-repeat="message in error_msgs">{{message}}</span>
-                        </div>
                         <div class="tab-pane active" id="infotab">
                             <fieldset>
                                 <legend>Product Details</legend>
