@@ -208,7 +208,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
                 $scope._focus_input($scope._tracking_num_inputObj);
             }
         }).error(function(){
-            $scope.show_alert(["Cannot load Order with id "+ $scope.order_id+". There was a server error"],0);
+            $scope.notify(["Cannot load Order with id "+ $scope.order_id+". There was a server error"],0);
         });
     }
     $scope._scan_tracking_num_handle_event = function(event) {
@@ -221,13 +221,13 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
                 $scope.hide_alert(-1);
                 if(data.status) {
                     if(data.notice_messages.length) {
-                        $scope.show_alert(data.notice_messages,2);
+                        $scope.notify(data.notice_messages,2);
                     }
                     if(data.success_messages.length) {
-                        $scope.show_alert(data.success_messages,1);
+                        $scope.notify(data.success_messages,1);
                     }
                 } else {
-                    $scope.show_alert(data.error_messages,0);
+                    $scope.notify(data.error_messages,0);
                 }
                 if(data.data != null) {
                     $scope.rf_input = "";
@@ -236,7 +236,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
                 }
 
             }).error(function(data){
-                    $scope.show_alert(["A server error was encountered"],0);
+                    $scope.notify(["A server error was encountered"],0);
             });
         }
     }
@@ -349,7 +349,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
                     if (data.data.unscanned_items != null && data.data.scanned_items != null) {
                         $scope.unscanned_items = data.data.unscanned_items;
                         $scope.scanned_items = data.data.scanned_items;
-                        $scope._compute_unscanned_and_scanned_products();   
+                        $scope._compute_unscanned_and_scanned_products();
                     }
                 }
             } else {
@@ -374,7 +374,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
                 if (data.data.unscanned_items != null && data.data.scanned_items != null) {
                     $scope.unscanned_items = data.data.unscanned_items;
                     $scope.scanned_items = data.data.scanned_items;
-                    $scope._compute_unscanned_and_scanned_products();   
+                    $scope._compute_unscanned_and_scanned_products();
                 }
             } else {
                 $scope.notify(data.error_messages,0);
