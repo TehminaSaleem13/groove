@@ -148,4 +148,24 @@ describe Order do
       expect(order_item_kit_product2.scanned_status).to eq('unscanned')
       expect(order_item_kit_product2.scanned_qty).to eq(0)     
    end
+
+   it "should add tag to the orders" do
+      order = FactoryGirl.create(:order)
+      tag = FactoryGirl.create(:order_tag)
+
+      order.addtag(tag.id)
+
+      expect(order.order_tags.length).to eq(1)
+   end
+
+   it "should remove tag from the orders" do
+      order = FactoryGirl.create(:order)
+      tag = FactoryGirl.create(:order_tag)
+
+      order.addtag(tag.id)
+      expect(order.order_tags.length).to eq(1)
+
+      order.removetag(tag.id)
+      expect(order.order_tags.length).to eq(0)
+   end
 end
