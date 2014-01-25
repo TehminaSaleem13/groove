@@ -62,7 +62,7 @@ groovepacks_services.factory('notification',function($timeout) {
                 function() {
                     delete scope.notifs[notif_id];
                 },
-                (Object.keys(scope.notifs).length-1)*1500 + 1500 + (scope.notifs[notif_id].msg.length*50)
+                Object.keys(scope.notifs).length*1500 + (scope.notifs[notif_id].msg.length*50)
             );
         };
         return {
