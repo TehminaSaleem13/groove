@@ -50,28 +50,39 @@ groovepacks_directives.directive('fileUpload', function () {
 
 groovepacks_services.factory('notification',function($timeout) {
         var scope = null;
+        var id = 0;
         var notif_types =  {
             0: "error",
             1: "success",
             2: "notice",
             default: 0
         };
+        var queue_remove =function(notif_id) {
+            $timeout(
+                function() {
+                    delete scope.notifs[notif_id];
+                },
+                (Object.keys(scope.notifs).length-1)*1500 + 1500 + (scope.notifs[notif_id].msg.length*50)
+            );
+        };
         return {
             set_scope: function(scop) {
                 scope = scop;
-                scope.notifs = [];
+                scope.notifs = {};
             },
             notify: function (msg,type) {
+                console.log();
                 if(typeof type != "number" ||  typeof notif_types[type] == "undefined") {
                     type = notif_types["default"];
                 }
                 var alert = notif_types[type];
-                if(typeof msg != "array") {
+                if(typeof msg == "string") {
                     msg = [msg];
                 }
                 for(i in msg) {
-                    scope.notifs.push({alert: alert, msg: msg[i]});
-                    $timeout(function(){scope.notifs.shift()},5000);
+                    id++;
+                    scope.notifs[id] = {show:true , alert: alert, msg: msg[i]};
+                    queue_remove(id);
                 }
             }
         }

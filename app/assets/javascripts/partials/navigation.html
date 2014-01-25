@@ -40,8 +40,8 @@
 </header>
 
 <div class="notifications">
-    <div ng-repeat="notif in notifs" class="slide alert alert-{{ notif.alert}}" >
-        <i class="icon icon-remove close pull-right" ng-click="notifs.splice($index,1)"></i>
+    <div ng-show="notif.show" ng-repeat="(notif_key, notif) in notifs" class="slide alert alert-{{ notif.alert}}" >
+        <i class="icon icon-remove close pull-right" ng-click="notif.show = false"></i>
         {{notif.msg}}
     </div>
 </div>
