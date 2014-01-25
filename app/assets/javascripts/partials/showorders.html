@@ -116,11 +116,13 @@
                 <tbody>
                 <tr ng-repeat="order in orders">
                     <td data-header="checkbox"><input type="checkbox" ng-model="order.checked"/></td>
-                    <td data-header="tags">
-                        <span ng-repeat = "tag in order.tags">
-                            <div class="tagbox" ng-style="{background: tag.color}">
-                            </div>
-                        </span>
+                    <td data-header="tags" >
+                        <div style="width:80px;">
+                        <ul class="inline">
+                         <li class="tagbox" ng-repeat = "tag in order.tags" ng-style="{background: tag.color}">
+                         </li>
+                        </ul>
+                        </div>
                     </td>
                     <td data-header="store_name">
                         {{order.store_name}}
