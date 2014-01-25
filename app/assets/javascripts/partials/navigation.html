@@ -1,7 +1,7 @@
 <header class="navbar">
     <div class="container">
         <div class="span2">
-            <a href="#/orders" class="brand"><img src="images/logo.png"></a>
+            <a href="#/orders" class="brand"><img src="assets/logo.png"></a>
         </div>
         <div class="span05">
             <ul class="nav" id="mainMenu">
@@ -25,7 +25,7 @@
 
                 <ul class="nav pull-right">
                     <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">{{username}}<b class="caret"></b></a>
+                        <a href="" class="dropdown-toggle" data-toggle="dropdown">{{username}}<b class="caret"></b></a>
                         <ul class="dropdown-menu">
                             <li>
                                 <a href="/users/sign_out" data-method="delete" rel="nofollow">Sign Out</a>
@@ -38,6 +38,14 @@
         </div>
     </div>
 </header>
+
+<div class="notifications">
+    <div ng-repeat="notif in notifs" class="slide alert alert-{{ notif.alert}}" >
+        <i class="icon icon-remove close pull-right" ng-click="notifs.splice($index,1)"></i>
+        {{notif.msg}}
+    </div>
+</div>
+
 <div class="loading" ng-show="loading">
     <div class="loading-body row-fluid">
         <p>Processing...</p>

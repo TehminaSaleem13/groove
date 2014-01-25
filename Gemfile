@@ -18,7 +18,7 @@ group :assets do
   gem 'jquery-fileupload-rails'
   gem 'jquery-ui-rails'
   gem 'therubyracer', :platform => :ruby
-  gem 'angularjs-rails'
+  gem 'angularjs-rails','>= 1.2.9'
 end
 
 gem 'jquery-rails'

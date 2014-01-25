@@ -1,6 +1,6 @@
 groovepacks_controllers.
-controller('showUsersCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$location', '$route', '$cookies','import_all',
-    function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,import_all) {
+controller('showUsersCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$location', '$route', '$cookies','import_all','notification',
+    function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,import_all,notification) {
         $scope.import_all_orders = function () {
             $('#importOrders').modal('show');
             import_all.do_import($scope);
@@ -9,6 +9,11 @@ controller('showUsersCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$l
     		$scope.username = data.username;
     	});
         $('.modal-backdrop').remove();
+        notification.set_scope($scope);
+
+        $scope.notify = function(msg,type) {
+            notification.notify(msg,type);
+        }
         $scope.current_page="show_users";
         $scope.currently_open = 0;
     	$http.get('/user_settings/userslist.json').success(function(data) {
@@ -16,8 +21,7 @@ controller('showUsersCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$l
     		$scope.reverse = false;
             $scope.newUser = {};
     	}).error(function(data) {
-    		$scope.error_msg = "There was a problem retrieving users list";
-    		$scope.show_error = true;
+    		$scope.notify("There was a problem retrieving users list",0);
     	});
 
         $scope.show_password = true;
@@ -28,12 +32,10 @@ controller('showUsersCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$l
     			console.log(data);
     			if(!data.result)
     			{
-    				$scope.error_msgs = data.messages;
-    				$scope.show_error_msgs = true;
+    				$scope.notify(data.messages,0);
     			}
     			else
     			{
-    				$scope.show_error_msgs = false;
     				$scope.newUser = {};
     				$('#createUser').modal('hide');
 
@@ -44,8 +46,7 @@ controller('showUsersCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$l
 								        usersScope.$apply();
 								      }
 						    	}).error(function(data) {
-						    		$scope.error_msg = "There was a problem retrieving users list.";
-						    		$scope.show_error = true;
+						    		$scope.notify("There was a problem retrieving users list.",0);
 						    	});
                     $scope.edit_status = false;
                     $scope.show_password = true;
@@ -101,16 +102,15 @@ controller('showUsersCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$l
                         $scope.users[userArray[i].index].active = userArray[i].active;
                         $scope.users[userArray[i].index].checked = false;
                     }
+                    $scope.notify("Status updated successfully",1);
                 }
                 else
                 {
-                    $scope.error_msg = "There was a problem changing users status";
-                    $scope.show_error = true;
+                    $scope.notify("There was a problem changing users status",0);
                 }
                 }).error(function(data){
-                            $scope.error_msg = "There was a problem changing users status";
-                            $scope.show_error = true;
-                    });
+                    $scope.notify("There was a problem changing users status",0);
+                });
         }
 
         $scope.handle_user_delete_event = function(event) {
@@ -140,22 +140,20 @@ controller('showUsersCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$l
             $http.put('/user_settings/deleteuser.json', userArray).success(function(data){
                         if (data.status)
                         {
+                            $scope.notify("Deleted successfully",1);
                             $http.get('/user_settings/userslist.json').success(function(data) {
                                 $scope.users = data;
                                 $scope.reverse = false;
                             }).error(function(data) {
-                                $scope.error_msg = "There was a problem retrieving users list";
-                                $scope.show_error = true;
+                                $scope.notify("There was a problem retrieving users list",0);
                             });
                         }
                         else
                         {
-                            $scope.error_msg = "There was a problem deleting users";
-                            $scope.show_error = true;
+                            $scope.notify("There was a problem deleting users",0);
                         }
                         }).error(function(data){
-                            $scope.error_msg = "There was a problem changing users status";
-                            $scope.show_error = true;
+                            $scope.notify("There was a problem changing users status",0);
                         });
         }
 
@@ -186,22 +184,20 @@ controller('showUsersCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$l
             $http.put('/user_settings/duplicateuser.json', userArray).success(function(data){
                         if (data.status)
                         {
+                            $scope.notify("Duplicated successfully",1);
                             $http.get('/user_settings/userslist.json').success(function(data) {
                                 $scope.users = data;
                                 $scope.reverse = false;
                             }).error(function(data) {
-                                $scope.error_msg = "There was a problem retrieving users list";
-                                $scope.show_error = true;
+                                $scope.notify("There was a problem retrieving users list",0);
                             });
                         }
                         else
                         {
-                            $scope.error_msg = "There was a problem duplicating users";
-                            $scope.show_error = true;
+                            $scope.notify("There was a problem duplicating users",0);
                         }
                         }).error(function(data){
-                            $scope.error_msg = "There was a problem duplicating users";
-                            $scope.show_error = true;
+                            $scope.notify("There was a problem duplicating users",0);
                         });
         }
 
@@ -209,7 +205,6 @@ controller('showUsersCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$l
         if(typeof index !== 'undefined'){
             $scope.currently_open = index;
         }
-        $scope.loading = true;
         /* update the server with the changed status */
         $http.get('/user_settings/getuserinfo.json?id='+id).success(function(data){
             if (data.status)
@@ -223,14 +218,10 @@ controller('showUsersCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$l
             }
             else
             {
-                $scope.error_msg = "There was a problem getting user information";
-                $scope.show_error = true;
+                $scope.notify("There was a problem getting user information",0);
             }
-            $scope.loading = false;
         }).error(function(data){
-            $scope.error_msg = "There was a problem getting user information";
-            $scope.show_error = true;
-            $scope.loading = false;
+            $scope.notify("There was a problem getting user information",0);
         });
     }
 

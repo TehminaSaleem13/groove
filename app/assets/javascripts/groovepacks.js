@@ -1,4 +1,4 @@
-angular.module('groovepacks', ['groovepacks.filters', 'groovepacks.services', 'groovepacks.directives', 'groovepacks.controllers','ui.sortable', 'ngCookies']).
+angular.module('groovepacks', ['groovepacks.filters', 'groovepacks.services', 'groovepacks.directives', 'groovepacks.controllers','ui.sortable', 'ngCookies', 'ngRoute','ngAnimate']).
   config(['$routeProvider', function($routeProvider) {
     $routeProvider.when('/orders',
     	{templateUrl: '/assets/partials/showorders.html', controller: 'showOrdersCtrl'});
@@ -47,7 +47,38 @@ groovepacks_directives.directive('fileUpload', function () {
         }
     };
 });
-groovepacks_services.factory("import_all", function($http,$timeout) {
+
+groovepacks_services.factory('notification',function($timeout) {
+        var scope = null;
+        var notif_types =  {
+            0: "error",
+            1: "success",
+            2: "notice",
+            default: 0
+        };
+        return {
+            set_scope: function(scop) {
+                scope = scop;
+                scope.notifs = [];
+            },
+            notify: function (msg,type) {
+                if(typeof type != "number" ||  typeof notif_types[type] == "undefined") {
+                    type = notif_types["default"];
+                }
+                var alert = notif_types[type];
+                if(typeof msg != "array") {
+                    msg = [msg];
+                }
+                for(i in msg) {
+                    scope.notifs.push({alert: alert, msg: msg[i]});
+                    $timeout(function(){scope.notifs.shift()},5000);
+                }
+            }
+        }
+    }
+)
+
+groovepacks_services.factory("import_all", function($http) {
     return {
         do_import: function(scope) {
 

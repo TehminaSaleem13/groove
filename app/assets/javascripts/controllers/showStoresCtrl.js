@@ -1,11 +1,15 @@
 groovepacks_controllers.
-controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$location', '$route', '$cookies','import_all',
-function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,import_all) {
+controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$location', '$route', '$cookies','import_all','notification',
+function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,import_all,notification) {
     $scope.import_all_orders = function () {
         $('#importOrders').modal('show');
         import_all.do_import($scope);
     }
+    notification.set_scope($scope);
 
+    $scope.notify = function(msg,type) {
+        notification.notify(msg,type);
+    }
     $('.modal-backdrop').remove();
         $scope.current_page="show_stores";
         $scope.$on("fileSelected", function (event, args) {
@@ -28,7 +32,6 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
         $scope.orderimport_type = 'apiimport';
         $scope.productimport_type = 'apiimport';
         $scope.ebay_show_signin_url = true;
-        $scope.loading = true;
     	$http.get('/store_settings/storeslist.json').success(function(data) {
     		$scope.stores = data;
     		$scope.reverse = false;
@@ -57,7 +60,6 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
                     $scope.newStore.status = $routeParams.status;
                     $scope.newStore.store_type = $routeParams.storetype;
                     $('#createStore').modal('show');
-                    $scope.loading = false;
                 }
             }
             else
@@ -74,11 +76,8 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
             //         $scope.ebay_signin_url_status = false;
             //     });
             }
-            $scope.loading = false;
     	}).error(function(data) {
-    		$scope.error_msg = "There was a problem retrieving stores list";
-    		$scope.show_error = true;
-            $scope.loading = false;
+    		$scope.notify("There was a problem retrieving stores list",0);
     	});
 
         $scope.retrieveandupdateusertoken = function(id) {
@@ -95,10 +94,11 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
 
 
     	$scope.submit = function() {
-            $scope.loading = true;
+            //$scope.loading = true;
+            //console.log($scope.newStore);
             $http({
                 method: 'POST',
-                headers: { 'Content-Type': false },
+                headers: { 'Content-Type': undefined },
                 url:'/store_settings/createStore.json',
                 transformRequest: function (data) {
                     var request = new FormData();
@@ -111,16 +111,11 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
             }).success(function(data) {
                 if(!data.status)
     			{
-    				$scope.error_msgs = data.messages;
-    				$scope.show_error_msgs = true;
-                    $scope.loading = false;
+                   $scope.notify(data.messages,0);
     			}
     			else
     			{
-    				$scope.show_error_msgs = false;
-                    $scope.error_msgs = {};
-                    $scope.showstoreupdate_status = true;
-                    $scope.storeupdate_message = 'Store has been successfully updated.';
+
     				var type = $scope.newStore.type;
                     if ($scope.newStore.store_type == 'CSV')
                     {
@@ -131,33 +126,27 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
                     {
                         $('#createStore').modal('hide');
                     }
-                    $scope.loading = true;
+                    //$scope.loading = true;
     				$http.get('/store_settings/storeslist.json').success(function(data) {
-						    		var storesScope = angular.element($("#storestbl")).scope();
-								      storesScope.stores = data;
-								      if(!$scope.$$phase) {
-								        storesScope.$apply();
-								      }
-
-                        $scope.loading = false;
+                        var storesScope = angular.element($("#storestbl")).scope();
+                          storesScope.stores = data;
+                          if(!$scope.$$phase) {
+                            storesScope.$apply();
+                          }
                     }).error(function(data) {
-						    		$scope.error_msg = "There was a problem retrieving stores list.";
-						    		$scope.show_error = true;
-                            $scope.loading = false;
+						    $scope.notify( "There was a problem retrieving stores list.",0);
                     });
                     $scope.edit_status = true;
 
                     //Use FileReader API here if it exists (post prototype feature)
                     if(data.csv_import && data.store_id) {
-                        $scope.loading = true;
+                        //$scope.loading = true;
                         $http.get('/store_settings/csvImportData.json?id='+data.store_id+'&type='+type).success(function(data) {
                             $scope.csv_init(data);
                             $('#importCsv').modal('show');
                             $scope.loading = false;
                         }).error(function(data) {
-                            $scope.error_msg = "There was a problem retrieving stores list.";
-                            $scope.show_error = true;
-                            $scope.loading = false;
+                            $scope.notify("There was a problem retrieving stores list.");
                         });
                     }
     			}
@@ -181,7 +170,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
     	}
 
         $scope.handle_change_status = function(event) {
-            $scope.loading = true;
+            //$scope.loading = true;
             storeArray = [];
 
             /* get user objects of checked items */
@@ -207,6 +196,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
             $http.put('/store_settings/changestorestatus.json', storeArray).success(function(data){
                 if (data.status)
                 {
+                    $scope.notify("Status changed successfully",1);
                     for(i=0; i<= storeArray.length -1; i++)
                     {
                         $scope.stores[storeArray[i].index].status = storeArray[i].status;
@@ -217,19 +207,15 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
                 }
                 else
                 {
-                    $scope.error_msg = "There was a problem changing stores status";
-                    $scope.show_error = true;
+                    $scope.notify("There was a problem changing stores status",0);
                 }
-                $scope.loading = false;
                 }).error(function(data){
-                            $scope.error_msg = "There was a problem changing stores status";
-                            $scope.show_error = true;
-                    $scope.loading = false;
-                    });
+                    $scope.notify("There was a problem changing stores status",0);
+                });
         }
 
         $scope.handle_store_delete_event = function(event) {
-            $scope.loading = true;
+            //$scope.loading = true;
             storeArray = [];
             /* get user objects of checked items */
             for( var store_index=0; store_index<= $scope.stores.length-1; store_index++)
@@ -245,31 +231,27 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
            // console.log(storeArray);
             /* update the server with the changed status */
             $http.put('/store_settings/deletestore.json', storeArray).success(function(data){
-                        if (data.status)
-                        {
-                            $http.get('/store_settings/storeslist.json').success(function(data) {
-                                $scope.stores = data;
-                                $scope.reverse = false;
-                            }).error(function(data) {
-                                $scope.error_msg = "There was a problem retrieving stores list";
-                                $scope.show_error = true;
-                            });
-                        }
-                        else
-                        {
-                            $scope.error_msg = "There was a problem deleting stores";
-                            $scope.show_error = true;
-                        }
-                $scope.loading = false;
-                        }).error(function(data){
-                            $scope.error_msg = "There was a problem changing stores status";
-                            $scope.show_error = true;
-                    $scope.loading = false;
-                        });
+                if (data.status)
+                {
+                    $scope.notify("Store deleted successfully",1);
+                    $http.get('/store_settings/storeslist.json').success(function(data) {
+                        $scope.stores = data;
+                        $scope.reverse = false;
+                    }).error(function(data) {
+                        $scope.notify("There was a problem retrieving stores list");
+                    });
+                }
+                else
+                {
+                    $scope.notify("There was a problem deleting stores");
+                }
+                }).error(function(data){
+                    $scope.notify("There was a problem changing stores status");
+
+                });
         }
 
         $scope.handle_store_duplicate_event = function(event) {
-            $scope.loading = true;
             storeArray = [];
             /* get user objects of checked items */
             for( var store_index=0; store_index<= $scope.stores.length-1; store_index++)
@@ -286,28 +268,22 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
             $http.put('/store_settings/duplicatestore.json', storeArray).success(function(data){
                 if (data.status)
                 {
-                    $scope.loading = true;
+                    $scope.notify("Store duplicated successfully",1);
                     $http.get('/store_settings/storeslist.json').success(function(data) {
                         $scope.stores = data;
                         $scope.reverse = false;
-                        $scope.loading = false;
+
                     }).error(function(data) {
-                        $scope.error_msg = "There was a problem retrieving stores list";
-                        $scope.show_error = true;
-                            $scope.loading = false;
+                        $scope.notify("There was a problem retrieving stores list",0);
                     });
                 }
                 else
                 {
-                    $scope.error_msg = "There was a problem duplicating stores";
-                    $scope.show_error = true;
-                    $scope.loading = false;
+                    $scope.notify("There was a problem duplicating stores",0);
                 }
                 $scope.loading = false;
             }).error(function(data){
-                $scope.error_msg = "There was a problem duplicating stores";
-                $scope.show_error = true;
-                $scope.loading = false;
+                $scope.notify("There was a problem duplicating stores",0);
             });
         }
     $scope.ebayuserfetchtoken = function(session_id) {
@@ -318,8 +294,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
             $http.post('/store_settings/createStore.json', $scope.newStore).success(function(data) {
                 if(!data.status)
                 {
-                    $scope.error_msgs = data.messages;
-                    $scope.show_error_msgs = true;
+                    $scope.notify(data.messages,0);
                 }
                 else
                 {
@@ -357,7 +332,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
                         });
     }
     $scope.getstoreinfo = function(id,index) {
-        $scope.loading = true;
+        //$scope.loading = true;
         if(typeof index !== 'undefined'){
             $scope.currently_open = index;
         }
@@ -424,14 +399,10 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
             }
             else
             {
-                $scope.error_msg = "There was a problem getting store information";
-                $scope.show_error = true;
+                $scope.notify("There was a problem getting store information",0);
             }
-            $scope.loading = false;
         }).error(function(data){
-            $scope.error_msg = "There was a problem getting store information";
-            $scope.show_error = true;
-            $scope.loading = false;
+            $scope.notify("There was a problem getting store information",0);
         });
     }
 
@@ -559,7 +530,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
     }
 
     $scope.request_import_products = function() {
-        $scope.loading = true;
+        //$scope.loading = true;
             $scope.importproduct_status = "Import request in progress";
             $scope.importproductstatus_show = true;
             $http.get('/products/requestamazonreport/'+$scope.newStore.id+'.json').success(function(data){
@@ -583,7 +554,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
             });
     }
     $scope.check_request_import_products =function() {
-        $scope.loading = true;
+        //$scope.loading = true;
             $scope.importproduct_status = "Checking status of the request";
             $scope.importproductstatus_show = true;
             $http.get('/products/checkamazonreportstatus/'+$scope.newStore.id+'.json').success(function(data){
@@ -634,24 +605,18 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
     }
 
     $scope.import_csv = function() {
-        $scope.loading = true;
         $http.post('store_settings/csvDoImport.json',$scope.current).success(function(data){
             if(!data.status) {
-                $scope.error_msgs = data.messages;
-                $scope.show_error_msgs = true;
+                $scope.notify(data.messages,0);
                 $scope.current.rows = $scope.current.rows + data.last_row
             } else {
-                $scope.show_error_msgs = false;
-                $scope.error_msgs = {};
+                $scope.notify("CSV imported successfully",1);
                 $scope.current = {};
                 $scope.csvimporter = {};
                 $('#importCsv').modal('hide');
             }
-            $scope.loading = false;
         }).error(function(){
-                $scope.show_error_msgs = true;
-                $scope.error_msgs = ["Some Error Occurred"];
-                $scope.loading = false;
+            $scope.notify("Some Error Occurred",0);
         });
     }
 
@@ -771,18 +736,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
     $scope.close_modal = function() {
         $scope.newStore = {};
         $('#createStore').modal('hide');
-        $scope.showstoreupdate_status = false;
-        $scope.storeupdate_message = '';
     }
-    $scope.$watch('showstoreupdate_status',function() {
-        if($scope.showstoreupdate_status) {
-            $("#showstoreupdate_status").fadeTo("fast",1,function() {
-                $("#showstoreupdate_status").fadeTo("slow", 0 ,function() {
-                    $scope.showstoreupdate_status = false;
-                });
-            });
-        }
-    });
 
     $scope.keyboard_nav_event = function(event) {
         if($('#createStore').hasClass("in") && $scope.edit_status) {

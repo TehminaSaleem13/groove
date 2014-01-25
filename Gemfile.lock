@@ -65,7 +65,7 @@ GEM
     akami (1.2.0)
       gyoku (>= 0.4.0)
       nokogiri (>= 1.4.0)
-    angularjs-rails (1.0.8)
+    angularjs-rails (1.2.9)
     arel (3.0.2)
     atomic (1.1.13)
     bcrypt-ruby (3.1.2)
@@ -362,7 +362,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  angularjs-rails
+  angularjs-rails (>= 1.2.9)
   better_errors (>= 0.2.0)
   binding_of_caller (>= 0.6.8)
   bootstrap-sass (>= 2.1.1.0)
