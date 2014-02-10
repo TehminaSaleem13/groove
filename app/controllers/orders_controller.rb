@@ -1,7 +1,7 @@
 class OrdersController < ApplicationController
 
   include OrdersHelper
-
+  include ProductsHelper
   # GET /orders
   # GET /orders.json
   def index
@@ -29,7 +29,7 @@ class OrdersController < ApplicationController
     @result['activestoreindex'] = params[:activestoreindex]
   end
 
- begin
+ # begin
   #import if magento products
   if @store.store_type == 'Magento'
     @magento_credentials = MagentoCredentials.where(:store_id => @store.id)
@@ -312,7 +312,7 @@ class OrdersController < ApplicationController
             #@result['report_id'] = response.body
       @orders = []
 
-      if !response.orders.kindof?(Array)
+      if !response.orders.kind_of?(Array)
         @orders.push(response.orders)
       else
         @orders = response.orders
@@ -339,6 +339,22 @@ class OrdersController < ApplicationController
             @order_item.qty = item.quantity_ordered
             @order_item.row_total= item.item_price.amount.to_i * item.quantity_ordered.to_i
             @order_item.sku = item.seller_sku
+            if ProductSku.where(:sku=>item.seller_sku).length == 0
+              #create and import product
+              product = Product.new
+              product.name = 'New imported item'
+              product.store_product_id = 0
+              product.store = @store
+
+              sku = ProductSku.new
+              sku.sku = item.seller_sku
+
+              product.product_skus << sku
+              product.save
+              import_amazon_product_details(@store.id, item.seller_sku, product.id)
+            else
+              @order_item.product = ProductSku.where(:sku=>item.seller_sku).first.product
+            end
             @order_item.name = item.title
           end
 
@@ -376,11 +392,11 @@ class OrdersController < ApplicationController
       @result['response'] = response
     end
   end
-  rescue Exception => e
-    @result['status'] = false
-    @result['messages'].push(e.message)
-    puts e.backtrace
-  end
+  # rescue Exception => e
+  #   @result['status'] = false
+  #   @result['messages'].push(e.message)
+  #   puts e.backtrace
+  # end
     respond_to do |format|
       format.json { render json: @result}
     end

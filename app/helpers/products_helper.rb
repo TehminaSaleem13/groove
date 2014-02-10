@@ -22,6 +22,8 @@ module ProductsHelper
 				product_hash = Hash.from_xml(products_xml.to_s)
 
 				product = Product.find(product_id)
+
+				product.name = product_hash['GetMatchingProductForIdResult']['Products']['Product']['AttributeSets']['ItemAttributes']['Title']
 				product.store_product_id = product_hash['GetMatchingProductForIdResult']['Products']['Product']['Identifiers']['MarketplaceASIN']['ASIN']
 
 				if @credential.import_images

@@ -466,7 +466,7 @@ class Order < ActiveRecord::Base
       contains_new = false
 
       self.order_items.each do |order_item|
-        if order_item.product.status == 'new'
+        if !order_item.product.nil? && order_item.product.status == 'new'
           contains_new = true
         end
       end
@@ -485,7 +485,7 @@ class Order < ActiveRecord::Base
       contains_inactive = false
 
       self.order_items.each do |order_item|
-        if order_item.product.status == 'inactive'
+        if !order_item.product.nil? && order_item.product.status == 'inactive'
           contains_inactive = true
           break
         end
