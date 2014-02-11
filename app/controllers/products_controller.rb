@@ -664,7 +664,7 @@ class ProductsController < ApplicationController
   def changeproductstatus
     @result = Hash.new
     @result['status'] = true
-    @result['error_messages'] = []
+    @result['messages'] = []
 
     @products = list_selected_products
     unless @products.nil?
@@ -678,21 +678,21 @@ class ProductsController < ApplicationController
           	if !@product.update_product_status && params[:status] == 'active'
           		@result['status'] &= false
           		if @product.is_kit == 1
-          			@result['error_messages'].push('There was a problem changing kit status for '+
+          			@result['messages'].push('There was a problem changing kit status for '+
           			 @product.name + '. Reason: In order for a Kit to be Active it needs to '+
           			 'have at least one item and every item in the Kit must be Active.')
           		else
-          			@result['error_messages'].push('There was a problem changing product status for '+
+          			@result['messages'].push('There was a problem changing product status for '+
           			 @product.name + '. Reason: In order for a product to be Active it needs to '+
-          			 'have at least one SKU and one barcode.')			
+          			 'have at least one SKU and one barcode.')
           		end
-          		@product.status = current_status 
+          		@product.status = current_status
           		@product.save
           	end
           end
         else
           @result['status'] &= false
-          @result['error_messages'].push('There was a problem changing products status for '+@product.name)
+          @result['messages'].push('There was a problem changing products status for '+@product.name)
         end
       end
     end
@@ -731,7 +731,7 @@ class ProductsController < ApplicationController
 					kit_sku['option_product_id'] = option_product.id
 					@result['product']['productkitskus'].push(kit_sku)
 				end
-				@result['product']['productkitskus'] = 
+				@result['product']['productkitskus'] =
 					@result['product']['productkitskus'].sort_by {|hsh| hsh['packing_order']}
       end
 
@@ -759,36 +759,39 @@ class ProductsController < ApplicationController
   	if !@kit.is_kit
   		@result['messages'].push("Product with id="+@kit.id+"is not a kit")
   		@result['status'] &= false
-  	else
-  		if !params[:product_id].nil?
-        item = Product.find_by_id(params[:product_id])
-        if item.nil?
-          @result['messages'].push("Item does not exist")
-          @result['status'] &= false
-        else
-			product_kit_sku = ProductKitSkus.find_by_option_product_id_and_product_id(params[:product_id], @kit.id)
-	        if product_kit_sku.nil?
-	          @productkitsku = ProductKitSkus.new
-	          @productkitsku.option_product_id = item.id
-	          @productkitsku.qty = 1
-	          @kit.product_kit_skuss << @productkitsku
-	          if @kit.save
-	          	@productkitsku.reload
-	          	@productkitsku.add_product_in_order_items
-	          else
-	            @result['messages'].push("Could not save kit with sku: "+@product_skus.first.sku)
-	            @result['status'] &= false
-	          end
-	        else
-	          @result['messages'].push("The product with id #{item.id} has already been added to the kit")
-	          @result['status'] &= false
-	        end
-	        item.update_product_status
-        end
+    else
+  		if params[:product_ids].nil?
+        @result['messages'].push("No item sent in the request")
+        @result['status'] &= false
 	  	else
-	  		@result['messages'].push("No item sent in the request")
-			  @result['status'] &= false
-  		end
+        items = Product.find(params[:product_ids])
+        items.each do |item|
+          if item.nil?
+            @result['messages'].push("Item does not exist")
+            @result['status'] &= false
+          else
+            product_kit_sku = ProductKitSkus.find_by_option_product_id_and_product_id(item.id, @kit.id)
+            if product_kit_sku.nil?
+              @productkitsku = ProductKitSkus.new
+              @productkitsku.option_product_id = item.id
+              @productkitsku.qty = 1
+              @kit.product_kit_skuss << @productkitsku
+              if @kit.save
+                @productkitsku.reload
+                @productkitsku.add_product_in_order_items
+              else
+                @result['messages'].push("Could not save kit with sku: "+@product_skus.first.sku)
+                @result['status'] &= false
+              end
+            else
+              @result['messages'].push("The product with id #{item.id} has already been added to the kit")
+              @result['status'] &= false
+            end
+            item.update_product_status
+          end
+        end
+      end
+
   	end
 
     respond_to do |format|
@@ -812,7 +815,7 @@ class ProductsController < ApplicationController
         params[:kit_products].reject!{|a| a==""}
         params[:kit_products].each do |kit_product|
 	    product_kit_sku = ProductKitSkus.find_by_option_product_id_and_product_id(kit_product,@kit.id)
-        
+
         if product_kit_sku.nil?
           @result['messages'].push("Product #{kit_product} not found in item")
           @result['status'] &= false

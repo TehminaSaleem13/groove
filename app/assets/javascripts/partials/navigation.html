@@ -38,52 +38,11 @@
         </div>
     </div>
 </header>
-
-<div class="notifications">
-    <div ng-show="notif.show" ng-repeat="(notif_key, notif) in notifs" class="slide alert alert-{{ notif.alert}}" >
-        <i class="icon icon-remove close pull-right" ng-click="notif.show = false"></i>
-        {{notif.msg}}
-    </div>
-</div>
-
 <div class="loading" ng-show="loading">
     <div class="loading-body row-fluid">
         <p>Processing...</p>
         <button class="btn" ng-click="loading = false" aria-hidden="true">Dismiss</button>
     </div>
 </div>
-<div id="importOrders" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="importOrders"
-     aria-hidden="true">
 
-    <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-        <h3 id="importOrdersheader">Import Orders Summary</h3>
-    </div>
-    <div class="modal-body" id="importOrders-body">
-        <table class="table importtable">
-            <tbody>
-            <tr ng-repeat="store in active_stores">
-                <td>
-                    <img src="https://s3.amazonaws.com/groovepacker/EBAY-BUTTON.png" width="60px" height="50px" ng-show="store.info.store_type=='Ebay'">
-                    <img src="https://s3.amazonaws.com/groovepacker/amazonLogo.jpg" width="60px" height="50px" ng-show="store.info.store_type=='Amazon'">
-                    <img src="https://s3.amazonaws.com/groovepacker/MagentoLogo.jpg" width="60px" height="50px" ng-show="store.info.store_type=='Magento'">
-                </td>
-                <td>
-                    <strong>{{store.info.name}}</strong>
-                </td>
-                <td>
-                    <i class="icon-refresh icon-spin" ng-show="store.status=='in_progress'"></i>
-                    <i class="icon-ok" style="color:green;" ng-show="store.status=='completed'"></i>
-                    <i class="icon-remove" style="color:maroon;" ng-show="store.status=='failed'"></i>
-                </td>
-                <td><span ng-show="store.status=='not_started'">Queued for import</span>
-                    <span ng-show="store.status=='in_progress'"> Import in progress</span>
-                    <span ng-show="store.status=='completed' || store.status=='failed'">{{store.message}}</span></td>
-            </tr>
-            </tbody>
-        </table>
-    </div>
-    <div class="modal-footer">
-        <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-    </div>
-</div>
+

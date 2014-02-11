@@ -1,19 +1,10 @@
 groovepacks_controllers.
-controller('showUsersCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$location', '$route', '$cookies','import_all','notification',
-    function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,import_all,notification) {
-        $scope.import_all_orders = function () {
-            $('#importOrders').modal('show');
-            import_all.do_import($scope);
-        }
+controller('showUsersCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$location', '$route', '$cookies',
+    function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies) {
     	$http.get('/home/userinfo.json').success(function(data){
     		$scope.username = data.username;
     	});
         $('.modal-backdrop').remove();
-        notification.set_scope($scope);
-
-        $scope.notify = function(msg,type) {
-            notification.notify(msg,type);
-        }
         $scope.current_page="show_users";
         $scope.currently_open = 0;
     	$http.get('/user_settings/userslist.json').success(function(data) {

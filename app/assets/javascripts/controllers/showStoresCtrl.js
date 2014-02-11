@@ -1,15 +1,6 @@
 groovepacks_controllers.
-controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$location', '$route', '$cookies','import_all','notification',
-function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,import_all,notification) {
-    $scope.import_all_orders = function () {
-        $('#importOrders').modal('show');
-        import_all.do_import($scope);
-    }
-    notification.set_scope($scope);
-
-    $scope.notify = function(msg,type) {
-        notification.notify(msg,type);
-    }
+controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$location', '$route', '$cookies',
+function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies) {
     $('.modal-backdrop').remove();
         $scope.current_page="show_stores";
         $scope.$on("fileSelected", function (event, args) {

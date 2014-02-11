@@ -284,30 +284,28 @@ background: url('/assets/sort_desc.png') no-repeat center right;
   margin-top:-50px;
   font-size:3em;
 }
-.active .caret-DESC {
+
+
+.active a.ASC:after, .active a.DESC:after {
   display: inline-block;
   width: 0;
   height: 0;
   margin-left: 2px;
   vertical-align: middle;
+  border-right: 4px solid transparent;
+  border-left: 4px solid transparent;
+  content: "";
+}
+.active a.DESC:after {
   border-top: 4px solid #000000;
-  border-right: 4px solid transparent;
   border-bottom: 0 dotted;
-  border-left: 4px solid transparent;
-  content: "";
+
 }
-.active .caret-ASC {
-  display: inline-block;
-  width: 0;
-  height: 0;
-  margin-left: 2px;
-  vertical-align: middle;
+.active a.ASC:after {
   border-bottom: 4px solid #000000;
-  border-left: 4px solid transparent;
   border-top: 0 dotted;
-  border-right: 4px solid transparent;
-  content: "";
 }
+
 .product_single_top_table {
   width:100%;
 }

@@ -1,19 +1,12 @@
 groovepacks_controllers.
-controller('showScanPackCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$location', '$route', '$cookies','import_all','notification',
-function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,import_all,notification) {
+controller('showScanPackCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$location', '$route', '$cookies',
+function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies) {
     //Definitions
 
     /*
      * Public methods
      */
-    $scope.import_all_orders = function () {
-        $('#importOrders').modal('show');
-        import_all.do_import($scope);
-    }
 
-    $scope.notify = function(msg,type) {
-        notification.notify(msg,type);
-    }
 
     /*
      * Private methods
@@ -54,6 +47,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
         $scope._order_confirmation_inputObj = $('input#order_edit_confirmation_code');
         $scope._product_confirmation_inputObj = $('input#product_edit_confirmation_code');
         $scope._tracking_num_inputObj = $('input#scantracking_num');
+
         $scope._cos_confirmation_inputObj = $('input#cos_confirmation_code');
 
         //Register events and make function calls
@@ -80,7 +74,6 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
         $(".scan_product_times").disableSelection();
         $scope._next_state({next_state:"default"});
         $scope.set_products_defaults();
-        notification.set_scope($scope);
     }
 
     $scope._set_rf_state = function(state) {
@@ -263,11 +256,11 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
     $scope._product_edit_confirmation_code_state = function(data) {
         $("#showProductConfirmation").modal('show');
     }
-    
+
     $scope._cos_confirmation_code_state = function(data) {
         $("#showCosConfirmation").modal('show');
     }
-    
+
     $scope._product_edit_state = function(data) {
         $scope.inactive_new_products = data.inactive_or_new_products;
         $("#showProductList").modal('show');

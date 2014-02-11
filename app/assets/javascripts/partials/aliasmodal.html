@@ -1,0 +1,44 @@
+<!-- Aliasing Modal -->
+<div id="showAliasOptions{{custom_identifier}}" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="showAliasOptions"
+     aria-hidden="true">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="icon-remove"></i></button>
+        <h3 >Select Product to <span ng-show="is_kit">add to Kit</span><span ng-hide="is_kit">Alias</span></h3>
+    </div>
+    <div class="modal-body" >
+
+        <input type="text" id="alias-search-query-{{custom_identifier}}" ng-model="products.setup.search" class="input-large search-query" placeholder="Search term" /><br/><br/>
+        <table class="table table-hover table-bordered">
+            <thead>
+            <tr>
+                <th ng-class="{active: products.setup.sort=='name'}">
+                    <a href="" ng-click="handlesort('name')" ng-class="products.setup.order">Item Name</a>
+                </th>
+                <th ng-class="{active: products.setup.sort=='sku'}">
+                    <a href="" ng-click="handlesort('sku')" ng-class="products.setup.order">Primary Sku</a>
+                </th>
+                <th ng-class="{active: products.setup.sort=='status'}">
+                    <a href="" ng-click="handlesort('status')" ng-class="products.setup.order">Status</a>
+                </th>
+                <th ng-class="{active: products.setup.sort=='barcode'}">
+                    <a href="" ng-click="handlesort('barcode')" ng-class="products.setup.order">Barcode</a>
+                </th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-click="add_alias_product(product)" ng-class="{info: product.checked}" ng-repeat="product in products.list">
+                <td>{{product.name}}</td>
+                <td>{{product.sku}}</td>
+                <td>{{product.status}}</td>
+                <td>{{product.barcode}}</td>
+            </tr>
+            </tbody>
+        </table>
+        <button ng-show="products.load_new" class="btn btn-info btn-large" style="width:100%;" ng-click="product_next()">Load More</button>
+    </div>
+    <div class="modal-footer">
+        <button ng-click="save()" class="btn btn-primary">Save</button>
+        <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+    </div>
+</div>
+<!-- Aliasing Modal ends-->

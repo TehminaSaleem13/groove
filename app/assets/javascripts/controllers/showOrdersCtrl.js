@@ -1,14 +1,9 @@
 groovepacks_controllers.
-    controller('showOrdersCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$location', '$route', '$cookies','import_all','notification',
-function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,import_all,notification) {
+    controller('showOrdersCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$location', '$route', '$cookies',
+function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies) {
     $scope.import_all_orders = function () {
         $('#importOrders').modal('show');
         import_all.do_import($scope);
-    }
-    notification.set_scope($scope);
-
-    $scope.notify = function(msg,type) {
-        notification.notify(msg,type);
     }
     $http.get('/home/userinfo.json').success(function(data){
         $scope.username = data.username;
