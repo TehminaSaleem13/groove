@@ -11,6 +11,7 @@ class User < ActiveRecord::Base
   validates_presence_of  :username, :confirmation_code
   validates_uniqueness_of :username, :case_sensitive => false
   # attr_accessible :title, :body
+  belongs_to :inventory_warehouse
 
   def email_required?
     false

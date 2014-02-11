@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140117112311) do
+ActiveRecord::Schema.define(:version => 20140211135401) do
 
   create_table "amazon_credentials", :force => true do |t|
     t.string   "merchant_id",                                     :null => false
@@ -43,6 +43,14 @@ ActiveRecord::Schema.define(:version => 20140117112311) do
     t.date     "ebay_auth_expiration"
     t.text     "productauth_token"
     t.text     "auth_token"
+  end
+
+  create_table "inventory_warehouses", :force => true do |t|
+    t.string   "name",                               :null => false
+    t.string   "location"
+    t.datetime "created_at",                         :null => false
+    t.datetime "updated_at",                         :null => false
+    t.string   "status",     :default => "inactive"
   end
 
   create_table "magento_credentials", :force => true do |t|
@@ -230,17 +238,19 @@ ActiveRecord::Schema.define(:version => 20140117112311) do
   add_index "product_images", ["product_id"], :name => "index_product_images_on_product_id"
 
   create_table "product_inventory_warehouses", :force => true do |t|
-    t.string   "location"
     t.integer  "qty"
     t.integer  "product_id"
-    t.datetime "created_at",         :null => false
-    t.datetime "updated_at",         :null => false
+    t.datetime "created_at",             :null => false
+    t.datetime "updated_at",             :null => false
     t.string   "alert"
     t.string   "location_primary"
     t.string   "location_secondary"
     t.string   "name"
+    t.string   "location"
+    t.integer  "inventory_warehouse_id"
   end
 
+  add_index "product_inventory_warehouses", ["inventory_warehouse_id"], :name => "index_product_inventory_warehouses_on_inventory_warehouse_id"
   add_index "product_inventory_warehouses", ["product_id"], :name => "index_product_inventory_warehouses_on_product_id"
 
   create_table "product_kit_skus", :force => true do |t|
@@ -354,8 +364,10 @@ ActiveRecord::Schema.define(:version => 20140117112311) do
     t.string   "other"
     t.string   "name"
     t.string   "confirmation_code",      :default => "",    :null => false
+    t.integer  "inventory_warehouse_id"
   end
 
+  add_index "users", ["inventory_warehouse_id"], :name => "index_users_on_inventory_warehouse_id"
   add_index "users", ["reset_password_token"], :name => "index_users_on_reset_password_token", :unique => true
 
   create_table "users_roles", :id => false, :force => true do |t|

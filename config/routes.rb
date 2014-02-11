@@ -1,6 +1,20 @@
 Groovepacks::Application.routes.draw do
 
 
+  get "inventory_warehouse/create"
+
+  get "inventory_warehouse/update"
+
+  get "inventory_warehouse/show"
+
+  get "inventory_warehouse/index"
+
+  get "inventory_warehouse/destroy"
+
+  get "inventory_warehouse/adduser"
+
+  get "inventory_warehouse/removeuser"
+
   get "store_settings/createStore"
 
   get "store_settings/csvImportData"
