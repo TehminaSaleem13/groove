@@ -949,7 +949,7 @@ class OrdersController < ApplicationController
       @order_hash['notes'] = order.notes_internal
       @order_hash['ordernum'] = order.increment_id
       @order_hash['orderdate'] = order.order_placed_time
-      @order_hash['itemslength'] = OrderItem.where(:order_id=>order.id).length
+      @order_hash['itemslength'] = order.get_items_count
       @order_hash['status'] = order.status
       @order_hash['recipient'] = "#{order.firstname} #{order.lastname}"
       @order_hash['email'] = order.email

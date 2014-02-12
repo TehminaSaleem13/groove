@@ -328,7 +328,10 @@ class Order < ActiveRecord::Base
                 unscanned_list.push(order_item.build_unscanned_individual_kit(true))
               end
               if order_item.qty > order_item.kit_split_qty
-                unscanned_list.push(order_item.build_unscanned_single_item(true))
+                unscanned_item = order_item.build_unscanned_single_item(true)
+                if unscanned_item['qty_remaining'] > 0
+                  unscanned_list.push(unscanned_item)
+                end
               end
               # unscanned_qty = order_item.qty - order_item.scanned_qty
               # added_to_list_qty = true
@@ -357,13 +360,19 @@ class Order < ActiveRecord::Base
               #   end
               # end
             else
-              unscanned_list.push(order_item.build_unscanned_single_item)
+              unscanned_item = order_item.build_unscanned_single_item
+              if unscanned_item['qty_remaining'] > 0
+                unscanned_list.push(unscanned_item)
+              end
             end
           end
           #puts "After:"+unscanned_list.to_s
         else
           # add order item to unscanned list
-          unscanned_list.push(order_item.build_unscanned_single_item)
+          unscanned_item = order_item.build_unscanned_single_item
+          if unscanned_item['qty_remaining'] > 0
+            unscanned_list.push(unscanned_item)
+          end
         end
       end
     end
@@ -402,6 +411,34 @@ class Order < ActiveRecord::Base
         end
       end
     end
+
+    #transform scanned_list to move all child items into displaying as individual items
+    scanned_list.each do |scanned_item|
+      if scanned_item['product_type'] == 'individual'
+        scanned_item['child_items'].each do |child_item|
+          found_single_item = false
+          #for each child item, check if the child item already exists in list of single items
+          #in the scanned list. If so, then add this child items scanned quantity to the single items quantity
+          scanned_list.each do |single_scanned_item|
+            if single_scanned_item['product_type'] == 'single'
+              if single_scanned_item['product_id'] == child_item['product_id']
+                single_scanned_item['scanned_qty'] = single_scanned_item['scanned_qty'] +
+                    child_item['scanned_qty']
+                found_single_item = true
+              end
+            end
+          end
+
+          #if not found, then add this child item as a new single item
+          if !found_single_item
+            new_item = child_item
+            new_item['product_type'] = 'single'
+            scanned_list.push(new_item)
+          end
+        end
+      end
+    end
+
     scanned_list
   end
 
@@ -500,5 +537,13 @@ class Order < ActiveRecord::Base
 
     self.save
 
+  end
+
+  def get_items_count
+    count = 0
+    self.order_items.each do |item|
+      count = count + item.qty
+    end
+    count
   end
 end

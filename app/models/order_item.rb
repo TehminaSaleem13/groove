@@ -191,7 +191,7 @@ class OrderItem < ActiveRecord::Base
           if kit_product.product_kit_skus.option_product.product_barcodes.length > 0
             child_item['barcodes'] = kit_product.product_kit_skus.option_product.product_barcodes
           end
-
+          child_item['product_id'] = kit_product.product_kit_skus.option_product.id
           child_item['kit_product_id'] = kit_product.id
           result['child_items'].push(child_item)
         end

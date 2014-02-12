@@ -58,7 +58,6 @@ class InventoryWarehouseController < ApplicationController
     result['error_messages'] = []
     result['success_messages'] = []
     result['notice_messages'] = []
-      
     
 
     respond_to do |format|

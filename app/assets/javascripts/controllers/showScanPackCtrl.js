@@ -410,11 +410,11 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
             if ($scope.scanned_items[i].product_type == 'single'){
                 $scope.scanned_count = $scope.scanned_count + $scope.scanned_items[i].scanned_qty;
             }
-            else if ($scope.scanned_items[i].product_type == 'individual') {
-                for (j=0; j< $scope.scanned_items[i].child_items.length; j++) {
-                    $scope.scanned_count += $scope.scanned_items[i].child_items[j].scanned_qty;
-                }
-            }
+            // else if ($scope.scanned_items[i].product_type == 'individual') {
+            //     for (j=0; j< $scope.scanned_items[i].child_items.length; j++) {
+            //         $scope.scanned_count += $scope.scanned_items[i].child_items[j].scanned_qty;
+            //     }
+            // }
         }
     }
 
