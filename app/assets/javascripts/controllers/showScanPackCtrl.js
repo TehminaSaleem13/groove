@@ -218,7 +218,8 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
                     order_id:$scope.order_id}).success(function(data){
 
                 //console.log(data);
-                $scope.hide_alert(-1);
+                //$scope.hide_alert(-1);
+
                 if(data.status) {
                     if(data.notice_messages.length) {
                         $scope.notify(data.notice_messages,2);
@@ -231,6 +232,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
                 }
                 if(data.data != null) {
                     $scope.rf_input = "";
+                    $scope.tracking_num = "";
                     $('#trackingNumberScan').modal('hide');
                     $scope._next_state(data.data);
                 }
