@@ -205,7 +205,11 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
             if(data.status) {
                 $scope.order_increment_id = data.order.basicinfo.increment_id;
                 $('#trackingNumberScan').modal('show');
-                $scope._focus_input($scope._tracking_num_inputObj);
+
+                $timeout(function() { $('#scantracking_num').focus()},1000);
+                //scantracking_num
+                //$scope._focus_input(_order_confirmation_inputObj);
+                //$scope._focus_input($scope._tracking_num_inputObj);
             }
         }).error(function(){
             $scope.notify(["Cannot load Order with id "+ $scope.order_id+". There was a server error"],0);
