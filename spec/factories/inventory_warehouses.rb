@@ -2,7 +2,8 @@
 
 FactoryGirl.define do
   factory :inventory_warehouse do
-    name "MyString"
-    location "MyString"
+    name "Manhattan warehouse"
+    location "New Jersey"
+    status "inactive"
   end
 end

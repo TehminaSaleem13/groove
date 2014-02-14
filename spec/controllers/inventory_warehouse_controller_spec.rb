@@ -2,17 +2,60 @@ require 'spec_helper'
 
 describe InventoryWarehouseController do
 
-  describe "GET 'create'" do
-    it "returns http success" do
-      # get 'create'
-      # response.should be_success
+  describe "POST 'create'" do
+    it "creates an inventory warehouse" do
+      request.accept = "application/json"
+
+      post :create, { :name => 'Manhattan Warehouse', :location => 'New Jersey' }
+
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["status"]).to eq(true)
+      expect(result["success_messages"].length).to eq(1)
+      expect(result["success_messages"].length).to eq(1)
+      expect(result["success_messages"].first).to eq('Inventory warehouse created successfully')
+    end
+
+    it " does not create an inventory warehouse" do
+      request.accept = "application/json"
+
+      post :create, { :location => 'New Jersey' }
+
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["status"]).to eq(false)
+      expect(result["error_messages"].length).to eq(1)
+      expect(result["error_messages"].first).to eq('Cannot create warehouse without a name')
+    end
+
+    it " does not create an inventory warehouse as the name is not unique" do
+      request.accept = "application/json"
+
+      post :create, { :name => 'Manhattan Warehouse', :location => 'New Jersey' }
+      post :create, { :name => 'Manhattan Warehouse', :location => 'New York' }
+
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["status"]).to eq(false)
+      expect(result["error_messages"].length).to eq(1)
+      puts result['error_messages']
+      expect(result["error_messages"].first).to eq('Name has already been taken')
     end
   end
 
   describe "GET 'update'" do
     it "returns http success" do
-      # get 'update'
-      # response.should be_success
+      request.accept = "application/json"
+
+      post :create, { :name => 'Manhattan Warehouse', :location => 'New Jersey' }
+      post :create, { :name => 'Manhattan Warehouse', :location => 'New York' }
+
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["status"]).to eq(false)
+      expect(result["error_messages"].length).to eq(1)
+      puts result['error_messages']
+      expect(result["error_messages"].first).to eq('Name has already been taken')
     end
   end
 

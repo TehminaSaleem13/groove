@@ -11,11 +11,15 @@ class InventoryWarehouseController < ApplicationController
     if !params[:name].nil?
       inv_wh = InventoryWarehouse.new
       inv_wh.name = params[:name]
+      inv_wh.location = params[:location] if !params[:location].nil?
+      inv_wh.status = 'new'
       if inv_wh.save
         result['success_messages'].push('Inventory warehouse created successfully')
       else
         result['status'] &= false
-        result['error_messages'].push('There was an error creating inventory warehouse')
+        inv_wh.errors.full_messages.each do |message|
+          result['error_messages'].push(message)
+        end
       end
     else
       result['status'] &= false
