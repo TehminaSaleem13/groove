@@ -40,15 +40,27 @@ class InventoryWarehouseController < ApplicationController
     result['notice_messages'] = []
     
     if !params[:id].nil?
-      inv_wh = InventoryWarehouse.find(params[:id])
-      inv_wh.name = params[:name] if !params[:name].nil?
-      inv_wh.location = params[:location] if !params[:location].nil?
-      inv_wh.status = params[:status] if !params[:status].nil?
-      if inv_wh.save
-        result['success_messages'].push('Inventory warehouse updated successfully')
-      else
-        result['status'] &= false
-        result['error_messages'].push('There was an error creating inventory warehouses')
+      begin
+        inv_wh = InventoryWarehouse.find(params[:id])
+        if !inv_wh.nil?
+          inv_wh.name = params[:name] if !params[:name].nil?
+          inv_wh.location = params[:location] if !params[:location].nil?
+          inv_wh.status = params[:status] if !params[:status].nil?
+          if inv_wh.save
+            result['success_messages'].push('Inventory warehouse updated successfully')
+          else
+            result['status'] &= false
+            inv_wh.errors.full_messages.each do |message|
+              result['error_messages'].push(message)
+            end
+          end
+        else
+          result['status'] &= false
+          result['error_messages'].push('No warehouse found with id:'+params[:id])
+        end
+      rescue Exception => e
+          result['status'] &= false
+          result['error_messages'].push(e.message)
       end
     else
       result['status'] &= false
