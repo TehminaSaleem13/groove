@@ -12,6 +12,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
     }
     $http.get('/home/userinfo.json').success(function(data){
         $scope.username = data.username;
+        $scope.current_userid = data.user_id;
     });
     $('.modal-backdrop').remove();
     $scope.get_orders = function(next,post_fn) {
@@ -257,8 +258,29 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
         }
         $http.get('/orders/getdetails.json?id='+id).success(function(data) {
             //console.log(data.order);
+            var user_found = false;
+            var currentuser_idx = -1;
             if(data.status) {
                 $scope.single_order = data.order;
+
+                for (i=0; i < $scope.single_order.users.length; i++) {
+                    if ($scope.single_order.users[i].id == $scope.current_userid) {
+                        $scope.single_order.users[i].name = $scope.single_order.users[i].name + ' (Packing User)';
+                        currentuser_idx = i;
+                        break;
+                    }
+                }
+
+                for (i=0; i < $scope.single_order.users.length; i++) {
+                    if ($scope.single_order.exception != null &&
+                        $scope.single_order.exception.assoc != null &&
+                        $scope.single_order.users[i].id == $scope.single_order.exception.assoc.id) {
+                        $scope.single_order.exception.assoc = $scope.single_order.users[i];
+                        user_found = true;
+                        break;
+                    }
+                }
+
                 $scope.item_edit = {
                     index: -1,
                     qty: 0
@@ -280,6 +302,8 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
         ).success(function(data) {
             if(data.status) {
                 $scope.order_single_details($scope.single_order.basicinfo.id);
+            } else {
+                $scope.notify(data.error_messages,0);
             }
         })
     }

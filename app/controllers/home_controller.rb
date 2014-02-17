@@ -10,6 +10,7 @@ class HomeController < ApplicationController
   def userinfo
   	@user = Hash.new
   	@user['username'] = current_user.username
+    @user['user_id'] = current_user.id
     respond_to do |format|
       format.html # show.html.erb
       format.json { render json: @user}

@@ -614,6 +614,17 @@ class OrdersController < ApplicationController
       @result['order']['remove_items_permitted'] = current_user.remove_order_items
       @result['order']['activities'] = @order.order_activities
       @result['order']['exception'] = @order.order_exceptions
+      @result['order']['exception']['assoc'] = 
+        User.find(@order.order_exceptions.user_id) if !@order.order_exceptions.nil? && @order.order_exceptions.user_id !=0
+
+      @result['order']['users'] = User.all
+
+      #add a user with name of nobody to display in the list
+      dummy_user = User.new
+      dummy_user.name = 'Nobody'
+      dummy_user.id = 0
+      @result['order']['users'].unshift(dummy_user)
+
       @result['order']['tags'] = @order.order_tags
     else
       @result['status'] = false
@@ -636,27 +647,37 @@ class OrdersController < ApplicationController
   def recordexception
     @result = Hash.new
     @result['status'] = true
+    username = current_user.name
+    @result['error_messages'] = []
+    @result['messages'] = []
 
     @order = Order.find(params[:id])
 
-    if @order.order_exceptions.nil?
-      @exception = OrderExceptions.new
-      @exception.order_id = @order.id
-    else
-      @exception = @order.order_exceptions
-    end
+    if !params[:reason].nil?
+      if @order.order_exceptions.nil?
+        @exception = OrderExceptions.new
+        @exception.order_id = @order.id
+      else
+        @exception = @order.order_exceptions
+      end
 
-    @exception.reason = params[:reason]
-    @exception.description = params[:description]
-    @exception.user_id = params[:user_id]
+      @exception.reason = params[:reason]
+      @exception.description = params[:description]
+      if !params[:assoc].nil? && !params[:assoc][:id] != 0
+        @exception.user_id = params[:assoc][:id] 
+        username = params[:assoc][:name]
+      end
 
-    if @exception.save
-      @order.addactivity("Order Exception Recorded", current_user.name)
+      if @exception.save
+        @order.addactivity("Order Exception Recorded", username)
+      else
+        @result['status'] &= false
+        @result['messages'].push('Could not save order with exception')
+      end
     else
       @result['status'] &= false
-      @result['messages'].push('Could not save order with exception')
+      @result['error_messages'].push('Cannot record exception without a reason')
     end
-
     respond_to do |format|
       format.html # show.html.erb
       format.json { render json: @result }

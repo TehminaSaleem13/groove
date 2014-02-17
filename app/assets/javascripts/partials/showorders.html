@@ -462,12 +462,8 @@
                                             <div class="control-group">
                                                 <label class="control-label">Associate exception with</label>
                                                 <div class="controls">
-                                                    <label class="radio">
-                                                        <input type="radio"  ng-model="single_order.exception.assoc" value="current" /> Current user
-                                                    </label>
-                                                    <label class="radio">
-                                                        <input type="radio"  ng-model="single_order.exception.assoc" value="none" /> No user
-                                                    </label>
+                                                    <select name="{{'orders_status_'+$index}}" ng-model="single_order.exception.assoc" ng-options="u.name for u in single_order.users">
+                                                    </select>
                                                 </div>
                                             </div>
                                             <button class="btn btn-primary" ng-click="update_order_exception()">Record Exception</button>
