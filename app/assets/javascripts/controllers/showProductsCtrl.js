@@ -61,9 +61,6 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,pro
     $scope._init = function() {
         //Public properties
         $scope.products = products.model.get();
-        $scope.aliases = products.model.get();
-        $scope.aliases.setup.limit = 30;
-        $scope.aliases.setup.filter = "all";
         $scope.editableOptions = {
             array:false,
             update: $scope.update_product_list,

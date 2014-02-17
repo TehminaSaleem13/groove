@@ -370,7 +370,7 @@ class OrdersController < ApplicationController
               split_name = order.shipping_address.name.split(' ')
               @order.lastname = split_name.pop
               @order.firstname = split_name.join(' ')
-              
+
           if @order.save
             if !@order.addnewitems
               @result['status'] &= false
@@ -433,15 +433,17 @@ class OrdersController < ApplicationController
   # PUT /orders/1.json
   def update
     @order = Order.find(params[:id])
+    @result = Hash.new
+    @result['status']= true
+    unless @order.update_attributes(params[:order])
+      @result['status'] &= false
+      @result['messages'] = @order.errors.full_messages
+    end
+
 
     respond_to do |format|
-      if @order.update_attributes(params[:order])
-        format.html { redirect_to @order, notice: 'Order was successfully updated.' }
-        format.json { head :no_content }
-      else
-        format.html { render action: "edit" }
-        format.json { render json: @order.errors, status: :unprocessable_entity }
-      end
+      format.html # show.html.erb
+      format.json { render json: @result }
     end
   end
 
@@ -468,7 +470,7 @@ class OrdersController < ApplicationController
   # If no filter is passed, then the API will default to 'active'
   def getorders
     @result = Hash.new
-    @result[:status] = true
+    @result['status'] = true
 
     @orders = do_getorders
 
@@ -565,6 +567,7 @@ class OrdersController < ApplicationController
         @order.status = params[:status]
         unless @order.save
           @result['status'] = false
+          @result['messages'] = @order.errors.full_messages
         end
       end
     end
@@ -603,7 +606,7 @@ class OrdersController < ApplicationController
           end
           @orderitem['sku'] = product.product_skus.first.sku
           @orderitem['productimages'] = product.product_images
-          
+
         end
         @result['order']['items'].push(@orderitem)
       end

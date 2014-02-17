@@ -48,11 +48,11 @@ groovepacks_directives.directive('groovProductModal',['notification','products',
 
                 }
                 if(typeof index == 'number'){
-                    scope.groovProducts.currently_open = index;
+                    scope.groovProducts.current = index;
                 } else {
                     for(i in scope.groovProducts.list) {
                         if(scope.groovProducts.list[i].id == id) {
-                            scope.groovProducts.currently_open = parseInt(i);
+                            scope.groovProducts.current = parseInt(i);
                             break;
                         }
                     }
@@ -79,7 +79,7 @@ groovepacks_directives.directive('groovProductModal',['notification','products',
                 if(args.name =='product_image') {
                     scope.$apply(function () {
                         products.single.image_upload(scope.groovProducts,args).then(function(response) {
-                              scope.groovSingleProduct(scope.groovProducts.single.basicinfo.id,scope.currently_open,0, false);
+                              scope.groovSingleProduct(scope.groovProducts.single.basicinfo.id,scope.groovProducts.current,0, false);
                         });
                     });
                 }
@@ -90,7 +90,7 @@ groovepacks_directives.directive('groovProductModal',['notification','products',
                 if(scope.groovProducts.single.basicinfo.is_kit) {
                     products.single.kit.add(scope.groovProducts,args.selected).then(function(response) {
                         //console.log(response.data);
-                        scope.groovSingleProduct(scope.groovProducts.single.basicinfo.id,scope.currently_open);
+                        scope.groovSingleProduct(scope.groovProducts.single.basicinfo.id,scope.groovProducts.current);
                     });
                 } else {
                     products.single.alias(scope.groovProducts,args.selected).then(function() {
@@ -101,16 +101,14 @@ groovepacks_directives.directive('groovProductModal',['notification','products',
 
             scope.handle_keydown =  function(event) {
                 if(event.which == 38) {//up key
-                    if(scope.groovProducts.currently_open > 0) {
-                        scope.groovSingleProduct(scope.groovProducts.list[scope.groovProducts.currently_open -1].id, scope.groovProducts.currently_open - 1,0, false);
+                    if(scope.groovProducts.current > 0) {
+                        scope.groovSingleProduct(scope.groovProducts.list[scope.groovProducts.current -1].id, scope.groovProducts.current - 1,0, false);
                     } else {
                         alert("Already at the top of the list");
                     }
                 } else if(event.which == 40) { //down key
-                    //console.log(scope.groovProducts.list.length);
-                    //console.log(scope.groovProducts.currently_open);
-                    if(scope.groovProducts.currently_open < scope.groovProducts.list.length -1) {
-                        scope.groovSingleProduct(scope.groovProducts.list[scope.groovProducts.currently_open + 1].id, scope.groovProducts.currently_open + 1,0, false);
+                    if(scope.groovProducts.current < scope.groovProducts.list.length -1) {
+                        scope.groovSingleProduct(scope.groovProducts.list[scope.groovProducts.current + 1].id, scope.groovProducts.current + 1,0, false);
                     } else {
                         scope._keydown_last = true;
                         scope.$emit("products-next-load");
@@ -120,7 +118,7 @@ groovepacks_directives.directive('groovProductModal',['notification','products',
             scope.update_single_product = function(post_fn,auto) {
                 //console.log(scope.groovProducts.single);
                 products.single.update(scope.groovProducts,auto).then(function() {
-                    scope.groovSingleProduct(scope.groovProducts.single.basicinfo.id,scope.groovProducts.currently_open, post_fn, false);
+                    scope.groovSingleProduct(scope.groovProducts.single.basicinfo.id,scope.groovProducts.current, post_fn, false);
                 });
             };
 
@@ -159,7 +157,7 @@ groovepacks_directives.directive('groovProductModal',['notification','products',
                     }
                 }
                 products.single.kit.remove(scope.groovProducts,selected_skus).then(function(data) {
-                    scope.groovSingleProduct(scope.groovProducts.single.basicinfo.id,scope.currently_open,0,false);
+                    scope.groovSingleProduct(scope.groovProducts.single.basicinfo.id,scope.groovProducts.current,0,false);
                 });
             }
 
@@ -192,8 +190,8 @@ groovepacks_directives.directive('groovProductModal',['notification','products',
             scope.$on("products-next-loaded",function(){
                 if(scope._keydown_last) {
                     scope._keydown_last = false;
-                    if(scope.groovProducts.currently_open < scope.groovProducts.list -1) {
-                        scope.groovSingleProduct(scope.groovProducts.list[scope.groovProducts.currently_open + 1].id, scope.groovProducts.currently_open + 1,0, false);
+                    if(scope.groovProducts.current < scope.groovProducts.list.length -1) {
+                        scope.groovSingleProduct(scope.groovProducts.list[scope.groovProducts.current + 1].id, scope.groovProducts.current + 1,0, false);
                     } else {
                         alert("Already at the bottom of the list");
                     }
@@ -205,7 +203,7 @@ groovepacks_directives.directive('groovProductModal',['notification','products',
                 },5000);
             });
             scope.$on("alias-modal-selected",scope._add_alias_product);
-            scope.$on("products-modal-closed",function(event, args){ if(args.identifier !== scope.custom_identifier) { event.stopPropagation(); scope.groovSingleProduct(scope.groovProducts.single.basicinfo.id,scope.currently_open);} });
+            scope.$on("products-modal-closed",function(event, args){ if(args.identifier !== scope.custom_identifier) { event.stopPropagation(); scope.groovSingleProduct(scope.groovProducts.single.basicinfo.id,scope.groovProducts.current);} });
             $('.icon-question-sign').popover({trigger: 'hover focus'});
             scope.$emit("product-modal-loading-complete",{identifier:scope.custom_identifier});
             scope.$on("product-modal-loading-complete",function(event, args){ if(args.identifier !== scope.custom_identifier) { event.stopPropagation();} });

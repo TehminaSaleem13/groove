@@ -1,5 +1,11 @@
 groovepacks_services.factory('products',['$http','notification',function($http,notification) {
 
+    var success_messages = {
+        update_status: "Status updated Successfully",
+        delete:"Deleted Successfully",
+        duplicate: "Duplicated Successfully"
+    };
+
     //default object
     var get_default = function() {
         return {
@@ -22,6 +28,7 @@ groovepacks_services.factory('products',['$http','notification',function($http,n
             }
         };
     }
+
     //Setup related function
     var update_setup = function (setup,type,value) {
         if(type =='sort') {
@@ -50,11 +57,11 @@ groovepacks_services.factory('products',['$http','notification',function($http,n
             object.setup.offset = object.setup.offset + object.setup.limit;
         }
         if(setup.search=='') {
-            url = '/products/getproducts.json?filter='+setup.filter+'&sort='+setup.sort+'&order='+setup.order
+            url = '/products/getproducts.json?filter='+setup.filter+'&sort='+setup.sort+'&order='+setup.order;
         } else {
             url = '/products/search.json?search='+setup.search
         }
-        url += '&iskit='+setup.is_kit+'&limit='+setup.limit+'&offset='+setup.offset
+        url += '&iskit='+setup.is_kit+'&limit='+setup.limit+'&offset='+setup.offset;
         return $http.get(url).success(
             function(data) {
                 if(data.status) {
@@ -92,6 +99,7 @@ groovepacks_services.factory('products',['$http','notification',function($http,n
 
             return $http.post(url,products.setup).success(function(data) {
                 if(data.status) {
+                    notification.notify(success_messages[action],1);
                     products.setup.select_all =  false;
                 } else {
                     notification.notify(data.messages,0);
@@ -138,6 +146,7 @@ groovepacks_services.factory('products',['$http','notification',function($http,n
             }
         }).error(notification.server_error);
     }
+
     var add_image = function(products,image) {
         return $http({
         method: 'POST',

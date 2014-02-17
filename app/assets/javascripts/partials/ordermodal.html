@@ -1,0 +1,280 @@
+<!-- show order modal -->
+<div id="showOrder{{custom_identifier}}" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="showOrder"
+     aria-hidden="true">
+
+<div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="icon-remove"></i></button>
+    <h3>Order #{{orders.single.basicinfo.increment_id}} Details</h3>
+</div>
+
+
+<div class="form-horizontal form-horizontal-create" >
+<fieldset>
+<div class="modal-body" >
+<ul class="nav nav-tabs" id="myTab{{custom_identifier}}">
+    <li class="active"><a href="" data-target="#infotab{{custom_identifier}}" data-toggle="tab">Information</a></li>
+    <li><a href="" data-target="#itemstab{{custom_identifier}}" data-toggle="tab">Items</a></li>
+    <li><a href="" data-target="#notestab{{custom_identifier}}" data-toggle="tab">Notes</a></li>
+    <li><a href="" data-target="#actexceptab{{custom_identifier}}" data-toggle="tab">Activity & exceptions</a></li>
+</ul>
+
+
+<div class="tab-content">
+<div class="tab-pane active" id="infotab{{custom_identifier}}">
+    <fieldset>
+        <legend>Product Details</legend>
+        <div class="row-fluid">
+            <div class="span6">
+                <div class="control-group">
+                    <label class="control-label">First Name</label>
+                    <div class="controls">
+                        <input xs-input-sync type="text" ng-model="orders.single.basicinfo.firstname" class="regular-input" />
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">Last Name</label>
+                    <div class="controls">
+                        <input xs-input-sync type="text" ng-model="orders.single.basicinfo.lastname" class="regular-input" />
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">Company</label>
+                    <div class="controls">
+                        <input xs-input-sync type="text" ng-model="orders.single.basicinfo.company" class="regular-input" />
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">Address line 1</label>
+                    <div class="controls">
+                        <input xs-input-sync type="text" ng-model="orders.single.basicinfo.address_1" class="regular-input" />
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">Address line 2</label>
+                    <div class="controls">
+                        <input xs-input-sync type="text" ng-model="orders.single.basicinfo.address_2" class="regular-input" />
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">City</label>
+                    <div class="controls">
+                        <input xs-input-sync type="text" ng-model="orders.single.basicinfo.city" class="regular-input" />
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">State</label>
+                    <div class="controls">
+                        <input xs-input-sync type="text" ng-model="orders.single.basicinfo.state" class="regular-input" />
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">Zip</label>
+                    <div class="controls">
+                        <input xs-input-sync type="text" ng-model="orders.single.basicinfo.postcode" class="regular-input" />
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">Country</label>
+                    <div class="controls">
+                        <input xs-input-sync type="text" ng-model="orders.single.basicinfo.country" class="regular-input" />
+                    </div>
+                </div>
+            </div>
+            <div class="span6">
+                <div class="control-group">
+                    <label class="control-label">Order #</label>
+                    <div class="controls">
+                        <input xs-input-sync type="text" ng-model="orders.single.basicinfo.increment_id" class="regular-input" />
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">Buyer Email</label>
+                    <div class="controls">
+                        <input xs-input-sync type="text" ng-model="orders.single.basicinfo.email" class="regular-input" />
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">Store Order id</label>
+                    <div class="controls">
+                        <input xs-input-sync type="text" ng-model="orders.single.basicinfo.store_order_id" class="regular-input" />
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">Order Date</label>
+                    <div class="controls">
+                        <input xs-input-sync type="text" ng-model="orders.single.basicinfo.order_placed_time" class="regular-input" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </fieldset>
+    <fieldset>
+        <legend>Shipping Information</legend>
+        <div class="row-fluid">
+            <div class="span6">
+                <div class="control-group">
+                    <label class="control-label">Scanned on</label>
+                    <div class="controls">
+                        <input xs-input-sync type="text" ng-model="orders.single.basicinfo.scanned_on" class="regular-input" />
+                    </div>
+                </div>
+
+            </div>
+            <div class="span6">
+
+                <div class="control-group">
+                    <label class="control-label">Tracking id #</label>
+                    <div class="controls">
+                        <input xs-input-sync type="text" ng-model="orders.single.basicinfo.tracking_num" class="regular-input" />
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </fieldset>
+</div>
+
+
+<div class="tab-pane" id="itemstab{{custom_identifier}}">
+    <div class="control-group pull-right" ng-show="orders.single.remove_items_permitted">
+        <div class="controls">
+            <button class="btn btn-danger" ng-click="item_remove_selected()">Remove selected Items</button>
+        </div>
+    </div>
+
+
+    <table class="table table-hover table-bordered" >
+        <thead>
+        <tr >
+            <th>Product</th>
+            <th>Primary Image</th>
+            <th>Primary SKU</th>
+            <th>Primary Warehouse</th>
+            <th>Qty ordered</th>
+            <th>On hand</th>
+            <th>Is Skippable</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr ng-repeat="item in orders.single.items" ng-click="item.checked = !item.checked" ng-class="{info: item.checked}">
+            <td>{{ item.productinfo.name }}</td>
+            <td> <div class="single-image"><img class="img-thumb" ng-src="{{item.productimages[0].image}}" /></div></td>
+            <td>{{item.sku}}</td>
+            <td>{{item.location}}</td>
+            <td ng-dblclick="edit_qty($index)">{{item.iteminfo.qty}}
+                <div ng-show="item_edit.index==$index" class="tag-bubble tag-bubble-input span3 input-text">
+                    <input xs-input-sync class="span3" name="{{'item_qty_' +$index}}" type="number" min="0" ng-model="item_edit.qty" />
+                    <i class="icon-ok" ng-click="save_item()"></i>
+                </div>
+            </td>
+            <td>{{item.qty_on_hand}}</td>
+            <td><input type="checkbox" ng-model="item.productinfo.is_skippable"/></td>
+        </tr>
+        </tbody>
+    </table>
+    <div class="control-group pull-right"  ng-show="orders.single.add_items_permitted">
+        <div class="controls">
+            <button class="btn" ng-click="item_order()">Add Item</button>
+        </div>
+    </div>
+</div>
+<div class="tab-pane" id="notestab{{custom_identifier}}">
+    <fieldset>
+        <legend>Internal Notes</legend>
+        <textarea xs-input-sync ng-model="orders.single.basicinfo.notes_internal" class="regular-input span8" rows="4"></textarea>
+    </fieldset>
+    <fieldset>
+        <legend>Notes to Packer</legend>
+        <textarea xs-input-sync ng-model="orders.single.basicinfo.notes_toPacker" class="regular-input span8" rows="4"></textarea>
+    </fieldset>
+    <fieldset>
+        <legend>Notes from Packer</legend>
+        <textarea xs-input-sync ng-model="orders.single.basicinfo.notes_fromPacker" class="regular-input span8" rows="4"></textarea>
+    </fieldset>
+    <fieldset>
+        <legend>Customer Comments</legend>
+        <textarea xs-input-sync ng-model="orders.single.basicinfo.customer_comments" class="regular-input span8" rows="4"></textarea>
+    </fieldset>
+</div>
+<div class="tab-pane" id="actexceptab{{custom_identifier}}">
+
+    <div class="row-fluid">
+        <div class="span6">
+            <fieldset>
+                <legend>Activity Log</legend>
+                <div class="control-group" ng-repeat="activity in orders.single.activities">
+                    <h5>{{ activity.activitytime | date:'EEEE MM/dd/yyyy hh:mm:ss a'}}</h5>
+                    <div class="controls">
+                        {{ activity.action}} - by: {{ activity.username }}
+                    </div>
+                </div>
+            </fieldset>
+        </div>
+        <div class="span6">
+            <fieldset>
+                <legend>Packing Exceptions</legend>
+                <div class="control-group">
+                    <label class="control-label">Reason</label>
+                    <div class="controls">
+                        <label class="radio">
+                            <input type="radio" ng-model="orders.single.exception.reason" value="qty_related" /> Quantity Related
+                        </label>
+                        <label class="radio">
+                            <input type="radio" ng-model="orders.single.exception.reason" value="incorrect_item" /> Incorrect item
+                        </label>
+                        <label class="radio">
+                            <input type="radio" ng-model="orders.single.exception.reason" value="missing_item" /> Missing item
+                        </label>
+                        <label class="radio">
+                            <input type="radio" ng-model="orders.single.exception.reason" value="damaged_item" /> Damaged item
+                        </label>
+                        <label class="radio">
+                            <input type="radio" ng-model="orders.single.exception.reason" value="special_instruction" /> Special instruction related
+                        </label>
+                        <label class="radio">
+                            <input type="radio" ng-model="orders.single.exception.reason" value="other" /> Other
+                        </label>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">Description (optional)</label>
+                    <div class="controls">
+                        <textarea xs-input-sync ng-model="orders.single.exception.description" class="span8" rows="4"></textarea>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">Associate exception with</label>
+                    <div class="controls">
+                        <label class="radio">
+                            <input type="radio"  ng-model="orders.single.exception.assoc" value="current" /> Current user
+                        </label>
+                        <label class="radio">
+                            <input type="radio"  ng-model="orders.single.exception.assoc" value="none" /> No user
+                        </label>
+                    </div>
+                </div>
+                <button class="btn btn-primary" ng-click="update_order_exception()">Record Exception</button>
+                <button class="btn btn-danger" ng-click="clear_order_exception()">Clear Exception</button>
+            </fieldset>
+        </div>
+    </div>
+
+</div>
+
+</div>
+</div>
+
+<div class="modal-footer">
+    <div class="row-fluid">
+        <div class="span12">
+            <div class="pull-right">
+                <button class="btn btn-primary" ng-click="update_single_order()">Save</button>
+                <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+</fieldset>
+</div>
+</div>
