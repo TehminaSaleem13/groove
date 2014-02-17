@@ -424,7 +424,7 @@ describe ScanPackController do
       order_item_kit = FactoryGirl.create(:order_item, :product_id=>product_kit.id,
                     :qty=>2, :price=>"10", :row_total=>"10", :order=>order, :name=>product_kit.name)
 
-      kit_product = FactoryGirl.create(:product, :name=>'IPROTO1',:packing_placement=>50, :kit_packing_placement=>1)
+      kit_product = FactoryGirl.create(:product, :name=>'IPROTO1',:packing_placement=>50)
       kit_product_sku = FactoryGirl.create(:product_sku, :product=> kit_product, :sku=> 'IPROTO1')
       kit_product_barcode = FactoryGirl.create(:product_barcode, :product=> kit_product, :barcode => 'KITITEM1')
 
@@ -432,7 +432,7 @@ describe ScanPackController do
       order_item_kit_product = FactoryGirl.create(:order_item_kit_product, :order_item => order_item_kit,   
             :product_kit_skus=> product_kit_sku)
 
-      kit_product2 = FactoryGirl.create(:product, :name=>'IPROTO2', :packing_placement=>50, :kit_packing_placement=>25)
+      kit_product2 = FactoryGirl.create(:product, :name=>'IPROTO2', :packing_placement=>50)
       kit_product2_sku = FactoryGirl.create(:product_sku, :product=> kit_product2, :sku=> 'IPROTO2')
       kit_product2_barcode = FactoryGirl.create(:product_barcode, :product=> kit_product2, :barcode => 'KITITEM2')
 
@@ -544,7 +544,7 @@ describe ScanPackController do
       order_item_kit = FactoryGirl.create(:order_item, :product_id=>product_kit.id,
                     :qty=>2, :price=>"10", :row_total=>"10", :order=>order, :name=>product_kit.name)
 
-      kit_product = FactoryGirl.create(:product, :name=>'Protection Sheet', :packing_placement=>30, :kit_packing_placement=>1)
+      kit_product = FactoryGirl.create(:product, :name=>'Protection Sheet', :packing_placement=>30)
       kit_product_sku = FactoryGirl.create(:product_sku, :product=> kit_product, :sku=> 'IPROTO1')
       kit_product_barcode = FactoryGirl.create(:product_barcode, :product=> kit_product, :barcode => 'KITITEM1')
 
@@ -552,7 +552,7 @@ describe ScanPackController do
       order_item_kit_product = FactoryGirl.create(:order_item_kit_product, :order_item => order_item_kit,   
             :product_kit_skus=> product_kit_sku)
 
-      kit_product2 = FactoryGirl.create(:product, :name=>'Screen Wiper', :packing_placement=>40, :kit_packing_placement=>25)
+      kit_product2 = FactoryGirl.create(:product, :name=>'Screen Wiper', :packing_placement=>40)
       kit_product2_sku = FactoryGirl.create(:product_sku, :product=> kit_product2, :sku=> 'IPROTO2')
       kit_product2_barcode = FactoryGirl.create(:product_barcode, :product=> kit_product2, :barcode => 'KITITEM2')
 
@@ -560,7 +560,7 @@ describe ScanPackController do
       order_item_kit_product2 = FactoryGirl.create(:order_item_kit_product, :order_item => order_item_kit,   
             :product_kit_skus => product_kit_sku2)
 
-      kit_product3 = FactoryGirl.create(:product, :name=>'Instruction Manual', :packing_placement=>50, :kit_packing_placement=>50)
+      kit_product3 = FactoryGirl.create(:product, :name=>'Instruction Manual', :packing_placement=>50)
       kit_product3_sku = FactoryGirl.create(:product_sku, :product=> kit_product3, :sku=> 'IPROTO3')
       kit_product3_barcode = FactoryGirl.create(:product_barcode, :product=> kit_product3, :barcode => 'KITITEM3')
 

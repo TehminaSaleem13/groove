@@ -713,7 +713,7 @@ class ProductsController < ApplicationController
   		@result['product']['cats'] = @product.product_cats
     	@result['product']['images'] = @product.product_images
   		@result['product']['barcodes'] = @product.product_barcodes
-      @result['product']['inventory_warehouses'] = @product.product_inventory_warehousess
+      	@result['product']['inventory_warehouses'] = @product.product_inventory_warehousess
         #@result['product']['productkitskus'] = @product.product_kit_skuss
       @result['product']['productkitskus'] = []
       if @product.is_kit
@@ -727,7 +727,7 @@ class ProductsController < ApplicationController
 					end
 					kit_sku['qty'] = 0
 					kit_sku['qty_on_hand'] = 0
-					kit_sku['packing_order'] = option_product.kit_packing_placement
+					kit_sku['packing_order'] = kit.packing_order
 					kit_sku['option_product_id'] = option_product.id
 					@result['product']['productkitskus'].push(kit_sku)
 				end
@@ -854,7 +854,6 @@ class ProductsController < ApplicationController
   		@product.name = params[:basicinfo][:name]
   		@product.pack_time_adj = params[:basicinfo][:pack_time_adj]
   		@product.packing_placement = params[:basicinfo][:packing_placement]
-  		@product.kit_packing_placement = params[:basicinfo][:kit_packing_placement]
   		@product.product_type = params[:basicinfo][:product_type]
   		@product.spl_instructions_4_confirmation =
   			params[:basicinfo][:spl_instructions_4_confirmation]

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140211135401) do
+ActiveRecord::Schema.define(:version => 20140217093035) do
 
   create_table "amazon_credentials", :force => true do |t|
     t.string   "merchant_id",                                     :null => false
@@ -255,10 +255,11 @@ ActiveRecord::Schema.define(:version => 20140211135401) do
 
   create_table "product_kit_skus", :force => true do |t|
     t.integer  "product_id"
-    t.datetime "created_at",                       :null => false
-    t.datetime "updated_at",                       :null => false
+    t.datetime "created_at",                        :null => false
+    t.datetime "updated_at",                        :null => false
     t.integer  "option_product_id"
     t.integer  "qty",               :default => 0
+    t.integer  "packing_order",     :default => 50
   end
 
   add_index "product_kit_skus", ["product_id"], :name => "index_product_kit_skus_on_product_id"
@@ -292,7 +293,6 @@ ActiveRecord::Schema.define(:version => 20140211135401) do
     t.string   "kit_parsing",                     :default => "depends"
     t.integer  "is_kit",                          :default => 0
     t.boolean  "disable_conf_req",                :default => false
-    t.integer  "kit_packing_placement",           :default => 50
   end
 
   add_index "products", ["store_id"], :name => "index_products_on_store_id"

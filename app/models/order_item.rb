@@ -98,7 +98,7 @@ class OrderItem < ActiveRecord::Base
             child_item['scanned_qty'] = kit_product.scanned_qty
           end
           child_item['packing_placement'] = kit_product.product_kit_skus.option_product.packing_placement
-          child_item['kit_packing_placement'] = kit_product.product_kit_skus.option_product.kit_packing_placement
+          child_item['kit_packing_placement'] = kit_product.product_kit_skus.packing_order
 
           if kit_product.product_kit_skus.option_product.product_barcodes.length > 0
             child_item['barcodes'] = kit_product.product_kit_skus.option_product.product_barcodes
@@ -187,7 +187,7 @@ class OrderItem < ActiveRecord::Base
             kit_product.scanned_qty
           child_item['scanned_qty'] = kit_product.scanned_qty
           child_item['packing_placement'] = kit_product.product_kit_skus.option_product.packing_placement
-          child_item['kit_packing_placement'] = kit_product.product_kit_skus.option_product.kit_packing_placement
+          child_item['kit_packing_placement'] = kit_product.product_kit_skus.packing_order
           if kit_product.product_kit_skus.option_product.product_barcodes.length > 0
             child_item['barcodes'] = kit_product.product_kit_skus.option_product.product_barcodes
           end
