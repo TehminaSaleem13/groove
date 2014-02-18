@@ -5,3 +5,21 @@
 #
 #   cities = City.create([{ name: 'Chicago' }, { name: 'Copenhagen' }])
 #   Mayor.create(name: 'Emanuel', city: cities.first)
+
+if User.where(:username=>'admin').length == 0
+	User.create(:username=>'admin', :email => "abc@gmail.com", :password => "12345678", 
+		:password_confirmation => "12345678", :confirmation_code=>'1234567890')
+	#user = User.create(:username=>'admin', :password=>'12345678')
+end
+
+if OrderTag.where(:name=>'Contains New').length == 0
+	contains_new_tag = OrderTag.create(:name=>'Contains New', :color=>'#FF0000', :predefined => true)
+end
+
+if OrderTag.where(:name=>'Contains Inactive').length == 0
+	contains_inactive_tag = OrderTag.create(:name=>'Contains Inactive', :color=>'#00FF00', :predefined => true)
+end
+
+if OrderTag.where(:name=>'Manual Hold').length == 0
+	manual_hold_tag = OrderTag.create(:name=>'Manual Hold', :color=>'#0000FF', :predefined => true)
+end
