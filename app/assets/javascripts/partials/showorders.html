@@ -18,6 +18,7 @@
                             <li class="order_setup-filter order_setup-filter-all" ><a href="" ng-click="order_setup_opt('filter','all')">Show All</a></li>
                             <li class="order_setup-filter order_setup-filter-awaiting" ><a href="" ng-click="order_setup_opt('filter','awaiting')">Awaiting</a></li>
                             <li class="order_setup-filter order_setup-filter-onhold"><a href="" ng-click="order_setup_opt('filter','onhold')">On Hold</a></li>
+                            <li class="order_setup-filter order_setup-filter-serviceissue"><a href="" ng-click="order_setup_opt('filter','serviceissue')">Service Issue</a></li>
                             <li class="order_setup-filter order_setup-filter-cancelled"><a href="" ng-click="order_setup_opt('filter','cancelled')">Cancelled</a></li>
                             <li class="order_setup-filter order_setup-filter-scanned"><a href="" ng-click="order_setup_opt('filter','scanned')">Scanned</a></li>
                         </ul>
@@ -50,6 +51,7 @@
                             <ul id="menu1" class="dropdown-menu" role="menu" aria-labelledby="drop5">
                                 <li role="presentation"><a role="menuitem" tabindex="-1" ng-click="order_change_status('awaiting')">Awaiting</a></li>
                                 <li role="presentation"><a role="menuitem" tabindex="-1" ng-click="order_change_status('onhold')">On Hold</a></li>
+                                <li role="presentation"><a role="menuitem" tabindex="-1" ng-click="order_change_status('serviceissue')">Service Issue</a></li>
                                 <li role="presentation"><a role="menuitem" tabindex="-1" ng-click="order_change_status('cancelled')">Cancelled</a></li>
                                 <li role="presentation"><a role="menuitem" tabindex="-1" ng-click="order_change_status('scanned')">Scanned</a></li>
                             </ul>
@@ -161,6 +163,7 @@
                             <select class="span2" name="{{'orders_status_'+$index}}" ng-model="orders_edit_tmp.status" ng-click="save_single_node()">
                                 <option value="awaiting">Awaiting</option>
                                 <option value="onhold" >On Hold</option>
+                                <option value="serviceissue" >Service Issue</option>
                                 <option value="cancelled">Cancelled</option>
                                 <option value="scanned">Scanned</option>
                             </select>

@@ -44,6 +44,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
             ready_for_product: $scope._ready_for_product_state,
             request_for_confirmation_code_with_order_edit: $scope._order_edit_confirmation_code_state,
             request_for_confirmation_code_with_product_edit: $scope._product_edit_confirmation_code_state,
+            request_for_confirmation_code_with_cos: $scope._cos_confirmation_code_state,
             product_edit: $scope._product_edit_state,
             order_clicked: $scope._order_clicked_state,
             ready_for_tracking_num: $scope._ready_for_tracking_num,
@@ -53,6 +54,8 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
         $scope._order_confirmation_inputObj = $('input#order_edit_confirmation_code');
         $scope._product_confirmation_inputObj = $('input#product_edit_confirmation_code');
         $scope._tracking_num_inputObj = $('input#scantracking_num');
+        $scope._cos_confirmation_inputObj = $('input#cos_confirmation_code');
+
         //Register events and make function calls
         $http.get('/home/userinfo.json').success(function(data){
             $scope.username = data.username;
@@ -61,11 +64,16 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
         $scope._order_confirmation_inputObj.keydown($scope._handle_order_confirmation_code_key_event);
         $scope._product_confirmation_inputObj.keydown($scope._handle_product_confirmation_code_key_event);
         $scope._tracking_num_inputObj.keydown($scope._scan_tracking_num_handle_event);
+        $scope._cos_confirmation_inputObj.keydown($scope._handle_cos_confirmation_code_key_event);
+
         $("#showProductConfirmation").on('shown',function() {
             $scope._focus_input($scope._product_confirmation_inputObj);
         });
         $("#showOrderConfirmation").on('shown',function() {
             $scope._focus_input($scope._order_confirmation_inputObj);
+        });
+        $("#showCosConfirmation").on('shown',function() {
+            $scope._focus_input($scope._cos_confirmation_inputObj);
         });
         $("#showProduct").on('hidden',$scope._refresh_inactive_list);
 
@@ -89,6 +97,8 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
             state = $scope._next_states["default"];
         }
         //console.log(data);
+        console.log(state);
+        console.log($scope._next_states[state]);
         $scope._next_states[state](data);
     }
 
@@ -253,7 +263,11 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
     $scope._product_edit_confirmation_code_state = function(data) {
         $("#showProductConfirmation").modal('show');
     }
-
+    
+    $scope._cos_confirmation_code_state = function(data) {
+        $("#showCosConfirmation").modal('show');
+    }
+    
     $scope._product_edit_state = function(data) {
         $scope.inactive_new_products = data.inactive_or_new_products;
         $("#showProductList").modal('show');
@@ -321,7 +335,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
                     if(data.data.product_edit_matched) {
                         var stuff =  data.data;
                         $("#showProductConfirmation").modal('hide');
-                            $scope._next_state(stuff);
+                        $scope._next_state(stuff);
                     } else {
                         $scope.notify(["I’m sorry, the code you have scanned does not belong to a user who can scan orders that are On Hold.",
                             "Please get assistance from someone with this permission, or press escape to scan another order"],0);
@@ -396,11 +410,39 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
 
     }
 
+    $scope._handle_cos_confirmation_code_key_event = function(event) {
+        if(event.which == 13) {
+            //console.log($scope.product_confirmation_code);
+            $http.post('/scan_pack/cos_confirmation_code.json',{order_id:$scope.order_id,cos_confirmation_code:$scope.cos_confirmation_code}).
+            success(function(data){
+                //console.log(data);
+                if(data.status){
+                    if(data.data.cos_confirmation_code_matched) {
+                        var stuff =  data.data;
+                        $("#showCosConfirmation").modal('hide');
+                        $scope._next_state(stuff);
+                        if (stuff.next_state == 'ready_for_order') {
+                            $scope._handle_ready_for_order_enter_event();
+                        }
+                    } else {
+                        $scope.notify(data.error_messages,0);
+                        $scope.cos_confirmation_code = "";
+                        $scope._focus_input($scope._cos_confirmation_inputObj);
+                    }
+                } else {
+                    $scope.notify(data.error_messages,0);
+                    $scope.cos_confirmation_code = "";
+                    $scope._focus_input($scope._cos_confirmation_inputObj);
+                }
+            }).error(function(){
+                    $scope.notify(["There was a server error"],0);
+            });
+        }
+    }
+
     $scope._compute_unscanned_and_scanned_products = function() {
         $scope.unscanned_count = 0;
         $scope.scanned_count = 0;
-        console.log($scope.unscanned_items.length);
-        console.log($scope.scanned_items.length);
 
         for (i = 0;  i < $scope.unscanned_items.length; i++) {
             if ($scope.unscanned_items[i].product_type == 'single'){

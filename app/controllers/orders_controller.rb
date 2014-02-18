@@ -890,7 +890,7 @@ class OrdersController < ApplicationController
     supported_sort_keys = ['updated_at', 'store', 'notes',
                            'store_order_id', 'order_date', 'items', 'recipient', 'status','email','tracking_num','city','state','postcode','country' ]
     supported_order_keys = ['ASC', 'DESC' ] #Caps letters only
-    supported_status_filters = ['all', 'awaiting', 'onhold', 'cancelled', 'scanned']
+    supported_status_filters = ['all', 'awaiting', 'onhold', 'cancelled', 'scanned', 'serviceissue']
 
 
     # Get passed in parameter variables if they are valid.

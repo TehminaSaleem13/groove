@@ -466,6 +466,30 @@
 </div>
 <!-- Product list Modal ends-->
 
+<div id="showCosConfirmation" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="showCosConfirmation"
+     aria-hidden="true">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="icon-remove"></i></button>
+        <h3 id="showCosConfirmationHeader" >Scan Confirmation Code with 'Change of Status' permission</h3>
+    </div>
+    <div class="form-horizontal form-horizontal-create" >
+        <fieldset>
+            <div class="modal-body" id="showCosConfirmation-body">
+                <div class="control-group">
+                    <label class="control-label">Confirmation Code</label>
+                    <div class="controls">
+                        <input id="cos_confirmation_code" type="text" ng-model="cos_confirmation_code" />
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+    </div>
+    <div class="modal-footer">
+        <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+    </div>
+</div>
+
+
 <!-- Tracking number Scan modal -->
 <div id="trackingNumberScan" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="trackingNumberScan"
      aria-hidden="true">

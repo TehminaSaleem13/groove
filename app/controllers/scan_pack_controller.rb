@@ -42,8 +42,22 @@ class ScanPackController < ApplicationController
                   'scan a different order')
             end
           end
+          
+          #process orders that have status of Service Issue
+          if @order.status == 'serviceissue'
+          	@order_result['next_state'] = 'request_for_confirmation_code_with_cos'
+          	if current_user.change_order_status
+            	@result['notice_messages'].push('This order has a pending Service Issue. '+
+            		'To clear the Service Issue and continue packing the order please scan your confirmation code')
+            else
+            	@result['notice_messages'].push('This order has a pending Service Issue. To continue with this order, '+
+            		'please ask another user who has Change Order Status permissions to scan their '+
+            	 	'confirmation code and clear the issue. Alternatively, you can pack another order '+
+            	 	'by scanning another order number')
+            end
+          end
 
-            #search in orders that have status of Cancelled
+           #search in orders that have status of Cancelled
           if @order.status == 'cancelled'
             @order_result['next_state'] = 'ready_for_order'
             @result['notice_messages'].push('This order has been cancelled')
@@ -363,6 +377,56 @@ class ScanPackController < ApplicationController
 	    respond_to do |format|
 	      format.html # show.html.erb
 	      format.json { render json: result }
+	    end
+	end
+
+	def cos_confirmation_code
+		@result = Hash.new
+	    @result['status'] = true
+	    @result['error_messages'] = []
+	    @result['success_messages'] = []
+	    @result['notice_messages'] = []
+	    @result['data'] = Hash.new
+
+	    if !params[:order_id].nil? || !params[:cos_confirmation_code].nil?
+			#check if order status is On Hold
+			@order = Order.find(params[:order_id])
+			if !@order.nil?
+				if @order.status == "serviceissue"
+					if User.where(:confirmation_code => params[:cos_confirmation_code]).length > 0
+						user = User.where(:confirmation_code => params[:cos_confirmation_code]).first
+
+						@result['data']['cos_confirmation_code_matched'] = true
+						#set order state to awaiting scannus
+						@order.status = 'awaiting'
+						@order.save
+						@order.update_order_status
+						#set next state 
+				 		@result['data']['next_state'] = 'ready_for_order'
+					else
+						@result['data']['cos_confirmation_code_matched'] = false
+						@result['data']['next_state'] = 'request_for_confirmation_code_with_cos'
+						@result['error_messages'].push("Could not find any user with confirmation code")
+					end
+				else
+					@result['status'] &= false
+					@result['error_messages'].push("Only orders with status Service issue"+
+						"can use change of status confirmation code")
+				end
+			else
+				@result['status'] &= false
+				@result['error_messages'].push("Could not find order with id:"+params[:order_id])
+			end
+
+			#check if current user edit confirmation code is same as that entered
+	    else
+			@result['status'] &= false
+			@result['error_messages'].push("Please specify confirmation code and order id to change order status")
+	    end
+
+	    respond_to do |format|
+	      format.html # show.html.erb
+	      format.json { render json: @result }
 	    end
 	end
 end
