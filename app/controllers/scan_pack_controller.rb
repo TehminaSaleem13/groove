@@ -396,13 +396,19 @@ class ScanPackController < ApplicationController
 					if User.where(:confirmation_code => params[:cos_confirmation_code]).length > 0
 						user = User.where(:confirmation_code => params[:cos_confirmation_code]).first
 
-						@result['data']['cos_confirmation_code_matched'] = true
-						#set order state to awaiting scannus
-						@order.status = 'awaiting'
-						@order.save
-						@order.update_order_status
-						#set next state 
-				 		@result['data']['next_state'] = 'ready_for_order'
+						if user.change_order_status
+							@result['data']['cos_confirmation_code_matched'] = true
+							#set order state to awaiting scannus
+							@order.status = 'awaiting'
+							@order.save
+							@order.update_order_status
+							#set next state 
+					 		@result['data']['next_state'] = 'ready_for_order'
+				 		else
+							@result['data']['cos_confirmation_code_matched'] = false
+							@result['data']['next_state'] = 'request_for_confirmation_code_with_cos'
+							@result['error_messages'].push("User with confirmation code: "+ params[:cos_confirmation_code]+ " does not have permission to change order status")
+				 		end
 					else
 						@result['data']['cos_confirmation_code_matched'] = false
 						@result['data']['next_state'] = 'request_for_confirmation_code_with_cos'
