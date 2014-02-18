@@ -508,11 +508,11 @@ class Order < ActiveRecord::Base
         end
       end
 
-      if contains_new
-        self.addtag(contains_new_tag.id)
-      else
-        self.removetag(contains_new_tag.id)
-      end
+      # if contains_new
+      #   self.addtag(contains_new_tag.id)
+      # else
+      #   self.removetag(contains_new_tag.id)
+      # end
     end
 
     #apply contains inactive tag, if any of the order items contain inactive products
@@ -528,11 +528,11 @@ class Order < ActiveRecord::Base
         end
       end
 
-      if contains_inactive
-        self.addtag(contains_inactive_tag.id)
-      else
-        self.removetag(contains_inactive_tag.id)
-      end
+      # if contains_inactive
+      #   self.addtag(contains_inactive_tag.id)
+      # else
+      #   self.removetag(contains_inactive_tag.id)
+      # end
     end
 
     self.save

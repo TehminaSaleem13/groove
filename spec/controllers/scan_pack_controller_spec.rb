@@ -68,6 +68,7 @@ describe ScanPackController do
       expect(result["notice_messages"][0]).to eq("This order has already been scanned")
     end
 
+
    	it "should process order scan for orders having a status of Cancelled" do
       request.accept = "application/json"
 
@@ -118,6 +119,42 @@ describe ScanPackController do
       #expect(result["data"]["inactive_or_new_products"]).to eq()
       expect(result["notice_messages"][0]).to eq("The following items in this order are not Active." +
       	"They may need a barcode or other product info before their status can be changed to Active")
+    end
+
+    it "should process order scan for orders having a status of Service issue" do
+      request.accept = "application/json"
+
+      @order = FactoryGirl.create(:order, :status=>'serviceissue', :scanned_on=> "2013-09-03")
+      @user.change_order_status = true
+      @user.save
+
+      get :scan_order_by_barcode, { :barcode => 12345678 }
+
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["status"]).to eq(true)
+      expect(result["data"]["status"]).to eq("serviceissue")
+      expect(result["data"]["next_state"]).to eq("request_for_confirmation_code_with_cos")
+      expect(result["notice_messages"][0]).to eq('This order has a pending Service Issue. '+
+                'To clear the Service Issue and continue packing the order please scan your confirmation code')
+    end
+
+    it "should process order scan for orders having a status of Service issue" do
+      request.accept = "application/json"
+
+      @order = FactoryGirl.create(:order, :status=>'serviceissue', :scanned_on=> "2013-09-03")
+
+      get :scan_order_by_barcode, { :barcode => 12345678 }
+
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["status"]).to eq(true)
+      expect(result["data"]["status"]).to eq("serviceissue")
+      expect(result["data"]["next_state"]).to eq("request_for_confirmation_code_with_cos")
+      expect(result["notice_messages"][0]).to eq('This order has a pending Service Issue. To continue with this order, '+
+                'please ask another user who has Change Order Status permissions to scan their '+
+                'confirmation code and clear the issue. Alternatively, you can pack another order '+
+                'by scanning another order number')
     end
 
    end
@@ -354,6 +391,80 @@ describe ScanPackController do
       order_item.reload
       expect(order_item.scanned_qty).to eq(3)
       expect(order_item.scanned_status).to eq("scanned")
+  end
+
+  describe "Change of order status" do
+    it "should process confirmation code for change of order status " do
+      request.accept = "application/json"
+      
+      order = FactoryGirl.create(:order, :status=>'serviceissue')
+      @user.change_order_status = 1
+      @user.save
+      
+      product = FactoryGirl.create(:product)
+      product_sku = FactoryGirl.create(:product_sku, :product=> product)
+      product_barcode = FactoryGirl.create(:product_barcode, :product=> product)
+
+      order_item = FactoryGirl.create(:order_item, :product_id=>product.id,
+                    :qty=>3, :price=>"10", :row_total=>"10", :order=>order, :name=>product.name)
+
+      post :cos_confirmation_code, { :cos_confirmation_code => '1234567890', :order_id => order.id }
+
+
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["status"]).to eq(true)
+      expect(result["data"]["next_state"]).to eq("ready_for_order")
+      order.reload
+      expect(order.status).to eq("awaiting")
+
+    end
+
+    it "should not process confirmation code for change of order status since user does not have change order status" do
+      request.accept = "application/json"
+      
+      order = FactoryGirl.create(:order, :status=>'serviceissue')
+      
+      product = FactoryGirl.create(:product)
+      product_sku = FactoryGirl.create(:product_sku, :product=> product)
+      product_barcode = FactoryGirl.create(:product_barcode, :product=> product)
+
+      order_item = FactoryGirl.create(:order_item, :product_id=>product.id,
+                    :qty=>3, :price=>"10", :row_total=>"10", :order=>order, :name=>product.name)
+
+      post :cos_confirmation_code, { :cos_confirmation_code => '1234567890', :order_id => order.id }
+
+
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["status"]).to eq(true)
+      expect(result["data"]["next_state"]).to eq("request_for_confirmation_code_with_cos")
+      expect(result["error_messages"].first).to eq(
+          "User with confirmation code: 1234567890 does not have permission to change order status")      
+    end
+
+    it "should not process confirmation code for change of order status since confirmation code does not exist" do
+      request.accept = "application/json"
+      
+      order = FactoryGirl.create(:order, :status=>'serviceissue')
+      
+      product = FactoryGirl.create(:product)
+      product_sku = FactoryGirl.create(:product_sku, :product=> product)
+      product_barcode = FactoryGirl.create(:product_barcode, :product=> product)
+
+      order_item = FactoryGirl.create(:order_item, :product_id=>product.id,
+                    :qty=>3, :price=>"10", :row_total=>"10", :order=>order, :name=>product.name)
+
+      post :cos_confirmation_code, { :cos_confirmation_code => '123456789123', :order_id => order.id }
+
+
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["status"]).to eq(true)
+      expect(result["data"]["next_state"]).to eq("request_for_confirmation_code_with_cos")
+      expect(result["error_messages"].first).to eq(
+          "Could not find any user with confirmation code")      
+    end
   end
 
   describe "Product Kit Scan" do

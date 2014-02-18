@@ -412,7 +412,6 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,imp
 
     $scope._handle_cos_confirmation_code_key_event = function(event) {
         if(event.which == 13) {
-            //console.log($scope.product_confirmation_code);
             $http.post('/scan_pack/cos_confirmation_code.json',{order_id:$scope.order_id,cos_confirmation_code:$scope.cos_confirmation_code}).
             success(function(data){
                 //console.log(data);
