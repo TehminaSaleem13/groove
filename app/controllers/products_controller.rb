@@ -725,8 +725,11 @@ class ProductsController < ApplicationController
 					if option_product.product_skus.length > 0
 						kit_sku['sku'] = option_product.product_skus.first.sku
 					end
-					kit_sku['qty'] = 0
+					kit_sku['qty'] = kit.qty
 					kit_sku['qty_on_hand'] = 0
+          option_product.product_inventory_warehousess.each do |inventory|
+            kit_sku['qty_on_hand'] +=  inventory.qty.to_i
+          end
 					kit_sku['packing_order'] = kit.packing_order
 					kit_sku['option_product_id'] = option_product.id
 					@result['product']['productkitskus'].push(kit_sku)
