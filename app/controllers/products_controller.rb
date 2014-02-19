@@ -709,10 +709,10 @@ class ProductsController < ApplicationController
   	if !@product.nil?
   		@result['product'] = Hash.new
   		@result['product']['basicinfo'] = @product
-  		@result['product']['skus'] = @product.product_skus
+  		@result['product']['skus'] = @product.product_skus.order(order: :asc)
   		@result['product']['cats'] = @product.product_cats
-    	@result['product']['images'] = @product.product_images
-  		@result['product']['barcodes'] = @product.product_barcodes
+    	@result['product']['images'] = @product.product_images.order(order: :asc)
+  		@result['product']['barcodes'] = @product.product_barcodes.order(order: :asc)
       	@result['product']['inventory_warehouses'] = @product.product_inventory_warehousess
         #@result['product']['productkitskus'] = @product.product_kit_skuss
       @result['product']['productkitskus'] = []
@@ -993,11 +993,13 @@ class ProductsController < ApplicationController
 	  		end
   		end
 	  	if !params[:skus].nil?
+	  		order = 0
 	  		params[:skus].each do |sku|
 	  			if !sku["id"].nil?
 	  				product_sku = ProductSku.find(sku["id"])
 	  				product_sku.sku = sku["sku"]
 	  				product_sku.purpose = sku["purpose"]
+	  				product_sku.order = order
 			  		if !product_sku.save
 			  			@result['status'] &= false
 			  		end
@@ -1006,10 +1008,12 @@ class ProductsController < ApplicationController
 	  				product_sku.sku = sku["sku"]
 	  				product_sku.purpose = sku["purpose"]
 	  				product_sku.product_id = @product.id
+	  				product_sku.order = order
 			  		if !product_sku.save
 			  			@result['status'] &= false
 			  		end
 	  			end
+	  			order = order + 1
 	  		end
   		end
 
@@ -1040,10 +1044,12 @@ class ProductsController < ApplicationController
   		#Update product barcodes
   		#check if a product barcode is defined
   		if !params[:barcodes].nil?
+ 	  		order = 0
 	  		params[:barcodes].each do |barcode|
 	  			if !barcode["id"].nil?
 	  				product_barcode = ProductBarcode.find(barcode["id"])
 	  				product_barcode.barcode = barcode["barcode"]
+	  				product_barcode.order = order
 			  		if !product_barcode.save
 			  			@result['status'] &= false
 			  		end
@@ -1051,6 +1057,7 @@ class ProductsController < ApplicationController
 			  		if ProductBarcode.where(:barcode => barcode["barcode"]).length == 0
 				  		product_barcode = ProductBarcode.new
 				  		product_barcode.barcode = barcode["barcode"]
+				  		product_barcode.order = order
 				  		product_barcode.product_id = @product.id
 				  		if !product_barcode.save
 				  			@result['status'] &= false
@@ -1060,6 +1067,7 @@ class ProductsController < ApplicationController
 				  		@result['message'] = "Barcode "+barcode["barcode"]+" already exists"
 				  	end
 	  			end
+	  			order = order + 1
 	  		end
   		end
 
@@ -1090,11 +1098,13 @@ class ProductsController < ApplicationController
   		#Update product barcodes
   		#check if a product barcode is defined
   		if !params[:images].nil?
+  			order = 0
 	  		params[:images].each do |image|
 	  			if !image["id"].nil?
 	  				product_image = ProductImage.find(image["id"])
 	  				product_image.image = image["image"]
 	  				product_image.caption = image["caption"]
+	  				product_image.order = order
 			  		if !product_image.save
 			  			@result['status'] &= false
 			  		end
@@ -1103,10 +1113,12 @@ class ProductsController < ApplicationController
 			  		product_image.image = image["image"]
 			  		product_image.caption = image["caption"]
 			  		product_image.product_id = @product.id
+	  				product_image.order = order
 			  		if !product_image.save
 			  			@result['status'] &= false
 			  		end
 	  			end
+	  			order = order + 1
 	  		end
   		end
 

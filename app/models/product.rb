@@ -112,7 +112,4 @@ class Product < ActiveRecord::Base
   	self.save
   end
 
-
-
-
 end
