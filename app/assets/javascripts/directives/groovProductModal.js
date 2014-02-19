@@ -12,7 +12,7 @@ groovepacks_directives.directive('groovProductModal',['notification','products',
              * Public properties
              */
             scope.kit_products = products.model.get();
-            scope.$watch('groovProducts.single.basicinfo.is_kit',function(){
+            scope.$watch('groovProducts.single.productkitskus',function(){
                 if(typeof scope.groovProducts.single.basicinfo != "undefined" && scope.groovProducts.single.basicinfo.is_kit == 1) {
                     if(scope.kit_modal == "") {
                         scope.kit_modal = $sce.trustAsHtml('<div groov-product-modal groov-products="kit_products" groov-single-product="kit_product_single_details"></div>');
