@@ -92,7 +92,7 @@ groovepacks_services.factory('orders',['$http','notification',function($http,not
                 url = '/orders/deleteorder.json';
             } else if(action =="duplicate") {
                 url = '/orders/duplicateorder.json';
-            } else if(action == "status_update") {
+            } else if(action == "update_status") {
                 url = '/orders/changeorderstatus.json';
             }
 

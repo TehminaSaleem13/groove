@@ -93,7 +93,7 @@ groovepacks_services.factory('products',['$http','notification',function($http,n
                 url = '/products/deleteproduct.json';
             } else if(action =="duplicate") {
                 url = '/products/duplicateproduct.json';
-            } else if(action == "status_update") {
+            } else if(action == "update_status") {
                 url = '/products/changeproductstatus.json';
             }
 
