@@ -617,7 +617,7 @@ class OrdersController < ApplicationController
       @result['order']['remove_items_permitted'] = current_user.remove_order_items
       @result['order']['activities'] = @order.order_activities
       @result['order']['exception'] = @order.order_exceptions
-      @result['order']['exception']['assoc'] = 
+      @result['order']['exception']['assoc'] =
         User.find(@order.order_exceptions.user_id) if !@order.order_exceptions.nil? && @order.order_exceptions.user_id !=0
 
       @result['order']['users'] = User.all
@@ -651,7 +651,6 @@ class OrdersController < ApplicationController
     @result = Hash.new
     @result['status'] = true
     username = current_user.name
-    @result['error_messages'] = []
     @result['messages'] = []
 
     @order = Order.find(params[:id])
@@ -667,7 +666,7 @@ class OrdersController < ApplicationController
       @exception.reason = params[:reason]
       @exception.description = params[:description]
       if !params[:assoc].nil? && !params[:assoc][:id] != 0
-        @exception.user_id = params[:assoc][:id] 
+        @exception.user_id = params[:assoc][:id]
         username = params[:assoc][:name]
       end
 
@@ -679,7 +678,7 @@ class OrdersController < ApplicationController
       end
     else
       @result['status'] &= false
-      @result['error_messages'].push('Cannot record exception without a reason')
+      @result['messages'].push('Cannot record exception without a reason')
     end
     respond_to do |format|
       format.html # show.html.erb
@@ -690,8 +689,10 @@ class OrdersController < ApplicationController
   def clearexception
     @result = Hash.new
     @result['status'] = true
+    @result['messages'] = []
 
     @order = Order.find(params[:id])
+    @result["huh"] = @order
 
     if @order.order_exceptions.nil?
       @result['status'] &= false
@@ -714,27 +715,30 @@ class OrdersController < ApplicationController
   def additemtoorder
     @result = Hash.new
     @result['status'] = true
-
+    qty = 1
+    qty = params[:qty] if !params[:qty].nil? && params[:qty].to_i > -1
     @order = Order.find(params[:id])
-    @product = Product.find(params[:productid])
-
-    if @product.nil?
+    @products = Product.find(params[:productids])
+    if @products.nil?
       @result['status'] &= false
-      @result['messages'].push("Could not find any Item with product id:"+@productid)
+      @result['messages'].push("Could not find any Item")
     else
-      @orderitem = OrderItem.new
-      @orderitem.name = @product.name
-      @orderitem.price = params[:price]
-      @orderitem.qty = params[:qty]
-      @orderitem.row_total = params[:price].to_f * params[:qty].to_f
-      @orderitem.product_id = @product.id
-      @order.order_items << @orderitem
+      @products.each do |product|
+        @orderitem = OrderItem.new
+        @orderitem.name = product.name
+        @orderitem.price = params[:price]
+        @orderitem.qty = qty.to_i
+        @orderitem.row_total = params[:price].to_f * params[:qty].to_f
+        @orderitem.product_id = product.id
+        @order.order_items << @orderitem
 
+      end
       if !@order.save
         @result['status'] &= false
         @result['messages'].push("Adding item to order failed")
       end
     end
+
 
     respond_to do |format|
       format.html # show.html.erb

@@ -1126,7 +1126,7 @@ class ProductsController < ApplicationController
       @result['status'] = false
       @result['error_msg'] ="Cannot find Product"
     else
-      if ["name","status"].include?(params[:var])
+      if ["name","status","is_skippable"].include?(params[:var])
         @product[params[:var]] = params[:value]
         unless @product.save
           @result['status'] &= false
@@ -1316,13 +1316,14 @@ class ProductsController < ApplicationController
     limit = 10
     offset = 0
     query_add = ""
+    kit_query = ""
     status_filter_text = ""
     is_kit = 0
     supported_sort_keys = ['updated_at', 'name', 'sku',
                            'status', 'barcode', 'location_primary', 'store' ]
     supported_order_keys = ['ASC', 'DESC' ] #Caps letters only
     supported_status_filters = ['all', 'active', 'inactive', 'new']
-    supported_kit_params = ['0', '1']
+    supported_kit_params = ['0', '1', '-1']
 
     # Get passed in parameter variables if they are valid.
     limit = params[:limit] if !params[:limit].nil? && params[:limit].to_i > 0
@@ -1341,8 +1342,12 @@ class ProductsController < ApplicationController
     is_kit = params[:iskit] if !params[:iskit].nil?  &&
         supported_kit_params.include?(params[:iskit])
 
+    unless is_kit == '-1'
+      kit_query = " AND products.is_kit="+is_kit.to_s
+    end
+
     unless params[:select_all]
-      query_add = " LIMIT "+limit+" OFFSET "+offset
+      query_add += " LIMIT "+limit.to_s+" OFFSET "+offset.to_s
     end
 
     #hack to bypass for now and enable client development
@@ -1356,18 +1361,21 @@ class ProductsController < ApplicationController
 
     if sort_key == 'sku'
       products = Product.find_by_sql("SELECT products.* FROM products, product_skus WHERE "+
-                                         "products.id = product_skus.product_id AND products.is_kit="+is_kit+
+                                         "products.id = product_skus.product_id "+kit_query+
                                          status_filter_text+" ORDER BY product_skus.sku "+sort_order+query_add)
     elsif sort_key == 'store'
       products = Product.find_by_sql("SELECT products.* FROM products, stores WHERE "+
-                                         "products.store_id = stores.id AND products.is_kit="+is_kit+
+                                         "products.store_id = stores.id "+kit_query+
                                          status_filter_text+" ORDER BY stores.name "+sort_order+query_add)
     elsif sort_key == 'location_primary'
      products = Product.find_by_sql("SELECT products.* FROM products, product_inventory_warehouses WHERE "+
-                                            "products.id = product_inventory_warehouses.product_id AND products.is_kit="+is_kit+
+                                            "products.id = product_inventory_warehouses.product_id "+kit_query+
                                             status_filter_text+" ORDER BY product_inventory_warehouses.location_primary "+sort_order+query_add)
     else
-      products = Product.order(sort_key+" "+sort_order).where(:is_kit=> is_kit)
+      products = Product.order(sort_key+" "+sort_order)
+      unless is_kit == '-1'
+        products = products.where(:is_kit=> is_kit)
+      end
       unless status_filter == 'all'
           products = products.where(:status=>status_filter)
       end
@@ -1376,8 +1384,11 @@ class ProductsController < ApplicationController
       end
     end
 
-    if products.length==0
-      products = Product.where(:is_kit=> is_kit)
+    if products.length!=0
+      products = Product.where(1)
+      unless is_kit == '-1'
+        products = products.where(:is_kit=> is_kit)
+      end
       unless status_filter == 'all'
         products = products.where(:status=>status_filter)
       end

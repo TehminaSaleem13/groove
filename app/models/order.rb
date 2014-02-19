@@ -194,13 +194,13 @@ class Order < ActiveRecord::Base
     matched_product_id = 0
 
     product_barcode = ProductBarcode.where(:barcode=>barcode)
-    
+
     if product_barcode.length > 0
       product_barcode = product_barcode.first
       self.order_items.each do |order_item|
         if order_item.product_id == product_barcode.product.id
           barcode_found = true
-          matched_product_id = order_item.product_id 
+          matched_product_id = order_item.product_id
         end
 
         if !barcode_found
@@ -230,7 +230,7 @@ class Order < ActiveRecord::Base
     matched_product_id = 0
     matched_order_item_id = 0
     product_barcode = ProductBarcode.where(:barcode=>barcode)
-    
+
     if product_barcode.length > 0
       product_barcode = product_barcode.first
     else
@@ -240,7 +240,7 @@ class Order < ActiveRecord::Base
     #check if barcode is present in a kit which has kitparsing of depends
     if !product_barcode.nil?
       self.order_items.each do |order_item|
-        if order_item.product.is_kit == 1 && order_item.product.kit_parsing == 'depends' && 
+        if order_item.product.is_kit == 1 && order_item.product.kit_parsing == 'depends' &&
           order_item.scanned_status != 'scanned'
           order_item.product.product_kit_skuss.each do |kit_product|
             #puts "Product Id:" + kit_product.option_product_id.to_s
@@ -260,7 +260,7 @@ class Order < ActiveRecord::Base
     #puts "Product inside splittable kit:"+product_inside_splittable_kit.to_s
     #if barcode is present and the matched product is also present in other non-kit
     #and unscanned order items, then the kit need not be split.
-    if product_inside_splittable_kit 
+    if product_inside_splittable_kit
       self.order_items.each do |order_item|
         #puts "Order Kit Status:"+order_item.product.is_kit.to_s
         #puts "Order Item Status:"+order_item.scanned_status
@@ -277,7 +277,7 @@ class Order < ActiveRecord::Base
       end
     end
 
-    if result 
+    if result
       order_item = OrderItem.find(matched_order_item_id)
       if order_item.kit_split == true
 
@@ -316,7 +316,7 @@ class Order < ActiveRecord::Base
           #puts "Kit Parsing:" + order_item.product.kit_parsing
           #puts "Before:"+unscanned_list.to_s
           if order_item.product.kit_parsing == 'single'
-            #if single, then add order item to unscanned list  
+            #if single, then add order item to unscanned list
             unscanned_list.push(order_item.build_unscanned_single_item)
           elsif order_item.product.kit_parsing == 'individual'
             #else if individual then add all order items as children to unscanned list
@@ -335,7 +335,7 @@ class Order < ActiveRecord::Base
               end
               # unscanned_qty = order_item.qty - order_item.scanned_qty
               # added_to_list_qty = true
-              # unscanned_qty.times do 
+              # unscanned_qty.times do
               #   if added_to_list_qty < unscanned_qty
               #     individual_kit_count = 0
 
@@ -388,7 +388,7 @@ class Order < ActiveRecord::Base
           order_item.scanned_status == 'partially_scanned'
         if order_item.product.is_kit == 1
           if order_item.product.kit_parsing == 'single'
-            #if single, then add order item to unscanned list  
+            #if single, then add order item to unscanned list
             scanned_list.push(order_item.build_scanned_single_item)
           elsif order_item.product.kit_parsing == 'individual'
             #else if individual then add all order items as children to unscanned list
@@ -468,9 +468,9 @@ class Order < ActiveRecord::Base
 
   def addtag(tag_id)
     result = false
-    
+
     tag = OrderTag.find(tag_id)
-    
+
     if !tag.nil? && (!self.order_tags.include? tag)
       self.order_tags << tag
       self.save
@@ -482,9 +482,9 @@ class Order < ActiveRecord::Base
 
   def removetag(tag_id)
     result = false
-    
+
     tag = OrderTag.find(tag_id)
-    
+
     if !tag.nil? && (self.order_tags.include? tag)
       self.order_tags.delete(tag)
       self.save

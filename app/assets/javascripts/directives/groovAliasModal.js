@@ -32,6 +32,7 @@ groovepacks_directives.directive('groovAliasModal',['notification','products','$
                 scope.products.setup.filter = "all";
                 scope.custom_identifier = Math.floor(Math.random()*1000);
                 scope.is_kit = false;
+                scope.is_order = false;
                 scope.selected_aliases = [];
 
                 //Private properties
@@ -40,20 +41,29 @@ groovepacks_directives.directive('groovAliasModal',['notification','products','$
                 scope._exceptions = [];
                 scope._do_load_products = false;
                 scope._can_load_products = true;
+                scope._accepted_types = ['alias','kit','order'];
                 //Register watchers
                 scope.$watch('products.setup.search',scope._search_products);
                 scope.$watch('_can_load_products',scope._can_do_load_products);
             }
 
-            scope.product_alias = function (single) {
+            scope.product_alias = function (type,exceptions,id) {
+                if(scope._accepted_types.indexOf(type) == -1) {
+                    type = 'alias';
+                }
                 scope._exceptions = [];
-                scope.is_kit = single.basicinfo.is_kit;
-                scope._exceptions.push(single.basicinfo.id);
-                if(scope.is_kit) {
-                    for (i in single.productkitskus) {
-                        scope._exceptions.push(single.productkitskus[i].option_product_id);
+                scope.is_order = (type == 'order');
+                scope.is_kit = (type == 'kit');
+                scope.products.setup.is_kit = scope.is_order ? -1 : scope.products.setup.is_kit;
+                if(typeof exceptions != 'undefined') {
+                    for(i in exceptions) {
+                        scope._exceptions.push(exceptions[i].id);
                     }
                 }
+                if(typeof id !== 'undefined') {
+                    scope._exceptions.push(id);
+                }
+
                 scope._get_products();
                 if(scope._alias_obj == null) {
                     scope._alias_obj = $('#showAliasOptions'+scope.custom_identifier);
@@ -70,7 +80,7 @@ groovepacks_directives.directive('groovAliasModal',['notification','products','$
             }
             scope.add_alias_product = function(product) {
                 product.checked = !product.checked;
-                if(scope.is_kit) {
+                if(scope.is_kit || scope.is_order) {
                     scope.selected_aliases.push(product.id);
                 } else {
                     if(confirm("Are you sure? This can not be undone!")) {
@@ -100,6 +110,7 @@ groovepacks_directives.directive('groovAliasModal',['notification','products','$
             scope._common_setup_opt = function(type,value,selector) {
                 products.setup.update(scope.products.setup,type,value);
                 scope.products.setup.is_kit = (selector == 'kit')? 1 : 0;
+                scope.products.setup.is_kit = scope.is_order ? -1 : scope.products.setup.is_kit;
                 scope._get_products();
             }
 

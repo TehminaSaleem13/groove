@@ -16,12 +16,20 @@
                 <div id="collapseOne" class="accordion-body collapse in">
                     <div class="accordion-inner">
                         <ul class="nav nav-pills nav-stacked">
+<<<<<<< HEAD
                             <li class="order_setup-filter order_setup-filter-all" ><a href="" ng-click="order_setup_opt('filter','all')">Show All</a></li>
                             <li class="order_setup-filter order_setup-filter-awaiting" ><a href="" ng-click="order_setup_opt('filter','awaiting')">Awaiting</a></li>
                             <li class="order_setup-filter order_setup-filter-onhold"><a href="" ng-click="order_setup_opt('filter','onhold')">On Hold</a></li>
                             <li class="order_setup-filter order_setup-filter-serviceissue"><a href="" ng-click="order_setup_opt('filter','serviceissue')">Service Issue</a></li>
                             <li class="order_setup-filter order_setup-filter-cancelled"><a href="" ng-click="order_setup_opt('filter','cancelled')">Cancelled</a></li>
                             <li class="order_setup-filter order_setup-filter-scanned"><a href="" ng-click="order_setup_opt('filter','scanned')">Scanned</a></li>
+=======
+                            <li ng-class="{active:orders.setup.filter=='all'}" ><a href="" ng-click="order_setup_opt('filter','all')">Show All</a></li>
+                            <li ng-class="{active:orders.setup.filter=='awaiting'}" ><a href="" ng-click="order_setup_opt('filter','awaiting')">Awaiting</a></li>
+                            <li ng-class="{active:orders.setup.filter=='onhold'}"><a href="" ng-click="order_setup_opt('filter','onhold')">On Hold</a></li>
+                            <li ng-class="{active:orders.setup.filter=='cancelled'}"><a href="" ng-click="order_setup_opt('filter','cancelled')">Cancelled</a></li>
+                            <li ng-class="{active:orders.setup.filter=='scanned'}"><a href="" ng-click="order_setup_opt('filter','scanned')">Scanned</a></li>
+>>>>>>> EOD commit 19-feb multiple issues ready for review
                         </ul>
                     </div>
                 </div>
@@ -34,7 +42,7 @@
             <div class="row-fluid">
                 <div class="span8">
                     <form class="form-search">
-                        <input type="text" id="order-search-query" ng-model="order_setup.search" class="input-large search-query" placeholder="Search">
+                        <input type="text" id="order-search-query" ng-model="orders.setup.search" class="input-large search-query" placeholder="Search">
                     </form>
                 </div>
                 <div class="span4">
@@ -64,49 +72,49 @@
                 <thead>
                 <tr>
                     <th class="span1" data-header="checkbox">
-                        <input ng-model="order_setup.select_all" type="checkbox" ng-change='select_all_toggle()' />
+                        <input ng-model="orders.setup.select_all" type="checkbox" ng-change='select_all_toggle()' />
                     </th>
-                    <th class="span1 order_setup-sort" data-header="tags">
+                    <th class="dragtable-sortable span1" data-header="tags">
                         Tags
                     </th>
-                    <th class="order_setup-sort order_setup-sort-store span1" data-header="store_name">
-                        <a href="" ng-click="order_setup_opt('sort','store')">Store<span class="{{'caret-'+order_setup.order}}"></span></a>
+                    <th class="dragtable-sortable span1" data-header="store_name" ng-class="{active:orders.setup.sort=='store'}">
+                        <a href="" ng-click="handlesort('store')" ng-class="orders.setup.order">Store</a>
                     </th>
-                    <th class="order_setup-sort order_setup-sort-notes span1" data-header="notes">
-                        <a href="" ng-click="order_setup_opt('sort','notes')">Notes<span class="{{'caret-'+order_setup.order}}"></span></a>
+                    <th class="dragtable-sortable span1" data-header="notes" ng-class="{active:orders.setup.sort=='notes'}">
+                        <a href="" ng-click="handlesort('notes')" ng-class="orders.setup.order">Notes</a>
                     </th>
-                    <th class="order_setup-sort order_setup-sort-store_order_id span2" data-header="ordernum">
-                        <a href="" ng-click="order_setup_opt('sort','store_order_id')">Order #<span class="{{'caret-'+order_setup.order}}"></span></a>
+                    <th class="dragtable-sortable span2" data-header="ordernum" ng-class="{active:orders.setup.sort=='store_order_id'}">
+                        <a href="" ng-click="handlesort('store_order_id')" ng-class="orders.setup.order">Order #</a>
                     </th>
-                    <th class="order_setup-sort order_setup-sort-order_date span2" data-header="orderdate">
-                        <a href="" ng-click="order_setup_opt('sort','order_date')">Order Date<span class="{{'caret-'+order_setup.order}}"></span></a>
+                    <th class="dragtable-sortable span2" data-header="orderdate" ng-class="{active:orders.setup.sort=='order_date'}">
+                        <a href="" ng-click="handlesort('order_date')" ng-class="orders.setup.order">Order Date</a>
                     </th>
-                    <th class="order_setup-sort order_setup-sort-items span1" data-header="itemslength">
-                        <a href="" ng-click="order_setup_opt('sort','items')">Items<span class="{{'caret-'+order_setup.order}}"></span></a>
+                    <th class="dragtable-sortable span1" data-header="itemslength" ng-class="{active:orders.setup.sort=='items'}">
+                        <a href="" ng-click="handlesort('items')" ng-class="orders.setup.order">Items</a>
                     </th>
-                    <th class="order_setup-sort order_setup-sort-recipient span2" data-header="recipient">
-                        <a href="" ng-click="order_setup_opt('sort','recipient')">Recipient<span class="{{'caret-'+order_setup.order}}"></span></a>
+                    <th class="dragtable-sortable span2" data-header="recipient" ng-class="{active:orders.setup.sort=='recipient'}">
+                        <a href="" ng-click="handlesort('recipient')" ng-class="orders.setup.order">Recipient</a>
                     </th>
-                    <th class="order_setup-sort order_setup-sort-status span1" data-header="status">
-                        <a href="" ng-click="order_setup_opt('sort','status')">Status<span class="{{'caret-'+order_setup.order}}"></span></a>
+                    <th class="dragtable-sortable span1" data-header="status" ng-class="{active:orders.setup.sort=='status'}">
+                        <a href="" ng-click="handlesort('status')" ng-class="orders.setup.order">Status</a>
                     </th>
-                    <th class="order_setup-sort order_setup-sort-email span2" data-header="email">
-                        <a href="" ng-click="order_setup_opt('sort','email')">Email<span class="{{'caret-'+order_setup.order}}"></span></a>
+                    <th class="dragtable-sortable span2" data-header="email" ng-class="{active:orders.setup.sort=='email'}">
+                        <a href="" ng-click="handlesort('email')" ng-class="orders.setup.order">Email</a>
                     </th>
-                    <th class="order_setup-sort order_setup-sort-tracking_num span2" data-header="tracking_num">
-                        <a href="" ng-click="order_setup_opt('sort','tracking_num')">Tracking Id<span class="{{'caret-'+order_setup.order}}"></span></a>
+                    <th class="dragtable-sortable span2" data-header="tracking_num" ng-class="{active:orders.setup.sort=='tracking_num'}">
+                        <a href="" ng-click="handlesort('tracking_num')" ng-class="orders.setup.order">Tracking Id</a>
                     </th>
-                    <th class="order_setup-sort order_setup-sort-city span2" data-header="city">
-                        <a href="" ng-click="order_setup_opt('sort','city')">City<span class="{{'caret-'+order_setup.order}}"></span></a>
+                    <th class="dragtable-sortable span2" data-header="city" ng-class="{active:orders.setup.sort=='city'}">
+                        <a href="" ng-click="handlesort('city')" ng-class="orders.setup.order">City</a>
                     </th>
-                    <th class="order_setup-sort order_setup-sort-state span1" data-header="state">
-                        <a href="" ng-click="order_setup_opt('sort','state')">State<span class="{{'caret-'+order_setup.order}}"></span></a>
+                    <th class="dragtable-sortable span1" data-header="state" ng-class="{active:orders.setup.sort=='state'}">
+                        <a href="" ng-click="handlesort('state')" ng-class="orders.setup.order">State</a>
                     </th>
-                    <th class="order_setup-sort order_setup-sort-postcode span2" data-header="postcode">
-                        <a href="" ng-click="order_setup_opt('sort','postcode')">Zip<span class="{{'caret-'+order_setup.order}}"></span></a>
+                    <th class="dragtable-sortable span2" data-header="postcode" ng-class="{active:orders.setup.sort=='postcode'}">
+                        <a href="" ng-click="handlesort('postcode')" ng-class="orders.setup.order">Zip</a>
                     </th>
-                    <th class="order_setup-sort order_setup-sort-country span3" data-header="country">
-                        <a href="" ng-click="order_setup_opt('sort','country')">Country<span class="{{'caret-'+order_setup.order}}"></span></a>
+                    <th class="dragtable-sortable span3" data-header="country" ng-class="{active:orders.setup.sort=='country'}">
+                        <a href="" ng-click="handlesort('country')" ng-class="orders.setup.order">Country</a>
                     </th>
                 </tr>
                 </thead>
@@ -124,143 +132,28 @@
                             </ul>
                         </div>
                     </td>
-                    <td data-header="store_name">
-                        {{order.store_name}}
+                    <td data-header="store_name">{{order.store_name}}</td>
+                    <td data-header="notes" groov-editable="editableOptions" ng-model="order" prop="notes" identifier="orders_list-notes-{{$index}}"></td>
+                    <td data-header="ordernum" groov-editable="editableOptions" ng-model="order" prop="ordernum" identifier="orders_list-ordernum-{{$index}}">
+                        <a href="" ng-click="function(ngModel.id,'auto',0,true)">{{ngModel.ordernum}}</a>
                     </td>
-                    <td data-header="notes" id="{{'orders_notes_'+$index}}" ng-dblclick="edit_single_node($index,order.id,'notes')">
-                        {{order.notes}}
-                        <div id="{{'orders_notes_input_'+$index}}" ng-show="orders_edit_tmp.editing == $index && orders_edit_tmp.editing_var == 'notes'" class="tag-bubble tag-bubble-input span2 input-text">
-                            <input xs-input-sync class="span2" name="{{'orders_notes_'+$index}}" ng-model="orders_edit_tmp.notes" type="text" placeholder="Edit..." />
-                            <i ng-show="orders_edit_tmp.editing != -1" class="icon-ok" ng-click="save_single_node()"></i>
-                        </div>
+                    <td data-header="orderdate" groov-editable="editableOptions" ng-model="order" prop="orderdate" identifier="orders_list-orderdate-{{$index}}">
+                        {{ngModel.orderdate | date:'EEEE MM/dd/yyyy hh:mm:ss a'}}
                     </td>
-                    <td data-header="ordernum" id="{{'orders_ordernum_'+$index}}" ng-dblclick="edit_single_node($index,order.id,'ordernum')">
-                        <a href="" role="button" data-toggle="modal" ng-click="order_single_details(order.id,$index,0,true)" class="ng-binding">{{order.ordernum}}</a>
-                        <div id="{{'orders_ordernum_input_'+$index}}" ng-show="orders_edit_tmp.editing == $index && orders_edit_tmp.editing_var == 'ordernum'" class="tag-bubble tag-bubble-input span2 input-text">
-                            <input xs-input-sync class="span2" name="{{'orders_ordernum_'+$index}}" ng-model="orders_edit_tmp.ordernum" type="text" placeholder="Edit..." />
-                            <i ng-show="orders_edit_tmp.editing != -1 && orders_edit_tmp.ordernum != ''" class="icon-ok" ng-click="save_single_node()"></i>
-                        </div>
-                    </td>
-                    <td data-header="orderdate" id="{{'orders_orderdate_'+$index}}" ng-dblclick="edit_single_node($index,order.id,'orderdate')">
-                        {{order.orderdate | date:'EEEE MM/dd/yyyy hh:mm:ss a'}}
-                        <div id="{{'orders_orderdate_input_'+$index}}" ng-show="orders_edit_tmp.editing == $index && orders_edit_tmp.editing_var == 'orderdate'" class="tag-bubble tag-bubble-input span2 input-text">
-                            <input xs-input-sync class="span2" name="{{'orders_orderdate_'+$index}}" ng-model="orders_edit_tmp.orderdate" type="text" placeholder="Edit..." />
-                            <i ng-show="orders_edit_tmp.editing != -1" class="icon-ok" ng-click="save_single_node()"></i>
-                        </div>
-                    </td>
-                    <td data-header="itemslength">
-                        {{order.itemslength}}
-                    </td>
-                    <td data-header="recipient" id="{{'orders_recipient_'+$index}}" ng-dblclick="edit_single_node($index,order.id,'recipient')">
-                        {{order.recipient}}
-                        <div id="{{'orders_recipient_input_'+$index}}" ng-show="orders_edit_tmp.editing == $index && orders_edit_tmp.editing_var == 'recipient'" class="tag-bubble tag-bubble-input span2 input-text">
-                            <input xs-input-sync class="span2" name="{{'orders_recipient_'+$index}}" ng-model="orders_edit_tmp.recipient" type="text" placeholder="Edit..." />
-                            <i ng-show="orders_edit_tmp.editing != -1" class="icon-ok" ng-click="save_single_node()"></i>
-                        </div>
-                    </td>
-                    <td data-header="status" id="{{'orders_status_'+$index}}" ng-dblclick="edit_single_node($index,order.id,'status')">
-                        {{order.status}}
-                        <div id="{{'orders_status_input_'+$index}}" ng-show="orders_edit_tmp.editing == $index && orders_edit_tmp.editing_var == 'status' " class="input-text">
-                            <select class="span2" name="{{'orders_status_'+$index}}" ng-model="orders_edit_tmp.status" ng-click="save_single_node()">
-                                <option value="awaiting">Awaiting</option>
-                                <option value="onhold" >On Hold</option>
-                                <option value="serviceissue" >Service Issue</option>
-                                <option value="cancelled">Cancelled</option>
-                                <option value="scanned">Scanned</option>
-                            </select>
-                        </div>
-                    </td>
-                    <td data-header="email" id="{{'orders_email_'+$index}}" ng-dblclick="edit_single_node($index,order.id,'email')">
-                        {{order.email}}
-                        <div id="{{'orders_email_input_'+$index}}" ng-show="orders_edit_tmp.editing == $index && orders_edit_tmp.editing_var == 'email'" class="tag-bubble tag-bubble-input span2 input-text">
-                            <input xs-input-sync class="span2" name="{{'orders_email_'+$index}}" ng-model="orders_edit_tmp.email" type="text" placeholder="Edit..." />
-                            <i class="icon-ok" ng-click="save_single_node()"></i>
-                        </div>
-                    </td>
-                    <td data-header="tracking_num" id="{{'orders_tracking_num_'+$index}}" ng-dblclick="edit_single_node($index,order.id,'tracking_num')">
-                        {{order.tracking_num}}
-                        <div id="{{'orders_tracking_num_input_'+$index}}" ng-show="orders_edit_tmp.editing == $index && orders_edit_tmp.editing_var == 'tracking_num'" class="tag-bubble tag-bubble-input span2 input-text">
-                            <input xs-input-sync class="span2" name="{{'orders_tracking_num_'+$index}}" ng-model="orders_edit_tmp.tracking_num" type="text" placeholder="Edit..." />
-                            <i class="icon-ok" ng-click="save_single_node()"></i>
-                        </div>
-                    </td>
-                    <td data-header="city" id="{{'orders_city_'+$index}}" ng-dblclick="edit_single_node($index,order.id,'city')">
-                        {{order.city}}
-                        <div id="{{'orders_city_input_'+$index}}" ng-show="orders_edit_tmp.editing == $index && orders_edit_tmp.editing_var == 'city'" class="tag-bubble tag-bubble-input span2 input-text">
-                            <input xs-input-sync class="span2" name="{{'orders_city_'+$index}}" ng-model="orders_edit_tmp.city" type="text" placeholder="Edit..." />
-                            <i class="icon-ok" ng-click="save_single_node()"></i>
-                        </div>
-                    </td>
-                    <td data-header="state" id="{{'orders_state_'+$index}}" ng-dblclick="edit_single_node($index,order.id,'state')">
-                        {{order.state}}
-                        <div id="{{'orders_state_input_'+$index}}" ng-show="orders_edit_tmp.editing == $index && orders_edit_tmp.editing_var == 'state'" class="tag-bubble tag-bubble-input span3 input-text">
-                            <input xs-input-sync class="span3" name="{{'orders_state_'+$index}}" ng-model="orders_edit_tmp.state" type="text" placeholder="Edit..." />
-                            <i class="icon-ok" ng-click="save_single_node()"></i>
-                        </div>
-                    </td>
-                    <td data-header="postcode" id="{{'orders_postcode_'+$index}}" ng-dblclick="edit_single_node($index,order.id,'postcode')">
-                        {{order.postcode}}
-                        <div id="{{'orders_postcode_input_'+$index}}" ng-show="orders_edit_tmp.editing == $index && orders_edit_tmp.editing_var == 'postcode'" class="tag-bubble tag-bubble-input span3 input-text">
-                            <input xs-input-sync class="span3" name="{{'orders_postcode_'+$index}}" ng-model="orders_edit_tmp.postcode" type="text" placeholder="Edit..." />
-                            <i class="icon-ok" ng-click="save_single_node()"></i>
-                        </div>
-                    </td>
-                    <td data-header="country" id="{{'orders_country_'+$index}}" ng-dblclick="edit_single_node($index,order.id,'country')">
-                        {{order.country}}
-                        <div id="{{'orders_country_input_'+$index}}" ng-show="orders_edit_tmp.editing == $index && orders_edit_tmp.editing_var == 'country'" class="tag-bubble tag-bubble-input span3 input-text">
-                            <input xs-input-sync class="span3" name="{{'orders_country_'+$index}}" ng-model="orders_edit_tmp.country" type="text" placeholder="Edit..." />
-                            <i class="icon-ok" ng-click="save_single_node()"></i>
-                        </div>
-                    </td>
+                    <td data-header="itemslength">{{order.itemslength}}</td>
+                    <td data-header="recipient" groov-editable="editableOptions" ng-model="order" prop="recipient" identifier="orders_list-recipient-{{$index}}"></td>
+                    <td data-header="status" groov-editable="editableOptions" ng-model="order" prop="status" identifier="orders_list-status-{{$index}}"></td>
+                    <td data-header="email" groov-editable="editableOptions" ng-model="order" prop="email" identifier="orders_list-email-{{$index}}"></td>
+                    <td data-header="tracking_num" groov-editable="editableOptions" ng-model="order" prop="tracking_num" identifier="orders_list-tracking_num-{{$index}}"></td>
+                    <td data-header="city" groov-editable="editableOptions" ng-model="order" prop="city" identifier="orders_list-city-{{$index}}"></td>
+                    <td data-header="state" groov-editable="editableOptions" ng-model="order" prop="state" identifier="orders_list-state-{{$index}}"></td>
+                    <td data-header="postcode" groov-editable="editableOptions" ng-model="order" prop="postcode" identifier="orders_list-postcode-{{$index}}"></td>
+                    <td data-header="country" groov-editable="editableOptions" ng-model="order" prop="country" identifier="orders_list-country-{{$index}}"></td>
                 </tr>
                 </tbody>
             </table>
 
         </div>
-
-<!-- Add item modal -->
-        <div id="addItem" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="addItem"
-             aria-hidden="true">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="icon-remove"></i></button>
-                <h3 id="addItemHeader" >Select Item to add to Order</h3>
-            </div>
-            <div class="modal-body" id="addItem-body">
-                <input type="text" ng-model="product_setup.search" class="input-large search-query" placeholder="Search term" /> <button class="btn" ng-click="product_setup.search='';get_products()">Clear</button><br/><br/>
-                <table id="itemstbl" class="table table-hover table-bordered">
-                    <thead>
-                    <tr>
-                        <th class="item_setup-sort item_setup-sort-name">
-                            <a href="" ng-click="item_setup_opt('sort','name')">Item Name<span class="{{'caret-'+product_setup.order}}"></span></a>
-                        </th>
-                        <th class="item_setup-sort item_setup-sort-sku">
-                            <a href="" ng-click="item_setup_opt('sort','sku')">Primary Sku<span class="{{'caret-'+product_setup.order}}"></span></a>
-                        </th>
-                        <th class="item_setup-sort item_setup-sort-status">
-                            <a href="" ng-click="item_setup_opt('sort','status')">Status<span class="{{'caret-'+product_setup.order}}"></span></a>
-                        </th>
-                        <th class="item_setup-sort item_setup-sort-barcode">
-                            <a href="" ng-click="item_setup_opt('sort','barcode')">Barcode<span class="{{'caret-'+product_setup.order}}"></span></a>
-                        </th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr ng-click="add_item_order(product.id)" ng-repeat="product in products">
-                        <td>{{product.name}}</td>
-                        <td>{{product.sku}}</td>
-                        <td>{{product.status}}</td>
-                        <td>{{product.barcode}}</td>
-                    </tr>
-                    </tbody>
-                </table>
-                <button ng-show="new_products" class="btn btn-info btn-large" style="width:100%;" ng-click="product_next()">Load More</button>
-            </div>
-            <div class="modal-footer">
-                <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
-            </div>
-        </div>
-
-
 
     </div>
 </div>

@@ -137,7 +137,7 @@ groovepacks_services.factory('orders',['$http','notification',function($http,not
                 order_data[i] = orders.single.basicinfo[i];
             }
         }
-        return $http.post("orders/update.json",{id: $scope.single_order.basicinfo.id , order: order_data}).success(
+        return $http.post("orders/update.json",{id: orders.single.basicinfo.id , order: order_data}).success(
             function(data) {
                 if(data.status) {
                     if(!auto) {
@@ -151,12 +151,12 @@ groovepacks_services.factory('orders',['$http','notification',function($http,not
     }
 
     var single_add_item = function(orders,ids) {
-        return $http.post("orders/additemtoorder.json",{productids: ids , id: orders.single.basicinfo.id, qty:0}).success(
+        return $http.post("orders/additemtoorder.json",{productids: ids , id: orders.single.basicinfo.id, qty:1}).success(
             function(data) {
                 if(data.status) {
                     notification.notify("Item Successfully Added",1);
                 } else {
-                    notification.notify("Some error Occurred",0);
+                    notification.notify("Error adding",0);
                 }
             }
         ).error(notification.server_error);
@@ -168,10 +168,48 @@ groovepacks_services.factory('orders',['$http','notification',function($http,not
                 if(data.status) {
                     notification.notify("Item Successfully Removed",1);
                 } else {
-                    notification.notify("Some error Occurred",0);
+                    notification.notify("Error removing",0);
                 }
             }
         ).error(notification.server_error);
+    }
+
+    var single_record_exception = function(orders) {
+        return $http.post(
+            '/orders/recordexception.json',
+            {
+                id: orders.single.basicinfo.id,
+                reason: orders.single.exception.reason,
+                description: orders.single.exception.description,
+                assoc: orders.single.exception.assoc
+            }
+        ).success(function(data) {
+                if(data.status) {
+                    notification.notify("Exception successfully recorded",1);
+                } else {
+                    notification.notify(data.messages,0);
+                }
+        }).error(notification.server_error);
+    }
+
+    var single_clear_exception = function(orders) {
+        return $http.post('/orders/clearexception.json', {id: orders.single.basicinfo.id}).success(function(data) {
+            if(data.status) {
+                notification.notify("Exception successfully cleared",1);
+            } else {
+                notification.notify(data.messages,0);
+            }
+        }).error(notification.server_error);
+    }
+
+     var single_update_item_qty = function(item) {
+        return $http.post('/orders/updateiteminorder.json',{orderitem: item.id, qty: item.qty}).success(function(data) {
+            if(data.status) {
+                notification.notify("Item updated",1);
+            } else {
+                notification.notify(data.messages,0);
+            }
+        }).error(notification.server_error);
     }
 
     return {
@@ -191,7 +229,12 @@ groovepacks_services.factory('orders',['$http','notification',function($http,not
             update:update_single,
             item: {
                 add: single_add_item,
-                remove: single_remove_item
+                remove: single_remove_item,
+                update:  single_update_item_qty
+            },
+            exception: {
+                record: single_record_exception,
+                clear: single_clear_exception
             }
         }
     }

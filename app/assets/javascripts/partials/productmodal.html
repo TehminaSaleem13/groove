@@ -30,7 +30,7 @@
 
             <p ng-show="groovProducts.single.basicinfo.is_kit==0">
                 <i class="icon-large icon-paste"></i>
-                <a href="" ng-click="product_alias(groovProducts.single)">Make this product an alias of another product</a>
+                <a href="" ng-click="product_alias('alias',[],groovProducts.single.basicinfo.id)">Make this product an alias of another product</a>
             </p>
         </td>
         <td>
@@ -200,7 +200,7 @@
     </table>
 
 
-    <button class="btn btn-success" ng-click="product_alias(groovProducts.single)">Add product to kit</button>
+    <button class="btn btn-success" ng-click="product_alias('kit',kit_products.list,groovProducts.single.basicinfo.id)">Add product to kit</button>
     <button ng-click="remove_skus_from_kit()" class="btn btn-danger">Remove selected</button>
     <h5>This Kit Should</h5>
 
@@ -227,7 +227,7 @@
     <div class="row-fluid">
         <div class="span12">
             <div class="pull-right">
-                <button ng-click="update_single_product()" class="btn btn-primary">Save</button>
+                <button ng-click="update_single_product(false)" class="btn btn-primary">Save</button>
                 <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
             </div>
         </div>
