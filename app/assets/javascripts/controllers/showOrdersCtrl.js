@@ -73,6 +73,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,ord
                     options:[
                         {name:"Awaiting",value:'awaiting'},
                         {name:"On Hold",value:'onhold'},
+                        {name:"Service Issue",value:'serviceissue'},
                         {name:"Cancelled",value:'cancelled'},
                         {name:"Scanned",value:'scanned'}
                     ]
