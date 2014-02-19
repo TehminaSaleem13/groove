@@ -1,4 +1,4 @@
-groovepacks_directives.directive('groovOrderModal',['notification','orders','products','$timeout', function (notification, orders,products,$timeout) {
+groovepacks_directives.directive('groovOrderModal',['notification','orders','products','$timeout','$http', function (notification, orders,products,$timeout,$http) {
     return {
         restrict:"A",
         templateUrl:"/assets/partials/ordermodal.html",
@@ -33,7 +33,10 @@ groovepacks_directives.directive('groovOrderModal',['notification','orders','pro
             /**
              * Public methods
              */
-
+            $http.get('/home/userinfo.json').success(function(data){
+                scope.username = data.username;
+                scope.current_userid = data.user_id;
+            });
             scope.order_single_details = function(id,index,post_fn, open_modal) {
                 if(typeof open_modal == 'boolean' && open_modal ){
                     if(scope._order_obj == null) {
@@ -56,6 +59,27 @@ groovepacks_directives.directive('groovOrderModal',['notification','orders','pro
                     }
                 }
                 orders.single.get(id,scope.orders).then(function(data) {
+                    var user_found = false;
+                    var currentuser_idx = -1;
+
+
+                    for (i=0; i < scope.orders.single.users.length; i++) {
+                        if (scope.orders.single.users[i].id == scope.current_userid) {
+                            scope.orders.single.users[i].name = scope.orders.single.users[i].name + ' (Packing User)';
+                            currentuser_idx = i;
+                            break;
+                        }
+                    }
+
+                    for (i=0; i < scope.orders.single.users.length; i++) {
+                        if (scope.orders.single.exception != null &&
+                            scope.orders.single.exception.assoc != null &&
+                            scope.orders.single.users[i].id == scope.orders.single.exception.assoc.id) {
+                            scope.orders.single.exception.assoc = scope.orders.single.users[i];
+                            user_found = true;
+                            break;
+                        }
+                    }
                     if(typeof post_fn == 'function' ) {
                         $timeout(post_fn,10);
                     }
@@ -106,7 +130,7 @@ groovepacks_directives.directive('groovOrderModal',['notification','orders','pro
                     });
                 } else {
                     obj = {
-                        id: (prop == 'name')? model.id : model.iteminfo.product_id,
+                        id: (prop == 'name' || prop == 'is_skippable')? model.id : model.iteminfo.product_id,
                         var: (prop == 'qty_on_hand')? 'qty': ((prop == 'location')? 'location_name': prop),
                         value: model[prop]
                     }
@@ -184,6 +208,7 @@ groovepacks_directives.directive('groovOrderModal',['notification','orders','pro
                     scope.$emit("orders-next-loaded");
                 },5000);
             });
+            scope.$on("products-next-load",function(event, args){event.stopPropagation(); scope.$broadcast("products-next-loaded");});
             scope.$on("alias-modal-selected",scope.add_item_order);
             scope.$on("products-modal-closed",function(event, args){ event.stopPropagation(); scope.order_single_details(scope.orders.single.basicinfo.id,scope.orders.current);});
             $('.icon-question-sign').popover({trigger: 'hover focus'});

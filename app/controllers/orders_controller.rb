@@ -599,7 +599,7 @@ class OrdersController < ApplicationController
           @orderitem['productinfo'] = product
           @orderitem['qty_on_hand'] = 0
           product.product_inventory_warehousess.each do |inventory|
-            @orderitem['qty_on_hand'] +=  inventory.qty
+            @orderitem['qty_on_hand'] +=  inventory.qty.to_i
           end
           if product.product_inventory_warehousess.length > 0
             @orderitem["location"] = product.product_inventory_warehousess.first.name

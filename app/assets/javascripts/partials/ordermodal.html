@@ -240,16 +240,11 @@
                 <div class="control-group">
                     <label class="control-label">Associate exception with</label>
                     <div class="controls">
-                        <label class="radio">
-                            <input type="radio"  ng-model="orders.single.exception.assoc" value="current" /> Current user
-                        </label>
-                        <label class="radio">
-                            <input type="radio"  ng-model="orders.single.exception.assoc" value="none" /> No user
-                        </label>
+                        <select name="{{'orders_status_'+$index}}" ng-model="orders.single.exception.assoc" ng-options="u.name for u in orders.single.users"></select>
                     </div>
                 </div>
-                <button class="btn btn-primary" ng-click="update_order_exception()">Record Exception</button>
-                <button class="btn btn-danger" ng-click="clear_order_exception()">Clear Exception</button>
+                <button class="btn btn-success" ng-click="update_order_exception()">Record Exception</button>
+                <button class="btn btn-warning" ng-click="clear_order_exception()">Clear Exception</button>
             </fieldset>
         </div>
     </div>

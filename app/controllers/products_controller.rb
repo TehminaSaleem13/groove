@@ -1384,7 +1384,7 @@ class ProductsController < ApplicationController
       end
     end
 
-    if products.length!=0
+    if products.length == 0
       products = Product.where(1)
       unless is_kit == '-1'
         products = products.where(:is_kit=> is_kit)

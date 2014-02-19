@@ -93,6 +93,7 @@ groovepacks_directives.directive('groovAliasModal',['notification','products','$
             scope._get_products = function(next,post_fn) {
                 scope._can_load_products = false;
                 products.list.get(scope.products,next).then(function(response) {
+
                     var tmp_list = scope.products.list;
                     scope.products.list = [];
                     for(i in tmp_list) {
