@@ -114,8 +114,8 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies) {
                 $scope.next_item.images = $scope.unscanned_items[i].child_items[0].images;
                 $scope.next_item.qty_remaining = $scope.unscanned_items[i].child_items[0].qty_remaining;
                 $scope.next_item.scanned_qty = $scope.unscanned_items[i].child_items[0].scanned_qty;
-                $scope.next_item.qty = $scope.unscanned_items[i].scanned_qty +
-                    $scope.unscanned_items[i].qty_remaining;
+                $scope.next_item.qty = $scope.unscanned_items[i].child_items[0].scanned_qty +
+                    $scope.unscanned_items[i].child_items[0].qty_remaining;
                 break;
             }
         }
