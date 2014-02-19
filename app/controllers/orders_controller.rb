@@ -692,8 +692,6 @@ class OrdersController < ApplicationController
     @result['messages'] = []
 
     @order = Order.find(params[:id])
-    @result["huh"] = @order
-
     if @order.order_exceptions.nil?
       @result['status'] &= false
       @result['messages'].push('Order does not have exception to clear')

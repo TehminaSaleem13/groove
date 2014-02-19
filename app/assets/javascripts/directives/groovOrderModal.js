@@ -82,7 +82,6 @@ groovepacks_directives.directive('groovOrderModal',['notification','orders','pro
                         ids.push(scope.orders.single.items[i].iteminfo.id);
                     }
                 }
-                console.log(ids);
                 orders.single.item.remove(ids).then(function(){
                     scope.order_single_details(scope.orders.single.basicinfo.id);
                 });
@@ -108,7 +107,7 @@ groovepacks_directives.directive('groovOrderModal',['notification','orders','pro
                 } else {
                     obj = {
                         id: (prop == 'name')? model.id : model.iteminfo.product_id,
-                        var: (prop == 'qty_on_hand')? 'qty': prop,
+                        var: (prop == 'qty_on_hand')? 'qty': ((prop == 'location')? 'location_name': prop),
                         value: model[prop]
                     }
                     products.list.update_node(obj).then(function(response) {
