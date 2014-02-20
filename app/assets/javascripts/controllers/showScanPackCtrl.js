@@ -96,6 +96,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies) {
     }
 
     $scope._next_item = function() {
+        if (!$scope.next_item_present) {
         $scope.item_image_index = 0;
         for (i=0; i<$scope.unscanned_items.length; i++) {
             if ($scope.unscanned_items[i].product_type == 'single') {
@@ -118,6 +119,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies) {
                     $scope.unscanned_items[i].child_items[0].qty_remaining;
                 break;
             }
+        }
         }
 
         // $scope.order_details.items_to_scan = 0;
@@ -148,6 +150,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies) {
         $scope._focus_input($scope._rf_inputObj);
         $scope.unscanned_items = {};
         $scope.scanned_items = {};
+        $scope.next_item_present = false;
     }
 
     $scope._order_clicked_state = function(data) {
@@ -387,6 +390,8 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies) {
                 if (data.data.unscanned_items != null && data.data.scanned_items != null) {
                     $scope.unscanned_items = data.data.unscanned_items;
                     $scope.scanned_items = data.data.scanned_items;
+                    $scope.next_item = data.data.next_item;
+                    $scope.next_item_present = data.data.next_item_present;
                     $scope._compute_unscanned_and_scanned_products();
                 }
             } else {

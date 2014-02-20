@@ -8,7 +8,7 @@ class ScanPackController < ApplicationController
 	    @result['error_messages'] = []
 	    @result['success_messages'] = []
 	    @result['notice_messages'] = []
-
+	    session[:most_recent_scanned_products] = []
 	    if !params[:barcode].nil? && params[:barcode] != ""
 		    @order = Order.where(:increment_id=>params[:barcode])
 
@@ -289,6 +289,7 @@ class ScanPackController < ApplicationController
 				  					#process product barcode scan
 				  					order_item = OrderItem.find(item['order_item_id'])
 				  					order_item.process_item if !order_item.nil?
+				  					(session[:most_recent_scanned_products] ||= []) << order_item.product_id
 				  					break
 				  				end
 					  		end
@@ -300,6 +301,30 @@ class ScanPackController < ApplicationController
 					  	@order.reload
 					  	@result['data']['unscanned_items'] = @order.get_unscanned_items
 					  	@result['data']['scanned_items'] = @order.get_scanned_items
+					  	@result['data']['most_recent_scanned_products'] = session[:most_recent_scanned_products]
+					  	
+					  	next_item_found = false
+					  	@result['data']['next_item_present'] = false
+					  	session[:most_recent_scanned_products].reverse!.each do |scanned_product_id|
+					  		@result['data']['unscanned_items'].each do |unscanned_item|
+					  			if scanned_product_id == unscanned_item['product_id'] && 
+					  				unscanned_item['scanned_qty'] + unscanned_item['qty_remaining'] > 0
+					  				@result['data']['next_item'] = Hash.new
+					  				@result['data']['next_item']['name'] = unscanned_item['name']
+					  				@result['data']['next_item']['sku'] = unscanned_item['sku']
+					  				@result['data']['next_item']['images'] = unscanned_item['images']
+					  				@result['data']['next_item']['scanned_qty'] = unscanned_item['scanned_qty']
+					  				@result['data']['next_item']['qty'] = unscanned_item['scanned_qty'] +
+					  					unscanned_item['qty_remaining']
+					  				@result['data']['next_item']['qty_remaining'] = unscanned_item['qty_remaining']
+					  				@result['data']['next_item_present'] = true
+					  				next_item_found = true
+					  				break
+					  			end
+					  		end
+					  		break if next_item_found
+					  	end
+
 					  	if !@order.has_unscanned_items
 					  		@result['data']['next_state'] = 'ready_for_tracking_num'
 					  	end
