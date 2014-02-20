@@ -330,7 +330,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies) {
                         $("#showProductConfirmation").modal('hide');
                         $scope._next_state(stuff);
                     } else {
-                        $scope.notify(["I’m sorry, the code you have scanned does not belong to a user who can scan orders that are On Hold.",
+                        $scope.notify(["I’m sorry, the code you have scanned does not belong to a user who can edit products.",
                             "Please get assistance from someone with this permission, or press escape to scan another order"],0);
                         $scope.product_confirmation_code = "";
                         $scope._focus_input($scope._product_confirmation_inputObj);

@@ -30,10 +30,18 @@ class ScanPackController < ApplicationController
           if @order.status == 'onhold'
             if @order.has_inactive_or_new_products
               #get list of inactive_or_new_products
-              @order_result['next_state'] = 'request_for_confirmation_code_with_product_edit'
-              @result['notice_messages'].push("The following items in this order are not Active."+
-                "They may need a barcode or other product info before their status can be changed"+
-                " to Active")
+              @order_result['conf_code'] = session[:confirmation_code]
+
+          	  if current_user.edit_products
+				@order_result['product_edit_matched'] = true
+				@order_result['inactive_or_new_products'] = @order.get_inactive_or_new_products
+		 		@order_result['next_state'] = 'product_edit'
+              else
+                @order_result['next_state'] = 'request_for_confirmation_code_with_product_edit'
+                @result['notice_messages'].push("The following items in this order are not Active."+
+                  "They may need a barcode or other product info before their status can be changed"+
+                  " to Active")
+              end
             else
               @order_result['order_edit_permission'] = current_user.import_orders
               @order_result['next_state'] = 'request_for_confirmation_code_with_order_edit'
@@ -152,10 +160,18 @@ class ScanPackController < ApplicationController
 			if !@order.nil?
 				if @order.status == "onhold" && @order.has_inactive_or_new_products
 					if User.where(:confirmation_code => params[:confirmation_code]).length > 0
-						@result['data']['product_edit_matched'] = true
-						@result['data']['inactive_or_new_products'] = @order.get_inactive_or_new_products
-				 		@result['data']['next_state'] = 'product_edit'
-						session[:product_edit_matched_for_current_user] = true
+						user = User.where(:confirmation_code => params[:confirmation_code]).first
+						if user.edit_products
+							@result['data']['product_edit_matched'] = true
+							@result['data']['inactive_or_new_products'] = @order.get_inactive_or_new_products
+					 		@result['data']['next_state'] = 'product_edit'
+							session[:product_edit_matched_for_current_user] = true
+						else
+							@result['data']['product_edit_matched'] = false
+							@result['data']['next_state'] = 'request_for_confirmation_code_with_product_edit'
+							@result['error_messages'].push("User with confirmation code "+ params[:confirmation_code] +
+								"does not have permission for editing products.")
+						end
 					else
 						@result['data']['product_edit_matched'] = false
 						@result['data']['next_state'] = 'request_for_confirmation_code_with_product_edit'
