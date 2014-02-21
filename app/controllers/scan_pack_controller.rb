@@ -38,9 +38,9 @@ class ScanPackController < ApplicationController
 		 		@order_result['next_state'] = 'product_edit'
               else
                 @order_result['next_state'] = 'request_for_confirmation_code_with_product_edit'
-                @result['notice_messages'].push("The following items in this order are not Active."+
-                  "They may need a barcode or other product info before their status can be changed"+
-                  " to Active")
+                @result['notice_messages'].push("This order was automatically placed on hold because it contains items that have a "+
+                	"status of New or Inactive. These items may not have barcodes or other information needed for processing. "+
+                	"Please ask a user with product edit permissions to scan their code so that these items can be edited.")
               end
             else
               @order_result['order_edit_permission'] = current_user.import_orders
