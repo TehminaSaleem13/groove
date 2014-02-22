@@ -34,6 +34,7 @@ groovepacks_directives.directive('groovAliasModal',['notification','products','$
                 scope.is_kit = false;
                 scope.is_order = false;
                 scope.selected_aliases = [];
+                scope.load_disabled = false;
 
                 //Private properties
 
@@ -105,6 +106,9 @@ groovepacks_directives.directive('groovAliasModal',['notification','products','$
                         $timeout(post_fn,30);
                     }
                     scope._can_load_products = true;
+                    if(scope._alias_obj !== null) {
+                        scope.load_disabled = !scope.products.load_new;
+                    }
                 })
 
             }
