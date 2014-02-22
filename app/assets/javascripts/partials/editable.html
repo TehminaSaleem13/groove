@@ -22,10 +22,10 @@
     </div>
     <div ng-click="add_node()" ng-show="editing == -1" class="tag-bubble false-tag-bubble tag-bubble-input span3 input-text">Add...</div>
 </div>
-<div ng-if="!editable.array" bindonce="ngModel">
+<div ng-if="!editable.array">
     <div ng-hide="editing == 1"> <span ng-transclude></span> <span ng-hide="is_transcluded">{{ngModel[prop]}}</span> &nbsp;</div>
     <div ng-show="editing == 1" ng-class="tag_class">
-           <span bo-switch on="input.type">
+           <span bindonce="input" bo-switch="input.type">
                <span bo-switch-when="number">
                    <input bo-id="single_editable_id" class="span3" ng-model="ngModel[prop]" ng-focus="focus_event()" ng-blur="blur_event()" ng-keydown="handle_key_event($event)" type="number" min="{{input.min}}" max="{{input.max}}" placeholder="Edit..."/>
                </span>
