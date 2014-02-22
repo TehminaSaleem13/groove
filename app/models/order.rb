@@ -4,7 +4,7 @@ class Order < ActiveRecord::Base
   attr_accessible :address_1, :address_2, :city, :country, :customer_comments, :email, :firstname,
   :increment_id, :lastname,
   		:method, :order_placed_time, :postcode, :price, :qty, :sku, :state, :store_id, :notes_internal,
-  		:notes_toPacker, :notes_fromPacker, :tracking_processed, :scanned_on, :tracking_num, :company
+  		:notes_toPacker, :notes_fromPacker, :tracking_processed, :scanned_on, :tracking_num, :company, :packing_user_id
 
   has_many :order_items, :dependent => :destroy
   has_one :order_shipping, :dependent => :destroy

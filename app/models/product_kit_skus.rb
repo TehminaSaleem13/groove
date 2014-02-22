@@ -6,10 +6,12 @@ class ProductKitSkus < ActiveRecord::Base
   def add_product_in_order_items
   	@order_items = OrderItem.where(:product_id => self.product_id)
   	@order_items.each do |order_item|
-  		order_item_kit_product = OrderItemKitProduct.new
-  		order_item_kit_product.product_kit_skus = self
-  		order_item_kit_product.order_item = order_item
-  		order_item_kit_product.save
+      if OrderItemKitProduct.where(:order_item_id => order_item.id).where(:product_kit_skus_id => self.id).length == 0
+    		order_item_kit_product = OrderItemKitProduct.new
+    		order_item_kit_product.product_kit_skus = self
+    		order_item_kit_product.order_item = order_item
+    		order_item_kit_product.save
+      end
   	end
   end
 

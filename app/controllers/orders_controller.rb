@@ -729,9 +729,15 @@ class OrdersController < ApplicationController
         @orderitem.row_total = params[:price].to_f * params[:qty].to_f
         @orderitem.product_id = product.id
         @order.order_items << @orderitem
-
+        if @orderitem.save && product.is_kit == 1
+          kit_skus = ProductKitSkus.where(:product_id => @orderitem.product_id)
+          kit_skus.each do |kit_sku|
+            kit_sku.add_product_in_order_items
+          end
+        end
       end
       if !@order.save
+
         @result['status'] &= false
         @result['messages'].push("Adding item to order failed")
       end
@@ -774,7 +780,7 @@ class OrdersController < ApplicationController
 
     if !@orderitem.nil?
       @orderitem.each do |item|
-        unless item.destroy
+        unless item.remove_order_item_kit_products && item.destroy
           @result['status'] &= false
           @result['messages'].push("Removed items from order")
         end

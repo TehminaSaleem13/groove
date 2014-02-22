@@ -266,5 +266,16 @@ class OrderItem < ActiveRecord::Base
 
     end
     result
-  end 
+  end
+
+  def remove_order_item_kit_products
+    result = true
+    if self.product.is_kit == 1
+      self.order_item_kit_products.each do |kit_product|
+        kit_product.destroy
+      end
+    end
+    result  
+  end
+
 end
