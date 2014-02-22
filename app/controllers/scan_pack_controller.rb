@@ -40,14 +40,14 @@ class ScanPackController < ApplicationController
                 @order_result['next_state'] = 'request_for_confirmation_code_with_product_edit'
                 @result['notice_messages'].push("This order was automatically placed on hold because it contains items that have a "+
                 	"status of New or Inactive. These items may not have barcodes or other information needed for processing. "+
-                	"Please ask a user with product edit permissions to scan their code so that these items can be edited.")
+                	"Please ask a user with product edit permissions to scan their code so that these items can be edited or scan a different order.")
               end
             else
               @order_result['order_edit_permission'] = current_user.import_orders
               @order_result['next_state'] = 'request_for_confirmation_code_with_order_edit'
               @result['notice_messages'].push('This order is currently on Hold. Please scan or enter '+
                   'confirmation code with order edit permission to continue scanning this order or '+
-                  'scan a different order')
+                  'scan a different order.')
             end
           end
           
@@ -56,12 +56,12 @@ class ScanPackController < ApplicationController
           	@order_result['next_state'] = 'request_for_confirmation_code_with_cos'
           	if current_user.change_order_status
             	@result['notice_messages'].push('This order has a pending Service Issue. '+
-            		'To clear the Service Issue and continue packing the order please scan your confirmation code')
+            		'To clear the Service Issue and continue packing the order please scan your confirmation code or scan a different order.')
             else
             	@result['notice_messages'].push('This order has a pending Service Issue. To continue with this order, '+
             		'please ask another user who has Change Order Status permissions to scan their '+
             	 	'confirmation code and clear the issue. Alternatively, you can pack another order '+
-            	 	'by scanning another order number')
+            	 	'by scanning another order number.')
             end
           end
 

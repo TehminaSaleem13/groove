@@ -364,11 +364,42 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies) {
                         $("#showProductConfirmation").modal('hide');
                         $scope._next_state(stuff);
                     } else {
-                        $scope.notify(["I’m sorry, the code you have scanned does not belong to a user who can edit products.",
-                            "Please get assistance from someone with this permission, or press escape to scan another order"],0);
-                        $scope.product_confirmation_code = "";
-                        $scope._focus_input($scope._product_confirmation_inputObj);
+    
+                        $("#showProductConfirmation").modal('hide').on('hidden',function() {
+                                $scope._focus_input($scope._rf_inputObj);
+                            });
 
+                        $scope.rf_input = $scope.product_confirmation_code;
+                        $http.get('/scan_pack/scan_order_by_barcode.json?barcode='+$scope.product_confirmation_code).success(function(data){
+                            if(data.status) {
+                                if(data.notice_messages.length) {
+                                    $scope.notify(data.notice_messages,2);
+                                }
+                                if(data.success_messages.length) {
+                                    $scope.notify(data.success_messages,1);
+                                }
+                                if(data.data != null) {
+                                    $scope.order_id = data.data.id;
+                                    $scope._next_state(data.data);
+                                    if (data.data.unscanned_items != null && data.data.scanned_items != null) {
+                                        $scope.unscanned_items = data.data.unscanned_items;
+                                        $scope.scanned_items = data.data.scanned_items;
+                                        $scope._compute_unscanned_and_scanned_products();
+                                    }
+                                    $scope.product_confirmation_code = "";
+                                    $scope._focus_input($scope._product_confirmation_inputObj);
+                                }
+                                result = true;
+                            } else {
+                                $scope.notify(["I’m sorry, the code you have scanned does not belong to a user who can edit products.",
+                                        "Please get assistance from someone with this permission, or scan another order"],0);
+                                $scope.product_confirmation_code = "";
+                                $scope._focus_input($scope._product_confirmation_inputObj);
+                            }
+
+                        }).error(function(data){
+                                $scope.notify(["A server error was encountered"],0);
+                        });
                     }
                 } else {
                     $scope.notify(data.error_messages,0);
@@ -454,6 +485,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies) {
                 //console.log(data);
                 if(data.status){
                     if(data.data.cos_confirmation_code_matched) {
+                        $scope.cos_confirmation_code = "";
                         var stuff =  data.data;
                         $("#showCosConfirmation").modal('hide');
                         $scope._next_state(stuff);
@@ -461,9 +493,40 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies) {
                             $scope._handle_ready_for_order_enter_event($scope.rf_input);
                         }
                     } else {
-                        $scope.notify(data.error_messages,0);
-                        $scope.cos_confirmation_code = "";
-                        $scope._focus_input($scope._cos_confirmation_inputObj);
+                        $("#showCosConfirmation").modal('hide').on('hidden',function() {
+                                $scope._focus_input($scope._rf_inputObj);
+                            });
+
+                        $scope.rf_input = $scope.cos_confirmation_code;
+                        $http.get('/scan_pack/scan_order_by_barcode.json?barcode='+$scope.cos_confirmation_code).success(function(data){
+                            if(data.status) {
+                                if(data.notice_messages.length) {
+                                    $scope.notify(data.notice_messages,2);
+                                }
+                                if(data.success_messages.length) {
+                                    $scope.notify(data.success_messages,1);
+                                }
+                                if(data.data != null) {
+                                    $scope.order_id = data.data.id;
+                                    $scope._next_state(data.data);
+                                    if (data.data.unscanned_items != null && data.data.scanned_items != null) {
+                                        $scope.unscanned_items = data.data.unscanned_items;
+                                        $scope.scanned_items = data.data.scanned_items;
+                                        $scope._compute_unscanned_and_scanned_products();
+                                    }
+                                    $scope.cos_confirmation_code = "";
+                                }
+                                result = true;
+                            } else {
+                                $scope.notify(["I’m sorry, the code you have scanned does not belong to a user who can edit products.",
+                                        "Please get assistance from someone with this permission, or scan another order"],0);
+                                $scope.cos_confirmation_code = "";
+                                $scope._focus_input($scope._cos_confirmation_inputObj);
+                            }
+
+                        }).error(function(data){
+                                $scope.notify(["A server error was encountered"],0);
+                        });
                     }
                 } else {
                     $scope.notify(data.error_messages,0);
