@@ -6,12 +6,12 @@
                 <i class="icon-remove" ng-click="remove_node($index)"></i>
             </div>
             <div ng-show="editing == $index">
-               <span ng-switch on="input.type">
-                   <span ng-switch-when="number">
+               <span bindonce="input" bo-switch="input.type">
+                   <span bo-switch-when="number">
                        <input id="editable-{{identifier}}-{{prop}}-{{$index}}" class="span3" ng-model="single[prop]" ng-focus="focus_event()" ng-blur="blur_event()" ng-keydown="handle_key_event($event)" type="number" min="{{input.min}}" max="{{input.max}}" placeholder="Edit..."/>
                    </span>
-                   <span ng-switch-default>
-                        <input id="editable-{{identifier}}-{{prop}}-{{$index}}"  class="span3" ng-model="single[prop]" ng-focus="focus_event()" ng-blur="blur_event()" ng-keydown="handle_key_event($event)" type="text" placeholder="Edit..."/>
+                   <span bo-switch-default>
+                        <input id="editable-{{identifier}}-{{prop}}-{{$index}}" class="span3" ng-model="single[prop]" ng-focus="focus_event()" ng-blur="blur_event()" ng-keydown="handle_key_event($event)" type="text" placeholder="Edit..."/>
                    </span>
                </span>
                 <i ng-show="single[prop] != ''" class="icon-ok" ng-click="save_node()"></i>
@@ -30,7 +30,7 @@
                    <input bo-id="single_editable_id" class="span3" ng-model="ngModel[prop]" ng-focus="focus_event()" ng-blur="blur_event()" ng-keydown="handle_key_event($event)" type="number" min="{{input.min}}" max="{{input.max}}" placeholder="Edit..."/>
                </span>
                <span bo-switch-when="select">
-                   <select class="span3" bo-id="single_editable_id" ng-click="save_node()"  ng-model="ngModel[prop]" ng-focus="focus_event()" ng-blur="blur_event()" ng-options="item.value as item.name for item in input.options">
+                   <select bo-id="single_editable_id" class="span3" ng-change="save_node()"  ng-model="ngModel[prop]" ng-focus="focus_event()" ng-blur="blur_event()" ng-options="item.value as item.name for item in input.options">
                    </select>
                </span>
                <span bo-switch-default>

@@ -7,7 +7,7 @@
     </div>
     <div class="modal-body" infinite-scroll="product_next()" infinite-scroll-disabled="{{load_disabled}}">
         <input type="text" id="alias-search-query-{{custom_identifier}}" ng-model="products.setup.search" class="input-large search-query" placeholder="Search term" /><br/><br/>
-        <table class="table table-hover table-bordered infinite-scroller" >
+        <table class="table table-hover table-bordered infinite-scroller aliasproductstbl" >
             <thead>
             <tr>
                 <th ng-class="{active: products.setup.sort=='name'}">
