@@ -8,10 +8,10 @@
             <div ng-show="editing == $index">
                <span ng-switch on="input.type">
                    <span ng-switch-when="number">
-                       <input id="editable-{{identifier}}-{{prop}}-{{$index}}" xs-input-sync class="span3" ng-model="single[prop]" ng-focus="focus_event()" ng-blur="blur_event()" ng-keydown="handle_key_event($event)" type="number" min="{{input.min}}" max="{{input.max}}" placeholder="Edit..."/>
+                       <input id="editable-{{identifier}}-{{prop}}-{{$index}}" class="span3" ng-model="single[prop]" ng-focus="focus_event()" ng-blur="blur_event()" ng-keydown="handle_key_event($event)" type="number" min="{{input.min}}" max="{{input.max}}" placeholder="Edit..."/>
                    </span>
                    <span ng-switch-default>
-                        <input id="editable-{{identifier}}-{{prop}}-{{$index}}" xs-input-sync class="span3" ng-model="single[prop]" ng-focus="focus_event()" ng-blur="blur_event()" ng-keydown="handle_key_event($event)" type="text" placeholder="Edit..."/>
+                        <input id="editable-{{identifier}}-{{prop}}-{{$index}}"  class="span3" ng-model="single[prop]" ng-focus="focus_event()" ng-blur="blur_event()" ng-keydown="handle_key_event($event)" type="text" placeholder="Edit..."/>
                    </span>
                </span>
                 <i ng-show="single[prop] != ''" class="icon-ok" ng-click="save_node()"></i>
@@ -22,19 +22,19 @@
     </div>
     <div ng-click="add_node()" ng-show="editing == -1" class="tag-bubble false-tag-bubble tag-bubble-input span3 input-text">Add...</div>
 </div>
-<div ng-if="!editable.array">
+<div ng-if="!editable.array" bindonce="ngModel">
     <div ng-hide="editing == 1"> <span ng-transclude></span> <span ng-hide="is_transcluded">{{ngModel[prop]}}</span> &nbsp;</div>
     <div ng-show="editing == 1" ng-class="tag_class">
-           <span ng-switch on="input.type">
-               <span ng-switch-when="number">
-                   <input id="editable-{{identifier}}-{{prop}}-1" xs-input-sync class="span3" ng-model="ngModel[prop]" ng-focus="focus_event()" ng-blur="blur_event()" ng-keydown="handle_key_event($event)" type="number" min="{{input.min}}" max="{{input.max}}" placeholder="Edit..."/>
+           <span bo-switch on="input.type">
+               <span bo-switch-when="number">
+                   <input bo-id="single_editable_id" class="span3" ng-model="ngModel[prop]" ng-focus="focus_event()" ng-blur="blur_event()" ng-keydown="handle_key_event($event)" type="number" min="{{input.min}}" max="{{input.max}}" placeholder="Edit..."/>
                </span>
-               <span ng-switch-when="select">
-                   <select class="span3" id="editable-{{identifier}}-{{prop}}-1" ng-click="save_node()"  ng-model="ngModel[prop]" ng-focus="focus_event()" ng-blur="blur_event()" ng-options="item.value as item.name for item in input.options">
+               <span bo-switch-when="select">
+                   <select class="span3" bo-id="single_editable_id" ng-click="save_node()"  ng-model="ngModel[prop]" ng-focus="focus_event()" ng-blur="blur_event()" ng-options="item.value as item.name for item in input.options">
                    </select>
                </span>
-               <span ng-switch-default>
-                    <input id="editable-{{identifier}}-{{prop}}-1" xs-input-sync class="span3" ng-model="ngModel[prop]" ng-focus="focus_event()" ng-blur="blur_event()" ng-keydown="handle_key_event($event)" type="text" placeholder="Edit..."/>
+               <span bo-switch-default>
+                    <input bo-id="single_editable_id" class="span3" ng-model="ngModel[prop]" ng-focus="focus_event()" ng-blur="blur_event()" ng-keydown="handle_key_event($event)" type="text" placeholder="Edit..."/>
                </span>
            </span>
         <i ng-hide="input.type=='select'" class="icon-ok" ng-click="save_node()"></i>

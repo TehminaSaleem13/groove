@@ -90,18 +90,6 @@ ActiveRecord::Schema.define(:version => 20140221020607) do
   add_index "order_exceptions", ["order_id"], :name => "index_order_exceptions_on_order_id"
   add_index "order_exceptions", ["user_id"], :name => "index_order_exceptions_on_user_id"
 
-  create_table "order_item_kit_product", :force => true do |t|
-    t.string   "scanned_status",      :default => "unscanned"
-    t.integer  "scanned_qty",         :default => 0
-    t.integer  "order_item_id"
-    t.integer  "product_kit_skus_id"
-    t.datetime "created_at",                                   :null => false
-    t.datetime "updated_at",                                   :null => false
-  end
-
-  add_index "order_item_kit_product", ["order_item_id"], :name => "index_order_item_kit_product_on_order_item_id"
-  add_index "order_item_kit_product", ["product_kit_skus_id"], :name => "index_order_item_kit_product_on_product_kit_skus_id"
-
   create_table "order_item_kit_products", :force => true do |t|
     t.integer  "order_item_id"
     t.integer  "product_kit_skus_id"
@@ -186,6 +174,7 @@ ActiveRecord::Schema.define(:version => 20140221020607) do
     t.string   "method"
     t.datetime "created_at",         :null => false
     t.datetime "updated_at",         :null => false
+    t.string   "store_order_id"
     t.string   "notes_internal"
     t.string   "notes_toPacker"
     t.string   "notes_fromPacker"
@@ -241,6 +230,7 @@ ActiveRecord::Schema.define(:version => 20140221020607) do
   add_index "product_images", ["product_id"], :name => "index_product_images_on_product_id"
 
   create_table "product_inventory_warehouses", :force => true do |t|
+    t.string   "location"
     t.integer  "qty"
     t.integer  "product_id"
     t.datetime "created_at",             :null => false
@@ -249,7 +239,6 @@ ActiveRecord::Schema.define(:version => 20140221020607) do
     t.string   "location_primary"
     t.string   "location_secondary"
     t.string   "name"
-    t.string   "location"
     t.integer  "inventory_warehouse_id"
   end
 

@@ -709,10 +709,10 @@ class ProductsController < ApplicationController
   	if !@product.nil?
   		@result['product'] = Hash.new
   		@result['product']['basicinfo'] = @product
-  		@result['product']['skus'] = @product.product_skus.order(order: :asc)
+      @result['product']['skus'] = @product.product_skus.order("product_skus.order ASC")
   		@result['product']['cats'] = @product.product_cats
-    	@result['product']['images'] = @product.product_images.order(order: :asc)
-  		@result['product']['barcodes'] = @product.product_barcodes.order(order: :asc)
+    	@result['product']['images'] = @product.product_images.order("product_images.order ASC")
+  		@result['product']['barcodes'] = @product.product_barcodes.order("product_barcodes.order ASC")
       	@result['product']['inventory_warehouses'] = @product.product_inventory_warehousess
         #@result['product']['productkitskus'] = @product.product_kit_skuss
       @result['product']['productkitskus'] = []
@@ -1127,7 +1127,7 @@ class ProductsController < ApplicationController
   			params[:productkitskus].each do |kit_product|
   			  actual_product = ProductKitSkus.where(:option_product_id => kit_product["option_product_id"])
   			  if actual_product.length > 0
-  			  	actual_product = actual_product.first 
+  			  	actual_product = actual_product.first
   			  	actual_product.qty = kit_product["qty"]
   			  	actual_product.packing_order = kit_product["packing_order"]
   			  	actual_product.save
