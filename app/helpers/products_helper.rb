@@ -10,14 +10,14 @@ module ProductsHelper
 				@credential = @amazon_credentials.first
 
 				mws = Mws.connect(
-					  merchant: @credential.merchant_id, 
-					  access: ENV['AMAZON_MWS_ACCESS_KEY_ID'], 
+					  merchant: @credential.merchant_id,
+					  access: ENV['AMAZON_MWS_ACCESS_KEY_ID'],
 					  secret: ENV['AMAZON_MWS_SECRET_ACCESS_KEY']
 					)
 				#send request to amazon mws get matching product API
-				products_xml = mws.products.get_matching_products_for_id(:marketplace_id=>@credential.marketplace_id, 
+				products_xml = mws.products.get_matching_products_for_id(:marketplace_id=>@credential.marketplace_id,
 						:id_type=>'SellerSKU', :id_list=>[product_sku])
-				
+
 				require 'active_support/core_ext/hash/conversions'
 				product_hash = Hash.from_xml(products_xml.to_s)
 
@@ -43,5 +43,22 @@ module ProductsHelper
 			end
 		rescue Exception => e
 		end
-	end
+  end
+
+  def zip_to_files(filename,data_object)
+    require 'zip'
+    temp_file = Tempfile.new(filename)
+    begin
+      Zip::OutputStream.open(temp_file) { |zos| }
+      Zip::File.open(temp_file.path, Zip::File::CREATE) do |zip|
+        data_object.each do |ident,file|
+          zip.add(ident.to_s+".csv", file)
+        end
+      end
+      zip_data = File.read(temp_file.path)
+    ensure
+      temp_file.close
+      temp_file.unlink
+    end
+  end
 end

@@ -37,6 +37,30 @@ class Product < ActiveRecord::Base
   has_many :product_kit_skuss, :dependent => :destroy
   has_many :product_inventory_warehousess, :dependent => :destroy
 
+  def self.to_csv(folder,options= {})
+    require 'csv'
+      response = {}
+      tables = {
+        products: self,
+        product_barcodes: ProductBarcode,
+        product_images: ProductImage,
+        product_skus:ProductSku,
+        product_cats:ProductCat,
+        product_kit_skus: ProductKitSkus,
+        product_inventory_warehouses:ProductInventoryWarehouses
+    }
+    tables.each do |ident,model|
+      CSV.open("#{folder}/#{ident}.csv","w",options) do |csv|
+        csv << model.column_names
+        model.all.each do |item|
+          csv << item.attributes.values_at(*model.column_names)
+        end
+        response[ident] = "#{folder}/#{ident}.csv"
+      end
+    end
+    response
+  end
+
   def update_product_status (force_from_inactive_state = false)
   	#puts "Updating product status"
   	if self.status != 'inactive' || force_from_inactive_state

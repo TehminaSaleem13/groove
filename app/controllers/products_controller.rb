@@ -1321,6 +1321,22 @@ class ProductsController < ApplicationController
 
   end
 
+  def export_csv
+    dir = Dir.mktmpdir([current_user.username+'groov-export-',Time.now.to_s])
+    filename = 'groov-export-'+Time.now.to_s+'.zip'
+    begin
+      data = zip_to_files(filename,Product.to_csv(dir))
+
+    ensure
+      FileUtils.remove_entry_secure dir
+    end
+
+    respond_to do |format|
+      format.html # show.html.erb
+      format.zip { send_data  data,:type => 'application/zip', :filename => filename }
+    end
+  end
+
   private
 
   def do_search
