@@ -18,6 +18,7 @@
 //= require angular-route
 //= require angular-animate
 //= require jquery.ui.sortable
+//= require bindonce
 //= require groovepacks
 //= require_tree .
 

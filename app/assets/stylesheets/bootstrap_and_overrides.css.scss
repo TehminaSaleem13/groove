@@ -380,18 +380,19 @@ background: url('/assets/sort_desc.png') no-repeat center right;
   text-align:center;
   position:absolute;
 }
-#aliasproductstbl tr {
+.aliasproductstbl tr {
   cursor:pointer;
 }
-#aliasproductstbl tr:hover td {
-  background:#0088cc;
-  color:#fff;
-}
-#productstbl th:hover, #orderstbl th:hover {
+
+.data-table th:hover {
   cursor:pointer;
 }
 .uneditable-input, .uneditable-textarea {
   cursor:auto;
+}
+
+.scroll-x {
+  overflow-x: scroll;
 }
 
 .loading {

@@ -33,7 +33,9 @@ groovepacks_directives.directive('groovEditable', ['$timeout',function ($timeout
                             scope.remove_node(scope.editing);
                         }
                     }
-                    scope.editable.update(scope.ngModel,scope.prop);
+                    $timeout(function() {
+                        scope.editable.update(scope.ngModel,scope.prop);
+                    },30);
                 }
                 scope.editing = -1;
                 if(!blur) {
@@ -85,7 +87,7 @@ groovepacks_directives.directive('groovEditable', ['$timeout',function ($timeout
             scope.focus_input = function() {
                 $timeout(function(){
                     $("#editable-"+scope.identifier+"-"+scope.prop+"-"+scope.editing).focus();
-                },100);
+                },200);
             }
             scope.blur_event = function() {
                 scope._focus_lost=true;
@@ -135,6 +137,7 @@ groovepacks_directives.directive('groovEditable', ['$timeout',function ($timeout
             scope._init = function() {
 
                 scope.is_transcluded = false;
+                scope.single_editable_id = "editable-"+scope.identifier+"-"+scope.prop+"-1";
                 scope.editing = -1;
                 scope._focus_lost = false;
                 scope._setup_editable();

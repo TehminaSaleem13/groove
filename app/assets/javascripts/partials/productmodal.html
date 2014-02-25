@@ -66,7 +66,7 @@
     <label class="control-label">Name</label>
 
     <div class="controls">
-        <input xs-input-sync type="text" ng-model="groovProducts.single.basicinfo.name" ng-blur="update_single_product()" class="span8"/>
+        <input type="text" ng-model="groovProducts.single.basicinfo.name" ng-blur="update_single_product()" class="span8"/>
     </div>
 </div>
 <div class="control-group">
@@ -83,7 +83,7 @@
     <label class="control-label">Special instructions for Packer</label>
 
     <div class="controls">
-        <textarea xs-input-sync ng-model="groovProducts.single.basicinfo.spl_instructions_4_packer" ng-blur="update_single_product()" class="span8" rows="4"></textarea>
+        <textarea ng-model="groovProducts.single.basicinfo.spl_instructions_4_packer" ng-blur="update_single_product()" class="span8" rows="4"></textarea>
     </div>
 </div>
 <div class="control-group">
@@ -232,5 +232,6 @@
 <!-- Kit product modal ends -->
 
 <div groov-alias-modal="product_alias"></div>
+
 
 <div ng-bind-html="kit_modal" compile-template></div>
