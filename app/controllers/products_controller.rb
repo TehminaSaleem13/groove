@@ -1004,14 +1004,20 @@ class ProductsController < ApplicationController
 			  			@result['status'] &= false
 			  		end
 			  	else
-			  		product_sku = ProductSku.new
-	  				product_sku.sku = sku["sku"]
-	  				product_sku.purpose = sku["purpose"]
-	  				product_sku.product_id = @product.id
-	  				product_sku.order = order
-			  		if !product_sku.save
-			  			@result['status'] &= false
-			  		end
+			  		if sku["sku"]!='' && ProductSku.where(:sku => sku["sku"]).length == 0
+				  		product_sku = ProductSku.new
+		  				product_sku.sku = sku["sku"]
+		  				product_sku.purpose = sku["purpose"]
+		  				product_sku.product_id = @product.id
+		  				product_sku.order = order
+				  		if !product_sku.save
+				  			@result['status'] &= false
+				  		end
+				  	else
+				  		@result['status'] &= false
+				  		@result['message'] = "Sku "+sku["sku"]+" already exists"
+				  	end
+
 	  			end
 	  			order = order + 1
 	  		end
@@ -1054,7 +1060,7 @@ class ProductsController < ApplicationController
 			  			@result['status'] &= false
 			  		end
 			  	else
-			  		if ProductBarcode.where(:barcode => barcode["barcode"]).length == 0
+			  		if barcode["barcode"]!='' && ProductBarcode.where(:barcode => barcode["barcode"]).length == 0
 				  		product_barcode = ProductBarcode.new
 				  		product_barcode.barcode = barcode["barcode"]
 				  		product_barcode.order = order
