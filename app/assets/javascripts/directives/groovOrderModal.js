@@ -63,13 +63,13 @@ groovepacks_directives.directive('groovOrderModal',['notification','orders','pro
                     var currentuser_idx = -1;
 
 
-                    for (i=0; i < scope.orders.single.users.length; i++) {
-                        if (scope.orders.single.users[i].id == scope.current_userid) {
-                            scope.orders.single.users[i].name = scope.orders.single.users[i].name + ' (Packing User)';
-                            currentuser_idx = i;
-                            break;
-                        }
-                    }
+                    // for (i=0; i < scope.orders.single.users.length; i++) {
+                    //     if (scope.orders.single.users[i].id == scope.current_userid) {
+                    //         scope.orders.single.users[i].name = scope.orders.single.users[i].name + ' (Packing User)';
+                    //         currentuser_idx = i;
+                    //         break;
+                    //     }
+                    // }
 
                     for (i=0; i < scope.orders.single.users.length; i++) {
                         if (scope.orders.single.exception != null &&

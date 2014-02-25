@@ -88,6 +88,12 @@ class ScanPackController < ApplicationController
 			  @result['status'] &= false
 			  @result['error_messages'].push("Please specify a barcode to scan the order")
       end
+
+    @order.packing_user_id = current_user.id
+    if !@order.save
+	  @result['status'] &= false
+	  @result['error_messages'].push("Could not save order with id: "+@order.id)
+    end
     @result['data'] = @order_result
 
     respond_to do |format|
@@ -347,7 +353,12 @@ class ScanPackController < ApplicationController
 		@result['status'] &= false
 		@result['error_messages'].push("Please specify barcode and order id to confirm purchase code")
 	end
-
+	
+    @order.packing_user_id = current_user.id
+    if !@order.save
+	  @result['status'] &= false
+	  @result['error_messages'].push("Could not save order with id: "+@order.id)
+    end
 
     respond_to do |format|
       format.html # show.html.erb

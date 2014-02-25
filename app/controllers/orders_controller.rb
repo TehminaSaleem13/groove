@@ -627,6 +627,14 @@ class OrdersController < ApplicationController
       dummy_user.name = 'Nobody'
       dummy_user.id = 0
       @result['order']['users'].unshift(dummy_user)
+      
+      if !@order.packing_user_id.nil?
+        @result['order']['users'].each do |user|
+          if user.id == @order.packing_user_id
+            user.name = user.name + ' (Packing User)'
+          end
+        end
+      end
 
       @result['order']['tags'] = @order.order_tags
     else

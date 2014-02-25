@@ -158,8 +158,6 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,ord
             }
             $scope._can_load_orders = true;
         });
-
-
     }
 
 

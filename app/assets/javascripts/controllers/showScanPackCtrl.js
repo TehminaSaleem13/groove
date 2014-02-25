@@ -98,7 +98,9 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies) {
     $scope._next_item = function() {
         if (!$scope.next_item_present) {
         $scope.item_image_index = 0;
+        $scope.next_item = {};
         for (i=0; i<$scope.unscanned_items.length; i++) {
+            $scope.next_item = {};
             if ($scope.unscanned_items[i].product_type == 'single') {
                 $scope.next_item.name = $scope.unscanned_items[i].name;
                 $scope.next_item.sku = $scope.unscanned_items[i].sku;
