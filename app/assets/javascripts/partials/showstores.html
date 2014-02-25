@@ -173,5 +173,41 @@ aria-hidden="true">
         <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
     </div>
 </div>
+    <!-- Modal for backup -->
+    <div id="backup" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="backup"
+         aria-hidden="true">
+
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+            <h3>Backup and Restore</h3>
+        </div>
+        <div class="form-horizontal form-horizontal-create" >
+            <div class="modal-body" id="backup-body">
+                <h4>Backup</h4>
+                <a href="/settings/export_csv.zip">Download Backup</a>
+                <h4>Restore</h4>
+
+                <div class="control-group">
+                    <label class="control-label">Restore Action</label>
+                    <div class="controls">
+                        <label class="radio inline">
+                            <input type="radio" ng-model="backup_restore.data.method" value="del_import" /> Delete All and Import
+                        </label>
+                        <label class="radio inline">
+                            <input type="radio" ng-model="backup_restore.data.method" value="update_only" /> Update Only
+                        </label>
+
+                    </div>
+                </div>
+                <div class="control-group">
+                    <input name="importbackupfile" file-upload  type="file" value="" required/>
+                    <br/>{{backup_restore.data.file.name}}
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+        </div>
+    </div>
 </div>
 </div>

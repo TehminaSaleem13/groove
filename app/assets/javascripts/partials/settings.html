@@ -13,7 +13,7 @@
 			<ul class="nav nav-pills nav-stacked">
 			  <li class="active" ng-show="current_page=='show_stores' "><a href="#/settings/showstores">Show All</a></li>
 			  <li ng-show="current_page!='show_stores' "><a href="#/settings/showstores">Show All</a></li>
-			  <li><a href="" role="button" data-toggle="modal" ng-click='create_store()'>Create Store</a></li>
+			  <li><a href="#/settings/showstores/create" >Create Store</a></li>
 			  <li><a href="" role="button" data-toggle="modal" ng-click='import_all_orders()'>Import Orders</a></li>
 			</ul>
 	      </div>
@@ -31,7 +31,7 @@
 			<ul class="nav nav-pills nav-stacked">
 			  <li class="active" ng-show="current_page=='show_users' "><a href="#/settings/showusers">Show All</a></li>
 			  <li ng-show="current_page !='show_users' "><a href="#/settings/showusers">Show All</a></li>
-			  <li><a href="" role="button" data-toggle="modal" ng-click='create_user()'>Create User</a></li>
+			  <li><a href="#/settings/showusers/create">Create User</a></li>
 			</ul>
 	      </div>
 	    </div>
@@ -45,7 +45,7 @@
 	    <div id="collapseThree" class="accordion-body collapse in">
 	      <div class="accordion-inner">
               <ul class="nav nav-pills nav-stacked">
-                  <li><a href="/products/export_csv.zip">Export Products</a></li>
+                  <li><a href="#/settings/showstores/backup">Backup and Restore</a></li>
               </ul>
 	      </div>
 	    </div>

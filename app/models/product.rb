@@ -39,15 +39,15 @@ class Product < ActiveRecord::Base
 
   def self.to_csv(folder,options= {})
     require 'csv'
-      response = {}
-      tables = {
-        products: self,
-        product_barcodes: ProductBarcode,
-        product_images: ProductImage,
-        product_skus:ProductSku,
-        product_cats:ProductCat,
-        product_kit_skus: ProductKitSkus,
-        product_inventory_warehouses:ProductInventoryWarehouses
+    response = {}
+    tables = {
+      products: self,
+      product_barcodes: ProductBarcode,
+      product_images: ProductImage,
+      product_skus:ProductSku,
+      product_cats:ProductCat,
+      product_kit_skus: ProductKitSkus,
+      product_inventory_warehouses:ProductInventoryWarehouses
     }
     tables.each do |ident,model|
       CSV.open("#{folder}/#{ident}.csv","w",options) do |csv|

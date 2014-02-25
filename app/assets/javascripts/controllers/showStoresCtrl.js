@@ -2,18 +2,59 @@ groovepacks_controllers.
 controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$location', '$route', '$cookies',
 function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies) {
     $('.modal-backdrop').remove();
-        $scope.current_page="show_stores";
-        $scope.$on("fileSelected", function (event, args) {
+    $scope.current_page="show_stores";
+    $scope.backup_restore = {};
+    $scope.backup_restore.data = {};
+    $scope.backup_restore.data.method = "del_import";
+    $scope.backup_restore.data.file = null;
+    $scope.backup_restore.import = function() {
+        $http({
+            method: 'POST',
+            headers: { 'Content-Type': undefined },
+            url:'/settings/restore.json',
+            transformRequest: function (data) {
+                var request = new FormData();
+                for (var key in data) {
+                    request.append(key,data[key]);
+                }
+                return request;
+            },
+            data: $scope.backup_restore.data
+        }).success(function(data) {
+            if(data.status) {
+                console.log(data);
+                $scope.notify("Imported Successfully",1);
+                $("#backup").modal("hide");
+            } else {
+                $scope.notify(data.messages);
+            }
+        }).error(function(){
+                $scope.notify("Error contacting server");
+        });
+    };
+
+
+
+    $scope.$on("fileSelected", function (event, args) {
+        if(args.name =='orderfile' || args.name == 'productfile') {
             $scope.$apply(function () {
                 $scope.newStore[args.name] = args.file;
             });
             $("input[type='file']").val('');
             if(args.name == 'orderfile') {
-                $scope.newStore.type = 'order'
+                $scope.newStore.type = 'order';
             } else {
-                $scope.newStore.type = 'product'
+                $scope.newStore.type = 'product';
             }
             $scope.submit();
+        } else if(args.name == "importbackupfile") {
+            $scope.$apply(function () {
+                $scope.backup_restore.data.file = args.file;
+                $("input[type='file']").val('');
+            });
+            $scope.backup_restore.import();
+        }
+
         });
 
     	$http.get('/home/userinfo.json').success(function(data){
@@ -27,7 +68,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies) {
     		$scope.stores = data;
     		$scope.reverse = false;
             $scope.newUser = {};
-            $scope.redirect = $routeParams.redirect;
+            $scope.redirect = ($routeParams.redirect || ($routeParams.action == "create"));
            // console.log($routeParams);
             if ($scope.redirect)
             {
@@ -40,8 +81,6 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies) {
                     $scope.newStore.name = $routeParams.name;
                     $scope.newStore.status = $routeParams.status;
                     $scope.newStore.store_type = $routeParams.storetype;
-                    $('#createStore').modal('show');
-                    $scope.loading = false;
                 }
                 else
                 {
@@ -50,8 +89,10 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies) {
                     $scope.newStore.name = $routeParams.name;
                     $scope.newStore.status = $routeParams.status;
                     $scope.newStore.store_type = $routeParams.storetype;
-                    $('#createStore').modal('show');
                 }
+                $('#createStore').modal('show').on("hidden",function(){
+                    $timeout(function(){$location.path("/settings/showstores");},200);
+                });
             }
             else
             {
@@ -66,6 +107,11 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies) {
             //     }).error(function(data) {
             //         $scope.ebay_signin_url_status = false;
             //     });
+            }
+            if($routeParams.action == "backup") {
+                $("#backup").modal("show").on("hidden",function(){
+                    $timeout(function(){$location.path("/settings/showstores");},200);
+                });
             }
     	}).error(function(data) {
     		$scope.notify("There was a problem retrieving stores list",0);
@@ -747,6 +793,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies) {
 
         }
     }
+
     $('#createStore').keydown($scope.keyboard_nav_event);
     $("#store-search-query").focus();
 }]);

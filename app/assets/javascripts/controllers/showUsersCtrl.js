@@ -7,10 +7,19 @@ controller('showUsersCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$l
         $('.modal-backdrop').remove();
         $scope.current_page="show_users";
         $scope.currently_open = 0;
+
     	$http.get('/user_settings/userslist.json').success(function(data) {
     		$scope.users = data;
     		$scope.reverse = false;
             $scope.newUser = {};
+            if ($routeParams.action == "create") {
+                $scope.create_user();
+                $('#createUser').modal('show').on("hidden",function(){
+                   $timeout(function(){
+                        $location.path("/settings/showusers");
+                   },200);
+                });
+            }
     	}).error(function(data) {
     		$scope.notify("There was a problem retrieving users list",0);
     	});

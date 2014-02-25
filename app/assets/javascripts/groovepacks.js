@@ -6,8 +6,12 @@ angular.module('groovepacks', ['groovepacks.filters', 'groovepacks.services', 'g
     	{templateUrl: '/assets/partials/showusers.html', controller: 'showUsersCtrl'});
     $routeProvider.when('/settings/showusers',
     	{templateUrl: '/assets/partials/showusers.html', controller: 'showUsersCtrl'});
+    $routeProvider.when('/settings/showusers/:action',
+        {templateUrl: '/assets/partials/showusers.html', controller: 'showUsersCtrl'});
     $routeProvider.when('/settings/showstores',
         {templateUrl: '/assets/partials/showstores.html', controller: 'showStoresCtrl'});
+    $routeProvider.when('/settings/showstores/:action',
+            {templateUrl: '/assets/partials/showstores.html', controller: 'showStoresCtrl'});
     $routeProvider.when('/products',
     	{templateUrl: '/assets/partials/showproducts.html', controller: 'showProductsCtrl'});
     $routeProvider.when('/scanandpack',
