@@ -21,8 +21,35 @@ require 'spec_helper'
 describe OrdersController do
 
   before(:each) do 
-    @user = FactoryGirl.create(:user, :import_orders=> "1")
+    @user = FactoryGirl.create(:user, :import_orders=> "1", :name=>'Admin')
     sign_in @user
   end
-  
+
+  describe "Order" do
+    it "should get details of the packing user" do
+	  request.accept = "application/json"
+	  order = FactoryGirl.create(:order, :status=>'awaiting', :packing_user_id=> @user.id)
+
+	  get :getdetails, {:id => order.id}
+
+	  expect(response.status).to eq(200)
+	  result = JSON.parse(response.body)
+	  expect(result['status']).to eq(true)
+	  expect(result['order']['users'][0]['name']).to eq("Nobody")
+	  expect(result['order']['users'][1]['name']).to eq(@user.name+" (Packing User)")
+    end
+
+
+    it "should record exception with the user" do
+	  request.accept = "application/json"
+	  order = FactoryGirl.create(:order, :status=>'awaiting')
+
+	  put :recordexception, {:id => order.id, :reason=>'Missing item',
+	  	:description=>'Test Description', :assoc=>{:id=> @user.id, :name=>@user.name} }
+
+	  expect(response.status).to eq(200)
+	  result = JSON.parse(response.body)
+	  expect(result['status']).to eq(true)
+    end
+  end
 end

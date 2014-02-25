@@ -97,9 +97,8 @@ describe ScanPackController do
       expect(result["data"]["status"]).to eq("onhold")
       expect(result["data"]["next_state"]).to eq("request_for_confirmation_code_with_order_edit")
       expect(result["data"]["order_edit_permission"]).to eq(true)
-      expect(result["notice_messages"][0]).to eq("This order is currently on Hold. "+
-      	"Please scan or enter confirmation code with order edit permission to continue scanning this order"+
-      	" or scan a different order")
+      expect(result["notice_messages"][0]).to eq("This order is currently on Hold. Please scan or enter "+
+        "confirmation code with order edit permission to continue scanning this order or scan a different order.")
     end
 
    	it "should process order scan for orders having a status of On Hold" do
@@ -117,8 +116,10 @@ describe ScanPackController do
       expect(result["data"]["status"]).to eq("onhold")
       expect(result["data"]["next_state"]).to eq("request_for_confirmation_code_with_product_edit")
       #expect(result["data"]["inactive_or_new_products"]).to eq()
-      expect(result["notice_messages"][0]).to eq("The following items in this order are not Active." +
-      	"They may need a barcode or other product info before their status can be changed to Active")
+      expect(result["notice_messages"][0]).to eq("This order was automatically placed on hold because it contains "+
+        "items that have a status of New or Inactive. These items may not have barcodes or other information needed "+
+        "for processing. Please ask a user with product edit permissions to scan their code so that these items can be "+
+        "edited or scan a different order.")
     end
 
     it "should process order scan for orders having a status of Service issue" do
@@ -135,8 +136,8 @@ describe ScanPackController do
       expect(result["status"]).to eq(true)
       expect(result["data"]["status"]).to eq("serviceissue")
       expect(result["data"]["next_state"]).to eq("request_for_confirmation_code_with_cos")
-      expect(result["notice_messages"][0]).to eq('This order has a pending Service Issue. '+
-                'To clear the Service Issue and continue packing the order please scan your confirmation code')
+      expect(result["notice_messages"][0]).to eq("This order has a pending Service Issue. To clear the Service "+
+        "Issue and continue packing the order please scan your confirmation code or scan a different order.")
     end
 
     it "should process order scan for orders having a status of Service issue" do
@@ -151,10 +152,11 @@ describe ScanPackController do
       expect(result["status"]).to eq(true)
       expect(result["data"]["status"]).to eq("serviceissue")
       expect(result["data"]["next_state"]).to eq("request_for_confirmation_code_with_cos")
-      expect(result["notice_messages"][0]).to eq('This order has a pending Service Issue. To continue with this order, '+
-                'please ask another user who has Change Order Status permissions to scan their '+
-                'confirmation code and clear the issue. Alternatively, you can pack another order '+
-                'by scanning another order number')
+      expect(result["notice_messages"][0]).to eq('This order has a pending Service Issue. To continue with this '+
+        'order, please ask another user who has Change Order Status permissions to scan their confirmation code '+
+        'and clear the issue. Alternatively, you can pack another order by scanning another order number.')
+
+
     end
 
    end
@@ -226,14 +228,15 @@ describe ScanPackController do
       
       @other_user = FactoryGirl.create(:user, :email=>'test_other@groovepacks.com', :username=>'test_user')
       
-      @other_user.confirmation_code = '1234567890'
+      @other_user.confirmation_code = '12345678901'
+      @other_user.edit_products = 1
       @other_user.save
 
       @order = FactoryGirl.create(:order, :status=>'onhold')
       @orderitem = FactoryGirl.create(:order_item, :order=>@order)
       @order.addnewitems
 
-      get :product_edit_confirmation_code, { :confirmation_code => '1234567890', :order_id => @order.id }
+      get :product_edit_confirmation_code, { :confirmation_code => '12345678901', :order_id => @order.id }
 
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
