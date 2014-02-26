@@ -679,7 +679,7 @@ class OrdersController < ApplicationController
       end
 
       if @exception.save
-        @order.addactivity("Order Exception Recorded", username)
+        @order.addactivity("Order Exception Associated with "+username+" - Recorded", current_user.name)
       else
         @result['status'] &= false
         @result['messages'].push('Could not save order with exception')
