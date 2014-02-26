@@ -530,3 +530,19 @@ ul.tag-list > li {
   top: -50px;
   height: 0px;
 }
+
+.child_items {
+  width:90%;
+  float:right;
+}
+tbody tr td.bluebg, tbody tr:hover td.bluebg {
+  background: #95BCF2;
+  border-top:0px;
+}
+tbody tr:hover td.colspan {
+  background: none;
+}
+tbody tr td.colspan {
+  border-top:0px;
+  padding:0px;
+}

@@ -48,17 +48,26 @@
                                         {{ unscanned_item.name }}</td>
                                         <td class='scantable-greyedout'>
                                         {{unscanned_item.qty_remaining}}</td>
-                                        <tr ng-repeat = 'child_item in unscanned_item.child_items'>
-                                            <td>
-                                            <div class="single-image">
-                                                <img class="img-thumb" ng-src="{{ child_item.image.image }}" />
-                                            </div>
-                                            </td>
-                                            <td>
-                                            {{ child_item.name }}</td>
-                                            <td>
-                                            {{child_item.qty_remaining}}</td>
-                                        </tr>
+                                </tr>
+                                <tr ng-show="unscanned_item.product_type =='individual'" >
+                                    <td colspan="3" class="colspan">
+                                        <table class="table table-hover child_items">
+                                            <tbody>
+                                                <tr ng-repeat = 'child_item in unscanned_item.child_items' >
+                                                <td class="bluebg"></td>
+                                                <td>
+                                                    <div class="single-image">
+                                                        <img class="img-thumb" ng-src="{{ child_item.image.image }}" />
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    {{ child_item.name }}</td>
+                                                <td>
+                                                    {{child_item.qty_remaining}}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </td>
                                 </tr>
                                 </tbody>
                             </table>
