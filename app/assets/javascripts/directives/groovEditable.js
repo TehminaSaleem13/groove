@@ -86,7 +86,7 @@ groovepacks_directives.directive('groovEditable', ['$timeout',function ($timeout
             }
             scope.focus_input = function() {
                 $timeout(function(){
-                    $("#editable-"+scope.identifier+"-"+scope.prop+"-"+scope.editing).focus();
+                    $("#"+scope.custom_identifier+scope.identifier+"-"+scope.prop+"-"+scope.editing).focus();
                 },200);
             }
             scope.blur_event = function() {
@@ -137,7 +137,8 @@ groovepacks_directives.directive('groovEditable', ['$timeout',function ($timeout
             scope._init = function() {
 
                 scope.is_transcluded = false;
-                scope.single_editable_id = "editable-"+scope.identifier+"-"+scope.prop+"-1";
+                scope.custom_identifier = "editable-" +Math.floor(Math.random()*1000)+"-";
+                scope.single_editable_id = scope.custom_identifier+scope.identifier+"-"+scope.prop+"-1";
                 scope.editing = -1;
                 scope._focus_lost = false;
                 scope._setup_editable();
