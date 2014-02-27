@@ -627,7 +627,7 @@ class OrdersController < ApplicationController
       dummy_user.name = 'Nobody'
       dummy_user.id = 0
       @result['order']['users'].unshift(dummy_user)
-      
+
       if !@order.packing_user_id.nil?
         @result['order']['users'].each do |user|
           if user.id == @order.packing_user_id
@@ -953,15 +953,15 @@ class OrdersController < ApplicationController
     #sort_key = 'updated_at' if sort_key == 'sku'
 
     unless status_filter == 'all'
-      status_filter_text = " AND orders.status='"+status_filter+"'"
+      status_filter_text = " WHERE orders.status='"+status_filter+"'"
     end
     #todo status filters to be implemented
     if sort_key == 'store'
-      orders = Order.find_by_sql("SELECT orders.* FROM orders, stores WHERE orders.store_id = stores.id"+status_filter_text+
+      orders = Order.find_by_sql("SELECT orders.* FROM orders LEFT JOIN stores ON orders.store_id = stores.id "+status_filter_text+
                                      " ORDER BY stores.name "+ sort_order+query_add)
     elsif sort_key == 'items'
-      orders = Order.find_by_sql("SELECT orders.*, count(order_items.id) AS count FROM orders, order_items"+
-                                      " WHERE order_items.order_id = orders.id "+status_filter_text+" GROUP BY order_items.order_id "+
+      orders = Order.find_by_sql("SELECT orders.*, count(order_items.id) AS count FROM orders LEFT JOIN order_items"+
+                                      " ON (order_items.order_id = orders.id) "+status_filter_text+" GROUP BY order_items.order_id "+
                                       "ORDER BY count "+sort_order+query_add)
     else
       orders = Order.order(sort_key+" "+sort_order)

@@ -114,17 +114,17 @@
                     <th class="span1 dragtable-sortable" ng-class="{active: products.setup.sort=='store'}" data-header="store">
                         <a href="" ng-click="handlesort('store')" ng-class="products.setup.order">Store</a>
                     </th>
-                    <th class="span1 dragtable-sortable" data-header="cat">
-                        Category
+                    <th class="span1 dragtable-sortable" ng-class="{active: products.setup.sort=='cat'}"  data-header="cat">
+                        <a href="" ng-click="handlesort('cat')" ng-class="products.setup.order">Category</a>
                     </th>
-                    <th class="span1 dragtable-sortable" data-header="location_secondary">
-                        Secondary Location
+                    <th class="span1 dragtable-sortable" ng-class="{active: products.setup.sort=='location_secondary'}"  data-header="location_secondary">
+                        <a href="" ng-click="handlesort('location_secondary')" ng-class="products.setup.order">Secondary Location</a>
                     </th>
-                    <th class="span1 dragtable-sortable" data-header="location_name">
-                        Warehouse Name
+                    <th class="span1 dragtable-sortable"  ng-class="{active: products.setup.sort=='location_name'}" data-header="location_name">
+                        <a href="" ng-click="handlesort('location_name')" ng-class="products.setup.order">Warehouse Name</a>
                     </th>
-                    <th class="span1 dragtable-sortable" data-header="qty">
-                        Quantity
+                    <th class="span1 dragtable-sortable"  ng-class="{active: products.setup.sort=='qty'}" data-header="qty">
+                        <a href="" ng-click="handlesort('qty')" ng-class="products.setup.order">Quantity</a>
                     </th>
                 </tr>
                 </thead>

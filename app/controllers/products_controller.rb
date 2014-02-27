@@ -1356,7 +1356,7 @@ class ProductsController < ApplicationController
     status_filter_text = ""
     is_kit = 0
     supported_sort_keys = ['updated_at', 'name', 'sku',
-                           'status', 'barcode', 'location_primary', 'store' ]
+                           'status', 'barcode', 'location_primary','location_secondary','location_name','cat','qty', 'store' ]
     supported_order_keys = ['ASC', 'DESC' ] #Caps letters only
     supported_status_filters = ['all', 'active', 'inactive', 'new']
     supported_kit_params = ['0', '1', '-1']
@@ -1379,7 +1379,7 @@ class ProductsController < ApplicationController
         supported_kit_params.include?(params[:iskit])
 
     unless is_kit == '-1'
-      kit_query = " AND products.is_kit="+is_kit.to_s
+      kit_query = " WHERE products.is_kit="+is_kit.to_s+" AND "
     end
 
     unless params[:select_all]
@@ -1392,21 +1392,40 @@ class ProductsController < ApplicationController
     #todo status filters to be implemented
 
     unless status_filter == 'all'
-      status_filter_text = " AND products.status='"+status_filter+"'"
+      if is_kit == '-1'
+        status_filter_text = " WHERE "
+      end
+      status_filter_text += " products.status='"+status_filter+"'"
     end
 
     if sort_key == 'sku'
-      products = Product.find_by_sql("SELECT products.* FROM products, product_skus WHERE "+
-                                         "products.id = product_skus.product_id "+kit_query+
+      products = Product.find_by_sql("SELECT products.* FROM products LEFT JOIN product_skus ON ("+
+                                         "products.id = product_skus.product_id ) "+kit_query+
                                          status_filter_text+" ORDER BY product_skus.sku "+sort_order+query_add)
     elsif sort_key == 'store'
-      products = Product.find_by_sql("SELECT products.* FROM products, stores WHERE "+
-                                         "products.store_id = stores.id "+kit_query+
+      products = Product.find_by_sql("SELECT products.* FROM products LEFT JOIN stores ON ("+
+                                         "products.store_id = stores.id ) "+kit_query+
                                          status_filter_text+" ORDER BY stores.name "+sort_order+query_add)
     elsif sort_key == 'location_primary'
-     products = Product.find_by_sql("SELECT products.* FROM products, product_inventory_warehouses WHERE "+
-                                            "products.id = product_inventory_warehouses.product_id "+kit_query+
+      products = Product.find_by_sql("SELECT products.* FROM products LEFT JOIN product_inventory_warehouses ON ( "+
+                                            "products.id = product_inventory_warehouses.product_id ) "+kit_query+
                                             status_filter_text+" ORDER BY product_inventory_warehouses.location_primary "+sort_order+query_add)
+    elsif sort_key == 'location_secondary'
+      products = Product.find_by_sql("SELECT products.* FROM products LEFT JOIN product_inventory_warehouses ON ( "+
+                                            "products.id = product_inventory_warehouses.product_id )  "+kit_query+
+                                            status_filter_text+" ORDER BY product_inventory_warehouses.location_secondary "+sort_order+query_add)
+    elsif sort_key == 'location_name'
+      products = Product.find_by_sql("SELECT products.* FROM products LEFT JOIN product_inventory_warehouses ON ( "+
+                                            "products.id = product_inventory_warehouses.product_id )  "+kit_query+
+                                            status_filter_text+" ORDER BY product_inventory_warehouses.name "+sort_order+query_add)
+    elsif sort_key == 'qty'
+      products = Product.find_by_sql("SELECT products.* FROM products LEFT JOIN product_inventory_warehouses ON ( "+
+                                            "products.id = product_inventory_warehouses.product_id ) "+kit_query+
+                                            status_filter_text+" ORDER BY product_inventory_warehouses.qty "+sort_order+query_add)
+    elsif sort_key == 'cat'
+      products = Product.find_by_sql("SELECT products.* FROM products LEFT JOIN product_cats ON ( "+
+                                            "products.id = product_cats.product_id ) "+kit_query+
+                                            status_filter_text+" ORDER BY product_cats.category "+sort_order+query_add)
     else
       products = Product.order(sort_key+" "+sort_order)
       unless is_kit == '-1'

@@ -23,7 +23,7 @@
     <div ng-click="add_node()" ng-show="editing == -1" class="tag-bubble false-tag-bubble tag-bubble-input span3 input-text">Add...</div>
 </div>
 <div ng-if="!editable.array">
-    <div ng-hide="editing == 1"> <span ng-transclude></span> <span ng-hide="is_transcluded">{{ngModel[prop]}}</span> &nbsp;</div>
+    <div ng-show="editing != 1"> <span ng-transclude></span> <span ng-hide="is_transcluded">{{ngModel[prop]}}</span> &nbsp;</div>
     <div ng-show="editing == 1" ng-class="tag_class">
            <span bindonce="input" bo-switch="input.type">
                <span bo-switch-when="number">
