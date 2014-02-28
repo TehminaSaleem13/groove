@@ -5,6 +5,25 @@ describe ScanPackController do
   before(:each) do 
     @user = FactoryGirl.create(:user, :import_orders=> "1")
     sign_in @user
+    
+    @unscanned_item_l = lambda do |name, product_type, images, sku, qty_remaining, scanned_qty, packing_placement,
+      barcodes, product_id, order_item_id| 
+      unscanned_item = Hash.new
+      
+      unscanned_item["name"] = name
+      unscanned_item["product_type"] = product_type
+      unscanned_item["images"] = images
+      unscanned_item["sku"] = sku
+      unscanned_item["qty_remaining"] = qty_remaining
+      unscanned_item["scanned_qty"] = scanned_qty
+      unscanned_item["packing_placement"] = packing_placement
+      unscanned_item["barcodes"] = barcodes
+      unscanned_item["product_id"] = product_id
+      unscanned_item["order_item_id"] = order_item_id
+      
+      return unscanned_item
+    end
+
   end
 
   describe "Order Scan" do
@@ -941,32 +960,17 @@ describe ScanPackController do
       expected_result['data']['unscanned_items'] = []
       expected_result['data']['scanned_items'] = []
 
-      unscanned_item = Hash.new
-      unscanned_item["name"] = 'iPhone Protection Kit'
-      unscanned_item["product_type"] = 'single'
-      unscanned_item["images"] = []
-      unscanned_item["sku"] = 'IPROTO'
-      unscanned_item["qty_remaining"] = 2
-      unscanned_item["scanned_qty"] = 0
-      unscanned_item["packing_placement"] = 50
-      unscanned_item["barcodes"] = product_kit.product_barcodes
-      unscanned_item["product_id"] = product_kit.id
-      unscanned_item["order_item_id"] = order_item_kit.id
+      unscanned_item = @unscanned_item_l.call('iPhone Protection Kit', 'single', [], 
+              'IPROTO', 2, 0, 50, product_kit.product_barcodes,
+              product_kit.id, order_item_kit.id)
+      
 
       expected_result['data']['unscanned_items'] << unscanned_item
 
-      unscanned_item = Hash.new
-      unscanned_item["name"] = kit_product2.name
-      unscanned_item["product_type"] = 'single'
-      unscanned_item["images"] = []
-      unscanned_item["sku"] = 'IPROTO2'
-      unscanned_item["qty_remaining"] = 1
-      unscanned_item["scanned_qty"] = 0
-      unscanned_item["packing_placement"] = 50
-      unscanned_item["barcodes"] = kit_product2.product_barcodes
-      unscanned_item["product_id"] = kit_product2.id
-      unscanned_item["order_item_id"] = order_item2.id
-
+      unscanned_item = @unscanned_item_l.call(kit_product2.name, 'single', [], 
+              'IPROTO2', 1, 0, 50, kit_product2.product_barcodes,
+              kit_product2.id, order_item2.id)
+      
       expected_result['data']['unscanned_items'] << unscanned_item
 
       scanned_item = Hash.new
