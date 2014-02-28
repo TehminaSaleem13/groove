@@ -19,7 +19,6 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout','$http','notificat
                 }).error(notification.server_error);
             }
             myscope._checkSwapNodes = function() {
-                console.log(myscope.columns);
                scope.can_render = false;
                 el.find('tr').each(
                     function(index){
