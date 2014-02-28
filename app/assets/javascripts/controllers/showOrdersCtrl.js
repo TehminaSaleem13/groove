@@ -90,32 +90,26 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,ord
         //Private properties
         $scope._do_load_orders = false;
         $scope._can_load_orders = true;
+        $scope.gridOptions = {
+            identifier:'orders',
+            all_fields: {
+                tags: "Tags",
+                store_name: "Store",
+                notes:"Notes",
+                orderdate:"Order Date",
+                itemslength:"Items",
+                recipient:"Recipient",
+                status:"Status",
+                email:"Email",
+                tracking_num:"Tracking Id",
+                city:"City",
+                state:"State",
+                postcode:"Zip",
+                country:"Country"
+            },
+            shown_fields: ["checkbox","ordernum","tags","store_name","notes","orderdate","itemslength","recipient","status"]
 
-        $scope._all_fields = {
-            tags:{name:"<i class='icon icon-ok'></i> Tags", className:"rt_field_tags"},
-            store_name: {name:"<i class='icon icon-ok'></i> Store", className:"rt_field_store_name"},
-            notes:{name:"<i class='icon icon-ok'></i> Notes", className:"rt_field_notes"},
-            order_date:{name:"<i class='icon icon-ok'></i> Order Date", className:"rt_field_orderdate"},
-            itemslength:{name:"<i class='icon icon-ok'></i> Items", className:"rt_field_itemslength"},
-            recipient:{name:"<i class='icon icon-ok'></i> Recipient", className:"rt_field_recipient"},
-            status:{name:"<i class='icon icon-ok'></i> Status", className:"rt_field_status"},
-            email:{name:"<i class='icon icon-ok'></i> Email", className:"rt_field_email"},
-            tracking_num:{name:"<i class='icon icon-ok'></i> Tracking Id", className:"rt_field_tracking_num"},
-            city:{name:"<i class='icon icon-ok'></i> City", className:"rt_field_city"},
-            state:{name:"<i class='icon icon-ok'></i> State", className:"rt_field_state"},
-            postcode:{name:"<i class='icon icon-ok'></i> Zip", className:"rt_field_postcode"},
-            country:{name:"<i class='icon icon-ok'></i> Country", className:"rt_field_country"}
-        };
-        $scope._shown_fields = ["checkbox","ordernum","tags","store_name","notes","orderdate","itemslength","recipient","status"];
-
-        $.contextMenu({
-            // define which elements trigger this menu
-            selector: "#orderstbl thead",
-            // define the elements of the menu
-            items: $scope._all_fields,
-            // there's more, have a look at the demos and docs...
-            callback: $scope._showHideField
-        });
+        }
 
         $scope.$watch('orders.setup.search',function() {
             if($scope._can_load_orders) {
@@ -138,7 +132,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,ord
         $scope.$on("orders-next-load",function(event, args){$scope.order_next(function(){ $scope.$broadcast("orders-next-loaded");});});
         $("#order-search-query").focus();
 
-        $('#orderstbl').dragtable({dragaccept:'.dragtable-sortable',clickDelay:250});
+
         $http.get('/home/userinfo.json').success(function(data){
             $scope.username = data.username;
             $scope.current_userid = data.user_id;
@@ -150,53 +144,15 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,ord
         //$scope.loading = true;
         $scope._can_load_orders = false;
         orders.list.get($scope.orders,next).then(function(data) {
-            $timeout($scope._checkSwapNodes,20);
-            $timeout($scope._showHideField,25);
             $scope.select_all_toggle();
             if(typeof post_fn == 'function') {
                 $timeout(post_fn,30);
             }
+            $scope.$broadcast("groov-data-grid-trigger");
             $scope._can_load_orders = true;
         });
     }
 
-
-    $scope._showHideField = function(key,options) {
-        $(".context-menu-item i").removeClass("icon-ok").addClass("icon-remove");
-        $("#orderstbl th, #orderstbl td").hide();
-        var array_position = $scope._shown_fields.indexOf(key);
-        if(array_position > -1) {
-            $scope._shown_fields.splice( array_position, 1 );
-        } else {
-            $scope._shown_fields.push(key);
-        }
-        for (i in $scope._shown_fields) {
-            $(".rt_field_"+$scope._shown_fields[i]+" i").removeClass("icon-remove").addClass("icon-ok");
-            $("[data-header='"+$scope._shown_fields[i]+"']").show();
-        }
-        return false;
-    }
-
-    $scope._checkSwapNodes = function() {
-        var node_order_array = [];
-        $('#orderstbl thead tr').children('th').each(function(index){node_order_array[this.getAttribute('data-header')] = index;});
-        $('#orderstbl tbody tr ').each(
-            function(index){
-                var children = this.children;
-                for (i=0; i <children.length; i++) {
-                    if( node_order_array[children[i].getAttribute('data-header')] != i) {
-                        $scope._doRealSwap(children[i],children[node_order_array[children[i].getAttribute('data-header')]]);
-                    }
-                }
-            }
-        );
-    }
-    $scope._doRealSwap = function swapNodes(a, b) {
-        var aparent = a.parentNode;
-        var asibling = a.nextSibling === b ? a : a.nextSibling;
-        b.parentNode.insertBefore(a, b);
-        aparent.insertBefore(b, asibling);
-    }
 
 
 

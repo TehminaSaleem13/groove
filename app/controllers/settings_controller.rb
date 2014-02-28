@@ -179,6 +179,44 @@ class SettingsController < ApplicationController
       format.zip { send_data  data,:type => 'application/zip', :filename => filename }
     end
   end
+
+  def get_columns_state
+    @result = Hash.new
+    @result['status'] = true
+    @result['messages'] = []
+    if params[:identifier].nil?
+      @result['messages'].push("No Identifier for state preference given")
+      @result['status'] = false
+    else
+      preference = ColumnPreference.find_by_user_id_and_identifier(current_user.id,params[:identifier])
+      unless preference.nil?
+        @result['data'] = preference
+      end
+    end
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json:@result}
+    end
+  end
+
+  def save_columns_state
+    @result = Hash.new
+    @result['status'] = true
+    @result['messages'] = []
+    if params[:identifier].nil?
+      @result['messages'].push("No Identifier for state preference given")
+      @result['status'] = false
+    else
+      preference = ColumnPreference.find_or_create_by_user_id_and_identifier(current_user.id,params[:identifier])
+      preference.order = params[:order]
+      preference.shown = params[:shown]
+      preference.save!
+    end
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json:@result}
+    end
+  end
 end
 
 

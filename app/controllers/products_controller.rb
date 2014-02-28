@@ -1379,7 +1379,7 @@ class ProductsController < ApplicationController
         supported_kit_params.include?(params[:iskit])
 
     unless is_kit == '-1'
-      kit_query = " WHERE products.is_kit="+is_kit.to_s+" AND "
+      kit_query = " WHERE products.is_kit="+is_kit.to_s
     end
 
     unless params[:select_all]
@@ -1394,6 +1394,8 @@ class ProductsController < ApplicationController
     unless status_filter == 'all'
       if is_kit == '-1'
         status_filter_text = " WHERE "
+      else
+        status_filter_text = " AND "
       end
       status_filter_text += " products.status='"+status_filter+"'"
     end
@@ -1406,6 +1408,10 @@ class ProductsController < ApplicationController
       products = Product.find_by_sql("SELECT products.* FROM products LEFT JOIN stores ON ("+
                                          "products.store_id = stores.id ) "+kit_query+
                                          status_filter_text+" ORDER BY stores.name "+sort_order+query_add)
+    elsif sort_key == 'barcode'
+      products = Product.find_by_sql("SELECT products.* FROM products LEFT JOIN product_barcodes ON ("+
+                                         "products.id = product_barcodes.product_id ) "+kit_query+
+                                         status_filter_text+" ORDER BY product_barcodes.barcode "+sort_order+query_add)
     elsif sort_key == 'location_primary'
       products = Product.find_by_sql("SELECT products.* FROM products LEFT JOIN product_inventory_warehouses ON ( "+
                                             "products.id = product_inventory_warehouses.product_id ) "+kit_query+

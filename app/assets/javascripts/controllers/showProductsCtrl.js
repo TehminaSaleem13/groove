@@ -90,30 +90,22 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,pro
 
         $scope._do_load_products = false;
         $scope._can_load_products = true;
-        $scope._all_fields = {
-            sku: {name:"<i class='icon icon-ok'></i> Sku", className:"rt_field_sku"},
-            status:{name:"<i class='icon icon-ok'></i> Status", className:"rt_field_status"},
-            barcode:{name:"<i class='icon icon-ok'></i> Barcode", className:"rt_field_barcode"},
-            location:{name:"<i class='icon icon-ok'></i> Primary Location", className:"rt_field_location"},
-            store:{name:"<i class='icon icon-ok'></i> Store", className:"rt_field_store"},
-            cat:{name:"<i class='icon icon-ok'></i> Category", className:"rt_field_cat"},
-            location_secondary:{name:"<i class='icon icon-ok'></i> Secondary Location", className:"rt_field_location_secondary"},
-            location_name:{name:"<i class='icon icon-ok'></i> Warehouse Name", className:"rt_field_location_name"},
-            qty:{name:"<i class='icon icon-ok'></i> Quantity", className:"rt_field_qty"}
-        };
-        $scope._shown_fields = ["checkbox","name","sku","status","barcode","location","store"];
+        $scope.gridOptions = {
+            identifier:'products',
+            all_fields: {
+                sku: "Sku",
+                status: "Status",
+                barcode:"Barcode",
+                location: "Primary Location",
+                store:"Store",
+                cat: "Category",
+                location_secondary: "Secondary Location",
+                location_name: "Warehouse Name",
+                qty: "Quantity"
+            },
+            shown_fields: ["checkbox","name","sku","status","barcode","location","store"]
 
-
-        //Register events and make function calls
-        $.contextMenu({
-            // define which elements trigger this menu
-            selector: "#productstbl thead",
-            // define the elements of the menu
-            items: $scope._all_fields,
-            // there's more, have a look at the demos and docs...
-            callback: $scope._showHideField
-        });
-        $('#productstbl').dragtable({dragaccept:'.dragtable-sortable',clickDelay:250});
+        }
 
         //Register watchers
         $scope.$watch('products.setup.search',$scope._search_products);
@@ -137,8 +129,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,pro
                 //console.log("triggering post function on get products");
                 $timeout(post_fn,30);
             }
-            $timeout($scope._checkSwapNodes,20);
-            $timeout($scope._showHideField,25);
+            $scope.$broadcast("groov-data-grid-trigger");
             $scope.select_all_toggle();
             $scope._can_load_products = true;
         })
@@ -148,44 +139,6 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,pro
         products.setup.update($scope.products.setup,type,value);
         $scope.products.setup.is_kit = (selector == 'kit')? 1 : 0;
         $scope._get_products();
-    }
-
-    $scope._checkSwapNodes = function() {
-        var node_order_array = [];
-        $('#productstbl thead tr').children('th').each(function(index){node_order_array[this.getAttribute('data-header')] = index;});
-        $('#productstbl tbody tr ').each(
-            function(index){
-                var children = this.children;
-                for (i=0; i <children.length; i++) {
-                    if( node_order_array[children[i].getAttribute('data-header')] != i) {
-                        $scope._doRealSwap(children[i],children[node_order_array[children[i].getAttribute('data-header')]]);
-                    }
-                }
-            }
-        );
-    }
-
-    $scope._doRealSwap = function swapNodes(a, b) {
-        var aparent = a.parentNode;
-        var asibling = a.nextSibling === b ? a : a.nextSibling;
-        b.parentNode.insertBefore(a, b);
-        aparent.insertBefore(b, asibling);
-    }
-
-    $scope._showHideField = function(key,options) {
-        $(".context-menu-item i").removeClass("icon-ok").addClass("icon-remove");
-        $("#productstbl th, #productstbl td").hide();
-        var array_position = $scope._shown_fields.indexOf(key);
-        if(array_position > -1) {
-            $scope._shown_fields.splice( array_position, 1 );
-        } else {
-            $scope._shown_fields.push(key);
-        }
-        for (i in $scope._shown_fields) {
-            $(".rt_field_"+$scope._shown_fields[i]+" i").removeClass("icon-remove").addClass("icon-ok");
-            $("[data-header='"+$scope._shown_fields[i]+"']").show();
-        }
-        return false;
     }
 
     //Watcher ones

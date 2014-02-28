@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140221020607) do
+ActiveRecord::Schema.define(:version => 20140227224258) do
 
   create_table "amazon_credentials", :force => true do |t|
     t.string   "merchant_id",                                     :null => false
@@ -25,6 +25,17 @@ ActiveRecord::Schema.define(:version => 20140221020607) do
     t.string   "productgenerated_report_id"
     t.datetime "productgenerated_report_date"
   end
+
+  create_table "column_preferences", :force => true do |t|
+    t.integer  "user_id"
+    t.string   "identifier"
+    t.text     "shown"
+    t.text     "order"
+    t.datetime "created_at", :null => false
+    t.datetime "updated_at", :null => false
+  end
+
+  add_index "column_preferences", ["user_id"], :name => "index_column_preferences_on_user_id"
 
   create_table "csv_mappings", :force => true do |t|
     t.integer  "store_id"
