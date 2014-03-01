@@ -1,16 +1,74 @@
-groovepacks_directives.directive('groovDataGrid', ['$timeout','$http','notification',function ($timeout,$http,notification) {
+groovepacks_directives.directive('groovDataGrid', ['$timeout','$http','$sce','notification',function ($timeout,$http,$sce,notification) {
+    var default_options = function() {
+        return {
+            identifier:'datagrid',
+            select_all:false,
+            show_hide:false,
+            draggable:false,
+            editable:false,
+            sort_func:function() {},
+            setup: {},
+            all_fields:{}
+        }
+    }
+    var default_field_options = function (){
+        return {
+            name: "field",
+            sortable:true,
+            class: "span2",
+            draggable:true,
+            hideable: true,
+            hidden:false,
+            transclude:'',
+            grid_bind: ''
+        }
+    }
     return {
         restrict:"A",
         scope: {
-            options: "=groovDataGrid"
+            groovDataGrid: "=",
+            rows: "=groovList"
         },
+        templateUrl:"/assets/partials/datagrid.html",
         link: function(scope,el,attrs) {
             var myscope = {};
-            myscope._persist_state = function() {
-                myscope.columns = {};
-                myscope.set_columns();
+            scope.context_menu = function(event) {
+                if(scope.options.show_hide) {
+                    if(scope.options.show_hide) {
+                        myscope.contextmenuRoot = $("#"+scope.custom_identifier+"-context-menu");
+                        myscope.contextmenu = $("#"+scope.custom_identifier+"-context-menu .dropdown-menu");
+                        myscope.contextmenu.on("mousedown",function(event){
+                            event.stopPropagation();
+                        });
+                        myscope.contextmenuRoot.on("mousedown",function(event){
+                            event.preventDefault();
+                            event.stopPropagation();
+                            myscope.contextmenuRoot.hide();
+                        });
+                    }
+                    myscope.contextmenuRoot.css({
+                        display: "block"
+                    });
+                    myscope.contextmenu.css({
+                        left:event.pageX,
+                        top:event.pageY
+                    });
+                }
+            }
 
-                $http.post('settings/save_columns_state.json',{identifier:scope.options.identifier,shown:myscope.shown_fields, order:myscope.columns}).success(function(data) {
+            scope.show_hide = function(field) {
+                field.hidden = ! field.hidden;
+                myscope.update();
+            }
+
+            myscope.update = function() {
+                var shown = []
+                for(i in scope.options.all_fields) {
+                    if(!scope.options.all_fields[i].hidden) {
+                        shown.push(i);
+                    }
+                }
+                $http.post('settings/save_columns_state.json',{identifier:scope.options.identifier,shown:shown, order:scope.theads}).success(function(data) {
                     if(data.status) {
                         notification.notify("Successfully saved column preferences",1);
                     } else {
@@ -18,73 +76,60 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout','$http','notificat
                     }
                 }).error(notification.server_error);
             }
-            myscope.set_columns = function() {
-                el.find('th').each(function(index){myscope.columns[this.getAttribute('data-header')] = index;});
-            }
-            myscope._checkSwapNodes = function() {
-                myscope.set_columns();
-                scope.$apply(
-                    function() {
-                        el.find('tr').each(
-                            function(index){
-                                var children = this.children;
-                                for (i=0; i <children.length; i++) {
-                                    if( myscope.columns[children[i].getAttribute('data-header')] != i) {
-                                        myscope._doRealSwap(children[i],children[myscope.columns[children[i].getAttribute('data-header')]]);
-                                    }
-                                }
-                            }
-                        );
-                        $timeout(myscope._showHideField);
-                    }
-                );
-            }
 
-            myscope._doRealSwap = function swapNodes(a, b) {
-                var aparent = a.parentNode;
-                var asibling = a.nextSibling === b ? a : a.nextSibling;
-                b.parentNode.insertBefore(a, b);
-                aparent.insertBefore(b, asibling);
-            }
+            scope.compile = function(ind,field) {
 
-            myscope._showHideField = function(key,options) {
-                scope.$apply(function() {
-                    $(".context-menu-item i").removeClass("icon-ok").addClass("icon-remove");
-                    $("#"+myscope.custom_identifier+" th, #"+myscope.custom_identifier+" td").hide();
-                    if(typeof key !== "undefined") {
-                        var array_position = myscope.shown_fields.indexOf(key);
-                        if(array_position > -1) {
-                            myscope.shown_fields.splice( array_position, 1 );
-                        } else {
-                            myscope.shown_fields.push(key);
-                        }
-                        myscope._persist_state();
-                    }
-                    for (i in myscope.shown_fields) {
-                        $(".rt_field_"+myscope.shown_fields[i]+" i").removeClass("icon-remove").addClass("icon-ok");
-                        $("[data-header='"+myscope.shown_fields[i]+"']").show();
-                    }
-                });
-                return false;
+                if(typeof scope.editable[field] == "undefined") {
+                    scope.editable[field] = {};
+                }
+                if(typeof scope.editable[field][ind] == "undefined") {
+                    scope.editable[field][ind] = $sce.trustAsHtml('<div groov-editable="options.editable" prop="{{field}}" ng-model="row" identifier="'+scope.options.identifier+'_list-'+field+'-'+ind+'">'+scope.options.all_fields[field].transclude+'</div>');
+                }
+
+                $timeout(function() {scope.$broadcast(scope.options.identifier+'_list-'+field+'-'+ind);},30);
             }
             myscope._init = function() {
-                myscope.all_fields = {};
-                myscope.shown_fields = [];
-                myscope.custom_identifier = scope.options.identifier + Math.floor(Math.random()*1000);
-                myscope.columns = {};
-                myscope.shown_fields = scope.options.shown_fields;
-                el.attr('id', myscope.custom_identifier);
-                for(i in scope.options.all_fields) {
-                    myscope.all_fields[i] = {name:"<i class='icon icon-ok'></i> "+ scope.options.all_fields[i], className:"rt_field_"+i};
+                scope.theads = [];
+                scope.sortableOptions = {
+                    update:function(){
+                        $timeout(myscope.update,2)
+                    },
+                    axis:'x'
                 }
+
+                scope.editable={};
+                var options = default_options();
+                jQuery.extend(true,options,scope.groovDataGrid);
+                for (i in scope.groovDataGrid.all_fields) {
+                    options.all_fields[i] = default_field_options();
+                    options.all_fields[i].editable = (scope.groovDataGrid.editable != false);
+                    angular.extend(options.all_fields[i],scope.groovDataGrid.all_fields[i]);
+                    if(options.all_fields[i].grid_bind !== '') {
+                        options.all_fields[i].grid_bind = $sce.trustAsHtml(scope.groovDataGrid.all_fields[i].grid_bind);
+                    }
+                    scope.theads.push(i);
+                }
+                options.setup = scope.groovDataGrid.setup;
+                scope.options = options;
+                scope.custom_identifier = scope.options.identifier + Math.floor(Math.random()*1000);
+
 
                 $http.get('settings/get_columns_state.json?identifier='+scope.options.identifier).success(function(data) {
                     if(data.status) {
                         if(data.data) {
-                            myscope.shown_fields = data.data.shown;
-                            myscope.columns = data.data.order;
-                        } else {
-                            myscope.set_columns();
+
+                            for(i in scope.options.all_fields) {
+                                if(scope.options.all_fields[i].hideable) {
+                                    scope.options.all_fields[i].hidden = true;
+                                }
+                            }
+
+                            for(i in data.data.shown) {
+                                if(typeof scope.options.all_fields[data.data.shown[i]] !=="undefined") {
+                                    scope.options.all_fields[data.data.shown[i]].hidden = false;
+                                }
+                            }
+                            scope.theads = data.data.order;
                         }
                     } else {
                         notification.notify(data.messages,0);
@@ -92,20 +137,6 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout','$http','notificat
 
                 }).error(notification.server_error);
 
-
-                //Register events and make function calls
-                $.contextMenu({
-                    // define which elements trigger this menu
-                    selector: '#'+myscope.custom_identifier+' thead',
-                    // define the elements of the menu
-                    items: myscope.all_fields,
-                    // there's more, have a look at the demos and docs...
-                    callback: myscope._showHideField
-                });
-                $('#'+myscope.custom_identifier).dragtable({dragaccept:'.dragtable-sortable',clickDelay:250,persistState: myscope._persist_state});
-                scope.$on("groov-data-grid-trigger",function() {
-                    $timeout(myscope._checkSwapNodes,10);
-                });
             }
 
             myscope._init();

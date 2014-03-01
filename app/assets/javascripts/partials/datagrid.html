@@ -1,0 +1,48 @@
+<div bindonce="options">
+
+<div bo-if="options.select_all !== false">
+    <a href="" ng-click="options.select_all(true)" ng-hide="options.setup.select_all">Select all</a>
+    <a href="" ng-click="options.select_all(false)" ng-show="options.setup.select_all">Select None</a>
+</div>
+<table id="{{custom_identifier}}" class="table table-hover table-bordered">
+    <thead groov-rt-click="context_menu($event)">
+    <tr ui-sortable="sortableOptions" ng-model="theads">
+        <th ng-repeat="field in theads" ng-hide="options.all_fields[field].hidden" class="{{options.all_fields[field].class}}" ng-class="{active: options.setup.sort == field}">
+            <span bo-if="options.all_fields[field].sortable"><a href="" ng-click="options.sort_func(field)" ng-class="options.setup.order">{{options.all_fields[field].name}}</a></span>
+            <span bo-if="!options.all_fields[field].sortable"><span bo-text="options.all_fields[field].name"></span></span>
+        </th>
+    </tr>
+    </thead>
+    <tbody>
+
+    <tr ng-click="row.checked = !row.checked" ng-repeat="row in rows" ng-class="{info: row.checked}">
+        <td ng-repeat="field in theads" ng-hide="options.all_fields[field].hidden">
+            <div style="display:inline-block; width:100%;height:100%;" bo-if="options.editable != false && options.all_fields[field].editable == true" groov-rt-click="compile($parent.$parent.$index,field)">
+                <div ng-hide="editable[field][$parent.$parent.$index]">
+                    <span bo-if="options.all_fields[field].transclude == '' && row[field] !== null" bo-text="row[field]"></span>
+                    <span bo-if="options.all_fields[field].transclude == '' && row[field] == null"> &nbsp;</span>
+                    <span bo-if="options.all_fields[field].transclude != ''" ng-bind-html="options.all_fields[field].grid_bind" compile-template ></span>
+                </div>
+                <div ng-bind-html="editable[field][$parent.$parent.$index]" compile-template></div>
+            </div>
+            <div bo-if="options.editable == false || options.all_fields[field].editable == false">
+                <span bo-if="options.all_fields[field].grid_bind != '' " ng-bind-html="options.all_fields[field].grid_bind" compile-template></span>
+                <span bo-if="options.all_fields[field].grid_bind == '' " bo-text="row[field]"></span>
+            </div>
+        </td>
+
+    </tr>
+    </tbody>
+</table>
+    <div bo-if="options.show_hide">
+        <div id="{{custom_identifier}}-context-menu" class="context-menu dropdown clearfix">
+
+            <ul class="dropdown-menu">
+                <li ng-repeat="field in options.all_fields" ng-show="field.hideable">
+
+                    <a href="" ng-click="show_hide(field)"> <i class="icon pull-left" ng-class="{'icon-ok':!field.hidden, 'icon-remove':field.hidden}"></i> <span bo-text="field.name"></span></a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>

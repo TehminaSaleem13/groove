@@ -60,7 +60,8 @@
                     </ul>
                 </div>
             </div>
-            <table id="orderstbl" groov-data-grid="gridOptions" class="table table-hover table-bordered data-table" infinite-scroll="order_next()">
+            <div groov-data-grid="gridOptions" groov-list="orders.list" infinite-scroll="order_next()"></div>
+           <!-- <table id="orderstbl" groov-data-grid="gridOptions" class="table table-hover table-bordered data-table" infinite-scroll="order_next()">
                 <thead>
                 <tr>
                     <th class="span1" data-header="checkbox">
@@ -143,7 +144,7 @@
                     <td data-header="country" groov-editable="editableOptions" ng-model="order" prop="country" identifier="orders_list-country-{{$index}}"></td>
                 </tr>
                 </tbody>
-            </table>
+            </table> -->
 
         </div>
 

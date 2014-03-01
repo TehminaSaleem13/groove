@@ -63,7 +63,7 @@
 
     <div class="span8">
         <div class="well scroll-x">
-            <div class="row-fluid">
+            <div class="row-fluid" >
                 <div class="span8">
                     <form class="form-search">
                         <input type="text" id="product-search-query" ng-model="products.setup.search" class="input-large search-query" placeholder="Search" />
@@ -90,7 +90,9 @@
                     </ul>
                 </div>
             </div>
-            <table class="table table-hover table-bordered data-table" groov-data-grid="gridOptions" infinite-scroll="product_next()" infinite-scroll-disabled="{{!products.load_new}}">
+            <div groov-data-grid="gridOptions" groov-list="products.list" infinite-scroll="product_next()" infinite-scroll-disabled="{{!products.load_new}}"></div>
+            <!--
+            <table class="table table-hover table-bordered data-table" >
                 <thead>
                 <tr>
                     <th class="span1" data-header="checkbox">
@@ -145,7 +147,7 @@
                     <td data-header="qty" groov-editable="editableOptions" ng-model="product" prop="qty" identifier="products_list-qty-{{$index}}"></td>
                 </tr>
                 </tbody>
-            </table>
+            </table> -->
 
             <button ng-show="products.load_new" class="btn btn-large" style="width:100%;" ng-click="product_next()">Load More</button>
         </div>

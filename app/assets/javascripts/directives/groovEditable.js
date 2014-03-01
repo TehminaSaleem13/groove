@@ -22,9 +22,6 @@ groovepacks_directives.directive('groovEditable', ['$timeout',function ($timeout
         },
         link: function(scope,el,attrs,ctrl,transclude) {
 
-
-
-
             scope.save_node = function(blur) {
                 blur = (typeof blur == "boolean")? blur : false;
                 if(scope.editing != -1) {
