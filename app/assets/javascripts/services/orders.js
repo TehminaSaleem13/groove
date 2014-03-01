@@ -49,7 +49,7 @@ groovepacks_services.factory('orders',['$http','notification',function($http,not
     var get_list = function(object,next) {
         var url = '';
         var setup = object.setup;
-        next = typeof next !== 'undefined' ? next : false;
+        next = typeof next == 'boolean' ? next : false;
         if(!next) {
             object.setup.offset = 0;
         } else {
