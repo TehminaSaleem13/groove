@@ -58,10 +58,10 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout','$http','$sce','no
 
             scope.show_hide = function(field) {
                 field.hidden = ! field.hidden;
-                myscope.update();
+                scope.update();
             }
 
-            myscope.update = function() {
+            scope.update = function() {
                 var shown = []
                 for(i in scope.options.all_fields) {
                     if(!scope.options.all_fields[i].hidden) {
@@ -90,12 +90,6 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout','$http','$sce','no
             }
             myscope._init = function() {
                 scope.theads = [];
-                scope.sortableOptions = {
-                    update:function(){
-                        $timeout(myscope.update,2)
-                    },
-                    axis:'x'
-                }
 
                 scope.editable={};
                 var options = default_options();

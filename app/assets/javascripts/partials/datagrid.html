@@ -4,9 +4,9 @@
     <a href="" ng-click="options.select_all(true)" ng-hide="options.setup.select_all">Select all</a>
     <a href="" ng-click="options.select_all(false)" ng-show="options.setup.select_all">Select None</a>
 </div>
-<table id="{{custom_identifier}}" class="table table-hover table-bordered">
+<table groov-dragtable="update" groov-model="theads" id="{{custom_identifier}}" class="table table-hover table-bordered">
     <thead groov-rt-click="context_menu($event)">
-    <tr ui-sortable="sortableOptions" ng-model="theads">
+    <tr>
         <th ng-repeat="field in theads" ng-hide="options.all_fields[field].hidden" class="{{options.all_fields[field].class}}" ng-class="{active: options.setup.sort == field}">
             <span bo-if="options.all_fields[field].sortable"><a href="" ng-click="options.sort_func(field)" ng-class="options.setup.order">{{options.all_fields[field].name}}</a></span>
             <span bo-if="!options.all_fields[field].sortable"><span bo-text="options.all_fields[field].name"></span></span>
