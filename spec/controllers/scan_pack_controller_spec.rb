@@ -6,8 +6,9 @@ describe ScanPackController do
     @user = FactoryGirl.create(:user, :import_orders=> "1")
     sign_in @user
     
-    @unscanned_item_l = lambda do |name, product_type, images, sku, qty_remaining, scanned_qty, packing_placement,
-      barcodes, product_id, order_item_id| 
+    @unscanned_item_l = lambda do |name, product_type, images, sku, qty_remaining, 
+      scanned_qty, packing_placement,
+      barcodes, product_id, order_item_id, child_items| 
       unscanned_item = Hash.new
       
       unscanned_item["name"] = name
@@ -20,8 +21,55 @@ describe ScanPackController do
       unscanned_item["barcodes"] = barcodes
       unscanned_item["product_id"] = product_id
       unscanned_item["order_item_id"] = order_item_id
-      
+
+      if !child_items.nil?
+        unscanned_item['child_items'] = child_items
+      end
+
       return unscanned_item
+    end
+
+    @scanned_item_l = lambda do |name, product_type, images, sku, qty_remaining, 
+      scanned_qty, packing_placement,
+      barcodes, product_id, order_item_id| 
+      scanned_item = Hash.new
+      
+      scanned_item["name"] = name
+      scanned_item["product_type"] = product_type
+      scanned_item["images"] = images
+      scanned_item["sku"] = sku
+      scanned_item["qty_remaining"] = qty_remaining
+      scanned_item["scanned_qty"] = scanned_qty
+      scanned_item["packing_placement"] = packing_placement
+      scanned_item["barcodes"] = barcodes
+      scanned_item["product_id"] = product_id
+      scanned_item["order_item_id"] = order_item_id
+      
+      return scanned_item
+    end
+
+    @expected_result_l = lambda {
+      expected_result = Hash.new
+      expected_result['status'] = true
+      expected_result['error_messages'] = []
+      expected_result['success_messages'] = []
+      expected_result['notice_messages'] = []
+
+      expected_result['data'] = Hash.new
+      expected_result['data']['next_state'] = 'ready_for_product'
+      expected_result['data']['unscanned_items'] = []
+      expected_result['data']['scanned_items'] = []
+
+      expected_result['data']['most_recent_scanned_products'] = []
+
+      expected_result['data']['next_item_present'] = false
+
+      return expected_result
+    }
+
+    @get_response_l = lambda do |response| 
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
     end
 
   end
@@ -939,63 +987,98 @@ describe ScanPackController do
 
       product_kit_sku2 = FactoryGirl.create(:product_kit_sku, :product => product_kit, :option_product_id=>kit_product2.id)
       order_item_kit_product2 = FactoryGirl.create(:order_item_kit_product, :order_item => order_item_kit,   
-            :product_kit_skus => product_kit_sku2, :scanned_status=>'scanned', :scanned_qty=>1)
+            :product_kit_skus => product_kit_sku2)
 
       order_item2 = FactoryGirl.create(:order_item, :product_id=>kit_product2.id,
                :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>kit_product2.name)
       
+      #scanned barcode: BARCODE1
       get :scan_product_by_barcode, {:barcode => 'BARCODE1', :order_id => order.id }
 
-      expect(response.status).to eq(200)
-      result = JSON.parse(response.body)
+      result = @get_response_l.call(response)
       
-      expected_result = Hash.new
-      expected_result['status'] = true
-      expected_result['error_messages'] = []
-      expected_result['success_messages'] = []
-      expected_result['notice_messages'] = []
-
-      expected_result['data'] = Hash.new
-      expected_result['data']['next_state'] = 'ready_for_product'
-      expected_result['data']['unscanned_items'] = []
-      expected_result['data']['scanned_items'] = []
+      expected_result = @expected_result_l.call()
 
       unscanned_item = @unscanned_item_l.call('iPhone Protection Kit', 'single', [], 
               'IPROTO', 2, 0, 50, product_kit.product_barcodes,
-              product_kit.id, order_item_kit.id)
-      
+              product_kit.id, order_item_kit.id, nil)
 
       expected_result['data']['unscanned_items'] << unscanned_item
 
       unscanned_item = @unscanned_item_l.call(kit_product2.name, 'single', [], 
               'IPROTO2', 1, 0, 50, kit_product2.product_barcodes,
-              kit_product2.id, order_item2.id)
-      
+              kit_product2.id, order_item2.id, nil)
+
       expected_result['data']['unscanned_items'] << unscanned_item
 
-      scanned_item = Hash.new
-      scanned_item["name"] = "Apple iPhone 5S"
-      scanned_item["product_type"] = "single"
-      scanned_item["images"] = []
-      scanned_item["sku"] = "IPHONE5S" 
-      scanned_item["qty_remaining"] = 0 
-      scanned_item["scanned_qty"] = 1 
-      scanned_item["packing_placement"] = 50 
-      scanned_item["barcodes"] = product.product_barcodes
-      scanned_item["product_id"] = product.id
-      scanned_item["order_item_id"] = order_item.id
-      
+      scanned_item = @scanned_item_l.call('Apple iPhone 5S', 'single', [], 
+              'IPHONE5S', 0, 1, 50, product.product_barcodes,
+              product.id, order_item.id)
+
       expected_result['data']['scanned_items'] << scanned_item
 
-      expected_result['data']['most_recent_scanned_products'] = []
-      expected_result['data']['most_recent_scanned_products'] << product.id
-      expected_result['data']['next_item_present'] = false
-      #response expectations
-      #puts result.to_s
-      #expect(result['status']).to eq(true)
+      expected_result['data']['most_recent_scanned_products'] = session[:most_recent_scanned_products]
 
-      #expect(result['data']['unscanned_items'].first).to eq(JSON.parse(unscanned_item.to_json))
       expect(result).to eq(JSON.parse(expected_result.to_json))
+
+      #scanned barcode: KITITEM2
+      get :scan_product_by_barcode, {:barcode => 'KITITEM2', :order_id => order.id }
+
+      result = @get_response_l.call(response)
+      
+      expected_result = @expected_result_l.call()
+
+      unscanned_item = @unscanned_item_l.call('iPhone Protection Kit', 'single', [], 
+              'IPROTO', 2, 0, 50, product_kit.product_barcodes,
+              product_kit.id, order_item_kit.id, nil)
+
+      expected_result['data']['unscanned_items'] << unscanned_item
+
+      scanned_item = @scanned_item_l.call('Apple iPhone 5S', 'single', [], 
+              'IPHONE5S', 0, 1, 50, product.product_barcodes,
+              product.id, order_item.id)
+
+      expected_result['data']['scanned_items'] << scanned_item
+
+      scanned_item = @scanned_item_l.call(kit_product2.name, 'single', [], 
+              'IPROTO2', 0, 1, 50, kit_product2.product_barcodes,
+              kit_product2.id, order_item2.id)
+
+      expected_result['data']['scanned_items'] << scanned_item
+
+      expected_result['data']['most_recent_scanned_products'] = session[:most_recent_scanned_products]
+
+      expect(result).to eq(JSON.parse(expected_result.to_json))
+
+      #scanned barcode: KITITEM2
+      get :scan_product_by_barcode, {:barcode => 'KITITEM2', :order_id => order.id }
+
+      result = @get_response_l.call(response)
+      
+      expected_result = @expected_result_l.call()
+
+      unscanned_item = @unscanned_item_l.call('iPhone Protection Kit', 'single', [], 
+              'IPROTO', 2, 0, 50, product_kit.product_barcodes,
+              product_kit.id, order_item_kit.id, nil)
+
+      expected_result['data']['unscanned_items'] << unscanned_item
+
+      scanned_item = @scanned_item_l.call('Apple iPhone 5S', 'single', [], 
+              'IPHONE5S', 0, 1, 50, product.product_barcodes,
+              product.id, order_item.id)
+
+      expected_result['data']['scanned_items'] << scanned_item
+
+      scanned_item = @scanned_item_l.call(kit_product2.name, 'single', [], 
+              'IPROTO2', 0, 1, 50, kit_product2.product_barcodes,
+              kit_product2.id, order_item2.id)
+
+      expected_result['data']['scanned_items'] << scanned_item
+
+      expected_result['data']['most_recent_scanned_products'] = session[:most_recent_scanned_products]
+
+      expect(result).to eq(JSON.parse(expected_result.to_json))
+
 
 
       #order status
