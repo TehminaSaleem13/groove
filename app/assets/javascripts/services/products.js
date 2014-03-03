@@ -50,7 +50,7 @@ groovepacks_services.factory('products',['$http','notification',function($http,n
     var get_list = function(object,next) {
         var url = '';
         var setup = object.setup;
-        next = typeof next !== 'undefined' ? next : false;
+        next = typeof next == 'boolean' ? next : false;
         if(!next) {
             object.setup.offset = 0;
         } else {

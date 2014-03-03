@@ -906,8 +906,8 @@ class OrdersController < ApplicationController
     offset = 0
     query_add = ""
     status_filter_text = ""
-    supported_sort_keys = ['updated_at', 'store', 'notes',
-                           'store_order_id', 'order_date', 'items', 'recipient', 'status','email','tracking_num','city','state','postcode','country' ]
+    supported_sort_keys = ['updated_at', 'store_name', 'notes',
+                           'ordernum', 'order_date', 'items', 'recipient', 'status','email','tracking_num','city','state','postcode','country' ]
     supported_order_keys = ['ASC', 'DESC' ] #Caps letters only
     supported_status_filters = ['all', 'awaiting', 'onhold', 'cancelled', 'scanned', 'serviceissue']
 
@@ -933,7 +933,7 @@ class OrdersController < ApplicationController
 
     #overrides
 
-    if sort_key == 'store_order_id'
+    if sort_key == 'ordernum'
       sort_key = 'increment_id'
     end
 
@@ -956,7 +956,7 @@ class OrdersController < ApplicationController
       status_filter_text = " WHERE orders.status='"+status_filter+"'"
     end
     #todo status filters to be implemented
-    if sort_key == 'store'
+    if sort_key == 'store_name'
       orders = Order.find_by_sql("SELECT orders.* FROM orders LEFT JOIN stores ON orders.store_id = stores.id "+status_filter_text+
                                      " ORDER BY stores.name "+ sort_order+query_add)
     elsif sort_key == 'items'
@@ -988,7 +988,7 @@ class OrdersController < ApplicationController
       end
       @order_hash['notes'] = order.notes_internal
       @order_hash['ordernum'] = order.increment_id
-      @order_hash['orderdate'] = order.order_placed_time
+      @order_hash['order_date'] = order.order_placed_time
       @order_hash['itemslength'] = order.get_items_count
       @order_hash['status'] = order.status
       @order_hash['recipient'] = "#{order.firstname} #{order.lastname}"

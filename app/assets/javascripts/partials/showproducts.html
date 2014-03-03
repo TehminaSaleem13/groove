@@ -63,7 +63,7 @@
 
     <div class="span8">
         <div class="well scroll-x">
-            <div class="row-fluid">
+            <div class="row-fluid" >
                 <div class="span8">
                     <form class="form-search">
                         <input type="text" id="product-search-query" ng-model="products.setup.search" class="input-large search-query" placeholder="Search" />
@@ -90,62 +90,7 @@
                     </ul>
                 </div>
             </div>
-            <table class="table table-hover table-bordered data-table" groov-data-grid="gridOptions" infinite-scroll="product_next()" infinite-scroll-disabled="{{!products.load_new}}">
-                <thead>
-                <tr>
-                    <th class="span1" data-header="checkbox">
-                        <input ng-model="products.setup.select_all" type="checkbox" ng-change='select_all_toggle()' />
-                    </th>
-                    <th class="span3 dragtable-sortable" ng-class="{active: products.setup.sort=='name'}" data-header="name">
-                        <a href="" ng-click="handlesort('name')" ng-class="products.setup.order">Item Name</a>
-                    </th>
-                    <th class="span2 dragtable-sortable" ng-class="{active: products.setup.sort=='sku'}" data-header="sku">
-                        <a href="" ng-click="handlesort('sku')" ng-class="products.setup.order">Sku</a>
-                    </th>
-                    <th class="span1 dragtable-sortable" ng-class="{active: products.setup.sort=='status'}" data-header="status">
-                        <a href="" ng-click="handlesort('status')" ng-class="products.setup.order">Status</a>
-                    </th>
-                    <th class="span2 dragtable-sortable" ng-class="{active: products.setup.sort=='barcode'}" data-header="barcode">
-                        <a href="" ng-click="handlesort('barcode')" ng-class="products.setup.order">Barcode</a>
-                    </th>
-                    <th class="span2 dragtable-sortable" ng-class="{active: products.setup.sort=='location_primary'}" data-header="location">
-                        <a href="" ng-click="handlesort('location_primary')" ng-class="products.setup.order">Primary Location</a>
-                    </th>
-                    <th class="span1 dragtable-sortable" ng-class="{active: products.setup.sort=='store'}" data-header="store">
-                        <a href="" ng-click="handlesort('store')" ng-class="products.setup.order">Store</a>
-                    </th>
-                    <th class="span1 dragtable-sortable" ng-class="{active: products.setup.sort=='cat'}"  data-header="cat">
-                        <a href="" ng-click="handlesort('cat')" ng-class="products.setup.order">Category</a>
-                    </th>
-                    <th class="span1 dragtable-sortable" ng-class="{active: products.setup.sort=='location_secondary'}"  data-header="location_secondary">
-                        <a href="" ng-click="handlesort('location_secondary')" ng-class="products.setup.order">Secondary Location</a>
-                    </th>
-                    <th class="span1 dragtable-sortable"  ng-class="{active: products.setup.sort=='location_name'}" data-header="location_name">
-                        <a href="" ng-click="handlesort('location_name')" ng-class="products.setup.order">Warehouse Name</a>
-                    </th>
-                    <th class="span1 dragtable-sortable"  ng-class="{active: products.setup.sort=='qty'}" data-header="qty">
-                        <a href="" ng-click="handlesort('qty')" ng-class="products.setup.order">Quantity</a>
-                    </th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr ng-repeat="product in products.list" >
-                    <td data-header="checkbox" ><input type="checkbox" ng-model="product.checked"/></td>
-                    <td data-header="name" groov-editable="editableOptions" ng-model="product" prop="name" identifier="products_list-name-{{$index}}">
-                        <a href="" ng-click="function(ngModel.id,'auto',null,true)" class="ng-binding">{{ngModel.name}}</a>
-                    </td>
-                    <td data-header="sku" groov-editable="editableOptions" ng-model="product" prop="sku" identifier="products_list-sku-{{$index}}"></td>
-                    <td data-header="status" groov-editable="editableOptions" ng-model="product" prop="status" identifier="products_list-status-{{$index}}"></td>
-                    <td data-header="barcode" groov-editable="editableOptions" ng-model="product" prop="barcode" identifier="products_list-barcode-{{$index}}"></td>
-                    <td data-header="location" groov-editable="editableOptions" ng-model="product" prop="location" identifier="products_list-location-{{$index}}"></td>
-                    <td data-header="store">{{product.store_type}} </td>
-                    <td data-header="cat" groov-editable="editableOptions" ng-model="product" prop="cat" identifier="products_list-cat-{{$index}}"></td>
-                    <td data-header="location_secondary" groov-editable="editableOptions" ng-model="product" prop="location_secondary" identifier="products_list-location_secondary-{{$index}}"></td>
-                    <td data-header="location_name" groov-editable="editableOptions" ng-model="product" prop="location_name" identifier="products_list-location_name-{{$index}}"></td>
-                    <td data-header="qty" groov-editable="editableOptions" ng-model="product" prop="qty" identifier="products_list-qty-{{$index}}"></td>
-                </tr>
-                </tbody>
-            </table>
+            <div groov-data-grid="gridOptions" groov-list="products.list" infinite-scroll="product_next()" infinite-scroll-disabled="{{!products.load_new}}"></div>
 
             <button ng-show="products.load_new" class="btn btn-large" style="width:100%;" ng-click="product_next()">Load More</button>
         </div>

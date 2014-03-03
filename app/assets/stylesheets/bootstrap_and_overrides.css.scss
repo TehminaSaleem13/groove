@@ -546,3 +546,30 @@ tbody tr td.colspan {
   border-top:0px;
   padding:0px;
 }
+
+.context-menu {
+  display:none;
+  position:absolute;
+  left:0;
+  top:0;
+  width:100%;
+  height:100%;
+}
+.context-menu .dropdown-menu {
+  display:block;
+  position:absolute;
+}
+.clearbg-all {
+  background:#fff;
+  width:100%;
+  height:100%;
+  left:0px;
+  top:0px;
+}
+.dragtable-sortable table.table {
+  margin: 0px ;
+}
+
+.draginit tbody {
+  //display:none;
+}

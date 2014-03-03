@@ -1,7 +1,7 @@
 /*!
  * dragtable
  *
- * @Version 2.0.9
+ * @Version 2.0.10
  *
  * Copyright (c) 2010-2013, Andres akottr@gmail.com
  * Dual licensed under the MIT (MIT-LICENSE.txt)
@@ -48,12 +48,8 @@
  * start: start,
  * beforeStop: beforeStop
  */
-
-/* TODO: support colgroups
- */
-
 /*
- * Thx to kriswill, https://github.com/akottr/dragtable/pull/9
+ * Special thx to all pull requests comitters
  */
 
 (function($) {
@@ -61,7 +57,7 @@
         options: {
             revert: false,               // smooth revert
             dragHandle: '.table-handle', // handle for moving cols, if not exists the whole 'th' is the handle
-            maxMovingRows: 100,           // 1 -> only header. 40 row should be enough, the rest is usually not in the viewport
+            maxMovingRows: 40,           // 1 -> only header. 40 row should be enough, the rest is usually not in the viewport
             excludeFooter: false,        // excludes the footer row(s) while moving other columns. Make sense if there is a footer with a colspan. */
             onlyHeaderThreshold: 100,    // TODO:  not implemented yet, switch automatically between entire col moving / only header moving
             dragaccept: null,            // draggable cols -> default all
@@ -74,10 +70,11 @@
             distance: 0,                 // @see http://api.jqueryui.com/sortable/#option-distance, for immediate feedback use "0"
             tolerance: 'pointer',        // @see http://api.jqueryui.com/sortable/#option-tolerance
             axis: 'x',                   // @see http://api.jqueryui.com/sortable/#option-axis, Only vertical moving is allowed. Use 'x' or null. Use this in conjunction with the 'containment' setting
-            beforeStart: $.noop,
+            beforeStart: $.noop,         // returning FALSE will stop the execution chain.
             beforeMoving: $.noop,
             beforeReorganize: $.noop,
-            beforeStop: $.noop
+            beforeStop: $.noop,
+            doRealSort: true
         },
         originalTable: {
             el: null,
@@ -118,6 +115,8 @@
         },
         // bubble the moved col left or right
         _bubbleCols: function() {
+            if(this.options.doRealSort == false) return false;
+            return false;
             var i, j, col1, col2;
             var from = this.originalTable.startIndex;
             var to = this.originalTable.endIndex;
@@ -234,7 +233,7 @@
             // assemble the needed html
             thtb.find('> tr > th').each(function(i, v) {
                 sortableHtml += '<li>';
-                sortableHtml += '<table ' + attrsString + '>';
+                sortableHtml += '<table class="table table-bordered">';
                 var row = thtb.find('> tr > th:nth-child(' + (i + 1) + ')');
                 if (_this.options.maxMovingRows > 1) {
                     row = row.add(thtb.find('> tr > td:nth-child(' + (i + 1) + ')').slice(0, _this.options.maxMovingRows - 1));
@@ -243,7 +242,7 @@
                     // TODO: May cause duplicate style-Attribute
                     var row_content = $(this).clone().wrap('<div></div>').parent().html();
                     if (row_content.toLowerCase().indexOf('<th') === 0) sortableHtml += "<thead>";
-                    sortableHtml += '<tr ' + rowAttrsArr[j] + '" style="height:' + heightArr[j] + 'px;">';
+                    sortableHtml += '<tr ' + rowAttrsArr[j] + ' style="height:' + heightArr[j] + 'px;">';
                     sortableHtml += row_content;
                     if (row_content.toLowerCase().indexOf('<th') === 0) sortableHtml += "</thead>";
                     sortableHtml += '</tr>';
@@ -283,7 +282,7 @@
 
             this.options.beforeMoving(this.originalTable, this.sortableTable);
             // Start moving by delegating the original event to the new sortable table
-            this.sortableTable.movingRow = this.sortableTable.el.find('li:nth-child(' + this.originalTable.startIndex + ')');
+            this.sortableTable.movingRow = this.sortableTable.el.find('> li:nth-child(' + this.originalTable.startIndex + ')');
 
             // prevent the user from drag selecting "highlighting" surrounding page elements
             disableTextSelection();
@@ -331,15 +330,16 @@
             }
             var _this = this;
             this.bindTo.mousedown(function(evt) {
-                if(evt.which == 1) {
-                    clearTimeout(this.downTimer);
-                    this.downTimer = setTimeout(function() {
-                        _this.originalTable.selectedHandle = $(this);
-                        _this.originalTable.selectedHandle.addClass('dragtable-handle-selected');
-                        _this.options.beforeStart(this.originalTable);
-                        _this._generateSortable(evt);
-                    }, _this.options.clickDelay);
+                if(evt.which !=1 ) return false;
+                if (_this.options.beforeStart(this.originalTable) === false) {
+                    return;
                 }
+                clearTimeout(this.downTimer);
+                this.downTimer = setTimeout(function() {
+                    _this.originalTable.selectedHandle = $(this);
+                    _this.originalTable.selectedHandle.addClass('dragtable-handle-selected');
+                    _this._generateSortable(evt);
+                }, _this.options.clickDelay);
             }).mouseup(function(evt) {
                     clearTimeout(this.downTimer);
                 });

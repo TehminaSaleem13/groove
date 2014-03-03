@@ -10,7 +10,8 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,pro
         $scope._get_products(true,post_fn);
     }
 
-    $scope.select_all_toggle = function() {
+    $scope.select_all_toggle = function(val) {
+        $scope.products.setup.select_all = val
         for (i in $scope.products.list) {
             $scope.products.list[i].checked =  $scope.products.setup.select_all;
         }
@@ -61,30 +62,6 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,pro
     $scope._init = function() {
         //Public properties
         $scope.products = products.model.get();
-        $scope.editableOptions = {
-            array:false,
-            update: $scope.update_product_list,
-            elements: {
-                status: {
-                    type:'select',
-                    options:[
-                        {name:"Active",value:'active'},
-                        {name:"Inactive",value:'inactive'},
-                        {name:"New",value:'new'}
-                    ]
-                },
-                qty:{
-                    type:'number',
-                    min:0
-                }
-            },
-            functions: {
-                name: function(id,index,post_fn,open_modal) {
-                    $scope.product_single_details(id,index,post_fn,open_modal);
-                }
-            }
-
-        };
 
         //Private properties
 
@@ -92,19 +69,77 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,pro
         $scope._can_load_products = true;
         $scope.gridOptions = {
             identifier:'products',
-            all_fields: {
-                sku: "Sku",
-                status: "Status",
-                barcode:"Barcode",
-                location: "Primary Location",
-                store:"Store",
-                cat: "Category",
-                location_secondary: "Secondary Location",
-                location_name: "Warehouse Name",
-                qty: "Quantity"
-            },
-            shown_fields: ["checkbox","name","sku","status","barcode","location","store"]
+            select_all: $scope.select_all_toggle,
+            sort_func: $scope.handlesort,
+            setup: $scope.products.setup,
+            show_hide:true,
+            editable:{
+                array:false,
+                update: $scope.update_product_list,
+                elements: {
+                    status: {
+                        type:'select',
+                        options:[
+                            {name:"Active",value:'active'},
+                            {name:"Inactive",value:'inactive'},
+                            {name:"New",value:'new'}
+                        ]
+                    },
+                    qty:{
+                        type:'number',
+                        min:0
+                    }
+                },
+                functions: {
+                    name: function(id,index,post_fn,open_modal) {
+                        $scope.product_single_details(id,index,post_fn,open_modal);
+                    }
+                }
 
+            },
+            all_fields: {
+                name: {
+                    name: "Item Name",
+                    hideable: false,
+                    transclude:'<a href="" ng-click="function(ngModel.id,false,null,true)" class="ng-binding">{{ngModel.name}}</a>',
+                    grid_bind: '<a href="" ng-click="options.editable.functions.name(row.id,false,null,true)" >{{row[field]}}</a>'
+                },
+                sku: {
+                    name: "SKU"
+                },
+                status: {
+                    name: "Status"
+                },
+                barcode: {
+                    name:"Barcode"
+                },
+                location_primary: {
+                    name: "Primary Location",
+                    class:"span3"
+                },
+                store_type: {
+                    name: "Store",
+                    editable:false
+                },
+                cat:{
+                    name:"Category",
+                    hidden:true
+                },
+                location_secondary: {
+                    name: "Secondary Location",
+                    class:"span3",
+                    hidden:true
+                },
+                location_name: {
+                    name:"Warehouse Name",
+                    class:"span3",
+                    hidden:true
+                },
+                qty: {
+                    name:"Quantity",
+                    hidden:true
+                }
+            }
         }
 
         //Register watchers
@@ -129,8 +164,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,pro
                 //console.log("triggering post function on get products");
                 $timeout(post_fn,30);
             }
-            $scope.$broadcast("groov-data-grid-trigger");
-            $scope.select_all_toggle();
+            $scope.select_all_toggle(false);
             $scope._can_load_products = true;
         })
 

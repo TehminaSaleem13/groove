@@ -807,7 +807,6 @@ class ProductsController < ApplicationController
     @result = Hash.new
     @result['status'] = true
     @result['messages'] = []
-    @result['asddddd'] = []
     @kit = Product.find_by_id(params[:kit_id])
 
     if @kit.is_kit
@@ -823,7 +822,6 @@ class ProductsController < ApplicationController
           @result['messages'].push("Product #{kit_product} not found in item")
           @result['status'] &= false
         else
-          @result["asddddd"].push(product_kit_sku);
           unless product_kit_sku.destroy
             @result['messages'].push("Product #{kit_product} could not be removed fronm kit")
             @result['status'] &= false
@@ -1206,13 +1204,13 @@ class ProductsController < ApplicationController
 	  		@result['status'] &= false
 	  		@result['error_msg'] = "Barcode "+params[:value]+" already exists"
 	  	end
-      elsif ["location" ,"location_secondary","location_name","qty"].include?(params[:var])
+      elsif ["location_primary" ,"location_secondary","location_name","qty"].include?(params[:var])
         @product_location = @product.product_inventory_warehousess.first
         if @product_location.nil?
           @product_location = ProductInventoryWarehouses.new
           @product_location.product_id = params[:id]
         end
-        if params[:var] == "location"
+        if params[:var] == "location_primary"
           @product_location.location_primary = params[:value]
         elsif params[:var] == "location_secondary"
           @product_location.location_secondary = params[:value]
@@ -1356,7 +1354,7 @@ class ProductsController < ApplicationController
     status_filter_text = ""
     is_kit = 0
     supported_sort_keys = ['updated_at', 'name', 'sku',
-                           'status', 'barcode', 'location_primary','location_secondary','location_name','cat','qty', 'store' ]
+                           'status', 'barcode', 'location_primary','location_secondary','location_name','cat','qty', 'store_type' ]
     supported_order_keys = ['ASC', 'DESC' ] #Caps letters only
     supported_status_filters = ['all', 'active', 'inactive', 'new']
     supported_kit_params = ['0', '1', '-1']
@@ -1404,7 +1402,7 @@ class ProductsController < ApplicationController
       products = Product.find_by_sql("SELECT products.* FROM products LEFT JOIN product_skus ON ("+
                                          "products.id = product_skus.product_id ) "+kit_query+
                                          status_filter_text+" ORDER BY product_skus.sku "+sort_order+query_add)
-    elsif sort_key == 'store'
+    elsif sort_key == 'store_type'
       products = Product.find_by_sql("SELECT products.* FROM products LEFT JOIN stores ON ("+
                                          "products.store_id = stores.id ) "+kit_query+
                                          status_filter_text+" ORDER BY stores.name "+sort_order+query_add)
@@ -1467,7 +1465,7 @@ class ProductsController < ApplicationController
       @product_hash['id'] = product.id
       @product_hash['name'] = product.name
       @product_hash['status'] = product.status
-      @product_hash['location'] = ""
+      @product_hash['location_primary'] = ""
       @product_hash['location_secondary'] = ""
       @product_hash['location_name'] = ""
       @product_hash['qty'] = ""
@@ -1477,7 +1475,7 @@ class ProductsController < ApplicationController
 
       @product_location = product.product_inventory_warehousess.first
       unless @product_location.nil?
-        @product_hash['location'] = @product_location.location_primary
+        @product_hash['location_primary'] = @product_location.location_primary
         @product_hash['location_secondary'] = @product_location.location_secondary
         @product_hash['location_name'] = @product_location.name
         @product_hash["qty"] = @product_location.qty
