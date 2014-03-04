@@ -960,7 +960,7 @@ class OrdersController < ApplicationController
       orders = Order.find_by_sql("SELECT orders.* FROM orders LEFT JOIN stores ON orders.store_id = stores.id "+status_filter_text+
                                      " ORDER BY stores.name "+ sort_order+query_add)
     elsif sort_key == 'itemslength'
-      orders = Order.find_by_sql("SELECT orders.*, count(order_items.id) AS count FROM orders LEFT JOIN order_items"+
+      orders = Order.find_by_sql("SELECT orders.*, sum(order_items.qty) AS count FROM orders LEFT JOIN order_items"+
                                       " ON (order_items.order_id = orders.id) "+status_filter_text+" GROUP BY orders.id "+
                                       "ORDER BY count "+sort_order+query_add)
     else
