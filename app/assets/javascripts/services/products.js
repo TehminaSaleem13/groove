@@ -125,9 +125,14 @@ groovepacks_services.factory('products',['$http','notification',function($http,n
             if(data.product) {
                 products.single = data.product;
             }
-        });
+        }).error(notification.server_error);
     }
 
+    var create_single = function(products) {
+        return $http.post('/products/create.json').success(function(data){
+            products.single = {};
+        }).error(notification.server_error);
+    }
     var update_single = function(products,auto) {
         if(typeof auto !== "boolean") {
             auto = true;
@@ -221,6 +226,7 @@ groovepacks_services.factory('products',['$http','notification',function($http,n
         },
         single: {
             get: get_single,
+            create:create_single,
             update:update_single,
             image_upload: add_image,
             alias: set_alias,
