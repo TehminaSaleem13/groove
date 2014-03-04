@@ -7,6 +7,9 @@ groovepacks_directives.directive('groovCommon',['notification','importOrders', f
             groovImport:"="
         },
         link: function(scope,el,attrs) {
+            $(".modal").on("click",function() {
+                $(".modal").modal("refresh");
+            })
             scope.notifs = {};
             //Notification related calls
             scope.$on('notification',function(event,args) {
