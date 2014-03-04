@@ -907,7 +907,7 @@ class OrdersController < ApplicationController
     query_add = ""
     status_filter_text = ""
     supported_sort_keys = ['updated_at', 'store_name', 'notes',
-                           'ordernum', 'order_date', 'items', 'recipient', 'status','email','tracking_num','city','state','postcode','country' ]
+                           'ordernum', 'order_date', 'itemslength', 'recipient', 'status','email','tracking_num','city','state','postcode','country' ]
     supported_order_keys = ['ASC', 'DESC' ] #Caps letters only
     supported_status_filters = ['all', 'awaiting', 'onhold', 'cancelled', 'scanned', 'serviceissue']
 
@@ -959,9 +959,9 @@ class OrdersController < ApplicationController
     if sort_key == 'store_name'
       orders = Order.find_by_sql("SELECT orders.* FROM orders LEFT JOIN stores ON orders.store_id = stores.id "+status_filter_text+
                                      " ORDER BY stores.name "+ sort_order+query_add)
-    elsif sort_key == 'items'
+    elsif sort_key == 'itemslength'
       orders = Order.find_by_sql("SELECT orders.*, count(order_items.id) AS count FROM orders LEFT JOIN order_items"+
-                                      " ON (order_items.order_id = orders.id) "+status_filter_text+" GROUP BY order_items.order_id "+
+                                      " ON (order_items.order_id = orders.id) "+status_filter_text+" GROUP BY orders.id "+
                                       "ORDER BY count "+sort_order+query_add)
     else
       orders = Order.order(sort_key+" "+sort_order)

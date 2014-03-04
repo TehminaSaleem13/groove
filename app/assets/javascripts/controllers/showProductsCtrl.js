@@ -73,6 +73,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,pro
             sort_func: $scope.handlesort,
             setup: $scope.products.setup,
             show_hide:true,
+            draggable:true,
             editable:{
                 array:false,
                 update: $scope.update_product_list,

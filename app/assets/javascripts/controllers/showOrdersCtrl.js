@@ -72,6 +72,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,ord
         $scope.gridOptions = {
             identifier:'orders',
             select_all: $scope.select_all_toggle,
+            draggable:true,
             sort_func: $scope.handlesort,
             setup: $scope.orders.setup,
             show_hide:true,

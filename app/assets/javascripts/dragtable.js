@@ -331,7 +331,7 @@
             var _this = this;
             this.bindTo.mousedown(function(evt) {
                 if(evt.which !=1 ) return false;
-                if (_this.options.beforeStart(this.originalTable) === false) {
+                if (_this.options.beforeStart(this) === false) {
                     return;
                 }
                 clearTimeout(this.downTimer);
