@@ -5,10 +5,30 @@ describe ScanPackController do
   before(:each) do 
     @user = FactoryGirl.create(:user, :import_orders=> "1")
     sign_in @user
+
+    @child_item_l = lambda do |name, images, sku, qty_remaining, 
+      scanned_qty, packing_placement, kit_packing_placement,
+      barcodes, product_id, kit_product_id|
+      child_item = Hash.new
+
+      child_item['name'] = name
+      child_item['images'] = []
+      child_item['sku'] = sku
+      child_item['qty_remaining'] = qty_remaining
+      child_item['scanned_qty'] = scanned_qty
+      child_item['packing_placement'] = packing_placement
+      child_item['kit_packing_placement'] =kit_packing_placement
+      child_item['barcodes'] = barcodes
+      child_item['product_id'] = product_id
+      child_item['kit_product_id'] = kit_product_id
+
+      return child_item
+    end
     
     @unscanned_item_l = lambda do |name, product_type, images, sku, qty_remaining, 
       scanned_qty, packing_placement,
       barcodes, product_id, order_item_id, child_items| 
+
       unscanned_item = Hash.new
       
       unscanned_item["name"] = name
@@ -31,7 +51,7 @@ describe ScanPackController do
 
     @scanned_item_l = lambda do |name, product_type, images, sku, qty_remaining, 
       scanned_qty, packing_placement,
-      barcodes, product_id, order_item_id| 
+      barcodes, product_id, order_item_id, child_items| 
       scanned_item = Hash.new
       
       scanned_item["name"] = name
@@ -44,7 +64,11 @@ describe ScanPackController do
       scanned_item["barcodes"] = barcodes
       scanned_item["product_id"] = product_id
       scanned_item["order_item_id"] = order_item_id
-      
+
+      if !child_items.nil?
+        scanned_item['child_items'] = child_items
+      end
+
       return scanned_item
     end
 
@@ -70,6 +94,15 @@ describe ScanPackController do
     @get_response_l = lambda do |response| 
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
+    end
+
+    @hash_diff_l = lambda do |hash1, hash2|
+      puts "Diffing the two hashes:"
+     puts Hash[*(
+        (hash2.size > hash1.size)    \
+            ? hash2.to_a - hash1.to_a \
+            : hash1.to_a - hash2.to_a
+        ).flatten].to_s
     end
 
   end
@@ -973,7 +1006,7 @@ describe ScanPackController do
       order_item_kit = FactoryGirl.create(:order_item, :product_id=>product_kit.id,
                     :qty=>2, :price=>"10", :row_total=>"10", :order=>order, :name=>product_kit.name)
 
-      kit_product = FactoryGirl.create(:product)
+      kit_product = FactoryGirl.create(:product, :name=>'Apple iPhone 5C')
       kit_product_sku = FactoryGirl.create(:product_sku, :product=> kit_product, :sku=> 'IPROTO1')
       kit_product_barcode = FactoryGirl.create(:product_barcode, :product=> kit_product, :barcode => 'KITITEM1')
 
@@ -1013,7 +1046,7 @@ describe ScanPackController do
 
       scanned_item = @scanned_item_l.call('Apple iPhone 5S', 'single', [], 
               'IPHONE5S', 0, 1, 50, product.product_barcodes,
-              product.id, order_item.id)
+              product.id, order_item.id, nil)
 
       expected_result['data']['scanned_items'] << scanned_item
 
@@ -1036,13 +1069,13 @@ describe ScanPackController do
 
       scanned_item = @scanned_item_l.call('Apple iPhone 5S', 'single', [], 
               'IPHONE5S', 0, 1, 50, product.product_barcodes,
-              product.id, order_item.id)
+              product.id, order_item.id, nil)
 
       expected_result['data']['scanned_items'] << scanned_item
 
       scanned_item = @scanned_item_l.call(kit_product2.name, 'single', [], 
               'IPROTO2', 0, 1, 50, kit_product2.product_barcodes,
-              kit_product2.id, order_item2.id)
+              kit_product2.id, order_item2.id, nil)
 
       expected_result['data']['scanned_items'] << scanned_item
 
@@ -1057,21 +1090,152 @@ describe ScanPackController do
       
       expected_result = @expected_result_l.call()
 
+      child_items = []
+
+      child_items << @child_item_l.call('Apple iPhone 5C', [], 'IPROTO1', 1, 
+      0, 50, 50,
+      kit_product.product_barcodes, kit_product.id, order_item_kit_product.id)
+
+      unscanned_item = @unscanned_item_l.call('iPhone Protection Kit', 'individual', [], 
+              'IPROTO', 1, 0, 50, product_kit.product_barcodes,
+              product_kit.id, order_item_kit.id, child_items)
+
+      expected_result['data']['unscanned_items'] << unscanned_item
+
       unscanned_item = @unscanned_item_l.call('iPhone Protection Kit', 'single', [], 
-              'IPROTO', 2, 0, 50, product_kit.product_barcodes,
+              'IPROTO', 1, 0, 50, product_kit.product_barcodes,
               product_kit.id, order_item_kit.id, nil)
 
       expected_result['data']['unscanned_items'] << unscanned_item
 
       scanned_item = @scanned_item_l.call('Apple iPhone 5S', 'single', [], 
               'IPHONE5S', 0, 1, 50, product.product_barcodes,
-              product.id, order_item.id)
+              product.id, order_item.id, nil)
+
+      expected_result['data']['scanned_items'] << scanned_item
+
+      child_items = []
+
+      child_items << @child_item_l.call(kit_product2.name, [], 'IPROTO2', 1, 
+      1, 50, 50,
+      kit_product2.product_barcodes, kit_product2.id, order_item_kit_product2.id)
+
+      scanned_item = @scanned_item_l.call('iPhone Protection Kit', 'individual', [], 
+              'IPROTO', 1, 0, 50, product_kit.product_barcodes,
+              product_kit.id, order_item_kit.id, child_items)
 
       expected_result['data']['scanned_items'] << scanned_item
 
       scanned_item = @scanned_item_l.call(kit_product2.name, 'single', [], 
-              'IPROTO2', 0, 1, 50, kit_product2.product_barcodes,
-              kit_product2.id, order_item2.id)
+              'IPROTO2', 0, 2, 50, kit_product2.product_barcodes,
+              kit_product2.id, order_item2.id, nil)
+
+      expected_result['data']['scanned_items'] << scanned_item
+
+      expected_result['data']['most_recent_scanned_products'] = session[:most_recent_scanned_products]
+
+      expect(result).to eq(JSON.parse(expected_result.to_json))
+
+      #scanned barcode: KITITEM2
+      get :scan_product_by_barcode, {:barcode => 'KITITEM2', :order_id => order.id }
+
+      result = @get_response_l.call(response)
+      
+      expected_result = @expected_result_l.call()
+
+      child_items = []
+
+      child_items << @child_item_l.call('Apple iPhone 5C', [], 'IPROTO1', 2, 
+      0, 50, 50,
+      kit_product.product_barcodes, kit_product.id, order_item_kit_product.id)
+
+      unscanned_item = @unscanned_item_l.call('iPhone Protection Kit', 'individual', [], 
+              'IPROTO', 2, 0, 50, product_kit.product_barcodes,
+              product_kit.id, order_item_kit.id, child_items)
+
+      expected_result['data']['unscanned_items'] << unscanned_item
+
+      scanned_item = @scanned_item_l.call('Apple iPhone 5S', 'single', [], 
+              'IPHONE5S', 0, 1, 50, product.product_barcodes,
+              product.id, order_item.id, nil)
+
+      expected_result['data']['scanned_items'] << scanned_item
+
+      child_items = []
+
+      child_items << @child_item_l.call(kit_product.name, [], 'IPROTO1', 2, 
+      0, 50, 50,
+      kit_product.product_barcodes, kit_product.id, order_item_kit_product.id)
+
+      child_items << @child_item_l.call(kit_product2.name, [], 'IPROTO2', 0, 
+      2, 50, 50,
+      kit_product2.product_barcodes, kit_product2.id, order_item_kit_product2.id)
+
+      scanned_item = @scanned_item_l.call('iPhone Protection Kit', 'individual', [], 
+              'IPROTO', 2, 0, 50, product_kit.product_barcodes,
+              product_kit.id, order_item_kit.id, child_items)
+
+      expected_result['data']['scanned_items'] << scanned_item
+
+      scanned_item = @scanned_item_l.call(kit_product2.name, 'single', [], 
+              'IPROTO2', 0, 3, 50, kit_product2.product_barcodes,
+              kit_product2.id, order_item2.id, nil)
+
+      expected_result['data']['scanned_items'] << scanned_item
+
+      expected_result['data']['most_recent_scanned_products'] = session[:most_recent_scanned_products]
+
+      expect(result).to eq(JSON.parse(expected_result.to_json))
+
+      #scanned barcode: KITITEM1
+      get :scan_product_by_barcode, {:barcode => 'KITITEM1', :order_id => order.id }
+
+      result = @get_response_l.call(response)
+      
+      expected_result = @expected_result_l.call()
+
+      child_items = []
+
+      child_items << @child_item_l.call('Apple iPhone 5C', [], 'IPROTO1', 1, 
+      1, 50, 50,
+      kit_product.product_barcodes, kit_product.id, order_item_kit_product.id)
+
+      unscanned_item = @unscanned_item_l.call('iPhone Protection Kit', 'individual', [], 
+              'IPROTO', 1, 1, 50, product_kit.product_barcodes,
+              product_kit.id, order_item_kit.id, child_items)
+
+      expected_result['data']['unscanned_items'] << unscanned_item
+
+      scanned_item = @scanned_item_l.call('Apple iPhone 5S', 'single', [], 
+              'IPHONE5S', 0, 1, 50, product.product_barcodes,
+              product.id, order_item.id, nil)
+
+      expected_result['data']['scanned_items'] << scanned_item
+
+      child_items = []
+
+      child_items << @child_item_l.call(kit_product.name, [], 'IPROTO1', 1, 
+      1, 50, 50,
+      kit_product.product_barcodes, kit_product.id, order_item_kit_product.id)
+
+      child_items << @child_item_l.call(kit_product2.name, [], 'IPROTO2', 0, 
+      2, 50, 50,
+      kit_product2.product_barcodes, kit_product2.id, order_item_kit_product2.id)
+
+      scanned_item = @scanned_item_l.call('iPhone Protection Kit', 'individual', [], 
+              'IPROTO', 1, 1, 50, product_kit.product_barcodes,
+              product_kit.id, order_item_kit.id, child_items)
+
+      expected_result['data']['scanned_items'] << scanned_item
+
+      scanned_item = @scanned_item_l.call(kit_product2.name, 'single', [], 
+              'IPROTO2', 0, 3, 50, kit_product2.product_barcodes,
+              kit_product2.id, order_item2.id, nil)
+      expected_result['data']['scanned_items'] << scanned_item
+
+      scanned_item = @scanned_item_l.call(kit_product.name, 'single', [], 
+              'IPROTO1', 1, 1, 50, kit_product.product_barcodes,
+              kit_product.id, order_item_kit.id, nil)
 
       expected_result['data']['scanned_items'] << scanned_item
 
@@ -1080,12 +1244,366 @@ describe ScanPackController do
       expect(result).to eq(JSON.parse(expected_result.to_json))
 
 
+      #scanned barcode: KITITEM1
+      get :scan_product_by_barcode, {:barcode => 'KITITEM1', :order_id => order.id }
+
+      result = @get_response_l.call(response)
+      
+      expected_result = @expected_result_l.call()
+
+      expected_result['data']['next_state'] ='ready_for_tracking_num'
+
+      scanned_item = @scanned_item_l.call('Apple iPhone 5S', 'single', [], 
+              'IPHONE5S', 0, 1, 50, product.product_barcodes,
+              product.id, order_item.id, nil)
+
+      expected_result['data']['scanned_items'] << scanned_item
+
+      child_items = []
+
+      child_items << @child_item_l.call(kit_product.name, [], 'IPROTO1', 0, 
+      2, 50, 50,
+      kit_product.product_barcodes, kit_product.id, order_item_kit_product.id)
+
+      child_items << @child_item_l.call(kit_product2.name, [], 'IPROTO2', 0, 
+      2, 50, 50,
+      kit_product2.product_barcodes, kit_product2.id, order_item_kit_product2.id)
+
+      scanned_item = @scanned_item_l.call('iPhone Protection Kit', 'individual', [], 
+              'IPROTO', 0, 2, 50, product_kit.product_barcodes,
+              product_kit.id, order_item_kit.id, child_items)
+
+      expected_result['data']['scanned_items'] << scanned_item
+
+      scanned_item = @scanned_item_l.call(kit_product2.name, 'single', [], 
+              'IPROTO2', 0, 3, 50, kit_product2.product_barcodes,
+              kit_product2.id, order_item2.id, nil)
+      expected_result['data']['scanned_items'] << scanned_item
+
+      scanned_item = @scanned_item_l.call(kit_product.name, 'single', [], 
+              'IPROTO1', 0, 2, 50, kit_product.product_barcodes,
+              kit_product.id, order_item_kit.id, nil)
+
+      expected_result['data']['scanned_items'] << scanned_item
+
+      expected_result['data']['most_recent_scanned_products'] = session[:most_recent_scanned_products]
+
+      expect(result).to eq(JSON.parse(expected_result.to_json))
 
       #order status
       order.reload
       expect(order.status).to eq('awaiting')
+    end
 
-      #expect()
+    it "should scan orders with multiple kit products" do
+
+      request.accept = "application/json"
+      
+      #create an order with one order item which is an individual product,
+      #another is a kit which has a quantity of 2 and depedently splittable.
+      order = FactoryGirl.create(:order, :status=>'awaiting')
+
+      product = FactoryGirl.create(:product)
+      product_sku = FactoryGirl.create(:product_sku, :product=> product)
+      product_barcode = FactoryGirl.create(:product_barcode, :product=> product, :barcode => 'BARCODE1')
+
+      order_item = FactoryGirl.create(:order_item, :product_id=>product.id,
+                    :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>product.name)
+
+      product_kit = FactoryGirl.create(:product, :is_kit => 1, :name=>'iPhone Protection Kit', 
+                        :kit_parsing=>'depends')
+      product_kit_sku = FactoryGirl.create(:product_sku, :product=> product_kit, :sku=> 'IPROTO')
+      product_kit_barcode = FactoryGirl.create(:product_barcode, :product=> product_kit, :barcode => 'IPROTOBAR')
+      order_item_kit = FactoryGirl.create(:order_item, :product_id=>product_kit.id,
+                    :qty=>2, :price=>"10", :row_total=>"10", :order=>order, :name=>product_kit.name)
+
+      kit_product = FactoryGirl.create(:product, :name=>'Apple iPhone 5C')
+      kit_product_sku = FactoryGirl.create(:product_sku, :product=> kit_product, :sku=> 'IPROTO1')
+      kit_product_barcode = FactoryGirl.create(:product_barcode, :product=> kit_product, :barcode => 'KITITEM1')
+
+      product_kit_sku = FactoryGirl.create(:product_kit_sku, :product => product_kit, :option_product_id=>kit_product.id)
+      order_item_kit_product = FactoryGirl.create(:order_item_kit_product, :order_item => order_item_kit,   
+            :product_kit_skus=> product_kit_sku)
+
+      kit_product2 = FactoryGirl.create(:product)
+      kit_product2_sku = FactoryGirl.create(:product_sku, :product=> kit_product2, :sku=> 'IPROTO2')
+      kit_product2_barcode = FactoryGirl.create(:product_barcode, :product=> kit_product2, :barcode => 'KITITEM2')
+
+      product_kit_sku2 = FactoryGirl.create(:product_kit_sku, :product => product_kit, :option_product_id=>kit_product2.id)
+      order_item_kit_product2 = FactoryGirl.create(:order_item_kit_product, :order_item => order_item_kit,   
+            :product_kit_skus => product_kit_sku2)
+
+      order_item2 = FactoryGirl.create(:order_item, :product_id=>kit_product2.id,
+               :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>kit_product2.name)
+      
+      #scanned barcode: BARCODE1
+      get :scan_product_by_barcode, {:barcode => 'BARCODE1', :order_id => order.id }
+
+      result = @get_response_l.call(response)
+      
+      expected_result = @expected_result_l.call()
+
+      unscanned_item = @unscanned_item_l.call('iPhone Protection Kit', 'single', [], 
+              'IPROTO', 2, 0, 50, product_kit.product_barcodes,
+              product_kit.id, order_item_kit.id, nil)
+
+      expected_result['data']['unscanned_items'] << unscanned_item
+
+      unscanned_item = @unscanned_item_l.call(kit_product2.name, 'single', [], 
+              'IPROTO2', 1, 0, 50, kit_product2.product_barcodes,
+              kit_product2.id, order_item2.id, nil)
+
+      expected_result['data']['unscanned_items'] << unscanned_item
+
+      scanned_item = @scanned_item_l.call('Apple iPhone 5S', 'single', [], 
+              'IPHONE5S', 0, 1, 50, product.product_barcodes,
+              product.id, order_item.id, nil)
+
+      expected_result['data']['scanned_items'] << scanned_item
+
+      expected_result['data']['most_recent_scanned_products'] = session[:most_recent_scanned_products]
+
+      expect(result).to eq(JSON.parse(expected_result.to_json))
+
+      #scanned barcode: KITITEM2
+      get :scan_product_by_barcode, {:barcode => 'KITITEM2', :order_id => order.id }
+
+      result = @get_response_l.call(response)
+      
+      expected_result = @expected_result_l.call()
+
+      unscanned_item = @unscanned_item_l.call('iPhone Protection Kit', 'single', [], 
+              'IPROTO', 2, 0, 50, product_kit.product_barcodes,
+              product_kit.id, order_item_kit.id, nil)
+
+      expected_result['data']['unscanned_items'] << unscanned_item
+
+      scanned_item = @scanned_item_l.call('Apple iPhone 5S', 'single', [], 
+              'IPHONE5S', 0, 1, 50, product.product_barcodes,
+              product.id, order_item.id, nil)
+
+      expected_result['data']['scanned_items'] << scanned_item
+
+      scanned_item = @scanned_item_l.call(kit_product2.name, 'single', [], 
+              'IPROTO2', 0, 1, 50, kit_product2.product_barcodes,
+              kit_product2.id, order_item2.id, nil)
+
+      expected_result['data']['scanned_items'] << scanned_item
+
+      expected_result['data']['most_recent_scanned_products'] = session[:most_recent_scanned_products]
+
+      expect(result).to eq(JSON.parse(expected_result.to_json))
+
+      #scanned barcode: KITITEM2
+      get :scan_product_by_barcode, {:barcode => 'KITITEM2', :order_id => order.id }
+
+      result = @get_response_l.call(response)
+      
+      expected_result = @expected_result_l.call()
+
+      child_items = []
+
+      child_items << @child_item_l.call('Apple iPhone 5C', [], 'IPROTO1', 1, 
+      0, 50, 50,
+      kit_product.product_barcodes, kit_product.id, order_item_kit_product.id)
+
+      unscanned_item = @unscanned_item_l.call('iPhone Protection Kit', 'individual', [], 
+              'IPROTO', 1, 0, 50, product_kit.product_barcodes,
+              product_kit.id, order_item_kit.id, child_items)
+
+      expected_result['data']['unscanned_items'] << unscanned_item
+
+      unscanned_item = @unscanned_item_l.call('iPhone Protection Kit', 'single', [], 
+              'IPROTO', 1, 0, 50, product_kit.product_barcodes,
+              product_kit.id, order_item_kit.id, nil)
+
+      expected_result['data']['unscanned_items'] << unscanned_item
+
+      scanned_item = @scanned_item_l.call('Apple iPhone 5S', 'single', [], 
+              'IPHONE5S', 0, 1, 50, product.product_barcodes,
+              product.id, order_item.id, nil)
+
+      expected_result['data']['scanned_items'] << scanned_item
+
+      child_items = []
+
+      child_items << @child_item_l.call(kit_product2.name, [], 'IPROTO2', 1, 
+      1, 50, 50,
+      kit_product2.product_barcodes, kit_product2.id, order_item_kit_product2.id)
+
+      scanned_item = @scanned_item_l.call('iPhone Protection Kit', 'individual', [], 
+              'IPROTO', 1, 0, 50, product_kit.product_barcodes,
+              product_kit.id, order_item_kit.id, child_items)
+
+      expected_result['data']['scanned_items'] << scanned_item
+
+      scanned_item = @scanned_item_l.call(kit_product2.name, 'single', [], 
+              'IPROTO2', 0, 2, 50, kit_product2.product_barcodes,
+              kit_product2.id, order_item2.id, nil)
+
+      expected_result['data']['scanned_items'] << scanned_item
+
+      expected_result['data']['most_recent_scanned_products'] = session[:most_recent_scanned_products]
+
+      expect(result).to eq(JSON.parse(expected_result.to_json))
+
+      #scanned barcode: KITITEM2
+      get :scan_product_by_barcode, {:barcode => 'KITITEM2', :order_id => order.id }
+
+      result = @get_response_l.call(response)
+      
+      expected_result = @expected_result_l.call()
+
+      child_items = []
+
+      child_items << @child_item_l.call('Apple iPhone 5C', [], 'IPROTO1', 2, 
+      0, 50, 50,
+      kit_product.product_barcodes, kit_product.id, order_item_kit_product.id)
+
+      unscanned_item = @unscanned_item_l.call('iPhone Protection Kit', 'individual', [], 
+              'IPROTO', 2, 0, 50, product_kit.product_barcodes,
+              product_kit.id, order_item_kit.id, child_items)
+
+      expected_result['data']['unscanned_items'] << unscanned_item
+
+      scanned_item = @scanned_item_l.call('Apple iPhone 5S', 'single', [], 
+              'IPHONE5S', 0, 1, 50, product.product_barcodes,
+              product.id, order_item.id, nil)
+
+      expected_result['data']['scanned_items'] << scanned_item
+
+      child_items = []
+
+      child_items << @child_item_l.call(kit_product.name, [], 'IPROTO1', 2, 
+      0, 50, 50,
+      kit_product.product_barcodes, kit_product.id, order_item_kit_product.id)
+
+      child_items << @child_item_l.call(kit_product2.name, [], 'IPROTO2', 0, 
+      2, 50, 50,
+      kit_product2.product_barcodes, kit_product2.id, order_item_kit_product2.id)
+
+      scanned_item = @scanned_item_l.call('iPhone Protection Kit', 'individual', [], 
+              'IPROTO', 2, 0, 50, product_kit.product_barcodes,
+              product_kit.id, order_item_kit.id, child_items)
+
+      expected_result['data']['scanned_items'] << scanned_item
+
+      scanned_item = @scanned_item_l.call(kit_product2.name, 'single', [], 
+              'IPROTO2', 0, 3, 50, kit_product2.product_barcodes,
+              kit_product2.id, order_item2.id, nil)
+
+      expected_result['data']['scanned_items'] << scanned_item
+
+      expected_result['data']['most_recent_scanned_products'] = session[:most_recent_scanned_products]
+
+      expect(result).to eq(JSON.parse(expected_result.to_json))
+
+      #scanned barcode: KITITEM1
+      get :scan_product_by_barcode, {:barcode => 'KITITEM1', :order_id => order.id }
+
+      result = @get_response_l.call(response)
+      
+      expected_result = @expected_result_l.call()
+
+      child_items = []
+
+      child_items << @child_item_l.call('Apple iPhone 5C', [], 'IPROTO1', 1, 
+      1, 50, 50,
+      kit_product.product_barcodes, kit_product.id, order_item_kit_product.id)
+
+      unscanned_item = @unscanned_item_l.call('iPhone Protection Kit', 'individual', [], 
+              'IPROTO', 1, 1, 50, product_kit.product_barcodes,
+              product_kit.id, order_item_kit.id, child_items)
+
+      expected_result['data']['unscanned_items'] << unscanned_item
+
+      scanned_item = @scanned_item_l.call('Apple iPhone 5S', 'single', [], 
+              'IPHONE5S', 0, 1, 50, product.product_barcodes,
+              product.id, order_item.id, nil)
+
+      expected_result['data']['scanned_items'] << scanned_item
+
+      child_items = []
+
+      child_items << @child_item_l.call(kit_product.name, [], 'IPROTO1', 1, 
+      1, 50, 50,
+      kit_product.product_barcodes, kit_product.id, order_item_kit_product.id)
+
+      child_items << @child_item_l.call(kit_product2.name, [], 'IPROTO2', 0, 
+      2, 50, 50,
+      kit_product2.product_barcodes, kit_product2.id, order_item_kit_product2.id)
+
+      scanned_item = @scanned_item_l.call('iPhone Protection Kit', 'individual', [], 
+              'IPROTO', 1, 1, 50, product_kit.product_barcodes,
+              product_kit.id, order_item_kit.id, child_items)
+
+      expected_result['data']['scanned_items'] << scanned_item
+
+      scanned_item = @scanned_item_l.call(kit_product2.name, 'single', [], 
+              'IPROTO2', 0, 3, 50, kit_product2.product_barcodes,
+              kit_product2.id, order_item2.id, nil)
+      expected_result['data']['scanned_items'] << scanned_item
+
+      scanned_item = @scanned_item_l.call(kit_product.name, 'single', [], 
+              'IPROTO1', 1, 1, 50, kit_product.product_barcodes,
+              kit_product.id, order_item_kit.id, nil)
+
+      expected_result['data']['scanned_items'] << scanned_item
+
+      expected_result['data']['most_recent_scanned_products'] = session[:most_recent_scanned_products]
+
+      expect(result).to eq(JSON.parse(expected_result.to_json))
+
+
+      #scanned barcode: KITITEM1
+      get :scan_product_by_barcode, {:barcode => 'KITITEM1', :order_id => order.id }
+
+      result = @get_response_l.call(response)
+      
+      expected_result = @expected_result_l.call()
+
+      expected_result['data']['next_state'] ='ready_for_tracking_num'
+
+      scanned_item = @scanned_item_l.call('Apple iPhone 5S', 'single', [], 
+              'IPHONE5S', 0, 1, 50, product.product_barcodes,
+              product.id, order_item.id, nil)
+
+      expected_result['data']['scanned_items'] << scanned_item
+
+      child_items = []
+
+      child_items << @child_item_l.call(kit_product.name, [], 'IPROTO1', 0, 
+      2, 50, 50,
+      kit_product.product_barcodes, kit_product.id, order_item_kit_product.id)
+
+      child_items << @child_item_l.call(kit_product2.name, [], 'IPROTO2', 0, 
+      2, 50, 50,
+      kit_product2.product_barcodes, kit_product2.id, order_item_kit_product2.id)
+
+      scanned_item = @scanned_item_l.call('iPhone Protection Kit', 'individual', [], 
+              'IPROTO', 0, 2, 50, product_kit.product_barcodes,
+              product_kit.id, order_item_kit.id, child_items)
+
+      expected_result['data']['scanned_items'] << scanned_item
+
+      scanned_item = @scanned_item_l.call(kit_product2.name, 'single', [], 
+              'IPROTO2', 0, 3, 50, kit_product2.product_barcodes,
+              kit_product2.id, order_item2.id, nil)
+      expected_result['data']['scanned_items'] << scanned_item
+
+      scanned_item = @scanned_item_l.call(kit_product.name, 'single', [], 
+              'IPROTO1', 0, 2, 50, kit_product.product_barcodes,
+              kit_product.id, order_item_kit.id, nil)
+
+      expected_result['data']['scanned_items'] << scanned_item
+
+      expected_result['data']['most_recent_scanned_products'] = session[:most_recent_scanned_products]
+
+      expect(result).to eq(JSON.parse(expected_result.to_json))
+
+      #order status
+      order.reload
+      expect(order.status).to eq('awaiting')
     end
   end
 end

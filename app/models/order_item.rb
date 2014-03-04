@@ -71,6 +71,7 @@ class OrderItem < ActiveRecord::Base
       end
       result['scanned_qty'] = self.scanned_qty
       result['packing_placement'] = self.product.packing_placement
+      result['barcodes'] = self.product.product_barcodes
       result['product_id'] = self.product.id
       result['order_item_id'] = self.id
       result['child_items'] = []
@@ -103,7 +104,7 @@ class OrderItem < ActiveRecord::Base
           if kit_product.product_kit_skus.option_product.product_barcodes.length > 0
             child_item['barcodes'] = kit_product.product_kit_skus.option_product.product_barcodes
           end
-
+          child_item['product_id'] = kit_product.product_kit_skus.option_product.id
           child_item['kit_product_id'] = kit_product.id
           result['child_items'].push(child_item)
         end
@@ -159,6 +160,7 @@ class OrderItem < ActiveRecord::Base
         result['scanned_qty'] = self.scanned_qty
       end
       result['packing_placement'] = self.product.packing_placement
+      result['barcodes'] = self.product.product_barcodes
       result['product_id'] = self.product.id
       result['order_item_id'] = self.id
       result['child_items'] = []
@@ -167,11 +169,16 @@ class OrderItem < ActiveRecord::Base
            !kit_product.product_kit_skus.product.nil? &&
             (kit_product.scanned_status == 'scanned' or
               kit_product.scanned_status == 'partially_scanned')
+
           child_item = Hash.new
           child_item['name'] = kit_product.product_kit_skus.option_product.name
           if kit_product.product_kit_skus.option_product.product_images.length >0
             child_item['image'] = 
               kit_product.product_kit_skus.option_product.product_images.first 
+          end
+          child_item['images'] = kit_product.product_kit_skus.option_product.product_images
+            if kit_product.product_kit_skus.option_product.product_skus.length > 0
+            child_item['sku'] = kit_product.product_kit_skus.option_product.product_skus.first.sku 
           end
           if depends_kit
             child_item['qty_remaining'] = self.kit_split_qty * kit_product.product_kit_skus.qty - 

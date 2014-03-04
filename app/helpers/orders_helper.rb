@@ -76,4 +76,28 @@ module OrdersHelper
 		rescue Exception => e
 		end
 	end
+
+	def build_pack_item( name, product_type, images, sku, qty_remaining, 
+      scanned_qty, packing_placement,
+      barcodes, product_id, order_item_id, child_items)
+
+      unscanned_item = Hash.new
+      
+      unscanned_item["name"] = name
+      unscanned_item["product_type"] = product_type
+      unscanned_item["images"] = images
+      unscanned_item["sku"] = sku
+      unscanned_item["qty_remaining"] = qty_remaining
+      unscanned_item["scanned_qty"] = scanned_qty
+      unscanned_item["packing_placement"] = packing_placement
+      unscanned_item["barcodes"] = barcodes
+      unscanned_item["product_id"] = product_id
+      unscanned_item["order_item_id"] = order_item_id
+
+      if !child_items.nil?
+        unscanned_item['child_items'] = child_items
+      end
+
+      return unscanned_item
+    end
 end

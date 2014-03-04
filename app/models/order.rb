@@ -13,6 +13,8 @@ class Order < ActiveRecord::Base
   has_and_belongs_to_many :order_tags
 
   include ProductsHelper
+  include OrdersHelper
+
   def addactivity (order_activity_message, username)
   	@activity = OrderActivity.new
   	@activity.order_id = self.id
@@ -416,24 +418,28 @@ class Order < ActiveRecord::Base
     scanned_list.each do |scanned_item|
       if scanned_item['product_type'] == 'individual'
         scanned_item['child_items'].each do |child_item|
-          found_single_item = false
-          #for each child item, check if the child item already exists in list of single items
-          #in the scanned list. If so, then add this child items scanned quantity to the single items quantity
-          scanned_list.each do |single_scanned_item|
-            if single_scanned_item['product_type'] == 'single'
-              if single_scanned_item['product_id'] == child_item['product_id']
-                single_scanned_item['scanned_qty'] = single_scanned_item['scanned_qty'] +
-                    child_item['scanned_qty']
-                found_single_item = true
+          if child_item['scanned_qty'] > 0
+            found_single_item = false
+            #for each child item, check if the child item already exists in list of single items
+            #in the scanned list. If so, then add this child items scanned quantity to the single items quantity
+            scanned_list.each do |single_scanned_item|
+              if single_scanned_item['product_type'] == 'single'
+                if single_scanned_item['product_id'] == child_item['product_id']
+                  single_scanned_item['scanned_qty'] = single_scanned_item['scanned_qty'] +
+                      child_item['scanned_qty']
+                  found_single_item = true
+                end
               end
             end
-          end
 
-          #if not found, then add this child item as a new single item
-          if !found_single_item
-            new_item = child_item
-            new_item['product_type'] = 'single'
-            scanned_list.push(new_item)
+            #if not found, then add this child item as a new single item
+            if !found_single_item
+              new_item = build_pack_item(child_item['name'], 'single', child_item['images'], child_item['sku'], 
+                child_item['qty_remaining'],
+                child_item['scanned_qty'], child_item['packing_placement'], child_item['barcodes'], 
+                child_item['product_id'], scanned_item['order_item_id'], nil)
+              scanned_list.push(new_item)
+            end
           end
         end
       end
