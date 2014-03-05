@@ -23,6 +23,13 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,pro
             value: product[prop]
         }).then($scope._get_products)
     }
+    $scope.create_product = function () {
+        products.single.create($scope.products).then(function(response) {
+            if(response.data.status) {
+                $scope.product_single_details(response.data.product.id,-1,0,true);
+            }
+        })
+    }
 
     //Setup options
     $scope.product_setup_opt = function(type,value) {
@@ -73,6 +80,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,pro
             sort_func: $scope.handlesort,
             setup: $scope.products.setup,
             show_hide:true,
+            draggable:true,
             editable:{
                 array:false,
                 update: $scope.update_product_list,
@@ -152,7 +160,6 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,pro
         $http.get('/home/userinfo.json').success(function(data){
             $scope.username = data.username;
         });
-        $('.modal-backdrop').remove();
         $("#product-search-query").focus();
     }
 

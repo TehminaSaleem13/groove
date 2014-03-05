@@ -69,6 +69,16 @@
 			this.options.loading && this.loading();
 		},
 
+        refresh: function (e) {
+            e && e.preventDefault()
+            var modal = this.$element
+
+            modal.css('margin-top',(modal.outerHeight()/2)*-1)
+                .css('margin-left',(modal.outerWidth()/2)*-1)
+
+            return this
+        },
+
 		hide: function (e) {
 			e && e.preventDefault();
 

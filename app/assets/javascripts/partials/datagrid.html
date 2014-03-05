@@ -4,10 +4,10 @@
     <a href="" ng-click="options.select_all(true)" ng-hide="options.setup.select_all">Select all</a>
     <a href="" ng-click="options.select_all(false)" ng-show="options.setup.select_all">Select None</a>
 </div>
-<table groov-dragtable="update" groov-model="theads" id="{{custom_identifier}}" class="table table-hover table-bordered">
+<table groov-dragtable="dragOptions" groov-enabled="options.draggable" groov-model="theads" id="{{custom_identifier}}" class="table table-hover table-bordered">
     <thead groov-rt-click="context_menu($event)">
     <tr>
-        <th ng-repeat="field in theads" ng-hide="options.all_fields[field].hidden" class="{{options.all_fields[field].class}}" ng-class="{active: options.setup.sort == field}">
+        <th ng-repeat="field in theads" ng-hide="options.all_fields[field].hidden" class="{{options.all_fields[field].class}}" groov-draggable="{{options.all_fields[field].draggable}}" ng-class="{active: options.setup.sort == field}">
             <span bo-if="options.all_fields[field].sortable"><a href="" ng-click="options.sort_func(field)" ng-class="options.setup.order">{{options.all_fields[field].name}}</a></span>
             <span bo-if="!options.all_fields[field].sortable"><span bo-text="options.all_fields[field].name"></span></span>
         </th>
@@ -35,12 +35,12 @@
     </tbody>
 </table>
     <div bo-if="options.show_hide">
-        <div id="{{custom_identifier}}-context-menu" class="context-menu dropdown clearfix">
+        <div id="{{custom_identifier}}-context-menu" class="context-menu dropdown clearfix" ng-show="context_menu_shown" ng-click="context_menu_shown = false" groov-rt-click="context_menu_shown = false">
 
             <ul class="dropdown-menu">
                 <li ng-repeat="field in options.all_fields" ng-show="field.hideable">
 
-                    <a href="" ng-click="show_hide(field)"> <i class="icon pull-left" ng-class="{'icon-ok':!field.hidden, 'icon-remove':field.hidden}"></i> <span bo-text="field.name"></span></a>
+                    <a href="" ng-click="show_hide(field); $event.stopPropagation();"> <i class="icon pull-left" ng-class="{'icon-ok':!field.hidden, 'icon-remove':field.hidden}"></i> <span bo-text="field.name"></span></a>
                 </li>
             </ul>
         </div>

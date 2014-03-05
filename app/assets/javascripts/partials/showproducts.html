@@ -17,6 +17,7 @@
                 <div id="collapseOne" class="accordion-body collapse in">
                     <div class="accordion-inner">
                         <ul class="nav nav-pills nav-stacked">
+                            <li><a href="" ng-click="create_product()">Create</a></li>
                             <li ng-class="{active: products.setup.filter=='all' && products.setup.is_kit == 0}" ><a href="" ng-click="product_setup_opt('filter','all')">Show All</a></li>
                             <li ng-class="{active: products.setup.filter=='active' && products.setup.is_kit == 0}" ><a href="" ng-click="product_setup_opt('filter','active')">Active Products</a></li>
                             <li ng-class="{active: products.setup.filter=='inactive' && products.setup.is_kit == 0}" ><a href="" ng-click="product_setup_opt('filter','inactive')">Inactive Products</a></li>

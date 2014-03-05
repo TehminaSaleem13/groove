@@ -521,6 +521,22 @@ class ProductsController < ApplicationController
     	end
 	end
 
+  def create
+    @result = Hash.new
+    @result['status'] = true
+    product = Product.new
+    product.name = ""
+    product.store_id = 0
+    product.store_product_id = 0
+    product.save
+
+    product.store_product_id = product.id
+    product.save
+    @result['product'] = product
+    respond_to do |format|
+      format.json { render json: @result}
+    end
+  end
   def duplicateproduct
 
     @result = Hash.new

@@ -1,4 +1,4 @@
-groovepacks_directives.directive('groovCommon',['notification','importOrders', function (notification, importOrders) {
+groovepacks_directives.directive('groovCommon',['notification','importOrders','$rootScope', function (notification, importOrders,$rootScope) {
     return {
         restrict:"A",
         templateUrl:"/assets/partials/common.html",
@@ -7,6 +7,13 @@ groovepacks_directives.directive('groovCommon',['notification','importOrders', f
             groovImport:"="
         },
         link: function(scope,el,attrs) {
+            $(".modal").on("click",function() {
+                $(".modal").modal("refresh");
+            });
+            $rootScope.$on('$locationChangeSuccess',function() {
+                $(".modal").modal("hide");
+                $(".modal-scrollable").hide();
+            });
             scope.notifs = {};
             //Notification related calls
             scope.$on('notification',function(event,args) {

@@ -4,7 +4,6 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout','$http','$sce','no
             identifier:'datagrid',
             select_all:false,
             show_hide:false,
-            draggable:false,
             editable:false,
             sort_func:function() {},
             setup: {},
@@ -16,7 +15,6 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout','$http','$sce','no
             name: "field",
             sortable:true,
             class: "span2",
-            draggable:true,
             hideable: true,
             hidden:false,
             transclude:'',
@@ -34,21 +32,13 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout','$http','$sce','no
             var myscope = {};
             scope.context_menu = function(event) {
                 if(scope.options.show_hide) {
-                    if(scope.options.show_hide) {
-                        myscope.contextmenuRoot = $("#"+scope.custom_identifier+"-context-menu");
+                    if(typeof myscope.contextmenu == "undefined") {
                         myscope.contextmenu = $("#"+scope.custom_identifier+"-context-menu .dropdown-menu");
                         myscope.contextmenu.on("mousedown",function(event){
                             event.stopPropagation();
                         });
-                        myscope.contextmenuRoot.on("mousedown",function(event){
-                            event.preventDefault();
-                            event.stopPropagation();
-                            myscope.contextmenuRoot.hide();
-                        });
                     }
-                    myscope.contextmenuRoot.css({
-                        display: "block"
-                    });
+                    scope.context_menu_shown = true;
                     myscope.contextmenu.css({
                         left:event.pageX,
                         top:event.pageY
@@ -97,6 +87,7 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout','$http','$sce','no
                 for (i in scope.groovDataGrid.all_fields) {
                     options.all_fields[i] = default_field_options();
                     options.all_fields[i].editable = (scope.groovDataGrid.editable != false);
+                    options.all_fields[i].draggable = (scope.groovDataGrid.draggable != false);
                     angular.extend(options.all_fields[i],scope.groovDataGrid.all_fields[i]);
                     if(options.all_fields[i].grid_bind !== '') {
                         options.all_fields[i].grid_bind = $sce.trustAsHtml(scope.groovDataGrid.all_fields[i].grid_bind);
@@ -104,7 +95,12 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout','$http','$sce','no
                     scope.theads.push(i);
                 }
                 options.setup = scope.groovDataGrid.setup;
+                scope.context_menu_shown = false;
                 scope.options = options;
+                scope.dragOptions = {
+                    update: scope.update,
+                    enabled: scope.options.draggable
+                }
                 scope.custom_identifier = scope.options.identifier + Math.floor(Math.random()*1000);
 
 
