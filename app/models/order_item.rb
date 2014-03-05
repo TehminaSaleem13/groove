@@ -106,7 +106,7 @@ class OrderItem < ActiveRecord::Base
           end
           child_item['product_id'] = kit_product.product_kit_skus.option_product.id
           child_item['kit_product_id'] = kit_product.id
-          result['child_items'].push(child_item)
+          result['child_items'].push(child_item) if child_item['qty_remaining'] != 0
         end
       end
       result['child_items'] = result['child_items'].sort_by { |hsh| hsh['kit_packing_placement'] }
@@ -115,6 +115,7 @@ class OrderItem < ActiveRecord::Base
   end
 
   def build_scanned_single_item(depends_kit = false)
+
     result = Hash.new
 
     if !self.product.nil?
@@ -189,10 +190,6 @@ class OrderItem < ActiveRecord::Base
               kit_product.scanned_qty
             child_item['scanned_qty'] = kit_product.scanned_qty
           end
-
-          child_item['qty_remaining'] = self.qty * kit_product.product_kit_skus.qty - 
-            kit_product.scanned_qty
-          child_item['scanned_qty'] = kit_product.scanned_qty
           child_item['packing_placement'] = kit_product.product_kit_skus.option_product.packing_placement
           child_item['kit_packing_placement'] = kit_product.product_kit_skus.packing_order
           if kit_product.product_kit_skus.option_product.product_barcodes.length > 0
@@ -200,7 +197,7 @@ class OrderItem < ActiveRecord::Base
           end
           child_item['product_id'] = kit_product.product_kit_skus.option_product.id
           child_item['kit_product_id'] = kit_product.id
-          result['child_items'].push(child_item)
+          result['child_items'].push(child_item) if child_item['scanned_qty'] != 0
         end
       end
     end
@@ -248,30 +245,22 @@ class OrderItem < ActiveRecord::Base
     result = false
     if self.product.is_kit == 1 && self.kit_split && 
         self.product.kit_parsing == 'depends'
-        order_items = []
-        min_qty = 9999
-        self.order_item_kit_products.each do |kit_product|
-            item = Hash.new
-            item['id'] = kit_product.product_kit_skus.option_product.id
-            item['unscanned_qty'] = self.qty * kit_product.product_kit_skus.qty - 
-              kit_product.scanned_qty 
-            order_items.push(item)
-            min_qty = item['unscanned_qty'] if item['unscanned_qty'] < min_qty
-        end
-        
-        logger.info order_items.to_s
 
-        if min_qty != 9999
-          order_items.each do |item|
-            if item['id'] == product_id &&
-              item['unscanned_qty'] == min_qty
-              result = true
-              break 
-            end
+        #if no of unscanned items in the kit split qty for the corrseponding item 
+        #is greater than 0 and the kit split can be increased in the order item,
+        #then the quantity should be increased
+        self.order_item_kit_products.each do |kit_product|
+          if kit_product.product_kit_skus.option_product.id == product_id && 
+              kit_product.scanned_qty != 0 &&
+              (kit_product.scanned_qty % 
+                (self.kit_split_qty * kit_product.product_kit_skus.qty) == 0) && 
+              self.scanned_qty < self.qty
+            result = true
           end
         end
-
     end
+    logger.info "result:"+result.to_s
+
     result
   end
 
