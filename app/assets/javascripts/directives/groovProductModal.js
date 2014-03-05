@@ -7,6 +7,7 @@ groovepacks_directives.directive('groovProductModal',['notification','products',
             groovProducts: "="
         },
         link: function(scope,el,attrs) {
+            var myscope = {};
             scope.custom_identifier = Math.floor(Math.random()*1000);
             /**
              * Public properties
@@ -40,12 +41,12 @@ groovepacks_directives.directive('groovProductModal',['notification','products',
                 if(typeof open_modal == 'boolean' && open_modal ){
                     if(scope._product_obj == null) {
                         scope._product_obj = $("#showProduct"+scope.custom_identifier);
-                        scope._product_obj.on('hidden',function(){
+                        scope._product_obj.on('hidden',function() {
+                            scope.update_single_product(false,false);
                             scope.$emit("products-modal-closed",{identifier: scope.custom_identifier});
                         });
                     }
                     scope._product_obj.modal('show');
-
                 }
                 if(typeof index == 'number'){
                     scope.groovProducts.current = index;
@@ -59,11 +60,19 @@ groovepacks_directives.directive('groovProductModal',['notification','products',
                 }
                 products.single.get(id,scope.groovProducts).then(function(data) {
                     //console.log(scope.groovProducts);
+                    if(typeof open_modal == 'boolean' && open_modal ){
+                        myscope.single = {}
+                        angular.copy(scope.groovProducts.single, myscope.single);
+                    }
                     if(typeof post_fn == 'function' ) {
                         $timeout(post_fn,10);
                     }
                 });
             };
+            scope.rollback = function() {
+                scope.groovProducts.single = {}
+                angular.copy(myscope.single,scope.groovProducts.single);
+            }
             scope.load_kit = function(id) {
                 scope.kit_product_single_details(id,'auto',0,true);
             }
