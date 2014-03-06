@@ -281,7 +281,12 @@ class ScanPackController < ApplicationController
 							  					#process product barcode scan
 							  					order_item_kit_product = 
 							  						OrderItemKitProduct.find(child_item['kit_product_id'])
-							  					order_item_kit_product.process_item if !order_item_kit_product.nil?
+
+							  					unless order_item_kit_product.nil?
+								  					order_item_kit_product.process_item
+								  					(session[:most_recent_scanned_products] ||= []) << child_item['actual_product_id']
+							  					end
+
 							  					break
 							  				end
 							  			end
@@ -295,8 +300,11 @@ class ScanPackController < ApplicationController
 				  					barcode_found = true
 				  					#process product barcode scan
 				  					order_item = OrderItem.find(item['order_item_id'])
-				  					order_item.process_item if !order_item.nil?
-				  					(session[:most_recent_scanned_products] ||= []) << order_item.product_id
+
+				  					unless order_item.nil?
+					  					order_item.process_item
+					  					(session[:most_recent_scanned_products] ||= []) << order_item.product_id
+				  					end
 				  					break
 				  				end
 					  		end
