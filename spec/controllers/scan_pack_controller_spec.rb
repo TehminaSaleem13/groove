@@ -105,6 +105,19 @@ describe ScanPackController do
         ).flatten].to_s
     end
 
+    @next_item_recommendation_l = lambda do |name, sku, images, scanned_qty, qty, qty_remaining|
+      next_item = Hash.new
+
+      next_item['name'] = name
+      next_item['sku'] = sku
+      next_item['images'] = []
+      next_item['scanned_qty'] = scanned_qty
+      next_item['qty'] = qty
+      next_item['qty_remaining'] = qty_remaining
+
+      next_item
+    end
+
   end
 
   describe "Order Scan" do
@@ -1812,6 +1825,10 @@ describe ScanPackController do
 
       expected_result['data']['most_recent_scanned_products'] = session[:most_recent_scanned_products]
 
+      expected_result['data']['next_item'] = @next_item_recommendation_l.call(kit_product2.name, 'IPROTO2', [], 
+          1, 4, 3)
+      expected_result['data']['next_item_present'] = true
+      
       expect(result).to eq(JSON.parse(expected_result.to_json))
 
       #scanned barcode: KITITEM2
@@ -1868,6 +1885,11 @@ describe ScanPackController do
       expected_result['data']['scanned_items'] << scanned_item
 
       expected_result['data']['most_recent_scanned_products'] = session[:most_recent_scanned_products]
+
+      expected_result['data']['next_item'] = @next_item_recommendation_l.call(kit_product2.name, 'IPROTO2', [], 
+          2, 4, 2)
+      expected_result['data']['next_item_present'] = true
+
 
       expect(result).to eq(JSON.parse(expected_result.to_json))
 
@@ -1932,6 +1954,10 @@ describe ScanPackController do
       expected_result['data']['scanned_items'] << scanned_item
 
       expected_result['data']['most_recent_scanned_products'] = session[:most_recent_scanned_products]
+
+      expected_result['data']['next_item'] = @next_item_recommendation_l.call(kit_product2.name, 'IPROTO2', [], 
+          3, 4, 1)
+      expected_result['data']['next_item_present'] = true
 
       expect(result).to eq(JSON.parse(expected_result.to_json))
 
@@ -2055,6 +2081,10 @@ describe ScanPackController do
 
       expected_result['data']['most_recent_scanned_products'] = session[:most_recent_scanned_products]
 
+      expected_result['data']['next_item'] = @next_item_recommendation_l.call(kit_product2.name, 'IPROTO2', [], 
+          5, 8, 3)
+      expected_result['data']['next_item_present'] = true
+
       expect(result).to eq(JSON.parse(expected_result.to_json))
 
 
@@ -2113,6 +2143,10 @@ describe ScanPackController do
       expected_result['data']['scanned_items'] << scanned_item
 
       expected_result['data']['most_recent_scanned_products'] = session[:most_recent_scanned_products]
+      
+      expected_result['data']['next_item'] = @next_item_recommendation_l.call(kit_product2.name, 'IPROTO2', [], 
+          6, 8, 2)
+      expected_result['data']['next_item_present'] = true
 
       expect(result).to eq(JSON.parse(expected_result.to_json))
 
@@ -2172,6 +2206,10 @@ describe ScanPackController do
       expected_result['data']['scanned_items'] << scanned_item
 
       expected_result['data']['most_recent_scanned_products'] = session[:most_recent_scanned_products]
+
+      expected_result['data']['next_item'] = @next_item_recommendation_l.call(kit_product2.name, 'IPROTO2', [], 
+          7, 8, 1)
+      expected_result['data']['next_item_present'] = true
 
       expect(result).to eq(JSON.parse(expected_result.to_json))
 
@@ -2293,6 +2331,10 @@ describe ScanPackController do
 
       expected_result['data']['most_recent_scanned_products'] = session[:most_recent_scanned_products]
 
+      expected_result['data']['next_item'] = @next_item_recommendation_l.call(kit_product.name, 'IPROTO1', [], 
+          1, 6, 5)
+      expected_result['data']['next_item_present'] = true
+
       expect(result).to eq(JSON.parse(expected_result.to_json))
 
       #scanned barcode: KITITEM1
@@ -2305,8 +2347,6 @@ describe ScanPackController do
       order_item_kit.reload
 
       expect(order_item_kit.kit_split_qty).to eq(2)
-
-
 
       child_items = []
 
@@ -2356,6 +2396,10 @@ describe ScanPackController do
       expected_result['data']['scanned_items'] << scanned_item
 
       expected_result['data']['most_recent_scanned_products'] = session[:most_recent_scanned_products]
+
+      expected_result['data']['next_item'] = @next_item_recommendation_l.call(kit_product.name, 'IPROTO1', [], 
+          2, 6, 4)
+      expected_result['data']['next_item_present'] = true
 
       expect(result).to eq(JSON.parse(expected_result.to_json))
 
@@ -2418,6 +2462,10 @@ describe ScanPackController do
       expected_result['data']['scanned_items'] << scanned_item
 
       expected_result['data']['most_recent_scanned_products'] = session[:most_recent_scanned_products]
+      
+      expected_result['data']['next_item'] = @next_item_recommendation_l.call(kit_product.name, 'IPROTO1', [], 
+          3, 6, 3)
+      expected_result['data']['next_item_present'] = true
 
       expect(result).to eq(JSON.parse(expected_result.to_json))
 
@@ -2480,6 +2528,10 @@ describe ScanPackController do
       expected_result['data']['scanned_items'] << scanned_item
 
       expected_result['data']['most_recent_scanned_products'] = session[:most_recent_scanned_products]
+      
+      expected_result['data']['next_item'] = @next_item_recommendation_l.call(kit_product.name, 'IPROTO1', [], 
+          4, 6, 2)
+      expected_result['data']['next_item_present'] = true
 
       expect(result).to eq(JSON.parse(expected_result.to_json))
 
@@ -2542,6 +2594,10 @@ describe ScanPackController do
       expected_result['data']['scanned_items'] << scanned_item
 
       expected_result['data']['most_recent_scanned_products'] = session[:most_recent_scanned_products]
+      
+      expected_result['data']['next_item'] = @next_item_recommendation_l.call(kit_product.name, 'IPROTO1', [], 
+          5, 6, 1)
+      expected_result['data']['next_item_present'] = true
 
       expect(result).to eq(JSON.parse(expected_result.to_json))
 
