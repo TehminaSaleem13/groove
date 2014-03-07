@@ -157,10 +157,10 @@
         </thead>
         <tbody>
         <tr ng-repeat="item in orders.single.items" ng-click="item.checked = !item.checked" ng-class="{info: item.checked}">
-            <td groov-editable="itemEditableOptions" ng-model="item.productinfo" prop="name" identifier="item-sku-{{$index}}"><a href="" ng-click="function(ngModel.id,'auto',0,true)" >{{ ngModel[prop] }}</a></td>
+            <td groov-editable="itemEditableOptions" ng-model="item.productinfo" prop="name" identifier="item-name-{{$index}}"><a href="" ng-click="function(ngModel.id,'auto',0,true)" >{{ ngModel[prop] }}</a></td>
             <td> <div class="single-image"><img class="img-thumb" ng-src="{{item.productimages[0].image}}" /></div></td>
             <td groov-editable="itemEditableOptions" ng-model="item" prop="sku" identifier="item-sku-{{$index}}"></td>
-            <td groov-editable="itemEditableOptions" ng-model="item" prop="location" identifier="item-qty-{{$index}}"></td>
+            <td groov-editable="itemEditableOptions" ng-model="item" prop="location" identifier="item-location-{{$index}}"></td>
             <td groov-editable="itemEditableOptions" ng-model="item.iteminfo" prop="qty" identifier="item-qty-{{$index}}" ></td>
             <td groov-editable="itemEditableOptions" ng-model="item" prop="qty_on_hand" identifier="item-qoh-{{$index}}"></td>
             <td ng-click="save_item(item.productinfo,'is_skippable')"><input type="checkbox" ng-model="item.productinfo.is_skippable"/></td>
