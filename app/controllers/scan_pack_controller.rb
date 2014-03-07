@@ -338,34 +338,20 @@ class ScanPackController < ApplicationController
 					  				break
 					  			elsif unscanned_item['product_type'] == 'individual'
 
-					  				if scanned_product_id == unscanned_item['product_id'] && 
-					  					unscanned_item['scanned_qty'] + unscanned_item['qty_remaining'] > 0
-						  				@result['data']['next_item'] = Hash.new
-						  				@result['data']['next_item']['name'] = unscanned_item['name']
-						  				@result['data']['next_item']['sku'] = unscanned_item['sku']
-						  				@result['data']['next_item']['images'] = unscanned_item['images']
-						  				@result['data']['next_item']['scanned_qty'] = unscanned_item['scanned_qty']
-						  				@result['data']['next_item']['qty'] = unscanned_item['scanned_qty'] +
-						  					unscanned_item['qty_remaining']
-						  				@result['data']['next_item']['qty_remaining'] = unscanned_item['qty_remaining']
-						  				@result['data']['next_item_present'] = true							  				
-					  				    next_item_found = true
-					  				else
-						  				unscanned_item['child_items'].each do |child_item|
-						  					if child_item['product_id'] == scanned_product_id 
-								  				@result['data']['next_item'] = Hash.new
-								  				@result['data']['next_item']['name'] = child_item['name']
-								  				@result['data']['next_item']['sku'] = child_item['sku']
-								  				@result['data']['next_item']['images'] = child_item['images']
-								  				@result['data']['next_item']['scanned_qty'] = child_item['scanned_qty']
-								  				@result['data']['next_item']['qty'] = child_item['scanned_qty'] +
-								  					child_item['qty_remaining']
-								  				@result['data']['next_item']['qty_remaining'] = child_item['qty_remaining']
-								  				@result['data']['next_item_present'] = true
-								  				next_item_found =true
-								  				break
-								  			end
-						  				end
+					  				unscanned_item['child_items'].each do |child_item|
+					  					if child_item['product_id'] == scanned_product_id 
+							  				@result['data']['next_item'] = Hash.new
+							  				@result['data']['next_item']['name'] = child_item['name']
+							  				@result['data']['next_item']['sku'] = child_item['sku']
+							  				@result['data']['next_item']['images'] = child_item['images']
+							  				@result['data']['next_item']['scanned_qty'] = child_item['scanned_qty']
+							  				@result['data']['next_item']['qty'] = child_item['scanned_qty'] +
+							  					child_item['qty_remaining']
+							  				@result['data']['next_item']['qty_remaining'] = child_item['qty_remaining']
+							  				@result['data']['next_item_present'] = true
+							  				next_item_found =true
+							  				break
+							  			end
 					  				end
 
 					  				break if next_item_found
