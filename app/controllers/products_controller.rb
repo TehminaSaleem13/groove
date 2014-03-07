@@ -526,7 +526,7 @@ class ProductsController < ApplicationController
     @result['status'] = true
     product = Product.new
     product.name = ""
-    product.store_id = 0
+    product.store_id = Store.where(:store_type=>'system').first.id
     product.store_product_id = 0
     product.save
 

@@ -35,11 +35,11 @@
         </td>
         <td>
             <h5>Status </h5>
-            <label class="radio"><input type="radio" ng-click="update_single_product()"
+            <label class="radio"><input type="radio" ng-change="update_single_product()"
                                         ng-model="groovProducts.single.basicinfo.status" value="active"> Active </label>
-            <label class="radio"><input type="radio" ng-click="update_single_product()"
+            <label class="radio"><input type="radio" ng-change="update_single_product()"
                                         ng-model="groovProducts.single.basicinfo.status" value="inactive"> Inactive </label>
-            <label class="radio"><input type="radio" ng-click="update_single_product()"
+            <label class="radio"><input type="radio" ng-change="update_single_product()"
                                         ng-model="groovProducts.single.basicinfo.status" value="new"> New </label>
         </td>
     </tr>
@@ -91,11 +91,11 @@
 
     <div class="controls">
         <label class="radio inline">
-            <input type="radio" ng-click="update_single_product()"
+            <input type="radio" ng-change="update_single_product()"
                    ng-model="groovProducts.single.basicinfo.spl_instructions_4_confirmation" value="1"/> Required
         </label>
         <label class="radio inline">
-            <input type="radio" ng-click="update_single_product()"
+            <input type="radio" ng-change="update_single_product()"
                    ng-model="groovProducts.single.basicinfo.spl_instructions_4_confirmation" value="0"/> Not Required
         </label>
     </div>
@@ -106,7 +106,7 @@
     <div class="controls">
         <div groov-editable="arrayEditableOptions" identifier="product_single_barcodes" prop="barcode" ng-model="groovProducts.single.barcodes" class="pull-left"></div>
         <label ng-show="groovProducts.single.barcodes == ''" class="checkbox inline">
-            <input type="checkbox" ng-click="update_single_product()"
+            <input type="checkbox" ng-change="update_single_product()"
                    ng-model="groovProducts.single.basicinfo.disable_conf_req"/> Disable Confirmation Requests
         </label>
     </div>
@@ -116,11 +116,11 @@
 
     <div class="controls">
         <label class="radio inline">
-            <input type="radio" ng-click="update_single_product()" ng-model="groovProducts.single.basicinfo.is_skippable"
+            <input type="radio" ng-change="update_single_product()" ng-model="groovProducts.single.basicinfo.is_skippable"
                    value="1"/> Yes
         </label>
         <label class="radio inline">
-            <input type="radio" ng-click="update_single_product()" ng-model="groovProducts.single.basicinfo.is_skippable"
+            <input type="radio" ng-change="update_single_product()" ng-model="groovProducts.single.basicinfo.is_skippable"
                    value="0"/> No
         </label>
     </div>
@@ -200,15 +200,15 @@
     <div class="control-group">
         <div class="controls">
             <label class="radio">
-                <input type="radio" ng-click="update_single_product()" ng-model="groovProducts.single.basicinfo.kit_parsing"
+                <input type="radio" ng-change="update_single_product()" ng-model="groovProducts.single.basicinfo.kit_parsing"
                        value="single"/> Always be scanned as single SKU
             </label>
             <label class="radio">
-                <input type="radio" ng-click="update_single_product()" ng-model="groovProducts.single.basicinfo.kit_parsing"
+                <input type="radio" ng-change="update_single_product()" ng-model="groovProducts.single.basicinfo.kit_parsing"
                        value="individual"/> Always be scanned as individual part SKUs
             </label>
             <label class="radio">
-                <input type="radio" ng-click="update_single_product()" ng-model="groovProducts.single.basicinfo.kit_parsing"
+                <input type="radio" ng-change="update_single_product()" ng-model="groovProducts.single.basicinfo.kit_parsing"
                        value="depends"/> Automatically switch as needed when part SKUs are scanned
             </label>
         </div>
@@ -220,8 +220,8 @@
     <div class="row-fluid">
         <div class="span12">
             <div class="pull-right">
-                <button ng-click="update_single_product(false)" class="btn btn-primary">Save</button>
-                <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+                <button data-dismiss="modal"  aria-hidden="true" class="btn btn-primary">Save & close</button>
+                <button class="btn" data-dismiss="modal" ng-click="rollback()" aria-hidden="true">Cancel</button>
             </div>
         </div>
     </div>

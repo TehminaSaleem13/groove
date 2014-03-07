@@ -1,6 +1,6 @@
 class StoreSettingsController < ApplicationController
   def storeslist
-    @stores = Store.all
+    @stores = Store.where("store_type != 'system'")
 
     respond_to do |format|
       format.json { render json: @stores}
@@ -11,7 +11,7 @@ class StoreSettingsController < ApplicationController
   def getactivestores
     @result = Hash.new
     @result['status'] = true
-    @result['stores'] = Store.where(:status=>'1')
+    @result['stores'] = Store.where("status = '1' AND store_type != 'system'")
 
     respond_to do |format|
       format.json { render json: @result}
@@ -400,11 +400,11 @@ class StoreSettingsController < ApplicationController
                       order_required.delete('qty')
                     end
                     order.order_items << order_item
-                  end  
+                  end
                 end
                   #if product id cannot be found with SKU, then create product with product name and SKU
 
-              
+
                 order[single_map] = single_row[mapping[single_map]]
 
                 if order_required.include? single_map
@@ -526,7 +526,7 @@ class StoreSettingsController < ApplicationController
             if @result["status"]
               begin
                 if product.name != 'name' && product.name != ''
-                  product.save! 
+                  product.save!
                   product.update_product_status
                 end
               rescue ActiveRecord::RecordInvalid => e

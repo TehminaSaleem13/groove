@@ -7,7 +7,7 @@
 #   Mayor.create(name: 'Emanuel', city: cities.first)
 
 if User.where(:username=>'admin').length == 0
-	User.create(:username=>'admin', :email => "abc@gmail.com", :password => "12345678", 
+	User.create(:username=>'admin', :email => "abc@gmail.com", :password => "12345678",
 		:password_confirmation => "12345678", :confirmation_code=>'1234567890')
 	#user = User.create(:username=>'admin', :password=>'12345678')
 end
@@ -22,4 +22,7 @@ end
 
 if OrderTag.where(:name=>'Manual Hold').length == 0
 	manual_hold_tag = OrderTag.create(:name=>'Manual Hold', :color=>'#0000FF', :predefined => true)
+end
+if Store.where(:store_type=>'system').length == 0
+  system_store = Store.create(:name=>'GroovePacker', :store_type=>'system',:status=>true)
 end
