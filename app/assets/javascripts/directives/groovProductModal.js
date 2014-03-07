@@ -111,13 +111,13 @@ groovepacks_directives.directive('groovProductModal',['notification','products',
             scope.handle_keydown =  function(event) {
                 if(event.which == 38) {//up key
                     if(scope.groovProducts.current > 0) {
-                        scope.groovSingleProduct(scope.groovProducts.list[scope.groovProducts.current -1].id, scope.groovProducts.current - 1,0, false);
+                        scope.groovSingleProduct(scope.groovProducts.list[scope.groovProducts.current -1].id, scope.groovProducts.current - 1,0, true);
                     } else {
                         alert("Already at the top of the list");
                     }
                 } else if(event.which == 40) { //down key
                     if(scope.groovProducts.current < scope.groovProducts.list.length -1) {
-                        scope.groovSingleProduct(scope.groovProducts.list[scope.groovProducts.current + 1].id, scope.groovProducts.current + 1,0, false);
+                        scope.groovSingleProduct(scope.groovProducts.list[scope.groovProducts.current + 1].id, scope.groovProducts.current + 1,0, true);
                     } else {
                         scope._keydown_last = true;
                         scope.$emit("products-next-load");
@@ -200,7 +200,7 @@ groovepacks_directives.directive('groovProductModal',['notification','products',
                 if(scope._keydown_last) {
                     scope._keydown_last = false;
                     if(scope.groovProducts.current < scope.groovProducts.list.length -1) {
-                        scope.groovSingleProduct(scope.groovProducts.list[scope.groovProducts.current + 1].id, scope.groovProducts.current + 1,0, false);
+                        scope.groovSingleProduct(scope.groovProducts.list[scope.groovProducts.current + 1].id, scope.groovProducts.current + 1,0, true);
                     } else {
                         alert("Already at the bottom of the list");
                     }

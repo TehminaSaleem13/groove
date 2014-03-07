@@ -71,7 +71,7 @@
 </div>
 
 <!-- Modal popup for creating user -->
-<div id="createUser" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="createUser"
+<div id="createUser{{custom_identifier}}" ng-keydown="keyboard_nav_event($event)" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="createUser"
 aria-hidden="true">
 
   <div class="modal-header">
@@ -357,9 +357,9 @@ aria-hidden="true">
 </div>
 
   <div class="modal-footer">
-        <button ng-click="submit()"class="btn btn-primary" ng-hide="edit_status">Add User</button>
-        <button ng-click="submit()"class="btn btn-primary" ng-show="edit_status">Update User</button>
-        <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+        <button class="btn btn-primary" data-dismiss="modal" aria-hidden="true" ng-hide="edit_status">Add User</button>
+        <button class="btn btn-primary" data-dismiss="modal" aria-hidden="true" ng-show="edit_status">Save & close</button>
+        <button class="btn" data-dismiss="modal" ng-click="rollback()" aria-hidden="true">Cancel</button>
   </div>
 
 </fieldset>

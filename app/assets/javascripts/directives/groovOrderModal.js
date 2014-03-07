@@ -157,14 +157,14 @@ groovepacks_directives.directive('groovOrderModal',['notification','orders','pro
             scope.handle_keydown = function(event) {
                     if(event.which == 38) {//up key
                         if(scope.orders.current > 0) {
-                            scope.order_single_details(scope.orders.list[scope.orders.current -1].id, scope.orders.current - 1);
+                            scope.order_single_details(scope.orders.list[scope.orders.current -1].id, scope.orders.current - 1,0,true);
                         } else {
                             alert("Already at the top of the list");
                         }
                     } else if(event.which == 40) { //down key
 
                         if(scope.orders.current < scope.orders.list.length -1) {
-                            scope.order_single_details(scope.orders.list[scope.orders.current + 1].id, scope.orders.current + 1);
+                            scope.order_single_details(scope.orders.list[scope.orders.current + 1].id, scope.orders.current + 1,0,true);
                         } else {
                             scope._keydown_last = true;
                             scope.$emit("orders-next-load");
@@ -211,7 +211,7 @@ groovepacks_directives.directive('groovOrderModal',['notification','orders','pro
                 if(scope._keydown_last) {
                     scope._keydown_last = false;
                     if(scope.orders.current < scope.orders.list.length -1) {
-                        scope.order_single_details(scope.orders.list[scope.orders.current + 1].id, scope.orders.current + 1,0, false);
+                        scope.order_single_details(scope.orders.list[scope.orders.current + 1].id, scope.orders.current + 1,0, true);
                     } else {
                         alert("Already at the bottom of the list");
                     }
