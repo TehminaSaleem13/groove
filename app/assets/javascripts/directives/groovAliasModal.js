@@ -82,7 +82,11 @@ groovepacks_directives.directive('groovAliasModal',['notification','products','$
             scope.add_alias_product = function(product) {
                 product.checked = !product.checked;
                 if(scope.is_kit || scope.is_order) {
-                    scope.selected_aliases.push(product.id);
+                    if(product.checked) {
+                        scope.selected_aliases.push(product.id);
+                    } else {
+                        scope.selected_aliases.splice(scope.selected_aliases.indexOf(product.id),1);
+                    }
                 } else {
                     if(confirm("Are you sure? This can not be undone!")) {
                         scope.selected_aliases.push(product.id);
@@ -99,6 +103,9 @@ groovepacks_directives.directive('groovAliasModal',['notification','products','$
                     scope.products.list = [];
                     for(i in tmp_list) {
                        if(scope._exceptions.indexOf(tmp_list[i].id) == -1 ) {
+                           if(scope.selected_aliases.indexOf(tmp_list[i].id) != -1) {
+                               tmp_list[i].checked = true
+                           }
                            scope.products.list.push(tmp_list[i]);
                        }
                     }

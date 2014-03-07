@@ -604,7 +604,9 @@ class OrdersController < ApplicationController
           if product.product_inventory_warehousess.length > 0
             @orderitem["location"] = product.product_inventory_warehousess.first.name
           end
-          @orderitem['sku'] = product.product_skus.first.sku
+          if product.product_skus.length > 0
+            @orderitem['sku'] = product.product_skus.first.sku
+          end
           @orderitem['productimages'] = product.product_images
 
         end
@@ -784,6 +786,7 @@ class OrdersController < ApplicationController
   def removeitemfromorder
     @result = Hash.new
     @result['status'] = true
+    @result['messages'] =[]
 
     @orderitem = OrderItem.find(params[:orderitem])
 
@@ -800,6 +803,87 @@ class OrdersController < ApplicationController
       @result['status'] &= false
       @result['messages'].push("Could not find order item")
     end
+
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json: @result }
+    end
+  end
+
+  def rollback
+    @result = Hash.new
+    @result['status'] = true
+    @result['messages'] =[]
+    if params[:single].nil?
+      @result['status'] &= false
+      @result['messages'].push("Order can not be nil")
+    else
+      order = Order.find(params[:single]['basicinfo']['id'])
+      if order.nil?
+        @result['status'] &= false
+        @result['messages'].push("Wrong order id")
+      else
+        #Items
+        items = OrderItem.where(:order_id => order.id)
+        items.each do |current_item|
+          found_item = false
+          unless params[:single]['items'].blank?
+            params[:single]['items'].each do |single_item|
+              if current_item.id == single_item['iteminfo']['id']
+                found_item = true
+              end
+            end
+          end
+
+          unless found_item
+            current_item.destroy
+          end
+        end
+        unless params[:single]['items'].blank?
+          params[:single]['items'].each do |current_item|
+            single_item = OrderItem.find_or_create_by_order_id_and_product_id( order.id, current_item['iteminfo']['product_id'])
+              current_item['iteminfo'].each do |value|
+                unless ["id","created_at","updated_at","order_id","product_id"].include?(value[0])
+                  single_item[value[0]] = value[1]
+                end
+              end
+              single_item.save!
+          end
+        end
+
+        #activity
+        #As activities only get added, no updating or adding required
+        activities = OrderActivity.where(:order_id => params[:single]['basicinfo']['id'])
+        activities.each do |current_activity|
+          found_activity = false
+          params[:single]['activities'].each do |single_item|
+            if current_activity.id == single_item['id']
+              found_activity = true
+            end
+          end
+          unless found_activity
+            current_activity.destroy
+          end
+        end
+
+        #exception
+        if params[:single]['exception'].nil?
+          unless order.exceptions.nil?
+            order.exceptions.destroy
+          end
+        else
+          exception = OrderExceptions.find_or_create_by_order_id(order.id)
+          params[:single]['exception'].each do |value|
+            unless ["id","created_at","updated_at","order_id","assoc"].include?(value[0])
+              exception[value[0]] = value[1]
+            end
+          end
+          exception.save!
+        end
+
+      end
+    end
+
 
     respond_to do |format|
       format.html # show.html.erb

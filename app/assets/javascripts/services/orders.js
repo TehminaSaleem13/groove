@@ -149,7 +149,18 @@ groovepacks_services.factory('orders',['$http','notification',function($http,not
             }
         ).error(notification.server_error);
     }
-
+    var rollback_single = function(single) {
+        update_single({single: single});
+        return $http.post("orders/rollback.json",{single: single}).success(
+            function(data) {
+                if(data.status) {
+                    notification.notify("Successfully Updated",1);
+                } else {
+                    notification.notify(data.messages,0);
+                }
+            }
+        ).error(notification.server_error);
+    }
     var single_add_item = function(orders,ids) {
         return $http.post("orders/additemtoorder.json",{productids: ids , id: orders.single.basicinfo.id, qty:1}).success(
             function(data) {
@@ -227,6 +238,7 @@ groovepacks_services.factory('orders',['$http','notification',function($http,not
         single: {
             get: get_single,
             update:update_single,
+            rollback:rollback_single,
             item: {
                 add: single_add_item,
                 remove: single_remove_item,

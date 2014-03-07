@@ -7,6 +7,7 @@ groovepacks_directives.directive('groovOrderModal',['notification','orders','pro
             orders: "=groovOrders"
         },
         link: function(scope,el,attrs) {
+            var myscope = {};
             scope.custom_identifier = Math.floor(Math.random()*1000);
             /**
              * Public properties
@@ -42,6 +43,7 @@ groovepacks_directives.directive('groovOrderModal',['notification','orders','pro
                     if(scope._order_obj == null) {
                         scope._order_obj = $("#showOrder"+scope.custom_identifier);
                         scope._order_obj.on('hidden',function(){
+                            scope.update_single_order(false);
                             scope.$emit("orders-modal-closed",{identifier: scope.custom_identifier});
                         });
                     }
@@ -80,12 +82,22 @@ groovepacks_directives.directive('groovOrderModal',['notification','orders','pro
                             break;
                         }
                     }
+                    if(typeof open_modal == 'boolean' && open_modal ){
+                        myscope.single = {}
+                        angular.copy(scope.orders.single,myscope.single);
+                    }
                     if(typeof post_fn == 'function' ) {
                         $timeout(post_fn,10);
                     }
                 });
             };
 
+            scope.rollback = function() {
+                orders.single.rollback(myscope.single).then(function(response){
+                    scope.order_single_details(scope.orders.single.basicinfo.id);
+                })
+
+            }
             scope.update_single_order = function(auto) {
                 orders.single.update(scope.orders,auto).then(function(response) {
                     scope.order_single_details(scope.orders.single.basicinfo.id);
@@ -95,7 +107,9 @@ groovepacks_directives.directive('groovOrderModal',['notification','orders','pro
             scope.add_item_order = function(event, args) {
                 event.stopPropagation();
                 orders.single.item.add(scope.orders,args.selected).then(function(response){
-                    scope.order_single_details(scope.orders.single.basicinfo.id);
+                    scope.order_single_details(scope.orders.single.basicinfo.id,false,function(){
+                        scope._order_obj.modal("refresh");
+                    });
                 });
             }
 

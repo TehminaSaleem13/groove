@@ -474,6 +474,11 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies) {
         $('#createStore').modal('show');
     }
 
+    $scope.refresh_modal = function() {
+        $timeout(function(){
+            $("#createStore").modal("refresh")
+        },100);
+    }
     $scope.copydata =function(event) {
 
         if (event){

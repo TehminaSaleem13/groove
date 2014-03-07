@@ -101,7 +101,7 @@ aria-hidden="true">
       <div class="control-group">
         <label class="control-label">Store Type</label>
         <div class="controls">
-            <select class="selectpicker" ng-model="newStore.store_type">
+            <select class="selectpicker" ng-change="refresh_modal()" ng-model="newStore.store_type">
               <option value="Amazon">Amazon</option>
               <option value="Ebay">Ebay</option>
               <option value="Magento">Magento</option>

@@ -7,10 +7,10 @@ groovepacks_directives.directive('groovCommon',['notification','importOrders','$
             groovImport:"="
         },
         link: function(scope,el,attrs) {
-            $(".modal").on("click",function() {
-                $(".modal").modal("refresh");
-            });
-            $rootScope.$on('$locationChangeSuccess',function() {
+            $rootScope.$on('$locationChangeStart',function(event) {
+                if($(".modal").is(':visible')) {
+                    event.preventDefault();
+                }
                 $(".modal").modal("hide");
                 $(".modal-scrollable").hide();
             });
