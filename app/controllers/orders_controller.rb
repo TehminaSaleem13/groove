@@ -745,9 +745,10 @@ class OrdersController < ApplicationController
         end
       end
       if !@order.save
-
         @result['status'] &= false
         @result['messages'].push("Adding item to order failed")
+      else
+        @order.update_order_status
       end
     end
 
@@ -790,7 +791,9 @@ class OrdersController < ApplicationController
       @orderitem.each do |item|
         unless item.remove_order_item_kit_products && item.destroy
           @result['status'] &= false
-          @result['messages'].push("Removed items from order")
+          @result['messages'].push("Removed items from order failed")
+        else
+          item.order.update_order_status
         end
       end
     else
