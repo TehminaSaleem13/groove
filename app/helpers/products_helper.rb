@@ -45,4 +45,53 @@ module ProductsHelper
 		end
   end
 
+  def updatelist(product,var,value)
+    if ["name","status","is_skippable"].include?(var)
+      product[var] = value
+      product.save
+    elsif var ==  "sku"
+      product_sku = product.product_skus.first
+      if product_sku.nil?
+        product_sku = ProductSku.new
+        product_sku.product_id = product.id
+      end
+      product_sku.sku = value
+      product_sku.save
+    elsif var ==  "cat"
+      product_cat = product.product_cats.first
+      if product_cat.nil?
+        product_cat = ProductCat.new
+        product_cat.product_id = product.id
+      end
+      product_cat.category = value
+      product_cat.save
+    elsif var ==  "barcode"
+      if ProductBarcode.where(:barcode => value).length == 0
+        product_barcode = product.product_barcodes.first
+        if product_barcode.nil?
+          product_barcode = ProductBarcode.new
+          product_barcode.product_id = product.id
+        end
+        product_barcode.barcode = value
+        product_barcode.save
+      end
+    elsif ["location_primary" ,"location_secondary","location_name","qty"].include?(var)
+      product_location = product.product_inventory_warehousess.first
+      if product_location.nil?
+        product_location = ProductInventoryWarehouses.new
+        product_location.product_id = product.id
+      end
+        if var == "location_primary"
+          product_location.location_primary = value
+        elsif var == "location_secondary"
+          product_location.location_secondary = value
+        elsif var == "location_name"
+          product_location.name = value
+        elsif var == "qty"
+          product_location.qty = value
+        end
+      product_location.save
+    end
+    product.update_product_status
+  end
 end
