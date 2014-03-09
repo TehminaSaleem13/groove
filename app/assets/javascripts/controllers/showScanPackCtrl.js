@@ -7,6 +7,25 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies) {
      * Public methods
      */
 
+    $scope.reset_order = function () {
+        $http.post('/scan_pack/reset_order_scan.json',{order_id: $scope.order_id}).success(function(data) {
+            if(data.status) {
+                if(data.notice_messages.length) {
+                    $scope.notify(data.notice_messages,2);
+                }
+                if(data.success_messages.length) {
+                    $scope.notify(data.success_messages,1);
+                }
+                if(data.data != null) {
+                    $scope._next_state(data.data);
+                }
+            } else {
+                $scope.notify(data.error_messages,0);
+            }
+        }).error(function(data){
+                $scope.notify(["A server error was encountered"],0);
+            });
+    }
 
     /*
      * Private methods
@@ -153,6 +172,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies) {
         $scope.unscanned_items = {};
         $scope.scanned_items = {};
         $scope.next_item_present = false;
+        $scope.rf_input = "";
     }
 
     $scope._order_clicked_state = function(data) {
@@ -366,7 +386,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies) {
                         $("#showProductConfirmation").modal('hide');
                         $scope._next_state(stuff);
                     } else {
-    
+
                         $("#showProductConfirmation").modal('hide').on('hidden',function() {
                                 $scope._focus_input($scope._rf_inputObj);
                             });
@@ -436,7 +456,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies) {
                         $scope.scanned_items = data.data.scanned_items;
                         $scope._compute_unscanned_and_scanned_products();
                     }
-                    
+
                 }
                 result = true;
             } else {
