@@ -60,6 +60,11 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,pro
             $scope._get_products();
         });
     }
+    $scope.product_barcode = function() {
+        products.list.update('barcode',$scope.products).then(function(data) {
+            $scope._get_products();
+        });
+    }
 
 
     /*

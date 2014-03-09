@@ -656,6 +656,35 @@ class ProductsController < ApplicationController
         format.json { render json: @result }
     end
   end
+
+  def generatebarcode
+    @result = Hash.new
+    @result['status'] = true
+    @result['messages'] = []
+    @products = list_selected_products
+    unless @products.nil?
+      @products.each do|product|
+        @product = Product.find(product["id"])
+        if @product.product_barcodes.first.nil?
+          sku = @product.product_skus.first
+          unless sku.nil?
+            barcode = @product.product_barcodes.new
+            barcode.barcode = sku.sku
+            unless barcode.save
+              @result['status'] &= false
+              @result['messages'].push(barcode.errors.full_messages)
+            end
+          end
+        end
+      end
+    end
+
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json: @result }
+    end
+  end
+
   # For search pass in parameter params[:search] and a params[:limit] and params[:offset].
   # If limit and offset are not passed, then it will be default to 10 and 0
   def search

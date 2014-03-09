@@ -150,7 +150,6 @@ groovepacks_services.factory('orders',['$http','notification',function($http,not
         ).error(notification.server_error);
     }
     var rollback_single = function(single) {
-        update_single({single: single});
         return $http.post("orders/rollback.json",{single: single}).success(
             function(data) {
                 if(data.status) {

@@ -93,6 +93,7 @@ groovepacks_directives.directive('groovOrderModal',['notification','orders','pro
             };
 
             scope.rollback = function() {
+                angular.copy(myscope.single,scope.orders.single);
                 orders.single.rollback(myscope.single).then(function(response){
                     scope.order_single_details(scope.orders.single.basicinfo.id);
                 })
