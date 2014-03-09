@@ -154,7 +154,7 @@ groovepacks_services.factory('orders',['$http','notification',function($http,not
         return $http.post("orders/rollback.json",{single: single}).success(
             function(data) {
                 if(data.status) {
-                    notification.notify("Successfully Updated",1);
+                    //notification.notify("Successfully Updated",1);
                 } else {
                     notification.notify(data.messages,0);
                 }
