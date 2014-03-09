@@ -27,6 +27,11 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies) {
             });
     }
 
+    $scope.add_note = function () {
+        $scope.notify("Adding notes is yet to be implemented");
+
+    }
+
     /*
      * Private methods
      */
@@ -34,6 +39,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies) {
     $scope._init = function() {
         // Public properties
         $scope.rf_input = "";
+        $scope.order_num = "";
         $scope.order_confirmation_code = "";
         $scope.product_confirmation_code = "";
         $scope.next_item = {};
@@ -187,6 +193,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies) {
         $scope._focus_input($scope._rf_inputObj);
         $http.get('/orders/getdetails.json?id='+$scope.order_id).success(function(data) {
             if(data.status) {
+                $scope.order_num = data.order.basicinfo.increment_id;
                 //console.log(data);
                 var neworderdetails =  {};
                 neworderdetails.items_to_scan = 0;
