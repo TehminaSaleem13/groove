@@ -36,8 +36,8 @@ controller('showUsersCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$l
                 }
                 else
                 {
-                    $scope.newUser = {};
-                    $scope.user_modal.modal('hide');
+                    //$scope.newUser = {};
+                    //$scope.user_modal.modal('hide');
 
                     $http.get('/user_settings/userslist.json').success(function(data) {
                         var usersScope = angular.element($("#userstbl")).scope();
@@ -48,8 +48,8 @@ controller('showUsersCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$l
                     }).error(function(data) {
                             $scope.notify("There was a problem retrieving users list.",0);
                         });
-                    $scope.edit_status = false;
-                    $scope.show_password = true;
+                    //$scope.edit_status = false;
+                    //$scope.show_password = true;
                 }
             })
         }
