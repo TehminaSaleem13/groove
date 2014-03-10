@@ -464,10 +464,13 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies) {
                         $scope._compute_unscanned_and_scanned_products();
                     }
 
+                } else {
+                    $scope._next_state({next_state: 'ready_for_order'});
                 }
                 result = true;
             } else {
                 $scope.notify(data.error_messages,0);
+                $scope._next_state({next_state: 'ready_for_order'});
             }
 
         }).error(function(data){
