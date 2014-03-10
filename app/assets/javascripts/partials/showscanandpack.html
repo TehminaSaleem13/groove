@@ -4,6 +4,19 @@
 <div groov-common groov-notif="notify" groov-import="import_all_orders"></div>
 
 <div class="row home-row">
+    <div class="row-fluid borderless-well" ng-show="rf_state=='ready_for_product'">
+        <div class="top-icon span2" ng-click="reset_order()">
+            <i class="icon icon-2x icon-undo"></i><br/>
+            Reset Order
+        </div>
+        <div class="top-icon span2" ng-click="add_note()">
+            <i class="icon icon-2x icon-edit"></i><br/>
+            Add Note
+        </div>
+        <div class="span8">
+            <h2>Now Packing Order# {{order_num}}</h2>
+        </div>
+    </div>
     <div class="row-fluid">
         <div class="span9">
             <div class="row-fluid">

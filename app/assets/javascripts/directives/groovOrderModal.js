@@ -7,6 +7,7 @@ groovepacks_directives.directive('groovOrderModal',['notification','orders','pro
             orders: "=groovOrders"
         },
         link: function(scope,el,attrs) {
+            var myscope = {};
             scope.custom_identifier = Math.floor(Math.random()*1000);
             /**
              * Public properties
@@ -42,6 +43,7 @@ groovepacks_directives.directive('groovOrderModal',['notification','orders','pro
                     if(scope._order_obj == null) {
                         scope._order_obj = $("#showOrder"+scope.custom_identifier);
                         scope._order_obj.on('hidden',function(){
+                            scope.update_single_order(false);
                             scope.$emit("orders-modal-closed",{identifier: scope.custom_identifier});
                         });
                     }
@@ -80,12 +82,23 @@ groovepacks_directives.directive('groovOrderModal',['notification','orders','pro
                             break;
                         }
                     }
+                    if(typeof open_modal == 'boolean' && open_modal ){
+                        myscope.single = {}
+                        angular.copy(scope.orders.single,myscope.single);
+                    }
                     if(typeof post_fn == 'function' ) {
                         $timeout(post_fn,10);
                     }
                 });
             };
 
+            scope.rollback = function() {
+                angular.copy(myscope.single,scope.orders.single);
+                orders.single.rollback(myscope.single).then(function(response){
+                    scope.order_single_details(scope.orders.single.basicinfo.id);
+                })
+
+            }
             scope.update_single_order = function(auto) {
                 orders.single.update(scope.orders,auto).then(function(response) {
                     scope.order_single_details(scope.orders.single.basicinfo.id);
@@ -95,7 +108,9 @@ groovepacks_directives.directive('groovOrderModal',['notification','orders','pro
             scope.add_item_order = function(event, args) {
                 event.stopPropagation();
                 orders.single.item.add(scope.orders,args.selected).then(function(response){
-                    scope.order_single_details(scope.orders.single.basicinfo.id);
+                    scope.order_single_details(scope.orders.single.basicinfo.id,false,function(){
+                        scope._order_obj.modal("refresh");
+                    });
                 });
             }
 
@@ -143,14 +158,14 @@ groovepacks_directives.directive('groovOrderModal',['notification','orders','pro
             scope.handle_keydown = function(event) {
                     if(event.which == 38) {//up key
                         if(scope.orders.current > 0) {
-                            scope.order_single_details(scope.orders.list[scope.orders.current -1].id, scope.orders.current - 1);
+                            scope.order_single_details(scope.orders.list[scope.orders.current -1].id, scope.orders.current - 1,0,true);
                         } else {
                             alert("Already at the top of the list");
                         }
                     } else if(event.which == 40) { //down key
 
                         if(scope.orders.current < scope.orders.list.length -1) {
-                            scope.order_single_details(scope.orders.list[scope.orders.current + 1].id, scope.orders.current + 1);
+                            scope.order_single_details(scope.orders.list[scope.orders.current + 1].id, scope.orders.current + 1,0,true);
                         } else {
                             scope._keydown_last = true;
                             scope.$emit("orders-next-load");
@@ -197,7 +212,7 @@ groovepacks_directives.directive('groovOrderModal',['notification','orders','pro
                 if(scope._keydown_last) {
                     scope._keydown_last = false;
                     if(scope.orders.current < scope.orders.list.length -1) {
-                        scope.order_single_details(scope.orders.list[scope.orders.current + 1].id, scope.orders.current + 1,0, false);
+                        scope.order_single_details(scope.orders.list[scope.orders.current + 1].id, scope.orders.current + 1,0, true);
                     } else {
                         alert("Already at the bottom of the list");
                     }

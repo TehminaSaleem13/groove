@@ -3,7 +3,8 @@ groovepacks_services.factory('products',['$http','notification',function($http,n
     var success_messages = {
         update_status: "Status updated Successfully",
         delete:"Deleted Successfully",
-        duplicate: "Duplicated Successfully"
+        duplicate: "Duplicated Successfully",
+        barcode: "Barcodes generated Successfully"
     };
 
     //default object
@@ -81,7 +82,7 @@ groovepacks_services.factory('products',['$http','notification',function($http,n
     }
 
     var update_list = function(action,products) {
-        if(["update_status","delete","duplicate"].indexOf(action) != -1) {
+        if(["update_status","delete","duplicate","barcode"].indexOf(action) != -1) {
             products.setup.productArray = [];
             for( i in products.list) {
                 if (products.list[i].checked == true) {
@@ -95,6 +96,8 @@ groovepacks_services.factory('products',['$http','notification',function($http,n
                 url = '/products/duplicateproduct.json';
             } else if(action == "update_status") {
                 url = '/products/changeproductstatus.json';
+            } else if(action == "barcode") {
+                url = '/products/generatebarcode.json';
             }
 
             return $http.post(url,products.setup).success(function(data) {

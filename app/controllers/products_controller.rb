@@ -656,6 +656,35 @@ class ProductsController < ApplicationController
         format.json { render json: @result }
     end
   end
+
+  def generatebarcode
+    @result = Hash.new
+    @result['status'] = true
+    @result['messages'] = []
+    @products = list_selected_products
+    unless @products.nil?
+      @products.each do|product|
+        @product = Product.find(product["id"])
+        if @product.product_barcodes.first.nil?
+          sku = @product.product_skus.first
+          unless sku.nil?
+            barcode = @product.product_barcodes.new
+            barcode.barcode = sku.sku
+            unless barcode.save
+              @result['status'] &= false
+              @result['messages'].push(barcode.errors.full_messages)
+            end
+          end
+        end
+      end
+    end
+
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json: @result }
+    end
+  end
+
   # For search pass in parameter params[:search] and a params[:limit] and params[:offset].
   # If limit and offset are not passed, then it will be default to 10 and 0
   def search
@@ -1176,71 +1205,7 @@ class ProductsController < ApplicationController
       @result['status'] = false
       @result['error_msg'] ="Cannot find Product"
     else
-      if ["name","status","is_skippable"].include?(params[:var])
-        @product[params[:var]] = params[:value]
-        unless @product.save
-          @result['status'] &= false
-          @result['error_msg'] = "Couldn't save product info"
-        end
-      elsif params[:var] ==  "sku"
-        @product_sku = @product.product_skus.first
-        if @product_sku.nil?
-          @product_sku = ProductSku.new
-          @product_sku.product_id = params[:id]
-        end
-        @product_sku.sku = params[:value]
-        unless @product_sku.save
-          @result['status'] &= false
-          @result['error_msg'] = "Couldn't save product info"
-        end
-      elsif params[:var] ==  "cat"
-        @product_cat = @product.product_cats.first
-        if @product_cat.nil?
-          @product_cat = ProductCat.new
-          @product_cat.product_id = params[:id]
-        end
-        @product_cat.category = params[:value]
-        unless @product_cat.save
-          @result['status'] &= false
-          @result['error_msg'] = "Couldn't save product info"
-        end
-      elsif params[:var] ==  "barcode"
-  		if ProductBarcode.where(:barcode => params[:value]).length == 0
-	        @product_barcode = @product.product_barcodes.first
-	        if @product_barcode.nil?
-	          @product_barcode = ProductBarcode.new
-	          @product_barcode.product_id = params[:id]
-	        end
-	        @product_barcode.barcode = params[:value]
-	        unless @product_barcode.save
-	          @result['status'] &= false
-	          @result['error_msg'] = "Couldn't save product info"
-	        end
-	  	else
-	  		@result['status'] &= false
-	  		@result['error_msg'] = "Barcode "+params[:value]+" already exists"
-	  	end
-      elsif ["location_primary" ,"location_secondary","location_name","qty"].include?(params[:var])
-        @product_location = @product.product_inventory_warehousess.first
-        if @product_location.nil?
-          @product_location = ProductInventoryWarehouses.new
-          @product_location.product_id = params[:id]
-        end
-        if params[:var] == "location_primary"
-          @product_location.location_primary = params[:value]
-        elsif params[:var] == "location_secondary"
-          @product_location.location_secondary = params[:value]
-        elsif params[:var] == "location_name"
-          @product_location.name = params[:value]
-        elsif params[:var] == "qty"
-          @product_location.qty = params[:value]
-        end
-        unless @product_location.save
-          @result['status'] &= false
-          @result['error_msg'] = "Couldn't save product info"
-        end
-      end
-      @product.update_product_status
+      updatelist(@product,params[:var],params[:value])
     end
     respond_to do |format|
       format.html # show.html.erb

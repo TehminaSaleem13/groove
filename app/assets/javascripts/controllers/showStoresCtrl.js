@@ -90,6 +90,9 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies) {
                     $scope.newStore.status = $routeParams.status;
                     $scope.newStore.store_type = $routeParams.storetype;
                 }
+                if(typeof $scope.newStore.status == "undefined") {
+                    $scope.newStore.status = 1;
+                }
                 $('#createStore').modal('show').on("hidden",function(){
                     $timeout(function(){$location.path("/settings/showstores");},200);
                 });
@@ -456,8 +459,8 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies) {
         $scope.edit_status = false;
         $scope.redirect = false;
         $scope.newStore = {};
-        $scope.ebay_show_signin_url = true;
         $scope.newStore.status = 1;
+        $scope.ebay_show_signin_url = true;
         $scope.loading = false;
         $http.get('/store_settings/getebaysigninurl.json').success(function(data) {
             if (data.ebay_signin_url_status)
@@ -474,6 +477,11 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies) {
         $('#createStore').modal('show');
     }
 
+    $scope.refresh_modal = function() {
+        $timeout(function(){
+            $("#createStore").modal("refresh")
+        },100);
+    }
     $scope.copydata =function(event) {
 
         if (event){

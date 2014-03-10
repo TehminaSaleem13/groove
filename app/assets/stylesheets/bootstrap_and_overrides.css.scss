@@ -470,8 +470,18 @@ background: url('/assets/sort_desc.png') no-repeat center right;
   color:green;
 }
 
+.top-icon {
+  cursor: pointer;
+  color:#0088cc;
+  text-align:center;
+}
+
+
 .small-well {
   padding-top:3px;
+}
+.borderless-well {
+  margin-bottom:10px;
 }
 .scantable-greyedout {
   color: #dddddd;;

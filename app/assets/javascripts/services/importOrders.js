@@ -1,4 +1,4 @@
-groovepacks_services.factory("importOrders", function($http) {
+groovepacks_services.factory("importOrders", ['$http',function($http) {
         return {
             do_import: function(scope) {
 
@@ -55,5 +55,5 @@ groovepacks_services.factory("importOrders", function($http) {
                     });
             }
         }
-    }
+    }]
 );
