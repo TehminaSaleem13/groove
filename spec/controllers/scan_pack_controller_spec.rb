@@ -1058,7 +1058,7 @@ describe ScanPackController do
       expected_result['data']['unscanned_items'] << unscanned_item
 
       scanned_item = @scanned_item_l.call('Apple iPhone 5S', 'single', [], 
-              'IPHONE5S', 0, 2, 50, product.product_barcodes,
+              'IPHONE5S', 0, 1, 50, product.product_barcodes,
               product.id, order_item.id, nil)
 
       expected_result['data']['scanned_items'] << scanned_item
@@ -1081,7 +1081,7 @@ describe ScanPackController do
       expected_result['data']['unscanned_items'] << unscanned_item
 
       scanned_item = @scanned_item_l.call('Apple iPhone 5S', 'single', [], 
-              'IPHONE5S', 0, 2, 50, product.product_barcodes,
+              'IPHONE5S', 0, 1, 50, product.product_barcodes,
               product.id, order_item.id, nil)
 
       expected_result['data']['scanned_items'] << scanned_item
@@ -1122,14 +1122,14 @@ describe ScanPackController do
       expected_result['data']['unscanned_items'] << unscanned_item
 
       scanned_item = @scanned_item_l.call('Apple iPhone 5S', 'single', [], 
-              'IPHONE5S', 0, 2, 50, product.product_barcodes,
+              'IPHONE5S', 0, 1, 50, product.product_barcodes,
               product.id, order_item.id, nil)
 
       expected_result['data']['scanned_items'] << scanned_item
 
       child_items = []
 
-      child_items << @child_item_l.call(kit_product2.name, [], 'IPROTO2', 1, 
+      child_items << @child_item_l.call(kit_product2.name, [], 'IPROTO2', 0, 
       1, 50, 50,
       kit_product2.product_barcodes, kit_product2.id, order_item_kit_product2.id)
 
@@ -1169,16 +1169,12 @@ describe ScanPackController do
       expected_result['data']['unscanned_items'] << unscanned_item
 
       scanned_item = @scanned_item_l.call('Apple iPhone 5S', 'single', [], 
-              'IPHONE5S', 0, 2, 50, product.product_barcodes,
+              'IPHONE5S', 0, 1, 50, product.product_barcodes,
               product.id, order_item.id, nil)
 
       expected_result['data']['scanned_items'] << scanned_item
 
       child_items = []
-
-      child_items << @child_item_l.call(kit_product.name, [], 'IPROTO1', 2, 
-      0, 50, 50,
-      kit_product.product_barcodes, kit_product.id, order_item_kit_product.id)
 
       child_items << @child_item_l.call(kit_product2.name, [], 'IPROTO2', 0, 
       2, 50, 50,
@@ -1220,7 +1216,7 @@ describe ScanPackController do
       expected_result['data']['unscanned_items'] << unscanned_item
 
       scanned_item = @scanned_item_l.call('Apple iPhone 5S', 'single', [], 
-              'IPHONE5S', 0, 2, 50, product.product_barcodes,
+              'IPHONE5S', 0, 1, 50, product.product_barcodes,
               product.id, order_item.id, nil)
 
       expected_result['data']['scanned_items'] << scanned_item
@@ -1254,6 +1250,15 @@ describe ScanPackController do
 
       expected_result['data']['most_recent_scanned_products'] = session[:most_recent_scanned_products]
 
+      expected_result['data']['next_item_present'] = true
+      expected_result['data']['next_item'] = Hash.new
+      expected_result['data']['next_item']['name'] = 'Apple iPhone 5C'
+      expected_result['data']['next_item']['sku'] = 'IPROTO1'
+      expected_result['data']['next_item']['images'] = []
+      expected_result['data']['next_item']['scanned_qty'] = 1
+      expected_result['data']['next_item']['qty'] = 2
+      expected_result['data']['next_item']['qty_remaining'] = 1
+
       expect(result).to eq(JSON.parse(expected_result.to_json))
 
 
@@ -1267,7 +1272,7 @@ describe ScanPackController do
       expected_result['data']['next_state'] ='ready_for_tracking_num'
 
       scanned_item = @scanned_item_l.call('Apple iPhone 5S', 'single', [], 
-              'IPHONE5S', 0, 2, 50, product.product_barcodes,
+              'IPHONE5S', 0, 1, 50, product.product_barcodes,
               product.id, order_item.id, nil)
 
       expected_result['data']['scanned_items'] << scanned_item
@@ -1369,7 +1374,7 @@ describe ScanPackController do
       expected_result['data']['unscanned_items'] << unscanned_item
 
       scanned_item = @scanned_item_l.call('Apple iPhone 5S', 'single', [], 
-              'IPHONE5S', 0, 2, 50, product.product_barcodes,
+              'IPHONE5S', 0, 1, 50, product.product_barcodes,
               product.id, order_item.id, nil)
 
       expected_result['data']['scanned_items'] << scanned_item
@@ -1392,7 +1397,7 @@ describe ScanPackController do
       expected_result['data']['unscanned_items'] << unscanned_item
 
       scanned_item = @scanned_item_l.call('Apple iPhone 5S', 'single', [], 
-              'IPHONE5S', 0, 2, 50, product.product_barcodes,
+              'IPHONE5S', 0, 1, 50, product.product_barcodes,
               product.id, order_item.id, nil)
 
       expected_result['data']['scanned_items'] << scanned_item
@@ -1433,14 +1438,14 @@ describe ScanPackController do
       expected_result['data']['unscanned_items'] << unscanned_item
 
       scanned_item = @scanned_item_l.call('Apple iPhone 5S', 'single', [], 
-              'IPHONE5S', 0, 2, 50, product.product_barcodes,
+              'IPHONE5S', 0, 1, 50, product.product_barcodes,
               product.id, order_item.id, nil)
 
       expected_result['data']['scanned_items'] << scanned_item
 
       child_items = []
 
-      child_items << @child_item_l.call(kit_product2.name, [], 'IPROTO2', 1, 
+      child_items << @child_item_l.call(kit_product2.name, [], 'IPROTO2', 0, 
       1, 50, 50,
       kit_product2.product_barcodes, kit_product2.id, order_item_kit_product2.id)
 
@@ -1480,16 +1485,12 @@ describe ScanPackController do
       expected_result['data']['unscanned_items'] << unscanned_item
 
       scanned_item = @scanned_item_l.call('Apple iPhone 5S', 'single', [], 
-              'IPHONE5S', 0, 2, 50, product.product_barcodes,
+              'IPHONE5S', 0, 1, 50, product.product_barcodes,
               product.id, order_item.id, nil)
 
       expected_result['data']['scanned_items'] << scanned_item
 
       child_items = []
-
-      child_items << @child_item_l.call(kit_product.name, [], 'IPROTO1', 2, 
-      0, 50, 50,
-      kit_product.product_barcodes, kit_product.id, order_item_kit_product.id)
 
       child_items << @child_item_l.call(kit_product2.name, [], 'IPROTO2', 0, 
       2, 50, 50,
@@ -1531,7 +1532,7 @@ describe ScanPackController do
       expected_result['data']['unscanned_items'] << unscanned_item
 
       scanned_item = @scanned_item_l.call('Apple iPhone 5S', 'single', [], 
-              'IPHONE5S', 0, 2, 50, product.product_barcodes,
+              'IPHONE5S', 0, 1, 50, product.product_barcodes,
               product.id, order_item.id, nil)
 
       expected_result['data']['scanned_items'] << scanned_item
@@ -1565,6 +1566,16 @@ describe ScanPackController do
 
       expected_result['data']['most_recent_scanned_products'] = session[:most_recent_scanned_products]
 
+      expected_result['data']['next_item_present'] = true
+
+      expected_result['data']['next_item'] = Hash.new
+      expected_result['data']['next_item']['name'] = 'Apple iPhone 5C'
+      expected_result['data']['next_item']['sku'] = 'IPROTO1'
+      expected_result['data']['next_item']['images'] = []
+      expected_result['data']['next_item']['scanned_qty'] = 1
+      expected_result['data']['next_item']['qty'] = 2
+      expected_result['data']['next_item']['qty_remaining'] = 1
+
       expect(result).to eq(JSON.parse(expected_result.to_json))
 
 
@@ -1578,7 +1589,7 @@ describe ScanPackController do
       expected_result['data']['next_state'] ='ready_for_tracking_num'
 
       scanned_item = @scanned_item_l.call('Apple iPhone 5S', 'single', [], 
-              'IPHONE5S', 0, 2, 50, product.product_barcodes,
+              'IPHONE5S', 0, 1, 50, product.product_barcodes,
               product.id, order_item.id, nil)
 
       expected_result['data']['scanned_items'] << scanned_item

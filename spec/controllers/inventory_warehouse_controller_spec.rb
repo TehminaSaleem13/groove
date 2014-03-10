@@ -86,18 +86,27 @@ describe InventoryWarehouseController do
     end
   end
 
-  describe "GET 'show'" do
-    it "returns http success" do
-      # request.accept = "application/json"
+  describe "GET inventory warehouse" do
+    it "returns detail of inventory warehouse" do
+      request.accept = "application/json"
+      inv_wh = FactoryGirl.create(:inventory_warehouse, :name=>'Manhattan Warehouse')
+      inv_wh2 = FactoryGirl.create(:inventory_warehouse, :name=>'Manhattan Warehouse1')
+      
+      get :show, { :id => inv_wh2.id}
 
-      # post :create, { :name => 'Manhattan Warehouse', :location => 'New Jersey' }
-      # post :create, { :name => 'Manhattan Warehouse', :location => 'New York' }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["status"]).to eq(true)
+      expect(result["data"]["inv_wh_info"]["name"]).to eq('Manhattan Warehouse1')
+      expect(result["data"]["inv_wh_users"]).to eq([])
 
-      # expect(response.status).to eq(200)
-      # result = JSON.parse(response.body)
-      # expect(result["status"]).to eq(false)
-      # expect(result["error_messages"].length).to eq(1)
-      # expect(result["error_messages"].first).to eq('Name has already been taken')
+      get :show, { :id => inv_wh.id}
+
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["status"]).to eq(true)
+      expect(result["data"]["inv_wh_info"]["name"]).to eq('Manhattan Warehouse')
+      expect(result["data"]["inv_wh_users"]).to eq([])
     end
   end
 
