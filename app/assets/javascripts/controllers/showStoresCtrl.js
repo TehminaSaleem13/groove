@@ -168,11 +168,11 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies) {
                     }
                     //$scope.loading = true;
     				$http.get('/store_settings/storeslist.json').success(function(data) {
-                        var storesScope = angular.element($("#storestbl")).scope();
-                          storesScope.stores = data;
-                          if(!$scope.$$phase) {
-                            storesScope.$apply();
-                          }
+                        //var storesScope = angular.element($("#storestbl")).scope();
+                          $scope.stores = data;
+                          //if(!$scope.$$phase) {
+                            //storesScope.$apply();
+                          //}
                     }).error(function(data) {
 						    $scope.notify( "There was a problem retrieving stores list.",0);
                     });

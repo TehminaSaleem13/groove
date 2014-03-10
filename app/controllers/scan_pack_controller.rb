@@ -84,18 +84,18 @@ class ScanPackController < ApplicationController
       else
         @result['notice_messages'].push('Order with number '+ params[:barcode] +' cannot be found. It may not have been imported yet')
       end
+      if !@order.nil?
+        @order.packing_user_id = current_user.id if !@order.nil?
+        if !@order.save
+          @result['status'] &= false
+          @result['error_messages'].push("Could not save order with id: "+@order.id)
+        end
+      end
+      @result['data'] = @order_result
     else
       @result['status'] &= false
       @result['error_messages'].push("Please specify a barcode to scan the order")
     end
-    if !@order.nil?
-      @order.packing_user_id = current_user.id if !@order.nil?
-      if !@order.save
-        @result['status'] &= false
-        @result['error_messages'].push("Could not save order with id: "+@order.id)
-      end
-    end
-    @result['data'] = @order_result
 
     respond_to do |format|
       format.html # show.html.erb

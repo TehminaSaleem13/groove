@@ -12,6 +12,11 @@ controller('showUsersCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$l
                 $scope.user_modal.on("hidden",function() {
                     if(typeof $scope.newUser.id != "undefined") {
                         $scope.submit();
+                        $http.get('/user_settings/userslist.json').success(function(data) {
+                            $scope.users = data;
+                        }).error(function(data) {
+                                $scope.notify("There was a problem retrieving users list.",0);
+                            });
                     }
                     $timeout(function(){
                         $location.path("/settings/showusers");
@@ -39,15 +44,7 @@ controller('showUsersCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$l
                     //$scope.newUser = {};
                     //$scope.user_modal.modal('hide');
 
-                    $http.get('/user_settings/userslist.json').success(function(data) {
-                        var usersScope = angular.element($("#userstbl")).scope();
-                        usersScope.users = data;
-                        if(!$scope.$$phase) {
-                            usersScope.$apply();
-                        }
-                    }).error(function(data) {
-                            $scope.notify("There was a problem retrieving users list.",0);
-                        });
+
                     //$scope.edit_status = false;
                     //$scope.show_password = true;
                 }
