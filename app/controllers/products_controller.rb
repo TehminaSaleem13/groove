@@ -676,6 +676,7 @@ class ProductsController < ApplicationController
             end
           end
         end
+        @product.update_product_status
       end
     end
 
