@@ -9,6 +9,8 @@ angular.module('groovepacks', ['groovepacks.filters', 'groovepacks.services', 'g
     	{templateUrl: '/assets/partials/showusers.html', controller: 'showUsersCtrl'});
     $routeProvider.when('/settings/showusers/:action',
         {templateUrl: '/assets/partials/showusers.html', controller: 'showUsersCtrl'});
+    $routeProvider.when('/settings/showwarehouses',
+        {templateUrl: '/assets/partials/showwarehouses.html', controller: 'showWarehousesCtrl'});
     $routeProvider.when('/settings/showstores',
         {templateUrl: '/assets/partials/showstores.html', controller: 'showStoresCtrl'});
     $routeProvider.when('/settings/showstores/:action',

@@ -46,6 +46,9 @@
 	      <div class="accordion-inner">
               <ul class="nav nav-pills nav-stacked">
                   <li><a href="#/settings/showstores/backup">Backup and Restore</a></li>
+                  <li ng-show="current_page !='show_warehouses' "><a href="#/settings/showwarehouses">Warehouse Settings</a></li>
+				  <li class="active" 
+				  	ng-show="current_page =='show_warehouses' "><a href="#/settings/showwarehouses">Warehouse Settings</a></li>
               </ul>
 	      </div>
 	    </div>
