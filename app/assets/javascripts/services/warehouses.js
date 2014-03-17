@@ -1,13 +1,75 @@
-groovepacks_services.factory('products',['$http','notification',function($http, notification) {
+groovepacks_services.factory('warehouses',['$http','notification',function($http, notification) {
 
-	var success_messages = {
-        update_status: "Status updated Successfully",
-        delete:"Deleted Successfully",
-        duplicate: "Duplicated Successfully",
-        barcode: "Barcodes generated Successfully"
+
+    //default object
+    var get_default = function() {
+        return {
+            list: [],
+            single: {}
+        };
+    }
+
+	var get_list = function(object) {
+        
+        var url = '/inventory_warehouse/index.json';
+
+        return $http.get(url).success(
+            function(data) {
+                if(data.status) {
+                	object.list = data.data.inv_whs;
+                	console.log(data.data.inv_whs);
+                	console.log(object);
+                } else {
+                    notification.notify("Can't load list of inventory warehouses",0);
+                }
+            }
+        ).error(notification.server_error);
+    }
+
+	var get_single = function(id, object) {
+        
+        var url = '/inventory_warehouse/show.json?id='+id;
+
+        return $http.get(url).success(
+            function(data) {
+                if(data.status) {
+                	object.inv_wh_info = data.inv_wh_info;
+                	object.inv_wh_users = data.inv_wh_users;
+                } else {
+                    notification.notify("Can't load list of products",0);
+                }
+            }
+        ).error(notification.server_error);
+    }
+
+	var create_inv_wh = function(inv_wh, object) {
+        
+        var url = '/inventory_warehouse/create.json';
+
+        return $http.post(url, inv_wh).success(
+            function(data) {
+                if(data.status) {
+                	get_list(object);
+                } else {
+                    notification.notify("Can't load list of products",0);
+                }
+            }
+        ).error(notification.server_error);
+    }
+
+    //Public facing API
+    return {
+        model: {
+            get:get_default
+        },
+        list: {
+            get: get_list
+        },
+        single: {
+            get: get_single,
+            create: create_inv_wh
+        }
     };
 
 
-    
-
-]});
+}]);

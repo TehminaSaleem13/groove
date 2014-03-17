@@ -18,357 +18,38 @@
   <div class="row-fluid">
     <div class="span4 offset2">
       <ul class="nav nav-pills nav-stacked warehouse-tabs">
-        <li><strong>Warehouse Name</strong></li>
-        <li ng-repeat="warehouse in warehouses">
-          {{warehouse.name}}
+        <li class="wh_heading"><strong>Warehouse Name</strong></li>
+        <li ng-repeat="warehouse in inv_whs">
+          {{warehouse.info.name}}
         </li>
       </ul>
     </div>
 
-    <div class="span6">
+    <div class="span6" style="margin-left:0px;">
       <ul class="nav nav-pills nav-stacked warehouse-tabs">
-        <li><strong>Associated users</strong></li>
+        <li class="wh_heading"><strong>Associated users</strong></li>
         <li ng-repeat="user in current_warehouse.users">
           {{user.name}}
         </li>
       </ul>
     </div>
-
-
-
-<!--     <table id="warehousestbl" class="table table-hover table-bordered">
-      <thead>
-        <tr>
-          <th>#</th>
-          <th><a href="" ng-click="handlesort('warehousename')">Warehouse Name</a></th>
-          <th><a href="" ng-click="handlesort('active')">Status</a></th>
-          <th>Associated Users</th>
-        </tr>
-      </thead>
-
-      <tbody>
-        <tr ng-repeat="warehouse in warehouses">
-          <td>{{$index}}</td>
-          <td>{{warehouse.name}}</td>
-          <td>{{warehouse.status}}</td>
-          <td>{{warehouse.users.length}}</td>
-        </tr>
-        <tr>
-          <td> </td>
-          <td><input type="text" ng-model="warehouse_name"/></td>
-          <td></td>
-          <td></td>
-        </tr>
-        <tr>
-          <td> </td>
-          <td><button class="btn">Remove</button> <button class="btn">Add Warehouse</button></td>
-          <td></td>
-          <td></td>
-        </tr>
-      </tbody>
-    </table> -->
   </div>
 
   <div class="row-fluid">
-
-  </div>
-
-</div>
-
-<!-- Modal popup for creating user -->
-<div id="createUser{{custom_identifier}}" ng-keydown="keyboard_nav_event($event)" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="createUser"
-aria-hidden="true">
-
-  <div class="modal-header">
-    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h3 id="createUserheader" ng-show="edit_status">Update User</h3>
-    <h3 id="createUserheader" ng-hide="edit_status">Create User</h3>
-  </div>
-
-
- <div class="form-horizontal form-horizontal-create" >
-  <fieldset>
-  <div class="modal-body" id="createUser-body">
-  <ul class="nav nav-tabs" id="myTab">
-    <li class="active"><a href="" data-target="#userinfotab" data-toggle="tab">User Info</a></li>
-    <li><a href="" data-target="#productstab" data-toggle="tab">Products</a></li>
-    <li><a href="" data-target="#orderstab" data-toggle="tab">Orders</a></li>
-    <li><a href="" data-target="#usertab" data-toggle="tab">User</a></li>
-    <li><a href="" data-target="#systemtab" data-toggle="tab">System</a></li>
-  </ul>
-
-
-
- <div class="tab-content">
-  <div class="tab-pane active" id="userinfotab">
-  <input type="hidden" ng-model="newUser.id" ng-show="edit_status"/>
-    <div class="control-group">
-      <label class="control-label">Username</label>
-      <div class="controls">
-        <input name="username" ng-blur="submit()" ng-model="newUser.username" type="text" value="" required/>
-       </div>
-    </div>
-
-    <div class="control-group">
-      <label class="control-label">Name</label>
-      <div class="controls">
-        <input name="name" ng-blur="submit()" ng-model="newUser.name" type="text" required/>
-       </div>
-    </div>
-
-    <div class="control-group">
-      <label class="control-label">Password</label>
-      <div class="controls" ng-show="show_password">
-        <input name="password" ng-blur="submit()" ng-model="newUser.password" type="password" />
-       </div>
-       <div class="controls" ng-hide="show_password">
-        <a href="" ng-click='change_password()'> Change Password</a>
-       </div>
-    </div>
-
-    <div class="control-group">
-      <label class="control-label">Email</label>
-      <div class="controls">
-        <input name="email" ng-blur="submit()" ng-model="newUser.email" type="text"/>
-       </div>
-    </div>
-
-    <div class="control-group">
-      <label class="control-label">Other</label>
-      <div class="controls">
-        <input name="other1" ng-blur="submit()" ng-model="newUser.other1" type="text"/>
-       </div>
-    </div>
-
-    <div class="control-group">
-      <label class="control-label">Active</label>
-      <div class="controls">
-        <input name="active" ng-change="submit()" ng-model="newUser.active" type="checkbox"/>
-        <span> User is active</span>
-       </div>
-    </div>
-
-    <div class="control-group">
-      <label class="control-label">Confirmation Code</label>
-      <div class="controls">
-        <input name="confirmation_code" ng-blur="submit()" ng-model="newUser.confirmation_code" type="text" required/>
+    <div class="span4 offset2">
+      <div class="row-fluid">
+        <input type="text" ng-model="inv_wh_single.name"/>
+      </div>
+      <div class="row-fluid">
+        <div class="btn-group">
+          <button class="btn" ng-click="remove_warehouse()">Remove</button>
+          <button class="btn" ng-click="add_warehouse()">Add Warehouse</button>
+        </div>
       </div>
     </div>
-
-  </div>
-  <div class="tab-pane createuser-tab" id="productstab">
-    <div class="control-group">
-      <label class="control-label">
-      User can activate/deactivate channels & edit additional product details </label>
-      <div class="controls">
-      	<input name="edit_product_details" ng-change="submit()" ng-model="newUser.edit_product_details" type="checkbox" />
-      </div>
-    </div>
-
-    <div class="control-group">
-      <label class="control-label">Add new products</label>
-      <div class="controls">
-        <input name="add_products" ng-model="newUser.add_products" ng-change="submit()"  type="checkbox" />
-       </div>
-    </div>
-
-    <div class="control-group">
-      <label class="control-label">Edit products</label>
-      <div class="controls">
-        <input name="edit_products" ng-model="newUser.edit_products" ng-change="submit()"  type="checkbox" />
-       </div>
-    </div>
-
-    <div class="control-group">
-      <label class="control-label">Delete products</label>
-      <div class="controls">
-        <input name="delete_products" ng-model="newUser.delete_products" ng-change="submit()"  type="checkbox" />
-       </div>
-    </div>
-
-    <div class="control-group">
-      <label class="control-label">Import products</label>
-      <div class="controls">
-        <input name="import_products" ng-model="newUser.import_products" ng-change="submit()"  type="checkbox"/>
-       </div>
-    </div>
-
-    <div class="control-group">
-      <label class="control-label">Edit product import settings</label>
-      <div class="controls">
-        <input name="edit_product_import" ng-model="newUser.edit_product_import" ng-change="submit()"  type="checkbox" checked/>
-       </div>
-    </div>
   </div>
 
-  <div class="tab-pane createuser-tab" id="orderstab">
-  <div class="row-fluid">
-  <div class="span6">
-  <legend>Order Settings</legend>
-    <div class="control-group">
-      <label class="control-label">Update orders </label>
-      <div class="controls">
-      	<input name="import_orders" ng-model="newUser.import_orders" ng-change="submit()"  type="checkbox" checked/>
-      </div>
-    </div>
-
-    <div class="control-group">
-      <label class="control-label">Change Order Status</label>
-      <div class="controls">
-        <input name="change_order_status" ng-model="newUser.change_order_status" ng-change="submit()"  type="checkbox" />
-       </div>
-    </div>
-
-    <div class="control-group">
-      <label class="control-label">Create/edit notes from Packer</label>
-      <div class="controls">
-        <input name="createEdit_packer" ng-model="newUser.createEdit_packer" ng-change="submit()"  type="checkbox" />
-       </div>
-    </div>
-
-    <div class="control-group">
-      <label class="control-label">Add/edit order items</label>
-      <div class="controls">
-        <input name="add_order_items_ALL" ng-model="newUser.add_order_items_ALL" ng-change="submit()"  type="checkbox" />
-       </div>
-    </div>
-    <div class="control-group">
-      <label class="control-label">Add order items</label>
-      <div class="controls">
-        <input name="add_order_items" ng-model="newUser.add_order_items" ng-change="submit()"  type="checkbox"/>
-       </div>
-    </div>
-
-    <div class="control-group">
-      <label class="control-label">Remove order items</label>
-      <div class="controls">
-        <input name="remove_order_items" ng-model="newUser.remove_order_items" ng-change="submit()"  type="checkbox" checked/>
-       </div>
-    </div>
-
-    </div>
-    <div class="span6">
-
-    <div class="control-group">
-      <label class="control-label">Change order items quantity</label>
-      <div class="controls">
-        <input name="change_quantity_items" ng-model="newUser.change_quantity_items" ng-change="submit()"  type="checkbox" checked/>
-       </div>
-    </div>
-    <legend>Order activity & Packing exceptions</legend>
-    <div class="control-group">
-      <label class="control-label">User can view packing exceptions</label>
-      <div class="controls">
-        <input name="view_packing_ex" ng-model="newUser.view_packing_ex" ng-change="submit()"  type="checkbox"/>
-       </div>
-    </div>
-
-    <div class="control-group">
-      <label class="control-label">User can create/enter packing</label>
-      <div class="controls">
-        <input name="create_packing_ex" ng-model="newUser.create_packing_ex" ng-change="submit()"  type="checkbox" checked/>
-       </div>
-    </div>
-    <div class="control-group">
-      <label class="control-label">User can edit existing packing</label>
-      <div class="controls">
-        <input name="edit_packing_ex" ng-model="newUser.edit_packing_ex" ng-change="submit()"  type="checkbox" checked/>
-       </div>
-    </div>
-    </div>
-  </div>
-  </div>
-  <div class="tab-pane createuser-tab" id="usertab">
-	<div class="row-fluid">
-	<div class="span4">
-	<legend>User status &amp; info</legend>
-
-    <div class="control-group">
-      <label class="control-label">Edit user info</label>
-      <div class="controls">
-        <input name="edit_user_info" ng-model="newUser.edit_user_info" ng-change="submit()"  type="checkbox" checked/>
-       </div>
-    </div>
-
-    <div class="control-group">
-      <label class="control-label">Edit user status</label>
-      <div class="controls">
-        <input name="edit_user_status" ng-model="newUser.edit_user_status" ng-change="submit()"  type="checkbox" checked/>
-       </div>
-    </div>
-    </div>
-	<div class="span4">
-	<legend>Super Admin</legend>
-    <div class="control-group">
-      <label class="control-label">User is Super Admin</label>
-      <div class="controls">
-        <input name="is_super_admin" ng-model="newUser.is_super_admin" ng-change="submit()"  type="checkbox" checked/>
-       </div>
-    </div>
-
-    <div class="control-group">
-      <label class="control-label">Create, duplicate and remove users</label>
-      <div class="controls">
-        <input name="create_users" ng-model="newUser.create_users" ng-change="submit()"  type="checkbox" checked/>
-       </div>
-    </div>
-    <div class="control-group">
-      <label class="control-label">Edit user permissions</label>
-      <div class="controls">
-        <input name="edit_user_permissions" ng-model="newUser.edit_user_permissions" ng-change="submit()"  type="checkbox" checked/>
-       </div>
-    </div>
-    </div>
-    <div class="span4">
-	<legend>Section access</legend>
-    <div class="control-group">
-      <label class="control-label">Scan &amp; Pack</label>
-      <div class="controls">
-        <input name="access_scanpack" ng-model="newUser.access_scanpack" ng-change="submit()"  type="checkbox" checked/>
-       </div>
-    </div>
-
-    <div class="control-group">
-      <label class="control-label">Orders</label>
-      <div class="controls">
-        <input name="access_orders" ng-model="newUser.access_orders" ng-change="submit()"  type="checkbox" checked/>
-       </div>
-    </div>
-    <div class="control-group">
-      <label class="control-label">Products</label>
-      <div class="controls">
-        <input name="access_products" ng-model="newUser.access_products" ng-change="submit()"  type="checkbox" checked/>
-       </div>
-    </div>
-    </div>
-  </div>
-  </div>
-  <div class="tab-pane createuser-tab" id="systemtab">
-				<legend>System settings permissions</legend>
-    <div class="control-group">
-      <label class="control-label">User can edit General Preferences</label>
-      <div class="controls">
-        <input name="edit_general_prefs" ng-model="newUser.edit_general_prefs" ng-change="submit()"  type="checkbox" checked/>
-       </div>
-    </div>
-    <div class="control-group">
-      <label class="control-label">User can edit Scanning Preferences</label>
-      <div class="controls">
-        <input name="edit_scanning_prefs" ng-model="newUser.edit_scanning_prefs" ng-change="submit()"  type="checkbox" checked/>
-       </div>
-    </div>
-  </div>
-  </div>
 </div>
 
-  <div class="modal-footer">
-        <button class="btn btn-primary" data-dismiss="modal" aria-hidden="true" ng-hide="edit_status">Add User</button>
-        <button class="btn btn-primary" data-dismiss="modal" aria-hidden="true" ng-show="edit_status">Save & close</button>
-        <button class="btn" data-dismiss="modal" ng-click="rollback()" aria-hidden="true">Cancel</button>
-  </div>
-
-</fieldset>
-</div>
-</div>
 </div>
 </div>
