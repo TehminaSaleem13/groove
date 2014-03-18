@@ -1,6 +1,6 @@
 groovepacks_controllers.
-controller('showScanPackCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$location', '$route', '$cookies',
-function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies) {
+controller('showScanPackCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$location', '$route', '$cookies','orders',
+function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies, orders) {
     //Definitions
 
     /*
@@ -28,8 +28,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies) {
     }
 
     $scope.add_note = function () {
-        $scope.notify("Adding notes is yet to be implemented");
-
+        $scope._ready_for_note_from_packer();
     }
 
     /*
@@ -48,6 +47,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies) {
         $scope.session_bonus = 0;
         $scope.scan_accuracy = 0;
         $scope.last_product_time = 0;
+        $scope.notes_from_packer = "";
 
 
         //Private properties
@@ -66,12 +66,14 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies) {
             product_edit: $scope._product_edit_state,
             order_clicked: $scope._order_clicked_state,
             ready_for_tracking_num: $scope._ready_for_tracking_num,
+            add_note: $scope._ready_for_note_from_packer,
             default: "ready_for_order"
         }
         $scope._rf_inputObj = $('input#rf_input');
         $scope._order_confirmation_inputObj = $('input#order_edit_confirmation_code');
         $scope._product_confirmation_inputObj = $('input#product_edit_confirmation_code');
         $scope._tracking_num_inputObj = $('input#scantracking_num');
+        $scope._note_inputObj = $('textarea#note_from_packer');
 
         $scope._cos_confirmation_inputObj = $('input#cos_confirmation_code');
 
@@ -84,6 +86,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies) {
         $scope._product_confirmation_inputObj.keydown($scope._handle_product_confirmation_code_key_event);
         $scope._tracking_num_inputObj.keydown($scope._scan_tracking_num_handle_event);
         $scope._cos_confirmation_inputObj.keydown($scope._handle_cos_confirmation_code_key_event);
+        $scope._note_inputObj.focusout($scope._handle_note_from_packer_key_event);
 
         $("#showProductConfirmation").on('shown',function() {
             $scope._focus_input($scope._product_confirmation_inputObj);
@@ -93,6 +96,9 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies) {
         });
         $("#showCosConfirmation").on('shown',function() {
             $scope._focus_input($scope._cos_confirmation_inputObj);
+        });
+        $("#showNotesPacker").on('shown',function() {
+            $scope._focus_input($scope._note_inputObj);
         });
         $("#showProduct").on('hidden',$scope._refresh_inactive_list);
 
@@ -165,6 +171,21 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies) {
         //     }
         // }
         // $scope.order_details.items_to_scan += $scope.order_details.total_items;
+    }
+
+    $scope._ready_for_note_from_packer = function (data) {
+
+        $http.get('/orders/getdetails.json?id='+$scope.order_id).success(function(data) {
+            if(data.status) {
+                $scope.notes_from_packer = data.order.basicinfo.notes_fromPacker;
+                $("#showNotesFromPacker").modal("show");
+                $timeout(function() { $scope._note_inputObj.focus()},1000);
+            }
+        }).error(function(){
+                $scope.notify(["Cannot load Order with id "+ $scope.order_id+". There was a server error"],0);
+            });
+
+
     }
 
     $scope._ready_for_order_state = function (data) {
@@ -344,7 +365,15 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies) {
            });
         }
     }
-
+    $scope._handle_note_from_packer_key_event = function(event) {
+        $http.post('/orders/updateorderlist.json',{id:$scope.order_id,var:"notes_from_packer",value:$scope.notes_from_packer}).success(function(data){
+            if(data.status) {
+                $scope.notify("Successfully Updated",1);
+            } else {
+                $scope.notify(data.error_msg,0);
+            }
+        });
+    }
     $scope._refresh_inactive_list = function () {
         $http.post('/scan_pack/inactive_or_new.json',{order_id:$scope.order_id}).success(function(data){
             if(data.status) {
