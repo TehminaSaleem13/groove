@@ -9,6 +9,11 @@ groovepacks_services.factory('warehouses',['$http','notification',function($http
         };
     }
 
+    var reset_single = function(object) {
+        object.single = {};
+        return object;
+    }
+
 	var get_list = function(object) {
         
         var url = '/inventory_warehouse/index.json';
@@ -42,11 +47,11 @@ groovepacks_services.factory('warehouses',['$http','notification',function($http
         ).error(notification.server_error);
     }
 
-	var create_inv_wh = function(inv_wh, object) {
+	var create_inv_wh = function(object) {
         
         var url = '/inventory_warehouse/create.json';
 
-        return $http.post(url, inv_wh).success(
+        return $http.post(url, object.single).success(
             function(data) {
                 if(data.status) {
                 	get_list(object);
@@ -60,7 +65,8 @@ groovepacks_services.factory('warehouses',['$http','notification',function($http
     //Public facing API
     return {
         model: {
-            get:get_default
+            get:get_default,
+            reset_single: reset_single
         },
         list: {
             get: get_list

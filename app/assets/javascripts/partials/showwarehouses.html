@@ -19,7 +19,7 @@
     <div class="span4 offset2">
       <ul class="nav nav-pills nav-stacked warehouse-tabs">
         <li class="wh_heading"><strong>Warehouse Name</strong></li>
-        <li ng-repeat="warehouse in inv_whs">
+        <li ng-repeat="warehouse in warehouses.list">
           {{warehouse.info.name}}
         </li>
       </ul>
@@ -38,7 +38,7 @@
   <div class="row-fluid">
     <div class="span4 offset2">
       <div class="row-fluid">
-        <input type="text" ng-model="inv_wh_single.name"/>
+        <input type="text" ng-model="warehouses.single.name"/>
       </div>
       <div class="row-fluid">
         <div class="btn-group">
