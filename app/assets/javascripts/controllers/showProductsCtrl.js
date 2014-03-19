@@ -23,6 +23,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,pro
             value: product[prop]
         }).then($scope._get_products)
     }
+    
     $scope.create_product = function () {
         products.single.create($scope.products).then(function(response) {
             if(response.data.status) {

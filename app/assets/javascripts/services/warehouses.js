@@ -5,12 +5,20 @@ groovepacks_services.factory('warehouses',['$http','notification',function($http
     var get_default = function() {
         return {
             list: [],
-            single: {}
+            single: {
+                inv_wh_info: {
+                    name: '',
+                    location: '',
+                    status: ''
+                },
+                inv_wh_users: []
+            }
         };
     }
 
     var reset_single = function(object) {
-        object.single = {};
+        object.single.inv_wh_info = {};
+        object.single.inv_wh_users = [];
         return object;
     }
 
