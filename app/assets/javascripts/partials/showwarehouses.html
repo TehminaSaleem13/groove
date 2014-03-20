@@ -75,27 +75,47 @@ aria-hidden="true">
     <div class="control-group">
       <label class="control-label">Name</label>
       <div class="controls">
-        <input name="name" ng-blur="submit()" ng-model="warehouses.single.inv_wh_info.name" type="text" required/>
+        <input name="name" ng-model="warehouses.single.inv_wh_info.name" type="text" required/>
        </div>
     </div>
 
     <div class="control-group">
       <label class="control-label">Location</label>
       <div class="controls">
-        <input name="location" ng-blur="submit()" ng-model="warehouses.single.inv_wh_info.location" type="text" />
+        <input name="location" ng-model="warehouses.single.inv_wh_info.location" type="text" />
        </div>
     </div>
 
     <div class="control-group">
       <label class="control-label">Status</label>
       <div class="controls">
-        <input name="status" ng-blur="submit()" ng-model="warehouses.single.inv_wh_info.location" type="text"/>
+        <input name="status" ng-model="warehouses.single.inv_wh_info.status" type="text"/>
        </div>
     </div>
   </div>
 
+  <hr/>
+  <!-- Associated Users -->
+  <div class="control-group">
+    <label class="control-label">Associated Users</label>
+    <div class="controls">
+      <div class="row-fluid">
+        <div class="span4">
+          <ul class="nav nav-tabs nav-stacked">
+              <li  ng-repeat="user in warehouses.available_users" id='user{{user.id}}' 
+              ng-click="select_toggle_user($index, user.id)">
+                <a href="">{{user.name}}</a>
+              </li>
+          </ul>
+        </div>
+      </div>
+     </div>
+  </div>
+
+
   <div class="modal-footer">
-        <button class="btn btn-primary" data-dismiss="modal" aria-hidden="true" ng-hide="edit_status">Add Warehouse</button>
+        <button class="btn btn-primary" data-dismiss="modal" aria-hidden="true" ng-hide="edit_status" ng-click="submit()">
+          Add Warehouse</button>
         <button class="btn btn-primary" data-dismiss="modal" aria-hidden="true" ng-show="edit_status">Save & close</button>
         <button class="btn" data-dismiss="modal" ng-click="rollback()" aria-hidden="true">Cancel</button>
   </div>

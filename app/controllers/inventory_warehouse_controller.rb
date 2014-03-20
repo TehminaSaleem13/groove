@@ -155,6 +155,25 @@ class InventoryWarehouseController < ApplicationController
     end
   end
 
+
+  #get list of available users
+  def available_users
+    result = Hash.new
+    result['status'] = true
+    result['error_messages'] = []
+    result['success_messages'] = []
+    result['notice_messages'] = []
+    result['data'] = Hash.new
+
+    result['data']['available_users'] =
+      User.where(:inventory_warehouse_id => nil)
+
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json: result }
+    end
+  end
+
   #add user to inventory warehouse where id is inventory warehouse and user_id is id of the user to 
   #be added
   def adduser
