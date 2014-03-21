@@ -86,6 +86,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,pro
             setup: $scope.products.setup,
             show_hide:true,
             draggable:true,
+            sortable:true,
             editable:{
                 array:false,
                 update: $scope.update_product_list,
@@ -114,7 +115,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,pro
                 name: {
                     name: "Item Name",
                     hideable: false,
-                    transclude:'<a href="" ng-click="function(ngModel.id,false,null,true)" class="ng-binding">{{ngModel.name}}</a>',
+                    transclude:'<a href="" ng-click="function(ngModel.id,false,null,true)">{{ngModel.name}}</a>',
                     grid_bind: '<a href="" ng-click="options.editable.functions.name(row.id,false,null,true)" >{{row[field]}}</a>'
                 },
                 sku: {

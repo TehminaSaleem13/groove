@@ -37,6 +37,6 @@
                     <input bo-id="single_editable_id" class="span3" ng-model="ngModel[prop]" ng-focus="focus_event()" ng-blur="blur_event()" ng-keydown="handle_key_event($event)" type="text" placeholder="Edit..."/>
                </span>
            </span>
-        <i ng-hide="input.type=='select'" class="icon-ok" ng-click="save_node()"></i>
+        <i ng-hide="input.type=='select' || input.type=='checkbox'" class="icon-ok" ng-click="save_node()"></i>
     </div>
 </div>

@@ -35,12 +35,11 @@
     </tbody>
 </table>
     <div bo-if="options.show_hide">
-        <div id="{{custom_identifier}}-context-menu" class="context-menu dropdown clearfix" ng-show="context_menu_shown" ng-click="context_menu_shown = false" groov-rt-click="context_menu_shown = false">
-
-            <ul class="dropdown-menu">
+        <div class="context-menu dropdown clearfix" ng-show="context_menu_shown" ng-click="context_menu()" groov-rt-click="context_menu()">
+            <ul class="dropdown-menu" ng-style="context_menu_style">
                 <li ng-repeat="field in options.all_fields" ng-show="field.hideable">
 
-                    <a href="" ng-click="show_hide(field); $event.stopPropagation();"> <i class="icon pull-left" ng-class="{'icon-ok':!field.hidden, 'icon-remove':field.hidden}"></i> <span bo-text="field.name"></span></a>
+                    <a href="" ng-click="show_hide(field); $event.stopPropagation();" groov-rt-click="show_hide(field); $event.stopPropagation();"> <i class="icon pull-left" ng-class="{'icon-ok':!field.hidden, 'icon-remove':field.hidden}"></i> <span bo-text="field.name"></span></a>
                 </li>
             </ul>
         </div>
