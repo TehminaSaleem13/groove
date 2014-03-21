@@ -229,6 +229,7 @@ groovepacks_directives.directive('groovOrderModal',['notification','orders','pro
                 all_fields: {
                     name: {
                         name:"Product",
+                        hideable: false,
                         model:"row.productinfo",
                         transclude:'<a href="" ng-click="function(ngModel.id,false,null,true)">{{ngModel.name}}</a>',
                         grid_bind: '<a href="" ng-click="options.editable.functions.name(row.productinfo.id,false,null,true)" >{{row.productinfo.name}}</a>'
