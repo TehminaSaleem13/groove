@@ -21,7 +21,6 @@ controller('showWarehousesCtrl', [ '$scope', '$http', '$timeout', '$routeParams'
     $scope.create_warehouse = function() {
         myscope.setup_modal();
         $scope.edit_status = false;
-        $scope.show_password = true;
         $scope.warehouses = warehouses.model.reset_single($scope.warehouses);
         warehouses.list.get_available_users($scope.warehouses).then(function(response){
           if(response.status) {
@@ -66,9 +65,6 @@ controller('showWarehousesCtrl', [ '$scope', '$http', '$timeout', '$routeParams'
 		$scope.list_warehouses();
     }
 
-
-
-
 	$scope.submit = function() {
     	/*call service */
 		warehouses.single.create($scope.warehouses).then(function(response) {
@@ -98,6 +94,18 @@ controller('showWarehousesCtrl', [ '$scope', '$http', '$timeout', '$routeParams'
 	$scope.remove_warehouse = function() {
 
 	}
+
+    $scope.edit_warehouse = function(warehouse_id) {
+        myscope.setup_modal();
+        $scope.edit_status = true;
+        $scope.warehouses = warehouses.model.reset_single($scope.warehouses);
+        warehouses.single.get(warehouse_id, $scope.warehouses).then(function(response){
+          if(response.status) {
+            $scope.warehouse_modal.modal('show');   
+          }
+        })
+
+    }
 
 	myscope.init();
 }]);

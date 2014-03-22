@@ -59,10 +59,10 @@ groovepacks_services.factory('warehouses',['$http','notification',function($http
         return $http.get(url).success(
             function(data) {
                 if(data.status) {
-                	object.inv_wh_info = data.inv_wh_info;
-                	object.inv_wh_users = data.inv_wh_users;
+                	object.single.inv_wh_info = data.data.inv_wh_info;
+                	object.single.inv_wh_users = data.data.inv_wh_users;
                 } else {
-                    notification.notify("Can't load list of products",0);
+                    notification.notify("Can't retrieve warehouse with id:"+id,0);
                 }
             }
         ).error(notification.server_error);

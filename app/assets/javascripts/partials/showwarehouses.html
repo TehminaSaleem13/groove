@@ -46,7 +46,7 @@
       <tbody>
       <tr ng-repeat="warehouse in warehouses.list">
         <td><input type="checkbox" ng-model="warehouse.checked"/></td>
-        <td><a href="" role="button" data-toggle="modal" ng-click="getwarehouse(warehouse.id)">{{warehouse.info.name}}</a></td>
+        <td><a href="" role="button" data-toggle="modal" ng-click="edit_warehouse(warehouse.info.id)">{{warehouse.info.name}}</a></td>
         <td><span>{{warehouse.info.location}}</span></td>
         <td>
           <span ng-show="warehouse.info.status" class="active">Active</span>
@@ -73,7 +73,7 @@ aria-hidden="true">
   <fieldset>
   <div class="modal-body" id="createWarehouse-body">
     <div class="control-group">
-      <label class="control-label">Name</label>
+      <label class="control-label">Name </label>
       <div class="controls">
         <input name="name" ng-model="warehouses.single.inv_wh_info.name" type="text" required/>
        </div>
