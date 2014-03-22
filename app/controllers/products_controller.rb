@@ -676,6 +676,7 @@ class ProductsController < ApplicationController
             end
           end
         end
+        @product.update_product_status
       end
     end
 
@@ -1174,7 +1175,7 @@ class ProductsController < ApplicationController
   		#if product is a kit, update product_kit_skus
   		if !params[:productkitskus].nil?
   			params[:productkitskus].each do |kit_product|
-  			  actual_product = ProductKitSkus.where(:option_product_id => kit_product["option_product_id"])
+                actual_product = ProductKitSkus.where(:option_product_id => kit_product["option_product_id"], :product_id => @product.id)
   			  if actual_product.length > 0
   			  	actual_product = actual_product.first
   			  	actual_product.qty = kit_product["qty"]

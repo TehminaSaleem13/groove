@@ -136,42 +136,13 @@
 
 
 <div class="tab-pane" id="itemstab{{custom_identifier}}">
-    <div class="control-group pull-right" ng-show="orders.single.remove_items_permitted">
-        <div class="controls">
-            <button class="btn btn-danger" ng-click="item_remove_selected()">Remove selected Items</button>
-        </div>
+    <div class="pull-right btn-toolbar">
+        <button ng-show="orders.single.add_items_permitted" class="btn" ng-click="item_order('order',item_products.list)">Add Item</button>
+        <button class="btn btn-danger" ng-show="orders.single.remove_items_permitted" ng-click="item_remove_selected()">Remove selected Items</button>
     </div>
 
+    <div groov-data-grid="gridOptions" groov-list="orders.single.items"></div>
 
-    <table class="table table-hover table-bordered" >
-        <thead>
-        <tr >
-            <th>Product</th>
-            <th>Primary Image</th>
-            <th>Primary SKU</th>
-            <th>Primary Warehouse</th>
-            <th>Qty ordered</th>
-            <th>On hand</th>
-            <th>Is Skippable</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr ng-repeat="item in orders.single.items" ng-click="item.checked = !item.checked" ng-class="{info: item.checked}">
-            <td groov-editable="itemEditableOptions" ng-model="item.productinfo" prop="name" identifier="item-name-{{$index}}"><a href="" ng-click="function(ngModel.id,'auto',0,true)" >{{ ngModel[prop] }}</a></td>
-            <td> <div class="single-image"><img class="img-thumb" ng-src="{{item.productimages[0].image}}" /></div></td>
-            <td groov-editable="itemEditableOptions" ng-model="item" prop="sku" identifier="item-sku-{{$index}}"></td>
-            <td groov-editable="itemEditableOptions" ng-model="item" prop="location" identifier="item-location-{{$index}}"></td>
-            <td groov-editable="itemEditableOptions" ng-model="item.iteminfo" prop="qty" identifier="item-qty-{{$index}}" ></td>
-            <td groov-editable="itemEditableOptions" ng-model="item" prop="qty_on_hand" identifier="item-qoh-{{$index}}"></td>
-            <td ng-click="save_item(item.productinfo,'is_skippable')"><input type="checkbox" ng-model="item.productinfo.is_skippable"/></td>
-        </tr>
-        </tbody>
-    </table>
-    <div class="control-group pull-right"  ng-show="orders.single.add_items_permitted">
-        <div class="controls">
-            <button class="btn" ng-click="item_order('order',item_products.list)">Add Item</button>
-        </div>
-    </div>
 </div>
 <div class="tab-pane" id="notestab{{custom_identifier}}">
     <fieldset>

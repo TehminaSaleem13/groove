@@ -73,6 +73,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,ord
             identifier:'orders',
             select_all: $scope.select_all_toggle,
             draggable:true,
+            sortable:true,
             sort_func: $scope.handlesort,
             setup: $scope.orders.setup,
             show_hide:true,
@@ -126,7 +127,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,ord
                 },
                 order_date:{
                     name:"Order Date",
-                    transclude: "<span>{{ngModel.orderdate | date:'EEEE MM/dd/yyyy hh:mm:ss a'}}</span>",
+                    transclude: "<span>{{ngModel.order_date | date:'EEEE MM/dd/yyyy hh:mm:ss a'}}</span>",
                     grid_bind: "<span>{{row[field] | date:'EEEE MM/dd/yyyy hh:mm:ss a'}}</span>"
                 },
                 itemslength:{

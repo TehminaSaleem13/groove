@@ -13,8 +13,8 @@
             <i class="icon icon-2x icon-edit"></i><br/>
             Add Note
         </div>
-        <div class="span8">
-            <h2>Now Packing Order# {{order_num}}</h2>
+        <div class="span8 scan_now_showing ">
+            <span style="font-size:20px;">Now Packing Order </span><span style="font-size:25px;">#{{order_num}}</span>
         </div>
     </div>
     <div class="row-fluid">
@@ -541,3 +541,25 @@
     </div>
 </div>
 <!-- Tracking number Scan modal ends -->
+<!-- Notes from Packer modal -->
+<div id="showNotesFromPacker" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="showNotesFromPacker"
+     aria-hidden="true">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="icon-remove"></i></button>
+        <h3 id="showNotesFromPackerHeader">Note from packer</h3>
+    </div>
+    <div class="form-horizontal form-horizontal-create" >
+        <div class="modal-body" id="showNotesFromPacker-body">
+            <div class="control-group">
+                <fieldset>
+                    <legend>Add Note to Order</legend>
+                    <textarea id="note_from_packer" class="span8" ng-model="notes_from_packer" ></textarea>
+                </fieldset>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+    </div>
+</div>
+<!-- Notes from packer modal ends -->

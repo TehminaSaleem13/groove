@@ -145,7 +145,7 @@ groovepacks_directives.directive('groovOrderModal',['notification','orders','pro
                     });
                 } else {
                     obj = {
-                        id: (prop == 'name' || prop == 'is_skippable')? model.id : model.iteminfo.product_id,
+                        id: (prop == 'name' || prop == 'is_skippable' || prop == 'status')? model.id : model.iteminfo.product_id,
                         var: (prop == 'qty_on_hand')? 'qty': ((prop == 'location')? 'location_name': prop),
                         value: model[prop]
                     }
@@ -194,19 +194,80 @@ groovepacks_directives.directive('groovOrderModal',['notification','orders','pro
 
             }
 
-            scope.itemEditableOptions = {
-                update: scope.save_item,
-                elements: {
-                    qty: {type:'number',min:0},
-                    qty_on_hand: {type:'number',min:0}
+
+            scope.gridOptions = {
+                identifier:'orderitems',
+                draggable:false,
+                show_hide:true,
+                editable: {
+                    update: scope.save_item,
+                    elements: {
+                        qty: {type:'number',min:0},
+                        qty_on_hand: {type:'number',min:0},
+                        is_skippable: {
+                            type:'select',
+                            options:[
+                                {name:"Yes",value:true},
+                                {name:"No",value:false}
+                            ]
+                        },
+                        status: {
+                            type:'select',
+                            options:[
+                                {name:"Active",value:'active'},
+                                {name:"Inactive",value:'inactive'},
+                                {name:"New",value:'new'}
+                            ]
+                        }
+                    },
+                    functions: {
+                        name: function(id,index,post_fn,open_modal) {
+                            scope.product_single_details(id,index,post_fn,open_modal);
+                        }
+                    }
                 },
-                functions: {
-                    name: function(id,index,post_fn,open_modal) {
-                        scope.product_single_details(id,index,post_fn,open_modal);
+                all_fields: {
+                    name: {
+                        name:"Product",
+                        hideable: false,
+                        model:"row.productinfo",
+                        transclude:'<a href="" ng-click="function(ngModel.id,false,null,true)">{{ngModel.name}}</a>',
+                        grid_bind: '<a href="" ng-click="options.editable.functions.name(row.productinfo.id,false,null,true)" >{{row.productinfo.name}}</a>'
+                    },
+                    image: {
+                        name:"Primary Image",
+                        editable:false,
+                        grid_bind:'<div class="single-image"><img class="img-thumb" ng-src="{{row.productimages[0].image}}" /></div>'
+                    },
+                    sku: {
+                        name:"Primary SKU"
+                    },
+                    location: {
+                        name:"Primary Warehouse"
+                    },
+                    status: {
+                        name:"Status",
+                        model:"row.productinfo",
+                        transclude: '<span>{{ngModel.status}}</span>',
+                        grid_bind: '<span>{{row.productinfo.status}}</span>'
+                    },
+                    qty: {
+                        name:"Qty ordered",
+                        model:"row.iteminfo",
+                        transclude: '<span>{{ngModel.qty}}</span>',
+                        grid_bind: '<span>{{row.iteminfo.qty}}</span>'
+                    },
+                    qty_on_hand: {
+                        name:"On hand"
+                    },
+                    is_skippable: {
+                        name: "Is Skippable",
+                        model:"row.productinfo",
+                        transclude: '<span ng-show="ngModel.is_skippable">Yes</span> <span ng-hide="ngModel.is_skippable">No</span>',
+                        grid_bind: '<span ng-show="row.productinfo.is_skippable">Yes</span> <span ng-hide="row.productinfo.is_skippable">No</span>'
                     }
                 }
-            };
-
+            }
 
             scope.$on("orders-next-loaded",function(){
                 if(scope._keydown_last) {

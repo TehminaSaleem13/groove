@@ -909,9 +909,10 @@ class OrdersController < ApplicationController
     else
       accepted_data = {
           "ordernum" => "increment_id",
-          "orderdate" => "order_placed_time",
+          "order_date" => "order_placed_time",
           "recipient" => 1,
           "notes" => "notes_internal",
+          "notes_from_packer" => "notes_fromPacker",
           "status" => "status",
           "email" => "email",
           "tracking_num" => "tracking_num",
