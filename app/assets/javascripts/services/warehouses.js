@@ -70,21 +70,31 @@ groovepacks_services.factory('warehouses',['$http','notification',function($http
 
 	var create_inv_wh = function(object) {
         var url = '/inventory_warehouse/create.json';
-        var warehouse = object.single.inv_wh_info;
+        var warehouse = {};
+        warehouse.inv_info = object.single.inv_wh_info;
+        warehouse.inv_users = [];
+
+        for (i = 0; i < object.available_users.length; i++) {
+            if (object.available_users[i].checked) {
+                warehouse.inv_users.push(object.available_users[i].id);
+            }
+        }
 
         return $http.post(url, warehouse).success(
             function(data) {
                 if(data.status) {
                 	get_list(object);
                 } else {
-                    notification.notify("Can't load list of products",0);
+                    notification.notify(data.error_messages,0);
                 }
             }
         ).error(notification.server_error);
     }
 
     var set_associated_user = function(index, user_id, set_unset, object) {
-        object.available_users[index].checked = set_unset;
+        if (index < object.available_users.length - 1) {
+            object.available_users[index].checked = set_unset;
+        }
     }
 
     //Public facing API

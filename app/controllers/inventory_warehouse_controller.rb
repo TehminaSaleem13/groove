@@ -8,13 +8,18 @@ class InventoryWarehouseController < ApplicationController
     result['success_messages'] = []
     result['notice_messages'] = []
     
-    if !params[:name].nil?
+    if !params[:inv_info][:name].nil?
       inv_wh = InventoryWarehouse.new
-      inv_wh.name = params[:name]
-      inv_wh.location = params[:location] if !params[:location].nil?
-      inv_wh.status = 'new'
+      inv_wh.name = params[:inv_info][:name]
+      inv_wh.location = params[:inv_info][:location] if !params[:inv_info][:location].nil?
+      inv_wh.status = params[:inv_info][:status]
+
       if inv_wh.save
         result['success_messages'].push('Inventory warehouse created successfully')
+        params[:inv_users].each do |inv_user_id|
+          inv_wh.users << User.find(inv_user_id)
+        end
+        inv_wh.save
       else
         result['status'] &= false
         inv_wh.errors.full_messages.each do |message|
