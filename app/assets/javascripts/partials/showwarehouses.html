@@ -102,9 +102,9 @@ aria-hidden="true">
       <div class="row-fluid">
         <div class="span4">
           <ul class="nav nav-tabs nav-stacked">
-              <li  ng-repeat="user in warehouses.available_users" id='user{{user.id}}' 
-              ng-click="select_toggle_user($index, user.id)">
-                <a href="">{{user.name}}</a>
+              <li  ng-repeat="user in warehouses.available_users" id='user{{user.user_info.id}}' 
+              ng-click="select_toggle_user($index, user.user_info.id)" ng-class="{active:user.checked == true}">
+                <a href="">{{user.user_info.name}}</a>
               </li>
           </ul>
         </div>
@@ -116,7 +116,7 @@ aria-hidden="true">
   <div class="modal-footer">
         <button class="btn btn-primary" data-dismiss="modal" aria-hidden="true" ng-hide="edit_status" ng-click="submit()">
           Add Warehouse</button>
-        <button class="btn btn-primary" data-dismiss="modal" aria-hidden="true" ng-show="edit_status">Save & close</button>
+        <button class="btn btn-primary" data-dismiss="modal" aria-hidden="true" ng-show="edit_status" ng-click="submit()">Save & close</button>
         <button class="btn" data-dismiss="modal" ng-click="rollback()" aria-hidden="true">Cancel</button>
   </div>
 

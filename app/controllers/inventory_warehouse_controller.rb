@@ -169,9 +169,31 @@ class InventoryWarehouseController < ApplicationController
     result['success_messages'] = []
     result['notice_messages'] = []
     result['data'] = Hash.new
+    result['data']['available_users'] = []
 
-    result['data']['available_users'] =
+    #get all users of current inventory warehouses' id
+    if !params[:inv_wh_id].nil?
+      current_inv_wh_users = 
+        User.where(:inventory_warehouse_id => params[:inv_wh_id])
+
+      current_inv_wh_users.each do |user| 
+        available_user = Hash.new
+        available_user['user_info'] = user
+        available_user['checked'] = true
+        result['data']['available_users'] << available_user
+      end
+    end
+
+    #get all available users
+    available_users = 
       User.where(:inventory_warehouse_id => nil)
+
+    available_users.each do |user|
+      available_user = Hash.new
+      available_user['user_info'] = user
+      available_user['checked'] = false
+      result['data']['available_users'] << available_user
+    end
 
     respond_to do |format|
       format.html # show.html.erb
@@ -195,12 +217,15 @@ class InventoryWarehouseController < ApplicationController
           #if a user is already associated with an inven
           user = User.find(params[:user_id])
           if !user.nil?
-            if user.inventory_warehouse.nil?
-              user.inventory_warehouse  = inv_wh
+            if user.inventory_warehouse_id.nil?
+              user.inventory_warehouse_id  = inv_wh.id
               if user.save
                 result['success_messages'].push('User is successfully added to the warehouse')
               else
                 result['status'] &= false
+                user.errors.full_messages.each do |message|
+                  result['error_messages'].push(message)
+                end
                 result['error_messages'].push('There was an error adding user to inventory warehouse')
               end
             else

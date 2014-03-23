@@ -34,21 +34,13 @@ controller('showWarehousesCtrl', [ '$scope', '$http', '$timeout', '$routeParams'
         //if in edit mode, then use the selected index and update the server 
         //to add this user to the list of associated users.
         if ($scope.edit_status) {
-
+            warehouses.model.toggle_associated_user(index, user_id, 
+                true, $scope.warehouses); 
         }
         else {
             // if not in edit mode, toggle the active
-            elem = $('#user'+user_id);
-            if (elem.hasClass('active')) {
-              warehouses.model.set_associated_user(index, user_id, 
-                false, $scope.warehouses);  
-              elem.removeClass('active');
-            }
-            else {
-              warehouses.model.set_associated_user(index, user_id, 
-                true, $scope.warehouses);  
-              elem.addClass('active');
-            }
+            warehouses.model.toggle_associated_user(index, user_id, 
+                false, $scope.warehouses); 
         }
     }
 
@@ -66,13 +58,24 @@ controller('showWarehousesCtrl', [ '$scope', '$http', '$timeout', '$routeParams'
     }
 
 	$scope.submit = function() {
-    	/*call service */
-		warehouses.single.create($scope.warehouses).then(function(response) {
+        if ($scope.edit_status) {
+        /*call service */
+        warehouses.single.update($scope.warehouses).then(function(response) {
             if(response.status) {
                 $scope.list_warehouses();
                 $scope.warehouses = warehouses.model.reset_single($scope.warehouses);
             }
         });
+        }
+        else {
+        /*call service */
+        warehouses.single.create($scope.warehouses).then(function(response) {
+            if(response.status) {
+                $scope.list_warehouses();
+                $scope.warehouses = warehouses.model.reset_single($scope.warehouses);
+            }
+        });
+        }
 	}
 
 	$scope.list_warehouses = function() {
@@ -101,10 +104,13 @@ controller('showWarehousesCtrl', [ '$scope', '$http', '$timeout', '$routeParams'
         $scope.warehouses = warehouses.model.reset_single($scope.warehouses);
         warehouses.single.get(warehouse_id, $scope.warehouses).then(function(response){
           if(response.status) {
-            $scope.warehouse_modal.modal('show');   
+            warehouses.list.get_available_users($scope.warehouses).then(function(response){
+              if(response.status) {
+                $scope.warehouse_modal.modal('show');
+              }
+            });  
           }
         })
-
     }
 
 	myscope.init();
