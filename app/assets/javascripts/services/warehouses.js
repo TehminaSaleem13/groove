@@ -9,7 +9,8 @@ groovepacks_services.factory('warehouses',['$http','notification',function($http
                 inv_wh_info: {},
                 inv_wh_users: []
             },
-            available_users: []
+            available_users: [],
+            select_deselectall: false
         };
     }
 
@@ -148,16 +149,92 @@ groovepacks_services.factory('warehouses',['$http','notification',function($http
         }
     }
 
+    var delete_wh = function(object) {
+        var delete_ids = {};
+
+        delete_ids.inv_wh_ids = [];
+        
+        for (i=0; i < object.list.length; i++) {
+            if (object.list[i].checked) {
+                delete_ids.inv_wh_ids.push(object.list[i].info.id);
+            }
+        }
+
+        var url = '/inventory_warehouse/destroy.json';
+        //sends a delete request
+        return $http.put(url, delete_ids).success(
+            function(data) {
+                if(data.status) {
+                    get_list(object);
+                } else {
+                    notification.notify(data.error_messages,0);
+                }
+            }
+        ).error(notification.server_error);
+    }
+
+    var select_deselectall_event = function(object) {
+        var unchecked  = false;
+        for (i=0; i<object.list.length; i++){
+            if (!object.list[i].checked) {
+                unchecked = true;
+                break;
+            }
+        }
+
+        if (unchecked) {
+            mark_checked = true;
+        } else {
+            mark_checked = false;
+        }
+
+        for (i=0; i<object.list.length; i++){
+            object.list[i].checked = mark_checked;
+        }
+
+        object.select_deselectall = mark_checked;
+    }
+
+    var changestatus = function(object, status) {
+        var changestatus_ids = {};
+
+        changestatus_ids.inv_wh_ids = [];
+        changestatus_ids.status = status;
+        
+        for (i=0; i < object.list.length; i++) {
+            if (object.list[i].checked) {
+                changestatus_ids.inv_wh_ids.push(object.list[i].info.id);
+            }
+        }
+
+        var url = '/inventory_warehouse/changestatus.json';
+        //sends a delete request
+        return $http.put(url, changestatus_ids).success(
+            function(data) {
+                if(data.status) {
+                    get_list(object);
+                    object.select_deselectall = false;
+                } else {
+                    notification.notify(data.error_messages,0);
+                }
+            }
+        ).error(notification.server_error);       
+
+    }
+
     //Public facing API
     return {
         model: {
             get:get_default,
             reset_single: reset_single,
-            toggle_associated_user: toggle_associated_user
+            toggle_associated_user: toggle_associated_user,
+            select_deselectall_event: select_deselectall_event
         },
         list: {
             get: get_list,
-            get_available_users: get_available_users
+            get_available_users: get_available_users,
+            delete_wh: delete_wh,
+            changestatus: changestatus
         },
         single: {
             get: get_single,

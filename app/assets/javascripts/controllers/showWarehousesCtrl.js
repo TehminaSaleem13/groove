@@ -64,6 +64,7 @@ controller('showWarehousesCtrl', [ '$scope', '$http', '$timeout', '$routeParams'
             if(response.status) {
                 $scope.list_warehouses();
                 $scope.warehouses = warehouses.model.reset_single($scope.warehouses);
+                $scope.edit_status = false;
             }
         });
         }
@@ -90,14 +91,6 @@ controller('showWarehousesCtrl', [ '$scope', '$http', '$timeout', '$routeParams'
         warehouses.list.get_available_users($scope.warehouses);
     }
 
-	$scope.get_warehouse_users = function() {
-
-	}
-
-	$scope.remove_warehouse = function() {
-
-	}
-
     $scope.edit_warehouse = function(warehouse_id) {
         myscope.setup_modal();
         $scope.edit_status = true;
@@ -111,6 +104,22 @@ controller('showWarehousesCtrl', [ '$scope', '$http', '$timeout', '$routeParams'
             });  
           }
         })
+    }
+
+    $scope.delete_warehouses = function() {
+        warehouses.list.delete_wh($scope.warehouses).then(function(response) {
+            if(response.status) {
+
+            }
+        })
+    }
+
+    $scope.select_deselectall_event =function() {
+        warehouses.model.select_deselectall_event($scope.warehouses);
+    }
+
+    $scope.handle_change_status = function(status) {
+        warehouses.list.changestatus($scope.warehouses, status);
     }
 
 	myscope.init();

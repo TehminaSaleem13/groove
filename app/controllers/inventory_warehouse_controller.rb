@@ -16,8 +16,10 @@ class InventoryWarehouseController < ApplicationController
 
       if inv_wh.save
         result['success_messages'].push('Inventory warehouse created successfully')
-        params[:inv_users].each do |inv_user_id|
-          inv_wh.users << User.find(inv_user_id)
+        if !params[:inv_wh_users].nil?
+          params[:inv_users].each do |inv_user_id|
+            inv_wh.users << User.find(inv_user_id)
+          end
         end
         inv_wh.save
       else
@@ -136,18 +138,24 @@ class InventoryWarehouseController < ApplicationController
     result['success_messages'] = []
     result['notice_messages'] = []
       
-    if !params[:id].nil?
-      inv_wh = InventoryWarehouse.find(params[:id])
-      if !inv_wh.nil?
-        if inv_wh.destroy
-          result['success_messages'].push('Inventory warehouse deleted successfully')
-        else
+    if !params[:inv_wh_ids].nil?
+      params[:inv_wh_ids].each do |inv_wh_id|
+
+        begin
+          inv_wh = InventoryWarehouse.find(inv_wh_id)
+          if !inv_wh.nil?
+            if !inv_wh.destroy
+              result['status'] &= false
+              result['error_messages'].push('There was an error deleting the warehouse with id: '+inv_wh_id)
+            end
+          else
+            result['status'] &= false
+            result['error_messages'].push('There is no inventory warehouse with id: '+ inv_wh_id)
+          end
+        rescue Exception => e
           result['status'] &= false
-          result['error_messages'].push('There was an error deleting the warehouse')
+          result['error_messages'].push(e.message)
         end
-      else
-        result['status'] &= false
-        result['error_messages'].push('There is no inventory warehouse with id: '+ params[:id])
       end
     else
       result['status'] &= false
@@ -301,6 +309,37 @@ class InventoryWarehouseController < ApplicationController
     end      
     
 
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json: result }
+    end
+  end
+
+  #change status to params[:status] for all inv_whs in the inv_wh_ids list
+  def changestatus
+    result = Hash.new
+    result['status'] = true
+    result['error_messages'] = []
+    result['success_messages'] = []
+    result['notice_messages'] = []
+
+    params[:inv_wh_ids]. each do |inv_wh_id|
+      begin
+        inv_wh = InventoryWarehouse.find(inv_wh_id)
+        if !inv_wh.nil?
+          inv_wh.status = params[:status]
+          if !inv_wh.save
+            result['status'] &= false
+            result['error_messages'].push('There was an error changing status for inventory warehouse id: '+
+                inv_wh_id)
+          end
+        end 
+      rescue Exception => e
+        result['status'] &= false
+        result['error_messages'].push(e.message)
+      end
+    end    
+    
     respond_to do |format|
       format.html # show.html.erb
       format.json { render json: result }

@@ -37,7 +37,7 @@
   <table id="warehousestbl" class="table table-hover table-bordered">
       <thead>
         <tr>
-          <th><input ng-model="select_deselectall" type="checkbox" ng-change='select_deselectall_event()' /></th>
+          <th><input ng-model="warehouses.select_deselectall" type="checkbox" ng-change='select_deselectall_event()' /></th>
           <th><a href="">Name</a></th>
           <th><a href="">Location</a></th>
           <th><a href="">Status</a></th>
@@ -49,8 +49,9 @@
         <td><a href="" role="button" data-toggle="modal" ng-click="edit_warehouse(warehouse.info.id)">{{warehouse.info.name}}</a></td>
         <td><span>{{warehouse.info.location}}</span></td>
         <td>
-          <span ng-show="warehouse.info.status" class="active">Active</span>
-          <span ng-hide="warehouse.info.status" class="inactive">Inactive</span>
+
+          <span ng-show="warehouse.info.status=='active'" class="active">Active</span>
+          <span ng-show="warehouse.info.status=='inactive'" class="inactive">Inactive</span>
         </td>
       </tr>
       </tbody>
@@ -89,7 +90,12 @@ aria-hidden="true">
     <div class="control-group">
       <label class="control-label">Status</label>
       <div class="controls">
-        <input name="status" ng-model="warehouses.single.inv_wh_info.status" type="text"/>
+        <label class="radio inline">
+          <input type="radio" ng-model="warehouses.single.inv_wh_info.status" value="active" />  Active
+        </label>
+        <label class="radio inline">
+          <input type="radio" ng-model="warehouses.single.inv_wh_info.status" value="inactive" /> Inactive
+        </label>
        </div>
     </div>
   </div>
