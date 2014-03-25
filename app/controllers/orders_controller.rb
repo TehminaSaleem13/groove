@@ -191,12 +191,13 @@ class OrdersController < ApplicationController
         end
       end
       seller_list.orderArray.each do |order|
-        if Order.where(:increment_id=>order.orderID).length == 0 &&
+        if !order.shippingDetails.nil? && 
+            Order.where(:increment_id=>order.shippingDetails.sellingManagerSalesRecordNumber).length == 0 &&
             order.checkoutStatus.status == 'Complete'
           @order = Order.new
           @order.status = 'awaiting'
           @order.store = @store
-          @order.increment_id = order.orderID
+          @order.increment_id = order.order.shippingDetails.sellingManagerSalesRecordNumber
           @order.order_placed_time = order.createdTime
 
           order.transactionArray.each do |transaction|
