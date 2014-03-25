@@ -197,7 +197,7 @@ class OrdersController < ApplicationController
           @order = Order.new
           @order.status = 'awaiting'
           @order.store = @store
-          @order.increment_id = order.order.shippingDetails.sellingManagerSalesRecordNumber
+          @order.increment_id = order.shippingDetails.sellingManagerSalesRecordNumber
           @order.order_placed_time = order.createdTime
 
           order.transactionArray.each do |transaction|
