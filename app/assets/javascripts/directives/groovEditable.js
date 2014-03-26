@@ -10,6 +10,7 @@ groovepacks_directives.directive('groovEditable', ['$timeout',function ($timeout
             };
         }
 
+    var editing = false;
     return {
         restrict:"A",
         transclude: true,
@@ -21,7 +22,6 @@ groovepacks_directives.directive('groovEditable', ['$timeout',function ($timeout
             groovEditable: "="
         },
         link: function(scope,el,attrs,ctrl,transclude) {
-
             scope.save_node = function(blur) {
                 blur = (typeof blur == "boolean")? blur : false;
                 if(scope.editing != -1) {
@@ -41,15 +41,16 @@ groovepacks_directives.directive('groovEditable', ['$timeout',function ($timeout
             }
 
             scope.add_node  = function () {
-                if(scope.editable.array) {
-                    mytemp = {};
-                    mytemp[scope.prop] = "";
-                    scope.ngModel.push(mytemp);
-                    scope.edit_node(-1);
-                } else {
-                    scope.edit_node();
+                if(editing == false || editing == scope.custom_identifier) {
+                    if(scope.editable.array) {
+                        mytemp = {};
+                        mytemp[scope.prop] = "";
+                        scope.ngModel.push(mytemp);
+                        scope.edit_node(-1);
+                    } else {
+                        scope.edit_node();
+                    }
                 }
-
             }
             scope.remove_node = function(index) {
                 if(scope.editable.array) {
@@ -61,18 +62,20 @@ groovepacks_directives.directive('groovEditable', ['$timeout',function ($timeout
             }
 
             scope.edit_node = function(index) {
-                if(scope.editable.array) {
-                    if(index == -1) {
-                        index = scope.ngModel.length-1;
+                if(editing == false || editing == scope.custom_identifier) {
+                    if(scope.editable.array) {
+                        if(index == -1) {
+                            index = scope.ngModel.length-1;
+                        }
+                        if(scope.editing != -1) {
+                            scope.save_node();
+                        }
+                        scope.editing = index;
+                    } else {
+                        scope.editing =  1;
                     }
-                    if(scope.editing != -1) {
-                        scope.save_node();
-                    }
-                    scope.editing = index;
-                } else {
-                    scope.editing =  1;
+                    $timeout(scope.focus_input,10);
                 }
-                $timeout(scope.focus_input,10);
             }
 
 
@@ -145,9 +148,6 @@ groovepacks_directives.directive('groovEditable', ['$timeout',function ($timeout
                 scope.tag_class = 'tag-bubble false-tag-bubble tag-bubble-input span3 input-text';
 
 
-
-
-
                 transclude(scope,function(clone){
                     scope.is_transcluded = clone.text().trim().length ? true: false;
                 });
@@ -161,12 +161,15 @@ groovepacks_directives.directive('groovEditable', ['$timeout',function ($timeout
                     }
                 });
                 scope.$watch('editing',function() {
-                    if(scope.editing != -1 && scope.editable.array) {
-                        if(typeof scope.ngModel[scope.editing] == 'undefined') {
-                            scope.editing = -1;
+                    if(scope.editing == -1) {
+                        if(editing == scope.custom_identifier) {
+                            editing = false;
                         }
+                    } else {
+                        editing = scope.custom_identifier;
                     }
-                })
+                });
+
                 scope.$on(scope.identifier,scope.edit_node);
             }
 
