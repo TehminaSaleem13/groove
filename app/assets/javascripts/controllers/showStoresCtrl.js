@@ -1,12 +1,16 @@
 groovepacks_controllers.
-controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$location', '$route', '$cookies',
-function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies) {
+controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$location', '$route', '$cookies', 
+    'warehouses',
+function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies, warehouses) {
     $('.modal-backdrop').remove();
     $scope.current_page="show_stores";
     $scope.backup_restore = {};
     $scope.backup_restore.data = {};
     $scope.backup_restore.data.method = "del_import";
     $scope.backup_restore.data.file = null;
+
+    $scope.warehouses = warehouses.model.get();
+        warehouses.list.get($scope.warehouses);
     $scope.backup_restore.import = function() {
         $http({
             method: 'POST',
@@ -60,6 +64,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies) {
     	$http.get('/home/userinfo.json').success(function(data){
     		$scope.username = data.username;
     	});
+
         $scope.currently_open = 0;
         $scope.orderimport_type = 'apiimport';
         $scope.productimport_type = 'apiimport';
@@ -81,6 +86,8 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies) {
                     $scope.newStore.name = $routeParams.name;
                     $scope.newStore.status = $routeParams.status;
                     $scope.newStore.store_type = $routeParams.storetype;
+                    $scope.newStore.inventory_warehouse_id = $routeParams.inventorywarehouseid;
+
                 }
                 else
                 {
@@ -89,6 +96,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies) {
                     $scope.newStore.name = $routeParams.name;
                     $scope.newStore.status = $routeParams.status;
                     $scope.newStore.store_type = $routeParams.storetype;
+                    $scope.newStore.inventory_warehouse_id = $routeParams.inventorywarehouseid;
                 }
                 if(typeof $scope.newStore.status == "undefined") {
                     $scope.newStore.status = 1;

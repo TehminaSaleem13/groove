@@ -99,6 +99,16 @@ aria-hidden="true">
       </div>
 
       <div class="control-group">
+        <label class="control-label">Warehouse Location </label>
+        <div class="controls">
+            <select class="selectpicker" ng-model="newStore.inventory_warehouse_id"
+            >
+              <option ng-repeat="inv_wh in warehouses.list" value="{{inv_wh.info.id}}">{{inv_wh.info.name}}</option>
+            </select>
+         </div>
+      </div>
+
+      <div class="control-group">
         <label class="control-label">Store Type</label>
         <div class="controls">
             <select class="selectpicker" ng-change="refresh_modal()" ng-model="newStore.store_type">
