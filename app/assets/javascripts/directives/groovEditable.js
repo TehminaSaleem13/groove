@@ -26,12 +26,14 @@ groovepacks_directives.directive('groovEditable', ['$timeout',function ($timeout
                 blur = (typeof blur == "boolean")? blur : false;
                 if(scope.editing != -1) {
                     if(scope.editable.array) {
-                        if(scope.ngModel[scope.editing][scope.prop] == "" && blur) {
+                        if(scope.ngModel[scope.editing][scope.prop] == "") {
                             scope.remove_node(scope.editing);
                         }
                     }
                     $timeout(function() {
-                        scope.editable.update(scope.ngModel,scope.prop);
+                        if(editing == false) {
+                            scope.editable.update(scope.ngModel,scope.prop);
+                        }
                     },30);
                 }
                 scope.editing = -1;
@@ -41,41 +43,39 @@ groovepacks_directives.directive('groovEditable', ['$timeout',function ($timeout
             }
 
             scope.add_node  = function () {
-                if(editing == false || editing == scope.custom_identifier) {
-                    if(scope.editable.array) {
-                        mytemp = {};
-                        mytemp[scope.prop] = "";
-                        scope.ngModel.push(mytemp);
-                        scope.edit_node(-1);
-                    } else {
-                        scope.edit_node();
-                    }
+                if(scope.editable.array) {
+                    mytemp = {};
+                    mytemp[scope.prop] = "";
+                    scope.ngModel.push(mytemp);
+                    scope.edit_node(-1);
+                } else {
+                    scope.edit_node();
                 }
             }
             scope.remove_node = function(index) {
                 if(scope.editable.array) {
                     scope.ngModel.splice(index,1);
-                    scope.editable.update(scope.ngModel,scope.prop);
+                    if(editing == false) {
+                        scope.editable.update(scope.ngModel,scope.prop);
+                    }
                     scope.editing = -1;
                 }
                 //scope.focus_input();
             }
 
             scope.edit_node = function(index) {
-                if(editing == false || editing == scope.custom_identifier) {
-                    if(scope.editable.array) {
-                        if(index == -1) {
-                            index = scope.ngModel.length-1;
-                        }
-                        if(scope.editing != -1) {
-                            scope.save_node();
-                        }
-                        scope.editing = index;
-                    } else {
-                        scope.editing =  1;
+                if(scope.editable.array) {
+                    if(index == -1) {
+                        index = scope.ngModel.length-1;
                     }
-                    $timeout(scope.focus_input,10);
+                    if(scope.editing != -1) {
+                        scope.save_node();
+                    }
+                    scope.editing = index;
+                } else {
+                    scope.editing =  1;
                 }
+                $timeout(scope.focus_input,10);
             }
 
 
@@ -166,7 +166,7 @@ groovepacks_directives.directive('groovEditable', ['$timeout',function ($timeout
                             editing = false;
                         }
                     } else {
-                        editing = scope.custom_identifier;
+                        editing = true;
                     }
                 });
 
