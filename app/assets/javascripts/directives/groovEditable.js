@@ -68,7 +68,7 @@ groovepacks_directives.directive('groovEditable', ['$timeout',function ($timeout
                     if(index == -1) {
                         index = scope.ngModel.length-1;
                     }
-                    if(scope.editing != -1) {
+                    if(scope.editing != -1 && scope.editing != index) {
                         scope.save_node();
                     }
                     scope.editing = index;
