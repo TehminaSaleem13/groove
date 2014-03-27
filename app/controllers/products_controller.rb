@@ -160,6 +160,11 @@ class ProductsController < ApplicationController
 								end
 								rescue
 								end
+								
+								#add inventory warehouse
+								inv_wh = ProductInventoryWarehouses.new
+								inv_wh.inventory_warehouse_id = @store.inventory_warehouse_id
+								@productdb.product_inventory_warehousess << inv_wh
 
 								if !@productdbsku.sku.nil? &&
 									ProductSku.where(:sku=>@productdbsku.sku).length == 0
@@ -175,6 +180,7 @@ class ProductsController < ApplicationController
 								else
 									@result['previous_imported'] = @result['previous_imported'] + 1
 								end
+
 							else
 								@result['previous_imported'] = @result['previous_imported'] + 1
 							end
@@ -273,11 +279,16 @@ class ProductsController < ApplicationController
 							end
 						end
 
+						#add inventory warehouse
+						inv_wh = ProductInventoryWarehouses.new
+						inv_wh.inventory_warehouse_id = @store.inventory_warehouse_id
+						@productdb.product_inventory_warehousess << inv_wh
+
 						if ProductSku.where(:sku=>@item.sKU).length == 0
 							#save
 							if @productdb.save
-								@productdb.set_product_status
-								@result['success_imported'] = @result['success_imported'] + 1
+							   @productdb.set_product_status
+							   @result['success_imported'] = @result['success_imported'] + 1
 							end
 						else
 							@result['previous_imported'] = @result['previous_imported'] + 1
@@ -356,6 +367,11 @@ class ProductsController < ApplicationController
 
 						#publish the sku to the product record
 						@productdb.product_skus << @productdbsku
+
+						#add inventory warehouse
+						inv_wh = ProductInventoryWarehouses.new
+						inv_wh.inventory_warehouse_id = @store.inventory_warehouse_id
+						@productdb.product_inventory_warehousess << inv_wh
 
 						#save
 						if ProductSku.where(:sku=>@productdbsku.sku).length == 0
@@ -751,7 +767,7 @@ class ProductsController < ApplicationController
   def getdetails
   	@result = Hash.new
   	@product = Product.find_by_id(params[:id])
-
+  	@product.reload
   	if !@product.nil?
   		@result['product'] = Hash.new
   		@result['product']['basicinfo'] = @product
@@ -759,7 +775,19 @@ class ProductsController < ApplicationController
   		@result['product']['cats'] = @product.product_cats
     	@result['product']['images'] = @product.product_images.order("product_images.order ASC")
   		@result['product']['barcodes'] = @product.product_barcodes.order("product_barcodes.order ASC")
-      	@result['product']['inventory_warehouses'] = @product.product_inventory_warehousess
+      	@result['product']['inventory_warehouses'] = []
+      	@product.product_inventory_warehousess.each do |inv_wh|
+      		inv_wh_result = Hash.new
+      		inv_wh_result['info'] = inv_wh
+      		if !inv_wh.inventory_warehouse_id.nil?
+      		  inv_wh_result['warehouse_info'] = 
+      		  	InventoryWarehouse.find(inv_wh.inventory_warehouse_id)
+      		else
+      		  inv_wh_result['warehouse_info'] = 
+      		  	nil		
+      		end
+      		@result['product']['inventory_warehouses'] << inv_wh_result
+      	end
         #@result['product']['productkitskus'] = @product.product_kit_skuss
       @result['product']['productkitskus'] = []
       if @product.is_kit
@@ -926,7 +954,7 @@ class ProductsController < ApplicationController
 
 	  			if !params[:inventory_warehouses].nil?
 		  			params[:inventory_warehouses].each do |wh|
-			  			if wh["id"] == inv_wh.id
+			  			if wh["info"]["id"] == inv_wh.id
 			  				found_inv_wh = true
 			  			end
 		  			end
@@ -944,27 +972,25 @@ class ProductsController < ApplicationController
   		#check if a product category is defined.
   		if !params[:inventory_warehouses].nil?
 	  		params[:inventory_warehouses].each do |wh|
-	  			if !wh["id"].nil?
-	  				product_inv_wh = ProductInventoryWarehouses.find(wh["id"])
-	  				product_inv_wh.qty = wh["qty"]
-	  				product_inv_wh.location_primary = wh["location_primary"]
-	  				product_inv_wh.location_secondary = wh["location_secondary"]
-	  				product_inv_wh.alert = wh["alert"]
-	  				product_inv_wh.name = wh["name"]
+	  			if !wh["info"]["id"].nil?
+	  				product_inv_wh = ProductInventoryWarehouses.find(wh["info"]["id"])
+	  				product_inv_wh.available_inv = wh["info"]["available_inv"]
+	  				# product_inv_wh.location_primary = wh["location_primary"]
+	  				# product_inv_wh.location_secondary = wh["location_secondary"]
 			  		if !product_inv_wh.save
 			  			@result['status'] &= false
 			  		end
 			  	else
-			  		product_inv_wh = ProductInventoryWarehouses.new
-            product_inv_wh.product_id = @product.id
-	  				product_inv_wh.qty = wh["qty"]
-	  				product_inv_wh.location_primary = wh["location_primary"]
-	  				product_inv_wh.location_secondary = wh["location_secondary"]
-	  				product_inv_wh.alert = wh["alert"]
-	  				product_inv_wh.name = wh["name"]
-			  		if !product_inv_wh.save
-			  			@result['status'] &= false
-			  		end
+			  		# product_inv_wh = ProductInventoryWarehouses.new
+       #      product_inv_wh.product_id = @product.id
+	  				# product_inv_wh.qty = wh["qty"]
+	  				# product_inv_wh.location_primary = wh["location_primary"]
+	  				# product_inv_wh.location_secondary = wh["location_secondary"]
+	  				# product_inv_wh.alert = wh["alert"]
+	  				# product_inv_wh.name = wh["name"]
+			  		# if !product_inv_wh.save
+			  		# 	@result['status'] &= false
+			  		# end
 	  			end
 	  		end
   		end

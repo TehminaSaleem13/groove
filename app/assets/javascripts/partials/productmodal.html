@@ -157,12 +157,13 @@
     </tr>
     </thead>
     <tbody>
-    <tr ng-repeat="warehouse in groovProducts.single.inventory_warehouses" ng-class="{info:warehouse.checked}"
+    <tr ng-repeat="warehouse in groovProducts.single.inventory_warehouses" 
+        ng-class="{info:warehouse.checked}"
         ng-click="warehouse.checked = !warehouse.checked">
-        <td groov-editable="editableOptions" ng-model="warehouse" prop="name" identifier="warehouse-name-{{$index}}"></td>
-        <td groov-editable="editableOptions" ng-model="warehouse" prop="qty" identifier="warehouse-qty-{{$index}}"></td>
-        <td groov-editable="editableOptions" ng-model="warehouse" prop="location_primary" identifier="warehouse-location_primary-{{$index}}"></td>
-        <td groov-editable="editableOptions" ng-model="warehouse" prop="location_secondary" identifier="warehouse-location_secondary-{{$index}}"></td>
+        <td groov-editable="editableOptions" ng-model="warehouse.warehouse_info" prop="name" identifier="warehouse-name-{{$index}}"></td>
+        <td groov-editable="editableOptions" ng-model="warehouse.info" prop="available_inv" identifier="warehouse-qty-{{$index}}"></td>
+        <td groov-editable="editableOptions" ng-model="warehouse.warehouse_info" prop="location" identifier="warehouse-location_primary-{{$index}}"></td>
+        <td groov-editable="editableOptions" ng-model="warehouse.warehouse_info" prop="location"identifier="warehouse-location_secondary-{{$index}}"></td>
     </tr>
     </tbody>
 </table>

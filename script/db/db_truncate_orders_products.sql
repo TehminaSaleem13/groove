@@ -1,0 +1,14 @@
+TRUNCATE `groovepacks_development`.`order_activities`;
+TRUNCATE `groovepacks_development`.`order_exceptions`;
+TRUNCATE `groovepacks_development`.`order_item_kit_product`;
+TRUNCATE `groovepacks_development`.`order_item_kit_products`;
+TRUNCATE `groovepacks_development`.`order_items`;
+TRUNCATE `groovepacks_development`.`orders`;
+TRUNCATE `groovepacks_development`.`order_shippings`;
+TRUNCATE `groovepacks_development`.`product_barcodes`;
+TRUNCATE `groovepacks_development`.`product_cats`;
+TRUNCATE `groovepacks_development`.`product_images`;
+TRUNCATE `groovepacks_development`.`product_inventory_warehouses`;
+TRUNCATE `groovepacks_development`.`product_kit_skus`;
+TRUNCATE `groovepacks_development`.`products`;
+TRUNCATE `groovepacks_development`.`product_skus`;

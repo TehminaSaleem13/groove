@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140326155106) do
+ActiveRecord::Schema.define(:version => 20140327061149) do
 
   create_table "amazon_credentials", :force => true do |t|
     t.string   "merchant_id",                                     :null => false
@@ -254,14 +254,16 @@ ActiveRecord::Schema.define(:version => 20140326155106) do
   create_table "product_inventory_warehouses", :force => true do |t|
     t.integer  "qty"
     t.integer  "product_id"
-    t.datetime "created_at",             :null => false
-    t.datetime "updated_at",             :null => false
+    t.datetime "created_at",                            :null => false
+    t.datetime "updated_at",                            :null => false
     t.string   "alert"
     t.string   "location_primary"
     t.string   "location_secondary"
     t.string   "name"
     t.string   "location"
     t.integer  "inventory_warehouse_id"
+    t.integer  "available_inv",          :default => 0, :null => false
+    t.integer  "allocated_inv",          :default => 0, :null => false
   end
 
   add_index "product_inventory_warehouses", ["inventory_warehouse_id"], :name => "index_product_inventory_warehouses_on_inventory_warehouse_id"
@@ -308,6 +310,8 @@ ActiveRecord::Schema.define(:version => 20140326155106) do
     t.string   "kit_parsing",                     :default => "depends"
     t.integer  "is_kit",                          :default => 0
     t.boolean  "disable_conf_req",                :default => false
+    t.integer  "total_avail_loc",                 :default => 0,         :null => false
+    t.integer  "total_avail_ext",                 :default => 0,         :null => false
   end
 
   add_index "products", ["store_id"], :name => "index_products_on_store_id"
