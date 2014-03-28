@@ -1,37 +1,73 @@
 groovepacks_controllers.
-controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$location', '$route', '$cookies',
-function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies) {
-    $('.modal-backdrop').remove();
-    $scope.current_page="show_stores";
-    $scope.backup_restore = {};
-    $scope.backup_restore.data = {};
-    $scope.backup_restore.data.method = "del_import";
-    $scope.backup_restore.data.file = null;
-    $scope.backup_restore.import = function() {
-        $http({
-            method: 'POST',
-            headers: { 'Content-Type': undefined },
-            url:'/settings/restore.json',
-            transformRequest: function (data) {
-                var request = new FormData();
-                for (var key in data) {
-                    request.append(key,data[key]);
-                }
-                return request;
-            },
-            data: $scope.backup_restore.data
-        }).success(function(data) {
-            if(data.status) {
-                console.log(data);
-                $scope.notify("Imported Successfully",1);
-                $("#backup").modal("hide");
-            } else {
-                $scope.notify(data.messages);
-            }
-        }).error(function(){
-                $scope.notify("Error contacting server");
+controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$stateParams', '$location', '$state', '$cookies',
+function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies) {
+
+    $scope.init = function() {
+        $('.modal-backdrop').remove();
+        $scope.current_page="show_stores";
+        $scope.store_modal = null;
+        $scope.backup_restore = {};
+        $scope.backup_restore.data = {};
+        $scope.backup_restore.data.method = "del_import";
+        $scope.backup_restore.data.file = null;
+        $scope.backup_restore.import = function() {
+            $http({
+                method: 'POST',
+                headers: { 'Content-Type': undefined },
+                url:'/settings/restore.json',
+                transformRequest: function (data) {
+                    var request = new FormData();
+                    for (var key in data) {
+                        request.append(key,data[key]);
+                    }
+                    return request;
+                },
+                data: $scope.backup_restore.data
+            }).success(function(data) {
+                    if(data.status) {
+                        console.log(data);
+                        $scope.notify("Imported Successfully",1);
+                        $("#backup").modal("hide");
+                    } else {
+                        $scope.notify(data.messages);
+                    }
+                }).error(function(){
+                    $scope.notify("Error contacting server");
+                });
+        };
+        $http.get('/home/userinfo.json').success(function(data){
+            $scope.username = data.username;
         });
-    };
+        $scope.currently_open = 0;
+        $scope.orderimport_type = 'apiimport';
+        $scope.productimport_type = 'apiimport';
+        $scope.ebay_show_signin_url = true;
+        $http.get('/store_settings/storeslist.json').success(function(data) {
+            $scope.stores = data;
+            $scope.reverse = false;
+            $scope.newStore = {};
+            $scope.redirect = $stateParams.redirect;
+            // console.log($stateParams);
+        }).error(function(data) {
+                $scope.notify("There was a problem retrieving stores list",0);
+            });
+        $("#store-search-query").focus();
+    }
+
+    $scope.setup_modal = function() {
+        if($scope.store_modal == null ) {
+            $scope.store_modal = $('#createStore');
+            $scope.store_modal.on("hidden",function() {
+                if(typeof $scope.newStore.id != "undefined") {
+                    $scope.submit();
+                }
+                $timeout(function(){
+                    $scope.init();
+                    $state.go("settings.showstores");
+                },200);
+            });
+        }
+    }
 
 
 
@@ -57,68 +93,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies) {
 
         });
 
-    	$http.get('/home/userinfo.json').success(function(data){
-    		$scope.username = data.username;
-    	});
-        $scope.currently_open = 0;
-        $scope.orderimport_type = 'apiimport';
-        $scope.productimport_type = 'apiimport';
-        $scope.ebay_show_signin_url = true;
-    	$http.get('/store_settings/storeslist.json').success(function(data) {
-    		$scope.stores = data;
-    		$scope.reverse = false;
-            $scope.newUser = {};
-            $scope.redirect = ($routeParams.redirect || ($routeParams.action == "create"));
-           // console.log($routeParams);
-            if ($scope.redirect)
-            {
-                if ($routeParams.editstatus=='true')
-                {
-                    $scope.edit_status = $routeParams.editstatus;
-                    $scope.retrieveandupdateusertoken($routeParams.storeid);
-                    $scope.newStore = new Object();
-                    $scope.newStore.id = $routeParams.storeid;
-                    $scope.newStore.name = $routeParams.name;
-                    $scope.newStore.status = $routeParams.status;
-                    $scope.newStore.store_type = $routeParams.storetype;
-                }
-                else
-                {
-                    $scope.ebayuserfetchtoken();
-                    $scope.newStore = new Object();
-                    $scope.newStore.name = $routeParams.name;
-                    $scope.newStore.status = $routeParams.status;
-                    $scope.newStore.store_type = $routeParams.storetype;
-                }
-                if(typeof $scope.newStore.status == "undefined") {
-                    $scope.newStore.status = 1;
-                }
-                $('#createStore').modal('show').on("hidden",function(){
-                    $timeout(function(){$location.path("/settings/showstores");},200);
-                });
-            }
-            else
-            {
-            // $http.get('/store_settings/getebaysigninurl.json').success(function(data) {
-            //     if (data.ebay_signin_url_status)
-            //     {
-            //     $scope.ebay_signin_url = data.ebay_signin_url;
-            //     $scope.ebay_signin_url_status = data.ebay_signin_url_status;
-            //     $scope.ebay_sessionid = data.ebay_sessionid;
-            //     }
 
-            //     }).error(function(data) {
-            //         $scope.ebay_signin_url_status = false;
-            //     });
-            }
-            if($routeParams.action == "backup") {
-                $("#backup").modal("show").on("hidden",function(){
-                    $timeout(function(){$location.path("/settings/showstores");},200);
-                });
-            }
-    	}).error(function(data) {
-    		$scope.notify("There was a problem retrieving stores list",0);
-    	});
 
         $scope.retrieveandupdateusertoken = function(id) {
             $http.get('/store_settings/updateebayusertoken.json?storeid='+id).success(function(data) {
@@ -160,11 +135,11 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies) {
                     if ($scope.newStore.store_type == 'CSV')
                     {
                         $scope.newStore = {};
-                        $('#createStore').modal('hide');
+                        $scope.store_modal.modal('hide');
                     }
                     if ($scope.edit_status)
                     {
-                        $('#createStore').modal('hide');
+                        $scope.store_modal.modal('hide');
                     }
                     //$scope.loading = true;
     				$http.get('/store_settings/storeslist.json').success(function(data) {
@@ -376,6 +351,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies) {
         if(typeof index !== 'undefined'){
             $scope.currently_open = index;
         }
+        $scope.setup_modal();
         /* update the server with the changed status */
         $http.get('/store_settings/getstoreinfo.json?id='+id).success(function(data){
             $scope.importproduct_status ="";
@@ -435,7 +411,7 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies) {
                 }
 
                 }
-                $('#createStore').modal('show');
+                $scope.store_modal.modal('show');
             }
             else
             {
@@ -455,31 +431,9 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies) {
         }
     }
 
-    $scope.create_store = function() {
-        $scope.edit_status = false;
-        $scope.redirect = false;
-        $scope.newStore = {};
-        $scope.newStore.status = 1;
-        $scope.ebay_show_signin_url = true;
-        $scope.loading = false;
-        $http.get('/store_settings/getebaysigninurl.json').success(function(data) {
-            if (data.ebay_signin_url_status)
-            {
-            $scope.ebay_signin_url = data.ebay_signin_url;
-            $scope.ebay_signin_url_status = data.ebay_signin_url_status;
-            $scope.ebay_sessionid = data.ebay_sessionid;
-            }
-
-            }).error(function(data) {
-                $scope.ebay_signin_url_status = false;
-
-            });
-        $('#createStore').modal('show');
-    }
-
     $scope.refresh_modal = function() {
         $timeout(function(){
-            $("#createStore").modal("refresh")
+            $scope.store_modal.modal("refresh")
         },100);
     }
     $scope.copydata =function(event) {
@@ -778,13 +732,8 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies) {
         $scope.check_disable();
     }
 
-    $scope.close_modal = function() {
-        $scope.newStore = {};
-        $('#createStore').modal('hide');
-    }
-
     $scope.keyboard_nav_event = function(event) {
-        if($('#createStore').hasClass("in") && $scope.edit_status) {
+        if($scope.edit_status) {
             if(event.which == 38) {//up key
                 if($scope.currently_open > 0) {
                     $scope.getstoreinfo($scope.stores[$scope.currently_open -1].id, $scope.currently_open - 1);
@@ -802,6 +751,5 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies) {
         }
     }
 
-    $('#createStore').keydown($scope.keyboard_nav_event);
-    $("#store-search-query").focus();
+    $scope.init();
 }]);

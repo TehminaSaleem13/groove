@@ -16,6 +16,7 @@
 //= require angular
 //= require angular-cookies
 //= require angular-route
+//= require ui-router
 //= require angular-animate
 //= require jquery.ui.sortable
 //= require bindonce

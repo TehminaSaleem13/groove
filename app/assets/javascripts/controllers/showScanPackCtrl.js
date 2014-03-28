@@ -1,6 +1,6 @@
 groovepacks_controllers.
-controller('showScanPackCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$location', '$route', '$cookies','orders',
-function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies, orders) {
+controller('showScanPackCtrl', [ '$scope', '$http', '$timeout', '$stateParams', '$location', '$state', '$cookies','orders',
+function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies, orders) {
     //Definitions
 
     /*

@@ -1,6 +1,6 @@
 groovepacks_controllers.
-controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$location', '$route', '$cookies','products',
-function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,products) {
+controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$stateParams', '$location', '$state', '$cookies','products',
+function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,products) {
     //Definitions
 
     /*

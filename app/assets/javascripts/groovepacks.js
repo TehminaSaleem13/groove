@@ -1,6 +1,20 @@
-angular.module('groovepacks', ['groovepacks.filters', 'groovepacks.services', 'groovepacks.directives', 
-    'groovepacks.controllers','ui.sortable','pasvaz.bindonce', 'ngCookies', 'ngRoute','ngAnimate']).
-  config(['$routeProvider', function($routeProvider) {
+angular.module('groovepacks', ['groovepacks.filters', 'groovepacks.services', 'groovepacks.directives',
+    'groovepacks.controllers','ui.sortable','pasvaz.bindonce', 'ngCookies', 'ui.router','ngAnimate']).
+  config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $urlRouterProvider) {
+
+        $urlRouterProvider.otherwise("/settings/showstores");
+        $urlRouterProvider.when('/settings', '/settings/showusers');
+        $stateProvider
+            .state('orders', {url: '/orders', templateUrl: '/assets/partials/showorders.html', controller: 'showOrdersCtrl'})
+            .state('products',{url:'/products', templateUrl: '/assets/partials/showproducts.html', controller: 'showProductsCtrl'})
+            .state('scanpack',{url: '/scanandpack', templateUrl: '/assets/partials/showscanandpack.html', controller: 'showScanPackCtrl'})
+            .state('settings',{url: '/settings', templateUrl:'/assets/partials/settings.html', controller:'showSettingsCtrl', abstract:true })
+            .state('settings.showusers',{url: '/showusers', templateUrl: '/assets/partials/showusers.html', controller: 'showUsersCtrl'})
+            .state('settings.showusers.create',{url: '/create', controller: 'createUserCtrl'})
+            .state('settings.showstores', {url:'/showstores', templateUrl:'/assets/partials/showstores.html', controller: 'showStoresCtrl'})
+            .state('settings.showstores.create', {url:'/create', controller: 'createStoreCtrl'})
+            .state('settings.showstores.backup', {url:'/backup',controller:'showBackupCtrl'});
+/**
     $routeProvider.when('/orders',
     	{templateUrl: '/assets/partials/showorders.html', controller: 'showOrdersCtrl'});
     $routeProvider.when('/settings',
@@ -18,6 +32,7 @@ angular.module('groovepacks', ['groovepacks.filters', 'groovepacks.services', 'g
     $routeProvider.when('/scanandpack',
         {templateUrl: '/assets/partials/showscanandpack.html', controller: 'showScanPackCtrl'});
     $routeProvider.otherwise({redirectTo: '/settings/showstores'});
+ */
   }]).directive('xsInputSync', function() {
     return {
         restrict: "A",

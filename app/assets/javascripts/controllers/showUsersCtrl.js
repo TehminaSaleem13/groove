@@ -1,12 +1,9 @@
 groovepacks_controllers.
-controller('showUsersCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$location', '$route', '$cookies',
-    function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies) {
+controller('showUsersCtrl', [ '$scope', '$http', '$timeout', '$stateParams', '$location', '$state', '$cookies',
+    function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies) {
 
-
-
-        var myscope = {};
-
-        myscope.setup_modal = function() {
+        var myscope = {}
+        $scope.setup_modal = function() {
             if($scope.user_modal == null ) {
                 $scope.user_modal = $('#createUser'+$scope.custom_identifier);
                 $scope.user_modal.on("hidden",function() {
@@ -19,19 +16,13 @@ controller('showUsersCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$l
                             });
                     }
                     $timeout(function(){
-                        $location.path("/settings/showusers");
+                        myscope.init();
+                        $state.go("settings.showusers");
                     },200);
                 });
             }
         }
-        myscope.create_user = function() {
-            myscope.setup_modal();
-            $scope.edit_status = false;
-            $scope.show_password = true;
-            $scope.newUser = {};
-            $scope.newUser.active = true;
-            $scope.user_modal.modal('show');
-        }
+
 
         $scope.submit = function() {
             $http.post('/user_settings/createUser.json', $scope.newUser).success(function(data) {
@@ -41,7 +32,7 @@ controller('showUsersCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$l
                 }
                 else
                 {
-                    //$scope.newUser = {};
+                    $scope.newUser.id = data.user.id;
                     //$scope.user_modal.modal('hide');
 
 
@@ -67,9 +58,6 @@ controller('showUsersCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$l
                 $scope.users = data;
                 $scope.reverse = false;
                 $scope.newUser = {};
-                if ($routeParams.action == "create") {
-                    myscope.create_user();
-                }
             }).error(function(data) {
                     $scope.notify("There was a problem retrieving users list",0);
                 });
@@ -226,7 +214,7 @@ controller('showUsersCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$l
             if(typeof index !== 'undefined'){
                 $scope.currently_open = index;
             }
-            myscope.setup_modal();
+            $scope.setup_modal();
             /* update the server with the changed status */
             $http.get('/user_settings/getuserinfo.json?id='+id).success(function(data){
                 if (data.status)
