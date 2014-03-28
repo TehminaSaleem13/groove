@@ -136,4 +136,21 @@ class Product < ActiveRecord::Base
   	self.save
   end
 
+  def update_available_product_inventory_level(inventory_warehouse_id, purchase_qty)
+  	prod_warehouses = ProductInventoryWarehouses.where(:inventory_warehouse_id => 
+  		inventory_warehouse_id).where(:product_id => self.id)
+  	result = true
+  	unless prod_warehouses.length == 1 
+  		result &= false 
+  	end 
+
+  	unless !result
+  		prod_warehouses.each do |wh|
+  			wh.update_available_inventory_level(purchase_qty)
+		end
+	end
+
+	result
+  end
+
 end

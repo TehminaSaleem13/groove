@@ -11,7 +11,8 @@ class Order < ActiveRecord::Base
   has_one :order_exceptions, :dependent => :destroy
   has_many :order_activities, :dependent => :destroy
   has_and_belongs_to_many :order_tags
-
+  # after_create :update_inventory_levels
+  
   include ProductsHelper
   include OrdersHelper
 
@@ -544,7 +545,6 @@ class Order < ActiveRecord::Base
     self.save
 
   end
-
   def get_items_count
     count = 0
     self.order_items.each do |item|
@@ -552,4 +552,24 @@ class Order < ActiveRecord::Base
     end
     count
   end
+
+  # def update_inventory_levels
+  #   result = true
+  #   if self.status == 'awaiting'
+  #     self.order_items.each do |order_item|
+  #       if !order_item.product.nil? && !self.store.nil? &&
+  #           !self.store.inventory_warehouse_id.nil?
+  #         result &= order_item.product.
+  #           update_available_product_inventory_level(
+  #             self.store.inventory_warehouse_id, purchase_qty)
+  #       end
+
+  #       unless result do
+  #         self.status = 'onhold'
+  #       end
+  #       self.save
+  #     end
+  #   end
+  #   result
+  # end
 end

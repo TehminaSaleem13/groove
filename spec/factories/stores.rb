@@ -4,7 +4,7 @@ FactoryGirl.define do
   factory :store do
     name "MyString"
     status false
-    type ""
+    store_type "system"
     order_date "2013-08-29"
   end
 end

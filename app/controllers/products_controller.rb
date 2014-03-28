@@ -982,7 +982,7 @@ class ProductsController < ApplicationController
 			  		end
 			  	else
 			  		# product_inv_wh = ProductInventoryWarehouses.new
-       #      product_inv_wh.product_id = @product.id
+       				# product_inv_wh.product_id = @product.id
 	  				# product_inv_wh.qty = wh["qty"]
 	  				# product_inv_wh.location_primary = wh["location_primary"]
 	  				# product_inv_wh.location_secondary = wh["location_secondary"]

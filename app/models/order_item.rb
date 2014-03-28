@@ -4,6 +4,7 @@ class OrderItem < ActiveRecord::Base
 
   has_many :order_item_kit_products
   attr_accessible :price, :qty, :row_total, :sku
+  after_create :update_inventory_levels
 
   def has_unscanned_kit_items
   	result = false
@@ -272,6 +273,23 @@ class OrderItem < ActiveRecord::Base
       end
     end
     result  
+  end
+
+  def update_inventory_levels
+    result = true
+    if !self.order.nil? && self.order.status == 'awaiting'
+      if !self.product.nil? && !self.order.store.nil? &&
+        !self.order.store.inventory_warehouse_id.nil?
+        result &= self.product.
+          update_available_product_inventory_level(self.order.store.inventory_warehouse_id, self.qty)
+
+        unless result
+          self.order.status = 'onhold'
+        end
+        self.order.save
+      end
+    end
+    result
   end
 
 end
