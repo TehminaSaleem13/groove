@@ -5,15 +5,26 @@ class ProductInventoryWarehouses < ActiveRecord::Base
   belongs_to :inventory_warehouse
 
 
-  def update_available_inventory_level(purchase_qty)
+  def update_available_inventory_level(purchase_qty, reason)
   	result = true
-  	if self.available_inv >= purchase_qty
-  		self.available_inv = self.available_inv - purchase_qty
-  		self.allocated_inv = self.allocated_inv + purchase_qty
-  		self.save
-  	else
-  		result &= false
-  	end
+
+    if reason == 'purchase'
+    	if self.available_inv >= purchase_qty
+    		self.available_inv = self.available_inv - purchase_qty
+    		self.allocated_inv = self.allocated_inv + purchase_qty
+    		self.save
+    	else
+    		result &= false
+    	end
+    else
+      if self.allocated_inv >= purchase_qty
+        self.allocated_inv = self.allocated_inv - purchase_qty
+        self.available_inv = self.available_inv + purchase_qty
+        self.save
+      else
+        result &= false
+      end      
+    end 
 
   	result
   end

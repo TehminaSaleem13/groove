@@ -4,7 +4,9 @@ class OrderItem < ActiveRecord::Base
 
   has_many :order_item_kit_products
   attr_accessible :price, :qty, :row_total, :sku
-  after_create :update_inventory_levels
+  after_create :update_inventory_levels_for_packing
+  before_destroy :update_inventory_levels_for_return
+
 
   def has_unscanned_kit_items
   	result = false
@@ -275,13 +277,32 @@ class OrderItem < ActiveRecord::Base
     result  
   end
 
-  def update_inventory_levels
+  def update_inventory_levels_for_packing
     result = true
     if !self.order.nil? && self.order.status == 'awaiting'
       if !self.product.nil? && !self.order.store.nil? &&
         !self.order.store.inventory_warehouse_id.nil?
         result &= self.product.
-          update_available_product_inventory_level(self.order.store.inventory_warehouse_id, self.qty)
+          update_available_product_inventory_level(self.order.store.inventory_warehouse_id, 
+            self.qty, 'purchase')
+
+        unless result
+          self.order.status = 'onhold'
+        end
+        self.order.save
+      end
+    end
+    result
+  end
+
+  def update_inventory_levels_for_return
+    result = true
+    if !self.order.nil? && self.order.status == 'awaiting'
+      if !self.product.nil? && !self.order.store.nil? &&
+        !self.order.store.inventory_warehouse_id.nil?
+        result &= self.product.
+          update_available_product_inventory_level(self.order.store.inventory_warehouse_id, 
+            self.qty, 'return')
 
         unless result
           self.order.status = 'onhold'

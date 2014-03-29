@@ -169,7 +169,7 @@ describe Order do
       expect(order.order_tags.length).to eq(0)
    end
 
-    it "should create order and update inventory count" do      
+    it "should create order and update available inventory count" do      
       inv_wh = FactoryGirl.create(:inventory_warehouse)
 
       store = FactoryGirl.create(:store, :inventory_warehouse_id => inv_wh.id)
@@ -188,15 +188,28 @@ describe Order do
 
       expect(product_inv_wh.available_inv).to equal(23)
       expect(product_inv_wh.allocated_inv).to equal(2)
+    end
 
+    it "should create order then delete order and update allocated inventory count" do      
+      inv_wh = FactoryGirl.create(:inventory_warehouse)
+
+      store = FactoryGirl.create(:store, :inventory_warehouse_id => inv_wh.id)
+
+      order = FactoryGirl.create(:order, :status=>'awaiting', :store => store)
       
+      product = FactoryGirl.create(:product)
+      product_sku = FactoryGirl.create(:product_sku, :product=> product)
+      product_barcode = FactoryGirl.create(:product_barcode, :product=> product)
+      product_inv_wh = FactoryGirl.create(:product_inventory_warehouse, :product=> product,
+                   :inventory_warehouse_id =>inv_wh.id, :available_inv => 25)
+      order_item = FactoryGirl.create(:order_item, :product_id=>product.id,
+                    :qty=>2, :price=>"10", :row_total=>"10", :order=>order, :name=>product.name)
 
-      # product2 = FactoryGirl.create(:product, :name=>"Apple iPhone5C")
-      # product_sku2 = FactoryGirl.create(:product_sku, :product=> product2, :sku=>'iPhone5C')
-      # product_barcode2 = FactoryGirl.create(:product_barcode, :product=> product2, :barcode=>"2456789")
-      # order_item2 = FactoryGirl.create(:order_item, :product_id=>product2.id,
-      #               :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>product2.name)
+      order_item.destroy
 
+      product_inv_wh.reload
 
+      expect(product_inv_wh.available_inv).to equal(25)
+      expect(product_inv_wh.allocated_inv).to equal(0)
     end
 end
