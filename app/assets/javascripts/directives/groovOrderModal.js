@@ -34,10 +34,6 @@ groovepacks_directives.directive('groovOrderModal',['notification','orders','pro
             /**
              * Public methods
              */
-            $http.get('/home/userinfo.json').success(function(data){
-                scope.username = data.username;
-                scope.current_userid = data.user_id;
-            });
             scope.order_single_details = function(id,index,post_fn, open_modal) {
                 if(typeof open_modal == 'boolean' && open_modal ){
                     if(scope._order_obj == null) {
@@ -63,16 +59,6 @@ groovepacks_directives.directive('groovOrderModal',['notification','orders','pro
                 orders.single.get(id,scope.orders).then(function(data) {
                     var user_found = false;
                     var currentuser_idx = -1;
-
-
-                    // for (i=0; i < scope.orders.single.users.length; i++) {
-                    //     if (scope.orders.single.users[i].id == scope.current_userid) {
-                    //         scope.orders.single.users[i].name = scope.orders.single.users[i].name + ' (Packing User)';
-                    //         currentuser_idx = i;
-                    //         break;
-                    //     }
-                    // }
-
                     for (i=0; i < scope.orders.single.users.length; i++) {
                         if (scope.orders.single.exception != null &&
                             scope.orders.single.exception.assoc != null &&

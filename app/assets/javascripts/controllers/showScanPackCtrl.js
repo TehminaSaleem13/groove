@@ -78,9 +78,6 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies, or
         $scope._cos_confirmation_inputObj = $('input#cos_confirmation_code');
 
         //Register events and make function calls
-        $http.get('/home/userinfo.json').success(function(data){
-            $scope.username = data.username;
-        });
         $scope._rf_inputObj.keydown($scope._handle_rf_key_event);
         $scope._order_confirmation_inputObj.keydown($scope._handle_order_confirmation_code_key_event);
         $scope._product_confirmation_inputObj.keydown($scope._handle_product_confirmation_code_key_event);

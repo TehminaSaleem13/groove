@@ -162,10 +162,6 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,pro
 
         $scope.$on("products-modal-closed",function(event, args){event.stopPropagation(); $scope._get_products();});
         $scope.$on("products-next-load",function(event, args){$scope.product_next(function(){ $scope.$broadcast("products-next-loaded");});});
-
-        $http.get('/home/userinfo.json').success(function(data){
-            $scope.username = data.username;
-        });
         $("#product-search-query").focus();
     }
 

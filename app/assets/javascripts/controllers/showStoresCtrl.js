@@ -35,9 +35,6 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies) {
                     $scope.notify("Error contacting server");
                 });
         };
-        $http.get('/home/userinfo.json').success(function(data){
-            $scope.username = data.username;
-        });
         $scope.currently_open = 0;
         $scope.orderimport_type = 'apiimport';
         $scope.productimport_type = 'apiimport';

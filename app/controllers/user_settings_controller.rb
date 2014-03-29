@@ -57,6 +57,7 @@ class UserSettingsController < ApplicationController
     @user.access_scanpack = params[:access_scanpack] if !params[:access_scanpack].nil?
     @user.access_orders = params[:access_orders] if !params[:access_orders].nil?
     @user.access_products = params[:access_products] if !params[:access_products].nil?
+    @user.access_settings = params[:access_settings] if !params[:access_settings].nil?
 
     #add system settings permission
     @user.edit_general_prefs = params[:edit_general_prefs] if !params[:edit_general_prefs].nil?

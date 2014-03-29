@@ -8,6 +8,7 @@ groovepacks_controllers.
                 $scope.show_password = true;
                 $scope.newUser = {};
                 $scope.newUser.active = true;
+                $scope.newUser.access_scanpack = true;
                 $scope.user_modal.modal('show');
             }
             $timeout(myscope.create_user);

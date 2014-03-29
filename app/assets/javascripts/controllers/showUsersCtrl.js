@@ -1,6 +1,6 @@
 groovepacks_controllers.
-controller('showUsersCtrl', [ '$scope', '$http', '$timeout', '$stateParams', '$location', '$state', '$cookies',
-    function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies) {
+controller('showUsersCtrl', [ '$scope', '$http', '$timeout', '$stateParams', '$location', '$state', '$cookies','auth',
+    function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,auth) {
 
         var myscope = {}
         $scope.setup_modal = function() {
@@ -33,6 +33,9 @@ controller('showUsersCtrl', [ '$scope', '$http', '$timeout', '$stateParams', '$l
                 else
                 {
                     $scope.newUser.id = data.user.id;
+                    if(data.user.id == $scope.current_user.id) {
+                        auth.check();
+                    }
                     //$scope.user_modal.modal('hide');
 
 
@@ -43,9 +46,6 @@ controller('showUsersCtrl', [ '$scope', '$http', '$timeout', '$stateParams', '$l
         }
 
         myscope.init = function() {
-            $http.get('/home/userinfo.json').success(function(data){
-                $scope.username = data.username;
-            });
             $scope.custom_identifier  = Math.floor(Math.random()*1000);
             $('.modal-backdrop').remove();
             $scope.user_modal = null;

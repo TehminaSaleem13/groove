@@ -1,9 +1,8 @@
-groovepacks_directives.directive('groovCommon',['notification','importOrders','$rootScope', function (notification, importOrders,$rootScope) {
+groovepacks_directives.directive('groovCommon',['importOrders','$rootScope', function ( importOrders,$rootScope) {
     return {
         restrict:"A",
         templateUrl:"/assets/partials/common.html",
         scope: {
-            groovNotif: "=",
             groovImport:"="
         },
         link: function(scope,el,attrs) {
@@ -19,9 +18,6 @@ groovepacks_directives.directive('groovCommon',['notification','importOrders','$
             scope.$on('notification',function(event,args) {
                 scope.notifs = args.data;
             });
-            scope.groovNotif = function(msg,type) {
-                notification.notify(msg,type);
-            }
 
             //import All Orders function
             scope.groovImport = function () {

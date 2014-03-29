@@ -189,12 +189,6 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,ord
         $scope.$on("orders-modal-closed",function(event, args){event.stopPropagation(); $scope._get_orders();});
         $scope.$on("orders-next-load",function(event, args){$scope.order_next(function(){ $scope.$broadcast("orders-next-loaded");});});
         $("#order-search-query").focus();
-
-
-        $http.get('/home/userinfo.json').success(function(data){
-            $scope.username = data.username;
-            $scope.current_userid = data.user_id;
-        });
         $('.modal-backdrop').remove();
     }
 
