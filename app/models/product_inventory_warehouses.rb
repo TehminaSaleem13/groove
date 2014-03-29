@@ -29,4 +29,15 @@ class ProductInventoryWarehouses < ActiveRecord::Base
   	result
   end
 
+  def update_sold_inventory_level(allocated_qty)
+    result = true
+    if self.allocated_qty > allocated_qty
+      self.sold_inv = self.sold_inv + allocated_qty
+      self.allocated_qty = self.allocated_qty - allocated_qty
+    else
+      result &= false
+    end
+    result
+  end
+
 end

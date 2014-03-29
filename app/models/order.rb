@@ -579,6 +579,20 @@ class Order < ActiveRecord::Base
         order_item.update_inventory_levels_for_return(true)
       end
     end
+
+
+    #if changing for awaiting to scanned
+    if changed_hash['status'][0] == 'awaiting' and
+      changed_hash['status'][1] == 'scanned'
+      result = true
+      #move items from allocated to sold for each order items
+      self.order_items.each do |order_item|
+        result &= order_item.product.update_allocated_product_sold_level(self.store.inventory_warehouse_id,
+          order_item.qty)
+      end
+
+      if !result logger.info('error updating sold inventory level')
+    end
   end
 
   # def update_inventory_levels

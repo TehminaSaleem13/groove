@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140327061149) do
+ActiveRecord::Schema.define(:version => 20140329155438) do
 
   create_table "amazon_credentials", :force => true do |t|
     t.string   "merchant_id",                                     :null => false
@@ -264,6 +264,8 @@ ActiveRecord::Schema.define(:version => 20140327061149) do
     t.integer  "inventory_warehouse_id"
     t.integer  "available_inv",          :default => 0, :null => false
     t.integer  "allocated_inv",          :default => 0, :null => false
+    t.integer  "sold_inv",               :default => 0, :null => false
+    t.datetime "sold_date"
   end
 
   add_index "product_inventory_warehouses", ["inventory_warehouse_id"], :name => "index_product_inventory_warehouses_on_inventory_warehouse_id"

@@ -156,6 +156,26 @@ class Product < ActiveRecord::Base
 	result
   end
 
+  def update_allocated_product_sold_level(inventory_warehouse_id, allocated_qty)
+   	result = true
+
+  	if self.is_kit != 1 or 
+  		(self.is_kit == 1 and self.kit_parsing == 'single')
+	     result &= self.update_warehouses_sold_level(inventory_warehouse_id, self.id,
+	 		allocated_qty, reason)
+    else
+    	if self.kit_parsing == 'individual'
+    		#update all kits products inventory warehouses
+    		self.product_kit_skuss.each do |kit_item|
+	    		result &= self.update_warehouses_sold_level(inventory_warehouse_id, kit_item.option_product_id,
+	  				allocated_qty * kit_item.qty, reason)
+    		end
+    	end
+    end
+
+	result
+  end
+
   def update_warehouses_inventory_level(inv_wh_id, product_id, purchase_qty, reason)
 	result = true
   	prod_warehouses = ProductInventoryWarehouses.where(:inventory_warehouse_id => 
@@ -168,6 +188,24 @@ class Product < ActiveRecord::Base
   	unless !result
   		prod_warehouses.each do |wh|
   			wh.update_available_inventory_level(purchase_qty, reason)
+		end
+	end
+
+	result
+  end
+
+  def update_warehouses_sold_level(inv_wh_id, product_id, allocated_qty)
+ 	result = true
+  	prod_warehouses = ProductInventoryWarehouses.where(:inventory_warehouse_id => 
+  		inv_wh_id).where(:product_id => product_id)
+
+  	unless prod_warehouses.length == 1 
+  		result &= false 
+  	end 
+
+  	unless !result
+  		prod_warehouses.each do |wh|
+  			wh.update_sold_inventory_level(allocated_qty)
 		end
 	end
 
