@@ -11,8 +11,8 @@ class Order < ActiveRecord::Base
   has_one :order_exceptions, :dependent => :destroy
   has_many :order_activities, :dependent => :destroy
   has_and_belongs_to_many :order_tags
-  # after_create :update_inventory_levels
-  
+  after_update :update_inventory_levels_for_items
+
   include ProductsHelper
   include OrdersHelper
 
@@ -551,6 +551,34 @@ class Order < ActiveRecord::Base
       count = count + item.qty
     end
     count
+  end
+
+  def update_inventory_levels_for_items
+    changed_hash = self.changes
+
+    logger.debug(changed_hash)
+
+    unless changed_hash['status'].nil?
+      if (changed_hash['status'][0] == 'onhold' or 
+          changed_hash['status'][0] == 'cancelled') and
+        changed_hash['status'][1] == 'awaiting'
+        #update_inventory_levels_for_purchase
+        reason = 'packing'
+      elsif changed_hash['status'][0] == 'awaiting' and 
+        (changed_hash['status'][1] == 'onhold' or 
+        changed_hash['status'][1] == 'cancelled')
+        #update_inventory_levels_for_return
+        reason = 'return'
+      end
+    end
+
+    self.order_items.each do |order_item|
+      if reason == 'packing'
+        order_item.update_inventory_levels_for_packing(true)
+      elsif reason == 'return'
+        order_item.update_inventory_levels_for_return(true)
+      end
+    end
   end
 
   # def update_inventory_levels

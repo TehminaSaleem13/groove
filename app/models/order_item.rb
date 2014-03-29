@@ -277,9 +277,10 @@ class OrderItem < ActiveRecord::Base
     result  
   end
 
-  def update_inventory_levels_for_packing
+  def update_inventory_levels_for_packing(override = false)
     result = true
-    if !self.order.nil? && self.order.status == 'awaiting'
+    if !self.order.nil? && 
+      (self.order.status == 'awaiting' or override)
       if !self.product.nil? && !self.order.store.nil? &&
         !self.order.store.inventory_warehouse_id.nil?
         result &= self.product.
@@ -295,11 +296,13 @@ class OrderItem < ActiveRecord::Base
     result
   end
 
-  def update_inventory_levels_for_return
+  def update_inventory_levels_for_return (override = false)
     result = true
-    if !self.order.nil? && self.order.status == 'awaiting'
+    if !self.order.nil? && 
+        (self.order.status == 'awaiting' or override)
       if !self.product.nil? && !self.order.store.nil? &&
         !self.order.store.inventory_warehouse_id.nil?
+        logger.info('available product inventory level')
         result &= self.product.
           update_available_product_inventory_level(self.order.store.inventory_warehouse_id, 
             self.qty, 'return')
