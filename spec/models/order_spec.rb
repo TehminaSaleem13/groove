@@ -307,4 +307,34 @@ describe Order do
       expect(kit_product_inv_wh.available_inv).to eq(25)
       expect(kit_product_inv_wh.allocated_inv).to eq(0)
     end
+
+    it "should create order with status awaiting change it to scanned and update sold inventory count" do      
+      inv_wh = FactoryGirl.create(:inventory_warehouse)
+
+      store = FactoryGirl.create(:store, :inventory_warehouse_id => inv_wh.id)
+
+      order = FactoryGirl.create(:order, :status=>'awaiting', :store => store)
+      
+      product = FactoryGirl.create(:product)
+      product_sku = FactoryGirl.create(:product_sku, :product=> product)
+      product_barcode = FactoryGirl.create(:product_barcode, :product=> product)
+      product_inv_wh = FactoryGirl.create(:product_inventory_warehouse, :product=> product,
+                   :inventory_warehouse_id =>inv_wh.id, :available_inv => 25)
+      order_item = FactoryGirl.create(:order_item, :product_id=>product.id,
+                    :qty=>2, :price=>"10", :row_total=>"10", :order=>order, :name=>product.name)
+
+      product_inv_wh.reload
+      expect(product_inv_wh.available_inv).to eq(23)
+      expect(product_inv_wh.allocated_inv).to eq(2)
+
+      order.status = 'scanned'
+      order.save
+
+      product_inv_wh.reload
+      expect(product_inv_wh.available_inv).to eq(23)
+      expect(product_inv_wh.allocated_inv).to eq(0)
+      sold_inv_wh = SoldInventoryWarehouse.where(:product_inventory_warehouses_id => product_inv_wh.id)
+      expect(sold_inv_wh.count).to eq(1)
+      expect(sold_inv_wh.first.sold_qty).to eq(2)
+    end
 end

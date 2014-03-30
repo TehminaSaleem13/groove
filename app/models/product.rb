@@ -162,13 +162,13 @@ class Product < ActiveRecord::Base
   	if self.is_kit != 1 or 
   		(self.is_kit == 1 and self.kit_parsing == 'single')
 	     result &= self.update_warehouses_sold_level(inventory_warehouse_id, self.id,
-	 		allocated_qty, reason)
+	 		allocated_qty)
     else
     	if self.kit_parsing == 'individual'
     		#update all kits products inventory warehouses
     		self.product_kit_skuss.each do |kit_item|
 	    		result &= self.update_warehouses_sold_level(inventory_warehouse_id, kit_item.option_product_id,
-	  				allocated_qty * kit_item.qty, reason)
+	  				allocated_qty * kit_item.qty)
     		end
     	end
     end
@@ -202,6 +202,7 @@ class Product < ActiveRecord::Base
   	unless prod_warehouses.length == 1 
   		result &= false 
   	end 
+    logger.info('Allocated Qty2:'+allocated_qty.to_s)
 
   	unless !result
   		prod_warehouses.each do |wh|
