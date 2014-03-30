@@ -103,7 +103,8 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,ord
                 ordernum: {
                     name: "Order #",
                     hideable:false,
-                    transclude:'<a href="" ng-click="function(ngModel.id,false,0,true)">{{ngModel.ordernum}}</a>',
+                    editable: false,
+                    //transclude:'<a href="" ng-click="function(ngModel.id,false,0,true)">{{ngModel.ordernum}}</a>',
                     grid_bind: '<a href="" ng-click="options.editable.functions.ordernum(row.id,false,null,true)" >{{row[field]}}</a>'
                 },
                 tags: {
