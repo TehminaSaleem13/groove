@@ -146,6 +146,21 @@
         <input type="number" ng-blur="update_single_product()" ng-model="groovProducts.single.basicinfo.pack_time_adj"/>
     </div>
 </div>
+<div class="control-group">
+    <label class="control-label">Total Available Local Inventory (LOC)</label>
+
+    <div class="controls">
+        <label class="control-label" style="text-align:left;">{{groovProducts.single.basicinfo.total_avail_loc}}</label>
+    </div>
+</div>
+<div class="control-group">
+    <label class="control-label">Total Available External Inventory (EXT)</label>
+
+    <div class="controls">
+        <label class="control-label" style="text-align:left;">
+            {{groovProducts.single.basicinfo.total_avail_ext}}</label>
+    </div>
+</div>
 <h5>Inventory and Location by Warehouses</h5>
 <table class="table table-hover table-bordered table-striped table-condensed">
     <thead>

@@ -771,7 +771,8 @@ class ProductsController < ApplicationController
   	if !@product.nil?
   		@result['product'] = Hash.new
   		@result['product']['basicinfo'] = @product
-      @result['product']['skus'] = @product.product_skus.order("product_skus.order ASC")
+   		@result['product']['basicinfo']['total_avail_loc'] = @product.get_total_avail_loc
+        @result['product']['skus'] = @product.product_skus.order("product_skus.order ASC")
   		@result['product']['cats'] = @product.product_cats
     	@result['product']['images'] = @product.product_images.order("product_images.order ASC")
   		@result['product']['barcodes'] = @product.product_barcodes.order("product_barcodes.order ASC")
