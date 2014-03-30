@@ -1327,6 +1327,57 @@ class ProductsController < ApplicationController
 
   end
 
+  #input params[:id] gives product id params[:inv_wh_id] gives inventory warehouse id
+  #params[:inventory_count] contains the inventory count from the recount
+  #params[:method] this can contain two options: 'recount' or 'receive'
+  #PUT request and it updates the available inventory if method is recount
+  # or adds to the available inventory if method is receive
+  def adjust_available_inventory
+    result = Hash.new
+    result['status'] = true
+    result['error_messages'] = []
+    result['success_messages'] = []
+    result['notice_messages'] = []
+
+    unless params[:id].nil? || params[:inv_wh_id].nil? || params[:inventory_count].nil? || 
+    	params[:method].nil?
+      product = Product.find(params[:id])
+      unless product.nil?
+        product_inv_whs = ProductInventoryWarehouses.where(:product_id=> product.id).
+        	where(:inventory_warehouse_id=>params[:inv_wh_id])
+       	unless product_inv_whs.length != 1
+       		if params[:method] == 'recount'
+	       		product_inv_whs.first.available_inv = params[:inventory_count]
+	       		product_inv_whs.first.save
+	       	elsif params[:method] == 'receive'
+	       		product_inv_whs.first.available_inv += params[:inventory_count].to_i
+	       		product_inv_whs.first.save
+	       	else
+	       		result['status'] &= false
+		    	result['error_messages'].push("Invalid method passed in parameter. 
+		    		Only 'receive' and 'recount' are valid. Passed in parameter: "+params[:method])
+	       	end
+       	else
+		    result['status'] &= false
+		    result['error_messages'].push('Could not find an appropriate inventory warehouse 
+		    	for the product warehouse id: '+params[:inv_wh_id]+'product id: '+ params[:id])
+       	end
+      else
+	    result['status'] &= false
+	    result['error_messages'].push('Cannot find product with id: ' +params[:id])
+      end
+    else
+      result['status'] &= false
+      result['error_messages'].push('Cannot recount inventory without product id and 
+      		inventory_warehouse_id')
+    end
+
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json: result }
+    end
+  end
+
   private
 
   def do_search
@@ -1531,4 +1582,5 @@ class ProductsController < ApplicationController
       return params[:productArray]
     end
   end
+
 end

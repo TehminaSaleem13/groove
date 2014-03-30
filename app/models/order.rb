@@ -591,8 +591,6 @@ class Order < ActiveRecord::Base
                     logger.info('Allocated Qty1:'+order_item.qty.to_s)
           result &= order_item.product.update_allocated_product_sold_level(self.store.inventory_warehouse_id,
             order_item.qty)
-
-
         end
 
         logger.info('error updating sold inventory level') if !result 

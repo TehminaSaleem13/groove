@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140330174622) do
+ActiveRecord::Schema.define(:version => 20140330180444) do
 
   create_table "amazon_credentials", :force => true do |t|
     t.string   "merchant_id",                                     :null => false
@@ -310,7 +310,6 @@ ActiveRecord::Schema.define(:version => 20140330174622) do
     t.string   "kit_parsing",                     :default => "depends"
     t.integer  "is_kit",                          :default => 0
     t.boolean  "disable_conf_req",                :default => false
-    t.integer  "total_avail_loc",                 :default => 0,         :null => false
     t.integer  "total_avail_ext",                 :default => 0,         :null => false
   end
 
