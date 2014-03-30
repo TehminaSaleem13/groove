@@ -4,6 +4,10 @@ groovepacks_controllers.
             $scope.$on("user-data-reloaded", function(){
                 $scope.current_user = auth.get();
             });
+
+            $scope.$on("editing-a-var",function(event,data) {
+                $scope.current_editing = data.ident;
+            });
             $scope.notify = function(msg,type) {
                 notification.notify(msg,type);
             }

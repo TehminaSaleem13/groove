@@ -1,16 +1,4 @@
-groovepacks_directives.directive('groovEditable', ['$timeout',function ($timeout) {
-        var groovEditableConfig = function () {
-            return {
-                class:'span3',
-                array:false,
-                update: function() {},
-                sortableOptions:{},
-                elements: {},
-                functions: {}
-            };
-        }
-
-    var editing = false;
+groovepacks_directives.directive('groovEditable', ['$timeout','editable',function ($timeout,editable) {
     return {
         restrict:"A",
         transclude: true,
@@ -23,6 +11,7 @@ groovepacks_directives.directive('groovEditable', ['$timeout',function ($timeout
         },
         link: function(scope,el,attrs,ctrl,transclude) {
             scope.save_node = function(blur) {
+                editable.unset();
                 blur = (typeof blur == "boolean")? blur : false;
                 if(scope.editing != -1) {
                     if(scope.editable.array) {
@@ -30,11 +19,7 @@ groovepacks_directives.directive('groovEditable', ['$timeout',function ($timeout
                             scope.remove_node(scope.editing);
                         }
                     }
-                    $timeout(function() {
-                        if(editing == false) {
-                            scope.editable.update(scope.ngModel,scope.prop);
-                        }
-                    },30);
+                    scope.editable.update(scope.ngModel,scope.prop);
                 }
                 scope.editing = -1;
                 if(!blur) {
@@ -43,39 +28,45 @@ groovepacks_directives.directive('groovEditable', ['$timeout',function ($timeout
             }
 
             scope.add_node  = function () {
-                if(scope.editable.array) {
-                    mytemp = {};
-                    mytemp[scope.prop] = "";
-                    scope.ngModel.push(mytemp);
-                    scope.edit_node(-1);
-                } else {
-                    scope.edit_node();
+                if(editable.status() == false) {
+                    if(scope.editable.array) {
+                        mytemp = {};
+                        mytemp[scope.prop] = "";
+                        scope.ngModel.push(mytemp);
+                        scope.edit_node(-1);
+                    } else {
+                        scope.edit_node();
+                    }
                 }
             }
             scope.remove_node = function(index) {
-                if(scope.editable.array) {
-                    scope.ngModel.splice(index,1);
-                    if(editing == false) {
+                if(editable.status() == false) {
+                    if(scope.editable.array) {
+                        scope.ngModel.splice(index,1);
                         scope.editable.update(scope.ngModel,scope.prop);
+                        scope.editing = -1;
                     }
-                    scope.editing = -1;
                 }
                 //scope.focus_input();
             }
 
             scope.edit_node = function(index) {
-                if(scope.editable.array) {
-                    if(index == -1) {
-                        index = scope.ngModel.length-1;
+                if(editable.status() == false) {
+                    editable.set(scope.custom_identifier);
+
+                    if(scope.editable.array) {
+                        if(index == -1) {
+                            index = scope.ngModel.length-1;
+                        }
+                        if(scope.editing != -1 && scope.editing != index) {
+                            scope.save_node();
+                        }
+                        scope.editing = index;
+                    } else {
+                        scope.editing =  1;
                     }
-                    if(scope.editing != -1 && scope.editing != index) {
-                        scope.save_node();
-                    }
-                    scope.editing = index;
-                } else {
-                    scope.editing =  1;
+                    $timeout(scope.focus_input,10);
                 }
-                $timeout(scope.focus_input,10);
             }
 
 
@@ -117,7 +108,7 @@ groovepacks_directives.directive('groovEditable', ['$timeout',function ($timeout
             }
 
             scope._setup_editable =function() {
-                scope.editable = groovEditableConfig();
+                scope.editable = editable.default();
                 angular.extend(scope.editable,scope.groovEditable);
                 if(typeof scope.editable.elements[scope.prop] == "undefined") {
                     scope.editable.elements[scope.prop] = {type:'text',value:''};
@@ -135,11 +126,11 @@ groovepacks_directives.directive('groovEditable', ['$timeout',function ($timeout
             }
 
             scope._init = function() {
-
                 scope.is_transcluded = false;
                 scope.custom_identifier = "editable-" +Math.floor(Math.random()*1000)+"-";
                 scope.single_editable_id = scope.custom_identifier+scope.identifier+"-"+scope.prop+"-1";
                 scope.editing = -1;
+                scope.disabled = false;
                 scope._focus_lost = false;
                 scope._setup_editable();
                 scope.function = scope.editable.functions[scope.prop];
@@ -160,13 +151,12 @@ groovepacks_directives.directive('groovEditable', ['$timeout',function ($timeout
                         },500);
                     }
                 });
-                scope.$watch('editing',function() {
-                    if(scope.editing == -1) {
-                        if(editing == scope.custom_identifier) {
-                            editing = false;
-                        }
+
+                scope.$on("editing-a-var",function(event,data) {
+                    if(data.ident == false || data.ident == scope.custom_identifier) {
+                        scope.disabled = false;
                     } else {
-                        editing = true;
+                        scope.disabled = true;
                     }
                 });
 

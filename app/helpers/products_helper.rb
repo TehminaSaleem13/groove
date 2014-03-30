@@ -50,7 +50,7 @@ module ProductsHelper
       product[var] = value
       product.save
     elsif var ==  "sku"
-      product_sku = product.product_skus.first
+      product_sku = product.product_skus.order("product_skus.order ASC").first
       if product_sku.nil?
         product_sku = ProductSku.new
         product_sku.product_id = product.id
@@ -67,7 +67,7 @@ module ProductsHelper
       product_cat.save
     elsif var ==  "barcode"
       if ProductBarcode.where(:barcode => value).length == 0
-        product_barcode = product.product_barcodes.first
+        product_barcode = product.product_barcodes.order("product_barcodes.order ASC").first
         if product_barcode.nil?
           product_barcode = ProductBarcode.new
           product_barcode.product_id = product.id
