@@ -4,16 +4,13 @@ class HomeController < ApplicationController
   	if !user_signed_in?
   		redirect_to new_user_session_path
   	end
-  	
+
   end
 
   def userinfo
-  	@user = Hash.new
-  	@user['username'] = current_user.username
-    @user['user_id'] = current_user.id
     respond_to do |format|
       format.html # show.html.erb
-      format.json { render json: @user}
+      format.json { render json: current_user}
     end
   end
 end

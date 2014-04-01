@@ -1,6 +1,6 @@
 groovepacks_controllers.
-    controller('showOrdersCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$location', '$route', '$cookies','orders',
-function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,orders) {
+    controller('showOrdersCtrl', [ '$scope', '$http', '$timeout', '$stateParams', '$location', '$state', '$cookies','orders',
+function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,orders) {
     //Definitions
 
     /*
@@ -103,7 +103,8 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,ord
                 ordernum: {
                     name: "Order #",
                     hideable:false,
-                    transclude:'<a href="" ng-click="function(ngModel.id,false,0,true)">{{ngModel.ordernum}}</a>',
+                    editable: false,
+                    //transclude:'<a href="" ng-click="function(ngModel.id,false,0,true)">{{ngModel.ordernum}}</a>',
                     grid_bind: '<a href="" ng-click="options.editable.functions.ordernum(row.id,false,null,true)" >{{row[field]}}</a>'
                 },
                 tags: {
@@ -189,12 +190,6 @@ function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies,ord
         $scope.$on("orders-modal-closed",function(event, args){event.stopPropagation(); $scope._get_orders();});
         $scope.$on("orders-next-load",function(event, args){$scope.order_next(function(){ $scope.$broadcast("orders-next-loaded");});});
         $("#order-search-query").focus();
-
-
-        $http.get('/home/userinfo.json').success(function(data){
-            $scope.username = data.username;
-            $scope.current_userid = data.user_id;
-        });
         $('.modal-backdrop').remove();
     }
 

@@ -24,7 +24,7 @@ class UserSettingsController < ApplicationController
       params[:active] = false
     end
     @user.active = params[:active]
-    @user.name = params[:name] 
+    @user.name = params[:name]
     @user.confirmation_code = params[:confirmation_code]
 
     #add product details
@@ -57,6 +57,7 @@ class UserSettingsController < ApplicationController
     @user.access_scanpack = params[:access_scanpack] if !params[:access_scanpack].nil?
     @user.access_orders = params[:access_orders] if !params[:access_orders].nil?
     @user.access_products = params[:access_products] if !params[:access_products].nil?
+    @user.access_settings = params[:access_settings] if !params[:access_settings].nil?
 
     #add system settings permission
     @user.edit_general_prefs = params[:edit_general_prefs] if !params[:edit_general_prefs].nil?
@@ -64,9 +65,10 @@ class UserSettingsController < ApplicationController
 
     if @user.save
       @result['result'] = true
+      @result['user'] = @user
     else
       @result['result'] = false
-      @result['messages'] = @user.errors.full_messages 
+      @result['messages'] = @user.errors.full_messages
     end
 
     respond_to do |format|
@@ -107,7 +109,7 @@ class UserSettingsController < ApplicationController
       index = 0
       @newuser.username = @user.username+"(duplicate"+index.to_s+")"
       @userslist = User.where(:username=>@newuser.username)
-      begin 
+      begin
         index = index + 1
         @newuser.username = @user.username+"(duplicate"+index.to_s+")"
         @userslist = User.where(:username=>@newuser.username)
@@ -119,7 +121,7 @@ class UserSettingsController < ApplicationController
 
       if !@newuser.save(:validate => false)
         @result['status'] = false
-        @result['messages'] = @newuser.errors.full_messages 
+        @result['messages'] = @newuser.errors.full_messages
       end
     end
 
@@ -150,7 +152,7 @@ class UserSettingsController < ApplicationController
   def getuserinfo
     @user = User.find(params[:id])
     @result = Hash.new
-    
+
     if !@user.nil?
       @result['status'] = true
       @result['user'] = @user

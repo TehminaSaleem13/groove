@@ -141,7 +141,7 @@ class StoreSettingsController < ApplicationController
               @result['status'] = false
               @result['messages'] = [e.message]
         end
-        @result['storeid'] = @store.id
+        @result['store_id'] = @store.id
       end
 
       if @store.store_type == 'CSV'
@@ -174,7 +174,6 @@ class StoreSettingsController < ApplicationController
 
       end
     end
-
     respond_to do |format|
         format.json { render json: @result}
     end

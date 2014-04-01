@@ -440,6 +440,7 @@ class OrdersController < ApplicationController
   def update
     @order = Order.find(params[:id])
     @result = Hash.new
+    params[:order]['increment_id'] = @order.increment_id
     @result['status']= true
     unless @order.update_attributes(params[:order])
       @result['status'] &= false
@@ -914,7 +915,7 @@ class OrdersController < ApplicationController
       @result['error_msg'] = "Cannot find Order"
     else
       accepted_data = {
-          "ordernum" => "increment_id",
+          #"ordernum" => "increment_id",
           "order_date" => "order_placed_time",
           "recipient" => 1,
           "notes" => "notes_internal",

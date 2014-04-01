@@ -1541,12 +1541,12 @@ class ProductsController < ApplicationController
         @product_hash["qty"] = @product_location.qty
       end
 
-      @product_barcode = product.product_barcodes.first
+      @product_barcode = product.product_barcodes.order("product_barcodes.order ASC").first
       unless @product_barcode.nil?
         @product_hash['barcode'] = @product_barcode.barcode
       end
 
-      @product_sku = product.product_skus.first
+      @product_sku = product.product_skus.order("product_skus.order ASC").first
       unless @product_sku.nil?
         @product_hash['sku'] = @product_sku.sku
       end

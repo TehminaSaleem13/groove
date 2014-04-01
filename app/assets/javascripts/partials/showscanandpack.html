@@ -1,8 +1,3 @@
-<div class="row navigation-row">
-    <div ng-include="'/assets/partials/navigation.html'"></div>
-</div>
-<div groov-common groov-notif="notify" groov-import="import_all_orders"></div>
-
 <div class="row home-row">
     <div class="row-fluid borderless-well" ng-show="rf_state=='ready_for_product'">
         <div class="top-icon span2" ng-click="reset_order()">
@@ -92,8 +87,10 @@
                     <div class="well small-well">
                         <div class="text-center">
                             <div ng-show="rf_state=='ready_for_order'">
-                                <h3>Please scan an Order to begin</h3>
-                                <div class="pack_image"> <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>RFO back ground space<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/></div>
+
+                                <div class="pack_image">
+                                   <img src="assets/RFO_background.png" alt="RFO background" />
+                                </div>
                             </div>
 
 
