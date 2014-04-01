@@ -167,6 +167,7 @@
     <tr>
         <th>Warehouse Name</th>
         <th>Quantity on Hand</th>
+        <th>Allocated Qty</th>
         <th>Primary Location</th>
         <th>Secondary Location</th>
     </tr>
@@ -177,6 +178,7 @@
         ng-click="warehouse.checked = !warehouse.checked">
         <td groov-editable="editableOptions" ng-model="warehouse.warehouse_info" prop="name" identifier="warehouse-name-{{$index}}"></td>
         <td groov-editable="editableOptions" ng-model="warehouse.info" prop="available_inv" identifier="warehouse-qty-{{$index}}"></td>
+        <td groov-editable="editableOptions" ng-model="warehouse.info" prop="allocated_inv" identifier="warehouse-qty-{{$index}}"></td>
         <td groov-editable="editableOptions" ng-model="warehouse.warehouse_info" prop="location" identifier="warehouse-location_primary-{{$index}}"></td>
         <td groov-editable="editableOptions" ng-model="warehouse.warehouse_info" prop="location"identifier="warehouse-location_secondary-{{$index}}"></td>
     </tr>
