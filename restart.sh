@@ -6,10 +6,10 @@ git pull origin master
 exit
 EOF
 cd /home/groovepacker/groove
-RAILS_ENV=production rvmsudo bundle install
+rvmsudo bundle install RAILS_ENV=production
 
-RAILS_ENV=production rvmsudo rake db:migrate
-RAILS_ENV=production rvmsudo rake assets:precompile
+rvmsudo rake db:migrate RAILS_ENV=production
+rvmsudo rake assets:precompile RAILS_ENV=production
 
 sudo service nginx restart
 
