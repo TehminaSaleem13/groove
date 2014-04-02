@@ -1,6 +1,6 @@
-groovepacks_controllers.
-controller('showWarehousesCtrl', [ '$scope', '$http', '$timeout', '$routeParams', '$location', '$route', '$cookies',
-	'warehouses', function( $scope, $http, $timeout, $routeParams, $location, $route, $cookies, warehouses) {
+groovepacks_controllers. 
+controller('showWarehousesCtrl', [ '$scope', '$http', '$timeout', '$location', '$state', '$cookies',
+	'warehouses', function( $scope, $http, $timeout, $location, $state, $cookies, warehouses) {
 
     var myscope = {};
 
@@ -81,9 +81,6 @@ controller('showWarehousesCtrl', [ '$scope', '$http', '$timeout', '$routeParams'
 
 	$scope.list_warehouses = function() {
 		warehouses.list.get($scope.warehouses).then(function() {
- 			if ($routeParams.action == "create") {
-                 myscope.create_warehouse();
-             }
 		});
 	}
 

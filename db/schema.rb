@@ -252,6 +252,7 @@ ActiveRecord::Schema.define(:version => 20140330180444) do
   add_index "product_images", ["product_id"], :name => "index_product_images_on_product_id"
 
   create_table "product_inventory_warehouses", :force => true do |t|
+    t.string   "location"
     t.integer  "qty"
     t.integer  "product_id"
     t.datetime "created_at",                            :null => false
@@ -260,7 +261,6 @@ ActiveRecord::Schema.define(:version => 20140330180444) do
     t.string   "location_primary"
     t.string   "location_secondary"
     t.string   "name"
-    t.string   "location"
     t.integer  "inventory_warehouse_id"
     t.integer  "available_inv",          :default => 0, :null => false
     t.integer  "allocated_inv",          :default => 0, :null => false
