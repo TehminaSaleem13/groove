@@ -4,9 +4,9 @@ class OrderItem < ActiveRecord::Base
 
   has_many :order_item_kit_products
   attr_accessible :price, :qty, :row_total, :sku
-  after_create :update_inventory_levels_for_packing
-  before_destroy :update_inventory_levels_for_return
 
+  after_create :update_inventory_levels_for_packing, :add_kit_products
+  before_destroy :update_inventory_levels_for_return
 
   def has_unscanned_kit_items
   	result = false
@@ -301,6 +301,22 @@ class OrderItem < ActiveRecord::Base
       end
     end
     result
+
+  end
+
+  def add_kit_products
+    if  self.product.is_kit == 1
+      self.product.product_kit_skuss.each do |kit_sku|
+        if OrderItemKitProduct.where(:order_item_id=>self.id).
+            where(:product_kit_skus_id=>kit_sku.id).length == 0
+          order_item_kit_product = OrderItemKitProduct.new
+          order_item_kit_product.product_kit_skus = kit_sku
+          order_item_kit_product.order_item = self
+          order_item_kit_product.save
+        end
+      end
+    end
+
   end
 
 end

@@ -221,4 +221,14 @@ class Product < ActiveRecord::Base
   	total_avail_loc
   end
 
+
+  def get_total_sold_qty
+    total_sold_qty = 0
+    self.product_inventory_warehousess.each do |inv_wh|
+      inv_wh.sold_inventory_warehouses.each do |sold_wh|
+        total_sold_qty += sold_wh.sold_qty
+      end
+    end
+    total_sold_qty
+  end
 end

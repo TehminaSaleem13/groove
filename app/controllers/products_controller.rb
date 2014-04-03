@@ -772,6 +772,7 @@ class ProductsController < ApplicationController
   		@result['product'] = Hash.new
   		@result['product']['basicinfo'] = @product
    		@result['product']['basicinfo']['total_avail_loc'] = @product.get_total_avail_loc
+   		@result['product']['basicinfo']['total_sold_inv'] = @product.get_total_sold_qty
         @result['product']['skus'] = @product.product_skus.order("product_skus.order ASC")
   		@result['product']['cats'] = @product.product_cats
     	@result['product']['images'] = @product.product_images.order("product_images.order ASC")
