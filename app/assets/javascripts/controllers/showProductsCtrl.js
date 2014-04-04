@@ -1,6 +1,7 @@
 groovepacks_controllers.
-controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$stateParams', '$location', '$state', '$cookies','products',
-function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,products) {
+controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$stateParams', '$location', '$state', '$cookies','products', 
+    'inventory_manager', 'warehouses',
+function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,products, inventory_manager, warehouses) {
     //Definitions
 
     /*
@@ -202,6 +203,50 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,pro
         } else {
             $scope._do_load_products = true;
         }
+    }
+
+    $scope.recount_or_receive_inventory = function() {
+        //alert('Recounting or receiving inventory');
+        $scope.warehouses = warehouses.model.get();
+        warehouses.list.get($scope.warehouses).then(function() {
+            $scope.inventory_manager = inventory_manager.model.get();
+            //register events for recount and receive inventory
+            $scope._inventory_warehouse_inputObj = $('input#inventorymanagerbarcode');
+            $scope._inventory_warehouse_inputObj.keydown($scope._handle_inv_manager_key_event);
+            $('#showProductInv').modal('show');
+        });
+    }
+
+    $scope.submit_recount_or_receive_inventory = function() {
+    }
+
+    $scope._handle_inv_manager_key_event = function(event) {
+        if(event.which == 13) {
+            //call products service
+            $scope.products = products.model.get();
+            products.single.get_by_barcode($scope.inventory_manager.single.product_barcode,
+                $scope.products).then(function(){
+                    $scope._inventory_count_inputObj = $('input#inventory_count');
+                    $scope._inventory_count_inputObj.keydown($scope._handle_inv_count_key_event);
+                    $scope.inventory_manager.single.id = $scope.products.single.basicinfo.id;
+                    $timeout(function() {$scope._inventory_count_inputObj.focus()},20);
+                });
+            //console.log($scope.inventory_manager.single.product_barcode);
+        }
+    }
+
+    $scope._handle_inv_count_key_event = function() {
+        if(event.which == 13) {
+            //call inventory manager service
+            inventory_manager.single.update($scope.inventory_manager).then(function(){
+                products.single.reset_obj($scope.products);
+                $('#showProductInv').modal('hide');
+            });
+        }
+    }
+
+    $scope.handle_change_event = function() {
+        $timeout(function() {$scope._inventory_warehouse_inputObj.focus()},20);
     }
 
     //Definitions end above this line

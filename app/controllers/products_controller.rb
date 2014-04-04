@@ -766,9 +766,17 @@ class ProductsController < ApplicationController
 
   def getdetails
   	@result = Hash.new
-  	@product = Product.find_by_id(params[:id])
-  	@product.reload
+  	@product = nil
+  	if !params[:id].nil?
+  		@product = Product.find_by_id(params[:id])
+  	else
+  		prod_barcodes = ProductBarcode.where(:barcode=>params[:barcode])
+  		if prod_barcodes.length > 0
+  			@product = prod_barcodes.first.product
+  		end
+  	end
   	if !@product.nil?
+  		@product.reload
   		@result['product'] = Hash.new
   		@result['product']['basicinfo'] = @product
    		@result['product']['basicinfo']['total_avail_loc'] = @product.get_total_avail_loc

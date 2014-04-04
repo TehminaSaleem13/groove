@@ -1,0 +1,93 @@
+<!-- Modal for product and kit details -->
+<div id="showProductInv" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="showProductInv{{custom_identifier}}"
+     aria-hidden="true">
+
+<div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="icon-remove"></i></button>
+    <h3>Receive or Recount Inventory</h3>
+</div>
+<div class="form-horizontal form-horizontal-create">
+<fieldset>
+<div class="modal-body" >
+    <div class="control-group">
+        <label class="control-label">Inventory Warehouse</label>
+        <div class="controls">
+            <select class="selectpicker" ng-model="inventory_manager.single.inv_wh_id" ng-change='handle_change_event()'>
+              <option ng-repeat="warehouse in warehouses.list" value="{{warehouse.info.id}}">{{warehouse.info.name}}</option>
+            </select>
+         </div>
+    </div>
+
+    <div class="control-group">
+        <label class="control-label">Receive or Recount Inventory</label>
+
+        <div class="controls">
+            <label class="radio inline">
+                <input type="radio"
+                       ng-model="inventory_manager.single.method" value="receive" ng-change='handle_change_event()'/> Receive Inventory
+            </label>
+            <label class="radio inline">
+                <input type="radio" 
+                       ng-model="inventory_manager.single.method" value="recount" ng-change='handle_change_event()'/> Recount Inventory
+            </label>
+        </div>
+    </div>
+
+    <div class="control-group">
+        <label class="control-label">Scan Product Barcode</label>
+
+        <div class="controls">
+            <input id="inventorymanagerbarcode" type="text" ng-model="inventory_manager.single.product_barcode" class="span4"/>
+        </div>
+    </div>
+    <div ng-show="products.single.basicinfo.id > 0">
+    <h5>Product Information</h5>
+    <table class="table table-hover table-bordered table-striped table-condensed">
+        <thead>
+        <tr>
+            <th>Product Name</th>
+            <th>SKU</th>
+            <th>Quantity on Hand</th>
+            <th>Inventory Warehouse</th>
+        </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>{{products.single.basicinfo.name}}</td>
+                <td><span ng-repeat="sku in products.single.skus">{{sku.sku}}</span></td>
+                <td><span ng-repeat="warehouse in products.single.inventory_warehouses" 
+                    ng-show="warehouse.warehouse_info.id == inventory_manager.single.inv_wh_id">
+                    {{warehouse.info.available_inv}}</span></td>
+                <td><span ng-repeat="warehouse in products.single.inventory_warehouses" 
+                    ng-show="warehouse.warehouse_info.id == inventory_manager.single.inv_wh_id">
+                    {{warehouse.warehouse_info.name}}</span></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="control-group">
+        <label class="control-label">Enter Count</label>
+
+        <div class="controls">
+            <input id="inventory_count" type="text" ng-model="inventory_manager.single.inventory_count" class="span4"/>
+        </div>
+    </div>
+    </div>
+</div>
+</fieldset>
+<div class="modal-footer">
+    <div class="row-fluid">
+        <div class="span12">
+            <div class="pull-right">
+                <button data-dismiss="modal"  aria-hidden="true" class="btn btn-primary">Save & close</button>
+                <button class="btn" data-dismiss="modal" ng-click="rollback()" aria-hidden="true">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+</div>
+</div>
+</div>
+<!-- Kit product modal ends -->
+
+

@@ -39,7 +39,7 @@
                     </div>
                 </div>
             </div>
-            <div class="accordion-group">
+<!--             <div class="accordion-group">
                 <div class="accordion-heading">
                     <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" data-target="#collapseThree" href="">
                         Categories
@@ -52,7 +52,7 @@
                         </ul>
                     </div>
                 </div>
-            </div>
+            </div> -->
             <div class="accordion-group">
                 <div class="accordion-heading">
                     <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" data-target="#collapseFour" href="">
@@ -62,8 +62,7 @@
                 <div id="collapseFour" class="accordion-body collapse in">
                     <div class="accordion-inner">
                         <ul class="nav nav-pills nav-stacked">
-                            <li><a href="">Recount Inventory</a></li>
-                            <li><a href="">Receive Inventory</a></li>
+                            <li><a href="" ng-click="recount_or_receive_inventory()">Receive or Recount Inventory</a></li>
                         </ul>
                     </div>
                 </div>
@@ -105,6 +104,8 @@
             <div groov-data-grid="gridOptions" groov-list="products.list" infinite-scroll="product_next()" infinite-scroll-disabled="{{!products.load_new}}"></div>
 
             <button ng-show="products.load_new" class="btn btn-large" style="width:100%;" ng-click="product_next()">Load More</button>
+
+            <div ng-include="'/assets/partials/productinvmodal.html'"></div>
         </div>
     </div>
 </div>

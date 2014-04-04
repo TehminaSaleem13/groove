@@ -131,6 +131,16 @@ groovepacks_services.factory('products',['$http','notification',function($http,n
         }).error(notification.server_error);
     }
 
+    //single product retrieval by barcode
+    var get_single_product_by_barcode = function(barcode,products) {
+        return $http.get('/products/getdetails.json?barcode='+barcode).success(function(data) {
+            products.single = {};
+            if(data.product) {
+                products.single = data.product;
+            }
+        }).error(notification.server_error);
+    }
+
     var create_single = function(products) {
         return $http.post('/products/create.json').success(function(data){
             products.single = {};
@@ -213,6 +223,9 @@ groovepacks_services.factory('products',['$http','notification',function($http,n
         }).error(notification.server_error);
     }
 
+    var reset_single_obj = function(products) {
+        products.single = {};
+    }
 
     //Public facing API
     return {
@@ -229,10 +242,12 @@ groovepacks_services.factory('products',['$http','notification',function($http,n
         },
         single: {
             get: get_single,
+            get_by_barcode: get_single_product_by_barcode,
             create:create_single,
             update:update_single,
             image_upload: add_image,
             alias: set_alias,
+            reset_obj: reset_single_obj,
             kit:{
                 add: add_to_kit,
                 remove:remove_from_kit
