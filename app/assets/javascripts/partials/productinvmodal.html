@@ -40,6 +40,13 @@
             <input id="inventorymanagerbarcode" type="text" ng-model="inventory_manager.single.product_barcode" class="span4"/>
         </div>
     </div>
+    
+    <div ng-show="products.single.inventory_warehouses.length == 0">
+        <p class="alert alert-danger"> 
+            There are no inventory warehouses associated with this product.
+        </p>
+    </div>
+
     <div ng-show="products.single.basicinfo.id > 0">
     <h5>Product Information</h5>
     <table class="table table-hover table-bordered table-striped table-condensed">
@@ -65,7 +72,7 @@
         </tbody>
     </table>
 
-    <div class="control-group">
+    <div class="control-group" ng-show="inventory_manager.single.inv_wh_id > 0">
         <label class="control-label">Enter Count</label>
 
         <div class="controls">
