@@ -37,6 +37,11 @@ module ProductsHelper
 					category.category =  product_hash['GetMatchingProductForIdResult']['Products']['Product']['AttributeSets']['ItemAttributes']['ProductGroup']
 					product.product_cats << category
 				end
+        
+        #add inventory warehouse
+        inv_wh = ProductInventoryWarehouses.new
+        inv_wh.inventory_warehouse_id = @store.inventory_warehouse_id
+        product.product_inventory_warehousess << inv_wh
 
 				product.save
 				product.update_product_status

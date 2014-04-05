@@ -1,3 +1,15 @@
 // Place all the styles related to the inventory_warehouse controller here.
 // They will automatically be included in application.css.
 // You can use Sass (SCSS) here: http://sass-lang.com/
+
+.warehouse-tabs {
+	border: 1px solid #666666;
+}
+
+.warehouse-tabs li {
+	text-align: center;
+}
+
+.wh_heading {
+	background-color: #D8D1D1;
+}

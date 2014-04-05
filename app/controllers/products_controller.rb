@@ -160,6 +160,11 @@ class ProductsController < ApplicationController
 								end
 								rescue
 								end
+								
+								#add inventory warehouse
+								inv_wh = ProductInventoryWarehouses.new
+								inv_wh.inventory_warehouse_id = @store.inventory_warehouse_id
+								@productdb.product_inventory_warehousess << inv_wh
 
 								if !@productdbsku.sku.nil? &&
 									ProductSku.where(:sku=>@productdbsku.sku).length == 0
@@ -175,6 +180,7 @@ class ProductsController < ApplicationController
 								else
 									@result['previous_imported'] = @result['previous_imported'] + 1
 								end
+
 							else
 								@result['previous_imported'] = @result['previous_imported'] + 1
 							end
@@ -273,11 +279,16 @@ class ProductsController < ApplicationController
 							end
 						end
 
+						#add inventory warehouse
+						inv_wh = ProductInventoryWarehouses.new
+						inv_wh.inventory_warehouse_id = @store.inventory_warehouse_id
+						@productdb.product_inventory_warehousess << inv_wh
+
 						if ProductSku.where(:sku=>@item.sKU).length == 0
 							#save
 							if @productdb.save
-								@productdb.set_product_status
-								@result['success_imported'] = @result['success_imported'] + 1
+							   @productdb.set_product_status
+							   @result['success_imported'] = @result['success_imported'] + 1
 							end
 						else
 							@result['previous_imported'] = @result['previous_imported'] + 1
@@ -356,6 +367,11 @@ class ProductsController < ApplicationController
 
 						#publish the sku to the product record
 						@productdb.product_skus << @productdbsku
+
+						#add inventory warehouse
+						inv_wh = ProductInventoryWarehouses.new
+						inv_wh.inventory_warehouse_id = @store.inventory_warehouse_id
+						@productdb.product_inventory_warehousess << inv_wh
 
 						#save
 						if ProductSku.where(:sku=>@productdbsku.sku).length == 0
@@ -750,16 +766,38 @@ class ProductsController < ApplicationController
 
   def getdetails
   	@result = Hash.new
-  	@product = Product.find_by_id(params[:id])
-
+  	@product = nil
+  	if !params[:id].nil?
+  		@product = Product.find_by_id(params[:id])
+  	else
+  		prod_barcodes = ProductBarcode.where(:barcode=>params[:barcode])
+  		if prod_barcodes.length > 0
+  			@product = prod_barcodes.first.product
+  		end
+  	end
   	if !@product.nil?
+  		@product.reload
   		@result['product'] = Hash.new
   		@result['product']['basicinfo'] = @product
-      @result['product']['skus'] = @product.product_skus.order("product_skus.order ASC")
+   		@result['product']['basicinfo']['total_avail_loc'] = @product.get_total_avail_loc
+   		@result['product']['basicinfo']['total_sold_inv'] = @product.get_total_sold_qty
+        @result['product']['skus'] = @product.product_skus.order("product_skus.order ASC")
   		@result['product']['cats'] = @product.product_cats
     	@result['product']['images'] = @product.product_images.order("product_images.order ASC")
   		@result['product']['barcodes'] = @product.product_barcodes.order("product_barcodes.order ASC")
-      	@result['product']['inventory_warehouses'] = @product.product_inventory_warehousess
+      	@result['product']['inventory_warehouses'] = []
+      	@product.product_inventory_warehousess.each do |inv_wh|
+      		inv_wh_result = Hash.new
+      		inv_wh_result['info'] = inv_wh
+      		if !inv_wh.inventory_warehouse_id.nil?
+      		  inv_wh_result['warehouse_info'] = 
+      		  	InventoryWarehouse.find(inv_wh.inventory_warehouse_id)
+      		else
+      		  inv_wh_result['warehouse_info'] = 
+      		  	nil		
+      		end
+      		@result['product']['inventory_warehouses'] << inv_wh_result
+      	end
         #@result['product']['productkitskus'] = @product.product_kit_skuss
       @result['product']['productkitskus'] = []
       if @product.is_kit
@@ -926,7 +964,7 @@ class ProductsController < ApplicationController
 
 	  			if !params[:inventory_warehouses].nil?
 		  			params[:inventory_warehouses].each do |wh|
-			  			if wh["id"] == inv_wh.id
+			  			if wh["info"]["id"] == inv_wh.id
 			  				found_inv_wh = true
 			  			end
 		  			end
@@ -944,27 +982,25 @@ class ProductsController < ApplicationController
   		#check if a product category is defined.
   		if !params[:inventory_warehouses].nil?
 	  		params[:inventory_warehouses].each do |wh|
-	  			if !wh["id"].nil?
-	  				product_inv_wh = ProductInventoryWarehouses.find(wh["id"])
-	  				product_inv_wh.qty = wh["qty"]
-	  				product_inv_wh.location_primary = wh["location_primary"]
-	  				product_inv_wh.location_secondary = wh["location_secondary"]
-	  				product_inv_wh.alert = wh["alert"]
-	  				product_inv_wh.name = wh["name"]
+	  			if !wh["info"]["id"].nil?
+	  				product_inv_wh = ProductInventoryWarehouses.find(wh["info"]["id"])
+	  				product_inv_wh.available_inv = wh["info"]["available_inv"]
+	  				# product_inv_wh.location_primary = wh["location_primary"]
+	  				# product_inv_wh.location_secondary = wh["location_secondary"]
 			  		if !product_inv_wh.save
 			  			@result['status'] &= false
 			  		end
 			  	else
-			  		product_inv_wh = ProductInventoryWarehouses.new
-            product_inv_wh.product_id = @product.id
-	  				product_inv_wh.qty = wh["qty"]
-	  				product_inv_wh.location_primary = wh["location_primary"]
-	  				product_inv_wh.location_secondary = wh["location_secondary"]
-	  				product_inv_wh.alert = wh["alert"]
-	  				product_inv_wh.name = wh["name"]
-			  		if !product_inv_wh.save
-			  			@result['status'] &= false
-			  		end
+			  		# product_inv_wh = ProductInventoryWarehouses.new
+       				# product_inv_wh.product_id = @product.id
+	  				# product_inv_wh.qty = wh["qty"]
+	  				# product_inv_wh.location_primary = wh["location_primary"]
+	  				# product_inv_wh.location_secondary = wh["location_secondary"]
+	  				# product_inv_wh.alert = wh["alert"]
+	  				# product_inv_wh.name = wh["name"]
+			  		# if !product_inv_wh.save
+			  		# 	@result['status'] &= false
+			  		# end
 	  			end
 	  		end
   		end
@@ -1301,6 +1337,62 @@ class ProductsController < ApplicationController
 
   end
 
+  #input params[:id] gives product id params[:inv_wh_id] gives inventory warehouse id
+  #params[:inventory_count] contains the inventory count from the recount
+  #params[:method] this can contain two options: 'recount' or 'receive'
+  #PUT request and it updates the available inventory if method is recount
+  # or adds to the available inventory if method is receive if the product is
+  #not associated with the inventory warehouse, then it automatically associates it and
+  #sets the value.
+  def adjust_available_inventory
+    result = Hash.new
+    result['status'] = true
+    result['error_messages'] = []
+    result['success_messages'] = []
+    result['notice_messages'] = []
+
+    unless params[:id].nil? || params[:inv_wh_id].nil? || params[:inventory_count].nil? || 
+    	params[:method].nil?
+      product = Product.find(params[:id])
+      unless product.nil?
+        product_inv_whs = ProductInventoryWarehouses.where(:product_id=> product.id).
+        	where(:inventory_warehouse_id=>params[:inv_wh_id])
+        
+        unless product_inv_whs.length == 1
+        	product_inv_wh = ProductInventoryWarehouses.new
+        	product_inv_wh.inventory_warehouse_id = params[:inv_wh_id]
+        	product.product_inventory_warehousess << product_inv_wh
+        	product.save
+        end
+        product_inv_whs.reload
+
+        if params[:method] == 'recount'
+       		product_inv_whs.first.available_inv = params[:inventory_count]
+       		product_inv_whs.first.save
+       	elsif params[:method] == 'receive'
+       		product_inv_whs.first.available_inv += params[:inventory_count].to_i
+       		product_inv_whs.first.save
+       	else
+       		result['status'] &= false
+	    	result['error_messages'].push("Invalid method passed in parameter. 
+	    		Only 'receive' and 'recount' are valid. Passed in parameter: "+params[:method])
+       	end
+      else
+	    result['status'] &= false
+	    result['error_messages'].push('Cannot find product with id: ' +params[:id])
+      end
+    else
+      result['status'] &= false
+      result['error_messages'].push('Cannot recount inventory without product id and 
+      		inventory_warehouse_id')
+    end
+
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json: result }
+    end
+  end
+
   private
 
   def do_search
@@ -1505,4 +1597,5 @@ class ProductsController < ApplicationController
       return params[:productArray]
     end
   end
+
 end

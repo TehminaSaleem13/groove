@@ -4,7 +4,9 @@ class OrderItem < ActiveRecord::Base
 
   has_many :order_item_kit_products
   attr_accessible :price, :qty, :row_total, :sku
-  after_create :add_kit_products
+
+  after_create :update_inventory_levels_for_packing, :add_kit_products
+  before_destroy :update_inventory_levels_for_return
 
   def has_unscanned_kit_items
   	result = false
@@ -225,19 +227,6 @@ class OrderItem < ActiveRecord::Base
         self.scanned_status = 'partially_scanned'
       end
       self.save
-      #puts "Order Item Status:" + self.scanned_status
-      #update order status
-      # self.order.order_items.each do |order_item|
-      #   if order_item.scanned_status != 'scanned'
-      #     order_unscanned = true
-      #   end
-      # end
-      # if order_unscanned
-      #   self.order.status = 'awaiting'
-      # else
-      #   self.order.set_order_to_scanned_state
-      # end
-      # self.order.save
     end
 
   end
@@ -275,6 +264,46 @@ class OrderItem < ActiveRecord::Base
     result  
   end
 
+  def update_inventory_levels_for_packing(override = false)
+    result = true
+    if !self.order.nil? && 
+      (self.order.status == 'awaiting' or override)
+      if !self.product.nil? && !self.order.store.nil? &&
+        !self.order.store.inventory_warehouse_id.nil?
+        result &= self.product.
+          update_available_product_inventory_level(self.order.store.inventory_warehouse_id, 
+            self.qty, 'purchase')
+
+        unless result
+          self.order.status = 'onhold'
+        end
+        self.order.save
+      end
+    end
+    result
+  end
+
+  def update_inventory_levels_for_return (override = false)
+    result = true
+    if !self.order.nil? && 
+        (self.order.status == 'awaiting' or override)
+      if !self.product.nil? && !self.order.store.nil? &&
+        !self.order.store.inventory_warehouse_id.nil?
+        logger.info('available product inventory level')
+        result &= self.product.
+          update_available_product_inventory_level(self.order.store.inventory_warehouse_id, 
+            self.qty, 'return')
+
+        unless result
+          self.order.status = 'onhold'
+        end
+        self.order.save
+      end
+    end
+    result
+
+  end
+
   def add_kit_products
     if  self.product.is_kit == 1
       self.product.product_kit_skuss.each do |kit_sku|
@@ -287,6 +316,7 @@ class OrderItem < ActiveRecord::Base
         end
       end
     end
+
   end
 
 end

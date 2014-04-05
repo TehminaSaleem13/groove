@@ -12,7 +12,9 @@ groovepacks.config(['$stateProvider', '$urlRouterProvider', function($stateProvi
         .state('settings.showusers.create',{url: '/create', controller: 'createUserCtrl'})
         .state('settings.showstores', {url:'/showstores', templateUrl:'/assets/partials/showstores.html', controller: 'showStoresCtrl'})
         .state('settings.showstores.create', {url:'/create', controller: 'createStoreCtrl'})
-        .state('settings.showstores.backup', {url:'/backup',controller:'showBackupCtrl'});
+        .state('settings.showstores.backup', {url:'/backup',controller:'showBackupCtrl'})
+        .state('settings.warehouses', {url:'/showwarehouses',templateUrl:'/assets/partials/showwarehouses.html', 
+                controller:'showWarehousesCtrl'});
 }]).run(['$rootScope','$state','$urlRouter','$timeout','auth',function($rootScope, $state, $urlRouter, $timeout, auth) {
         $rootScope.$on('$stateChangeStart', function(e, to,toParams,from,fromParams) {
             if(jQuery.isEmptyObject(auth.get())) {

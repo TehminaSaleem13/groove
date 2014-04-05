@@ -136,4 +136,99 @@ class Product < ActiveRecord::Base
   	self.save
   end
 
+  def update_available_product_inventory_level(inventory_warehouse_id, purchase_qty, reason)
+  	result = true
+
+  	if self.is_kit != 1 or 
+  		(self.is_kit == 1 and self.kit_parsing == 'single')
+	     result &= self.update_warehouses_inventory_level(inventory_warehouse_id, self.id,
+	 		purchase_qty, reason)
+    else
+    	if self.kit_parsing == 'individual'
+    		#update all kits products inventory warehouses
+    		self.product_kit_skuss.each do |kit_item|
+	    		result &= self.update_warehouses_inventory_level(inventory_warehouse_id, kit_item.option_product_id,
+	  				purchase_qty * kit_item.qty, reason)
+    		end
+    	end
+    end
+
+	result
+  end
+
+  def update_allocated_product_sold_level(inventory_warehouse_id, allocated_qty)
+   	result = true
+
+  	if self.is_kit != 1 or 
+  		(self.is_kit == 1 and self.kit_parsing == 'single')
+	     result &= self.update_warehouses_sold_level(inventory_warehouse_id, self.id,
+	 		allocated_qty)
+    else
+    	if self.kit_parsing == 'individual'
+    		#update all kits products inventory warehouses
+    		self.product_kit_skuss.each do |kit_item|
+	    		result &= self.update_warehouses_sold_level(inventory_warehouse_id, kit_item.option_product_id,
+	  				allocated_qty * kit_item.qty)
+    		end
+    	end
+    end
+
+	result
+  end
+
+  def update_warehouses_inventory_level(inv_wh_id, product_id, purchase_qty, reason)
+	result = true
+  	prod_warehouses = ProductInventoryWarehouses.where(:inventory_warehouse_id => 
+  		inv_wh_id).where(:product_id => product_id)
+
+  	unless prod_warehouses.length == 1 
+  		result &= false 
+  	end 
+
+  	unless !result
+  		prod_warehouses.each do |wh|
+  			wh.update_available_inventory_level(purchase_qty, reason)
+		end
+	end
+
+	result
+  end
+
+  def update_warehouses_sold_level(inv_wh_id, product_id, allocated_qty)
+ 	result = true
+  	prod_warehouses = ProductInventoryWarehouses.where(:inventory_warehouse_id => 
+  		inv_wh_id).where(:product_id => product_id)
+
+  	unless prod_warehouses.length == 1 
+  		result &= false 
+  	end 
+    logger.info('Allocated Qty2:'+allocated_qty.to_s)
+
+  	unless !result
+  		prod_warehouses.each do |wh|
+  			wh.update_sold_inventory_level(allocated_qty)
+		end
+	end
+
+	result
+  end
+
+  def get_total_avail_loc
+  	total_avail_loc = 0
+  	self.product_inventory_warehousess.each do |inv_wh|
+  		total_avail_loc = total_avail_loc + inv_wh.available_inv
+  	end
+  	total_avail_loc
+  end
+
+
+  def get_total_sold_qty
+    total_sold_qty = 0
+    self.product_inventory_warehousess.each do |inv_wh|
+      inv_wh.sold_inventory_warehouses.each do |sold_wh|
+        total_sold_qty += sold_wh.sold_qty
+      end
+    end
+    total_sold_qty
+  end
 end

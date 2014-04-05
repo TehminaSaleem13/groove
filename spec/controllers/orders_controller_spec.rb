@@ -51,5 +51,6 @@ describe OrdersController do
 	  result = JSON.parse(response.body)
 	  expect(result['status']).to eq(true)
     end
+
   end
 end

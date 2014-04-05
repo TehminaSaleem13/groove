@@ -258,7 +258,12 @@ class OrdersController < ApplicationController
                 @productdb.product_cats << @product_cat
               end
             end
-
+            
+            #add inventory warehouse
+            inv_wh = ProductInventoryWarehouses.new
+            inv_wh.inventory_warehouse_id = @store.inventory_warehouse_id
+            @productdb.product_inventory_warehousess << inv_wh
+            
             @productdb.save
             @productdb.set_product_status
             @order_item.product_id = @productdb.id

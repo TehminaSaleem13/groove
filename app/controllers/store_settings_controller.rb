@@ -30,6 +30,8 @@ class StoreSettingsController < ApplicationController
     @store.name= params[:name]
     @store.store_type = params[:store_type]
     @store.status = params[:status]
+    @store.inventory_warehouse_id = params[:inventory_warehouse_id]
+    
     @result['status'] = true
     @result['store_id'] = 0
     @result['csv_import'] = false

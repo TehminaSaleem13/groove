@@ -4,6 +4,7 @@ class Store < ActiveRecord::Base
   has_one :magento_credentials
   has_one :ebay_credentials
   has_one :amazon_credentials
+  belongs_to :inventory_warehouse
 
   validates_presence_of :name
   validates_uniqueness_of :name

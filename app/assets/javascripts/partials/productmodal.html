@@ -146,23 +146,48 @@
         <input type="number" ng-blur="update_single_product()" ng-model="groovProducts.single.basicinfo.pack_time_adj"/>
     </div>
 </div>
+<div class="control-group">
+    <label class="control-label">Total Available Local Inventory (LOC)</label>
+
+    <div class="controls">
+        <label class="control-label" style="text-align:left;">{{groovProducts.single.basicinfo.total_avail_loc}}</label>
+    </div>
+</div>
+<div class="control-group">
+    <label class="control-label">Total Available External Inventory (EXT)</label>
+
+    <div class="controls">
+        <label class="control-label" style="text-align:left;">
+            {{groovProducts.single.basicinfo.total_avail_ext}}</label>
+    </div>
+</div>
+<div class="control-group">
+    <label class="control-label">Total Inventory Sold</label>
+    <div class="controls">
+        <label class="control-label" style="text-align:left;">
+            {{groovProducts.single.basicinfo.total_sold_inv}}</label>
+    </div>
+</div>
 <h5>Inventory and Location by Warehouses</h5>
 <table class="table table-hover table-bordered table-striped table-condensed">
     <thead>
     <tr>
         <th>Warehouse Name</th>
         <th>Quantity on Hand</th>
+        <th>Allocated Qty</th>
         <th>Primary Location</th>
         <th>Secondary Location</th>
     </tr>
     </thead>
     <tbody>
-    <tr ng-repeat="warehouse in groovProducts.single.inventory_warehouses" ng-class="{info:warehouse.checked}"
+    <tr ng-repeat="warehouse in groovProducts.single.inventory_warehouses" 
+        ng-class="{info:warehouse.checked}"
         ng-click="warehouse.checked = !warehouse.checked">
-        <td groov-editable="editableOptions" ng-model="warehouse" prop="name" identifier="warehouse-name-{{$index}}"></td>
-        <td groov-editable="editableOptions" ng-model="warehouse" prop="qty" identifier="warehouse-qty-{{$index}}"></td>
-        <td groov-editable="editableOptions" ng-model="warehouse" prop="location_primary" identifier="warehouse-location_primary-{{$index}}"></td>
-        <td groov-editable="editableOptions" ng-model="warehouse" prop="location_secondary" identifier="warehouse-location_secondary-{{$index}}"></td>
+        <td groov-editable="editableOptions" ng-model="warehouse.warehouse_info" prop="name" identifier="warehouse-name-{{$index}}"></td>
+        <td groov-editable="editableOptions" ng-model="warehouse.info" prop="available_inv" identifier="warehouse-qty-{{$index}}"></td>
+        <td groov-editable="editableOptions" ng-model="warehouse.info" prop="allocated_inv" identifier="warehouse-qty-{{$index}}"></td>
+        <td groov-editable="editableOptions" ng-model="warehouse.warehouse_info" prop="location" identifier="warehouse-location_primary-{{$index}}"></td>
+        <td groov-editable="editableOptions" ng-model="warehouse.warehouse_info" prop="location"identifier="warehouse-location_secondary-{{$index}}"></td>
     </tr>
     </tbody>
 </table>

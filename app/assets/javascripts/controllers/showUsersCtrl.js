@@ -36,11 +36,6 @@ controller('showUsersCtrl', [ '$scope', '$http', '$timeout', '$stateParams', '$l
                     if(data.user.id == $scope.current_user.id) {
                         auth.check();
                     }
-                    //$scope.user_modal.modal('hide');
-
-
-                    //$scope.edit_status = false;
-                    //$scope.show_password = true;
                 }
             })
         }
