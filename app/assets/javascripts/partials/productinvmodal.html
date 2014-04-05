@@ -66,13 +66,14 @@
         </tbody>
     </table>
     
-    <div ng-show="products_inv_manager.single.inventory_warehouses.length == 0">
+    <div ng-show="inventory_manager.single.inv_wh_id>0 && 
+        (products_inv_manager.single.inventory_warehouses.length == 0 || inv_wh_found == false)">
         <p class="alert alert-danger"> 
             This item is not currently found in the selected warehouse. Enter an inventory value to add it automatically.
         </p>
     </div>
 
-    <div class="control-group" ng-show="inventory_manager.single.inv_wh_id > 0">
+    <div class="control-group" ng-show="inventory_manager.single.inv_wh_id > 0 ">
         <label class="control-label">Enter Count</label>
 
         <div class="controls">

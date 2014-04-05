@@ -16,9 +16,7 @@ groovepacks_services.factory('inventory_manager',['$http','notification',functio
         console.log(inventory_manager_obj);
         return $http.put(url, inventory_manager_obj.single).success(
             function(data) {
-                if(data.status) {
-                 object.list = data.data.inv_whs;
-                } else {
+                if(!data.status) {
                     notification.notify(data.error_messages,0);
                 }
             }
