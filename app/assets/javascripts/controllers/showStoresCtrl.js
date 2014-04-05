@@ -1,6 +1,6 @@
 groovepacks_controllers.
-controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$stateParams', '$location', '$state', '$cookies',
-function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies) {
+controller('showStoresCtrl', [ '$scope', '$http', '$timeout', '$stateParams', '$location', '$state', '$cookies', 'warehouses',
+function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies, warehouses) {
 
     $scope.init = function() {
         $('.modal-backdrop').remove();
@@ -49,6 +49,9 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies) {
                 $scope.notify("There was a problem retrieving stores list",0);
             });
         $("#store-search-query").focus();
+
+        $scope.warehouses = warehouses.model.get();
+        warehouses.list.get($scope.warehouses);
     }
 
     $scope.setup_modal = function() {
@@ -57,6 +60,7 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies) {
             $scope.store_modal.on("hidden",function() {
                 if(typeof $scope.newStore.id != "undefined") {
                     $scope.submit();
+                    $scope.store_modal.modal('hide');
                 }
                 $timeout(function(){
                     $scope.init();
@@ -99,30 +103,30 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies) {
     		$scope.stores = data;
     		$scope.reverse = false;
             $scope.newUser = {};
-            $scope.redirect = ($routeParams.redirect || ($routeParams.action == "create"));
-           // console.log($routeParams);
+            $scope.redirect = ($stateParams.redirect || ($stateParams.action == "create"));
+           // console.log($stateParams);
             if ($scope.redirect)
             {
-                if ($routeParams.editstatus=='true')
+                if ($stateParams.editstatus=='true')
                 {
-                    $scope.edit_status = $routeParams.editstatus;
-                    $scope.retrieveandupdateusertoken($routeParams.storeid);
+                    $scope.edit_status = $stateParams.editstatus;
+                    $scope.retrieveandupdateusertoken($stateParams.storeid);
                     $scope.newStore = new Object();
-                    $scope.newStore.id = $routeParams.storeid;
-                    $scope.newStore.name = $routeParams.name;
-                    $scope.newStore.status = $routeParams.status;
-                    $scope.newStore.store_type = $routeParams.storetype;
-                    $scope.newStore.inventory_warehouse_id = $routeParams.inventorywarehouseid;
+                    $scope.newStore.id = $stateParams.storeid;
+                    $scope.newStore.name = $stateParams.name;
+                    $scope.newStore.status = $stateParams.status;
+                    $scope.newStore.store_type = $stateParams.storetype;
+                    $scope.newStore.inventory_warehouse_id = $stateParams.inventorywarehouseid;
 
                 }
                 else
                 {
                     $scope.ebayuserfetchtoken();
                     $scope.newStore = new Object();
-                    $scope.newStore.name = $routeParams.name;
-                    $scope.newStore.status = $routeParams.status;
-                    $scope.newStore.store_type = $routeParams.storetype;
-                    $scope.newStore.inventory_warehouse_id = $routeParams.inventorywarehouseid;
+                    $scope.newStore.name = $stateParams.name;
+                    $scope.newStore.status = $stateParams.status;
+                    $scope.newStore.store_type = $stateParams.storetype;
+                    $scope.newStore.inventory_warehouse_id = $stateParams.inventorywarehouseid;
                 }
                 if(typeof $scope.newStore.status == "undefined") {
                     $scope.newStore.status = 1;
@@ -145,7 +149,7 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies) {
             //         $scope.ebay_signin_url_status = false;
             //     });
             }
-            if($routeParams.action == "backup") {
+            if($stateParams.action == "backup") {
                 $("#backup").modal("show").on("hidden",function(){
                     $timeout(function(){$location.path("/settings/showstores");},200);
                 });

@@ -41,13 +41,13 @@
         </div>
     </div>
     
-    <div ng-show="products.single.inventory_warehouses.length == 0">
+    <div ng-show="products_inv_manager.single.inventory_warehouses.length == 0">
         <p class="alert alert-danger"> 
             There are no inventory warehouses associated with this product.
         </p>
     </div>
 
-    <div ng-show="products.single.basicinfo.id > 0">
+    <div ng-show="products_inv_manager.single.inventory_warehouses.length != 0 && products_inv_manager.single.basicinfo.id > 0">
     <h5>Product Information</h5>
     <table class="table table-hover table-bordered table-striped table-condensed">
         <thead>
@@ -60,12 +60,12 @@
         </thead>
         <tbody>
             <tr>
-                <td>{{products.single.basicinfo.name}}</td>
-                <td><span ng-repeat="sku in products.single.skus">{{sku.sku}}</span></td>
-                <td><span ng-repeat="warehouse in products.single.inventory_warehouses" 
+                <td>{{products_inv_manager.single.basicinfo.name}}</td>
+                <td><span ng-repeat="sku in products_inv_manager.single.skus">{{sku.sku}}</span></td>
+                <td><span ng-repeat="warehouse in products_inv_manager.single.inventory_warehouses" 
                     ng-show="warehouse.warehouse_info.id == inventory_manager.single.inv_wh_id">
                     {{warehouse.info.available_inv}}</span></td>
-                <td><span ng-repeat="warehouse in products.single.inventory_warehouses" 
+                <td><span ng-repeat="warehouse in products_inv_manager.single.inventory_warehouses" 
                     ng-show="warehouse.warehouse_info.id == inventory_manager.single.inv_wh_id">
                     {{warehouse.warehouse_info.name}}</span></td>
             </tr>
@@ -86,8 +86,7 @@
     <div class="row-fluid">
         <div class="span12">
             <div class="pull-right">
-                <button data-dismiss="modal"  aria-hidden="true" class="btn btn-primary">Save & close</button>
-                <button class="btn" data-dismiss="modal" ng-click="rollback()" aria-hidden="true">Cancel</button>
+                <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
             </div>
         </div>
     </div>

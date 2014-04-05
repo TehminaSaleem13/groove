@@ -223,12 +223,12 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,pro
     $scope._handle_inv_manager_key_event = function(event) {
         if(event.which == 13) {
             //call products service
-            $scope.products = products.model.get();
+            $scope.products_inv_manager = products.model.get();
             products.single.get_by_barcode($scope.inventory_manager.single.product_barcode,
-                $scope.products).then(function(){
+                $scope.products_inv_manager).then(function(){
                     $scope._inventory_count_inputObj = $('input#inventory_count');
                     $scope._inventory_count_inputObj.keydown($scope._handle_inv_count_key_event);
-                    $scope.inventory_manager.single.id = $scope.products.single.basicinfo.id;
+                    $scope.inventory_manager.single.id = $scope.products_inv_manager.single.basicinfo.id;
                     $timeout(function() {$scope._inventory_count_inputObj.focus()},20);
                 });
             //console.log($scope.inventory_manager.single.product_barcode);
@@ -239,7 +239,7 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,pro
         if(event.which == 13) {
             //call inventory manager service
             inventory_manager.single.update($scope.inventory_manager).then(function(){
-                products.single.reset_obj($scope.products);
+                products.single.reset_obj($scope.products_inv_manager);
                 $('#showProductInv').modal('hide');
             });
         }
