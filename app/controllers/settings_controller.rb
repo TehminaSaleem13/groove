@@ -217,6 +217,70 @@ class SettingsController < ApplicationController
       format.json { render json:@result}
     end
   end
+
+  def get_settings
+    @result = Hash.new
+    @result['status'] = true
+    @result['error_messages'] = []
+    @result['success_messages'] = []
+    @result['notice_messages'] = []
+    @result['data'] = Hash.new
+
+    general_setting = GeneralSetting.all.first
+
+    if !general_setting.nil?
+      @result['data']['settings'] = general_setting
+    else
+      @result['status'] &= false
+      @result['error_messages'].push('No general settings available for the system. Contact administrator.')
+    end
+
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json: @result }
+    end
+  end
+
+  def update_settings
+    @result = Hash.new
+    @result['status'] = true
+    @result['error_messages'] = []
+    @result['success_messages'] = []
+    @result['notice_messages'] = []
+
+    general_setting = GeneralSetting.all.first
+
+    if !general_setting.nil?
+      if current_user.edit_general_prefs
+        general_setting.conf_req_on_notes_to_packer = params[:conf_req_on_notes_to_packer]
+        general_setting.email_address_for_packer_notes = params[:email_address_for_packer_notes]
+        general_setting.hold_orders_due_to_inventory = params[:hold_orders_due_to_inventory]
+        general_setting.inventory_tracking = params[:inventory_tracking]
+        general_setting.low_inventory_alert_email = params[:low_inventory_alert_email]
+        general_setting.low_inventory_email_address = params[:low_inventory_email_address]
+        general_setting.send_email_for_packer_notes = params[:send_email_for_packer_notes]
+
+        if general_setting.save
+          @result['success_messages'].push('Settings updated successfully.')
+        else
+          @result['status'] &= false
+          @result['error_messages'].push('Error saving general settings.')
+        end
+      else
+       @result['status'] &= false
+       @result['error_messages'].push('You are not authorized to update general preferences.')
+      end
+    else
+      @result['status'] &= false
+      @result['error_messages'].push('No general settings available for the system. Contact administrator.')
+    end
+
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json: @result }
+    end
+  end
+
 end
 
 

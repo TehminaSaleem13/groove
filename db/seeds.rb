@@ -26,3 +26,13 @@ end
 if Store.where(:store_type=>'system').length == 0
   system_store = Store.create(:name=>'GroovePacker', :store_type=>'system',:status=>true)
 end
+
+if GeneralSetting.all.length == 0
+  general_setting = GeneralSetting.create(:inventory_tracking=>1, 
+  		:low_inventory_alert_email => 1, 
+  		:low_inventory_email_address => '',
+  		:hold_orders_due_to_inventory=> 1,
+  		:conf_req_on_notes_to_packer => 'optional',
+  		:send_email_for_packer_notes => 'always',
+  		:email_address_for_packer_notes => '')
+end

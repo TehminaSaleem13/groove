@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140330180444) do
+ActiveRecord::Schema.define(:version => 20140405065523) do
 
   create_table "amazon_credentials", :force => true do |t|
     t.string   "merchant_id",                                     :null => false
@@ -54,6 +54,18 @@ ActiveRecord::Schema.define(:version => 20140330180444) do
     t.date     "ebay_auth_expiration"
     t.text     "productauth_token"
     t.text     "auth_token"
+  end
+
+  create_table "general_settings", :force => true do |t|
+    t.boolean  "inventory_tracking",             :default => true
+    t.boolean  "low_inventory_alert_email",      :default => true
+    t.string   "low_inventory_email_address",    :default => ""
+    t.boolean  "hold_orders_due_to_inventory",   :default => true
+    t.string   "conf_req_on_notes_to_packer",    :default => "optional"
+    t.string   "send_email_for_packer_notes",    :default => "always"
+    t.string   "email_address_for_packer_notes", :default => ""
+    t.datetime "created_at",                                             :null => false
+    t.datetime "updated_at",                                             :null => false
   end
 
   create_table "inventory_warehouses", :force => true do |t|

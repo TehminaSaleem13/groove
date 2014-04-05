@@ -1,0 +1,101 @@
+<div class="span8">
+  <div class="well">
+
+    <!-- INVENTORY RELATED SETTINGS -->
+    <div class="row-fluid">
+      <h4>Inventory Related Settings</h4>
+       <div class="form-horizontal general-settings-form">
+        <fieldset>
+          <div class="control-group">
+            <label class="control-label">Inventory Tracking </label>
+            <div class="controls">
+              <label class="radio inline">
+                <input type="radio" ng-model="generalsettings.single.inventory_tracking" value="1" ng-change="update_settings()"/>  On
+              </label>
+              <label class="radio inline">
+                <input type="radio" ng-model="generalsettings.single.inventory_tracking" value="0" ng-change="update_settings()"/>  Off
+              </label>
+             </div>
+          </div>
+
+          <div class="control-group">
+            <label class="control-label">Low Inventory Alert Email</label>
+            <div class="controls">
+              <label class="radio inline">
+                <input type="radio" ng-model="generalsettings.single.low_inventory_alert_email" value="1" ng-change="update_settings()"/>  On
+              </label>
+              <label class="radio inline">
+                <input type="radio" ng-model="generalsettings.single.low_inventory_alert_email" value="0" ng-change="update_settings()"/>  Off
+              </label>
+             </div>
+          </div>
+          <div class="control-group" ng-show="generalsettings.single.low_inventory_alert_email== '1'">
+            <div class="controls">
+              <input type="text" ng-model="generalsettings.single.low_inventory_email_address" placeholder="Email address" ng-blur="update_settings()"/> 
+             </div>
+          </div>
+
+          <div class="control-group">
+            <label class="control-label">Hold Order due to Inventory</label>
+            <div class="controls">
+              <label class="radio inline">
+                <input type="radio" ng-model="generalsettings.single.hold_orders_due_to_inventory" value="1" ng-change="update_settings()"/>  On
+              </label>
+              <label class="radio inline">
+                <input type="radio" ng-model="generalsettings.single.hold_orders_due_to_inventory" value="0" ng-change="update_settings()"/>  Off
+              </label>
+             </div>
+          </div>
+
+          </fieldset>
+        </div>
+    </div>
+    <hr/>
+    <!-- Confirmation and Notifications -->
+    <div class="row-fluid">
+      <h4>Confirmations & Notifications</h4>
+       <div class="form-horizontal general-settings-form">
+        <fieldset>
+          <div class="control-group">
+            <label class="control-label">Should confirmation be required on notes to packer? </label>
+            <div class="controls">
+              <label class="radio inline">
+                <input type="radio" ng-model="generalsettings.single.conf_req_on_notes_to_packer" value="always" ng-change="update_settings()"/>  Always
+              </label>
+              <label class="radio inline">
+                <input type="radio" ng-model="generalsettings.single.conf_req_on_notes_to_packer" value="optional" ng-change="update_settings()" />  Make it optional
+              </label>
+              <label class="radio inline">
+                <input type="radio" ng-model="generalsettings.single.conf_req_on_notes_to_packer" value="never" ng-change="update_settings()"/>  Never
+              </label>
+             </div>
+          </div>
+
+          <div class="control-group">
+            <label class="control-label">Should an email be sent when notes from packer are added? </label>
+            <div class="controls">
+              <label class="radio inline">
+                <input type="radio" ng-model="generalsettings.single.send_email_for_packer_notes" value="always" ng-change="update_settings()" />  Always
+              </label>
+              <label class="radio inline">
+                <input type="radio" ng-model="generalsettings.single.send_email_for_packer_notes" value="optional" ng-change="update_settings()"/>  Make it optional
+              </label>
+              <label class="radio inline">
+                <input type="radio" ng-model="generalsettings.single.send_email_for_packer_notes" value="never" ng-change="update_settings()"/>  Never
+              </label>
+             </div>
+          </div>
+
+          <div class="control-group" ng-show="generalsettings.single.send_email_for_packer_notes != 'never'">
+            <div class="controls">
+              <input type="text" ng-model="generalsettings.single.email_address_for_packer_notes" placeholder="Email address" ng-blur="update_settings()"/> 
+             </div>
+          </div>
+
+          </fieldset>
+        </div>
+    </div>
+  </div>
+</div>
+
+
