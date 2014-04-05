@@ -78,6 +78,27 @@ describe ProductsController do
       product_inv_wh.reload
       expect(product_inv_wh.available_inv).to eq(75)
     end
+
+    it "associates the warehouse and the count" do
+      request.accept = "application/json"
+
+      inv_wh = FactoryGirl.create(:inventory_warehouse)
+
+      product = FactoryGirl.create(:product)
+      product_sku = FactoryGirl.create(:product_sku, :product=> product)
+      product_barcode = FactoryGirl.create(:product_barcode, :product=> product)
+
+
+      put :adjust_available_inventory, { :id => product.id, :inv_wh_id => inv_wh.id, 
+          :inventory_count =>50, :method=>'recount' }
+
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["status"]).to eq(true)
+      expect(product.product_inventory_warehousess.length).to eq(1)
+      expect(product.product_inventory_warehousess.first.available_inv).to eq(50)
+
+    end
   end
 
 end

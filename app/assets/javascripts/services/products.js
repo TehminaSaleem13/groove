@@ -138,6 +138,9 @@ groovepacks_services.factory('products',['$http','notification',function($http,n
             if(data.product) {
                 products.single = data.product;
             }
+            else {
+               notification.notify('Cannot find product with barcode: '+barcode, 0); 
+            }
         }).error(notification.server_error);
     }
 

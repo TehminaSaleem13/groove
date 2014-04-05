@@ -40,14 +40,8 @@
             <input id="inventorymanagerbarcode" type="text" ng-model="inventory_manager.single.product_barcode" class="span4"/>
         </div>
     </div>
-    
-    <div ng-show="products_inv_manager.single.inventory_warehouses.length == 0">
-        <p class="alert alert-danger"> 
-            There are no inventory warehouses associated with this product.
-        </p>
-    </div>
 
-    <div ng-show="products_inv_manager.single.inventory_warehouses.length != 0 && products_inv_manager.single.basicinfo.id > 0">
+    <div ng-show="products_inv_manager.single.basicinfo.id > 0">
     <h5>Product Information</h5>
     <table class="table table-hover table-bordered table-striped table-condensed">
         <thead>
@@ -71,6 +65,12 @@
             </tr>
         </tbody>
     </table>
+    
+    <div ng-show="products_inv_manager.single.inventory_warehouses.length == 0">
+        <p class="alert alert-danger"> 
+            This item is not currently found in the selected warehouse. Enter an inventory value to add it automatically.
+        </p>
+    </div>
 
     <div class="control-group" ng-show="inventory_manager.single.inv_wh_id > 0">
         <label class="control-label">Enter Count</label>

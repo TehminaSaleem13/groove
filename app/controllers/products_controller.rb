@@ -1341,7 +1341,9 @@ class ProductsController < ApplicationController
   #params[:inventory_count] contains the inventory count from the recount
   #params[:method] this can contain two options: 'recount' or 'receive'
   #PUT request and it updates the available inventory if method is recount
-  # or adds to the available inventory if method is receive
+  # or adds to the available inventory if method is receive if the product is
+  #not associated with the inventory warehouse, then it automatically associates it and
+  #sets the value.
   def adjust_available_inventory
     result = Hash.new
     result['status'] = true
@@ -1355,22 +1357,25 @@ class ProductsController < ApplicationController
       unless product.nil?
         product_inv_whs = ProductInventoryWarehouses.where(:product_id=> product.id).
         	where(:inventory_warehouse_id=>params[:inv_wh_id])
-       	unless product_inv_whs.length != 1
-       		if params[:method] == 'recount'
-	       		product_inv_whs.first.available_inv = params[:inventory_count]
-	       		product_inv_whs.first.save
-	       	elsif params[:method] == 'receive'
-	       		product_inv_whs.first.available_inv += params[:inventory_count].to_i
-	       		product_inv_whs.first.save
-	       	else
-	       		result['status'] &= false
-		    	result['error_messages'].push("Invalid method passed in parameter. 
-		    		Only 'receive' and 'recount' are valid. Passed in parameter: "+params[:method])
-	       	end
+        
+        unless product_inv_whs.length == 1
+        	product_inv_wh = ProductInventoryWarehouses.new
+        	product_inv_wh.inventory_warehouse_id = params[:inv_wh_id]
+        	product.product_inventory_warehousess << product_inv_wh
+        	product.save
+        end
+        product_inv_whs.reload
+
+        if params[:method] == 'recount'
+       		product_inv_whs.first.available_inv = params[:inventory_count]
+       		product_inv_whs.first.save
+       	elsif params[:method] == 'receive'
+       		product_inv_whs.first.available_inv += params[:inventory_count].to_i
+       		product_inv_whs.first.save
        	else
-		    result['status'] &= false
-		    result['error_messages'].push('Could not find an appropriate inventory warehouse 
-		    	for the product warehouse id: '+params[:inv_wh_id]+'product id: '+ params[:id])
+       		result['status'] &= false
+	    	result['error_messages'].push("Invalid method passed in parameter. 
+	    		Only 'receive' and 'recount' are valid. Passed in parameter: "+params[:method])
        	end
       else
 	    result['status'] &= false
