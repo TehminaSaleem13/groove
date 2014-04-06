@@ -266,17 +266,28 @@ class OrderItem < ActiveRecord::Base
 
   def update_inventory_levels_for_packing(override = false)
     result = true
-    if !self.order.nil? && 
+    if self.inv_status != 'allocated' && 
+      !self.order.nil? && 
       (self.order.status == 'awaiting' or override)
       if !self.product.nil? && !self.order.store.nil? &&
         !self.order.store.inventory_warehouse_id.nil?
         result &= self.product.
           update_available_product_inventory_level(self.order.store.inventory_warehouse_id, 
             self.qty, 'purchase')
-
-        unless result
-          self.order.status = 'onhold'
+        
+        if !GeneralSetting.all.first.nil? && 
+              (GeneralSetting.all.first.inventory_tracking ||
+                GeneralSetting.all.first.hold_orders_due_to_inventory)
+          unless result
+              self.order.status = 'onhold'
+              self.order.status_reason = 'on_hold_due_to_inventory'
+              self.inv_status = 'unallocated'
+              self.inv_status_reason = 'on_hold_due_to_inventory'
+          else
+            self.inv_status = 'allocated'
+          end
         end
+        self.save
         self.order.save
       end
     end
@@ -285,7 +296,8 @@ class OrderItem < ActiveRecord::Base
 
   def update_inventory_levels_for_return (override = false)
     result = true
-    if !self.order.nil? && 
+    if self.inv_status == 'allocated' &&
+      !self.order.nil? && 
         (self.order.status == 'awaiting' or override)
       if !self.product.nil? && !self.order.store.nil? &&
         !self.order.store.inventory_warehouse_id.nil?
@@ -294,14 +306,23 @@ class OrderItem < ActiveRecord::Base
           update_available_product_inventory_level(self.order.store.inventory_warehouse_id, 
             self.qty, 'return')
 
-        unless result
-          self.order.status = 'onhold'
+        if !GeneralSetting.all.first.nil? && 
+              (GeneralSetting.all.first.inventory_tracking ||
+                GeneralSetting.all.first.hold_orders_due_to_inventory)
+          unless result
+            self.order.status = 'onhold'
+            self.order.status_reason = 'on_hold_due_to_inventory'
+            self.inv_status = 'allocated'
+            self.inv_status_reason = 'allocated_due_to_low_available_inventory'
+          else
+            self.inv_status = 'unallocated'
+          end
         end
+        self.save
         self.order.save
       end
     end
     result
-
   end
 
   def add_kit_products

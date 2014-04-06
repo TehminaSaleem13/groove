@@ -588,8 +588,7 @@ class Order < ActiveRecord::Base
 
         #move items from allocated to sold for each order items
         self.order_items.each do |order_item|
-                    logger.info('Allocated Qty1:'+order_item.qty.to_s)
-          result &= order_item.product.update_allocated_product_sold_level(self.store.inventory_warehouse_id,
+            result &= order_item.product.update_allocated_product_sold_level(self.store.inventory_warehouse_id,
             order_item.qty)
         end
 
