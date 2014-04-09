@@ -167,141 +167,70 @@ class OrdersController < ApplicationController
 
     if @ebay_credentials.length > 0
       @credential = @ebay_credentials.first
+      
       require 'eBayAPI'
       if ENV['EBAY_SANDBOX_MODE'] == 'YES'
         sandbox = true
       else
         sandbox = false
       end
+
       @eBay = EBay::API.new(@credential.auth_token,
         ENV['EBAY_DEV_ID'], ENV['EBAY_APP_ID'],
         ENV['EBAY_CERT_ID'], :sandbox=>sandbox)
 
-      seller_list =@eBay.GetOrders(:orderRole=> 'Seller', :orderStatus=>'Completed',
-        :createTimeFrom=> (Date.today - 3.months).to_datetime,
-         :createTimeTo =>(Date.today + 1.day).to_datetime)
-      if (seller_list.orderArray != nil)
-        @result['total_imported']  = seller_list.orderArray.size
-      #@result['seller_list'] = seller_list.transactionArray
-      #@result['app_id'] = @credential
-      @ordercnt = 0
-      seller_list.orderArray.each do |order|
-        if order.checkoutStatus.status == 'Complete'
-          @ordercnt = @ordercnt + 1
-        end
-      end
-      seller_list.orderArray.each do |order|
-        if !order.shippingDetails.nil? &&
-            Order.where(:increment_id=>order.shippingDetails.sellingManagerSalesRecordNumber).length == 0 &&
-            order.checkoutStatus.status == 'Complete'
-          @order = Order.new
-          @order.status = 'awaiting'
-          @order.store = @store
-          @order.increment_id = order.shippingDetails.sellingManagerSalesRecordNumber
-          @order.order_placed_time = order.createdTime
+      seller_list = @eBay.GetMyeBaySelling(:soldList=> {:orderStatusFilter=>'AwaitingShipment'})
+      
+        if (seller_list.soldList != nil && 
+          seller_list.soldList.orderTransactionArray != nil)
+        order_or_transactionArray = seller_list.soldList.orderTransactionArray
+        @result['total_imported'] = seller_list.soldList.orderTransactionArray.length
+        @ordercnt = 0
 
-          order.transactionArray.each do |transaction|
-            @order_item = OrderItem.new
-            @order_item.price = transaction.transactionPrice
-            @order_item.qty = transaction.quantityPurchased
-            @order_item.row_total= transaction.amountPaid
-            if !transaction.item.sKU.nil?
-              @order_item.sku = transaction.item.sKU
-            end
-            @item = @eBay.getItem(:ItemID => transaction.item.itemID).item
-            @order_item.name = @item.title
+        order_or_transactionArray.each do |order_transaction|
+          #single line item order transaction
+          if !order_transaction.transaction.nil?
+            transactionID = order_transaction.transaction.transactionID
+            itemID = order_transaction.transaction.item.itemID
 
-          if ProductSku.where(:sku=> transaction.item.sKU).length == 0
-            @productdb = Product.new
-            @productdb.name = @item.title
-            @productdb.store_product_id = @item.itemID
-            @productdb.product_type = 'not_used'
-            @productdb.status = 'inactive'
-            @productdb.store = @store
+            #get sellingmanager SalesRecordNumber
+            item_transactions = @eBay.GetItemTransactions(:itemID => itemID, 
+              :transactionID=> transactionID)
+            if item_transactions.transactionArray.length == 1
+              transaction = item_transactions.transactionArray.first
+              sellingManagerSalesRecordNumber = 
+                transaction.shippingDetails.sellingManagerSalesRecordNumber
 
-            #add productdb sku
-            @productdbsku = ProductSku.new
-            if  @item.sKU.nil?
-              @productdbsku.sku = "not_available"
-            else
-              @productdbsku.sku = @item.sKU
-            end
-            #@item.productListingType.uPC
-            @productdbsku.purpose = 'primary'
+              if Order.where(:increment_id=>sellingManagerSalesRecordNumber).length == 0 
+                order = Order.new
 
-            #publish the sku to the product record
-            @productdb.product_skus << @productdbsku
-
-            if @credential.import_images
-              if !@item.pictureDetails.nil?
-                if !@item.pictureDetails.pictureURL.nil? &&
-                  @item.pictureDetails.pictureURL.length > 0
-                  @productimage = ProductImage.new
-                  @productimage.image = "http://i.ebayimg.com" +
-                    @item.pictureDetails.pictureURL.first.request_uri()
-                  @productdb.product_images << @productimage
-
+                order = build_order_with_single_item_from_ebay(order, transaction, order_transaction)
+                if order.save
+                  order.addactivity("Order Import", @store.name+" Import")
+                  order.order_items.each do |item|
+                    order.addactivity("Item with SKU: "+item.sku+" Added", @store.name+" Import")
+                  end
+                  order.set_order_status
+                  @result['success_imported'] = @result['success_imported'] + 1
                 end
+              else # transaction is already imported
+                @result['previous_imported'] = @result['previous_imported'] + 1
               end
+            else # transactions Array is not equal to 1
+              @result['status'] &= false
+              @result['error_messages'].push('There was an error importing the order transactions from Ebay, 
+                Order transactions length: '+ item_transactions.transactionArray.length )
             end
-
-            if @credential.import_products
-              if !@item.primaryCategory.nil?
-                @product_cat = ProductCat.new
-                @product_cat.category = @item.primaryCategory.categoryName
-                @productdb.product_cats << @product_cat
-              end
-
-              if !@item.secondaryCategory.nil?
-                @product_cat = ProductCat.new
-                @product_cat.category = @item.secondaryCategory.categoryName
-                @productdb.product_cats << @product_cat
-              end
-            end
-            
-            #add inventory warehouse
-            inv_wh = ProductInventoryWarehouses.new
-            inv_wh.inventory_warehouse_id = @store.inventory_warehouse_id
-            @productdb.product_inventory_warehousess << inv_wh
-            
-            @productdb.save
-            @productdb.set_product_status
-            @order_item.product_id = @productdb.id
-          else
-            @order_item.product_id  = ProductSku.where(:sku=> transaction.item.sKU).first.product_id
+          else # for orders with multiple line items
+            @result['status'] &= false
+            @result['error_messages'].push('Importing orders with multiple order items is not supported')
           end
-
-          @order.order_items << @order_item
-          end
-
-          @order.address_1  = order.shippingAddress.street1
-          @order.city = order.shippingAddress.cityName
-          #@shipping.region = transaction.buyer.buyerInfo.shippingAddress.stateOrProvince
-          @order.state = order.shippingAddress.stateOrProvince
-          @order.country = order.shippingAddress.country
-          @order.postcode = order.shippingAddress.postalCode
-
-          #split name separated by a space
-          split_name = order.shippingAddress.name.split(' ')
-          @order.lastname = split_name.pop
-          @order.firstname = split_name.join(' ')
-          #@order.order_shipping = @shipping
-          if @order.save
-            @order.addactivity("Order Import", @store.name+" Import")
-            @order.order_items.each do |item|
-              @order.addactivity("Item with SKU: "+item.sku+" Added", @store.name+" Import")
-            end
-
-            @order.set_order_status
-            @result['success_imported'] = @result['success_imported'] + 1
-          end
-        else
-          @result['previous_imported'] = @result['previous_imported'] + 1
-        end
-      end
-    end
-
-    end
+        end # end of order transaction array
+      end # end of sellers list's sold list
+    else # no ebay credentials are found
+      @result['status'] &= false
+      @result['error_messages'].push('Error fetching credentials for ebay store')
+    end # end of ebay credentials
   elsif @store.store_type == 'Amazon'
     @amazon_credentials = AmazonCredentials.where(:store_id => @store.id)
 

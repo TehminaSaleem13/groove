@@ -106,4 +106,40 @@ module OrdersHelper
 
       return unscanned_item
     end
+
+  def build_order_with_single_item_from_ebay(order, transaction, order_transaction)
+    order.status = 'awaiting'
+    order.store = @store
+    order.increment_id = transaction.shippingDetails.sellingManagerSalesRecordNumber
+    order.order_placed_time = transaction.createdDate
+
+    if !transaction.buyer.nil? && !transaction.buyer.buyerInfo.nil? &&
+      !transaction.buyer.buyerInfo.shippingAddress.nil?
+      order.address_1  = transaction.buyer.buyerInfo.shippingAddress.street1
+      order.city = transaction.buyer.buyerInfo.shippingAddress.cityName
+      order.state = transaction.buyer.buyerInfo.shippingAddress.stateOrProvince
+      order.country = transaction.buyer.buyerInfo.shippingAddress.country
+      order.postcode = transaction.buyer.buyerInfo.shippingAddress.postalCode
+      #split name separated by a space
+      if !transaction.buyer.buyerInfo.shippingAddress.name.nil?
+        split_name = transaction.buyer.buyerInfo.shippingAddress.name.split(' ')
+        order.lastname = split_name.pop
+        order.firstname = split_name.join(' ')
+      end
+    end
+
+    #single item transaction does not have transaction array
+    order_item = OrderItem.new
+    order_item.price = transaction.transactionPrice
+    order_item.qty = transaction.quantityPurchased
+    order_item.row_total = transaction.amountPaid
+    order_item.sku = order_transaction.transaction.item.sKU
+    #create product if it does not exist already
+    order_item.product_id = 
+    import_ebay_product(order_transaction.transaction.item.itemID, 
+    		order_transaction.transaction.item.sKU, @ebay, @credential)
+    order.order_items << order_item
+
+   order
+  end
 end
