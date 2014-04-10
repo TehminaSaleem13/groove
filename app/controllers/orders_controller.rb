@@ -181,7 +181,7 @@ class OrdersController < ApplicationController
 
       seller_list = @eBay.GetMyeBaySelling(:soldList=> {:orderStatusFilter=>'AwaitingShipment'})
       
-        if (seller_list.soldList != nil && 
+      if (seller_list.soldList != nil && 
           seller_list.soldList.orderTransactionArray != nil)
         order_or_transactionArray = seller_list.soldList.orderTransactionArray
         @result['total_imported'] = seller_list.soldList.orderTransactionArray.length
@@ -218,18 +218,53 @@ class OrdersController < ApplicationController
               end
             else # transactions Array is not equal to 1
               @result['status'] &= false
-              @result['error_messages'].push('There was an error importing the order transactions from Ebay, 
+              @result['messages'].push('There was an error importing the order transactions from Ebay, 
                 Order transactions length: '+ item_transactions.transactionArray.length )
             end
-          else # for orders with multiple line items
+          elsif !order_transaction.order.nil?
+            # for orders with multiple line items
+            order_id = order_transaction.order.orderID
+            order_detail = @eBay.GetOrders(:orderIDArray =>[order_id])
+            
+            if !order_detail.orderArray.nil? && 
+                order_detail.orderArray.length == 1
+        
+              order_detail = order_detail.orderArray.first
+
+              if !order_detail.shippingDetails.nil?
+               sellingManagerSalesRecordNumber = order_detail.shippingDetails.sellingManagerSalesRecordNumber
+              else
+               sellingManagerSalesRecordNumber = nil
+              end
+              
+              if Order.where(:increment_id=>sellingManagerSalesRecordNumber).length == 0 
+                order = Order.new
+                order = build_order_with_multiple_items_from_ebay(order, order_detail)
+                if order.save
+                  order.addactivity("Order Import", @store.name+" Import")
+                  order.order_items.each do |item|
+                    order.addactivity("Item with SKU: "+item.sku+" Added", @store.name+" Import")
+                  end
+                  order.set_order_status
+                  @result['success_imported'] = @result['success_imported'] + 1
+                end
+              else #order is already imported
+                @result['previous_imported'] = @result['previous_imported'] + 1
+              end
+            else
+              #order detail cannot be more than 1
+              @result['status'] &= false
+              @result['messages'].push('More than 1 order detail is returned for a single order id')
+            end
+          else 
             @result['status'] &= false
-            @result['error_messages'].push('Importing orders with multiple order items is not supported')
+            @result['messages'].push('Importing orders with multiple order items is not supported')
           end
         end # end of order transaction array
       end # end of sellers list's sold list
     else # no ebay credentials are found
       @result['status'] &= false
-      @result['error_messages'].push('Error fetching credentials for ebay store')
+      @result['messages'].push('Error fetching credentials for ebay store')
     end # end of ebay credentials
   elsif @store.store_type == 'Amazon'
     @amazon_credentials = AmazonCredentials.where(:store_id => @store.id)
