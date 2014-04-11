@@ -1363,14 +1363,15 @@ class ProductsController < ApplicationController
         	product_inv_wh.inventory_warehouse_id = params[:inv_wh_id]
         	product.product_inventory_warehousess << product_inv_wh
         	product.save
+        	product_inv_whs.reload
         end
-        product_inv_whs.reload
 
         if params[:method] == 'recount'
        		product_inv_whs.first.available_inv = params[:inventory_count]
        		product_inv_whs.first.save
        	elsif params[:method] == 'receive'
-       		product_inv_whs.first.available_inv += params[:inventory_count].to_i
+       		product_inv_whs.first.available_inv = 
+       			product_inv_whs.first.available_inv + (params[:inventory_count].to_i)
        		product_inv_whs.first.save
        	else
        		result['status'] &= false

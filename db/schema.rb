@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140330180444) do
+ActiveRecord::Schema.define(:version => 20140407153316) do
 
   create_table "amazon_credentials", :force => true do |t|
     t.string   "merchant_id",                                     :null => false
@@ -54,6 +54,19 @@ ActiveRecord::Schema.define(:version => 20140330180444) do
     t.date     "ebay_auth_expiration"
     t.text     "productauth_token"
     t.text     "auth_token"
+  end
+
+  create_table "general_settings", :force => true do |t|
+    t.boolean  "inventory_tracking",                :default => true
+    t.boolean  "low_inventory_alert_email",         :default => true
+    t.string   "low_inventory_email_address",       :default => ""
+    t.boolean  "hold_orders_due_to_inventory",      :default => true
+    t.string   "conf_req_on_notes_to_packer",       :default => "optional"
+    t.string   "send_email_for_packer_notes",       :default => "always"
+    t.string   "email_address_for_packer_notes",    :default => ""
+    t.datetime "created_at",                                                :null => false
+    t.datetime "updated_at",                                                :null => false
+    t.integer  "default_low_inventory_alert_limit", :default => 0
   end
 
   create_table "inventory_warehouses", :force => true do |t|
@@ -131,9 +144,9 @@ ActiveRecord::Schema.define(:version => 20140330180444) do
     t.decimal  "price",                 :precision => 10, :scale => 0
     t.decimal  "row_total",             :precision => 10, :scale => 0
     t.integer  "order_id"
-    t.datetime "created_at",                                                                     :null => false
-    t.datetime "updated_at",                                                                     :null => false
-    t.string   "name",                                                 :default => "",           :null => false
+    t.datetime "created_at",                                                                      :null => false
+    t.datetime "updated_at",                                                                      :null => false
+    t.string   "name",                                                 :default => "",            :null => false
     t.integer  "product_id"
     t.string   "scanned_status",                                       :default => "notscanned"
     t.integer  "scanned_qty",                                          :default => 0
@@ -141,6 +154,8 @@ ActiveRecord::Schema.define(:version => 20140330180444) do
     t.integer  "kit_split_qty",                                        :default => 0
     t.integer  "kit_split_scanned_qty",                                :default => 0
     t.integer  "single_scanned_qty",                                   :default => 0
+    t.string   "inv_status",                                           :default => "unprocessed"
+    t.string   "inv_status_reason",                                    :default => ""
   end
 
   add_index "order_items", ["order_id"], :name => "index_order_items_on_order_id"
@@ -206,6 +221,7 @@ ActiveRecord::Schema.define(:version => 20140330180444) do
     t.string   "tracking_num"
     t.string   "company"
     t.integer  "packing_user_id"
+    t.string   "status_reason"
   end
 
   create_table "orders_import_summaries", :force => true do |t|
@@ -311,6 +327,7 @@ ActiveRecord::Schema.define(:version => 20140330180444) do
     t.integer  "is_kit",                          :default => 0
     t.boolean  "disable_conf_req",                :default => false
     t.integer  "total_avail_ext",                 :default => 0,         :null => false
+    t.integer  "low_inventory_level",             :default => 0
   end
 
   add_index "products", ["store_id"], :name => "index_products_on_store_id"
