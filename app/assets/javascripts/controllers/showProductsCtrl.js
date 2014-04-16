@@ -152,7 +152,7 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,pro
                     hidden:true
                 },
                 qty: {
-                    name:"Quantity",
+                    name:"Total Avbl",
                     hidden:true
                 }
             }

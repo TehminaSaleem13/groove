@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140330180444) do
+ActiveRecord::Schema.define(:version => 20140416134830) do
 
   create_table "amazon_credentials", :force => true do |t|
     t.string   "merchant_id",                                     :null => false
@@ -185,7 +185,6 @@ ActiveRecord::Schema.define(:version => 20140330180444) do
     t.string   "method"
     t.datetime "created_at",         :null => false
     t.datetime "updated_at",         :null => false
-    t.string   "store_order_id"
     t.string   "notes_internal"
     t.string   "notes_toPacker"
     t.string   "notes_fromPacker"
