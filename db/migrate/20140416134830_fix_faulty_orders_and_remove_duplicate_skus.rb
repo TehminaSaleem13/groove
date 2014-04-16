@@ -30,7 +30,7 @@ class FixFaultyOrdersAndRemoveDuplicateSkus < ActiveRecord::Migration
 							order_item.product_id = active_product_id
 							order_item.save
 						end
-						product_sku.destroy
+						product_sku.product.destroy
 					end
 				end
   	
