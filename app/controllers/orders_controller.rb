@@ -92,8 +92,10 @@ class OrdersController < ApplicationController
                       @order_item.product_id = product_id
                       @order.order_items << @order_item
                     else
-                      import_magento_product(client, session, line_items[:item][:sku], @store.id,
-                          @magento_credentials.first.import_images, @magento_credentials.first.import_products)
+                      if ProductSku.where(:sku=>line_items[:item][:sku]).length == 0
+                        import_magento_product(client, session, line_items[:item][:sku], @store.id,
+                            @magento_credentials.first.import_images, @magento_credentials.first.import_products)
+                      end
                     end
                 else
                   line_items[:item].each do |line_item|
@@ -114,8 +116,10 @@ class OrdersController < ApplicationController
                       @order_item.product_id = product_id
                       @order.order_items << @order_item
                     else
-                      import_magento_product(client, session, line_item[:sku], @store.id,
-                          @magento_credentials.first.import_images, @magento_credentials.first.import_products)
+                      if ProductSku.where(:sku=>line_item[:sku]).length == 0
+                        import_magento_product(client, session, line_item[:sku], @store.id,
+                            @magento_credentials.first.import_images, @magento_credentials.first.import_products)
+                      end
                     end
                   end
                 end
