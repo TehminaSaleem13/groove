@@ -140,7 +140,7 @@ class Product < ActiveRecord::Base
   	result = true
 
   	if self.is_kit != 1 or 
-  		(self.is_kit == 1 and self.kit_parsing == 'single')
+  		(self.is_kit == 1 and (self.kit_parsing == 'single' or self.kit_parsing == 'depends'))
 	     result &= self.update_warehouses_inventory_level(inventory_warehouse_id, self.id,
 	 		purchase_qty, reason)
     else
@@ -160,7 +160,7 @@ class Product < ActiveRecord::Base
    	result = true
 
   	if self.is_kit != 1 or 
-  		(self.is_kit == 1 and self.kit_parsing == 'single')
+  		(self.is_kit == 1 and (self.kit_parsing == 'single' or self.kit_parsing == 'depends'))
 	     result &= self.update_warehouses_sold_level(inventory_warehouse_id, self.id,
 	 		allocated_qty)
     else
@@ -207,8 +207,8 @@ class Product < ActiveRecord::Base
   	unless !result
   		prod_warehouses.each do |wh|
   			wh.update_sold_inventory_level(allocated_qty)
-		end
-	end
+		  end
+	 end
 
 	result
   end

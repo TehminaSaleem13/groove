@@ -471,6 +471,7 @@ class Order < ActiveRecord::Base
     end
 
     self.status = 'awaiting'
+    self.update_inventory_levels_for_items(override)
     self.save
   end
 
@@ -554,14 +555,14 @@ class Order < ActiveRecord::Base
     count
   end
 
-  def update_inventory_levels_for_items
+  def update_inventory_levels_for_items(override = false)
     changed_hash = self.changes
 
     logger.debug(changed_hash)
 
     unless changed_hash['status'].nil?
       if (changed_hash['status'][0] == 'onhold' or 
-          changed_hash['status'][0] == 'cancelled') and
+          changed_hash['status'][0] == 'cancelled' or override) and
         changed_hash['status'][1] == 'awaiting'
         #update_inventory_levels_for_purchase
         reason = 'packing'
@@ -586,12 +587,25 @@ class Order < ActiveRecord::Base
       if changed_hash['status'][0] == 'awaiting' and
         changed_hash['status'][1] == 'scanned'
         result = true
-
         #move items from allocated to sold for each order items
         self.order_items.each do |order_item|
-                    logger.info('Allocated Qty1:'+order_item.qty.to_s)
-          result &= order_item.product.update_allocated_product_sold_level(self.store.inventory_warehouse_id,
-            order_item.qty)
+
+          if order_item.product.is_kit == 1 and order_item.product.kit_parsing == 'depends' and
+          order_item.kit_split
+
+            order_item.product.product_kit_skuss.each do |kit_sku|
+              result &= kit_sku.option_product.update_allocated_product_sold_level(self.store.inventory_warehouse_id,
+                order_item.kit_split_qty * kit_sku.qty)
+            end
+
+            if order_item.kit_split_qty < order_item.qty
+              result &= order_item.product.update_allocated_product_sold_level(self.store.inventory_warehouse_id,
+                            order_item.qty - order_item.kit_split_qty)
+            end
+          else
+            result &= order_item.product.update_allocated_product_sold_level(self.store.inventory_warehouse_id,
+              order_item.qty)
+          end
         end
 
         logger.info('error updating sold inventory level') if !result 
@@ -599,23 +613,4 @@ class Order < ActiveRecord::Base
     end
   end
 
-  # def update_inventory_levels
-  #   result = true
-  #   if self.status == 'awaiting'
-  #     self.order_items.each do |order_item|
-  #       if !order_item.product.nil? && !self.store.nil? &&
-  #           !self.store.inventory_warehouse_id.nil?
-  #         result &= order_item.product.
-  #           update_available_product_inventory_level(
-  #             self.store.inventory_warehouse_id, purchase_qty)
-  #       end
-
-  #       unless result do
-  #         self.status = 'onhold'
-  #       end
-  #       self.save
-  #     end
-  #   end
-  #   result
-  # end
 end
