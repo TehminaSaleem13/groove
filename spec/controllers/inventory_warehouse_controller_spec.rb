@@ -6,7 +6,7 @@ describe InventoryWarehouseController do
     it "creates an inventory warehouse" do
       request.accept = "application/json"
 
-      post :create, { :name => 'Manhattan Warehouse', :location => 'New Jersey' }
+      post :create, {:inv_info =>{:name => 'Manhattan Warehouse', :location => 'New Jersey'} }
 
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
@@ -19,7 +19,7 @@ describe InventoryWarehouseController do
     it " does not create an inventory warehouse" do
       request.accept = "application/json"
 
-      post :create, { :location => 'New Jersey' }
+      post :create, { :inv_info => {:location => 'New Jersey'} }
 
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
@@ -31,8 +31,8 @@ describe InventoryWarehouseController do
     it " does not create an inventory warehouse as the name is not unique" do
       request.accept = "application/json"
 
-      post :create, { :name => 'Manhattan Warehouse', :location => 'New Jersey' }
-      post :create, { :name => 'Manhattan Warehouse', :location => 'New York' }
+      post :create, { :inv_info => { :name => 'Manhattan Warehouse', :location => 'New Jersey' } }
+      post :create, { :inv_info => { :name => 'Manhattan Warehouse', :location => 'New York'} }
 
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
