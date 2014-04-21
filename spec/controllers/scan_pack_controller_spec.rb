@@ -2946,6 +2946,130 @@ describe ScanPackController do
       expect(sold_inv_wh.first.sold_qty).to eq(1)
     end
 
+    it "should scan orders with multiple kit products and adjust inventory accordingly when some kits are not split also should reset order scan and adjust inventory accordingly" do
+      request.accept = "application/json"
+      inv_wh = FactoryGirl.create(:inventory_warehouse)
+
+      store = FactoryGirl.create(:store, :inventory_warehouse_id => inv_wh.id)
+
+      #create an order with one order item which is an individual product,
+      #another is a kit which has a quantity of 2 and depedently splittable.
+      order = FactoryGirl.create(:order, :status=>'awaiting', :store=>store)
+
+      product = FactoryGirl.create(:product)
+      product_sku = FactoryGirl.create(:product_sku, :product=> product)
+      product_barcode = FactoryGirl.create(:product_barcode, :product=> product, :barcode => 'BARCODE1')
+      product_inv_wh = FactoryGirl.create(:product_inventory_warehouse, :product=> product,
+                   :inventory_warehouse_id =>inv_wh.id, :available_inv => 25)
+
+      order_item = FactoryGirl.create(:order_item, :product_id=>product.id,
+                    :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>product.name)
+
+      product_kit = FactoryGirl.create(:product, :is_kit => 1, :name=>'iPhone Protection Kit', 
+                        :kit_parsing=>'depends')
+      product_kit_sku = FactoryGirl.create(:product_sku, :product=> product_kit, :sku=> 'IPROTO')
+      product_kit_barcode = FactoryGirl.create(:product_barcode, :product=> product_kit, :barcode => 'IPROTOBAR')
+      product_kit_inv_wh = FactoryGirl.create(:product_inventory_warehouse, :product=> product_kit,
+                   :inventory_warehouse_id =>inv_wh.id, :available_inv => 25)
+
+      order_item_kit = FactoryGirl.create(:order_item, :product_id=>product_kit.id,
+                    :qty=>2, :price=>"10", :row_total=>"10", :order=>order, :name=>product_kit.name)
+
+      kit_product = FactoryGirl.create(:product, :name=>'Apple iPhone 5C')
+      kit_product_sku = FactoryGirl.create(:product_sku, :product=> kit_product, :sku=> 'IPROTO1')
+      kit_product_barcode = FactoryGirl.create(:product_barcode, :product=> kit_product, :barcode => 'KITITEM1')
+      kit_product_inv_wh = FactoryGirl.create(:product_inventory_warehouse, :product=> kit_product,
+                   :inventory_warehouse_id =>inv_wh.id, :available_inv => 25)
+
+      product_kit_sku = FactoryGirl.create(:product_kit_sku, :product => product_kit, :option_product_id=>kit_product.id, :qty=>1)
+      order_item_kit_product = FactoryGirl.create(:order_item_kit_product, :order_item => order_item_kit,   
+            :product_kit_skus=> product_kit_sku)
+
+      kit_product2 = FactoryGirl.create(:product)
+      kit_product2_sku = FactoryGirl.create(:product_sku, :product=> kit_product2, :sku=> 'IPROTO2')
+      kit_product2_barcode = FactoryGirl.create(:product_barcode, :product=> kit_product2, :barcode => 'KITITEM2')
+      kit_product2_inv_wh = FactoryGirl.create(:product_inventory_warehouse, :product=> kit_product2,
+                   :inventory_warehouse_id =>inv_wh.id, :available_inv => 25)
+
+      product_kit_sku2 = FactoryGirl.create(:product_kit_sku, :product => product_kit, :option_product_id=>kit_product2.id)
+      order_item_kit_product2 = FactoryGirl.create(:order_item_kit_product, :order_item => order_item_kit,   
+            :product_kit_skus => product_kit_sku2)
+    
+      
+      product_kit_inv_wh.reload
+      expect(product_kit_inv_wh.available_inv).to eq(23)
+      expect(product_kit_inv_wh.allocated_inv).to eq(2)
+
+      kit_product_inv_wh.reload
+      expect(kit_product_inv_wh.available_inv).to eq(25)
+      expect(kit_product_inv_wh.allocated_inv).to eq(0)
+
+      kit_product2_inv_wh.reload
+      expect(kit_product2_inv_wh.available_inv).to eq(25)
+      expect(kit_product2_inv_wh.allocated_inv).to eq(0)
+      
+      #scanned barcode: BARCODE1
+      get :scan_product_by_barcode, {:barcode => 'BARCODE1', :order_id => order.id }
+
+      get :scan_product_by_barcode, {:barcode => 'KITITEM1', :order_id => order.id }
+
+      product_kit_inv_wh.reload
+      expect(product_kit_inv_wh.available_inv).to eq(24)
+      expect(product_kit_inv_wh.allocated_inv).to eq(1)
+
+      kit_product_inv_wh.reload
+      expect(kit_product_inv_wh.available_inv).to eq(24)
+      expect(kit_product_inv_wh.allocated_inv).to eq(1)
+
+      kit_product2_inv_wh.reload
+      expect(kit_product2_inv_wh.available_inv).to eq(24)
+      expect(kit_product2_inv_wh.allocated_inv).to eq(1)
+
+      get :scan_product_by_barcode, {:barcode => 'KITITEM2', :order_id => order.id }
+
+      product_kit_inv_wh.reload
+      expect(product_kit_inv_wh.available_inv).to eq(24)
+      expect(product_kit_inv_wh.allocated_inv).to eq(1)
+
+      kit_product_inv_wh.reload
+      expect(kit_product_inv_wh.available_inv).to eq(24)
+      expect(kit_product_inv_wh.allocated_inv).to eq(1)
+
+      kit_product2_inv_wh.reload
+      expect(kit_product2_inv_wh.available_inv).to eq(24)
+      expect(kit_product2_inv_wh.allocated_inv).to eq(1)
+
+
+      get :scan_product_by_barcode, {:barcode => 'IPROTOBAR', :order_id => order.id }
+
+      product_kit_inv_wh.reload
+      expect(product_kit_inv_wh.available_inv).to eq(24)
+      expect(product_kit_inv_wh.allocated_inv).to eq(1)
+
+      kit_product_inv_wh.reload
+      expect(kit_product_inv_wh.available_inv).to eq(24)
+      expect(kit_product_inv_wh.allocated_inv).to eq(1)
+
+      kit_product2_inv_wh.reload
+      expect(kit_product2_inv_wh.available_inv).to eq(24)
+      expect(kit_product2_inv_wh.allocated_inv).to eq(1)
+
+      order.reload
+      put :reset_order_scan, {:order_id => order.id}
+
+      product_kit_inv_wh.reload
+      expect(product_kit_inv_wh.available_inv).to eq(23)
+      expect(product_kit_inv_wh.allocated_inv).to eq(2)
+
+      kit_product_inv_wh.reload
+      expect(kit_product_inv_wh.available_inv).to eq(25)
+      expect(kit_product_inv_wh.allocated_inv).to eq(0)
+
+      kit_product2_inv_wh.reload
+      expect(kit_product2_inv_wh.available_inv).to eq(25)
+      expect(kit_product2_inv_wh.allocated_inv).to eq(0)
+    end
+
     it "should scan orders with multiple kit products and adjust inventory accordingly when all depends kits are not split" do
       request.accept = "application/json"
       inv_wh = FactoryGirl.create(:inventory_warehouse)

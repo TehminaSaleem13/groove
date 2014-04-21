@@ -471,7 +471,7 @@ class Order < ActiveRecord::Base
     end
 
     self.status = 'awaiting'
-    self.update_inventory_levels_for_items(override)
+    self.update_inventory_levels_for_items(true)
     self.save
   end
 

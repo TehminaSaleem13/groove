@@ -137,7 +137,7 @@ module OrdersHelper
     #create product if it does not exist already
     order_item.product_id = 
     import_ebay_product(order_transaction.transaction.item.itemID, 
-    		order_transaction.transaction.item.sKU, @ebay, @credential)
+    		order_transaction.transaction.item.sKU, @eBay, @credential)
     order.order_items << order_item
 
    order
@@ -173,7 +173,7 @@ module OrdersHelper
 	    #create product if it does not exist already
 	    order_item.product_id = 
 	    import_ebay_product(transaction.item.itemID, 
-	    		transaction.item.sKU, @ebay, @credential)
+	    		transaction.item.sKU, @eBay, @credential)
 	    order.order_items << order_item
 	end
 

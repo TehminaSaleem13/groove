@@ -321,31 +321,44 @@ class OrderItem < ActiveRecord::Base
   end
 
 
-  def update_inventory_levels_for_kit_parsing_depends
+  def update_inventory_levels_for_kit_parsing_depends()
     result = true
     if !self.product.nil? && self.product.kit_parsing == 'depends'
       changed_hash = self.changes
 
       # this condition gaurantees a new depends kit has been split dynamically
-      if !changed_hash.nil? and (!changed_hash['kit_split_qty'].nil? and 
-          changed_hash['kit_split_qty'][0] != changed_hash['kit_split_qty'][1])
+      if !changed_hash.nil? and (!changed_hash['kit_split_qty'].nil?)
 
-        if !self.order.nil? && 
-          (self.order.status == 'awaiting')
-          if !self.product.nil? && !self.order.store.nil? &&
-            !self.order.store.inventory_warehouse_id.nil?
-            #return the single kit product
-            result &= self.product.
-              update_available_product_inventory_level(self.order.store.inventory_warehouse_id, 
-                1, 'return')
 
-            #foreach product skus, update the available inventory levels
-            self.product.product_kit_skuss.each do |kit_sku|
-              result &= kit_sku.option_product.update_available_product_inventory_level(
-                self.order.store.inventory_warehouse_id,
-                kit_sku.qty, 'purchase')
+        if (changed_hash['kit_split_qty'][0] < changed_hash['kit_split_qty'][1])
+          if !self.order.nil? && 
+            (self.order.status == 'awaiting')
+            if !self.product.nil? && !self.order.store.nil? &&
+              !self.order.store.inventory_warehouse_id.nil?
+              #return the single kit product
+              result &= self.product.
+                update_available_product_inventory_level(self.order.store.inventory_warehouse_id, 
+                  1, 'return')
+
+              #foreach product skus, update the available inventory levels
+              self.product.product_kit_skuss.each do |kit_sku|
+                result &= kit_sku.option_product.update_available_product_inventory_level(
+                  self.order.store.inventory_warehouse_id,
+                  kit_sku.qty, 'purchase')
+              end
             end
           end
+        elsif (!changed_hash['kit_split_qty'][1].nil? && changed_hash['kit_split_qty'][0] != changed_hash['kit_split_qty'][1]) 
+          #reverse the procedure above. this is most likely used when order is reset
+          self.product.product_kit_skuss.each do |kit_sku|
+            result &= kit_sku.option_product.update_available_product_inventory_level(
+              self.order.store.inventory_warehouse_id,
+              changed_hash['kit_split_qty'][0] * kit_sku.qty, 'return')
+          end
+
+          result &= self.product.
+            update_available_product_inventory_level(self.order.store.inventory_warehouse_id, 
+              changed_hash['kit_split_qty'][0], 'purchase')
         end
       end
     end
