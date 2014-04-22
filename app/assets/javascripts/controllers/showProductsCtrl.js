@@ -152,7 +152,7 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,pro
                     hidden:true
                 },
                 qty: {
-                    name:"Quantity",
+                    name:"Total Avbl",
                     hidden:true
                 }
             }
@@ -213,8 +213,8 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,pro
         warehouses.list.get($scope.warehouses).then(function() {
             //register events for recount and receive inventory
             $scope._inventory_warehouse_inputObj = $('input#inventorymanagerbarcode');
-            $scope._inventory_warehouse_inputObj.keydown($scope._handle_inv_manager_key_event);
             $('#showProductInv').modal('show');
+            $timeout(function() {$scope._inventory_warehouse_inputObj.focus()},20);
         });
     }
 
@@ -229,7 +229,6 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,pro
                 $scope.products_inv_manager).then(function(){
                     console.log($scope.products_inv_manager);
                     $scope._inventory_count_inputObj = $('input#inventory_count');
-                    $scope._inventory_count_inputObj.keydown($scope._handle_inv_count_key_event);
                     $scope.inventory_manager.single.id = $scope.products_inv_manager.single.basicinfo.id;
                     $scope.check_if_inv_wh_is_associated_with_product();
                     $timeout(function() {$scope._inventory_count_inputObj.focus()},20);
@@ -250,13 +249,16 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,pro
         }
     }
 
-    $scope._handle_inv_count_key_event = function() {
-        if(event.which == 13) {
+    $scope._handle_inv_count_key_event = function(event) {
+        if(event.which === 13) {
             //call inventory manager service
             inventory_manager.single.update($scope.inventory_manager).then(function(){
                 products.single.reset_obj($scope.products_inv_manager);
-                $('#showProductInv').modal('hide');
+                $scope.inventory_manager.single.product_barcode = '';
+                $scope.inventory_manager.single.inventory_count = '';
+                $timeout(function() {$scope._inventory_warehouse_inputObj.focus()},20);
             });
+            event.preventDefault();
         }
     }
 

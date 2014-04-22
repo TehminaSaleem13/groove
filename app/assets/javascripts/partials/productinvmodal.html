@@ -37,7 +37,7 @@
         <label class="control-label">Scan Product Barcode</label>
 
         <div class="controls">
-            <input id="inventorymanagerbarcode" type="text" ng-model="inventory_manager.single.product_barcode" class="span4"/>
+            <input id="inventorymanagerbarcode" type="text" ng-model="inventory_manager.single.product_barcode" ng-keypress="_handle_inv_manager_key_event($event)"class="span4"/>
         </div>
     </div>
 
@@ -77,7 +77,7 @@
         <label class="control-label">Enter Count</label>
 
         <div class="controls">
-            <input id="inventory_count" type="text" ng-model="inventory_manager.single.inventory_count" class="span4"/>
+            <input id="inventory_count" type="text" ng-model="inventory_manager.single.inventory_count" class="span4" ng-keypress="_handle_inv_count_key_event($event)"/>
         </div>
     </div>
     </div>

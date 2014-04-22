@@ -20,6 +20,8 @@
 //= require angular-animate
 //= require jquery.ui.sortable
 //= require bindonce
+//= require ez-timepicker
+//= require ez-timepicker-tpls
 //= require groovepacks
 //= require_tree .
 

@@ -99,4 +99,70 @@ module ProductsHelper
     end
     product.update_product_status
   end
+
+  def import_ebay_product(itemID, sku, ebay, credential)
+    product_id = 0
+    if ProductSku.where(:sku=> sku).length == 0
+      @item = ebay.getItem(:ItemID => itemID).item
+      @productdb = Product.new
+      @productdb.name = @item.title
+      @productdb.store_product_id = @item.itemID
+      @productdb.product_type = 'not_used'
+      @productdb.status = 'inactive'
+      @productdb.store = @store
+
+      #add productdb sku
+      @productdbsku = ProductSku.new
+      if  @item.sKU.nil?
+        @productdbsku.sku = "not_available"
+      else
+        @productdbsku.sku = @item.sKU
+      end
+      #@item.productListingType.uPC
+      @productdbsku.purpose = 'primary'
+
+      #publish the sku to the product record
+      @productdb.product_skus << @productdbsku
+
+      if credential.import_images
+        if !@item.pictureDetails.nil?
+          if !@item.pictureDetails.pictureURL.nil? &&
+            @item.pictureDetails.pictureURL.length > 0
+            @productimage = ProductImage.new
+            @productimage.image = "http://i.ebayimg.com" +
+              @item.pictureDetails.pictureURL.first.request_uri()
+            @productdb.product_images << @productimage
+
+          end
+        end
+      end
+
+      if credential.import_products
+        if !@item.primaryCategory.nil?
+          @product_cat = ProductCat.new
+          @product_cat.category = @item.primaryCategory.categoryName
+          @productdb.product_cats << @product_cat
+        end
+
+        if !@item.secondaryCategory.nil?
+          @product_cat = ProductCat.new
+          @product_cat.category = @item.secondaryCategory.categoryName
+          @productdb.product_cats << @product_cat
+        end
+      end
+      
+      #add inventory warehouse
+      inv_wh = ProductInventoryWarehouses.new
+      inv_wh.inventory_warehouse_id = @store.inventory_warehouse_id
+      @productdb.product_inventory_warehousess << inv_wh
+      
+      @productdb.save
+      @productdb.set_product_status
+      product_id = @productdb.id
+    else
+      product_id  = ProductSku.where(:sku=> sku).first.product_id
+    end
+
+    product_id
+  end
 end

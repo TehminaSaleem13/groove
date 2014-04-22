@@ -1,41 +1,86 @@
 <p>
 	This email was sent to let you know that the following items are currently at or below their low inventory threshold.
 </p>
-<%if @product.product_images.length > 0 %>
-<img src='<%= @product.product_images.first.image %>'/>
-<%end%>
-<p><strong>Product SKU's:</strong></p>
-<p> 
-	<% @product.product_skus.each do |sku| %>
-		<%=sku.sku %>
-    <% end %> 
-</p>
-<p><strong>Product Name:</strong></p>
-<p> <%= @product.name %></p>
-
 <table style="border: 1px solid black;">
 	<thead>
-		<th style="border: 1px solid black;">Available Quantity</th>
-		<th style="border: 1px solid black;">Threshold</th>
+		<th style="border: 1px solid black;">Product Image</th>
+		<th style="border: 1px solid black;">SKU</th>
+		<th style="border: 1px solid black;">Product Name</th>
+		<th style="border: 1px solid black;">Product Id</th>
 		<th style="border: 1px solid black;">Warehouse name</th>
 	</thead>
 	<tbody>
-		<% @product.product_inventory_warehousess.each do |wh| %>
-		<tr style="border: 1px solid black;">
-			<% if wh.available_inv <= GeneralSetting.all.first.default_low_inventory_alert_limit %>
-			<td style="border: 1px solid black;"><span style="color:red;"> 
-				<%= wh.available_inv %>
-				</span></td>
-			<td style="border: 1px solid black;"><span style="color:red;"> 
-				<%= GeneralSetting.all.first.default_low_inventory_alert_limit %></span></td>
-			<%else %>
-			<td style="border: 1px solid black;"><span>
-				<%= wh.available_inv / GeneralSetting.all.first.default_low_inventory_alert_limit%>
-				</span></td>
-			<td style="border: 1px solid black;"><%= GeneralSetting.all.first.default_low_inventory_alert_limit %></td>
-			<% end %>
-			<td style="border: 1px solid black;"><%= wh.inventory_warehouse.name %></td>
-		</tr>
+	<%
+	  	@products = []
+	  	@products_list = Product.all
+	  	@products_list.each do |product|
+			product_hash = Hash.new
+	  		product_hash['id'] = product.id
+	  		product_hash['name'] = product.name
+	  		if product.product_skus.length > 0
+	  			product_hash['sku'] = product.product_skus.first.sku
+	  		else
+	  			product_hash['sku'] = '-'
+	  		end
+	 	  	if product.product_images.length > 0
+	  			product_hash['image'] = product.product_images.first.image
+	  		else
+	  			product_hash['image'] = '-'
+	  		end
+	  		product_hash['warehouses'] = []
+	  		low_inv_found = false
+			product.product_inventory_warehousess.each do |wh|
+				wh_hash = Hash.new
+	  	  		wh_hash['name'] = wh.inventory_warehouse.name 
+	  	  		wh_hash['available_inv'] = wh.available_inv
+	  	  		wh_hash['threshold'] = GeneralSetting.all.first.default_low_inventory_alert_limit
+		  	  	if wh.available_inv <=  GeneralSetting.all.first.default_low_inventory_alert_limit
+		  	  		wh_hash['style'] = 'color:red;'
+		  	  		low_inv_found = true
+			  	else
+					wh_hash['style'] = 'color:black;'	  		
+		  	  	end
+			  	product_hash['warehouses'].push(wh_hash)
+	  	  	end
+
+	  	  	@products.push(product_hash) if low_inv_found
+	  	end
+	%>
+	<%= @my_name %>
+		<% if !@products.nil? %>
+			<% @products.each do |product| %>
+
+					<tr style="border: 1px solid black;">
+						<td style="border: 1px solid black;">
+							<img src="<%= product['image'] %>" />
+						</td>
+						<td style="border: 1px solid black;">
+							<%= product['sku']%>
+						</td>
+						<td style="border: 1px solid black;">
+							<%= product['name']%>
+						</td>
+						<td style="border: 1px solid black;">
+							<%= product['id']%>
+						</td>
+						<td style="border: 1px solid black;">
+							<span>
+							<table>
+								<% product['warehouses'].each do |pro_wh|%>
+								<tr style="border: 1px solid black;">
+									<td style="border: 1px solid black;">
+										<%= pro_wh['name'] %>
+									</td>
+									<td style="border: 1px solid black;<%= pro_wh['style'] %>">
+										<%= pro_wh['available_inv'] %>/<%= pro_wh['threshold']%>
+									</td>
+								</tr>
+								<% end %>
+							</table>
+							</span>
+						</td>
+					</tr>
+			<%end%>
 		<% end %>
 	</tbody>
 </table>

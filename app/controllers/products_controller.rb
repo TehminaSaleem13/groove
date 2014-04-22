@@ -1363,14 +1363,15 @@ class ProductsController < ApplicationController
         	product_inv_wh.inventory_warehouse_id = params[:inv_wh_id]
         	product.product_inventory_warehousess << product_inv_wh
         	product.save
+        	product_inv_whs.reload
         end
-        product_inv_whs.reload
 
         if params[:method] == 'recount'
        		product_inv_whs.first.available_inv = params[:inventory_count]
        		product_inv_whs.first.save
        	elsif params[:method] == 'receive'
-       		product_inv_whs.first.available_inv += params[:inventory_count].to_i
+       		product_inv_whs.first.available_inv = 
+       			product_inv_whs.first.available_inv + (params[:inventory_count].to_i)
        		product_inv_whs.first.save
        	else
        		result['status'] &= false
@@ -1486,20 +1487,21 @@ class ProductsController < ApplicationController
                                          status_filter_text+" ORDER BY product_barcodes.barcode "+sort_order+query_add)
     elsif sort_key == 'location_primary'
       products = Product.find_by_sql("SELECT products.* FROM products LEFT JOIN product_inventory_warehouses ON ( "+
-                                            "products.id = product_inventory_warehouses.product_id ) "+kit_query+
+                                            "products.id = product_inventory_warehouses.product_id ) "+ kit_query+
                                             status_filter_text+" ORDER BY product_inventory_warehouses.location_primary "+sort_order+query_add)
     elsif sort_key == 'location_secondary'
       products = Product.find_by_sql("SELECT products.* FROM products LEFT JOIN product_inventory_warehouses ON ( "+
-                                            "products.id = product_inventory_warehouses.product_id )  "+kit_query+
+                                            "products.id = product_inventory_warehouses.product_id ) "+kit_query+
                                             status_filter_text+" ORDER BY product_inventory_warehouses.location_secondary "+sort_order+query_add)
     elsif sort_key == 'location_name'
       products = Product.find_by_sql("SELECT products.* FROM products LEFT JOIN product_inventory_warehouses ON ( "+
-                                            "products.id = product_inventory_warehouses.product_id )  "+kit_query+
-                                            status_filter_text+" ORDER BY product_inventory_warehouses.name "+sort_order+query_add)
+                                            "products.id = product_inventory_warehouses.product_id )  LEFT JOIN inventory_warehouses ON("+
+                                            "product_inventory_warehouses.inventory_warehouse_id = inventory_warehouses.id ) "+kit_query+
+                                            status_filter_text+" ORDER BY inventory_warehouses.name "+sort_order+query_add)
     elsif sort_key == 'qty'
       products = Product.find_by_sql("SELECT products.* FROM products LEFT JOIN product_inventory_warehouses ON ( "+
                                             "products.id = product_inventory_warehouses.product_id ) "+kit_query+
-                                            status_filter_text+" ORDER BY product_inventory_warehouses.qty "+sort_order+query_add)
+                                            status_filter_text+" ORDER BY product_inventory_warehouses.available_inv "+sort_order+query_add)
     elsif sort_key == 'cat'
       products = Product.find_by_sql("SELECT products.* FROM products LEFT JOIN product_cats ON ( "+
                                             "products.id = product_cats.product_id ) "+kit_query+
@@ -1551,10 +1553,10 @@ class ProductsController < ApplicationController
       unless @product_location.nil?
         @product_hash['location_primary'] = @product_location.location_primary
         @product_hash['location_secondary'] = @product_location.location_secondary
-        @product_hash['location_name'] = @product_location.name
-        @product_hash["qty"] = @product_location.qty
+        @product_hash['location_name'] = @product_location.inventory_warehouse.name
       end
 
+      @product_hash["qty"] = product.get_total_avail_loc
       @product_barcode = product.product_barcodes.order("product_barcodes.order ASC").first
       unless @product_barcode.nil?
         @product_hash['barcode'] = @product_barcode.barcode

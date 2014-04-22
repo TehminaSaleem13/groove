@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140406093358) do
+ActiveRecord::Schema.define(:version => 20140422114250) do
 
   create_table "amazon_credentials", :force => true do |t|
     t.string   "merchant_id",                                     :null => false
@@ -45,6 +45,22 @@ ActiveRecord::Schema.define(:version => 20140406093358) do
     t.datetime "updated_at",  :null => false
   end
 
+  create_table "delayed_jobs", :force => true do |t|
+    t.integer  "priority",   :default => 0, :null => false
+    t.integer  "attempts",   :default => 0, :null => false
+    t.text     "handler",                   :null => false
+    t.text     "last_error"
+    t.datetime "run_at"
+    t.datetime "locked_at"
+    t.datetime "failed_at"
+    t.string   "locked_by"
+    t.string   "queue"
+    t.datetime "created_at",                :null => false
+    t.datetime "updated_at",                :null => false
+  end
+
+  add_index "delayed_jobs", ["priority", "run_at"], :name => "delayed_jobs_priority"
+
   create_table "ebay_credentials", :force => true do |t|
     t.integer  "store_id"
     t.datetime "created_at",                              :null => false
@@ -64,9 +80,17 @@ ActiveRecord::Schema.define(:version => 20140406093358) do
     t.string   "conf_req_on_notes_to_packer",       :default => "optional"
     t.string   "send_email_for_packer_notes",       :default => "always"
     t.string   "email_address_for_packer_notes",    :default => ""
-    t.datetime "created_at",                                                :null => false
-    t.datetime "updated_at",                                                :null => false
+    t.datetime "created_at",                                                           :null => false
+    t.datetime "updated_at",                                                           :null => false
     t.integer  "default_low_inventory_alert_limit", :default => 0
+    t.boolean  "send_email_on_mon",                 :default => false
+    t.boolean  "send_email_on_tue",                 :default => false
+    t.boolean  "send_email_on_wed",                 :default => false
+    t.boolean  "send_email_on_thurs",               :default => false
+    t.boolean  "send_email_on_fri",                 :default => false
+    t.boolean  "send_email_on_sat",                 :default => false
+    t.boolean  "send_email_on_sun",                 :default => false
+    t.time     "time_to_send_email",                :default => '2000-01-01 00:00:00'
   end
 
   create_table "inventory_warehouses", :force => true do |t|
@@ -113,18 +137,6 @@ ActiveRecord::Schema.define(:version => 20140406093358) do
 
   add_index "order_exceptions", ["order_id"], :name => "index_order_exceptions_on_order_id"
   add_index "order_exceptions", ["user_id"], :name => "index_order_exceptions_on_user_id"
-
-  create_table "order_item_kit_product", :force => true do |t|
-    t.string   "scanned_status",      :default => "unscanned"
-    t.integer  "scanned_qty",         :default => 0
-    t.integer  "order_item_id"
-    t.integer  "product_kit_skus_id"
-    t.datetime "created_at",                                   :null => false
-    t.datetime "updated_at",                                   :null => false
-  end
-
-  add_index "order_item_kit_product", ["order_item_id"], :name => "index_order_item_kit_product_on_order_item_id"
-  add_index "order_item_kit_product", ["product_kit_skus_id"], :name => "index_order_item_kit_product_on_product_kit_skus_id"
 
   create_table "order_item_kit_products", :force => true do |t|
     t.integer  "order_item_id"

@@ -106,4 +106,77 @@ module OrdersHelper
 
       return unscanned_item
     end
+
+  def build_order_with_single_item_from_ebay(order, transaction, order_transaction)
+    order.status = 'awaiting'
+    order.store = @store
+    order.increment_id = transaction.shippingDetails.sellingManagerSalesRecordNumber
+    order.order_placed_time = transaction.createdDate
+
+    if !transaction.buyer.nil? && !transaction.buyer.buyerInfo.nil? &&
+      !transaction.buyer.buyerInfo.shippingAddress.nil?
+      order.address_1  = transaction.buyer.buyerInfo.shippingAddress.street1
+      order.city = transaction.buyer.buyerInfo.shippingAddress.cityName
+      order.state = transaction.buyer.buyerInfo.shippingAddress.stateOrProvince
+      order.country = transaction.buyer.buyerInfo.shippingAddress.country
+      order.postcode = transaction.buyer.buyerInfo.shippingAddress.postalCode
+      #split name separated by a space
+      if !transaction.buyer.buyerInfo.shippingAddress.name.nil?
+        split_name = transaction.buyer.buyerInfo.shippingAddress.name.split(' ')
+        order.lastname = split_name.pop
+        order.firstname = split_name.join(' ')
+      end
+    end
+
+    #single item transaction does not have transaction array
+    order_item = OrderItem.new
+    order_item.price = transaction.transactionPrice
+    order_item.qty = transaction.quantityPurchased
+    order_item.row_total = transaction.amountPaid
+    order_item.sku = order_transaction.transaction.item.sKU
+    #create product if it does not exist already
+    order_item.product_id = 
+    import_ebay_product(order_transaction.transaction.item.itemID, 
+    		order_transaction.transaction.item.sKU, @eBay, @credential)
+    order.order_items << order_item
+
+   order
+  end
+
+  def build_order_with_multiple_items_from_ebay(order, order_detail)
+    order.status = 'awaiting'
+    order.store = @store
+    order.increment_id = order_detail.shippingDetails.sellingManagerSalesRecordNumber
+    order.order_placed_time = order_detail.createdTime
+
+    if !order_detail.shippingAddress.nil?
+      order.address_1  = order_detail.shippingAddress.street1
+      order.city = order_detail.shippingAddress.cityName
+      order.state = order_detail.shippingAddress.stateOrProvince
+      order.country = order_detail.shippingAddress.country
+      order.postcode = order_detail.shippingAddress.postalCode
+      #split name separated by a space
+      if !order_detail.shippingAddress.name.nil?
+        split_name = order_detail.shippingAddress.name.split(' ')
+        order.lastname = split_name.pop
+        order.firstname = split_name.join(' ')
+      end
+    end
+
+    #multiple order items from transaction array
+    order_detail.transactionArray.each do |transaction|
+	    order_item = OrderItem.new
+	    order_item.price = transaction.transactionPrice
+	    order_item.qty = transaction.quantityPurchased
+	    order_item.row_total = transaction.amountPaid
+	    order_item.sku = transaction.item.sKU
+	    #create product if it does not exist already
+	    order_item.product_id = 
+	    import_ebay_product(transaction.item.itemID, 
+	    		transaction.item.sKU, @eBay, @credential)
+	    order.order_items << order_item
+	end
+
+   order
+  end
 end
