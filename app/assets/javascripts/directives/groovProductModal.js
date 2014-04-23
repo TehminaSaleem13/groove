@@ -214,8 +214,8 @@ groovepacks_directives.directive('groovProductModal',['notification','products',
             scope.$on("alias-modal-selected",scope._add_alias_product);
             scope.$on("products-modal-closed",function(event, args){ if(args.identifier !== scope.custom_identifier) { event.stopPropagation(); scope.groovSingleProduct(scope.groovProducts.single.basicinfo.id,scope.groovProducts.current);} });
             $('.icon-question-sign').popover({trigger: 'hover focus'});
-            scope.$emit("product-modal-loading-complete",{identifier:scope.custom_identifier});
-            scope.$on("product-modal-loading-complete",function(event, args){ if(args.identifier !== scope.custom_identifier) { event.stopPropagation();} });
+            scope.$emit("products-modal-loading-complete",{identifier:scope.custom_identifier});
+            scope.$on("products-modal-loading-complete",function(event, args){ if(args.identifier !== scope.custom_identifier) { event.stopPropagation();} });
         }
     };
 }]);

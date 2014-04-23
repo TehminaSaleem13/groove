@@ -7,45 +7,26 @@ html, body {
 }
 
 body {
- padding-top: 20px;
  background-color: #555;
 }
-
-
-.navigation-row {
-margin-left: 40px;
-margin-top: 20px;
-margin-bottom: -20px;
-margin-right: 40px;
-}
-
 
 
 .navbar .brand {
 float: left;
 display: block;
 padding: 0px 0px 0px 0px;
-margin-left: -130px;
+//margin-left: -130px;
 font-size: 20px;
 font-weight: 200;
 color: #777777;
 text-shadow: 0 1px 0 white;
-margin-right: -80px;
+//margin-right: -80px;
 }
 
 
 .container {
-padding-left: 30px;
+//padding-left: 30px;
 }
-
-
-.span05 {
-width: 600px;
-margin-left: 100px;
-margin-right: -200px;
-}
-
-
 
 
 #wrap
@@ -56,6 +37,7 @@ min-height: 100%;
 #main
 {
 overflow:auto;
+padding-top:20px;
 padding-bottom:80px; /* this needs to be bigger than footer height*/
 }
 .app-container
@@ -68,7 +50,7 @@ padding-bottom:80px; /* this needs to be bigger than footer height*/
 .footer {
 background-color: #f5f5f5;
 position: relative;
-margin-top: -20px; /* negative value of footer height */
+margin-top: -60px; /* negative value of footer height + padding */
 height: 40px;
 clear:both;
 padding-top:20px;
@@ -86,6 +68,10 @@ padding-top:20px;
 	margin-bottom: 20px;
 	margin-right: 40px;
 }
+.navigation-row {
+  margin:20px;
+}
+
 
 .left-menu {
 	margin-left: 0px;
@@ -226,6 +212,9 @@ background: url('/assets/sort_desc.png') no-repeat center right;
 	border-right: 1px solid black;
 }
 
+.navbar .nav > li > a {
+  padding:10px;
+}
 #mainMenu {
 	border: none;
 	background: none;
@@ -485,7 +474,7 @@ background: url('/assets/sort_desc.png') no-repeat center right;
   padding-top:3px;
 }
 .borderless-well {
-  margin-bottom:10px;
+  margin:20px 0;
 }
 .scantable-greyedout {
   color: #dddddd;;
@@ -586,3 +575,4 @@ tbody tr td.colspan {
 .draginit tbody {
   //display:none;
 }
+

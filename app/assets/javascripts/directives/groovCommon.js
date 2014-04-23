@@ -6,7 +6,7 @@ groovepacks_directives.directive('groovCommon',['importOrders','$rootScope', fun
             groovImport:"="
         },
         link: function(scope,el,attrs) {
-            $rootScope.$on('$locationChangeStart',function(event) {
+            $rootScope.$on('$stateChangeStart',function(event) {
                 if($(".modal").is(':visible')) {
                     event.preventDefault();
                 }
