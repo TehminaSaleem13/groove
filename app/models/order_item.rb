@@ -91,6 +91,7 @@ class OrderItem < ActiveRecord::Base
     else
       result['qty_remaining'] = self.qty - self.scanned_qty
     end
+    result['scanned_qty'] = self.scanned_qty
     result['child_items'] = []
     result
   end

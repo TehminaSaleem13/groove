@@ -439,7 +439,7 @@ class Order < ActiveRecord::Base
               new_item = build_pack_item(child_item['name'], 'single', child_item['images'], child_item['sku'],
                 child_item['qty_remaining'],
                 child_item['scanned_qty'], child_item['packing_placement'], child_item['barcodes'],
-                child_item['product_id'], scanned_item['order_item_id'], nil)
+                child_item['product_id'], scanned_item['order_item_id'], nil,child_item['instruction'],child_item['confirmation'],child_item['skippable'])
               scanned_list.push(new_item)
             end
           end
@@ -470,7 +470,7 @@ class Order < ActiveRecord::Base
       order_item.save
     end
 
-    self.update_order_status
+    self.status = 'awaiting'
     self.tracking_num = ''
     self.update_inventory_levels_for_items(true)
     self.save

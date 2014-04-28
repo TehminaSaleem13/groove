@@ -5,6 +5,7 @@ class ScanPackController < ApplicationController
 
   def scan_barcode
     @result = Hash.new
+    @result['status'] = true
     @result['error_messages'] = []
     @result['success_messages'] = []
     @result['notice_messages'] = []
@@ -19,7 +20,10 @@ class ScanPackController < ApplicationController
         'scanpack.rfp.confirmation.cos' => ['cos_conf','order_scan']
     }
 
-    if !params[:input].nil? && !params[:state].nil?
+    if params[:state].nil?
+      @result['status'] &= false
+      @result['error_messages'].push("Please specify a state")
+    else
       @matcher[params[:state]].each do |state_func|
         output = send(state_func,params[:input],params[:state],params[:id])
         @result['error_messages'] = @result['error_messages'] + output['error_messages']
@@ -32,7 +36,6 @@ class ScanPackController < ApplicationController
 
     end
 
-    @result['paramm']= params
 
     respond_to do |format|
       format.html # show.html.erb

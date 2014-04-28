@@ -391,40 +391,37 @@ module ScanPackHelper
   end
 
   def order_details_and_next_item(single_order)
-    data = single_order
+    single_order.reload
+    data = single_order.attributes
     data['unscanned_items'] = single_order.get_unscanned_items
     data['scanned_items'] = single_order.get_scanned_items
-    if data['unscanned_items'].length == 0
-      if single_order.tracking_num.nil? || single_order.tracking_num == ''
-        data['next_state'] = 'scanpack.rfp.tracking'
-      else
-        data['next_state'] = 'scanpack.rfo'
-      end
-    else
-      session[:most_recent_scanned_products].reverse!.each do |scanned_product_id|
-        data['unscanned_items'].each do |unscanned_item|
-          if unscanned_item['product_type'] == 'single' &&
-              scanned_product_id == unscanned_item['product_id'] &&
-              unscanned_item['scanned_qty'] + unscanned_item['qty_remaining'] > 0
-            data['next_item'] = unscanned_item
-            break
-          elsif unscanned_item['product_type'] == 'individual'
-            unscanned_item['child_items'].each do |child_item|
-              if child_item['product_id'] == scanned_product_id
-                data['next_item'] = child_item
-                break
+    unless data['unscanned_items'].length == 0
+      unless session[:most_recent_scanned_products].nil?
+        session[:most_recent_scanned_products].reverse!.each do |scanned_product_id|
+          data['unscanned_items'].each do |unscanned_item|
+            if unscanned_item['product_type'] == 'single' &&
+                scanned_product_id == unscanned_item['product_id'] &&
+                unscanned_item['scanned_qty'] + unscanned_item['qty_remaining'] > 0
+              data['next_item'] = unscanned_item.clone
+              break
+            elsif unscanned_item['product_type'] == 'individual'
+              unscanned_item['child_items'].each do |child_item|
+                if child_item['product_id'] == scanned_product_id
+                  data['next_item'] = child_item.clone
+                  break
+                end
               end
+              break if !data['next_item'].nil?
             end
-            break if !data['next_item'].nil?
           end
+          break if !data['next_item'].nil?
         end
-        break if !data['next_item'].nil?
       end
       if data['next_item'].nil?
         if data['unscanned_items'].first['product_type'] == 'single'
-          data['next_item'] = data['unscanned_items'].first
+          data['next_item'] = data['unscanned_items'].first.clone
         elsif data['unscanned_items'].first['product_type'] == 'individual'
-          data['next_item'] = data['unscanned_items'].first['child_items'].first
+          data['next_item'] = data['unscanned_items'].first['child_items'].first.clone
         end
       end
       data['next_item']['qty'] = data['next_item']['scanned_qty'] + data['next_item']['qty_remaining']

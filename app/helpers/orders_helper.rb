@@ -4,7 +4,7 @@ module OrdersHelper
 		response = client.call(:catalog_product_info, message: {session: session, productId: sku})
 		if response.success?
 		  	@product  = response.body[:catalog_product_info_response][:info]
-			
+
 			#add product to the database
 			@productdb = Product.new
 			@productdb.name = @product[:name]
@@ -15,7 +15,7 @@ module OrdersHelper
 			# magento products should be marked with a status new as t
 			#they cannot be scanned.
 			@productdb.status = 'new'
-			
+
 			@productdbsku = ProductSku.new
 			#add productdb sku
 			if @product[:sku] != {:"@xsi:type"=>"xsd:string"}
@@ -65,7 +65,7 @@ module OrdersHelper
 								@productdb.product_cats << @product_cat
 							end
 						end
-					rescue 
+					rescue
 					end
 				end
 			end
@@ -74,7 +74,7 @@ module OrdersHelper
 			inv_wh = ProductInventoryWarehouses.new
 			inv_wh.inventory_warehouse_id = @store.inventory_warehouse_id
 			@productdb.product_inventory_warehousess << inv_wh
-			
+
 			@productdb.save
 			@productdb.set_product_status
 		@productdb.id
@@ -83,22 +83,24 @@ module OrdersHelper
 		end
 	end
 
-	def build_pack_item( name, product_type, images, sku, qty_remaining, 
+	def build_pack_item( name, product_type, images, sku, qty_remaining,
       scanned_qty, packing_placement,
-      barcodes, product_id, order_item_id, child_items)
+      barcodes, product_id, order_item_id, child_items,instruction,confirmation,skippable)
 
       unscanned_item = Hash.new
-      
       unscanned_item["name"] = name
-      unscanned_item["product_type"] = product_type
+      unscanned_item["instruction"] = instruction
+      unscanned_item["confirmation"] = confirmation
       unscanned_item["images"] = images
       unscanned_item["sku"] = sku
-      unscanned_item["qty_remaining"] = qty_remaining
-      unscanned_item["scanned_qty"] = scanned_qty
       unscanned_item["packing_placement"] = packing_placement
       unscanned_item["barcodes"] = barcodes
       unscanned_item["product_id"] = product_id
+      unscanned_item["skippable"] = skippable
       unscanned_item["order_item_id"] = order_item_id
+      unscanned_item["product_type"] = product_type
+      unscanned_item["qty_remaining"] = qty_remaining
+      unscanned_item["scanned_qty"] = scanned_qty
 
       if !child_items.nil?
         unscanned_item['child_items'] = child_items
@@ -135,8 +137,8 @@ module OrdersHelper
     order_item.row_total = transaction.amountPaid
     order_item.sku = order_transaction.transaction.item.sKU
     #create product if it does not exist already
-    order_item.product_id = 
-    import_ebay_product(order_transaction.transaction.item.itemID, 
+    order_item.product_id =
+    import_ebay_product(order_transaction.transaction.item.itemID,
     		order_transaction.transaction.item.sKU, @eBay, @credential)
     order.order_items << order_item
 
@@ -171,8 +173,8 @@ module OrdersHelper
 	    order_item.row_total = transaction.amountPaid
 	    order_item.sku = transaction.item.sKU
 	    #create product if it does not exist already
-	    order_item.product_id = 
-	    import_ebay_product(transaction.item.itemID, 
+	    order_item.product_id =
+	    import_ebay_product(transaction.item.itemID,
 	    		transaction.item.sKU, @eBay, @credential)
 	    order.order_items << order_item
 	end
