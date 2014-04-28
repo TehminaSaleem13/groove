@@ -470,7 +470,7 @@ class Order < ActiveRecord::Base
       order_item.save
     end
 
-    self.status = 'awaiting'
+    self.set_order_status
     self.tracking_num = ''
     self.update_inventory_levels_for_items(true)
     self.save
