@@ -30,7 +30,6 @@ groovepacks_controllers.
                     $scope.$parent.redirect = ($stateParams.redirect || ($stateParams.action == "create"));
                     if ($scope.$parent.redirect)
                     {
-                        console.log($stateParams);
                         if ($stateParams.editstatus=='true')
                         {
                             $scope.$parent.edit_status = $stateParams.editstatus;

@@ -4,7 +4,7 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies, wa
 
     $scope.init = function() {
         $('.modal-backdrop').remove();
-        $scope.current_page="show_stores";
+        $scope.$parent.current_page="show_stores";
         $scope.store_modal = null;
         $scope.backup_restore = {};
         $scope.backup_restore.data = {};
