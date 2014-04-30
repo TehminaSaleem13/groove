@@ -10,15 +10,22 @@ class GeneralSetting < ActiveRecord::Base
 
     if (self.inventory_tracking ||
         self.low_inventory_alert_email)
-
-    	if  self.should_send_email_today
-    		LowInventoryLevel.delay(:run_at => self.time_to_send_email).notify(self)
-    	end
+      if self.should_send_email_today
+        self.schedule_job(DateTime.now)
+      end
     end
   end
 
+  def schedule_job (date)
+    run_at_date = date + 1.day
+    run_at_date = run_at_date.change({:hour => self.time_to_send_email.hour, 
+      :min => self.time_to_send_email.min, :sec => self.time_to_send_email.sec})
+    logger.info run_at_date
+    LowInventoryLevel.delay(:run_at => run_at_date.getutc).notify(self)
+  end
+
   def should_send_email_today
-	day = DateTime.now.strftime("%A")
+	  day = DateTime.now.strftime("%A")
   	result = false
 
   	if day == 'Monday' && self.send_email_on_mon
@@ -38,5 +45,29 @@ class GeneralSetting < ActiveRecord::Base
   	end
   	
   	result
+  end
+
+  def should_send_email(date)
+
+    day = date.strftime("%A")
+    result = false
+
+    if day == 'Monday' && self.send_email_on_mon
+      result = true
+    elsif day == 'Tuesday' && self.send_email_on_tue
+      result = true
+    elsif day == 'Wednesday' && self.send_email_on_wed
+      result = true
+    elsif day == 'Thursday' && self.send_email_on_thurs
+      result = true
+    elsif day == 'Friday' && self.send_email_on_fri
+      result = true
+    elsif day == 'Saturday' && self.send_email_on_sat
+      result = true
+    elsif day == 'Sunday' && self.send_email_on_sun
+      result = true
+    end
+    
+    result
   end
 end

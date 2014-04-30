@@ -15,6 +15,7 @@ groovepacks_services.factory('generalsettings',['$http','notification',function(
             function(data) {
                 if(data.status) {
                     settings.single = data.data.settings;
+                    settings.single.time_to_send_email = new Date(data.data.settings.time_to_send_email);
                     console.log(settings);
                 } else {
                     notification.notify(data.error_messages,0);
@@ -25,7 +26,7 @@ groovepacks_services.factory('generalsettings',['$http','notification',function(
 
     var update_settings = function(settings) {
         var url = '/settings/update_settings.json';
-
+        console.log(settings);
         return $http.put(url, settings.single).success(
             function(data) {
                 if(data.status) {
