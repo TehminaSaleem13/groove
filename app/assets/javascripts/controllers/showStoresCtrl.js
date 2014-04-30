@@ -35,23 +35,29 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies, wa
                     $scope.notify("Error contacting server");
                 });
         };
+        $("#store-search-query").focus();
+        $scope.warehouses = warehouses.model.get();
+        warehouses.list.get($scope.warehouses);
+
         $scope.currently_open = 0;
         $scope.orderimport_type = 'apiimport';
         $scope.productimport_type = 'apiimport';
         $scope.ebay_show_signin_url = true;
-        $http.get('/store_settings/storeslist.json').success(function(data) {
+        return $http.get('/store_settings/storeslist.json').success(function(data) {
             $scope.stores = data;
             $scope.reverse = false;
-            $scope.newStore = {};
-            $scope.redirect = $stateParams.redirect;
+            $scope.newUser = {};
             // console.log($stateParams);
+
+            if($stateParams.action == "backup") {
+                $("#backup").modal("show").on("hidden",function(){
+                    $timeout(function(){$location.path("/settings/showstores");},200);
+                });
+            }
         }).error(function(data) {
                 $scope.notify("There was a problem retrieving stores list",0);
             });
-        $("#store-search-query").focus();
 
-        $scope.warehouses = warehouses.model.get();
-        warehouses.list.get($scope.warehouses);
     }
 
     $scope.setup_modal = function() {
@@ -64,7 +70,7 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies, wa
                 }
                 $timeout(function(){
                     $scope.init();
-                    $state.go("settings.showstores");
+                    $state.go("settings.showstores",{});
                 },200);
             });
         }
@@ -95,68 +101,6 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies, wa
         });
 
 
-        $scope.currently_open = 0;
-        $scope.orderimport_type = 'apiimport';
-        $scope.productimport_type = 'apiimport';
-        $scope.ebay_show_signin_url = true;
-    	$http.get('/store_settings/storeslist.json').success(function(data) {
-    		$scope.stores = data;
-    		$scope.reverse = false;
-            $scope.newUser = {};
-            $scope.redirect = ($stateParams.redirect || ($stateParams.action == "create"));
-           // console.log($stateParams);
-            if ($scope.redirect)
-            {
-                if ($stateParams.editstatus=='true')
-                {
-                    $scope.edit_status = $stateParams.editstatus;
-                    $scope.retrieveandupdateusertoken($stateParams.storeid);
-                    $scope.newStore = new Object();
-                    $scope.newStore.id = $stateParams.storeid;
-                    $scope.newStore.name = $stateParams.name;
-                    $scope.newStore.status = $stateParams.status;
-                    $scope.newStore.store_type = $stateParams.storetype;
-                    $scope.newStore.inventory_warehouse_id = $stateParams.inventorywarehouseid;
-
-                }
-                else
-                {
-                    $scope.ebayuserfetchtoken();
-                    $scope.newStore = new Object();
-                    $scope.newStore.name = $stateParams.name;
-                    $scope.newStore.status = $stateParams.status;
-                    $scope.newStore.store_type = $stateParams.storetype;
-                    $scope.newStore.inventory_warehouse_id = $stateParams.inventorywarehouseid;
-                }
-                if(typeof $scope.newStore.status == "undefined") {
-                    $scope.newStore.status = 1;
-                }
-                $('#createStore').modal('show').on("hidden",function(){
-                    $timeout(function(){$location.path("/settings/showstores");},200);
-                });
-            }
-            else
-            {
-            // $http.get('/store_settings/getebaysigninurl.json').success(function(data) {
-            //     if (data.ebay_signin_url_status)
-            //     {
-            //     $scope.ebay_signin_url = data.ebay_signin_url;
-            //     $scope.ebay_signin_url_status = data.ebay_signin_url_status;
-            //     $scope.ebay_sessionid = data.ebay_sessionid;
-            //     }
-
-            //     }).error(function(data) {
-            //         $scope.ebay_signin_url_status = false;
-            //     });
-            }
-            if($stateParams.action == "backup") {
-                $("#backup").modal("show").on("hidden",function(){
-                    $timeout(function(){$location.path("/settings/showstores");},200);
-                });
-            }
-    	}).error(function(data) {
-    		$scope.notify("There was a problem retrieving stores list",0);
-    	});
 
         $scope.retrieveandupdateusertoken = function(id) {
             $http.get('/store_settings/updateebayusertoken.json?storeid='+id).success(function(data) {
