@@ -3,6 +3,7 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout','$http','$sce','no
         return {
             identifier:'datagrid',
             select_all:false,
+            selectable:false,
             show_hide:false,
             editable:false,
             sortable:false,
@@ -48,6 +49,12 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout','$http','$sce','no
             scope.show_hide = function(field) {
                 field.hidden = ! field.hidden;
                 scope.update();
+            }
+
+            scope.check_uncheck = function(row) {
+                if(scope.options.selectable) {
+                    row.checked = !row.checked;
+                }
             }
 
             scope.update = function() {

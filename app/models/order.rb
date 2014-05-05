@@ -4,7 +4,7 @@ class Order < ActiveRecord::Base
   attr_accessible :address_1, :address_2, :city, :country, :customer_comments, :email, :firstname,
   :increment_id, :lastname,
   		:method, :order_placed_time, :postcode, :price, :qty, :sku, :state, :store_id, :notes_internal,
-  		:notes_toPacker, :notes_fromPacker, :tracking_processed, :scanned_on, :tracking_num, :company, 
+  		:notes_toPacker, :notes_fromPacker, :tracking_processed, :scanned_on, :tracking_num, :company,
       :packing_user_id, :status_reason
 
   has_many :order_items, :dependent => :destroy
@@ -157,7 +157,7 @@ class Order < ActiveRecord::Base
 
   def has_unscanned_items
     result = false
-
+    self.reload
     self.order_items.each do |order_item|
       if order_item.scanned_status != 'scanned'
         result |= true
@@ -436,10 +436,10 @@ class Order < ActiveRecord::Base
 
             #if not found, then add this child item as a new single item
             if !found_single_item
-              new_item = build_pack_item(child_item['name'], 'single', child_item['images'], child_item['sku'], 
+              new_item = build_pack_item(child_item['name'], 'single', child_item['images'], child_item['sku'],
                 child_item['qty_remaining'],
-                child_item['scanned_qty'], child_item['packing_placement'], child_item['barcodes'], 
-                child_item['product_id'], scanned_item['order_item_id'], nil)
+                child_item['scanned_qty'], child_item['packing_placement'], child_item['barcodes'],
+                child_item['product_id'], scanned_item['order_item_id'], nil,child_item['instruction'],child_item['confirmation'],child_item['skippable'])
               scanned_list.push(new_item)
             end
           end
@@ -470,7 +470,9 @@ class Order < ActiveRecord::Base
       order_item.save
     end
 
-    self.status = 'awaiting'
+    self.set_order_status
+    self.tracking_num = ''
+    self.update_inventory_levels_for_items(true)
     self.save
   end
 
@@ -554,19 +556,19 @@ class Order < ActiveRecord::Base
     count
   end
 
-  def update_inventory_levels_for_items
+  def update_inventory_levels_for_items(override = false)
     changed_hash = self.changes
 
     logger.debug(changed_hash)
 
     unless changed_hash['status'].nil?
-      if (changed_hash['status'][0] == 'onhold' or 
-          changed_hash['status'][0] == 'cancelled') and
+      if (changed_hash['status'][0] == 'onhold' or
+          changed_hash['status'][0] == 'cancelled' or override) and
         changed_hash['status'][1] == 'awaiting'
         #update_inventory_levels_for_purchase
         reason = 'packing'
-      elsif changed_hash['status'][0] == 'awaiting' and 
-        (changed_hash['status'][1] == 'onhold' or 
+      elsif changed_hash['status'][0] == 'awaiting' and
+        (changed_hash['status'][1] == 'onhold' or
         changed_hash['status'][1] == 'cancelled')
         #update_inventory_levels_for_return
         reason = 'return'
@@ -586,35 +588,15 @@ class Order < ActiveRecord::Base
       if changed_hash['status'][0] == 'awaiting' and
         changed_hash['status'][1] == 'scanned'
         result = true
-
         #move items from allocated to sold for each order items
         self.order_items.each do |order_item|
-            result &= order_item.product.update_allocated_product_sold_level(self.store.inventory_warehouse_id,
-            order_item.qty)
+          result &= order_item.product.update_allocated_product_sold_level(self.store.inventory_warehouse_id,
+          order_item.qty)
         end
 
-        logger.info('error updating sold inventory level') if !result 
+        logger.info('error updating sold inventory level') if !result
       end
     end
   end
 
-  # def update_inventory_levels
-  #   result = true
-  #   if self.status == 'awaiting'
-  #     self.order_items.each do |order_item|
-  #       if !order_item.product.nil? && !self.store.nil? &&
-  #           !self.store.inventory_warehouse_id.nil?
-  #         result &= order_item.product.
-  #           update_available_product_inventory_level(
-  #             self.store.inventory_warehouse_id, purchase_qty)
-  #       end
-
-  #       unless result do
-  #         self.status = 'onhold'
-  #       end
-  #       self.save
-  #     end
-  #   end
-  #   result
-  # end
 end

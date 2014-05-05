@@ -44,7 +44,7 @@ controller('showUsersCtrl', [ '$scope', '$http', '$timeout', '$stateParams', '$l
             $scope.custom_identifier  = Math.floor(Math.random()*1000);
             $('.modal-backdrop').remove();
             $scope.user_modal = null;
-            $scope.current_page="show_users";
+            $scope.$parent.current_page="show_users";
             $scope.currently_open = 0;
             $scope.show_password = true;
 

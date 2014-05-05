@@ -1,5 +1,5 @@
 groovepacks_controllers.
-controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$stateParams', '$location', '$state', '$cookies','products', 
+controller('showProductsCtrl', [ '$scope', '$http', '$timeout', '$stateParams', '$location', '$state', '$cookies','products',
     'inventory_manager', 'warehouses',
 function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,products, inventory_manager, warehouses) {
     //Definitions
@@ -24,7 +24,7 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,pro
             value: product[prop]
         }).then($scope._get_products)
     }
-    
+
     $scope.create_product = function () {
         products.single.create($scope.products).then(function(response) {
             if(response.data.status) {
@@ -87,6 +87,7 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,pro
             sort_func: $scope.handlesort,
             setup: $scope.products.setup,
             show_hide:true,
+            selectable:true,
             draggable:true,
             sortable:true,
             editable:{
@@ -241,7 +242,7 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,pro
         $scope.inv_wh_found = false;
         if (typeof $scope.products_inv_manager.single.inventory_warehouses != 'undefined'){
             for (i = 0; i < $scope.products_inv_manager.single.inventory_warehouses.length; i++) {
-                if ($scope.products_inv_manager.single.inventory_warehouses[i].warehouse_info.id == 
+                if ($scope.products_inv_manager.single.inventory_warehouses[i].warehouse_info.id ==
                     $scope.inventory_manager.single.inv_wh_id) {
                     $scope.inv_wh_found = true;
                 }

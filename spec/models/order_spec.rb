@@ -337,4 +337,5 @@ describe Order do
       expect(sold_inv_wh.count).to eq(1)
       expect(sold_inv_wh.first.sold_qty).to eq(2)
     end
+
 end

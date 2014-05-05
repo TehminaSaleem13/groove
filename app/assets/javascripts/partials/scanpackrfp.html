@@ -1,0 +1,228 @@
+<div class="row-fluid" ng-show="data.order.next_item.instruction.length">
+    <div class="alert alert-warning"><h4>Special instruction for the product: {{data.order.next_item.instruction}}</h4></div>
+</div>
+<div class="row-fluid">
+    <div class="span9">
+        <div class="row-fluid">
+            <div class="span5">
+                <div class="row-fluid borderless-well">
+                    <div class="top-icon span6" ng-click="reset_order()">
+                        <i class="icon icon-2x icon-undo"></i><br/>
+                        Reset Order
+                    </div>
+                    <div class="top-icon span6" ng-click="add_note()">
+                        <i class="icon icon-2x icon-edit"></i><br/>
+                        Add Note
+                    </div>
+                </div>
+                <div class="well small-well">
+                    <div class="text-center">
+                        <h4>Now Packing Order #{{ data.order.increment_id}}</h4>
+                        <h4>{{ unscanned_count }} items left to scan</h4>
+                        <div class="alert alert-info" ng-show="data.order.notes_toPacker.length">
+                            <h4>{{data.order.notes_toPacker}}</h4>
+                        </div>
+                    </div>
+
+                    <div class="scan_table">
+                        <table class="table table-hover">
+                            <thead>
+                            <tr>
+                                <th>Image</th>
+                                <th>Product</th>
+                                <th>Qty</th>
+                            </tr>
+                            </thead>
+                            <tbody ng-repeat="unscanned_item in data.order.unscanned_items">
+                            <tr ng-show= "unscanned_item.product_type =='single'">
+
+                                <td ng-show= "unscanned_item.product_type =='single'">
+                                    <div class="single-image">
+                                        <img class="img-thumb" ng-src="{{ unscanned_item.images[0].image }}" />
+                                    </div>
+                                </td>
+                                <td ng-show= "unscanned_item.product_type =='single'">
+                                    {{ unscanned_item.name }}</td>
+                                <td ng-show= "unscanned_item.product_type =='single'">
+                                    {{unscanned_item.qty_remaining}}</td>
+                            </tr>
+
+                            <tr ng-show= "unscanned_item.product_type =='individual'">
+                                <td class='scantable-greyedout'>
+                                    <div class="single-image">
+                                        <img class="img-thumb" ng-src="{{ unscanned_item.images[0].image }}" />
+                                    </div>
+                                </td>
+                                <td class='scantable-greyedout'>
+                                    {{ unscanned_item.name }}</td>
+                                <td class='scantable-greyedout'>
+                                    {{unscanned_item.qty_remaining}}</td>
+                            </tr>
+                            <tr ng-show="unscanned_item.product_type =='individual'" >
+                                <td colspan="3" class="colspan">
+                                    <table class="table table-hover child_items">
+                                        <tbody>
+                                        <tr ng-repeat = 'child_item in unscanned_item.child_items' >
+                                            <td class="bluebg"></td>
+                                            <td>
+                                                <div class="single-image">
+                                                    <img class="img-thumb" ng-src="{{ child_item.images[0].image }}" />
+                                                </div>
+                                            </td>
+                                            <td>
+                                                {{ child_item.name }}</td>
+                                            <td>
+                                                {{child_item.qty_remaining}}</td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="span7">
+                <div class="well small-well">
+                    <div class="text-center">
+                        <div>
+                            <h3 ng-show="data.order.next_item.scanned_qty ==0">Please scan this product next</h3>
+                            <h3 ng-show="data.order.next_item.scanned_qty !=0">{{data.order.next_item.scanned_qty}} of {{ data.order.next_item.qty }} have been scanned</h3>
+                            <div class="text-left">
+                                <h5>
+                                    &nbsp;
+                                    <span class="pull-left"><strong>{{data.order.next_item.name}}</strong></span>
+                                    <span class="pull-right"><strong>{{data.order.next_item.sku}}</strong></span>
+                                </h5>
+                                    <h4>{{data.order.next_item.qty_remaining}} more to scan.</h4>
+
+                            </div>
+                            <div class=" alert alert-info" ng-show="data.order.next_item.skippable">This product can be skipped, scan the skip code to skip</div>
+                            <div class="scan_product_images">
+                                <div class="scan_product_times img-rounded" ng-show="data.order.next_item.qty > 1">
+                                    <div class="text-center pull-left"><i class="icon icon-5x icon-remove"></i><br/>TIMES</div> <div class="times_number pull-right">{{data.order.next_item.qty}}</div>
+                                </div>
+                                <div ng-click="item_image_index = item_image_index + 1" ng-show="item_image_index < data.order.next_item.images.length - 1" class="nav-right img-circle"><i class="icon icon-2x icon-arrow-right"></i></div>
+                                <div ng-click="item_image_index = item_image_index - 1" ng-show="item_image_index > 0" class="nav-left img-circle"><i class="icon icon-2x icon-arrow-left"></i></div>
+                                <img ng-repeat="image in data.order.next_item.images" ng-show="item_image_index == $index" class="img-thumb" ng-src="{{ image.image }}" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="span3">
+        <div class="well small-well">
+            <div class="text-center">
+                <div class="pack_image">
+                    <h4>{{ scanned_count }} items scanned</h4>
+                    <img src="/images/bcqc_box.png" alt="products to scan" />
+                </div>
+            </div>
+            <div class="scan_table">
+                <table class="table table-hover" >
+                    <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Scanned</th>
+                    </tr>
+                    </thead>
+                    <tbody ng-repeat="scanned_item in data.order.scanned_items">
+                    <tr ng-show= "scanned_item.product_type =='single'">
+                        <td ng-show= "scanned_item.product_type =='single'">
+                            {{ scanned_item.name }}</td>
+                        <td ng-show= "scanned_item.product_type =='single'">
+                            {{scanned_item.scanned_qty}}</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <fieldset>
+                <legend>Packing Stats</legend>
+                <p>Current Order Bonus : {{cur_order_bonus}}</p>
+                <p>Session Bonus : {{session_bonus}}</p>
+                <p>Scan Accuracy : {{scan_accuracy}}</p>
+                <p>Last Product Time : {{last_product_time}}</p>
+            </fieldset>
+        </div>
+    </div>
+</div>
+<!-- Notes from Packer modal -->
+<div id="showNotesFromPacker" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="showNotesFromPacker"
+     aria-hidden="true">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="icon-remove"></i></button>
+        <h3 id="showNotesFromPackerHeader">Note from packer</h3>
+    </div>
+    <div class="form-horizontal form-horizontal-create" >
+        <div class="modal-body" id="showNotesFromPacker-body">
+            <div class="control-group">
+                <fieldset>
+                    <legend>Add Note to Order</legend>
+                    <textarea id="note_from_packer" class="span8" ng-model="data.order.notes_fromPacker" ></textarea>
+                </fieldset>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-primary" data-dismiss="modal" aria-hidden="true">Save & close</button>
+    </div>
+</div>
+<!-- Notes from packer modal ends -->
+<!-- Order instruction modal -->
+<div id="showOrderInstructions" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="showOrderInstructions"
+     aria-hidden="true">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="icon-remove"></i></button>
+        <h3>Handling Instructions for this Order</h3>
+    </div>
+    <div class="form-horizontal form-horizontal-create" >
+        <div class="modal-body">
+            <h4>{{data.order.notes_toPacker}}</h4>
+            <div class="control-group">
+                <fieldset>
+                    <legend>Please acknowledge with your confirmation code to continue</legend>
+                    <label class="control-label">Confirmation code</label>
+                    <div class="controls">
+                        <input type="text" id="order_instruction" ng-keydown="check_order_confirm($event)" ng-model="confirmation_code" />
+                    </div>
+
+                </fieldset>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+    </div>
+</div>
+<!-- Order instruction modal -->
+<!-- Product instruction modal -->
+<div id="showProductInstructions" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="showProductInstructions"
+     aria-hidden="true">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="icon-remove"></i></button>
+        <h3>Special Instruction for this Product</h3>
+    </div>
+    <div class="form-horizontal form-horizontal-create" >
+        <div class="modal-body">
+            <h4>{{data.order.next_item.instruction}}</h4>
+            <div class="control-group">
+                <fieldset>
+                    <legend>Please acknowledge with your confirmation code to continue</legend>
+                    <label class="control-label">Confirmation code</label>
+                    <div class="controls">
+                        <input type="text" id="product_instruction" ng-keydown="check_product_confirm($event)" ng-model="confirmation_code" />
+                    </div>
+
+                </fieldset>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+    </div>
+</div>
+<!-- Product instruction modal -->

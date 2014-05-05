@@ -1,167 +1,433 @@
 module ScanPackHelper
-  # def process_product_scan (params, result)
-		# barcode_found = false
-  #   order = Order.find(params[:order_id])
-		# order.order_items.each do |order_item|
 
-  #     product = Product.find_by_id(order_item.product_id)
-		# 	unless product.nil?
-  #       barcodes = product.product_barcodes.where(:barcode=>params[:barcode])
-  #       if barcodes.length > 0
-  #         barcode_found = true
-  #         if order_item.scanned_status == 'scanned' || order_item.scanned_qty >= order_item.qty
-  #           result['status'] &= false
-  #           result['error_messages'].push("This item has already been scanned, Please scan another item")
-  #         else
-  #           order_item.scanned_qty = order_item.scanned_qty + 1
-  #           if order_item.scanned_qty == order_item.qty
-  #             order_item.scanned_status = 'scanned'
-  #           else
-  #             order_item.scanned_status = 'partially_scanned'
-  #           end
-  #           order_item.save
-  #           puts order_item.scanned_status
-  #         end
-  #         unless order.has_unscanned_items
-  #            order.set_order_to_scanned_state
-  #            result['data']['next_state'] = 'ready_for_order'
-  #         end
-  #         break
-  #       end
-		# 	end
-		# end
+  include OrdersHelper
 
-		# unless barcode_found
-		# 	result['status'] &= false
-		# 	result['error_messages'].push("There are no barcodes that match items in this order")
-  #     puts "Barcode not found"
-		# end
+  def order_scan(input,state,id)
+    result = Hash.new
+    result['status'] = true
+    result['matched'] = true
+    result['error_messages'] = []
+    result['success_messages'] = []
+    result['notice_messages'] = []
+    result['data'] = Hash.new
+    result['data']['next_state'] = 'scanpack.rfo'
 
-	 #  result
-  # end
+    session[:most_recent_scanned_products] = []
+    if !input.nil? && input != ""
+      single_order = Order.find_by_increment_id(input)
 
-  # def process_product_scan_for_kits(params, result)
-  #   barcode_found = false
-  #   matched_product_kit_sku_id = 0
-  #   order = Order.find(params[:order_id])
-    
-  #   order.order_items.each do |order_item|
-  #   product = Product.find_by_id(order_item.product_id)
+      if single_order.nil?
+        result['notice_messages'].push('Order with number '+ input +' cannot be found. It may not have been imported yet')
+      else
+        single_order_result = Hash.new
 
-  #   #check if barcode matches for any of the non-scanned items in the order
-  #   #to determine non scanned items in the order, check the non scanned order items
-  #   #for each order item, if product is kit and kit_parsing method is individual, then 
-  #   #for each order item kit product, if barcode matches the product barcode, then mark
-  #   #the barcode found as true and do processing
-  #   if order_item.scanned_status != 'scanned' && !product.nil? && 
-  #       product.is_kit && product.kit_parsing == 'individual'
-      
-  #     order_item.order_item_kit_products.each do |kit_product|
-  #       if kit_product.scanned_status != 'scanned'
-  #         item_barcodes = kit_product.product_kit_skus.product.product_barcodes
-  #         item_barcodes.each do |barcode|
-  #           if barcode.barcode == params[:barcode]
-  #             barcode_found  = true
-  #             #if barcode exists then process the barcode for scan
-              
-  #             #to process barcode for scan, find the first item which matches the non scanned item barcode
-  #               #increment the scanned qty for the order item which is scanned in the order item kit products
-                
-  #               #if scanned qty is same as product quantity (obtained from product_kit_skus model) then mark 
-  #               #order item kit product as scanned
-                
-  #               #if all order item kit products are scanned, then mark the order item as scanned depending on
-  #               #scanned qty, increment the scanned qty in the order item
+        single_order_result['status'] = single_order.status
+        single_order_result['order_num'] = single_order.increment_id
 
-  #               #if all order items are scanned, then mark order as scanned              
-  #           end
-  #         end
-  #       end
-  #     end
+        #search in orders that have status of Scanned
+        if single_order.status == 'scanned'
+          single_order_result['scanned_on'] = single_order.scanned_on
+          single_order_result['next_state'] = 'scanpack.rfo'
+          result['notice_messages'].push('This order has already been scanned')
+        end
 
+        #search in orders that have status of On Hold
+        if single_order.status == 'onhold'
+          if single_order.has_inactive_or_new_products
+            #get list of inactive_or_new_products
+            single_order_result['conf_code'] = session[:confirmation_code]
 
+            if current_user.edit_products
+              single_order_result['product_edit_matched'] = true
+              single_order_result['inactive_or_new_products'] = single_order.get_inactive_or_new_products
+              single_order_result['next_state'] = 'scanpack.rfp.product_edit'
+            else
+              single_order_result['next_state'] = 'scanpack.rfp.confirmation.product_edit'
+              result['notice_messages'].push("This order was automatically placed on hold because it contains items that have a "+
+                                                  "status of New or Inactive. These items may not have barcodes or other information needed for processing. "+
+                                                  "Please ask a user with product edit permissions to scan their code so that these items can be edited or scan a different order.")
+            end
+          else
+            single_order_result['order_edit_permission'] = current_user.import_orders
+            single_order_result['next_state'] = 'scanpack.rfp.confirmation.order_edit'
+            result['notice_messages'].push('This order is currently on Hold. Please scan or enter '+
+                                                'confirmation code with order edit permission to continue scanning this order or '+
+                                                'scan a different order.')
+          end
+        end
 
+        #process orders that have status of Service Issue
+        if single_order.status == 'serviceissue'
+          single_order_result['next_state'] = 'scanpack.rfp.confirmation.cos'
+          if current_user.change_order_status
+            result['notice_messages'].push('This order has a pending Service Issue. '+
+                                                'To clear the Service Issue and continue packing the order please scan your confirmation code or scan a different order.')
+          else
+            result['notice_messages'].push('This order has a pending Service Issue. To continue with this order, '+
+                                                'please ask another user who has Change Order Status permissions to scan their '+
+                                                'confirmation code and clear the issue. Alternatively, you can pack another order '+
+                                                'by scanning another order number.')
+          end
+        end
 
-  #   #if barcode exists then process the barcode for scan
-  #     #to process barcode for scan, find the first item which matches the non scanned item barcode
-  #     #increment the scanned qty for the order item which is scanned in the order item kit products
-      
-  #     #if scanned qty is same as product quantity (obtained from product_kit_skus model) then mark 
-  #     #order item kit product as scanned
-      
-  #     #if all order item kit products are scanned, then mark the order item as scanned depending on
-  #     #scanned qty, increment the scanned qty in the order item
+        #search in orders that have status of Cancelled
+        if single_order.status == 'cancelled'
+          single_order_result['next_state'] = 'scanpack.rfo'
+          result['notice_messages'].push('This order has been cancelled')
+        end
 
-  #     #if all order items are scanned, then mark order as scanned
+        #if order has status of Awaiting Scanning
+        if single_order.status == 'awaiting'
+          if !single_order.has_unscanned_items
+            single_order_result['next_state'] = 'scanpack.rfp.tracking'
+          else
+            single_order_result['next_state'] = 'scanpack.rfp.default'
+          end
+        end
+        unless single_order.nil?
+          single_order.packing_user_id = current_user.id
+          unless single_order.save
+            result['status'] &= false
+            result['error_messages'].push("Could not save order with id: "+single_order.id)
+          end
+          single_order_result['order'] = order_details_and_next_item(single_order)
+        end
 
+        result['data'] = single_order_result
+      end
+    else
+      result['status'] &= false
+      result['error_messages'].push("Please specify a barcode to scan the order")
+    end
+    return result
+  end
 
-  #   #product_kit_sku = 
-  #   if order_item.scanned_status != 'scanned' && !product.nil? && product.is_kit
-  #     product.product_kit_skuss.each do |kit_item|
-  #       kit_item.product.product_barcodes.each do |barcode|
-  #         #check for order item product kit
-  #         if barcode.barcode == params[:barcode]
-  #           barcode_found = true
-  #           matched_product_kit_sku_id = kit_item.id
-  #           break
-  #         end
-  #       end
-  #     end
+  def product_scan(input,state,id)
+    result = Hash.new
+    result['status'] = true
+    result['matched'] = true
+    result['error_messages'] = []
+    result['success_messages'] = []
+    result['notice_messages'] = []
+    result['data'] = Hash.new
+    result['data']['next_state'] = 'scanpack.rfp.default'
 
-  #     if barcode_found
-  #       if order_item.scanned_status == 'scanned' || order_item.scanned_qty >= order_item.qty
-  #         result['status'] &= false
-  #         result['error_messages'].push("This item has already been scanned, Please scan another item")
-  #       else
-  #         order_item.order_item_kit_products.each do |order_item_kit_product|
-  #           if order_item_kit_product.product_kit_skus.id == matched_product_kit_sku_id
-  #             if order_item_kit_product.scanned_qty < order_item_kit_product.product_kit_skus.qty
-  #               order_item_kit_product.scanned_qty = order_item_kit_product.scanned_qty + 1
-  #               if order_item_kit_product.scanned_qty == order_item_kit_product.product_kit_skus.qty
-  #                 order_item_kit_product.scanned_status = 'scanned'
-  #               else
-  #                 order_item_kit_product.scanned_status = 'partially_scanned'
-  #               end
-  #               order_item_kit_product.save
-  #             else
-  #               result['status'] &= false
-  #               result['error_messages'].push("All items in this product are already scanned")
-  #             end
-  #           end
-  #         end
+    if id.nil? || input.nil?
+      result['status'] &= false
+      result['error_messages'].push("Please specify barcode and order id to confirm purchase code")
+    else
+      #check if order status is On Hold
+      single_order = Order.find(id)
+      if single_order.nil?
+        result['status'] &= false
+        result['error_messages'].push("Could not find order with id:"+id)
+      else
 
-  #         if order_item.has_unscanned_kit_items
-  #           if order_item.has_atleast_one_item_scanned
-  #             order_item.scanned_status = 'kit_partially_scanned'
-  #           end
-  #         else
-  #           order_item.scanned_qty = order_item.scanned_qty + 1
-  #           if order_item.scanned_qty >= order_item.qty
-  #             order_item.scanned_status = 'scanned'
-  #           else
-  #             order_item.scanned_status = 'partially_scanned'
-  #           end
-  #         end
-  #         order_item.save
-  #         break
-  #       end
-  #     end
-  #   end
+        result['data']['order_num'] = single_order.increment_id
 
-  #   #update order state
-  #   unless order.has_unscanned_items
-  #      order.set_order_to_scanned_state
-  #      result['data']['next_state'] = 'ready_for_order'
-  #   end
+        if single_order.has_unscanned_items
+          single_order.should_the_kit_be_split(input) if single_order.contains_kit && single_order.contains_splittable_kit
 
-  #   #if barcode not found
-  #   unless barcode_found
-  #     result['status'] &= false
-  #     result['error_messages'].push("There are no barcodes that match items in this order")
-  #     puts "Barcode not found"
-  #   end
-  # end
-  #   result
-  # end
+          unscanned_items = single_order.get_unscanned_items
+          barcode_found = false
+          #puts unscanned_items.to_s
+          #search if barcode exists
+          unscanned_items.each do |item|
+            if item['product_type'] == 'individual'
+              if item['child_items'].length > 0
+                item['child_items'].each do |child_item|
+                  #puts child_item.to_s
+                  if !child_item['barcodes'].nil?
+                    child_item['barcodes'].each do |barcode|
+                      if barcode.barcode == input || (input == current_user.confirmation_code && child_item['skippable'])
+                        barcode_found = true
+                        #process product barcode scan
+                        order_item_kit_product =
+                            OrderItemKitProduct.find(child_item['kit_product_id'])
+
+                        unless order_item_kit_product.nil?
+                          order_item_kit_product.process_item
+                          (session[:most_recent_scanned_products] ||= []) << child_item['product_id']
+                        end
+
+                        break
+                      end
+                    end
+                  end
+                  break if barcode_found
+                end
+              end
+            elsif item['product_type'] == 'single'
+              item['barcodes'].each do |barcode|
+                if barcode.barcode == input || (input == current_user.confirmation_code && item['skippable'])
+                  barcode_found = true
+                  #process product barcode scan
+                  order_item = OrderItem.find(item['order_item_id'])
+
+                  unless order_item.nil?
+                    order_item.process_item
+                    (session[:most_recent_scanned_products] ||= []) << order_item.product_id
+                  end
+                  break
+                end
+              end
+            end
+            break if barcode_found
+          end
+          #puts "Barcode "+input+" found: "+barcode_found.to_s
+          if barcode_found
+            if !single_order.has_unscanned_items
+              result['data']['next_state'] = 'scanpack.rfp.tracking'
+            end
+            #puts "Length of unscanned items:" + result['data']['unscanned_items'].length.to_s
+            #puts result['data']['unscanned_items'].to_s
+          else
+            result['status'] &= false
+            result['error_messages'].push("Barcode '"+input+"' doesn't match any item on this order")
+          end
+        else
+          result['status'] &= false
+          result['error_messages'].push("There are no unscanned items in this order")
+        end
+      end
+    end
+
+    unless single_order.nil?
+      single_order.packing_user_id = current_user.id
+      unless single_order.save
+        result['status'] &= false
+        result['error_messages'].push("Could not save order with id: "+single_order.id)
+      end
+      result['data']['order'] = order_details_and_next_item(single_order)
+    end
+
+    return result
+  end
+
+  def scan_tracking(input,state,id)
+    result = Hash.new
+    result['status'] = true
+    result['matched'] = true
+    result['error_messages'] = []
+    result['success_messages'] = []
+    result['notice_messages'] = []
+    result['data'] = Hash.new
+    result['data']['next_state'] = 'scanpack.rfp.tracking'
+
+    order = Order.find(id)
+
+    if order.nil?
+      result['status'] &= false
+      result['error_messages'].push("Could not find order with id: "+id)
+    else
+      if order.status == 'awaiting'
+        if input.nil?
+          result['status'] &= false
+          result['error_messages'].push("No tracking number is provided")
+        else
+          order.tracking_num = input
+          order.set_order_to_scanned_state(current_user.username)
+          result['data']['next_state'] = 'scanpack.rfo'
+          #update inventory when inventory warehouses is implemented.
+          order.save
+        end
+      else
+        result['status'] &= false
+        result['error_messages'].push("The order is not in awaiting state. Cannot scan the tracking number")
+      end
+    end
+    return result
+  end
+
+  def order_edit_conf(input,state,id)
+    result = Hash.new
+    result['status'] = true
+    result['matched'] = false
+    result['error_messages'] = []
+    result['success_messages'] = []
+    result['notice_messages'] = []
+    result['data'] = Hash.new
+
+    if !id.nil? || !input.nil?
+      #check if order status is On Hold
+      single_order = Order.find(id)
+      if single_order.nil?
+        result['status'] &= false
+        result['error_messages'].push("Could not find order with id: "+id.to_s)
+      else
+        result['data']['order_num'] = single_order.increment_id
+        if single_order.status == "onhold" && !single_order.has_inactive_or_new_products
+          if User.where(:confirmation_code => input).length > 0
+            result['matched'] = true
+            single_order.status = 'awaiting'
+            single_order.addactivity("Status changed from onhold to awaiting",
+                               User.where(:confirmation_code => input).first.username)
+            single_order.save
+            result['data']['scanned_on'] = single_order.scanned_on
+            result['data']['next_state'] = 'scanpack.rfp.default'
+            session[:order_edit_matched_for_current_user] = true
+          else
+            result['data']['next_state'] = 'scanpack.rfo'
+          end
+        else
+          result['status'] &= false
+          result['error_messages'].push("Only orders with status On Hold and has inactive or new products "+
+                                             "can use edit confirmation code.")
+        end
+        result['data']['order'] = order_details_and_next_item(single_order)
+      end
+
+      #check if current user edit confirmation code is same as that entered
+    else
+      result['status'] &= false
+      result['error_messages'].push("Please specify confirmation code and order id to confirm purchase code")
+    end
+
+    return result
+  end
+
+  def cos_conf(input,state,id)
+    result = Hash.new
+    result['status'] = true
+    result['matched'] = false
+    result['error_messages'] = []
+    result['success_messages'] = []
+    result['notice_messages'] = []
+    result['data'] = Hash.new
+
+    if !id.nil? || !input.nil?
+      #check if order status is On Hold
+      single_order = Order.find(id)
+      if single_order.nil?
+        result['status'] &= false
+        result['error_messages'].push("Could not find order with id: "+id.to_s)
+      else
+        result['data']['order_num'] = single_order.increment_id
+        if single_order.status == "serviceissue"
+          if User.where(:confirmation_code => input).length > 0
+            user = User.where(:confirmation_code => input).first
+
+            if user.change_order_status
+              #set order state to awaiting scannus
+              single_order.status = 'awaiting'
+              single_order.save
+              single_order.update_order_status
+              result['matched'] = true
+              #set next state
+              result['data']['next_state'] = 'scanpack.rfp.default'
+            else
+              result['matched'] = true
+              result['data']['next_state'] = 'scanpack.rfp.confirmation.cos'
+              result['error_messages'].push("User with confirmation code: "+ input+ " does not have permission to change order status")
+            end
+          else
+            result['data']['next_state'] = 'request_for_confirmation_code_with_cos'
+            result['error_messages'].push("Could not find any user with confirmation code")
+          end
+        else
+          result['status'] &= false
+          result['error_messages'].push("Only orders with status Service issue"+
+                                             "can use change of status confirmation code")
+        end
+        result['data']['order'] = order_details_and_next_item(single_order)
+      end
+
+      #check if current user edit confirmation code is same as that entered
+    else
+      result['status'] &= false
+      result['error_messages'].push("Please specify confirmation code and order id to change order status")
+    end
+
+    return result
+  end
+
+  def product_edit_conf(input,state,id)
+    result = Hash.new
+    result['status'] = true
+    result['matched'] = false
+    result['error_messages'] = []
+    result['success_messages'] = []
+    result['notice_messages'] = []
+    result['data'] = Hash.new
+
+    if !id.nil? || !input.nil?
+      #check if order status is On Hold
+      single_order = Order.find(id)
+      if single_order.nil?
+        result['status'] &= false
+        result['error_messages'].push("Could not find order with id: "+id.to_s)
+      else
+        if single_order.status == "onhold" && single_order.has_inactive_or_new_products
+          if User.where(:confirmation_code => input).length > 0
+            user = User.where(:confirmation_code => input).first
+            if user.edit_products
+              result['matched'] = true
+              result['data']['inactive_or_new_products'] = single_order.get_inactive_or_new_products
+              result['data']['next_state'] = 'scanpack.rfp.product_edit'
+              session[:product_edit_matched_for_current_user] = true
+            else
+              result['data']['next_state'] = 'scanpack.rfp.confirmation.product_edit'
+              result['matched'] = true
+              result['error_messages'].push("User with confirmation code "+ input +
+                                                 " does not have permission for editing products.")
+            end
+          else
+            result['data']['next_state'] = 'scanpack.rfo'
+          end
+        else
+          result['status'] &= false
+          result['error_messages'].push("Only orders with status On Hold and has inactive or new products "+
+                                             "can use edit confirmation code.")
+        end
+        result['data']['order'] = order_details_and_next_item(single_order)
+      end
+
+      #check if current user edit confirmation code is same as that entered
+    else
+      result['status'] &= false
+      result['error_messages'].push("Please specify confirmation code and order id to confirm purchase code")
+    end
+    return result
+  end
+
+  def order_details_and_next_item(single_order)
+    single_order.reload
+    data = single_order.attributes
+    data['unscanned_items'] = single_order.get_unscanned_items
+    data['scanned_items'] = single_order.get_scanned_items
+    unless data['unscanned_items'].length == 0
+      unless session[:most_recent_scanned_products].nil?
+        session[:most_recent_scanned_products].reverse!.each do |scanned_product_id|
+          data['unscanned_items'].each do |unscanned_item|
+            if unscanned_item['product_type'] == 'single' &&
+                scanned_product_id == unscanned_item['product_id'] &&
+                unscanned_item['scanned_qty'] + unscanned_item['qty_remaining'] > 0
+              data['next_item'] = unscanned_item.clone
+              break
+            elsif unscanned_item['product_type'] == 'individual'
+              unscanned_item['child_items'].each do |child_item|
+                if child_item['product_id'] == scanned_product_id
+                  data['next_item'] = child_item.clone
+                  break
+                end
+              end
+              break if !data['next_item'].nil?
+            end
+          end
+          break if !data['next_item'].nil?
+        end
+      end
+      if data['next_item'].nil?
+        if data['unscanned_items'].first['product_type'] == 'single'
+          data['next_item'] = data['unscanned_items'].first.clone
+        elsif data['unscanned_items'].first['product_type'] == 'individual'
+          data['next_item'] = data['unscanned_items'].first['child_items'].first.clone
+        end
+      end
+      data['next_item']['qty'] = data['next_item']['scanned_qty'] + data['next_item']['qty_remaining']
+    end
+
+    return data
+  end
 
 end

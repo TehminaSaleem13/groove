@@ -185,6 +185,7 @@ groovepacks_directives.directive('groovOrderModal',['notification','orders','pro
                 identifier:'orderitems',
                 draggable:false,
                 show_hide:true,
+                selectable:true,
                 editable: {
                     update: scope.save_item,
                     elements: {

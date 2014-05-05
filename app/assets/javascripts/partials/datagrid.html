@@ -15,7 +15,7 @@
     </thead>
     <tbody>
 
-    <tr ng-click="row.checked = !row.checked" ng-repeat="row in rows" ng-class="{info: row.checked}">
+    <tr ng-click="check_uncheck(row)" ng-repeat="row in rows" ng-class="{info: row.checked}">
         <td ng-repeat="field in theads" ng-hide="options.all_fields[field].hidden">
             <div style="display:inline-block; width:100%;height:100%;" bo-if="options.editable != false && options.all_fields[field].editable == true" groov-rt-click="compile($parent.$parent.$index,field)">
                 <div ng-hide="editable[field][$parent.$parent.$index]">

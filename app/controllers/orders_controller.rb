@@ -171,7 +171,7 @@ class OrdersController < ApplicationController
 
     if @ebay_credentials.length > 0
       @credential = @ebay_credentials.first
-      
+
       require 'eBayAPI'
       if ENV['EBAY_SANDBOX_MODE'] == 'YES'
         sandbox = true
@@ -184,8 +184,8 @@ class OrdersController < ApplicationController
         ENV['EBAY_CERT_ID'], :sandbox=>sandbox)
 
       seller_list = @eBay.GetMyeBaySelling(:soldList=> {:orderStatusFilter=>'AwaitingShipment'})
-      
-      if (seller_list.soldList != nil && 
+
+      if (seller_list.soldList != nil &&
           seller_list.soldList.orderTransactionArray != nil)
         order_or_transactionArray = seller_list.soldList.orderTransactionArray
         @result['total_imported'] = seller_list.soldList.orderTransactionArray.length
@@ -198,14 +198,14 @@ class OrdersController < ApplicationController
             itemID = order_transaction.transaction.item.itemID
 
             #get sellingmanager SalesRecordNumber
-            item_transactions = @eBay.GetItemTransactions(:itemID => itemID, 
+            item_transactions = @eBay.GetItemTransactions(:itemID => itemID,
               :transactionID=> transactionID)
             if item_transactions.transactionArray.length == 1
               transaction = item_transactions.transactionArray.first
-              sellingManagerSalesRecordNumber = 
+              sellingManagerSalesRecordNumber =
                 transaction.shippingDetails.sellingManagerSalesRecordNumber
 
-              if Order.where(:increment_id=>sellingManagerSalesRecordNumber).length == 0 
+              if Order.where(:increment_id=>sellingManagerSalesRecordNumber).length == 0
                 order = Order.new
 
                 order = build_order_with_single_item_from_ebay(order, transaction, order_transaction)
@@ -222,17 +222,17 @@ class OrdersController < ApplicationController
               end
             else # transactions Array is not equal to 1
               @result['status'] &= false
-              @result['messages'].push('There was an error importing the order transactions from Ebay, 
+              @result['messages'].push('There was an error importing the order transactions from Ebay,
                 Order transactions length: '+ item_transactions.transactionArray.length )
             end
           elsif !order_transaction.order.nil?
             # for orders with multiple line items
             order_id = order_transaction.order.orderID
             order_detail = @eBay.GetOrders(:orderIDArray =>[order_id])
-            
-            if !order_detail.orderArray.nil? && 
+
+            if !order_detail.orderArray.nil? &&
                 order_detail.orderArray.length == 1
-        
+
               order_detail = order_detail.orderArray.first
 
               if !order_detail.shippingDetails.nil?
@@ -240,8 +240,8 @@ class OrdersController < ApplicationController
               else
                sellingManagerSalesRecordNumber = nil
               end
-              
-              if Order.where(:increment_id=>sellingManagerSalesRecordNumber).length == 0 
+
+              if Order.where(:increment_id=>sellingManagerSalesRecordNumber).length == 0
                 order = Order.new
                 order = build_order_with_multiple_items_from_ebay(order, order_detail)
                 if order.save
@@ -260,7 +260,7 @@ class OrdersController < ApplicationController
               @result['status'] &= false
               @result['messages'].push('More than 1 order detail is returned for a single order id')
             end
-          else 
+          else
             @result['status'] &= false
             @result['messages'].push('Importing orders with multiple order items is not supported')
           end
@@ -580,9 +580,9 @@ class OrdersController < ApplicationController
             @orderitem["location"] = product.product_inventory_warehousess.first.name
           end
           if product.product_skus.length > 0
-            @orderitem['sku'] = product.product_skus.first.sku
+            @orderitem['sku'] = product.product_skus.order('product_skus.order ASC').first.sku
           end
-          @orderitem['productimages'] = product.product_images
+          @orderitem['productimages'] = product.product_images.order("product_images.order ASC")
 
         end
         @result['order']['items'].push(@orderitem)

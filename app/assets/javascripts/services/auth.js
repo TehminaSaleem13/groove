@@ -17,7 +17,7 @@ groovepacks_services.factory("auth", ['$http','$rootScope',function($http,$rootS
         if(has_access('orders')) {
             return 'orders';
         }
-        return 'scanpack';
+        return 'scanpack.rfo';
     }
 
     var prevent = function (name) {

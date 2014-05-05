@@ -74,6 +74,7 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,ord
             select_all: $scope.select_all_toggle,
             draggable:true,
             sortable:true,
+            selectable:true,
             sort_func: $scope.handlesort,
             setup: $scope.orders.setup,
             show_hide:true,
