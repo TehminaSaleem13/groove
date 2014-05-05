@@ -7,21 +7,34 @@ class GeneralSetting < ActiveRecord::Base
 
   def send_low_inventory_alert_email
   	changed_hash = self.changes
-
+    logger.info changed_hash
     if (self.inventory_tracking ||
-        self.low_inventory_alert_email)
+        self.low_inventory_alert_email) &&
+        !changed_hash['time_to_send_email'].nil?
       if self.should_send_email_today
-        self.schedule_job(DateTime.now)
+        job_scheduled = false
+        date = DateTime.now
+        while !job_scheduled do
+          job_scheduled = self.schedule_job(date)
+          date = DateTime.now + 1.day
+        end
       end
     end
   end
 
   def schedule_job (date)
-    run_at_date = date + 1.day
+    job_scheduled = false
+    run_at_date = date.getutc
     run_at_date = run_at_date.change({:hour => self.time_to_send_email.hour, 
       :min => self.time_to_send_email.min, :sec => self.time_to_send_email.sec})
-    logger.info run_at_date
-    LowInventoryLevel.delay(:run_at => run_at_date.getutc).notify(self)
+    time_diff = ((run_at_date - DateTime.now.getutc) * 24 * 60 * 60).to_i
+    logger.info time_diff
+    if time_diff > 0
+      Delayed::Job.destroy_all
+      LowInventoryLevel.delay(:run_at => time_diff.seconds.from_now).notify(self)
+      job_scheduled = true
+    end
+    job_scheduled
   end
 
   def should_send_email_today

@@ -39,7 +39,7 @@
             <label class="control-label">Time for sending low inventory email</label>
             <div class="controls">
               <input sy-timepicker-popup='HH:mm:ss' class='form-control' ng-model='generalsettings.single.time_to_send_email'
-              show-meridian='false' sy-timepicker-append-to-body=false ng-blur='update_settings()' />
+              show-meridian='false' sy-timepicker-append-to-body=false ng-change='update_settings()' />
              </div>
           </div>
           <div class="control-group" ng-show="generalsettings.single.low_inventory_alert_email== '1'">

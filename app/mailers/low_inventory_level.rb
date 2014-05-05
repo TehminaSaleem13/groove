@@ -10,12 +10,10 @@ class LowInventoryLevel < ActionMailer::Base
 
   	while !job_scheduled do
 	   if general_settings.should_send_email(date)
-	   	logger.info 'Scheduling next job'
-	   	general_settings.schedule_job(date)
-	   	job_scheduled = true
+	   	job_scheduled = general_settings.schedule_job(date)
 	   else
 	   	date = date + 1.day
 	   end
-	end
+		end
   end
 end
