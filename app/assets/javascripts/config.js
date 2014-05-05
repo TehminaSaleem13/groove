@@ -27,8 +27,10 @@ groovepacks.config(['$stateProvider', '$urlRouterProvider', function($stateProvi
         .state('settings.showstores.ebay', {url:'/ebay?ebaytkn&tknexp&username&redirect&editstatus&name&status&storetype&storeid&inventorywarehouseid', controller: 'createStoreCtrl' })
         .state('settings.showstores.create', {url:'/create', controller: 'createStoreCtrl'})
         .state('settings.showstores.backup', {url:'/backup',controller:'showBackupCtrl'})
-        .state('settings.warehouses', {url:'/showwarehouses',templateUrl:'/assets/partials/showwarehouses.html',
-                controller:'showWarehousesCtrl'});
+        .state('settings.warehouses', {url:'/showwarehouses',templateUrl:'/assets/partials/showwarehouses.html', 
+                controller:'showWarehousesCtrl'})
+        .state('settings.general', {url:'/general',templateUrl:'/assets/partials/generalsettings.html', 
+                controller:'generalSettingsCtrl'});
 }]).run(['$rootScope','$state','$urlRouter','$timeout','auth',function($rootScope, $state, $urlRouter, $timeout, auth) {
         $rootScope.$on('$stateChangeStart', function(e, to,toParams,from,fromParams) {
             if(jQuery.isEmptyObject(auth.get())) {

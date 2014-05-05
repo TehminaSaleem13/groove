@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140416134830) do
+ActiveRecord::Schema.define(:version => 20140422114250) do
 
   create_table "amazon_credentials", :force => true do |t|
     t.string   "merchant_id",                                     :null => false
@@ -45,6 +45,22 @@ ActiveRecord::Schema.define(:version => 20140416134830) do
     t.datetime "updated_at",  :null => false
   end
 
+  create_table "delayed_jobs", :force => true do |t|
+    t.integer  "priority",   :default => 0, :null => false
+    t.integer  "attempts",   :default => 0, :null => false
+    t.text     "handler",                   :null => false
+    t.text     "last_error"
+    t.datetime "run_at"
+    t.datetime "locked_at"
+    t.datetime "failed_at"
+    t.string   "locked_by"
+    t.string   "queue"
+    t.datetime "created_at",                :null => false
+    t.datetime "updated_at",                :null => false
+  end
+
+  add_index "delayed_jobs", ["priority", "run_at"], :name => "delayed_jobs_priority"
+
   create_table "ebay_credentials", :force => true do |t|
     t.integer  "store_id"
     t.datetime "created_at",                              :null => false
@@ -54,6 +70,27 @@ ActiveRecord::Schema.define(:version => 20140416134830) do
     t.date     "ebay_auth_expiration"
     t.text     "productauth_token"
     t.text     "auth_token"
+  end
+
+  create_table "general_settings", :force => true do |t|
+    t.boolean  "inventory_tracking",                :default => true
+    t.boolean  "low_inventory_alert_email",         :default => true
+    t.string   "low_inventory_email_address",       :default => ""
+    t.boolean  "hold_orders_due_to_inventory",      :default => true
+    t.string   "conf_req_on_notes_to_packer",       :default => "optional"
+    t.string   "send_email_for_packer_notes",       :default => "always"
+    t.string   "email_address_for_packer_notes",    :default => ""
+    t.datetime "created_at",                                                           :null => false
+    t.datetime "updated_at",                                                           :null => false
+    t.integer  "default_low_inventory_alert_limit", :default => 0
+    t.boolean  "send_email_on_mon",                 :default => false
+    t.boolean  "send_email_on_tue",                 :default => false
+    t.boolean  "send_email_on_wed",                 :default => false
+    t.boolean  "send_email_on_thurs",               :default => false
+    t.boolean  "send_email_on_fri",                 :default => false
+    t.boolean  "send_email_on_sat",                 :default => false
+    t.boolean  "send_email_on_sun",                 :default => false
+    t.time     "time_to_send_email",                :default => '2000-01-01 00:00:00'
   end
 
   create_table "inventory_warehouses", :force => true do |t|
@@ -119,9 +156,9 @@ ActiveRecord::Schema.define(:version => 20140416134830) do
     t.decimal  "price",                 :precision => 10, :scale => 0
     t.decimal  "row_total",             :precision => 10, :scale => 0
     t.integer  "order_id"
-    t.datetime "created_at",                                                                     :null => false
-    t.datetime "updated_at",                                                                     :null => false
-    t.string   "name",                                                 :default => "",           :null => false
+    t.datetime "created_at",                                                                      :null => false
+    t.datetime "updated_at",                                                                      :null => false
+    t.string   "name",                                                 :default => "",            :null => false
     t.integer  "product_id"
     t.string   "scanned_status",                                       :default => "notscanned"
     t.integer  "scanned_qty",                                          :default => 0
@@ -129,6 +166,8 @@ ActiveRecord::Schema.define(:version => 20140416134830) do
     t.integer  "kit_split_qty",                                        :default => 0
     t.integer  "kit_split_scanned_qty",                                :default => 0
     t.integer  "single_scanned_qty",                                   :default => 0
+    t.string   "inv_status",                                           :default => "unprocessed"
+    t.string   "inv_status_reason",                                    :default => ""
   end
 
   add_index "order_items", ["order_id"], :name => "index_order_items_on_order_id"
@@ -195,6 +234,7 @@ ActiveRecord::Schema.define(:version => 20140416134830) do
     t.string   "tracking_num"
     t.string   "company"
     t.integer  "packing_user_id"
+    t.string   "status_reason"
   end
 
   create_table "orders_import_summaries", :force => true do |t|

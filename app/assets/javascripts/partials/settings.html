@@ -45,6 +45,8 @@
 	    <div id="collapseThree" class="accordion-body collapse in">
 	      <div class="accordion-inner">
               <ul class="nav nav-pills nav-stacked">
+              	{{$child.current_page}}
+                  <li ng-class="{active: current_page=='general'}"><a href="#/settings/general">General Settings</a></li>
                   <li><a href="#/settings/showstores/backup">Backup and Restore</a></li>
                   <li ng-show="current_page !='show_warehouses' "><a href="#/settings/showwarehouses">Warehouse Settings</a></li>
 				  <li class="active" 

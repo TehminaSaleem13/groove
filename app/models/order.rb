@@ -590,23 +590,8 @@ class Order < ActiveRecord::Base
         result = true
         #move items from allocated to sold for each order items
         self.order_items.each do |order_item|
-
-          if order_item.product.is_kit == 1 and order_item.product.kit_parsing == 'depends' and
-          order_item.kit_split
-
-            order_item.product.product_kit_skuss.each do |kit_sku|
-              result &= kit_sku.option_product.update_allocated_product_sold_level(self.store.inventory_warehouse_id,
-                order_item.kit_split_qty * kit_sku.qty)
-            end
-
-            if order_item.kit_split_qty < order_item.qty
-              result &= order_item.product.update_allocated_product_sold_level(self.store.inventory_warehouse_id,
-                            order_item.qty - order_item.kit_split_qty)
-            end
-          else
-            result &= order_item.product.update_allocated_product_sold_level(self.store.inventory_warehouse_id,
-              order_item.qty)
-          end
+          result &= order_item.product.update_allocated_product_sold_level(self.store.inventory_warehouse_id,
+          order_item.qty)
         end
 
         logger.info('error updating sold inventory level') if !result

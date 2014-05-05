@@ -1,7 +1,7 @@
 
 var groovepacks = angular.module('groovepacks', ['groovepacks.filters', 'groovepacks.services',
 	 'groovepacks.directives', 'groovepacks.controllers','ui.sortable','pasvaz.bindonce', 'ngCookies', 
-	 'ui.router','ngAnimate']);
+	 'ui.router','ngAnimate', 'ui.bootstrap']);
 var groovepacks_controllers = angular.module('groovepacks.controllers', []);
 var groovepacks_filters = angular.module('groovepacks.filters', []);
 var groovepacks_services = angular.module('groovepacks.services', []);
