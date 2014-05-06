@@ -74,10 +74,12 @@ Groovepacks::Application.configure do
 
   config.action_mailer.smtp_settings = {
     :address => "smtp.gmail.com",
-    :authentication=> "plain",
-    :enable_starttls_auto => false,
+    :port => 587,  
+    :authentication => "plain",
+    :enable_starttls_auto => true,
     :user_name => ' liquorexam@gmail.com',
-    :password => 'alaskatap'
+    :password => 'alaskatap',
+    :openssl_verify_mode  => 'none'
   }
   # Log the query plan for queries taking more than this (works
   # with SQLite, MySQL, and PostgreSQL)
