@@ -68,7 +68,8 @@ Groovepacks::Application.configure do
     :authentication=> "plain",
     :enable_starttls_auto => true,
     :user_name => 'app@groovepacker.com',
-    :password => '1packermail!'
+    :password => '1packermail!',
+    :openssl_verify_mode  => 'none'
   }
 
   # Log the query plan for queries taking more than this (works
