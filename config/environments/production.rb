@@ -75,7 +75,7 @@ Groovepacks::Application.configure do
   config.action_mailer.smtp_settings = {
     :address => "smtp.gmail.com",
     :authentication=> "plain",
-    :enable_starttls_auto => true,
+    :enable_starttls_auto => false,
     :user_name => ' liquorexam@gmail.com',
     :password => 'alaskatap'
   }
