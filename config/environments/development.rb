@@ -41,7 +41,7 @@ Groovepacks::Application.configure do
   config.action_mailer.smtp_settings = {
     :address => "mail.groovepacker.com",
     :authentication=> "plain",
-    :enable_starttls_auto => true,
+    :enable_starttls_auto => false,
     :user_name => 'app@groovepacker.com',
     :password => '1packermail!'
   }
