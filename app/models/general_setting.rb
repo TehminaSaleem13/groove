@@ -32,6 +32,7 @@ class GeneralSetting < ActiveRecord::Base
     if time_diff > 0
       Delayed::Job.destroy_all
       #LowInventoryLevel.notify(self).deliver
+      logger.info 'inserting delayed job'
       LowInventoryLevel.delay(:run_at => time_diff.seconds.from_now).notify(self)
       job_scheduled = true
     end

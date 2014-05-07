@@ -8,7 +8,7 @@ class LowInventoryLevel < ActionMailer::Base
 
   	date = DateTime.now
   	date = date + 1.day
-  	job_scheduled = true
+  	job_scheduled = false
 
   	while !job_scheduled do
 	   if general_settings.should_send_email(date)
