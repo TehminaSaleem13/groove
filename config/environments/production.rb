@@ -61,29 +61,21 @@ Groovepacks::Application.configure do
   # Send deprecation notices to registered listeners
   config.active_support.deprecation = :notify
 
-  #config.action_mailer.default_url_options = { :host => 'test.groovepacker.com' }
   config.action_mailer.delivery_method = :smtp
-  # config.action_mailer.smtp_settings = {
-  #   :address => "mail.groovepacker.com",
-  #   :authentication=> "plain",
-  #   :enable_starttls_auto => false,
-  #   :user_name => 'app@groovepacker.com',
-  #   :password => '1packermail!',
-  #   :openssl_verify_mode  => 'none'
-  # }
 
   config.action_mailer.smtp_settings = {
     :address => "smtp.gmail.com",
     :port => 587,  
     :authentication => "plain",
     :enable_starttls_auto => true,
-    :user_name => 'liquorexam@gmail.com',
-    :password => 'alaskatap',
+    :domain => 'gmail.com',
+    :user_name => 'uvarsity.elearn@gmail.com',
+    :password => 'uvarsity2015',
     :openssl_verify_mode  => 'none'
   }
+
   # Log the query plan for queries taking more than this (works
   # with SQLite, MySQL, and PostgreSQL)
-  # config.active_record.auto_explain_threshold_in_seconds = 0.5
   ENV['AMAZON_MWS_ACCESS_KEY_ID'] = "AKIAJ4VZ2GY7HZUL277Q"
   ENV['AMAZON_MWS_SECRET_ACCESS_KEY'] = "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"
 
@@ -92,9 +84,4 @@ Groovepacks::Application.configure do
   ENV['EBAY_DEV_ID'] = "353bd404-651b-4431-955d-25e0a0c8140f"
   ENV['EBAY_RU_NAME'] = "DSO-DSO698331-163d--aptkv"
   ENV['EBAY_SANDBOX_MODE'] = "NO"
-  # ENV['EBAY_APP_ID'] = "Navarata-607d-4a45-8a42-51c735a57026"
-  # ENV['EBAY_CERT_ID'] = "86380834-e449-4dd9-b19f-748b4625533d"
-  # ENV['EBAY_DEV_ID'] = "568a739c-a13d-40e5-922a-6e3ecc652d9d"
-  # ENV['EBAY_RU_NAME'] = "Navaratan_Techn-Navarata-607d-4-ltqij"
-  # ENV['EBAY_SANDBOX_MODE'] = "YES"
 end
