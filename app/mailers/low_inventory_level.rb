@@ -2,12 +2,9 @@ class LowInventoryLevel < ActionMailer::Base
   default from: "app@groovepacker.com"
   
   def notify(general_settings)
-  	begin
-	  	mail to: general_settings.low_inventory_email_address, 
-	  		subject: "GroovePacker Low Inventory Alert"
-  	rescue
-
-  	end
+    puts "notify method called"
+  	mail to: general_settings.low_inventory_email_address, 
+  		subject: "GroovePacker Low Inventory Alert"
 
   	date = DateTime.now
   	date = date + 1.day
