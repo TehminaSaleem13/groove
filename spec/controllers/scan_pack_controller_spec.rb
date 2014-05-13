@@ -2813,7 +2813,7 @@ describe ScanPackController do
       expect(sold_inv_wh.first.sold_qty).to eq(2)
     end
 
-    it "should scan orders with multiple kit products and adjust inventory accordingly when some kits are not split" do
+    it "should scan orders with multiple kit products and adjust inventory accordingly when some kits are not split1" do
       request.accept = "application/json"
       inv_wh = FactoryGirl.create(:inventory_warehouse)
 
@@ -2907,7 +2907,8 @@ describe ScanPackController do
       expect(kit_product2_inv_wh.allocated_inv).to eq(1)
 
 
-      get :scan_barcode, {:state => 'scanpack.rfp.default', :input => 'IPROTOBAR', :id => order.id }
+      get :scan_barcode, {:state => 'scanpack.rfp.default', 
+        :input => 'IPROTOBAR', :id => order.id }
 
       product_kit_inv_wh.reload
       expect(product_kit_inv_wh.available_inv).to eq(24)
@@ -2925,7 +2926,7 @@ describe ScanPackController do
       order.reload
       order.status = 'scanned'
       order.save
-
+      # puts order
       product_kit_inv_wh.reload
       expect(product_kit_inv_wh.available_inv).to eq(24)
       expect(product_kit_inv_wh.allocated_inv).to eq(0)
