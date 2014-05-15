@@ -25,7 +25,8 @@ class ProductsController < ApplicationController
 
 				if response.success?
 					session =  response.body[:login_response][:login_return]
-					response = client.call(:call, message: {session: session, method: 'product.list'})
+					response = client.call(:call, message: {session: session, 
+						method: 'product.list'})
 
 					# fetching all products
 					if response.success?

@@ -2876,9 +2876,11 @@ describe ScanPackController do
       expect(kit_product2_inv_wh.allocated_inv).to eq(0)
 
       #scanned barcode: BARCODE1
-      get :scan_barcode, {:state => 'scanpack.rfp.default', :input => 'BARCODE1', :id => order.id }
+      get :scan_barcode, {:state => 'scanpack.rfp.default', 
+        :input => 'BARCODE1', :id => order.id }
 
-      get :scan_barcode, {:state => 'scanpack.rfp.default', :input => 'KITITEM1', :id => order.id }
+      get :scan_barcode, {:state => 'scanpack.rfp.default', 
+        :input => 'KITITEM1', :id => order.id }
 
       product_kit_inv_wh.reload
       expect(product_kit_inv_wh.available_inv).to eq(24)
@@ -2892,7 +2894,8 @@ describe ScanPackController do
       expect(kit_product2_inv_wh.available_inv).to eq(24)
       expect(kit_product2_inv_wh.allocated_inv).to eq(1)
 
-      get :scan_barcode, {:state => 'scanpack.rfp.default', :input => 'KITITEM2', :id => order.id }
+      get :scan_barcode, {:state => 'scanpack.rfp.default', 
+        :input => 'KITITEM2', :id => order.id }
 
       product_kit_inv_wh.reload
       expect(product_kit_inv_wh.available_inv).to eq(24)

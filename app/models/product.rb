@@ -156,11 +156,12 @@ class Product < ActiveRecord::Base
 	result
   end
 
-  def update_allocated_product_sold_level(inventory_warehouse_id, allocated_qty)
+  def update_allocated_product_sold_level(inventory_warehouse_id, allocated_qty, 
+    order_item =nil)
    	result = true
 
   	if self.is_kit != 1 or 
-  		(self.is_kit == 1 and (self.kit_parsing == 'single' or self.kit_parsing == 'depends'))
+  		(self.is_kit == 1 and self.kit_parsing == 'single')
 	     result &= self.update_warehouses_sold_level(inventory_warehouse_id, self.id,
 	 		allocated_qty)
     else
@@ -170,6 +171,11 @@ class Product < ActiveRecord::Base
 	    		result &= self.update_warehouses_sold_level(inventory_warehouse_id, kit_item.option_product_id,
 	  				allocated_qty * kit_item.qty)
     		end
+      elsif self.kit_parsing == 'depends'
+        result &= self.update_warehouses_sold_level(inventory_warehouse_id, self.id,
+        order_item.kit_split_scanned_qty)
+        result &= self.update_warehouses_sold_level(inventory_warehouse_id, self.id,
+        order_item.single_scanned_qty)
     	end
     end
 
@@ -203,7 +209,8 @@ class Product < ActiveRecord::Base
   		result &= false 
   	end 
     logger.info('Allocated Qty2:'+allocated_qty.to_s)
-
+    logger.info('result')
+    logger.info(result)
   	unless !result
   		prod_warehouses.each do |wh|
   			wh.update_sold_inventory_level(allocated_qty)

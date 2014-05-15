@@ -591,7 +591,7 @@ class Order < ActiveRecord::Base
         #move items from allocated to sold for each order items
         self.order_items.each do |order_item|
           result &= order_item.product.update_allocated_product_sold_level(self.store.inventory_warehouse_id,
-          order_item.qty)
+          order_item.qty, order_item)
         end
 
         logger.info('error updating sold inventory level') if !result

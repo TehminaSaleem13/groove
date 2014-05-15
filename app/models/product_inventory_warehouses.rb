@@ -35,8 +35,9 @@ class ProductInventoryWarehouses < ActiveRecord::Base
   def update_sold_inventory_level(allocated_qty)
     result = true
     logger.info('Allocated Qty:'+allocated_qty.to_s)
-    if self.allocated_inv >= allocated_qty
-      logger.info('Allocated Qty:'+self.allocated_inv.to_s)
+    logger.info(self.allocated_inv)
+    if self.allocated_inv >= allocated_qty && allocated_qty!= 0
+      logger.info('Allocated Qty3:'+self.allocated_inv.to_s)
       
       sold_inv = SoldInventoryWarehouse.new
       sold_inv.sold_qty = allocated_qty
