@@ -172,8 +172,13 @@ class Product < ActiveRecord::Base
 	  				allocated_qty * kit_item.qty)
     		end
       elsif self.kit_parsing == 'depends'
-        result &= self.update_warehouses_sold_level(inventory_warehouse_id, self.id,
-        order_item.kit_split_scanned_qty)
+        logger.info "saving order to scanned"
+        logger.info order_item.inspect
+        self.product_kit_skuss.each do |kit_sku|
+          result &= self.update_warehouses_sold_level(inventory_warehouse_id, 
+            kit_sku.option_product_id,
+          order_item.kit_split_scanned_qty)
+        end
         result &= self.update_warehouses_sold_level(inventory_warehouse_id, self.id,
         order_item.single_scanned_qty)
     	end
@@ -208,9 +213,7 @@ class Product < ActiveRecord::Base
   	unless prod_warehouses.length == 1 
   		result &= false 
   	end 
-    logger.info('Allocated Qty2:'+allocated_qty.to_s)
-    logger.info('result')
-    logger.info(result)
+    logger.info('Allocated Qty which has been sold:'+allocated_qty.to_s)
   	unless !result
   		prod_warehouses.each do |wh|
   			wh.update_sold_inventory_level(allocated_qty)
