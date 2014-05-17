@@ -1,5 +1,5 @@
 require 'debugger'
-
+include ProductsHelper
 namespace :db do
   desc "add weight to all products in the database"
   task :weights_migration => :environment do
