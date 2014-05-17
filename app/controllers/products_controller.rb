@@ -376,6 +376,7 @@ class ProductsController < ApplicationController
 			csv.each_with_index do | row, index|
 				if index > 0
 					product_row = row.first.split(/\t/)
+					render :text => product_row.inspect and return
 					if Product.where(:store_product_id=>product_row[2]).length  == 0
 						@productdb = Product.new
 						@productdb.name = product_row[0]

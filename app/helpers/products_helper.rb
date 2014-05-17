@@ -24,6 +24,7 @@ module ProductsHelper
 				product = Product.find(product_id)
 
 				product.name = product_hash['GetMatchingProductForIdResult']['Products']['Product']['AttributeSets']['ItemAttributes']['Title']
+        product.weight = product_hash['GetMatchingProductForIdResult']['Products']['Product']['AttributeSets']['ItemAttributes']['ItemDimensions']['Weight'] * 16
 				product.store_product_id = product_hash['GetMatchingProductForIdResult']['Products']['Product']['Identifiers']['MarketplaceASIN']['ASIN']
 
 				if @credential.import_images
@@ -111,6 +112,10 @@ module ProductsHelper
       @productdb.status = 'inactive'
       @productdb.store = @store
 
+      weight_lbs = @item.shippingDetails.calculatedShippingRate.weightMajor
+      weight_oz = @item.shippingDetails.calculatedShippingRate.weightMinor
+      @productdb.weight = weight_lbs * 16 + weight_oz
+      
       #add productdb sku
       @productdbsku = ProductSku.new
       if  @item.sKU.nil?

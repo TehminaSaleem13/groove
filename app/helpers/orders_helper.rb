@@ -1,9 +1,11 @@
 module OrdersHelper
 	def import_magento_product(client, session, sku, store_id, import_images, import_products)
 		begin
-		response = client.call(:catalog_product_info, message: {session: session, productId: sku})
+		response = client.call(:catalog_product_info, 
+			message: {session: session, productId: sku})
 		if response.success?
 		  	@product  = response.body[:catalog_product_info_response][:info]
+		  	
 
 			#add product to the database
 			@productdb = Product.new
@@ -11,6 +13,8 @@ module OrdersHelper
 			@productdb.store_product_id = @product[:product_id]
 			@productdb.product_type = @product[:type]
 			@productdb.store_id = store_id
+			@productdb.weight = @product[:weight].to_f * 16
+
 			# Magento product api does not provide a barcode, so all
 			# magento products should be marked with a status new as t
 			#they cannot be scanned.
