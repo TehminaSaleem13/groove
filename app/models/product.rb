@@ -241,4 +241,15 @@ class Product < ActiveRecord::Base
     end
     total_sold_qty
   end
+
+  def get_weight
+    result = Hash.new
+    if self.weight < 1
+      result['lbs'] = 0
+    else
+      result['lbs'] = (self.weight / 16).floor
+    end
+    result['oz'] = (self.weight % 16)
+    result
+  end
 end

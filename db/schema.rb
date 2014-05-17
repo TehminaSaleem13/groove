@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140422114250) do
+ActiveRecord::Schema.define(:version => 20140515074711) do
 
   create_table "amazon_credentials", :force => true do |t|
     t.string   "merchant_id",                                     :null => false
@@ -224,7 +224,6 @@ ActiveRecord::Schema.define(:version => 20140422114250) do
     t.string   "method"
     t.datetime "created_at",         :null => false
     t.datetime "updated_at",         :null => false
-    t.string   "store_order_id"
     t.string   "notes_internal"
     t.string   "notes_toPacker"
     t.string   "notes_fromPacker"
@@ -321,25 +320,26 @@ ActiveRecord::Schema.define(:version => 20140422114250) do
   add_index "product_skus", ["product_id"], :name => "index_product_skus_on_product_id"
 
   create_table "products", :force => true do |t|
-    t.string   "store_product_id",                                       :null => false
-    t.string   "name",                                                   :null => false
+    t.string   "store_product_id",                                                                     :null => false
+    t.string   "name",                                                                                 :null => false
     t.string   "product_type"
-    t.integer  "store_id",                                               :null => false
-    t.datetime "created_at",                                             :null => false
-    t.datetime "updated_at",                                             :null => false
+    t.integer  "store_id",                                                                             :null => false
+    t.datetime "created_at",                                                                           :null => false
+    t.datetime "updated_at",                                                                           :null => false
     t.string   "inv_wh1"
-    t.string   "status",                          :default => "new"
+    t.string   "status",                                                        :default => "new"
     t.text     "spl_instructions_4_packer"
-    t.boolean  "spl_instructions_4_confirmation", :default => false
+    t.boolean  "spl_instructions_4_confirmation",                               :default => false
     t.text     "alternate_location"
     t.text     "barcode"
-    t.boolean  "is_skippable",                    :default => false
-    t.integer  "packing_placement",               :default => 50
+    t.boolean  "is_skippable",                                                  :default => false
+    t.integer  "packing_placement",                                             :default => 50
     t.integer  "pack_time_adj"
-    t.string   "kit_parsing",                     :default => "depends"
-    t.integer  "is_kit",                          :default => 0
-    t.boolean  "disable_conf_req",                :default => false
-    t.integer  "total_avail_ext",                 :default => 0,         :null => false
+    t.string   "kit_parsing",                                                   :default => "depends"
+    t.integer  "is_kit",                                                        :default => 0
+    t.boolean  "disable_conf_req",                                              :default => false
+    t.integer  "total_avail_ext",                                               :default => 0,         :null => false
+    t.decimal  "weight",                          :precision => 8, :scale => 2, :default => 0.0,       :null => false
   end
 
   add_index "products", ["store_id"], :name => "index_products_on_store_id"

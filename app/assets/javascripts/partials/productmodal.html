@@ -80,6 +80,34 @@
     </div>
 </div>
 <div class="control-group">
+    <label class="control-label">Barcodes</label>
+
+    <div class="controls">
+        <div groov-editable="arrayEditableOptions" identifier="product_single_barcodes" prop="barcode" ng-model="groovProducts.single.barcodes" class="pull-left"></div>
+        <label ng-show="groovProducts.single.barcodes == ''" class="checkbox inline">
+            <input type="checkbox" ng-change="update_single_product()"
+                   ng-model="groovProducts.single.basicinfo.disable_conf_req"/> Disable Confirmation Requests
+        </label>
+    </div>
+</div>
+<div class="control-group">
+    <label class="control-label">Weight</label>
+
+    <div class="controls">
+        <label class="control-label" style="text-align:left;"
+            ng-show="groovProducts.single.weight.lbs == 0 && 
+                groovProducts.single.weight.oz == 0">
+            0 oz
+        </label>    
+        <label class="control-label" style="text-align:left;" ng-show="groovProducts.single.weight.lbs>0">
+            {{groovProducts.single.weight.lbs}} lbs
+        </label>
+        <label class="control-label" style="text-align:left;" ng-show="groovProducts.single.weight.oz>0">
+            {{groovProducts.single.weight.oz}} oz
+        </label>
+    </div>
+</div>
+<div class="control-group">
     <label class="control-label">Special instructions for Packer</label>
 
     <div class="controls">
@@ -100,17 +128,7 @@
         </label>
     </div>
 </div>
-<div class="control-group">
-    <label class="control-label">Barcodes</label>
 
-    <div class="controls">
-        <div groov-editable="arrayEditableOptions" identifier="product_single_barcodes" prop="barcode" ng-model="groovProducts.single.barcodes" class="pull-left"></div>
-        <label ng-show="groovProducts.single.barcodes == ''" class="checkbox inline">
-            <input type="checkbox" ng-change="update_single_product()"
-                   ng-model="groovProducts.single.basicinfo.disable_conf_req"/> Disable Confirmation Requests
-        </label>
-    </div>
-</div>
 <div class="control-group">
     <label class="control-label">Product can be skipped</label>
 

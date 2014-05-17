@@ -1,6 +1,7 @@
 class Store < ActiveRecord::Base
   attr_accessible :name, :order_date, :status, :store_type
   has_many :orders
+  has_many :products
   has_one :magento_credentials
   has_one :ebay_credentials
   has_one :amazon_credentials

@@ -10,7 +10,7 @@ class ProductsController < ApplicationController
 	@result['total_imported'] = 0
 	@result['success_imported'] = 0
 	@result['previous_imported'] = 0
-	begin
+	#begin
 	#import if magento products
 	if @store.store_type == 'Magento' then
 		@magento_credentials = MagentoCredentials.where(:store_id => @store.id)
@@ -63,6 +63,24 @@ class ProductsController < ApplicationController
 									#publish the sku to the product record
 									@productdb.product_skus << @productdbsku
 								end
+
+							  if !result_product['sku'].nil?
+									get_product_info = client.call(:call, 
+											message: {session: session,
+											method: 'catalog_product.info',
+											product: result_product['sku']})
+									product_info = 
+										get_product_info.body[:call_response][:call_return][:item]
+									product_info.each do |product_info_item|
+										if product_info_item[:key] == 'weight'
+											if product_info_item[:value] != nil
+												weight_in_f = product_info_item[:value].to_f
+												@productdb.weight = weight_in_f * 16
+											end
+										end
+									end
+
+							  end
 
 								#get images and categories
 								begin
@@ -240,6 +258,8 @@ class ProductsController < ApplicationController
 						@productdb.status = 'inactive'
 						@productdb.store = @store
 
+						
+
 						#add productdb sku
 						@productdbsku = ProductSku.new
 						if  @item.sKU.nil?
@@ -252,6 +272,13 @@ class ProductsController < ApplicationController
 
 						#publish the sku to the product record
 						@productdb.product_skus << @productdbsku
+
+						weight_lbs = @item.shippingDetails.calculatedShippingRate.weightMajor
+						weight_oz = @item.shippingDetails.calculatedShippingRate.weightMinor
+						# puts weight_lbs
+						# puts weight_oz
+						@productdb.weight = weight_lbs * 16 + weight_oz
+
 
 						if @credential.import_images
 							if !@item.pictureDetails.nil?
@@ -306,7 +333,8 @@ class ProductsController < ApplicationController
 
 		if @amazon_credentials.length > 0
 			@credential = @amazon_credentials.first
-			mws = MWS.new(:aws_access_key_id => ENV['AMAZON_MWS_ACCESS_KEY_ID'],
+			mws = MWS.new(:aws_access_key_id => 
+				ENV['AMAZON_MWS_ACCESS_KEY_ID'],
 			  :secret_access_key => ENV['AMAZON_MWS_SECRET_ACCESS_KEY'],
 			  :seller_id => @credential.merchant_id,
 			  :marketplace_id => @credential.marketplace_id)
@@ -349,6 +377,7 @@ class ProductsController < ApplicationController
 			csv.each_with_index do | row, index|
 				if index > 0
 					product_row = row.first.split(/\t/)
+					render :text => product_row.inspect and return
 					if Product.where(:store_product_id=>product_row[2]).length  == 0
 						@productdb = Product.new
 						@productdb.name = product_row[0]
@@ -392,10 +421,10 @@ class ProductsController < ApplicationController
 			end
 		end
 	end
-	rescue Exception => e
-		@result['status'] = false
-		@result['messages'].push(e.message)
-	end
+	# rescue Exception => e
+	# 	@result['status'] = false
+	# 	@result['messages'].push(e.message)
+	# end
 
     respond_to do |format|
       format.json { render json: @result}
@@ -780,6 +809,7 @@ class ProductsController < ApplicationController
   		@product.reload
   		@result['product'] = Hash.new
   		@result['product']['basicinfo'] = @product
+  		@result['product']['weight'] = @product.get_weight
    		@result['product']['basicinfo']['total_avail_loc'] = @product.get_total_avail_loc
    		@result['product']['basicinfo']['total_sold_inv'] = @product.get_total_sold_qty
         @result['product']['skus'] = @product.product_skus.order("product_skus.order ASC")
