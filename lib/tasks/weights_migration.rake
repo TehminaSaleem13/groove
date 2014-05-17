@@ -1,5 +1,7 @@
 require 'debugger'
+require "#{Rails.root}/app/helpers/products_helper"
 include ProductsHelper
+
 namespace :db do
   desc "add weight to all products in the database"
   task :weights_migration => :environment do
@@ -89,7 +91,7 @@ namespace :db do
 					# puts product_skus
 					product_skus.each do |product_sku|
 						#use the call from amazon import and import the weight attribute
-						import_amazon_product_details(store.id, product_sku, product.id)
+						import_amazon_product_details(store.id, product_sku.sku, product.id)
 					end
 				end
 			end

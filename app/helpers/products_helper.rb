@@ -8,7 +8,8 @@ module ProductsHelper
 
 			if @amazon_credentials.length > 0
 				@credential = @amazon_credentials.first
-
+        puts "connecting to mws"
+        puts product_sku.to_s
 				mws = Mws.connect(
 					  merchant: @credential.merchant_id,
 					  access: ENV['AMAZON_MWS_ACCESS_KEY_ID'],
@@ -26,7 +27,7 @@ module ProductsHelper
 				product.name = product_hash['GetMatchingProductForIdResult']['Products']['Product']['AttributeSets']['ItemAttributes']['Title']
         product.weight = product_hash['GetMatchingProductForIdResult']['Products']['Product']['AttributeSets']['ItemAttributes']['ItemDimensions']['Weight'] * 16
 				product.store_product_id = product_hash['GetMatchingProductForIdResult']['Products']['Product']['Identifiers']['MarketplaceASIN']['ASIN']
-
+        puts product.weight.to_s
 				if @credential.import_images
 					image = ProductImage.new
 					image.image = product_hash['GetMatchingProductForIdResult']['Products']['Product']['AttributeSets']['ItemAttributes']['SmallImage']['URL']
@@ -48,6 +49,7 @@ module ProductsHelper
 				product.update_product_status
 			end
 		rescue Exception => e
+      puts e.inspect
 		end
   end
 
@@ -115,7 +117,7 @@ module ProductsHelper
       weight_lbs = @item.shippingDetails.calculatedShippingRate.weightMajor
       weight_oz = @item.shippingDetails.calculatedShippingRate.weightMinor
       @productdb.weight = weight_lbs * 16 + weight_oz
-      
+
       #add productdb sku
       @productdbsku = ProductSku.new
       if  @item.sKU.nil?
