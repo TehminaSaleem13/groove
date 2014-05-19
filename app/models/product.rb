@@ -1,7 +1,7 @@
 class Product < ActiveRecord::Base
   belongs_to :store
 
-  attr_accessible :name, :product_type, :store_product_id,
+  attr_accessible :name, :product_type, :store_product_id, :sku,
 				    :status,
 					:spl_instructions_4_packer,
 					:spl_instructions_4_confirmation,
