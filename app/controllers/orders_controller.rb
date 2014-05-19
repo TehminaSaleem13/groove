@@ -468,17 +468,22 @@ class OrdersController < ApplicationController
 
         @neworder = @order.dup
         index = 0
-        @order.increment_id = @order.increment_id+"(duplicate"+index.to_s+")"
-        @orderlist = Order.where(:increment_id=>@order.increment_id)
+        temp_increment_id = ''
+
         begin
+          temp_increment_id = @order.increment_id + "(duplicate"+index.to_s+ ")"
+          @neworder.increment_id = temp_increment_id          
+          @orderslist = Order.where(:increment_id=>temp_increment_id)
           index = index + 1
-          @neworder.increment_id = @order.increment_id+"(duplicate"+index.to_s+")"
-          @orderslist = Order.where(:increment_id=>@neworder.increment_id)
         end while(!@orderslist.nil? && @orderslist.length > 0)
 
         if !@neworder.save(:validate => false)
           @result['status'] = false
           @result['messages'] = @neworder.errors.full_messages
+        else
+          #add activity
+          username = current_user.name
+          @neworder.addactivity("Order duplicated", username)
         end
       end
     end
@@ -714,10 +719,18 @@ class OrdersController < ApplicationController
         @orderitem.row_total = params[:price].to_f * params[:qty].to_f
         @orderitem.product_id = product.id
         @order.order_items << @orderitem
-        if @orderitem.save && product.is_kit == 1
-          kit_skus = ProductKitSkus.where(:product_id => @orderitem.product_id)
-          kit_skus.each do |kit_sku|
-            kit_sku.add_product_in_order_items
+        if @orderitem.save
+          product_skus = product.product_skus
+          if product_skus.length > 0
+            product_sku = product_skus.first.sku
+          end
+          username = current_user.name
+          @order.addactivity("Item with sku " + product_sku + " added", username)
+          if product.is_kit == 1
+            kit_skus = ProductKitSkus.where(:product_id => @orderitem.product_id)
+            kit_skus.each do |kit_sku|
+              kit_sku.add_product_in_order_items
+            end
           end
         end
       end
@@ -726,6 +739,7 @@ class OrdersController < ApplicationController
         @result['messages'].push("Adding item to order failed")
       else
         @order.update_order_status
+        
       end
     end
 
@@ -762,16 +776,25 @@ class OrdersController < ApplicationController
     @result = Hash.new
     @result['status'] = true
     @result['messages'] =[]
-
     @orderitem = OrderItem.find(params[:orderitem])
 
     if !@orderitem.nil?
       @orderitem.each do |item|
+        product = item.product
+        if !product.nil?
+          product_skus = product.product_skus
+          if product_skus.length > 0
+            sku = product_skus.first.sku
+          end
+        end
+        
+        username = current_user.name
         unless item.remove_order_item_kit_products && item.destroy
           @result['status'] &= false
           @result['messages'].push("Removed items from order failed")
         else
           item.order.update_order_status
+          item.order.addactivity("Item with sku " + sku + " removed", username)
         end
       end
     else
