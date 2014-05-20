@@ -1634,5 +1634,4 @@ class ProductsController < ApplicationController
       return params[:productArray]
     end
   end
-
 end

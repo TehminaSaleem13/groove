@@ -23,8 +23,9 @@ groovepacks_services.factory('orders',['$http','notification',function($http,not
                 //used for updating only
                 status:'',
                 orderArray:[]
+            },
+            orders_count: {                
             }
-
         };
     }
 
@@ -65,6 +66,7 @@ groovepacks_services.factory('orders',['$http','notification',function($http,not
             function(data) {
                 if(data.status) {
                     object.load_new = (data.orders.length > 0);
+                    object.orders_count = data.orders_count;
                     if(!next) {
                         object.list = data.orders;
                     } else {

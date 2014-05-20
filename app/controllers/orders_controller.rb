@@ -450,6 +450,7 @@ class OrdersController < ApplicationController
     @orders = do_getorders
 
     @result['orders'] = make_orders_list(@orders)
+    @result['orders_count'] = get_orders_count()
 
     respond_to do |format|
           format.json { render json: @result}
@@ -525,6 +526,7 @@ class OrdersController < ApplicationController
       @orders = do_search
 
       @result['orders'] = make_orders_list(@orders)
+      @result['orders_count'] = get_orders_count()      
     else
       @result['status'] = false
       @result['message'] = 'Improper search string'
@@ -1108,6 +1110,19 @@ class OrdersController < ApplicationController
     else
       return params[:orderArray]
     end
+  end
+
+  def get_orders_count
+    count = Hash.new
+    count['all'] = Order.all.count
+    count['scanned'] = Order.where(:status => 'scanned').count
+    count['cancelled'] = Order.where(:status => 'cancelled').count
+    count['onhold'] = Order.where(:status => 'onhold').count
+    count['awaiting'] = Order.where(:status => 'awaiting').count
+    count['serviceissue'] = 
+      Order.where(:status => 'serviceissue').count
+
+    count
   end
 
 end
