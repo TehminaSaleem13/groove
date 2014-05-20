@@ -1265,6 +1265,20 @@ class ProductsController < ApplicationController
     end
   end
 
+  #params[:id]
+  def generate_barcode_slip
+
+  	@product = Product.find(params[:id])
+		   
+    respond_to do |format|
+      format.html
+      format.pdf {
+        render :pdf => "file_name", 
+        :template => 'products/generate_barcode_slip.html.erb',
+        :orientation => 'Portrait'      	
+       }
+    end
+  end
   def updateproductlist
     @result = Hash.new
     @result['status'] = true
