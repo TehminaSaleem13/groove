@@ -68,9 +68,11 @@ aria-hidden="true">
 
   <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h3 id="createUserheader" ng-show="edit_status">Update User</h3>
+    <h3 id="createUserheader" ng-show="edit_status">Currently Updating {{newUser.name}}</h3>
     <h3 id="createUserheader" ng-hide="edit_status">Create User</h3>
+    <div><h4 id="createUserheader" ng-hide="edit_status">Currently Updating </h4></div>
   </div>
+
 
 
  <div class="form-horizontal form-horizontal-create" >
