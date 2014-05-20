@@ -1584,7 +1584,11 @@ class ProductsController < ApplicationController
       unless @product_location.nil?
         @product_hash['location_primary'] = @product_location.location_primary
         @product_hash['location_secondary'] = @product_location.location_secondary
-        @product_hash['location_name'] = @product_location.inventory_warehouse.name
+        if !@product_location.inventory_warehouse.nil?
+        	@product_hash['location_name'] = @product_location.inventory_warehouse.name
+        else
+        	@product_hash['location_name'] = "not_available"
+      	end
       end
 
       @product_hash["qty"] = product.get_total_avail_loc
