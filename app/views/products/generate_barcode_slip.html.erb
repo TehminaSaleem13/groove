@@ -2,7 +2,7 @@
 <html>
 <head>
 </head>
-<body style="line-height: 12px; margin-left: 3px; margin-top: 2px;">
+<body style="line-height: 10px; margin-left: 3px; margin-top: 2px; margin-right: 2px; margin-bottom: 2px">
   <!--Here is the product information<br>
     Name: 
     <%=@product.name %>
@@ -22,8 +22,18 @@
         <%barcode.barcode = sku.sku%>
         <span style="font-size: 14px;">SKU-NUMBER <%= barcode.barcode%></span> <br/>
       <%end%>
-        <span style="font-size: 13px;">Item Name <%= @product.name%></span>
-      <br>
+      <span style="font-size: 12px; margin-bottom: 10px;">Item Name <%= @product.name%></span>
+      <br/>
+      <br/>
+      <%if !@product.product_barcodes.first.nil?%>
+        <% barcode = @product.product_barcodes.first.barcode %>
+      <%else%>
+        <% barcode = "not available" %>
+      <%end%>
+      <% generate_barcode(barcode)%>
+      <%= pdf_image_tag(@product.product_barcodes.first.barcode+".png") %>
+      <br/>
+      <p style="text-align:center; font-size:10px; line-height: 0px;">*BARCODE*</p>
     <%end%>
 </body>
 </html>

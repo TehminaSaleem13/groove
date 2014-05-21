@@ -1,4 +1,9 @@
 module ProductsHelper
+
+  require 'barby'
+  require 'barby/barcode/code_128'
+  require 'barby/outputter/png_outputter'
+
 	require 'mws-connect'
 	#requires a product is created with appropriate seller sku
 	def import_amazon_product_details(store_id, product_sku, product_id)
@@ -172,4 +177,18 @@ module ProductsHelper
 
     product_id
   end
+
+  def generate_barcode(barcode_string)
+    barcode = Barby::Code128B.new(barcode_string)
+    outputter = Barby::PngOutputter.new(barcode)
+    outputter.height = 35
+    outputter.margin = 0
+    blob = outputter.to_png #Raw PNG data
+    File.open("#{Rails.root}/public/images/#{barcode_string}.png", 
+      'w') do |f|
+      f.write blob
+    end    
+    barcode_string
+    #puts barcode.to_ascii #Implicitly uses the AsciiOutputter
+  end  
 end

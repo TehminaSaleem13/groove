@@ -60,5 +60,7 @@ module Groovepacks
     config.assets.version = '1.0'
     config.assets.precompile += %w( font-awesome-ie7.min.css )
 
+    config.serve_static_assets = true
+
   end
 end

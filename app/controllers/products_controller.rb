@@ -1266,17 +1266,17 @@ class ProductsController < ApplicationController
   end
 
   #params[:id]
-  def generate_barcode_slip
-  # 	@products = list_selected_products
-  # 	puts "@products"
-  # 	puts @products.inspect
-  # 	if !@products.nil?
-  #     product = @products.first
-  # 		@product = Product.find(product.id)
-  # 		# puts "@product"
-  # 		# puts @product.inspect
-		# end  
+  def generate_barcode_slip 
 		@product = Product.find(params[:id]) 
+		if !@product.product_barcodes.first.nil?
+      sku = @product.product_skus.first
+      unless sku.nil?
+        @barcode = @product.product_barcodes.new
+        @barcode.barcode = sku.sku
+      end
+      @name = @product.name
+    end
+
     respond_to do |format|
       format.html
       format.pdf {
@@ -1288,7 +1288,7 @@ class ProductsController < ApplicationController
         :margin => {:top => '0',                     
                     :bottom => '0',
                     :left => '0',
-                    :right => '0'}      	
+                    :right => '0'}       	
        }
     end
   end
