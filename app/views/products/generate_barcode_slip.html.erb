@@ -14,8 +14,6 @@
     <br>
     Status:
     <%=@product.status %> -->
-    <%result = Hash.new%>
-    <%result['error_messages'] = []%>
     <%if !@product.product_barcodes.first.nil? && !@product.product_barcodes.first.barcode.nil? %>
       <%sku = @product.product_skus.first%>
       <%unless sku.nil?%>
@@ -33,7 +31,7 @@
       <br/>
       <p style="text-align:center; font-size:10px; line-height: 0px;">*BARCODE*</p>
     <%else%>
-      <%result['error_messages'].push('Cannot create barcode')%>
+      <span style="font-size: 14px; margin-bottom: 10px;">Barcode not available</span>
     <%end%>
 </body>
 </html>
