@@ -291,6 +291,11 @@ class SettingsController < ApplicationController
     end
   end
 
+  def send_test_mail
+    LowInventoryLevel.notify(GeneralSetting.all.first).deliver
+    render json: "ok"
+  end
+
 end
 
 
