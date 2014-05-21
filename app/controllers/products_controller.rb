@@ -564,7 +564,7 @@ class ProductsController < ApplicationController
 		@result['products'] = make_products_list(@products)
 		respond_to do |format|
       		format.json { render json: @result}
-    	end
+    end
 	end
 
   def create
@@ -1266,16 +1266,29 @@ class ProductsController < ApplicationController
   end
 
   #params[:id]
-  def generate_barcode_slip
+  def generate_barcode_slip 
+		@product = Product.find(params[:id]) 
+		if !@product.product_barcodes.first.nil?
+      sku = @product.product_skus.first
+      unless sku.nil?
+        @barcode = @product.product_barcodes.new
+        @barcode.barcode = sku.sku
+      end
+      @name = @product.name
+    end
 
-  	@product = Product.find(params[:id])
-		   
     respond_to do |format|
       format.html
       format.pdf {
         render :pdf => "file_name", 
         :template => 'products/generate_barcode_slip.html.erb',
-        :orientation => 'Portrait'      	
+        :orientation => 'Portrait',
+        :page_height => '1in', 
+        :page_width => '3in',
+        :margin => {:top => '0',                     
+                    :bottom => '0',
+                    :left => '0',
+                    :right => '0'}       	
        }
     end
   end
