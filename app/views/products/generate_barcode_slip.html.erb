@@ -7124,18 +7124,26 @@ td.visible-print {
 
 </head>
 <body>
-  <h3>Here is the product information</h3></br>
-    <h4>Name: </hr>
-    <%=@product.name %></br>
-    <h4>ID: </h4>
+  Here is the product information<br>
+    Name: 
+    <%=@product.name %>
+    ID: 
     <%=@product.id %>
-    </br>
-    <h4>Product Type:</h4>
+    <br>
+    Product Type:
     <%=@product.product_type %>
-    </br>
-    <h4>Status:</h4>
+    <br>
+    Status:
     <%=@product.status %>
-    </br>
+    
+    <%#if @product.product_barcodes.first.nil?%>
+      <%#sku = @product.product_skus.first%>
+      <%#unless sku.nil?%>
+        <%#barcode = @product.product_barcodes.new%>
+        <%#barcode.barcode = sku.sku%>
+      <%#end%>
+      <%#product_name = @product.name%>
+    <%#end%>
 </body>
 </html>
 
