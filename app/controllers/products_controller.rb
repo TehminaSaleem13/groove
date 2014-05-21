@@ -1267,9 +1267,16 @@ class ProductsController < ApplicationController
 
   #params[:id]
   def generate_barcode_slip
-
-  	@product = Product.find(params[:id])
-		   
+  # 	@products = list_selected_products
+  # 	puts "@products"
+  # 	puts @products.inspect
+  # 	if !@products.nil?
+  #     product = @products.first
+  # 		@product = Product.find(product.id)
+  # 		# puts "@product"
+  # 		# puts @product.inspect
+		# end  
+		@product = Product.find(params[:id]) 
     respond_to do |format|
       format.html
       format.pdf {

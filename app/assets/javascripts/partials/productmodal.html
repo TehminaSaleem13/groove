@@ -84,6 +84,11 @@
 
     <div class="controls">
         <div groov-editable="arrayEditableOptions" identifier="product_single_barcodes" prop="barcode" ng-model="groovProducts.single.barcodes" class="pull-left"></div>
+        <i class="icon-large  icon-question-sign" data-toggle="popover" data-placement="top" data-content="Every barcode in the list can be used to scan this product. The first barcode in the list is considered the 'Primary' barcode. It will be displayed in Scan & Pack and in lists. It will also be the one that is printed when you click the Print icon. Drag the barcodes to reorder them if you would like to make another barcode the primary"
+        data-original-title=""></i>
+        <a href="/products/generate_barcode_slip/{{groovProducts.single.basicinfo.id}}.pdf" target="_blank">
+            <i class="icon-print icon-large"></i>
+        </a>
         <label ng-show="groovProducts.single.barcodes == ''" class="checkbox inline">
             <input type="checkbox" ng-change="update_single_product()"
                    ng-model="groovProducts.single.basicinfo.disable_conf_req"/> Disable Confirmation Requests
