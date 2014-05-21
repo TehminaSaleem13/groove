@@ -66,7 +66,7 @@
 		  	  		else
 		  	  			wh_hash['secondary_location'] = 'Not Available'
 		  	  		end
-		  	  		
+
 		  	  		wh_hash['threshold'] = GeneralSetting.all.first.default_low_inventory_alert_limit
 			  	  	if wh.available_inv <=  GeneralSetting.all.first.default_low_inventory_alert_limit
 			  	  		wh_hash['style'] = 'color:red;'
@@ -126,7 +126,7 @@
 									<% product['warehouses'].each do |pro_wh|%>
 									<tr>
 										<td>
-											<%= pro_wh['name'] %>
+											<%= pro_wh['primary_location'] %>
 										</td>
 									</tr>
 									<% end %>
@@ -139,7 +139,7 @@
 									<% product['warehouses'].each do |pro_wh|%>
 									<tr>
 										<td>
-											<%= pro_wh['name'] %>
+											<%= pro_wh['secondary_location'] %>
 										</td>
 									</tr>
 									<% end %>
