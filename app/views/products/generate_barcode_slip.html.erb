@@ -14,8 +14,9 @@
     <br>
     Status:
     <%=@product.status %> -->
-    
-    <%if !@product.product_barcodes.first.nil?%>
+    <%result = Hash.new%>
+    <%result['error_messages'] = []%>
+    <%if !@product.product_barcodes.first.nil? && !@product.product_barcodes.first.barcode.nil? %>
       <%sku = @product.product_skus.first%>
       <%unless sku.nil?%>
         <%barcode = @product.product_barcodes.new%>
@@ -25,15 +26,14 @@
       <span style="font-size: 12px; margin-bottom: 10px;">Item Name <%= @product.name%></span>
       <br/>
       <br/>
-      <%if !@product.product_barcodes.first.nil?%>
-        <% barcode = @product.product_barcodes.first.barcode %>
-      <%else%>
-        <% barcode = "not available" %>
-      <%end%>
+      <% barcode = @product.product_barcodes.first.barcode %>
+
       <% generate_barcode(barcode)%>
-      <%= pdf_image_tag(@product.product_barcodes.first.barcode+".png") %>
+      <%= pdf_image_tag(barcode+".png") %>
       <br/>
       <p style="text-align:center; font-size:10px; line-height: 0px;">*BARCODE*</p>
+    <%else%>
+      <%result['error_messages'].push('Cannot create barcode')%>
     <%end%>
 </body>
 </html>
