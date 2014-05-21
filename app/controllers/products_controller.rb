@@ -1285,11 +1285,10 @@ class ProductsController < ApplicationController
         :orientation => 'Portrait',
         :page_height => '1in', 
         :page_width => '3in',
-        :line_height => '5',
-        :margin => {:top => '2',                     
-                    :bottom => '2',
-                    :left => '2',
-                    :right => '2'}      	
+        :margin => {:top => '0',                     
+                    :bottom => '0',
+                    :left => '0',
+                    :right => '0'}      	
        }
     end
   end
