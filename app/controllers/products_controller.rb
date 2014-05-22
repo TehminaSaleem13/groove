@@ -980,6 +980,8 @@ class ProductsController < ApplicationController
   		@product.status = params[:basicinfo][:status]
   		@product.store_id = params[:basicinfo][:store_id]
   		@product.store_product_id = params[:basicinfo][:store_product_id]
+  		@product.weight = 
+  			get_product_weight(params[:weight][:lbs],params[:weight][:oz])
 
   		if !@product.save
   			@result['status'] &= false
@@ -1445,6 +1447,12 @@ class ProductsController < ApplicationController
   end
 
   private
+
+  def get_product_weight(lbs,oz)
+		@lbs = 	16 * lbs.to_i
+		@oz = oz.to_f
+		@lbs + @oz
+ 	end
 
   def do_search
     limit = 10
