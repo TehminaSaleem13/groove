@@ -11,12 +11,12 @@
                 <div id="collapseOne" class="accordion-body collapse in">
                     <div class="accordion-inner">
                         <ul class="nav nav-pills nav-stacked">
-                            <li ng-class="{active:orders.setup.filter=='all'}" ><a href="" ng-click="order_setup_opt('filter','all')">Show All <span class="pull-right badge">{{orders.orders_count.all}}</span></a></li>
-                            <li ng-class="{active:orders.setup.filter=='awaiting'}" ><a href="" ng-click="order_setup_opt('filter','awaiting')">Awaiting <span class="pull-right badge badge-info">{{orders.orders_count.awaiting}}</span> </a></li>
+                            <li ng-class="{active:orders.setup.filter=='all'}" ><a href="" ng-click="order_setup_opt('filter','all')">Show All</a></li>
+                            <li ng-class="{active:orders.setup.filter=='awaiting'}" ><a href="" ng-click="order_setup_opt('filter','awaiting')">Awaiting</a></li>
                             <li ng-class="{active:orders.setup.filter=='onhold'}"><a href="" ng-click="order_setup_opt('filter','onhold')">On Hold <span class="pull-right badge badge-important">{{orders.orders_count.onhold}}</span></a> </li>
-                            <li ng-class="{active:orders.setup.filter=='serviceissue'}"><a href="" ng-click="order_setup_opt('filter','serviceissue')">Service Issue <span class="pull-right badge badge-warning">{{orders.orders_count.serviceissue}}</span></a></li>
-                            <li ng-class="{active:orders.setup.filter=='cancelled'}"><a href="" ng-click="order_setup_opt('filter','cancelled')">Cancelled <span class="pull-right badge">{{orders.orders_count.cancelled}}</span></a></li>
-                            <li ng-class="{active:orders.setup.filter=='scanned'}"><a href="" ng-click="order_setup_opt('filter','scanned')">Scanned <span class="pull-right badge badge-success">{{orders.orders_count.scanned}}</span></a></li>
+                            <li ng-class="{active:orders.setup.filter=='serviceissue'}"><a href="" ng-click="order_setup_opt('filter','serviceissue')">Service Issue</a></li>
+                            <li ng-class="{active:orders.setup.filter=='cancelled'}"><a href="" ng-click="order_setup_opt('filter','cancelled')">Cancelled</a></li>
+                            <li ng-class="{active:orders.setup.filter=='scanned'}"><a href="" ng-click="order_setup_opt('filter','scanned')">Scanned</a></li>
                         </ul>
                     </div>
                 </div>

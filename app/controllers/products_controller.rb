@@ -1268,14 +1268,6 @@ class ProductsController < ApplicationController
   #params[:id]
   def generate_barcode_slip 
 		@product = Product.find(params[:id]) 
-		if !@product.product_barcodes.first.nil?
-      sku = @product.product_skus.first
-      unless sku.nil?
-        @barcode = @product.product_barcodes.new
-        @barcode.barcode = sku.sku
-      end
-      @name = @product.name
-    end
 
     respond_to do |format|
       format.html
