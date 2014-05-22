@@ -3,6 +3,7 @@
 <div bo-if="options.select_all !== false">
     <a href="" ng-click="options.select_all(true)" ng-hide="options.setup.select_all">Select all</a>
     <a href="" ng-click="options.select_all(false)" ng-show="options.setup.select_all">Select None</a>
+    <span ng-show="options.setup.select_all">Selected: {{rows.length}}</span>
 </div>
 <table groov-dragtable="dragOptions" groov-enabled="options.draggable" groov-model="theads" id="{{custom_identifier}}" class="table table-hover table-bordered">
     <thead groov-rt-click="context_menu($event)">

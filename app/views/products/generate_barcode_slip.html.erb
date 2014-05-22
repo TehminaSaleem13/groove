@@ -3,17 +3,6 @@
 <head>
 </head>
 <body style="line-height: 10px; margin-left: 3px; margin-top: 2px; margin-right: 2px; margin-bottom: 2px">
-  <!--Here is the product information<br>
-    Name: 
-    <%=@product.name %>
-    ID: 
-    <%=@product.id %>
-    <br>
-    Product Type:
-    <%=@product.product_type %>
-    <br>
-    Status:
-    <%=@product.status %> -->
     <%if !@product.product_barcodes.first.nil? && !@product.product_barcodes.first.barcode.nil? %>
       <%sku = @product.product_skus.first%>
       <%unless sku.nil?%>
