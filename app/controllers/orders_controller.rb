@@ -470,7 +470,7 @@ class OrdersController < ApplicationController
         @neworder = @order.dup
         index = 0
         temp_increment_id = ''
-
+          
         begin
           temp_increment_id = @order.increment_id + "(duplicate"+index.to_s+ ")"
           @neworder.increment_id = temp_increment_id          
@@ -483,6 +483,12 @@ class OrdersController < ApplicationController
           @result['messages'] = @neworder.errors.full_messages
         else
           #add activity
+          @order_items = @order.order_items
+          @order_items.each do |order_item|
+            neworder_item = order_item.dup
+            neworder_item.order_id = @neworder.id
+            neworder_item.save
+          end          
           username = current_user.name
           @neworder.addactivity("Order duplicated", username)
         end
