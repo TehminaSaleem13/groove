@@ -98,18 +98,14 @@
 <div class="control-group">
     <label class="control-label">Weight</label>
 
-    <div class="controls controls-row">
-        <span ng-show="groovProducts.single.weight.lbs == 0 && groovProducts.single.weight.oz == 0">
-                <input class="span2" type="text" ng-blur="update_single_product()"  value="0" />
-                <label class="control-label" style="width: 20px;">oz</label>
-        </span>    
-        <span ng-show="groovProducts.single.weight.lbs>0">
-                <input class="span2" type="text" ng-model="groovProducts.single.weight.lbs" ng-blur="update_single_product()"/>
-                <label class="control-label" style="width: 20px;">lbs</label>
+    <div class="controls controls-row">    
+        <span>
+            <input class="span2" type="text" ng-model="groovProducts.single.weight.lbs" ng-blur="update_single_product()"/>
+            <label class="control-label" style="width: 20px;">lbs</label>
         </span>
-        <span ng-show="groovProducts.single.weight.oz>0">
-                <input class="span2" type="text" ng-model="groovProducts.single.weight.oz" ng-blur="update_single_product()"/>
-                <label class="control-label" style="width: 20px;"> oz </label>
+        <span>
+            <input class="span2" type="text" ng-model="groovProducts.single.weight.oz" ng-blur="update_single_product()"/>
+            <label class="control-label" style="width: 20px;"> oz </label>
         </span>
     </div>
 </div>
