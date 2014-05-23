@@ -5,9 +5,6 @@ class ProductInventoryWarehouses < ActiveRecord::Base
   belongs_to :inventory_warehouse
   has_many :sold_inventory_warehouses
 
-  after_save :send_low_inventory_alert_email
-
-
   def update_available_inventory_level(purchase_qty, reason)
   	result = true
 
@@ -51,16 +48,6 @@ class ProductInventoryWarehouses < ActiveRecord::Base
       result &= false
     end
     result
-  end
-
-  def send_low_inventory_alert_email
-    if !GeneralSetting.all.first.nil? && 
-      (GeneralSetting.all.first.inventory_tracking ||
-        GeneralSetting.all.first.low_inventory_alert_email)
-      if self.available_inv <= GeneralSetting.all.first.default_low_inventory_alert_limit
-        LowInventoryLevel.delay(run_at: 2.seconds.from_now).notify(GeneralSetting.all.first)
-      end
-    end
   end
 
 end
