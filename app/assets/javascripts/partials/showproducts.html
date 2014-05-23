@@ -16,7 +16,7 @@
                             <li ng-class="{active: products.setup.filter=='all' && products.setup.is_kit == 0}" ><a href="" ng-click="product_setup_opt('filter','all')">Show All</a></li>
                             <li ng-class="{active: products.setup.filter=='active' && products.setup.is_kit == 0}" ><a href="" ng-click="product_setup_opt('filter','active')">Active Products</a></li>
                             <li ng-class="{active: products.setup.filter=='inactive' && products.setup.is_kit == 0}" ><a href="" ng-click="product_setup_opt('filter','inactive')">Inactive Products</a></li>
-                            <li ng-class="{active: products.setup.filter=='new' && products.setup.is_kit == 0}"><a href="" ng-click="product_setup_opt('filter','new')">New</a></li>
+                            <li ng-class="{active: products.setup.filter=='new' && products.setup.is_kit == 0}"><a href="" ng-click="product_setup_opt('filter','new')">New <span class="pull-right badge badge-important" ng-show="products.products_count.new>0">{{products.products_count.new}}</span></a></li>
                         </ul>
                     </div>
                 </div>
