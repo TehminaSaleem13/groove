@@ -562,6 +562,7 @@ class ProductsController < ApplicationController
 		@result[:status] = true
     @products = do_getproducts
 		@result['products'] = make_products_list(@products)
+		@result['products_count'] = get_products_count()
 		respond_to do |format|
       		format.json { render json: @result}
     end
@@ -1660,5 +1661,14 @@ class ProductsController < ApplicationController
     else
       return params[:productArray]
     end
+  end
+  def get_products_count
+  	count = Hash.new
+    count['all'] = Product.all.count
+    count['active'] = Product.where(:status => 'active').count
+    count['inactive'] = Product.where(:status => 'inactive').count
+    count['new'] = Product.where(:status => 'new').count
+
+    count
   end
 end
