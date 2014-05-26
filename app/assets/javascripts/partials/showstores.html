@@ -93,10 +93,12 @@ aria-hidden="true">
 
       <div class="control-group">
         <label class="control-label">Warehouse Location </label>
+
         <div class="controls">
-            <select class="selectpicker" ng-model="newStore.inventory_warehouse_id"
+            {{newStore.inventory_warehouse_id}}
+            {{warehouses.list}}
+            <select class="selectpicker" ng-model="newStore.inventory_warehouse_id" ng-options ="inv_wh.info.name for inv_wh in warehouses.list"
             >
-              <option ng-repeat="inv_wh in warehouses.list" value="{{inv_wh.info.id}}">{{inv_wh.info.name}}</option>
             </select>
          </div>
       </div>
