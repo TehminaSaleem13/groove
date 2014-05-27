@@ -27,10 +27,10 @@ class StoreSettingsController < ApplicationController
       @store = Store.new
     end
 
-    @store.name= params[:name]
+    @store.name= params[:name] || get_default_warehouse_name
     @store.store_type = params[:store_type]
     @store.status = params[:status]
-    @store.inventory_warehouse_id = params[:inventory_warehouse_id]
+    @store.inventory_warehouse_id = params[:inventory_warehouse_id] || get_default_warehouse_id
     
     @result['status'] = true
     @result['store_id'] = 0

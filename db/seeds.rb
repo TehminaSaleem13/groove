@@ -23,6 +23,11 @@ end
 if OrderTag.where(:name=>'Manual Hold').length == 0
 	manual_hold_tag = OrderTag.create(:name=>'Manual Hold', :color=>'#0000FF', :predefined => true)
 end
+
+if InventoryWarehouse.where(:name=>'Default Warehouse').length == 0
+  default_location = InventoryWarehouse.create(:name=>'Default Warehouse', :location=> 'Default Warehouse', :status => 'active', :is_default => 1)
+end
+
 if Store.where(:store_type=>'system').length == 0
   system_store = Store.create(:name=>'GroovePacker', :store_type=>'system',:status=>true)
 end

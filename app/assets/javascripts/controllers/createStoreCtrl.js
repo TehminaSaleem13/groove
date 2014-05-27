@@ -10,8 +10,22 @@ groovepacks_controllers.
                 $scope.$parent.newStore.status = 1;
                 $scope.$parent.ebay_show_signin_url = true;
                 $scope.$parent.loading = false;
+
+
+                for(var i=0; i<$scope.$parent.warehouses.list.length; 
+                    i++) {
+                    if ($scope.$parent.warehouses.list[i].info.is_default) {
+                        $scope.$parent.newStore.inventory_warehouse_id =
+                          $scope.$parent.warehouses.list[i].info.id;
+                          console.log($scope.$parent.newStore);
+                        break;
+                    }
+                }
                 $http.get('/store_settings/getebaysigninurl.json').success(function(data) {
-                    if (data.ebay_signin_url_status)
+                    if (data.ebay_signin_url_status && typeof
+                        $scope.$parent!='undefined' && 
+                        $scope.$parent != null &&
+                        typeof $scope.$parent.ebay_signin_url != 'undefined')
                     {
                         $scope.$parent.ebay_signin_url = data.ebay_signin_url;
                         $scope.$parent.ebay_signin_url_status = data.ebay_signin_url_status;
@@ -36,9 +50,12 @@ groovepacks_controllers.
                             $scope.retrieveandupdateusertoken($stateParams.storeid);
                             $scope.$parent.newStore = new Object();
                             $scope.$parent.newStore.id = $stateParams.storeid;
+
                             $scope.$parent.newStore.name = $stateParams.name;
+                
                             $scope.$parent.newStore.status = $stateParams.status;
                             $scope.$parent.newStore.store_type = $stateParams.storetype;
+
                             $scope.$parent.newStore.inventory_warehouse_id = $stateParams.inventorywarehouseid;
 
                         }
@@ -49,11 +66,22 @@ groovepacks_controllers.
                             $scope.$parent.newStore.name = $stateParams.name;
                             $scope.$parent.newStore.status = $stateParams.status;
                             $scope.$parent.newStore.store_type = $stateParams.storetype;
+                            
                             $scope.$parent.newStore.inventory_warehouse_id = $stateParams.inventorywarehouseid;
+                            
                         }
                         if(typeof $scope.$parent.newStore.status == "undefined") {
-                            $scope.$parent.newStore.status = 1;
+                            $scope.$parent.newStore.status = 1;                           
                         }
+                        for(var i=0; i<$scope.$parent.warehouses.list.length; i++) {
+                            if ($scope.$parent.warehouses.list[i].info.is_default) {
+                                $scope.$parent.newStore.inventory_warehouse_id =
+                                $scope.$parent.warehouses.list[i].info.id;
+                                console.log("assigning again");
+                                console.log($scope.$parent.newStore);
+                            break;
+                            }
+                        }                        
                         $scope.setup_modal();
                         $scope.store_modal.modal('show');
                     }

@@ -1,5 +1,5 @@
 class InventoryWarehouse < ActiveRecord::Base
-  attr_accessible :location, :name
+  attr_accessible :location, :name, :status, :is_default
 
   has_many :users, :dependent => :nullify
   has_many :product_inventory_warehousess
