@@ -9,6 +9,8 @@ module ProductsHelper
 	def import_amazon_product_details(store_id, product_sku, product_id)
 		begin
 			@store = Store.find(store_id)
+      puts "@store:"
+      puts @store.inspect
 			@amazon_credentials = AmazonCredentials.where(:store_id => store_id)
 
 			if @amazon_credentials.length > 0
@@ -30,7 +32,11 @@ module ProductsHelper
 				product = Product.find(product_id)
 
 				product.name = product_hash['GetMatchingProductForIdResult']['Products']['Product']['AttributeSets']['ItemAttributes']['Title']
-        product.weight = product_hash['GetMatchingProductForIdResult']['Products']['Product']['AttributeSets']['ItemAttributes']['ItemDimensions']['Weight'] * 16
+        puts "product.name:"
+        puts product.name
+        product.weight = product_hash['GetMatchingProductForIdResult']['Products']['Product']['AttributeSets']['ItemAttributes']['ItemDimensions']['Weight'].to_f * 16
+        puts "product.weight:"
+        puts product.weight
 				product.store_product_id = product_hash['GetMatchingProductForIdResult']['Products']['Product']['Identifiers']['MarketplaceASIN']['ASIN']
         puts product.weight.to_s
 				if @credential.import_images
