@@ -1,4 +1,8 @@
 module OrdersHelper
+	require 'barby'
+  require 'barby/barcode/code_128'
+  require 'barby/outputter/png_outputter'
+  
 	def import_magento_product(client, session, sku, store_id, import_images, import_products)
 		begin
 		response = client.call(:catalog_product_info, 
@@ -184,5 +188,17 @@ module OrdersHelper
 	end
 
    order
+  end
+
+  def generate_order_barcode(increment_id)
+  	order_barcode = Barby::Code128B.new(increment_id)
+    outputter = Barby::PngOutputter.new(order_barcode)
+    outputter.margin = 0
+    blob = outputter.to_png #Raw PNG data
+    File.open("#{Rails.root}/public/images/#{increment_id}.png", 
+      'w') do |f|
+      f.write blob
+    end
+		increment_id
   end
 end
