@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html>
 <link href='http://fonts.googleapis.com/css?family=Montserrat+Alternates:700' rel='stylesheet' type='text/css'>
 <style type="text/css">
@@ -6218,55 +6217,111 @@ border-left: 2px solid #D66E6E;width: 5px;height: 450px;margin-left:65px;margin-
   margin-left:-1.9%;
  }
 
+body{
+  font-size: 30px;
+  line-height: 40px;
+}
+label{
+  font-size: 40px;
+  line-height: 40px;
+  margin-left: 40px;
+}
+table{
+  font-size: 30px;
+  line-height: 40px;
+  width: 900px;
+}
+thead td{
+  border: solid 1px black;
+  font-size: 30px;
+  font-weight: bold;
+}
+hr{
+  border: solid 2px #eeeeee;
+}
+textarea{
+  font-size: 30px;
+  min-height: 300px;
+  width: 900px;
+}
+p{
+  margin-left: 30px;
+  font-size: 30px;
+}
+
 </style>
 <body>
-	<div class="container-fluid">
+	<div class="container" style="border: 15px solid black;">
     <% if !@order.nil?%>
+      <%order_items = @order.order_items%>
+      <%order_no = 0%>
+      <%order_items.each do |order_item|%>
+        <%order_no = order_no + order_item.qty%>
+      <%end%>
     	<div class="row">
     		<div class="span4">
-    			Total<br>Items:<strong font-size='40'><%= @order.qty%></strong>
+          <label style="margin-top: 30px; margin-left: 30px; font-size: 30px; text-alignment: top;">Total<br>Items:</label>
+    			
+          <span style="font-size: 200px; margin-left: 120px;"><%= order_no%></span>
     		</div>
 	    	<div class="span8">  	
 	      	<% barcode_string = generate_order_barcode(@order.increment_id)%>
-	      	<%= pdf_image_tag(barcode_string+".png", {:width => 255, :height => 42}) %><br>
-	      	<center><%= @order.increment_id%></center>
+	      	<label style="margin-top: 30px;margin-bottom: 0px; padding-bottom: 0px"><center><%= pdf_image_tag(barcode_string+".png", {:width => 400, :height => 60}) %></center></label><br>
+	      	<span style="margin-top: 0px; padding-top: 0px; line-height: 0px;"><center><%= @order.increment_id%></center></span>
 	    	</div>
 	    </div>
-    	<div>
+      <br><br><br>
+    	<div class="row">
     		<div class="span6">
-    			<label class="span2">Ship To:</label>
-    			<label class="span4"><%=@order.firstname%> <%=@order.lastname%><br><%=@order.address_1%> <%=@order.city%><br><%=@order.state%> <%=@order.postcode%></label>
+    			<span>
+            <span class="span2" style="font-size: 25px; text-align: left;"><strong>Ship To:</strong></span>
+    			  <span class="span3" style="font-size: 25px; text-align: left; line-height: 30px;"><%=@order.firstname%> <%=@order.lastname%><br><%=@order.address_1%> <%=@order.city%><br><%=@order.state%> <%=@order.postcode%>
+            </span>
+          </span>
     		</div>
-    		<div class="span6">
-    			<label class="span2">Order#:</label>
-    			<label class="span4"><%=@order.increment_id%></label>
-    			<label class="span2">Date</label>
-    			<label class="span4"><%=@order.order_placed_time%></label>
+    		<div class="span2" style= "text-align: right;">
+    			<span class="span2" style="font-size: 25px;"><strong>Order#</strong></span>
+    			
+    			<span class="span2" style="font-size: 25px;"><strong>Date</strong></span>
+        </div>
+
+        <%order_placed_time = @order.order_placed_time%>
+        <%date = order_placed_time.to_s.split(" ")[0]%>
+        <div class="span4">
+          <span class="span4" style="font-size: 25px; text-align: left;"><%=@order.increment_id%></span>
+    			<span class="span4" style="font-size: 25px; text-align: left;"><%=date%></span>
     		</div>
     	</div>
+      <br>
     	<div class="span12">
     		<table>
-    			<thead border='1'>
-    				<td>Item</td>
-    				<td>Description</td>
-    				<td>Qty</td>
+    			<thead>
+    				<td> Item</td>
+    				<td> Description</td>
+    				<td><center> Qty</center></td>
     			</thead>
-    			<%order_items = @order.order_items%>
+    			
     			<%order_items.each do |order_item|%>
     				<tr>
     					<td><%=order_item.sku%></td>
     					<td><%=order_item.name%></td>
-    					<td><%=order_item.qty%></td>
+    					<td><center><%=order_item.qty%></center></td>
     				</tr>
     			<%end%>
     		</table>
     	</div>
-    		<hr>
-    		<br><br><br>
+    		<center><hr></center>
+        <br>
+    		<p><i>Thankyou for your order!<br>
+        Need to return an item? No problem! Checkout our returns page<br>
+        www.dreadheadhq.com/returns.html</i></p>
     	<div>
-    		<textarea rows="4" cols="35">
- 					Note to customer.
-				</textarea>
+        <center>
+      		<textarea>
+            <%#=Note to customer.%>
+   					Note to customer.
+  				</textarea>
+        </center>
     	</div>
     <%else%>
     	<span>No orders</span>
