@@ -981,6 +981,31 @@ class OrdersController < ApplicationController
     end
   end
 
+  def generate_packing_slip
+    # @orders = list_selected_orders
+    # unless @orders.nil?
+      # @orders.each do|order|
+        @order = Order.find(params[:id])
+        puts "@order" 
+        puts @order.inspect
+        respond_to do |format|
+          format.html
+          format.pdf {
+            render :pdf => "file_name", 
+            :template => 'orders/generate_packing_slip.html.erb',
+            :orientation => 'Portrait',
+            :page_height => '6in', 
+            :page_width => '4in',
+            :margin => {:top => '0',                     
+                        :bottom => '0',
+                        :left => '0',
+                        :right => '0'}        
+          }
+        end
+      # end
+    # end
+  end
+
   private
 
   def do_search
