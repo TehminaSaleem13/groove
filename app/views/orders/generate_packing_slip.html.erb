@@ -6251,7 +6251,7 @@ p{
 
 </style>
 <body>
-	<div class="container" style="border: 15px solid black; margin-left: 60px; margin-top: 50px">
+	<div class="container" style="margin-left: 60px; margin-top: 50px">
     <% if !@order.nil?%>
       <%order_items = @order.order_items%>
       <%order_no = 0%>
@@ -6263,11 +6263,11 @@ p{
     		<div class="span4">
           <label style="margin-top: 30px; margin-left: 30px; font-size: 30px; text-alignment: top;">Total<br>Items:</label>
     			
-          <span style="font-size: 200px; margin-left: 120px;"><%= order_no%></span>
+          <span style="font-size: 160px; margin-left: 120px;"><%= order_no%></span>
     		</div>
 	    	<div class="span8">  	
 	      	<% barcode_string = generate_order_barcode(@order.increment_id)%>
-	      	<label style="margin-top: 30px;margin-bottom: 0px; padding-bottom: 0px"><center><%= pdf_image_tag(barcode_string+".png", {:width => 400, :height => 60}) %></center></label><br>
+	      	<label style="margin-top: 30px;margin-bottom: 0px; margin-left: 10px; padding-bottom: 0px"><%= pdf_image_tag(barcode_string+".png", {:width => 550, :height => 50}) %></label><br>
 	      	<span style="margin-top: 0px; padding-top: 0px; line-height: 0px;"><center><%= @order.increment_id%></center></span>
 	    	</div>
 	    </div>

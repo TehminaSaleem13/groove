@@ -194,6 +194,7 @@ module OrdersHelper
   	order_barcode = Barby::Code128B.new(increment_id)
     outputter = Barby::PngOutputter.new(order_barcode)
     outputter.margin = 0
+    outputter.xdim = 2
     blob = outputter.to_png #Raw PNG data
     File.open("#{Rails.root}/public/images/#{increment_id}.png", 
       'w') do |f|
