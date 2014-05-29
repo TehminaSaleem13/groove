@@ -37,6 +37,9 @@ module ProductsHelper
         product.weight = product_hash['GetMatchingProductForIdResult']['Products']['Product']['AttributeSets']['ItemAttributes']['ItemDimensions']['Weight'].to_f * 16
         puts "product.weight:"
         puts product.weight
+        product.shipping_weight = product_hash['GetMatchingProductForIdResult']['Products']['Product']['AttributeSets']['ItemAttributes']['PackageDimensions']['Weight'].to_f * 16
+        puts "product.shipping_weight:"
+        puts product.shipping_weight
 				product.store_product_id = product_hash['GetMatchingProductForIdResult']['Products']['Product']['Identifiers']['MarketplaceASIN']['ASIN']
         puts product.weight.to_s
 				if @credential.import_images

@@ -811,6 +811,7 @@ class ProductsController < ApplicationController
   		@result['product'] = Hash.new
   		@result['product']['basicinfo'] = @product
   		@result['product']['weight'] = @product.get_weight
+  		@result['product']['shipping_weight'] = @product.get_shipping_weight
    		@result['product']['basicinfo']['total_avail_loc'] = @product.get_total_avail_loc
    		@result['product']['basicinfo']['total_sold_inv'] = @product.get_total_sold_qty
         @result['product']['skus'] = @product.product_skus.order("product_skus.order ASC")
@@ -983,7 +984,8 @@ class ProductsController < ApplicationController
   		@product.store_product_id = params[:basicinfo][:store_product_id]
   		@product.weight = 
   			get_product_weight(params[:weight][:lbs],params[:weight][:oz])
-
+  		@product.shipping_weight = 
+  			get_product_weight(params[:shipping_weight][:lbs],params[:shipping_weight][:oz])
   		if !@product.save
   			@result['status'] &= false
   		end
