@@ -982,6 +982,15 @@ class OrdersController < ApplicationController
   end
 
   def generate_packing_slip
+    @page_height = params[:page_height]
+    @page_width = params[:page_width]
+    @orientation = params[:orientation]
+    if @orientation == "landscape"
+      @page_height = @page_height.to_f/2
+      @page_height = @page_height.to_s
+    end
+    time = Time.now
+    file_name = time.strftime("%d/%b/%Y %I:%M %p")
     # @orders = list_selected_orders
     # unless @orders.nil?
       # @orders.each do|order|
@@ -991,11 +1000,11 @@ class OrdersController < ApplicationController
         respond_to do |format|
           format.html
           format.pdf {
-            render :pdf => "file_name", 
+            render :pdf => file_name, 
             :template => 'orders/generate_packing_slip.html.erb',
-            :orientation => 'Portrait',
-            :page_height => '6in', 
-            :page_width => '4in',
+            :orientation => @orientation,
+            :page_height => @page_height+'in', 
+            :page_width => @page_width+'in',
             :margin => {:top => '0',                     
                         :bottom => '0',
                         :left => '0',
