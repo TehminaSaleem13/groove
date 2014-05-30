@@ -41,6 +41,14 @@
   <div class="row">
     <div class="span6">
         <h5>Store Settings</h5>
+        <div class="control-group">
+        <label class="radio">
+          <input type="radio" ng-model="newStore.show_product_weight" name="display_weight" value="1"/> Display the Amazon Product Weight for products imported from this store<br/>
+        </label>
+        <label class="radio">
+          <input type="radio" ng-model="newStore.show_shipping_weight" name="display_weight" value="1"/> Display the Amazon Shipping Weight for products imported from this store<br/>
+        </label>
+        </div>
         <label class="checkbox">
           <input type="checkbox"
                  ng-model="newStore.import_images"
@@ -53,7 +61,7 @@
         </label>
     </div>
   </div>
-
+  
   <div class="row">
   <div class="span6">
       <h5>Import Orders</h5>

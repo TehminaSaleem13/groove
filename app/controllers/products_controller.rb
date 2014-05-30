@@ -808,13 +808,21 @@ class ProductsController < ApplicationController
   	end
   	if !@product.nil?
   		@product.reload
+  		store_id = @product.store_id
+  		@store = Store.where(:store_id=>store_id)
+  		@amazon_products = AmazonCredentials.where(:store_id=>store_id)
+  		if !@amazon_products.nil?
+  			@amazon_product = @amazon_products.first
+
   		@result['product'] = Hash.new
+  		@result['product']['amazon_product'] = @amazon_product
+  		@result['product']['store'] = @store
   		@result['product']['basicinfo'] = @product
   		@result['product']['weight'] = @product.get_weight
   		@result['product']['shipping_weight'] = @product.get_shipping_weight
    		@result['product']['basicinfo']['total_avail_loc'] = @product.get_total_avail_loc
    		@result['product']['basicinfo']['total_sold_inv'] = @product.get_total_sold_qty
-        @result['product']['skus'] = @product.product_skus.order("product_skus.order ASC")
+      @result['product']['skus'] = @product.product_skus.order("product_skus.order ASC")
   		@result['product']['cats'] = @product.product_cats
     	@result['product']['images'] = @product.product_images.order("product_images.order ASC")
   		@result['product']['barcodes'] = @product.product_barcodes.order("product_barcodes.order ASC")
