@@ -413,6 +413,8 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies, wa
                     $scope.newStore.productmerchant_id = data.credentials.amazon_credentials.productmerchant_id;
                     $scope.newStore.import_products = data.credentials.amazon_credentials.import_products;
                     $scope.newStore.import_images = data.credentials.amazon_credentials.import_images;
+                    $scope.newStore.show_product_weight = data.credentials.amazon_credentials.show_product_weight;
+                    $scope.newStore.show_shipping_weight = data.credentials.amazon_credentials.show_shipping_weight;
                     $scope.newStore.productreport_id = data.credentials.amazon_credentials.productreport_id;
                     $scope.newStore.productgenerated_report_id = data.credentials.amazon_credentials.productgenerated_report_id
                 }
