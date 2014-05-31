@@ -809,10 +809,14 @@ class ProductsController < ApplicationController
   	if !@product.nil?
   		@product.reload
   		store_id = @product.store_id
-  		@store = Store.where(:store_id=>store_id)
-  		@amazon_products = AmazonCredentials.where(:store_id=>store_id)
-  		if !@amazon_products.nil?
-  			@amazon_product = @amazon_products.first
+  		stores = Store.where(:id=>store_id)
+  		if !stores.nil?
+  			@store = stores.first
+  		end
+  		amazon_products = AmazonCredentials.where(:store_id=>store_id)
+  		if !amazon_products.nil?
+  			@amazon_product = amazon_products.first
+  		end
 
   		@result['product'] = Hash.new
   		@result['product']['amazon_product'] = @amazon_product
