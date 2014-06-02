@@ -997,6 +997,22 @@ class OrdersController < ApplicationController
         @order = Order.find(params[:id])
         puts "@order" 
         puts @order.inspect
+
+        render :pdf => file_name, 
+            :template => 'orders/generate_packing_slip.html.erb',
+            :orientation => @orientation,
+            :save_only => true,
+            :save_to_file => Rails.root.join('pdfs', "hello1.pdf"),
+            :page_height => @page_height+'in', 
+            :page_width => @page_width+'in',
+            :margin => {:top => '0',                     
+                        :bottom => '0',
+                        :left => '0',
+                        :right => '0'}
+        reader = PDF::Reader.new(Rails.root.join('pdfs', "hello1.pdf"))
+        puts "page_count:"
+        puts reader.page_count
+
         respond_to do |format|
           format.html
           format.pdf {
