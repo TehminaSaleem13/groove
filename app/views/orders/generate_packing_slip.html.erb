@@ -6250,34 +6250,22 @@ p{
 }
 
 </style>
-<script type="text/javascript">
-  function number_pages() {
-    var vars=[];
-    var x=document.location.search.substring(1).split('&');
-    for(var i in x) {var z=x[i].split('=',2);vars[z[0]] = unescape(z[1]);}
-    var x1=['frompage','topage','page','webpage','section','subsection','subsubsection'];
-    for(var i in x1) {
-      var y = document.getElementsByClassName(x1[i]);
-      for(var j=0; j<y.length; ++j) y[j].textContent = x.length ;
-        //vars[x[i]];
-    }
-  }
-</script>
-<body onload="number_pages()">
-	<div class="container" style="margin-left: 60px; margin-top: 50px">
-    Page <span class="page"></span> of <span class="topage"></span>
+
+<body>
+	<div class="container" style="margin-left: 60px; margin-top: 50px; margin-bottom: 50px;">
     <% if !@order.nil?%>
       <%order_items = @order.order_items%>
-      <%order_no = 0%>
+      <%order_count = 0%>
       <%order_items.each do |order_item|%>
-        <%order_no = order_no + order_item.qty%>
+        <%order_count = order_count + order_item.qty%>
       <%end%>
+      
     	<div class="row">
         <br>
     		<div class="span4">
           <label style="margin-top: 30px; margin-left: 30px; font-size: 30px; text-alignment: top;">Total<br>Items:</label>
     			
-          <span style="font-size: 160px; margin-left: 120px;"><%= order_no%></span>
+          <span style="font-size: 160px; margin-left: 120px;"><%= order_count%></span>
     		</div>
 	    	<div class="span8">  	
 	      	<% barcode_string = generate_order_barcode(@order.increment_id)%>
@@ -6326,7 +6314,7 @@ p{
     		</table>
     	</div>
     		<center><hr></center>
-        <br><br><br><br><br><br><br><br><br><br><br><br>
+        <br>
     		<p><i>Thankyou for your order!<br>
         Need to return an item? No problem! Checkout our returns page<br>
         www.dreadheadhq.com/returns.html</i></p>
