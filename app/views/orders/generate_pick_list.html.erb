@@ -6252,27 +6252,27 @@ p{
 </style>
 
 <body>
-	<div class="container" style="margin-left: 60px; margin-top: 50px; margin-bottom: 50px;">
+  <div class="container" style="margin-left: 60px; margin-top: 50px; margin-bottom: 50px;">
     <% if !@pick_list.nil?%>
-    	<div class="span12">
-    		<table>
-    			<thead>
-    				<td> Product SKU</td>
-    				<td><center>Pick Quantity</center></td>
+      <div class="span12">
+        <table>
+          <thead>
+            <td> Product SKU</td>
+            <td><center>Pick Quantity</center></td>
             <td>Product Name</td>
-    			</thead>
-    			
-    			<%@pick_list.each do |pick|%>
-    				<tr>
-    					<td><%=pick[0]%></td>
-    					<td><center><%=pick[1]%></center></td>
-              
-    				</tr>
-    			<%end%>
-    		</table>
-    	</div>
+          </thead>
+          
+          <%@pick_list.each do |pick|%>
+            <tr>
+              <td><%=pick['sku']%></td>
+              <td><center><%=pick['qty']%></center></td>
+              <td><%=pick['name']%></td>
+            </tr>
+          <%end%>
+        </table>
+      </div>
     <%else%>
-    	<span>No orders</span>
+      <span>No orders</span>
     <%end%>
   </div>
 </body>

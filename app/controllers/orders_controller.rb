@@ -982,24 +982,41 @@ class OrdersController < ApplicationController
   end
 
   def generate_pick_list
-    @pick_list = Hash.new
+    @pick_list = []
+
     # @orders = list_selected_orders
     # unless @orders.nil?
       # @orders.each do|order|
         order = Order.find(params[:id])
-        order_items = order.order_items
-
-        order_items.each do |order_item|
+        order.order_items.each do |order_item|
           product = order_item.product
-          if product.is_kit == 0
+          flag = false
+          if !product.nil? && product.is_kit == 0
             product_skus = product.product_skus
             if !product_skus.first.nil?
               sku = product_skus.first.sku
-              # @pick_list['name'] = order_item.name
-              if @pick_list[sku].nil?
-                @pick_list[sku] = order_item.qty
+              
+              if @pick_list.length > 0
+                @pick_list.each do |item|
+                  if item['sku']== sku
+                    flag = true
+                    item['qty'] = item['qty'] + order_item.qty
+                    break
+                  end
+                end
+                if !flag
+                  pick_list_item = {}
+                  pick_list_item['sku'] = sku
+                  pick_list_item['qty'] = order_item.qty
+                  pick_list_item['name'] = order_item.product.name
+                  @pick_list.push(pick_list_item)
+                end
               else
-                @pick_list[sku] = @pick_list[sku]+order_item.qty
+                pick_list_item = {}
+                pick_list_item['sku'] = sku
+                pick_list_item['qty'] = order_item.qty
+                pick_list_item['name'] = order_item.name
+                @pick_list.push(pick_list_item)
               end
             end
           end
