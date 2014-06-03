@@ -981,6 +981,52 @@ class OrdersController < ApplicationController
     end
   end
 
+  def generate_pick_list
+    @pick_list = Hash.new
+    # @orders = list_selected_orders
+    # unless @orders.nil?
+      # @orders.each do|order|
+        order = Order.find(params[:id])
+        order_items = order.order_items
+
+        order_items.each do |order_item|
+          product = order_item.product
+          if product.is_kit == 0
+            product_skus = product.product_skus
+            if !product_skus.first.nil?
+              sku = product_skus.first.sku
+              # @pick_list['name'] = order_item.name
+              if @pick_list[sku].nil?
+                @pick_list[sku] = order_item.qty
+              else
+                @pick_list[sku] = @pick_list[sku]+order_item.qty
+              end
+            end
+          end
+        end
+
+        puts "@pick_list[sku]:"
+        puts @pick_list.inspect
+
+        respond_to do |format|
+          format.html
+          format.pdf {
+            render :pdf => 'file_name', 
+            :template => 'orders/generate_pick_list.html.erb',
+            :orientation => 'portrait',
+            :page_height => '6in', 
+            :page_width => '6in',
+            :no_background => false,
+            :margin => {:top => '0',                     
+                        :bottom => '0',
+                        :left => '0',
+                        :right => '0'}             
+          }
+        end
+      # end
+    # end
+  end
+
   def generate_packing_slip
     # @orders = list_selected_orders
     # unless @orders.nil?
