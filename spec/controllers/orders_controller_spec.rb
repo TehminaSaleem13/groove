@@ -66,7 +66,8 @@ describe OrdersController do
 
       #Create products
       product = FactoryGirl.create(:product)
-      product_sku = FactoryGirl.create(:product_sku, 
+
+      product_sku = FactoryGirl.create(:product_sku, :sku=>'IPHONE5C', 
       	:product=> product)
       product_inv_wh = FactoryGirl.create(
       	:product_inventory_warehouse, :product=> product,
@@ -89,14 +90,91 @@ describe OrdersController do
       expect(result["status"]).to eq(true)
 
       expect(result["data"]["pick_list"].length).to eq(1)
+ 
       expect(result["data"]["pick_list"].first["sku"]).
-      	to eq("IPHONE5S")
+      	to eq("IPHONE5C")
       expect(result["data"]["pick_list"].first["primary_location"]).
-      	to eq("A1")
+      	to eq("-")
       expect(result["data"]["pick_list"].first["secondary_location"]).
-      	to eq("H4")
+      	to eq("-")
       expect(result["data"]["pick_list"].first["name"]).
       	to eq("Apple iPhone 5S")
     end
-  end  
+  end 
+
+  describe "GET order pick list" do
+    it "checks lenght of pick list" do
+      request.accept = "application/json"
+
+      #set up of data      
+      #Inventory warehouse
+      inv_wh = FactoryGirl.create(:inventory_warehouse)
+      
+      #Store
+      store = FactoryGirl.create(:store, :inventory_warehouse_id => inv_wh.id)
+
+      #Create products
+      product = FactoryGirl.create(:product)
+      product1 = FactoryGirl.create(:product, :name=>'iPhone 5C')
+
+      product_sku = FactoryGirl.create(:product_sku, 
+      	:product=> product)
+      product_sku1 = FactoryGirl.create(:product_sku, :sku=>'IPHONE5C', 
+      	:product=> product1)
+
+      product_inv_wh = FactoryGirl.create(:product_inventory_warehouse, :product=> product,
+        :inventory_warehouse_id =>inv_wh.id, 
+        :available_inv => 25)
+      product_inv_wh1 = FactoryGirl.create(
+      	:product_inventory_warehouse, :product=> product1,
+        :inventory_warehouse_id =>inv_wh.id, 
+        :available_inv => 25)
+
+      #Order
+      order = FactoryGirl.create(:order, :status=>'awaiting', :store=>store)
+      
+      #Order item
+      order_item = FactoryGirl.create(:order_item, :product_id=>product.id,
+                    :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>product.name)
+      order_item1 = FactoryGirl.create(:order_item, :product_id=>product1.id,
+                    :qty=>1, :price=>"100", :row_total=>"100", :order=>order, :name=>product.name)
+      order_item2 = FactoryGirl.create(:order_item, :product_id=>product.id,
+                    :qty=>1, :price=>"100", :row_total=>"100", :order=>order, :name=>product.name)
+
+      #execution
+      get :generate_pick_list, {:id => order.id }
+
+      #expectations
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["status"]).to eq(true)
+
+      expect(result["data"]["pick_list"].length).to eq(2)
+  		puts result["data"]["pick_list"].inspect
+      expect(result["data"]["pick_list"][0]["sku"]).
+      	to eq("IPHONE5S")
+      expect(result["data"]["pick_list"][0]["primary_location"]).
+      	to eq("A1")
+      expect(result["data"]["pick_list"][0]["secondary_location"]).
+      	to eq("H4")
+      expect(result["data"]["pick_list"][0]["name"]).
+      	to eq("Apple iPhone 5S")
+      expect(result["data"]["pick_list"][0]["qty"]).
+      	to eq(2)
+
+
+      expect(result["data"]["pick_list"][1]["sku"]).
+      	to eq("IPHONE5C")
+      expect(result["data"]["pick_list"][1]["primary_location"]).
+      	to eq("A1")
+      expect(result["data"]["pick_list"][1]["secondary_location"]).
+      	to eq("H4")
+      expect(result["data"]["pick_list"][1]["name"]).
+      	to eq("iPhone 5C")
+      expect(result["data"]["pick_list"][1]["qty"]).
+      	to eq(1)  
+
+    end
+  end 
+  
 end

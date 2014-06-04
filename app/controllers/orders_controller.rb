@@ -1000,7 +1000,6 @@ class OrdersController < ApplicationController
           inventory_warehouse_id = store.inventory_warehouse_id
         end
         
-        puts "@inventory_warehouse_id:"+@inventory_warehouse_id.to_s
         order.order_items.each do |order_item|
           if !order_item.product.nil?
             # for single products which are not kit
@@ -1231,22 +1230,17 @@ class OrdersController < ApplicationController
 
   def build_single_pick_list(order_item, product, pick_list, inventory_warehouse_id)
     product_skus = product.product_skus
-    
-    inventory_warehouse_id = 
-      order_item.order.store.inventory_warehouse_id
-    
-    product_inventory_warehouses = product.get_inventory_warehouse_info(inventory_warehouse_id)
+        
+    product_inventory_warehouse = product.get_inventory_warehouse_info(inventory_warehouse_id)
     sku_found = false
-    
-    if !product_inventory_warehouses.nil?
-      if !product_inventory_warehouses.first.nil?
-        primary_location = product_inventory_warehouses.first.location_primary
-        secondary_location = product_inventory_warehouses.first.location_secondary 
-      else
-        primary_location = "-"
-        secondary_location = "-"
-      end
+    if !product_inventory_warehouse.nil?
+      primary_location = product_inventory_warehouse.location_primary
+      secondary_location = product_inventory_warehouse.location_secondary 
+    else
+      primary_location = "-"
+      secondary_location = "-"
     end
+
     if !product_skus.first.nil?
       sku = product_skus.first.sku
       

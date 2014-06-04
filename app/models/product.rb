@@ -253,7 +253,9 @@ class Product < ActiveRecord::Base
     result
   end
   def get_inventory_warehouse_info(inventory_warehouse_id)
-    product_inventory_warehouses = ProductInventoryWarehouses.where(:inventory_warehouse_id => inventory_warehouse_id).where(:id => self.id)
-    product_inventory_warehouses
+    product_inventory_warehouses = 
+     ProductInventoryWarehouses.where(:inventory_warehouse_id => inventory_warehouse_id).
+      where(:product_id => self.id)
+    product_inventory_warehouses.first
   end
 end
