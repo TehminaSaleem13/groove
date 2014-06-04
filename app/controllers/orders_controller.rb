@@ -982,51 +982,50 @@ class OrdersController < ApplicationController
   end
 
   def generate_pick_list
+    result = Hash.new
+    result['status'] = true
+    result['error_messages'] = []
+    result['success_messages'] = []
+    result['notice_messages'] = []
+    result['data'] = Hash.new
     @pick_list = []
 
     # @orders = list_selected_orders
     # unless @orders.nil?
       # @orders.each do|order|
         order = Order.find(params[:id])
+        store = order.store
+        inventory_warehouse_id = 0
+        if !store.nil? && !store.inventory_warehouse.nil?
+          inventory_warehouse_id = store.inventory_warehouse_id
+        end
+        
+        puts "@inventory_warehouse_id:"+@inventory_warehouse_id.to_s
         order.order_items.each do |order_item|
-          product = order_item.product
-          flag = false
-          if !product.nil? && product.is_kit == 0
-            product_skus = product.product_skus
-            if !product_skus.first.nil?
-              sku = product_skus.first.sku
-              
-              if @pick_list.length > 0
-                @pick_list.each do |item|
-                  if item['sku']== sku
-                    flag = true
-                    item['qty'] = item['qty'] + order_item.qty
-                    break
-                  end
-                end
-                if !flag
-                  pick_list_item = {}
-                  pick_list_item['sku'] = sku
-                  pick_list_item['qty'] = order_item.qty
-                  pick_list_item['name'] = order_item.product.name
-                  @pick_list.push(pick_list_item)
-                end
+          if !order_item.product.nil?
+            # for single products which are not kit
+            if order_item.product.is_kit == 0
+              @pick_list = build_single_pick_list(
+                order_item, order_item.product, @pick_list, inventory_warehouse_id)
+            else # for products which are kits
+              if order_item.product.kit_parsing == 'single'
+                @pick_list = build_single_pick_list(
+                  order_item, order_item.product, @pick_list, inventory_warehouse_id)
               else
-                pick_list_item = {}
-                pick_list_item['sku'] = sku
-                pick_list_item['qty'] = order_item.qty
-                pick_list_item['name'] = order_item.name
-                @pick_list.push(pick_list_item)
+                #for individual and automatic depends kits
+
               end
             end
           end
         end
 
-        puts "@pick_list[sku]:"
-        puts @pick_list.inspect
 
         respond_to do |format|
           format.html
+          format.json {
+            result['data']['pick_list'] = @pick_list
+            render json: result
+          }
           format.pdf {
             render :pdf => 'file_name', 
             :template => 'orders/generate_pick_list.html.erb',
@@ -1049,8 +1048,7 @@ class OrdersController < ApplicationController
     # unless @orders.nil?
       # @orders.each do|order|
         @order = Order.find(params[:id])
-        puts "@order" 
-        puts @order.inspect
+
         respond_to do |format|
           format.html
           format.pdf {
@@ -1068,6 +1066,7 @@ class OrdersController < ApplicationController
       # end
     # end
   end
+
 
   private
 
@@ -1217,6 +1216,56 @@ class OrdersController < ApplicationController
       Order.where(:status => 'serviceissue').count
 
     count
+  end
+
+  def build_pick_list_item(primary_location, 
+    sku, qty, name, secondary_location)
+    pick_list_item = {}
+    pick_list_item['primary_location'] = primary_location
+    pick_list_item['sku'] = sku
+    pick_list_item['qty'] = qty
+    pick_list_item['name'] = name
+    pick_list_item['secondary_location'] = secondary_location
+    pick_list_item
+  end
+
+  def build_single_pick_list(order_item, product, pick_list, inventory_warehouse_id)
+    product_skus = product.product_skus
+    
+    inventory_warehouse_id = 
+      order_item.order.store.inventory_warehouse_id
+    
+    product_inventory_warehouses = product.get_inventory_warehouse_info(inventory_warehouse_id)
+    sku_found = false
+    
+    if !product_inventory_warehouses.nil?
+      if !product_inventory_warehouses.first.nil?
+        primary_location = product_inventory_warehouses.first.location_primary
+        secondary_location = product_inventory_warehouses.first.location_secondary 
+      else
+        primary_location = "-"
+        secondary_location = "-"
+      end
+    end
+    if !product_skus.first.nil?
+      sku = product_skus.first.sku
+      
+      if pick_list.length > 0
+        pick_list.each do |item|
+          if item['sku']== sku
+            sku_found = true
+            item['qty'] = item['qty'] + order_item.qty
+            break
+          end
+        end
+        if !sku_found
+          pick_list.push(build_pick_list_item(primary_location, sku, order_item.qty, order_item.product.name, secondary_location))
+        end
+      else
+        pick_list.push(build_pick_list_item(primary_location, sku, order_item.qty, order_item.product.name, secondary_location))
+      end
+    end
+    pick_list
   end
 
 end

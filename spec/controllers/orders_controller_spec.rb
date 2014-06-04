@@ -51,6 +51,52 @@ describe OrdersController do
 	  result = JSON.parse(response.body)
 	  expect(result['status']).to eq(true)
     end
-
   end
+
+  describe "GET order pick list" do
+    it "retrieves pick list for an order" do
+      request.accept = "application/json"
+
+      #set up of data      
+      #Inventory warehouse
+      inv_wh = FactoryGirl.create(:inventory_warehouse)
+      
+      #Store
+      store = FactoryGirl.create(:store, :inventory_warehouse_id => inv_wh.id)
+
+      #Create products
+      product = FactoryGirl.create(:product)
+      product_sku = FactoryGirl.create(:product_sku, 
+      	:product=> product)
+      product_inv_wh = FactoryGirl.create(
+      	:product_inventory_warehouse, :product=> product,
+        :inventory_warehouse_id =>inv_wh.id, 
+        :available_inv => 25)
+
+      #Order
+      order = FactoryGirl.create(:order, :status=>'awaiting', :store=>store)
+      
+      #Order item
+      order_item = FactoryGirl.create(:order_item, :product_id=>product.id,
+                    :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>product.name)
+
+      #execution
+      get :generate_pick_list, {:id => order.id }
+
+      #expectations
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["status"]).to eq(true)
+
+      expect(result["data"]["pick_list"].length).to eq(1)
+      expect(result["data"]["pick_list"].first["sku"]).
+      	to eq("IPHONE5S")
+      expect(result["data"]["pick_list"].first["primary_location"]).
+      	to eq("A1")
+      expect(result["data"]["pick_list"].first["secondary_location"]).
+      	to eq("H4")
+      expect(result["data"]["pick_list"].first["name"]).
+      	to eq("Apple iPhone 5S")
+    end
+  end  
 end

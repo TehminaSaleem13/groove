@@ -6257,16 +6257,20 @@ p{
       <div class="span12">
         <table>
           <thead>
+            <td>Location Primary</td>
             <td> Product SKU</td>
             <td><center>Pick Quantity</center></td>
             <td>Product Name</td>
+            <td>Location Secondary</td>
           </thead>
           
           <%@pick_list.each do |pick|%>
             <tr>
+              <td><%=pick['primary_location']%></td>
               <td><%=pick['sku']%></td>
               <td><center><%=pick['qty']%></center></td>
               <td><%=pick['name']%></td>
+              <td><%=pick['secondary_location']%></td>
             </tr>
           <%end%>
         </table>
