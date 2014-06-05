@@ -249,5 +249,114 @@ describe OrdersController do
 
 
     end
+    it "for products with kit_parsing as individual" do
+      request.accept = "application/json"
+
+      inv_wh = FactoryGirl.create(:inventory_warehouse)
+
+      store = FactoryGirl.create(:store, 
+        :inventory_warehouse_id => inv_wh.id)
+
+      #Order
+      order = FactoryGirl.create(:order, :status=>'awaiting', 
+        :store=>store)
+      
+
+      #Create products
+      # product = FactoryGirl.create(:product)
+      product_kit = FactoryGirl.create(:product, 
+        :is_kit => 1, :name=>'iPhone Protection Kit',
+        :kit_parsing=>'individual')
+      order_item_kit = FactoryGirl.create(:order_item, 
+        :product_id=>product_kit.id, :qty=>2, :price=>"10", 
+        :row_total=>"10", :order=>order)
+      product_kit_inv_wh = FactoryGirl.create(
+        :product_inventory_warehouse, :product=> product_kit,
+        :inventory_warehouse_id =>inv_wh.id, :available_inv => 25)
+      #kit_product #1
+      kit_product = FactoryGirl.create(:product, 
+        :name=>'Apple iPhone 5C')
+      product_kit_sku = FactoryGirl.create(:product_kit_sku, 
+        :product => product_kit, :id=>product_kit.id, :option_product_id=>kit_product.id, 
+        :qty=>2)
+      kit_product_sku = FactoryGirl.create(:product_sku, 
+        :product=> kit_product, :sku=> 'IPROTO1')
+      kit_product_inv_wh = FactoryGirl.create(:product_inventory_warehouse, 
+        :product=> kit_product,
+        :inventory_warehouse_id =>inv_wh.id, :available_inv => 25)
+
+      
+      #kit_product #2
+      kit_product1 = FactoryGirl.create(:product, 
+        :name=>'Apple iPhone 5S')
+      product_kit_sku1 = FactoryGirl.create(:product_kit_sku, 
+        :product => product_kit,  
+        :option_product_id=>kit_product1.id, 
+        :qty=>1)
+      kit_product_sku1 = FactoryGirl.create(:product_sku, 
+        :product=> kit_product1, :sku=> 'IPROTO2')
+      kit_product_inv_wh1 = FactoryGirl.create(:product_inventory_warehouse, 
+        :product=> kit_product1,
+        :inventory_warehouse_id =>inv_wh.id, :available_inv => 25)
+
+      #kit_product #3
+      kit_product2 = FactoryGirl.create(:product, 
+        :name=>'Apple iPhone 5D')
+      product_kit_sku2 = FactoryGirl.create(:product_kit_sku, 
+        :product => product_kit,  
+        :option_product_id=>kit_product2.id, 
+        :qty=>3)
+      kit_product_sku2 = FactoryGirl.create(:product_sku, 
+        :product=> kit_product2, :sku=> 'IPROTO3')
+      kit_product_inv_wh2 = FactoryGirl.create(:product_inventory_warehouse, 
+        :product=> kit_product2,
+        :inventory_warehouse_id =>inv_wh.id, :available_inv => 25)
+
+      #execution
+      get :generate_pick_list, {:id => order.id }
+
+      #expectations
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["status"]).to eq(true)
+
+      puts "pick_list:"
+      puts result["data"]["pick_list"].inspect
+      expect(result["data"]["pick_list"].length).to eq(3)
+
+      expect(result["data"]["pick_list"][0]["sku"]).
+        to eq("IPROTO1")
+      expect(result["data"]["pick_list"][0]["primary_location"]).
+        to eq("A1")
+      expect(result["data"]["pick_list"][0]["secondary_location"]).
+        to eq("H4")
+      expect(result["data"]["pick_list"][0]["name"]).
+        to eq("Apple iPhone 5C")
+      expect(result["data"]["pick_list"][0]["qty"]).
+        to eq(4)
+
+      expect(result["data"]["pick_list"][1]["sku"]).
+        to eq("IPROTO2")
+      expect(result["data"]["pick_list"][1]["primary_location"]).
+        to eq("A1")
+      expect(result["data"]["pick_list"][1]["secondary_location"]).
+        to eq("H4")
+      expect(result["data"]["pick_list"][1]["name"]).
+        to eq("Apple iPhone 5S")
+      expect(result["data"]["pick_list"][1]["qty"]).
+        to eq(2)
+
+      expect(result["data"]["pick_list"][2]["sku"]).
+        to eq("IPROTO3")
+      expect(result["data"]["pick_list"][2]["primary_location"]).
+        to eq("A1")
+      expect(result["data"]["pick_list"][2]["secondary_location"]).
+        to eq("H4")
+      expect(result["data"]["pick_list"][2]["name"]).
+        to eq("Apple iPhone 5D")
+      expect(result["data"]["pick_list"][2]["qty"]).
+        to eq(6)
+
+    end
   end
 end

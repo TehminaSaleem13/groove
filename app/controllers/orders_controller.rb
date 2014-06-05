@@ -1000,20 +1000,25 @@ class OrdersController < ApplicationController
           inventory_warehouse_id = store.inventory_warehouse_id
         end
         single_pick_list_obj = 
-          Groovepacker::PickList::SinglePickListBuilder.new        
+          Groovepacker::PickList::SinglePickListBuilder.new 
+        individual_pick_list_obj = 
+          Groovepacker::PickList::IndividualPickListBuilder.new                  
         order.order_items.each do |order_item|
           if !order_item.product.nil?
             # for single products which are not kit
             if order_item.product.is_kit == 0
               @pick_list = single_pick_list_obj.build(
-                order_item, order_item.product, @pick_list, inventory_warehouse_id)
+                order_item.qty, order_item.product, @pick_list, inventory_warehouse_id)
             else # for products which are kits
               if order_item.product.kit_parsing == 'single'
                 @pick_list = single_pick_list_obj.build(
-                  order_item, order_item.product, @pick_list, inventory_warehouse_id)
-              else
-                #for individual and automatic depends kits
+                  order_item.qty, order_item.product, @pick_list, inventory_warehouse_id)    
+              else #for individual and automatic depends kits
+                if order_item.product.kit_parsing == 'individual'
 
+                  @pick_list = individual_pick_list_obj.build(
+                  order_item.qty, order_item.product, @pick_list, inventory_warehouse_id)    
+                end
               end
             end
           end
