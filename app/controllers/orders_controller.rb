@@ -989,6 +989,7 @@ class OrdersController < ApplicationController
     result['notice_messages'] = []
     result['data'] = Hash.new
     @pick_list = []
+    @depends_pick_list = []
 
     # @orders = list_selected_orders
     # unless @orders.nil?
@@ -1002,7 +1003,9 @@ class OrdersController < ApplicationController
         single_pick_list_obj = 
           Groovepacker::PickList::SinglePickListBuilder.new 
         individual_pick_list_obj = 
-          Groovepacker::PickList::IndividualPickListBuilder.new                  
+          Groovepacker::PickList::IndividualPickListBuilder.new
+        depends_pick_list_obj = 
+          Groovepacker::PickList::DependsPickListBuilder.new                  
         order.order_items.each do |order_item|
           if !order_item.product.nil?
             # for single products which are not kit
@@ -1013,11 +1016,15 @@ class OrdersController < ApplicationController
               if order_item.product.kit_parsing == 'single'
                 @pick_list = single_pick_list_obj.build(
                   order_item.qty, order_item.product, @pick_list, inventory_warehouse_id)    
-              else #for individual and automatic depends kits
+              else #for individual kits
                 if order_item.product.kit_parsing == 'individual'
-
                   @pick_list = individual_pick_list_obj.build(
-                  order_item.qty, order_item.product, @pick_list, inventory_warehouse_id)    
+                  order_item.qty, order_item.product, @pick_list, inventory_warehouse_id) 
+                else #for automatic depends kits
+                  if order_item.product.kit_parsing == 'depends'
+                    @depends_pick_list = depends_pick_list_obj.build(
+                    order_item.qty, order_item.product, @depends_pick_list, inventory_warehouse_id)
+                  end
                 end
               end
             end
@@ -1029,6 +1036,7 @@ class OrdersController < ApplicationController
           format.html
           format.json {
             result['data']['pick_list'] = @pick_list
+            result['data']['depends_pick_list'] = @depends_pick_list
             render json: result
           }
           format.pdf {
