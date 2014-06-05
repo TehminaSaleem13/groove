@@ -999,16 +999,17 @@ class OrdersController < ApplicationController
         if !store.nil? && !store.inventory_warehouse.nil?
           inventory_warehouse_id = store.inventory_warehouse_id
         end
-        
+        single_pick_list_obj = 
+          Groovepacker::PickList::SinglePickListBuilder.new        
         order.order_items.each do |order_item|
           if !order_item.product.nil?
             # for single products which are not kit
             if order_item.product.is_kit == 0
-              @pick_list = build_single_pick_list(
+              @pick_list = single_pick_list_obj.build(
                 order_item, order_item.product, @pick_list, inventory_warehouse_id)
             else # for products which are kits
               if order_item.product.kit_parsing == 'single'
-                @pick_list = build_single_pick_list(
+                @pick_list = single_pick_list_obj.build(
                   order_item, order_item.product, @pick_list, inventory_warehouse_id)
               else
                 #for individual and automatic depends kits
@@ -1217,49 +1218,7 @@ class OrdersController < ApplicationController
     count
   end
 
-  def build_pick_list_item(primary_location, 
-    sku, qty, name, secondary_location)
-    pick_list_item = {}
-    pick_list_item['primary_location'] = primary_location
-    pick_list_item['sku'] = sku
-    pick_list_item['qty'] = qty
-    pick_list_item['name'] = name
-    pick_list_item['secondary_location'] = secondary_location
-    pick_list_item
-  end
 
-  def build_single_pick_list(order_item, product, pick_list, inventory_warehouse_id)
-    product_skus = product.product_skus
-        
-    product_inventory_warehouse = product.get_inventory_warehouse_info(inventory_warehouse_id)
-    sku_found = false
-    if !product_inventory_warehouse.nil?
-      primary_location = product_inventory_warehouse.location_primary
-      secondary_location = product_inventory_warehouse.location_secondary 
-    else
-      primary_location = "-"
-      secondary_location = "-"
-    end
 
-    if !product_skus.first.nil?
-      sku = product_skus.first.sku
-      
-      if pick_list.length > 0
-        pick_list.each do |item|
-          if item['sku']== sku
-            sku_found = true
-            item['qty'] = item['qty'] + order_item.qty
-            break
-          end
-        end
-        if !sku_found
-          pick_list.push(build_pick_list_item(primary_location, sku, order_item.qty, order_item.product.name, secondary_location))
-        end
-      else
-        pick_list.push(build_pick_list_item(primary_location, sku, order_item.qty, order_item.product.name, secondary_location))
-      end
-    end
-    pick_list
-  end
 
 end

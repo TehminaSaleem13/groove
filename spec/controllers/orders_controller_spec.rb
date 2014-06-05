@@ -94,16 +94,14 @@ describe OrdersController do
       expect(result["data"]["pick_list"].first["sku"]).
       	to eq("IPHONE5C")
       expect(result["data"]["pick_list"].first["primary_location"]).
-      	to eq("-")
+      	to eq("A1")
       expect(result["data"]["pick_list"].first["secondary_location"]).
-      	to eq("-")
+      	to eq("H4")
       expect(result["data"]["pick_list"].first["name"]).
       	to eq("Apple iPhone 5S")
     end
-  end 
 
-  describe "GET order pick list" do
-    it "checks lenght of pick list" do
+    it "checks length of pick list" do
       request.accept = "application/json"
 
       #set up of data      
@@ -175,6 +173,81 @@ describe OrdersController do
       	to eq(1)  
 
     end
-  end 
-  
+
+    it "for products with kit_parsing as single" do
+      request.accept = "application/json"
+
+      #set up of data      
+      #Inventory warehouse
+      inv_wh = FactoryGirl.create(:inventory_warehouse)
+
+      store = FactoryGirl.create(:store, 
+        :inventory_warehouse_id => inv_wh.id)
+
+      #Order
+      order = FactoryGirl.create(:order, :status=>'awaiting', 
+        :store=>store)
+
+      #Create products
+      product = FactoryGirl.create(:product)
+
+      product_sku = FactoryGirl.create(:product_sku, 
+        :product=> product)
+
+      order_item = FactoryGirl.create(:order_item, 
+        :product_id=>product.id,
+        :qty=>1, :price=>"10", :row_total=>"10", 
+        :order=>order, :name=>product.name)
+
+      product_kit = FactoryGirl.create(:product, 
+        :is_kit => 1, :name=>'iPhone Protection Kit',
+        :kit_parsing=>'single')
+
+      product_kit_sku = FactoryGirl.create(:product_sku, 
+        :product=> product_kit, :sku=> 'IPROTO')
+
+      product_kit_inv_wh = FactoryGirl.create(:product_inventory_warehouse, 
+        :product=> product_kit,
+        :inventory_warehouse_id =>inv_wh.id, :available_inv => 25)
+
+      order_item_kit = FactoryGirl.create(:order_item, 
+        :product_id=>product_kit.id, :qty=>2, :price=>"10", 
+        :row_total=>"10", :order=>order, :name=>product_kit.name)
+
+      #execution
+      get :generate_pick_list, {:id => order.id }
+
+      #expectations
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["status"]).to eq(true)
+
+      expect(result["data"]["pick_list"].length).to eq(2)
+      puts result["data"]["pick_list"].inspect
+
+      expect(result["data"]["pick_list"][0]["sku"]).
+        to eq("IPHONE5S")
+      expect(result["data"]["pick_list"][0]["primary_location"]).
+        to eq("-")
+      expect(result["data"]["pick_list"][0]["secondary_location"]).
+        to eq("-")
+      expect(result["data"]["pick_list"][0]["name"]).
+        to eq("Apple iPhone 5S")
+      expect(result["data"]["pick_list"][0]["qty"]).
+        to eq(1)
+
+      expect(result["data"]["pick_list"][1]["sku"]).
+        to eq("IPROTO")
+      expect(result["data"]["pick_list"][1]["primary_location"]).
+        to eq("A1")
+      expect(result["data"]["pick_list"][1]["secondary_location"]).
+        to eq("H4")
+      expect(result["data"]["pick_list"][1]["name"]).
+        to eq("iPhone Protection Kit")
+      expect(result["data"]["pick_list"][1]["qty"]).
+        to eq(2)
+
+
+    end
+  end
 end
