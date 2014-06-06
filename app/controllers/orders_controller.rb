@@ -991,10 +991,9 @@ class OrdersController < ApplicationController
     @pick_list = []
     @depends_pick_list = []
 
-    # @orders = list_selected_orders
-    # unless @orders.nil?
-      # @orders.each do|order|
-        order = Order.find(params[:id])
+    if !params['order_ids'].nil?      
+      params['order_ids'].each do |id|
+        order = Order.find(id)
         store = order.store
         inventory_warehouse_id = 0
         if !store.nil? && !store.inventory_warehouse.nil?
@@ -1030,29 +1029,28 @@ class OrdersController < ApplicationController
             end
           end
         end
+      end
+    end
 
-
-        respond_to do |format|
-          format.html
-          format.json {
-            result['data']['pick_list'] = @pick_list
-            result['data']['depends_pick_list'] = @depends_pick_list
-            render json: result
-          }
-          format.pdf {
-            render :pdf => 'file_name', 
-            :template => 'orders/generate_pick_list.html.erb',
-            :orientation => 'portrait',
-            :page_height => '8in', 
-            :page_width => '11.5in',
-            :margin => {:top => '0',                     
-                        :bottom => '0',
-                        :left => '0',
-                        :right => '0'}           
-          }
-        end
-      # end
-    # end
+    respond_to do |format|
+      format.html
+      format.json {
+        result['data']['pick_list'] = @pick_list
+        result['data']['depends_pick_list'] = @depends_pick_list
+        render json: result
+      }
+      format.pdf {
+        render :pdf => 'file_name', 
+        :template => 'orders/generate_pick_list.html.erb',
+        :orientation => 'portrait',
+        :page_height => '8in', 
+        :page_width => '11.5in',
+        :margin => {:top => '0',                     
+                    :bottom => '0',
+                    :left => '0',
+                    :right => '0'}           
+      }
+    end
   end
 
   def generate_packing_slip

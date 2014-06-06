@@ -82,7 +82,7 @@ describe OrdersController do
                     :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>product.name)
 
       #execution
-      get :generate_pick_list, {:id => order.id }
+      get :generate_pick_list, {:id => order.id}
 
       #expectations
       expect(response.status).to eq(200)
@@ -140,7 +140,7 @@ describe OrdersController do
                     :qty=>1, :price=>"100", :row_total=>"100", :order=>order, :name=>product.name)
 
       #execution
-      get :generate_pick_list, {:id => order.id }
+      get :generate_pick_list, {:id => order.id}
 
       #expectations
       expect(response.status).to eq(200)
@@ -215,7 +215,7 @@ describe OrdersController do
         :row_total=>"10", :order=>order, :name=>product_kit.name)
 
       #execution
-      get :generate_pick_list, {:id => order.id }
+      get :generate_pick_list, {:order_ids=>[order.id, order.id, order.id] }
 
       #expectations
       expect(response.status).to eq(200)
@@ -234,7 +234,7 @@ describe OrdersController do
       expect(result["data"]["pick_list"][0]["name"]).
         to eq("Apple iPhone 5S")
       expect(result["data"]["pick_list"][0]["qty"]).
-        to eq(1)
+        to eq(3)
 
       expect(result["data"]["pick_list"][1]["sku"]).
         to eq("IPROTO")
@@ -245,7 +245,7 @@ describe OrdersController do
       expect(result["data"]["pick_list"][1]["name"]).
         to eq("iPhone Protection Kit")
       expect(result["data"]["pick_list"][1]["qty"]).
-        to eq(2)
+        to eq(6)
 
 
     end
@@ -315,7 +315,7 @@ describe OrdersController do
         :row_total=>"10", :order=>order)
 
       #execution
-      get :generate_pick_list, {:id => order.id }
+      get :generate_pick_list, {:order_ids=>[order.id, order.id, order.id] }
 
       #expectations
       expect(response.status).to eq(200)
@@ -335,7 +335,7 @@ describe OrdersController do
       expect(result["data"]["pick_list"][0]["name"]).
         to eq("Apple iPhone 5C")
       expect(result["data"]["pick_list"][0]["qty"]).
-        to eq(4)
+        to eq(12)
 
       expect(result["data"]["pick_list"][1]["sku"]).
         to eq("IPROTO2")
@@ -346,7 +346,7 @@ describe OrdersController do
       expect(result["data"]["pick_list"][1]["name"]).
         to eq("Apple iPhone 5S")
       expect(result["data"]["pick_list"][1]["qty"]).
-        to eq(2)
+        to eq(6)
 
       expect(result["data"]["pick_list"][2]["sku"]).
         to eq("IPROTO3")
@@ -357,7 +357,7 @@ describe OrdersController do
       expect(result["data"]["pick_list"][2]["name"]).
         to eq("Apple iPhone 5D")
       expect(result["data"]["pick_list"][2]["qty"]).
-        to eq(6)
+        to eq(18)
 
     end
     it "for products with kit_parsing as depends" do
@@ -419,7 +419,7 @@ describe OrdersController do
         :product_id=>product_kit.id, :qty=>2, :price=>"10", 
         :row_total=>"10", :order=>order)
 
-      get :generate_pick_list, {:id => order.id }
+      get :generate_pick_list, {:order_ids=>[order.id, order.id, order.id]}
 
       #expectations
       expect(response.status).to eq(200)
