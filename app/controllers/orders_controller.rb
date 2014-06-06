@@ -1043,13 +1043,12 @@ class OrdersController < ApplicationController
             render :pdf => 'file_name', 
             :template => 'orders/generate_pick_list.html.erb',
             :orientation => 'portrait',
-            :page_height => '6in', 
-            :page_width => '6in',
-            :no_background => false,
+            :page_height => '8in', 
+            :page_width => '11.5in',
             :margin => {:top => '0',                     
                         :bottom => '0',
                         :left => '0',
-                        :right => '0'}             
+                        :right => '0'}           
           }
         end
       # end

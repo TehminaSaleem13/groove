@@ -19,8 +19,9 @@ module Groovepacker
 					individual_pick_list, 
 					inventory_warehouse_id)
 				
-				pick_list.push({single: single_pick_list,
-				 individual:individual_pick_list})
+				pick_list.push({
+					"single" => single_pick_list,
+				  "individual" => individual_pick_list})
 				puts "depends_pick_list:"
 				puts pick_list.inspect
 				pick_list
