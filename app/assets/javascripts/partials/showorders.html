@@ -27,13 +27,21 @@
     <div class="span8">
         <div class="well scroll-x">
             <div class="row-fluid">
-                <div class="span8">
+                <div class="span6">
                     <form class="form-search">
                         <input type="text" id="order-search-query" ng-model="orders.setup.search" class="input-large search-query" placeholder="Search">
                     </form>
                 </div>
-                <div class="span4">
+                <div class="span6">
                     <ul class="nav nav-pills">
+                        <li class="dropdown">
+                            <a class="dropdown-toggle" id="drop4" role="button" data-toggle="dropdown" href="">Printing <b class="caret"></b></a>
+                            <ul id="menu2" class="dropdown-menu" role="menu" aria-labelledby="drop4">
+                                <li role="presentation"><a role="menuitem" tabindex="-1" ng-click="">Print Pick List and Packing Slips</a></li>
+                                <li role="presentation"><a role="menuitem" tabindex="-1" ng-click="generate_orders_pick_list()">Print Only Pick list</a></li>
+                                <li role="presentation"><a role="menuitem" tabindex="-1" ng-click="">Print Only Packing Slips</a></li>
+                            </ul>
+                        </li>
                         <li class="dropdown">
                             <a class="dropdown-toggle" id="drop4" role="button" data-toggle="dropdown" href="">Edit <b class="caret"></b></a>
                             <ul id="menu2" class="dropdown-menu" role="menu" aria-labelledby="drop4">

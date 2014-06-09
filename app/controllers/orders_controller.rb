@@ -991,9 +991,10 @@ class OrdersController < ApplicationController
     @pick_list = []
     @depends_pick_list = []
 
-    if !params['order_ids'].nil?      
-      params['order_ids'].each do |id|
-        order = Order.find(id)
+    @orders = list_selected_orders
+    unless @orders.nil?
+      @orders.each do |order|
+        order = Order.find(order['id'])
         store = order.store
         inventory_warehouse_id = 0
         if !store.nil? && !store.inventory_warehouse.nil?
@@ -1037,18 +1038,25 @@ class OrdersController < ApplicationController
       format.json {
         result['data']['pick_list'] = @pick_list
         result['data']['depends_pick_list'] = @depends_pick_list
-        render json: result
-      }
-      format.pdf {
-        render :pdf => 'file_name', 
+        time = Time.now
+        file_name = 'pick_list_'+time.strftime("%d_%b_%Y")
+        result['data']['pick_list_file_path'] = '/pdfs/'+ file_name + '.pdf'
+        render :pdf => file_name, 
         :template => 'orders/generate_pick_list.html.erb',
         :orientation => 'portrait',
         :page_height => '8in', 
+        :save_only => true,
         :page_width => '11.5in',
         :margin => {:top => '0',                     
                     :bottom => '0',
                     :left => '0',
-                    :right => '0'}           
+                    :right => '0'},
+        :save_to_file => Rails.root.join('public','pdfs', "#{file_name}.pdf")
+        
+        render json: result
+      }
+      format.pdf {
+          
       }
     end
   end

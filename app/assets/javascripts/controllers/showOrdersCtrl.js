@@ -57,6 +57,10 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,ord
         });
 
     }
+    $scope.generate_orders_pick_list = function() {
+        orders.list.generate('pick_list',$scope.orders).then(
+            function(data){});
+    }
     /**
      * Private methods
      */
