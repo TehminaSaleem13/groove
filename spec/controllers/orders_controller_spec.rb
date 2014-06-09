@@ -439,7 +439,7 @@ describe OrdersController do
       expect(result["data"]["depends_pick_list"].first["single"][0]["name"]).
         to eq("iPhone Protection Kit")
       expect(result["data"]["depends_pick_list"].first["single"][0]["qty"]).
-        to eq(2)
+        to eq(6)
 
       expect(result["data"]["depends_pick_list"].first["individual"].length).to eq(2)
 
@@ -452,7 +452,7 @@ describe OrdersController do
       expect(result["data"]["depends_pick_list"].first["individual"][0]["name"]).
         to eq("Apple iPhone 5C")
       expect(result["data"]["depends_pick_list"].first["individual"][0]["qty"]).
-        to eq(4)
+        to eq(12)
 
       expect(result["data"]["depends_pick_list"].first["individual"][1]["sku"]).
         to eq("IPROTO2")
@@ -463,7 +463,7 @@ describe OrdersController do
       expect(result["data"]["depends_pick_list"].first["individual"][1]["name"]).
         to eq("Apple iPhone 5D")
       expect(result["data"]["depends_pick_list"].first["individual"][1]["qty"]).
-        to eq(4)
+        to eq(12)
     end
   end
 end
