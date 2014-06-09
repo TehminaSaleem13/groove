@@ -61,6 +61,8 @@ module Groovepacks
     config.assets.precompile += %w( font-awesome-ie7.min.css )
 
     config.serve_static_assets = true
-
+    
+    # Autoload lib/ folder including all subdirectories
+    config.autoload_paths += Dir["#{config.root}/lib/**/"]
   end
 end

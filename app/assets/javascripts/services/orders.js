@@ -1,4 +1,4 @@
-groovepacks_services.factory('orders',['$http','notification',function($http,notification) {
+groovepacks_services.factory('orders',['$http','$window','notification',function($http,$window,notification) {
 
     var success_messages = {
         update_status: "Status updated Successfully",
@@ -79,6 +79,28 @@ groovepacks_services.factory('orders',['$http','notification',function($http,not
                 }
             }
         ).error(notification.server_error);
+    }
+
+    var generate_list = function(action, orders) {
+
+        orders.setup.orderArray = [];
+        for( i in orders.list) {
+            if (orders.list[i].checked == true) {
+                orders.setup.orderArray.push({id: orders.list[i].id});
+            }
+        }
+        var url = '';
+
+        if(action == "pick_list") {
+            url = '/orders/generate_pick_list.json';
+        }        
+        return $http.post(url,orders.setup)
+        .success(function(response) {
+            
+            $window.open(response.data.pick_list_file_path);
+            // $window.open('/pdf/pick_list_09_Jun_2014.pdf');
+
+        }).error(notification.server_error);
     }
 
     var update_list = function(action,orders) {
@@ -234,7 +256,8 @@ groovepacks_services.factory('orders',['$http','notification',function($http,not
         list: {
             get: get_list,
             update: update_list,
-            update_node: update_list_node
+            update_node: update_list_node,
+            generate: generate_list
         },
         single: {
             get: get_single,

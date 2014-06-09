@@ -981,13 +981,92 @@ class OrdersController < ApplicationController
     end
   end
 
+  def generate_pick_list
+    result = Hash.new
+    result['status'] = true
+    result['error_messages'] = []
+    result['success_messages'] = []
+    result['notice_messages'] = []
+    result['data'] = Hash.new
+    @pick_list = []
+    @depends_pick_list = []
+
+    @orders = list_selected_orders
+    unless @orders.nil?
+      @orders.each do |order|
+        order = Order.find(order['id'])
+        store = order.store
+        inventory_warehouse_id = 0
+        if !store.nil? && !store.inventory_warehouse.nil?
+          inventory_warehouse_id = store.inventory_warehouse_id
+        end
+        single_pick_list_obj = 
+          Groovepacker::PickList::SinglePickListBuilder.new 
+        individual_pick_list_obj = 
+          Groovepacker::PickList::IndividualPickListBuilder.new
+        depends_pick_list_obj = 
+          Groovepacker::PickList::DependsPickListBuilder.new                  
+        order.order_items.each do |order_item|
+          if !order_item.product.nil?
+            # for single products which are not kit
+            if order_item.product.is_kit == 0
+              @pick_list = single_pick_list_obj.build(
+                order_item.qty, order_item.product, @pick_list, inventory_warehouse_id)
+            else # for products which are kits
+              if order_item.product.kit_parsing == 'single'
+                @pick_list = single_pick_list_obj.build(
+                  order_item.qty, order_item.product, @pick_list, inventory_warehouse_id)    
+              else #for individual kits
+                if order_item.product.kit_parsing == 'individual'
+                  @pick_list = individual_pick_list_obj.build(
+                  order_item.qty, order_item.product, @pick_list, inventory_warehouse_id) 
+                else #for automatic depends kits
+                  if order_item.product.kit_parsing == 'depends'
+                    @depends_pick_list = depends_pick_list_obj.build(
+                    order_item.qty, order_item.product, @depends_pick_list, inventory_warehouse_id)
+                  end
+                end
+              end
+            end
+          end
+        end
+      end
+    end
+
+    respond_to do |format|
+      format.html
+      format.json {
+        result['data']['pick_list'] = @pick_list
+        result['data']['depends_pick_list'] = @depends_pick_list
+        time = Time.now
+        file_name = 'pick_list_'+time.strftime("%d_%b_%Y")
+        result['data']['pick_list_file_path'] = '/pdfs/'+ file_name + '.pdf'
+        render :pdf => file_name, 
+        :template => 'orders/generate_pick_list.html.erb',
+        :orientation => 'portrait',
+        :page_height => '8in', 
+        :save_only => true,
+        :page_width => '11.5in',
+        :margin => {:top => '0',                     
+                    :bottom => '0',
+                    :left => '0',
+                    :right => '0'},
+        :save_to_file => Rails.root.join('public','pdfs', "#{file_name}.pdf")
+        
+        render json: result
+      }
+      format.pdf {
+          
+      }
+    end
+  end
+
   def generate_packing_slip
     # @orders = list_selected_orders
     # unless @orders.nil?
       # @orders.each do|order|
         @order = Order.find(params[:id])
-        puts "@order" 
-        puts @order.inspect
+
         respond_to do |format|
           format.html
           format.pdf {
@@ -1005,6 +1084,7 @@ class OrdersController < ApplicationController
       # end
     # end
   end
+
 
   private
 
@@ -1155,5 +1235,8 @@ class OrdersController < ApplicationController
 
     count
   end
+
+
+
 
 end

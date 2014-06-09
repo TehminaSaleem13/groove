@@ -252,6 +252,7 @@ class Product < ActiveRecord::Base
     result['oz'] = (self.weight % 16)
     result
   end
+
   def get_shipping_weight
     result = Hash.new
     if self.shipping_weight < 1
@@ -261,5 +262,12 @@ class Product < ActiveRecord::Base
     end
     result['oz'] = (self.shipping_weight % 16)
     result
+  end
+  
+  def get_inventory_warehouse_info(inventory_warehouse_id)
+    product_inventory_warehouses = 
+     ProductInventoryWarehouses.where(:inventory_warehouse_id => inventory_warehouse_id).
+      where(:product_id => self.id)
+    product_inventory_warehouses.first
   end
 end

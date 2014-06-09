@@ -5,5 +5,7 @@ FactoryGirl.define do
     location "MyString"
     qty 1
     product nil
+    location_primary 'A1' 
+    location_secondary 'H4'
   end
 end
