@@ -1076,6 +1076,31 @@ class OrdersController < ApplicationController
       # @orders.each do|order|
         @order = Order.find(params[:id])
 
+
+        render :pdf => file_name, 
+            :template => 'orders/generate_packing_slip.html.erb',
+            :orientation => @orientation,
+            :save_only => true,
+            :save_to_file => Rails.root.join('tmp', @order.increment_id+".pdf"),
+            :page_height => @page_height+'in', 
+            :page_width => @page_width+'in',
+            :margin => {:top => '5',                     
+                        :bottom => '10',
+                        :left => '2',
+                        :right => '2'}
+        reader = PDF::Reader.new(Rails.root.join('tmp', @order.increment_id+".pdf"))
+        page_count = reader.page_count
+        File.delete(Rails.root.join('tmp', @order.increment_id+".pdf"))
+        #delete the file
+        if page_count > 1
+          @header = "Multi-Slip Order # " + @order.increment_id
+          @footer = "Multi-Slip Order # " + @order.increment_id
+        else
+          @header = ""
+          @footer = ""
+        end
+
+
         respond_to do |format|
           format.html
           format.pdf {
@@ -1084,10 +1109,21 @@ class OrdersController < ApplicationController
             :orientation => @orientation,
             :page_height => @page_height+'in', 
             :page_width => @page_width+'in',
-            :margin => {:top => '0',                     
-                        :bottom => '0',
-                        :left => '0',
-                        :right => '0'}        
+            :no_background => false,
+            :margin => {:top => '5',                     
+                        :bottom => '10',
+                        :left => '2',
+                        :right => '2'},
+            :header => {
+              :html => { 
+                :template => 'orders/generate_packing_slip_header.pdf.erb'
+                }
+            },
+            :footer => {
+              :html => { 
+                :template => 'orders/generate_packing_slip_header.pdf.erb'
+                }
+            }              
           }
         end
       # end
