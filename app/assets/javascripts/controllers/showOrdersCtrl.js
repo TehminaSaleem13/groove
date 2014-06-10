@@ -61,6 +61,10 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,ord
         orders.list.generate('pick_list',$scope.orders).then(
             function(data){});
     }
+    $scope.generate_orders_packing_slip = function() {
+        orders.list.generate('packing_slip',$scope.orders).then(
+            function(data){});
+    }
     /**
      * Private methods
      */

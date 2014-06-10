@@ -237,6 +237,7 @@ GEM
     nori (2.1.0)
     open4 (1.3.0)
     orm_adapter (0.4.0)
+    pdf-core (0.2.5)
     pdf-reader (1.3.3)
       Ascii85 (~> 1.0.0)
       afm (~> 0.2.0)
@@ -244,6 +245,9 @@ GEM
       ruby-rc4
       ttfunk
     polyglot (0.3.3)
+    prawn (1.0.0)
+      pdf-core (~> 0.2.2)
+      ttfunk (~> 1.1.1)
     quiet_assets (1.0.2)
       railties (>= 3.1, < 5.0)
     rack (1.4.5)
@@ -398,6 +402,7 @@ DEPENDENCIES
   mysql2
   open4
   pdf-reader
+  prawn
   quiet_assets (>= 1.0.1)
   rails (= 3.2.13)
   rolify (>= 3.2.0)
