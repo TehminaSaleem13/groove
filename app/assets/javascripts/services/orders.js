@@ -100,10 +100,11 @@ groovepacks_services.factory('orders',['$http','$window','notification',function
         return $http.post(url,orders.setup)
         .success(function(response) {
             if (action == "pick_list") {
-               $window.open(response.data.pick_list_file_path); 
+               $window.open(response.data.pick_list_file_paths); 
             }
             else if(action == "packing_slip") {
-                $window.open(response.data.packing_slip_file_path);
+
+                $window.open(response.data.merged_packing_slip_url);    
             }
         }).error(notification.server_error);
     }

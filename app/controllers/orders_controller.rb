@@ -1,16 +1,10 @@
 class OrdersController < ApplicationController
-  require "prawn"
+
   include OrdersHelper
   include ProductsHelper
   # GET /orders
   # GET /orders.json
-  def test
-    Prawn::Document.generate("public/pdfs/hello.pdf") do
-      text "Hello World!"
-    end
-    render json: "ok"
-  end
-  
+   
   def index
     @orders = Order.all
 
@@ -1047,7 +1041,7 @@ class OrdersController < ApplicationController
         result['data']['depends_pick_list'] = @depends_pick_list
         time = Time.now
         file_name = 'pick_list_'+time.strftime("%d_%b_%Y")
-        result['data']['pick_list_file_path'] = '/pdfs/'+ file_name + '.pdf'
+        result['data']['pick_list_file_paths'] = '/pdfs/'+ file_name + '.pdf'
         render :pdf => file_name, 
         :template => 'orders/generate_pick_list.html.erb',
         :orientation => 'portrait',
@@ -1139,15 +1133,15 @@ class OrdersController < ApplicationController
             :save_to_file => Rails.root.join('public','pdfs', "#{@order.increment_id}.pdf")
           
         result['data']['packing_slip_file_paths'].push(Rails.root.join('public','pdfs', "#{@order.increment_id}.pdf"))
-
       end
     
-    result['data']['destination'] =  Rails.root.join('public','pdfs', "destination.pdf")
+      result['data']['destination'] =  Rails.root.join('public','pdfs', "#{file_name}_packing_slip.pdf")
 
-    packing_slip_obj.merge(result['data']['packing_slip_file_paths'], 
-      result['data']['destination'])
-    
-    render json: result        
+      result['data']['merged_packing_slip_url'] =  '/pdfs/'+ file_name + '_packing_slip.pdf'
+      
+      packing_slip_obj.merge(result['data']['packing_slip_file_paths'], result['data']['destination'])
+      
+      render json: result        
     end
   end
 
