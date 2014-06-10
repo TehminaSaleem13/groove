@@ -93,13 +93,19 @@ groovepacks_services.factory('orders',['$http','$window','notification',function
 
         if(action == "pick_list") {
             url = '/orders/generate_pick_list.json';
-        }        
+        }
+        else if(action == "packing_slip") {
+            url = '/orders/generate_packing_slip.json';
+        }
         return $http.post(url,orders.setup)
         .success(function(response) {
-            
-            $window.open(response.data.pick_list_file_path);
-            // $window.open('/pdf/pick_list_09_Jun_2014.pdf');
+            if (action == "pick_list") {
+               $window.open(response.data.pick_list_file_paths); 
+            }
+            else if(action == "packing_slip") {
 
+                $window.open(response.data.merged_packing_slip_url);    
+            }
         }).error(notification.server_error);
     }
 

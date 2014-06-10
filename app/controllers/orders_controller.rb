@@ -4,6 +4,7 @@ class OrdersController < ApplicationController
   include ProductsHelper
   # GET /orders
   # GET /orders.json
+   
   def index
     @orders = Order.all
 
@@ -1040,7 +1041,7 @@ class OrdersController < ApplicationController
         result['data']['depends_pick_list'] = @depends_pick_list
         time = Time.now
         file_name = 'pick_list_'+time.strftime("%d_%b_%Y")
-        result['data']['pick_list_file_path'] = '/pdfs/'+ file_name + '.pdf'
+        result['data']['pick_list_file_paths'] = '/pdfs/'+ file_name + '.pdf'
         render :pdf => file_name, 
         :template => 'orders/generate_pick_list.html.erb',
         :orientation => 'portrait',
@@ -1062,19 +1063,27 @@ class OrdersController < ApplicationController
   end
 
   def generate_packing_slip
-    @page_height = params[:page_height]
-    @page_width = params[:page_width]
-    @orientation = params[:orientation]
+    # @page_height = params[:page_height]
+    # @page_width = params[:page_width]
+    # @orientation = params[:orientation]
+    result = Hash.new
+    result['data'] = Hash.new
+    result['data']['packing_slip_file_paths'] = []
+    @page_height = '6'
+    @page_width = '4'
+    @orientation = "portrait"
     if @orientation == "landscape"
       @page_height = @page_height.to_f/2
       @page_height = @page_height.to_s
     end
     time = Time.now
-    file_name = time.strftime("%d/%b/%Y %I:%M %p")
-    # @orders = list_selected_orders
-    # unless @orders.nil?
-      # @orders.each do|order|
-        @order = Order.find(params[:id])
+    file_name = time.strftime("%d_%b_%Y_%I:%M_%p")
+    @orders = list_selected_orders
+    packing_slip_obj = 
+          Groovepacker::PackingSlip::PdfMerger.new 
+    unless @orders.nil?
+      @orders.each do|order|
+        @order = Order.find(order['id'])
 
 
         render :pdf => file_name, 
@@ -1100,15 +1109,12 @@ class OrdersController < ApplicationController
           @footer = ""
         end
 
-
-        respond_to do |format|
-          format.html
-          format.pdf {
-            render :pdf => file_name, 
+        render :pdf => file_name, 
             :template => 'orders/generate_packing_slip.html.erb',
             :orientation => @orientation,
             :page_height => @page_height+'in', 
             :page_width => @page_width+'in',
+            :save_only => true,
             :no_background => false,
             :margin => {:top => '5',                     
                         :bottom => '10',
@@ -1123,11 +1129,20 @@ class OrdersController < ApplicationController
               :html => { 
                 :template => 'orders/generate_packing_slip_header.pdf.erb'
                 }
-            }              
-          }
-        end
-      # end
-    # end
+            },
+            :save_to_file => Rails.root.join('public','pdfs', "#{@order.increment_id}.pdf")
+          
+        result['data']['packing_slip_file_paths'].push(Rails.root.join('public','pdfs', "#{@order.increment_id}.pdf"))
+      end
+    
+      result['data']['destination'] =  Rails.root.join('public','pdfs', "#{file_name}_packing_slip.pdf")
+
+      result['data']['merged_packing_slip_url'] =  '/pdfs/'+ file_name + '_packing_slip.pdf'
+      
+      packing_slip_obj.merge(result['data']['packing_slip_file_paths'], result['data']['destination'])
+      
+      render json: result        
+    end
   end
 
 
