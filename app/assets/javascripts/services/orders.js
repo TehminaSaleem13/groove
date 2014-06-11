@@ -83,30 +83,33 @@ groovepacks_services.factory('orders',['$http','$window','notification',function
 
     var generate_list = function(action, orders) {
 
-        orders.setup.orderArray = [];
-        for( i in orders.list) {
-            if (orders.list[i].checked == true) {
-                orders.setup.orderArray.push({id: orders.list[i].id});
+            orders.setup.orderArray = [];
+            for( i in orders.list) {
+                if (orders.list[i].checked == true) {
+                    orders.setup.orderArray.push({id: orders.list[i].id});
+                }
             }
-        }
-        var url = '';
+            var url = '';
 
-        if(action == "pick_list") {
-            url = '/orders/generate_pick_list.json';
-        }
-        else if(action == "packing_slip") {
-            url = '/orders/generate_packing_slip.json';
-        }
-        return $http.post(url,orders.setup)
-        .success(function(response) {
-            if (action == "pick_list") {
-               $window.open(response.data.pick_list_file_paths); 
+            //set url for each action.
+            if(action == "pick_list") {
+                url = '/orders/generate_pick_list.json';
             }
             else if(action == "packing_slip") {
-
-                $window.open(response.data.merged_packing_slip_url);    
+                url = '/orders/generate_packing_slip.json';
             }
-        }).error(notification.server_error);
+
+            //send post http request and catch the response to display the pdfs.
+            return $http.post(url,orders.setup)
+            .success(function(response) {
+                if (action == "pick_list") {
+                    $window.open(response.data.pick_list_file_paths); 
+                }
+                else if(action == "packing_slip") {
+
+                    $window.open(response.data.merged_packing_slip_url);    
+                }
+            }).error(notification.server_error);
     }
 
     var update_list = function(action,orders) {
