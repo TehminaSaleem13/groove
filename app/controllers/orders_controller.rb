@@ -1099,8 +1099,10 @@ class OrdersController < ApplicationController
                         :right => '2'}
         reader = PDF::Reader.new(Rails.root.join('tmp', @order.increment_id+".pdf"))
         page_count = reader.page_count
-        File.delete(Rails.root.join('tmp', @order.increment_id+".pdf"))
+
         #delete the file
+        File.delete(Rails.root.join('tmp', @order.increment_id+".pdf"))
+        
         if page_count > 1
           @header = "Multi-Slip Order # " + @order.increment_id
           @footer = "Multi-Slip Order # " + @order.increment_id
@@ -1139,6 +1141,7 @@ class OrdersController < ApplicationController
 
       result['data']['merged_packing_slip_url'] =  '/pdfs/'+ file_name + '_packing_slip.pdf'
       
+      #merge the packing-slips
       packing_slip_obj.merge(result['data']['packing_slip_file_paths'], result['data']['destination'])
       
       render json: result        

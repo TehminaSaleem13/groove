@@ -65,6 +65,13 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,ord
         orders.list.generate('packing_slip',$scope.orders).then(
             function(data){});
     }
+    $scope.generate_orders_pick_list_and_packing_slip = function() {
+        //call the pick_list and packing_slip actions separately, to get the pdfs.
+        orders.list.generate('pick_list',$scope.orders).then(
+            function(data){});
+        orders.list.generate('packing_slip',$scope.orders).then(
+            function(data){});
+    }
     /**
      * Private methods
      */
