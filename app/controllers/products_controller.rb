@@ -822,6 +822,7 @@ class ProductsController < ApplicationController
   		@result['product']['amazon_product'] = @amazon_product
   		@result['product']['store'] = @store
   		@result['product']['basicinfo'] = @product
+  		@result['product']['product_weight_format'] = GeneralSetting.get_product_weight_format
   		@result['product']['weight'] = @product.get_weight
   		@result['product']['shipping_weight'] = @product.get_shipping_weight
    		@result['product']['basicinfo']['total_avail_loc'] = @product.get_total_avail_loc
@@ -994,15 +995,12 @@ class ProductsController < ApplicationController
   		@product.status = params[:basicinfo][:status]
   		@product.store_id = params[:basicinfo][:store_id]
   		@product.store_product_id = params[:basicinfo][:store_product_id]
+
   		@product.weight = 
-  			get_product_weight(params[:weight][:lbs],params[:weight][:oz])
+  			get_product_weight(params[:weight][:lbs], params[:weight][:oz])
   		@product.shipping_weight = 
   			get_product_weight(params[:shipping_weight][:lbs],params[:shipping_weight][:oz])
 
-  		@product.metric_weight = 
-  			get_product_weight_metric(params[:weight][:kgs],params[:weight][:gms])
-  		@product.metric_shipping_weight = 
-  			get_product_weight_metric(params[:shipping_weight][:kgs],params[:shipping_weight][:gms])
   		if !@product.save
   			@result['status'] &= false
   		end
@@ -1472,12 +1470,6 @@ class ProductsController < ApplicationController
 		@lbs = 	16 * lbs.to_i
 		@oz = oz.to_f
 		@lbs + @oz
- 	end
-
- 	def get_product_weight_metric
- 		@kgs = 	1000 * kgs.to_i
-		@gms = gms.to_f
-		@kgs + @gms
  	end
 
   def do_search

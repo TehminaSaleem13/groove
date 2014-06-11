@@ -147,9 +147,9 @@
           <div class="control-group">
             <label class="control-label">Product Weight Units: </label>
             <div class="controls">
-              <select class="dropdown">
-                <option value="English" ng-model="generalsettings.single.product_weight_format" ng-click="update_settings()">English</option>
-                <option value="Metric" ng-model="generalsettings.single.product_weight_format" ng-click="update_settings()">Metric</option>
+              <select class="dropdown" ng-model="generalsettings.single.product_weight_format" ng-change="update_settings()">
+                <option value="English">English</option>
+                <option value="Metric">Metric</option>
               </select>
             </div>
           </div>
