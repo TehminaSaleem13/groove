@@ -998,6 +998,11 @@ class ProductsController < ApplicationController
   			get_product_weight(params[:weight][:lbs],params[:weight][:oz])
   		@product.shipping_weight = 
   			get_product_weight(params[:shipping_weight][:lbs],params[:shipping_weight][:oz])
+
+  		@product.metric_weight = 
+  			get_product_weight_metric(params[:weight][:kgs],params[:weight][:gms])
+  		@product.metric_shipping_weight = 
+  			get_product_weight_metric(params[:shipping_weight][:kgs],params[:shipping_weight][:gms])
   		if !@product.save
   			@result['status'] &= false
   		end
@@ -1467,6 +1472,12 @@ class ProductsController < ApplicationController
 		@lbs = 	16 * lbs.to_i
 		@oz = oz.to_f
 		@lbs + @oz
+ 	end
+
+ 	def get_product_weight_metric
+ 		@kgs = 	1000 * kgs.to_i
+		@gms = gms.to_f
+		@kgs + @gms
  	end
 
   def do_search
