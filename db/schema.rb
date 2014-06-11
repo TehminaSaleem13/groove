@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140526101444) do
+ActiveRecord::Schema.define(:version => 20140611120807) do
 
   create_table "amazon_credentials", :force => true do |t|
     t.string   "merchant_id",                                     :null => false
@@ -24,6 +24,8 @@ ActiveRecord::Schema.define(:version => 20140526101444) do
     t.string   "productreport_id"
     t.string   "productgenerated_report_id"
     t.datetime "productgenerated_report_date"
+    t.boolean  "show_product_weight",          :default => true
+    t.boolean  "show_shipping_weight",         :default => false
   end
 
   create_table "column_preferences", :force => true do |t|
@@ -91,6 +93,7 @@ ActiveRecord::Schema.define(:version => 20140526101444) do
     t.boolean  "send_email_on_sat",                 :default => false
     t.boolean  "send_email_on_sun",                 :default => false
     t.time     "time_to_send_email",                :default => '2000-01-01 00:00:00'
+    t.string   "product_weight_format"
   end
 
   create_table "inventory_warehouses", :force => true do |t|
@@ -341,6 +344,7 @@ ActiveRecord::Schema.define(:version => 20140526101444) do
     t.boolean  "disable_conf_req",                                              :default => false
     t.integer  "total_avail_ext",                                               :default => 0,         :null => false
     t.decimal  "weight",                          :precision => 8, :scale => 2, :default => 0.0,       :null => false
+    t.decimal  "shipping_weight",                 :precision => 8, :scale => 2, :default => 0.0
   end
 
   add_index "products", ["store_id"], :name => "index_products_on_store_id"

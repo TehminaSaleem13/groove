@@ -98,42 +98,73 @@
 <div class="control-group" ng-hide="groovProducts.single.store.store_type=='Amazon'">
     <label class="control-label">Product Weight</label>
 
-    <div class="controls controls-row">    
+    <div class="controls controls-row" ng-show="groovProducts.single.product_weight_format=='English'">    
         <span>
             <input class="span1" type="text" ng-model="groovProducts.single.weight.lbs" ng-blur="update_single_product()"/>
-            <label class="control-label" style="width: 20px;">lbs</label>
+            <label class="control-label" style="width: 25px;">lbs</label>
         </span>
         <span>
             <input class="span1" type="text" ng-model="groovProducts.single.weight.oz" ng-blur="update_single_product()"/>
-            <label class="control-label" style="width: 20px;"> oz </label>
+            <label class="control-label" style="width: 25px;"> oz </label>
+        </span>
+    </div>
+    <div class="controls controls-row" ng-hide="groovProducts.single.product_weight_format=='English'">    
+        <span>
+            <input class="span1" type="text" ng-model="groovProducts.single.weight.kgs" ng-blur="update_single_product()"/>
+            <label class="control-label" style="width: 25px;">kgs</label>
+        </span>
+        <span>
+            <input class="span1" type="text" ng-model="groovProducts.single.weight.gms" ng-blur="update_single_product()"/>
+            <label class="control-label" style="width: 25px;"> gms </label>
         </span>
     </div>
 </div>
+<div><br><label>{{groovProducts.single.product_weight_format}}</label></div>
 <div class="control-group" ng-show="groovProducts.single.store.store_type=='Amazon' && groovProducts.single.amazon_product.show_product_weight==true">
     <label class="control-label">Product Weight</label>
 
-    <div class="controls controls-row">    
+    <div class="controls controls-row" ng-show="groovProducts.single.product_weight_format=='English'">    
         <span>
             <input class="span1" type="text" ng-model="groovProducts.single.weight.lbs" ng-blur="update_single_product()"/>
-            <label class="control-label" style="width: 20px;"> lbs </label>
+            <label class="control-label" style="width: 25px;"> lbs </label>
         </span>
         <span>
             <input class="span1" type="text" ng-model="groovProducts.single.weight.oz" ng-blur="update_single_product()"/>
-            <label class="control-label" style="width: 20px;"> oz </label>
+            <label class="control-label" style="width: 25px;"> oz </label>
+        </span>
+    </div>
+    <div class="controls controls-row" ng-hide="groovProducts.single.product_weight_format=='English'">    
+        <span>
+            <input class="span1" type="text" ng-model="groovProducts.single.weight.kgs" ng-blur="update_single_product()"/>
+            <label class="control-label" style="width: 25px;"> kgs </label>
+        </span>
+        <span>
+            <input class="span1" type="text" ng-model="groovProducts.single.weight.gms" ng-blur="update_single_product()"/>
+            <label class="control-label" style="width: 25px;"> gms </label>
         </span>
     </div>
 </div>
 
 <div class="control-group" ng-show="groovProducts.single.store.store_type=='Amazon' && groovProducts.single.amazon_product.show_shipping_weight==true">
     <label class="control-label">Shipping Weight</label>
-    <div class="controls controls-row">    
+    <div class="controls controls-row" ng-show="groovProducts.single.product_weight_format=='English'">    
         <span>
             <input class="span1" type="text" ng-model="groovProducts.single.shipping_weight.lbs" ng-blur="update_single_product()"/>
-            <label class="control-label" style="width: 20px;"> lbs </label>
+            <label class="control-label" style="width: 25px;"> lbs </label>
         </span>
         <span>
             <input class="span1" type="text" ng-model="groovProducts.single.shipping_weight.oz" ng-blur="update_single_product()"/>
-            <label class="control-label" style="width: 20px;"> oz </label>
+            <label class="control-label" style="width: 25px;"> oz </label>
+        </span>
+    </div>
+    <div class="controls controls-row" ng-hide="groovProducts.single.product_weight_format=='English'">    
+        <span>
+            <input class="span1" type="text" ng-model="groovProducts.single.shipping_weight.kgs" ng-blur="update_single_product()"/>
+            <label class="control-label" style="width: 25px;"> kgs </label>
+        </span>
+        <span>
+            <input class="span1" type="text" ng-model="groovProducts.single.shipping_weight.gms" ng-blur="update_single_product()"/>
+            <label class="control-label" style="width: 25px;"> gms </label>
         </span>
     </div>
 </div>

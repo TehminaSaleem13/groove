@@ -822,6 +822,7 @@ class ProductsController < ApplicationController
   		@result['product']['amazon_product'] = @amazon_product
   		@result['product']['store'] = @store
   		@result['product']['basicinfo'] = @product
+  		@result['product']['product_weight_format'] = GeneralSetting.get_product_weight_format
   		@result['product']['weight'] = @product.get_weight
   		@result['product']['shipping_weight'] = @product.get_shipping_weight
    		@result['product']['basicinfo']['total_avail_loc'] = @product.get_total_avail_loc
@@ -994,10 +995,12 @@ class ProductsController < ApplicationController
   		@product.status = params[:basicinfo][:status]
   		@product.store_id = params[:basicinfo][:store_id]
   		@product.store_product_id = params[:basicinfo][:store_product_id]
+
   		@product.weight = 
-  			get_product_weight(params[:weight][:lbs],params[:weight][:oz])
+  			get_product_weight(params[:weight])
   		@product.shipping_weight = 
-  			get_product_weight(params[:shipping_weight][:lbs],params[:shipping_weight][:oz])
+  			get_product_weight(params[:shipping_weight])
+
   		if !@product.save
   			@result['status'] &= false
   		end
@@ -1463,10 +1466,16 @@ class ProductsController < ApplicationController
 
   private
 
-  def get_product_weight(lbs,oz)
-		@lbs = 	16 * lbs.to_i
-		@oz = oz.to_f
-		@lbs + @oz
+  def get_product_weight(weight)
+  	if GeneralSetting.get_product_weight_format=='English'
+  		@lbs = 	16 * weight[:lbs].to_i
+			@oz = weight[:oz].to_f
+			@lbs + @oz
+		else
+			@kgs = 1000 * weight[:kgs].to_i
+			@gms = weight[:gms].to_f
+			(@kgs + @gms) * 0.035274
+  	end		
  	end
 
   def do_search

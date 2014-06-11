@@ -4,6 +4,9 @@ class GeneralSetting < ActiveRecord::Base
 
   after_save :send_low_inventory_alert_email
 
+  def self.get_product_weight_format
+    self.all.first.product_weight_format
+  end
 
   def send_low_inventory_alert_email
   	changed_hash = self.changes

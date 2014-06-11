@@ -41,3 +41,9 @@ if GeneralSetting.all.length == 0
   		:send_email_for_packer_notes => 'always',
   		:email_address_for_packer_notes => '')
 end
+
+if GeneralSetting.all.length == 1
+  general_setting = GeneralSetting.all.first
+  general_setting.product_weight_format = 'English'
+  general_setting.save
+end
