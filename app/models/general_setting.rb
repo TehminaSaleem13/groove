@@ -7,6 +7,12 @@ class GeneralSetting < ActiveRecord::Base
   def self.get_product_weight_format
     self.all.first.product_weight_format
   end
+  def self.get_packing_slip_size
+    self.all.first.packing_slip_size
+  end
+  def self.get_packing_slip_orientation
+    self.all.first.packing_slip_orientation
+  end
 
   def send_low_inventory_alert_email
   	changed_hash = self.changes

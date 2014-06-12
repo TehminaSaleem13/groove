@@ -619,6 +619,10 @@ class OrdersController < ApplicationController
       dummy_user.id = 0
       @result['order']['users'].unshift(dummy_user)
 
+      #add packing_slip_size and packing_slip_orientation
+      # @result['order']['packing_slip_size'] = GeneralSetting.get_packing_slip_size
+      # @result['order']['packing_slip_orientation'] = GeneralSetting.get_packing_slip_orientation
+
       if !@order.packing_user_id.nil?
         @result['order']['users'].each do |user|
           if user.id == @order.packing_user_id
@@ -1066,12 +1070,20 @@ class OrdersController < ApplicationController
     # @page_height = params[:page_height]
     # @page_width = params[:page_width]
     # @orientation = params[:orientation]
+    if GeneralSetting.get_packing_slip_size == '4" x 6"'
+      @page_height = '6'
+      @page_width = '4'
+    else
+      @page_height = '11'
+      @page_width = '8.5'
+    end
+    @orientation = GeneralSetting.get_packing_slip_orientation
     result = Hash.new
     result['data'] = Hash.new
     result['data']['packing_slip_file_paths'] = []
-    @page_height = '6'
-    @page_width = '4'
-    @orientation = "portrait"
+    # @page_height = '6'
+    # @page_width = '4'
+    # @orientation = "portrait"
     if @orientation == "landscape"
       @page_height = @page_height.to_f/2
       @page_height = @page_height.to_s

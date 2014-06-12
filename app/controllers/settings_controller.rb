@@ -253,6 +253,8 @@ class SettingsController < ApplicationController
     if !general_setting.nil?
       if current_user.edit_general_prefs
         general_setting.product_weight_format = params[:product_weight_format]
+        general_setting.packing_slip_size = params[:packing_slip_size]
+        general_setting.packing_slip_orientation = params[:packing_slip_orientation]
         general_setting.conf_req_on_notes_to_packer = params[:conf_req_on_notes_to_packer]
         general_setting.email_address_for_packer_notes = params[:email_address_for_packer_notes]
         general_setting.hold_orders_due_to_inventory = params[:hold_orders_due_to_inventory]

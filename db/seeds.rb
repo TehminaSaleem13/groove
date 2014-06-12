@@ -45,5 +45,7 @@ end
 if GeneralSetting.all.length == 1
   general_setting = GeneralSetting.all.first
   general_setting.product_weight_format = 'English'
+  general_setting.packing_slip_size = '4" x 6"'
+  general_setting.packing_slip_orientation = 'portrait'
   general_setting.save
 end
