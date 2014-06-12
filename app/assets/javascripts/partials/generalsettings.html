@@ -145,12 +145,12 @@
             <label class="control-label">Packing Slip Size: </label>
             <div class="controls">
               <select class="dropdown" ng-model="generalsettings.single.packing_slip_size" ng-change="update_settings()">
-                <option value='4" x 6"'>4" x 6"</option>
-                <option value='8.5" x 11"'>8.5" x 11"</option>
+                <option value='4 x 6'>4" x 6"</option>
+                <option value='8.5 x 11'>8.5" x 11"</option>
               </select>
             </div>
           </div>
-          <div class="control-group">
+          <div class="control-group" ng-show="generalsettings.single.packing_slip_size=='8.5 x 11'">
             <label class="control-label">Packing Slip Orientation: </label>
             <div class="controls">
               <select class="dropdown" ng-model="generalsettings.single.packing_slip_orientation" ng-change="update_settings()">

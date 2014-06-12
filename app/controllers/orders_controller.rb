@@ -1070,7 +1070,7 @@ class OrdersController < ApplicationController
     # @page_height = params[:page_height]
     # @page_width = params[:page_width]
     # @orientation = params[:orientation]
-    if GeneralSetting.get_packing_slip_size == '4" x 6"'
+    if GeneralSetting.get_packing_slip_size == '4 x 6'
       @page_height = '6'
       @page_width = '4'
     else
