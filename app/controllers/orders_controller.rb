@@ -1063,12 +1063,10 @@ class OrdersController < ApplicationController
   end
 
   def generate_packing_slip
-    # @page_height = params[:page_height]
-    # @page_width = params[:page_width]
-    # @orientation = params[:orientation]
-    result = Hash.new
-    result['data'] = Hash.new
-    result['data']['packing_slip_file_paths'] = []
+
+    @result = Hash.new
+    @result['data'] = Hash.new
+    @result['data']['packing_slip_file_paths'] = []
     @page_height = '6'
     @page_width = '4'
     @orientation = "portrait"
@@ -1076,6 +1074,8 @@ class OrdersController < ApplicationController
       @page_height = @page_height.to_f/2
       @page_height = @page_height.to_s
     end
+    @header = ""
+    @footer = ""
     time = Time.now
     file_name = time.strftime("%d_%b_%Y_%I:%M_%p")
     @orders = list_selected_orders
@@ -1085,23 +1085,13 @@ class OrdersController < ApplicationController
       @orders.each do|order|
         @order = Order.find(order['id'])
 
+        generate_pdf(@result,@order,@page_height,@page_width,@orientation,file_name,@header,@footer)
 
-        render :pdf => file_name, 
-            :template => 'orders/generate_packing_slip.html.erb',
-            :orientation => @orientation,
-            :save_only => true,
-            :save_to_file => Rails.root.join('tmp', @order.increment_id+".pdf"),
-            :page_height => @page_height+'in', 
-            :page_width => @page_width+'in',
-            :margin => {:top => '5',                     
-                        :bottom => '10',
-                        :left => '2',
-                        :right => '2'}
-        reader = PDF::Reader.new(Rails.root.join('tmp', @order.increment_id+".pdf"))
+        reader = PDF::Reader.new(Rails.root.join('public', 'pdfs', "#{@order.increment_id}.pdf"))
         page_count = reader.page_count
 
         #delete the file
-        File.delete(Rails.root.join('tmp', @order.increment_id+".pdf"))
+        File.delete(Rails.root.join('public', 'pdfs', @order.increment_id+".pdf"))
         
         if page_count > 1
           @header = "Multi-Slip Order # " + @order.increment_id
@@ -1110,46 +1100,53 @@ class OrdersController < ApplicationController
           @header = ""
           @footer = ""
         end
-
-        render :pdf => file_name, 
-            :template => 'orders/generate_packing_slip.html.erb',
-            :orientation => @orientation,
-            :page_height => @page_height+'in', 
-            :page_width => @page_width+'in',
-            :save_only => true,
-            :no_background => false,
-            :margin => {:top => '5',                     
-                        :bottom => '10',
-                        :left => '2',
-                        :right => '2'},
-            :header => {
-              :html => { 
-                :template => 'orders/generate_packing_slip_header.pdf.erb'
-                }
-            },
-            :footer => {
-              :html => { 
-                :template => 'orders/generate_packing_slip_header.pdf.erb'
-                }
-            },
-            :save_to_file => Rails.root.join('public','pdfs', "#{@order.increment_id}.pdf")
+        generate_pdf(@result,@order,@page_height,@page_width,@orientation,file_name,@header,@footer)
+        
           
-        result['data']['packing_slip_file_paths'].push(Rails.root.join('public','pdfs', "#{@order.increment_id}.pdf"))
+        @result['data']['packing_slip_file_paths'].push(Rails.root.join('public','pdfs', "#{@order.increment_id}.pdf"))
       end
-    
-      result['data']['destination'] =  Rails.root.join('public','pdfs', "#{file_name}_packing_slip.pdf")
-
-      result['data']['merged_packing_slip_url'] =  '/pdfs/'+ file_name + '_packing_slip.pdf'
+      @result['data']['destination'] =  Rails.root.join('public','pdfs', "#{file_name}_packing_slip.pdf")
+      @result['data']['merged_packing_slip_url'] =  '/pdfs/'+ file_name + '_packing_slip.pdf'
       
       #merge the packing-slips
-      packing_slip_obj.merge(result['data']['packing_slip_file_paths'], result['data']['destination'])
+      packing_slip_obj.merge(@result['data']['packing_slip_file_paths'], @result['data']['destination'])
       
-      render json: result        
+      render json: @result        
     end
   end
-
+  
 
   private
+
+  def generate_pdf(result,order,page_height,page_width,orientation,file_name,header,footer)
+    respond_to do |format|
+      format.json{
+        render :pdf => file_name, 
+                :template => 'orders/generate_packing_slip.html.erb',
+                :orientation => @orientation,
+                :page_height => @page_height+'in', 
+                :page_width => @page_width+'in',
+                :save_only => true,
+                :no_background => false,
+                :margin => {:top => '5',                     
+                            :bottom => '10',
+                            :left => '2',
+                            :right => '2'},
+                :header => {
+                  :html => { 
+                    :template => 'orders/generate_packing_slip_header.pdf.erb'
+                    }
+                },
+                :footer => {
+                  :html => { 
+                    :template => 'orders/generate_packing_slip_header.pdf.erb'
+                    }
+                },
+                :save_to_file => Rails.root.join('public', 'pdfs', "#{order.increment_id}.pdf")
+                # @result['data']['pdf_path'].push(Rails.root.join('tmp', "#{order.increment_id}.pdf"))
+      }
+    end
+  end
 
   def do_search
     limit = 10
