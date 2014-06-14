@@ -119,7 +119,7 @@
         </span>
     </div>
 </div>
-<div class="control-group" ng-show="groovProducts.single.store.store_type=='Amazon' && groovProducts.single.amazon_product.show_product_weight==true">
+<div class="control-group" ng-show="groovProducts.single.store.store_type=='Amazon' && groovProducts.single.amazon_product.show_shipping_weight_only==false">
     <label class="control-label">Product Weight</label>
 
     <div class="controls controls-row" ng-show="groovProducts.single.product_weight_format=='English'">    
@@ -144,7 +144,7 @@
     </div>
 </div>
 
-<div class="control-group" ng-show="groovProducts.single.store.store_type=='Amazon' && groovProducts.single.amazon_product.show_shipping_weight==true">
+<div class="control-group" ng-show="groovProducts.single.store.store_type=='Amazon' && groovProducts.single.amazon_product.show_shipping_weight_only==true">
     <label class="control-label">Shipping Weight</label>
     <div class="controls controls-row" ng-show="groovProducts.single.product_weight_format=='English'">    
         <span>

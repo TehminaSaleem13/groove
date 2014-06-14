@@ -93,8 +93,7 @@ class StoreSettingsController < ApplicationController
 
         @amazon.import_products = params[:import_products]
         @amazon.import_images = params[:import_images]
-        @amazon.show_product_weight = params[:show_product_weight]
-        @amazon.show_shipping_weight = params[:show_shipping_weight]
+        @amazon.show_shipping_weight_only = params[:show_shipping_weight_only]
 
         @store.amazon_credentials = @amazon
 
