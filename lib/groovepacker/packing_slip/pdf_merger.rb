@@ -5,9 +5,8 @@ module Groovepacker
 			  if pdf_paths.any?
 
 
-			  	#join the path names with a space in between each consicutive paths
-			  	joined_paths = pdf_paths.join(' ')
-			  	puts joined_paths.inspect
+			  	#join the path names with a space in between each consicutive paths and give as input
+
 
 			  	`pdftk #{pdf_paths.join(' ')} cat output #{destination.to_s}`
 
