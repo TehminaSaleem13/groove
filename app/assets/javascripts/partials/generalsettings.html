@@ -137,8 +137,31 @@
         </div>
     </div>
     <!-- Printing Options -->
-
-
+    <div class="row-fluid">
+      <h4>Printing Options</h4>
+      <div class="form-horizontal general-settings-form">
+        <fieldset>
+          <div class="control-group">
+            <label class="control-label">Packing Slip Size: </label>
+            <div class="controls">
+              <select class="dropdown" ng-model="generalsettings.single.packing_slip_size" ng-change="update_settings()">
+                <option value='4 x 6'>4" x 6"</option>
+                <option value='8.5 x 11'>8.5" x 11"</option>
+              </select>
+            </div>
+          </div>
+          <div class="control-group" ng-show="generalsettings.single.packing_slip_size=='8.5 x 11'">
+            <label class="control-label">Packing Slip Orientation: </label>
+            <div class="controls">
+              <select class="dropdown" ng-model="generalsettings.single.packing_slip_orientation" ng-change="update_settings()">
+                <option value="portrait">portrait</option>
+                <option value="landscape">landscape</option>
+              </select>
+            </div>
+          </div>
+        </fieldset>
+      </div>
+    </div>
     <!-- Miscellaneous Settings -->
     <div class="row-fluid">
       <h4>Miscellaneous Settings</h4>
