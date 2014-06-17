@@ -1,37 +1,29 @@
 module Groovepacker
 	module PackingSlip
 		class PdfMerger
-		  def merge(pdf_paths, destination, orientation, size, file_name)
-			  if pdf_paths.any?
+		  def merge(result, orientation, size, file_name)
+			  if result['data']['packing_slip_file_paths'].any?
 
 
 			  	#join the path names with a space in between each consicutive paths and give as input
 
 
-			  	`pdftk #{pdf_paths.join(' ')} cat output #{destination.to_s}`
+			  	`pdftk #{result['data']['packing_slip_file_paths'].join(' ')} cat output #{result['data']['destination'].to_s}`
 
-			    raise "Problem combining PDF files: #{pdf_paths.join(' ')}" unless $?.success?
+			    raise "Problem combining PDF files: #{result['data']['packing_slip_file_paths'].join(' ')}" unless $?.success?
 
-			    # if size == '8.5 x 11' && orientation == 'landscape'
-			    # 	input = destination
-			    # 	render :pdf => file_name, 
-       #          :template => 'orders/generate_packing_slip.html.erb',
-       #          :page_height => '8.5in', 
-       #          :page_width => '11in',
-       #          :save_only => true,
-       #          :no_background => false,
-       #          :margin => {:top => '5',                     
-       #                      :bottom => '10',
-       #                      :left => '2',
-       #                      :right => '2'},
-       #          :save_to_file => Rails.root.join('public','pdfs', "#{file_name}_packing_slip.pdf")
-       #      destination = Rails.root.join('public','pdfs', "#{file_name}_packing_slip.pdf")
-       #      `pdfjam --nup 2x1 #{input} --outfile #{destination.to_s}`
+			    if size == '8.5 x 11' && orientation == 'landscape'
+			    	input = result['data']['destination']
 
-       # 			destination = Rails.root.join('public','pdfs', "#{@file_name}_packing_slip_landscape.pdf")
-		     #    @result['data']['merged_packing_slip_url'] =  '/pdfs/'+ @file_name + '_packing_slip_landscape.pdf'
-		     #    `pdfjam --nup 2x1 #{input} --outfile #{destination.to_s} --papersize '{11in,8.5in}'`
-			    # end
+       			result['data']['destination'] = Rails.root.join('public','pdfs', "#{file_name}_packing_slip_landscape.pdf")
+		        result['data']['merged_packing_slip_url'] =  '/pdfs/'+ file_name + '_packing_slip_landscape.pdf'
+		 
+		 				#render the merged pdf into a separate pdf as two packing_slips per page
+		        `pdfjam --nup 2x1 #{input} --outfile #{result['data']['destination'].to_s} --papersize '{11in,8.5in}'`
+		        
+		        #delete the perviously generated merged pdf
+		        File.delete(input)
+			    end
 			  end
 		  end
 		end

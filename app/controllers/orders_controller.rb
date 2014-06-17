@@ -1095,8 +1095,6 @@ class OrdersController < ApplicationController
     unless @orders.nil?
       @orders.each do|order|
         @order = Order.find(order['id'])
-        puts "order_increment_id"
-        puts @order.increment_id
 
         generate_pdf(@result,@order,@page_height,@page_width,@orientation,@file_name,@header,@footer)
 
@@ -1122,25 +1120,7 @@ class OrdersController < ApplicationController
       @result['data']['merged_packing_slip_url'] =  '/pdfs/'+ @file_name + '_packing_slip.pdf'
       
       #merge the packing-slips
-      packing_slip_obj.merge(@result['data']['packing_slip_file_paths'], @result['data']['destination'],@orientation,@size,@file_name)
-      if @size == '8.5 x 11' && @orientation == 'landscape'
-        input = @result['data']['destination'].to_s
-        # render :pdf => @file_name, 
-        #     :template => 'orders/generate_packing_slip_landscape.pdf.erb',
-        #     :page_height => '11in', 
-        #     :page_width => '8.5in',
-        #     :orientation => @orientation,
-        #     :save_only => true,
-        #     :no_background => false,
-        #     :margin => {:top => '5',                     
-        #                 :bottom => '10',
-        #                 :left => '2',
-        #                 :right => '2'},
-        #     :save_to_file => Rails.root.join('public','pdfs', "#{@file_name}_packing_slip_landscape.pdf")
-        @result['data']['destination'] = Rails.root.join('public','pdfs', "#{@file_name}_packing_slip_landscape.pdf")
-        @result['data']['merged_packing_slip_url'] =  '/pdfs/'+ @file_name + '_packing_slip_landscape.pdf'
-        `pdfjam --nup 2x1 #{input} --outfile #{@result['data']['destination'].to_s} --papersize '{11in,8.5in}'`
-      end
+      packing_slip_obj.merge(@result,@orientation,@size,@file_name)
       
       render json: @result        
     end
@@ -1174,7 +1154,6 @@ class OrdersController < ApplicationController
                     }
                 },
                 :save_to_file => Rails.root.join('public', 'pdfs', "#{order.increment_id}.pdf")
-                # @result['data']['pdf_path'].push(Rails.root.join('tmp', "#{order.increment_id}.pdf"))
       }
     end
   end
