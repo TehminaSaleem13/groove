@@ -102,6 +102,13 @@ aria-hidden="true">
       </div>
 
       <div class="control-group">
+        <label class="control-label">Custom Packing-Slip Message For Customer</label>
+        <div class="controls">
+            <textarea ng-model="newStore.thank_you_message_to_customer"class="span8" rows="4"></textarea>
+        </div>
+      </div>
+
+      <div class="control-group">
         <label class="control-label">Store Type</label>
         <div class="controls">
             <select class="selectpicker" ng-change="refresh_modal()" ng-model="newStore.store_type">
@@ -128,7 +135,7 @@ aria-hidden="true">
            ng-show="newStore.store_type =='CSV'"></div>
   </div>
 
-
+  
 
   <div class="modal-footer">
   <div class="row-fluid">

@@ -6241,7 +6241,8 @@ hr{
 }
 textarea{
   font-size: 30px;
-  min-height: 300px;
+  line-height: 40px;
+  min-height: 200px;
   width: 900px;
 }
 p{
@@ -6252,7 +6253,7 @@ p{
 </style>
 
 <body>
-	<div class="container" style="margin-left: 60px; margin-top: 50px; margin-bottom: 50px;">
+	<div class="container" style="margin-left: 60px; margin-top: 50px; margin-bottom: 50px; margin-right: 50px;">
     <% if !@order.nil?%>
       <%order_items = @order.order_items%>
       <%order_count = 0%>
@@ -6315,14 +6316,21 @@ p{
     	</div>
     		<center><hr></center>
         <br>
-    		<p><i>Thankyou for your order!<br>
-        Need to return an item? No problem! Checkout our returns page<br>
-        www.dreadheadhq.com/returns.html</i></p>
+    		<p><i>
+          <%if !@order.store.nil?%>
+            <%if !@order.store.thank_you_message_to_customer.nil?%>
+              <%=@order.store.thank_you_message_to_customer%>
+            <%else%>
+              <%=GeneralSetting.get_packing_slip_message_to_customer%>
+            <% end %>
+          <%end%>    
+        </i></p>
     	<div>
         <center>
       		<textarea>
-            <%#=Note to customer.%>
-   					Note to customer.
+            <%if !@order.nil?%>
+              <%= @order.customer_comments%>
+            <%end%>
   				</textarea>
         </center>
     	</div>

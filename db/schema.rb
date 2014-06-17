@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140612052135) do
+ActiveRecord::Schema.define(:version => 20140617075404) do
 
   create_table "amazon_credentials", :force => true do |t|
     t.string   "merchant_id",                                     :null => false
@@ -24,6 +24,8 @@ ActiveRecord::Schema.define(:version => 20140612052135) do
     t.string   "productreport_id"
     t.string   "productgenerated_report_id"
     t.datetime "productgenerated_report_date"
+    t.boolean  "display_shipping_weight"
+    t.boolean  "show_shipping_weight_only",    :default => false
     t.boolean  "show_product_weight",          :default => true
     t.boolean  "show_shipping_weight",         :default => false
   end
@@ -96,6 +98,7 @@ ActiveRecord::Schema.define(:version => 20140612052135) do
     t.string   "product_weight_format"
     t.string   "packing_slip_size"
     t.string   "packing_slip_orientation"
+    t.text     "packing_slip_message_to_customer"
   end
 
   create_table "inventory_warehouses", :force => true do |t|
@@ -371,13 +374,14 @@ ActiveRecord::Schema.define(:version => 20140612052135) do
   end
 
   create_table "stores", :force => true do |t|
-    t.string   "name",                                      :null => false
-    t.boolean  "status",                 :default => false, :null => false
-    t.string   "store_type",                                :null => false
+    t.string   "name",                                             :null => false
+    t.boolean  "status",                        :default => false, :null => false
+    t.string   "store_type",                                       :null => false
     t.date     "order_date"
-    t.datetime "created_at",                                :null => false
-    t.datetime "updated_at",                                :null => false
+    t.datetime "created_at",                                       :null => false
+    t.datetime "updated_at",                                       :null => false
     t.integer  "inventory_warehouse_id"
+    t.text     "thank_you_message_to_customer"
   end
 
   create_table "users", :force => true do |t|

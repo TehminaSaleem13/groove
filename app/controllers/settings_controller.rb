@@ -252,6 +252,7 @@ class SettingsController < ApplicationController
 
     if !general_setting.nil?
       if current_user.edit_general_prefs
+        general_setting.packing_slip_message_to_customer = params[:packing_slip_message_to_customer]
         general_setting.product_weight_format = params[:product_weight_format]
         general_setting.packing_slip_size = params[:packing_slip_size]
         if general_setting.packing_slip_size == '4 x 6'
