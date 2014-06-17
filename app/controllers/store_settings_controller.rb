@@ -30,6 +30,7 @@ class StoreSettingsController < ApplicationController
     @store.name= params[:name] || get_default_warehouse_name
     @store.store_type = params[:store_type]
     @store.status = params[:status]
+    @store.thank_you_message_to_customer = params[:thank_you_message_to_customer]
     @store.inventory_warehouse_id = params[:inventory_warehouse_id] || get_default_warehouse_id
     
     @result['status'] = true

@@ -6315,7 +6315,15 @@ p{
     	</div>
     		<center><hr></center>
         <br>
-    		<p><i><%=GeneralSetting.get_packing_slip_message_to_customer%></i></p>
+    		<p><i>
+          <%if !@order.store.nil?%>
+            <%if !@order.store.thank_you_message_to_customer.nil?%>
+              <%=@order.store.thank_you_message_to_customer%>
+            <%else%>
+              <%=GeneralSetting.get_packing_slip_message_to_customer%>
+            <% end %>
+          <%end%>    
+        </i></p>
     	<div>
         <center>
       		<textarea>
