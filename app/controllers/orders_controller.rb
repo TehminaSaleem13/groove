@@ -1075,10 +1075,11 @@ class OrdersController < ApplicationController
       @page_height = '11'
       @page_width = '8.5'
     end
+    @size = GeneralSetting.get_packing_slip_size
     @orientation = GeneralSetting.get_packing_slip_orientation
-    result = Hash.new
-    result['data'] = Hash.new
-    result['data']['packing_slip_file_paths'] = []
+    @result = Hash.new
+    @result['data'] = Hash.new
+    @result['data']['packing_slip_file_paths'] = []
 
     if @orientation == "landscape"
       @page_height = @page_height.to_f/2
@@ -1087,7 +1088,7 @@ class OrdersController < ApplicationController
     @header = ""
     @footer = ""
     time = Time.now
-    file_name = time.strftime("%d_%b_%Y_%I:%M_%p")
+    @file_name = time.strftime("%d_%b_%Y_%I:%M_%p")
     @orders = list_selected_orders
     packing_slip_obj = 
           Groovepacker::PackingSlip::PdfMerger.new 
@@ -1095,7 +1096,7 @@ class OrdersController < ApplicationController
       @orders.each do|order|
         @order = Order.find(order['id'])
 
-        generate_pdf(@result,@order,@page_height,@page_width,@orientation,file_name,@header,@footer)
+        generate_pdf(@result,@order,@page_height,@page_width,@orientation,@file_name,@header,@footer)
 
         reader = PDF::Reader.new(Rails.root.join('public', 'pdfs', "#{@order.increment_id}.pdf"))
         page_count = reader.page_count
@@ -1110,16 +1111,16 @@ class OrdersController < ApplicationController
           @header = ""
           @footer = ""
         end
-        generate_pdf(@result,@order,@page_height,@page_width,@orientation,file_name,@header,@footer)
-        
-          
+        generate_pdf(@result,@order,@page_height,@page_width,@orientation,@file_name,@header,@footer)
+         
         @result['data']['packing_slip_file_paths'].push(Rails.root.join('public','pdfs', "#{@order.increment_id}.pdf"))
+
       end
-      @result['data']['destination'] =  Rails.root.join('public','pdfs', "#{file_name}_packing_slip.pdf")
-      @result['data']['merged_packing_slip_url'] =  '/pdfs/'+ file_name + '_packing_slip.pdf'
+      @result['data']['destination'] =  Rails.root.join('public','pdfs', "#{@file_name}_packing_slip.pdf")
+      @result['data']['merged_packing_slip_url'] =  '/pdfs/'+ @file_name + '_packing_slip.pdf'
       
       #merge the packing-slips
-      packing_slip_obj.merge(@result['data']['packing_slip_file_paths'], @result['data']['destination'])
+      packing_slip_obj.merge(@result,@orientation,@size,@file_name)
       
       render json: @result        
     end
@@ -1153,7 +1154,6 @@ class OrdersController < ApplicationController
                     }
                 },
                 :save_to_file => Rails.root.join('public', 'pdfs', "#{order.increment_id}.pdf")
-                # @result['data']['pdf_path'].push(Rails.root.join('tmp', "#{order.increment_id}.pdf"))
       }
     end
   end
