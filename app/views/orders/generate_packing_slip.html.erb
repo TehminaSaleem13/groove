@@ -6315,14 +6315,11 @@ p{
     	</div>
     		<center><hr></center>
         <br>
-    		<p><i>Thankyou for your order!<br>
-        Need to return an item? No problem! Checkout our returns page<br>
-        www.dreadheadhq.com/returns.html</i></p>
+    		<p><i><%=GeneralSetting.get_packing_slip_message_to_customer%></i></p>
     	<div>
         <center>
       		<textarea>
-            <%#=Note to customer.%>
-   					Note to customer.
+            <%#=GeneralSetting.packing_slip_message_to_customer%>
   				</textarea>
         </center>
     	</div>

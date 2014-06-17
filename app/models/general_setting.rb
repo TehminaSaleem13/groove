@@ -4,6 +4,10 @@ class GeneralSetting < ActiveRecord::Base
 
   after_save :send_low_inventory_alert_email
 
+  def self.get_packing_slip_message_to_customer
+    self.all.first.packing_slip_message_to_customer
+  end
+
   def self.get_product_weight_format
     self.all.first.product_weight_format
   end
