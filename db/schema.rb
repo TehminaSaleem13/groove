@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140617075404) do
+ActiveRecord::Schema.define(:version => 20140619142408) do
 
   create_table "amazon_credentials", :force => true do |t|
     t.string   "merchant_id",                                     :null => false
@@ -24,9 +24,7 @@ ActiveRecord::Schema.define(:version => 20140617075404) do
     t.string   "productreport_id"
     t.string   "productgenerated_report_id"
     t.datetime "productgenerated_report_date"
-
     t.boolean  "show_shipping_weight_only",    :default => false
-
   end
 
   create_table "column_preferences", :force => true do |t|
@@ -97,10 +95,7 @@ ActiveRecord::Schema.define(:version => 20140617075404) do
     t.string   "product_weight_format"
     t.string   "packing_slip_size"
     t.string   "packing_slip_orientation"
-<<<<<<< HEAD
     t.text     "packing_slip_message_to_customer"
-=======
->>>>>>> origin/show_amazon_shipping_weight_optionally
   end
 
   create_table "inventory_warehouses", :force => true do |t|
