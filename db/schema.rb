@@ -24,10 +24,9 @@ ActiveRecord::Schema.define(:version => 20140617075404) do
     t.string   "productreport_id"
     t.string   "productgenerated_report_id"
     t.datetime "productgenerated_report_date"
-    t.boolean  "display_shipping_weight"
+
     t.boolean  "show_shipping_weight_only",    :default => false
-    t.boolean  "show_product_weight",          :default => true
-    t.boolean  "show_shipping_weight",         :default => false
+
   end
 
   create_table "column_preferences", :force => true do |t|
@@ -98,7 +97,10 @@ ActiveRecord::Schema.define(:version => 20140617075404) do
     t.string   "product_weight_format"
     t.string   "packing_slip_size"
     t.string   "packing_slip_orientation"
+<<<<<<< HEAD
     t.text     "packing_slip_message_to_customer"
+=======
+>>>>>>> origin/show_amazon_shipping_weight_optionally
   end
 
   create_table "inventory_warehouses", :force => true do |t|
