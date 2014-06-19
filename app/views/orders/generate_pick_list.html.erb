@@ -6318,7 +6318,7 @@ border: 2px solid #ccc;}
                     <% if pick == depends_pick['individual'].first%>
                       <tr>
                         <td style="padding-left: 20px;"><%=pick['primary_location']%></td>
-                        <td style="padding-left: 10px;"><%=pick['sku']%></td>
+                        <td style="padding-left: 20px;"><%=pick['sku']%></td>
                         <td class="autoResizeImage" style="text-align:right; padding-top:0px; padding-bottom:0px;"><%= wicked_pdf_image_tag 'Pick-List-ORArrow.png' %></td>
                         <td style="padding-left: 20px;"><%=pick['qty']%></td>
                         <td style="padding-left: 20px;"><%=pick['name']%></td>
@@ -6327,7 +6327,7 @@ border: 2px solid #ccc;}
                     <%else%>
                       <tr>
                         <td style="padding-left: 20px;"><%=pick['primary_location']%></td>
-                        <td style="padding-left: 10px;"><%=pick['sku']%></td>
+                        <td style="padding-left: 20px;"><%=pick['sku']%></td>
                         <td class="autoResizeImage" style="text-align:right; padding-top:0px; padding-bottom:0px;"><%= wicked_pdf_image_tag 'Pick-List-MidArrow.png' %></td>
                         <td style="padding-left: 20px;"><%=pick['qty']%></td>
                         <td style="padding-left: 20px;"><%=pick['name']%></td>
