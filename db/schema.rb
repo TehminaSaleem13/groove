@@ -24,6 +24,7 @@ ActiveRecord::Schema.define(:version => 20140619142408) do
     t.string   "productreport_id"
     t.string   "productgenerated_report_id"
     t.datetime "productgenerated_report_date"
+    t.boolean "display_shipping_weight"
     t.boolean  "show_shipping_weight_only",    :default => false
   end
 
