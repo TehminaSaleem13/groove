@@ -6227,13 +6227,13 @@ label{
   margin-left: 40px;
 }
 table{
-  font-size: 15px;
+  font-size: 12px;
   line-height: 30px;
   font-weight: bold;
   width: 100%;
 }
 thead td{
-  font-size: 15px;
+  font-size: 12px;
   font-weight: bold;
 }
 thead{
@@ -6261,7 +6261,6 @@ p{
 display: block;
 clear: both;
 border: 2px solid #ccc;}
-
 </style>
 
 <body>
@@ -6273,8 +6272,8 @@ border: 2px solid #ccc;}
             <thead>
               <td>Location Primary</td>
               <td> Product SKU</td>
-              <td></td>
-              <td><center>Pick Quantity</center></td>
+              <td style="text-align:right;">Pick</td>
+              <td>Quantity</td>
               <td>Product Name</td>
               <td>Location Secondary</td>
             </thead>
@@ -6283,19 +6282,20 @@ border: 2px solid #ccc;}
               <tr>
                 <td><%=pick['primary_location']%></td>
                 <td><%=pick['sku']%></td>
-                <td style="padding-left: 10px;"></td>
-                <td><center><%=pick['qty']%></center></td>
+                <td></td>
+                <td><%=pick['qty']%></td>
                 <td><%=pick['name']%></td>
                 <td><%=pick['secondary_location']%></td>
               </tr>
             <%end%>
             <tr><td colspan="6"></td></tr>
-            <tr><td colspan="6"><center>Kits below are set to automatically split during packing. Their inventory is listed separately so it can be picked as needed.</center></td></tr>
+            
             <% if !@depends_pick_list.empty? %>
+              <tr><td colspan="6"><center>Kits below are set to automatically split during packing. Their inventory is listed separately so it can be picked as needed.</center></td></tr>
               <thead>
                 <td>Location Primary</td>
                 <td> Product SKU</td>
-                <td>Pick</td>
+                <td style="text-align:right;">Pick</td>
                 <td>Quantity</td>                
                 <td>Product Name</td>
                 <td>Location Secondary</td>
@@ -6303,60 +6303,40 @@ border: 2px solid #ccc;}
               <%@depends_pick_list.each do |depends_pick|%>
                 <%if !depends_pick['single'].nil?%>
                   <%depends_pick['single'].each do |pick|%>
-                    <tr>
-                      <td><%=pick['primary_location']%></td>
-                      <td><%=pick['sku']%></td>
-                      <td></td>
-                      <td><%=pick['qty']%></td>
-                      <td><%=pick['name']%></td>
-                      <td><%=pick['secondary_location']%></td>
+                    <tr style="margin-bottom:0px; padding-bottom:0px;">
+                      <td style="border-bottom:0px;"><%=pick['primary_location']%></td>
+                      <td style="border-bottom:0px;"><%=pick['sku']%></td>
+                      <td class="autoResizeImage" style="vertical-align:bottom; text-align:right; padding-top:0px; padding-bottom:0px;"><%= wicked_pdf_image_tag 'Pick-List-TopArrow.png' %></td>
+                      <td style="border-bottom:0px;"><%=pick['qty']%></td>
+                      <td style="border-bottom:0px;"><%=pick['name']%></td>
+                      <td style="border-bottom:0px;"><%=pick['secondary_location']%></td>
                     </tr>
                   <%end%>
-                <%end%>
-                  <tr>                      
-                    <td></td>
-                    <td></td>
-                    <td>OR</td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                  </tr>                
-                  <%if !depends_pick['individual'].nil?%>
+                <%end%>               
+                <%if !depends_pick['individual'].nil?%>
                   <%depends_pick['individual'].each do |pick|%>
-                    <tr>
-                      <td style="padding-left: 20px;"><%=pick['primary_location']%></td>
-                      <td style="padding-left: 20px;"><%=pick['sku']%></td>
-                      <td style="padding-left: 10px;"></td>
-                      <td style="padding-left: 20px; border-left: 2px solid grey;"><%=pick['qty']%></td>
-                      <td style="padding-left: 20px;"><%=pick['name']%></td>
-                      <td style="padding-left: 20px;"><%=pick['secondary_location']%></td>
-                    </tr>
+                    <% if pick == depends_pick['individual'].first%>
+                      <tr>
+                        <td style="padding-left: 20px;"><%=pick['primary_location']%></td>
+                        <td style="padding-left: 10px;"><%=pick['sku']%></td>
+                        <td class="autoResizeImage" style="text-align:right; padding-top:0px; padding-bottom:0px;"><%= wicked_pdf_image_tag 'Pick-List-ORArrow.png' %></td>
+                        <td style="padding-left: 20px;"><%=pick['qty']%></td>
+                        <td style="padding-left: 20px;"><%=pick['name']%></td>
+                        <td style="padding-left: 20px;"><%=pick['secondary_location']%></td>
+                      </tr>
+                    <%else%>
+                      <tr>
+                        <td style="padding-left: 20px;"><%=pick['primary_location']%></td>
+                        <td style="padding-left: 10px;"><%=pick['sku']%></td>
+                        <td class="autoResizeImage" style="text-align:right; padding-top:0px; padding-bottom:0px;"><%= wicked_pdf_image_tag 'Pick-List-MidArrow.png' %></td>
+                        <td style="padding-left: 20px;"><%=pick['qty']%></td>
+                        <td style="padding-left: 20px;"><%=pick['name']%></td>
+                        <td style="padding-left: 20px;"><%=pick['secondary_location']%></td>
+                      </tr>
+                    <%end%>
                   <%end%>
                 <%end%>
-              <%end%>
-
-              <!-- <%#if !@depends_pick_list.first['single'].nil?%>
-                <%#@depends_pick_list.first['single'].each do |pick|%>
-                  <tr>
-                    <td><%#=pick['primary_location']%></td>
-                    <td><%#=pick['sku']%></td>
-                    <td><center><%#=pick['qty']%></center></td>
-                    <td><%#=pick['name']%></td>
-                    <td><%#=pick['secondary_location']%></td>
-                  </tr>
-                  <%#if !@depends_pick_list.first['individual'].nil?%>
-                    <%#@depends_pick_list.first['individual'].each do |pick|%>
-                      <tr>
-                        <td><%#=pick['primary_location']%></td>
-                        <td><%#=pick['sku']%></td>
-                        <td><center><%#=pick['qty']%></center></td>
-                        <td><%#=pick['name']%></td>
-                        <td><%#=pick['secondary_location']%></td>
-                      </tr>
-                    <%#end%>
-                  <%#end%>
-                <%#end%>
-              <%#end%> -->    
+              <%end%>    
             <%end%>
           </table>
         </div>
