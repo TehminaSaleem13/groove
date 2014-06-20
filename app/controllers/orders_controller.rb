@@ -1052,8 +1052,8 @@ class OrdersController < ApplicationController
         :page_height => '8in', 
         :save_only => true,
         :page_width => '11.5in',
-        :margin => {:top => '0',                     
-                    :bottom => '0',
+        :margin => {:top => '20',                     
+                    :bottom => '20',
                     :left => '0',
                     :right => '0'},
         :save_to_file => Rails.root.join('public','pdfs', "#{file_name}.pdf")
