@@ -73,14 +73,15 @@ Groovepacks::Application.configure do
   ENV['AMAZON_MWS_ACCESS_KEY_ID'] = "AKIAJ4VZ2GY7HZUL277Q"
   ENV['AMAZON_MWS_SECRET_ACCESS_KEY'] = "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"
 
-  # ENV['EBAY_APP_ID'] = "Navarata-607d-4a45-8a42-51c735a57026"
-  # ENV['EBAY_CERT_ID'] = "86380834-e449-4dd9-b19f-748b4625533d"
-  # ENV['EBAY_DEV_ID'] = "568a739c-a13d-40e5-922a-6e3ecc652d9d"
-  # ENV['EBAY_RU_NAME'] = "Navaratan_Techn-Navarata-607d-4-ltqij"
-  # ENV['EBAY_SANDBOX_MODE'] = "YES"
+
   ENV['EBAY_APP_ID'] = "Navarata-c04e-41cb-a923-77755ae59a0f"
   ENV['EBAY_CERT_ID'] = "596cd688-b754-49b1-8b92-a3c393caed49"
   ENV['EBAY_DEV_ID'] = "568a739c-a13d-40e5-922a-6e3ecc652d9d"
   ENV['EBAY_RU_NAME'] = "Navaratan_Techn-Navarata-c04e-4-kglxwbl"
   ENV['EBAY_SANDBOX_MODE'] = "NO"
+  # ENV['EBAY_APP_ID'] = "Navarata-607d-4a45-8a42-51c735a57026"
+  # ENV['EBAY_CERT_ID'] = "86380834-e449-4dd9-b19f-748b4625533d"
+  # ENV['EBAY_DEV_ID'] = "568a739c-a13d-40e5-922a-6e3ecc652d9d"
+  # ENV['EBAY_RU_NAME'] = "Navaratan_Techn-Navarata-607d-4-klyznn"
+  # ENV['EBAY_SANDBOX_MODE'] = "YES"
 end

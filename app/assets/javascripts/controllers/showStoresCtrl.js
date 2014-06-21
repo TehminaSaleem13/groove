@@ -392,7 +392,7 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies, wa
                     $scope.newStore.productebay_auth_token = data.credentials.ebay_credentials.productauth_token;
                     $scope.newStore.import_products = data.credentials.ebay_credentials.import_products;
                     $scope.newStore.import_images = data.credentials.ebay_credentials.import_images;
-                    if($scope.newStore.ebay_auth_token != '')
+                    if($scope.newStore.ebay_auth_token != '' && $scope.newStore.ebay_auth_token != null)
                     {
                         $scope.ebay_show_signin_url = false;
                     }
