@@ -24,8 +24,7 @@ groovepacks_controllers.
                 $http.get('/store_settings/getebaysigninurl.json').success(function(data) {
                     if (data.ebay_signin_url_status && typeof
                         $scope.$parent!='undefined' && 
-                        $scope.$parent != null &&
-                        typeof $scope.$parent.ebay_signin_url != 'undefined')
+                        $scope.$parent != null)
                     {
                         $scope.$parent.ebay_signin_url = data.ebay_signin_url;
                         $scope.$parent.ebay_signin_url_status = data.ebay_signin_url_status;
