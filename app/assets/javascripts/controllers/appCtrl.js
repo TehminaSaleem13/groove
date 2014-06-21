@@ -2,7 +2,7 @@ groovepacks_controllers.
     controller('appCtrl', [ '$scope', '$http', '$timeout', '$stateParams', '$location', '$state', '$cookies','auth','notification','importOrders',
         function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,auth,notification,importOrders) {
             $scope.$on("user-data-reloaded", function(){
-                $scope.current_user = auth.get();
+                $scope.current_user = auth;
             });
 
             $scope.$on("editing-a-var",function(event,data) {

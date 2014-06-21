@@ -4,11 +4,14 @@ groovepacks_controllers.
             var myscope = {};
             myscope.create_user = function() {
                 $scope.setup_modal();
-                $scope.edit_status = false;
-                $scope.show_password = true;
-                $scope.newUser = {};
-                $scope.newUser.active = true;
-                $scope.newUser.access_scanpack = true;
+                $scope.$apply(function(){
+                    $scope.$parent.edit_status = false;
+                    $scope.$parent.show_password = true;
+                    $scope.$parent.newUser = {};
+                    $scope.$parent.newUser.active = true;
+                    $scope.$parent.newUser.role = {};
+                    $scope.$parent.showSelectBaseRole = true;
+                });
                 $scope.user_modal.modal('show');
             }
             $timeout(myscope.create_user);

@@ -150,6 +150,9 @@ groovepacks_services.factory('products',['$http','notification',function($http,n
     var create_single = function(products) {
         return $http.post('/products/create.json').success(function(data){
             products.single = {};
+            if(!data.status) {
+                notification.notify(data.messages,0);
+            }
         }).error(notification.server_error);
     }
     var update_single = function(products,auto) {

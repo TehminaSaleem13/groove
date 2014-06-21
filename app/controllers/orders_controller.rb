@@ -2,17 +2,7 @@ class OrdersController < ApplicationController
 
   include OrdersHelper
   include ProductsHelper
-  # GET /orders
-  # GET /orders.json
-   
-  def index
-    @orders = Order.all
 
-    respond_to do |format|
-      format.html # index.html.erb
-      format.json { render json: @orders }
-    end
-  end
 
   # Import orders from store based on store id
   def importorders
@@ -30,409 +20,422 @@ class OrdersController < ApplicationController
     @result['activestoreindex'] = params[:activestoreindex]
   end
 
-  begin
-  #import if magento products
-  if @store.store_type == 'Magento'
-    @magento_credentials = MagentoCredentials.where(:store_id => @store.id)
+  if current_user.can? 'import_orders'
+    begin
+    #import if magento products
+    if @store.store_type == 'Magento'
+      @magento_credentials = MagentoCredentials.where(:store_id => @store.id)
 
-    if @magento_credentials.length > 0
-      client = Savon.client(wsdl: @magento_credentials.first.host+"/index.php/api/v2_soap/index/wsdl/1")
+      if @magento_credentials.length > 0
+        client = Savon.client(wsdl: @magento_credentials.first.host+"/index.php/api/v2_soap/index/wsdl/1")
 
-      if !client.nil?
-                 # @result['client'] = client
-        response = client.call(:login,  message: { apiUser: @magento_credentials.first.username,
-          apikey: @magento_credentials.first.api_key })
+        if !client.nil?
+                   # @result['client'] = client
+          response = client.call(:login,  message: { apiUser: @magento_credentials.first.username,
+            apikey: @magento_credentials.first.api_key })
 
-          #@result['response'] = response
-        if response.success?
-          session =  response.body[:login_response][:login_return]
-
-          @filters = Hash.new
-          @filter = Hash.new
-          item = Hash.new
-          item['key'] = 'status'
-          item['value'] = 'processing'
-          @filter['item'] = item
-          @filters['filter']  = @filter
-          @filters_array = []
-          @filters_array << @filters
-
-          response = client.call(:sales_order_list, message: {sessionId: session, filters: @filters_array })
-
+            #@result['response'] = response
           if response.success?
-           # @result['response'] = response.body
-            @result['total_imported'] =  response.body[:sales_order_list_response][:result][:item].length
+            session =  response.body[:login_response][:login_return]
 
-            response.body[:sales_order_list_response][:result][:item].each do |item|
-              order_info = client.call(:sales_order_info,
-                message:{sessionId: session, orderIncrementId: item[:increment_id]})
+            @filters = Hash.new
+            @filter = Hash.new
+            item = Hash.new
+            item['key'] = 'status'
+            item['value'] = 'processing'
+            @filter['item'] = item
+            @filters['filter']  = @filter
+            @filters_array = []
+            @filters_array << @filters
 
-              order_info = order_info.body[:sales_order_info_response][:result]
-              if Order.where(:increment_id=>item[:increment_id]).length == 0
-                @order = Order.new
-                @order.increment_id = item[:increment_id]
-                @order.status = 'awaiting'
-                @order.order_placed_time = item[:created_at]
-                #@order.storename = item[:store_name]
-                @order.store = @store
-                line_items = order_info[:items]
-                if line_items[:item].is_a?(Hash)
-                    if line_items[:item][:product_type] == 'simple'
-                      @order_item = OrderItem.new
-                      @order_item.price = line_items[:item][:price]
-                      @order_item.qty = line_items[:item][:qty_ordered]
-                      @order_item.row_total= line_items[:item][:row_total]
-                      @order_item.name = line_items[:item][:name]
-                      @order_item.sku = line_items[:item][:sku]
-                      if ProductSku.where(:sku=>@order_item.sku).length == 0
-                        product_id = import_magento_product(client, session, @order_item.sku, @store.id,
-                          @magento_credentials.first.import_images, @magento_credentials.first.import_products)
-                      else
-                        product_id = ProductSku.where(:sku=>@order_item.sku).first.product_id
-                      end
-                      @order_item.product_id = product_id
-                      @order.order_items << @order_item
-                    else
-                      if ProductSku.where(:sku=>line_items[:item][:sku]).length == 0
-                        import_magento_product(client, session, line_items[:item][:sku], @store.id,
+            response = client.call(:sales_order_list, message: {sessionId: session, filters: @filters_array })
+
+            if response.success?
+             # @result['response'] = response.body
+              @result['total_imported'] =  response.body[:sales_order_list_response][:result][:item].length
+
+              response.body[:sales_order_list_response][:result][:item].each do |item|
+                order_info = client.call(:sales_order_info,
+                  message:{sessionId: session, orderIncrementId: item[:increment_id]})
+
+                order_info = order_info.body[:sales_order_info_response][:result]
+                if Order.where(:increment_id=>item[:increment_id]).length == 0
+                  @order = Order.new
+                  @order.increment_id = item[:increment_id]
+                  @order.status = 'awaiting'
+                  @order.order_placed_time = item[:created_at]
+                  #@order.storename = item[:store_name]
+                  @order.store = @store
+                  line_items = order_info[:items]
+                  if line_items[:item].is_a?(Hash)
+                      if line_items[:item][:product_type] == 'simple'
+                        @order_item = OrderItem.new
+                        @order_item.price = line_items[:item][:price]
+                        @order_item.qty = line_items[:item][:qty_ordered]
+                        @order_item.row_total= line_items[:item][:row_total]
+                        @order_item.name = line_items[:item][:name]
+                        @order_item.sku = line_items[:item][:sku]
+                        if ProductSku.where(:sku=>@order_item.sku).length == 0
+                          product_id = import_magento_product(client, session, @order_item.sku, @store.id,
                             @magento_credentials.first.import_images, @magento_credentials.first.import_products)
+                        else
+                          product_id = ProductSku.where(:sku=>@order_item.sku).first.product_id
+                        end
+                        @order_item.product_id = product_id
+                        @order.order_items << @order_item
+                      else
+                        if ProductSku.where(:sku=>line_items[:item][:sku]).length == 0
+                          import_magento_product(client, session, line_items[:item][:sku], @store.id,
+                              @magento_credentials.first.import_images, @magento_credentials.first.import_products)
+                        end
+                      end
+                  else
+                    line_items[:item].each do |line_item|
+                      if line_item[:product_type] == 'simple'
+                        @order_item = OrderItem.new
+                        @order_item.price = line_item[:price]
+                        @order_item.qty = line_item[:qty_ordered]
+                        @order_item.row_total= line_item[:row_total]
+                        @order_item.name = line_item[:name]
+                        @order_item.sku = line_item[:sku]
+
+                        if ProductSku.where(:sku=>@order_item.sku).length == 0
+                          product_id = import_magento_product(client, session, @order_item.sku, @store.id,
+                            @magento_credentials.first.import_images, @magento_credentials.first.import_products)
+                        else
+                          product_id = ProductSku.where(:sku=>@order_item.sku).first.product_id
+                        end
+                        @order_item.product_id = product_id
+                        @order.order_items << @order_item
+                      else
+                        if ProductSku.where(:sku=>line_item[:sku]).length == 0
+                          import_magento_product(client, session, line_item[:sku], @store.id,
+                              @magento_credentials.first.import_images, @magento_credentials.first.import_products)
+                        end
                       end
                     end
+                  end
+
+                #if product does not exist import product using product.info
+                @order.address_1  = order_info[:shipping_address][:street]
+                @order.city = order_info[:shipping_address][:city]
+                @order.country = order_info[:shipping_address][:country_id]
+                @order.postcode = order_info[:shipping_address][:postcode]
+                @order.email = item[:customer_email]
+                @order.lastname = order_info[:shipping_address][:lastname]
+                @order.firstname = order_info[:shipping_address][:firstname]
+                @order.state = order_info[:shipping_address][:region]
+                if @order.save
+                    if !@order.addnewitems
+                      @result['status'] &= false
+                      @result['messages'].push('Problem adding new items')
+                    end
+                    @order.addactivity("Order Import", @store.name+" Import")
+                    @order.order_items.each do |item|
+                      @order.addactivity("Item with SKU: "+item.sku+" Added", @store.name+" Import")
+                    end
+                    @order.set_order_status
+                    @result['success_imported'] = @result['success_imported'] + 1
+                  end
                 else
-                  line_items[:item].each do |line_item|
-                    if line_item[:product_type] == 'simple'
-                      @order_item = OrderItem.new
-                      @order_item.price = line_item[:price]
-                      @order_item.qty = line_item[:qty_ordered]
-                      @order_item.row_total= line_item[:row_total]
-                      @order_item.name = line_item[:name]
-                      @order_item.sku = line_item[:sku]
-
-                      if ProductSku.where(:sku=>@order_item.sku).length == 0
-                        product_id = import_magento_product(client, session, @order_item.sku, @store.id,
-                          @magento_credentials.first.import_images, @magento_credentials.first.import_products)
-                      else
-                        product_id = ProductSku.where(:sku=>@order_item.sku).first.product_id
-                      end
-                      @order_item.product_id = product_id
-                      @order.order_items << @order_item
-                    else
-                      if ProductSku.where(:sku=>line_item[:sku]).length == 0
-                        import_magento_product(client, session, line_item[:sku], @store.id,
-                            @magento_credentials.first.import_images, @magento_credentials.first.import_products)
-                      end
-                    end
-                  end
+                  @result['previous_imported'] = @result['previous_imported'] + 1
                 end
-
-              #if product does not exist import product using product.info
-              @order.address_1  = order_info[:shipping_address][:street]
-              @order.city = order_info[:shipping_address][:city]
-              @order.country = order_info[:shipping_address][:country_id]
-              @order.postcode = order_info[:shipping_address][:postcode]
-              @order.email = item[:customer_email]
-              @order.lastname = order_info[:shipping_address][:lastname]
-              @order.firstname = order_info[:shipping_address][:firstname]
-              @order.state = order_info[:shipping_address][:region]
-              if @order.save
-                  if !@order.addnewitems
-                    @result['status'] &= false
-                    @result['messages'].push('Problem adding new items')
-                  end
-                  @order.addactivity("Order Import", @store.name+" Import")
-                  @order.order_items.each do |item|
-                    @order.addactivity("Item with SKU: "+item.sku+" Added", @store.name+" Import")
-                  end
-                  @order.set_order_status
-                  @result['success_imported'] = @result['success_imported'] + 1
-                end
-              else
-                @result['previous_imported'] = @result['previous_imported'] + 1
               end
+            else
+              @result['status'] = false
+              @result['messages'].push('Problem retrieving products list')
             end
           else
             @result['status'] = false
-            @result['messages'].push('Problem retrieving products list')
+            @result['messages'].push('Problem connecting to Magento API. Authentication failed')
           end
         else
           @result['status'] = false
-          @result['messages'].push('Problem connecting to Magento API. Authentication failed')
+          @result['messages'].push('Problem connecting to Magento API. Check the hostname of the server')
         end
       else
         @result['status'] = false
-        @result['messages'].push('Problem connecting to Magento API. Check the hostname of the server')
+        @result['messages'].push('No Store found!')
       end
-    else
-      @result['status'] = false
-      @result['messages'].push('No Store found!')
-    end
-  elsif @store.store_type == 'Ebay'
-    #do ebay connect.
-    @ebay_credentials = EbayCredentials.where(:store_id => @store.id)
+    elsif @store.store_type == 'Ebay'
+      #do ebay connect.
+      @ebay_credentials = EbayCredentials.where(:store_id => @store.id)
 
-    if @ebay_credentials.length > 0
-      @credential = @ebay_credentials.first
+      if @ebay_credentials.length > 0
+        @credential = @ebay_credentials.first
 
-      require 'eBayAPI'
-      if ENV['EBAY_SANDBOX_MODE'] == 'YES'
-        sandbox = true
-      else
-        sandbox = false
-      end
+        require 'eBayAPI'
+        if ENV['EBAY_SANDBOX_MODE'] == 'YES'
+          sandbox = true
+        else
+          sandbox = false
+        end
 
-      @eBay = EBay::API.new(@credential.auth_token,
-        ENV['EBAY_DEV_ID'], ENV['EBAY_APP_ID'],
-        ENV['EBAY_CERT_ID'], :sandbox=>sandbox)
+        @eBay = EBay::API.new(@credential.auth_token,
+          ENV['EBAY_DEV_ID'], ENV['EBAY_APP_ID'],
+          ENV['EBAY_CERT_ID'], :sandbox=>sandbox)
 
-      seller_list = @eBay.GetMyeBaySelling(:soldList=> {:orderStatusFilter=>'AwaitingShipment'})
+        seller_list = @eBay.GetMyeBaySelling(:soldList=> {:orderStatusFilter=>'AwaitingShipment'})
 
-      if (seller_list.soldList != nil &&
-          seller_list.soldList.orderTransactionArray != nil)
-        order_or_transactionArray = seller_list.soldList.orderTransactionArray
-        @result['total_imported'] = seller_list.soldList.orderTransactionArray.length
-        @ordercnt = 0
+        if (seller_list.soldList != nil &&
+            seller_list.soldList.orderTransactionArray != nil)
+          order_or_transactionArray = seller_list.soldList.orderTransactionArray
+          @result['total_imported'] = seller_list.soldList.orderTransactionArray.length
+          @ordercnt = 0
 
-        order_or_transactionArray.each do |order_transaction|
-          #single line item order transaction
-          if !order_transaction.transaction.nil?
-            transactionID = order_transaction.transaction.transactionID
-            itemID = order_transaction.transaction.item.itemID
+          order_or_transactionArray.each do |order_transaction|
+            #single line item order transaction
+            if !order_transaction.transaction.nil?
+              transactionID = order_transaction.transaction.transactionID
+              itemID = order_transaction.transaction.item.itemID
 
-            #get sellingmanager SalesRecordNumber
-            item_transactions = @eBay.GetItemTransactions(:itemID => itemID,
-              :transactionID=> transactionID)
-            if item_transactions.transactionArray.length == 1
-              transaction = item_transactions.transactionArray.first
-              sellingManagerSalesRecordNumber =
-                transaction.shippingDetails.sellingManagerSalesRecordNumber
+              #get sellingmanager SalesRecordNumber
+              item_transactions = @eBay.GetItemTransactions(:itemID => itemID,
+                :transactionID=> transactionID)
+              if item_transactions.transactionArray.length == 1
+                transaction = item_transactions.transactionArray.first
+                sellingManagerSalesRecordNumber =
+                  transaction.shippingDetails.sellingManagerSalesRecordNumber
 
-              if Order.where(:increment_id=>sellingManagerSalesRecordNumber).length == 0
-                order = Order.new
+                if Order.where(:increment_id=>sellingManagerSalesRecordNumber).length == 0
+                  order = Order.new
 
-                order = build_order_with_single_item_from_ebay(order, transaction, order_transaction)
-                if order.save
-                  order.addactivity("Order Import", @store.name+" Import")
-                  order.order_items.each do |item|
-                    order.addactivity("Item with SKU: "+item.sku+" Added", @store.name+" Import")
+                  order = build_order_with_single_item_from_ebay(order, transaction, order_transaction)
+                  if order.save
+                    order.addactivity("Order Import", @store.name+" Import")
+                    order.order_items.each do |item|
+                      order.addactivity("Item with SKU: "+item.sku+" Added", @store.name+" Import")
+                    end
+                    order.set_order_status
+                    @result['success_imported'] = @result['success_imported'] + 1
                   end
-                  order.set_order_status
-                  @result['success_imported'] = @result['success_imported'] + 1
+                else # transaction is already imported
+                  @result['previous_imported'] = @result['previous_imported'] + 1
                 end
-              else # transaction is already imported
-                @result['previous_imported'] = @result['previous_imported'] + 1
+              else # transactions Array is not equal to 1
+                @result['status'] &= false
+                @result['messages'].push('There was an error importing the order transactions from Ebay,
+                  Order transactions length: '+ item_transactions.transactionArray.length )
               end
-            else # transactions Array is not equal to 1
-              @result['status'] &= false
-              @result['messages'].push('There was an error importing the order transactions from Ebay,
-                Order transactions length: '+ item_transactions.transactionArray.length )
-            end
-          elsif !order_transaction.order.nil?
-            # for orders with multiple line items
-            order_id = order_transaction.order.orderID
-            order_detail = @eBay.GetOrders(:orderIDArray =>[order_id])
+            elsif !order_transaction.order.nil?
+              # for orders with multiple line items
+              order_id = order_transaction.order.orderID
+              order_detail = @eBay.GetOrders(:orderIDArray =>[order_id])
 
-            if !order_detail.orderArray.nil? &&
-                order_detail.orderArray.length == 1
+              if !order_detail.orderArray.nil? &&
+                  order_detail.orderArray.length == 1
 
-              order_detail = order_detail.orderArray.first
+                order_detail = order_detail.orderArray.first
 
-              if !order_detail.shippingDetails.nil?
-               sellingManagerSalesRecordNumber = order_detail.shippingDetails.sellingManagerSalesRecordNumber
+                if !order_detail.shippingDetails.nil?
+                 sellingManagerSalesRecordNumber = order_detail.shippingDetails.sellingManagerSalesRecordNumber
+                else
+                 sellingManagerSalesRecordNumber = nil
+                end
+
+                if Order.where(:increment_id=>sellingManagerSalesRecordNumber).length == 0
+                  order = Order.new
+                  order = build_order_with_multiple_items_from_ebay(order, order_detail)
+                  if order.save
+                    order.addactivity("Order Import", @store.name+" Import")
+                    order.order_items.each do |item|
+                      order.addactivity("Item with SKU: "+item.sku+" Added", @store.name+" Import")
+                    end
+                    order.set_order_status
+                    @result['success_imported'] = @result['success_imported'] + 1
+                  end
+                else #order is already imported
+                  @result['previous_imported'] = @result['previous_imported'] + 1
+                end
               else
-               sellingManagerSalesRecordNumber = nil
-              end
-
-              if Order.where(:increment_id=>sellingManagerSalesRecordNumber).length == 0
-                order = Order.new
-                order = build_order_with_multiple_items_from_ebay(order, order_detail)
-                if order.save
-                  order.addactivity("Order Import", @store.name+" Import")
-                  order.order_items.each do |item|
-                    order.addactivity("Item with SKU: "+item.sku+" Added", @store.name+" Import")
-                  end
-                  order.set_order_status
-                  @result['success_imported'] = @result['success_imported'] + 1
-                end
-              else #order is already imported
-                @result['previous_imported'] = @result['previous_imported'] + 1
+                #order detail cannot be more than 1
+                @result['status'] &= false
+                @result['messages'].push('More than 1 order detail is returned for a single order id')
               end
             else
-              #order detail cannot be more than 1
               @result['status'] &= false
-              @result['messages'].push('More than 1 order detail is returned for a single order id')
+              @result['messages'].push('Importing orders with multiple order items is not supported')
+            end
+          end # end of order transaction array
+        end # end of sellers list's sold list
+      else # no ebay credentials are found
+        @result['status'] &= false
+        @result['messages'].push('Error fetching credentials for ebay store')
+      end # end of ebay credentials
+    elsif @store.store_type == 'Amazon'
+      @amazon_credentials = AmazonCredentials.where(:store_id => @store.id)
+
+      if @amazon_credentials.length > 0
+        @credential = @amazon_credentials.first
+        mws = MWS.new(:aws_access_key_id => ENV['AMAZON_MWS_ACCESS_KEY_ID'],
+          :secret_access_key => ENV['AMAZON_MWS_SECRET_ACCESS_KEY'],
+          :seller_id => @credential.merchant_id,
+          :marketplace_id => @credential.marketplace_id)
+
+        #@result['aws-response'] = mws.reports.request_report :report_type=>'_GET_MERCHANT_LISTINGS_DATA_'
+        #@result['aws-rewuest_status'] = mws.reports.get_report_request_list
+        response = mws.orders.list_orders :last_updated_after => 2.months.ago, :order_status => ['Unshipped', 'PartiallyShipped']
+              #@result['report_id'] = response.body
+        @orders = []
+
+        if !response.orders.kind_of?(Array)
+          @orders.push(response.orders)
+        else
+          @orders = response.orders
+        end
+
+        if !@orders.nil?
+          @result['total_imported'] = @orders.length
+          @orders.each do |order|
+          if Order.where(:increment_id=>order.amazon_order_id).length == 0
+            @order = Order.new
+            @order.status = 'awaiting'
+            @order.increment_id = order.amazon_order_id
+            #@order.storename = @store.name
+            @order.order_placed_time = order.purchase_date
+
+            @order.store = @store
+
+            order_items  = mws.orders.list_order_items :amazon_order_id => order.amazon_order_id
+            @result['orderitem'] = order_items
+
+            order_items.order_items.each do |item|
+              @order_item = OrderItem.new
+              @order_item.price = item.item_price.amount
+              @order_item.qty = item.quantity_ordered
+              @order_item.row_total= item.item_price.amount.to_i * item.quantity_ordered.to_i
+              @order_item.sku = item.seller_sku
+              if ProductSku.where(:sku=>item.seller_sku).length == 0
+                #create and import product
+                product = Product.new
+                product.name = 'New imported item'
+                product.store_product_id = 0
+                product.store = @store
+
+                sku = ProductSku.new
+                sku.sku = item.seller_sku
+
+                product.product_skus << sku
+                product.save
+                import_amazon_product_details(@store.id, item.seller_sku, product.id)
+              else
+                @order_item.product = ProductSku.where(:sku=>item.seller_sku).first.product
+              end
+              @order_item.name = item.title
+            end
+
+            @order.order_items << @order_item
+
+                @order.address_1  = order.shipping_address.address_line1
+                @order.city = order.shipping_address.city
+                @order.country = order.shipping_address.country_code
+                @order.postcode = order.shipping_address.postal_code
+                @order.state = order.shipping_address.state_or_region
+                @order.email = order.buyer_email
+                @order.lastname = order.shipping_address.name
+                split_name = order.shipping_address.name.split(' ')
+                @order.lastname = split_name.pop
+                @order.firstname = split_name.join(' ')
+
+            if @order.save
+              if !@order.addnewitems
+                @result['status'] &= false
+                @result['messages'].push('Problem adding new items')
+              end
+              @order.addactivity("Order Import", @store.name+" Import")
+              @order.order_items.each do |item|
+                @order.addactivity("Item with SKU: "+item.sku+" Added", @store.name+" Import")
+              end
+              @order.set_order_status
+              @result['success_imported'] = @result['success_imported'] + 1
             end
           else
-            @result['status'] &= false
-            @result['messages'].push('Importing orders with multiple order items is not supported')
+            @result['previous_imported'] = @result['previous_imported'] + 1
           end
-        end # end of order transaction array
-      end # end of sellers list's sold list
-    else # no ebay credentials are found
-      @result['status'] &= false
-      @result['messages'].push('Error fetching credentials for ebay store')
-    end # end of ebay credentials
-  elsif @store.store_type == 'Amazon'
-    @amazon_credentials = AmazonCredentials.where(:store_id => @store.id)
-
-    if @amazon_credentials.length > 0
-      @credential = @amazon_credentials.first
-      mws = MWS.new(:aws_access_key_id => ENV['AMAZON_MWS_ACCESS_KEY_ID'],
-        :secret_access_key => ENV['AMAZON_MWS_SECRET_ACCESS_KEY'],
-        :seller_id => @credential.merchant_id,
-        :marketplace_id => @credential.marketplace_id)
-
-      #@result['aws-response'] = mws.reports.request_report :report_type=>'_GET_MERCHANT_LISTINGS_DATA_'
-      #@result['aws-rewuest_status'] = mws.reports.get_report_request_list
-      response = mws.orders.list_orders :last_updated_after => 2.months.ago, :order_status => ['Unshipped', 'PartiallyShipped']
-            #@result['report_id'] = response.body
-      @orders = []
-
-      if !response.orders.kind_of?(Array)
-        @orders.push(response.orders)
-      else
-        @orders = response.orders
-      end
-
-      if !@orders.nil?
-        @result['total_imported'] = @orders.length
-        @orders.each do |order|
-        if Order.where(:increment_id=>order.amazon_order_id).length == 0
-          @order = Order.new
-          @order.status = 'awaiting'
-          @order.increment_id = order.amazon_order_id
-          #@order.storename = @store.name
-          @order.order_placed_time = order.purchase_date
-
-          @order.store = @store
-
-          order_items  = mws.orders.list_order_items :amazon_order_id => order.amazon_order_id
-          @result['orderitem'] = order_items
-
-          order_items.order_items.each do |item|
-            @order_item = OrderItem.new
-            @order_item.price = item.item_price.amount
-            @order_item.qty = item.quantity_ordered
-            @order_item.row_total= item.item_price.amount.to_i * item.quantity_ordered.to_i
-            @order_item.sku = item.seller_sku
-            if ProductSku.where(:sku=>item.seller_sku).length == 0
-              #create and import product
-              product = Product.new
-              product.name = 'New imported item'
-              product.store_product_id = 0
-              product.store = @store
-
-              sku = ProductSku.new
-              sku.sku = item.seller_sku
-
-              product.product_skus << sku
-              product.save
-              import_amazon_product_details(@store.id, item.seller_sku, product.id)
-            else
-              @order_item.product = ProductSku.where(:sku=>item.seller_sku).first.product
-            end
-            @order_item.name = item.title
           end
 
-          @order.order_items << @order_item
-
-              @order.address_1  = order.shipping_address.address_line1
-              @order.city = order.shipping_address.city
-              @order.country = order.shipping_address.country_code
-              @order.postcode = order.shipping_address.postal_code
-              @order.state = order.shipping_address.state_or_region
-              @order.email = order.buyer_email
-              @order.lastname = order.shipping_address.name
-              split_name = order.shipping_address.name.split(' ')
-              @order.lastname = split_name.pop
-              @order.firstname = split_name.join(' ')
-
-          if @order.save
-            if !@order.addnewitems
-              @result['status'] &= false
-              @result['messages'].push('Problem adding new items')
-            end
-            @order.addactivity("Order Import", @store.name+" Import")
-            @order.order_items.each do |item|
-              @order.addactivity("Item with SKU: "+item.sku+" Added", @store.name+" Import")
-            end
-            @order.set_order_status
-            @result['success_imported'] = @result['success_imported'] + 1
-          end
-        else
-          @result['previous_imported'] = @result['previous_imported'] + 1
         end
-        end
-
+        @result['response'] = response
       end
-      @result['response'] = response
     end
-  end
-  rescue Exception => e
-    @result['status'] = false
-    @result['messages'].push(e.message)
-    puts e.backtrace
+    rescue Exception => e
+      @result['status'] = false
+      @result['messages'].push(e.message)
+      puts e.backtrace
+    end
+  else
+    @result["status"] = false
+    @result["messages"].push("You do not have the permission to import orders")
   end
     respond_to do |format|
       format.json { render json: @result}
     end
   end
 
-  # GET /orders/1
-  # GET /orders/1.json
-  def show
-    @order = Order.find(params[:id])
-
-    respond_to do |format|
-      format.html # show.html.erb
-      format.json { render json: @order }
-    end
-  end
-
-  # POST /orders
-  # POST /orders.json
-  def create
-    @order = Order.new(params[:order])
-
-    respond_to do |format|
-      if @order.save
-        format.html { redirect_to @order, notice: 'Order was successfully created.' }
-        format.json { render json: @order, status: :created, location: @order }
-      else
-        format.html { render action: "new" }
-        format.json { render json: @order.errors, status: :unprocessable_entity }
-      end
-    end
-  end
 
   # PUT /orders/1
   # PUT /orders/1.json
   def update
     @order = Order.find(params[:id])
     @result = Hash.new
-    params[:order]['increment_id'] = @order.increment_id
-    @result['status']= true
-    unless @order.update_attributes(params[:order])
+    @result['status'] = true
+    @result['messages'] = []
+
+    #Everyone can create notes from Packer
+    @order.notes_fromPacker = params[:order]['notes_fromPacker']
+
+    if current_user.can?('create_edit_notes')
+      @order.notes_internal = params[:order]['notes_internal']
+      @order.notes_toPacker = params[:order]['notes_toPacker']
+    elsif @order.notes_internal != params[:order]['notes_internal'] ||
+          @order.notes_toPacker != params[:order]['notes_toPacker']
+      @result['status'] = false
+      @result['messages'].push('You do not have the permissions to edit notes')
+    end
+
+    if current_user.can?('add_edit_order_items')
+      @order.firstname = params[:order]['firstname']
+      @order.lastname = params[:order]['lastname']
+      @order.company = params[:order]['company']
+      @order.address_1 = params[:order]['address_1']
+      @order.address_2 = params[:order]['address_2']
+      @order.city = params[:order]['city']
+      @order.state = params[:order]['state']
+      @order.postcode = params[:order]['postcode']
+      @order.country = params[:order]['country']
+      @order.email = params[:order]['email']
+      @order.store_order_id = params[:order]['store_order_id']
+      @order.order_placed_time = params[:order]['order_placed_time']
+      @order.customer_comments = params[:order]['customer_comments']
+      @order.scanned_on = params[:order]['scanned_on']
+      @order.tracking_num = params[:order]['tracking_num']
+    elsif @order.firstname != params[:order]['firstname'] ||
+          @order.lastname != params[:order]['lastname'] ||
+          @order.company != params[:order]['company'] ||
+          @order.address_1 != params[:order]['address_1'] ||
+          @order.address_2 != params[:order]['address_2'] ||
+          @order.city != params[:order]['city'] ||
+          @order.state != params[:order]['state'] ||
+          @order.postcode != params[:order]['postcode'] ||
+          @order.country != params[:order]['country'] ||
+          @order.email != params[:order]['email'] ||
+          @order.store_order_id != params[:order]['store_order_id'] ||
+          @order.order_placed_time != params[:order]['order_placed_time'] ||
+          @order.customer_comments != params[:order]['customer_comments'] ||
+          @order.scanned_on != params[:order]['scanned_on'] ||
+          @order.tracking_num != params[:order]['tracking_num']
+      @result['status'] = false
+      @result['messages'].push('You do not have enough permissions to edit the order')
+    end
+
+    unless @order.save
       @result['status'] &= false
       @result['messages'] = @order.errors.full_messages
     end
 
-
     respond_to do |format|
       format.html # show.html.erb
       format.json { render json: @result }
-    end
-  end
-
-
-  # DELETE /orders/1
-  # DELETE /orders/1.json
-  def destroy
-    @order = Order.find(params[:id])
-    @order.destroy
-
-    respond_to do |format|
-      format.html { redirect_to orders_url }
-      format.json { head :no_content }
     end
   end
 
@@ -462,38 +465,45 @@ class OrdersController < ApplicationController
 
     @result = Hash.new
     @result['status'] = true
+    @result['messages'] = []
     @orders = list_selected_orders
-    unless @orders.nil?
-      @orders.each do|order|
 
-        @order = Order.find(order["id"])
+    if current_user.can?('add_edit_order_items')
+      unless @orders.nil?
+        @orders.each do|order|
 
-        @neworder = @order.dup
-        index = 0
-        temp_increment_id = ''
-          
-        begin
-          temp_increment_id = @order.increment_id + "(duplicate"+index.to_s+ ")"
-          @neworder.increment_id = temp_increment_id          
-          @orderslist = Order.where(:increment_id=>temp_increment_id)
-          index = index + 1
-        end while(!@orderslist.nil? && @orderslist.length > 0)
+          @order = Order.find(order["id"])
 
-        if !@neworder.save(:validate => false)
-          @result['status'] = false
-          @result['messages'] = @neworder.errors.full_messages
-        else
-          #add activity
-          @order_items = @order.order_items
-          @order_items.each do |order_item|
-            neworder_item = order_item.dup
-            neworder_item.order_id = @neworder.id
-            neworder_item.save
-          end          
-          username = current_user.name
-          @neworder.addactivity("Order duplicated", username)
+          @neworder = @order.dup
+          index = 0
+          temp_increment_id = ''
+
+          begin
+            temp_increment_id = @order.increment_id + "(duplicate"+index.to_s+ ")"
+            @neworder.increment_id = temp_increment_id
+            @orderslist = Order.where(:increment_id=>temp_increment_id)
+            index = index + 1
+          end while(!@orderslist.nil? && @orderslist.length > 0)
+
+          if !@neworder.save(:validate => false)
+            @result['status'] = false
+            @result['messages'] = @neworder.errors.full_messages
+          else
+            #add activity
+            @order_items = @order.order_items
+            @order_items.each do |order_item|
+              neworder_item = order_item.dup
+              neworder_item.order_id = @neworder.id
+              neworder_item.save
+            end
+            username = current_user.name
+            @neworder.addactivity("Order duplicated", username)
+          end
         end
       end
+    else
+      @result['status'] = false
+      @result['messages'].push("You do not have enough permissions to duplicate order")
     end
 
     respond_to do |format|
@@ -505,17 +515,23 @@ class OrdersController < ApplicationController
   def deleteorder
     @result = Hash.new
     @result['status'] = true
+    @result['messages'] = []
     @orders = list_selected_orders
-    unless @orders.nil?
-      @orders.each do|order|
-        @order = Order.find(order["id"])
-        if @order.destroy
-          @result['status'] &= true
-        else
-          @result['status'] &= false
-          @result['messages'] = @order.errors.full_messages
+    if current_user.can? 'add_edit_order_items'
+      unless @orders.nil?
+        @orders.each do|order|
+          @order = Order.find(order["id"])
+          if @order.destroy
+            @result['status'] &= true
+          else
+            @result['status'] &= false
+            @result['messages'] = @order.errors.full_messages
+          end
         end
       end
+    else
+      @result['status'] = false
+      @result['messages'].push("You do not have enough permissions to delete order")
     end
 
     respond_to do |format|
@@ -549,17 +565,25 @@ class OrdersController < ApplicationController
   def changeorderstatus
     @result = Hash.new
     @result['status'] = true
+    @result['messages'] = []
+
     @orders = list_selected_orders
-    unless @orders.nil?
-      @orders.each do|order|
-        @order = Order.find(order["id"])
-        @order.status = params[:status]
-        unless @order.save
-          @result['status'] = false
-          @result['messages'] = @order.errors.full_messages
+    if current_user.can? 'change_order_status'
+      unless @orders.nil?
+        @orders.each do|order|
+          @order = Order.find(order["id"])
+          @order.status = params[:status]
+          unless @order.save
+            @result['status'] = false
+            @result['messages'] = @order.errors.full_messages
+          end
         end
       end
+    else
+      @result['status'] = false
+      @result['messages'].push("You do not have enough permissions to delete order")
     end
+
     respond_to do |format|
       format.html # show.html.erb
       format.json { render json: @result }
@@ -604,12 +628,13 @@ class OrdersController < ApplicationController
       @result['order']['storeinfo'] = @order.store
 
       #setting user permissions for add and remove items permitted
-      @result['order']['add_items_permitted'] = current_user.add_order_items
-      @result['order']['remove_items_permitted'] = current_user.remove_order_items
+      @result['order']['add_items_permitted'] = current_user.can? 'add_edit_order_items'
+      @result['order']['remove_items_permitted'] = current_user.can? 'add_edit_order_items'
       @result['order']['activities'] = @order.order_activities
-      @result['order']['exception'] = @order.order_exceptions
+
+      @result['order']['exception'] = @order.order_exceptions if current_user.can?('view_packing_ex')
       @result['order']['exception']['assoc'] =
-        User.find(@order.order_exceptions.user_id) if !@order.order_exceptions.nil? && @order.order_exceptions.user_id !=0
+        User.find(@order.order_exceptions.user_id) if current_user.can?('view_packing_ex') && !@order.order_exceptions.nil? && @order.order_exceptions.user_id !=0
 
       @result['order']['users'] = User.all
 
@@ -626,7 +651,7 @@ class OrdersController < ApplicationController
       if !@order.packing_user_id.nil?
         @result['order']['users'].each do |user|
           if user.id == @order.packing_user_id
-            user.name = user.name + ' (Packing User)'
+            user.name = "#{user.name} (Packing User)"
           end
         end
       end
@@ -643,12 +668,6 @@ class OrdersController < ApplicationController
     end
   end
 
-  def additem
-    @result = Hash.new
-  end
-
-  def removeitem
-  end
 
   def recordexception
     @result = Hash.new
@@ -659,26 +678,34 @@ class OrdersController < ApplicationController
     @order = Order.find(params[:id])
 
     if !params[:reason].nil?
-      if @order.order_exceptions.nil?
-        @exception = OrderExceptions.new
-        @exception.order_id = @order.id
-      else
-        @exception = @order.order_exceptions
-      end
+      if (current_user.can?('create_packing_ex') &&  @order.order_exceptions.nil?) ||
+          (current_user.can?('edit_packing_ex') &&  !@order.order_exceptions.nil?)
+        if @order.order_exceptions.nil?
+          @exception = OrderExceptions.new
+          @exception.order_id = @order.id
+        else
+          @exception = @order.order_exceptions
+        end
 
-      @exception.reason = params[:reason]
-      @exception.description = params[:description]
-      if !params[:assoc].nil? && !params[:assoc][:id] != 0
-        @exception.user_id = params[:assoc][:id]
-        username = params[:assoc][:name]
-      end
+        @exception.reason = params[:reason]
+        @exception.description = params[:description]
+        if !params[:assoc].nil? && !params[:assoc][:id] != 0
+          @exception.user_id = params[:assoc][:id]
+          username = params[:assoc][:name]
+        end
 
-      if @exception.save
-        @order.addactivity("Order Exception Associated with "+username+" - Recorded", current_user.name)
+        if @exception.save
+          @order.addactivity("Order Exception Associated with #{username} - Recorded", current_user.name)
+        else
+          @result['status'] &= false
+          @result['messages'].push('Could not save order with exception')
+        end
       else
         @result['status'] &= false
-        @result['messages'].push('Could not save order with exception')
+        @result['messages'].push('Insufficient permissions')
+        @result['messages'].push(current_user.role)
       end
+
     else
       @result['status'] &= false
       @result['messages'].push('Cannot record exception without a reason')
@@ -699,11 +726,16 @@ class OrdersController < ApplicationController
       @result['status'] &= false
       @result['messages'].push('Order does not have exception to clear')
     else
-      if @order.order_exceptions.destroy
-        @order.addactivity("Order Exception Cleared", current_user.name)
+      if current_user.can? 'edit_packing_ex'
+        if @order.order_exceptions.destroy
+          @order.addactivity("Order Exception Cleared", current_user.name)
+        else
+          @result['status'] &= false
+          @result['messages'].push('Error clearing exceptions')
+        end
       else
         @result['status'] &= false
-        @result['messages'].push('Error clearing exceptions')
+        @result['messages'].push('You can not edit exceptions')
       end
     end
 
@@ -716,46 +748,53 @@ class OrdersController < ApplicationController
   def additemtoorder
     @result = Hash.new
     @result['status'] = true
-    qty = 1
-    qty = params[:qty] if !params[:qty].nil? && params[:qty].to_i > -1
-    @order = Order.find(params[:id])
-    @products = Product.find(params[:productids])
-    if @products.nil?
-      @result['status'] &= false
-      @result['messages'].push("Could not find any Item")
-    else
-      @products.each do |product|
-        @orderitem = OrderItem.new
-        @orderitem.name = product.name
-        @orderitem.price = params[:price]
-        @orderitem.qty = qty.to_i
-        @orderitem.row_total = params[:price].to_f * params[:qty].to_f
-        @orderitem.product_id = product.id
-        @order.order_items << @orderitem
-        if @orderitem.save
-          product_skus = product.product_skus
-          if product_skus.length > 0
-            product_sku = product_skus.first.sku
-          end
-          username = current_user.name
-          @order.addactivity("Item with sku " + product_sku + " added", username)
-          if product.is_kit == 1
-            kit_skus = ProductKitSkus.where(:product_id => @orderitem.product_id)
-            kit_skus.each do |kit_sku|
-              kit_sku.add_product_in_order_items
+    @result['messages'] = []
+    if current_user.can? 'add_edit_order_items'
+      qty = 1
+      qty = params[:qty] if !params[:qty].nil? && params[:qty].to_i > -1
+      @order = Order.find(params[:id])
+      @products = Product.find(params[:productids])
+      if @products.nil?
+        @result['status'] &= false
+        @result['messages'].push("Could not find any Item")
+      else
+
+        @products.each do |product|
+          @orderitem = OrderItem.new
+          @orderitem.name = product.name
+          @orderitem.price = params[:price]
+          @orderitem.qty = qty.to_i
+          @orderitem.row_total = params[:price].to_f * params[:qty].to_f
+          @orderitem.product_id = product.id
+          @order.order_items << @orderitem
+
+          if @orderitem.save
+            product_skus = product.product_skus
+            if product_skus.length > 0
+              product_sku = product_skus.first.sku
+            end
+            username = current_user.name
+            @order.addactivity("Item with sku " + product_sku + " added", username)
+            if product.is_kit == 1
+              kit_skus = ProductKitSkus.where(:product_id => @orderitem.product_id)
+              kit_skus.each do |kit_sku|
+                kit_sku.add_product_in_order_items
+              end
             end
           end
         end
-      end
-      if !@order.save
-        @result['status'] &= false
-        @result['messages'].push("Adding item to order failed")
-      else
-        @order.update_order_status
-        
-      end
-    end
 
+        if !@order.save
+          @result['status'] &= false
+          @result['messages'].push("Adding item to order failed")
+        else
+          @order.update_order_status
+        end
+      end
+    else
+      @result['status'] = false
+      @result['messages'].push('You can not add or edit order items')
+    end
 
     respond_to do |format|
       format.html # show.html.erb
@@ -767,18 +806,24 @@ class OrdersController < ApplicationController
     @result = Hash.new
     @result['status'] = true
     @result['messages'] = []
-    @orderitem = OrderItem.find_by_id(params[:orderitem])
-    if @orderitem.nil?
-      @result['status'] &= false
-      @result['messages'].push("Could not find order item")
-    else
-      @orderitem.qty = params[:qty]
-
-      unless @orderitem.save
+    if current_user.can? 'add_edit_order_items'
+      @orderitem = OrderItem.find_by_id(params[:orderitem])
+      if @orderitem.nil?
         @result['status'] &= false
-        @result['messages'].push("Could not update order item")
+        @result['messages'].push("Could not find order item")
+      else
+        @orderitem.qty = params[:qty]
+
+        unless @orderitem.save
+          @result['status'] &= false
+          @result['messages'].push("Could not update order item")
+        end
       end
+    else
+      @result['status'] = false
+      @result['messages'].push('You can not add or edit order items')
     end
+
     respond_to do |format|
       format.html # show.html.erb
       format.json { render json: @result }
@@ -789,32 +834,37 @@ class OrdersController < ApplicationController
     @result = Hash.new
     @result['status'] = true
     @result['messages'] =[]
-    @orderitem = OrderItem.find(params[:orderitem])
+    if current_user.can? 'add_edit_order_items'
+      @orderitem = OrderItem.find(params[:orderitem])
 
-    if !@orderitem.nil?
-      @orderitem.each do |item|
-        product = item.product
-        if !product.nil?
-          product_skus = product.product_skus
-          if product_skus.length > 0
-            sku = product_skus.first.sku
+      if @orderitem.nil?
+        @result['status'] &= false
+        @result['messages'].push("Could not find order item")
+      else
+        @orderitem.each do |item|
+          product = item.product
+          if !product.nil?
+            product_skus = product.product_skus
+            if product_skus.length > 0
+              sku = product_skus.first.sku
+            end
           end
-        end
-        
-        username = current_user.name
-        unless item.remove_order_item_kit_products && item.destroy
-          @result['status'] &= false
-          @result['messages'].push("Removed items from order failed")
-        else
-          item.order.update_order_status
-          item.order.addactivity("Item with sku " + sku + " removed", username)
+
+          username = current_user.name
+          if item.remove_order_item_kit_products && item.destroy
+            item.order.update_order_status
+            item.order.addactivity("Item with sku " + sku + " removed", username)
+          else
+            @result['status'] &= false
+            @result['messages'].push("Removed items from order failed")
+          end
+
         end
       end
     else
-      @result['status'] &= false
-      @result['messages'].push("Could not find order item")
+      @result['status'] = false
+      @result['messages'].push('You can not add or edit order items')
     end
-
     respond_to do |format|
       format.html # show.html.erb
       format.json { render json: @result }
@@ -834,70 +884,79 @@ class OrdersController < ApplicationController
         @result['status'] &= false
         @result['messages'].push("Wrong order id")
       else
-        #Items
-        items = OrderItem.where(:order_id => order.id)
-        items.each do |current_item|
-          found_item = false
-          unless params[:single]['items'].blank?
-            params[:single]['items'].each do |single_item|
-              if current_item.id == single_item['iteminfo']['id']
-                found_item = true
-              end
-            end
-          end
-
-          unless found_item
-            current_item.destroy
-          end
-        end
-        unless params[:single]['items'].blank?
-          params[:single]['items'].each do |current_item|
-            single_item = OrderItem.find_or_create_by_order_id_and_product_id( order.id, current_item['iteminfo']['product_id'])
-              current_item['iteminfo'].each do |value|
-                unless ["id","created_at","updated_at","order_id","product_id"].include?(value[0])
-                  single_item[value[0]] = value[1]
+        if current_user.can? 'add_edit_order_items'
+          #Items
+          items = OrderItem.where(:order_id => order.id)
+          items.each do |current_item|
+            found_item = false
+            unless params[:single]['items'].blank?
+              params[:single]['items'].each do |single_item|
+                if current_item.id == single_item['iteminfo']['id']
+                  found_item = true
                 end
               end
-              single_item.save!
+            end
 
-            current_product = Product.find(current_item['iteminfo']['product_id'])
-            updatelist(current_product,'name',current_item['productinfo']['name'])
-            updatelist(current_product,'is_skippable',current_item['productinfo']['is_skippable'])
-            updatelist(current_product,'qty',current_item['qty_on_hand'])
-            updatelist(current_product,'location_name',current_item['location'])
-            updatelist(current_product,'sku',current_item['sku'])
-
-          end
-        end
-
-        #activity
-        #As activities only get added, no updating or adding required
-        activities = OrderActivity.where(:order_id => params[:single]['basicinfo']['id'])
-        activities.each do |current_activity|
-          found_activity = false
-          params[:single]['activities'].each do |single_item|
-            if current_activity.id == single_item['id']
-              found_activity = true
+            unless found_item
+              current_item.destroy
             end
           end
-          unless found_activity
-            current_activity.destroy
-          end
-        end
+          unless params[:single]['items'].blank?
+            params[:single]['items'].each do |current_item|
+              single_item = OrderItem.find_or_create_by_order_id_and_product_id( order.id, current_item['iteminfo']['product_id'])
+                current_item['iteminfo'].each do |value|
+                  unless ["id","created_at","updated_at","order_id","product_id"].include?(value[0])
+                    single_item[value[0]] = value[1]
+                  end
+                end
+                single_item.save!
 
-        #exception
-        if params[:single]['exception'].nil?
-          unless order.order_exceptions.nil?
-            order.order_exceptions.destroy
+              current_product = Product.find(current_item['iteminfo']['product_id'])
+              updatelist(current_product,'name',current_item['productinfo']['name'])
+              updatelist(current_product,'is_skippable',current_item['productinfo']['is_skippable'])
+              updatelist(current_product,'qty',current_item['qty_on_hand'])
+              updatelist(current_product,'location_name',current_item['location'])
+              updatelist(current_product,'sku',current_item['sku'])
+
+            end
+          end
+
+          #activity
+          #As activities only get added, no updating or adding required
+          activities = OrderActivity.where(:order_id => params[:single]['basicinfo']['id'])
+          activities.each do |current_activity|
+            found_activity = false
+            params[:single]['activities'].each do |single_item|
+              if current_activity.id == single_item['id']
+                found_activity = true
+              end
+            end
+            unless found_activity
+              current_activity.destroy
+            end
           end
         else
-          exception = OrderExceptions.find_or_create_by_order_id(order.id)
-          params[:single]['exception'].each do |value|
-            unless ["id","created_at","updated_at","order_id","assoc"].include?(value[0])
-              exception[value[0]] = value[1]
+          @result['status'] = false
+          @result['messages'].push('Couldn\'t rollback because you can not add or edit order items')
+        end
+        if current_user.can? 'edit_packing_ex'
+          #exception
+          if params[:single]['exception'].nil?
+            unless order.order_exceptions.nil?
+              order.order_exceptions.destroy
             end
+          else
+            exception = OrderExceptions.find_or_create_by_order_id(order.id)
+            params[:single]['exception'].each do |value|
+              unless ["id","created_at","updated_at","order_id","assoc"].include?(value[0])
+                exception[value[0]] = value[1]
+              end
+            end
+            exception.save!
           end
-          exception.save!
+        else
+          @result['status'] = false
+          @result['messages'].push('Couldn\'t rollback because you can not edit packing exceptions')
         end
 
       end
@@ -937,13 +996,20 @@ class OrdersController < ApplicationController
           arr = params[:value].blank? ? [] : params[:value].split(" ")
           @order.lastname = arr.pop()
           @order.firstname = arr.join(" ")
-        else
+        elsif params[:var] == 'notes_from_packer' ||
+              (params[:var] == 'notes' && current_user.can?('create_edit_notes')) ||
+              current_user.can?('add_edit_order_items')
           key = accepted_data[params[:var]]
           @order[key] = params[:value]
+        else
+          @result['status']&= false
+          @result['error_msg'] = 'Insufficient permissions'
         end
-        unless @order.save
-          @result['status'] &= false
-          @result['error_msg'] = "Could not save order info"
+        if @result['status']
+          unless @order.save
+            @result['status'] &= false
+            @result['error_msg'] = "Could not save order info"
+          end
         end
       else
         @result['status'] &= false
@@ -956,35 +1022,6 @@ class OrdersController < ApplicationController
     end
   end
 
-  def update_order_status
-    @result = Hash.new
-    @result['status'] = true
-    @result['error_messages'] = []
-    @result['success_messages'] = []
-    @result['notice_messages'] = []
-    @result['data'] = Hash.new
-
-    if !params[:order_id].nil?
-    #check if order status is On Hold
-    @order = Order.find(params[:order_id])
-    if !@order.nil?
-      @order.update_order_status
-    else
-      @result['status'] &= false
-      @result['error_messages'].push("Could not find order with id:"+params[:order_id])
-    end
-
-    #check if current user edit confirmation code is same as that entered
-    else
-    @result['status'] &= false
-    @result['error_messages'].push("Please specify order id to update order status")
-    end
-
-    respond_to do |format|
-      format.html # show.html.erb
-      format.json { render json: @result }
-    end
-  end
 
   def generate_pick_list
     result = Hash.new
@@ -1047,7 +1084,7 @@ class OrdersController < ApplicationController
         file_name = 'pick_list_'+time.strftime("%d_%b_%Y")
         result['data']['pick_list_file_paths'] = '/pdfs/'+ file_name + '.pdf'
         render :pdf => file_name, 
-        :template => 'orders/generate_pick_list.html.erb',
+        :template => 'orders/generate_pick_list',
         :orientation => 'portrait',
         :page_height => '8in', 
         :save_only => true,
@@ -1056,6 +1093,8 @@ class OrdersController < ApplicationController
                     :bottom => '20',
                     :left => '0',
                     :right => '0'},
+        :handlers =>[:erb],
+        :formats => [:html],
         :save_to_file => Rails.root.join('public','pdfs', "#{file_name}.pdf")
         
         render json: result

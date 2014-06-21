@@ -37,18 +37,22 @@ module ScanPackHelper
             #get list of inactive_or_new_products
             single_order_result['conf_code'] = session[:confirmation_code]
 
-            if current_user.edit_products
+            if current_user.can?('add_edit_products') || (session[:product_edit_matched_for_current_user] && session[:product_edit_matched_for_order] == single_order.id)
               single_order_result['product_edit_matched'] = true
               single_order_result['inactive_or_new_products'] = single_order.get_inactive_or_new_products
               single_order_result['next_state'] = 'scanpack.rfp.product_edit'
             else
+              session[:product_edit_matched_for_current_user] = false
+              session[:order_edit_matched_for_current_user] = false
+              session[:product_edit_matched_for_order] = false
+              session[:product_edit_matched_for_products] = []
               single_order_result['next_state'] = 'scanpack.rfp.confirmation.product_edit'
               result['notice_messages'].push("This order was automatically placed on hold because it contains items that have a "+
                                                   "status of New or Inactive. These items may not have barcodes or other information needed for processing. "+
                                                   "Please ask a user with product edit permissions to scan their code so that these items can be edited or scan a different order.")
             end
           else
-            single_order_result['order_edit_permission'] = current_user.import_orders
+            single_order_result['order_edit_permission'] = current_user.can?('import_orders')
             single_order_result['next_state'] = 'scanpack.rfp.confirmation.order_edit'
             result['notice_messages'].push('This order is currently on Hold. Please scan or enter '+
                                                 'confirmation code with order edit permission to continue scanning this order or '+
@@ -59,7 +63,7 @@ module ScanPackHelper
         #process orders that have status of Service Issue
         if single_order.status == 'serviceissue'
           single_order_result['next_state'] = 'scanpack.rfp.confirmation.cos'
-          if current_user.change_order_status
+          if current_user.can?('change_order_status')
             result['notice_messages'].push('This order has a pending Service Issue. '+
                                                 'To clear the Service Issue and continue packing the order please scan your confirmation code or scan a different order.')
           else
@@ -112,6 +116,10 @@ module ScanPackHelper
     result['data'] = Hash.new
     result['data']['next_state'] = 'scanpack.rfp.default'
 
+    session[:product_edit_matched_for_current_user] = false
+    session[:order_edit_matched_for_current_user] = false
+    session[:product_edit_matched_for_order] = false
+    session[:product_edit_matched_for_products] = []
     if id.nil? || input.nil?
       result['status'] &= false
       result['error_messages'].push("Please specify barcode and order id to confirm purchase code")
@@ -225,6 +233,7 @@ module ScanPackHelper
           result['status'] &= false
           result['error_messages'].push("No tracking number is provided")
         else
+          #allow tracking id to be saved without special permissions
           order.tracking_num = input
           order.set_order_to_scanned_state(current_user.username)
           result['data']['next_state'] = 'scanpack.rfo'
@@ -307,7 +316,7 @@ module ScanPackHelper
           if User.where(:confirmation_code => input).length > 0
             user = User.where(:confirmation_code => input).first
 
-            if user.change_order_status
+            if user.can?('change_order_status')
               #set order state to awaiting scannus
               single_order.status = 'awaiting'
               single_order.save
@@ -321,7 +330,7 @@ module ScanPackHelper
               result['error_messages'].push("User with confirmation code: "+ input+ " does not have permission to change order status")
             end
           else
-            result['data']['next_state'] = 'request_for_confirmation_code_with_cos'
+            result['data']['next_state'] = 'scanpack.rfp.confirmation.cos'
             result['error_messages'].push("Could not find any user with confirmation code")
           end
         else
@@ -360,11 +369,16 @@ module ScanPackHelper
         if single_order.status == "onhold" && single_order.has_inactive_or_new_products
           if User.where(:confirmation_code => input).length > 0
             user = User.where(:confirmation_code => input).first
-            if user.edit_products
+            if user.can? 'add_edit_products'
               result['matched'] = true
               result['data']['inactive_or_new_products'] = single_order.get_inactive_or_new_products
               result['data']['next_state'] = 'scanpack.rfp.product_edit'
               session[:product_edit_matched_for_current_user] = true
+              session[:product_edit_matched_for_products] = []
+              result['data']['inactive_or_new_products'].each do |inactive_new_product|
+                session[:product_edit_matched_for_products].push(inactive_new_product.id)
+              end
+              session[:product_edit_matched_for_order] = single_order.id
             else
               result['data']['next_state'] = 'scanpack.rfp.confirmation.product_edit'
               result['matched'] = true

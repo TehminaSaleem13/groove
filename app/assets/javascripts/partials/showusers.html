@@ -26,22 +26,26 @@
   </ul>
   </div>
 </div>
-
 	<table id="userstbl" class="table table-hover table-bordered">
       <thead>
         <tr>
           <th><input ng-model="select_deselectall" type="checkbox" ng-change='select_deselectall_event()' /></th>
-          <th><a href="" ng-click="handlesort('username')">Username</a></th>
-          <th><a href="" ng-click="handlesort('active')">Status</a></th>
-          <th><a href="" ng-click="handlesort('last_sign_in_at')">Last Login</a></th>
-          <th><a href="" ng-click="handlesort('online')">Online</a></th>
-          <th><a href="" ng-click="handlesort('is_super_admin')">Type</a></th>
+          <th ng-class="{active:predicate=='username'}"><a href="" ng-click="handlesort('username')" ng-class="{ASC:!reverse, DESC:reverse}">Username</a></th>
+          <th ng-class="{active:predicate=='active'}"><a href="" ng-click="handlesort('active')" ng-class="{ASC:!reverse, DESC:reverse}">Status</a></th>
+          <th ng-class="{active:predicate=='last_sign_in_at'}"><a href="" ng-click="handlesort('last_sign_in_at')" ng-class="{ASC:!reverse, DESC:reverse}">Last Login</a></th>
+          <th ng-class="{active:predicate=='online'}"><a href="" ng-click="handlesort('online')" ng-class="{ASC:!reverse, DESC:reverse}">Online</a></th>
+          <th ng-class="{active:predicate=='role.name'}"><a href="" ng-click="handlesort('role.name')" ng-class="{ASC:!reverse, DESC:reverse}">Type</a></th>
         </tr>
       </thead>
       <tbody>
       <tr ng-repeat="user in users | filter: usernameFilter | orderBy:predicate:reverse">
       	<td><input type="checkbox" ng-model="user.checked"/></td>
-      	<td><a href="" role="button" data-toggle="modal" ng-click="getuserinfo(user.id,$index)">{{user.username}}</a></td>
+      	<td>
+            <span ng-if="current_user.can('add_edit_users')">
+                <a href="" role="button" data-toggle="modal" ng-click="getuserinfo(user.id,$index)">{{user.username}}</a>
+            </span>
+            <span ng-if="!current_user.can('add_edit_users')">{{user.username}}</span>
+        </td>
       	<td>
       		<span ng-show="user.active" class="active">Active</span>
       		<span ng-hide="user.active" class="inactive">Inactive</span>
@@ -52,8 +56,8 @@
       		<span ng-hide="user.online" class="inactive">Not Online</span>
       	</td>
       	<td>
-      		<span ng-show="user.is_super_admin">Administrator</span>
-      		<span ng-hide="user.is_super_admin">User</span>
+      		<span ng-show="user.role.display">{{user.role.name}}</span>
+            <span ng-hide="user.role.display">Custom</span>
       	</td>
       </tr>
 
@@ -90,270 +94,266 @@ aria-hidden="true">
 
  <div class="tab-content">
   <div class="tab-pane active" id="userinfotab">
-  <input type="hidden" ng-model="newUser.id" ng-show="edit_status"/>
-    <div class="control-group">
-      <label class="control-label">Username</label>
-      <div class="controls">
-        <input name="username" ng-blur="submit()" ng-model="newUser.username" type="text" value="" required/>
-       </div>
-    </div>
+    <div class="row-fluid">
+        <div class="span6">
 
-    <div class="control-group">
-      <label class="control-label">Name</label>
-      <div class="controls">
-        <input name="name" ng-blur="submit()" ng-model="newUser.name" type="text" required/>
-       </div>
-    </div>
+            <legend>Basic User Info</legend>
+          <input type="hidden" ng-model="newUser.id" ng-show="edit_status"/>
+            <div class="control-group">
+              <label class="control-label">Username</label>
+              <div class="controls">
+                <input name="username" ng-blur="submit()" ng-model="newUser.username" type="text" value="" required/>
+               </div>
+            </div>
 
-    <div class="control-group">
-      <label class="control-label">Password</label>
-      <div class="controls" ng-show="show_password">
-        <input name="password" ng-blur="submit()" ng-model="newUser.password" type="password" />
-       </div>
-       <div class="controls" ng-hide="show_password">
-        <a href="" ng-click='change_password()'> Change Password</a>
-       </div>
-    </div>
+            <div class="control-group">
+              <label class="control-label">Name</label>
+              <div class="controls">
+                <input name="name" ng-blur="submit()" ng-model="newUser.name" type="text" required/>
+               </div>
+            </div>
 
-    <div class="control-group">
-      <label class="control-label">Email</label>
-      <div class="controls">
-        <input name="email" ng-blur="submit()" ng-model="newUser.email" type="text"/>
-       </div>
-    </div>
+            <div class="control-group">
+              <label class="control-label">Password</label>
+              <div class="controls" ng-show="show_password">
+                <input name="password" ng-blur="submit()" ng-model="newUser.password" type="password" />
+               </div>
+               <div class="controls" ng-hide="show_password">
+                <a href="" ng-click='change_password()'> Change Password</a>
+               </div>
+            </div>
 
-    <div class="control-group">
-      <label class="control-label">Other</label>
-      <div class="controls">
-        <input name="other1" ng-blur="submit()" ng-model="newUser.other1" type="text"/>
-       </div>
-    </div>
+            <div class="control-group">
+              <label class="control-label">Email</label>
+              <div class="controls">
+                <input name="email" ng-blur="submit()" ng-model="newUser.email" type="text"/>
+               </div>
+            </div>
 
-    <div class="control-group">
-      <label class="control-label">Active</label>
-      <div class="controls">
-        <input name="active" ng-change="submit()" ng-model="newUser.active" type="checkbox"/>
-        <span> User is active</span>
-       </div>
-    </div>
+            <div class="control-group">
+              <label class="control-label">Other</label>
+              <div class="controls">
+                <input name="other1" ng-blur="submit()" ng-model="newUser.other" type="text"/>
+               </div>
+            </div>
 
-    <div class="control-group">
-      <label class="control-label">Confirmation Code</label>
-      <div class="controls">
-        <input name="confirmation_code" ng-blur="submit()" ng-model="newUser.confirmation_code" type="text" required/>
+            <div class="control-group">
+              <label class="control-label">Active</label>
+              <div class="controls">
+                <input name="active" ng-change="submit()" ng-model="newUser.active" type="checkbox"/>
+                <span> User is active</span>
+               </div>
+            </div>
+
+            <div class="control-group">
+              <label class="control-label">Confirmation Code</label>
+              <div class="controls">
+                <input name="confirmation_code" ng-blur="submit()" ng-model="newUser.confirmation_code" type="text" required/>
+              </div>
+            </div>
+        </div>
+        <div class="span6">
+            <legend>Apply and Manage Roles</legend>
+            <div class="control-group">
+                <label class="control-label">Role</label>
+                <div class="controls">
+                    <select ng-model="selectedRole" ng-change="set_selected_role($event)" ng-options="role.name for role in userRoles">
+                        <option value="">Custom</option>
+                    </select>
+                </div>
+            </div>
+            <div ng-show="selectedRole == null" class="control-group">
+                <label class="control-label">Select Base Role to customize</label>
+                <div class="controls span4">
+                    <table class="table table-hover table-bordered">
+                        <tr ng-repeat="role in userRoles" ng-click="set_base_role(role)">
+                            <td>{{role.name}}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div ng-show="!showSelectBaseRole && selectedRole == null"  class="control-group">
+                <label class="control-label">Save new Role</label>
+                <div class="controls">
+                    <input type="text" ng-model="newUser.role.new_name" placeholder="Role name" />
+                    <btn class="btn btn-success" ng-click="make_new_role()">Save</btn>
+                </div>
+            </div>
+
+            <div ng-show="!showSelectBaseRole && selectedRole != null && newUser.role.custom && newUser.role.display"  class="control-group">
+                <label class="control-label">Delete current Role</label>
+                <div class="controls">
+                    <btn class="btn btn-danger" ng-click="delete_role()">Delete</btn>
+                </div>
+            </div>
+
+        </div>
       </div>
-    </div>
-
   </div>
   <div class="tab-pane createuser-tab" id="productstab">
     <div class="control-group">
       <label class="control-label">
-      User can activate/deactivate channels & edit additional product details </label>
+      Add and Edit Products and Edit Product Status
+      </label>
       <div class="controls">
-      	<input name="edit_product_details" ng-change="submit()" ng-model="newUser.edit_product_details" type="checkbox" />
+      	<input name="add_edit_products" ng-change="submit()" ng-disabled="selectedRole!=null || showSelectBaseRole==true" ng-model="newUser.role.add_edit_products" type="checkbox" />
       </div>
-    </div>
-
-    <div class="control-group">
-      <label class="control-label">Add new products</label>
-      <div class="controls">
-        <input name="add_products" ng-model="newUser.add_products" ng-change="submit()"  type="checkbox" />
-       </div>
-    </div>
-
-    <div class="control-group">
-      <label class="control-label">Edit products</label>
-      <div class="controls">
-        <input name="edit_products" ng-model="newUser.edit_products" ng-change="submit()"  type="checkbox" />
-       </div>
     </div>
 
     <div class="control-group">
       <label class="control-label">Delete products</label>
       <div class="controls">
-        <input name="delete_products" ng-model="newUser.delete_products" ng-change="submit()"  type="checkbox" />
+        <input name="delete_products" ng-model="newUser.role.delete_products" ng-disabled="selectedRole!=null || showSelectBaseRole==true" ng-change="submit()"  type="checkbox" />
        </div>
     </div>
 
     <div class="control-group">
       <label class="control-label">Import products</label>
       <div class="controls">
-        <input name="import_products" ng-model="newUser.import_products" ng-change="submit()"  type="checkbox"/>
+        <input name="import_products" ng-model="newUser.role.import_products" ng-disabled="selectedRole!=null || showSelectBaseRole==true" ng-change="submit()"  type="checkbox"/>
        </div>
     </div>
 
-    <div class="control-group">
-      <label class="control-label">Edit product import settings</label>
-      <div class="controls">
-        <input name="edit_product_import" ng-model="newUser.edit_product_import" ng-change="submit()"  type="checkbox" checked/>
-       </div>
-    </div>
   </div>
 
   <div class="tab-pane createuser-tab" id="orderstab">
-  <div class="row-fluid">
-  <div class="span6">
-  <legend>Order Settings</legend>
-    <div class="control-group">
-      <label class="control-label">Update orders </label>
-      <div class="controls">
-      	<input name="import_orders" ng-model="newUser.import_orders" ng-change="submit()"  type="checkbox" checked/>
+    <div class="row-fluid">
+        <div class="span6">
+            <legend>Order Settings</legend>
+            <div class="control-group">
+              <label class="control-label">Add/edit order items</label>
+              <div class="controls">
+                  <input name="add_edit_order_items" ng-model="newUser.role.add_edit_order_items" ng-disabled="selectedRole!=null || showSelectBaseRole==true" ng-change="submit()"  type="checkbox" />
+              </div>
+            </div>
+            <div class="control-group">
+              <label class="control-label">Import orders</label>
+              <div class="controls">
+                <input name="import_orders" ng-model="newUser.role.import_orders" ng-disabled="selectedRole!=null || showSelectBaseRole==true" ng-change="submit()"  type="checkbox" checked/>
+              </div>
+            </div>
+
+            <div class="control-group">
+              <label class="control-label">Change Order Status</label>
+              <div class="controls">
+                <input name="change_order_status" ng-model="newUser.role.change_order_status" ng-disabled="selectedRole!=null || showSelectBaseRole==true" ng-change="submit()"  type="checkbox" />
+               </div>
+            </div>
+
+            <div class="control-group">
+              <label class="control-label">Create/edit notes from/to Packer</label>
+              <div class="controls">
+                <input name="create_edit_notescreate_edit_notes" ng-model="newUser.role.create_edit_notes" ng-disabled="selectedRole!=null || showSelectBaseRole==true" ng-change="submit()"  type="checkbox" />
+               </div>
+            </div>
+        </div>
+        <div class="span6">
+            <legend>Order activity & Packing exceptions</legend>
+            <div class="control-group">
+              <label class="control-label">View packing exceptions</label>
+              <div class="controls">
+                <input name="view_packing_ex" ng-model="newUser.role.view_packing_ex" ng-disabled="selectedRole!=null || showSelectBaseRole==true" ng-change="submit()"  type="checkbox"/>
+               </div>
+            </div>
+
+            <div class="control-group">
+              <label class="control-label">Record packing exceptions</label>
+              <div class="controls">
+                <input name="create_packing_ex" ng-model="newUser.role.create_packing_ex" ng-disabled="selectedRole!=null || showSelectBaseRole==true" ng-change="submit()"  type="checkbox" checked/>
+               </div>
+            </div>
+            <div class="control-group">
+              <label class="control-label">Edit existing packing exceptions</label>
+              <div class="controls">
+                <input name="edit_packing_ex" ng-model="newUser.role.edit_packing_ex" ng-disabled="selectedRole!=null || showSelectBaseRole==true" ng-change="submit()"  type="checkbox" checked/>
+               </div>
+            </div>
+        </div>
       </div>
-    </div>
-
-    <div class="control-group">
-      <label class="control-label">Change Order Status</label>
-      <div class="controls">
-        <input name="change_order_status" ng-model="newUser.change_order_status" ng-change="submit()"  type="checkbox" />
-       </div>
-    </div>
-
-    <div class="control-group">
-      <label class="control-label">Create/edit notes from Packer</label>
-      <div class="controls">
-        <input name="createEdit_packer" ng-model="newUser.createEdit_packer" ng-change="submit()"  type="checkbox" />
-       </div>
-    </div>
-
-    <div class="control-group">
-      <label class="control-label">Add/edit order items</label>
-      <div class="controls">
-        <input name="add_order_items_ALL" ng-model="newUser.add_order_items_ALL" ng-change="submit()"  type="checkbox" />
-       </div>
-    </div>
-    <div class="control-group">
-      <label class="control-label">Add order items</label>
-      <div class="controls">
-        <input name="add_order_items" ng-model="newUser.add_order_items" ng-change="submit()"  type="checkbox"/>
-       </div>
-    </div>
-
-    <div class="control-group">
-      <label class="control-label">Remove order items</label>
-      <div class="controls">
-        <input name="remove_order_items" ng-model="newUser.remove_order_items" ng-change="submit()"  type="checkbox" checked/>
-       </div>
-    </div>
-
-    </div>
-    <div class="span6">
-
-    <div class="control-group">
-      <label class="control-label">Change order items quantity</label>
-      <div class="controls">
-        <input name="change_quantity_items" ng-model="newUser.change_quantity_items" ng-change="submit()"  type="checkbox" checked/>
-       </div>
-    </div>
-    <legend>Order activity & Packing exceptions</legend>
-    <div class="control-group">
-      <label class="control-label">User can view packing exceptions</label>
-      <div class="controls">
-        <input name="view_packing_ex" ng-model="newUser.view_packing_ex" ng-change="submit()"  type="checkbox"/>
-       </div>
-    </div>
-
-    <div class="control-group">
-      <label class="control-label">User can create/enter packing</label>
-      <div class="controls">
-        <input name="create_packing_ex" ng-model="newUser.create_packing_ex" ng-change="submit()"  type="checkbox" checked/>
-       </div>
-    </div>
-    <div class="control-group">
-      <label class="control-label">User can edit existing packing</label>
-      <div class="controls">
-        <input name="edit_packing_ex" ng-model="newUser.edit_packing_ex" ng-change="submit()"  type="checkbox" checked/>
-       </div>
-    </div>
-    </div>
-  </div>
   </div>
   <div class="tab-pane createuser-tab" id="usertab">
 	<div class="row-fluid">
-	<div class="span4">
-	<legend>User status &amp; info</legend>
+        <div class="span6">
+            <legend>User permissions</legend>
+            <div class="control-group">
+                <label class="control-label">Can make super admins</label>
+                <div class="controls">
+                    <input name="make_super_admin" ng-model="newUser.role.make_super_admin" ng-disabled="selectedRole!=null || showSelectBaseRole==true"  ng-change="submit()"  type="checkbox" />
+                </div>
+            </div>
+            <div class="control-group">
+              <label class="control-label">Add and edit users</label>
+              <div class="controls">
+                <input name="add_edit_users" ng-model="newUser.role.add_edit_users" ng-disabled="selectedRole!=null || showSelectBaseRole==true" ng-change="submit()"  type="checkbox" checked/>
+               </div>
+            </div>
 
-    <div class="control-group">
-      <label class="control-label">Edit user info</label>
-      <div class="controls">
-        <input name="edit_user_info" ng-model="newUser.edit_user_info" ng-change="submit()"  type="checkbox" checked/>
-       </div>
-    </div>
 
-    <div class="control-group">
-      <label class="control-label">Edit user status</label>
-      <div class="controls">
-        <input name="edit_user_status" ng-model="newUser.edit_user_status" ng-change="submit()"  type="checkbox" checked/>
-       </div>
-    </div>
-    </div>
-	<div class="span4">
-	<legend>Super Admin</legend>
-    <div class="control-group">
-      <label class="control-label">User is Super Admin</label>
-      <div class="controls">
-        <input name="is_super_admin" ng-model="newUser.is_super_admin" ng-change="submit()"  type="checkbox" checked/>
-       </div>
-    </div>
-
-    <div class="control-group">
-      <label class="control-label">Create, duplicate and remove users</label>
-      <div class="controls">
-        <input name="create_users" ng-model="newUser.create_users" ng-change="submit()"  type="checkbox" checked/>
-       </div>
-    </div>
-    <div class="control-group">
-      <label class="control-label">Edit user permissions</label>
-      <div class="controls">
-        <input name="edit_user_permissions" ng-model="newUser.edit_user_permissions" ng-change="submit()"  type="checkbox" checked/>
-       </div>
-    </div>
-    </div>
-    <div class="span4">
-	<legend>Section access</legend>
-
-    <div class="control-group">
-        <label class="control-label">Settings</label>
-        <div class="controls">
-            <input name="access_scanpack" ng-model="newUser.access_settings" ng-change="submit()"  type="checkbox" checked/>
         </div>
-    </div>
+        <div class="span6">
+            <legend>Section access</legend>
 
-    <div class="control-group">
-      <label class="control-label">Scan &amp; Pack</label>
-      <div class="controls">
-        <input name="access_scanpack" ng-model="newUser.access_scanpack" ng-change="submit()"  type="checkbox" disabled/>
-       </div>
-    </div>
+            <div class="control-group">
+                <label class="control-label">Settings</label>
+                <div class="controls">
+                    <input name="access_settings" ng-model="newUser.role.access_settings" ng-disabled="selectedRole!=null || showSelectBaseRole==true" ng-change="submit()"  type="checkbox" checked/>
+                </div>
+            </div>
 
-    <div class="control-group">
-      <label class="control-label">Orders</label>
-      <div class="controls">
-        <input name="access_orders" ng-model="newUser.access_orders" ng-change="submit()"  type="checkbox" checked/>
-       </div>
-    </div>
-    <div class="control-group">
-      <label class="control-label">Products</label>
-      <div class="controls">
-        <input name="access_products" ng-model="newUser.access_products" ng-change="submit()"  type="checkbox" checked/>
-       </div>
-    </div>
-    </div>
-  </div>
+            <div class="control-group">
+              <label class="control-label">Scan &amp; Pack</label>
+              <div class="controls">
+                <input name="access_scanpack" ng-model="newUser.role.access_scanpack" ng-change="submit()"  type="checkbox" disabled/>
+               </div>
+            </div>
+
+            <div class="control-group">
+              <label class="control-label">Orders</label>
+              <div class="controls">
+                <input name="access_orders" ng-model="newUser.role.access_orders" ng-disabled="selectedRole!=null || showSelectBaseRole==true" ng-change="submit()"  type="checkbox" checked/>
+               </div>
+            </div>
+            <div class="control-group">
+              <label class="control-label">Products</label>
+              <div class="controls">
+                <input name="access_products" ng-model="newUser.role.access_products" ng-disabled="selectedRole!=null || showSelectBaseRole==true" ng-change="submit()"  type="checkbox" checked/>
+               </div>
+            </div>
+        </div>
+      </div>
   </div>
   <div class="tab-pane createuser-tab" id="systemtab">
-				<legend>System settings permissions</legend>
+    <legend>System settings permissions</legend>
     <div class="control-group">
-      <label class="control-label">User can edit General Preferences</label>
+      <label class="control-label">Edit General Preferences</label>
       <div class="controls">
-        <input name="edit_general_prefs" ng-model="newUser.edit_general_prefs" ng-change="submit()"  type="checkbox" checked/>
+        <input name="edit_general_prefs" ng-model="newUser.role.edit_general_prefs" ng-disabled="selectedRole!=null || showSelectBaseRole==true" ng-change="submit()"  type="checkbox" checked/>
        </div>
     </div>
     <div class="control-group">
-      <label class="control-label">User can edit Scanning Preferences</label>
+      <label class="control-label">Edit Scan and pack Preferences</label>
       <div class="controls">
-        <input name="edit_scanning_prefs" ng-model="newUser.edit_scanning_prefs" ng-change="submit()"  type="checkbox" checked/>
+        <input name="edit_scanning_prefs" ng-model="newUser.role.edit_scanning_prefs" ng-disabled="selectedRole!=null || showSelectBaseRole==true" ng-change="submit()"  type="checkbox" checked/>
        </div>
     </div>
+    <div class="control-group">
+        <label class="control-label">Create, Edit and Delete Stores</label>
+        <div class="controls">
+            <input name="add_edit_stores" ng-model="newUser.role.add_edit_stores" ng-disabled="selectedRole!=null || showSelectBaseRole==true" ng-change="submit()"  type="checkbox" checked/>
+        </div>
+    </div>
+      <div class="control-group">
+          <label class="control-label">Create Backups</label>
+          <div class="controls">
+              <input name="create_backups" ng-model="newUser.role.create_backups" ng-disabled="selectedRole!=null || showSelectBaseRole==true" ng-change="submit()"  type="checkbox" checked/>
+          </div>
+      </div>
+      <div class="control-group">
+          <label class="control-label">Restore Backups</label>
+          <div class="controls">
+              <input name="restore_backups" ng-model="newUser.role.restore_backups" ng-disabled="selectedRole!=null || showSelectBaseRole==true" ng-change="submit()"  type="checkbox" checked/>
+          </div>
+      </div>
   </div>
   </div>
 </div>

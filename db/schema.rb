@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140619142408) do
+ActiveRecord::Schema.define(:version => 20140619141700) do
 
   create_table "amazon_credentials", :force => true do |t|
     t.string   "merchant_id",                                     :null => false
@@ -24,7 +24,6 @@ ActiveRecord::Schema.define(:version => 20140619142408) do
     t.string   "productreport_id"
     t.string   "productgenerated_report_id"
     t.datetime "productgenerated_report_date"
-    t.boolean "display_shipping_weight"
     t.boolean  "show_shipping_weight_only",    :default => false
   end
 
@@ -231,6 +230,7 @@ ActiveRecord::Schema.define(:version => 20140619142408) do
     t.string   "method"
     t.datetime "created_at",         :null => false
     t.datetime "updated_at",         :null => false
+    t.string   "store_order_id"
     t.string   "notes_internal"
     t.string   "notes_toPacker"
     t.string   "notes_fromPacker"
@@ -353,15 +353,31 @@ ActiveRecord::Schema.define(:version => 20140619142408) do
   add_index "products", ["store_id"], :name => "index_products_on_store_id"
 
   create_table "roles", :force => true do |t|
-    t.string   "name"
-    t.integer  "resource_id"
-    t.string   "resource_type"
-    t.datetime "created_at",    :null => false
-    t.datetime "updated_at",    :null => false
+    t.string  "name",                                    :null => false
+    t.boolean "display",              :default => false, :null => false
+    t.boolean "custom",               :default => true,  :null => false
+    t.boolean "add_edit_order_items", :default => false, :null => false
+    t.boolean "import_orders",        :default => false, :null => false
+    t.boolean "change_order_status",  :default => false, :null => false
+    t.boolean "create_edit_notes",    :default => false, :null => false
+    t.boolean "view_packing_ex",      :default => false, :null => false
+    t.boolean "create_packing_ex",    :default => false, :null => false
+    t.boolean "edit_packing_ex",      :default => false, :null => false
+    t.boolean "delete_products",      :default => false, :null => false
+    t.boolean "import_products",      :default => false, :null => false
+    t.boolean "add_edit_products",    :default => false, :null => false
+    t.boolean "add_edit_users",       :default => false, :null => false
+    t.boolean "make_super_admin",     :default => false, :null => false
+    t.boolean "access_scanpack",      :default => true,  :null => false
+    t.boolean "access_orders",        :default => false, :null => false
+    t.boolean "access_products",      :default => false, :null => false
+    t.boolean "access_settings",      :default => false, :null => false
+    t.boolean "edit_general_prefs",   :default => false, :null => false
+    t.boolean "edit_scanning_prefs",  :default => false, :null => false
+    t.boolean "add_edit_stores",      :default => false, :null => false
+    t.boolean "create_backups",       :default => false, :null => false
+    t.boolean "restore_backups",      :default => false, :null => false
   end
-
-  add_index "roles", ["name", "resource_type", "resource_id"], :name => "index_roles_on_name_and_resource_type_and_resource_id"
-  add_index "roles", ["name"], :name => "index_roles_on_name"
 
   create_table "sold_inventory_warehouses", :force => true do |t|
     t.integer  "product_inventory_warehouses_id"
@@ -396,50 +412,16 @@ ActiveRecord::Schema.define(:version => 20140619142408) do
     t.datetime "updated_at",                                :null => false
     t.string   "username",               :default => "",    :null => false
     t.string   "email",                  :default => "",    :null => false
-    t.boolean  "access_scanpack",        :default => false, :null => false
-    t.boolean  "access_orders",          :default => false, :null => false
-    t.boolean  "access_products",        :default => false, :null => false
-    t.boolean  "access_settings",        :default => false, :null => false
     t.boolean  "active",                 :default => false, :null => false
-    t.boolean  "edit_product_details",   :default => false, :null => false
-    t.boolean  "add_products",           :default => false, :null => false
-    t.boolean  "edit_products",          :default => false, :null => false
-    t.boolean  "delete_products",        :default => false, :null => false
-    t.boolean  "import_products",        :default => false, :null => false
-    t.boolean  "edit_product_import",    :default => false, :null => false
-    t.boolean  "import_orders",          :default => false, :null => false
-    t.boolean  "change_order_status",    :default => false, :null => false
-    t.boolean  "createEdit_from_packer", :default => false, :null => false
-    t.boolean  "createEdit_to_packer",   :default => false, :null => false
-    t.boolean  "add_order_items",        :default => false, :null => false
-    t.boolean  "remove_order_items",     :default => false, :null => false
-    t.boolean  "change_quantity_items",  :default => false, :null => false
-    t.boolean  "view_packing_ex",        :default => false, :null => false
-    t.boolean  "create_packing_ex",      :default => false, :null => false
-    t.boolean  "edit_packing_ex",        :default => false, :null => false
-    t.boolean  "create_users",           :default => false, :null => false
-    t.boolean  "remove_users",           :default => false, :null => false
-    t.boolean  "edit_user_info",         :default => false, :null => false
-    t.boolean  "edit_user_permissions",  :default => false, :null => false
-    t.boolean  "is_super_admin",         :default => false, :null => false
-    t.boolean  "edit_general_prefs",     :default => false, :null => false
-    t.boolean  "edit_scanning_prefs",    :default => false, :null => false
-    t.boolean  "edit_user_status",       :default => false, :null => false
-    t.boolean  "add_order_items_ALL",    :default => false, :null => false
     t.string   "other"
     t.string   "name"
     t.string   "confirmation_code",      :default => "",    :null => false
     t.integer  "inventory_warehouse_id"
+    t.integer  "role_id"
   end
 
   add_index "users", ["inventory_warehouse_id"], :name => "index_users_on_inventory_warehouse_id"
   add_index "users", ["reset_password_token"], :name => "index_users_on_reset_password_token", :unique => true
-
-  create_table "users_roles", :id => false, :force => true do |t|
-    t.integer "user_id"
-    t.integer "role_id"
-  end
-
-  add_index "users_roles", ["user_id", "role_id"], :name => "index_users_roles_on_user_id_and_role_id"
+  add_index "users", ["role_id"], :name => "index_users_on_role_id"
 
 end

@@ -4,6 +4,11 @@ controller('showUsersCtrl', [ '$scope', '$http', '$timeout', '$stateParams', '$l
 
         var myscope = {}
         $scope.setup_modal = function() {
+            $http.get('/user_settings/getRoles.json').success(function(data) {
+                if(data.status) {
+                    $scope.userRoles = data.roles;
+                }
+            });
             if($scope.user_modal == null ) {
                 $scope.user_modal = $('#createUser'+$scope.custom_identifier);
                 $scope.user_modal.on("hidden",function() {
@@ -26,7 +31,8 @@ controller('showUsersCtrl', [ '$scope', '$http', '$timeout', '$stateParams', '$l
 
         $scope.submit = function() {
             $http.post('/user_settings/createUser.json', $scope.newUser).success(function(data) {
-                if(!data.result)
+                console.log(data);
+                if(!data.status)
                 {
                     $scope.notify(data.messages,0);
                 }
@@ -37,7 +43,23 @@ controller('showUsersCtrl', [ '$scope', '$http', '$timeout', '$stateParams', '$l
                         auth.check();
                     }
                 }
+
+                if( typeof data.user != "undefined" && typeof data.user.role !="undefined")
+                {
+                    $scope.newUser.role = data.user.role;
+                    myscope.reset_selected_role();
+                }
             })
+        }
+
+        myscope.reset_selected_role = function() {
+            $scope.selectedRole = null;
+            //set role by reference for modal
+            for(var i in $scope.userRoles) {
+                if($scope.newUser.role.id  === $scope.userRoles[i].id) {
+                    $scope.selectedRole = $scope.userRoles[i];
+                }
+            }
         }
 
         myscope.init = function() {
@@ -47,6 +69,7 @@ controller('showUsersCtrl', [ '$scope', '$http', '$timeout', '$stateParams', '$l
             $scope.$parent.current_page="show_users";
             $scope.currently_open = 0;
             $scope.show_password = true;
+            $scope.showSelectBaseRole = false;
 
 
             $http.get('/user_settings/userslist.json').success(function(data) {
@@ -201,7 +224,81 @@ controller('showUsersCtrl', [ '$scope', '$http', '$timeout', '$stateParams', '$l
                         });
         }
 
-        $scope.rollback = function(){
+        $scope.set_selected_role = function() {
+            $scope.showSelectBaseRole = false;
+            if($scope.selectedRole != null && typeof $scope.selectedRole['name'] != "undefined") {
+                if(confirm("Are you sure?")) {
+                    $scope.newUser.role = $scope.selectedRole;
+                    $scope.submit();
+                }
+            } else {
+                $scope.showSelectBaseRole = true;
+                $scope.newUser.role = {};
+            }
+        }
+
+        $scope.set_base_role = function(role) {
+            $scope.newUser.role = {};
+            for(var i in role) {
+                if(i != "id" && i != "name") {
+                    $scope.newUser.role[i] = role[i];
+                }
+            }
+            $scope.showSelectBaseRole = false;
+            $scope.notify("Permissions from "+ role.name + " applied",1);
+        }
+
+        $scope.make_new_role = function() {
+            $http.put('/user_settings/createRole.json', $scope.newUser).success(function(data){
+                console.log(data);
+                if (data.status)
+                {
+                    $scope.notify("Role successfully applied",1);
+                    $scope.newUser.role = data.role;
+                    $http.get('/user_settings/getRoles.json').success(function(data) {
+                        if(data.status) {
+                            $scope.userRoles = data.roles;
+                            myscope.reset_selected_role();
+                        }
+                        auth.check();
+                    });
+                }
+                else
+                {
+                    $scope.notify(data.messages,0);
+                }
+            }).error(function(data){
+                $scope.notify("There was a problem creating role",0);
+            });
+        }
+
+        $scope.delete_role = function() {
+            if(confirm("Are you sure you want to delete this role? All users with current role will be changed to Scan & Pack users")) {
+                $http.post('/user_settings/deleteRole.json',$scope.newUser).success(function(data){
+                    console.log(data);
+                    if (data.status)
+                    {
+                        $scope.notify("Role successfully deleted",1);
+                        $scope.newUser.role = data.role;
+                        $http.get('/user_settings/getRoles.json').success(function(data) {
+                            if(data.status) {
+                                $scope.userRoles = data.roles;
+                                myscope.reset_selected_role();
+                            }
+                            auth.check();
+                        });
+                    }
+                    else
+                    {
+                        $scope.notify(data.messages,0);
+                    }
+                }).error(function(){
+                    $scope.notify("There was a problem deleting role",0);
+                })
+            }
+        }
+
+        $scope.rollback = function() {
             angular.copy(myscope.single,$scope.newUser);
         }
 
@@ -215,8 +312,8 @@ controller('showUsersCtrl', [ '$scope', '$http', '$timeout', '$stateParams', '$l
                 if (data.status)
                 {
                     $scope.newUser = data.user;
-                    $scope.newUser.other1 = data.user.other;
-                    $scope.newUser.createEdit_packer = data.user.createEdit_from_packer;
+                    console.log($scope.newUser);
+                    myscope.reset_selected_role();
                     myscope.single = {};
                     angular.copy($scope.newUser,myscope.single);
                     $scope.edit_status = true;

@@ -1,8 +1,9 @@
 require 'spec_helper'
 
 describe ProductsController do
-  before(:each) do 
-    @user = FactoryGirl.create(:user, :import_orders=> "1")
+  before(:each) do
+    sup_ad = FactoryGirl.create(:role,:name=>'super_admin1',:make_super_admin=>true)
+    @user = FactoryGirl.create(:user,:username=>"new_admin1", :role=>sup_ad)
     sign_in @user
   end
   

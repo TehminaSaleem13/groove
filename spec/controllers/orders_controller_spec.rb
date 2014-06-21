@@ -20,12 +20,110 @@ require 'spec_helper'
 
 describe OrdersController do
 
-  before(:each) do 
-    @user = FactoryGirl.create(:user, :import_orders=> "1", :name=>'Admin')
+  before(:each) do
+    @user_role = FactoryGirl.create(:role,:name=>'order_controller_tester_scan_pack')
+    @user = FactoryGirl.create(:user,:name=>'Order Controller Tester', :username=>"order_controller_tester", :role=>@user_role)
     sign_in @user
+    @copy_order_l = lambda do |order|
+      order_data = Hash.new
+      order_data['notes_fromPacker'] =  order.notes_fromPacker
+      order_data['notes_internal'] =  order.notes_internal
+      order_data['notes_toPacker'] =  order.notes_toPacker
+      order_data['firstname'] = order.firstname
+      order_data['lastname'] = order.lastname
+      order_data['company'] = order.company
+      order_data['address_1'] = order.address_1
+      order_data['address_2'] = order.address_2
+      order_data['city'] = order.city
+      order_data['state'] = order.state
+      order_data['postcode'] = order.postcode
+      order_data['country'] = order.country
+      order_data['email'] = order.email
+      order_data['store_order_id'] = order.store_order_id
+      order_data['order_placed_time'] = order.order_placed_time
+      order_data['customer_comments'] = order.customer_comments
+      order_data['scanned_on'] = order.scanned_on
+      order_data['tracking_num'] = order.tracking_num
+      return order_data
+    end
   end
 
   describe "Order" do
+    it "Should not allow editing order data without permissions" do
+      request.accept = "application/json"
+      order = FactoryGirl.create(:order, :status=>'awaiting', :packing_user_id=> @user.id)
+      order_data = @copy_order_l.call(order)
+      order_data['firstname'] = "Test"
+
+      post :update, {id: order.id, order: order_data}
+
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['status']).to eq(false)
+      expect(result['messages'][0]).to eq('You do not have enough permissions to edit the order')
+    end
+
+    it "Should allow editing order data with permissions" do
+      request.accept = "application/json"
+      order = FactoryGirl.create(:order, :status=>'awaiting', :packing_user_id=> @user.id)
+      order_data = @copy_order_l.call(order)
+      order_data['firstname'] = "Test"
+      @user_role.add_edit_order_items = true
+      @user_role.save
+
+      post :update, {id: order.id, order: order_data}
+
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['status']).to eq(true)
+    end
+
+    it "Should not allow editing notes without permissions" do
+      request.accept = "application/json"
+      order = FactoryGirl.create(:order, :status=>'awaiting', :packing_user_id=> @user.id)
+      order_data = @copy_order_l.call(order)
+      order_data['notes_internal'] = "Test"
+
+      post :update, {id: order.id, order: order_data}
+
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['status']).to eq(false)
+      expect(result['messages'][0]).to eq('You do not have the permissions to edit notes')
+    end
+
+    it "Should allow editing notes with permissions" do
+      request.accept = "application/json"
+      order = FactoryGirl.create(:order, :status=>'awaiting', :packing_user_id=> @user.id)
+      order_data = @copy_order_l.call(order)
+      order_data['notes_internal'] = "Test"
+
+      @user_role.create_edit_notes = true
+      @user_role.save
+
+      post :update, {id: order.id, order: order_data}
+
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['status']).to eq(true)
+    end
+
+    it "Should allow editing notes with add_edit order items permissions" do
+      request.accept = "application/json"
+      order = FactoryGirl.create(:order, :status=>'awaiting', :packing_user_id=> @user.id)
+      order_data = @copy_order_l.call(order)
+      order_data['notes_internal'] = "Test2"
+
+      @user_role.add_edit_order_items = true
+      @user_role.save
+
+      post :update, {id: order.id, order: order_data}
+
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['status']).to eq(true)
+    end
+
     it "should get details of the packing user" do
 	  request.accept = "application/json"
 	  order = FactoryGirl.create(:order, :status=>'awaiting', :packing_user_id=> @user.id)
@@ -36,11 +134,11 @@ describe OrdersController do
 	  result = JSON.parse(response.body)
 	  expect(result['status']).to eq(true)
 	  expect(result['order']['users'][0]['name']).to eq("Nobody")
-	  expect(result['order']['users'][1]['name']).to eq(@user.name+" (Packing User)")
+	  expect(result['order']['users'][1]['name']).to eq("#{@user.name} (Packing User)")
     end
 
 
-    it "should record exception with the user" do
+    it "should not record exception with the user without permission" do
 	  request.accept = "application/json"
 	  order = FactoryGirl.create(:order, :status=>'awaiting')
 
@@ -49,7 +147,23 @@ describe OrdersController do
 
 	  expect(response.status).to eq(200)
 	  result = JSON.parse(response.body)
-	  expect(result['status']).to eq(true)
+	  expect(result['status']).to eq(false)
+    end
+
+    it "should record exception with the user with permission" do
+      request.accept = "application/json"
+
+      order = FactoryGirl.create(:order, :status=>'awaiting')
+      @user_role.create_packing_ex = true
+      @user_role.save
+
+
+      put :recordexception, {:id => order.id, :reason=>'Missing item',
+                             :description=>'Test Description', :assoc=>{:id=> @user.id, :name=>@user.name} }
+
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['status']).to eq(true)
     end
   end
 

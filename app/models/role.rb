@@ -1,6 +1,7 @@
 class Role < ActiveRecord::Base
-  has_and_belongs_to_many :users, :join_table => :users_roles
-  belongs_to :resource, :polymorphic => true
-  
-  scopify
+  attr_accessible :name, :display
+  validates_presence_of  :name
+  validates_uniqueness_of :name, :case_sensitive => false
+
+  has_many :users
 end

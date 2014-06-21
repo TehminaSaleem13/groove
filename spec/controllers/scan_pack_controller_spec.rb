@@ -3,7 +3,8 @@ require 'spec_helper'
 describe ScanPackController do
 
   before(:each) do
-    @user = FactoryGirl.create(:user, :import_orders=> "1")
+    @user_role =FactoryGirl.create(:role,:name=>'scan_pack',:import_orders=>true)
+    @user = FactoryGirl.create(:user,:username=>"scan_pack_spec_user", :name=>'Scan Pack user', :role=>@user_role)
     sign_in @user
 
     @child_item_l = lambda do |name, images, sku, qty_remaining,
@@ -264,8 +265,8 @@ describe ScanPackController do
       request.accept = "application/json"
 
       @order = FactoryGirl.create(:order, :status=>'serviceissue', :scanned_on=> "2013-09-03")
-      @user.change_order_status = true
-      @user.save
+      @user_role.change_order_status = true
+      @user_role.save
 
       get :scan_barcode, {:state=>'scanpack.rfo', :input => 12345678 }
 
@@ -302,7 +303,7 @@ describe ScanPackController do
   it "should check for confirmation code when order status is on hold" do
       request.accept = "application/json"
 
-      @other_user = FactoryGirl.create(:user, :email=>'test_other@groovepacks.com', :username=>'test_user')
+      @other_user = FactoryGirl.create(:user, :email=>'test_other@groovepacks.com', :username=>'test_user', :role=>FactoryGirl.create(:role, :import_orders=>false))
 
       @other_user.confirmation_code = '12345678901'
       @other_user.save
@@ -324,7 +325,7 @@ describe ScanPackController do
 
   it "should not check for confirmation code when order status is not on hold" do
       request.accept = "application/json"
-      @other_user = FactoryGirl.create(:user, :email=>'test_other@groovepacks.com', :username=>'test_user')
+      @other_user = FactoryGirl.create(:user, :email=>'test_other@groovepacks.com', :username=>'test_user', :role=>FactoryGirl.create(:role, :import_orders=>false))
 
       @other_user.confirmation_code = '1234567890'
       @other_user.save
@@ -344,7 +345,7 @@ describe ScanPackController do
   it "should not set session variable when confirmation code does not match" do
       request.accept = "application/json"
 
-      @other_user = FactoryGirl.create(:user, :email=>'test_other@groovepacks.com', :username=>'test_user')
+      @other_user = FactoryGirl.create(:user, :email=>'test_other@groovepacks.com', :username=>'test_user', :role=>FactoryGirl.create(:role, :import_orders=>false))
 
       @other_user.confirmation_code = '1234567890'
       @other_user.save
@@ -363,10 +364,10 @@ describe ScanPackController do
   it "should check for  when order status is on hold and has inactive or new products" do
       request.accept = "application/json"
 
-      @other_user = FactoryGirl.create(:user, :email=>'test_other@groovepacks.com', :username=>'test_user')
+      @other_user = FactoryGirl.create(:user, :email=>'test_other@groovepacks.com', :username=>'test_user', :role=>FactoryGirl.create(:role, :import_orders=>false,:add_edit_products=>true))
 
       @other_user.confirmation_code = '12345678901'
-      @other_user.edit_products = 1
+      @other_user.role.add_edit_products = 1
       @other_user.save
 
       @order = FactoryGirl.create(:order, :status=>'onhold')
@@ -384,7 +385,7 @@ describe ScanPackController do
 
   it "should not check for product confirmation code when order status is not on hold" do
       request.accept = "application/json"
-      @other_user = FactoryGirl.create(:user, :email=>'test_other@groovepacks.com', :username=>'test_user')
+      @other_user = FactoryGirl.create(:user, :email=>'test_other@groovepacks.com', :username=>'test_user', :role=>FactoryGirl.create(:role, :import_orders=>false))
 
       @other_user.confirmation_code = '1234567890'
       @other_user.save
@@ -406,7 +407,7 @@ describe ScanPackController do
   it "should not set session variable when confirmation code does not match" do
       request.accept = "application/json"
 
-      @other_user = FactoryGirl.create(:user, :email=>'test_other@groovepacks.com', :username=>'test_user')
+      @other_user = FactoryGirl.create(:user, :email=>'test_other@groovepacks.com', :username=>'test_user', :role=>FactoryGirl.create(:role, :import_orders=>false))
 
       @other_user.confirmation_code = '1234567890'
       @other_user.save
@@ -538,8 +539,8 @@ describe ScanPackController do
       request.accept = "application/json"
 
       order = FactoryGirl.create(:order, :status=>'serviceissue')
-      @user.change_order_status = 1
-      @user.save
+      @user_role.change_order_status = true
+      @user_role.save
 
       product = FactoryGirl.create(:product)
       product_sku = FactoryGirl.create(:product_sku, :product=> product)

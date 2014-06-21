@@ -10,459 +10,467 @@ class ProductsController < ApplicationController
 	@result['total_imported'] = 0
 	@result['success_imported'] = 0
 	@result['previous_imported'] = 0
-	#begin
-	#import if magento products
-	if @store.store_type == 'Magento' then
-		@magento_credentials = MagentoCredentials.where(:store_id => @store.id)
+  if current_user.can?('import_products')
+    #begin
+    #import if magento products
+    if @store.store_type == 'Magento' then
+      @magento_credentials = MagentoCredentials.where(:store_id => @store.id)
 
-		if @magento_credentials.length > 0
-			client = Savon.client(wsdl: @magento_credentials.first.host+"/index.php/api/soap/index/wsdl/1")
+      if @magento_credentials.length > 0
+        client = Savon.client(wsdl: @magento_credentials.first.host+"/index.php/api/soap/index/wsdl/1")
 
-			if !client.nil?
+        if !client.nil?
 
-				response = client.call(:login,  message: { apiUser: @magento_credentials.first.username,
-					apikey: @magento_credentials.first.api_key })
+          response = client.call(:login,  message: { apiUser: @magento_credentials.first.username,
+            apikey: @magento_credentials.first.api_key })
 
-				if response.success?
-					session =  response.body[:login_response][:login_return]
-					response = client.call(:call, message: {session: session, 
-						method: 'product.list'})
+          if response.success?
+            session =  response.body[:login_response][:login_return]
+            response = client.call(:call, message: {session: session,
+              method: 'product.list'})
 
-					# fetching all products
-					if response.success?
-					  # listing found products
-					  @products  = response.body[:call_response][:call_return][:item]
-						@products .each do |product|
-							product = product[:item]
-							result_product = Hash.new
+            # fetching all products
+            if response.success?
+              # listing found products
+              @products  = response.body[:call_response][:call_return][:item]
+              @products .each do |product|
+                product = product[:item]
+                result_product = Hash.new
 
-							product.each do |pkey|
-								result_product[pkey[:key]] = pkey[:value]
-							end
+                product.each do |pkey|
+                  result_product[pkey[:key]] = pkey[:value]
+                end
 
-							@result['total_imported'] = @result['total_imported'] + 1
+                @result['total_imported'] = @result['total_imported'] + 1
 
-							if Product.where(:store_product_id=>result_product['product_id']).length  == 0
-								#add product to the database
-								@productdb = Product.new
-								@productdb.name = result_product['name']
-								@productdb.store_product_id = result_product['product_id']
-								@productdb.product_type = result_product['type']
-								@productdb.store = @store
-								# Magento product api does not provide a barcode, so all
-								# magento products should be marked with a status new as t
-								#they cannot be scanned.
-								@productdb.status = 'new'
+                if Product.where(:store_product_id=>result_product['product_id']).length  == 0
+                  #add product to the database
+                  @productdb = Product.new
+                  @productdb.name = result_product['name']
+                  @productdb.store_product_id = result_product['product_id']
+                  @productdb.product_type = result_product['type']
+                  @productdb.store = @store
+                  # Magento product api does not provide a barcode, so all
+                  # magento products should be marked with a status new as t
+                  #they cannot be scanned.
+                  @productdb.status = 'new'
 
-								@productdbsku = ProductSku.new
-								#add productdb sku
-								if result_product['sku'] != {:"@xsi:type"=>"xsd:string"}
-									@productdbsku.sku = result_product['sku']
-									@productdbsku.purpose = 'primary'
+                  @productdbsku = ProductSku.new
+                  #add productdb sku
+                  if result_product['sku'] != {:"@xsi:type"=>"xsd:string"}
+                    @productdbsku.sku = result_product['sku']
+                    @productdbsku.purpose = 'primary'
 
-									#publish the sku to the product record
-									@productdb.product_skus << @productdbsku
-								end
+                    #publish the sku to the product record
+                    @productdb.product_skus << @productdbsku
+                  end
 
-							  if !result_product['sku'].nil?
-									get_product_info = client.call(:call, 
-											message: {session: session,
-											method: 'catalog_product.info',
-											product: result_product['sku']})
-									product_info = 
-										get_product_info.body[:call_response][:call_return][:item]
-									product_info.each do |product_info_item|
-										if product_info_item[:key] == 'weight'
-											if product_info_item[:value] != nil
-												weight_in_f = product_info_item[:value].to_f
-												@productdb.weight = weight_in_f * 16
-											end
-										end
-									end
+                  if !result_product['sku'].nil?
+                    get_product_info = client.call(:call,
+                        message: {session: session,
+                        method: 'catalog_product.info',
+                        product: result_product['sku']})
+                    product_info =
+                      get_product_info.body[:call_response][:call_return][:item]
+                    product_info.each do |product_info_item|
+                      if product_info_item[:key] == 'weight'
+                        if product_info_item[:value] != nil
+                          weight_in_f = product_info_item[:value].to_f
+                          @productdb.weight = weight_in_f * 16
+                        end
+                      end
+                    end
 
-							  end
+                  end
 
-								#get images and categories
-								begin
-								if !result_product['sku'].nil? && @magento_credentials.first.import_images
-									getimages = client.call(:call, message: {session: session,
-										method: 'catalog_product_attribute_media.list',
-										product: result_product['sku']})
-									if getimages.success?
+                  #get images and categories
+                  begin
+                  if !result_product['sku'].nil? && @magento_credentials.first.import_images
+                    getimages = client.call(:call, message: {session: session,
+                      method: 'catalog_product_attribute_media.list',
+                      product: result_product['sku']})
+                    if getimages.success?
 
-										@images = getimages.body[:call_response][:call_return][:item]
-										if !@images.nil?
-											if @images.length != 2
-												@images.each do |image|
-													image[:item].each do |itemhash|
-														@productimage = ProductImage.new
-														if itemhash[:key] == 'url'
-															@productimage.image = itemhash[:value]
-														end
+                      @images = getimages.body[:call_response][:call_return][:item]
+                      if !@images.nil?
+                        if @images.length != 2
+                          @images.each do |image|
+                            image[:item].each do |itemhash|
+                              @productimage = ProductImage.new
+                              if itemhash[:key] == 'url'
+                                @productimage.image = itemhash[:value]
+                              end
 
-														if itemhash[:key] == 'label'
-															@productimage.caption = itemhash[:value]
-														end
+                              if itemhash[:key] == 'label'
+                                @productimage.caption = itemhash[:value]
+                              end
 
-														if !@productimage.image.nil?
-															@productdb.product_images << @productimage
-														end
-													end
-												end
-											else
-												if @images.kind_of?(Array)
-													@images.each do |image|
-														image[:item].each do |itemhash|
-															@productimage = ProductImage.new
-															if itemhash[:key] == 'url'
-																@productimage.image = itemhash[:value]
-															end
+                              if !@productimage.image.nil?
+                                @productdb.product_images << @productimage
+                              end
+                            end
+                          end
+                        else
+                          if @images.kind_of?(Array)
+                            @images.each do |image|
+                              image[:item].each do |itemhash|
+                                @productimage = ProductImage.new
+                                if itemhash[:key] == 'url'
+                                  @productimage.image = itemhash[:value]
+                                end
 
-															if itemhash[:key] == 'label'
-																@productimage.caption = itemhash[:value]
-															end
+                                if itemhash[:key] == 'label'
+                                  @productimage.caption = itemhash[:value]
+                                end
 
-															if !@productimage.image.nil?
-																@productdb.product_images << @productimage
-															end
-														end
-													end
-												else
-													@images[:item].each do |itemhash|
-														@productimage = ProductImage.new
-														if itemhash[:key] == 'url'
-															@productimage.image = itemhash[:value]
-														end
+                                if !@productimage.image.nil?
+                                  @productdb.product_images << @productimage
+                                end
+                              end
+                            end
+                          else
+                            @images[:item].each do |itemhash|
+                              @productimage = ProductImage.new
+                              if itemhash[:key] == 'url'
+                                @productimage.image = itemhash[:value]
+                              end
 
-														if itemhash[:key] == 'label'
-															@productimage.caption = itemhash[:value]
-														end
+                              if itemhash[:key] == 'label'
+                                @productimage.caption = itemhash[:value]
+                              end
 
-														if !@productimage.image.nil?
-															@productdb.product_images << @productimage
-														end
-													end
-												end
-											end
-										end
-									end
-								end
-								rescue
+                              if !@productimage.image.nil?
+                                @productdb.product_images << @productimage
+                              end
+                            end
+                          end
+                        end
+                      end
+                    end
+                  end
+                  rescue
 
-								end
-
-
-								begin
-
-								if @magento_credentials.first.import_products && !result_product['category_ids'][:item].nil? &&
-									result_product['category_ids'][:item].kind_of?(Array)
-									result_product['category_ids'][:item].each do|category_id|
-
-										get_categories = client.call(:call, message: {session: session,
-											method: 'catalog_category.info',
-											categoryId: category_id})
-
-										if get_categories.success?
-											@categories = get_categories.body[:call_response][:call_return][:item]
-											@categories.each do |category|
-												if category[:key] == 'name'
-													@product_cat = ProductCat.new
-													@product_cat.category = category[:value]
-
-													if !@product_cat.category.nil?
-														@productdb.product_cats << @product_cat
-													end
-												end
-											end
-										end
-									end
-								end
-								rescue
-								end
-								
-								#add inventory warehouse
-								inv_wh = ProductInventoryWarehouses.new
-								inv_wh.inventory_warehouse_id = @store.inventory_warehouse_id
-								@productdb.product_inventory_warehousess << inv_wh
-
-								if !@productdbsku.sku.nil? &&
-									ProductSku.where(:sku=>@productdbsku.sku).length == 0
-									#save
-									if @productdb.save
-										# if @productdb.product_images.length == 0 && !getimages.nil?
-										# 	raise getimages.inspect
-										# else
-										# 	raise getimages.inspect
-										# end
-										@result['success_imported'] = @result['success_imported'] + 1
-									end
-								else
-									@result['previous_imported'] = @result['previous_imported'] + 1
-								end
-
-							else
-								@result['previous_imported'] = @result['previous_imported'] + 1
-							end
-						end
-					else
-						@result['status'] = false
-						@result['messages'].push('Problem retrieving products list')
-					end
-				else
-					@result['status'] = false
-					@result['messages'].push('Problem connecting to Magento API. Authentication failed')
-				end
-			else
-				@result['status'] = false
-				@result['messages'].push('Problem connecting to Magento API. Check the hostname of the server')
-			end
-		else
-			@result['status'] = false
-			@result['messages'].push('No Store found!')
-		end
-	elsif @store.store_type == 'Ebay'
-		#do ebay connect.
-		@ebay_credentials = EbayCredentials.where(:store_id => @store.id)
-
-		if @ebay_credentials.length > 0
-			@credential = @ebay_credentials.first
-			require 'eBayAPI'
-			if ENV['EBAY_SANDBOX_MODE'] == 'YES'
-				sandbox = true
-			else
-				sandbox = false
-			end
-			@eBay = EBay::API.new(@credential.productauth_token,
-				        ENV['EBAY_DEV_ID'], ENV['EBAY_APP_ID'],
-        				ENV['EBAY_CERT_ID'], :sandbox=>sandbox)
-
-			seller_list =@eBay.GetSellerList(:startTimeFrom=> (Date.today - 3.months).to_datetime,
-				 :startTimeTo =>(Date.today + 1.day).to_datetime)
-
-			@result['total_imported']  = seller_list.itemArray.length
-			total_pages = (@result['total_imported'] / 10) +1
-			page_num = 1
-			begin
-				seller_list =@eBay.GetSellerList(:startTimeFrom=> (Date.today - 3.months).to_datetime,
-				 	 :startTimeTo =>(Date.today + 1.day).to_datetime, :detailLevel=>'ReturnAll',
-					 :pagination=>{:entriesPerPage=> '10', :pageNumber=>page_num})
-				page_num = page_num+1
-				seller_list.itemArray.each do |item|
-					#add product to the database
-					if Product.where(:store_product_id=>item.itemID).length  == 0
-						@productdb = Product.new
-						@item = @eBay.getItem(:ItemID => item.itemID).item
-						@productdb.name = @item.title
-						@productdb.store_product_id = item.itemID
-						@productdb.product_type = 'not_used'
-						@productdb.status = 'inactive'
-						@productdb.store = @store
-
-						
-
-						#add productdb sku
-						@productdbsku = ProductSku.new
-						if  @item.sKU.nil?
-							@productdbsku.sku = "not_available"
-						else
-							@productdbsku.sku = @item.sKU
-						end
-						#@item.productListingType.uPC
-						@productdbsku.purpose = 'primary'
-
-						#publish the sku to the product record
-						@productdb.product_skus << @productdbsku
-
-						weight_lbs = @item.shippingDetails.calculatedShippingRate.weightMajor
-						weight_oz = @item.shippingDetails.calculatedShippingRate.weightMinor
-						# puts weight_lbs
-						# puts weight_oz
-						@productdb.weight = weight_lbs * 16 + weight_oz
+                  end
 
 
-						if @credential.import_images
-							if !@item.pictureDetails.nil?
-								if !@item.pictureDetails.pictureURL.nil? &&
-									@item.pictureDetails.pictureURL.length > 0
-									@productimage = ProductImage.new
-									@productimage.image = "http://i.ebayimg.com" +
-										@item.pictureDetails.pictureURL.first.request_uri()
-									@productdb.product_images << @productimage
+                  begin
 
-								end
-							end
-						end
+                  if @magento_credentials.first.import_products && !result_product['category_ids'][:item].nil? &&
+                    result_product['category_ids'][:item].kind_of?(Array)
+                    result_product['category_ids'][:item].each do|category_id|
 
-						if @credential.import_products
-							if !@item.primaryCategory.nil?
-								@product_cat = ProductCat.new
-								@product_cat.category = @item.primaryCategory.categoryName
-								@productdb.product_cats << @product_cat
-							end
+                      get_categories = client.call(:call, message: {session: session,
+                        method: 'catalog_category.info',
+                        categoryId: category_id})
 
-							if !@item.secondaryCategory.nil?
-								@product_cat = ProductCat.new
-								@product_cat.category = @item.secondaryCategory.categoryName
-								@productdb.product_cats << @product_cat
-							end
-						end
+                      if get_categories.success?
+                        @categories = get_categories.body[:call_response][:call_return][:item]
+                        @categories.each do |category|
+                          if category[:key] == 'name'
+                            @product_cat = ProductCat.new
+                            @product_cat.category = category[:value]
 
-						#add inventory warehouse
-						inv_wh = ProductInventoryWarehouses.new
-						inv_wh.inventory_warehouse_id = @store.inventory_warehouse_id
-						@productdb.product_inventory_warehousess << inv_wh
+                            if !@product_cat.category.nil?
+                              @productdb.product_cats << @product_cat
+                            end
+                          end
+                        end
+                      end
+                    end
+                  end
+                  rescue
+                  end
 
-						if ProductSku.where(:sku=>@item.sKU).length == 0
-							#save
-							if @productdb.save
-							   @productdb.set_product_status
-							   @result['success_imported'] = @result['success_imported'] + 1
-							end
-						else
-							@result['previous_imported'] = @result['previous_imported'] + 1
-						end
-					else
-						@result['previous_imported'] = @result['previous_imported'] + 1
-					end
-				end
-			end while(page_num <= total_pages)
+                  #add inventory warehouse
+                  inv_wh = ProductInventoryWarehouses.new
+                  inv_wh.inventory_warehouse_id = @store.inventory_warehouse_id
+                  @productdb.product_inventory_warehousess << inv_wh
 
-		end
-	elsif @store.store_type == 'Amazon'
-		@amazon_credentials = AmazonCredentials.where(:store_id => @store.id)
+                  if !@productdbsku.sku.nil? &&
+                    ProductSku.where(:sku=>@productdbsku.sku).length == 0
+                    #save
+                    if @productdb.save
+                      # if @productdb.product_images.length == 0 && !getimages.nil?
+                      # 	raise getimages.inspect
+                      # else
+                      # 	raise getimages.inspect
+                      # end
+                      @result['success_imported'] = @result['success_imported'] + 1
+                    end
+                  else
+                    @result['previous_imported'] = @result['previous_imported'] + 1
+                  end
 
-		if @amazon_credentials.length > 0
-			@credential = @amazon_credentials.first
-			mws = MWS.new(:aws_access_key_id => 
-				ENV['AMAZON_MWS_ACCESS_KEY_ID'],
-			  :secret_access_key => ENV['AMAZON_MWS_SECRET_ACCESS_KEY'],
-			  :seller_id => @credential.merchant_id,
-			  :marketplace_id => @credential.marketplace_id)
-			#@result['aws-response'] = mws.reports.request_report :report_type=>'_GET_MERCHANT_LISTINGS_DATA_'
-			#@result['aws-rewuest_status'] = mws.reports.get_report_request_list
-			response = mws.reports.get_report :report_id=> params[:reportid]
+                else
+                  @result['previous_imported'] = @result['previous_imported'] + 1
+                end
+              end
+            else
+              @result['status'] = false
+              @result['messages'].push('Problem retrieving products list')
+            end
+          else
+            @result['status'] = false
+            @result['messages'].push('Problem connecting to Magento API. Authentication failed')
+          end
+        else
+          @result['status'] = false
+          @result['messages'].push('Problem connecting to Magento API. Check the hostname of the server')
+        end
+      else
+        @result['status'] = false
+        @result['messages'].push('No Store found!')
+      end
+    elsif @store.store_type == 'Ebay'
+      #do ebay connect.
+      @ebay_credentials = EbayCredentials.where(:store_id => @store.id)
 
-			# _GET_MERCHANT_LISTINGS_DATA_
-			# item-name
-			# item-description
-			# listing-id
-			# seller-sku
-			# price
-			# quantity
-			# open-date
-			# image-url
-			# item-is-marketplace
-			# product-id-type
-			# zshop-shipping-fee
-			# item-note
-			# item-condition
-			# zshop-category1
-			# zshop-browse-path
-			# zshop-storefront-feature
-			# asin1
-			# asin2
-			# asin3
-			# will-ship-internationally
-			# expedited-shipping
-			# zshop-boldface
-			# product-id
-			# bid-for-featured-placement
-			# add-delete
-			# pending-quantity
-			# fulfillment-channel
+      if @ebay_credentials.length > 0
+        @credential = @ebay_credentials.first
+        require 'eBayAPI'
+        if ENV['EBAY_SANDBOX_MODE'] == 'YES'
+          sandbox = true
+        else
+          sandbox = false
+        end
+        @eBay = EBay::API.new(@credential.productauth_token,
+                  ENV['EBAY_DEV_ID'], ENV['EBAY_APP_ID'],
+                  ENV['EBAY_CERT_ID'], :sandbox=>sandbox)
 
-			require 'csv'
-			csv = CSV.parse(response.body,:quote_char => "|")
-			@result['total_imported']  = csv.length - 1
-			csv.each_with_index do | row, index|
-				if index > 0
-					product_row = row.first.split(/\t/)
-					render :text => product_row.inspect and return
-					if Product.where(:store_product_id=>product_row[2]).length  == 0
-						@productdb = Product.new
-						@productdb.name = product_row[0]
-						@productdb.store_product_id = product_row[2]
-						if @productdb.store_product_id.nil?
-							@productdb.store_product_id = 'not_available'
-						end
+        seller_list =@eBay.GetSellerList(:startTimeFrom=> (Date.today - 3.months).to_datetime,
+           :startTimeTo =>(Date.today + 1.day).to_datetime)
 
-						@productdb.product_type = 'not_used'
-						@productdb.status = 'new'
-						@productdb.store = @store
+        @result['total_imported']  = seller_list.itemArray.length
+        total_pages = (@result['total_imported'] / 10) +1
+        page_num = 1
+        begin
+          seller_list =@eBay.GetSellerList(:startTimeFrom=> (Date.today - 3.months).to_datetime,
+             :startTimeTo =>(Date.today + 1.day).to_datetime, :detailLevel=>'ReturnAll',
+             :pagination=>{:entriesPerPage=> '10', :pageNumber=>page_num})
+          page_num = page_num+1
+          seller_list.itemArray.each do |item|
+            #add product to the database
+            if Product.where(:store_product_id=>item.itemID).length  == 0
+              @productdb = Product.new
+              @item = @eBay.getItem(:ItemID => item.itemID).item
+              @productdb.name = @item.title
+              @productdb.store_product_id = item.itemID
+              @productdb.product_type = 'not_used'
+              @productdb.status = 'inactive'
+              @productdb.store = @store
 
-						#add productdb sku
-						@productdbsku = ProductSku.new
-						@productdbsku.sku = product_row[3]
-						@productdbsku.purpose = 'primary'
 
-						#publish the sku to the product record
-						@productdb.product_skus << @productdbsku
 
-						#add inventory warehouse
-						inv_wh = ProductInventoryWarehouses.new
-						inv_wh.inventory_warehouse_id = @store.inventory_warehouse_id
-						@productdb.product_inventory_warehousess << inv_wh
+              #add productdb sku
+              @productdbsku = ProductSku.new
+              if  @item.sKU.nil?
+                @productdbsku.sku = "not_available"
+              else
+                @productdbsku.sku = @item.sKU
+              end
+              #@item.productListingType.uPC
+              @productdbsku.purpose = 'primary'
 
-						#save
-						if ProductSku.where(:sku=>@productdbsku.sku).length == 0
-							#save
-							if @productdb.save
-								import_amazon_product_details(@store.id, @productdbsku.sku, @productdb.id)
-								#import_amazon_product_details(mws, @credential, @productdb.id)
-								@result['success_imported'] = @result['success_imported'] + 1
-							end
-						else
-							@result['previous_imported'] = @result['previous_imported'] + 1
-						end
-					else
-						@result['previous_imported'] = @result['previous_imported'] + 1
-					end
-			  	end
-			end
-		end
-	end
-	# rescue Exception => e
-	# 	@result['status'] = false
-	# 	@result['messages'].push(e.message)
-	# end
+              #publish the sku to the product record
+              @productdb.product_skus << @productdbsku
 
+              weight_lbs = @item.shippingDetails.calculatedShippingRate.weightMajor
+              weight_oz = @item.shippingDetails.calculatedShippingRate.weightMinor
+              # puts weight_lbs
+              # puts weight_oz
+              @productdb.weight = weight_lbs * 16 + weight_oz
+
+
+              if @credential.import_images
+                if !@item.pictureDetails.nil?
+                  if !@item.pictureDetails.pictureURL.nil? &&
+                    @item.pictureDetails.pictureURL.length > 0
+                    @productimage = ProductImage.new
+                    @productimage.image = "http://i.ebayimg.com" +
+                      @item.pictureDetails.pictureURL.first.request_uri()
+                    @productdb.product_images << @productimage
+
+                  end
+                end
+              end
+
+              if @credential.import_products
+                if !@item.primaryCategory.nil?
+                  @product_cat = ProductCat.new
+                  @product_cat.category = @item.primaryCategory.categoryName
+                  @productdb.product_cats << @product_cat
+                end
+
+                if !@item.secondaryCategory.nil?
+                  @product_cat = ProductCat.new
+                  @product_cat.category = @item.secondaryCategory.categoryName
+                  @productdb.product_cats << @product_cat
+                end
+              end
+
+              #add inventory warehouse
+              inv_wh = ProductInventoryWarehouses.new
+              inv_wh.inventory_warehouse_id = @store.inventory_warehouse_id
+              @productdb.product_inventory_warehousess << inv_wh
+
+              if ProductSku.where(:sku=>@item.sKU).length == 0
+                #save
+                if @productdb.save
+                   @productdb.set_product_status
+                   @result['success_imported'] = @result['success_imported'] + 1
+                end
+              else
+                @result['previous_imported'] = @result['previous_imported'] + 1
+              end
+            else
+              @result['previous_imported'] = @result['previous_imported'] + 1
+            end
+          end
+        end while(page_num <= total_pages)
+
+      end
+    elsif @store.store_type == 'Amazon'
+      @amazon_credentials = AmazonCredentials.where(:store_id => @store.id)
+
+      if @amazon_credentials.length > 0
+        @credential = @amazon_credentials.first
+        mws = MWS.new(:aws_access_key_id =>
+          ENV['AMAZON_MWS_ACCESS_KEY_ID'],
+          :secret_access_key => ENV['AMAZON_MWS_SECRET_ACCESS_KEY'],
+          :seller_id => @credential.merchant_id,
+          :marketplace_id => @credential.marketplace_id)
+        #@result['aws-response'] = mws.reports.request_report :report_type=>'_GET_MERCHANT_LISTINGS_DATA_'
+        #@result['aws-rewuest_status'] = mws.reports.get_report_request_list
+        response = mws.reports.get_report :report_id=> params[:reportid]
+
+        # _GET_MERCHANT_LISTINGS_DATA_
+        # item-name
+        # item-description
+        # listing-id
+        # seller-sku
+        # price
+        # quantity
+        # open-date
+        # image-url
+        # item-is-marketplace
+        # product-id-type
+        # zshop-shipping-fee
+        # item-note
+        # item-condition
+        # zshop-category1
+        # zshop-browse-path
+        # zshop-storefront-feature
+        # asin1
+        # asin2
+        # asin3
+        # will-ship-internationally
+        # expedited-shipping
+        # zshop-boldface
+        # product-id
+        # bid-for-featured-placement
+        # add-delete
+        # pending-quantity
+        # fulfillment-channel
+
+        require 'csv'
+        csv = CSV.parse(response.body,:quote_char => "|")
+        @result['total_imported']  = csv.length - 1
+        csv.each_with_index do | row, index|
+          if index > 0
+            product_row = row.first.split(/\t/)
+            render :text => product_row.inspect and return
+            if Product.where(:store_product_id=>product_row[2]).length  == 0
+              @productdb = Product.new
+              @productdb.name = product_row[0]
+              @productdb.store_product_id = product_row[2]
+              if @productdb.store_product_id.nil?
+                @productdb.store_product_id = 'not_available'
+              end
+
+              @productdb.product_type = 'not_used'
+              @productdb.status = 'new'
+              @productdb.store = @store
+
+              #add productdb sku
+              @productdbsku = ProductSku.new
+              @productdbsku.sku = product_row[3]
+              @productdbsku.purpose = 'primary'
+
+              #publish the sku to the product record
+              @productdb.product_skus << @productdbsku
+
+              #add inventory warehouse
+              inv_wh = ProductInventoryWarehouses.new
+              inv_wh.inventory_warehouse_id = @store.inventory_warehouse_id
+              @productdb.product_inventory_warehousess << inv_wh
+
+              #save
+              if ProductSku.where(:sku=>@productdbsku.sku).length == 0
+                #save
+                if @productdb.save
+                  import_amazon_product_details(@store.id, @productdbsku.sku, @productdb.id)
+                  #import_amazon_product_details(mws, @credential, @productdb.id)
+                  @result['success_imported'] = @result['success_imported'] + 1
+                end
+              else
+                @result['previous_imported'] = @result['previous_imported'] + 1
+              end
+            else
+              @result['previous_imported'] = @result['previous_imported'] + 1
+            end
+            end
+        end
+      end
+    end
+    # rescue Exception => e
+    # 	@result['status'] = false
+    # 	@result['messages'].push(e.message)
+    # end
+  else
+    @result['status'] = false
+    @result['messages'].push('You can not import products')
+  end
     respond_to do |format|
       format.json { render json: @result}
     end
 
 	end
 
+  # PS:Where is this used?
 	def import_product_details
-		@store = Store.find(params[:store_id])
-		@amazon_credentials = AmazonCredentials.where(:store_id => @store.id)
+    if current_user.can?('import_products')
+      @store = Store.find(params[:store_id])
+      @amazon_credentials = AmazonCredentials.where(:store_id => @store.id)
 
-		if @amazon_credentials.length > 0
-			@credential = @amazon_credentials.first
+      if @amazon_credentials.length > 0
+        @credential = @amazon_credentials.first
 
-			require 'mws-connect'
+        require 'mws-connect'
 
-			mws = Mws.connect(
-				  merchant: @credential.merchant_id,
-				  access: ENV['AMAZON_MWS_ACCESS_KEY_ID'],
-				  secret: ENV['AMAZON_MWS_SECRET_ACCESS_KEY']
-				)
-			products_api = mws.products.get_matching_products_for_id(:marketplace_id=>@credential.marketplace_id,
-				:id_type=>'SellerSKU', :id_list=>['T-TOOL'])
-			require 'active_support/core_ext/hash/conversions'
-			product_hash = Hash.from_xml(products_api.to_s)
-			#product_hash = from_xml(products_api)
-			puts product_hash['GetMatchingProductForIdResult']['Products']['Product']['AttributeSets']['ItemAttributes']['SmallImage']['URL']
-			raise
-			# response = mws.orders.get_matching_product_for_id :id_type=>'SellerSKU', :seller_sku => ["12345678"],
-			# 	:marketplace_id => @credential.marketplace_id
-			# # response = mws.orders.list_orders :last_updated_after => 2.months.ago,
-			# # 	:order_status => ['Unshipped', 'PartiallyShipped']
-			# response.products
-			@products = Product.where(:store_id => params[:store_id])
-			@products.each do |product|
-				#import_amazon_product_details(mws, @credential, product.id)
-			end
-		end
+        mws = Mws.connect(
+            merchant: @credential.merchant_id,
+            access: ENV['AMAZON_MWS_ACCESS_KEY_ID'],
+            secret: ENV['AMAZON_MWS_SECRET_ACCESS_KEY']
+          )
+        products_api = mws.products.get_matching_products_for_id(:marketplace_id=>@credential.marketplace_id,
+          :id_type=>'SellerSKU', :id_list=>['T-TOOL'])
+        require 'active_support/core_ext/hash/conversions'
+        product_hash = Hash.from_xml(products_api.to_s)
+        #product_hash = from_xml(products_api)
+        puts product_hash['GetMatchingProductForIdResult']['Products']['Product']['AttributeSets']['ItemAttributes']['SmallImage']['URL']
+        raise
+        # response = mws.orders.get_matching_product_for_id :id_type=>'SellerSKU', :seller_sku => ["12345678"],
+        # 	:marketplace_id => @credential.marketplace_id
+        # # response = mws.orders.list_orders :last_updated_after => 2.months.ago,
+        # # 	:order_status => ['Unshipped', 'PartiallyShipped']
+        # response.products
+        @products = Product.where(:store_id => params[:store_id])
+        @products.each do |product|
+          #import_amazon_product_details(mws, @credential, product.id)
+        end
+      end
+
+    end
 	end
 
 	def requestamazonreport
@@ -571,111 +579,125 @@ class ProductsController < ApplicationController
   def create
     @result = Hash.new
     @result['status'] = true
-    product = Product.new
-    product.name = ""
-    product.store_id = Store.where(:store_type=>'system').first.id
-    product.store_product_id = 0
-    product.save
+    @result['messages'] = []
+    if current_user.can?('add_edit_products')
+      product = Product.new
+      product.name = ""
+      product.store_id = Store.where(:store_type=>'system').first.id
+      product.store_product_id = 0
+      product.save
 
-    product.store_product_id = product.id
-    product.save
-    @result['product'] = product
+      product.store_product_id = product.id
+      product.save
+      @result['product'] = product
+    else
+      @result['status'] = false
+      @result['messages'].push('You do not have enough permissions to create a product')
+    end
+
     respond_to do |format|
       format.json { render json: @result}
     end
   end
+
   def duplicateproduct
 
     @result = Hash.new
     @result['status'] = true
-    @products = list_selected_products
-    unless @products.nil?
-      @products.each do|product|
-      	#copy product
-        @product = Product.find(product["id"])
+    @result['messages'] = []
 
-        @newproduct = @product.dup
-        index = 0
-        @newproduct.name = @product.name+" "+index.to_s
-        @productslist = Product.where(:name=>@newproduct.name)
-        begin
-          index = index + 1
-          #todo: duplicate sku, images, categories associated with product too.
+    if current_user.can?('add_edit_products')
+      @products = list_selected_products
+      unless @products.nil?
+        @products.each do|product|
+          #copy product
+          @product = Product.find(product["id"])
+
+          @newproduct = @product.dup
+          index = 0
           @newproduct.name = @product.name+" "+index.to_s
           @productslist = Product.where(:name=>@newproduct.name)
-        end while(!@productslist.nil? && @productslist.length > 0)
+          begin
+            index = index + 1
+            #todo: duplicate sku, images, categories associated with product too.
+            @newproduct.name = @product.name+" "+index.to_s
+            @productslist = Product.where(:name=>@newproduct.name)
+          end while(!@productslist.nil? && @productslist.length > 0)
 
-        #copy barcodes
-        @product.product_barcodes.each do |barcode|
-	        index = 0
-	        newbarcode = barcode.barcode+" "+index.to_s
-	        barcodeslist = ProductBarcode.where(:barcode=>newbarcode)
-	        begin
-	          index = index + 1
-	          #todo: duplicate sku, images, categories associated with product too.
-	          newbarcode = barcode.barcode+" "+index.to_s
-	          barcodeslist = ProductBarcode.where(:barcode=>newbarcode)
-	        end while(!barcodeslist.nil? && barcodeslist.length > 0)
+          #copy barcodes
+          @product.product_barcodes.each do |barcode|
+            index = 0
+            newbarcode = barcode.barcode+" "+index.to_s
+            barcodeslist = ProductBarcode.where(:barcode=>newbarcode)
+            begin
+              index = index + 1
+              #todo: duplicate sku, images, categories associated with product too.
+              newbarcode = barcode.barcode+" "+index.to_s
+              barcodeslist = ProductBarcode.where(:barcode=>newbarcode)
+            end while(!barcodeslist.nil? && barcodeslist.length > 0)
 
-	        newbarcode_item = ProductBarcode.new
-	        newbarcode_item.barcode = newbarcode
-	        @newproduct.product_barcodes << newbarcode_item
-        end
+            newbarcode_item = ProductBarcode.new
+            newbarcode_item.barcode = newbarcode
+            @newproduct.product_barcodes << newbarcode_item
+          end
 
-        #copy skus
-        @product.product_skus.each do |sku|
-	        index = 0
-	        newsku = sku.sku+" "+index.to_s
-	        skuslist = ProductSku.where(:sku=>newsku)
-	        begin
-	          index = index + 1
-	          #todo: duplicate sku, images, categories associated with product too.
-	          newsku = sku.sku+" "+index.to_s
-	          skuslist = ProductSku.where(:sku=>newsku)
-	        end while(!skuslist.nil? && skuslist.length > 0)
+          #copy skus
+          @product.product_skus.each do |sku|
+            index = 0
+            newsku = sku.sku+" "+index.to_s
+            skuslist = ProductSku.where(:sku=>newsku)
+            begin
+              index = index + 1
+              #todo: duplicate sku, images, categories associated with product too.
+              newsku = sku.sku+" "+index.to_s
+              skuslist = ProductSku.where(:sku=>newsku)
+            end while(!skuslist.nil? && skuslist.length > 0)
 
-	        newsku_item = ProductSku.new
-	        newsku_item.sku = newsku
-	        newsku_item.purpose = sku.purpose
-	        @newproduct.product_skus << newsku_item
-        end
+            newsku_item = ProductSku.new
+            newsku_item.sku = newsku
+            newsku_item.purpose = sku.purpose
+            @newproduct.product_skus << newsku_item
+          end
 
-        #copy images
-        @product.product_images.each do |image|
-	        newimage = ProductImage.new
-	        newimage = image.dup
-	        @newproduct.product_images << newimage
-        end
+          #copy images
+          @product.product_images.each do |image|
+            newimage = ProductImage.new
+            newimage = image.dup
+            @newproduct.product_images << newimage
+          end
 
-        #copy categories
-        @product.product_cats.each do |category|
-	        newcategory = ProductCat.new
-	        newcategory = category.dup
-	        @newproduct.product_cats << newcategory
-        end
+          #copy categories
+          @product.product_cats.each do |category|
+            newcategory = ProductCat.new
+            newcategory = category.dup
+            @newproduct.product_cats << newcategory
+          end
 
-        #copy product kit items
-        @product.product_kit_skuss.each do |sku|
-	        new_kit_sku = ProductKitSkus.new
-	        new_kit_sku = sku.dup
-	        @newproduct.product_kit_skuss << new_kit_sku
-        end
+          #copy product kit items
+          @product.product_kit_skuss.each do |sku|
+            new_kit_sku = ProductKitSkus.new
+            new_kit_sku = sku.dup
+            @newproduct.product_kit_skuss << new_kit_sku
+          end
 
-        #copy product inventory warehouses
-        @product.product_inventory_warehousess.each do |warehouse|
-	        new_warehouse = ProductInventoryWarehouses.new
-	        new_warehouse = warehouse.dup
-	        @newproduct.product_inventory_warehousess << new_warehouse
-        end
+          #copy product inventory warehouses
+          @product.product_inventory_warehousess.each do |warehouse|
+            new_warehouse = ProductInventoryWarehouses.new
+            new_warehouse = warehouse.dup
+            @newproduct.product_inventory_warehousess << new_warehouse
+          end
 
 
-        if !@newproduct.save(:validate => false)
-          @result['status'] = false
-          @result['messages'] = @newproduct.errors.full_messages
+          if !@newproduct.save(:validate => false)
+            @result['status'] = false
+            @result['messages'] = @newproduct.errors.full_messages
+          end
         end
       end
+    else
+      @result['status'] = false
+      @result['messages'].push('You do not have enough permissions to duplicate products')
     end
-
     respond_to do |format|
         format.html # show.html.erb
         format.json { render json: @result }
@@ -685,17 +707,24 @@ class ProductsController < ApplicationController
   def deleteproduct
     @result = Hash.new
     @result['status'] = true
-    @products = list_selected_products
-    unless @products.nil?
-      @products.each do|product|
-        @product = Product.find(product["id"])
-        if @product.destroy
-          @result['status'] &= true
-        else
-          @result['status'] &= false
-          @result['messages'] = @product.errors.full_messages
+    @result['messages'] = []
+
+    if current_user.can?('delete_products')
+      @products = list_selected_products
+      unless @products.nil?
+        @products.each do|product|
+          @product = Product.find(product["id"])
+          if @product.destroy
+            @result['status'] &= true
+          else
+            @result['status'] &= false
+            @result['messages'] = @product.errors.full_messages
+          end
         end
       end
+    else
+      @result['status'] = false
+      @result['messages'].push('You do not have enough permissions to delete products')
     end
 
     respond_to do |format|
@@ -708,23 +737,28 @@ class ProductsController < ApplicationController
     @result = Hash.new
     @result['status'] = true
     @result['messages'] = []
-    @products = list_selected_products
-    unless @products.nil?
-      @products.each do|product|
-        @product = Product.find(product["id"])
-        if @product.product_barcodes.first.nil?
-          sku = @product.product_skus.first
-          unless sku.nil?
-            barcode = @product.product_barcodes.new
-            barcode.barcode = sku.sku
-            unless barcode.save
-              @result['status'] &= false
-              @result['messages'].push(barcode.errors.full_messages)
+    if current_user.can?('add_edit_products')
+      @products = list_selected_products
+      unless @products.nil?
+        @products.each do|product|
+          @product = Product.find(product["id"])
+          if @product.product_barcodes.first.nil?
+            sku = @product.product_skus.first
+            unless sku.nil?
+              barcode = @product.product_barcodes.new
+              barcode.barcode = sku.sku
+              unless barcode.save
+                @result['status'] &= false
+                @result['messages'].push(barcode.errors.full_messages)
+              end
             end
           end
+          @product.update_product_status
         end
-        @product.update_product_status
       end
+    else
+      @result['status'] = false
+      @result['messages'].push('You do not have enough permissions to generate barcodes')
     end
 
     respond_to do |format|
@@ -759,36 +793,42 @@ class ProductsController < ApplicationController
     @result['status'] = true
     @result['messages'] = []
 
-    @products = list_selected_products
-    unless @products.nil?
-      @products.each do|product|
-        @product = Product.find(product["id"])
-        current_status = @product.status
-        @product.status = params[:status]
-        if @product.save
-           @product.reload
-          if @product.status !='inactive'
-          	if !@product.update_product_status && params[:status] == 'active'
-          		@result['status'] &= false
-          		if @product.is_kit == 1
-          			@result['messages'].push('There was a problem changing kit status for '+
-          			 @product.name + '. Reason: In order for a Kit to be Active it needs to '+
-          			 'have at least one item and every item in the Kit must be Active.')
-          		else
-          			@result['messages'].push('There was a problem changing product status for '+
-          			 @product.name + '. Reason: In order for a product to be Active it needs to '+
-          			 'have at least one SKU and one barcode.')
-          		end
-          		@product.status = current_status
-          		@product.save
-          	end
+    if current_user.can?('add_edit_products')
+      @products = list_selected_products
+      unless @products.nil?
+        @products.each do|product|
+          @product = Product.find(product["id"])
+          current_status = @product.status
+          @product.status = params[:status]
+          if @product.save
+             @product.reload
+            if @product.status !='inactive'
+              if !@product.update_product_status && params[:status] == 'active'
+                @result['status'] &= false
+                if @product.is_kit == 1
+                  @result['messages'].push('There was a problem changing kit status for '+
+                   @product.name + '. Reason: In order for a Kit to be Active it needs to '+
+                   'have at least one item and every item in the Kit must be Active.')
+                else
+                  @result['messages'].push('There was a problem changing product status for '+
+                   @product.name + '. Reason: In order for a product to be Active it needs to '+
+                   'have at least one SKU and one barcode.')
+                end
+                @product.status = current_status
+                @product.save
+              end
+            end
+          else
+            @result['status'] &= false
+            @result['messages'].push('There was a problem changing products status for '+@product.name)
           end
-        else
-          @result['status'] &= false
-          @result['messages'].push('There was a problem changing products status for '+@product.name)
         end
       end
+    else
+      @result['status'] = false
+      @result['messages'].push('You do not have enough permissions to edit product status')
     end
+
     respond_to do |format|
       format.html # show.html.erb
       format.json { render json: @result }
@@ -887,45 +927,50 @@ class ProductsController < ApplicationController
   	@result['status'] = true
     @result['messages'] = []
 
-  	@kit = Product.find_by_id(params[:kit_id])
+    if current_user.can?('add_edit_products')
+      @kit = Product.find_by_id(params[:kit_id])
 
-  	if !@kit.is_kit
-  		@result['messages'].push("Product with id="+@kit.id+"is not a kit")
-  		@result['status'] &= false
-    else
-  		if params[:product_ids].nil?
-        @result['messages'].push("No item sent in the request")
+      if !@kit.is_kit
+        @result['messages'].push("Product with id="+@kit.id+"is not a kit")
         @result['status'] &= false
-	  	else
-        items = Product.find(params[:product_ids])
-        items.each do |item|
-          if item.nil?
-            @result['messages'].push("Item does not exist")
-            @result['status'] &= false
-          else
-            product_kit_sku = ProductKitSkus.find_by_option_product_id_and_product_id(item.id, @kit.id)
-            if product_kit_sku.nil?
-              @productkitsku = ProductKitSkus.new
-              @productkitsku.option_product_id = item.id
-              @productkitsku.qty = 1
-              @kit.product_kit_skuss << @productkitsku
-              if @kit.save
-                @productkitsku.reload
-                @productkitsku.add_product_in_order_items
+      else
+        if params[:product_ids].nil?
+          @result['messages'].push("No item sent in the request")
+          @result['status'] &= false
+        else
+          items = Product.find(params[:product_ids])
+          items.each do |item|
+            if item.nil?
+              @result['messages'].push("Item does not exist")
+              @result['status'] &= false
+            else
+              product_kit_sku = ProductKitSkus.find_by_option_product_id_and_product_id(item.id, @kit.id)
+              if product_kit_sku.nil?
+                @productkitsku = ProductKitSkus.new
+                @productkitsku.option_product_id = item.id
+                @productkitsku.qty = 1
+                @kit.product_kit_skuss << @productkitsku
+                if @kit.save
+                  @productkitsku.reload
+                  @productkitsku.add_product_in_order_items
+                else
+                  @result['messages'].push("Could not save kit with sku: "+@product_skus.first.sku)
+                  @result['status'] &= false
+                end
               else
-                @result['messages'].push("Could not save kit with sku: "+@product_skus.first.sku)
+                @result['messages'].push("The product with id #{item.id} has already been added to the kit")
                 @result['status'] &= false
               end
-            else
-              @result['messages'].push("The product with id #{item.id} has already been added to the kit")
-              @result['status'] &= false
+              item.update_product_status
             end
-            item.update_product_status
           end
         end
-      end
 
-  	end
+      end
+    else
+      @result['status'] = false
+      @result['messages'].push('You do not have enough permissions to add a product to a kit')
+    end
 
     respond_to do |format|
       format.html # show.html.erb
@@ -936,33 +981,38 @@ class ProductsController < ApplicationController
   def removeproductsfromkit
     @result = Hash.new
     @result['status'] = true
-    @result['messages'] = []
-    @kit = Product.find_by_id(params[:kit_id])
 
-    if @kit.is_kit
-      if params[:kit_products].nil?
-        @result['messages'].push("No sku sent in the request")
-        @result['status'] &= false
-      else
-        params[:kit_products].reject!{|a| a==""}
-        params[:kit_products].each do |kit_product|
-	    product_kit_sku = ProductKitSkus.find_by_option_product_id_and_product_id(kit_product,@kit.id)
+    if current_user.can?('add_edit_products')
+      @kit = Product.find_by_id(params[:kit_id])
 
-        if product_kit_sku.nil?
-          @result['messages'].push("Product #{kit_product} not found in item")
+      if @kit.is_kit
+        if params[:kit_products].nil?
+          @result['messages'].push("No sku sent in the request")
           @result['status'] &= false
         else
-          unless product_kit_sku.destroy
-            @result['messages'].push("Product #{kit_product} could not be removed fronm kit")
+          params[:kit_products].reject!{|a| a==""}
+          params[:kit_products].each do |kit_product|
+        product_kit_sku = ProductKitSkus.find_by_option_product_id_and_product_id(kit_product,@kit.id)
+
+          if product_kit_sku.nil?
+            @result['messages'].push("Product #{kit_product} not found in item")
             @result['status'] &= false
+          else
+            unless product_kit_sku.destroy
+              @result['messages'].push("Product #{kit_product} could not be removed fronm kit")
+              @result['status'] &= false
+            end
+          end
           end
         end
-        end
+        @kit.update_product_status
+      else
+        @result['messages'].push("Product with id="+@kit.id+"is not a kit")
+        @result['status'] &= false
       end
-   	  @kit.update_product_status
     else
-      @result['messages'].push("Product with id="+@kit.id+"is not a kit")
-      @result['status'] &= false
+      @result['status'] = false
+      @result['messages'].push('You do not have enough permissions to remove products from kits')
     end
 
     respond_to do |format|
@@ -974,310 +1024,317 @@ class ProductsController < ApplicationController
   	@result = Hash.new
   	@product = Product.find(params[:basicinfo][:id])
   	@result['status'] = true
+    @result['messages'] = []
   	@result['params'] = params
-  	if !@product.nil?
-  		@product.reload
-  		#Update Basic Info
-  		@product.alternate_location = params[:basicinfo][:alternate_location]
-  		@product.barcode = params[:basicinfo][:barcode]
-  		@product.disable_conf_req = params[:basicinfo][:disable_conf_req]
+    if current_user.can?('add_edit_products') ||
+        (session[:product_edit_matched_for_current_user] && session[:product_edit_matched_for_products].include?(@product_id))
+      if !@product.nil?
+        @product.reload
+        #Update Basic Info
+        @product.alternate_location = params[:basicinfo][:alternate_location]
+        @product.barcode = params[:basicinfo][:barcode]
+        @product.disable_conf_req = params[:basicinfo][:disable_conf_req]
 
-  		@product.is_kit = params[:basicinfo][:is_kit]
-  		@product.is_skippable = params[:basicinfo][:is_skippable]
-  		@product.kit_parsing = params[:basicinfo][:kit_parsing]
-  		@product.name = params[:basicinfo][:name]
-  		@product.pack_time_adj = params[:basicinfo][:pack_time_adj]
-  		@product.packing_placement = params[:basicinfo][:packing_placement]
-  		@product.product_type = params[:basicinfo][:product_type]
-  		@product.spl_instructions_4_confirmation =
-  			params[:basicinfo][:spl_instructions_4_confirmation]
-  		@product.spl_instructions_4_packer = params[:basicinfo][:spl_instructions_4_packer]
-  		@product.status = params[:basicinfo][:status]
-  		@product.store_id = params[:basicinfo][:store_id]
-  		@product.store_product_id = params[:basicinfo][:store_product_id]
+        @product.is_kit = params[:basicinfo][:is_kit]
+        @product.is_skippable = params[:basicinfo][:is_skippable]
+        @product.kit_parsing = params[:basicinfo][:kit_parsing]
+        @product.name = params[:basicinfo][:name]
+        @product.pack_time_adj = params[:basicinfo][:pack_time_adj]
+        @product.packing_placement = params[:basicinfo][:packing_placement]
+        @product.product_type = params[:basicinfo][:product_type]
+        @product.spl_instructions_4_confirmation =
+          params[:basicinfo][:spl_instructions_4_confirmation]
+        @product.spl_instructions_4_packer = params[:basicinfo][:spl_instructions_4_packer]
+        @product.status = params[:basicinfo][:status]
+        @product.store_id = params[:basicinfo][:store_id]
+        @product.store_product_id = params[:basicinfo][:store_product_id]
 
-  		@product.weight = 
-  			get_product_weight(params[:weight])
-  		@product.shipping_weight = 
-  			get_product_weight(params[:shipping_weight])
+        @product.weight =
+          get_product_weight(params[:weight])
+        @product.shipping_weight =
+          get_product_weight(params[:shipping_weight])
 
-  		if !@product.save
-  			@result['status'] &= false
-  		end
+        if !@product.save
+          @result['status'] &= false
+        end
 
-  		#Update product inventory warehouses
-  		#check if a product inventory warehouse is defined.
-  		product_inv_whs = ProductInventoryWarehouses.where(:product_id=>@product.id)
+        #Update product inventory warehouses
+        #check if a product inventory warehouse is defined.
+        product_inv_whs = ProductInventoryWarehouses.where(:product_id=>@product.id)
 
-  		if product_inv_whs.length > 0
-	  		product_inv_whs.each do |inv_wh|
-	  			found_inv_wh = false
+        if product_inv_whs.length > 0
+          product_inv_whs.each do |inv_wh|
+            found_inv_wh = false
 
-	  			if !params[:inventory_warehouses].nil?
-		  			params[:inventory_warehouses].each do |wh|
-			  			if wh["info"]["id"] == inv_wh.id
-			  				found_inv_wh = true
-			  			end
-		  			end
-	  			end
+            if !params[:inventory_warehouses].nil?
+              params[:inventory_warehouses].each do |wh|
+                if wh["info"]["id"] == inv_wh.id
+                  found_inv_wh = true
+                end
+              end
+            end
 
-	  			if found_inv_wh == false
-	  				if !inv_wh.destroy
-	  					@result['status'] &= false
-	  				end
-	  			end
-	  		end
-  		end
+            if found_inv_wh == false
+              if !inv_wh.destroy
+                @result['status'] &= false
+              end
+            end
+          end
+        end
 
-  		#Update product inventory warehouses
-  		#check if a product category is defined.
-  		if !params[:inventory_warehouses].nil?
-	  		params[:inventory_warehouses].each do |wh|
-	  			if !wh["info"]["id"].nil?
-	  				product_inv_wh = ProductInventoryWarehouses.find(wh["info"]["id"])
-	  				product_inv_wh.available_inv = wh["info"]["available_inv"]
-	  				# product_inv_wh.location_primary = wh["location_primary"]
-	  				# product_inv_wh.location_secondary = wh["location_secondary"]
-			  		if !product_inv_wh.save
-			  			@result['status'] &= false
-			  		end
-			  	else
-			  		# product_inv_wh = ProductInventoryWarehouses.new
-       				# product_inv_wh.product_id = @product.id
-	  				# product_inv_wh.qty = wh["qty"]
-	  				# product_inv_wh.location_primary = wh["location_primary"]
-	  				# product_inv_wh.location_secondary = wh["location_secondary"]
-	  				# product_inv_wh.alert = wh["alert"]
-	  				# product_inv_wh.name = wh["name"]
-			  		# if !product_inv_wh.save
-			  		# 	@result['status'] &= false
-			  		# end
-	  			end
-	  		end
-  		end
-
-
-  		#Update product categories
-  		#check if a product category is defined.
-  		product_cats = ProductCat.where(:product_id=>@product.id)
-
-  		if product_cats.length > 0
-	  		product_cats.each do |productcat|
-	  			found_cat = false
-
-	  			if !params[:cats].nil?
-		  			params[:cats].each do |cat|
-			  			if cat["id"] == productcat.id
-			  				found_cat = true
-			  			end
-		  			end
-	  			end
-
-	  			if found_cat == false
-	  				if !productcat.destroy
-	  					@result['status'] &= false
-	  				end
-	  			end
-	  		end
-  		end
-
-  		if !params[:cats].nil?
-	  		params[:cats].each do |category|
-	  			if !category["id"].nil?
-	  				product_cat = ProductCat.find(category["id"])
-	  				product_cat.category = category["category"]
-			  		if !product_cat.save
-			  			@result['status'] &= false
-			  		end
-			  	else
-			  		product_cat = ProductCat.new
-			  		product_cat.category = category["category"]
-			  		product_cat.product_id = @product.id
-			  		if !product_cat.save
-			  			@result['status'] &= false
-			  		end
-	  			end
-	  		end
-  		end
-
-  		#Update product skus
-  		#check if a product sku is defined.
-
-  		product_skus = ProductSku.where(:product_id=>@product.id)
-
-  		if product_skus.length > 0
-	  		product_skus.each do |productsku|
-	  			found_sku = false
-
-	  			if !params[:skus].nil?
-		  			params[:skus].each do |sku|
-			  			if sku["id"] == productsku.id
-			  				found_sku = true
-			  			end
-		  			end
-	  			end
-	  			if found_sku == false
-	  				if !productsku.destroy
-	  					@result['status'] &= false
-	  				end
-	  			end
-	  		end
-  		end
-	  	if !params[:skus].nil?
-	  		order = 0
-	  		params[:skus].each do |sku|
-	  			if !sku["id"].nil?
-	  				product_sku = ProductSku.find(sku["id"])
-	  				product_sku.sku = sku["sku"]
-	  				product_sku.purpose = sku["purpose"]
-	  				product_sku.order = order
-			  		if !product_sku.save
-			  			@result['status'] &= false
-			  		end
-			  	else
-			  		if sku["sku"]!='' && ProductSku.where(:sku => sku["sku"]).length == 0
-				  		product_sku = ProductSku.new
-		  				product_sku.sku = sku["sku"]
-		  				product_sku.purpose = sku["purpose"]
-		  				product_sku.product_id = @product.id
-		  				product_sku.order = order
-				  		if !product_sku.save
-				  			@result['status'] &= false
-				  		end
-				  	else
-				  		@result['status'] &= false
-				  		@result['message'] = "Sku "+sku["sku"]+" already exists"
-				  	end
-
-	  			end
-	  			order = order + 1
-	  		end
-  		end
-
-  		#Update product barcodes
-  		#check if a product barcode is defined.
-  		product_barcodes = ProductBarcode.where(:product_id=>@product.id)
-		product_barcodes.reload
-  		if product_barcodes.length > 0
-	  		product_barcodes.each do |productbarcode|
-	  			found_barcode = false
-
-	  			if !params[:barcodes].nil?
-		  			params[:barcodes].each do |barcode|
-			  			if barcode["id"] == productbarcode.id
-			  				found_barcode = true
-			  			end
-		  			end
-	  			end
-
-	  			if found_barcode == false
-	  				if !productbarcode.destroy
-	  					@result['status'] &= false
-	  				end
-	  			end
-	  		end
-  		end
-
-  		#Update product barcodes
-  		#check if a product barcode is defined
-  		if !params[:barcodes].nil?
- 	  		order = 0
-	  		params[:barcodes].each do |barcode|
-	  			if !barcode["id"].nil?
-	  				product_barcode = ProductBarcode.find(barcode["id"])
-	  				product_barcode.barcode = barcode["barcode"]
-	  				product_barcode.order = order
-			  		if !product_barcode.save
-			  			@result['status'] &= false
-			  		end
-			  	else
-			  		if barcode["barcode"]!='' && ProductBarcode.where(:barcode => barcode["barcode"]).length == 0
-				  		product_barcode = ProductBarcode.new
-				  		product_barcode.barcode = barcode["barcode"]
-				  		product_barcode.order = order
-				  		product_barcode.product_id = @product.id
-				  		if !product_barcode.save
-				  			@result['status'] &= false
-				  		end
-				  	else
-				  		@result['status'] &= false
-				  		@result['message'] = "Barcode "+barcode["barcode"]+" already exists"
-				  	end
-	  			end
-	  			order = order + 1
-	  		end
-  		end
-
-  		#Update product barcodes
-  		#check if a product barcode is defined.
-  		product_images = ProductImage.where(:product_id=>@product.id)
-
-  		if product_images.length > 0
-	  		product_images.each do |productimage|
-	  			found_image = false
-
-	  			if !params[:images].nil?
-		  			params[:images].each do |image|
-			  			if image["id"] == productimage.id
-			  				found_image = true
-			  			end
-		  			end
-	  			end
-
-	  			if found_image == false
-	  				if !productimage.destroy
-	  					@result['status'] &= false
-	  				end
-	  			end
-	  		end
-  		end
-
-  		#Update product barcodes
-  		#check if a product barcode is defined
-  		if !params[:images].nil?
-  			order = 0
-	  		params[:images].each do |image|
-	  			if !image["id"].nil?
-	  				product_image = ProductImage.find(image["id"])
-	  				product_image.image = image["image"]
-	  				product_image.caption = image["caption"]
-	  				product_image.order = order
-			  		if !product_image.save
-			  			@result['status'] &= false
-			  		end
-			  	else
-			  		product_image = ProductImage.new
-			  		product_image.image = image["image"]
-			  		product_image.caption = image["caption"]
-			  		product_image.product_id = @product.id
-	  				product_image.order = order
-			  		if !product_image.save
-			  			@result['status'] &= false
-			  		end
-	  			end
-	  			order = order + 1
-	  		end
-  		end
-
-  		#if product is a kit, update product_kit_skus
-  		if !params[:productkitskus].nil?
-  			params[:productkitskus].each do |kit_product|
-                actual_product = ProductKitSkus.where(:option_product_id => kit_product["option_product_id"], :product_id => @product.id)
-  			  if actual_product.length > 0
-  			  	actual_product = actual_product.first
-  			  	actual_product.qty = kit_product["qty"]
-  			  	actual_product.packing_order = kit_product["packing_order"]
-  			  	actual_product.save
-  			  end
-  			end
-  		end
+        #Update product inventory warehouses
+        #check if a product category is defined.
+        if !params[:inventory_warehouses].nil?
+          params[:inventory_warehouses].each do |wh|
+            if !wh["info"]["id"].nil?
+              product_inv_wh = ProductInventoryWarehouses.find(wh["info"]["id"])
+              product_inv_wh.available_inv = wh["info"]["available_inv"]
+              # product_inv_wh.location_primary = wh["location_primary"]
+              # product_inv_wh.location_secondary = wh["location_secondary"]
+              if !product_inv_wh.save
+                @result['status'] &= false
+              end
+            else
+              # product_inv_wh = ProductInventoryWarehouses.new
+                # product_inv_wh.product_id = @product.id
+              # product_inv_wh.qty = wh["qty"]
+              # product_inv_wh.location_primary = wh["location_primary"]
+              # product_inv_wh.location_secondary = wh["location_secondary"]
+              # product_inv_wh.alert = wh["alert"]
+              # product_inv_wh.name = wh["name"]
+              # if !product_inv_wh.save
+              # 	@result['status'] &= false
+              # end
+            end
+          end
+        end
 
 
-  		@product.update_product_status
-  	else
-  		@result['status'] = false
-  		@result['message'] = 'Cannot find product information.'
-  	end
+        #Update product categories
+        #check if a product category is defined.
+        product_cats = ProductCat.where(:product_id=>@product.id)
+
+        if product_cats.length > 0
+          product_cats.each do |productcat|
+            found_cat = false
+
+            if !params[:cats].nil?
+              params[:cats].each do |cat|
+                if cat["id"] == productcat.id
+                  found_cat = true
+                end
+              end
+            end
+
+            if found_cat == false
+              if !productcat.destroy
+                @result['status'] &= false
+              end
+            end
+          end
+        end
+
+        if !params[:cats].nil?
+          params[:cats].each do |category|
+            if !category["id"].nil?
+              product_cat = ProductCat.find(category["id"])
+              product_cat.category = category["category"]
+              if !product_cat.save
+                @result['status'] &= false
+              end
+            else
+              product_cat = ProductCat.new
+              product_cat.category = category["category"]
+              product_cat.product_id = @product.id
+              if !product_cat.save
+                @result['status'] &= false
+              end
+            end
+          end
+        end
+
+        #Update product skus
+        #check if a product sku is defined.
+
+        product_skus = ProductSku.where(:product_id=>@product.id)
+
+        if product_skus.length > 0
+          product_skus.each do |productsku|
+            found_sku = false
+
+            if !params[:skus].nil?
+              params[:skus].each do |sku|
+                if sku["id"] == productsku.id
+                  found_sku = true
+                end
+              end
+            end
+            if found_sku == false
+              if !productsku.destroy
+                @result['status'] &= false
+              end
+            end
+          end
+        end
+        if !params[:skus].nil?
+          order = 0
+          params[:skus].each do |sku|
+            if !sku["id"].nil?
+              product_sku = ProductSku.find(sku["id"])
+              product_sku.sku = sku["sku"]
+              product_sku.purpose = sku["purpose"]
+              product_sku.order = order
+              if !product_sku.save
+                @result['status'] &= false
+              end
+            else
+              if sku["sku"]!='' && ProductSku.where(:sku => sku["sku"]).length == 0
+                product_sku = ProductSku.new
+                product_sku.sku = sku["sku"]
+                product_sku.purpose = sku["purpose"]
+                product_sku.product_id = @product.id
+                product_sku.order = order
+                if !product_sku.save
+                  @result['status'] &= false
+                end
+              else
+                @result['status'] &= false
+                @result['message'] = "Sku "+sku["sku"]+" already exists"
+              end
+
+            end
+            order = order + 1
+          end
+        end
+
+        #Update product barcodes
+        #check if a product barcode is defined.
+        product_barcodes = ProductBarcode.where(:product_id=>@product.id)
+      product_barcodes.reload
+        if product_barcodes.length > 0
+          product_barcodes.each do |productbarcode|
+            found_barcode = false
+
+            if !params[:barcodes].nil?
+              params[:barcodes].each do |barcode|
+                if barcode["id"] == productbarcode.id
+                  found_barcode = true
+                end
+              end
+            end
+
+            if found_barcode == false
+              if !productbarcode.destroy
+                @result['status'] &= false
+              end
+            end
+          end
+        end
+
+        #Update product barcodes
+        #check if a product barcode is defined
+        if !params[:barcodes].nil?
+          order = 0
+          params[:barcodes].each do |barcode|
+            if !barcode["id"].nil?
+              product_barcode = ProductBarcode.find(barcode["id"])
+              product_barcode.barcode = barcode["barcode"]
+              product_barcode.order = order
+              if !product_barcode.save
+                @result['status'] &= false
+              end
+            else
+              if barcode["barcode"]!='' && ProductBarcode.where(:barcode => barcode["barcode"]).length == 0
+                product_barcode = ProductBarcode.new
+                product_barcode.barcode = barcode["barcode"]
+                product_barcode.order = order
+                product_barcode.product_id = @product.id
+                if !product_barcode.save
+                  @result['status'] &= false
+                end
+              else
+                @result['status'] &= false
+                @result['message'] = "Barcode "+barcode["barcode"]+" already exists"
+              end
+            end
+            order = order + 1
+          end
+        end
+
+        #Update product barcodes
+        #check if a product barcode is defined.
+        product_images = ProductImage.where(:product_id=>@product.id)
+
+        if product_images.length > 0
+          product_images.each do |productimage|
+            found_image = false
+
+            if !params[:images].nil?
+              params[:images].each do |image|
+                if image["id"] == productimage.id
+                  found_image = true
+                end
+              end
+            end
+
+            if found_image == false
+              if !productimage.destroy
+                @result['status'] &= false
+              end
+            end
+          end
+        end
+
+        #Update product barcodes
+        #check if a product barcode is defined
+        if !params[:images].nil?
+          order = 0
+          params[:images].each do |image|
+            if !image["id"].nil?
+              product_image = ProductImage.find(image["id"])
+              product_image.image = image["image"]
+              product_image.caption = image["caption"]
+              product_image.order = order
+              if !product_image.save
+                @result['status'] &= false
+              end
+            else
+              product_image = ProductImage.new
+              product_image.image = image["image"]
+              product_image.caption = image["caption"]
+              product_image.product_id = @product.id
+              product_image.order = order
+              if !product_image.save
+                @result['status'] &= false
+              end
+            end
+            order = order + 1
+          end
+        end
+
+        #if product is a kit, update product_kit_skus
+        if !params[:productkitskus].nil?
+          params[:productkitskus].each do |kit_product|
+                  actual_product = ProductKitSkus.where(:option_product_id => kit_product["option_product_id"], :product_id => @product.id)
+            if actual_product.length > 0
+              actual_product = actual_product.first
+              actual_product.qty = kit_product["qty"]
+              actual_product.packing_order = kit_product["packing_order"]
+              actual_product.save
+            end
+          end
+        end
+
+
+        @product.update_product_status
+      else
+        @result['status'] = false
+        @result['message'] = 'Cannot find product information.'
+      end
+    else
+      @result['status'] = false
+      @result['message'] = 'You do not have enough permissions to update a product'
+    end
 
     respond_to do |format|
       format.html # show.html.erb
@@ -1304,16 +1361,24 @@ class ProductsController < ApplicationController
        }
     end
   end
+
   def updateproductlist
     @result = Hash.new
     @result['status'] = true
-    @product = Product.find_by_id(params[:id])
-    if @product.nil?
-      @result['status'] = false
-      @result['error_msg'] ="Cannot find Product"
+
+    if current_user.can?('add_edit_products')
+      @product = Product.find_by_id(params[:id])
+      if @product.nil?
+        @result['status'] = false
+        @result['error_msg'] ="Cannot find Product"
+      else
+        updatelist(@product,params[:var],params[:value])
+      end
     else
-      updatelist(@product,params[:var],params[:value])
+      @result['status'] = false
+      @result['error_msg'] = 'You do not have enough permissions to edit product list'
     end
+
     respond_to do |format|
       format.html # show.html.erb
       format.json { render json: @result }
@@ -1331,43 +1396,48 @@ class ProductsController < ApplicationController
   	@result['status'] = true
   	@result['messages'] = []
 
-  	@product_orig = Product.find(params[:product_orig_id])
-  	@product_alias = Product.find(params[:product_alias_id])
+    if current_user.can?('add_edit_products') && current_user.can?('delete_products')
+      @product_orig = Product.find(params[:product_orig_id])
+      @product_alias = Product.find(params[:product_alias_id])
 
-  	#all SKUs of the alias will be copied. dont use @product_alias.product_skus
-  	@product_skus = ProductSku.where(:product_id=>@product_alias.id)
-  	@product_skus.each do |alias_sku|
-  		alias_sku.product_id = @product_orig.id
-  		if !alias_sku.save
-  			result['status'] &= false
-  			result['messages'].push('Error saving Sku for sku id'+alias_sku.id)
-  		end
-  	end
+      #all SKUs of the alias will be copied. dont use @product_alias.product_skus
+      @product_skus = ProductSku.where(:product_id=>@product_alias.id)
+      @product_skus.each do |alias_sku|
+        alias_sku.product_id = @product_orig.id
+        if !alias_sku.save
+          result['status'] &= false
+          result['messages'].push('Error saving Sku for sku id'+alias_sku.id)
+        end
+      end
 
-  	@product_barcodes = ProductBarcode.where(:product_id=>@product_alias.id)
-  	@product_barcodes.each do |alias_barcode|
-  		alias_barcode.product_id = @product_orig.id
-  		if !alias_barcode.save
-  			result['status'] &= false
-  			result['messages'].push('Error saving Barcode for barcode id'+alias_barcode.id)
-  		end
-  	end
+      @product_barcodes = ProductBarcode.where(:product_id=>@product_alias.id)
+      @product_barcodes.each do |alias_barcode|
+        alias_barcode.product_id = @product_orig.id
+        if !alias_barcode.save
+          result['status'] &= false
+          result['messages'].push('Error saving Barcode for barcode id'+alias_barcode.id)
+        end
+      end
 
-  	#update order items of aliased products to original products
-  	@order_items = OrderItem.where(:product_id=>@product_alias.id)
-  	@order_items.each do |order_item|
-  		order_item.product_id = @product_orig.id
-  		if !order_item.save
-  			result['status'] &= false
-  			result['messages'].push('Error saving order item with id'+order_item.id)
-  		end
-  	end
+      #update order items of aliased products to original products
+      @order_items = OrderItem.where(:product_id=>@product_alias.id)
+      @order_items.each do |order_item|
+        order_item.product_id = @product_orig.id
+        if !order_item.save
+          result['status'] &= false
+          result['messages'].push('Error saving order item with id'+order_item.id)
+        end
+      end
 
-  	#destroy the aliased object
-  	if !@product_alias.destroy
-  		result['status'] &= false
-  		result['messages'].push('Error deleting the product alias id:'+@product_alias.id)
-  	end
+      #destroy the aliased object
+      if !@product_alias.destroy
+        result['status'] &= false
+        result['messages'].push('Error deleting the product alias id:'+@product_alias.id)
+      end
+    else
+      @result['status'] = false
+      @result['messages'].push('You do not have enough permissions to set product alias')
+    end
 
   	respond_to do |format|
       format.html # show.html.erb
@@ -1380,25 +1450,30 @@ class ProductsController < ApplicationController
   	@result['status'] = true
   	@result['messages'] = []
 
-  	@product = Product.find(params[:product_id])
-  	if !@product.nil? && !params[:product_image].nil?
-	  	@image = ProductImage.new
+    if current_user.can?('add_edit_products')
+      @product = Product.find(params[:product_id])
+      if !@product.nil? && !params[:product_image].nil?
+        @image = ProductImage.new
 
-        csv_directory = "public/images"
-        file_name = Time.now.to_s+params[:product_image].original_filename
-        path = File.join(csv_directory, file_name )
-        File.open(path, "wb") { |f| f.write(params[:product_image].read) }
-       	@image.image = "/images/"+file_name
-	  	@image.caption = params[:caption] if !params[:caption].nil?
-	  	@product.product_images << @image
-	  	if !@product.save
-	  		@result['status'] = false
-	  		@result['messages'].push("Adding image failed")
-	  	end
-	else
-	  	@result['status'] = false
-	  	@result['messages'].push("Invalid data sent to the server")
-	end
+          csv_directory = "public/images"
+          file_name = Time.now.to_s+params[:product_image].original_filename
+          path = File.join(csv_directory, file_name )
+          File.open(path, "wb") { |f| f.write(params[:product_image].read) }
+          @image.image = "/images/"+file_name
+        @image.caption = params[:caption] if !params[:caption].nil?
+        @product.product_images << @image
+        if !@product.save
+          @result['status'] = false
+          @result['messages'].push("Adding image failed")
+        end
+      else
+          @result['status'] = false
+          @result['messages'].push("Invalid data sent to the server")
+      end
+    else
+      @result['status'] = false
+      @result['messages'].push('You do not have enough permissions to add image to a product')
+    end
 
   	respond_to do |format|
       format.html # show.html.erb

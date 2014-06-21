@@ -4,7 +4,7 @@ groovepacks_controllers.
 
             $scope.editreload = function () {
                return $scope.rfpinit().then(function() {
-                    $scope.set('title',"Fix status items or scan a new order");
+                    $scope.set('title',"Fix item statuses or scan a new order");
                     if(typeof $scope.data.raw.data != "undefined"
                         && typeof $scope.data.raw.data.inactive_or_new_products != "undefined"
                         &&  $scope.data.raw.data.inactive_or_new_products.length > 0) {

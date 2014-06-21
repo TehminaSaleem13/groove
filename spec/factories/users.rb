@@ -6,7 +6,6 @@ FactoryGirl.define do
     username "admin"
     password "12345678" 
     password_confirmation "12345678"
-    import_orders "0"
     confirmation_code "1234567890"
   end
 end

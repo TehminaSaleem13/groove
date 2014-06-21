@@ -8,9 +8,15 @@ class HomeController < ApplicationController
   end
 
   def userinfo
+    user =  Hash.new
+    user['username'] = current_user.username
+    user['name'] = current_user.name
+    user['id'] = current_user.id
+    user['role'] = current_user.role
+
     respond_to do |format|
       format.html # show.html.erb
-      format.json { render json: current_user}
+      format.json { render json: user}
     end
   end
 end

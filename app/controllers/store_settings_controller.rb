@@ -20,162 +20,170 @@ class StoreSettingsController < ApplicationController
 
   def createStore
     @result = Hash.new
-
-    if !params[:id].nil?
-      @store = Store.find(params[:id])
-    else
-      @store = Store.new
-    end
-
-    @store.name= params[:name] || get_default_warehouse_name
-    @store.store_type = params[:store_type]
-    @store.status = params[:status]
-    @store.thank_you_message_to_customer = params[:thank_you_message_to_customer]
-    @store.inventory_warehouse_id = params[:inventory_warehouse_id] || get_default_warehouse_id
-    
-    @result['status'] = true
-    @result['store_id'] = 0
-    @result['csv_import'] = false
-
-    if @result['status']
-
-      if params[:import_images].nil?
-        params[:import_images] = false
-      end
-      if params[:import_products].nil?
-        params[:import_products] = false
+    if current_user.can? 'add_edit_store'
+      if !params[:id].nil?
+        @store = Store.find(params[:id])
+      else
+        @store = Store.new
       end
 
-      if @store.store_type == 'Magento'
-        @magento = MagentoCredentials.where(:store_id=>@store.id)
+      @store.name= params[:name] || get_default_warehouse_name
+      @store.store_type = params[:store_type]
+      @store.status = params[:status]
+      @store.thank_you_message_to_customer = params[:thank_you_message_to_customer]
+      @store.inventory_warehouse_id = params[:inventory_warehouse_id] || get_default_warehouse_id
 
-        if @magento.nil? || @magento.length == 0
-          @magento = MagentoCredentials.new
-          new_record = true
-        else
-          @magento = @magento.first
+      @result['status'] = true
+      @result['store_id'] = 0
+      @result['csv_import'] = false
+
+      if @result['status']
+
+        if params[:import_images].nil?
+          params[:import_images] = false
         end
-        @magento.host = params[:host]
-        @magento.username = params[:username]
-        @magento.password = params[:password]
-        @magento.api_key  = params[:api_key]
+        if params[:import_products].nil?
+          params[:import_products] = false
+        end
 
-        @magento.import_products = params[:import_products]
-        @magento.import_images = params[:import_images]
+        if @store.store_type == 'Magento'
+          @magento = MagentoCredentials.where(:store_id=>@store.id)
 
-        @store.magento_credentials = @magento
+          if @magento.nil? || @magento.length == 0
+            @magento = MagentoCredentials.new
+            new_record = true
+          else
+            @magento = @magento.first
+          end
+          @magento.host = params[:host]
+          @magento.username = params[:username]
+          @magento.password = params[:password]
+          @magento.api_key  = params[:api_key]
+
+          @magento.import_products = params[:import_products]
+          @magento.import_images = params[:import_images]
+
+          @store.magento_credentials = @magento
 
           begin
-              @store.save
-              if !new_record
-                @store.magento_credentials.save
-              end
-              rescue ActiveRecord::RecordInvalid => e
-                @result['status'] = false
-                @result['messages'] = [@store.errors.full_messages, @store.magento_credentials.errors.full_messages]
+            @store.save
+            if !new_record
+              @store.magento_credentials.save
+            end
+          rescue ActiveRecord::RecordInvalid => e
+            @result['status'] = false
+            @result['messages'] = [@store.errors.full_messages, @store.magento_credentials.errors.full_messages]
 
-              rescue ActiveRecord::StatementInvalid => e
-                @result['status'] = false
-                @result['messages'] = [e.message]
+          rescue ActiveRecord::StatementInvalid => e
+            @result['status'] = false
+            @result['messages'] = [e.message]
           end
-      end
-
-      if @store.store_type == 'Amazon'
-        @amazon = AmazonCredentials.where(:store_id=>@store.id)
-
-        if @amazon.nil? || @amazon.length == 0
-          @amazon = AmazonCredentials.new
-          new_record = true
-        else
-          @amazon = @amazon.first
         end
-        @amazon.marketplace_id = params[:marketplace_id]
-        @amazon.merchant_id = params[:merchant_id]
 
-        @amazon.import_products = params[:import_products]
-        @amazon.import_images = params[:import_images]
-        @amazon.show_shipping_weight_only = params[:show_shipping_weight_only]
+        if @store.store_type == 'Amazon'
+          @amazon = AmazonCredentials.where(:store_id=>@store.id)
 
-        @store.amazon_credentials = @amazon
+          if @amazon.nil? || @amazon.length == 0
+            @amazon = AmazonCredentials.new
+            new_record = true
+          else
+            @amazon = @amazon.first
+          end
+          @amazon.marketplace_id = params[:marketplace_id]
+          @amazon.merchant_id = params[:merchant_id]
 
-        begin
+          @amazon.import_products = params[:import_products]
+          @amazon.import_images = params[:import_images]
+          @amazon.show_shipping_weight_only = params[:show_shipping_weight_only]
+
+
+          @store.amazon_credentials = @amazon
+
+          begin
             @store.save
             if !new_record
               @store.amazon_credentials.save
             end
-            rescue ActiveRecord::RecordInvalid => e
-              @result['status'] = false
-              @result['messages'] = [@store.errors.full_messages, @store.amazon_credentials.errors.full_messages]
+          rescue ActiveRecord::RecordInvalid => e
+            @result['status'] = false
+            @result['messages'] = [@store.errors.full_messages, @store.amazon_credentials.errors.full_messages]
 
-            rescue ActiveRecord::StatementInvalid => e
-              @result['status'] = false
-              @result['messages'] = [e.message]
-        end
-      end
-
-      if @store.store_type == 'Ebay'
-        @ebay = EbayCredentials.where(:store_id=>@store.id)
-
-        if @ebay.nil? || @ebay.length == 0
-          @ebay = EbayCredentials.new
-        else
-          @ebay = @ebay.first
+          rescue ActiveRecord::StatementInvalid => e
+            @result['status'] = false
+            @result['messages'] = [e.message]
+          end
         end
 
-        @ebay.auth_token = session[:ebay_auth_token] if !session[:ebay_auth_token].nil?
-        @ebay.productauth_token = session[:ebay_auth_token] if !session[:ebay_auth_token].nil?
-        @ebay.ebay_auth_expiration = session[:ebay_auth_expiration]
-        @ebay.import_products = params[:import_products]
-        @ebay.import_images = params[:import_images]
+        if @store.store_type == 'Ebay'
+          @ebay = EbayCredentials.where(:store_id=>@store.id)
 
-        @store.ebay_credentials = @ebay
+          if @ebay.nil? || @ebay.length == 0
+            @ebay = EbayCredentials.new
+          else
+            @ebay = @ebay.first
+          end
 
-        begin
+          @ebay.auth_token = session[:ebay_auth_token] if !session[:ebay_auth_token].nil?
+          @ebay.productauth_token = session[:ebay_auth_token] if !session[:ebay_auth_token].nil?
+          @ebay.ebay_auth_expiration = session[:ebay_auth_expiration]
+          @ebay.import_products = params[:import_products]
+          @ebay.import_images = params[:import_images]
+
+          @store.ebay_credentials = @ebay
+
+          begin
             @store.save!
             if !new_record
               @store.ebay_credentials.save
             end
-            rescue ActiveRecord::RecordInvalid => e
-              @result['status'] = false
-              @result['messages'] = [@store.errors.full_messages, @store.ebay_credentials.errors.full_messages]
+          rescue ActiveRecord::RecordInvalid => e
+            @result['status'] = false
+            @result['messages'] = [@store.errors.full_messages, @store.ebay_credentials.errors.full_messages]
 
-            rescue ActiveRecord::StatementInvalid => e
-              @result['status'] = false
-              @result['messages'] = [e.message]
-        end
-        @result['store_id'] = @store.id
-      end
-
-      if @store.store_type == 'CSV'
-        begin
-          @store.save!
-        rescue ActiveRecord::RecordInvalid => e
-          @result['status'] = false
-          @result['messages'] = [@store.errors.full_messages]
-
-        rescue ActiveRecord::StatementInvalid => e
-          @result['status'] = false
-          @result['messages'] = [e.message]
-        end
-
-        if @store.id
-          @result["store_id"] = @store.id
-          csv_directory = "uploads/csv"
-          unless params[:orderfile].nil?
-            path = File.join(csv_directory, "#{@store.id}.order.csv")
-            File.open(path, "wb") { |f| f.write(params[:orderfile].read) }
-            @result['csv_import'] = true
+          rescue ActiveRecord::StatementInvalid => e
+            @result['status'] = false
+            @result['messages'] = [e.message]
           end
-          unless params[:productfile].nil?
-            path = File.join(csv_directory, "#{@store.id}.product.csv")
-            File.open(path, "wb") { |f| f.write(params[:productfile].read) }
-            @result['csv_import'] = true
-          end
+          @result['store_id'] = @store.id
         end
 
+        if @store.store_type == 'CSV'
+          begin
+            @store.save!
+          rescue ActiveRecord::RecordInvalid => e
+            @result['status'] = false
+            @result['messages'] = [@store.errors.full_messages]
 
+          rescue ActiveRecord::StatementInvalid => e
+            @result['status'] = false
+            @result['messages'] = [e.message]
+          end
+
+          if @store.id
+            @result["store_id"] = @store.id
+            csv_directory = "uploads/csv"
+            unless params[:orderfile].nil?
+              path = File.join(csv_directory, "#{@store.id}.order.csv")
+              File.open(path, "wb") { |f| f.write(params[:orderfile].read) }
+              @result['csv_import'] = true
+            end
+            unless params[:productfile].nil?
+              path = File.join(csv_directory, "#{@store.id}.product.csv")
+              File.open(path, "wb") { |f| f.write(params[:productfile].read) }
+              @result['csv_import'] = true
+            end
+          end
+
+
+        end
       end
+    else
+      @result['status'] = false
+      @result['messages'].push("Current user does not have permission to create or edit a store")
     end
+
+
+
     respond_to do |format|
         format.json { render json: @result}
     end
@@ -184,11 +192,13 @@ class StoreSettingsController < ApplicationController
   def csvImportData
     @result = Hash.new
     @result["status"] = true
+    @result["messages"] = []
+
     if !params[:id].nil?
       @store = Store.find(params[:id])
     else
       @result["status"] = false
-      @result["messages"] = ["No store selected"]
+      @result["messages"].push("No store selected")
     end
 
     if @result["status"]
@@ -196,76 +206,84 @@ class StoreSettingsController < ApplicationController
         if params[:type].nil? || !["both","order","product"].include?(params[:type])
           params[:type] = "both"
         end
-        @result["store_id"] = @store.id
+        if (params[:type] == "order" && current_user.can?('import_orders'))||
+            (params[:type] == "both" && current_user.can?('import_orders') && current_user.can?('import_products')) ||
+            (params[:type] == "product" && current_user.can?('import_products'))
+          @result["store_id"] = @store.id
 
-        #check if previous mapping exists
-        #else fill in defaults
-        default_csv_map = {:rows => 1, :sep => ',' , :other_sep => 0, :delimiter=>'"', :fix_width => 0, :fixed_width =>4, :map => {} }
-        csv_map = CsvMapping.find_or_create_by_store_id(@store.id)
-        csv_map_save = false
-        if csv_map.order_map.blank?
-          csv_map.order_map = default_csv_map
-          csv_map_save = true
-        end
-        if csv_map.product_map.blank?
-          csv_map.product_map = default_csv_map
-          csv_map_save = true
-        end
-        if csv_map_save
-          csv_map.save
-        end
-        # end check for mapping
+          #check if previous mapping exists
+          #else fill in defaults
+          default_csv_map = {:rows => 1, :sep => ',' , :other_sep => 0, :delimiter=>'"', :fix_width => 0, :fixed_width =>4, :map => {} }
+          csv_map = CsvMapping.find_or_create_by_store_id(@store.id)
+          csv_map_save = false
+          if csv_map.order_map.blank?
+            csv_map.order_map = default_csv_map
+            csv_map_save = true
+          end
+          if csv_map.product_map.blank?
+            csv_map.product_map = default_csv_map
+            csv_map_save = true
+          end
+          if csv_map_save
+            csv_map.save
+          end
+          # end check for mapping
 
-        csv_directory = "uploads/csv"
-        if ["both","order"].include?(params[:type])
-          @result["order"] = Hash.new
-          @result["order"]["map_options"] = [
-              { value: "increment_id", name: "Order number"},
-              { value: "order_placed_time", name: "Order placed"},
-              { value: "sku", name: "SKU"},
-              { value: "customer_comments", name: "Customer Comments"},
-              { value: "qty", name: "Qty"},
-              { value: "price", name: "Price"},
-              { value: "firstname", name: "First name"},
-              { value: "lastname", name: "Last name"},
-              { value: "email", name: "Email"},
-              { value: "address_1", name: "Address 1"},
-              { value: "address_2", name: "Address 2"},
-              { value: "city", name: "City"},
-              { value: "state", name: "State"},
-              { value: "postcode", name: "Postal Code"},
-              { value: "country", name: "Country"},
-              { value: "method", name: "Shipping Method"}
-          ]
-          @result["order"]["settings"] = csv_map.order_map
-          order_file_path = File.join(csv_directory, "#{@store.id}.order.csv")
-          if File.exists? order_file_path
-            # read 4 mb data
-            order_file_data = IO.read(order_file_path,4194304)
-            @result["order"]["data"] = order_file_data
+          csv_directory = "uploads/csv"
+          if ["both","order"].include?(params[:type])
+            @result["order"] = Hash.new
+            @result["order"]["map_options"] = [
+                { value: "increment_id", name: "Order number"},
+                { value: "order_placed_time", name: "Order placed"},
+                { value: "sku", name: "SKU"},
+                { value: "customer_comments", name: "Customer Comments"},
+                { value: "qty", name: "Qty"},
+                { value: "price", name: "Price"},
+                { value: "firstname", name: "First name"},
+                { value: "lastname", name: "Last name"},
+                { value: "email", name: "Email"},
+                { value: "address_1", name: "Address 1"},
+                { value: "address_2", name: "Address 2"},
+                { value: "city", name: "City"},
+                { value: "state", name: "State"},
+                { value: "postcode", name: "Postal Code"},
+                { value: "country", name: "Country"},
+                { value: "method", name: "Shipping Method"}
+            ]
+            @result["order"]["settings"] = csv_map.order_map
+            order_file_path = File.join(csv_directory, "#{@store.id}.order.csv")
+            if File.exists? order_file_path
+              # read 4 mb data
+              order_file_data = IO.read(order_file_path,4194304)
+              @result["order"]["data"] = order_file_data
+            end
           end
-        end
-        if ["both","product"].include?(params[:type])
-          @result["product"] = Hash.new
-          @result["product"]["map_options"] = [
-              { value:"sku" , name:"SKU"},
-              { value: "product_name", name: "Product Name"},
-              { value: "category_name", name: "Category Name"},
-              { value: "inv_wh1", name: "Inventory"},
-              { value: "product_images", name: "Product Images"},
-              { value: "product_type", name: "Product Type"},
-              { value: "location_primary", name: "Location/Bin"},
-              { value: "barcode", name: "Barcode Value"}
-          ]
-          @result["product"]["settings"] = csv_map.product_map
-          product_file_path = File.join(csv_directory, "#{@store.id}.product.csv")
-          if File.exists? product_file_path
-            product_file_data = IO.read(product_file_path,4194304)
-            @result["product"]["data"] = product_file_data
+          if ["both","product"].include?(params[:type])
+            @result["product"] = Hash.new
+            @result["product"]["map_options"] = [
+                { value:"sku" , name:"SKU"},
+                { value: "product_name", name: "Product Name"},
+                { value: "category_name", name: "Category Name"},
+                { value: "inv_wh1", name: "Inventory"},
+                { value: "product_images", name: "Product Images"},
+                { value: "product_type", name: "Product Type"},
+                { value: "location_primary", name: "Location/Bin"},
+                { value: "barcode", name: "Barcode Value"}
+            ]
+            @result["product"]["settings"] = csv_map.product_map
+            product_file_path = File.join(csv_directory, "#{@store.id}.product.csv")
+            if File.exists? product_file_path
+              product_file_data = IO.read(product_file_path,4194304)
+              @result["product"]["data"] = product_file_data
+            end
           end
+        else
+          @result["status"] = false
+          @result["messages"].push("Not enough permissions")
         end
       else
         @result["status"] = false
+        @result["messages"].push("Cannot find store")
       end
     end
 
@@ -294,6 +312,12 @@ class StoreSettingsController < ApplicationController
     if params[:type].nil? || !["order","product"].include?(params[:type])
       @result["status"] = false
       @result["messages"].push("No Type specified to import")
+    end
+
+    if (params[:type] == "order" && !current_user.can?('import_orders')) ||
+        (params[:type] == "product" && !current_user.can?('import_products'))
+      @result["status"] = false
+      @result["messages"].push("User does not have permissions to import #{params[:type]}")
     end
 
     if @result["status"]
@@ -562,12 +586,18 @@ class StoreSettingsController < ApplicationController
   def changestorestatus
     @result = Hash.new
     @result['status'] = true
-    params['_json'].each do|store|
-      @store = Store.find(store["id"])
-      @store.status = store["status"]
-      if !@store.save
-        @result['status'] = false
+    @result['messages'] =[]
+    if current_user.can? 'add_edit_stores'
+      params['_json'].each do|store|
+        @store = Store.find(store["id"])
+        @store.status = store["status"]
+        if !@store.save
+          @result['status'] = false
+        end
       end
+    else
+      @result["status"] = false
+      @result["messages"].push("User does not have permissions to change store status")
     end
 
 
@@ -577,30 +607,34 @@ class StoreSettingsController < ApplicationController
     end
   end
 
-  def editstore
-  end
-
   def duplicatestore
 
     @result = Hash.new
     @result['status'] = true
-    params['_json'].each do|store|
-      @store = Store.find(store["id"])
+    @result['messages'] = []
 
-      @newstore = @store.dup
-      index = 0
-      @newstore.name = @store.name+"(duplicate"+index.to_s+")"
-      @storeslist = Store.where(:name=>@newstore.name)
-      begin
-        index = index + 1
+    if current_user.can? 'add_edit_stores'
+      params['_json'].each do|store|
+        @store = Store.find(store["id"])
+
+        @newstore = @store.dup
+        index = 0
         @newstore.name = @store.name+"(duplicate"+index.to_s+")"
         @storeslist = Store.where(:name=>@newstore.name)
-      end while(!@storeslist.nil? && @storeslist.length > 0)
+        begin
+          index = index + 1
+          @newstore.name = @store.name+"(duplicate"+index.to_s+")"
+          @storeslist = Store.where(:name=>@newstore.name)
+        end while(!@storeslist.nil? && @storeslist.length > 0)
 
-      if !@newstore.save(:validate => false) || !@newstore.dupauthentications(@store.id)
-        @result['status'] = false
-        @result['messages'] = @newstore.errors.full_messages
+        if !@newstore.save(:validate => false) || !@newstore.dupauthentications(@store.id)
+          @result['status'] = false
+          @result['messages'] = @newstore.errors.full_messages
+        end
       end
+    else
+      @result["status"] = false
+      @result["messages"].push("User does not have permissions to duplicate store")
     end
 
 
@@ -613,11 +647,17 @@ class StoreSettingsController < ApplicationController
   def deletestore
     @result = Hash.new
     @result['status'] = false
-    params['_json'].each do|store|
-      @store = Store.find(store["id"])
-      if @store.deleteauthentications && @store.destroy
-        @result['status'] = true
+    @result['messages'] = []
+    if current_user.can? 'add_edit_stores'
+      params['_json'].each do|store|
+        @store = Store.find(store["id"])
+        if @store.deleteauthentications && @store.destroy
+          @result['status'] = true
+        end
       end
+    else
+      @result["status"] = false
+      @result["messages"].push("User does not have permissions to delete store")
     end
 
 

@@ -7,10 +7,10 @@
           </div>
           <div class="span5">
             <ul class="nav" id="mainMenu">
-              <li ng-show="current_user.is_super_admin || current_user.access_orders"><a ui-sref="orders">Orders</a></li>
-              <li ng-show="current_user.is_super_admin || current_user.access_products"><a ui-sref="products">Products</a></li>
-              <li ng-show="current_user.is_super_admin || current_user.access_settings"><a href="#/settings">Settings</a></li>
-              <li ng-show="current_user.is_super_admin || current_user.access_scanpack"><a ui-sref="scanpack.rfo">Scan and Pack</a></li>
+              <li ng-show="current_user.can('access_orders')"><a ui-sref="orders">Orders</a></li>
+              <li ng-show="current_user.can('access_products')"><a ui-sref="products">Products</a></li>
+              <li ng-show="current_user.can('access_settings')"><a href="#/settings">Settings</a></li>
+              <li ng-show="current_user.can('access_scanpack')"><a ui-sref="scanpack.rfo">Scan and Pack</a></li>
             </ul>
             <ul class="nav" id="mainMenu">
               <li><a href="" role="button" data-toggle="modal" ng-click='import_all_orders()'>Import Orders</a></li>
@@ -22,7 +22,7 @@
                 <li><a href="#">Help</a></li>
                 <li><a href="#">Profile</a></li>
                 <li class="dropdown">
-                  <a href="" class="dropdown-toggle" data-toggle="dropdown">{{current_user.username}}<b class="caret"></b></a>
+                  <a href="" class="dropdown-toggle" data-toggle="dropdown">{{current_user.get().username}}<b class="caret"></b></a>
                   <ul class="dropdown-menu">
 
                     <li>
