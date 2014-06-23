@@ -301,9 +301,12 @@ class ProductsController < ApplicationController
     @result['messages'] = []
     if current_user.can?('add_edit_products')
       product = Product.new
-      product.name = ""
+      product.name = "New Product"
       product.store_id = Store.where(:store_type=>'system').first.id
       product.store_product_id = 0
+      product_inv_wh = ProductInventoryWarehouses.new
+      product_inv_wh.inventory_warehouse_id = InventoryWarehouse.where(:is_default => true).first.id
+      product.product_inventory_warehousess << product_inv_wh
       product.save
 
       product.store_product_id = product.id

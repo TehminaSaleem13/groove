@@ -1,16 +1,16 @@
 groovepacks_services.factory("auth", ['$http','$rootScope',function($http,$rootScope) {
     var current_user = {};
     var check = function () {
-        return $http.get('/home/userinfo.json').success(function(data){
+        return $http.get('/home/userinfo.json',{ignoreLoadingBar: true}).success(function(data){
             current_user = data;
             $rootScope.$broadcast("user-data-reloaded");
         });
-    }
+    };
 
 
     var get_current = function () {
         return current_user;
-    }
+    };
 
     var home = function () {
         //check if access to orders
@@ -18,7 +18,7 @@ groovepacks_services.factory("auth", ['$http','$rootScope',function($http,$rootS
             return 'orders';
         }
         return 'scanpack.rfo';
-    }
+    };
 
     var prevent = function (name) {
         var to = false;
@@ -31,10 +31,11 @@ groovepacks_services.factory("auth", ['$http','$rootScope',function($http,$rootS
         }
 
         return {to: to, params: params};
-    }
+    };
 
     //Should always mimic code from app/model/user.rb User::can?
     var user_can = function (setting) {
+        if(typeof current_user['role'] == 'undefined') return false;
         if (current_user.role.make_super_admin) return true;
 
         if( ['create_edit_notes','change_order_status','import_orders'].indexOf(setting) != -1 ) {
@@ -45,7 +46,7 @@ groovepacks_services.factory("auth", ['$http','$rootScope',function($http,$rootS
             return current_user.role[setting];
         }
         return false;
-    }
+    };
 
     var has_access = function (name) {
         if(name == "home") return true;
@@ -54,7 +55,7 @@ groovepacks_services.factory("auth", ['$http','$rootScope',function($http,$rootS
             name = name.substr(0, name.indexOf('.'))
         }
         return user_can('access_' + name);
-    }
+    };
 
     return {
         check: check,

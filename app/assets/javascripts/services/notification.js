@@ -1,9 +1,9 @@
 groovepacks_services.factory("notification", ['$timeout','$rootScope',function($timeout,$rootScope) {
     var id = 0;
     var notif_types =  {
-        0: "error",
+        0: "danger",
         1: "success",
-        2: "notice",
+        2: "warning",
         default: 0
     };
     var notifications = {};

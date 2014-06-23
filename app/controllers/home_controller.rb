@@ -9,11 +9,13 @@ class HomeController < ApplicationController
 
   def userinfo
     user =  Hash.new
-    user['username'] = current_user.username
-    user['name'] = current_user.name
-    user['id'] = current_user.id
-    user['role'] = current_user.role
-    user['current_tenant'] = Apartment::Tenant.current_tenant
+    unless current_user.nil?
+      user['username'] = current_user.username
+      user['name'] = current_user.name
+      user['id'] = current_user.id
+      user['role'] = current_user.role
+      user['current_tenant'] = Apartment::Tenant.current_tenant
+    end
 
     respond_to do |format|
       format.html # show.html.erb

@@ -13,7 +13,7 @@ groovepacks_services.factory('orders',['$http','$window','notification',function
             load_new: true,
             current: 0,
             setup:{
-                sort: "updated_at",
+                sort: "",
                 order: "DESC",
                 filter: "awaiting",
                 search: '',
@@ -24,10 +24,10 @@ groovepacks_services.factory('orders',['$http','$window','notification',function
                 status:'',
                 orderArray:[]
             },
-            orders_count: {                
+            orders_count: {
             }
         };
-    }
+    };
 
     //Setup related function
     var update_setup = function (setup,type,value) {
@@ -70,7 +70,7 @@ groovepacks_services.factory('orders',['$http','$window','notification',function
                     if(!next) {
                         object.list = data.orders;
                     } else {
-                        for (key in data.orders) {
+                        for (var key = 0; key< data.orders.length; key++) {
                             object.list.push(data.orders[key]);
                         }
                     }
@@ -79,12 +79,12 @@ groovepacks_services.factory('orders',['$http','$window','notification',function
                 }
             }
         ).error(notification.server_error);
-    }
+    };
 
     var generate_list = function(action, orders) {
 
             orders.setup.orderArray = [];
-            for( i in orders.list) {
+            for(var i =0; i< orders.list.length; i++) {
                 if (orders.list[i].checked == true) {
                     orders.setup.orderArray.push({id: orders.list[i].id});
                 }
@@ -110,12 +110,12 @@ groovepacks_services.factory('orders',['$http','$window','notification',function
                     $window.open(response.data.merged_packing_slip_url);    
                 }
             }).error(notification.server_error);
-    }
+    };
 
     var update_list = function(action,orders) {
         if(["update_status","delete","duplicate"].indexOf(action) != -1) {
             orders.setup.orderArray = [];
-            for( i in orders.list) {
+            for(var i =0; i < orders.list.length; i++) {
                 if (orders.list[i].checked == true) {
                     orders.setup.orderArray.push({id: orders.list[i].id});
                 }
@@ -138,7 +138,7 @@ groovepacks_services.factory('orders',['$http','$window','notification',function
                 }
             }).error(notification.server_error);
         }
-    }
+    };
 
     var update_list_node = function(obj) {
         return $http.post('/orders/updateorderlist.json',obj).success(function(data){
@@ -148,7 +148,7 @@ groovepacks_services.factory('orders',['$http','$window','notification',function
                 notification.notify(data.error_msg,0);
             }
         }).error(notification.server_error);
-    }
+    };
 
     //single order related functions
     var get_single = function(id,orders) {
@@ -158,15 +158,15 @@ groovepacks_services.factory('orders',['$http','$window','notification',function
                 orders.single = data.order;
             }
         });
-    }
+    };
 
     var update_single = function(orders,auto) {
         if(typeof auto !== "boolean") {
             auto = true;
         }
         var order_data = {};
-        for(i in orders.single.basicinfo) {
-            if(i != 'id' && i != 'created_at' && i!='updated_at') {
+        for(var i in orders.single.basicinfo) {
+            if(orders.single.basicinfo.hasOwnProperty(i) && i != 'id' && i != 'created_at' && i!='updated_at') {
                 order_data[i] = orders.single.basicinfo[i];
             }
         }
@@ -181,7 +181,7 @@ groovepacks_services.factory('orders',['$http','$window','notification',function
                 }
             }
         ).error(notification.server_error);
-    }
+    };
     var rollback_single = function(single) {
         return $http.post("orders/rollback.json",{single: single}).success(
             function(data) {
@@ -192,7 +192,7 @@ groovepacks_services.factory('orders',['$http','$window','notification',function
                 }
             }
         ).error(notification.server_error);
-    }
+    };
     var single_add_item = function(orders,ids) {
         return $http.post("orders/additemtoorder.json",{productids: ids , id: orders.single.basicinfo.id, qty:1}).success(
             function(data) {
@@ -203,7 +203,7 @@ groovepacks_services.factory('orders',['$http','$window','notification',function
                 }
             }
         ).error(notification.server_error);
-    }
+    };
 
     var single_remove_item = function(ids) {
         return $http.post("orders/removeitemfromorder.json",{orderitem: ids}).success(
@@ -215,7 +215,7 @@ groovepacks_services.factory('orders',['$http','$window','notification',function
                 }
             }
         ).error(notification.server_error);
-    }
+    };
 
     var single_record_exception = function(orders) {
         return $http.post(
@@ -233,7 +233,7 @@ groovepacks_services.factory('orders',['$http','$window','notification',function
                     notification.notify(data.messages,0);
                 }
         }).error(notification.server_error);
-    }
+    };
 
     var single_clear_exception = function(orders) {
         return $http.post('/orders/clearexception.json', {id: orders.single.basicinfo.id}).success(function(data) {
@@ -243,7 +243,7 @@ groovepacks_services.factory('orders',['$http','$window','notification',function
                 notification.notify(data.messages,0);
             }
         }).error(notification.server_error);
-    }
+    };
 
      var single_update_item_qty = function(item) {
         return $http.post('/orders/updateiteminorder.json',{orderitem: item.id, qty: item.qty}).success(function(data) {
@@ -253,7 +253,7 @@ groovepacks_services.factory('orders',['$http','$window','notification',function
                 notification.notify(data.messages,0);
             }
         }).error(notification.server_error);
-    }
+    };
 
     return {
         model: {

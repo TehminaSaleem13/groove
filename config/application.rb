@@ -58,7 +58,7 @@ module Groovepacks
 
     # Version of your assets, change this if you want to expire all your assets
     config.assets.version = '1.0'
-    config.assets.precompile += %w( font-awesome-ie7.min.css )
+    #config.assets.precompile += %w( font-awesome-ie7.min.css )
 
     config.serve_static_assets = true
     
@@ -67,3 +67,4 @@ module Groovepacks
     config.middleware.use 'Apartment::Elevators::Subdomain'
   end
 end
+require Rails.root.join('config','initializers','groove_constants.rb')

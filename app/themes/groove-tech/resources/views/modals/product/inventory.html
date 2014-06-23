@@ -1,0 +1,92 @@
+<!-- show order modal -->
+<div>
+
+    <div class="modal-header">
+        <button type="button" class="close-btn" ng-click="cancel()"><i class="glyphicon glyphicon-remove"></i></button>
+        <div class="modal-title">Receive or Recount Inventory</div>
+    </div>
+
+
+    <div class="modal-body">
+        <div class="container-fluid form-horizontal" >
+            <div class="form-group">
+                <label class="control-label col-sm-2">Inventory Warehouse</label>
+                <div class="controls col-sm-8">
+                    <select class="selectpicker" ng-model="inventory_manager.single.inv_wh_id" ng-change='handle_change_event()' ng-options="warehouse.info.id as warehouse.info.name for warehouse in warehouses.list">
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-sm-2">Receive or Recount Inventory</label>
+
+                <div class="controls col-sm-8">
+                    <label class="radio inline">
+                        <input type="radio"
+                               ng-model="inventory_manager.single.method" value="receive" ng-change='handle_change_event()'/> Receive Inventory
+                    </label>
+                    <label class="radio inline">
+                        <input type="radio"
+                               ng-model="inventory_manager.single.method" value="recount" ng-change='handle_change_event()'/> Recount Inventory
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-sm-2">Scan Product Barcode</label>
+
+                <div class="controls col-sm-8">
+                    <input id="inventorymanagerbarcode" type="text" ng-model="inventory_manager.single.product_barcode" ng-keypress="_handle_inv_manager_key_event($event)"class="span4"/>
+                </div>
+            </div>
+
+            <div ng-show="products_inv_manager.single.basicinfo.id > 0">
+                <h5>Product Information</h5>
+                <table class="table table-hover table-bordered table-striped table-condensed">
+                    <thead>
+                    <tr>
+                        <th>Product Name</th>
+                        <th>SKU</th>
+                        <th>Quantity on Hand</th>
+                        <th>Inventory Warehouse</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>{{products_inv_manager.single.basicinfo.name}}</td>
+                        <td><span ng-repeat="sku in products_inv_manager.single.skus">{{sku.sku}}</span></td>
+                        <td><span ng-repeat="warehouse in products_inv_manager.single.inventory_warehouses"
+                                  ng-show="warehouse.warehouse_info.id == inventory_manager.single.inv_wh_id">
+                    {{warehouse.info.available_inv}}</span></td>
+                        <td><span ng-repeat="warehouse in products_inv_manager.single.inventory_warehouses"
+                                  ng-show="warehouse.warehouse_info.id == inventory_manager.single.inv_wh_id">
+                    {{warehouse.warehouse_info.name}}</span></td>
+                    </tr>
+                    </tbody>
+                </table>
+
+                <div ng-show="inventory_manager.single.inv_wh_id>0 &&
+        (products_inv_manager.single.inventory_warehouses.length == 0 || inv_wh_found == false)">
+                    <p class="alert alert-danger">
+                        This item is not currently found in the selected warehouse. Enter an inventory value to add it automatically.
+                    </p>
+                </div>
+
+                <div class="form-group" ng-show="inventory_manager.single.inv_wh_id > 0 ">
+                    <label class="control-label col-sm-2">Enter Count</label>
+
+                    <div class="controls col-sm-8">
+                        <input id="inventory_count" type="text" ng-model="inventory_manager.single.inventory_count" class="span4" ng-keypress="_handle_inv_count_key_event($event)"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-footer">
+        <button ng-click="cancel()" class="modal-cancel-button">Cancel</button>
+    </div>
+</div>
+
+
+

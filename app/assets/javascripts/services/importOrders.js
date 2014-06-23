@@ -1,8 +1,8 @@
 groovepacks_services.factory("importOrders", ['$http',function($http) {
         return {
             do_import: function(scope) {
-               $http.get('/orders/import_all.json').success(function(data) {
-                 scope.notify("Getting import orders success.",0);}).error(function(data) {
+               $http.get('/orders/import_all.json',{ignoreLoadingBar: true}).success(function(data) {
+                 scope.notify("Getting import orders success.",1);}).error(function(data) {
                         scope.notify("Getting import orders failed.",0);
                     });
             }

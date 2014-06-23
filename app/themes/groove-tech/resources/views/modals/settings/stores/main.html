@@ -1,0 +1,67 @@
+<div>
+    <div class="modal-header">
+        <button type="button" class="close-btn" ng-click="ok()"><i class="glyphicon glyphicon-remove"></i></button>
+        <div class="modal-title">
+            <span ng-show="edit_status">Currently Updating {{stores.single.name}}</span>
+            <span ng-hide="edit_status">Create Store</span>
+        </div>
+    </div>
+    <div class="modal-body">
+        <div class="container-fluid form-horizontal">
+            <div class="row">
+                <div class="col-md-8">
+                    <legend>Store Information</legend>
+                    <div class="form-group">
+                        <label class="control-label col-md-3">Store Name</label>
+                        <div class="controls col-md-9">
+                            <input name="name" ng-model="stores.single.name" ng-blur="update_single_store()" type="text" class="form-control input-style" value="" required/>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="control-label col-md-3">Store Status</label>
+                        <div class="controls col-md-9">
+                            <label class="radio inline">
+                                <input type="radio" ng-change="update_single_store()" ng-model="stores.single.status" value="1" />  Active
+                            </label>
+                            <label class="radio inline">
+                                <input type="radio" ng-change="update_single_store()" ng-model="stores.single.status" value="0"> Inactive
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="control-label col-md-3">Warehouse Location </label>
+
+                        <div class="controls col-md-9">
+                            <select class="form-control input-style" ng-change="update_single_store()" ng-model="stores.single.inventory_warehouse_id" ng-options="inv_wh.info.id as inv_wh.info.name for inv_wh in warehouses.list">
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="control-label col-md-3">Custom Packing-Slip Message For Customer</label>
+                        <div class="controls col-md-9">
+                            <textarea ng-blur="update_single_store()" ng-model="stores.single.thank_you_message_to_customer" class="form-control input-style" rows="4"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="control-label col-md-3">Store Type</label>
+                        <div class="controls col-md-9">
+                            <select ng-change="update_single_store()" class="form-control input-style" ng-model="stores.single.store_type" ng-options="id as store.name for (id ,store) in stores.types">
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div ng-repeat="(id, store_type) in stores.types" groov-include="{{store_type.file}}" ng-show="stores.single.store_type == id"></div>
+
+        </div>
+    </div>
+
+    <div class="modal-footer">
+        <button ng-click="ok()" class="modal-save-button">Save & close</button>
+        <button ng-click="cancel()" class="modal-cancel-button">Cancel</button>
+    </div>
+</div>

@@ -1,72 +1,59 @@
-<div class="container" ng-app="groovepacks" ng-controller="appCtrl">
-    <div class="row navigation-row">
-      <header class="navbar">
-        <div class="container">
-          <div class="span3">
-            <a ui-sref="home" class="brand"><img src="assets/logo.png"></a>
-          </div>
-          <div class="span6">
-            <ul class="nav" id="mainMenu">
-              <li ng-show="current_user.can('access_orders')"><a ui-sref="orders">Orders</a></li>
-              <li ng-show="current_user.can('access_products')"><a ui-sref="products">Products</a></li>
-              <li ng-show="current_user.can('access_settings')"><a href="#/settings">Settings</a></li>
-              <li ng-show="current_user.can('access_scanpack')"><a ui-sref="scanpack.rfo">Scan and Pack</a></li>
-            </ul>
-            <ul class="nav" id="mainMenu">
-              <li id="ordersitem" ng-mouseover="get_import_summary()"><a href="" role="button" data-toggle="popover" data-trigger="hover" 
-            data-content="" title="" 
-            ng-click='import_all_orders()'><i ng-show="import_summary.import_info.status =='in_progress'" class="icon-refresh icon-spin"></i> Import Orders</a></li>
-            </ul>
-            <div id="popoverExampleTwoHiddenContent" 
-              style="display: none;" width="500px">
 
-                <table style="font-size: 12px;">
-                  <tr ng-repeat="info in import_summary.import_items">
-                    <td>
-                      <img src="https://s3.amazonaws.com/groovepacker/EBAY-BUTTON.png" width="60px" height="50px" ng-show="info.store_info.store_type=='Ebay'">
-                      <img src="https://s3.amazonaws.com/groovepacker/amazonLogo.jpg" width="60px" height="50px" ng-show="info.store_info.store_type=='Amazon'">
-                      <img src="https://s3.amazonaws.com/groovepacker/MagentoLogo.jpg" width="60px" height="50px" ng-show="info.store_info.store_type=='Magento'">
-                    </td>
-                    <td> {{info.store_info.name}}</td>
-                    <td style="text-align: right;" ng-show="info.import_info.status=='completed'">Imported {{info.import_info.success_imported}} of {{info.import_info.success_imported+info.import_info.previous_imported}} orders. {{info.import_info.previous_imported}} were previously imported.</td>
-                    <td style="text-align: right;" ng-show="info.import_info.status=='not_started'">Import not started.</td>
-                    <td style="text-align: right;" ng-show="info.import_info.status=='in_progress'">Import in progress.</td>
-                    <td style="text-align: right;" ng-show="info.import_info.status=='failed'">Import failed.</td>
-                  </tr>
-                </table>    
-            </div>  
-            <!-- Popover 2 hidden title -->
-            <div id="popoverExampleTwoHiddenTitle" style="display: none;">
-               <div ng-show="import_summary.import_info.status =='completed'">
-                Last import:
-                <span am-time-ago="import_time.time"></span>
-               </div>
-               <div ng-show="import_summary.import_info.status =='in_progress'">Import in progress</div>
-               
-            </div>            
-          </div>
-          <div class="span3 pull-right">
-              <ul class="nav pull-right">
-                <li><a href="#/home">Home</a></li>
-                <li><a href="#">Help</a></li>
-                <li><a href="#">Profile</a></li>
-                <li class="dropdown">
-                  <a href="" class="dropdown-toggle" data-toggle="dropdown">{{current_user.get().username}}<b class="caret"></b></a>
-                  <ul class="dropdown-menu">
-
-                    <li>
-                      <a href="/users/sign_out" data-method="delete" rel="nofollow">Sign Out</a>
-                    </li>
-                  </ul>
-                </li>
-
-              </ul>
-
-          </div>
+<div class="row"  ng-controller="appCtrl">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="box-outer">
+        <div class="box"></div>
+        <div class="col-lg-10 col-md-11 col-sm-10">
+          <ul class="nav">
+            <li class="navbar-brand nav-li col-lg-5 col-md-4">
+              <a href="#/home"><img src="/assets/images/logo.png" alt="GroovePacker" /></a>
+            </li>
+            <li ng-show="current_user.can('access_orders')" class="nav-li">
+              <a ng-class="{active:is_active_tab('orders')}" ui-sref="orders">
+                Orders<br/>
+                <img class="icons" src="/assets/images/document.png">
+              </a>
+            </li>
+            <li ng-show="current_user.can('access_products')" class="nav-li">
+              <a ng-class="{active:is_active_tab('products')}" ui-sref="products">
+                Products<br/>
+                <img class="icons" src="/assets/images/db.png">
+              </a>
+            </li>
+            <li ng-show="current_user.can('access_settings')" class="nav-li">
+              <a ng-class="{active:is_active_tab('settings')}" href="#/settings">
+                Settings<br/>
+                <img class="icons" src="/assets/images/settings.png">
+              </a>
+            </li>
+            <li ng-show="current_user.can('access_scanpack')" class="nav-li">
+              <a ng-class="{active:is_active_tab('scanpack')}" ui-sref="scanpack.rfo">
+                Scan and Pack<br/>
+                <img class="icons" src="/assets/images/box.png">
+              </a>
+            </li>
+            <li class="nav-li" groov-popover="{{import_groov_popover.content}}" popover-title="{{import_groov_popover.title}}" popover-placement="bottom">
+              <a href="" ng-click='import_all_orders()' ><i ng-show="import_summary.import_info.status =='in_progress'" class="glyphicon glyphicon-refresh groov-refresh-spin"></i>
+                Import Orders<br/>
+                <img class="icons" src="/assets/images/cloud.png">
+              </a>
+            </li>
+          </ul>
         </div>
-      </header>
-      <div groov-common groov-import="import_all_orders"></div>
+        <div  class="col-lg-2 col-md-1 col-sm-2" dropdown>
+          <button type="button" class="nav-button dropdown-toggle pull-right">{{current_user.get().username}} <span><img class="arrow-icon" src="/assets/images/down.png"></span></button>
+          <ul class="dropdown-menu" role="menu">
+            <li><a href="/users/sign_out" data-method="delete" rel="nofollow">Sign Out</a></li>
+          </ul>
+        </div>
+      </div>
     </div>
-    <!-- {{import_summary}} -->
-      <div ui-view></div>
+  </div>
+
+  <div class="container-fluid">
+
+    <div ui-view></div>
+  </div>
+
 </div>

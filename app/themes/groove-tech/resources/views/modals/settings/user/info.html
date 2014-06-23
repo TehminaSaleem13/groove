@@ -1,0 +1,95 @@
+<div class="container-fluid form-horizontal">
+    <div class="row">
+        <div class="col-md-6">
+            <legend>Basic User Info</legend>
+            <div class="form-group">
+                <label class="control-label col-md-4">Username</label>
+                <div class="controls col-md-7">
+                    <input class="form-control input-style" name="username" ng-blur="update_single_user()" ng-model="users.single.username" type="text" value="" required/>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-md-4">Name</label>
+                <div class="controls col-md-7">
+                    <input class="form-control input-style" name="name" ng-blur="update_single_user()" ng-model="users.single.name" type="text" required/>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-md-4">Password</label>
+                <div class="controls col-md-7" ng-show="show_password">
+                    <input class="form-control input-style" name="password" ng-blur="update_single_user()" ng-model="users.single.password" type="password" />
+                </div>
+                <div class="controls col-md-7" ng-hide="show_password">
+                    <a href="" ng-click='change_password()'> Change Password</a>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-md-4">Email</label>
+                <div class="controls col-md-7">
+                    <input class="form-control input-style" name="email" ng-blur="update_single_user()" ng-model="users.single.email" type="text"/>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-md-4">Other</label>
+                <div class="controls col-md-7">
+                    <input class="form-control input-style" name="other1" ng-blur="update_single_user()" ng-model="users.single.other" type="text"/>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-md-4">Active</label>
+                <div class="controls col-md-7">
+                    <input name="active" ng-change="update_single_user()" ng-model="users.single.active" type="checkbox"/>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-md-4">Confirmation Code</label>
+                <div class="controls col-md-7">
+                    <input class="form-control input-style" name="confirmation_code" ng-blur="update_single_user()" ng-model="users.single.confirmation_code" type="text" required/>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <legend>Apply and Manage Roles</legend>
+            <div class="form-group">
+                <label class="control-label col-md-4">Role</label>
+                <div class="controls col-md-7">
+                    <select class="form-control input-style" ng-model="roles_data.selectedRole" ng-change="set_selected_role($event)" ng-options="role.name for role in users.roles">
+                        <option value="">Custom</option>
+                    </select>
+                </div>
+            </div>
+            <div ng-show="roles_data.selectedRole == null" class="form-group">
+                <label class="control-label col-md-4">Select Base Role to customize</label>
+                <div class="controls col-md-7 col-md-4">
+                    <table class="well table-well table table-striped table-hover table-roles">
+                        <tr ng-repeat="role in users.roles" ng-click="set_base_role(role)">
+                            <td>{{role.name}}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div ng-show="!roles_data.showSelectBaseRole && roles_data.selectedRole == null"  class="form-group">
+                <label class="control-label col-md-4">Save new Role</label>
+                <div class="controls col-md-5">
+                    <input class="form-control input-style" type="text" ng-model="users.single.role.new_name" placeholder="Role name" />
+                </div>
+                <div class="col-md-2"><btn class="modal-save-button" ng-click="make_new_role()">Save</btn></div>
+            </div>
+
+            <div ng-show="!roles_data.showSelectBaseRole && roles_data.selectedRole != null && users.single.role.custom && users.single.role.display"  class="form-group">
+                <label class="control-label col-md-4">Delete current Role</label>
+                <div class="controls col-md-7">
+                    <btn class="modal-remove-button" ng-click="delete_role()">Delete</btn>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>

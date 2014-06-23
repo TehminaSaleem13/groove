@@ -6,7 +6,7 @@ groovepacks_services.factory('generalsettings',['$http','notification',function(
         return {
             single: {}
         };
-    }
+    };
 
     var get_settings = function(settings) {
         var url = '/settings/get_settings.json';
@@ -22,7 +22,7 @@ groovepacks_services.factory('generalsettings',['$http','notification',function(
                 }
             }
         ).error(notification.server_error);
-    }
+    };
 
     var update_settings = function(settings) {
         var url = '/settings/update_settings.json';
@@ -37,7 +37,7 @@ groovepacks_services.factory('generalsettings',['$http','notification',function(
                 }
             }
         ).error(notification.server_error);
-    }
+    };
 
     //Public facing API
     return {

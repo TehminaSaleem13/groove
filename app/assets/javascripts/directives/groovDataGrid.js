@@ -11,67 +11,79 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout','$http','$sce','no
             setup: {},
             all_fields:{}
         }
-    }
+    };
     var default_field_options = function (){
         return {
             name: "field",
-            class: "span2",
+            class: "col-xs-2",
             hideable: true,
-            hidden:false,
-            transclude:'',
-            model:'row',
+            hidden: false,
+            transclude: '',
+            model: 'row',
             grid_bind: ''
         }
-    }
+    };
     return {
         restrict:"A",
         scope: {
             groovDataGrid: "=",
             rows: "=groovList"
         },
-        templateUrl:"/assets/partials/datagrid.html",
+        templateUrl:"/assets/views/directives/datagrid.html",
         link: function(scope,el,attrs) {
             var myscope = {};
             scope.context_menu = function(event) {
                 if(scope.options.show_hide) {
-                    scope.context_menu_shown = !scope.context_menu_shown;
+                    scope.context_menu.shown = !scope.context_menu.shown;
                     if(typeof event != "undefined") {
-                        var offset = {left:0,top:0}
-                        var modal = el.parents(".modal-body");
-                        if(modal.length) {
-                            offset = modal.offset();
-                        }
+                        event.preventDefault();
+                        event.stopPropagation();
+                        var offset = el.offset();
                         scope.context_menu_style = {left: event.pageX - offset.left, top: event.pageY - offset.top }
                     }
                 }
-            }
+            };
 
             scope.show_hide = function(field) {
                 field.hidden = ! field.hidden;
                 scope.update();
-            }
+            };
 
             scope.check_uncheck = function(row) {
                 if(scope.options.selectable) {
                     row.checked = !row.checked;
                 }
-            }
+            };
 
             scope.update = function() {
-                var shown = []
-                for(i in scope.options.all_fields) {
-                    if(!scope.options.all_fields[i].hidden) {
-                        shown.push(i);
+                var shown = [];
+                var hidden = [];
+                for(var i in scope.options.all_fields) {
+                    if(scope.options.all_fields.hasOwnProperty(i)) {
+                        if(!scope.options.all_fields[i].hidden) {
+                            shown.push(i);
+                            if(scope.theads.indexOf(i)<0) {
+                                scope.theads.push(i);
+                            }
+                        } else {
+                            hidden.push(i);
+                            if(scope.theads.indexOf(i)!=-1) {
+                                scope.theads.splice(scope.theads.indexOf(i),1);
+                            }
+                        }
                     }
                 }
-                $http.post('settings/save_columns_state.json',{identifier:scope.options.identifier,shown:shown, order:scope.theads}).success(function(data) {
+
+                myscope.headOrder = shown.concat(hidden);
+
+                $http.post('settings/save_columns_state.json',{identifier:scope.options.identifier,shown:scope.theads, order:myscope.headOrder}).success(function(data) {
                     if(data.status) {
                         notification.notify("Successfully saved column preferences",1);
                     } else {
                         notification.notify(data.messages,0);
                     }
                 }).error(notification.server_error);
-            }
+            };
 
             scope.compile = function(ind,field) {
 
@@ -83,23 +95,27 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout','$http','$sce','no
                 }
 
                 $timeout(function() {scope.$broadcast(scope.options.identifier+'_list-'+field+'-'+ind);},30);
-            }
+            };
             myscope._init = function() {
+                myscope.headOrder = [];
                 scope.theads = [];
 
                 scope.editable={};
                 var options = default_options();
                 jQuery.extend(true,options,scope.groovDataGrid);
-                for (i in scope.groovDataGrid.all_fields) {
-                    options.all_fields[i] = default_field_options();
-                    options.all_fields[i].editable = (options.editable != false);
-                    options.all_fields[i].draggable = (options.draggable != false);
-                    options.all_fields[i].sortable = (options.sortable != false);
-                    angular.extend(options.all_fields[i],scope.groovDataGrid.all_fields[i]);
-                    if(options.all_fields[i].grid_bind !== '') {
-                        options.all_fields[i].grid_bind = $sce.trustAsHtml(scope.groovDataGrid.all_fields[i].grid_bind);
+                for (var i in scope.groovDataGrid.all_fields) {
+                    if(scope.groovDataGrid.all_fields.hasOwnProperty(i)){
+                        options.all_fields[i] = default_field_options();
+                        options.all_fields[i].editable = (options.editable != false);
+                        options.all_fields[i].draggable = (options.draggable != false);
+                        options.all_fields[i].sortable = (options.sortable != false);
+                        angular.extend(options.all_fields[i],scope.groovDataGrid.all_fields[i]);
+                        if(options.all_fields[i].grid_bind !== '') {
+                            options.all_fields[i].grid_bind = $sce.trustAsHtml(scope.groovDataGrid.all_fields[i].grid_bind);
+                        }
+                        myscope.headOrder.push(i);
+                        scope.theads.push(i);
                     }
-                    scope.theads.push(i);
                 }
                 options.setup = scope.groovDataGrid.setup;
                 scope.context_menu_shown = false;
@@ -108,7 +124,7 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout','$http','$sce','no
                 scope.dragOptions = {
                     update: scope.update,
                     enabled: scope.options.draggable
-                }
+                };
                 scope.custom_identifier = scope.options.identifier + Math.floor(Math.random()*1000);
 
 
@@ -127,7 +143,8 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout','$http','$sce','no
                                     scope.options.all_fields[data.data.shown[i]].hidden = false;
                                 }
                             }
-                            scope.theads = data.data.order;
+                            scope.theads = data.data.shown;
+                            myscope.headOrder = data.data.order;
                         }
                     } else {
                         notification.notify(data.messages,0);
@@ -135,7 +152,7 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout','$http','$sce','no
 
                 }).error(notification.server_error);
 
-            }
+            };
 
             myscope._init();
         }
