@@ -24,7 +24,7 @@ groovepacks.config(['$stateProvider', '$urlRouterProvider', function($stateProvi
         .state('settings.showusers',{url: '/showusers', templateUrl: '/assets/partials/showusers.html', controller: 'showUsersCtrl'})
         .state('settings.showusers.create',{url: '/create', controller: 'createUserCtrl'})
         .state('settings.showstores', {url:'/showstores', templateUrl:'/assets/partials/showstores.html', controller: 'showStoresCtrl'})
-        .state('settings.showstores.ebay', {url:'/ebay?ebaytkn&tknexp&username&redirect&editstatus&name&status&storetype&storeid&inventorywarehouseid', controller: 'createStoreCtrl' })
+        .state('settings.showstores.ebay', {url:'/ebay?ebaytkn&tknexp&username&redirect&editstatus&name&status&storetype&storeid&inventorywarehouseid&importimages&importproducts&messagetocustomer', controller: 'createStoreCtrl' })
         .state('settings.showstores.create', {url:'/create', controller: 'createStoreCtrl'})
         .state('settings.showstores.backup', {url:'/backup',controller:'showBackupCtrl'})
         .state('settings.warehouses', {url:'/showwarehouses',templateUrl:'/assets/partials/showwarehouses.html', 
