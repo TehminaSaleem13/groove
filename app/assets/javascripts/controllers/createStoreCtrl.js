@@ -35,6 +35,7 @@ groovepacks_controllers.
                         $scope.$parent.ebay_signin_url_status = false;
 
                     });
+
                 $scope.store_modal.modal('show');
             }
 
@@ -43,6 +44,7 @@ groovepacks_controllers.
                     $scope.$parent.redirect = ($stateParams.redirect || ($stateParams.action == "create"));
                     if ($scope.$parent.redirect)
                     {
+                        
                         if ($stateParams.editstatus=='true')
                         {
                             $scope.$parent.edit_status = $stateParams.editstatus;
@@ -52,35 +54,33 @@ groovepacks_controllers.
 
                             $scope.$parent.newStore.name = $stateParams.name;
                 
-                            $scope.$parent.newStore.status = $stateParams.status;
+                            $scope.$parent.newStore.status = ($stateParams.status ==true);
                             $scope.$parent.newStore.store_type = $stateParams.storetype;
 
-                            $scope.$parent.newStore.inventory_warehouse_id = $stateParams.inventorywarehouseid;
+                            $scope.$parent.newStore.inventory_warehouse_id = parseInt($stateParams.inventorywarehouseid);
+                            $scope.$parent.newStore.import_images = ($stateParams.importimages == 'true');
+                            $scope.$parent.newStore.import_products = ($stateParams.importproducts == 'true');
+                            $scope.$parent.newStore.thank_you_message_to_customer = $stateParams.messagetocustomer;
 
                         }
                         else
                         {
                             $scope.ebayuserfetchtoken();
-                            $scope.$parent.newStore = new Object();
+                            $scope.$parent.newStore = {};
                             $scope.$parent.newStore.name = $stateParams.name;
-                            $scope.$parent.newStore.status = $stateParams.status;
+                            $scope.$parent.newStore.status = ($stateParams.status ==true);
                             $scope.$parent.newStore.store_type = $stateParams.storetype;
                             
-                            $scope.$parent.newStore.inventory_warehouse_id = $stateParams.inventorywarehouseid;
+                            $scope.$parent.newStore.inventory_warehouse_id = parseInt($stateParams.inventorywarehouseid);
+                            $scope.$parent.newStore.import_images = ($stateParams.importimages == 'true');
+                            $scope.$parent.newStore.import_products = ($stateParams.importproducts == 'true');
+                            $scope.$parent.newStore.thank_you_message_to_customer = $stateParams.messagetocustomer;
                             
                         }
                         if(typeof $scope.$parent.newStore.status == "undefined") {
                             $scope.$parent.newStore.status = 1;                           
                         }
-                        for(var i=0; i<$scope.$parent.warehouses.list.length; i++) {
-                            if ($scope.$parent.warehouses.list[i].info.is_default) {
-                                $scope.$parent.newStore.inventory_warehouse_id =
-                                $scope.$parent.warehouses.list[i].info.id;
-                                console.log("assigning again");
-                                console.log($scope.$parent.newStore);
-                            break;
-                            }
-                        }                        
+                    
                         $scope.setup_modal();
                         $scope.store_modal.modal('show');
                     }
