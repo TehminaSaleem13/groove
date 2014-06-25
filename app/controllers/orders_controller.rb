@@ -1164,6 +1164,13 @@ class OrdersController < ApplicationController
       render json: @result        
     end
   end
+  def import_all
+    @user_id = OrderImportSummaries.user_id
+    @status = OrderImportSummaries.status
+    if @status != 'not started' && @status != 'in progress'
+      # call delayed job
+    end
+  end
   
 
   private

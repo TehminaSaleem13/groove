@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140619141700) do
+ActiveRecord::Schema.define(:version => 20140625143218) do
 
   create_table "amazon_credentials", :force => true do |t|
     t.string   "merchant_id",                                     :null => false
@@ -98,6 +98,15 @@ ActiveRecord::Schema.define(:version => 20140619141700) do
     t.text     "packing_slip_message_to_customer"
   end
 
+  create_table "import_items", :force => true do |t|
+    t.string   "status"
+    t.integer  "store_id"
+    t.integer  "success_imported",  :default => 0
+    t.integer  "previous_imported", :default => 0
+    t.datetime "created_at",                       :null => false
+    t.datetime "updated_at",                       :null => false
+  end
+
   create_table "inventory_warehouses", :force => true do |t|
     t.string   "name",                               :null => false
     t.string   "location"
@@ -143,6 +152,13 @@ ActiveRecord::Schema.define(:version => 20140619141700) do
 
   add_index "order_exceptions", ["order_id"], :name => "index_order_exceptions_on_order_id"
   add_index "order_exceptions", ["user_id"], :name => "index_order_exceptions_on_user_id"
+
+  create_table "order_import_summaries", :force => true do |t|
+    t.integer  "user_id"
+    t.string   "status"
+    t.datetime "created_at", :null => false
+    t.datetime "updated_at", :null => false
+  end
 
   create_table "order_item_kit_products", :force => true do |t|
     t.integer  "order_item_id"
@@ -230,7 +246,6 @@ ActiveRecord::Schema.define(:version => 20140619141700) do
     t.string   "method"
     t.datetime "created_at",         :null => false
     t.datetime "updated_at",         :null => false
-    t.string   "store_order_id"
     t.string   "notes_internal"
     t.string   "notes_toPacker"
     t.string   "notes_fromPacker"
@@ -242,19 +257,6 @@ ActiveRecord::Schema.define(:version => 20140619141700) do
     t.integer  "packing_user_id"
     t.string   "status_reason"
   end
-
-  create_table "orders_import_summaries", :force => true do |t|
-    t.integer  "total_retrieved"
-    t.integer  "success_imported"
-    t.integer  "previous_imported"
-    t.boolean  "status"
-    t.string   "error_message"
-    t.integer  "store_id"
-    t.datetime "created_at",        :null => false
-    t.datetime "updated_at",        :null => false
-  end
-
-  add_index "orders_import_summaries", ["store_id"], :name => "index_orders_import_summaries_on_store_id"
 
   create_table "product_barcodes", :force => true do |t|
     t.integer  "product_id"
@@ -348,6 +350,7 @@ ActiveRecord::Schema.define(:version => 20140619141700) do
     t.integer  "total_avail_ext",                                               :default => 0,         :null => false
     t.decimal  "weight",                          :precision => 8, :scale => 2, :default => 0.0,       :null => false
     t.decimal  "shipping_weight",                 :precision => 8, :scale => 2, :default => 0.0
+    t.boolean  "is_packing_supply",                                             :default => false
   end
 
   add_index "products", ["store_id"], :name => "index_products_on_store_id"
