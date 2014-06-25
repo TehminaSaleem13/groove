@@ -16,10 +16,22 @@ module Groovepacker
         
         def get_handler
           self.handler
-        end  
+        end
+
+        def build_result
+          {
+            messages: [],
+            previous_imported: 0,
+            success_imported: 0,
+            total_imported: 0,
+            debug_messages:[]
+          }
+        end
 
         protected
           attr_accessor :handler
+
+
       end
     end
   end

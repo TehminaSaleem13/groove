@@ -20,6 +20,13 @@ module Groovepacker
 
         protected
           attr_accessor :store
+
+        def make_handle(credential, store_handle)
+          {
+            credential: credential,
+            store_handle: store_handle
+          }
+        end
       end
     end
   end
