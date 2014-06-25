@@ -314,13 +314,13 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies, wa
             {
             $scope.ebay_show_signin_url = false;
             $http.post('/store_settings/createStore.json', $scope.newStore).success(function(data) {
+                $scope.newStore.id = data.store_id;
                 if(!data.status)
                 {
                     $scope.notify(data.messages,0);
                 }
                 else
                 {
-                    $scope.newStore.id = data.storeid
                     $scope.edit_status = true;
                 }
             });
