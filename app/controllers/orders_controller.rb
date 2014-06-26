@@ -1166,16 +1166,22 @@ class OrdersController < ApplicationController
   end
   def import_all
     order_summary = OrderImportSummary.where(
-      "status == 'in progress'")
+      status: 'in progress')
 
     if order_summary.empty?
       order_summary_info = OrderImportSummary.new
       order_summary_info.user_id = current_user.id
-
+      order_summary_info.status = 'not started'
+      order_summary_info.save
       # call delayed job
+      import_orders_obj = ImportOrders.new
+      import_orders_obj.delay(:run_at => 15.seconds.from_now,:queue => 'importing orders').import_orders
+      # import_orders_obj.import_orders
     else
+      puts "the import is in progress..."
       #Send a message back to the user saying that import is already in progress
     end
+    render json: @result
   end
   
 
