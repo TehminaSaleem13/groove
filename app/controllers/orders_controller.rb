@@ -1165,10 +1165,16 @@ class OrdersController < ApplicationController
     end
   end
   def import_all
-    @user_id = OrderImportSummaries.user_id
-    @status = OrderImportSummaries.status
-    if @status != 'not started' && @status != 'in progress'
+    order_summary = OrderImportSummary.where(
+      "status == 'in progress'")
+
+    if order_summary.empty?
+      order_summary_info = OrderImportSummary.new
+      order_summary_info.user_id = current_user.id
+
       # call delayed job
+    else
+      #Send a message back to the user saying that import is already in progress
     end
   end
   

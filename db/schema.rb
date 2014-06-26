@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140625143218) do
+ActiveRecord::Schema.define(:version => 20140626113137) do
 
   create_table "amazon_credentials", :force => true do |t|
     t.string   "merchant_id",                                     :null => false
@@ -101,10 +101,11 @@ ActiveRecord::Schema.define(:version => 20140625143218) do
   create_table "import_items", :force => true do |t|
     t.string   "status"
     t.integer  "store_id"
-    t.integer  "success_imported",  :default => 0
-    t.integer  "previous_imported", :default => 0
-    t.datetime "created_at",                       :null => false
-    t.datetime "updated_at",                       :null => false
+    t.integer  "success_imported",        :default => 0
+    t.integer  "previous_imported",       :default => 0
+    t.datetime "created_at",                             :null => false
+    t.datetime "updated_at",                             :null => false
+    t.integer  "order_import_summary_id"
   end
 
   create_table "inventory_warehouses", :force => true do |t|
