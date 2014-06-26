@@ -13,6 +13,7 @@ namespace :import do
         context = Groovepacker::Store::Context.new(
           Groovepacker::Store::Handlers::EbayHandler.new(store))
         puts context.import_orders.inspect
+        puts context.import_products.inspect
       end
     end
   end
