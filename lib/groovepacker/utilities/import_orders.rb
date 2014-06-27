@@ -17,7 +17,6 @@ class ImportOrders
 				end
 			end
 		end
-		ImportItems.delete_all
 		stores = Store.where("status = '1' AND store_type != 'system'")
 		if stores.length != 0	
 			stores.each do |store|

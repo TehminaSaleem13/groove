@@ -5,7 +5,7 @@
           <div class="span3">
             <a ui-sref="home" class="brand"><img src="assets/logo.png"></a>
           </div>
-          <div class="span5">
+          <div class="span6">
             <ul class="nav" id="mainMenu">
               <li ng-show="current_user.can('access_orders')"><a ui-sref="orders">Orders</a></li>
               <li ng-show="current_user.can('access_products')"><a ui-sref="products">Products</a></li>
@@ -13,8 +13,18 @@
               <li ng-show="current_user.can('access_scanpack')"><a ui-sref="scanpack.rfo">Scan and Pack</a></li>
             </ul>
             <ul class="nav" id="mainMenu">
-              <li><a href="" role="button" data-toggle="modal" ng-click='import_all_orders()'>Import Orders</a></li>
+              <li id="ordersitem" ng-mouseover="get_import_summary()"><a href="" role="button" data-toggle="popover" data-trigger="hover" 
+            data-content="And here's some amazing content. It's very engaging." title="Popover title" 
+            ng-click='import_all_orders()'><i ng-show="import_in_progress" class="icon-refresh icon-spin"></i> Import Orders</a></li>
             </ul>
+            <div id="popoverExampleTwoHiddenContent" 
+              style="display: none">
+               <div>Import Summary</div>
+            </div>  
+            <!-- Popover 2 hidden title -->
+            <div id="popoverExampleTwoHiddenTitle" style="display: none">
+               Import Summmary Data
+            </div>            
           </div>
           <div class="span3 pull-right">
               <ul class="nav pull-right">

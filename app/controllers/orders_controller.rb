@@ -1164,6 +1164,7 @@ class OrdersController < ApplicationController
       render json: @result        
     end
   end
+  
   def import_all
     order_summary = OrderImportSummary.where(
       status: 'in_progress')
@@ -1180,9 +1181,31 @@ class OrdersController < ApplicationController
     else
       #Send a message back to the user saying that import is already in progress
     end
-    render json: @result
   end
-  
+
+  def import_status
+    @result = Hash.new
+    order_import_summaries = OrderImportSummary.order('updated_at' + " " + 'desc')
+    order_import_summary = order_import_summaries.first
+    @result['import_summay'] = Hash.new
+    @result['import_summary']['status'] = order_import_summary.status
+    @result['import_summary']['last_import_time'] = order_import_summary.updated_at
+    import_items = ImportItems.where(
+      order_import_summary_id: order_import_summary.id)
+    if !import_items.empty?
+      import_items.each do |import_item|
+        @result['import_item'] = Hash.new
+        @result['import_item']['store_type'] = import_item.store_type
+        @result['import_item']['store_id'] = import_item.store_id
+        store = Store.find(store_id)
+        @result['import_item']['store_name'] = store.name
+        @result['import_item']['previous_imported'] = import_item.previous_imported
+        @result['import_item']['success_imported'] = import_item.success_imported
+        @result['import_item']['total_imported'] = import_item.previous_imported + import_item.success_imported
+      end
+    end
+    render json: @result
+  end  
 
   private
 
