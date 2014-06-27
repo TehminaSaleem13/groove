@@ -6,10 +6,6 @@ module Groovepacker
           require 'mws-connect'
 
           def import
-            {
-              :handler => get_handler,
-              :status => "amazon ok"
-            }
           end
 
           #hash expects product_sku, product_id, handler(store handle, credential)

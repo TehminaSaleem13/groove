@@ -24,7 +24,8 @@ module Groovepacker
             previous_imported: 0,
             success_imported: 0,
             total_imported: 0,
-            debug_messages:[]
+            debug_messages:[],
+            status: true
           }
         end
 
