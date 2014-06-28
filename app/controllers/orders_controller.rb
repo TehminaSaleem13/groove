@@ -6,367 +6,57 @@ class OrdersController < ApplicationController
 
   # Import orders from store based on store id
   def importorders
-  @store = Store.find(params[:id])
-  @result = Hash.new
+    store = Store.find(params[:id])
+    @result = Hash.new
 
-  @result['status'] = true
-  @result['messages'] = []
-  @result['total_imported'] = 0
-  @result['success_imported'] = 0
-  @result['previous_imported'] = 0
-  @result['activestoreindex'] = 0
+    @result['status'] = true
+    @result['messages'] = []
+    @result['total_imported'] = 0
+    @result['success_imported'] = 0
+    @result['previous_imported'] = 0
+    @result['activestoreindex'] = 0
 
-  if !params[:activestoreindex].nil?
-    @result['activestoreindex'] = params[:activestoreindex]
-  end
+    import_result = nil
 
-  if current_user.can? 'import_orders'
-    begin
-    #import if magento products
-    if @store.store_type == 'Magento'
-      @magento_credentials = MagentoCredentials.where(:store_id => @store.id)
+    if !params[:activestoreindex].nil?
+      @result['activestoreindex'] = params[:activestoreindex]
+    end
 
-      if @magento_credentials.length > 0
-        client = Savon.client(wsdl: @magento_credentials.first.host+"/index.php/api/v2_soap/index/wsdl/1")
-
-        if !client.nil?
-                   # @result['client'] = client
-          response = client.call(:login,  message: { apiUser: @magento_credentials.first.username,
-            apikey: @magento_credentials.first.api_key })
-
-            #@result['response'] = response
-          if response.success?
-            session =  response.body[:login_response][:login_return]
-
-            @filters = Hash.new
-            @filter = Hash.new
-            item = Hash.new
-            item['key'] = 'status'
-            item['value'] = 'processing'
-            @filter['item'] = item
-            @filters['filter']  = @filter
-            @filters_array = []
-            @filters_array << @filters
-
-            response = client.call(:sales_order_list, message: {sessionId: session, filters: @filters_array })
-
-            if response.success?
-             # @result['response'] = response.body
-              @result['total_imported'] =  response.body[:sales_order_list_response][:result][:item].length
-
-              response.body[:sales_order_list_response][:result][:item].each do |item|
-                order_info = client.call(:sales_order_info,
-                  message:{sessionId: session, orderIncrementId: item[:increment_id]})
-
-                order_info = order_info.body[:sales_order_info_response][:result]
-                if Order.where(:increment_id=>item[:increment_id]).length == 0
-                  @order = Order.new
-                  @order.increment_id = item[:increment_id]
-                  @order.status = 'awaiting'
-                  @order.order_placed_time = item[:created_at]
-                  #@order.storename = item[:store_name]
-                  @order.store = @store
-                  line_items = order_info[:items]
-                  if line_items[:item].is_a?(Hash)
-                      if line_items[:item][:product_type] == 'simple'
-                        @order_item = OrderItem.new
-                        @order_item.price = line_items[:item][:price]
-                        @order_item.qty = line_items[:item][:qty_ordered]
-                        @order_item.row_total= line_items[:item][:row_total]
-                        @order_item.name = line_items[:item][:name]
-                        @order_item.sku = line_items[:item][:sku]
-                        if ProductSku.where(:sku=>@order_item.sku).length == 0
-                          product_id = import_magento_product(client, session, @order_item.sku, @store.id,
-                            @magento_credentials.first.import_images, @magento_credentials.first.import_products)
-                        else
-                          product_id = ProductSku.where(:sku=>@order_item.sku).first.product_id
-                        end
-                        @order_item.product_id = product_id
-                        @order.order_items << @order_item
-                      else
-                        if ProductSku.where(:sku=>line_items[:item][:sku]).length == 0
-                          import_magento_product(client, session, line_items[:item][:sku], @store.id,
-                              @magento_credentials.first.import_images, @magento_credentials.first.import_products)
-                        end
-                      end
-                  else
-                    line_items[:item].each do |line_item|
-                      if line_item[:product_type] == 'simple'
-                        @order_item = OrderItem.new
-                        @order_item.price = line_item[:price]
-                        @order_item.qty = line_item[:qty_ordered]
-                        @order_item.row_total= line_item[:row_total]
-                        @order_item.name = line_item[:name]
-                        @order_item.sku = line_item[:sku]
-
-                        if ProductSku.where(:sku=>@order_item.sku).length == 0
-                          product_id = import_magento_product(client, session, @order_item.sku, @store.id,
-                            @magento_credentials.first.import_images, @magento_credentials.first.import_products)
-                        else
-                          product_id = ProductSku.where(:sku=>@order_item.sku).first.product_id
-                        end
-                        @order_item.product_id = product_id
-                        @order.order_items << @order_item
-                      else
-                        if ProductSku.where(:sku=>line_item[:sku]).length == 0
-                          import_magento_product(client, session, line_item[:sku], @store.id,
-                              @magento_credentials.first.import_images, @magento_credentials.first.import_products)
-                        end
-                      end
-                    end
-                  end
-
-                #if product does not exist import product using product.info
-                @order.address_1  = order_info[:shipping_address][:street]
-                @order.city = order_info[:shipping_address][:city]
-                @order.country = order_info[:shipping_address][:country_id]
-                @order.postcode = order_info[:shipping_address][:postcode]
-                @order.email = item[:customer_email]
-                @order.lastname = order_info[:shipping_address][:lastname]
-                @order.firstname = order_info[:shipping_address][:firstname]
-                @order.state = order_info[:shipping_address][:region]
-                if @order.save
-                    if !@order.addnewitems
-                      @result['status'] &= false
-                      @result['messages'].push('Problem adding new items')
-                    end
-                    @order.addactivity("Order Import", @store.name+" Import")
-                    @order.order_items.each do |item|
-                      @order.addactivity("Item with SKU: "+item.sku+" Added", @store.name+" Import")
-                    end
-                    @order.set_order_status
-                    @result['success_imported'] = @result['success_imported'] + 1
-                  end
-                else
-                  @result['previous_imported'] = @result['previous_imported'] + 1
-                end
-              end
-            else
-              @result['status'] = false
-              @result['messages'].push('Problem retrieving products list')
-            end
-          else
-            @result['status'] = false
-            @result['messages'].push('Problem connecting to Magento API. Authentication failed')
-          end
-        else
-          @result['status'] = false
-          @result['messages'].push('Problem connecting to Magento API. Check the hostname of the server')
+    if current_user.can? 'import_orders'
+      begin
+        #import if magento products
+        if store.store_type == 'Amazon'
+          context = Groovepacker::Store::Context.new(
+            Groovepacker::Store::Handlers::AmazonHandler.new(store))
+          import_result = context.import_orders
+        elsif store.store_type == 'Ebay'
+          context = Groovepacker::Store::Context.new(
+            Groovepacker::Store::Handlers::EbayHandler.new(store))
+          import_result = context.import_orders
+        elsif store.store_type == 'Magento'
+          context = Groovepacker::Store::Context.new(
+            Groovepacker::Store::Handlers::MagentoHandler.new(store))
+          import_result = context.import_orders
         end
-      else
+      rescue Exception => e
         @result['status'] = false
-        @result['messages'].push('No Store found!')
+        @result['messages'].push(e.message)
+        puts e.backtrace
       end
-    elsif @store.store_type == 'Ebay'
-      #do ebay connect.
-      @ebay_credentials = EbayCredentials.where(:store_id => @store.id)
-
-      if @ebay_credentials.length > 0
-        @credential = @ebay_credentials.first
-
-        require 'eBayAPI'
-        if ENV['EBAY_SANDBOX_MODE'] == 'YES'
-          sandbox = true
-        else
-          sandbox = false
-        end
-
-        @eBay = EBay::API.new(@credential.auth_token,
-          ENV['EBAY_DEV_ID'], ENV['EBAY_APP_ID'],
-          ENV['EBAY_CERT_ID'], :sandbox=>sandbox)
-
-        seller_list = @eBay.GetMyeBaySelling(:soldList=> {:orderStatusFilter=>'AwaitingShipment'})
-
-        if (seller_list.soldList != nil &&
-            seller_list.soldList.orderTransactionArray != nil)
-          order_or_transactionArray = seller_list.soldList.orderTransactionArray
-          @result['total_imported'] = seller_list.soldList.orderTransactionArray.length
-          @ordercnt = 0
-
-          order_or_transactionArray.each do |order_transaction|
-            #single line item order transaction
-            if !order_transaction.transaction.nil?
-              transactionID = order_transaction.transaction.transactionID
-              itemID = order_transaction.transaction.item.itemID
-
-              #get sellingmanager SalesRecordNumber
-              item_transactions = @eBay.GetItemTransactions(:itemID => itemID,
-                :transactionID=> transactionID)
-              if item_transactions.transactionArray.length == 1
-                transaction = item_transactions.transactionArray.first
-                sellingManagerSalesRecordNumber =
-                  transaction.shippingDetails.sellingManagerSalesRecordNumber
-
-                if Order.where(:increment_id=>sellingManagerSalesRecordNumber).length == 0
-                  order = Order.new
-
-                  order = build_order_with_single_item_from_ebay(order, transaction, order_transaction)
-                  if order.save
-                    order.addactivity("Order Import", @store.name+" Import")
-                    order.order_items.each do |item|
-                      order.addactivity("Item with SKU: "+item.sku+" Added", @store.name+" Import")
-                    end
-                    order.set_order_status
-                    @result['success_imported'] = @result['success_imported'] + 1
-                  end
-                else # transaction is already imported
-                  @result['previous_imported'] = @result['previous_imported'] + 1
-                end
-              else # transactions Array is not equal to 1
-                @result['status'] &= false
-                @result['messages'].push('There was an error importing the order transactions from Ebay,
-                  Order transactions length: '+ item_transactions.transactionArray.length )
-              end
-            elsif !order_transaction.order.nil?
-              # for orders with multiple line items
-              order_id = order_transaction.order.orderID
-              order_detail = @eBay.GetOrders(:orderIDArray =>[order_id])
-
-              if !order_detail.orderArray.nil? &&
-                  order_detail.orderArray.length == 1
-
-                order_detail = order_detail.orderArray.first
-
-                if !order_detail.shippingDetails.nil?
-                 sellingManagerSalesRecordNumber = order_detail.shippingDetails.sellingManagerSalesRecordNumber
-                else
-                 sellingManagerSalesRecordNumber = nil
-                end
-
-                if Order.where(:increment_id=>sellingManagerSalesRecordNumber).length == 0
-                  order = Order.new
-                  order = build_order_with_multiple_items_from_ebay(order, order_detail)
-                  if order.save
-                    order.addactivity("Order Import", @store.name+" Import")
-                    order.order_items.each do |item|
-                      order.addactivity("Item with SKU: "+item.sku+" Added", @store.name+" Import")
-                    end
-                    order.set_order_status
-                    @result['success_imported'] = @result['success_imported'] + 1
-                  end
-                else #order is already imported
-                  @result['previous_imported'] = @result['previous_imported'] + 1
-                end
-              else
-                #order detail cannot be more than 1
-                @result['status'] &= false
-                @result['messages'].push('More than 1 order detail is returned for a single order id')
-              end
-            else
-              @result['status'] &= false
-              @result['messages'].push('Importing orders with multiple order items is not supported')
-            end
-          end # end of order transaction array
-        end # end of sellers list's sold list
-      else # no ebay credentials are found
-        @result['status'] &= false
-        @result['messages'].push('Error fetching credentials for ebay store')
-      end # end of ebay credentials
-    elsif @store.store_type == 'Amazon'
-      @amazon_credentials = AmazonCredentials.where(:store_id => @store.id)
-
-      if @amazon_credentials.length > 0
-        @credential = @amazon_credentials.first
-        mws = MWS.new(:aws_access_key_id => ENV['AMAZON_MWS_ACCESS_KEY_ID'],
-          :secret_access_key => ENV['AMAZON_MWS_SECRET_ACCESS_KEY'],
-          :seller_id => @credential.merchant_id,
-          :marketplace_id => @credential.marketplace_id)
-
-        #@result['aws-response'] = mws.reports.request_report :report_type=>'_GET_MERCHANT_LISTINGS_DATA_'
-        #@result['aws-rewuest_status'] = mws.reports.get_report_request_list
-        response = mws.orders.list_orders :last_updated_after => 2.months.ago, :order_status => ['Unshipped', 'PartiallyShipped']
-              #@result['report_id'] = response.body
-        @orders = []
-
-        if !response.orders.kind_of?(Array)
-          @orders.push(response.orders)
-        else
-          @orders = response.orders
-        end
-
-        if !@orders.nil?
-          @result['total_imported'] = @orders.length
-          @orders.each do |order|
-          if Order.where(:increment_id=>order.amazon_order_id).length == 0
-            @order = Order.new
-            @order.status = 'awaiting'
-            @order.increment_id = order.amazon_order_id
-            #@order.storename = @store.name
-            @order.order_placed_time = order.purchase_date
-
-            @order.store = @store
-
-            order_items  = mws.orders.list_order_items :amazon_order_id => order.amazon_order_id
-            @result['orderitem'] = order_items
-
-            order_items.order_items.each do |item|
-              @order_item = OrderItem.new
-              @order_item.price = item.item_price.amount
-              @order_item.qty = item.quantity_ordered
-              @order_item.row_total= item.item_price.amount.to_i * item.quantity_ordered.to_i
-              @order_item.sku = item.seller_sku
-              if ProductSku.where(:sku=>item.seller_sku).length == 0
-                #create and import product
-                product = Product.new
-                product.name = 'New imported item'
-                product.store_product_id = 0
-                product.store = @store
-
-                sku = ProductSku.new
-                sku.sku = item.seller_sku
-
-                product.product_skus << sku
-                product.save
-                import_amazon_product_details(@store.id, item.seller_sku, product.id)
-              else
-                @order_item.product = ProductSku.where(:sku=>item.seller_sku).first.product
-              end
-              @order_item.name = item.title
-            end
-
-            @order.order_items << @order_item
-
-                @order.address_1  = order.shipping_address.address_line1
-                @order.city = order.shipping_address.city
-                @order.country = order.shipping_address.country_code
-                @order.postcode = order.shipping_address.postal_code
-                @order.state = order.shipping_address.state_or_region
-                @order.email = order.buyer_email
-                @order.lastname = order.shipping_address.name
-                split_name = order.shipping_address.name.split(' ')
-                @order.lastname = split_name.pop
-                @order.firstname = split_name.join(' ')
-
-            if @order.save
-              if !@order.addnewitems
-                @result['status'] &= false
-                @result['messages'].push('Problem adding new items')
-              end
-              @order.addactivity("Order Import", @store.name+" Import")
-              @order.order_items.each do |item|
-                @order.addactivity("Item with SKU: "+item.sku+" Added", @store.name+" Import")
-              end
-              @order.set_order_status
-              @result['success_imported'] = @result['success_imported'] + 1
-            end
-          else
-            @result['previous_imported'] = @result['previous_imported'] + 1
-          end
-          end
-
-        end
-        @result['response'] = response
-      end
-    end
-    rescue Exception => e
+    else
       @result['status'] = false
-      @result['messages'].push(e.message)
-      puts e.backtrace
+      @result['messages'].push("You do not have the permission to import orders")
     end
-  else
-    @result["status"] = false
-    @result["messages"].push("You do not have the permission to import orders")
-  end
+
+    if !import_result.nil?
+      import_result[:messages].each do |message|
+        @result['messages'].push(message)
+      end
+      @result['total_imported'] = import_result[:total_imported]
+      @result['success_imported'] = import_result[:success_imported]
+      @result['previous_imported'] = import_result[:previous_imported]
+    end
+
     respond_to do |format|
       format.json { render json: @result}
     end

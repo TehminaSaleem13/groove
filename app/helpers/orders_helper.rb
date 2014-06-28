@@ -150,7 +150,7 @@ module OrdersHelper
     		order_transaction.transaction.item.sKU, @eBay, @credential)
     order.order_items << order_item
 
-   order
+    order
   end
 
   def build_order_with_multiple_items_from_ebay(order, order_detail)
@@ -185,7 +185,7 @@ module OrdersHelper
 	    import_ebay_product(transaction.item.itemID,
 	    		transaction.item.sKU, @eBay, @credential)
 	    order.order_items << order_item
-	end
+	  end
 
    order
   end
