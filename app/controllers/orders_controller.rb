@@ -94,7 +94,7 @@ class OrdersController < ApplicationController
       @order.postcode = params[:order]['postcode']
       @order.country = params[:order]['country']
       @order.email = params[:order]['email']
-      @order.store_order_id = params[:order]['store_order_id']
+      @order.increment_id = params[:order]['increment_id']
       @order.order_placed_time = params[:order]['order_placed_time']
       @order.customer_comments = params[:order]['customer_comments']
       @order.scanned_on = params[:order]['scanned_on']
@@ -109,7 +109,7 @@ class OrdersController < ApplicationController
           @order.postcode != params[:order]['postcode'] ||
           @order.country != params[:order]['country'] ||
           @order.email != params[:order]['email'] ||
-          @order.store_order_id != params[:order]['store_order_id'] ||
+          @order.increment_id != params[:order]['increment_id'] ||
           @order.order_placed_time != params[:order]['order_placed_time'] ||
           @order.customer_comments != params[:order]['customer_comments'] ||
           @order.scanned_on != params[:order]['scanned_on'] ||
@@ -147,8 +147,8 @@ class OrdersController < ApplicationController
     @result['orders_count'] = get_orders_count()
 
     respond_to do |format|
-          format.json { render json: @result}
-      end
+      format.json { render json: @result}
+    end
   end
 
   def duplicateorder
