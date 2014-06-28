@@ -19,7 +19,10 @@
             </ul>
             <div id="popoverExampleTwoHiddenContent" 
               style="display: none">
-               <div>Import Summary</div>
+                Import Summary
+                <p>{{current_user.get().username}}</p>
+                <p>{{import_in_progress}}</p>
+                <p>{{import_summary.store_id}}</p>
             </div>  
             <!-- Popover 2 hidden title -->
             <div id="popoverExampleTwoHiddenTitle" style="display: none">

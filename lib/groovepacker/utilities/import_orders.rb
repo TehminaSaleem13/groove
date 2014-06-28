@@ -4,7 +4,7 @@ class ImportOrders
 		# we will remove all the jobs pertaining to import which are not started
 
 		# we will also remove all the import summary which are not started.
-		order_import_summaries = OrderImportSummary.where(status: ['not_started','completed'])
+		order_import_summaries = OrderImportSummary.where(status: 'not_started')
 		if !order_import_summaries.empty?
 			order_import_summaries.each do |order_import_summary|
 				if order_import_summary == order_import_summaries.first
@@ -17,6 +17,7 @@ class ImportOrders
 				end
 			end
 		end
+		OrderImportSummary.where(status: 'completed').delete_all
 		stores = Store.where("status = '1' AND store_type != 'system'")
 		if stores.length != 0	
 			stores.each do |store|
@@ -36,12 +37,17 @@ class ImportOrders
        		# context = Groovepacker::Store::Context.new(
          # 	Groovepacker::Store::Handlers::EbayHandler.new(store))
        		# puts context.import_orders.inspect
+       		# puts context.import_products.inspect
        		import_item.store_id = store.id
 	       	import_item.previous_imported = 5
 	       	import_item.success_imported = 4
 	       	import_item.order_import_summary_id = @id
 	       	import_item.save
 	      elsif store.store_type == 'Magento'
+	      	# context = Groovepacker::Store::Context.new(
+        #   Groovepacker::Store::Handlers::MagentoHandler.new(store))
+	       #  puts context.import_products.inspect
+	       #  puts context.import_orders.inspect
 	      	import_item.store_id = store.id
 	       	import_item.previous_imported = 14
 	       	import_item.success_imported = 11
@@ -59,7 +65,7 @@ class ImportOrders
 				# import_items.save
 			end
 		end
-		order_import_summaries = OrderImportSummary.all
+		order_import_summaries = OrderImportSummary.where(status: 'in_progress')
 		if !order_import_summaries.first.nil?
 			order_import_summaries.first.status = 'completed'
 			order_import_summaries.first.save
