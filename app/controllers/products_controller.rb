@@ -70,10 +70,11 @@ class ProductsController < ApplicationController
           require 'csv'
           csv = CSV.parse(response.body,:quote_char => "|")
           @result['total_imported']  = csv.length - 1
+          puts "csv store"
           csv.each_with_index do | row, index|
+            puts "test"
             if index > 0
               product_row = row.first.split(/\t/)
-              render :text => product_row.inspect and return
               if Product.where(:store_product_id=>product_row[2]).length  == 0
                 @productdb = Product.new
                 @productdb.name = product_row[0]
@@ -100,20 +101,31 @@ class ProductsController < ApplicationController
                 @productdb.product_inventory_warehousess << inv_wh
 
                 #save
-                if ProductSku.where(:sku=>@productdbsku.sku).length == 0
-                  #save
+                if @productdbsku.sku != nil && @productdbsku.sku != ''
+                  if ProductSku.where(:sku=>@productdbsku.sku).length == 0
+                    #save
+                    if @productdb.save
+                      import_amazon_product_details(@store.id, @productdbsku.sku, @productdb.id)
+                      #import_amazon_product_details(mws, @credential, @productdb.id)
+                      @result['success_imported'] = @result['success_imported'] + 1
+                    end
+                  else
+                    @result['messages'].push("sku: "+product_row[3]) unless @productdbsku.sku.nil?
+                    @result['previous_imported'] = @result['previous_imported'] + 1
+                  end
+                else
                   if @productdb.save
-                    import_amazon_product_details(@store.id, @productdbsku.sku, @productdb.id)
+                    #import_amazon_product_details(@store.id, @productdbsku.sku, @productdb.id)
                     #import_amazon_product_details(mws, @credential, @productdb.id)
                     @result['success_imported'] = @result['success_imported'] + 1
                   end
-                else
-                  @result['previous_imported'] = @result['previous_imported'] + 1
                 end
               else
+                @result['messages'].push("store product id: "+product_row[2])
                 @result['previous_imported'] = @result['previous_imported'] + 1
               end
-              end
+            end
+            puts "test2"
           end
         end
       end
@@ -125,7 +137,8 @@ class ProductsController < ApplicationController
       @result['status'] = false
       @result['messages'].push('You can not import products')
     end
-
+    puts "test3"
+puts @result.inspect
     if !import_result.nil?
       import_result[:messages].each do |message|
         @result['messages'].push(message)

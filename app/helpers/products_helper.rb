@@ -34,14 +34,22 @@ module ProductsHelper
 				product.name = product_hash['GetMatchingProductForIdResult']['Products']['Product']['AttributeSets']['ItemAttributes']['Title']
         puts "product.name:"
         puts product.name
-        product.weight = product_hash['GetMatchingProductForIdResult']['Products']['Product']['AttributeSets']['ItemAttributes']['ItemDimensions']['Weight'].to_f * 16
-        puts "product.weight:"
-        puts product.weight
-        product.shipping_weight = product_hash['GetMatchingProductForIdResult']['Products']['Product']['AttributeSets']['ItemAttributes']['PackageDimensions']['Weight'].to_f * 16
-        puts "product.shipping_weight:"
-        puts product.shipping_weight
+        if !product_hash['GetMatchingProductForIdResult']['Products']['Product']['AttributeSets']['ItemAttributes']['ItemDimensions'].nil? &&
+          !product_hash['GetMatchingProductForIdResult']['Products']['Product']['AttributeSets']['ItemAttributes']['ItemDimensions']['Weight'].nil? 
+          product.weight = product_hash['GetMatchingProductForIdResult']['Products']['Product']['AttributeSets']['ItemAttributes']['ItemDimensions']['Weight'].to_f * 16
+          puts "product.weight:"
+          puts product.weight
+        end
+
+        if !product_hash['GetMatchingProductForIdResult']['Products']['Product']['AttributeSets']['ItemAttributes']['PackageDimensions'].nil? &&
+          !product_hash['GetMatchingProductForIdResult']['Products']['Product']['AttributeSets']['ItemAttributes']['PackageDimensions']['Weight'].nil? 
+          product.shipping_weight = product_hash['GetMatchingProductForIdResult']['Products']['Product']['AttributeSets']['ItemAttributes']['PackageDimensions']['Weight'].to_f * 16
+          puts "product.shipping_weight:"
+          puts product.shipping_weight
+        end
+
 				product.store_product_id = product_hash['GetMatchingProductForIdResult']['Products']['Product']['Identifiers']['MarketplaceASIN']['ASIN']
-        puts product.weight.to_s
+
 				if @credential.import_images
 					image = ProductImage.new
 					image.image = product_hash['GetMatchingProductForIdResult']['Products']['Product']['AttributeSets']['ItemAttributes']['SmallImage']['URL']
