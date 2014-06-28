@@ -1186,37 +1186,23 @@ class OrdersController < ApplicationController
   end
 
   def import_status
-    @result = Hash.new
+    result = Hash.new
+    result['status'] = true
+    result['error_messages'] = []
+    result['success_messages'] = []
+    result['notice_messages'] = []
+    result['data'] = Hash.new
+
     order_import_summaries = OrderImportSummary.order('updated_at' + " " + 'desc')
     if !order_import_summaries.empty?
       order_import_summary = order_import_summaries.first
-      @result['import_summay'] = Hash.new
+      result['data']['import_summary'] = Hash.new
       if !order_import_summary.nil?
-        @result['import_summary']['status'] = order_import_summary.status
-        @result['import_summary']['last_import_time'] = order_import_summary.updated_at
-        import_items = ImportItems.where(
-          order_import_summary_id: order_import_summary.id)
-        if !import_items.empty?
-          @result['import_item'] = Hash.new
-          @result['import_item']['store_name'] = []
-          @result['import_item']['store_type'] = []
-          @result['import_item']['previous_imported'] = []
-          @result['import_item']['success_imported'] = []
-          @result['import_item']['total_imported'] = []
-          import_items.each do |import_item|
-            @result['import_item']['store_id'] = import_item.store_id
-            store = Store.find(import_item.store_id)
-            @result['import_item']['store_name'] = store.name
-            @result['import_item']['store_type'] = store.store_type
-            @result['import_item']['previous_imported'] = import_item.previous_imported
-            @result['import_item']['success_imported'] = import_item.success_imported
-            @result['import_item']['total_imported'] = import_item.previous_imported + import_item.success_imported
-          end
-          puts "@result:" + @result.inspect
-        end
-        render json: @result
+        result['data']['import_summary']['import_info'] = order_import_summary
+        result['data']['import_summary']['import_items'] = order_import_summary.import_items
       end
     end
+    render json: result
   end  
 
   private

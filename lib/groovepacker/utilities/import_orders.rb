@@ -22,7 +22,7 @@ class ImportOrders
 		if stores.length != 0	
 			stores.each do |store|
 				puts "store:" + store.inspect
-				import_item = ImportItems.new
+				import_item = ImportItem.new
 				if store.store_type == 'Amazon'
       		# context = Groovepacker::Store::Context.new(
         #  	Groovepacker::Store::Handlers::AmazonHandler.new(store))

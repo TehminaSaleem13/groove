@@ -13,18 +13,20 @@ groovepacks_controllers.
             }
             $rootScope.import_in_progress = true;
             $rootScope.import_summary = {};
+            $rootScope.import_items = [];
             var myscope = {};
             //call a method at timeout of say 60 seconds.
             myscope.get_status = function() {
                 $http.get('/orders/import_status.json').success(function(data) {
                     if (data['import_summary']['status'] == 'in_progress') {
                         $rootScope.import_in_progress = true;
-                        $rootScope.import_summary.last_import_time = data['import_summary']['last_import_time']
-                        $rootScope.import_summary.store_id = data['import_item']['store_id'].first
+                        $rootScope.import_summary.last_import_time = data['import_summary']['last_import_time'];
 
                     }
-                    else
+                    else {
+                        $rootScope.import_summary.last_import_time = data['import_summary']['last_import_time'];
                         $rootScope.import_in_progress = false;
+                    }
                 }).error(function(data) {});
             }
             myscope.get_status();
