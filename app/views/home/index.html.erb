@@ -14,20 +14,22 @@
             </ul>
             <ul class="nav" id="mainMenu">
               <li id="ordersitem" ng-mouseover="get_import_summary()"><a href="" role="button" data-toggle="popover" data-trigger="hover" 
-            data-content="And here's some amazing content. It's very engaging." title="Popover title" 
-            ng-click='import_all_orders()'><i ng-show="import_in_progress" class="icon-refresh icon-spin"></i> Import Orders</a></li>
+            data-content="" title="" 
+            ng-click='import_all_orders()'><i ng-show="import_summary.import_info.status =='in_progress'" class="icon-refresh icon-spin"></i> Import Orders</a></li>
             </ul>
             <div id="popoverExampleTwoHiddenContent" 
-              style="display: none">
-                Import Summary
-                <p>{{current_user.get().username}}</p>
-                <p>{{import_in_progress}}</p>
-                <p>{{import_summary.last_import_time}}</p>
-                <p>{{import_items}}</p>
+              style="display: none;" width="500px">
+                <table style="font-size: 12px;">
+
+                  <tr ng-repeat="info in import_summary.import_items">
+                    <td>{{info.store_id}}</td>
+                    <td style="text-align: right;">Imported {{info.success_imported}} of {{info.success_imported+info.previous_imported}} orders. {{info.previous_imported}} were previously imported.</td>
+                  </tr>
+                </table>    
             </div>  
             <!-- Popover 2 hidden title -->
-            <div id="popoverExampleTwoHiddenTitle" style="display: none">
-               Import Summmary Data
+            <div id="popoverExampleTwoHiddenTitle" style="display: none;">
+               <p>Lasr import: {{Time.new-import_summary.import_info/60*60}} Hour(s) {{Time.new-import_summary.import_info/60}} Minute(s) {{Time.now-import_summary.import_info%60}} Second(s) ago.</p>
             </div>            
           </div>
           <div class="span3 pull-right">
@@ -52,5 +54,6 @@
       </header>
       <div groov-common groov-import="import_all_orders"></div>
     </div>
+    <!-- {{import_summary}} -->
       <div ui-view></div>
 </div>
