@@ -39,7 +39,7 @@ module Groovepacker
                     credential: credential}, 
                     true)
 
-                  if result_product_id == 0
+                  if result_product_id > 0
                     result[:success_imported] = result[:success_imported] + 1
                   else
                     result[:previous_imported] = result[:previous_imported] + 1

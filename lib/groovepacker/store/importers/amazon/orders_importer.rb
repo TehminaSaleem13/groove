@@ -19,6 +19,7 @@ module Groovepacker
             end
 
             if !@orders.nil?
+              result[:total_imported] = @orders.length
               @orders.each do |order|
                 if Order.where(:increment_id=>order.amazon_order_id).length == 0
                   @order = Order.new

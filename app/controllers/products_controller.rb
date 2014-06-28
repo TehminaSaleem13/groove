@@ -2,434 +2,139 @@ class ProductsController < ApplicationController
 
   include ProductsHelper
 	def importproducts
-	@store = Store.find(params[:id])
-	@result = Hash.new
+  	@store = Store.find(params[:id])
+  	@result = Hash.new
 
-	@result['status'] = true
-	@result['messages'] = []
-	@result['total_imported'] = 0
-	@result['success_imported'] = 0
-	@result['previous_imported'] = 0
-  if current_user.can?('import_products')
-    #begin
-    #import if magento products
-    if @store.store_type == 'Magento' then
-      @magento_credentials = MagentoCredentials.where(:store_id => @store.id)
+  	@result['status'] = true
+  	@result['messages'] = []
+  	@result['total_imported'] = 0
+  	@result['success_imported'] = 0
+  	@result['previous_imported'] = 0
 
-      if @magento_credentials.length > 0
-        client = Savon.client(wsdl: @magento_credentials.first.host+"/index.php/api/soap/index/wsdl/1")
+    import_result = nil
 
-        if !client.nil?
+    if current_user.can?('import_products')
+      begin
+      #import if magento products
+      if @store.store_type == 'Ebay'
+        context = Groovepacker::Store::Context.new(
+          Groovepacker::Store::Handlers::EbayHandler.new(@store))
+        import_result = context.import_products
+      elsif @store.store_type == 'Magento'
+        context = Groovepacker::Store::Context.new(
+          Groovepacker::Store::Handlers::MagentoHandler.new(@store))
+        import_result = context.import_products
+      elsif @store.store_type == 'Amazon'
+        @amazon_credentials = AmazonCredentials.where(:store_id => @store.id)
 
-          response = client.call(:login,  message: { apiUser: @magento_credentials.first.username,
-            apikey: @magento_credentials.first.api_key })
+        if @amazon_credentials.length > 0
+          @credential = @amazon_credentials.first
+          mws = MWS.new(:aws_access_key_id =>
+            ENV['AMAZON_MWS_ACCESS_KEY_ID'],
+            :secret_access_key => ENV['AMAZON_MWS_SECRET_ACCESS_KEY'],
+            :seller_id => @credential.merchant_id,
+            :marketplace_id => @credential.marketplace_id)
+          #@result['aws-response'] = mws.reports.request_report :report_type=>'_GET_MERCHANT_LISTINGS_DATA_'
+          #@result['aws-rewuest_status'] = mws.reports.get_report_request_list
+          response = mws.reports.get_report :report_id=> params[:reportid]
 
-          if response.success?
-            session =  response.body[:login_response][:login_return]
-            response = client.call(:call, message: {session: session,
-              method: 'product.list'})
+          # _GET_MERCHANT_LISTINGS_DATA_
+          # item-name
+          # item-description
+          # listing-id
+          # seller-sku
+          # price
+          # quantity
+          # open-date
+          # image-url
+          # item-is-marketplace
+          # product-id-type
+          # zshop-shipping-fee
+          # item-note
+          # item-condition
+          # zshop-category1
+          # zshop-browse-path
+          # zshop-storefront-feature
+          # asin1
+          # asin2
+          # asin3
+          # will-ship-internationally
+          # expedited-shipping
+          # zshop-boldface
+          # product-id
+          # bid-for-featured-placement
+          # add-delete
+          # pending-quantity
+          # fulfillment-channel
 
-            # fetching all products
-            if response.success?
-              # listing found products
-              @products  = response.body[:call_response][:call_return][:item]
-              @products .each do |product|
-                product = product[:item]
-                result_product = Hash.new
-
-                product.each do |pkey|
-                  result_product[pkey[:key]] = pkey[:value]
+          require 'csv'
+          csv = CSV.parse(response.body,:quote_char => "|")
+          @result['total_imported']  = csv.length - 1
+          csv.each_with_index do | row, index|
+            if index > 0
+              product_row = row.first.split(/\t/)
+              render :text => product_row.inspect and return
+              if Product.where(:store_product_id=>product_row[2]).length  == 0
+                @productdb = Product.new
+                @productdb.name = product_row[0]
+                @productdb.store_product_id = product_row[2]
+                if @productdb.store_product_id.nil?
+                  @productdb.store_product_id = 'not_available'
                 end
 
-                @result['total_imported'] = @result['total_imported'] + 1
+                @productdb.product_type = 'not_used'
+                @productdb.status = 'new'
+                @productdb.store = @store
 
-                if Product.where(:store_product_id=>result_product['product_id']).length  == 0
-                  #add product to the database
-                  @productdb = Product.new
-                  @productdb.name = result_product['name']
-                  @productdb.store_product_id = result_product['product_id']
-                  @productdb.product_type = result_product['type']
-                  @productdb.store = @store
-                  # Magento product api does not provide a barcode, so all
-                  # magento products should be marked with a status new as t
-                  #they cannot be scanned.
-                  @productdb.status = 'new'
+                #add productdb sku
+                @productdbsku = ProductSku.new
+                @productdbsku.sku = product_row[3]
+                @productdbsku.purpose = 'primary'
 
-                  @productdbsku = ProductSku.new
-                  #add productdb sku
-                  if result_product['sku'] != {:"@xsi:type"=>"xsd:string"}
-                    @productdbsku.sku = result_product['sku']
-                    @productdbsku.purpose = 'primary'
+                #publish the sku to the product record
+                @productdb.product_skus << @productdbsku
 
-                    #publish the sku to the product record
-                    @productdb.product_skus << @productdbsku
+                #add inventory warehouse
+                inv_wh = ProductInventoryWarehouses.new
+                inv_wh.inventory_warehouse_id = @store.inventory_warehouse_id
+                @productdb.product_inventory_warehousess << inv_wh
+
+                #save
+                if ProductSku.where(:sku=>@productdbsku.sku).length == 0
+                  #save
+                  if @productdb.save
+                    import_amazon_product_details(@store.id, @productdbsku.sku, @productdb.id)
+                    #import_amazon_product_details(mws, @credential, @productdb.id)
+                    @result['success_imported'] = @result['success_imported'] + 1
                   end
-
-                  if !result_product['sku'].nil?
-                    get_product_info = client.call(:call,
-                        message: {session: session,
-                        method: 'catalog_product.info',
-                        product: result_product['sku']})
-                    product_info =
-                      get_product_info.body[:call_response][:call_return][:item]
-                    product_info.each do |product_info_item|
-                      if product_info_item[:key] == 'weight'
-                        if product_info_item[:value] != nil
-                          weight_in_f = product_info_item[:value].to_f
-                          @productdb.weight = weight_in_f * 16
-                        end
-                      end
-                    end
-
-                  end
-
-                  #get images and categories
-                  begin
-                  if !result_product['sku'].nil? && @magento_credentials.first.import_images
-                    getimages = client.call(:call, message: {session: session,
-                      method: 'catalog_product_attribute_media.list',
-                      product: result_product['sku']})
-                    if getimages.success?
-
-                      @images = getimages.body[:call_response][:call_return][:item]
-                      if !@images.nil?
-                        if @images.length != 2
-                          @images.each do |image|
-                            image[:item].each do |itemhash|
-                              @productimage = ProductImage.new
-                              if itemhash[:key] == 'url'
-                                @productimage.image = itemhash[:value]
-                              end
-
-                              if itemhash[:key] == 'label'
-                                @productimage.caption = itemhash[:value]
-                              end
-
-                              if !@productimage.image.nil?
-                                @productdb.product_images << @productimage
-                              end
-                            end
-                          end
-                        else
-                          if @images.kind_of?(Array)
-                            @images.each do |image|
-                              image[:item].each do |itemhash|
-                                @productimage = ProductImage.new
-                                if itemhash[:key] == 'url'
-                                  @productimage.image = itemhash[:value]
-                                end
-
-                                if itemhash[:key] == 'label'
-                                  @productimage.caption = itemhash[:value]
-                                end
-
-                                if !@productimage.image.nil?
-                                  @productdb.product_images << @productimage
-                                end
-                              end
-                            end
-                          else
-                            @images[:item].each do |itemhash|
-                              @productimage = ProductImage.new
-                              if itemhash[:key] == 'url'
-                                @productimage.image = itemhash[:value]
-                              end
-
-                              if itemhash[:key] == 'label'
-                                @productimage.caption = itemhash[:value]
-                              end
-
-                              if !@productimage.image.nil?
-                                @productdb.product_images << @productimage
-                              end
-                            end
-                          end
-                        end
-                      end
-                    end
-                  end
-                  rescue
-
-                  end
-
-
-                  begin
-
-                  if @magento_credentials.first.import_products && !result_product['category_ids'][:item].nil? &&
-                    result_product['category_ids'][:item].kind_of?(Array)
-                    result_product['category_ids'][:item].each do|category_id|
-
-                      get_categories = client.call(:call, message: {session: session,
-                        method: 'catalog_category.info',
-                        categoryId: category_id})
-
-                      if get_categories.success?
-                        @categories = get_categories.body[:call_response][:call_return][:item]
-                        @categories.each do |category|
-                          if category[:key] == 'name'
-                            @product_cat = ProductCat.new
-                            @product_cat.category = category[:value]
-
-                            if !@product_cat.category.nil?
-                              @productdb.product_cats << @product_cat
-                            end
-                          end
-                        end
-                      end
-                    end
-                  end
-                  rescue
-                  end
-
-                  #add inventory warehouse
-                  inv_wh = ProductInventoryWarehouses.new
-                  inv_wh.inventory_warehouse_id = @store.inventory_warehouse_id
-                  @productdb.product_inventory_warehousess << inv_wh
-
-                  if !@productdbsku.sku.nil? &&
-                    ProductSku.where(:sku=>@productdbsku.sku).length == 0
-                    #save
-                    if @productdb.save
-                      # if @productdb.product_images.length == 0 && !getimages.nil?
-                      # 	raise getimages.inspect
-                      # else
-                      # 	raise getimages.inspect
-                      # end
-                      @result['success_imported'] = @result['success_imported'] + 1
-                    end
-                  else
-                    @result['previous_imported'] = @result['previous_imported'] + 1
-                  end
-
                 else
                   @result['previous_imported'] = @result['previous_imported'] + 1
                 end
-              end
-            else
-              @result['status'] = false
-              @result['messages'].push('Problem retrieving products list')
-            end
-          else
-            @result['status'] = false
-            @result['messages'].push('Problem connecting to Magento API. Authentication failed')
-          end
-        else
-          @result['status'] = false
-          @result['messages'].push('Problem connecting to Magento API. Check the hostname of the server')
-        end
-      else
-        @result['status'] = false
-        @result['messages'].push('No Store found!')
-      end
-    elsif @store.store_type == 'Ebay'
-      #do ebay connect.
-      @ebay_credentials = EbayCredentials.where(:store_id => @store.id)
-
-      if @ebay_credentials.length > 0
-        @credential = @ebay_credentials.first
-        require 'eBayAPI'
-        if ENV['EBAY_SANDBOX_MODE'] == 'YES'
-          sandbox = true
-        else
-          sandbox = false
-        end
-        @eBay = EBay::API.new(@credential.productauth_token,
-                  ENV['EBAY_DEV_ID'], ENV['EBAY_APP_ID'],
-                  ENV['EBAY_CERT_ID'], :sandbox=>sandbox)
-
-        seller_list =@eBay.GetSellerList(:startTimeFrom=> (Date.today - 3.months).to_datetime,
-           :startTimeTo =>(Date.today + 1.day).to_datetime)
-
-        @result['total_imported']  = seller_list.itemArray.length
-        total_pages = (@result['total_imported'] / 10) +1
-        page_num = 1
-        begin
-          seller_list =@eBay.GetSellerList(:startTimeFrom=> (Date.today - 3.months).to_datetime,
-             :startTimeTo =>(Date.today + 1.day).to_datetime, :detailLevel=>'ReturnAll',
-             :pagination=>{:entriesPerPage=> '10', :pageNumber=>page_num})
-          page_num = page_num+1
-          seller_list.itemArray.each do |item|
-            #add product to the database
-            if Product.where(:store_product_id=>item.itemID).length  == 0
-              @productdb = Product.new
-              @item = @eBay.getItem(:ItemID => item.itemID).item
-              @productdb.name = @item.title
-              @productdb.store_product_id = item.itemID
-              @productdb.product_type = 'not_used'
-              @productdb.status = 'inactive'
-              @productdb.store = @store
-
-
-
-              #add productdb sku
-              @productdbsku = ProductSku.new
-              if  @item.sKU.nil?
-                @productdbsku.sku = "not_available"
-              else
-                @productdbsku.sku = @item.sKU
-              end
-              #@item.productListingType.uPC
-              @productdbsku.purpose = 'primary'
-
-              #publish the sku to the product record
-              @productdb.product_skus << @productdbsku
-
-              weight_lbs = @item.shippingDetails.calculatedShippingRate.weightMajor
-              weight_oz = @item.shippingDetails.calculatedShippingRate.weightMinor
-              # puts weight_lbs
-              # puts weight_oz
-              @productdb.weight = weight_lbs * 16 + weight_oz
-
-
-              if @credential.import_images
-                if !@item.pictureDetails.nil?
-                  if !@item.pictureDetails.pictureURL.nil? &&
-                    @item.pictureDetails.pictureURL.length > 0
-                    @productimage = ProductImage.new
-                    @productimage.image = "http://i.ebayimg.com" +
-                      @item.pictureDetails.pictureURL.first.request_uri()
-                    @productdb.product_images << @productimage
-
-                  end
-                end
-              end
-
-              if @credential.import_products
-                if !@item.primaryCategory.nil?
-                  @product_cat = ProductCat.new
-                  @product_cat.category = @item.primaryCategory.categoryName
-                  @productdb.product_cats << @product_cat
-                end
-
-                if !@item.secondaryCategory.nil?
-                  @product_cat = ProductCat.new
-                  @product_cat.category = @item.secondaryCategory.categoryName
-                  @productdb.product_cats << @product_cat
-                end
-              end
-
-              #add inventory warehouse
-              inv_wh = ProductInventoryWarehouses.new
-              inv_wh.inventory_warehouse_id = @store.inventory_warehouse_id
-              @productdb.product_inventory_warehousess << inv_wh
-
-              if ProductSku.where(:sku=>@item.sKU).length == 0
-                #save
-                if @productdb.save
-                   @productdb.set_product_status
-                   @result['success_imported'] = @result['success_imported'] + 1
-                end
               else
                 @result['previous_imported'] = @result['previous_imported'] + 1
               end
-            else
-              @result['previous_imported'] = @result['previous_imported'] + 1
-            end
+              end
           end
-        end while(page_num <= total_pages)
-
-      end
-    elsif @store.store_type == 'Amazon'
-      @amazon_credentials = AmazonCredentials.where(:store_id => @store.id)
-
-      if @amazon_credentials.length > 0
-        @credential = @amazon_credentials.first
-        mws = MWS.new(:aws_access_key_id =>
-          ENV['AMAZON_MWS_ACCESS_KEY_ID'],
-          :secret_access_key => ENV['AMAZON_MWS_SECRET_ACCESS_KEY'],
-          :seller_id => @credential.merchant_id,
-          :marketplace_id => @credential.marketplace_id)
-        #@result['aws-response'] = mws.reports.request_report :report_type=>'_GET_MERCHANT_LISTINGS_DATA_'
-        #@result['aws-rewuest_status'] = mws.reports.get_report_request_list
-        response = mws.reports.get_report :report_id=> params[:reportid]
-
-        # _GET_MERCHANT_LISTINGS_DATA_
-        # item-name
-        # item-description
-        # listing-id
-        # seller-sku
-        # price
-        # quantity
-        # open-date
-        # image-url
-        # item-is-marketplace
-        # product-id-type
-        # zshop-shipping-fee
-        # item-note
-        # item-condition
-        # zshop-category1
-        # zshop-browse-path
-        # zshop-storefront-feature
-        # asin1
-        # asin2
-        # asin3
-        # will-ship-internationally
-        # expedited-shipping
-        # zshop-boldface
-        # product-id
-        # bid-for-featured-placement
-        # add-delete
-        # pending-quantity
-        # fulfillment-channel
-
-        require 'csv'
-        csv = CSV.parse(response.body,:quote_char => "|")
-        @result['total_imported']  = csv.length - 1
-        csv.each_with_index do | row, index|
-          if index > 0
-            product_row = row.first.split(/\t/)
-            render :text => product_row.inspect and return
-            if Product.where(:store_product_id=>product_row[2]).length  == 0
-              @productdb = Product.new
-              @productdb.name = product_row[0]
-              @productdb.store_product_id = product_row[2]
-              if @productdb.store_product_id.nil?
-                @productdb.store_product_id = 'not_available'
-              end
-
-              @productdb.product_type = 'not_used'
-              @productdb.status = 'new'
-              @productdb.store = @store
-
-              #add productdb sku
-              @productdbsku = ProductSku.new
-              @productdbsku.sku = product_row[3]
-              @productdbsku.purpose = 'primary'
-
-              #publish the sku to the product record
-              @productdb.product_skus << @productdbsku
-
-              #add inventory warehouse
-              inv_wh = ProductInventoryWarehouses.new
-              inv_wh.inventory_warehouse_id = @store.inventory_warehouse_id
-              @productdb.product_inventory_warehousess << inv_wh
-
-              #save
-              if ProductSku.where(:sku=>@productdbsku.sku).length == 0
-                #save
-                if @productdb.save
-                  import_amazon_product_details(@store.id, @productdbsku.sku, @productdb.id)
-                  #import_amazon_product_details(mws, @credential, @productdb.id)
-                  @result['success_imported'] = @result['success_imported'] + 1
-                end
-              else
-                @result['previous_imported'] = @result['previous_imported'] + 1
-              end
-            else
-              @result['previous_imported'] = @result['previous_imported'] + 1
-            end
-            end
         end
       end
+    rescue Exception => e
+    	@result['status'] = false
+    	@result['messages'].push(e.message)
     end
-    # rescue Exception => e
-    # 	@result['status'] = false
-    # 	@result['messages'].push(e.message)
-    # end
-  else
-    @result['status'] = false
-    @result['messages'].push('You can not import products')
-  end
+    else
+      @result['status'] = false
+      @result['messages'].push('You can not import products')
+    end
+
+    if !import_result.nil?
+      import_result[:messages].each do |message|
+        @result['messages'].push(message)
+      end
+      @result['total_imported'] = import_result[:total_imported]
+      @result['success_imported'] = import_result[:success_imported]
+      @result['previous_imported'] = import_result[:previous_imported]
+    end
+
     respond_to do |format|
       format.json { render json: @result}
     end

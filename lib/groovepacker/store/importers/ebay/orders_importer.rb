@@ -8,7 +8,7 @@ module Groovepacker
             credential = handler[:credential]
             ebay = handler[:store_handle]
             seller_list = ebay.GetMyeBaySelling(:soldList=> 
-              {:orderStatusFilter=>'PaidAndShipped'})
+              {:orderStatusFilter=>'AwaitingShipment'})
             result = self.build_result
 
             #puts seller_list.inspect
