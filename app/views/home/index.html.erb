@@ -19,6 +19,7 @@
             </ul>
             <div id="popoverExampleTwoHiddenContent" 
               style="display: none;" width="500px">
+
                 <table style="font-size: 12px;">
                   <tr ng-repeat="info in import_summary.import_items">
                     <td>
@@ -33,8 +34,12 @@
             </div>  
             <!-- Popover 2 hidden title -->
             <div id="popoverExampleTwoHiddenTitle" style="display: none;">
-               <div ng-show="import_summary.import_info.status =='completed'" >Last import: {{Time.new-import_summary.import_info.updated_at/60*60}} Hour(s) {{Time.new-import_summary.import_info.updated_at/60}} Minute(s) {{Time.now-import_summary.import_info.updated_at%60}} Second(s) ago.</div>
+               <div ng-show="import_summary.import_info.status =='completed'">
+                Last imported:
+                <span am-time-ago="import_time.time"></span>
+               </div>
                <div ng-show="import_summary.import_info.status =='in_progress'">Import in progress</div>
+               
             </div>            
           </div>
           <div class="span3 pull-right">

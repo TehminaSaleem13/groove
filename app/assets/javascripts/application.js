@@ -22,6 +22,8 @@
 //= require bindonce
 //= require ez-timepicker
 //= require ez-timepicker-tpls
+//= require moment.js
+//= require angular-moment.js
 //= require groovepacks
 //= require_tree .
 
