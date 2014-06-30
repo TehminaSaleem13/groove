@@ -30,7 +30,7 @@ groovepacks_controllers.
 
         myscope.get_status();      
         
-        $interval(myscope.get_status, 2000);
+        $interval(myscope.get_status, 10000);
 
         $scope.get_import_summary = function() {
           $("#ordersitem a").popover({
