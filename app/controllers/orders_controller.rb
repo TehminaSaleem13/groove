@@ -1199,7 +1199,11 @@ class OrdersController < ApplicationController
       result['data']['import_summary'] = Hash.new
       if !order_import_summary.nil?
         result['data']['import_summary']['import_info'] = order_import_summary
-        result['data']['import_summary']['import_items'] = order_import_summary.import_items
+        result['data']['import_summary']['import_items'] = []
+        order_import_summary.import_items.each do |import_item|
+          result['data']['import_summary']['import_items'].push(
+            {store_info: import_item.store, import_info: import_item})
+        end
       end
     end
     render json: result
