@@ -21,7 +21,7 @@ groovepacks_directives.directive('groovCommon',['importOrders','$rootScope', fun
 
             //import All Orders function
             scope.groovImport = function () {
-                $('#importOrders').modal('show');
+                //$('#importOrders').modal('show');
                 importOrders.do_import(scope);
             }
         }

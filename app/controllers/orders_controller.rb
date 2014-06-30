@@ -855,6 +855,49 @@ class OrdersController < ApplicationController
     end
   end
   
+  def import_all
+    @result = Hash.new
+    order_summary = OrderImportSummary.where(
+      status: 'in_progress')
+
+    if order_summary.empty?
+      order_summary_info = OrderImportSummary.new
+      order_summary_info.user_id = current_user.id
+      order_summary_info.status = 'not_started'
+      order_summary_info.save
+      # call delayed job
+      import_orders_obj = ImportOrders.new
+      import_orders_obj.delay(:run_at => 15.seconds.from_now,:queue => 'importing orders').import_orders
+      # import_orders_obj.import_orders
+    else
+      #Send a message back to the user saying that import is already in progress
+    end
+    render json: @result
+  end
+
+  def import_status
+    result = Hash.new
+    result['status'] = true
+    result['error_messages'] = []
+    result['success_messages'] = []
+    result['notice_messages'] = []
+    result['data'] = Hash.new
+
+    order_import_summaries = OrderImportSummary.order('updated_at' + " " + 'desc')
+    if !order_import_summaries.empty?
+      order_import_summary = order_import_summaries.first
+      result['data']['import_summary'] = Hash.new
+      if !order_import_summary.nil?
+        result['data']['import_summary']['import_info'] = order_import_summary
+        result['data']['import_summary']['import_items'] = []
+        order_import_summary.import_items.each do |import_item|
+          result['data']['import_summary']['import_items'].push(
+            {store_info: import_item.store, import_info: import_item})
+        end
+      end
+    end
+    render json: result
+  end  
 
   private
 

@@ -5,7 +5,7 @@
           <div class="span3">
             <a ui-sref="home" class="brand"><img src="assets/logo.png"></a>
           </div>
-          <div class="span5">
+          <div class="span6">
             <ul class="nav" id="mainMenu">
               <li ng-show="current_user.can('access_orders')"><a ui-sref="orders">Orders</a></li>
               <li ng-show="current_user.can('access_products')"><a ui-sref="products">Products</a></li>
@@ -13,8 +13,34 @@
               <li ng-show="current_user.can('access_scanpack')"><a ui-sref="scanpack.rfo">Scan and Pack</a></li>
             </ul>
             <ul class="nav" id="mainMenu">
-              <li><a href="" role="button" data-toggle="modal" ng-click='import_all_orders()'>Import Orders</a></li>
+              <li id="ordersitem" ng-mouseover="get_import_summary()"><a href="" role="button" data-toggle="popover" data-trigger="hover" 
+            data-content="" title="" 
+            ng-click='import_all_orders()'><i ng-show="import_summary.import_info.status =='in_progress'" class="icon-refresh icon-spin"></i> Import Orders</a></li>
             </ul>
+            <div id="popoverExampleTwoHiddenContent" 
+              style="display: none;" width="500px">
+
+                <table style="font-size: 12px;">
+                  <tr ng-repeat="info in import_summary.import_items">
+                    <td>
+                      <img src="https://s3.amazonaws.com/groovepacker/EBAY-BUTTON.png" width="60px" height="50px" ng-show="info.store_info.store_type=='Ebay'">
+                      <img src="https://s3.amazonaws.com/groovepacker/amazonLogo.jpg" width="60px" height="50px" ng-show="info.store_info.store_type=='Amazon'">
+                      <img src="https://s3.amazonaws.com/groovepacker/MagentoLogo.jpg" width="60px" height="50px" ng-show="info.store_info.store_type=='Magento'">
+                    </td>
+                    <td> {{info.store_info.name}}</td>
+                    <td style="text-align: right;">Imported {{info.import_info.success_imported}} of {{info.import_info.success_imported.+info.import_info.previous_imported}} orders. {{info.import_info.previous_imported}} were previously imported.</td>
+                  </tr>
+                </table>    
+            </div>  
+            <!-- Popover 2 hidden title -->
+            <div id="popoverExampleTwoHiddenTitle" style="display: none;">
+               <div ng-show="import_summary.import_info.status =='completed'">
+                Last imported:
+                <span am-time-ago="import_time.time"></span>
+               </div>
+               <div ng-show="import_summary.import_info.status =='in_progress'">Import in progress</div>
+               
+            </div>            
           </div>
           <div class="span3 pull-right">
               <ul class="nav pull-right">
@@ -38,5 +64,6 @@
       </header>
       <div groov-common groov-import="import_all_orders"></div>
     </div>
+    <!-- {{import_summary}} -->
       <div ui-view></div>
 </div>
