@@ -7,98 +7,103 @@ module Groovepacker
             handler = self.get_handler
             credential = handler[:credential]
             ebay = handler[:store_handle]
-            seller_list = ebay.GetMyeBaySelling(:soldList=> 
-              {:orderStatusFilter=>'AwaitingShipment'})
             result = self.build_result
+            
+            begin
+              seller_list = ebay.GetMyeBaySelling(:soldList=> 
+                {:orderStatusFilter=>'AwaitingShipment'})
+              #puts seller_list.inspect
 
-            #puts seller_list.inspect
+              if (seller_list.soldList != nil &&
+                  seller_list.soldList.orderTransactionArray != nil)
+                order_or_transactionArray = 
+                  seller_list.soldList.orderTransactionArray
 
-            if (seller_list.soldList != nil &&
-                seller_list.soldList.orderTransactionArray != nil)
-              order_or_transactionArray = 
-                seller_list.soldList.orderTransactionArray
+                result[:total_imported] = 
+                  seller_list.soldList.orderTransactionArray.length
 
-              result[:total_imported] = 
-                seller_list.soldList.orderTransactionArray.length
+                @ordercnt = 0
 
-              @ordercnt = 0
+                order_or_transactionArray.each do |order_transaction|
+                  #single line item order transaction
+                  if !order_transaction.transaction.nil?
+                    transactionID = order_transaction.transaction.transactionID
+                    itemID = order_transaction.transaction.item.itemID
 
-              order_or_transactionArray.each do |order_transaction|
-                #single line item order transaction
-                if !order_transaction.transaction.nil?
-                  transactionID = order_transaction.transaction.transactionID
-                  itemID = order_transaction.transaction.item.itemID
+                    #get sellingmanager SalesRecordNumber
+                    item_transactions = ebay.GetItemTransactions(:itemID => itemID,
+                      :transactionID=> transactionID)
+                    if item_transactions.transactionArray.length == 1
+                      transaction = item_transactions.transactionArray.first
+                      sellingManagerSalesRecordNumber =
+                        transaction.shippingDetails.sellingManagerSalesRecordNumber
 
-                  #get sellingmanager SalesRecordNumber
-                  item_transactions = ebay.GetItemTransactions(:itemID => itemID,
-                    :transactionID=> transactionID)
-                  if item_transactions.transactionArray.length == 1
-                    transaction = item_transactions.transactionArray.first
-                    sellingManagerSalesRecordNumber =
-                      transaction.shippingDetails.sellingManagerSalesRecordNumber
+                      if Order.where(:increment_id=>sellingManagerSalesRecordNumber).length == 0
+                        order = Order.new
 
-                    if Order.where(:increment_id=>sellingManagerSalesRecordNumber).length == 0
-                      order = Order.new
-
-                      order = build_order_with_single_item_from_ebay(order, transaction, 
-                        order_transaction, handler)
-                      if order.save
-                        order.addactivity("Order Import", credential.store.name+" Import")
-                        order.order_items.each do |item|
-                          order.addactivity("Item with SKU: "+item.sku+" Added", credential.store.name+" Import")
+                        order = build_order_with_single_item_from_ebay(order, transaction, 
+                          order_transaction, handler)
+                        if order.save
+                          order.addactivity("Order Import", credential.store.name+" Import")
+                          order.order_items.each do |item|
+                            order.addactivity("Item with SKU: "+item.sku+" Added", credential.store.name+" Import")
+                          end
+                          order.set_order_status
+                          result[:success_imported] = result[:success_imported] + 1
                         end
-                        order.set_order_status
-                        result[:success_imported] = result[:success_imported] + 1
+                      else # transaction is already imported
+                        result[:previous_imported] = result[:previous_imported] + 1
                       end
-                    else # transaction is already imported
-                      result[:previous_imported] = result[:previous_imported] + 1
+                    else # transactions Array is not equal to 1
+                      result[:status] &= false
+                      result[:messages].push('There was an error importing the order transactions from Ebay,
+                        Order transactions length: '+ item_transactions.transactionArray.length )
                     end
-                  else # transactions Array is not equal to 1
-                    result[:status] &= false
-                    result[:messages].push('There was an error importing the order transactions from Ebay,
-                      Order transactions length: '+ item_transactions.transactionArray.length )
-                  end
-                elsif !order_transaction.order.nil?
-                  # for orders with multiple line items
-                  order_id = order_transaction.order.orderID
-                  order_detail = ebay.GetOrders(:orderIDArray =>[order_id])
+                  elsif !order_transaction.order.nil?
+                    # for orders with multiple line items
+                    order_id = order_transaction.order.orderID
+                    order_detail = ebay.GetOrders(:orderIDArray =>[order_id])
 
-                  if !order_detail.orderArray.nil? &&
-                      order_detail.orderArray.length == 1
+                    if !order_detail.orderArray.nil? &&
+                        order_detail.orderArray.length == 1
 
-                    order_detail = order_detail.orderArray.first
+                      order_detail = order_detail.orderArray.first
 
-                    if !order_detail.shippingDetails.nil?
-                     sellingManagerSalesRecordNumber = order_detail.shippingDetails.sellingManagerSalesRecordNumber
+                      if !order_detail.shippingDetails.nil?
+                       sellingManagerSalesRecordNumber = order_detail.shippingDetails.sellingManagerSalesRecordNumber
+                      else
+                       sellingManagerSalesRecordNumber = nil
+                      end
+
+                      if Order.where(:increment_id=>sellingManagerSalesRecordNumber).length == 0
+                        order = Order.new
+                        order = build_order_with_multiple_items_from_ebay(order, order_detail, handler)
+                        if order.save
+                          order.addactivity("Order Import", credential.store.name+" Import")
+                          order.order_items.each do |item|
+                            order.addactivity("Item with SKU: "+item.sku+" Added", credential.store.name+" Import")
+                          end
+                          order.set_order_status
+                          result[:success_imported] = result[:success_imported] + 1
+                        end
+                      else #order is already imported
+                        result[:previous_imported] = result[:previous_imported] + 1
+                      end
                     else
-                     sellingManagerSalesRecordNumber = nil
-                    end
-
-                    if Order.where(:increment_id=>sellingManagerSalesRecordNumber).length == 0
-                      order = Order.new
-                      order = build_order_with_multiple_items_from_ebay(order, order_detail, handler)
-                      if order.save
-                        order.addactivity("Order Import", credential.store.name+" Import")
-                        order.order_items.each do |item|
-                          order.addactivity("Item with SKU: "+item.sku+" Added", credential.store.name+" Import")
-                        end
-                        order.set_order_status
-                        result[:success_imported] = result[:success_imported] + 1
-                      end
-                    else #order is already imported
-                      result[:previous_imported] = result[:previous_imported] + 1
+                      #order detail cannot be more than 1
+                      result[:status] &= false
+                      result[:messages].push('More than 1 order detail is returned for a single order id')
                     end
                   else
-                    #order detail cannot be more than 1
                     result[:status] &= false
-                    result[:messages].push('More than 1 order detail is returned for a single order id')
+                    result[:messages].push('Importing orders with multiple order items is not supported')
                   end
-                else
-                  result[:status] &= false
-                  result[:messages].push('Importing orders with multiple order items is not supported')
-                end
-              end # end of order transaction array
-            end # end of sellers list's sold list
+                end # end of order transaction array
+              end # end of sellers list's sold list
+            rescue Exception => e
+              result[:status] &= false
+              result[:messages].push(e)
+            end
             result
           end
 
