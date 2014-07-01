@@ -5,7 +5,6 @@ class ImportOrders
 
 		# we will also remove all the import summary which are not started.
 		if OrderImportSummary.where(status: 'in_progress').empty?
-			puts "status is not in_progress."
 			order_import_summaries = OrderImportSummary.where(status: 'not_started')
 			if !order_import_summaries.empty?
 				ordered_import_summaries = order_import_summaries.order('updated_at' + " " + 'desc')
@@ -18,7 +17,6 @@ class ImportOrders
 						stores = Store.where("status = '1' AND store_type != 'system'")
 						if stores.length != 0	
 							stores.each do |store|
-								puts "inside stores."
 								import_item = ImportItem.new
 								import_item.store_id = store.id
 								import_item.status = 'not_started'
@@ -34,47 +32,56 @@ class ImportOrders
 			end
 			OrderImportSummary.where(status: 'completed').delete_all
 			if !@order_import_summary.id.nil?
-				import_items = ImportItem.all
-				if import_items.length != 0
-					import_items.each do |import_item|
-						store_type = import_item.store.store_type
-						store = import_item.store
-						if store_type == 'Amazon'
-							import_item.status = 'in_progress'
-							import_item.save
-		      		context = Groovepacker::Store::Context.new(
-		         	Groovepacker::Store::Handlers::AmazonHandler.new(store))
-		       		result = context.import_orders
-			       	import_item.previous_imported = result[:previous_imported]
-			       	import_item.success_imported = result[:success_imported]
-			       	import_item.status = 'completed'
-			       	import_item.save
-		     		elsif store_type == 'Ebay'
-		     			import_item.status = 'in_progress'
-							import_item.save
-		       		context = Groovepacker::Store::Context.new(
-		         	Groovepacker::Store::Handlers::EbayHandler.new(store))
-		       		result = context.import_orders
-			       	import_item.previous_imported = result[:previous_imported]
-			       	import_item.success_imported = result[:success_imported]
-			       	import_item.status = 'completed'
-			       	import_item.save
-			      elsif store_type == 'Magento1'
-			      	import_item.status = 'in_progress'
-							import_item.save
-			      	context = Groovepacker::Store::Context.new(
-		          Groovepacker::Store::Handlers::MagentoHandler.new(store))
-			        result = context.import_orders.inspect
-			       	import_item.previous_imported = result[:previous_imported]
-			       	import_item.success_imported = result[:success_imported]
-			       	import_item.status = 'completed'
-			       	import_item.save
-		     		end
-		     	end
-		     	order_import_summary = OrderImportSummary.find(@order_import_summary.id)
-					order_import_summary.status = 'completed'
-					order_import_summary.save
-				end
+				import_items = @order_import_summary.import_items
+				import_items.each do |import_item|
+					store_type = import_item.store.store_type
+					store = import_item.store
+					if store_type == 'Amazon'
+						import_item.status = 'in_progress'
+						import_item.save
+	      		context = Groovepacker::Store::Context.new(
+	         	Groovepacker::Store::Handlers::AmazonHandler.new(store))
+	       		result = context.import_orders
+		       	import_item.previous_imported = result[:previous_imported]
+		       	import_item.success_imported = result[:success_imported]
+		       	if !result[:status]
+		       		import_item.status = 'failed'
+		       	else
+		       		import_item.status = 'completed'
+		       	end 	
+		       	import_item.save
+	     		elsif store_type == 'Ebay'
+	     			import_item.status = 'in_progress'
+						import_item.save
+	       		context = Groovepacker::Store::Context.new(
+	         	Groovepacker::Store::Handlers::EbayHandler.new(store))
+	       		result = context.import_orders
+		       	import_item.previous_imported = result[:previous_imported]
+		       	import_item.success_imported = result[:success_imported]
+		       	if !result[:status]
+		       		import_item.status = 'failed'
+		       	else
+		       		import_item.status = 'completed'
+		       	end
+		       	import_item.save
+		      elsif store_type == 'Magento'
+		      	import_item.status = 'in_progress'
+						import_item.save
+		      	context = Groovepacker::Store::Context.new(
+	          Groovepacker::Store::Handlers::MagentoHandler.new(store))
+		        result = context.import_orders.inspect
+		       	import_item.previous_imported = result[:previous_imported]
+		       	import_item.success_imported = result[:success_imported]
+		       	if !result[:status]
+		       		import_item.status = 'failed'
+		       	else
+		       		import_item.status = 'completed'
+		       	end
+		       	import_item.save
+	     		end
+	     	end
+				@order_import_summary.status = 'completed'
+				@order_import_summary.save
 			end
 		end	
 		result

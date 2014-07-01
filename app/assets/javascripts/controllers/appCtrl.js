@@ -30,7 +30,7 @@ groovepacks_controllers.
 
               
         
-        $interval(myscope.get_status, 5000);
+        $interval(myscope.get_status, 2000);
 
         $scope.get_import_summary = function() {
           myscope.get_status();

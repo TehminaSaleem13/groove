@@ -7,14 +7,16 @@ module Groovepacker
             handler = self.get_handler
             mws = handler[:store_handle][:main_handle]
             credential = handler[:credential]
+            result = self.build_result
 
             begin
               response = mws.orders.list_orders :last_updated_after => 2.months.ago, 
                 :order_status => ['Unshipped', 'PartiallyShipped']
-              result = self.build_result
+              
               @orders = []
 
-              if !response.orders.kind_of?(Array)
+              if !response.orders.kind_of?(Array) && 
+                !response.orders.nil?
                 @orders.push(response.orders)
               else
                 @orders = response.orders
@@ -101,7 +103,6 @@ module Groovepacker
               result[:status] &= false
               result[:messages].push(e)
             end
-
             result
           end #import order ends
 

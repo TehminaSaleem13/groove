@@ -31,6 +31,7 @@
                     <td style="text-align: right;" ng-show="info.import_info.status=='completed'">Imported {{info.import_info.success_imported}} of {{info.import_info.success_imported+info.import_info.previous_imported}} orders. {{info.import_info.previous_imported}} were previously imported.</td>
                     <td style="text-align: right;" ng-show="info.import_info.status=='not_started'">Import not started.</td>
                     <td style="text-align: right;" ng-show="info.import_info.status=='in_progress'">Import in progress.</td>
+                    <td style="text-align: right;" ng-show="info.import_info.status=='failed'">Import failed.</td>
                   </tr>
                 </table>    
             </div>  
