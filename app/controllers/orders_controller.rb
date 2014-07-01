@@ -856,7 +856,9 @@ class OrdersController < ApplicationController
   end
   
   def import_all
-    @result = Hash.new
+    result = Hash.new
+    result['success_messages'] = []
+    result['error_messages'] = []
     order_summary = OrderImportSummary.where(
       status: 'in_progress')
 
@@ -867,12 +869,13 @@ class OrdersController < ApplicationController
       order_summary_info.save
       # call delayed job
       import_orders_obj = ImportOrders.new
-      import_orders_obj.delay(:run_at => 15.seconds.from_now,:queue => 'importing orders').import_orders
-      # import_orders_obj.import_orders
+      # import_orders_obj.delay(:run_at => 15.seconds.from_now,:queue => 'importing orders').import_orders
+      import_orders_obj.import_orders
     else
       #Send a message back to the user saying that import is already in progress
+      result['error_messages'].push('Import is in progress')
     end
-    render json: @result
+    render json: result
   end
 
   def import_status

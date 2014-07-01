@@ -28,11 +28,12 @@ groovepacks_controllers.
             }).error(function(data) {});
         }
 
-        myscope.get_status();      
+              
         
-        $interval(myscope.get_status, 10000);
+        $interval(myscope.get_status, 5000);
 
         $scope.get_import_summary = function() {
+          myscope.get_status();
           $("#ordersitem a").popover({
               placement: 'bottom',
               html: true, 

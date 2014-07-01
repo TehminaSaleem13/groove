@@ -8,29 +8,33 @@ module Groovepacker
             credential = handler[:credential]
             client = handler[:store_handle][:handle]
             session = handler[:store_handle][:session]
+            begin
+              response = client.call(:catalog_product_list, message: {session: session})
+              result = self.build_result
 
-            response = client.call(:catalog_product_list, message: {session: session})
-            result = self.build_result
+              #fetching all products
+              if response.success?
+                #listing found products
+                @products = response.body[:catalog_product_list_response][:store_view][:item]
+                @products.each do |product|
+                  result[:total_imported] = result[:total_imported] + 1
 
-            #fetching all products
-            if response.success?
-              #listing found products
-              @products = response.body[:catalog_product_list_response][:store_view][:item]
-              @products.each do |product|
-                result[:total_imported] = result[:total_imported] + 1
-
-                if Product.where(:store_product_id => product[:product_id]).length  == 0
-                  result_product_id = 
-                    self.import_single({sku: product[:sku]})
-                  result[:success_imported] = result[:success_imported] + 1 unless 
-                    result_product_id == 0
-                else
-                  result[:previous_imported] = result[:previous_imported] + 1
+                  if Product.where(:store_product_id => product[:product_id]).length  == 0
+                    result_product_id = 
+                      self.import_single({sku: product[:sku]})
+                    result[:success_imported] = result[:success_imported] + 1 unless 
+                      result_product_id == 0
+                  else
+                    result[:previous_imported] = result[:previous_imported] + 1
+                  end
                 end
+              else
+                result[:status] &= false
+                result[:messages].push('Problem retrieving products list')
               end
-            else
+            rescue Exception => e
               result[:status] &= false
-              result[:messages].push('Problem retrieving products list')
+              result[:messages].push(e)
             end
             result
           end
