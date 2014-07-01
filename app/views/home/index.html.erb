@@ -28,7 +28,9 @@
                       <img src="https://s3.amazonaws.com/groovepacker/MagentoLogo.jpg" width="60px" height="50px" ng-show="info.store_info.store_type=='Magento'">
                     </td>
                     <td> {{info.store_info.name}}</td>
-                    <td style="text-align: right;">Imported {{info.import_info.success_imported}} of {{info.import_info.success_imported+info.import_info.previous_imported}} orders. {{info.import_info.previous_imported}} were previously imported.</td>
+                    <td style="text-align: right;" ng-show="info.import_info.status=='completed'">Imported {{info.import_info.success_imported}} of {{info.import_info.success_imported+info.import_info.previous_imported}} orders. {{info.import_info.previous_imported}} were previously imported.</td>
+                    <td style="text-align: right;" ng-show="info.import_info.status=='not_started'">Import not started.</td>
+                    <td style="text-align: right;" ng-show="info.import_info.status=='in_progress'">Import in progress.</td>
                   </tr>
                 </table>    
             </div>  
