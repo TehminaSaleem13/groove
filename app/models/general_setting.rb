@@ -3,14 +3,83 @@ class GeneralSetting < ActiveRecord::Base
    :inventory_tracking, :low_inventory_alert_email, :low_inventory_email_address, :send_email_for_packer_notes
 
   after_save :send_low_inventory_alert_email
+  after_save :scheduled_import
 
-  # def self.get_time_to_import_orders
-  #   self.time_to_import_orders
-  #   day = DateTime.now.strftime("%A")
-  #   if day == 'Monday' && self.import_orders_on_mon
-      
-  #   end
-  # end
+  def scheduled_import
+    result = Hash.new
+    changed_hash = self.changes
+    if self.scheduled_order_import
+      result = get_schedule_time
+    end
+  end
+
+  def get_schedule_time
+    result = Hash.new
+    day = DateTime.now.strftime("%A")
+    time = DateTime.now
+    time = time.change({:hour => setting.time_to_import_orders.hour, 
+      :min => setting.time_to_import_orders.min, 
+      :sec => setting.time_to_import_orders.sec})
+    if day == 'Monday' && self.import_orders_on_mon
+      result['time_to_import'] = get_time_to_import(time,day)
+    elsif day == 'Tuesday' && self.import_orders_on_tue
+      result['time_to_import'] = get_time_to_import(time,day)
+    elsif day == 'Wednesday' && self.import_orders_on_wed
+      result['time_to_import'] = get_time_to_import(time,day)
+    elsif day == 'Thursday' && self.import_orders_on_thurs
+      result['time_to_import'] = get_time_to_import(time,day)
+    elsif day == 'Friday' && self.import_orders_on_fri
+      result['time_to_import'] = get_time_to_import(time,day)
+    elsif day == 'Saturday' && self.import_orders_on_sat
+      result['time_to_import'] = get_time_to_import(time,day)
+    elsif day == 'Sunday' && self.import_orders_on_sun
+      result['time_to_import'] = get_time_to_import(time,day)
+    end
+  end
+  def get_time_to_import(time,day)
+    if (time - DateTime.now).to_i < 0
+      count_next_importing_day = find_next_importing_day(day)
+      time = time + count_next_importing_day.day
+      result['time_to_import'] = ((time - DateTime.now.getutc) * 24 * 60 * 60).to_i
+    else
+      result['time_to_import'] = ((time - DateTime.now.getutc) * 24 * 60 * 60).to_i
+    end
+  end
+  def find_next_importing_day(day)
+    count = 0
+    for i in ['Sunday', 'Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'] do
+      if day==i
+        unless do_import_orders_on(i)
+          count = count +1
+        end
+      end
+    end
+  end
+  def do_import_orders_on(i)
+    result = false
+    if i=='Sunday'
+      result = self.import_orders_on_sun
+    end
+    if i=='Monday'
+      result = self.import_orders_on_mon
+    end
+    if i=='Sunday'
+      result = self.import_orders_on_tue
+    end
+    if i=='Sunday'
+      result = self.import_orders_on_wed
+    end
+    if i=='Sunday'
+      result = self.import_orders_on_thurs
+    end
+    if i=='Sunday'
+      result = self.import_orders_on_fri
+    end
+    if i=='Sunday'
+      result = self.import_orders_on_sat
+    end
+    result
+  end
 
   def self.get_packing_slip_message_to_customer
     self.all.first.packing_slip_message_to_customer
