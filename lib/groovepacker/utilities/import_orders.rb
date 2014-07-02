@@ -69,7 +69,7 @@ class ImportOrders
 						import_item.save
 		      	context = Groovepacker::Store::Context.new(
 	          Groovepacker::Store::Handlers::MagentoHandler.new(store))
-		        result = context.import_orders.inspect
+		        result = context.import_orders
 		       	import_item.previous_imported = result[:previous_imported]
 		       	import_item.success_imported = result[:success_imported]
 		       	if !result[:status]

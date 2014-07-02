@@ -93,16 +93,16 @@ module Groovepacker
                       end
                     end
 
-                  #if product does not exist import product using product.info
-                  @order.address_1  = order_info[:shipping_address][:street]
-                  @order.city = order_info[:shipping_address][:city]
-                  @order.country = order_info[:shipping_address][:country_id]
-                  @order.postcode = order_info[:shipping_address][:postcode]
-                  @order.email = item[:customer_email]
-                  @order.lastname = order_info[:shipping_address][:lastname]
-                  @order.firstname = order_info[:shipping_address][:firstname]
-                  @order.state = order_info[:shipping_address][:region]
-                  if @order.save
+                    #if product does not exist import product using product.info
+                    @order.address_1  = order_info[:shipping_address][:street]
+                    @order.city = order_info[:shipping_address][:city]
+                    @order.country = order_info[:shipping_address][:country_id]
+                    @order.postcode = order_info[:shipping_address][:postcode]
+                    @order.email = item[:customer_email]
+                    @order.lastname = order_info[:shipping_address][:lastname]
+                    @order.firstname = order_info[:shipping_address][:firstname]
+                    @order.state = order_info[:shipping_address][:region]
+                    if @order.save
                       if !@order.addnewitems
                         result[:status] &= false
                         result[:messages].push('Problem adding new items')
