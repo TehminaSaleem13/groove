@@ -4,6 +4,14 @@ class GeneralSetting < ActiveRecord::Base
 
   after_save :send_low_inventory_alert_email
 
+  # def self.get_time_to_import_orders
+  #   self.time_to_import_orders
+  #   day = DateTime.now.strftime("%A")
+  #   if day == 'Monday' && self.import_orders_on_mon
+      
+  #   end
+  # end
+
   def self.get_packing_slip_message_to_customer
     self.all.first.packing_slip_message_to_customer
   end

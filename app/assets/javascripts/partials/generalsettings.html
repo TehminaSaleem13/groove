@@ -182,6 +182,52 @@
               </select>
             </div>
           </div>
+          <div class="control-group">
+            <label class="control-label">Scheduled Order-import</label>
+            <div class="controls">
+              <label class="radio inline">
+                <input type="radio" ng-model="generalsettings.single.scheduled_order_import" value="1" ng-change="update_settings()"/>  On
+              </label>
+              <label class="radio inline">
+                <input type="radio" ng-model="generalsettings.single.scheduled_order_import" value="0" ng-change="update_settings()"/>  Off
+              </label>
+             </div>
+          </div>
+          <div class="control-group" ng-show="generalsettings.single.scheduled_order_import== '1'">
+            <label class="control-label">Schedule Time for Import-orders</label>
+            <div class="controls">
+              <input sy-timepicker-popup='HH:mm:ss' class='form-control' ng-model='generalsettings.single.time_to_import_orders'
+              show-meridian='false' sy-timepicker-append-to-body=false ng-change='update_settings()' />
+             </div>
+          </div>
+          <div class="control-group" ng-show="generalsettings.single.scheduled_order_import== '1'">
+            <label class="control-label">Import-orders on</label>
+            <div class="controls">
+              <label class="checkbox inline">
+                <input type="checkbox" ng-model="generalsettings.single.import_orders_on_mon" ng-change="update_settings()"> Mon
+              </label>
+              <label class="checkbox inline">
+                <input type="checkbox" ng-model="generalsettings.single.import_orders_on_tue" ng-change="update_settings()"> Tue
+              </label>
+              <label class="checkbox inline">
+                <input type="checkbox" ng-model="generalsettings.single.import_orders_on_wed" ng-change="update_settings()"> Wed
+              </label>
+            </div>
+            <div class="controls">
+              <label class="checkbox inline">
+                <input type="checkbox" ng-model="generalsettings.single.import_orders_on_thurs" ng-change="update_settings()"> Thu
+              </label>
+              <label class="checkbox inline">
+                <input type="checkbox" ng-model="generalsettings.single.import_orders_on_fri" ng-change="update_settings()"> Fri
+              </label>
+              <label class="checkbox inline">
+                <input type="checkbox" ng-model="generalsettings.single.import_orders_on_sat" ng-change="update_settings()"> Sat
+              </label>
+              <label class="checkbox inline">
+                <input type="checkbox" ng-model="generalsettings.single.import_orders_on_sun" ng-change="update_settings()"> Sun
+              </label>
+            </div>
+          </div>
         </fieldset>
       </div>
     </div>
