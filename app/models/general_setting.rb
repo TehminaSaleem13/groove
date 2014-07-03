@@ -1,8 +1,69 @@
 class GeneralSetting < ActiveRecord::Base
+  include SettingsHelper
   attr_accessible :conf_req_on_notes_to_packer, :email_address_for_packer_notes, :hold_orders_due_to_inventory,
-   :inventory_tracking, :low_inventory_alert_email, :low_inventory_email_address, :send_email_for_packer_notes
+   :inventory_tracking, :low_inventory_alert_email, :low_inventory_email_address, :send_email_for_packer_notes,
+   :scheduled_order_import
 
   after_save :send_low_inventory_alert_email
+  after_save :scheduled_import
+
+  def scheduled_import
+    result = Hash.new
+    changed_hash = self.changes
+    if self.scheduled_order_import && !changed_hash[:time_to_import_orders].nil?
+      if self.should_import_orders_today
+        job_scheduled = false
+        date = DateTime.now
+        while !job_scheduled do
+          job_scheduled = self.schedule_job(date, 
+            self.time_to_import_orders, 'import_orders')
+          date = DateTime.now + 1.day
+        end
+      end
+    end
+  end
+
+  def should_import_orders_today
+    day = DateTime.now.strftime("%A")
+    result = false
+    if day=='Sunday' && self.import_orders_on_sun
+      result = true
+    elsif day=='Monday' && self.import_orders_on_mon
+      result = true
+    elsif day=='Tuesday' && self.import_orders_on_tue
+      result = true
+    elsif day=='Wednesday' && self.import_orders_on_wed
+      result = true
+    elsif day=='Thursday' && self.import_orders_on_thurs
+      result = true
+    elsif day=='Friday' && self.import_orders_on_fri
+      result = true
+    elsif day=='Saturday' && self.import_orders_on_sat
+      result = true
+    end
+    result
+  end
+  
+  def should_import_orders(date)
+    day = date.strftime("%A")
+    result = false
+    if day=='Sunday' && self.import_orders_on_sun
+      result = true
+    elsif day=='Monday' && self.import_orders_on_mon
+      result = true
+    elsif day=='Tuesday' && self.import_orders_on_tue
+      result = true
+    elsif day=='Wednesday' && self.import_orders_on_wed
+      result = true
+    elsif day=='Thursday' && self.import_orders_on_thurs
+      result = true
+    elsif day=='Friday' && self.import_orders_on_fri
+      result = true
+    elsif day=='Saturday' && self.import_orders_on_sat
+      result = true
+    end
+    result
+  end
 
   def self.get_packing_slip_message_to_customer
     self.all.first.packing_slip_message_to_customer
@@ -28,26 +89,33 @@ class GeneralSetting < ActiveRecord::Base
         job_scheduled = false
         date = DateTime.now
         while !job_scheduled do
-          job_scheduled = self.schedule_job(date)
+          job_scheduled = self.schedule_job(date, 
+            self.time_to_send_email, 'low_inventory_email')
           date = DateTime.now + 1.day
         end
       end
     end
   end
 
-  def schedule_job (date)
+  def schedule_job (date, time, job_type)
     job_scheduled = false
     run_at_date = date.getutc
-    run_at_date = run_at_date.change({:hour => self.time_to_send_email.hour, 
-      :min => self.time_to_send_email.min, :sec => self.time_to_send_email.sec})
+    run_at_date = run_at_date.change({:hour => time.hour, 
+      :min => time.min, :sec => time.sec})
     time_diff = ((run_at_date - DateTime.now.getutc) * 24 * 60 * 60).to_i
     logger.info time_diff
     if time_diff > 0
-      Delayed::Job.destroy_all
-      #LowInventoryLevel.notify(self).deliver
-      logger.info 'inserting delayed job'
-      LowInventoryLevel.delay(:run_at => time_diff.seconds.from_now).notify(self)
-      job_scheduled = true
+      if job_type == 'low_inventory_email'
+        Delayed::Job.where(queue: 'low inventory email scheduled').destroy_all
+        #LowInventoryLevel.notify(self).deliver
+        logger.info 'inserting delayed job'
+        LowInventoryLevel.delay(:run_at => time_diff.seconds.from_now,:queue => 'low inventory email scheduled').notify(self)
+        job_scheduled = true
+      elsif job_type == 'import_orders'
+        Delayed::Job.where(queue: 'import orders scheduled').destroy_all
+        self.delay(:run_at => time_diff.seconds.from_now,:queue => 'import orders scheduled').import_orders_helper
+        job_scheduled = true
+      end
     end
     job_scheduled
   end

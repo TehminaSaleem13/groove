@@ -2,6 +2,7 @@ class OrdersController < ApplicationController
 
   include OrdersHelper
   include ProductsHelper
+  include SettingsHelper
 
 
   # Import orders from store based on store id
@@ -856,6 +857,8 @@ class OrdersController < ApplicationController
   end
   
   def import_all
+    # import_orders_helper()
+
     result = Hash.new
     result['success_messages'] = []
     result['error_messages'] = []
@@ -869,13 +872,14 @@ class OrdersController < ApplicationController
       order_summary_info.save
       # call delayed job
       import_orders_obj = ImportOrders.new
+      Delayed::Job.where(queue: 'importing orders').destroy_all
       import_orders_obj.delay(:run_at => 1.seconds.from_now,:queue => 'importing orders').import_orders
       # import_orders_obj.import_orders
     else
       #Send a message back to the user saying that import is already in progress
       result['error_messages'].push('Import is in progress')
     end
-    render json: result
+    render json: "ok"
   end
 
   def import_status

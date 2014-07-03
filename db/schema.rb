@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140626113137) do
+ActiveRecord::Schema.define(:version => 20140702080718) do
 
   create_table "amazon_credentials", :force => true do |t|
     t.string   "merchant_id",                                     :null => false
@@ -96,6 +96,15 @@ ActiveRecord::Schema.define(:version => 20140626113137) do
     t.string   "packing_slip_size"
     t.string   "packing_slip_orientation"
     t.text     "packing_slip_message_to_customer"
+    t.boolean  "import_orders_on_mon",              :default => false
+    t.boolean  "import_orders_on_tue",              :default => false
+    t.boolean  "import_orders_on_wed",              :default => false
+    t.boolean  "import_orders_on_thurs",            :default => false
+    t.boolean  "import_orders_on_fri",              :default => false
+    t.boolean  "import_orders_on_sat",              :default => false
+    t.boolean  "import_orders_on_sun",              :default => false
+    t.time     "time_to_import_orders",             :default => '2000-01-01 00:00:00'
+    t.boolean  "scheduled_order_import",            :default => true
   end
 
   create_table "import_items", :force => true do |t|

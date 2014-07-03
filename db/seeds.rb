@@ -47,6 +47,15 @@ if GeneralSetting.all.length == 1
   general_setting.product_weight_format = 'English'
   general_setting.packing_slip_size = '4 x 6'
   general_setting.packing_slip_orientation = 'portrait'
+  general_setting.time_to_import_orders = '00:00:00'
+  general_setting.scheduled_order_import = true
+  general_setting.import_orders_on_mon = false
+  general_setting.import_orders_on_tue = false
+  general_setting.import_orders_on_wed = false
+  general_setting.import_orders_on_thurs = false
+  general_setting.import_orders_on_fri = false
+  general_setting.import_orders_on_sat = false
+  general_setting.import_orders_on_sun = false
   general_setting.save
 end
 

@@ -15,4 +15,20 @@ module SettingsHelper
       temp_file.unlink
     end
   end
+  def import_orders_helper
+    order_summary = OrderImportSummary.where(
+      status: 'in_progress')
+
+    if order_summary.empty?
+      order_summary_info = OrderImportSummary.new
+      order_summary_info.user_id = nil
+      order_summary_info.status = 'not_started'
+      order_summary_info.save
+      # call delayed job
+      import_orders_obj = ImportOrders.new
+      # import_orders_obj.delay(:run_at => 1.seconds.from_now,:queue => 'importing orders').import_orders
+      import_orders_obj.import_orders
+      import_orders_obj.reschedule_job('import_orders')
+    end
+  end
 end
