@@ -8,11 +8,11 @@ class GeneralSetting < ActiveRecord::Base
 
   def scheduled_import
     result = Hash.new
-    changed_hash = self.changes
     if self.scheduled_order_import
       result = get_schedule_time
       import_duration = result[:time_to_import]
       SettingsHelper.delay(:run_at => import_duration.seconds.from_now).import_orders_helper
+      scheduled_import
     end
   end
 
@@ -54,37 +54,39 @@ class GeneralSetting < ActiveRecord::Base
   end
   def find_next_importing_day(day)
     count = 0
-    for i in ['Sunday', 'Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'] do
-      if day==i
-        unless do_import_orders_on(i)
+    array = ['Sunday', 'Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']
+    for i in [0,1,2,3,4,5,6] do
+      if day==array[i]
+        while !do_import_orders_on(array[i])
           count = count +1
+          i = i+1
         end
+        count
       end
-    end
-    count
+    end  
   end
-  def do_import_orders_on(i)
-    result = false
-    if i=='Sunday'
-      result = self.import_orders_on_mon
+  def do_import_orders_on(day)
+    result = true
+    if day=='Sunday'
+      result &= self.import_orders_on_mon
     end
-    if i=='Monday'
-      result = self.import_orders_on_tue
+    if day=='Monday'
+      result &= self.import_orders_on_tue
     end
-    if i=='Tuesday'
-      result = self.import_orders_on_wed
+    if day=='Tuesday'
+      result &= self.import_orders_on_wed
     end
-    if i=='Wednesday'
-      result = self.import_orders_on_thurs
+    if day=='Wednesday'
+      result &= self.import_orders_on_thurs
     end
-    if i=='Thursday'
-      result = self.import_orders_on_fri
+    if day=='Thursday'
+      result &= self.import_orders_on_fri
     end
-    if i=='Friday'
-      result = self.import_orders_on_sat
+    if day=='Friday'
+      result &= self.import_orders_on_sat
     end
-    if i=='Saturday'
-      result = self.import_orders_on_sun
+    if day=='Saturday'
+      result &= self.import_orders_on_sun
     end
     result
   end
