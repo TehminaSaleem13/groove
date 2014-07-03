@@ -1,4 +1,5 @@
 class GeneralSetting < ActiveRecord::Base
+  include SettingsHelper
   attr_accessible :conf_req_on_notes_to_packer, :email_address_for_packer_notes, :hold_orders_due_to_inventory,
    :inventory_tracking, :low_inventory_alert_email, :low_inventory_email_address, :send_email_for_packer_notes,
    :scheduled_order_import
@@ -8,85 +9,58 @@ class GeneralSetting < ActiveRecord::Base
 
   def scheduled_import
     result = Hash.new
-    if self.scheduled_order_import
-      result = get_schedule_time
-      import_duration = result[:time_to_import]
-      SettingsHelper.delay(:run_at => import_duration.seconds.from_now).import_orders_helper
-      scheduled_import
+    changed_hash = self.changes
+    if self.scheduled_order_import && !changed_hash[:time_to_import_orders].nil?
+      if self.should_import_orders_today
+        job_scheduled = false
+        date = DateTime.now
+        while !job_scheduled do
+          job_scheduled = self.schedule_job(date, 
+            self.time_to_import_orders, 'import_orders')
+          date = DateTime.now + 1.day
+        end
+      end
     end
   end
 
-  def get_schedule_time
-    result = Hash.new
+  def should_import_orders_today
     day = DateTime.now.strftime("%A")
-    time = DateTime.now
-    time = time.change({:hour => self.time_to_import_orders.hour, 
-      :min => self.time_to_import_orders.min, 
-      :sec => self.time_to_import_orders.sec})
-    if day == 'Monday' && self.import_orders_on_mon
-      result = get_time_to_import(time,day)
-    elsif day == 'Tuesday' && self.import_orders_on_tue
-      result = get_time_to_import(time,day)
-    elsif day == 'Wednesday' && self.import_orders_on_wed
-      result = get_time_to_import(time,day)
-    elsif day == 'Thursday' && self.import_orders_on_thurs
-      result = get_time_to_import(time,day)
-    elsif day == 'Friday' && self.import_orders_on_fri
-      result = get_time_to_import(time,day)
-    elsif day == 'Saturday' && self.import_orders_on_sat
-      result = get_time_to_import(time,day)
-    elsif day == 'Sunday' && self.import_orders_on_sun
-      result = get_time_to_import(time,day)
+    result = false
+    if day=='Sunday' && self.import_orders_on_sun
+      result = true
+    elsif day=='Monday' && self.import_orders_on_mon
+      result = true
+    elsif day=='Tuesday' && self.import_orders_on_tue
+      result = true
+    elsif day=='Wednesday' && self.import_orders_on_wed
+      result = true
+    elsif day=='Thursday' && self.import_orders_on_thurs
+      result = true
+    elsif day=='Friday' && self.import_orders_on_fri
+      result = true
+    elsif day=='Saturday' && self.import_orders_on_sat
+      result = true
     end
     result
   end
-  def get_time_to_import(time,day)
-    result = Hash.new
-    if (time - DateTime.now).to_i < 0
-      count_next_importing_day = find_next_importing_day(day)
-      time = time + count_next_importing_day.day
-      time_diff_components = Time.diff(time, DateTime.now.getutc)
-      result['time_to_import'] = ((time - DateTime.now.getutc) * 24 * 60 * 60).to_i
-    else
-      result['time_to_import'] = ((time - DateTime.now.getutc) * 24 * 60 * 60).to_i
-    end
-    result
-  end
-  def find_next_importing_day(day)
-    count = 0
-    array = ['Sunday', 'Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']
-    for i in [0,1,2,3,4,5,6] do
-      if day==array[i]
-        while !do_import_orders_on(array[i])
-          count = count +1
-          i = i+1
-        end
-        count
-      end
-    end  
-  end
-  def do_import_orders_on(day)
-    result = true
-    if day=='Sunday'
-      result &= self.import_orders_on_mon
-    end
-    if day=='Monday'
-      result &= self.import_orders_on_tue
-    end
-    if day=='Tuesday'
-      result &= self.import_orders_on_wed
-    end
-    if day=='Wednesday'
-      result &= self.import_orders_on_thurs
-    end
-    if day=='Thursday'
-      result &= self.import_orders_on_fri
-    end
-    if day=='Friday'
-      result &= self.import_orders_on_sat
-    end
-    if day=='Saturday'
-      result &= self.import_orders_on_sun
+  
+  def should_import_orders(date)
+    day = date.strftime("%A")
+    result = false
+    if day=='Sunday' && self.import_orders_on_sun
+      result = true
+    elsif day=='Monday' && self.import_orders_on_mon
+      result = true
+    elsif day=='Tuesday' && self.import_orders_on_tue
+      result = true
+    elsif day=='Wednesday' && self.import_orders_on_wed
+      result = true
+    elsif day=='Thursday' && self.import_orders_on_thurs
+      result = true
+    elsif day=='Friday' && self.import_orders_on_fri
+      result = true
+    elsif day=='Saturday' && self.import_orders_on_sat
+      result = true
     end
     result
   end
@@ -115,26 +89,33 @@ class GeneralSetting < ActiveRecord::Base
         job_scheduled = false
         date = DateTime.now
         while !job_scheduled do
-          job_scheduled = self.schedule_job(date)
+          job_scheduled = self.schedule_job(date, 
+            self.time_to_send_email, 'low_inventory_email')
           date = DateTime.now + 1.day
         end
       end
     end
   end
 
-  def schedule_job (date)
+  def schedule_job (date, time, job_type)
     job_scheduled = false
     run_at_date = date.getutc
-    run_at_date = run_at_date.change({:hour => self.time_to_send_email.hour, 
-      :min => self.time_to_send_email.min, :sec => self.time_to_send_email.sec})
+    run_at_date = run_at_date.change({:hour => time.hour, 
+      :min => time.min, :sec => time.sec})
     time_diff = ((run_at_date - DateTime.now.getutc) * 24 * 60 * 60).to_i
     logger.info time_diff
     if time_diff > 0
-      # Delayed::Job.destroy_all
-      #LowInventoryLevel.notify(self).deliver
-      logger.info 'inserting delayed job'
-      LowInventoryLevel.delay(:run_at => time_diff.seconds.from_now).notify(self)
-      job_scheduled = true
+      if job_type == 'low_inventory_email'
+        Delayed::Job.destroy_all
+        #LowInventoryLevel.notify(self).deliver
+        logger.info 'inserting delayed job'
+        LowInventoryLevel.delay(:run_at => time_diff.seconds.from_now).notify(self)
+        job_scheduled = true
+      elsif job_type == 'import_orders'
+        Delayed::Job.destroy_all
+        self.delay(:run_at => time_diff.seconds.from_now,:queue => 'import orders scheduled').import_orders_helper
+        job_scheduled = true
+      end
     end
     job_scheduled
   end

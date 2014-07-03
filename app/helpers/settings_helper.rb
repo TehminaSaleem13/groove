@@ -21,13 +21,25 @@ module SettingsHelper
 
     if order_summary.empty?
       order_summary_info = OrderImportSummary.new
-      order_summary_info.user_id = current_user.id
+      order_summary_info.user_id = nil
       order_summary_info.status = 'not_started'
       order_summary_info.save
       # call delayed job
       import_orders_obj = ImportOrders.new
-      import_orders_obj.delay(:run_at => 1.seconds.from_now,:queue => 'importing orders').import_orders
-      # import_orders_obj.import_orders
+      # import_orders_obj.delay(:run_at => 1.seconds.from_now,:queue => 'importing orders').import_orders
+      import_orders_obj.import_orders
+      date = DateTime.now
+      date = date + 1.day
+      job_scheduled = false
+      general_settings = GeneralSetting.all.first
+      while !job_scheduled do
+       if general_settings.should_import_orders(date)
+        job_scheduled = general_settings.schedule_job(date,
+          general_settings.time_to_import_orders, 'import_orders')
+       else
+        date = date + 1.day
+       end
+      end
     end
   end
 end

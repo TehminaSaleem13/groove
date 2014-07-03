@@ -857,8 +857,7 @@ class OrdersController < ApplicationController
   end
   
   def import_all
-    # result = Hash.new
-    # view_context.import_orders_helper
+    # import_orders_helper()
 
     result = Hash.new
     result['success_messages'] = []
@@ -879,7 +878,7 @@ class OrdersController < ApplicationController
       #Send a message back to the user saying that import is already in progress
       result['error_messages'].push('Import is in progress')
     end
-    render json: result
+    render json: "ok"
   end
 
   def import_status
