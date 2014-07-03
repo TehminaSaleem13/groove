@@ -1,6 +1,7 @@
 class GeneralSetting < ActiveRecord::Base
   attr_accessible :conf_req_on_notes_to_packer, :email_address_for_packer_notes, :hold_orders_due_to_inventory,
-   :inventory_tracking, :low_inventory_alert_email, :low_inventory_email_address, :send_email_for_packer_notes
+   :inventory_tracking, :low_inventory_alert_email, :low_inventory_email_address, :send_email_for_packer_notes,
+   :scheduled_order_import
 
   after_save :send_low_inventory_alert_email
   after_save :scheduled_import
@@ -10,6 +11,8 @@ class GeneralSetting < ActiveRecord::Base
     changed_hash = self.changes
     if self.scheduled_order_import
       result = get_schedule_time
+      import_duration = result[:time_to_import]
+      SettingsHelper.delay(:run_at => import_duration.seconds.from_now).import_orders_helper
     end
   end
 
@@ -17,33 +20,37 @@ class GeneralSetting < ActiveRecord::Base
     result = Hash.new
     day = DateTime.now.strftime("%A")
     time = DateTime.now
-    time = time.change({:hour => setting.time_to_import_orders.hour, 
-      :min => setting.time_to_import_orders.min, 
-      :sec => setting.time_to_import_orders.sec})
+    time = time.change({:hour => self.time_to_import_orders.hour, 
+      :min => self.time_to_import_orders.min, 
+      :sec => self.time_to_import_orders.sec})
     if day == 'Monday' && self.import_orders_on_mon
-      result['time_to_import'] = get_time_to_import(time,day)
+      result = get_time_to_import(time,day)
     elsif day == 'Tuesday' && self.import_orders_on_tue
-      result['time_to_import'] = get_time_to_import(time,day)
+      result = get_time_to_import(time,day)
     elsif day == 'Wednesday' && self.import_orders_on_wed
-      result['time_to_import'] = get_time_to_import(time,day)
+      result = get_time_to_import(time,day)
     elsif day == 'Thursday' && self.import_orders_on_thurs
-      result['time_to_import'] = get_time_to_import(time,day)
+      result = get_time_to_import(time,day)
     elsif day == 'Friday' && self.import_orders_on_fri
-      result['time_to_import'] = get_time_to_import(time,day)
+      result = get_time_to_import(time,day)
     elsif day == 'Saturday' && self.import_orders_on_sat
-      result['time_to_import'] = get_time_to_import(time,day)
+      result = get_time_to_import(time,day)
     elsif day == 'Sunday' && self.import_orders_on_sun
-      result['time_to_import'] = get_time_to_import(time,day)
+      result = get_time_to_import(time,day)
     end
+    result
   end
   def get_time_to_import(time,day)
+    result = Hash.new
     if (time - DateTime.now).to_i < 0
       count_next_importing_day = find_next_importing_day(day)
       time = time + count_next_importing_day.day
+      time_diff_components = Time.diff(time, DateTime.now.getutc)
       result['time_to_import'] = ((time - DateTime.now.getutc) * 24 * 60 * 60).to_i
     else
       result['time_to_import'] = ((time - DateTime.now.getutc) * 24 * 60 * 60).to_i
     end
+    result
   end
   def find_next_importing_day(day)
     count = 0
@@ -54,29 +61,30 @@ class GeneralSetting < ActiveRecord::Base
         end
       end
     end
+    count
   end
   def do_import_orders_on(i)
     result = false
     if i=='Sunday'
-      result = self.import_orders_on_sun
-    end
-    if i=='Monday'
       result = self.import_orders_on_mon
     end
-    if i=='Sunday'
+    if i=='Monday'
       result = self.import_orders_on_tue
     end
-    if i=='Sunday'
+    if i=='Tuesday'
       result = self.import_orders_on_wed
     end
-    if i=='Sunday'
+    if i=='Wednesday'
       result = self.import_orders_on_thurs
     end
-    if i=='Sunday'
+    if i=='Thursday'
       result = self.import_orders_on_fri
     end
-    if i=='Sunday'
+    if i=='Friday'
       result = self.import_orders_on_sat
+    end
+    if i=='Saturday'
+      result = self.import_orders_on_sun
     end
     result
   end
@@ -120,7 +128,7 @@ class GeneralSetting < ActiveRecord::Base
     time_diff = ((run_at_date - DateTime.now.getutc) * 24 * 60 * 60).to_i
     logger.info time_diff
     if time_diff > 0
-      Delayed::Job.destroy_all
+      # Delayed::Job.destroy_all
       #LowInventoryLevel.notify(self).deliver
       logger.info 'inserting delayed job'
       LowInventoryLevel.delay(:run_at => time_diff.seconds.from_now).notify(self)
