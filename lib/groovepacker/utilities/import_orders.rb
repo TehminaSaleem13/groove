@@ -86,4 +86,27 @@ class ImportOrders
 		end	
 		result
 	end
+	def reschedule_job(type)
+		date = DateTime.now
+    date = date + 1.day
+    job_scheduled = false
+    general_settings = GeneralSetting.all.first
+    while !job_scheduled do
+    	should_schedule_job = false
+	    if type=='import_orders'
+	    	should_schedule_job = general_settings.should_import_orders(date)
+	    	time = general_settings.time_to_import_orders
+	    elsif type=='low_inventory_email'
+				should_schedule_job = general_settings.should_send_email(date)
+				time = general_settings.time_to_send_email
+	    end
+
+	   	if should_schedule_job
+	   		job_scheduled = general_settings.schedule_job(date,
+        time, type)
+	   	else
+	   		date = date + 1.day
+	   	end
+		end	
+	end
 end

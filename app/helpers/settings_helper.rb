@@ -28,18 +28,7 @@ module SettingsHelper
       import_orders_obj = ImportOrders.new
       # import_orders_obj.delay(:run_at => 1.seconds.from_now,:queue => 'importing orders').import_orders
       import_orders_obj.import_orders
-      date = DateTime.now
-      date = date + 1.day
-      job_scheduled = false
-      general_settings = GeneralSetting.all.first
-      while !job_scheduled do
-       if general_settings.should_import_orders(date)
-        job_scheduled = general_settings.schedule_job(date,
-          general_settings.time_to_import_orders, 'import_orders')
-       else
-        date = date + 1.day
-       end
-      end
+      import_orders_obj.reschedule_job('import_orders')
     end
   end
 end
