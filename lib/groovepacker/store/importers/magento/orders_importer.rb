@@ -28,7 +28,6 @@ module Groovepacker
             @filter1['item'] = item1
             @filters1['complex_filter']  = @filter1
             @filters_array = @filters_array.merge(@filters1)
-            
             begin
               response = client.call(:sales_order_list, message: 
                 { sessionId: session, filters: @filters_array })
