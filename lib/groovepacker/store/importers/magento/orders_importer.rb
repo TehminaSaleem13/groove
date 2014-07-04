@@ -10,6 +10,7 @@ module Groovepacker
             session = handler[:store_handle][:session]
             result = self.build_result
 
+            @filters_array = {}
             @filters = {}
             @filter = {}
             item = {}
@@ -17,12 +18,21 @@ module Groovepacker
             item['value'] = 'processing'
             @filter['item'] = item
             @filters['filter']  = @filter
-            @filters_array = []
-            @filters_array << @filters
+            @filters_array = @filters
+            
+            @filters1 = {}            
+            @filter1 = {}
+            item1 = {}
+            item1['key'] = 'created_at'
+            item1['value'] = [{'key'=>'from', 'value'=>Date.today-1.week}]
+            @filter1['item'] = item1
+            @filters1['complex_filter']  = @filter1
+            @filters_array = @filters_array.merge(@filters1)
+            
             begin
               response = client.call(:sales_order_list, message: 
                 { sessionId: session, filters: @filters_array })
-
+                           
               if response.success?
                 result[:total_imported] =  response.body[:sales_order_list_response][:result][:item].length
 
