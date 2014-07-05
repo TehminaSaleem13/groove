@@ -26,8 +26,7 @@ module Groovepacker
             if credential.last_imported_at.to_s != ""
               item1['key'] = 'created_at'
               # item1['value'] = [{'key'=>'from', 'value'=>credential.last_imported_at.strftime("%Y-%m-%d %H:%M:%S").to_s}]
-              # item1['value'] = [{'key'=>'from', 'value'=>credential.last_imported_at.to_s}]
-              item1['value'] = [{'key'=>'from', 'value'=>Date.today}]
+              item1['value'] = [{'key'=>'from', 'value'=>credential.last_imported_at.to_s}]
               @filter1['item'] = item1
               @filters1['complex_filter']  = @filter1
               @filters_array = @filters_array.merge(@filters1)              
