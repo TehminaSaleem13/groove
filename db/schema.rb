@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140702080718) do
+ActiveRecord::Schema.define(:version => 20140705051319) do
 
   create_table "amazon_credentials", :force => true do |t|
     t.string   "merchant_id",                                     :null => false
@@ -127,15 +127,16 @@ ActiveRecord::Schema.define(:version => 20140702080718) do
   end
 
   create_table "magento_credentials", :force => true do |t|
-    t.string   "host",                               :null => false
-    t.string   "username",                           :null => false
-    t.string   "password",                           :null => false
-    t.integer  "store_id",                           :null => false
-    t.datetime "created_at",                         :null => false
-    t.datetime "updated_at",                         :null => false
-    t.string   "api_key",         :default => "",    :null => false
-    t.boolean  "import_products", :default => false, :null => false
-    t.boolean  "import_images",   :default => false, :null => false
+    t.string   "host",                                :null => false
+    t.string   "username",                            :null => false
+    t.string   "password",                            :null => false
+    t.integer  "store_id",                            :null => false
+    t.datetime "created_at",                          :null => false
+    t.datetime "updated_at",                          :null => false
+    t.string   "api_key",          :default => "",    :null => false
+    t.boolean  "import_products",  :default => false, :null => false
+    t.boolean  "import_images",    :default => false, :null => false
+    t.datetime "last_imported_at"
   end
 
   create_table "order_activities", :force => true do |t|

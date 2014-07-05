@@ -9,7 +9,7 @@ module Groovepacker
             client = handler[:store_handle][:handle]
             session = handler[:store_handle][:session]
             result = self.build_result
-
+            puts "credential.last_imported_at" + credential.last_imported_at.to_s
             @filters_array = {}
             @filters = {}
             @filter = {}
@@ -23,16 +23,24 @@ module Groovepacker
             @filters1 = {}            
             @filter1 = {}
             item1 = {}
-            item1['key'] = 'created_at'
-            item1['value'] = [{'key'=>'from', 'value'=>Date.today-1.week}]
-            @filter1['item'] = item1
-            @filters1['complex_filter']  = @filter1
-            @filters_array = @filters_array.merge(@filters1)
-            begin
+            if credential.last_imported_at.to_s != ""
+              item1['key'] = 'created_at'
+              # item1['value'] = [{'key'=>'from', 'value'=>credential.last_imported_at.strftime("%Y-%m-%d %H:%M:%S").to_s}]
+              # item1['value'] = [{'key'=>'from', 'value'=>credential.last_imported_at.to_s}]
+              item1['value'] = [{'key'=>'from', 'value'=>Date.today}]
+              @filter1['item'] = item1
+              @filters1['complex_filter']  = @filter1
+              @filters_array = @filters_array.merge(@filters1)              
+            end
+            credential.last_imported_at = DateTime.now
+            credential.save
+            # begin
               response = client.call(:sales_order_list, message: 
                 { sessionId: session, filters: @filters_array })
-                           
-              if response.success?
+              # puts response.inspect
+              result[:total_imported] =  response.body[:sales_order_list_response][:result][:item].length
+              puts result[:total_imported]          
+              if false#response.success?
                 result[:total_imported] =  response.body[:sales_order_list_response][:result][:item].length
 
                 response.body[:sales_order_list_response][:result][:item].each do |item|
@@ -128,10 +136,10 @@ module Groovepacker
                   end
                 end
               end
-            rescue Exception => e
-              result[:status] &= false
-              result[:messages].push(e)
-            end
+            # rescue Exception => e
+            #   result[:status] &= false
+            #   result[:messages].push(e)
+            # end
             result
           end
 
