@@ -7,7 +7,6 @@ class ModifyGeneralSettings < ActiveRecord::Migration
 			general_setting.save
 		end
   end
-
   def down
   end
 end
