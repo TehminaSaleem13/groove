@@ -64,5 +64,6 @@ module Groovepacks
     
     # Autoload lib/ folder including all subdirectories
     config.autoload_paths += Dir["#{config.root}/lib/**/"]
+    config.middleware.use 'Apartment::Elevators::Subdomain'
   end
 end
