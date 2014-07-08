@@ -72,3 +72,4 @@ gem 'chunky_png'
 gem 'prawn'
 gem 'pdftk'
 gem 'apartment', :git=>'https://github.com/influitive/apartment.git'
+
