@@ -872,9 +872,8 @@ class OrdersController < ApplicationController
       order_summary_info.save
       # call delayed job
       import_orders_obj = ImportOrders.new
-      Delayed::Job.where(queue: 'importing orders').destroy_all
-      import_orders_obj.delay(:run_at => 1.seconds.from_now,:queue => 'importing orders').import_orders
-      # import_orders_obj.import_orders
+      # Delayed::Job.where(queue: 'importing orders').destroy_all
+      import_orders_obj.delay(:run_at => 20.seconds.from_now,:queue => 'importing orders').import_orders  Apartment::Tenant.current_tenant    # import_orders_obj.import_orders
     else
       #Send a message back to the user saying that import is already in progress
       result['error_messages'].push('Import is in progress')

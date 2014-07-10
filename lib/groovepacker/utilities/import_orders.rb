@@ -1,5 +1,6 @@
 class ImportOrders
-	def import_orders
+	def import_orders(tenant)
+		Apartment::Tenant.switch(tenant)
 		result = Hash.new
 		# we will remove all the jobs pertaining to import which are not started
 
@@ -31,7 +32,7 @@ class ImportOrders
 				end
 			end
 			OrderImportSummary.where(status: 'completed').delete_all
-			if !@order_import_summary.id.nil?
+			if !@order_import_summary.nil? && !@order_import_summary.id.nil?
 				import_items = @order_import_summary.import_items
 				import_items.each do |import_item|
 					store_type = import_item.store.store_type
