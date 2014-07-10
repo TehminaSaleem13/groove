@@ -16,6 +16,7 @@ module SettingsHelper
     end
   end
   def import_orders_helper(tenant)
+    Apartment::Tenant.switch(tenant)
     order_summary = OrderImportSummary.where(
       status: 'in_progress')
 
@@ -28,7 +29,7 @@ module SettingsHelper
       import_orders_obj = ImportOrders.new
       # import_orders_obj.delay(:run_at => 1.seconds.from_now,:queue => 'importing orders').import_orders
       import_orders_obj.import_orders(tenant)
-      import_orders_obj.reschedule_job('import_orders')
+      import_orders_obj.reschedule_job('import_orders',tenant)
     end
   end
 end

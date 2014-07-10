@@ -87,7 +87,8 @@ class ImportOrders
 		end	
 		result
 	end
-	def reschedule_job(type)
+	def reschedule_job(type,tenant)
+		Apartment::Tenant.switch(tenant)
 		date = DateTime.now
     date = date + 1.day
     job_scheduled = false

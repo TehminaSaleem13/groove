@@ -105,15 +105,16 @@ class GeneralSetting < ActiveRecord::Base
     time_diff = ((run_at_date - DateTime.now.getutc) * 24 * 60 * 60).to_i
     logger.info time_diff
     if time_diff > 0
+      tenant = Apartment::Tenant.current_tenant
       if job_type == 'low_inventory_email'
-        Delayed::Job.where(queue: 'low inventory email scheduled').destroy_all
+        Delayed::Job.where(queue: "low_inventory_email_scheduled_#{tenant}").destroy_all
         #LowInventoryLevel.notify(self).deliver
         logger.info 'inserting delayed job'
-        LowInventoryLevel.delay(:run_at => time_diff.seconds.from_now,:queue => 'low inventory email scheduled').notify(self)
+        LowInventoryLevel.delay(:run_at => time_diff.seconds.from_now,:queue => "low_inventory_email_scheduled_#{tenant}").notify(self,tenant)
         job_scheduled = true
       elsif job_type == 'import_orders'
-        Delayed::Job.where(queue: 'import orders scheduled').destroy_all
-        self.delay(:run_at => time_diff.seconds.from_now,:queue => 'import orders scheduled').import_orders_helper Apartment::Tenant.current_tenant
+        Delayed::Job.where(queue: "import_orders_scheduled_#{tenant}").destroy_all
+        self.delay(:run_at => time_diff.seconds.from_now,:queue => "import_orders_scheduled_#{tenant}").import_orders_helper tenant
         job_scheduled = true
       end
     end
