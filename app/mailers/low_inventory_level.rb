@@ -1,7 +1,8 @@
 class LowInventoryLevel < ActionMailer::Base
   default from: "app@groovepacker.com"
   
-  def notify(general_settings)
+  def notify(general_settings, tenant)
+    Apartment::Tenant.switch(tenant)
     attachments.inline['logo.png'] = 
       File.read("#{Rails.root}/public/images/logo.png")
     attachments.inline['caution_alert.png'] = 
@@ -9,6 +10,6 @@ class LowInventoryLevel < ActionMailer::Base
   	mail to: general_settings.low_inventory_email_address, 
   		subject: "GroovePacker Low Inventory Alert"
     import_orders_obj = ImportOrders.new
-    import_orders_obj.reschedule_job('low_inventory_email')
+    import_orders_obj.reschedule_job('low_inventory_email',tenant)
   end
 end
