@@ -8,7 +8,7 @@ source /usr/local/rvm/scripts/rvm
 cd ~/groove
 
 RAILS_ENV=production script/delayed_job stop
-RAILS_ENV=production script/delayed_job start
+RAILS_ENV=production script/delayed_job -n 2 start
 
 exit
 EOF
