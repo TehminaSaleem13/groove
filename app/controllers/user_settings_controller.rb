@@ -278,4 +278,21 @@ class UserSettingsController < ApplicationController
         format.json { render json: @result }
     end
   end
+
+  def create_tenant
+    @result = Hash.new
+    @result['messages'] = []
+    tenant = Tenant.new
+    tenant.name = params[:name]
+
+    if tenant.save
+      Apartment::Tenant.create(tenant.name)
+      @result['messages'] = 'Tenant successfully created'
+    else
+      @result['messages'] = tenant.errors.full_messages
+    end
+    respond_to do |format|
+      format.json {render json: @result}
+    end
+  end
 end

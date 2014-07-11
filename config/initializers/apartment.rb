@@ -34,9 +34,9 @@ Apartment.configure do |config|
 
   # supply list of database names for migrations to run on
   # config.tenant_names = lambda{ ToDo_Tenant_Or_User_Model.pluck :database }
-  # config.tenant_names = ['client1','client2']
-  config.tenant_names = ['test', 'test1']
-  config.excluded_models = ['Delayed::Job']
+  config.tenant_names = lambda{ Tenant.pluck :name }
+  # config.tenant_names = ['test', 'test1']
+  config.excluded_models = ['Delayed::Job','Tenant']
 end
 
 ##
