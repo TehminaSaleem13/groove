@@ -324,7 +324,7 @@ class SettingsController < ApplicationController
   end
 
   def send_test_mail
-    LowInventoryLevel.notify(GeneralSetting.all.first).deliver
+    LowInventoryLevel.notify(GeneralSetting.all.first, Apartment::Tenant.current_tenant).deliver
     render json: "ok"
   end
 
