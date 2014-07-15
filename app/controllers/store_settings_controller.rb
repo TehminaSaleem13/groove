@@ -145,6 +145,7 @@ class StoreSettingsController < ApplicationController
             @result['messages'] = [e.message]
           end
           @result['store_id'] = @store.id
+          @result['tenant_name'] = Apartment::Tenant.current_tenant
         end
 
         if @store.store_type == 'CSV'
@@ -689,6 +690,7 @@ class StoreSettingsController < ApplicationController
     @store = Store.new
     @result = @store.get_ebay_signin_url
     session[:ebay_session_id] = @result['ebay_sessionid']
+    @result['current_tenant'] = Apartment::Tenant.current_tenant
     respond_to do |format|
         format.html # show.html.erb
         format.json { render json: @result }
@@ -730,6 +732,7 @@ class StoreSettingsController < ApplicationController
     end
     ebaytoken_resp = MultiXml.parse(res.body)
     @result['response'] = ebaytoken_resp
+    puts "fetch token response:" + ebaytoken_resp.inspect
     if ebaytoken_resp['FetchTokenResponse']['Ack'] == 'Success'
       session[:ebay_auth_token] = ebaytoken_resp['FetchTokenResponse']['eBayAuthToken']
       session[:ebay_auth_expiration] = ebaytoken_resp['FetchTokenResponse']['HardExpirationTime']
@@ -824,6 +827,14 @@ class StoreSettingsController < ApplicationController
         format.html # show.html.erb
         format.json { render json: @result }
     end
+  end
+
+  def handle_ebay_redirect
+    # get the tenant name and construct the url 
+    # and redirect to it
+
+
+
   end
 end
 

@@ -347,6 +347,7 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies, wa
                         $scope.ebay_signin_url_status = data.ebay_signin_url_status;
                         $scope.ebay_sessionid = data.ebay_sessionid;
                         $scope.ebay_show_signin_url = true;
+                        $scope.current_tenant = data.current_tenant;
                         }
 
                         }).error(function(data) {
