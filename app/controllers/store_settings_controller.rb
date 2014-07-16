@@ -1,4 +1,5 @@
 class StoreSettingsController < ApplicationController
+  before_filter :authenticate_user!, :except => [:handle_ebay_redirect]
   def storeslist
     @stores = Store.where("store_type != 'system'")
 
@@ -830,11 +831,24 @@ class StoreSettingsController < ApplicationController
   end
 
   def handle_ebay_redirect
-    # get the tenant name and construct the url 
-    # and redirect to it
-
-
-
+    ebaytkn = params['ebaytkn']
+    tknexp = params['tknexp']
+    username = params['username']
+    redirect = params['redirect']
+    editstatus = params['editstatus']
+    name = params['name']
+    status = params['status']
+    storetype = params['storetype']
+    storeid = params['storeid']
+    inventorywarehouseid = params['inventorywarehouseid']
+    importimages = params['importimages']
+    importproducts = params['importproducts']
+    messagetocustomer = params['messagetocustomer']
+    tenant_name = params['tenantname']
+    # redirect_to ("https://#{tenant_name}.groovepacker.com:3001//#/settings/showstores/ebay?ebaytkn=#{ebaytkn}&tknexp=#{tknexp}&username=#{username}&redirect=#{redirect}&editstatus=#{editstatus}&name=#{name}&status=#{status}&storetype=#{storetype}&storeid=#{storeid}&inventorywarehouseid=#{inventorywarehouseid}&importimages=#{importimages}&importproducts=#{importproducts}&messagetocustomer=#{messagetocustomer}&tenantname=#{tenant_name}")
+    # redirect_to ("https://#{tenant_name}.groovepacker.com:3001//#/settings/showstores/ebay?ebaytkn=#{ebaytkn}&username=#{username}&redirect=#{redirect}&editstatus=#{editstatus}&name=#{name}&status=#{status}&storetype=#{storetype}&storeid=#{storeid}&inventorywarehouseid=#{inventorywarehouseid}&importimages=#{importimages}&importproducts=#{importproducts}&messagetocustomer=#{messagetocustomer}&tenantname=#{tenant_name}")
+    # redirect_to ("https://#{tenant_name}.groovepacker.com//#/settings/showstores/ebay?ebaytkn=#{ebaytkn}&tknexp=#{tknexp}&username=#{username}&redirect=#{redirect}&editstatus=#{editstatus}&name=#{name}&status=#{status}&storetype=#{storetype}&storeid=#{storeid}&inventorywarehouseid=#{inventorywarehouseid}&importimages=#{importimages}&importproducts=#{importproducts}&messagetocustomer=#{messagetocustomer}&tenantname=#{tenant_name}")
+    redirect_to ("https://#{tenant_name}.groovepacker.com//#/settings/showstores/ebay?ebaytkn=#{ebaytkn}&username=#{username}&redirect=#{redirect}&editstatus=#{editstatus}&name=#{name}&status=#{status}&storetype=#{storetype}&storeid=#{storeid}&inventorywarehouseid=#{inventorywarehouseid}&importimages=#{importimages}&importproducts=#{importproducts}&messagetocustomer=#{messagetocustomer}&tenantname=#{tenant_name}")
   end
 end
 
