@@ -9,7 +9,6 @@ module Groovepacker
             client = handler[:store_handle][:handle]
             session = handler[:store_handle][:session]
             result = self.build_result
-            puts "credential.last_imported_at" + credential.last_imported_at.to_s
             @filters_array = {}
             @filters = {}
             @filter = {}

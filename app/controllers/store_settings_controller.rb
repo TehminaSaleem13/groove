@@ -1,4 +1,5 @@
 class StoreSettingsController < ApplicationController
+  before_filter :authenticate_user!, :except => [:handle_ebay_redirect]
   def storeslist
     @stores = Store.where("store_type != 'system'")
 
@@ -145,6 +146,7 @@ class StoreSettingsController < ApplicationController
             @result['messages'] = [e.message]
           end
           @result['store_id'] = @store.id
+          @result['tenant_name'] = Apartment::Tenant.current_tenant
         end
 
         if @store.store_type == 'CSV'
@@ -689,6 +691,7 @@ class StoreSettingsController < ApplicationController
     @store = Store.new
     @result = @store.get_ebay_signin_url
     session[:ebay_session_id] = @result['ebay_sessionid']
+    @result['current_tenant'] = Apartment::Tenant.current_tenant
     respond_to do |format|
         format.html # show.html.erb
         format.json { render json: @result }
@@ -730,6 +733,7 @@ class StoreSettingsController < ApplicationController
     end
     ebaytoken_resp = MultiXml.parse(res.body)
     @result['response'] = ebaytoken_resp
+    puts "fetch token response:" + ebaytoken_resp.inspect
     if ebaytoken_resp['FetchTokenResponse']['Ack'] == 'Success'
       session[:ebay_auth_token] = ebaytoken_resp['FetchTokenResponse']['eBayAuthToken']
       session[:ebay_auth_expiration] = ebaytoken_resp['FetchTokenResponse']['HardExpirationTime']
@@ -824,6 +828,26 @@ class StoreSettingsController < ApplicationController
         format.html # show.html.erb
         format.json { render json: @result }
     end
+  end
+
+  def handle_ebay_redirect
+    ebaytkn = params['ebaytkn']
+    tknexp = params['tknexp']
+    username = params['username']
+    redirect = params['redirect']
+    editstatus = params['editstatus']
+    name = params['name']
+    status = params['status']
+    storetype = params['storetype']
+    storeid = params['storeid']
+    inventorywarehouseid = params['inventorywarehouseid']
+    importimages = params['importimages']
+    importproducts = params['importproducts']
+    messagetocustomer = params['messagetocustomer']
+    tenant_name = params['tenantname']
+
+    # redirect_to (URI::encode("https://#{tenant_name}.groovepacker.com:3001//") + "#" + URI::encode("/settings/showstores/ebay?ebaytkn=#{ebaytkn}&tknexp=#{tknexp}&username=#{username}&redirect=#{redirect}&editstatus=#{editstatus}&name=#{name}&status=#{status}&storetype=#{storetype}&storeid=#{storeid}&inventorywarehouseid=#{inventorywarehouseid}&importimages=#{importimages}&importproducts=#{importproducts}&messagetocustomer=#{messagetocustomer}&tenantname=#{tenant_name}") ) 
+    redirect_to (URI::encode("https://#{tenant_name}.groovepacker.com//") + "#" + URI::encode("/settings/showstores/ebay?ebaytkn=#{ebaytkn}&tknexp=#{tknexp}&username=#{username}&redirect=#{redirect}&editstatus=#{editstatus}&name=#{name}&status=#{status}&storetype=#{storetype}&storeid=#{storeid}&inventorywarehouseid=#{inventorywarehouseid}&importimages=#{importimages}&importproducts=#{importproducts}&messagetocustomer=#{messagetocustomer}&tenantname=#{tenant_name}") )
   end
 end
 

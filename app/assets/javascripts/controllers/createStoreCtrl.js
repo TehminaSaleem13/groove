@@ -1,6 +1,6 @@
 groovepacks_controllers.
-    controller('createStoreCtrl', [ '$scope', '$http', '$timeout', '$stateParams', '$location', '$state', '$cookies',
-        function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies) {
+    controller('createStoreCtrl', [ '$scope', '$http', '$timeout', '$stateParams', '$location', '$state', '$cookies', 'auth',
+        function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies, auth) {
             var myscope = {};
             myscope.create_store = function() {
                 $scope.setup_modal();
@@ -10,7 +10,6 @@ groovepacks_controllers.
                 $scope.$parent.newStore.status = 1;
                 $scope.$parent.ebay_show_signin_url = true;
                 $scope.$parent.loading = false;
-
 
                 for(var i=0; i<$scope.$parent.warehouses.list.length; 
                     i++) {
@@ -29,6 +28,7 @@ groovepacks_controllers.
                         $scope.$parent.ebay_signin_url = data.ebay_signin_url;
                         $scope.$parent.ebay_signin_url_status = data.ebay_signin_url_status;
                         $scope.$parent.ebay_sessionid = data.ebay_sessionid;
+                        $scope.$parent.current_tenant = data.current_tenant;
                     }
 
                 }).error(function(data) {

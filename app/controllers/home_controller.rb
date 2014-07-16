@@ -13,6 +13,7 @@ class HomeController < ApplicationController
     user['name'] = current_user.name
     user['id'] = current_user.id
     user['role'] = current_user.role
+    user['current_tenant'] = Apartment::Tenant.current_tenant
 
     respond_to do |format|
       format.html # show.html.erb
