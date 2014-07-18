@@ -906,6 +906,18 @@ class OrdersController < ApplicationController
     render json: result
   end  
 
+  def confirmation
+    
+  end
+  def match
+    # render :text => params.inspect and return
+    email = params['confirm']['email'].to_s
+    postcode = params['confirm']['postcode'].to_s
+    @orders = Order.where(email: email, postcode: postcode, status: 'onhold')
+    puts @orders.inspect
+    
+  end
+
   private
 
   def generate_pdf(result,order,page_height,page_width,orientation,file_name,header,footer)

@@ -1,0 +1,18 @@
+
+<%= form_for :confirm, url: {action: "match"} do |f| %>
+	<div class="well span6" style="margin-left: 250px;">
+		<div class="control-group">
+			<label class="control-label span1">Email:</label>
+			<div class="controls span4">
+				<%= f.email_field :email %>
+			</div>
+
+			<label class="control-label span1">Zip Code :</label>
+			<div class="controls span4">
+				<%= f.text_field :postcode %>
+			</div>
+			<div style="margin-left: 150px;"><%= f.button(:submit, {class: 'btn btn-primary span1'})%>
+			</div>
+		</div> 
+	</div> 
+<% end %>
