@@ -906,6 +906,21 @@ class OrdersController < ApplicationController
     render json: result
   end  
 
+  def confirmation
+    
+  end
+  def match
+    # render :text => params.inspect and return
+    email = params['confirm']['email']
+    postcode = params['confirm']['postcode']
+    @orders = Order.where(email: email, postcode: postcode, status: 'scanned')
+    if !@orders.empty?
+      render 'match'
+    else
+      render 'confirmation'
+    end
+  end
+
   private
 
   def generate_pdf(result,order,page_height,page_width,orientation,file_name,header,footer)
