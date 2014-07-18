@@ -911,11 +911,14 @@ class OrdersController < ApplicationController
   end
   def match
     # render :text => params.inspect and return
-    email = params['confirm']['email'].to_s
-    postcode = params['confirm']['postcode'].to_s
+    email = params['confirm']['email']
+    postcode = params['confirm']['postcode']
     @orders = Order.where(email: email, postcode: postcode, status: 'onhold')
-    puts @orders.inspect
-    
+    if !@orders.empty?
+      render 'match'
+    else
+      render 'confirmation'
+    end
   end
 
   private
