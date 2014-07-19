@@ -1,33 +1,40 @@
 <div style="padding-top: 20px;">
 	<div class="well span8" style="margin-left: 150px;">
-		<%= form_for :subscription do |f| %>
-			<!-- <%# if @subscription.error.any? %>
+		<%Apartment::Tenant.switch()%>
+		<%= form_for @subscription, url:{action: 'create'} do |f| %>
+			<% if @subscription.errors.any? %>
 				<div class="error_messages">
-					<h2><%#= pluralize(@subscription.error.count,"error") %> prohibited this subscription from being saved:</h2>
+					<h2><%= pluralize(@subscription.errors.count,"error") %> prohibited this subscription from being saved:</h2>
 					<ul>
-					<%# @subscription.error.full_messages.each do |msg| %>
-						<li><%#= msg%></li>
-					<%# end %>
+					<% @subscription.errors.full_messages.each do |msg| %>
+						<li><%= msg%></li>
+					<% end %>
 					</ul>
 				</div>
-			<%# end %> -->
+			<% end %>
 			<div class="control-group">
+				<%#= f.hidden_field :stripe_card_token%>
 				<label class="control-label span3">Email:</label>
 				<div class="controls">
 					<%= f.email_field :email %>
 				</div>
 				<label class="control-label span3"><%= label_tag :card_number, "Credit Card Number:" %></label>
 				<div class="controls">					
-					<%= text_field_tag :card_number, nil, name: nil %>
+					<%= f.text_field :card_number %>
 				</div>
 				<label class="control-label span3"><%= label_tag :card_code, "Security Code on Card (CVV):" %></label>
 				<div class="controls">	
-					<%= text_field_tag :card_code, nil, name: nil %>
+					<%= f.text_field :card_code%>
 				</div>
 				<label class="control-label span3"><%= label_tag :card_month, "Card Expiration:" %></label>
 				<div class="controls">					
 					<%= select_month nil, {add_month_numbers: true}, {name: nil, id: "card_month"} %>
 					<%= select_year nil, {start_year: Date.today.year, end_year: Date.today.year+15}, {name: nil, id: "card_year"} %>
+				</div>
+				<div id="stripe_error">
+					<noscript>
+						Javascript is not enabled and is required for this form. First enable it in your web browser settings.
+					</noscript>
 				</div>
 				<div class="actions">
 					<center>
