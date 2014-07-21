@@ -1,47 +1,36 @@
 <div style="padding-top: 20px;">
-	<div class="well span8" style="margin-left: 150px;">
-		<%Apartment::Tenant.switch()%>
-		<%= form_for @subscription, url:{action: 'create'}, method: 'POST' do |f| %>
-			<% if @subscription.errors.any? %>
-				<div class="error_messages">
-					<h2><%= pluralize(@subscription.errors.count,"error") %> prohibited this subscription from being saved:</h2>
-					<ul>
-					<% @subscription.errors.full_messages.each do |msg| %>
-						<li><%= msg%></li>
-					<% end %>
-					</ul>
-				</div>
-			<% end %>
-			<div class="control-group">
-				<%#= f.hidden_field :stripe_card_token%>
-				<label class="control-label span3">Email:</label>
-				<div class="controls">
+	<div class="well span7" style="margin-left: 250px;">
+		<div class="span1"  style=" margin-bottom: 5px; align: right;">
+			<%= link_to 'Back', {action: 'select_plan'}, class: "btn btn-primary"%>
+		</div>
+		<%= form_for :subscription, url: {action: 'create'} do |f|%>
+			<div class="control-group span7">
+				<label class="control-label span2">Email:</label>
+				<div class="controls span4">
 					<%= f.email_field :email %>
 				</div>
-				<label class="control-label span3"><%= label_tag :card_number, "Credit Card Number:" %></label>
-				<div class="controls">					
-					<%= text_field_tag :card_number, nil, name: nil %>
+				<label class="control-label span2">Username:</label>
+				<div class="controls span4">
+					<%= f.text_field :user_name %>
 				</div>
-				<label class="control-label span3"><%= label_tag :card_code, "Security Code on Card (CVV):" %></label>
-				<div class="controls">	
-					<%= text_field_tag :card_code, nil, name: nil%>
+				<label class="control-label span2">Password:</label>
+				<div class="controls span4">
+					<%= f.password_field :password %>
 				</div>
-				<label class="control-label span3"><%= label_tag :card_month, "Card Expiration:" %></label>
-				<div class="controls">					
-					<%= select_month nil, {add_month_numbers: true}, {name: nil, id: "card_month"} %>
-					<%= select_year nil, {start_year: Date.today.year, end_year: Date.today.year+15}, {name: nil, id: "card_year"} %>
+				<label class="control-label span2">Confirm Password:</label>
+				<div class="controls span4">
+					<%= f.password_field :confirm_password %>
 				</div>
-				<div id="stripe_error">
-					<noscript>
-						Javascript is not enabled and is required for this form. First enable it in your web browser settings.
-					</noscript>
+				<label class="control-label span2">Amount:</label>
+				<div class="controls span4" style="margin-bottom: 10px;">
+					<%#= f.text_field :amount, value: "#{@plan['amount']}.00$" %>
+					<%= "#{@plan['amount']}.00$"%>
 				</div>
-				<div class="actions">
-					<center>
-					<%= f.submit "Subscribe",class: "btn btn-primary" %>
-				</center>
+				<label class="control-label span2"></label>
+				<div>
+					<%= f.button('Purchase Now', {class: 'btn btn-primary span2'})%>
 				</div>
-			</div>
-		<% end %>
-	</div>
+			</div> 
+		<%end%>
+	</div> 
 </div>
