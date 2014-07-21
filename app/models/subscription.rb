@@ -1,8 +1,10 @@
 class Subscription < ActiveRecord::Base
   attr_accessible :card_code, :card_month, :card_number, :card_year, :email, :stripe_customer_token
   validates_presence_of :email
-  validates_presence_of :card_number
-  validates_presence_of :card_code
+  # validates_presence_of :card_number
+  # validates_presence_of :card_code
+  # validates_presence_of :card_month
+  # validates_presence_of :card_year
   attr_accessor :stripe_card_token
   def save_with_payment
   	if valid?

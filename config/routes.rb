@@ -1,9 +1,9 @@
 Groovepacks::Application.routes.draw do
 
 
-  get "subscriptions/new"
   match 'subscriptions/new', :to => 'subscriptions#new', :as => :subscriptions
-
+  # match 'subscriptions/new', :to => 'subscriptions#new'
+  # match 'subscriptions/show', :to => 'subscriptions#show'
   get "inventory_warehouse/create"
 
   get "inventory_warehouse/update"

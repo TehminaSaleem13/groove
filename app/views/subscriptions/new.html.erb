@@ -1,7 +1,7 @@
 <div style="padding-top: 20px;">
 	<div class="well span8" style="margin-left: 150px;">
 		<%Apartment::Tenant.switch()%>
-		<%= form_for @subscription, url:{action: 'create'} do |f| %>
+		<%= form_for @subscription, url:{action: 'create'}, method: 'POST' do |f| %>
 			<% if @subscription.errors.any? %>
 				<div class="error_messages">
 					<h2><%= pluralize(@subscription.errors.count,"error") %> prohibited this subscription from being saved:</h2>
@@ -20,11 +20,11 @@
 				</div>
 				<label class="control-label span3"><%= label_tag :card_number, "Credit Card Number:" %></label>
 				<div class="controls">					
-					<%= f.text_field :card_number %>
+					<%= text_field_tag :card_number, nil, name: nil %>
 				</div>
 				<label class="control-label span3"><%= label_tag :card_code, "Security Code on Card (CVV):" %></label>
 				<div class="controls">	
-					<%= f.text_field :card_code%>
+					<%= text_field_tag :card_code, nil, name: nil%>
 				</div>
 				<label class="control-label span3"><%= label_tag :card_month, "Card Expiration:" %></label>
 				<div class="controls">					
