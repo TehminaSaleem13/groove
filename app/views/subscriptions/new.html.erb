@@ -19,12 +19,12 @@
 				</div>
 				<label class="control-label span2">Confirm Password:</label>
 				<div class="controls span4">
-					<%= f.password_field :confirm_password %>
+					<%= f.password_field :password_confirmation %>
 				</div>
 				<label class="control-label span2">Amount:</label>
 				<div class="controls span4" style="margin-bottom: 10px;">
-					<%#= f.text_field :amount, value: "#{@plan['amount']}.00$" %>
 					<%= "#{@plan['amount']}.00$"%>
+					<%= f.hidden_field :amount, id: "amount", value: "#{@plan['amount']}"%>
 				</div>
 				<label class="control-label span2"></label>
 				<div>

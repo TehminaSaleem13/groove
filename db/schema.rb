@@ -414,13 +414,15 @@ ActiveRecord::Schema.define(:version => 20140719073021) do
 
   create_table "subscriptions", :force => true do |t|
     t.string   "email"
-    t.string   "card_number"
-    t.integer  "card_code"
-    t.integer  "card_month"
-    t.integer  "card_year"
+    t.string   "user_name"
+    t.text     "password"
+    t.text     "password_confirmation"
+    t.decimal  "amount",                :precision => 8, :scale => 2, :default => 0.0
     t.string   "stripe_customer_token"
-    t.datetime "created_at",            :null => false
-    t.datetime "updated_at",            :null => false
+    t.string   "status"
+    t.integer  "tenant_id"
+    t.datetime "created_at",                                                           :null => false
+    t.datetime "updated_at",                                                           :null => false
   end
 
   create_table "tenants", :force => true do |t|

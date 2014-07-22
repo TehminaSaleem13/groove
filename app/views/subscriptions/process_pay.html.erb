@@ -1,6 +1,6 @@
 <div style="padding-top: 20px;">
 	<div class="well span8" style="margin-left: 150px;">
-	  <form action="process_pay" method="POST" id="payment-form">
+	  <form action="show" method="POST" id="payment-form" >
 	    <span class="payment-errors"></span>
 	 		
 	    <div class="control-group">
@@ -16,7 +16,7 @@
 	    	<div class="controls">
 	        <input type="text" size="2" data-stripe="exp-month"/>
 	      	<input type="text" size="4" data-stripe="exp-year"/>
-	    	</div>
+	    	</div> 
 	    </div>
 	    <center><button type="submit" class="btn btn-primary">Submit Payment</button></center>
 	  </form>

@@ -1,11 +1,11 @@
 class Subscription < ActiveRecord::Base
-  attr_accessible :card_code, :card_month, :card_number, :card_year, 
-    :email, :stripe_customer_token
-  # validates_presence_of :email
-  # validates_presence_of :card_number
-  # validates_presence_of :card_code
-  # validates_presence_of :card_month
-  # validates_presence_of :card_year
+  attr_accessible :email, :stripe_customer_token, :user_name, :password, :password_confirmation, :amount
+  validates_presence_of :email
+  validates_presence_of :user_name
+  # validates_uniqueness_of :user_name
+  validates_presence_of :password
+  validates_presence_of :password_confirmation
+  validates_confirmation_of :password_confirmation
   attr_accessor :stripe_card_token
   def save_with_payment
   	if valid?
@@ -13,14 +13,12 @@ class Subscription < ActiveRecord::Base
   		self.stripe_customer_token = customer.id
       puts "inspect:" + self.inspect
       begin
-        puts ".............."
         Stripe::Charge.create(
           :amount => 1000,
           :currency => "usd",
           :customer => self.stripe_customer_token,
           :description => email
         )
-        puts "//////////////"
       rescue Stripe::CardError => e
         # The card has been declined
         puts "Card declined"
