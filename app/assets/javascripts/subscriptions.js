@@ -7,9 +7,10 @@ jQuery(function() {
 
 subscription = {
   setupForm: function() {
-    return $('#new_subscription').onClick(function() {
+    return $('#subscription').submit(function() {
+      console.log('processing card');
       $('input[type=submit]').attr('disabled', true);
-      if ($('#card_number').length) {
+      if ($('#number').length) {
         subscription.processCard();
         return false;
       } else {
@@ -19,19 +20,28 @@ subscription = {
   },
   processCard: function() {
     var card;
+    alert("processing")    
     card = {
-      number: $('#card_number').val(),
-      cvc: $('#card_code').val(),
-      expMonth: $('#card_month').val(),
-      expYear: $('#card_year').val()
+      number: $('#number').val(),
+      cvc: $('#cvc').val(),
+      expMonth: $('#exp-month').val(),
+      expYear: $('#exp-year').val()
     };
     return Stripe.createToken(card, subscription.handleStripeResponse);
   },
   handleStripeResponse: function(status, response) {
     if (status === 200) {
-      $('#new_subscription')[0].submit();
-      return alert(response.id);
+      $('#subscription_stripe_card_token').val(response.id);
+      alert("entering ajax.");
+      $.ajax({
+        type: "PUT",
+        url: "/subscriptions/confirm_payment",
+        data: { stripe_customer_token: response.id, id: $('#subscription_id').val() }
+        });
+      alert("exiting ajax.");
+      $('#subscription')[0].submit();
     } else {
+    alert('error');
       $('#stripe_error').text(response.error.message);
       return $('input[type=submit]').attr('disabled', false);
     }
