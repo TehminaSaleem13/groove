@@ -1,0 +1,10 @@
+<div class="well">
+	<div style="font-size: 30px;"><center><b><i>
+		<%= flash[:notice]%>
+	</i></b></center></div>
+	<hr>
+	<div>
+		<center>You have been charged with <%=@subscription.amount.to_i%>.00$.</center>
+		<center>Enjoy your subscription till <%= Date.today + 1.month%>.</center>
+	</div>
+</div>

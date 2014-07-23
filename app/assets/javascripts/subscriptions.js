@@ -7,7 +7,8 @@ jQuery(function() {
 
 subscription = {
   setupForm: function() {
-    return $('#subscription').submit(function() {
+    return $('#subscription').submit(function(event) {
+      event.preventDefault();
       console.log('processing card');
       $('input[type=submit]').attr('disabled', true);
       if ($('#number').length) {
@@ -35,11 +36,20 @@ subscription = {
       alert("entering ajax.");
       $.ajax({
         type: "PUT",
+        contentType: "application/json",
         url: "/subscriptions/confirm_payment",
-        data: { stripe_customer_token: response.id, id: $('#subscription_id').val() }
+        data: JSON.stringify({ stripe_customer_token: response.id, id: $('#subscription_id').val() }),
+        dataType: "json"
+        
+        }).error(function(response) {
+          alert(response.getResponseHeader());
+          alert('going to render the thankyou page.');
+          window.location.href = 'https://local.groovepacker.com:3001/subscriptions/show/' + $('#subscription_id').val() + '?notice=Thankyou+for+subscribing%21';
+        }).success(function(response){
+          alert("success");
+          alert(response.status);
         });
       alert("exiting ajax.");
-      $('#subscription')[0].submit();
     } else {
     alert('error');
       $('#stripe_error').text(response.error.message);

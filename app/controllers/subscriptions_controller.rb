@@ -35,41 +35,11 @@ class SubscriptionsController < ApplicationController
     end
   end
 
-  def save_with_payment(subscription)
-    if !subscription.nil?
-      begin
-        Stripe::Charge.create(
-          :amount => subscription.amount,
-          :currency => "usd",
-          :card => subscription.stripe_customer_token,
-          :description => subscription.email
-        )
-      rescue Stripe::CardError => e
-        subscription.status = 'failed'
-        subscription.save
-        puts "Card declined"
-        puts e.inspect
-      end
-      subscription.status = 'completed'
-      subscription.save 
-      save!
-    end
-  rescue Stripe::InvalidRequestError => e
-    subscription.status = 'failed'
-    subscription.save
-    logger.error "Stripe error while creating customer: #{e.message}"
-    errors.add :base, "There was a problem with your credit card."
-    false
-  end
 
   def show
-    # @subscription = Subscription.find(params[:id])
-
-    # if @subscription.save_with_payment
-    #   redirect_to subscriptions_path(@subscription), :notice => "Thankyou for subscribing!"
-    # else
-    #   render 'select_plan'
-    # end  
+    @subscription = Subscription.find(params[:id])
+    flash[:notice] = params[:notice]
+    
   end
   # def check_tenant_name
   # 	if Apartment::Tenant.current_tenant == 'test'
