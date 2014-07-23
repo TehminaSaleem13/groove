@@ -1,7 +1,7 @@
 class SubscriptionsController < ApplicationController
 	#before_filter: check_tenant_name
   def new
-    @subscription = Subscription.new
+    @subscription = Subscription.new(params[:subscription])
    	@plan = params
   end
   
@@ -14,6 +14,8 @@ class SubscriptionsController < ApplicationController
     @subscription.status = 'started'
     if @subscription.save
       redirect_to :action => 'process_pay', :id => @subscription.id
+    else
+      redirect_to :action => 'new', :subscription => params[:subscription]
     end 
   end
 

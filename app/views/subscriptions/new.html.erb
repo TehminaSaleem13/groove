@@ -23,8 +23,13 @@
 				</div>
 				<label class="control-label span2">Amount:</label>
 				<div class="controls span4" style="margin-bottom: 10px;">
-					<%= "#{@plan['amount']}.00$"%>
-					<%= f.hidden_field :amount, id: "amount", value: "#{@plan['amount']}"%>
+					<% if !@plan['amount'].nil?%>
+						<%= "#{@plan['amount']}.00$"%>
+						<%= f.hidden_field :amount, id: "amount", value: "#{@plan['amount']}"%>
+					<% else %>
+						<%= "#{@subscription['amount'].to_i}.00$"%>
+						<%= f.hidden_field :amount, id: "amount", value: "#{@subscription['amount']}"%>
+					<% end %>
 				</div>
 				<label class="control-label span2"></label>
 				<div>
