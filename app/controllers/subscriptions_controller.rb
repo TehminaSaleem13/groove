@@ -29,9 +29,9 @@ class SubscriptionsController < ApplicationController
     
 
     if @subscription.save_with_payment
-      render json: "ok"
+      render json: true
     else
-      render json: "failure"
+      render json: false
     end
   end
 

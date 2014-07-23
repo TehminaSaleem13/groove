@@ -36,18 +36,15 @@ subscription = {
       alert("entering ajax.");
       $.ajax({
         type: "PUT",
-        contentType: "application/json",
+        contentType: "application/json; charset=utf-8",
         url: "/subscriptions/confirm_payment",
         data: JSON.stringify({ stripe_customer_token: response.id, id: $('#subscription_id').val() }),
         dataType: "json"
         
-        }).error(function(response) {
-          alert(response.getResponseHeader());
+        }).success(function(response) {
+          alert(response.status);
           alert('going to render the thankyou page.');
           window.location.href = 'https://local.groovepacker.com:3001/subscriptions/show/' + $('#subscription_id').val() + '?notice=Thankyou+for+subscribing%21';
-        }).success(function(response){
-          alert("success");
-          alert(response.status);
         });
       alert("exiting ajax.");
     } else {
