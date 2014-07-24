@@ -12,11 +12,15 @@ class SubscriptionsController < ApplicationController
   def create
   	@subscription = Subscription.new(params[:subscription])
     @subscription.status = 'started'
-    if @subscription.save
-      redirect_to :action => 'process_pay', :id => @subscription.id
+    if @subscription.password == @subscription.password_confirmation
+      if @subscription.save
+        redirect_to :action => 'process_pay', :id => @subscription.id
+      else
+        redirect_to :action => 'new', :subscription => params[:subscription]
+      end 
     else
       redirect_to :action => 'new', :subscription => params[:subscription]
-    end 
+    end
   end
 
   def process_pay
@@ -27,13 +31,19 @@ class SubscriptionsController < ApplicationController
     puts "params" + params.inspect
     @subscription = Subscription.find(params[:id])
     @subscription.stripe_customer_token = params[:stripe_customer_token]
-    @subscription.save
-    
+    puts "subscription saving"
+    if @subscription.save
+      puts "subscription saved"
+      
 
-    if @subscription.save_with_payment
-      render json: true
+      if @subscription.save_with_payment
+        render json: true
+      else
+        render json: false
+      end
     else
-      render json: false
+      puts @subscription.errors.full_messages.inspect
+      render json: "failure"
     end
   end
 
