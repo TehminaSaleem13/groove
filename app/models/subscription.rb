@@ -3,7 +3,7 @@ class Subscription < ActiveRecord::Base
   belongs_to :tenant
   validates_presence_of :email
   validates_presence_of :user_name
-  # validates_uniqueness_of :user_name
+  validates_uniqueness_of :user_name
   validates_presence_of :password, :password_confirmation
   # validates_confirmation_of :password
   
@@ -11,21 +11,17 @@ class Subscription < ActiveRecord::Base
   def save_with_payment
     puts "save with payment"
   	if valid?
-  		# customer = Stripe::Customer.create(description: email, card: stripe_card_token)
-  		# self.stripe_customer_token = customer.id
-      #   puts "inspect:" + self.inspect
-      #   puts "customer:" + customer.inspect
       begin
         Stripe::Charge.create(
           :amount => self.amount.to_i*100,
           :currency => "usd",
           :card => stripe_customer_token,
-          # :customer => self.stripe_customer_token,
           :description => self.email
         )
-        # if Apartment::Tenant.create(self.user_name)
-        #   puts "Tenant created:" + self.user_name
-        # end
+
+        CreateTenant.delay(:run_at => 1.seconds.from_now).create_tenant self.user_name
+        Apartment::Tenant.switch()
+
       rescue Stripe::CardError => e
         # The card has been declined
         self.status = 'failed'
@@ -45,6 +41,4 @@ class Subscription < ActiveRecord::Base
   	errors.add :base, "There was a problem with your credit card."
   	false
   end
-
-  attr_accessor :stripe_card_token
 end

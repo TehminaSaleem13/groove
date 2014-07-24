@@ -28,14 +28,9 @@ class SubscriptionsController < ApplicationController
   end
 
   def confirm_payment
-    puts "params" + params.inspect
     @subscription = Subscription.find(params[:id])
     @subscription.stripe_customer_token = params[:stripe_customer_token]
-    puts "subscription saving"
     if @subscription.save
-      puts "subscription saved"
-      
-
       if @subscription.save_with_payment
         render json: true
       else
