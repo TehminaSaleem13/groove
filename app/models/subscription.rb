@@ -20,7 +20,8 @@ class Subscription < ActiveRecord::Base
         )
         transactions = Stripe::BalanceTransaction.all
         self.transaction_id = transactions.first.id
-        CreateTenant.delay(:run_at => 1.seconds.from_now).create_tenant self.user_name
+        CreateTenant.delay(:run_at => 1.seconds.from_now).create_tenant self
+        # CreateTenant.create_tenant self
         Apartment::Tenant.switch()
 
       rescue Stripe::CardError => e
