@@ -18,7 +18,8 @@ class Subscription < ActiveRecord::Base
           :card => stripe_customer_token,
           :description => self.email
         )
-
+        transactions = Stripe::BalanceTransaction.all
+        self.transaction_id = transactions.first.id
         CreateTenant.delay(:run_at => 1.seconds.from_now).create_tenant self.user_name
         Apartment::Tenant.switch()
 

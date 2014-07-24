@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140719073021) do
+ActiveRecord::Schema.define(:version => 20140724120519) do
 
   create_table "amazon_credentials", :force => true do |t|
     t.string   "merchant_id",                                     :null => false
@@ -423,6 +423,7 @@ ActiveRecord::Schema.define(:version => 20140719073021) do
     t.integer  "tenant_id"
     t.datetime "created_at",                                                           :null => false
     t.datetime "updated_at",                                                           :null => false
+    t.string   "transaction_id"
   end
 
   create_table "tenants", :force => true do |t|

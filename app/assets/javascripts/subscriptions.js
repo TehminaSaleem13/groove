@@ -44,7 +44,7 @@ subscription = {
         }).success(function(response) {
           alert(response.status);
           alert('going to render the thankyou page.');
-          window.location.href = 'https://local.groovepacker.com:3001/subscriptions/show/' + $('#subscription_id').val() + '?notice=Thankyou+for+subscribing%21';
+          window.location.href = 'https://local.groovepacker.com:3001/subscriptions/show/' + $('#subscription_id').val() + '?notice=Thank+you+for+your+subscription%21';
         });
       alert("exiting ajax.");
     } else {
