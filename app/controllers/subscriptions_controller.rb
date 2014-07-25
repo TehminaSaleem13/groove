@@ -31,13 +31,13 @@ class SubscriptionsController < ApplicationController
     @subscription.stripe_customer_token = params[:stripe_customer_token]
     if @subscription.save
       if @subscription.save_with_payment
-        render json: true
+        render json: {valid: false}
       else
-        render json: false
+        render json: {valid: true}
       end
     else
       puts @subscription.errors.full_messages.inspect
-      render json: "failure"
+      # render json: "failure"
     end
   end
 
@@ -45,9 +45,19 @@ class SubscriptionsController < ApplicationController
     tenant_name = params[:tenant_name]
 
     if Tenant.where(name: tenant_name).length > 0
-      render json: false
+      render json: {valid: false}
     else
-      render json: true
+      render json: {valid: true}
+    end
+  end
+
+  def valid_email
+    email = params[:email]
+
+    if Subscription.where(email: email).length > 0
+      render json: {valid: false}
+    else
+      render json: {valid: true}
     end
   end
 
