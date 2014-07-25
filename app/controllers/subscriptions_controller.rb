@@ -1,8 +1,7 @@
 class SubscriptionsController < ApplicationController
 	#before_filter: check_tenant_name
   def new
-    @subscription = Subscription.new(params[:subscription])
-   	@plan = params
+    @subscription = Subscription.new
   end
   
   def select_plan
@@ -28,7 +27,7 @@ class SubscriptionsController < ApplicationController
   end
 
   def confirm_payment
-    @subscription = Subscription.find(params[:id])
+    @subscription = Subscription.new(params[:subscription])
     @subscription.stripe_customer_token = params[:stripe_customer_token]
     if @subscription.save
       if @subscription.save_with_payment
@@ -42,6 +41,15 @@ class SubscriptionsController < ApplicationController
     end
   end
 
+  def valid_tenant_name
+    tenant_name = params[:tenant_name]
+
+    if Tenant.where(name: tenant_name).length > 0
+      render json: false
+    else
+      render json: true
+    end
+  end
 
   def show
     @subscription = Subscription.find(params[:id])

@@ -1,41 +1,70 @@
 <div style="padding-top: 20px;">
-	<div class="well span7" style="margin-left: 250px;">
-		<div class="span1"  style=" margin-bottom: 5px; align: right;">
+	<div class="well span6" style="margin-left: 20px;">
+		<div class=""  style=" margin-bottom: 5px; align: left;">
 			<%= link_to 'Back', {action: 'select_plan'}, class: "btn btn-primary"%>
 		</div>
-		<%= form_for :subscription, url: {action: 'create'} do |f|%>
-			<div class="control-group span7">
-				<label class="control-label span2">Email:</label>
-				<div class="controls span4">
-					<%= f.email_field :email %>
-				</div>
-				<label class="control-label span2">Username:</label>
-				<div class="controls span4">
-					<%= f.text_field :user_name %>
-				</div>
-				<label class="control-label span2">Password:</label>
-				<div class="controls span4">
-					<%= f.password_field :password %>
-				</div>
-				<label class="control-label span2">Confirm Password:</label>
-				<div class="controls span4">
-					<%= f.password_field :password_confirmation %>
-				</div>
-				<label class="control-label span2">Amount:</label>
-				<div class="controls span4" style="margin-bottom: 10px;">
-					<% if !@plan['amount'].nil?%>
-						<%= "#{@plan['amount']}.00$"%>
-						<%= f.hidden_field :amount, id: "amount", value: "#{@plan['amount']}"%>
-					<% else %>
-						<%= "#{@subscription['amount'].to_i}.00$"%>
-						<%= f.hidden_field :amount, id: "amount", value: "#{@subscription['amount']}"%>
-					<% end %>
-				</div>
-				<label class="control-label span2"></label>
-				<div>
-					<%= f.button('Register', {class: 'btn btn-primary span2'})%>
-				</div>
-			</div> 
-		<%end%>
+		<legend></legend>
+		<div>
+			<form action="" method="POST" class="form-vertical">
+  			<fieldset>
+  				<div>
+						<input type="hidden" id="amount" value="<%=params[:amount]%>"/>
+							
+						<label>Choose your site address<span style="color: red;">*</span></label>
+						<input type="text" placeholder="https://" class="span1" disabled/><input type="text" id="tenant_name" class="span2"/><input type="text" placeholder=".groovepacker.com" class="span2" disabled/>
+						<div id="help-block" style="color: red;"></div>
+
+				  	<label>Email<span style="color: red;">*</span></label>
+						<input type="email_field" id="email" class="span4"/>
+						<span class="help-block">Example block-level help text here.</span>
+					</div>
+
+					<script src="https://checkout.stripe.com/checkout.js"></script>
+					<div>
+						<button id="customButton" class="btn btn-primary">Purchase</button>
+					</div>
+					<script>
+					  var handler = StripeCheckout.configure({
+					    key: 'pk_test_4QS2UN3famIPlHtp2Q7ykpDf',
+					    image: '#{Rails.root}/public/images/logo.png',
+					    token: function(token) {
+					      // Use the token to create the charge with a server-side script.
+					      // You can access the token ID with `token.id`
+					    }
+					    // token: Stripe::stripeToken
+					  });
+
+					  $('#tenant_name').blur(function() {
+	  					//send request to the server /subscriptions/valid_tenant_name?name="test"
+	  					// if invalid, show site URL already exists message 
+	  					$.ajax({
+				        type: "GET",
+				        contentType: "application/json; charset=utf-8",
+				        url: "/subscriptions/valid_tenant_name",
+				        data: JSON.stringify({ tenant_name: $('#tenant_name').val() }),
+				        dataType: "json"
+				        
+				        }).error(function(response) {
+				          $('#help-block').html($('#tenant_name').val() +" already exists");
+				        });
+						});
+
+					  document.getElementById('customButton').addEventListener('click', function(e) {
+					    // Open Checkout with further options
+					    handler.open({
+					      name: 'Groovepacker',
+					      description: '1 subscription ($' + $('#amount').val() +')',
+					      amount: $('#amount').val()*100,
+					      email: $('#email').val()
+					    });
+
+
+					    e.preventDefault();
+					  });
+					</script>
+				</fieldset>
+			</form>
+		</div>
+		
 	</div> 
 </div>
