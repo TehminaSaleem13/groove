@@ -20,8 +20,7 @@ subscription = {
     });
   },
   processCard: function() {
-    var card;
-    alert("processing")    
+    var card;    
     card = {
       number: $('#number').val(),
       cvc: $('#cvc').val(),
@@ -33,7 +32,6 @@ subscription = {
   handleStripeResponse: function(status, response) {
     if (status === 200) {
       $('#subscription_stripe_card_token').val(response.id);
-      alert("entering ajax.");
       $.ajax({
         type: "PUT",
         contentType: "application/json; charset=utf-8",
@@ -42,11 +40,8 @@ subscription = {
         dataType: "json"
         
         }).success(function(response) {
-          alert(response.status);
-          alert('going to render the thankyou page.');
           window.location.href = 'https://local.groovepacker.com:3001/subscriptions/show/' + $('#subscription_id').val() + '?notice=Thank+you+for+your+subscription%21';
         });
-      alert("exiting ajax.");
     } else {
     alert('error');
       $('#stripe_error').text(response.error.message);
