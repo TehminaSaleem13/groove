@@ -4,9 +4,8 @@ class TransactionEmail < ActionMailer::Base
   def send_email(subscription)
     attachments.inline['logo.png'] = 
       File.read("#{Rails.root}/public/images/logo.png")
-    @user_name = subscription.user_name
+    @tenant_name = subscription.tenant_name
     @email = subscription.email
-    @password = subscription.password
   	mail to: subscription.email, 
   		subject: "GroovePacker Access Information"
   end

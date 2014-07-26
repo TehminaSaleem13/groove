@@ -37,9 +37,10 @@ class SubscriptionsController < ApplicationController
 
     if @subscription.save
       if @subscription.save_with_payment
-        render json: {valid: true}
+        render json: {valid: true, redirect_url: "subscriptions/show?transaction_id=#{@subscription.stripe_transaction_identifier}&notice=Thank you for your subscription!&amount=#{@subscription.amount}&email=#{@subscription.email}"}
       else
-        render json: {valid: false}
+        puts "returned false............."
+        render json: {valid: false, errors: @subscription.transaction_errors}
       end
     else
       puts @subscription.errors.full_messages.inspect

@@ -1,9 +1,6 @@
 <div style="padding-top: 20px;">
 	<div class="well span6" style="margin-left: 20px;">
-		<div class=""  style=" margin-bottom: 5px; align: left;">
-			<%= link_to 'Back', {action: 'select_plan'}, class: "btn btn-primary"%>
-		</div>
-		<legend></legend>
+		<legend>Subscribe here</legend>
 		<div>
 			<form action="" method="POST" class="form-vertical" name="myForm" id="my_form">
   			<fieldset>
@@ -20,8 +17,12 @@
 
 					<script src="https://checkout.stripe.com/checkout.js"></script>
 					<div>
-						<button id="customButton" class="btn btn-primary" disabled="disabled">Purchase</button>
-						<div class="control-group info"><span id="info-block" class="help-inline"></span></div>
+						<button id="customButton" class="btn btn-primary" disabled="disabled" style="margin-bottom: 15px;">Purchase</button>
+						<div class="alert alert-success" id="processing_alert_success" style="display:none;">
+							<p>Your subscription is being processed.</p>
+						</div>
+						<div class="alert alert-error" id="processing_alert_error" style="display:none;">
+						</div>
 					</div>
 				</fieldset>
 			</form>
@@ -46,15 +47,25 @@
 		        }).success(function(response) {
 		        	if (!response.valid) {
 		        		alert("success: invalid");
-		        		window.location.href = 'https://local.groovepacker.com:3001/subscriptions/show?notice=Thank+you+for+your+subscription%21';
+		        		//show the purchase button back
+		        		// $('#customButton').removeAttr('disabled');
+
+		        		$('#processing_alert_success').css('display','none');
+		        		$('#customButton').show();
+		        		//alert(response.errors);
+		        	 $('#processing_alert_error').css('display','block');
+		        		$('#processing_alert_error').html(response.errors);
+		        		//show the error messages
 		        	}
 		        	else {
 		        		alert("success: valid");
-		        		window.location.href = 'https://local.groovepacker.com:3001/subscriptions/show?notice=Thank+you+for+your+subscription%21';
+								window.location.href = 
+		        			response.redirect_url
 		        	}
 		        });
-		        $('#customButton').attr('disabled', 'disabled');
-		        $('#info-block').html("Your subscription is being processed.");
+		        // $('#customButton').attr('disabled', 'disabled');
+		        $('#customButton').hide();
+		        $('#processing_alert_success').css('display','block');
 			      //send ajax request to the server,
 			    }
 			    // token: Stripe::stripeToken

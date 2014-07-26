@@ -1,8 +1,8 @@
 class Subscription < ActiveRecord::Base
-  attr_accessible :email, :stripe_user_token, :tenant_name, :amount
+  attr_accessible :email, :stripe_user_token, :tenant_name, :amount, :transaction_errors
   belongs_to :tenant
-  validates_presence_of :email
-  validates_presence_of :tenant_name
+  # validates_presence_of :email
+  # validates_presence_of :tenant_name
   # validates_uniqueness_of :tenant_name
   
 
@@ -23,11 +23,9 @@ class Subscription < ActiveRecord::Base
         Apartment::Tenant.switch()
 
       rescue Stripe::CardError => e
-        # The card has been declined
         self.status = 'failed'
         self.save
-        puts "Card declined"
-        puts e.inspect
+        self.transaction_errors = e.message
       end
       self.status = 'completed'
       self.save
@@ -36,6 +34,7 @@ class Subscription < ActiveRecord::Base
   	end
   rescue Stripe::InvalidRequestError => e
     self.status = 'failed'
+    self.transaction_errors = e.message
     self.save
   	logger.error "Stripe error while creating customer: #{e.message}"
   	errors.add :base, "There was a problem with your credit card."
