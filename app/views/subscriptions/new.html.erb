@@ -5,104 +5,150 @@
 		</div>
 		<legend></legend>
 		<div>
-			<form action="" method="POST" class="form-vertical">
+			<form action="" method="POST" class="form-vertical" name="myForm" id="my_form">
   			<fieldset>
   				<div class="control-group">
 						<input type="hidden" id="amount" value="<%=params[:amount]%>"/>
 							
 						<label>Choose your site address<span class="help-inline">*</span></label>
-						<input type="text" placeholder="https://" class="input-mini" disabled/><input type="text" id="tenant_name" class="input-medium" required/><input type="text" placeholder=".groovepacker.com" class="input-medium" disabled/>
+						<input type="text" placeholder="https://" class="input-mini" disabled/><input type="text" id="tenant_name" class="input-medium" autofocus/><input type="text" placeholder=".groovepacker.com" class="input-medium" disabled/>
 						<div class="control-group error" style="color: red;"><span id="help-block" class="help-inline"></span></div>
 
 				  	<label for="email">Email<span class="help-inline">*</span></label>
-						<input type="email" id="email" class="input-large" required/>
+						<input type="email" id="email" class="input-large"/>
 						<div class="control-group error"><span id="error-block" class="help-inline"></span></div>
 					</div>
 
 					<script src="https://checkout.stripe.com/checkout.js"></script>
 					<div>
-						<button id="customButton" class="btn btn-primary">Purchase</button>
+						<button id="customButton" class="btn btn-primary" disabled="disabled">Purchase</button>
 					</div>
-					<script>
-					  var handler = StripeCheckout.configure({
-					    key: 'pk_test_4QS2UN3famIPlHtp2Q7ykpDf',
-					    image: '#{Rails.root}/public/images/logo.png',
-					    token: function(token) {
-					      // Use the token to create the charge with a server-side script.
-					      // You can access the token ID with `token.id`
-					    }
-					    // token: Stripe::stripeToken
-					  });
-
-					  $('#tenant_name').blur(function() {
-	  					//send request to the server /subscriptions/valid_tenant_name?name="test"
-	  					// if invalid, show site URL already exists message 
-	  					$.ajax({
-				        type: "GET",
-				        contentType: "application/json; charset=utf-8",
-				        url: "/subscriptions/valid_tenant_name",
-				        data: {tenant_name: $('#tenant_name').val() },
-				        dataType: "json"
-				        
-				        }).error(function(response) {
-
-				        }).success(function(response) {
-				        	if (!response.valid)
-				          	$('#help-block').html($('#tenant_name').val() +" already exists");
-				        	else
-				        		$('#error-block').html("");
-				        });
-						});
-
-					  $('#email').blur(function() {
-					  	$.ajax({
-					  		type: "GET",
-				        contentType: "application/json; charset=utf-8",
-				        url: "/subscriptions/valid_email",
-				        data: { email: $('#email').val() },
-				        dataType: "json"
-				        
-				        }).error(function(response){
-
-					  	}).success(function(response) {
-				        	if (!response.valid)
-				          	$('#error-block').html("email already exists");
-				        	else
-				        		$('#error-block').html("");
-					  	});
-					  });
-					  document.getElementById('customButton').addEventListener('click', function(e) {
-					    // Open Checkout with further options
-					    handler.open({
-					      name: 'Groovepacker',
-					      description: '1 subscription ($' + $('#amount').val() +')',
-					      amount: $('#amount').val()*100,
-					      email: $('#email').val()
-					    });
-
-					  $('#customButton').click(function() {
-					  	$ajax({
-					  		type: "GET",
-				        contentType: "application/json; charset=utf-8",
-				        url: "/subscriptions/valid_form",
-				        data: { email: $('#email').val(), tenant_name: $('#tenant_name').val() },
-				        dataType: "json"
-				        
-				        }).error(function(response){
-					  		alert("came to error. email is unique.");
-					  	}).success(function(response) {
-				        	alert("came to success. email exists");
-				          $('#error-block').html("email already exists");
-					  	});
-					  });
-
-
-					    e.preventDefault();
-					  });
-					</script>
 				</fieldset>
 			</form>
-		</div>
-		
+			<script>
+			  var handler = StripeCheckout.configure({
+			    key: 'pk_test_4QS2UN3famIPlHtp2Q7ykpDf',
+			    image: '#{Rails.root}/public/images/logo.png',
+			    token: function(token) {
+			      // Use the token to create the charge with a server-side script.
+			      // You can access the token ID with `token.id`
+			      //
+			      alert(token.id);
+			      $.ajax({
+		        type: "GET",
+		        contentType: "application/json; charset=utf-8",
+		        url: "/subscriptions/valid_tenant_name",
+		        data: { tenant_name: $('#tenant_name').val() },
+		        dataType: "json"
+		        
+		        }).error(function(response) {
+
+		        }).success(function(response) {
+		        	if (!response.valid) {
+		          	$('#help-block').html($('#tenant_name').val() +" already exists");
+		          	valid.tenant_name = false;
+		        	}
+		        	else {
+								$('#help-block').html("");
+								valid.tenant_name = true;
+		        	}
+		        });
+
+			      //send ajax request to the server,
+			    }
+			    // token: Stripe::stripeToken
+			  });
+			  
+			  var valid = {
+			  	tenant_name: false,
+			  	email: false
+			  }
+
+			  $('#tenant_name').blur(function() {
+					//send request to the server /subscriptions/valid_tenant_name?name="test"
+					// if invalid, show site URL already exists message 
+					var tenant_name = document.forms["myForm"]["tenant_name"].value;
+			    if (tenant_name == null || tenant_name == "") {
+			      $('#help-block').html("site name must be filled out");
+			      return false;
+			    }
+					$.ajax({
+		        type: "GET",
+		        contentType: "application/json; charset=utf-8",
+		        url: "/subscriptions/valid_tenant_name",
+		        data: { tenant_name: $('#tenant_name').val() },
+		        dataType: "json"
+		        
+		        }).error(function(response) {
+
+		        }).success(function(response) {
+		        	if (!response.valid) {
+		          	$('#help-block').html($('#tenant_name').val() +" already exists");
+		          	valid.tenant_name = false;
+		        	}
+		        	else {
+								$('#help-block').html("");
+								valid.tenant_name = true;
+		        	}
+		        });
+		        email.focus();
+		        update_purchase_button();
+				});
+
+			  $('#email').blur(function() {
+			  	var email = document.forms["myForm"]["email"].value;
+			    if (email == null || email == "") {
+			      $('#error-block').html("email must be filled out");
+			      return false;
+			    }
+			    var email = document.forms["myForm"]["email"].value;
+			    var atpos = email.indexOf("@");
+			    var dotpos = email.lastIndexOf(".");
+			    if (atpos< 1 || dotpos<atpos+2 || dotpos+2>=email.length) {
+			        $('#error-block').html("email is not valid");
+			        return false;
+			    }
+			  	$.ajax({
+			  		type: "GET",
+		        contentType: "application/json; charset=utf-8",
+		        url: "/subscriptions/valid_email",
+		        data: { email: $('#email').val() },
+		        dataType: "json"
+		        
+		        }).error(function(response){
+
+			  	}).success(function(response) {
+		        	if (!response.valid) {
+		        		$('#error-block').html($('#email').val() + " email already exists");
+		        		valid.email = false;
+		        	}		          	
+		        	else {
+		        		$('#error-block').html("");
+		        		valid.email = true;
+		        	}
+		        update_purchase_button();
+			  	});
+			  });
+
+				function update_purchase_button(){
+					if (valid.email && valid.tenant_name) {
+						$('#customButton').removeAttr('disabled');
+					}
+				}
+
+			  document.getElementById('customButton').addEventListener('click', function(e) {
+			    // Open Checkout with further options
+			    handler.open({
+			      name: 'Groovepacker',
+			      description: '1 subscription ($' + $('#amount').val() +')',
+			      amount: $('#amount').val()*100,
+			      email: $('#email').val()
+			    });
+
+
+			    e.preventDefault();
+			  });
+			</script>
+		</div>		
 	</div> 
 </div>

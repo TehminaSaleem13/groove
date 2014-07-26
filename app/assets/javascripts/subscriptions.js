@@ -40,7 +40,11 @@ subscription = {
         dataType: "json"
         
         }).success(function(response) {
-          window.location.href = 'https://local.groovepacker.com:3001/subscriptions/show/' + $('#subscription_id').val() + '?notice=Thank+you+for+your+subscription%21';
+          if (response.valid)
+            window.location.href = 'https://local.groovepacker.com:3001/subscriptions/show/' + $('#subscription_id').val() + '?notice=Thank+you+for+your+subscription%21';
+          else
+            window.location.href = 'https://local.groovepacker.com:3001/subscriptions/select_plan'
+          end
         });
     } else {
     alert('error');

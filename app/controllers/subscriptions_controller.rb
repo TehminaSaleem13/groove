@@ -31,13 +31,13 @@ class SubscriptionsController < ApplicationController
     @subscription.stripe_customer_token = params[:stripe_customer_token]
     if @subscription.save
       if @subscription.save_with_payment
-        render json: {valid: false}
-      else
         render json: {valid: true}
+      else
+        render json: {valid: false}
       end
     else
       puts @subscription.errors.full_messages.inspect
-      # render json: "failure"
+      render json: {valid: false}
     end
   end
 
@@ -66,6 +66,7 @@ class SubscriptionsController < ApplicationController
     flash[:notice] = params[:notice]
     
   end
+  
   # def check_tenant_name
   # 	if Apartment::Tenant.current_tenant == 'test'
   # 		render 'select_plan'
