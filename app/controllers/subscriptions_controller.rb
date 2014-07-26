@@ -27,8 +27,14 @@ class SubscriptionsController < ApplicationController
   end
 
   def confirm_payment
+    puts "params:" + params.inspect
     @subscription = Subscription.new(params[:subscription])
-    @subscription.stripe_customer_token = params[:stripe_customer_token]
+    @subscription.stripe_user_token = params[:stripe_user_token]
+    @subscription.tenant_name = params[:tenant_name]
+    @subscription.amount = params[:amount]
+    @subscription.email = params[:email]
+    @subscription.status = 'started'
+
     if @subscription.save
       if @subscription.save_with_payment
         render json: {valid: true}
@@ -62,9 +68,7 @@ class SubscriptionsController < ApplicationController
   end
 
   def show
-    @subscription = Subscription.find(params[:id])
-    flash[:notice] = params[:notice]
-    
+    flash[:notice] = params[:notice]   
   end
   
   # def check_tenant_name

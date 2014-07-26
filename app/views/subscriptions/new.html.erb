@@ -9,7 +9,6 @@
   			<fieldset>
   				<div class="control-group">
 						<input type="hidden" id="amount" value="<%=params[:amount]%>"/>
-							
 						<label>Choose your site address<span class="help-inline">*</span></label>
 						<input type="text" placeholder="https://" class="input-mini" disabled/><input type="text" id="tenant_name" class="input-medium" autofocus/><input type="text" placeholder=".groovepacker.com" class="input-medium" disabled/>
 						<div class="control-group error" style="color: red;"><span id="help-block" class="help-inline"></span></div>
@@ -22,6 +21,7 @@
 					<script src="https://checkout.stripe.com/checkout.js"></script>
 					<div>
 						<button id="customButton" class="btn btn-primary" disabled="disabled">Purchase</button>
+						<div class="control-group info"><span id="info-block" class="help-inline"></span></div>
 					</div>
 				</fieldset>
 			</form>
@@ -35,25 +35,26 @@
 			      //
 			      alert(token.id);
 			      $.ajax({
-		        type: "GET",
+		        type: "POST",
 		        contentType: "application/json; charset=utf-8",
-		        url: "/subscriptions/valid_tenant_name",
-		        data: { tenant_name: $('#tenant_name').val() },
+		        url: "/subscriptions/confirm_payment",
+		        data: JSON.stringify({ tenant_name: $('#tenant_name').val(), stripe_user_token: token.id, email: $('#email').val(), amount: $('#amount').val()}),
 		        dataType: "json"
 		        
 		        }).error(function(response) {
-
+		        	alert("error.");
 		        }).success(function(response) {
 		        	if (!response.valid) {
-		          	$('#help-block').html($('#tenant_name').val() +" already exists");
-		          	valid.tenant_name = false;
+		        		alert("success: invalid");
+		        		window.location.href = 'https://local.groovepacker.com:3001/subscriptions/show?notice=Thank+you+for+your+subscription%21';
 		        	}
 		        	else {
-								$('#help-block').html("");
-								valid.tenant_name = true;
+		        		alert("success: valid");
+		        		window.location.href = 'https://local.groovepacker.com:3001/subscriptions/show?notice=Thank+you+for+your+subscription%21';
 		        	}
 		        });
-
+		        $('#customButton').attr('disabled', 'disabled');
+		        $('#info-block').html("Your subscription is being processed.");
 			      //send ajax request to the server,
 			    }
 			    // token: Stripe::stripeToken
@@ -83,7 +84,7 @@
 
 		        }).success(function(response) {
 		        	if (!response.valid) {
-		          	$('#help-block').html($('#tenant_name').val() +" already exists");
+		          	$('#help-block').html("https://" + $('#tenant_name').val() +".groovepacker.com already exists");
 		          	valid.tenant_name = false;
 		        	}
 		        	else {

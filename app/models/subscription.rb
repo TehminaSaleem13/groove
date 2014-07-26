@@ -1,11 +1,9 @@
 class Subscription < ActiveRecord::Base
-  attr_accessible :email, :stripe_customer_token, :user_name, :password, :password_confirmation, :amount
+  attr_accessible :email, :stripe_user_token, :tenant_name, :amount
   belongs_to :tenant
   validates_presence_of :email
-  validates_presence_of :user_name
-  validates_uniqueness_of :user_name
-  validates_presence_of :password, :password_confirmation
-  # validates_confirmation_of :password
+  validates_presence_of :tenant_name
+  # validates_uniqueness_of :tenant_name
   
 
   def save_with_payment
@@ -15,11 +13,11 @@ class Subscription < ActiveRecord::Base
         Stripe::Charge.create(
           :amount => self.amount.to_i*100,
           :currency => "usd",
-          :card => stripe_customer_token,
+          :card => stripe_user_token,
           :description => self.email
         )
         transactions = Stripe::BalanceTransaction.all
-        self.transaction_id = transactions.first.id
+        self.stripe_transaction_identifier = transactions.first.id
         CreateTenant.delay(:run_at => 1.seconds.from_now).create_tenant self
         # CreateTenant.create_tenant self
         Apartment::Tenant.switch()

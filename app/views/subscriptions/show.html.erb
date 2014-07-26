@@ -4,7 +4,7 @@
 	</i></b></center></div>
 	<hr>
 	<div>
-		<center>You have been charged $<%=@subscription.amount.to_i%>.00 for this transaction. Your transaction id is: <%=@subscription.transaction_id%>.</center>
-		<center>You will be receiving an email momentarily at <i><%=@subscription.email%> </i>providing you the login details for your account.</center>
+		<center>You have been charged $<%#=@subscription.amount.to_i%>.00 for this transaction. Your transaction id is: <%#=@subscription.stripe_transaction_identifier%>.</center>
+		<center>You will be receiving an email momentarily providing you the login details for your account.</center>
 	</div>
 </div>
