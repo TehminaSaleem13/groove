@@ -1,6 +1,10 @@
 Groovepacks::Application.routes.draw do
 
 
+  match 'subscriptions', :to => 'subscriptions#new', :as => 'subscriptions'
+  # match 'subscriptions/new', :to => 'subscriptions#new'
+  # match 'subscriptions/show', :to => 'subscriptions#show'
+  # get "subscriptions/show"
   get "inventory_warehouse/create"
 
   get "inventory_warehouse/update"

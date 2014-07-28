@@ -1,0 +1,25 @@
+<div style="padding-top: 20px;">
+	<div class="well span8" style="margin-left: 150px;">
+	  <form action="" method="post" id="subscription" >
+	    <span class="payment-errors"></span>
+	 		
+	    <div class="control-group">
+	    	<label class="control-label span3">Card Number:</label>
+	        <div class="controls">
+	        	<input type="text" size="20" id="number" data-stripe="number"/>
+	      	</div>
+	 			<label class="control-label span3">CVC:</label>
+	    	<div class="controls">
+	        <input type="text" size="4" id="cvc" data-stripe="cvc"/>
+	      </div>
+	 			<label class="control-label span3">Expiration (MM/YYYY):</label>
+	    	<div class="controls">
+	        <input type="text" size="2" id="exp-month" data-stripe="exp-month"/>
+	      	<input type="text" size="4" id="exp-year" data-stripe="exp-year"/>
+	    	</div> 
+	    </div>
+	    <input type="hidden" id="subscription_id" value="<%= @id%>" />
+	    <center><button type="submit" class="btn btn-primary">Submit Payment</button></center>
+	  </form>
+	</div>
+</div>

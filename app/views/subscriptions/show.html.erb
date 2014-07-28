@@ -1,0 +1,10 @@
+<div class="well span8" style="margin-top: 20px; margin-left: 150px;">
+	<div style="font-size: 30px;"><center><b><i>
+		<%= flash[:notice]%>
+	</i></b></center></div>
+	<hr>
+	<div>
+		<center>You have been charged $<%=params[:amount].to_i%>.00 for this transaction. Your transaction id is: <%=params[:transaction_id]%>.</center>
+		<center>You will be receiving an email momentarily at <i><%=params[:email]%> </i>providing you the login details for your account.</center>
+	</div>
+</div>

@@ -1,0 +1,28 @@
+<div style="padding-top: 20px;">
+	<div class="well span11" style="background-color: #66A3E0;" >
+		<span class="span3">
+			<div class="well" style="">
+				<h2><center>STARTER</center></h2>
+				<h1><center>$5.00</center></h1>
+				<p><center>You will be allowed access for up to 2 stores</center></p>
+				<div><center><%= link_to 'Select', {action: 'new', controller: 'subscriptions', amount: 5}, class: "btn btn-primary"%></center></div>
+			</div>
+		</span>
+		<span class="span4" style=" ">
+			<div class="well" style="margin-left: 35px; margin-right: 35px;">
+				<h2><center>PROFESSIONAL</center></h2>
+				<h1><center>$15.00</center></h1>
+				<p><center>You will be allowed access for up to 4 stores</center></p>
+				<div><center><%= link_to 'Select', {action: 'new', controller: 'subscriptions', amount: 15}, class: "btn btn-primary"%></center></div>
+			</div>
+		</span>
+		<span class="span3">
+			<div class="well" style="padding-right: -10px;">
+				<h2><center>ENTERPRISE</center></h2>
+				<h1><center>$25.00</center></h1>
+				<p><center>You will be allowed access for all the  stores</center></p>
+				<div><center><%= link_to 'Select', {action: 'new', controller: 'subscriptions', amount: 25}, class: "btn btn-primary"%></center></div>
+			</div>
+		</span>
+	</div>
+</div>

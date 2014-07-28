@@ -1,0 +1,60 @@
+class SubscriptionsController < ApplicationController
+
+  def new
+    @subscription = Subscription.new
+  end
+  
+  def select_plan
+  	
+  end
+
+  def process_pay
+    @id = params[:id]
+  end
+
+  def confirm_payment
+    puts "params:" + params.inspect
+    @subscription = Subscription.new(params[:subscription])
+    @subscription.stripe_user_token = params[:stripe_user_token]
+    @subscription.tenant_name = params[:tenant_name]
+    @subscription.amount = params[:amount]
+    @subscription.email = params[:email]
+    @subscription.status = 'started'
+
+    if @subscription.save
+      if @subscription.save_with_payment
+        render json: {valid: true, redirect_url: "subscriptions/show?transaction_id=#{@subscription.stripe_transaction_identifier}&notice=Thank you for your subscription!&amount=#{@subscription.amount}&email=#{@subscription.email}"}
+      else
+        render json: {valid: false}
+      end
+    else
+      puts @subscription.errors.full_messages.inspect
+      render json: {valid: false}
+    end
+  end
+
+  def valid_tenant_name
+    tenant_name = params[:tenant_name]
+
+    if Tenant.where(name: tenant_name).length > 0
+      render json: {valid: false}
+    else
+      render json: {valid: true}
+    end
+  end
+
+  def valid_email
+    email = params[:email]
+
+    if Subscription.where(email: email).length > 0
+      render json: {valid: false}
+    else
+      render json: {valid: true}
+    end
+  end
+
+  def show
+    flash[:notice] = params[:notice]   
+  end
+
+end
