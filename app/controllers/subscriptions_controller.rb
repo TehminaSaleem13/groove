@@ -1,25 +1,11 @@
 class SubscriptionsController < ApplicationController
-	#before_filter: check_tenant_name
+
   def new
     @subscription = Subscription.new
   end
   
   def select_plan
   	
-  end
-  
-  def create
-  	@subscription = Subscription.new(params[:subscription])
-    @subscription.status = 'started'
-    if @subscription.password == @subscription.password_confirmation
-      if @subscription.save
-        redirect_to :action => 'process_pay', :id => @subscription.id
-      else
-        redirect_to :action => 'new', :subscription => params[:subscription]
-      end 
-    else
-      redirect_to :action => 'new', :subscription => params[:subscription]
-    end
   end
 
   def process_pay
@@ -39,8 +25,7 @@ class SubscriptionsController < ApplicationController
       if @subscription.save_with_payment
         render json: {valid: true, redirect_url: "subscriptions/show?transaction_id=#{@subscription.stripe_transaction_identifier}&notice=Thank you for your subscription!&amount=#{@subscription.amount}&email=#{@subscription.email}"}
       else
-        puts "returned false............."
-        render json: {valid: false, errors: @subscription.transaction_errors}
+        render json: {valid: false}
       end
     else
       puts @subscription.errors.full_messages.inspect
@@ -71,12 +56,5 @@ class SubscriptionsController < ApplicationController
   def show
     flash[:notice] = params[:notice]   
   end
-  
-  # def check_tenant_name
-  # 	if Apartment::Tenant.current_tenant == 'test'
-  # 		render 'select_plan'
-	# 	else
-	#
-	# 	end
-  # end
+
 end

@@ -1,19 +1,15 @@
 class Subscription < ActiveRecord::Base
   attr_accessible :email, :stripe_user_token, :tenant_name, :amount, :transaction_errors
   belongs_to :tenant
-  # validates_presence_of :email
-  # validates_presence_of :tenant_name
-  # validates_uniqueness_of :tenant_name
   
 
   def save_with_payment
-    puts "save with payment"
   	if valid?
       begin
         Stripe::Charge.create(
           :amount => self.amount.to_i*100,
           :currency => "usd",
-          :card => stripe_user_token,
+          :card => self.stripe_user_token,
           :description => self.email
         )
         transactions = Stripe::BalanceTransaction.all

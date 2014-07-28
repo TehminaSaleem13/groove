@@ -18,10 +18,11 @@
 					<script src="https://checkout.stripe.com/checkout.js"></script>
 					<div>
 						<button id="customButton" class="btn btn-primary" disabled="disabled" style="margin-bottom: 15px;">Purchase</button>
-						<div class="alert alert-success" id="processing_alert_success" style="display:none;">
-							<p>Your subscription is being processed.</p>
+						
+						<div class="alert alert-success" id="processing_alert_success" style="display:none;"><span><i class="icon-spinner icon-spin icon-large"></i></span><span> Your subscription is being processed.</span>
 						</div>
 						<div class="alert alert-error" id="processing_alert_error" style="display:none;">
+							<p>Your subscription could not be processed. Please try again.</p>
 						</div>
 					</div>
 				</fieldset>
@@ -31,10 +32,6 @@
 			    key: 'pk_test_4QS2UN3famIPlHtp2Q7ykpDf',
 			    image: '#{Rails.root}/public/images/logo.png',
 			    token: function(token) {
-			      // Use the token to create the charge with a server-side script.
-			      // You can access the token ID with `token.id`
-			      //
-			      alert(token.id);
 			      $.ajax({
 		        type: "POST",
 		        contentType: "application/json; charset=utf-8",
@@ -43,32 +40,25 @@
 		        dataType: "json"
 		        
 		        }).error(function(response) {
-		        	alert("error.");
+		        	$('#processing_alert_success').hide();
+	        		$('#customButton').show();
+	        	  $('#processing_alert_error').show();
 		        }).success(function(response) {
 		        	if (!response.valid) {
-		        		alert("success: invalid");
-		        		//show the purchase button back
-		        		// $('#customButton').removeAttr('disabled');
 
-		        		$('#processing_alert_success').css('display','none');
+		        		$('#processing_alert_success').hide();
 		        		$('#customButton').show();
-		        		//alert(response.errors);
-		        	 $('#processing_alert_error').css('display','block');
-		        		$('#processing_alert_error').html(response.errors);
-		        		//show the error messages
+		        	  $('#processing_alert_error').show();
 		        	}
 		        	else {
-		        		alert("success: valid");
 								window.location.href = 
 		        			response.redirect_url
 		        	}
 		        });
-		        // $('#customButton').attr('disabled', 'disabled');
 		        $('#customButton').hide();
-		        $('#processing_alert_success').css('display','block');
-			      //send ajax request to the server,
+		        $('#processing_alert_success').show();
+		        $('#processing_alert_error').hide();
 			    }
-			    // token: Stripe::stripeToken
 			  });
 			  
 			  var valid = {
@@ -76,9 +66,7 @@
 			  	email: false
 			  }
 
-			  $('#tenant_name').blur(function() {
-					//send request to the server /subscriptions/valid_tenant_name?name="test"
-					// if invalid, show site URL already exists message 
+			  $('#tenant_name').blur(function() { 
 					var tenant_name = document.forms["myForm"]["tenant_name"].value;
 			    if (tenant_name == null || tenant_name == "") {
 			      $('#help-block').html("site name must be filled out");
@@ -156,8 +144,6 @@
 			      amount: $('#amount').val()*100,
 			      email: $('#email').val()
 			    });
-
-
 			    e.preventDefault();
 			  });
 			</script>
