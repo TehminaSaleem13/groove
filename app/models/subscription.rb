@@ -6,12 +6,21 @@ class Subscription < ActiveRecord::Base
   def save_with_payment
   	if valid?
       begin
-        Stripe::Charge.create(
-          :amount => self.amount.to_i*100,
-          :currency => "usd",
+        customer = Stripe::Customer.create(
           :card => self.stripe_user_token,
-          :description => self.email
+          :description => self.email,
+          :plan => "02"
         )
+        puts "customer:" + customer.inspect
+        subscription = customer.subscriptions.create(:plan => "02")
+        puts "subscription" + subscription.inspect
+
+        # Stripe::Charge.create(
+        #   # :amount => self.amount*100,
+        #   :currency => "usd",
+        #   :customer => customer.id,
+        #   :description => self.email
+        # )
         transactions = Stripe::BalanceTransaction.all
         self.stripe_transaction_identifier = transactions.first.id
         CreateTenant.delay(:run_at => 1.seconds.from_now).create_tenant self
