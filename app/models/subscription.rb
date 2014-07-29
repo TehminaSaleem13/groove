@@ -1,5 +1,5 @@
 class Subscription < ActiveRecord::Base
-  attr_accessible :email, :stripe_user_token, :tenant_name, :amount, :transaction_errors
+  attr_accessible :email, :stripe_user_token, :tenant_name, :amount, :transaction_errors, :subscription_plan_id
   belongs_to :tenant
   
 
@@ -9,10 +9,10 @@ class Subscription < ActiveRecord::Base
         customer = Stripe::Customer.create(
           :card => self.stripe_user_token,
           :description => self.email,
-          :plan => "02"
+          :plan => self.subscription_plan_id
         )
         puts "customer:" + customer.inspect
-        subscription = customer.subscriptions.create(:plan => "02")
+        subscription = customer.subscriptions.create(:plan => self.subscription_plan_id)
         puts "subscription" + subscription.inspect
 
         # Stripe::Charge.create(
