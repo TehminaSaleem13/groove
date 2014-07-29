@@ -12,8 +12,9 @@ class Subscription < ActiveRecord::Base
           :plan => self.subscription_plan_id
         )
         puts "customer:" + customer.inspect
-        subscription = customer.subscriptions.create(:plan => self.subscription_plan_id)
-        puts "subscription" + subscription.inspect
+        puts "subscription_id:" + customer.subscriptions.data.first.id
+        self.stripe_customer_id = customer.id
+        self.customer_subscription_id = customer.subscriptions.data.first.id
 
         # Stripe::Charge.create(
         #   # :amount => self.amount*100,
