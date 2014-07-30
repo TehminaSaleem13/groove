@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140729130334) do
+ActiveRecord::Schema.define(:version => 20140730132034) do
 
   create_table "amazon_credentials", :force => true do |t|
     t.string   "merchant_id",                                     :null => false
@@ -426,6 +426,7 @@ ActiveRecord::Schema.define(:version => 20140729130334) do
     t.string   "subscription_plan_id"
     t.string   "customer_subscription_id"
     t.string   "stripe_customer_id"
+    t.boolean  "is_active"
   end
 
   create_table "tenants", :force => true do |t|
