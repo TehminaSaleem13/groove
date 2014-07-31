@@ -54,6 +54,7 @@ class Subscription < ActiveRecord::Base
         self.transaction_errors = e.message
       end
       self.status = 'completed'
+      self.is_active = true
       self.save
 
   		save!
