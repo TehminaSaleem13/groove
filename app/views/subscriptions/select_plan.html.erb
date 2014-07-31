@@ -2,26 +2,44 @@
 	<div class="well span11" style="background-color: #66A3E0;" >
 		<span class="span3">
 			<div class="well" style="">
-				<h2><center>STARTER</center></h2>
-				<h1><center>$5.00</center></h1>
-				<p><center>You will be allowed access for up to 2 stores</center></p>
-				<div><center><%= link_to 'Select', {action: 'new', controller: 'subscriptions', amount: 5}, class: "btn btn-primary"%></center></div>
+				<h2><center>SOLO</center></h2>
+				<h1><center>$20.00</center></h1>
+				<p><center>You will be allowed access for 1 store</center></p>
+				<div><center><%= link_to 'Select', {action: 'new', controller: 'subscriptions', amount: 20, plan_id: 'groove1'}, class: "btn btn-primary"%></center></div>
 			</div>
 		</span>
 		<span class="span4" style=" ">
-			<div class="well" style="margin-left: 35px; margin-right: 35px;">
-				<h2><center>PROFESSIONAL</center></h2>
-				<h1><center>$15.00</center></h1>
-				<p><center>You will be allowed access for up to 4 stores</center></p>
-				<div><center><%= link_to 'Select', {action: 'new', controller: 'subscriptions', amount: 15}, class: "btn btn-primary"%></center></div>
+			<div class="well" style="margin-left: 50px; margin-right: 50px;">
+				<h2><center>DUO</center></h2>
+				<h1><center>$30.00</center></h1>
+				<p><center>You will be allowed access for 2 stores</center></p>
+				<div><center><%= link_to 'Select', {action: 'new', controller: 'subscriptions', amount: 30, plan_id: 'groove2'}, class: "btn btn-primary"%></center></div>
 			</div>
 		</span>
 		<span class="span3">
 			<div class="well" style="padding-right: -10px;">
-				<h2><center>ENTERPRISE</center></h2>
-				<h1><center>$25.00</center></h1>
-				<p><center>You will be allowed access for all the  stores</center></p>
-				<div><center><%= link_to 'Select', {action: 'new', controller: 'subscriptions', amount: 25}, class: "btn btn-primary"%></center></div>
+				<h2><center>TRIO</center></h2>
+				<h1><center>$40.00</center></h1>
+				<p><center>You will be allowed access for 3  stores</center></p>
+				<div><center><%= link_to 'Select', {action: 'new', controller: 'subscriptions', amount: 40, plan_id: 'groove3'}, class: "btn btn-primary"%></center></div>
+			</div>
+		</span>
+	</div>
+	<div class="well span11" style="background-color: #66A3E0;" >
+		<span class="span5">
+			<div class="well" style="padding-right: -10px;">
+				<h2><center>QUINTET</center></h2>
+				<h1><center>$50.00</center></h1>
+				<p><center>You will be allowed access for 5  stores</center></p>
+				<div><center><%= link_to 'Select', {action: 'new', controller: 'subscriptions', amount: 50, plan_id: 'groove4'}, class: "btn btn-primary"%></center></div>
+			</div>
+		</span>
+		<span class="span5">
+			<div class="well" style="padding-right: -10px;">
+				<h2><center>SYMPHONY</center></h2>
+				<h1><center>$80.00</center></h1>
+				<p><center>You will be allowed access for 8  stores</center></p>
+				<div><center><%= link_to 'Select', {action: 'new', controller: 'subscriptions', amount: 80, plan_id: 'groove5'}, class: "btn btn-primary"%></center></div>
 			</div>
 		</span>
 	</div>

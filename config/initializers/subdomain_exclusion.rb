@@ -1,1 +1,1 @@
-Apartment::Elevators::Subdomain.excluded_subdomains = ['admin']
+Apartment::Elevators::Subdomain.excluded_subdomains = ['local','admin']

@@ -18,6 +18,7 @@ class SubscriptionsController < ApplicationController
     @subscription.stripe_user_token = params[:stripe_user_token]
     @subscription.tenant_name = params[:tenant_name]
     @subscription.amount = params[:amount]
+    @subscription.subscription_plan_id = params[:plan_id]
     @subscription.email = params[:email]
     @subscription.status = 'started'
 

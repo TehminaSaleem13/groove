@@ -6,6 +6,7 @@
   			<fieldset>
   				<div class="control-group">
 						<input type="hidden" id="amount" value="<%=params[:amount]%>"/>
+						<input type="hidden" id="plan_id" value="<%=params[:plan_id]%>"/>
 						<label>Choose your site address<span class="help-inline">*</span></label>
 						<input type="text" placeholder="https://" class="input-mini" disabled/><input type="text" id="tenant_name" class="input-medium" autofocus/><input type="text" placeholder=".groovepacker.com" class="input-medium" disabled/>
 						<div class="control-group error" style="color: red;"><span id="help-block" class="help-inline"></span></div>
@@ -30,13 +31,13 @@
 			<script>
 			  var handler = StripeCheckout.configure({
 			    key: 'pk_test_4QS2UN3famIPlHtp2Q7ykpDf',
-			    image: '#{Rails.root}/public/images/logo.png',
+			    image: '/images/apple-touch-icon.png',
 			    token: function(token) {
 			      $.ajax({
 		        type: "POST",
 		        contentType: "application/json; charset=utf-8",
 		        url: "/subscriptions/confirm_payment",
-		        data: JSON.stringify({ tenant_name: $('#tenant_name').val(), stripe_user_token: token.id, email: $('#email').val(), amount: $('#amount').val()}),
+		        data: JSON.stringify({ tenant_name: $('#tenant_name').val(), stripe_user_token: token.id, email: $('#email').val(), amount: $('#amount').val(), plan_id: $('#plan_id').val()}),
 		        dataType: "json"
 		        
 		        }).error(function(response) {
@@ -136,13 +137,15 @@
 					}
 				}
 
+
 			  document.getElementById('customButton').addEventListener('click', function(e) {
 			    // Open Checkout with further options
 			    handler.open({
 			      name: 'Groovepacker',
 			      description: '1 subscription ($' + $('#amount').val() +')',
 			      amount: $('#amount').val()*100,
-			      email: $('#email').val()
+			      email: $('#email').val(),
+			      allowRememberMe: false
 			    });
 			    e.preventDefault();
 			  });

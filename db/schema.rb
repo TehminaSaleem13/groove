@@ -11,7 +11,16 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140726152148) do
+ActiveRecord::Schema.define(:version => 20140731140547) do
+
+  create_table "access_restrictions", :force => true do |t|
+    t.integer  "tenant_id"
+    t.integer  "num_users"
+    t.integer  "num_shipments"
+    t.integer  "num_import_sources"
+    t.datetime "created_at",         :null => false
+    t.datetime "updated_at",         :null => false
+  end
 
   create_table "amazon_credentials", :force => true do |t|
     t.string   "merchant_id",                                     :null => false
@@ -423,12 +432,28 @@ ActiveRecord::Schema.define(:version => 20140726152148) do
     t.datetime "created_at",                                                                   :null => false
     t.datetime "updated_at",                                                                   :null => false
     t.text     "transaction_errors"
+    t.string   "subscription_plan_id"
+    t.string   "customer_subscription_id"
+    t.string   "stripe_customer_id"
+    t.boolean  "is_active"
   end
 
   create_table "tenants", :force => true do |t|
     t.string   "name"
     t.datetime "created_at", :null => false
     t.datetime "updated_at", :null => false
+  end
+
+  create_table "transactions", :force => true do |t|
+    t.string   "transaction_id"
+    t.decimal  "amount",            :precision => 8, :scale => 2, :default => 0.0
+    t.string   "card_type"
+    t.integer  "exp_month_of_card"
+    t.integer  "exp_year_of_card"
+    t.datetime "date_of_payment"
+    t.integer  "subscription_id"
+    t.datetime "created_at",                                                       :null => false
+    t.datetime "updated_at",                                                       :null => false
   end
 
   create_table "users", :force => true do |t|
@@ -456,5 +481,11 @@ ActiveRecord::Schema.define(:version => 20140726152148) do
   add_index "users", ["inventory_warehouse_id"], :name => "index_users_on_inventory_warehouse_id"
   add_index "users", ["reset_password_token"], :name => "index_users_on_reset_password_token", :unique => true
   add_index "users", ["role_id"], :name => "index_users_on_role_id"
+
+  create_table "webhooks", :force => true do |t|
+    t.binary   "event",      :limit => 16777215
+    t.datetime "created_at",                     :null => false
+    t.datetime "updated_at",                     :null => false
+  end
 
 end
