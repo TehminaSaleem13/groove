@@ -11,7 +11,16 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140730132034) do
+ActiveRecord::Schema.define(:version => 20140731105147) do
+
+  create_table "access_restrictions", :force => true do |t|
+    t.integer  "tenant_id"
+    t.integer  "num_users"
+    t.integer  "num_shipments"
+    t.integer  "num_import_sources"
+    t.datetime "created_at",         :null => false
+    t.datetime "updated_at",         :null => false
+  end
 
   create_table "amazon_credentials", :force => true do |t|
     t.string   "merchant_id",                                     :null => false
@@ -433,6 +442,18 @@ ActiveRecord::Schema.define(:version => 20140730132034) do
     t.string   "name"
     t.datetime "created_at", :null => false
     t.datetime "updated_at", :null => false
+  end
+
+  create_table "transactions", :force => true do |t|
+    t.string   "transaction_id"
+    t.decimal  "amount",            :precision => 8, :scale => 2, :default => 0.0
+    t.string   "card_type"
+    t.integer  "exp_month_of_card"
+    t.integer  "exp_year_of_card"
+    t.datetime "date_of_payment"
+    t.integer  "subscription_id"
+    t.datetime "created_at",                                                       :null => false
+    t.datetime "updated_at",                                                       :null => false
   end
 
   create_table "users", :force => true do |t|

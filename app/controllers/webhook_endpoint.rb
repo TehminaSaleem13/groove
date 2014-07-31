@@ -17,11 +17,11 @@ post "/my/webhook/url" do
   end
 
   if event == charge.succeeded
-
+    # amount has been deducted from account
   end
 
   if event == charge.failed
-
+    # the charge couldnot be completed due to some error.
   end
 
   if event == invoice.payment_succeeded
