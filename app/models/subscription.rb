@@ -16,6 +16,7 @@ class Subscription < ActiveRecord::Base
         puts "subscription_id:" + customer.subscriptions.data.first.id
         #whenever you do .first, make sure null check is done
         self.stripe_customer_id = customer.id
+        
         if !customer.subscriptions.data.first.nil?
           self.customer_subscription_id = customer.subscriptions.data.first.id
 
