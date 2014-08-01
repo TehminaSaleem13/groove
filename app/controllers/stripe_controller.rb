@@ -7,35 +7,35 @@ class StripeController < ApplicationController
 	  event = Stripe::Event.retrieve(event_json["id"])
 	  Webhook.create(event: event) 
 	  # Do something with event
-	  if event == 'invoice.created'
+	  if event.type == 'invoice.created'
 	  	invoice = Invoice.new
-	  	invoice.date = Time.at(event_json.object.date).utc
-	  	invoice.invoice_id = event_json.object.id
-	    invoice.subscription_id = event_json.object.subscription
-	    invoice.customer_id = event_json.object.customer
-	    invoice.charge_id = event_json.object.charge
-	    invoice.attempted = event_json.object.attempted
-	    invoice.closed = event_json.object.closed
-	    invoice.forgiven = event_json.object.forgiven
-	    invoice.paid = event_json.object.paid
-	    if !event_json.object.lines.data.first.nil?
-	    	invoice.plan_id = event_json.object.lines.data.first.plan.id
-		    invoice.period_start = Time.at(event_json.object.lines.data.first.period.start).utc
-		    invoice.period_end = Time.at(event_json.object.lines.data.first.period.end).utc
-		    invoice.amount = event_json.object.lines.data.first.amount.to_f/100
-		    invoice.quantity = event_json.object.lines.data.first.quantity
+	  	invoice.date = Time.at(event.object.date).utc
+	  	invoice.invoice_id = event.object.id
+	    invoice.subscription_id = event.object.subscription
+	    invoice.customer_id = event.object.customer
+	    invoice.charge_id = event.object.charge
+	    invoice.attempted = event.object.attempted
+	    invoice.closed = event.object.closed
+	    invoice.forgiven = event.object.forgiven
+	    invoice.paid = event.object.paid
+	    if !event.object.lines.data.first.nil?
+	    	invoice.plan_id = event.object.lines.data.first.plan.id
+		    invoice.period_start = Time.at(event.object.lines.data.first.period.start).utc
+		    invoice.period_end = Time.at(event.object.lines.data.first.period.end).utc
+		    invoice.amount = event.object.lines.data.first.amount.to_f/100
+		    invoice.quantity = event.object.lines.data.first.quantity
 	    end
 	    invoice.save
 	  end
 
-	  if event == 'charge.succeeded'
+	  if event.type == 'charge.succeeded'
 	    # amount has been deducted from account
 	    # customer_id = event_json.data.object.customer
 	    # transaction_id = event_json.data.object.balance_transaction
 	    # amount = event_json.data.object.amount
 	  end
 
-	  if event == 'charge.failed'
+	  if event.type == 'charge.failed'
 	    # the charge couldnot be completed due to some error.
 	    # customer_id = event_json.data.object.customer
 	    # transaction_id = event_json.data.object.balance_transaction
@@ -43,7 +43,7 @@ class StripeController < ApplicationController
 	    # error = event_json.data.object.failure_message
 	  end
 
-	  if event == 'invoice.payment_succeeded'
+	  if event.type == 'invoice.payment_succeeded'
 	    # customer_id = event_json.object.customer
 	    # subscription_id = event_json.object.line.data.first.id
 	    # subscription_upto = event_json.object.line.data.first.period.end
@@ -54,7 +54,7 @@ class StripeController < ApplicationController
 	    # subscription.save
 	  end
 
-	  if event == 'customer.created'
+	  if event.type == 'customer.created'
 	  	# customer_id = event_json.data.object.id
 	  	# if !event_json.data.object.subscription.data.first.nil?
 		  # 	subscription_id = event_json.data.object.subscription.data.first.id
@@ -66,16 +66,16 @@ class StripeController < ApplicationController
 		  # end
 	  end
 
-	  if event == 'customer.subscription.trial_will_end'
+	  if event.type == 'customer.subscription.trial_will_end'
 	  	#occurs three days before the trial period of a subscription is scheduled to end.
 
 	  end
 
-	  if event == 'customer.subscription.updated'
+	  if event.type == 'customer.subscription.updated'
 	    
 	  end
 
-	  if event == 'customer.subscription.created'
+	  if event.type == 'customer.subscription.created'
 	    # customer_id = event_json.object.customer
 	    # subscription_id = event_json.object.id
 	    # plan = event_json.object.plan.id
