@@ -26,7 +26,6 @@ class StripeController < ApplicationController
 		    invoice.amount = event_json.object.line.datas.first.amount.to_f/100
 		    invoice.quantity = event_json.object.lines.data.first.quantity
 	    end
-	    console.log("hello");
 	    invoice.save
 	  end
 
