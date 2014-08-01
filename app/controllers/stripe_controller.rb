@@ -6,8 +6,9 @@ class StripeController < ApplicationController
 	  # Verify the event by fetching it from Stripe
 	  event = Stripe::Event.retrieve(event_json["id"])
 
+
 	  # Do something with event
-	  if event == invoice.created
+	  if event == 'invoice.created'
 	  	invoice = Invoice.new
 	  	invoice.date = Time.at(event_json.object.date).utc
 	  	invoice.invoice_id = event_json.object.id
@@ -22,21 +23,21 @@ class StripeController < ApplicationController
 	    	invoice.plan_id = event_json.object.lines.data.first.plan.id
 		    invoice.period_start = Time.at(event_json.object.lines.data.first.period.start).utc
 		    invoice.period_end = Time.at(event_json.object.lines.data.first.period.end).utc
-		    invoice.amount = event_json.object.line.datas.first.amount
+		    invoice.amount = event_json.object.line.datas.first.amount.to_f/100
 		    invoice.quantity = event_json.object.lines.data.first.quantity
 	    end
+	    console.log("hello");
 	    invoice.save
 	  end
 
-	  if event == charge.succeeded
+	  if event == 'charge.succeeded'
 	    # amount has been deducted from account
 	    # customer_id = event_json.data.object.customer
 	    # transaction_id = event_json.data.object.balance_transaction
 	    # amount = event_json.data.object.amount
-	    puts "Congratulations!!! Charge succeeded."
 	  end
 
-	  if event == charge.failed
+	  if event == 'charge.failed'
 	    # the charge couldnot be completed due to some error.
 	    # customer_id = event_json.data.object.customer
 	    # transaction_id = event_json.data.object.balance_transaction
@@ -44,7 +45,7 @@ class StripeController < ApplicationController
 	    # error = event_json.data.object.failure_message
 	  end
 
-	  if event == invoice.payment_succeeded
+	  if event == 'invoice.payment_succeeded'
 	    # customer_id = event_json.object.customer
 	    # subscription_id = event_json.object.line.data.first.id
 	    # subscription_upto = event_json.object.line.data.first.period.end
@@ -55,7 +56,7 @@ class StripeController < ApplicationController
 	    # subscription.save
 	  end
 
-	  if event == customer.created
+	  if event == 'customer.created'
 	  	# customer_id = event_json.data.object.id
 	  	# if !event_json.data.object.subscription.data.first.nil?
 		  # 	subscription_id = event_json.data.object.subscription.data.first.id
@@ -67,16 +68,16 @@ class StripeController < ApplicationController
 		  # end
 	  end
 
-	  if event == customer.subscription.trial_will_end
+	  if event == 'customer.subscription.trial_will_end'
 	  	#occurs three days before the trial period of a subscription is scheduled to end.
 
 	  end
 
-	  if event == customer.subscription.updated
+	  if event == 'customer.subscription.updated'
 	    
 	  end
 
-	  if event == customer.subscription.created
+	  if event == 'customer.subscription.created'
 	    # customer_id = event_json.object.customer
 	    # subscription_id = event_json.object.id
 	    # plan = event_json.object.plan.id
