@@ -9,7 +9,7 @@ class StripeController < ApplicationController
 	  # Do something with event
 	  if event.type == 'invoice.created'
 	  	invoice = Invoice.new
-	  	# invoice.date = Time.at(event.data.object.date).utc
+	  	invoice.date = Time.at(event.data.object.date).utc
 	  	invoice.invoice_id = event.data.object.id
 	   #  invoice.subscription_id = event.data.object.subscription
 	   #  invoice.customer_id = event.data.object.customer
