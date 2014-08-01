@@ -9,22 +9,22 @@ class StripeController < ApplicationController
 	  # Do something with event
 	  if event.type == 'invoice.created'
 	  	invoice = Invoice.new
-	  	invoice.date = Time.at(event.data.object.date).utc
-	  	invoice.invoice_id = event.data.object.id
-	    invoice.subscription_id = event.data.object.subscription
-	    invoice.customer_id = event.data.object.customer
-	    invoice.charge_id = event.data.object.charge
-	    invoice.attempted = event.data.object.attempted
-	    invoice.closed = event.data.object.closed
-	    invoice.forgiven = event..data.object.forgiven
-	    invoice.paid = event.data.object.paid
-	    if !event.data.object.lines.data.first.nil?
-	    	invoice.plan_id = event.data.object.lines.data.first.plan.id
-		    invoice.period_start = Time.at(event.data.object.lines.data.first.period.start).utc
-		    invoice.period_end = Time.at(event.data.object.lines.data.first.period.end).utc
-		    invoice.amount = event.data.object.lines.data.first.amount.to_f/100
-		    invoice.quantity = event.data.object.lines.data.first.quantity
-	    end
+	  	# invoice.date = Time.at(event.data.object.date).utc
+	  	# invoice.invoice_id = event.data.object.id
+	   #  invoice.subscription_id = event.data.object.subscription
+	   #  invoice.customer_id = event.data.object.customer
+	   #  invoice.charge_id = event.data.object.charge
+	   #  invoice.attempted = event.data.object.attempted
+	   #  invoice.closed = event.data.object.closed
+	   #  invoice.forgiven = event..data.object.forgiven
+	    invoice.paid = false#event.data.object.paid
+	   #  if !event.data.object.lines.data.first.nil?
+	   #  	invoice.plan_id = event.data.object.lines.data.first.plan.id
+		  #   invoice.period_start = Time.at(event.data.object.lines.data.first.period.start).utc
+		  #   invoice.period_end = Time.at(event.data.object.lines.data.first.period.end).utc
+		    invoice.amount = 20#event.data.object.lines.data.first.amount.to_f/100
+		    invoice.quantity = 1#event.data.object.lines.data.first.quantity
+	   #  end
 	    invoice.save
 	  end
 
