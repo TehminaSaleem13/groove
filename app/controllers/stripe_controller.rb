@@ -23,7 +23,7 @@ class StripeController < ApplicationController
 	    	invoice.plan_id = event_json.object.lines.data.first.plan.id
 		    invoice.period_start = Time.at(event_json.object.lines.data.first.period.start).utc
 		    invoice.period_end = Time.at(event_json.object.lines.data.first.period.end).utc
-		    invoice.amount = event_json.object.line.datas.first.amount.to_f/100
+		    invoice.amount = event_json.object.lines.data.first.amount.to_f/100
 		    invoice.quantity = event_json.object.lines.data.first.quantity
 	    end
 	    invoice.save
