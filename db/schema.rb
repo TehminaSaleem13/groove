@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140731140547) do
+ActiveRecord::Schema.define(:version => 20140801094142) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "tenant_id"
@@ -133,6 +133,25 @@ ActiveRecord::Schema.define(:version => 20140731140547) do
     t.datetime "updated_at",                         :null => false
     t.string   "status",     :default => "inactive"
     t.boolean  "is_default", :default => false
+  end
+
+  create_table "invoices", :force => true do |t|
+    t.datetime "date"
+    t.string   "invoice_id"
+    t.string   "subscription_id"
+    t.decimal  "amount",          :precision => 8, :scale => 2, :default => 0.0
+    t.datetime "period_start"
+    t.datetime "period_end"
+    t.integer  "quantity"
+    t.string   "plan_id"
+    t.string   "customer_id"
+    t.string   "charge_id"
+    t.boolean  "attempted"
+    t.boolean  "closed"
+    t.boolean  "forgiven"
+    t.boolean  "paid"
+    t.datetime "created_at",                                                     :null => false
+    t.datetime "updated_at",                                                     :null => false
   end
 
   create_table "magento_credentials", :force => true do |t|

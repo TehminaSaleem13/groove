@@ -8,19 +8,40 @@ class StripeController < ApplicationController
 
 	  # Do something with event
 	  if event == invoice.created
-	    # subscription_id = event_json.object.line.data.first.id
-	    # customer_id = event_json.object.customer
-	    # plan = event_json.object.line.data.first.plan.id
-	    # subscription_upto = event_json.object.period_end
-	    # amount = event_json.object.data.first.amount
+	  	invoice = Invoice.new
+	  	invoice.date = event_json.object.date
+	  	invoice.invoice_id = event_json.object.id
+	    invoice.subscription_id = event_json.object.subscription
+	    invoice.customer_id = event_json.object.customer
+	    invoice.charge_id = event_json.object.charge
+	    invoice.attempted = event_json.object.attempted
+	    invoice.closed = event_json.object.closed
+	    invoice.forgiven = event_json.object.forgiven
+	    invoice.paid = event_json.object.paid
+	    if !event_json.object.lines.data.first.nil?
+	    	invoice.plan_id = event_json.object.lines.data.first.plan.id
+		    invoice.period_start = event_json.object.lines.data.first.period.start
+		    invoice.period_end = event_json.object.lines.data.first.period.end
+		    invoice.amount = event_json.object.line.datas.first.amount
+		    invoice.quantity = event_json.object.lines.data.first.quantity
+	    end
+	    invoice.save
 	  end
 
 	  if event == charge.succeeded
 	    # amount has been deducted from account
+	    # customer_id = event_json.data.object.customer
+	    # transaction_id = event_json.data.object.balance_transaction
+	    # amount = event_json.data.object.amount
+	    puts "Congratulations!!! Charge succeeded."
 	  end
 
 	  if event == charge.failed
 	    # the charge couldnot be completed due to some error.
+	    # customer_id = event_json.data.object.customer
+	    # transaction_id = event_json.data.object.balance_transaction
+	    # amount = event_json.data.object.amount
+	    # error = event_json.data.object.failure_message
 	  end
 
 	  if event == invoice.payment_succeeded
@@ -34,7 +55,20 @@ class StripeController < ApplicationController
 	    # subscription.save
 	  end
 
+	  if event == customer.created
+	  	# customer_id = event_json.data.object.id
+	  	# if !event_json.data.object.subscription.data.first.nil?
+		  # 	subscription_id = event_json.data.object.subscription.data.first.id
+		  # 	plan_name = event_json.data.object.subscription.data.first.plan.name
+		  # 	plan_interval = event_json.data.object.subscription.data.first.plan.interval
+		  # 	amount = event_json.data.object.subscription.data.first.plan.amount
+		  # 	trial_period_days = event_json.data.object.subscription.data.first.plan.trial_period_days
+		  # 	trial_end = event_json.data.object.subscription.data.first.trial_end
+		  # end
+	  end
+
 	  if event == customer.subscription.trial_will_end
+	  	#occurs three days before the trial period of a subscription is scheduled to end.
 
 	  end
 
