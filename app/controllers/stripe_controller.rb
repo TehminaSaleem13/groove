@@ -2,11 +2,10 @@ class StripeController < ApplicationController
  	protect_from_forgery :except => :webhook
   def webhook
 	  event_json = JSON.parse(request.body.read)
-	  Webhook.create(event: event_json) 
+	  # Webhook.create(event: event_json) 
 	  # Verify the event by fetching it from Stripe
 	  event = Stripe::Event.retrieve(event_json["id"])
-
-
+	  Webhook.create(event: event) 
 	  # Do something with event
 	  if event == 'invoice.created'
 	  	invoice = Invoice.new
