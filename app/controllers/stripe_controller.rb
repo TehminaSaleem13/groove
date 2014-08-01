@@ -11,13 +11,13 @@ class StripeController < ApplicationController
 	  	invoice = Invoice.new
 	  	invoice.date = Time.at(event.data.object.date).utc
 	  	invoice.invoice_id = event.data.object.id
-	   #  invoice.subscription_id = event.data.object.subscription
-	   #  invoice.customer_id = event.data.object.customer
-	   #  invoice.charge_id = event.data.object.charge
-	   #  invoice.attempted = event.data.object.attempted
-	   #  invoice.closed = event.data.object.closed
-	   #  invoice.forgiven = event..data.object.forgiven
-	    invoice.paid = false#event.data.object.paid
+	    invoice.subscription_id = event.data.object.subscription
+	    invoice.customer_id = event.data.object.customer
+	    invoice.charge_id = event.data.object.charge
+	    invoice.attempted = event.data.object.attempted
+	    invoice.closed = event.data.object.closed
+	    invoice.forgiven = event.data.object.forgiven
+	    invoice.paid = event.data.object.paid
 	   #  if !event.data.object.lines.data.first.nil?
 	   #  	invoice.plan_id = event.data.object.lines.data.first.plan.id
 		  #   invoice.period_start = Time.at(event.data.object.lines.data.first.period.start).utc
