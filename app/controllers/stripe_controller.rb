@@ -9,7 +9,7 @@ class StripeController < ApplicationController
 	  # Do something with event
 	  if event == invoice.created
 	  	invoice = Invoice.new
-	  	invoice.date = event_json.object.date
+	  	invoice.date = Time.at(event_json.object.date).utc
 	  	invoice.invoice_id = event_json.object.id
 	    invoice.subscription_id = event_json.object.subscription
 	    invoice.customer_id = event_json.object.customer
@@ -20,8 +20,8 @@ class StripeController < ApplicationController
 	    invoice.paid = event_json.object.paid
 	    if !event_json.object.lines.data.first.nil?
 	    	invoice.plan_id = event_json.object.lines.data.first.plan.id
-		    invoice.period_start = event_json.object.lines.data.first.period.start
-		    invoice.period_end = event_json.object.lines.data.first.period.end
+		    invoice.period_start = Time.at(event_json.object.lines.data.first.period.start).utc
+		    invoice.period_end = Time.at(event_json.object.lines.data.first.period.end).utc
 		    invoice.amount = event_json.object.line.datas.first.amount
 		    invoice.quantity = event_json.object.lines.data.first.quantity
 	    end
