@@ -30,7 +30,7 @@ controller('showUsersCtrl', [ '$scope', '$http', '$timeout', '$stateParams', '$l
 
 
         $scope.submit = function() {
-            $http.post('/user_settings/createUser.json', $scope.newUser).success(function(data) {
+            $http.post('/user_settings/user.json', $scope.newUser).success(function(data) {
                 console.log(data);
                 if(!data.status)
                 {
@@ -49,7 +49,9 @@ controller('showUsersCtrl', [ '$scope', '$http', '$timeout', '$stateParams', '$l
                     $scope.newUser.role = data.user.role;
                     myscope.reset_selected_role();
                 }
-            })
+            }).error(function(data) {
+                $scope.notify("You have reached max users count for your subscription.",0);
+            });
         }
 
         myscope.reset_selected_role = function() {

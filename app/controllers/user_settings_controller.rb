@@ -10,6 +10,19 @@ class UserSettingsController < ApplicationController
     end
   end
 
+  def user
+    users = userslist
+    user_count = users.count
+    tenant_name = Apartment::Tenant.current_tenant
+    tenants = Tenant.where(name: tenant_name)
+    max_users = tenants.first.access_restriction.num_users
+    if user_count < max_users
+      createUser
+    else
+      # display message saying you have reached your max users count for your subscription.
+    end
+  end
+
   def createUser
     @result = Hash.new
     @result['status'] = true
