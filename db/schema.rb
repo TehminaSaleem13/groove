@@ -11,16 +11,15 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140805073404) do
+ActiveRecord::Schema.define(:version => 20140805150146) do
 
   create_table "access_restrictions", :force => true do |t|
-    t.integer  "tenant_id"
-    t.integer  "num_users"
-    t.integer  "num_shipments"
-    t.integer  "num_import_sources"
-    t.datetime "created_at",              :null => false
-    t.datetime "updated_at",              :null => false
-    t.integer  "total_scanned_shipments"
+    t.integer  "num_users",               :default => 0, :null => false
+    t.integer  "num_shipments",           :default => 0, :null => false
+    t.integer  "num_import_sources",      :default => 0, :null => false
+    t.datetime "created_at",                             :null => false
+    t.datetime "updated_at",                             :null => false
+    t.integer  "total_scanned_shipments", :default => 0, :null => false
   end
 
   create_table "amazon_credentials", :force => true do |t|

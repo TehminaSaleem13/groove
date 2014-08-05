@@ -22,9 +22,7 @@ class StoreSettingsController < ApplicationController
   def store
     stores = Store.where("store_type != 'system'")
     store_count = stores.count
-    tenant_name = Apartment::Tenant.current_tenant
-    tenants = Tenant.where(name: tenant_name)
-    max_stores = tenants.first.access_restriction.num_import_sources
+    max_stores = AccessRestriction.first.num_import_sources
     if store_count < max_stores
       true
     else

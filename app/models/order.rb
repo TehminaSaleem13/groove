@@ -67,25 +67,13 @@ class Order < ActiveRecord::Base
   end
 
   def set_order_to_scanned_state(username)
-    result = false
-    tenant_name = Apartment::Tenant.current_tenant
-    tenants = Tenant.where(name: tenant_name)
-    restrictions = tenants.first.access_restriction
-    max_shipments = restrictions.num_shipments
-    total_shipments = restrictions.total_scanned_shipments
-    if total_shipments < max_shipments
-      self.status = 'scanned'
-      self.scanned_on = current_time_from_proper_timezone
-      self.addactivity('Order Scanning Complete', username)
-      self.save
-      total_shipments = total_shipments + 1
-      restrictions.total_scanned_shipments = total_shipments
-      restrictions.save
-      result = true
-    else
-      result = false
-    end
-    result
+    self.status = 'scanned'
+    self.scanned_on = current_time_from_proper_timezone
+    self.addactivity('Order Scanning Complete', username)
+    self.save
+    restriction = AccessRestriction.first
+    restriction.total_scanned_shipments += 1
+    restriction.save
   end
 
   def has_inactive_or_new_products

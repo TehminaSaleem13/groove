@@ -36,7 +36,7 @@ Apartment.configure do |config|
   # config.tenant_names = lambda{ ToDo_Tenant_Or_User_Model.pluck :database }
   config.tenant_names = lambda{ Tenant.pluck :name }
   # config.tenant_names = ['test', 'test1']
-  config.excluded_models = ['Delayed::Job','Tenant','Subscription','AccessRestriction']
+  config.excluded_models = ['Delayed::Job','Tenant','Subscription']
 end
 
 ##

@@ -13,9 +13,7 @@ class UserSettingsController < ApplicationController
   def user
     users = User.all
     user_count = users.count
-    tenant_name = Apartment::Tenant.current_tenant
-    tenants = Tenant.where(name: tenant_name)
-    max_users = tenants.first.access_restriction.num_users
+    max_users = AccessRestriction.first.num_users
     if user_count < max_users
       return true
     else

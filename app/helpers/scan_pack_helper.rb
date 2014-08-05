@@ -24,79 +24,84 @@ module ScanPackHelper
         single_order_result['status'] = single_order.status
         single_order_result['order_num'] = single_order.increment_id
 
-        #search in orders that have status of Scanned
-        if single_order.status == 'scanned'
-          single_order_result['scanned_on'] = single_order.scanned_on
-          single_order_result['next_state'] = 'scanpack.rfo'
-          result['notice_messages'].push('This order has already been scanned')
-        end
+        #can order be scanned?
+        if can_order_be_scanned
+          #search in orders that have status of Scanned
+          if single_order.status == 'scanned'
+            single_order_result['scanned_on'] = single_order.scanned_on
+            single_order_result['next_state'] = 'scanpack.rfo'
+            result['notice_messages'].push('This order has already been scanned')
+          end
 
-        #search in orders that have status of On Hold
-        if single_order.status == 'onhold'
-          if single_order.has_inactive_or_new_products
-            #get list of inactive_or_new_products
-            single_order_result['conf_code'] = session[:confirmation_code]
+          #search in orders that have status of On Hold
+          if single_order.status == 'onhold'
+            if single_order.has_inactive_or_new_products
+              #get list of inactive_or_new_products
+              single_order_result['conf_code'] = session[:confirmation_code]
 
-            if current_user.can?('add_edit_products') || (session[:product_edit_matched_for_current_user] && session[:product_edit_matched_for_order] == single_order.id)
-              single_order_result['product_edit_matched'] = true
-              single_order_result['inactive_or_new_products'] = single_order.get_inactive_or_new_products
-              single_order_result['next_state'] = 'scanpack.rfp.product_edit'
+              if current_user.can?('add_edit_products') || (session[:product_edit_matched_for_current_user] && session[:product_edit_matched_for_order] == single_order.id)
+                single_order_result['product_edit_matched'] = true
+                single_order_result['inactive_or_new_products'] = single_order.get_inactive_or_new_products
+                single_order_result['next_state'] = 'scanpack.rfp.product_edit'
+              else
+                session[:product_edit_matched_for_current_user] = false
+                session[:order_edit_matched_for_current_user] = false
+                session[:product_edit_matched_for_order] = false
+                session[:product_edit_matched_for_products] = []
+                single_order_result['next_state'] = 'scanpack.rfp.confirmation.product_edit'
+                result['notice_messages'].push("This order was automatically placed on hold because it contains items that have a "+
+                                                    "status of New or Inactive. These items may not have barcodes or other information needed for processing. "+
+                                                    "Please ask a user with product edit permissions to scan their code so that these items can be edited or scan a different order.")
+              end
             else
-              session[:product_edit_matched_for_current_user] = false
-              session[:order_edit_matched_for_current_user] = false
-              session[:product_edit_matched_for_order] = false
-              session[:product_edit_matched_for_products] = []
-              single_order_result['next_state'] = 'scanpack.rfp.confirmation.product_edit'
-              result['notice_messages'].push("This order was automatically placed on hold because it contains items that have a "+
-                                                  "status of New or Inactive. These items may not have barcodes or other information needed for processing. "+
-                                                  "Please ask a user with product edit permissions to scan their code so that these items can be edited or scan a different order.")
+              single_order_result['order_edit_permission'] = current_user.can?('import_orders')
+              single_order_result['next_state'] = 'scanpack.rfp.confirmation.order_edit'
+              result['notice_messages'].push('This order is currently on Hold. Please scan or enter '+
+                                                  'confirmation code with order edit permission to continue scanning this order or '+
+                                                  'scan a different order.')
             end
-          else
-            single_order_result['order_edit_permission'] = current_user.can?('import_orders')
-            single_order_result['next_state'] = 'scanpack.rfp.confirmation.order_edit'
-            result['notice_messages'].push('This order is currently on Hold. Please scan or enter '+
-                                                'confirmation code with order edit permission to continue scanning this order or '+
-                                                'scan a different order.')
           end
-        end
 
-        #process orders that have status of Service Issue
-        if single_order.status == 'serviceissue'
-          single_order_result['next_state'] = 'scanpack.rfp.confirmation.cos'
-          if current_user.can?('change_order_status')
-            result['notice_messages'].push('This order has a pending Service Issue. '+
-                                                'To clear the Service Issue and continue packing the order please scan your confirmation code or scan a different order.')
-          else
-            result['notice_messages'].push('This order has a pending Service Issue. To continue with this order, '+
-                                                'please ask another user who has Change Order Status permissions to scan their '+
-                                                'confirmation code and clear the issue. Alternatively, you can pack another order '+
-                                                'by scanning another order number.')
+          #process orders that have status of Service Issue
+          if single_order.status == 'serviceissue'
+            single_order_result['next_state'] = 'scanpack.rfp.confirmation.cos'
+            if current_user.can?('change_order_status')
+              result['notice_messages'].push('This order has a pending Service Issue. '+
+                                                  'To clear the Service Issue and continue packing the order please scan your confirmation code or scan a different order.')
+            else
+              result['notice_messages'].push('This order has a pending Service Issue. To continue with this order, '+
+                                                  'please ask another user who has Change Order Status permissions to scan their '+
+                                                  'confirmation code and clear the issue. Alternatively, you can pack another order '+
+                                                  'by scanning another order number.')
+            end
           end
-        end
 
-        #search in orders that have status of Cancelled
-        if single_order.status == 'cancelled'
-          single_order_result['next_state'] = 'scanpack.rfo'
-          result['notice_messages'].push('This order has been cancelled')
-        end
-
-        #if order has status of Awaiting Scanning
-        if single_order.status == 'awaiting'
-          if !single_order.has_unscanned_items
-            single_order_result['next_state'] = 'scanpack.rfp.tracking'
-          else
-            single_order_result['next_state'] = 'scanpack.rfp.default'
+          #search in orders that have status of Cancelled
+          if single_order.status == 'cancelled'
+            single_order_result['next_state'] = 'scanpack.rfo'
+            result['notice_messages'].push('This order has been cancelled')
           end
-        end
-        unless single_order.nil?
-          single_order.packing_user_id = current_user.id
-          unless single_order.save
-            result['status'] &= false
-            result['error_messages'].push("Could not save order with id: "+single_order.id)
-          end
-          single_order_result['order'] = order_details_and_next_item(single_order)
-        end
 
+          #if order has status of Awaiting Scanning
+          if single_order.status == 'awaiting'
+            if !single_order.has_unscanned_items
+              single_order_result['next_state'] = 'scanpack.rfp.tracking'
+            else
+              single_order_result['next_state'] = 'scanpack.rfp.default'
+            end
+          end
+          unless single_order.nil?
+            single_order.packing_user_id = current_user.id
+            unless single_order.save
+              result['status'] &= false
+              result['error_messages'].push("Could not save order with id: "+single_order.id)
+            end
+            single_order_result['order'] = order_details_and_next_item(single_order)
+          end
+        else
+          result['status'] &= false
+          result['error_messages'].push("You have reached the maximum limit of number of shipments for your subscription.")
+        end
         result['data'] = single_order_result
       end
     else
@@ -104,6 +109,18 @@ module ScanPackHelper
       result['error_messages'].push("Please specify a barcode to scan the order")
     end
     return result
+  end
+
+  def can_order_be_scanned
+    result = false
+    max_shipments = AccessRestriction.first.num_shipments
+    total_shipments = AccessRestriction.first.total_scanned_shipments
+    # if total_shipments < max_shipments
+    #   result = true
+    # else
+    #   result = false
+    # end
+    true
   end
 
   def product_scan(input,state,id)
@@ -235,13 +252,10 @@ module ScanPackHelper
         else
           #allow tracking id to be saved without special permissions
           order.tracking_num = input
-          if order.set_order_to_scanned_state(current_user.username)
-            result['data']['next_state'] = 'scanpack.rfo'
-            #update inventory when inventory warehouses is implemented.
-            order.save
-          else
-            result['error_messages'].push("You have reached the maximum limit of number of shipments for your subscription.")
-          end
+          order.set_order_to_scanned_state(current_user.username)
+          result['data']['next_state'] = 'scanpack.rfo'
+          #update inventory when inventory warehouses is implemented.
+          order.save   
         end
       else
         result['status'] &= false
