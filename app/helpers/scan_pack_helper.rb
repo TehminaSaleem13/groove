@@ -235,10 +235,13 @@ module ScanPackHelper
         else
           #allow tracking id to be saved without special permissions
           order.tracking_num = input
-          order.set_order_to_scanned_state(current_user.username)
-          result['data']['next_state'] = 'scanpack.rfo'
-          #update inventory when inventory warehouses is implemented.
-          order.save
+          if order.set_order_to_scanned_state(current_user.username)
+            result['data']['next_state'] = 'scanpack.rfo'
+            #update inventory when inventory warehouses is implemented.
+            order.save
+          else
+            result['error_messages'].push("You have reached the maximum limit of number of shipments for your subscription.")
+          end
         end
       else
         result['status'] &= false
