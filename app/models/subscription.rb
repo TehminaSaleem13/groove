@@ -32,7 +32,7 @@ class Subscription < ActiveRecord::Base
             self.stripe_transaction_identifier = transactions.first.id
             CreateTenant.delay(:run_at => 1.seconds.from_now).create_tenant self
             # CreateTenant.create_tenant self
-            
+
             Apartment::Tenant.switch()
             if !customer.cards.data.first.nil?
               card_type = customer.cards.data.first.brand
@@ -58,7 +58,6 @@ class Subscription < ActiveRecord::Base
       self.status = 'completed'
       self.is_active = true
       self.save
-      apply_restrictions(self.subscription_plan_id, self.tenant_id)
   		save!
   	end
   rescue Stripe::InvalidRequestError => e
@@ -68,39 +67,6 @@ class Subscription < ActiveRecord::Base
   	logger.error "Stripe error while creating customer: #{e.message}"
   	errors.add :base, "There was a problem with your credit card."
   	false
-  end
-  def apply_restrictions(plan, tenant_id)
-    if plan == "groove1"
-      AccessRestriction.create(
-        tenant_id: tenant_id, 
-        num_users: '1', 
-        num_shipments: '500',
-        num_import_sources: '1')
-    elsif plan == 'groove2'
-      AccessRestriction.create(
-        tenant_id: tenant_id,
-        num_users: '2',
-        num_shipments: '2000',
-        num_import_sources: '2')
-    elsif plan == 'groove3'
-    AccessRestriction.create(
-      tenant_id: tenant_id,
-      num_users: '3',
-      num_shipments: '6000',
-      num_import_sources: '3')
-    elsif plan == 'groove4'
-      AccessRestriction.create(
-        tenant_id: tenant_id,
-        num_users: '5',
-        num_shipments: '12000',
-        num_import_sources: '5')
-    elsif plan == 'groove5'
-      AccessRestriction.create(
-        tenant_id: tenant_id,
-        num_users: '12',
-        num_shipments: '50000',
-        num_import_sources: '8')
-    end
   end
 
 end
