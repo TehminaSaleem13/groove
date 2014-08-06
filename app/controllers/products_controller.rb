@@ -24,6 +24,10 @@ class ProductsController < ApplicationController
         context = Groovepacker::Store::Context.new(
           Groovepacker::Store::Handlers::MagentoHandler.new(@store))
         import_result = context.import_products
+      elsif @store.store_type == 'Shipstation'
+        context = Groovepacker::Store::Context.new(
+          Groovepacker::Store::Handlers::ShipstationHandler.new(@store))
+        import_result = context.import_products
       elsif @store.store_type == 'Amazon'
         @amazon_credentials = AmazonCredentials.where(:store_id => @store.id)
 

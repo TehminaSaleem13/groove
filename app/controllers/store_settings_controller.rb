@@ -187,8 +187,34 @@ class StoreSettingsController < ApplicationController
                 @result['csv_import'] = true
               end
             end
+          end
+          if @store.store_type == 'Shipstation'
+            @shipstation = ShipstationCredential.where(:store_id=>@store.id)
 
+            if @shipstation.nil? || @shipstation.length == 0
+              @shipstation = ShipstationCredential.new
+            else
+              @shipstation = @shipstation.first
+            end
 
+            @shipstation.username = params[:username]
+            @shipstation.password = params[:password]
+
+            @store.shipstation_credentials = @shipstation
+
+            begin
+              @store.save!
+              if !@shipstation.new_record?
+                @store.shipstation_credentials.save
+              end
+            rescue ActiveRecord::RecordInvalid => e
+              @result['status'] = false
+              @result['messages'] = [@store.errors.full_messages, @store.shipstation_credentials.errors.full_messages]
+
+            rescue ActiveRecord::StatementInvalid => e
+              @result['status'] = false
+              @result['messages'] = [e.message]
+            end
           end
         end
       else
