@@ -115,12 +115,12 @@ module ScanPackHelper
     result = false
     max_shipments = AccessRestriction.first.num_shipments
     total_shipments = AccessRestriction.first.total_scanned_shipments
-    # if total_shipments < max_shipments
-    #   result = true
-    # else
-    #   result = false
-    # end
-    true
+    if total_shipments < max_shipments
+      result = true
+    else
+      result = false
+    end
+    result
   end
 
   def product_scan(input,state,id)
