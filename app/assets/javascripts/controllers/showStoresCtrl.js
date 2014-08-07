@@ -418,6 +418,11 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies, wa
                     $scope.newStore.productreport_id = data.credentials.amazon_credentials.productreport_id;
                     $scope.newStore.productgenerated_report_id = data.credentials.amazon_credentials.productgenerated_report_id
                 }
+                if (data.store.store_type == 'Shipstation')
+                {
+                    $scope.newStore.username = data.credentials.shipstation_credentials.username;
+                    $scope.newStore.password = data.credentials.shipstation_credentials.password;
+                }
 
                 }
                 $scope.store_modal.modal('show');
@@ -456,33 +461,43 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies, wa
                     $scope.newStore.productpassword = $scope.newStore.password;
                     $scope.newStore.productapi_key = $scope.newStore.api_key;
                 }
-                if ($scope.newStore.store_type == 'Ebay')
+            if ($scope.newStore.store_type == 'Ebay')
                 {
                     $scope.newStore.productebay_auth_token = $scope.newStore.ebay_auth_token;
                 }
-                if ($scope.newStore.store_type == 'Amazon')
+            if ($scope.newStore.store_type == 'Amazon')
                 {
                     $scope.newStore.productmarketplace_id = $scope.newStore.marketplace_id;
                     $scope.newStore.productmerchant_id = $scope.newStore.merchant_id;
                 }
+            if ($scope.newStore.store_type == 'Shipstation')
+                {
+                    $scope.newStore.productusername = $scope.newStore.username;
+                    $scope.newStore.productpassword = $scope.newStore.password;
+                }
         }
         else
         {
-                if ($scope.newStore.store_type == 'Magento')
+            if ($scope.newStore.store_type == 'Magento')
                 {
                     $scope.newStore.producthost = "";
                     $scope.newStore.productusername = "";
                     $scope.newStore.productpassword = "";
                     $scope.newStore.productapi_key = "";
                 }
-                if ($scope.newStore.store_type == 'Ebay')
+            if ($scope.newStore.store_type == 'Ebay')
                 {
                     $scope.newStore.productebay_auth_token = "";
                 }
-                if ($scope.newStore.store_type == 'Amazon')
+            if ($scope.newStore.store_type == 'Amazon')
                 {
                     $scope.newStore.productmarketplace_id = "";
                     $scope.newStore.productmerchant_id = "";
+                }
+            if ($scope.newStore.store_type == 'Shipstation')
+                {
+                    $scope.newStore.productusername = "";
+                    $scope.newStore.productpassword = "";
                 }
         }
     }

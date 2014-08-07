@@ -5,6 +5,7 @@ class Store < ActiveRecord::Base
   has_one :magento_credentials
   has_one :ebay_credentials
   has_one :amazon_credentials
+  has_one :shipstation_credential
   belongs_to :inventory_warehouse
 
   validates_presence_of :name
@@ -35,6 +36,13 @@ class Store < ActiveRecord::Base
         @result['status'] =true
   		end
   	end
+    if self.store_type == 'Shipstation'
+      @credentials = ShipstationCredential.where(:store_id => self.id)
+      if !@credentials.nil? && @credentials.length > 0
+        @result['shipstation_credentials'] = @credentials.first
+        @result['status'] =true
+      end
+    end
   	@result
   end
 
@@ -48,6 +56,9 @@ class Store < ActiveRecord::Base
     end
     if self.store_type == 'Magento'
       @credentials = MagentoCredentials.where(:store_id => self.id)
+    end
+    if self.store_type == 'Shipstation'
+      @credentials = ShipstationCredential.where(:store_id => self.id)
     end
 
     if !@credentials.nil? && @credentials.length > 0
@@ -86,6 +97,17 @@ class Store < ActiveRecord::Base
       @credentials = MagentoCredentials.where(:store_id => id)
       if !@credentials.nil? && @credentials.length > 0
         @newcredentials = MagentoCredentials.new 
+        @newcredentials = @credentials.first.dup
+        @newcredentials.store_id = self.id
+        if !@newcredentials.save
+          @result = false
+        end
+      end
+    end
+    if self.store_type == 'Shipstation'
+      @credentials = ShipstationCredential.where(:store_id => id)
+      if !@credentials.nil? && @credentials.length > 0
+        @newcredentials = ShipstationCredential.new 
         @newcredentials = @credentials.first.dup
         @newcredentials.store_id = self.id
         if !@newcredentials.save

@@ -3,7 +3,16 @@ module Groovepacker
     module Handlers
       class ShipstationHandler < Handler
         def build_handle
-          
+          shipstation_credential = ShipstationCredential.where(:store_id => self.store.id).first
+          mws = nil
+
+          if !shipstation_credential.nil?
+            ShipStationRuby.username  = "dreadhead"
+            ShipStationRuby.password  = "g8J$v5KLoP"
+            client = ShipStationRuby::Client.new
+          end
+            
+          self.make_handle(shipstation_credential, client)
         end
 
         def import_products

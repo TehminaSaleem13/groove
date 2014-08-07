@@ -199,17 +199,16 @@ class StoreSettingsController < ApplicationController
 
             @shipstation.username = params[:username]
             @shipstation.password = params[:password]
-
-            @store.shipstation_credentials = @shipstation
+            @store.shipstation_credential = @shipstation
 
             begin
               @store.save!
               if !@shipstation.new_record?
-                @store.shipstation_credentials.save
+                @store.shipstation_credential.save
               end
             rescue ActiveRecord::RecordInvalid => e
               @result['status'] = false
-              @result['messages'] = [@store.errors.full_messages, @store.shipstation_credentials.errors.full_messages]
+              @result['messages'] = [@store.errors.full_messages, @store.shipstation_credential.errors.full_messages]
 
             rescue ActiveRecord::StatementInvalid => e
               @result['status'] = false
