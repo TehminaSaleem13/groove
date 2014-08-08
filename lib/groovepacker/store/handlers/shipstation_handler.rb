@@ -4,7 +4,6 @@ module Groovepacker
       class ShipstationHandler < Handler
         def build_handle
           shipstation_credential = ShipstationCredential.where(:store_id => self.store.id).first
-          mws = nil
 
           if !shipstation_credential.nil?
             ShipStationRuby.username  = "dreadhead"

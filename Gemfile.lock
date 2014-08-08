@@ -25,14 +25,6 @@ GIT
       ruby-hmac
 
 GIT
-  remote: https://github.com/navaratan-tech/shipstation-ruby
-  revision: aa632ef5d50f73233905662e8f2f03c3d79beeeb
-  specs:
-    shipstation-ruby (0.0.1)
-      rash
-      ruby_odata
-
-GIT
   remote: https://github.com/svisamsetty/mws.git
   revision: 26d17c69249709604389fed68ab3cc9fed8bf4d4
   specs:
@@ -439,10 +431,10 @@ DEPENDENCIES
   rspec-rails (>= 2.13.2)
   rubber
   ruby-mws (~> 0.0.8)!
+  ruby_odata
   rubyzip
   sass-rails (~> 3.2.3)
   savon
-  shipstation-ruby (~> 0.0.1)!
   simple_form (>= 2.0.4)
   soap2r!
   spring-commands-rspec

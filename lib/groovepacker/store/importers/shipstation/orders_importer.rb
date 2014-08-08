@@ -6,34 +6,118 @@ module Groovepacker
           def import
             handler = self.get_handler
             credential = handler[:credential]
-            shipstation = handler[:store_handle]
+            client = handler[:store_handle]
             result = self.build_result
             
             begin
-              orders = client.order.all
+              orders = client.order.filter_list('OrderStatusID' => 2)
+              puts "retrieved all the orders."
+              result[:total_imported] = orders.length
+              puts orders.inspect
+              puts "hello"
               if !orders.nil?
+                result[:total_imported] = orders.length
                 orders.each do |order|
-                  if Order.where(:increment_id=>order.order_id).length == 0
+                  puts order.inspect
+                  if Order.where(:increment_id=>order.order_id.to_s).length == 0
                     @order = Order.new
-                    @order.status = 'awaiting'
-                    @order.increment_id = order.order_id
-                    # @order.order_placed_time = order.purchase_date
-                    # @order.store = credential.store
+                    # @order.shipment_id = order.ShipmentID
+                    @order.increment_id = order.OrderID
+                    # @order.seller_id = order.SellerID
+                    # @order.package_type_id = order.PackageTypeID
+                    # @order.voided = order.Voided
+                    # @order.downloaded = order.Downloaded
+                    @order.firstname = order.Name
+                    @order.company = order.Company
+                    @order.address_1 = order.Street1
+                    @order.address_2 = order.Street2
+                    @order.city = order.City
+                    @order.state = order.State
+                    @order.postcode = order.PostalCode
+                    @order.country = order.CountryCode
+                    # @order.weight_oz = order.WeightOz
+                    # @order.width = order.Width
+                    # @order.length = order.Length
+                    # @order.height = order.Height
+                    # @order.marketplace_notified = order.MarketplaceNotified
+                    # @order.warehouse_id = order.WarehouseID
+                    # @order.RMA_number = order.RMANumber
+                    puts "retrieving order_items."
+                    order_items = client.order_items.where("order_id"=>order.OrderID)
+                    puts "retrieved order_items."
+                    if !order_items.nil?
+                      order_items.each do |item|
+                        @order_item = OrderItem.new
+                        @order_item.sku = item.SKU
+                        @order_item.qty = item.Quantity
+                        @order_item.price = item.UnitPrice
+                        @order_item.row_total = item.UnitPrice.to_f * 
+                        item.Quantity.to_i
+                        # @order_item.name = 
+                        @order_item.product_id = item.ProductID
+                        # @order_item.scanned_status = 
+                        # @order_item.scanned_qty = 
+                        # @order_item.kit_split = 
+                        # @order_item.kit_split_qty =
+                        # @order_item.kit_split_scanned_qty =
+                        # @order_item.inv_status = 
+                        # @order_item.inv_status_reason = item.Description
+                        @order_item.order_id = item.OrderID
+                        if ProductSku.where(:sku=>item.SKU).length == 0
+                          #create and import product
+                          product = Product.new
+                          product.name = 'New imported item'
+                          product.store_product_id = 0
+                          product.store = credential.store
+
+                          sku = ProductSku.new
+                          sku.sku = item.SKU
+                          product.product_skus << sku
+                          product.save
+
+                          #import other product details
+                          Groovepacker::Store::Importers::Shipstation::
+                            ProductsImporter.new(handler).import_single({ 
+                              # product_sku: item.SKU, 
+                              product_id: product.id, 
+                              handler: handler
+                            })
+                        else
+                          @order_item.product = ProductSku.where(:sku=>item.SKU).
+                          first.product
+                        end
+                      end
+                      @order.order_items << @order_item
+                    end
+                    if @order.save
+                      if !@order.addnewitems
+                        result[:status] &= false
+                        result[:messages].push('Problem adding new items')
+                      end
+                      @order.addactivity("Order Import", credential.store.name+" Import")
+                      @order.order_items.each do |item|
+                        @order.addactivity("Item with SKU: "+item.sku+" Added", credential.store.name+" Import")
+                      end
+                      @order.set_order_status
+                      result[:success_imported] = result[:success_imported] + 1
+                    end
+                  else
+                      result[:previous_imported] = result[:previous_imported] + 1
                   end
                 end
               end
             rescue Exception => e
               result[:status] &= false
               result[:messages].push(e)
+              puts "Exception****************"
+              puts e.inspect
             end
             result
           end
 
           def import_single(hash)
             {}
-          end
-
-          
+          end  
         end
       end
     end
