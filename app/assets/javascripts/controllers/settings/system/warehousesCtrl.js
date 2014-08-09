@@ -79,18 +79,18 @@ function( $scope, $http, $timeout, $location, $state, $cookies,$modal, warehouse
             all_fields: {
                 'info.name': {
                     name: "Name",
-                    grid_bind: '<a href="" ng-click="options.functions.name(row,$event)">{{row.info.name}}</a>',
+                    transclude: '<a href="" ng-click="options.functions.name(row,$event)">{{row.info.name}}</a>',
                     class:''
                 },
 
                 'info.location': {
                     name: "Location",
-                    grid_bind: '<span>{{row.info.location}}</span>',
+                    transclude: '<span>{{row.info.location}}</span>',
                     class:''
                 },
                 'info.status': {
                     name: "Status",
-                    grid_bind: '<span class="label label-default" ng-class="{\'label-success\': row.info.status==\'active\'}">' +
+                    transclude: '<span class="label label-default" ng-class="{\'label-success\': row.info.status==\'active\'}">' +
                                '{{row.info.status}}' +
                                '</span>',
                     class:''

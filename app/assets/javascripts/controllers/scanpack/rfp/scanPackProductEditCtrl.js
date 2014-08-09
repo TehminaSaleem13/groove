@@ -27,7 +27,7 @@ groovepacks_controllers.
                     all_fields: {
                         name: {
                             name: "Item Name",
-                            grid_bind: '<a ui-sref="scanpack.rfp.product_edit.single({order_num: options.data.order_num, product_id: row.id })" >{{row[field]}}</a>'
+                            transclude: '<a ui-sref="scanpack.rfp.product_edit.single({order_num: options.data.order_num, product_id: row.id })" >{{row[field]}}</a>'
                         },
                         status: {
                             name: "Status"

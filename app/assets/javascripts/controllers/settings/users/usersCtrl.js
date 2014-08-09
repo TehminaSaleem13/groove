@@ -69,7 +69,7 @@ controller('usersCtrl', [ '$scope', '$http', '$timeout', '$stateParams', '$locat
                     },
                     active: {
                         name:"Status",
-                        grid_bind: '<span class="label label-default" ng-class="{\'label-success\': row.active}">' +
+                        transclude: '<span class="label label-default" ng-class="{\'label-success\': row.active}">' +
                                    '<span ng-show="row.active" class="active">Active</span>' +
                                    '<span ng-hide="row.active" class="inactive">Inactive</span>' +
                                    '</span>',
@@ -77,12 +77,12 @@ controller('usersCtrl', [ '$scope', '$http', '$timeout', '$stateParams', '$locat
                     },
                     last_sign_in_at: {
                         name:"Last Login",
-                        grid_bind: "<span>{{row[field] | date:'EEEE MM/dd/yyyy hh:mm:ss a'}}</span>",
+                        transclude: "<span>{{row[field] | date:'EEEE MM/dd/yyyy hh:mm:ss a'}}</span>",
                         class:''
                     },
                     online:{
                         name:"Online",
-                        grid_bind:'<span class=\'label label-default\' ng-class="{\'label-success\': row.online}">' +
+                        transclude:'<span class=\'label label-default\' ng-class="{\'label-success\': row.online}">' +
                                   '<span ng-show="row.online" class="active">Online</span>' +
                                   '<span ng-hide="row.online" class="inactive">Not Online</span>' +
                                   '</span>',
@@ -90,7 +90,7 @@ controller('usersCtrl', [ '$scope', '$http', '$timeout', '$stateParams', '$locat
                     },
                     'role.name':{
                         name:"Type",
-                        grid_bind: '<span class=\'label label-default\' ng-class="{' +
+                        transclude: '<span class=\'label label-default\' ng-class="{' +
                                    '\'label-danger\': row.role.name==\'Super Admin\',' +
                                    '\'label-warning\': row.role.name==\'Admin\',' +
                                    '\'label-success\': row.role.name==\'Manager\',' +
@@ -103,7 +103,7 @@ controller('usersCtrl', [ '$scope', '$http', '$timeout', '$stateParams', '$locat
                 }
             };
             if(typeof $scope.current_user!= 'undefined' && $scope.current_user.can('add_edit_users')) {
-                $scope.gridOptions.all_fields.username.grid_bind ='<a ui-sref="settings.users.single({user_id:row.id})"' +
+                $scope.gridOptions.all_fields.username.transclude ='<a ui-sref="settings.users.single({user_id:row.id})"' +
                                                                   ' ng-click="$event.preventDefault();$event.stopPropagation();">{{row[field]}}</a>';
             }
 

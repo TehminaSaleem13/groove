@@ -163,7 +163,7 @@ groovepacks_controllers.
         scope.remove_warehouses = function() {
             var old_warehouses = scope.products.single.inventory_warehouses;
             scope.products.single.inventory_warehouses = [];
-            for(i in old_warehouses) {
+            for(var i =0; i < old_warehouses.length;i++) {
                 if(!old_warehouses[i].checked) {
                     scope.products.single.inventory_warehouses.push(old_warehouses[i]);
                 }
@@ -206,7 +206,7 @@ groovepacks_controllers.
             scope.$watch('products.single.productkitskus',function(){
                 if(typeof scope.products.single.basicinfo != "undefined" && scope.products.single.basicinfo.is_kit == 1) {
                     scope.kit_products.list = [];
-                    for(i in scope.products.single.productkitskus) {
+                    for(var i =0; i<scope.products.single.productkitskus.length; i++) {
                         scope.kit_products.list.push({id:scope.products.single.productkitskus[i].option_product_id});
                     }
                 }
@@ -225,12 +225,41 @@ groovepacks_controllers.
                     axis: 'x'
                 }
             };
-            scope.editableOptions = {
-                update: scope.update_single_product,
-                elements: {
-                    qty: {type:'number',min:0}
+
+            scope.warehouseGridOptions = {
+                identifier:'warehousesgrid',
+                selectable:true,
+                editable:{
+                    update: scope.update_single_product,
+                    elements: {
+                        qty: {type:'number',min:0}
+                    }
+                },
+                all_fields: {
+                    name: {
+                        name:'Warehouse Name',
+                        model: 'row.warehouse_info',
+                        transclude: '<span>{{row.warehouse_info.name}}</span>'
+                    },
+                    available_inv: {
+                        name: 'Quantity on Hand',
+                        model:'row.info',
+                        transclude: '<span>{{row.info.available_inv}}</span>'
+                    },
+                    allocated_inv: {
+                        name: 'Allocated Qty',
+                        model:'row.info',
+                        transclude: '<span>{{row.info.allocated_inv}}</span>'
+                    },
+
+                    location: {
+                        name: 'Primary Location',
+                        model:'row.warehouse_info',
+                        transclude: '<span>{{row.warehouse_info.location}}</span>'
+                    }
                 }
             };
+
             scope.kitEditableOptions = {
                 update: scope.update_single_product,
                 elements: {

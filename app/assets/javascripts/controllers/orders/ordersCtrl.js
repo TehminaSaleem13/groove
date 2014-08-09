@@ -170,13 +170,13 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,ord
                     hideable:false,
                     editable: false,
                     //transclude:'<a href="" ng-click="function(ngModel.id,false,0,true)">{{ngModel.ordernum}}</a>',
-                    grid_bind: '<a href="" ng-click="options.editable.functions.ordernum(row,$event)" >{{row[field]}}</a>'
+                    transclude: '<a href="" ng-click="options.editable.functions.ordernum(row,$event)" >{{row[field]}}</a>'
                 },
                 tags: {
                     name:"Tags",
                     editable:false,
                     sortable:false,
-                    grid_bind: '<div style="width:80px;">'+
+                    transclude: '<div style="width:80px;">'+
                         '<ul class="inline tag-list">'+
                         '<li ng-repeat = "tag in row[field]">'+
                         '<div class="tag-top-bottom-box" ng-show="tag.mark_place == 1"></div>'+
@@ -193,8 +193,7 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,ord
                 },
                 order_date:{
                     name:"Order Date",
-                    transclude:"<span>{{row[field] | date:'EEEE MM/dd/yyyy hh:mm:ss a'}}</span>",
-                    grid_bind: "<span>{{row[field] | date:'EEEE MM/dd/yyyy hh:mm:ss a'}}</span>"
+                    transclude:"<span>{{row[field] | date:'EEEE MM/dd/yyyy hh:mm:ss a'}}</span>"
                 },
                 itemslength:{
                     name:"Items",
@@ -206,11 +205,6 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,ord
                 status: {
                     name: "Status",
                     transclude:"<span class='label label-default' ng-class=\"{" +
-                        "'label-success': row[field] == 'awaiting', " +
-                        "'label-warning': row[field] == 'onhold', " +
-                        "'label-danger': row[field] == 'serviceissue' }\">" +
-                        "{{row[field]}}</span>",
-                    grid_bind:"<span class='label label-default' ng-class=\"{" +
                         "'label-success': row[field] == 'awaiting', " +
                         "'label-warning': row[field] == 'onhold', " +
                         "'label-danger': row[field] == 'serviceissue' }\">" +

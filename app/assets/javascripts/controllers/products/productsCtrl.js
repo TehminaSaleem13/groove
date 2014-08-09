@@ -147,8 +147,7 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$mo
                 name: {
                     name: "Item Name",
                     hideable: false,
-                    transclude:'<a href="" ng-click="options.editable.functions.name(row,$event)" >{{row[field]}}</a>',
-                    grid_bind:'<a href="" ng-click="options.editable.functions.name(row,$event)" >{{row[field]}}</a>'
+                    transclude:'<a href="" ng-click="options.editable.functions.name(row,$event)" >{{row[field]}}</a>'
                 },
                 sku: {
                     name: "SKU"
@@ -158,11 +157,7 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$mo
                     transclude:"<span class='label label-default' ng-class=\"{" +
                     "'label-success': row[field] == 'active', " +
                         "'label-info': row[field] == 'new' }\">" +
-                        "{{row[field]}}</span>",
-                    grid_bind:"<span class='label label-default' ng-class=\"{" +
-                    "'label-success': row[field] == 'active', " +
-                        "'label-info': row[field] == 'new' }\">" +
-                    "{{row[field]}}</span>"
+                        "{{row[field]}}</span>"
                 },
                 barcode: {
                     name:"Barcode"

@@ -69,7 +69,7 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies, st
                 },
                 status: {
                     name:"Status",
-                    grid_bind: '<span class="label label-default" ng-class="{\'label-success\': row.status}">' +
+                    transclude: '<span class="label label-default" ng-class="{\'label-success\': row.status}">' +
                                '<span ng-show="row.status" class="active">Active</span>' +
                                '<span ng-hide="row.status" class="inactive">Inactive</span>' +
                                '</span>',
@@ -83,7 +83,7 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies, st
             }
         };
         if(typeof $scope.current_user['can']!= 'undefined' && $scope.current_user.can('add_edit_stores')) {
-            $scope.gridOptions.all_fields.name.grid_bind ='<a ui-sref="settings.stores.single({storeid:row.id})"' +
+            $scope.gridOptions.all_fields.name.trasnclude ='<a ui-sref="settings.stores.single({storeid:row.id})"' +
                                                           ' ng-click="$event.preventDefault();$event.stopPropagation();">{{row[field]}}</a>';
         }
 

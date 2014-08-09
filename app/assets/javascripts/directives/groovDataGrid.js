@@ -19,8 +19,7 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout','$http','$sce','no
             hideable: true,
             hidden: false,
             transclude: '',
-            model: 'row',
-            grid_bind: ''
+            model: 'row'
         }
     };
     return {
@@ -110,8 +109,8 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout','$http','$sce','no
                         options.all_fields[i].draggable = (options.draggable != false);
                         options.all_fields[i].sortable = (options.sortable != false);
                         angular.extend(options.all_fields[i],scope.groovDataGrid.all_fields[i]);
-                        if(options.all_fields[i].grid_bind !== '') {
-                            options.all_fields[i].grid_bind = $sce.trustAsHtml(scope.groovDataGrid.all_fields[i].grid_bind);
+                        if(options.all_fields[i].transclude !== '') {
+                            options.all_fields[i].transclude = $sce.trustAsHtml(scope.groovDataGrid.all_fields[i].transclude);
                         }
                         myscope.headOrder.push(i);
                         scope.theads.push(i);
@@ -132,15 +131,17 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout','$http','$sce','no
                     if(data.status) {
                         if(data.data) {
 
-                            for(i in scope.options.all_fields) {
-                                if(scope.options.all_fields[i].hideable) {
-                                    scope.options.all_fields[i].hidden = true;
+                            for(var i in scope.options.all_fields) {
+                                if(scope.options.all_fields.hasOwnProperty(i)) {
+                                    if(scope.options.all_fields[i].hideable) {
+                                        scope.options.all_fields[i].hidden = true;
+                                    }
                                 }
                             }
 
-                            for(i in data.data.shown) {
-                                if(typeof scope.options.all_fields[data.data.shown[i]] !=="undefined") {
-                                    scope.options.all_fields[data.data.shown[i]].hidden = false;
+                            for(var j in data.data.shown) {
+                                if(typeof scope.options.all_fields[data.data.shown[j]] !=="undefined") {
+                                    scope.options.all_fields[data.data.shown[j]].hidden = false;
                                 }
                             }
                             scope.theads = data.data.shown;

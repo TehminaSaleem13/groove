@@ -16,20 +16,19 @@
         </tr>
         </thead>
         <tbody>
-
         <tr ng-click="check_uncheck(row)" ng-repeat="row in rows" ng-class="{selected: row.checked}">
             <td ng-repeat="field in theads">
                 <div style="display:inline-block; width:100%;height:100%;" bo-if="options.editable != false && options.all_fields[field].editable == true" groov-rt-click="compile($parent.$parent.$index,field)">
                     <div ng-hide="editable[field][$parent.$parent.$index]">
                         <span bo-if="options.all_fields[field].transclude == '' && row[field] !== null" bo-text="row[field]"></span>
                         <span bo-if="options.all_fields[field].transclude == '' && row[field] == null"> &nbsp;</span>
-                        <span bo-if="options.all_fields[field].transclude != ''" ng-bind-html="options.all_fields[field].grid_bind" compile-template ></span>
+                        <span bo-if="options.all_fields[field].transclude != ''" ng-bind-html="options.all_fields[field].transclude" compile-template ></span>
                     </div>
                     <div ng-bind-html="editable[field][$parent.$parent.$index]" compile-template></div>
                 </div>
                 <div bo-if="options.editable == false || options.all_fields[field].editable == false">
-                    <span bo-if="options.all_fields[field].grid_bind != '' " ng-bind-html="options.all_fields[field].grid_bind" compile-template></span>
-                    <span bo-if="options.all_fields[field].grid_bind == '' " bo-text="row[field]"></span>
+                    <span bo-if="options.all_fields[field].transclude != '' " ng-bind-html="options.all_fields[field].transclude" compile-template></span>
+                    <span bo-if="options.all_fields[field].transclude == '' " bo-text="row[field]"></span>
                 </div>
             </td>
 

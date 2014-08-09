@@ -283,13 +283,12 @@ groovepacks_controllers.
                             name:"Product",
                             hideable: false,
                             model:"row.productinfo",
-                            transclude: '<a href="" ng-click="options.editable.functions.name(row,event)" >{{row.productinfo.name}}</a>',
-                            grid_bind: '<a href="" ng-click="options.editable.functions.name(row,event)" >{{row.productinfo.name}}</a>'
+                            transclude: '<a href="" ng-click="options.editable.functions.name(row,event)" >{{row.productinfo.name}}</a>'
                         },
                         image: {
                             name:"Primary Image",
                             editable:false,
-                            grid_bind:'<div class="single-image"><img class="img-responsive" ng-src="{{row.productimages[0].image}}" /></div>'
+                            transclude:'<div class="single-image"><img class="img-responsive" ng-src="{{row.productimages[0].image}}" /></div>'
                         },
                         sku: {
                             name:"Primary SKU"
@@ -300,14 +299,12 @@ groovepacks_controllers.
                         status: {
                             name:"Status",
                             model:"row.productinfo",
-                            transclude: '<span>{{row.productinfo.status}}</span>',
-                            grid_bind: '<span>{{row.productinfo.status}}</span>'
+                            transclude: '<span>{{row.productinfo.status}}</span>'
                         },
                         qty: {
                             name:"Qty ordered",
                             model:"row.iteminfo",
-                            transclude: '<span>{{row.iteminfo.qty}}</span>',
-                            grid_bind: '<span>{{row.iteminfo.qty}}</span>'
+                            transclude: '<span>{{row.iteminfo.qty}}</span>'
                         },
                         qty_on_hand: {
                             name:"On hand"
@@ -315,8 +312,7 @@ groovepacks_controllers.
                         is_skippable: {
                             name: "Is Skippable",
                             model:"row.productinfo",
-                            transclude: '<span ng-show="row.productinfo.is_skippable">Yes</span> <span ng-hide="row.productinfo.is_skippable">No</span>',
-                            grid_bind: '<span ng-show="row.productinfo.is_skippable">Yes</span> <span ng-hide="row.productinfo.is_skippable">No</span>'
+                            transclude: '<span ng-show="row.productinfo.is_skippable">Yes</span> <span ng-hide="row.productinfo.is_skippable">No</span>'
                         }
                     }
                 };
