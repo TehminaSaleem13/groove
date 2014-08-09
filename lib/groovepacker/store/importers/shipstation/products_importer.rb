@@ -9,16 +9,34 @@ module Groovepacker
             client = handler[:store_handle]
             puts "client:" + client.inspect
             result = self.build_result
+            puts "credential: " + credential.inspect
             products = client.product.all
             puts "successfully entered to import products."
             if !products.nil?
-              result[:total_imported] = products.length
+              result[:total_imported] = products.length.to_s
+              puts "total_imported:" + products.length.to_s
               products.each do |item|
                 if ProductSku.where(:sku=>item.SKU).length == 0
                   @product = Product.new
-                  set_product_fields(@product,item)
+                  @product.store_id = credential.store_id
+                  @product.store_product_id = 0
+                  sku = ProductSku.new
+                  sku.sku = item.SKU
+                  @product.product_skus << sku
+
+                  if set_product_fields(@product,item)
+                    result[:success_imported] = result[:success_imported] + 1
+                  else
+                    result[:status] &= false
+                    result[:messages] = "The product information could not be saved."
+                  end
+                else
+                  result[:previous_imported] = result[:previous_imported] + 1
                 end
               end
+            else
+              result[:status] &= false
+              result[:messages] = "No available products."
             end
             result
           end
@@ -44,10 +62,11 @@ module Groovepacker
             result
           end
           def set_product_fields(product, ssproduct)
+            result = false
             # product.store_product_id = 
             product.name = ssproduct.Name
             # product_type = 
-            # product.store_id = 
+            # product.store_id = ssproduct.store.id
             product.inv_wh1 = ssproduct.WarehouseLocation
             # product.status =
             # product.spl_instructions_4_packer = 
@@ -61,11 +80,18 @@ module Groovepacker
             # product.is_kit = 
             # product.disable_conf_req = 
             # product.total_avail_ext = 
-            product.weight = ssproduct.WeightOz
+            if !ssproduct.WeightOz.nil?
+              product.weight = ssproduct.WeightOz
+            else
+              product.weight = 0
+            end
             # product.shipping_weight = 
             # product.is_packing_supply =
-            product.save
+            if product.save
+              result = true
+            end
             product.update_product_status
+            result
           end
         end
       end

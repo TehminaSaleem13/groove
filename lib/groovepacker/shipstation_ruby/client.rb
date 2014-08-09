@@ -4,7 +4,7 @@ module ShipStationRuby
 
     def initialize(username = ShipStationRuby.username, password = ShipStationRuby.password)
       raise ArgumentError unless username && password
-      @auth = {:username => username, :password => password}
+      @auth = {:username => username, :password => password, :namespace => 'Groovepacker::ShipStation::Models'}
 
       @client = OData::Service.new(API_BASE, @auth)
       self

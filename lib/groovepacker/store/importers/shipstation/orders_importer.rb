@@ -8,9 +8,15 @@ module Groovepacker
             credential = handler[:credential]
             client = handler[:store_handle]
             result = self.build_result
-            
+            puts "client:-" + client.inspect
+            puts client.warehouse.all.inspect
+            #puts Order.all.first.inspect
+#            puts client.product.where("seller_id"=>100571).first.inspect
+            # puts client.store.all.first.inspect
+            puts client.orders.where('OrderStatusID' => 2).inspect
+            # puts client.customer.all.first.inspect
             begin
-              orders = client.order.filter_list('OrderStatusID' => 2)
+              orders = client.order.where('OrderStatusID' => 2)
               puts "retrieved all the orders."
               result[:total_imported] = orders.length
               puts orders.inspect
@@ -19,6 +25,7 @@ module Groovepacker
                 result[:total_imported] = orders.length
                 orders.each do |order|
                   puts order.inspect
+                  Product.where(:status => 'new')
                   if Order.where(:increment_id=>order.order_id.to_s).length == 0
                     @order = Order.new
                     # @order.shipment_id = order.ShipmentID
@@ -108,9 +115,9 @@ module Groovepacker
               end
             rescue Exception => e
               result[:status] &= false
-              result[:messages].push(e)
+              result[:messages].push(e.message)
               puts "Exception****************"
-              puts e.inspect
+              puts e.message.inspect
             end
             result
           end

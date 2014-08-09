@@ -29,7 +29,7 @@ module ShipStationRuby
       return formatted_results
     end
 
-    def filter_list(filters={})
+    def where(filters={})
       final_string = ""
       final_string_array = []
       filters.each do |attribute, value|
