@@ -7,14 +7,10 @@ module Groovepacker
             handler = self.get_handler
             credential = handler[:credential]
             client = handler[:store_handle]
-            puts "client:" + client.inspect
             result = self.build_result
-            puts "credential: " + credential.inspect
             products = client.product.all
-            puts "successfully entered to import products."
             if !products.nil?
               result[:total_imported] = products.length.to_s
-              puts "total_imported:" + products.length.to_s
               products.each do |item|
                 if ProductSku.where(:sku=>item.SKU).length == 0
                   @product = Product.new
@@ -44,7 +40,6 @@ module Groovepacker
           def import_single(import_hash)
             result = true
             begin
-              puts "start importing the product."
               credential = import_hash[:handler][:credential]
               client = import_hash[:handler][:store_handle]
               sku = import_hash[:product_sku] 
