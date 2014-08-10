@@ -37,7 +37,7 @@
                         </a>
                         <div class="media-body">
                             <span class="item-count pull-right">X {{unscanned_item.qty_remaining}}</span>
-								    <span class="media-heading">{{ unscanned_item.name }}<br/>
+								    <span class="media-heading pack_link" ng-click="product_details(unscanned_item.product_id)">{{ unscanned_item.name }}<br/>
 									      {{ unscanned_item.sku }}</span>
                         </div>
                     </div>
@@ -49,7 +49,7 @@
                                 </a>
                                 <div class="media-body">
                                     <span class="item-count pull-right">X {{child_item.qty_remaining}}</span>
-                                    <span class="media-heading">{{ child_item.name }}</span>
+                                    <span class="media-heading pack_link" ng-click="product_details(child_item.product_id)">{{ child_item.name }}</span>
                                 </div>
                             </div>
                         </div>
@@ -121,7 +121,7 @@
             <div class="scanpack-well">
                 <div class="right-well-heading">
 								<span class="col-lg-8 col-md-8">
-									2 Items Packed
+									{{scanned_count}} Items Packed
 								</span>
 								<span class="col-lg-4 col-md-4 download-icon-styling">
 									<img src="/assets/images/download-icon.png">
@@ -135,7 +135,7 @@
                         </a>
                         <div class="media-body">
                             <span class="item-count pull-right">X {{scanned_item.scanned_qty}}</span>
-								    <span class="media-heading">{{ scanned_item.name }}<br>
+								    <span class="media-heading pack_link" ng-click="product_details(scanned_item.product_id)">{{ scanned_item.name }}<br>
 									      {{ scanned_item.sku }}</span>
                         </div>
                     </div>

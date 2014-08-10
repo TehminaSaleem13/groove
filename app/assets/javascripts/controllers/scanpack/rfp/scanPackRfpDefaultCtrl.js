@@ -1,14 +1,14 @@
 groovepacks_controllers.
-    controller('scanPackRfpDefaultCtrl', [ '$scope', '$http', '$timeout', '$stateParams', '$location', '$state', '$cookies', '$modal', 'orders', 'scanPack',
-        function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies, $modal, orders, scanPack) {
+    controller('scanPackRfpDefaultCtrl', [ '$scope', '$http', '$timeout', '$stateParams', '$location', '$state', '$cookies', '$modal','products', 'orders', 'scanPack',
+        function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies, $modal, products, orders, scanPack) {
             var myscope = {};
 
             $scope.reset_order = function () {
                 scanPack.reset($scope.data.order.id);
-            }
+            };
             myscope.resolve = function() {
                 return $scope.data.order;
-            }
+            };
             $scope.add_note = function() {
                 myscope.note_obj = $modal.open({
                     templateUrl: '/assets/views/modals/scanpack/addnote.html',
@@ -20,7 +20,21 @@ groovepacks_controllers.
                     $('.col-xs-12 input.search-box').focus();
                 });
 
-            }
+            };
+
+            $scope.product_details = function(id) {
+                var item_modal = $modal.open({
+                     templateUrl: '/assets/views/modals/product/main.html',
+                     controller: 'productsSingleModal',
+                     size:'lg',
+                     resolve: {
+                         product_data: function(){return products.model.get()},
+                         product_next: function(){return function(func){if(typeof func=='function'){func();}}},
+                         product_id: function(){return id;}
+                     }
+                 });
+                item_modal.result.finally(myscope.check_reload_compute);
+            };
 
             myscope.show_order_instructions = function () {
                 myscope.order_instruction_obj = $modal.open({
@@ -35,7 +49,7 @@ groovepacks_controllers.
                     }
                     $('.col-xs-12 input.search-box').focus();
                 });
-            }
+            };
 
             myscope.show_product_instructions = function () {
                 myscope.product_instruction_obj = $modal.open({
@@ -50,7 +64,7 @@ groovepacks_controllers.
                     }
                     $('.col-xs-12 input.search-box').focus();
                 });
-            }
+            };
 
             myscope.compute_counts = function() {
 
@@ -83,7 +97,7 @@ groovepacks_controllers.
                     }
                 }
 
-            }
+            };
 
             myscope.check_reload_compute = function () {
                 $scope.rfpinit().then(function () {
@@ -95,7 +109,7 @@ groovepacks_controllers.
                         myscope.compute_counts();
                     }
                 });
-            }
+            };
 
             myscope.init = function() {
                 myscope.note_obj = null;
@@ -105,7 +119,7 @@ groovepacks_controllers.
                 myscope.product_instruction_confirmed_id = 0;
                 $scope.confirmation_code = "";
                 myscope.check_reload_compute();
-            }
+            };
 
             $scope.$on('reload-scanpack-state',myscope.check_reload_compute);
             myscope.init();

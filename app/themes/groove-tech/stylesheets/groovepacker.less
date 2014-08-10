@@ -1520,6 +1520,11 @@ ul.tag-list > li {
   color:#888;
 }
 
+.img-responsive {
+  border-radius: 15px;
+  border: 1px solid #000;
+}
+
 .single-image {
   position:relative;
   float:left;
@@ -1527,10 +1532,15 @@ ul.tag-list > li {
   width:130px;
   .glyphicon-remove {
     position: absolute;
-    top:0;
-    right:0;
+    top:3px;
+    right:3px;
+    border-radius: 15px;
     padding:4px;
+    cursor:pointer;
     background:rgba(180,180, 180, 0.7);
+    &:hover {
+      background:rgba(255,255, 255, 0.9);
+    }
   }
 }
 
@@ -1538,6 +1548,14 @@ ul.tag-list > li {
   overflow-x: scroll;
 }
 
+.pack_link {
+  cursor:pointer;
+  color: rgba(51, 82, 35, 0.87);
+  &:hover,&focus {
+    color: rgba(51, 82, 35, 0.97);
+    text-decoration: underline;
+  }
+}
 
 #loading-bar .bar {
   background: #97dc57;

@@ -174,7 +174,7 @@ groovepacks_controllers.
         scope.remove_skus_from_kit = function () {
             var selected_skus = [];
             //console.log(scope.products.single.productkitskus);
-            for(i in scope.products.single.productkitskus) {
+            for(var i in scope.products.single.productkitskus) {
                 if(scope.products.single.productkitskus[i].checked){
                     selected_skus.push(scope.products.single.productkitskus[i].option_product_id);
                 }
