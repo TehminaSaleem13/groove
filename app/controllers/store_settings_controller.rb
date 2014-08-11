@@ -184,6 +184,11 @@ class StoreSettingsController < ApplicationController
 
 
         end
+
+        if @store.id
+          @result["store_id"] = @store.id
+        end
+
       end
     else
       @result['status'] = false

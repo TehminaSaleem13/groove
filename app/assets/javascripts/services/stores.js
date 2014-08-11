@@ -61,7 +61,7 @@ groovepacks_services.factory('stores',['$http','notification','$filter',function
             stores.setup.storeArray = [];
             for(var i = 0;  i< stores.list.length; i++) {
                 if (stores.list[i].checked == true) {
-                    stores.setup.storeArray.push({id: stores.list[i].id,index:i,active:(stores.setup.status =='active')});
+                    stores.setup.storeArray.push({id: stores.list[i].id,status:(stores.setup.status =='active')});
                 }
             }
             var url = '';

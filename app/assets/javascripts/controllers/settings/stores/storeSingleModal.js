@@ -97,15 +97,14 @@ function(scope, store_data, $state, $stateParams, $modal, $modalInstance, $timeo
     };
 
     scope.update_single_store = function(auto) {
-        if(scope.stores.single.name !== "" && scope.stores.single.store_type !== "") {
+        if(typeof scope.stores.single['name'] != "undefined"
+           && scope.stores.single.name != ""
+           && typeof scope.stores.single.store_type != "undefined"
+           && scope.stores.single.store_type != "") {
             return stores.single.update(scope.stores,auto).success(function(data){
                 if(data.status && data.store_id) {
                     if(typeof scope.stores.single['id'] == "undefined") {
-                        scope.stores.single.id = data.store_id;
-                        scope.edit_status = true;
-                        myscope.single = {};
-                        angular.copy(scope.stores.single,myscope.single);
-                        notification.notify("Store successfully created",1);
+                        myscope.store_single_details(data.store_id,true);
                     }
                     if(!auto) {
                         //Use FileReader API here if it exists (post prototype feature)
@@ -137,7 +136,7 @@ function(scope, store_data, $state, $stateParams, $modal, $modalInstance, $timeo
     myscope.up_key = function(event) {
         event.preventDefault();
         event.stopPropagation();
-        if(scope.edit_status) {
+        if($state.includes('settings.stores.single')) {
             if(scope.stores.current > 0) {
                 myscope.load_item(scope.stores.current -1);
             } else {
@@ -149,7 +148,7 @@ function(scope, store_data, $state, $stateParams, $modal, $modalInstance, $timeo
     myscope.down_key = function (event) {
         event.preventDefault();
         event.stopPropagation();
-        if(scope.edit_status) {
+        if($state.includes('settings.stores.single')) {
             if(scope.stores.current < scope.stores.list.length - 1) {
                 myscope.load_item(scope.stores.current + 1);
             } else {
