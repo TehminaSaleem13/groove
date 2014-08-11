@@ -1,0 +1,297 @@
+<!-- show order modal -->
+<div>
+
+    <div class="modal-header">
+        <button type="button" class="close-btn" ng-click="ok()"><i class="glyphicon glyphicon-remove"></i></button>
+        <div class="modal-title">Editing: {{products.single.skus[0].sku}} - ID #{{products.single.basicinfo.id}}</div>
+    </div>
+
+
+    <div class="modal-body">
+        <div class="container-fluid form-horizontal">
+            <table class="product_single_top_table">
+                <tr>
+                    <td>
+                        <h4>{{products.single.basicinfo.name}}</h4>
+                        <h4>SKU# {{products.single.skus[0].sku}}</h4>
+                    </td>
+                    <td class="col-sm-6">
+                        <p ng-show="products.single.basicinfo.is_kit==0">
+                            <i class="icon-large glyphicon glyphicon-briefcase"></i>
+                            <a href="" ng-click="products.single.basicinfo.is_kit=1;update_single_product();">Change this product to
+                                a kit</a>
+                        </p>
+
+                        <p ng-show="products.single.basicinfo.is_kit==1">
+                            <i class="icon-large glyphicon glyphicon-random"></i>
+                            <a href="" ng-click="products.single.basicinfo.is_kit=0;update_single_product();">Change this kit back to
+                                a product</a>
+                        </p>
+
+                        <p ng-show="products.single.basicinfo.is_kit==0">
+                            <i class="icon-large glyphicon glyphicon-link"></i>
+                            <a href="" ng-click="product_alias('alias',[],products.single.basicinfo.id)">Make this product an alias of another product</a>
+                        </p>
+                    </td>
+                    <td>
+                        <h5>Status </h5>
+                        <label class="radio"><input type="radio" ng-change="update_single_product()"
+                                                    ng-model="products.single.basicinfo.status" value="active"> Active </label>
+                        <label class="radio"><input type="radio" ng-change="update_single_product()"
+                                                    ng-model="products.single.basicinfo.status" value="inactive"> Inactive </label>
+                        <label class="radio"><input type="radio" ng-change="update_single_product()"
+                                                    ng-model="products.single.basicinfo.status" value="new"> New </label>
+                    </td>
+                </tr>
+            </table>
+
+            <h4>Product Images</h4>
+            <div class="form-group">
+
+                <div class="col-sm-12">
+
+                <div ui-sortable="arrayEditableOptions.sortableOptions" ng-model="products.single.images">
+                    <div class="single-image" ng-class="{'primary-image': $index==0}" ng-repeat="image in products.single.images">
+                        <img ng-src="{{ image.image }}" class="img-polaroid img-thumb img-responsive"/>
+                        <i class="glyphicon glyphicon-remove" ng-click="remove_image($index)"></i>
+                    </div>
+                </div>
+                <div ng-hide="true">
+                    <input name="product_image" id="product_image{{custom_identifier}}" file-upload type="file" value="Add Image" required/>
+                </div>
+                <button class="modal-save-button" ng-click="add_image()">Add Image</button>
+                </div>
+            </div>
+
+            <h4>Product Details</h4>
+
+            <div class="form-group">
+                <label class="control-label col-sm-2">Name</label>
+
+                <div class="controls col-sm-8">
+                    <input type="text" ng-model="products.single.basicinfo.name" ng-blur="update_single_product()" class="form-control input-style"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-sm-2">SKUs</label>
+
+                <div class="controls col-sm-8">
+                    <div groov-editable="arrayEditableOptions"  prop="sku" identifier="product_single_skus" ng-model="products.single.skus" class="form-control input-style"></div>
+                </div>
+                <div class="info col-sm-2" ><i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" popover="The first SKU listed is the Primary SKU.
+                                 It will be displayed during packing. Additional alias SKUs can be added by comma or enter."></i></div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-sm-2">Barcodes</label>
+
+                <div class="controls col-sm-8">
+                    <div groov-editable="arrayEditableOptions" identifier="product_single_barcodes" prop="barcode" ng-model="products.single.barcodes" class="form-control input-style"></div>
+                    <label ng-show="products.single.barcodes == ''" class="checkbox inline">
+                        <input type="checkbox" ng-change="update_single_product()"
+                               ng-model="products.single.basicinfo.disable_conf_req"/> Disable Confirmation Requests
+                    </label>
+                </div>
+                <div class="info col-sm-2"><i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" popover="Every barcode in the
+                list can be used to scan this product. The first barcode in the list is considered the 'Primary' barcode.
+                 It will be displayed in Scan & Pack and in lists. It will also be the one that is printed when you click the Print icon.
+                  Drag the barcodes to reorder them if you would like to make another barcode the primary"></i>
+                    &nbsp;&nbsp;
+                    <a href="/products/generate_barcode_slip/{{products.single.basicinfo.id}}.pdf" target="_blank">
+                    <i class="glyphicon glyphicon-print icon-large"></i>
+                </a>
+                </div>
+            </div>
+            <div class="form-group" ng-show="products.single.store.store_type!='Amazon' || (products.single.store.store_type=='Amazon' && products.single.amazon_product.show_shipping_weight_only==false)">
+                <label class="control-label col-sm-2">Product Weight</label>
+
+                <div class="controls form-inline" ng-show="products.single.product_weight_format=='English'">
+                    <div class="col-sm-2">
+                        <input class="form-control input-style" type="number" ng-model="products.single.weight.lbs" ng-blur="update_single_product()"/>
+                        <label class="control-label">lbs</label>
+                    </div>
+                    <div class="col-sm-2">
+                        <input class="form-control input-style" type="number" ng-model="products.single.weight.oz" ng-blur="update_single_product()"/>
+                        <label class="control-label">oz</label>
+                    </div>
+                </div>
+                <div class="controls form-inline" ng-hide="products.single.product_weight_format=='English'">
+                    <div class="col-sm-1">
+                        <input class=" form-control input-style" type="number" ng-model="products.single.weight.kgs" ng-blur="update_single_product()"/>
+                    </div>
+                    <label class="control-label col-sm-1">kgs</label>
+                    <div class="col-sm-1">
+                        <input class="form-control input-style" type="number" ng-model="products.single.weight.gms" ng-blur="update_single_product()"/>
+                    </div>
+                    <label class="control-label col-sm-1">gms</label>
+                </div>
+            </div>
+            <div class="form-group" ng-show="products.single.store.store_type=='Amazon' && products.single.amazon_product.show_shipping_weight_only==true">
+                <label class="control-label col-sm-2">Shipping Weight</label>
+                <div class="controls form-inline" ng-show="products.single.product_weight_format=='English'">
+                    <div class="col-sm-2">
+                        <input class="form-control input-style" type="text" ng-model="products.single.shipping_weight.lbs" ng-blur="update_single_product()"/>
+                        <label class="control-label" > lbs </label>
+                    </div>
+                    <div class="col-sm-2">
+                        <input class="form-control input-style" type="text" ng-model="products.single.shipping_weight.oz" ng-blur="update_single_product()"/>
+                        <label class="control-label" > oz </label>
+                    </div>
+                </div>
+                <div class="controls form-inline" ng-hide="products.single.product_weight_format=='English'">
+                    <div class="col-sm-2">
+                        <input class="form-control input-style" type="text" ng-model="products.single.shipping_weight.kgs" ng-blur="update_single_product()"/>
+                        <label class="control-label" > kgs </label>
+                    </div>
+                    <div class="col-sm-2">
+                        <input class="form-control input-style" type="text" ng-model="products.single.shipping_weight.gms" ng-blur="update_single_product()"/>
+                        <label class="control-label" > gms </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-sm-2">Special instructions for Packer</label>
+
+                <div class="controls col-sm-8">
+                    <textarea class="form-control input-style" ng-model="products.single.basicinfo.spl_instructions_4_packer" ng-blur="update_single_product()" class="col-sm-8" rows="4"></textarea>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-sm-2">Packer Confirmation</label>
+
+                <div class="controls col-sm-4">
+                    <label class="radio inline">
+                        <input type="radio" ng-change="update_single_product()"
+                               ng-model="products.single.basicinfo.spl_instructions_4_confirmation" value="1"/> Required
+                    </label>
+                    <label class="radio inline">
+                        <input type="radio" ng-change="update_single_product()"
+                               ng-model="products.single.basicinfo.spl_instructions_4_confirmation" value="0"/> Not Required
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-sm-2">Product can be skipped</label>
+
+                <div class="controls col-sm-2">
+                    <label class="radio inline">
+                        <input type="radio" ng-change="update_single_product()" ng-model="products.single.basicinfo.is_skippable"
+                               value="1"/> Yes
+                    </label>
+                    <label class="radio inline">
+                        <input type="radio" ng-change="update_single_product()" ng-model="products.single.basicinfo.is_skippable"
+                               value="0"/> No
+                    </label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-sm-2">Categories</label>
+
+                <div class="controls col-sm-8">
+                    <div groov-editable="arrayEditableOptions" identifier="product_single_cats" prop="category" ng-model="products.single.cats" class="form-control input-style"></div>
+                </div>
+            </div>
+
+
+            <div class="form-group">
+                <label class="control-label col-sm-2">Packing placement</label>
+
+                <div class="controls col-sm-1">
+                    <input type="number" min="1" max="100" ng-blur="update_single_product()" class="form-control input-style" ng-model="products.single.basicinfo.packing_placement"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-sm-2">Packing time adjustment</label>
+
+                <div class="controls col-sm-1">
+                    <input type="number" class="form-control input-style" ng-blur="update_single_product()" ng-model="products.single.basicinfo.pack_time_adj"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-sm-2">Total Available Local Inventory (LOC)</label>
+
+                <div class="controls col-sm-8">
+                    <label class="control-label col-sm-2" style="text-align:left;">{{products.single.basicinfo.total_avail_loc}}</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-sm-2">Total Available External Inventory (EXT)</label>
+
+                <div class="controls col-sm-8">
+                    <label class="control-label col-sm-2" style="text-align:left;">
+                        {{products.single.basicinfo.total_avail_ext}}</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-sm-2">Total Inventory Sold</label>
+                <div class="controls col-sm-8">
+                    <label class="control-label col-sm-2" style="text-align:left;">
+                        {{products.single.basicinfo.total_sold_inv}}</label>
+                </div>
+            </div>
+            <h4>Inventory and Location by Warehouses</h4>
+            <div groov-data-grid="warehouseGridOptions" groov-list="products.single.inventory_warehouses"></div>
+            <button class="modal-save-button" ng-click="add_warehouse()">Add warehouse</button>
+            <button ng-click="remove_warehouses()" class="modal-remove-button">Remove selected</button>
+            <fieldset ng-show="products.single.basicinfo.is_kit==1">
+                <legend>Kit Options</legend>
+                <table class="table table-hover table-bordered table-striped table-condensed">
+                    <thead>
+                    <tr>
+                        <th><div>Item Name</div></th>
+                        <th><div>Item SKU</div></th>
+                        <th><div>Quantity in Kit</div></th>
+                        <th><div>Quantity on Hand</div></th>
+                        <th><div>Packing Order</div></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="kit_sku in products.single.productkitskus" ng-class="{selected:kit_sku.checked}"
+                        ng-click="kit_sku.checked = !kit_sku.checked">
+                        <td groov-editable="kitEditableOptions" ng-model="kit_sku" prop="name" identifier="kit_sku-name-{{$index}}"><a href="" ng-click="load_kit(kit_sku,$event)">{{kit_sku.name}}</a></td>
+                        <td groov-editable="kitEditableOptions" ng-model="kit_sku" prop="sku" identifier="kit_sku-sku-{{$index}}"></td>
+                        <td groov-editable="kitEditableOptions" ng-model="kit_sku" prop="qty" identifier="kit_sku-qty-{{$index}}"></td>
+                        <td groov-editable="kitEditableOptions" ng-model="kit_sku" prop="qty_on_hand" identifier="kit_sku-qty_on_hand-{{$index}}"></td>
+                        <td groov-editable="kitEditableOptions" ng-model="kit_sku" prop="packing_order" identifier="kit_sku-packing_order-{{$index}}"></td>
+                    </tr>
+                    </tbody>
+                </table>
+
+
+                <button class="modal-save-button" ng-click="product_alias('kit',kit_products.list,products.single.basicinfo.id)">Add product to kit</button>
+                <button ng-click="remove_skus_from_kit()" class="modal-remove-button">Remove selected</button>
+                <h4>This Kit Should</h4>
+
+                <div class="form-group">
+                    <div class="controls col-sm-8">
+                        <label class="radio">
+                            <input type="radio" ng-change="update_single_product()" ng-model="products.single.basicinfo.kit_parsing"
+                                   value="single"/> Always be scanned as single SKU
+                        </label>
+                        <label class="radio">
+                            <input type="radio" ng-change="update_single_product()" ng-model="products.single.basicinfo.kit_parsing"
+                                   value="individual"/> Always be scanned as individual part SKUs
+                        </label>
+                        <label class="radio">
+                            <input type="radio" ng-change="update_single_product()" ng-model="products.single.basicinfo.kit_parsing"
+                                   value="depends"/> Automatically switch as needed when part SKUs are scanned
+                        </label>
+                    </div>
+                </div>
+            </fieldset>
+        </div>
+    </div>
+
+    <div class="modal-footer">
+        <button ng-click="ok()" class="modal-save-button">Save & close</button>
+        <button ng-click="cancel()" class="modal-cancel-button">Cancel</button>
+    </div>
+</div>
+<!-- Kit product modal ends -->
+
+
+<!--<div groov-alias-modal="product_alias"></div>
+
+<div ng-bind-html="kit_modal" compile-template></div>
+-->

@@ -17,20 +17,24 @@ groovepacks_directives.directive('groovDragtable',['$timeout', function ($timeou
                             scope.options.update();
                         }
                     }
-                    el.removeClass("draginit");
                 })
 
-            }
+            };
             var prefunc = function(cell) {
                 if(cell.attributes['groov-draggable'].value == 'true') {
                     el.addClass("draginit");
                 } else {
                     return false;
                 }
-            }
+            };
+
+            var prePersist = function (cell) {
+                el.removeClass("draginit");
+            };
+
             $timeout(function() {
                 if(scope.options.enabled) {
-                    el.dragtable({persistState:persist,clickDelay:200, beforeStart: prefunc, maxMovingRows:50,doRealSort:false});
+                    el.dragtable({persistState:persist,clickDelay:200, beforeStart: prefunc, beforeStop:prePersist, maxMovingRows:50,doRealSort:false});
                 }
             });
         }

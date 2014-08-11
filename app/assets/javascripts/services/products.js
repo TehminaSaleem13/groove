@@ -15,7 +15,7 @@ groovepacks_services.factory('products',['$http','notification',function($http,n
             load_new: true,
             current: 0,
             setup:{
-                sort: "updated_at",
+                sort: "",
                 order: "DESC",
                 filter: "active",
                 search: '',
@@ -30,7 +30,7 @@ groovepacks_services.factory('products',['$http','notification',function($http,n
             products_count: {                
             }
         };
-    }
+    };
 
     //Setup related function
     var update_setup = function (setup,type,value) {
@@ -73,8 +73,8 @@ groovepacks_services.factory('products',['$http','notification',function($http,n
                     if(!next) {
                         object.list = data.products;
                     } else {
-                        for (key in data.products) {
-                            object.list.push(data.products[key]);
+                        for (var i = 0; i< data.products.length; i++) {
+                            object.list.push(data.products[i]);
                         }
                     }
                 } else {
@@ -82,12 +82,12 @@ groovepacks_services.factory('products',['$http','notification',function($http,n
                 }
             }
         ).error(notification.server_error);
-    }
+    };
 
     var update_list = function(action,products) {
         if(["update_status","delete","duplicate","barcode"].indexOf(action) != -1) {
             products.setup.productArray = [];
-            for( i in products.list) {
+            for(var i =0; i < products.list.length; i++) {
                 if (products.list[i].checked == true) {
                     products.setup.productArray.push({id: products.list[i].id});
                 }
@@ -112,7 +112,7 @@ groovepacks_services.factory('products',['$http','notification',function($http,n
                 }
             }).error(notification.server_error);
         }
-    }
+    };
 
     var update_list_node = function(obj) {
         return $http.post('/products/updateproductlist.json',obj).success(function(data){
@@ -122,7 +122,7 @@ groovepacks_services.factory('products',['$http','notification',function($http,n
                 notification.notify(data.error_msg,0);
             }
         }).error(notification.server_error);
-    }
+    };
 
     //single product related functions
     var get_single = function(id,products) {
@@ -132,7 +132,7 @@ groovepacks_services.factory('products',['$http','notification',function($http,n
                 products.single = data.product;
             }
         }).error(notification.server_error);
-    }
+    };
 
     //single product retrieval by barcode
     var get_single_product_by_barcode = function(barcode,products) {
@@ -145,7 +145,7 @@ groovepacks_services.factory('products',['$http','notification',function($http,n
                notification.notify('Cannot find product with barcode: '+barcode, 0); 
             }
         }).error(notification.server_error);
-    }
+    };
 
     var create_single = function(products) {
         return $http.post('/products/create.json').success(function(data){
@@ -154,7 +154,7 @@ groovepacks_services.factory('products',['$http','notification',function($http,n
                 notification.notify(data.messages,0);
             }
         }).error(notification.server_error);
-    }
+    };
     var update_single = function(products,auto) {
         if(typeof auto !== "boolean") {
             auto = true;
@@ -172,7 +172,7 @@ groovepacks_services.factory('products',['$http','notification',function($http,n
                 }
             }
         }).error(notification.server_error);
-    }
+    };
 
     var add_image = function(products,image) {
         return $http({
@@ -230,11 +230,11 @@ groovepacks_services.factory('products',['$http','notification',function($http,n
                 notification.notify(data.messages,0);
             }
         }).error(notification.server_error);
-    }
+    };
 
     var reset_single_obj = function(products) {
         products.single = {};
-    }
+    };
 
     //Public facing API
     return {

@@ -1,0 +1,23 @@
+<div class="modal-header">
+    <div class="modal-title">Handling Instructions for this Order</div>
+    <button type="button" class="close-btn" ng-click="ok()"><i class="glyphicon glyphicon-remove"></i></button>
+</div>
+<div class="modal-body">
+    <div class="container-fluid">
+        <div class="form-horizontal form-horizontal-create" >
+            <h1>{{order.notes_toPacker}}</h1>
+            <div class="form-group">
+                <fieldset>
+                    <legend>Please acknowledge with your confirmation code to continue</legend>
+                    <label class="control-label col-sm-3">Confirmation code</label>
+                    <div class="controls col-sm-9">
+                        <input type="text" id="order_instruction" ng-keydown="check_order_confirm($event)" ng-model="confirmation_code" />
+                    </div>
+                </fieldset>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal-footer">
+    <button class="modal-cancel-button" ng-click="cancel('cancel-button-click')">Cancel</button>
+</div>

@@ -22,6 +22,7 @@ class InventoryWarehouseController < ApplicationController
           end
         end
         inv_wh.save
+        result['inv_wh_info'] = inv_wh
       else
         result['status'] &= false
         inv_wh.errors.full_messages.each do |message|

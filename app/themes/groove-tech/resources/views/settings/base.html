@@ -1,0 +1,29 @@
+<div class="container-fluid">
+    <div class="row bottom-well">
+        <div class="col-lg-2 col-md-2">
+            <div class="row">
+                <accordion>
+                    <accordion-group is-open="tabs[0].open">
+                        <accordion-heading>
+                            <i></i>
+                            Store Settings
+                        </accordion-heading>
+                        <li ng-class="{active:current_page=='show_stores'}" ui-sref="settings.stores">Show All</li>
+                        <li ui-sref="settings.stores.create">Create Store</li>
+                        <li ng-click='import_all_orders()'>Import Orders</li>
+                    </accordion-group>
+                    <accordion-group heading="Users & Permissions" is-open="tabs[1].open">
+                        <li ng-class="{active:current_page=='show_users'}" ui-sref="settings.users">Show All</li>
+                        <li ui-sref="settings.users.create">Create User</li>
+                    </accordion-group>
+                    <accordion-group heading="System Settings" is-open="tabs[2].open">
+                        <li ng-class="{active: current_page=='general'}" ui-sref="settings.system.general">General Settings</li>
+                        <li ng-class="{active:current_page =='backup'}" ui-sref="settings.system.backup">Backup and Restore</li>
+                        <li ng-class="{active:current_page =='show_warehouses'}" ui-sref="settings.system.warehouses">Warehouse Settings</li>
+                    </accordion-group>
+                </accordion>
+            </div>
+        </div>
+    <div ui-view></div>
+    </div>
+</div>

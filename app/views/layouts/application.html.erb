@@ -3,30 +3,25 @@
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= content_for?(:title) ? yield(:title) : "Groovepacks" %></title>
-     <meta name="description" content="<%= content_for?(:description) ? yield(:description) : "Groovepacks" %>">
+    <meta name="description" content="<%= content_for?(:description) ? yield(:description) : "Groovepacks" %>">
+    <link href='http://fonts.googleapis.com/css?family=Play:400,700' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
     <%= stylesheet_link_tag "application", :media => "all" %>
-    <!--[if lt IE 8]>
-    <%#= stylesheet_link_tag "font-awesome-ie7.min.css", media: "all" %>
-    <![endif]-->
-    <%= javascript_include_tag "https://js.stripe.com/v2/", "application" %>
-    <%#= javascript_include_tag "application" %>
+    <%= javascript_include_tag "https://js.stripe.com/v2/","application" %>
+
     <%= csrf_meta_tags %>
     <%= tag :meta, :name => "stripe-key", :content => STRIPE_PUBLIC_KEY %>
     <%= yield(:head) %>
   </head>
-  <body>
-    <div id="wrap">
-    <div id="main" role="main">
-      <div class="container app-container">
-        <%= yield %>
+  <body class="container-well" ng-app="groovepacks">
+    <div class="container main-body">
+      <div class="gradient-well">
+          <div class="container-fluid gradient-well-inner">
+            <%= yield %>
+          </div>
       </div>
-    </div> <!--! end of #main -->
     </div>
-      <section class="footer">
-      <div class="container">
-        <p class="muted credit">Copyright &copy; Groovepacker. All rights reserved.</p>
-      </div>
-    </section>
+    <div groov-notification></div>
   </body>
 
 </html>

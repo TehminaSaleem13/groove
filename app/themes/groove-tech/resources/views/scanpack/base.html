@@ -1,0 +1,12 @@
+<div class="container-fluid">
+    <div class="row scan_pack_input">
+        <div class="col-xs-12 scan_pack_title">
+            {{data.title}}
+        </div>
+        <div class="col-xs-12">
+           <input type="text" ng-model="data.input" ng-keydown="input_enter($event)" autofocus="autofocus" tabindex="1" class="form-control search-box" placeholder="Scan..." />
+        </div>
+
+    </div>
+    <div ui-view></div>
+</div>

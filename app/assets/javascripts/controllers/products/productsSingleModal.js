@@ -1,0 +1,307 @@
+groovepacks_controllers.
+    controller('productsSingleModal', [ '$scope', 'product_data', 'product_next', 'product_id', 'hotkeys', '$state', '$stateParams', '$modalInstance', '$timeout','$modal','products',
+    function(scope,product_data,product_next, product_id, hotkeys, $state,$stateParams,$modalInstance,$timeout,$modal,products) {
+        var myscope = {};
+
+
+        /**
+         * Public methods
+         */
+
+        scope.ok = function() {
+            $modalInstance.close("ok-button-click");
+        };
+        scope.cancel = function () {
+            $modalInstance.dismiss("cancel-button-click");
+        };
+
+        scope.update = function(reason) {
+            if(reason == "cancel-button-click") {
+                myscope.rollback();
+            } else {
+                scope.update_single_product(false);
+            }
+        };
+
+        myscope.product_single_details = function(id,new_rollback) {
+            //console.log(index);
+            //console.log(scope.products);
+
+            for(var i = 0; i< scope.products.list.length; i++) {
+                if(scope.products.list[i].id == id) {
+                    scope.products.current = parseInt(i);
+                    break;
+                }
+            }
+
+            products.single.get(id,scope.products).then(function(data) {
+                if(typeof new_rollback == 'boolean' && new_rollback ){
+                    myscope.single = {};
+                    angular.copy(scope.products.single, myscope.single);
+                }
+            });
+        };
+
+        myscope.rollback = function() {
+            scope.products.single = {};
+            angular.copy(myscope.single,scope.products.single);
+            scope.update_single_product(false);
+        };
+
+        scope.load_kit = function(kit,event) {
+            if(typeof event !=undefined) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            var kit_modal = $modal.open({
+                templateUrl: '/assets/views/modals/product/main.html',
+                controller: 'productsSingleModal',
+                size:'lg',
+                resolve: {
+                    product_data: function(){return scope.kit_products},
+                    product_next: function(){return function(func){if(typeof func=='function'){func();}}},
+                    product_id: function(){return kit.option_product_id;}
+                }
+            });
+            kit_modal.result.finally(function(){
+                myscope.product_single_details(scope.products.single.basicinfo.id);
+            });
+        };
+
+        scope.product_alias = function(type,exceptions,id) {
+            var alias_modal = $modal.open({
+                templateUrl: '/assets/views/modals/product/alias.html',
+                controller: 'aliasModal',
+                size:'lg',
+                resolve: {
+                    type: function(){return type},
+                    exceptions: function(){return exceptions},
+                    id: function(){return id;}
+                }
+            });
+            alias_modal.result.then(myscope.add_alias_product);
+        };
+        scope.add_image = function () {
+            $("#product_image"+scope.custom_identifier).click();
+        };
+        scope.remove_image = function(index) {
+            scope.products.single.images.splice(index,1);
+            scope.update_single_product();
+        };
+        scope.$on("fileSelected", function (event, args) {
+            $("input[type='file']").val('');
+            if(args.name =='product_image') {
+                scope.$apply(function () {
+                    products.single.image_upload(scope.products,args).then(function(response) {
+                          myscope.product_single_details(scope.products.single.basicinfo.id);
+                    });
+                });
+            }
+        });
+
+        myscope.add_alias_product = function(args) {
+            if(typeof args !="undefined") {
+                if(scope.products.single.basicinfo.is_kit) {
+                    products.single.kit.add(scope.products,args.selected).then(function(response) {
+                        //console.log(response.data);
+                        myscope.product_single_details(scope.products.single.basicinfo.id);
+                    });
+                } else {
+                    products.single.alias(scope.products,args.selected).then(function() {
+                        myscope.product_single_details(args.selected[0]);
+                    });
+                }
+            }
+        };
+
+        myscope.down_key =function(event){
+            event.preventDefault();
+            event.stopPropagation();
+            if(scope.products.current < scope.products.list.length -1) {
+                myscope.load_item(scope.products.current +1);
+            } else {
+                product_next(function(){
+                    if(scope.products.current < scope.products.list.length -1) {
+                        myscope.load_item(scope.products.current +1);
+                    } else {
+                        alert("Already at the bottom of the list");
+                    }
+                })
+            }
+        };
+        myscope.up_key = function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+            if(scope.products.current > 0) {
+                myscope.load_item(scope.products.current -1);
+            } else {
+                alert("Already at the top of the list");
+            }
+        };
+        scope.update_single_product = function(post_fn,auto) {
+            //console.log(scope.products.single);
+            products.single.update(scope.products,auto).then(function() {
+                myscope.product_single_details(scope.products.single.basicinfo.id);
+            });
+        };
+
+        scope.add_warehouse = function() {
+            var new_warehouse = {
+                alert: "",
+                location: "",
+                name:"",
+                qty: 0,
+                location_primary:"",
+                location_secondary:""
+            };
+            scope.products.single.inventory_warehouses.push(new_warehouse);
+            scope.update_single_product(function() {
+                scope.$broadcast("warehouse-name-"+(scope.products.single.inventory_warehouses.length-1));
+            });
+        };
+
+        scope.remove_warehouses = function() {
+            var old_warehouses = scope.products.single.inventory_warehouses;
+            scope.products.single.inventory_warehouses = [];
+            for(var i =0; i < old_warehouses.length;i++) {
+                if(!old_warehouses[i].checked) {
+                    scope.products.single.inventory_warehouses.push(old_warehouses[i]);
+                }
+            }
+            scope.update_single_product();
+        };
+
+        scope.remove_skus_from_kit = function () {
+            var selected_skus = [];
+            //console.log(scope.products.single.productkitskus);
+            for(var i in scope.products.single.productkitskus) {
+                if(scope.products.single.productkitskus[i].checked){
+                    selected_skus.push(scope.products.single.productkitskus[i].option_product_id);
+                }
+            }
+            products.single.kit.remove(scope.products,selected_skus).then(function(data) {
+                myscope.product_single_details(scope.products.single.basicinfo.id);
+            });
+        };
+
+
+
+        myscope.load_item = function(id) {
+            myscope.product_single_details(scope.products.list[id].id, true);
+            if(myscope.update_state) {
+                var newStateParams = angular.copy($stateParams);
+                newStateParams.product_id = ""+scope.products.list[id].id;
+                $state.go($state.current.name, newStateParams);
+            }
+        };
+
+        myscope.init = function() {
+            scope.custom_identifier = Math.floor(Math.random()*1000);
+            scope.products = product_data;
+
+            /**
+             * Public properties
+             */
+            scope.kit_products = products.model.get();
+            scope.$watch('products.single.productkitskus',function(){
+                if(typeof scope.products.single.basicinfo != "undefined" && scope.products.single.basicinfo.is_kit == 1) {
+                    scope.kit_products.list = [];
+                    for(var i =0; i<scope.products.single.productkitskus.length; i++) {
+                        scope.kit_products.list.push({id:scope.products.single.productkitskus[i].option_product_id});
+                    }
+                }
+            });
+
+            /**
+             * private properties
+             */
+            scope._product_obj = null;
+            scope.arrayEditableOptions = {
+                array: true,
+                update: scope.update_single_product,
+                class: '',
+                sortableOptions: {
+                    update: scope.update_single_product,
+                    axis: 'x'
+                }
+            };
+
+            scope.warehouseGridOptions = {
+                identifier:'warehousesgrid',
+                selectable:true,
+                editable:{
+                    update: scope.update_single_product,
+                    elements: {
+                        qty: {type:'number',min:0}
+                    }
+                },
+                all_fields: {
+                    name: {
+                        name:'Warehouse Name',
+                        model: 'row.warehouse_info',
+                        transclude: '<span>{{row.warehouse_info.name}}</span>'
+                    },
+                    available_inv: {
+                        name: 'Quantity on Hand',
+                        model:'row.info',
+                        transclude: '<span>{{row.info.available_inv}}</span>'
+                    },
+                    allocated_inv: {
+                        name: 'Allocated Qty',
+                        model:'row.info',
+                        transclude: '<span>{{row.info.allocated_inv}}</span>'
+                    },
+
+                    location: {
+                        name: 'Primary Location',
+                        model:'row.warehouse_info',
+                        transclude: '<span>{{row.warehouse_info.location}}</span>'
+                    }
+                }
+            };
+
+            scope.kitEditableOptions = {
+                update: scope.update_single_product,
+                elements: {
+                    qty: {type:'number',min:0},
+                    qty_on_hand: {type:'number',min:0},
+                    packing_order: {type:'number', min:0}
+                },
+                functions: {
+                    name: scope.load_kit
+                }
+            };
+
+            hotkeys.bindTo(scope).add({
+                combo: 'up',
+                description: 'Previous product',
+                callback: myscope.up_key
+            })
+            .add({
+                combo: 'down',
+                description: 'Next product',
+                callback: myscope.down_key
+            }).add({
+                combo: 'esc',
+                description: 'Save and close modal',
+                callback: function(){}
+            });
+
+            if(product_id) {
+                myscope.update_state = false;
+                myscope.product_single_details(product_id,true);
+            } else {
+                myscope.update_state = true;
+                myscope.product_single_details($stateParams.product_id,true);
+            }
+            $modalInstance.result.then(scope.update,scope.update);
+        };
+        myscope.init();
+
+
+        //scope.$on("alias-modal-selected",scope._add_alias_product);
+        //$('.icon-question-sign').popover({trigger: 'hover focus'});
+        scope.$emit("products-modal-loading-complete",{identifier:scope.custom_identifier});
+        scope.$on("products-modal-loading-complete",function(event, args){ if(args.identifier !== scope.custom_identifier) { event.stopPropagation();} });
+
+}]);

@@ -2,7 +2,7 @@ groovepacks_directives.directive('groovEditable', ['$timeout','editable',functio
     return {
         restrict:"A",
         transclude: true,
-        templateUrl:"/assets/partials/editable.html",
+        templateUrl:"/assets/views/directives/editable.html",
         scope: {
             ngModel: "=",
             prop: "@",

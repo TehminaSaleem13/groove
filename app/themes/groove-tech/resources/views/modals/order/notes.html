@@ -1,0 +1,22 @@
+<div class="container-fluid">
+    <fieldset>
+        <legend>Internal Notes</legend>
+        <textarea ng-model="orders.single.basicinfo.notes_internal" ng-blur="update_single_order()"
+                  class="form-control input-style" rows="4"></textarea>
+    </fieldset>
+    <fieldset>
+        <legend>Notes to Packer</legend>
+        <textarea ng-model="orders.single.basicinfo.notes_toPacker" ng-blur="update_single_order()"
+                  class="form-control input-style" rows="4"></textarea>
+    </fieldset>
+    <fieldset>
+        <legend>Notes from Packer</legend>
+        <textarea ng-model="orders.single.basicinfo.notes_fromPacker"
+                  ng-blur="update_single_order()" class="form-control input-style" rows="4"></textarea>
+    </fieldset>
+    <fieldset>
+        <legend>Customer Comments</legend>
+        <textarea ng-model="orders.single.basicinfo.customer_comments"
+                  ng-blur="update_single_order()" class="form-control input-style" rows="4"></textarea>
+    </fieldset>
+</div>

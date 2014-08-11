@@ -1,0 +1,65 @@
+<div class="container-fluid">
+    <div class="row bottom-well">
+        <div class="col-lg-2 col-md-2">
+            <div class="row">
+                <accordion>
+                    <accordion-group is-open="tabs[0].open">
+                        <accordion-heading >
+                            <i></i> Products
+                        </accordion-heading>
+                        <li ng-click="create_product()">Create</li>
+                        <li ng-class="{active: products.setup.filter=='all' && products.setup.is_kit == 0}" ui-sref="products.type.filter.page({type:'product',filter:'all',page:1})" >Show All</li>
+                        <li ng-class="{active: products.setup.filter=='active' && products.setup.is_kit == 0}"  ui-sref="products.type.filter.page({type:'product',filter:'active',page:1})">Active Products</li>
+                        <li ng-class="{active: products.setup.filter=='inactive' && products.setup.is_kit == 0}"  ui-sref="products.type.filter.page({type:'product',filter:'inactive',page:1})">Inactive Products</li>
+                        <li ng-class="{active: products.setup.filter=='new' && products.setup.is_kit == 0}"  ui-sref="products.type.filter.page({type:'product',filter:'new',page:1})">New <span class="pull-right badge badge-important" ng-show="products.products_count.new>0">{{products.products_count.new}}</span></li>
+                    </accordion-group>
+                    <accordion-group heading="Kits" is-open="tabs[1].open">
+                        <li ng-class="{active: products.setup.filter=='all' && products.setup.is_kit == 1}" ui-sref="products.type.filter.page({type:'kit',filter:'all',page:1})" >Show All</li>
+                        <li ng-class="{active: products.setup.filter=='active' && products.setup.is_kit == 1}"  ui-sref="products.type.filter.page({type:'kit',filter:'active',page:1})">Active Kits</li>
+                        <li ng-class="{active: products.setup.filter=='inactive' && products.setup.is_kit == 1}"  ui-sref="products.type.filter.page({type:'kit',filter:'inactive',page:1})">Inactive Kits</li>
+                        <li ng-class="{active: products.setup.filter=='new' && products.setup.is_kit == 1}"  ui-sref="products.type.filter.page({type:'kit',filter:'new',page:1})">New Kits</li>
+                    </accordion-group>
+                    <accordion-group heading="Inventory Warehouse Count" is-open="tabs[2].open">
+                        <li ng-click="recount_or_receive_inventory()">Receive or Recount Inventory</li>
+                    </accordion-group>
+                </accordion>
+            </div>
+        </div>
+        <div class="col-lg-10 col-md-10">
+            <div class="row">
+                <div class="col-lg-9 col-md-9">
+                    <div class="col-lg-offset-3 col-md-offset-3 col-lg-9 col-md-9 pull-left">
+                        <input type="text" id="product-search-query" autofocus="autofocus" class="form-control search-box" ng-model="products.setup.search" placeholder="Search">
+                    </div>
+                </div>
+                <div class="col-lg-1 col-md-1" dropdown>
+                    <button type="button" class="groove-button dropdown-toggle">
+                        Edit <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu" role="menu">
+                        <li><a ng-click="product_delete()">Delete</a></li>
+                        <li><a ng-click="product_duplicate()">Duplicate</a></li>
+                        <li><a ng-click="product_barcode()">Generate barcode from sku</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-2 col-md-2" dropdown>
+                    <button type="button" class="groove-button dropdown-toggle" data-toggle="dropdown">
+                        Change Status <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu" role="menu">
+                        <li><a ng-click="product_change_status('active')">Active</a></li>
+                        <li><a ng-click="product_change_status('inactive')">Inactive</a></li>
+                        <li><a ng-click="product_change_status('new')">New</a></li>
+                    </ul>
+                </div>
+
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div groov-data-grid="gridOptions" groov-list="products.list" infinite-scroll="product_next()" infinite-scroll-disabled="{{!products.load_new}}"></div>
+                </div>
+            </div>
+            <div ui-view></div>
+        </div>
+    </div>
+</div>

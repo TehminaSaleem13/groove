@@ -1,0 +1,25 @@
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="btn-group pull-right">
+                <button class="modal-save-button"
+                        ng-show="orders.single.add_items_permitted"
+                        ng-click="item_order('order',item_products.list)">
+                    Add Item
+                </button>
+                <button class="modal-remove-button"
+                        ng-show="orders.single.remove_items_permitted"
+                        ng-click="item_remove_selected()">
+                    Remove selected Items
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <div groov-data-grid="gridOptions" groov-list="orders.single.items"></div>
+        </div>
+    </div>
+
+
+</div>

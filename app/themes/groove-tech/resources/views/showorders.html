@@ -1,0 +1,70 @@
+<div class="container-fluid">
+    <div class="row bottom-well">
+        <div class="col-lg-2 col-md-2">
+            <div class="row">
+                <accordion>
+                    <accordion-group is-open="firstOpen">
+                        <accordion-heading >
+                            <i></i> Orders
+                        </accordion-heading>
+
+                        <li ng-class="{active:orders.setup.filter=='all'}" ui-sref="orders.filter.page({filter:'all',page:1})">Show All</li>
+                        <li ng-class="{active:orders.setup.filter=='awaiting'}" ui-sref="orders.filter.page({filter:'awaiting',page:1})">Awaiting </li>
+                        <li ng-class="{active:orders.setup.filter=='onhold'}" ui-sref="orders.filter.page({filter:'onhold',page:1})">On Hold <span class="pull-right badge badge-important" ng-show="orders.orders_count.onhold>0">{{orders.orders_count.onhold}}</span></li>
+                        <li ng-class="{active:orders.setup.filter=='serviceissue'}" ui-sref="orders.filter.page({filter:'serviceissue',page:1})">Service Issue</li>
+                        <li ng-class="{active:orders.setup.filter=='cancelled'}" ui-sref="orders.filter.page({filter:'cancelled',page:1})">Cancelled</li>
+                        <li ng-class="{active:orders.setup.filter=='scanned'}" ui-sref="orders.filter.page({filter:'scanned',page:1})">Scanned</li>
+                    </accordion-group>
+                </accordion>
+            </div>
+        </div>
+        <div class="col-lg-10 col-md-10">
+            <div class="row">
+                <div class="col-lg-7 col-md-7">
+                    <div class="col-lg-offset-3 col-md-offset-3 col-lg-9 col-md-9 pull-left">
+                        <input type="text" class="form-control search-box" autofocus="autofocus" id="order-search-query" ng-model="orders.setup.search" placeholder="Search">
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-2" dropdown>
+                    <button type="button" class="groove-button dropdown-toggle">
+                        Printing <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu" role="menu">
+                        <li><a class="dropdown-toggle" ng-click="generate_orders_pick_list_and_packing_slip()">Print Pick List and Packing Slips for selected</a></li>
+                        <li><a class="dropdown-toggle" ng-click="generate_orders_pick_list()">Print Only Pick list for selected</a></li>
+                        <li><a class="dropdown-toggle" ng-click="generate_orders_packing_slip()">Print Only Packing Slips for selected</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-1 col-md-1" dropdown>
+                    <button type="button" class="groove-button dropdown-toggle">
+                        Edit <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu" role="menu">
+                        <li><a class="dropdown-toggle" ng-click="order_delete()">Delete</a></li>
+                        <li><a class="dropdown-toggle" ng-click="order_duplicate()">Duplicate</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-2 col-md-2" dropdown>
+                    <button type="button" class="groove-button dropdown-toggle" data-toggle="dropdown">
+                        Change Status <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu" role="menu">
+                        <li><a ng-click="order_change_status('awaiting')">Awaiting </a></li>
+                        <li><a ng-click="order_change_status('onhold')">On Hold</a></li>
+                        <li><a ng-click="order_change_status('serviceissue')">Service Issue</a></li>
+                        <li><a ng-click="order_change_status('cancelled')">Cancelled</a></li>
+                        <li><a ng-click="order_change_status('scanned')">Scanned</a></li>
+                    </ul>
+                </div>
+
+            </div>
+            <div class="row">
+                <div class="col-xs-12">
+                    <div groov-data-grid="gridOptions" groov-list="orders.list" infinite-scroll="order_next()"></div>
+                </div>
+            </div>
+            <div ui-view></div>
+        </div>
+    </div>
+</div>
+
