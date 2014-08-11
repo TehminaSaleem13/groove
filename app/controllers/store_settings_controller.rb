@@ -1,5 +1,6 @@
 class StoreSettingsController < ApplicationController
   before_filter :authenticate_user!, :except => [:handle_ebay_redirect]
+  include StoreSettingsHelper
   def storeslist
     @stores = Store.where("store_type != 'system'")
 
@@ -21,22 +22,27 @@ class StoreSettingsController < ApplicationController
 
   def createStore
     @result = Hash.new
+    @result['status'] = true
+    @result['store_id'] = 0
+    @result['csv_import'] = false
+    @result['messages'] =[]
+
     if current_user.can? 'add_edit_store'
       if !params[:id].nil?
         @store = Store.find(params[:id])
       else
         @store = Store.new
       end
-
-      @store.name= params[:name] || get_default_warehouse_name
-      @store.store_type = params[:store_type]
-      @store.status = params[:status]
-      @store.thank_you_message_to_customer = params[:thank_you_message_to_customer]
-      @store.inventory_warehouse_id = params[:inventory_warehouse_id] || get_default_warehouse_id
-
-      @result['status'] = true
-      @result['store_id'] = 0
-      @result['csv_import'] = false
+      if params[:store_type].nil?
+        @result['status'] = false
+        @result['messages'].push('Please select a store type to create a store')
+      else
+        @store.name = params[:name] || get_default_warehouse_name
+        @store.store_type = params[:store_type]
+        @store.status = params[:status]
+        @store.thank_you_message_to_customer = params[:thank_you_message_to_customer]
+        @store.inventory_warehouse_id = params[:inventory_warehouse_id] || get_default_warehouse_id
+      end
 
       if @result['status']
 

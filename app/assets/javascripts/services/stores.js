@@ -158,8 +158,7 @@ groovepacks_services.factory('stores',['$http','notification','$filter',function
             },
             data: stores.single
         }).success(function(data) {
-            if(data.status) {
-                stores.single.id = data.store_id;
+            if(data.status && data.store_id) {
                 if(!auto) {
                     notification.notify("Successfully Updated",1);
                 }
