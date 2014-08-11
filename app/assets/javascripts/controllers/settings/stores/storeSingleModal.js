@@ -62,6 +62,9 @@ function(scope, store_data, $state, $stateParams, $modal, $modalInstance, $timeo
             } else if (scope.stores.single.store_type == 'Amazon') {
                 scope.stores.single.productmarketplace_id = scope.stores.single.marketplace_id;
                 scope.stores.single.productmerchant_id = scope.stores.single.merchant_id;
+            }else if (scope.stores.single.store_type == 'Shipstation') {
+                scope.stores.single.productusername = scope.stores.single.username;
+                scope.stores.single.productpassword = scope.stores.single.password;
             }
         } else {
             if (scope.stores.single.store_type == 'Magento') {
@@ -74,6 +77,9 @@ function(scope, store_data, $state, $stateParams, $modal, $modalInstance, $timeo
             } else if (scope.stores.single.store_type == 'Amazon') {
                 scope.stores.single.productmarketplace_id = "";
                 scope.stores.single.productmerchant_id = "";
+            }else if (scope.stores.single.store_type == 'Shipstation') {
+                scope.stores.single.productusername = "";
+                scope.stores.single.productpassword = "";
             }
         }
     };
@@ -196,6 +202,10 @@ function(scope, store_data, $state, $stateParams, $modal, $modalInstance, $timeo
             CSV: {
                 name: "CSV",
                 file: "/assets/views/modals/settings/stores/csv.html"
+            },
+            Shipstation: {
+                name: "Shipstation",
+                file: "/assets/views/modals/settings/stores/shipstation.html"
             }
         };
 

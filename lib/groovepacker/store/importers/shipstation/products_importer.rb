@@ -57,31 +57,16 @@ module Groovepacker
             result
           end
           def set_product_fields(product, ssproduct)
-            result = false
-            # product.store_product_id = 
+            result = false 
             product.name = ssproduct.Name
-            # product_type = 
-            # product.store_id = ssproduct.store.id
             product.inv_wh1 = ssproduct.WarehouseLocation
-            # product.status =
-            # product.spl_instructions_4_packer = 
-            # product.spl_instructions_4_confirmation = 
-            # product.alternate_location = 
-            # product.barcode = 
-            # product.is_skippable = 
-            # product.packing_placement = 
-            # product.pack_time_adj = 
-            # product.kit_parsing = 
-            # product.is_kit = 
-            # product.disable_conf_req = 
-            # product.total_avail_ext = 
+ 
             if !ssproduct.WeightOz.nil?
               product.weight = ssproduct.WeightOz
             else
               product.weight = 0
             end
-            # product.shipping_weight = 
-            # product.is_packing_supply =
+
             if product.save
               result = true
             end

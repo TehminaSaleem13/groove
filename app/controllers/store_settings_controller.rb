@@ -34,13 +34,13 @@ class StoreSettingsController < ApplicationController
     @result = Hash.new
     if store
       if current_user.can? 'add_edit_store'
-        if !params[:id].nil?
+        if !params[:id].nil? && !params[:id]!= '0'
           @store = Store.find(params[:id])
         else
           @store = Store.new
         end
 
-        @store.name= params[:name] || get_default_warehouse_name
+        @store.name= params[:name] #|| get_default_warehouse_name
         @store.store_type = params[:store_type]
         @store.status = params[:status]
         @store.thank_you_message_to_customer = params[:thank_you_message_to_customer]
@@ -58,7 +58,6 @@ class StoreSettingsController < ApplicationController
           if params[:import_products].nil?
             params[:import_products] = false
           end
-
           if @store.store_type == 'Magento'
             @magento = MagentoCredentials.where(:store_id=>@store.id)
 

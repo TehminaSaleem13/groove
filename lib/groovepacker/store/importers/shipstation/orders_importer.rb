@@ -19,12 +19,7 @@ module Groovepacker
                   Product.where(:status => 'new')
                   if Order.where(:increment_id=>order.order_id.to_s).length == 0
                     @order = Order.new
-                    # @order.shipment_id = order.ShipmentID
                     @order.increment_id = order.OrderID
-                    # @order.seller_id = order.SellerID
-                    # @order.package_type_id = order.PackageTypeID
-                    # @order.voided = order.Voided
-                    # @order.downloaded = order.Downloaded
                     @order.firstname = order.Name
                     @order.company = order.Company
                     @order.address_1 = order.Street1
@@ -33,13 +28,8 @@ module Groovepacker
                     @order.state = order.State
                     @order.postcode = order.PostalCode
                     @order.country = order.CountryCode
-                    # @order.weight_oz = order.WeightOz
-                    # @order.width = order.Width
-                    # @order.length = order.Length
-                    # @order.height = order.Height
-                    # @order.marketplace_notified = order.MarketplaceNotified
-                    # @order.warehouse_id = order.WarehouseID
-                    # @order.RMA_number = order.RMANumber
+                    @order.store = credential.store
+
                     order_items = client.order_items.where("order_id"=>order.OrderID)
                     if !order_items.nil?
                       order_items.each do |item|
@@ -49,15 +39,7 @@ module Groovepacker
                         @order_item.price = item.UnitPrice
                         @order_item.row_total = item.UnitPrice.to_f * 
                         item.Quantity.to_i
-                        # @order_item.name = 
                         @order_item.product_id = item.ProductID
-                        # @order_item.scanned_status = 
-                        # @order_item.scanned_qty = 
-                        # @order_item.kit_split = 
-                        # @order_item.kit_split_qty =
-                        # @order_item.kit_split_scanned_qty =
-                        # @order_item.inv_status = 
-                        # @order_item.inv_status_reason = item.Description
                         @order_item.order_id = item.OrderID
                         if ProductSku.where(:sku=>item.SKU).length == 0
                           #create and import product
@@ -69,8 +51,21 @@ module Groovepacker
                           sku = ProductSku.new
                           sku.sku = item.SKU
                           product.product_skus << sku
-                          product.save
 
+                          #Build Image
+                          unless item.ThumbnailUrl.nil?
+                            image = ProductImage.new
+                            image.image = item.ThumbnailUrl
+                            product.product_images << image
+                          end                          
+
+                          #build barcode
+                          unless item.UPC.nil?
+                            barcode = ProductBarcode.new
+                            barcode.barcode = item.UPC
+                            product.product_barcodes << barcode
+                          end
+                          product.save
                           #import other product details
                           Groovepacker::Store::Importers::Shipstation::
                             ProductsImporter.new(handler).import_single({ 

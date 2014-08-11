@@ -1,0 +1,52 @@
+  <div class="row">
+    <div class="col-md-6">
+      <h5>Shipstation Credentials</h5>
+      <div class="form-group">
+        <label class="control-label col-md-4">Username</label>
+        <div class="controls col-md-8">
+          <input name="username" xs-input-sync ng-model="stores.single.username" type="text" class="form-control input-style" value="" required/>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="control-label col-md-4">Password</label>
+        <div class="controls col-md-8">
+          <input name="password" xs-input-sync ng-model="stores.single.password" type="text" class="form-control input-style" value="" required/>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-6">
+      <h5>Import Orders</h5>
+      <div class="form-group">
+        <div class="controls col-md-8">
+          <button ng-click="import_orders()"class="btn btn-primary" ng-show="edit_status">Import Orders</button>
+        </div>
+      </div>
+      <div class="form-group">
+      	<div class="col-xs-12">
+        	<label class="alert alert-info" ng-show="importorderstatus_show">{{importorder_status}}</label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-6">
+    <h5>Import Products</h5>
+
+      <div class="form-group">
+        <div class="controls col-md-8">
+          <button ng-click="import_products()"class="btn btn-primary" ng-show="edit_status">Import Products</button>
+        </div>
+      </div>
+
+      <div class="form-group">
+      	<div class="col-xs-12">
+        	<label class="alert alert-info" ng-show="importproductstatus_show">{{importproduct_status}}</label>
+        </div>
+      </div>
+    </div>
+  </div>
