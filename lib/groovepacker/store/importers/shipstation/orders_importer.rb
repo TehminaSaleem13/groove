@@ -16,18 +16,20 @@ module Groovepacker
               if !orders.nil?
                 result[:total_imported] = orders.length
                 orders.each do |order|
-                  Product.where(:status => 'new')
                   if Order.where(:increment_id=>order.order_id.to_s).length == 0
                     @order = Order.new
                     @order.increment_id = order.OrderID
-                    @order.firstname = order.Name
-                    @order.company = order.Company
-                    @order.address_1 = order.Street1
-                    @order.address_2 = order.Street2
-                    @order.city = order.City
-                    @order.state = order.State
-                    @order.postcode = order.PostalCode
-                    @order.country = order.CountryCode
+                    @order.firstname = order.ShipName
+                    unless order.ShipCompany.nil?
+                      @order.company = order.ShipCompany
+                    end
+                    @order.address_1 = order.ShipStreet1
+                    @order.address_2 = order.ShipStreet2
+                    @order.city = order.ShipCity
+                    @order.state = order.ShipState
+                    @order.postcode = order.ShipPostalCode
+                    @order.country = order.ShipCountryCode
+                    @order.price = order.OrderTotal
                     @order.store = credential.store
 
                     order_items = client.order_items.where("order_id"=>order.OrderID)
@@ -37,6 +39,7 @@ module Groovepacker
                         @order_item.sku = item.SKU
                         @order_item.qty = item.Quantity
                         @order_item.price = item.UnitPrice
+                        @order_item.name = item.Description
                         @order_item.row_total = item.UnitPrice.to_f * 
                         item.Quantity.to_i
                         @order_item.product_id = item.ProductID

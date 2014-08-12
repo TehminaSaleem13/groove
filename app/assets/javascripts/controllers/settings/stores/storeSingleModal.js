@@ -103,27 +103,34 @@ function(scope, store_data, $state, $stateParams, $modal, $modalInstance, $timeo
     };
 
     scope.update_single_store = function(auto) {
-        return stores.single.update(scope.stores,auto).then(function(response){
-            if(response.data.status) {
-                scope.edit_status = true;
-                if(!auto) {
-                    //Use FileReader API here if it exists (post prototype feature)
-                    if (response.data.csv_import && response.data.store_id) {
-                        var csv_modal = $modal.open({
-                            templateUrl: '/assets/views/modals/settings/stores/csv_import.html',
-                            controller: 'csvSingleModal',
-                            size:'lg',
-                            resolve: {
-                                store_data: function(){return scope.stores}
-                            }
-                        });
-                        csv_modal.result.finally(function() {
-                            myscope.store_single_details(scope.stores.single.id,false);
-                        });
+        if(typeof scope.stores.single['name'] != "undefined"
+           && scope.stores.single.name != ""
+           && typeof scope.stores.single.store_type != "undefined"
+           && scope.stores.single.store_type != "") {
+            return stores.single.update(scope.stores,auto).success(function(data){
+                if(data.status && data.store_id) {
+                    if(typeof scope.stores.single['id'] == "undefined") {
+                        myscope.store_single_details(data.store_id,true);
+                    }
+                    if(!auto) {
+                        //Use FileReader API here if it exists (post prototype feature)
+                        if (data.csv_import && data.store_id) {
+                            var csv_modal = $modal.open({
+                                templateUrl: '/assets/views/modals/settings/stores/csv_import.html',
+                                controller: 'csvSingleModal',
+                                size:'lg',
+                                resolve: {
+                                    store_data: function(){return scope.stores}
+                                }
+                            });
+                            csv_modal.result.finally(function() {
+                                myscope.store_single_details(scope.stores.single.id,false);
+                            });
+                        }
                     }
                 }
-            }
-        });
+            });
+        }
     };
 
     myscope.rollback = function() {
@@ -135,7 +142,7 @@ function(scope, store_data, $state, $stateParams, $modal, $modalInstance, $timeo
     myscope.up_key = function(event) {
         event.preventDefault();
         event.stopPropagation();
-        if(scope.edit_status) {
+        if($state.includes('settings.stores.single')) {
             if(scope.stores.current > 0) {
                 myscope.load_item(scope.stores.current -1);
             } else {
@@ -147,7 +154,7 @@ function(scope, store_data, $state, $stateParams, $modal, $modalInstance, $timeo
     myscope.down_key = function (event) {
         event.preventDefault();
         event.stopPropagation();
-        if(scope.edit_status) {
+        if($state.includes('settings.stores.single')) {
             if(scope.stores.current < scope.stores.list.length - 1) {
                 myscope.load_item(scope.stores.current + 1);
             } else {
