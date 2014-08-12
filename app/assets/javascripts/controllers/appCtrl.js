@@ -55,6 +55,9 @@ groovepacks_controllers.
                         } else if(cur_item.store_info.store_type=='Magento') {
                             content += '<img src="https://s3.amazonaws.com/groovepacker/MagentoLogo.jpg" width="60px" ' +
                                 'height="50px" alt="Magento"/>'
+                        } else if(cur_item.store_info.store_type=='Shipstation') {
+                            content += '<img src="https://s3.amazonaws.com/groovepacker/MagentoLogo.jpg" width="60px" ' +
+                                'height="50px" alt="Magento"/>'
                         }
                         content+='</td>';
                         content+=$interpolate('<td>{{store_info.name}}</td>')(cur_item);

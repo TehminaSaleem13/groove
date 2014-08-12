@@ -30,6 +30,10 @@ groovepacks_controllers.
                         $scope.$parent.ebay_signin_url_status = data.ebay_signin_url_status;
                         $scope.$parent.ebay_sessionid = data.ebay_sessionid;
                     }
+                    if (data.status == false) {
+                        $scope.$parent.ebay_signin_url_status = false;
+                        $scope.notify("You have reached the maximum limit of number of stores for your subscription.",0);
+                    };
 
                 }).error(function(data) {
                         $scope.$parent.ebay_signin_url_status = false;

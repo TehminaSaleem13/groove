@@ -20,19 +20,31 @@ class StoreSettingsController < ApplicationController
     end
   end
 
+  def store
+    stores = Store.where("store_type != 'system'")
+    store_count = stores.count
+    max_stores = AccessRestriction.first.num_import_sources
+    if store_count < max_stores
+      true
+    else
+      false
+    end
+  end
+
   def createStore
     @result = Hash.new
+
     @result['status'] = true
     @result['store_id'] = 0
     @result['csv_import'] = false
     @result['messages'] =[]
-
     if current_user.can? 'add_edit_store'
       if !params[:id].nil?
         @store = Store.find(params[:id])
       else
         @store = Store.new
       end
+
       if params[:store_type].nil?
         @result['status'] = false
         @result['messages'].push('Please select a store type to create a store')
@@ -52,7 +64,6 @@ class StoreSettingsController < ApplicationController
         if params[:import_products].nil?
           params[:import_products] = false
         end
-
         if @store.store_type == 'Magento'
           @magento = MagentoCredentials.where(:store_id=>@store.id)
 
@@ -181,21 +192,46 @@ class StoreSettingsController < ApplicationController
               @result['csv_import'] = true
             end
           end
-
-
         end
+        if @store.store_type == 'Shipstation'
+          @shipstation = ShipstationCredential.where(:store_id=>@store.id)
+          if @shipstation.nil? || @shipstation.length == 0
+            @shipstation = ShipstationCredential.new
+            new_record = true
+          else
+            @shipstation = @shipstation.first
+          end
+
+          @shipstation.username = params[:username]
+          @shipstation.password = params[:password]
+          @store.shipstation_credential = @shipstation
+
+          begin
+            @store.save!
+            if !new_record
+              @store.shipstation_credential.save
+            end
+          rescue ActiveRecord::RecordInvalid => e
+            @result['status'] = false
+            @result['messages'] = [@store.errors.full_messages, @store.shipstation_credential.errors.full_messages]
+
+          rescue ActiveRecord::StatementInvalid => e
+            @result['status'] = false
+            @result['messages'] = [e.message]
+          end
+        end
+      else
+        @result['status'] = false
+        @result['messages'].push("Current user does not have permission to create or edit a store")
 
         if @store.id
           @result["store_id"] = @store.id
         end
-
       end
     else
       @result['status'] = false
-      @result['messages'].push("Current user does not have permission to create or edit a store")
+      @result['messages'] = "You have reached the maximum limit of number of stores for your subscription."
     end
-
-
 
     respond_to do |format|
         format.json { render json: @result}
@@ -699,10 +735,16 @@ class StoreSettingsController < ApplicationController
   end
 
   def getebaysigninurl
-    @store = Store.new
-    @result = @store.get_ebay_signin_url
-    session[:ebay_session_id] = @result['ebay_sessionid']
-    @result['current_tenant'] = Apartment::Tenant.current_tenant
+    @result = Hash.new
+    @result[:status] = true
+    if store
+      @store = Store.new
+      @result = @store.get_ebay_signin_url
+      session[:ebay_session_id] = @result['ebay_sessionid']
+      @result['current_tenant'] = Apartment::Tenant.current_tenant
+    else
+      @result[:status] = false
+    end
     respond_to do |format|
         format.html # show.html.erb
         format.json { render json: @result }

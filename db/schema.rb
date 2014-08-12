@@ -11,15 +11,15 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140801094142) do
+ActiveRecord::Schema.define(:version => 20140807125300) do
 
   create_table "access_restrictions", :force => true do |t|
-    t.integer  "tenant_id"
-    t.integer  "num_users"
-    t.integer  "num_shipments"
-    t.integer  "num_import_sources"
-    t.datetime "created_at",         :null => false
-    t.datetime "updated_at",         :null => false
+    t.integer  "num_users",               :default => 0, :null => false
+    t.integer  "num_shipments",           :default => 0, :null => false
+    t.integer  "num_import_sources",      :default => 0, :null => false
+    t.datetime "created_at",                             :null => false
+    t.datetime "updated_at",                             :null => false
+    t.integer  "total_scanned_shipments", :default => 0, :null => false
   end
 
   create_table "amazon_credentials", :force => true do |t|
@@ -285,7 +285,6 @@ ActiveRecord::Schema.define(:version => 20140801094142) do
     t.string   "method"
     t.datetime "created_at",         :null => false
     t.datetime "updated_at",         :null => false
-    t.string   "store_order_id"
     t.string   "notes_internal"
     t.string   "notes_toPacker"
     t.string   "notes_fromPacker"
@@ -390,6 +389,7 @@ ActiveRecord::Schema.define(:version => 20140801094142) do
     t.integer  "total_avail_ext",                                               :default => 0,         :null => false
     t.decimal  "weight",                          :precision => 8, :scale => 2, :default => 0.0,       :null => false
     t.decimal  "shipping_weight",                 :precision => 8, :scale => 2, :default => 0.0
+    t.boolean  "is_packing_supply",                                             :default => false
   end
 
   add_index "products", ["store_id"], :name => "index_products_on_store_id"
@@ -419,6 +419,14 @@ ActiveRecord::Schema.define(:version => 20140801094142) do
     t.boolean "add_edit_stores",      :default => false, :null => false
     t.boolean "create_backups",       :default => false, :null => false
     t.boolean "restore_backups",      :default => false, :null => false
+  end
+
+  create_table "shipstation_credentials", :force => true do |t|
+    t.string   "username",   :null => false
+    t.string   "password",   :null => false
+    t.datetime "created_at", :null => false
+    t.datetime "updated_at", :null => false
+    t.integer  "store_id"
   end
 
   create_table "sold_inventory_warehouses", :force => true do |t|

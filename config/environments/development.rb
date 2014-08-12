@@ -84,4 +84,7 @@ Groovepacks::Application.configure do
   # ENV['EBAY_DEV_ID'] = "568a739c-a13d-40e5-922a-6e3ecc652d9d"
   # ENV['EBAY_RU_NAME'] = "Navaratan_Techn-Navarata-607d-4-klyznn"
   # ENV['EBAY_SANDBOX_MODE'] = "YES"
+
+  ENV['SHIPSTATION_USERNAME'] = "dreadhead"
+  ENV['SHIPSTATION_PASSWORD'] = "g8J$v5KLoP"
 end

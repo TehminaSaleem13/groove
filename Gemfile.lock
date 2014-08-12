@@ -322,6 +322,12 @@ GEM
       thor
     ruby-hmac (0.4.0)
     ruby-rc4 (0.1.5)
+    ruby_odata (0.1.6)
+      activesupport (>= 3.0.0)
+      addressable (>= 2.3.4)
+      i18n (~> 0.6.0)
+      nokogiri (>= 1.4.2)
+      rest-client (>= 1.5.1)
     rubyzip (1.1.0)
     sass (3.2.10)
     sass-rails (3.2.6)
@@ -433,6 +439,7 @@ DEPENDENCIES
   rspec-rails (>= 2.13.2)
   rubber
   ruby-mws (~> 0.0.8)!
+  ruby_odata
   rubyzip
   sass-rails (~> 3.2.3)
   savon

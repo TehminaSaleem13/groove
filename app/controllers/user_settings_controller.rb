@@ -10,76 +10,92 @@ class UserSettingsController < ApplicationController
     end
   end
 
+  def user
+    users = User.all
+    user_count = users.count
+    max_users = AccessRestriction.first.num_users
+    if user_count < max_users
+      return true
+    else
+      return false
+    end
+  end
+
   def createUser
-    @result = Hash.new
-    @result['status'] = true
-    @result['messages'] = []
 
-    if current_user.can? 'add_edit_users'
-      if !params[:id].nil?
-        @user = User.find(params[:id])
-      else
-        @user = User.new
-      end
+      puts "user:" + user.inspect
+      @result = Hash.new
+      @result['status'] = true
+      @result['messages'] = []
+    if user
+      if current_user.can? 'add_edit_users'
+        if !params[:id].nil?
+          @user = User.find(params[:id])
+        else
+          @user = User.new
+        end
 
-      @user.email = params[:email]
-      @user.password = params[:password] if !params[:password].nil? && params[:password] != ''
-      @user.username = params[:username]
-      @user.other = params[:other] if !params[:other].nil?
-      @user.password_confirmation = params[:password] if !params[:password].nil? && params[:password] != ''
-      if params[:active].nil?
-        params[:active] = false
-      end
-      @user.active = params[:active]
-      @user.name = params[:name]
-      @user.confirmation_code = params[:confirmation_code]
+        @user.email = params[:email]
+        @user.password = params[:password] if !params[:password].nil? && params[:password] != ''
+        @user.username = params[:username]
+        @user.other = params[:other] if !params[:other].nil?
+        @user.password_confirmation = params[:password] if !params[:password].nil? && params[:password] != ''
+        if params[:active].nil?
+          params[:active] = false
+        end
+        @user.active = params[:active]
+        @user.name = params[:name]
+        @user.confirmation_code = params[:confirmation_code]
 
-      if params[:role].nil? || params[:role]['id'].nil?
-        user_role = Role.find_by_name("role_#{@user.id}")
+        if params[:role].nil? || params[:role]['id'].nil?
+          user_role = Role.find_by_name("role_#{@user.id}")
+          if user_role.nil?
+            user_role = Role.new
+            user_role.custom = true
+            user_role.display = false
+            user_role.name = "role_#{@user.id}"
+          end
+        else
+          user_role = Role.find_by_id(params[:role]['id'])
+        end
+
         if user_role.nil?
-          user_role = Role.new
-          user_role.custom = true
-          user_role.display = false
-          user_role.name = "role_#{@user.id}"
+          @result.status = false
+          @result['messages'].push("Invalid user Role")
+        else
+
+          if params[:role]['make_super_admin'] && !current_user.can?('make_super_admin')
+            params[:role]['make_super_admin'] = false
+            @result['status'] = false
+            @result['messages'].push("Cannot grant super admin privileges to non super admin.")
+          end
+
+          if user_role.custom && !user_role.display
+            user_role = update_role(user_role,params[:role])
+          end
+
+          @user.role = user_role
         end
-      else
-        user_role = Role.find_by_id(params[:role]['id'])
-      end
 
-      if user_role.nil?
-        @result.status = false
-        @result['messages'].push("Invalid user Role")
-      else
 
-        if params[:role]['make_super_admin'] && !current_user.can?('make_super_admin')
-          params[:role]['make_super_admin'] = false
+        if @user.save
+          @result['user'] = @user
+          @result['user']['role'] = @user.role
+        else
           @result['status'] = false
-          @result['messages'].push("Cannot grant super admin privileges to non super admin.")
-        end
-
-        if user_role.custom && !user_role.display
-          user_role = update_role(user_role,params[:role])
-        end
-
-        @user.role = user_role
-      end
-
-
-      if @user.save
-        @result['user'] = @user
-        @result['user']['role'] = @user.role
+          @result['messages'] = @user.errors.full_messages
+          end
       else
         @result['status'] = false
-        @result['messages'] = @user.errors.full_messages
-        end
-    else
-      @result['status'] = false
-      @result['messages'].push("Current user doesn't have permission to Add or Edit users")
-    end
+        @result['messages'].push("Current user doesn't have permission to Add or Edit users")
+      end
 
-    respond_to do |format|
-        format.html # show.html.erb
-        format.json { render json: @result}
+      respond_to do |format|
+          format.html # show.html.erb
+          format.json { render json: @result}
+      end
+    else
+      render json:{valid: false}
     end
   end
 

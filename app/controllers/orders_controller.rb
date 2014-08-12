@@ -38,6 +38,10 @@ class OrdersController < ApplicationController
           context = Groovepacker::Store::Context.new(
             Groovepacker::Store::Handlers::MagentoHandler.new(store))
           import_result = context.import_orders
+        elsif store.store_type == 'Shipstation'
+          context = Groovepacker::Store::Context.new(
+            Groovepacker::Store::Handlers::ShipstationHandler.new(store))
+          import_result = context.import_orders
         end
       rescue Exception => e
         @result['status'] = false

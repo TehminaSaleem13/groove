@@ -71,6 +71,9 @@ class Order < ActiveRecord::Base
     self.scanned_on = current_time_from_proper_timezone
     self.addactivity('Order Scanning Complete', username)
     self.save
+    restriction = AccessRestriction.first
+    restriction.total_scanned_shipments += 1
+    restriction.save
   end
 
   def has_inactive_or_new_products

@@ -49,7 +49,10 @@ controller('showUsersCtrl', [ '$scope', '$http', '$timeout', '$stateParams', '$l
                     $scope.newUser.role = data.user.role;
                     myscope.reset_selected_role();
                 }
-            })
+                if (data.valid == false) {
+                   $scope.notify("You have reached max users count for your subscription.",0); 
+                };
+            });
         }
 
         myscope.reset_selected_role = function() {

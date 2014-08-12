@@ -116,6 +116,7 @@ aria-hidden="true">
               <option value="Ebay">Ebay</option>
               <option value="Magento">Magento</option>
               <option value="CSV">CSV</option>
+              <option value="Shipstation">Shipstation</option>
             </select>
          </div>
       </div>
@@ -133,6 +134,8 @@ aria-hidden="true">
 
   <div ng-include="'/assets/partials/csvstorecreation.html'"
            ng-show="newStore.store_type =='CSV'"></div>
+  <div ng-include="'/assets/partials/shipstationstorecreation.html'"
+           ng-show="newStore.store_type =='Shipstation'"></div>
   </div>
 
   

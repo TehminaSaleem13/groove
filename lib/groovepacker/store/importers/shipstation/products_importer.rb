@@ -1,0 +1,80 @@
+module Groovepacker
+  module Store
+    module Importers
+      module Shipstation
+        class ProductsImporter < Groovepacker::Store::Importers::Importer
+          def import
+            handler = self.get_handler
+            credential = handler[:credential]
+            client = handler[:store_handle]
+            result = self.build_result
+            products = client.product.all
+            if !products.nil?
+              result[:total_imported] = products.length.to_s
+              products.each do |item|
+                if ProductSku.where(:sku=>item.SKU).length == 0
+                  @product = Product.new
+                  @product.store_id = credential.store_id
+                  @product.store_product_id = 0
+                  sku = ProductSku.new
+                  sku.sku = item.SKU
+                  @product.product_skus << sku
+
+                  if set_product_fields(@product,item)
+                    result[:success_imported] = result[:success_imported] + 1
+                  else
+                    result[:status] &= false
+                    result[:messages] = "The product information could not be saved."
+                  end
+                else
+                  result[:previous_imported] = result[:previous_imported] + 1
+                end
+              end
+            else
+              result[:status] &= false
+              result[:messages] = "No available products."
+            end
+            result
+          end
+
+          def import_single(import_hash)
+            result = true
+            begin
+              credential = import_hash[:handler][:credential]
+              client = import_hash[:handler][:store_handle]
+              sku = import_hash[:product_sku] 
+              id = import_hash[:product_id]
+              products = client.product.where("SKU"=>sku)
+              if !products.nil?
+                product = products.first
+                @product = Product.find(id)
+                set_product_fields(@product,product)
+              end 
+            rescue Exception => e
+              result &= false
+              Rails.logger.info('Error updating the product sku ' + e.to_s)
+            end
+            result
+          end
+          def set_product_fields(product, ssproduct)
+            result = false 
+            product.name = ssproduct.Name
+            product.inv_wh1 = ssproduct.WarehouseLocation
+ 
+            if !ssproduct.WeightOz.nil?
+              product.weight = ssproduct.WeightOz
+            else
+              product.weight = 0
+            end
+
+            if product.save
+              result = true
+            end
+            product.update_product_status
+            result
+          end
+        end
+      end
+    end
+  end
+end

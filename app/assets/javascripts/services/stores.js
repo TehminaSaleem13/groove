@@ -132,6 +132,9 @@ groovepacks_services.factory('stores',['$http','notification','$filter',function
                         stores.single.show_shipping_weight_only = data.credentials.amazon_credentials.show_shipping_weight_only;
                         stores.single.productreport_id = data.credentials.amazon_credentials.productreport_id;
                         stores.single.productgenerated_report_id = data.credentials.amazon_credentials.productgenerated_report_id
+                    } else if(data.store.store_type == 'Shipstation') {
+                        stores.single.username = data.credentials.shipstation_credentials.username;
+                        stores.single.password = data.credentials.shipstation_credentials.password;
                     }
 
                 }
