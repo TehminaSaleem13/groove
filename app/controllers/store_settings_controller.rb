@@ -38,13 +38,13 @@ class StoreSettingsController < ApplicationController
     @result['store_id'] = 0
     @result['csv_import'] = false
     @result['messages'] =[]
-
     if current_user.can? 'add_edit_store'
       if !params[:id].nil?
         @store = Store.find(params[:id])
       else
         @store = Store.new
       end
+
       if params[:store_type].nil?
         @result['status'] = false
         @result['messages'].push('Please select a store type to create a store')
@@ -195,9 +195,9 @@ class StoreSettingsController < ApplicationController
         end
         if @store.store_type == 'Shipstation'
           @shipstation = ShipstationCredential.where(:store_id=>@store.id)
-
           if @shipstation.nil? || @shipstation.length == 0
             @shipstation = ShipstationCredential.new
+            new_record = true
           else
             @shipstation = @shipstation.first
           end
@@ -208,7 +208,7 @@ class StoreSettingsController < ApplicationController
 
           begin
             @store.save!
-            if !@shipstation.new_record?
+            if !new_record
               @store.shipstation_credential.save
             end
           rescue ActiveRecord::RecordInvalid => e
