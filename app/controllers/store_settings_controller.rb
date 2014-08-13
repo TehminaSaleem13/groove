@@ -731,14 +731,12 @@ class StoreSettingsController < ApplicationController
   def getebaysigninurl
     @result = Hash.new
     @result[:status] = true
-    if store
-      @store = Store.new
-      @result = @store.get_ebay_signin_url
-      session[:ebay_session_id] = @result['ebay_sessionid']
-      @result['current_tenant'] = Apartment::Tenant.current_tenant
-    else
-      @result[:status] = false
-    end
+
+    @store = Store.new
+    @result = @store.get_ebay_signin_url
+    session[:ebay_session_id] = @result['ebay_sessionid']
+    @result['current_tenant'] = Apartment::Tenant.current_tenant
+
     respond_to do |format|
         format.html # show.html.erb
         format.json { render json: @result }
