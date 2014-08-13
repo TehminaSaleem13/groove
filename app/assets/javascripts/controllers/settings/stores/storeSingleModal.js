@@ -222,6 +222,7 @@ function(scope, store_data, $state, $stateParams, $modal, $modalInstance, $timeo
         scope.stores.import.order.type = 'apiimport';
         scope.stores.import.product.type = 'apiimport';
         scope.stores.ebay.show_url = true;
+        scope.stores.ebay.signin_url_status = true;
         if($state.includes('settings.stores.create')) {
             scope.edit_status = false;
             scope.redirect = false;
@@ -249,8 +250,6 @@ function(scope, store_data, $state, $stateParams, $modal, $modalInstance, $timeo
                     scope.stores.single.import_images = ($stateParams.importimages == 'true');
                     scope.stores.single.import_products = ($stateParams.importproducts == 'true');
                     scope.stores.single.thank_you_message_to_customer = $stateParams.messagetocustomer;
-                    scope.stores.single.username = $stateParams.username;
-                    scope.stores.single.password = $stateParams.password;
                 } else {
                     scope.stores.single.name = $stateParams.name;
                     scope.stores.single.status = ($stateParams.status ==true);
@@ -260,8 +259,6 @@ function(scope, store_data, $state, $stateParams, $modal, $modalInstance, $timeo
                     scope.stores.single.import_images = ($stateParams.importimages == 'true');
                     scope.stores.single.import_products = ($stateParams.importproducts == 'true');
                     scope.stores.single.thank_you_message_to_customer = $stateParams.messagetocustomer;
-                    scope.stores.single.username = $stateParams.username;
-                    scope.stores.single.password = $stateParams.password;
                     stores.ebay.user_token.fetch(scope.stores).then(function(response){
                         if(response.data.status) {
                             scope.update_single_store();
