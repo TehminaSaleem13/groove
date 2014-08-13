@@ -2,8 +2,8 @@ groovepacks.config(['$stateProvider', '$urlRouterProvider','hotkeysProvider','cf
     function($stateProvider, $urlRouterProvider,hotkeysProvider,cfpLoadingBarProvider) {
 
     $urlRouterProvider.otherwise("/home");
-    $urlRouterProvider.when('/settings/', '/settings/users');
-    $urlRouterProvider.when('/settings', '/settings/users');
+    $urlRouterProvider.when('/settings/', '/settings/stores');
+    $urlRouterProvider.when('/settings', '/settings/stores');
     $urlRouterProvider.when('/scanandpack/rfp', '/scanandpack');
     $urlRouterProvider.when('/scanandpack/rfp/', '/scanandpack');
     $urlRouterProvider.when('/orders', '/orders/awaiting/1');

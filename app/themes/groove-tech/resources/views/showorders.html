@@ -5,7 +5,8 @@
                 <accordion>
                     <accordion-group is-open="firstOpen">
                         <accordion-heading >
-                            <i></i> Orders
+                            <i></i>
+                            <a ui-sref="orders.filter.page({filter:'awaiting',page:1})">Orders</a>
                         </accordion-heading>
 
                         <li ng-class="{active:orders.setup.filter=='all'}" ui-sref="orders.filter.page({filter:'all',page:1})">Show All</li>
