@@ -21,7 +21,7 @@ class UserSettingsController < ApplicationController
     end
   end
 
-  def createUser
+  def createUpdateUser
 
       puts "user:" + user.inspect
       @result = Hash.new

@@ -125,7 +125,7 @@ groovepacks_services.factory('users',['$http','notification','$filter',function(
         if(typeof auto !== "boolean") {
             auto = true;
         }
-        return $http.post('/user_settings/createUser.json',users.single).success(function(data) {
+        return $http.post('/user_settings/createUpdateUser.json',users.single).success(function(data) {
             if(data.status) {
                 users.single.id = data.user.id;
                 users.single.role = data.user.role;

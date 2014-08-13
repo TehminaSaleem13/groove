@@ -20,7 +20,7 @@ class StoreSettingsController < ApplicationController
     end
   end
 
-  def createStore
+  def createUpdateStore
     @result = Hash.new
 
     @result['status'] = true
@@ -28,13 +28,19 @@ class StoreSettingsController < ApplicationController
     @result['csv_import'] = false
     @result['messages'] =[]
 
-    if can_store_be_created
-      if current_user.can? 'add_edit_store'
-        if !params[:id].nil?
-          @store = Store.find(params[:id])
-        else
+    if current_user.can? 'add_edit_store'
+      if params[:id].nil?
+        if can_store_be_created
           @store = Store.new
+        else
+          @result['status'] = false
+          @result['messages'] = "You have reached the maximum limit of number of stores for your subscription."
         end
+      else
+        @store = Store.find(params[:id])
+      end
+
+      if @result['status']
 
         if params[:store_type].nil?
           @result['status'] = false
@@ -48,7 +54,6 @@ class StoreSettingsController < ApplicationController
         end
 
         if @result['status']
-
           if params[:import_images].nil?
             params[:import_images] = false
           end
@@ -222,9 +227,7 @@ class StoreSettingsController < ApplicationController
           end
         end
       end
-    else
-      @result['status'] = false
-      @result['messages'] = "You have reached the maximum limit of number of stores for your subscription."
+
     end
 
     respond_to do |format|

@@ -149,7 +149,7 @@ groovepacks_services.factory('stores',['$http','notification','$filter',function
         return $http({
             method: 'POST',
             headers: { 'Content-Type': undefined },
-            url:'/store_settings/createStore.json',
+            url:'/store_settings/createUpdateStore.json',
                 transformRequest: function (data) {
                 var request = new FormData();
                 for (var key in data) {
