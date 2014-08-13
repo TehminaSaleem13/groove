@@ -222,6 +222,7 @@ function(scope, store_data, $state, $stateParams, $modal, $modalInstance, $timeo
         scope.stores.import.order.type = 'apiimport';
         scope.stores.import.product.type = 'apiimport';
         scope.stores.ebay.show_url = true;
+        scope.stores.ebay.signin_url_status = true;
         if($state.includes('settings.stores.create')) {
             scope.edit_status = false;
             scope.redirect = false;
