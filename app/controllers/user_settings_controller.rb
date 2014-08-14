@@ -10,9 +10,8 @@ class UserSettingsController < ApplicationController
     end
   end
 
-  def createUser
 
-      puts "user:" + user.inspect
+  def createUpdateUser
       @result = Hash.new
       @result['status'] = true
       @result['messages'] = []

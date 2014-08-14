@@ -4,8 +4,9 @@
             <div class="row">
                 <accordion>
                     <accordion-group is-open="tabs[0].open">
-                        <accordion-heading >
-                            <i></i> Products
+                        <accordion-heading>
+                            <i></i>
+                            <a ui-sref="products.type.filter.page({type:'product',filter:'active',page:1})">Products</a>
                         </accordion-heading>
                         <li ng-click="create_product()">Create</li>
                         <li ng-class="{active: products.setup.filter=='all' && products.setup.is_kit == 0}" ui-sref="products.type.filter.page({type:'product',filter:'all',page:1})" >Show All</li>
@@ -13,13 +14,19 @@
                         <li ng-class="{active: products.setup.filter=='inactive' && products.setup.is_kit == 0}"  ui-sref="products.type.filter.page({type:'product',filter:'inactive',page:1})">Inactive Products</li>
                         <li ng-class="{active: products.setup.filter=='new' && products.setup.is_kit == 0}"  ui-sref="products.type.filter.page({type:'product',filter:'new',page:1})">New <span class="pull-right badge badge-important" ng-show="products.products_count.new>0">{{products.products_count.new}}</span></li>
                     </accordion-group>
-                    <accordion-group heading="Kits" is-open="tabs[1].open">
+                    <accordion-group is-open="tabs[1].open">
+                        <accordion-heading>
+                            <a ui-sref="products.type.filter.page({type:'kit',filter:'active',page:1})">Kits</a>
+                        </accordion-heading>
                         <li ng-class="{active: products.setup.filter=='all' && products.setup.is_kit == 1}" ui-sref="products.type.filter.page({type:'kit',filter:'all',page:1})" >Show All</li>
                         <li ng-class="{active: products.setup.filter=='active' && products.setup.is_kit == 1}"  ui-sref="products.type.filter.page({type:'kit',filter:'active',page:1})">Active Kits</li>
                         <li ng-class="{active: products.setup.filter=='inactive' && products.setup.is_kit == 1}"  ui-sref="products.type.filter.page({type:'kit',filter:'inactive',page:1})">Inactive Kits</li>
                         <li ng-class="{active: products.setup.filter=='new' && products.setup.is_kit == 1}"  ui-sref="products.type.filter.page({type:'kit',filter:'new',page:1})">New Kits</li>
                     </accordion-group>
-                    <accordion-group heading="Inventory Warehouse Count" is-open="tabs[2].open">
+                    <accordion-group is-open="tabs[2].open">
+                        <accordion-heading>
+                            <a ng-click="recount_or_receive_inventory()">Inventory Warehouse Count</a>
+                        </accordion-heading>
                         <li ng-click="recount_or_receive_inventory()">Receive or Recount Inventory</li>
                     </accordion-group>
                 </accordion>
