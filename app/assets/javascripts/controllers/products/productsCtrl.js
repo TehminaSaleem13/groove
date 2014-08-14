@@ -13,7 +13,7 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$mo
 
     $scope.select_all_toggle = function(val) {
         $scope.products.setup.select_all = val;
-        for (var i =0; i < $scope.products.list.list;i++) {
+        for (var i =0; i < $scope.products.list.length;i++) {
             $scope.products.list[i].checked =  $scope.products.setup.select_all;
         }
     };
