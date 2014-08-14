@@ -8,6 +8,7 @@ class CreateTenant
         CreateTenant.apply_restrictions(subscription.subscription_plan_id)
         TransactionEmail.send_email(subscription).deliver
 	end
+    
 	def self.apply_restrictions(plan)
 		if plan == "groove1"
             AccessRestriction.create( 
