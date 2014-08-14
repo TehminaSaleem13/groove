@@ -901,11 +901,7 @@ class StoreSettingsController < ApplicationController
     stores = Store.where("store_type != 'system'")
     store_count = stores.count
     max_stores = AccessRestriction.first.num_import_sources
-    if store_count < max_stores
-      true
-    else
-      false
-    end
+    store_count < max_stores 
   end
 
 

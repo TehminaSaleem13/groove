@@ -10,24 +10,13 @@ class UserSettingsController < ApplicationController
     end
   end
 
-  def user
-    users = User.all
-    user_count = users.count
-    max_users = AccessRestriction.first.num_users
-    if user_count < max_users
-      return true
-    else
-      return false
-    end
-  end
-
   def createUser
 
       puts "user:" + user.inspect
       @result = Hash.new
       @result['status'] = true
       @result['messages'] = []
-    if user
+    if can_user_be_created
       if current_user.can? 'add_edit_users'
         if !params[:id].nil?
           @user = User.find(params[:id])
@@ -314,5 +303,14 @@ class UserSettingsController < ApplicationController
     respond_to do |format|
       format.json {render json: @result}
     end
+  end
+
+  private
+
+  def can_user_be_created
+    users = User.all
+    user_count = users.count
+    max_users = AccessRestriction.first.num_users
+    user_count < max_users
   end
 end

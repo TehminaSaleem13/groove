@@ -42,5 +42,4 @@ class CreateTenant
         total_scanned_shipments: '0')
     end
 	end
-
 end

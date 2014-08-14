@@ -12,8 +12,6 @@ class Subscription < ActiveRecord::Base
           :description => self.email,
           :plan => self.subscription_plan_id
         )
-        puts "customer:" + customer.inspect
-        puts "subscription_id:" + customer.subscriptions.data.first.id
         #whenever you do .first, make sure null check is done
         self.stripe_customer_id = customer.id
         
@@ -30,8 +28,8 @@ class Subscription < ActiveRecord::Base
           transactions = Stripe::BalanceTransaction.all(:limit => 1)
           if !transactions.first.nil?
             self.stripe_transaction_identifier = transactions.first.id
-            CreateTenant.delay(:run_at => 1.seconds.from_now).create_tenant self
-            # CreateTenant.create_tenant self
+            # CreateTenant.delay(:run_at => 1.seconds.from_now).create_tenant self
+            CreateTenant.create_tenant self
 
             Apartment::Tenant.switch()
             if !customer.cards.data.first.nil?
