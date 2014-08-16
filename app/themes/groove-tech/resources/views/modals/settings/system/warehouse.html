@@ -41,10 +41,23 @@
             <div class="form-group">
                 <label class="control-label col-md-2">Associated Users</label>
                 <div class="controls col-md-4">
-                    <table class="well table-well table table-striped table-hover table-roles">
-                        <tr ng-repeat="user in warehouses.available_users"  ng-class="{selected:user.checked}" ng-click="select_toggle_user($index, user.user_info.id)">
-                            <td>{{user.user_info.name}}</td>
-                        </tr>
+                    <table class="well table-well table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th><div><span class="glyphicon glyphicon-user"></span><br/>User</div><span class="holder"></span></th>
+                                <th><div><span class="glyphicon glyphicon-eye-open"></span><br/>See Inv</div><span class="holder"></span></th>
+                                <th><div><span class="glyphicon glyphicon-pencil"></span><br/>Edit Inv</div><span class="holder"></span></th>
+                                <th><div><span class="glyphicon glyphicon-home"></span><br />Home</div></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="user in warehouses.available_users">
+                                <td>{{user.user_info.name}}</td>
+                                <td><input type="checkbox" ng-disabled="user.checked == true || auth.user_can(user.user_info,'make_super_admin')" ng-model="user.user_perms.see" ng-change="user_permissions(user)" /></td>
+                                <td><input type="checkbox" ng-disabled="user.checked == true || auth.user_can(user.user_info,'make_super_admin') || !auth.user_can(user.user_info,'add_edit_products')" ng-model="user.user_perms.edit" ng-change="user_permissions(user)" /></td>
+                                <td><input type="radio" ng-model="user.checked" ng-value="true" ng-change="user_permissions(user)" /></td>
+                            </tr>
+                        </tbody>
                     </table>
                 </div>
             </div>

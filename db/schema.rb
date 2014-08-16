@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140807125300) do
+ActiveRecord::Schema.define(:version => 20140816134253) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0, :null => false
@@ -482,6 +482,15 @@ ActiveRecord::Schema.define(:version => 20140807125300) do
     t.datetime "created_at",                                                       :null => false
     t.datetime "updated_at",                                                       :null => false
   end
+
+  create_table "user_inventory_permissions", :force => true do |t|
+    t.integer "user_id",                                   :null => false
+    t.integer "inventory_warehouse_id",                    :null => false
+    t.boolean "see",                    :default => false, :null => false
+    t.boolean "edit",                   :default => false, :null => false
+  end
+
+  add_index "user_inventory_permissions", ["user_id", "inventory_warehouse_id"], :name => "index_user_inventory_permissions_user_inventory", :unique => true
 
   create_table "users", :force => true do |t|
     t.string   "encrypted_password",     :default => "",    :null => false

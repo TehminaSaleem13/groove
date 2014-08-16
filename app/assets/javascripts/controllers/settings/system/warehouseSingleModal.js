@@ -41,11 +41,11 @@ function(scope,warehouse_data,warehouse_id,$state,$stateParams,$modal, $modalIns
         });
     };
 
-    scope.select_toggle_user = function(index, user_id) {
-        //if in edit mode, then use the selected index and update the server
-        //to add this user to the list of associated users.
-        // if not in edit mode, toggle the active
-        warehouses.single.toggle_associated_user(index, user_id, scope.edit_status, scope.warehouses);
+    scope.user_permissions = function(user) {
+        //if in edit mode, then update the server
+        if(scope.edit_status) {
+            warehouses.single.user_permissions(user, scope.warehouses);
+        }
     };
 
     scope.update_single_warehouse = function() {
@@ -77,7 +77,7 @@ function(scope,warehouse_data,warehouse_id,$state,$stateParams,$modal, $modalIns
     myscope.up_key = function(event) {
         event.preventDefault();
         event.stopPropagation();
-        if(scope.edit_status) {
+        if(warehouse_id != 0) {
             if(scope.warehouses.current > 0) {
                 myscope.load_item(scope.warehouses.current -1);
             } else {
@@ -89,7 +89,7 @@ function(scope,warehouse_data,warehouse_id,$state,$stateParams,$modal, $modalIns
     myscope.down_key = function (event) {
         event.preventDefault();
         event.stopPropagation();
-        if(scope.edit_status) {
+        if(warehouse_id != 0) {
             if(scope.warehouses.current < scope.warehouses.list.length - 1) {
                 myscope.load_item(scope.warehouses.current +1);
             } else {
@@ -105,6 +105,7 @@ function(scope,warehouse_data,warehouse_id,$state,$stateParams,$modal, $modalIns
 
     myscope.init = function() {
         scope.warehouses = warehouse_data;
+        scope.auth = auth;
         warehouses.model.reset_single(scope.warehouses);
         //All tabs
 
@@ -113,7 +114,7 @@ function(scope,warehouse_data,warehouse_id,$state,$stateParams,$modal, $modalIns
         * Public properties
         */
 
-        if(warehouse_id ==0) {
+        if(warehouse_id == 0) {
             scope.edit_status = false;
             warehouses.list.get_available_users(scope.warehouses);
         } else {

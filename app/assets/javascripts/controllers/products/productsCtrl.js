@@ -182,10 +182,11 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$mo
                 location_name: {
                     name:"Warehouse Name",
                     class:"span3",
+                    editable:false,
                     hidden:true
                 },
                 qty: {
-                    name:"Total Avbl",
+                    name:"Avbl Inv",
                     hidden:true
                 }
             }

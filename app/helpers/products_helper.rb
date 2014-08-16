@@ -106,11 +106,11 @@ module ProductsHelper
         product_barcode.save
       end
     elsif ["location_primary" ,"location_secondary","location_name","qty"].include?(var)
-      product_location = product.product_inventory_warehousess.first
+      product_location = ProductInventoryWarehouses.where(product_id:product.id,inventory_warehouse_id: current_user.inventory_warehouse_id).first
       if product_location.nil?
         product_location = ProductInventoryWarehouses.new
         product_location.product_id = product.id
-        product_location.inventory_warehouse_id = InventoryWarehouse.where(:is_default=>true).first.id
+        product_location.inventory_warehouse_id = current_user.inventory_warehouse_id
       end
         if var == "location_primary"
           product_location.location_primary = value

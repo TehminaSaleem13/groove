@@ -593,18 +593,27 @@ class ProductsController < ApplicationController
   		@result['product']['cats'] = @product.product_cats
     	@result['product']['images'] = @product.product_images.order("product_images.order ASC")
   		@result['product']['barcodes'] = @product.product_barcodes.order("product_barcodes.order ASC")
-      	@result['product']['inventory_warehouses'] = []
-      	@product.product_inventory_warehousess.each do |inv_wh|
-      		inv_wh_result = Hash.new
-      		inv_wh_result['info'] = inv_wh
-          inv_wh_result['info']['sold_inv'] = SoldInventoryWarehouse.sum(:sold_qty,:conditions => {:product_inventory_warehouses_id => inv_wh.id})
+      @result['product']['inventory_warehouses'] = []
+      @product.product_inventory_warehousess.each do |inv_wh|
+        if UserInventoryPermission.where(
+            :user_id => current_user.id,
+            :inventory_warehouse_id => inv_wh.inventory_warehouse_id,
+            :see => true
+        ).length > 0
+          inv_wh_result = Hash.new
+          inv_wh_result['info'] = inv_wh
+          inv_wh_result['info']['sold_inv'] = SoldInventoryWarehouse.sum(
+              :sold_qty,
+              :conditions => {:product_inventory_warehouses_id => inv_wh.id}
+          )
           inv_wh_result['warehouse_info'] = nil
           unless inv_wh.inventory_warehouse_id.nil?
-      		  inv_wh_result['warehouse_info'] = InventoryWarehouse.find(inv_wh.inventory_warehouse_id)
-      		end
-      		@result['product']['inventory_warehouses'] << inv_wh_result
-      	end
-        #@result['product']['productkitskus'] = @product.product_kit_skuss
+            inv_wh_result['warehouse_info'] = InventoryWarehouse.find(inv_wh.inventory_warehouse_id)
+          end
+          @result['product']['inventory_warehouses'] << inv_wh_result
+        end
+      end
+      #@result['product']['productkitskus'] = @product.product_kit_skuss
       @result['product']['productkitskus'] = []
       if @product.is_kit
 				@product.product_kit_skuss.each do |kit|
@@ -784,19 +793,23 @@ class ProductsController < ApplicationController
 
         if product_inv_whs.length > 0
           product_inv_whs.each do |inv_wh|
-            found_inv_wh = false
-
-            unless params[:inventory_warehouses].nil?
-              params[:inventory_warehouses].each do |wh|
-                if wh["info"]["id"] == inv_wh.id
-                  found_inv_wh = true
+            if UserInventoryPermission.where(
+                :user_id => current_user.id,
+                :inventory_warehouse_id => inv_wh.inventory_warehouse_id,
+                :edit => true
+            ).length > 0
+              found_inv_wh = false
+              unless params[:inventory_warehouses].nil?
+                params[:inventory_warehouses].each do |wh|
+                  if wh["info"]["id"] == inv_wh.id
+                    found_inv_wh = true
+                  end
                 end
               end
-            end
-
-            if found_inv_wh == false
-              if !inv_wh.destroy
-                @result['status'] &= false
+              if found_inv_wh == false
+                if !inv_wh.destroy
+                  @result['status'] &= false
+                end
               end
             end
           end
@@ -806,21 +819,27 @@ class ProductsController < ApplicationController
         #check if a product category is defined.
         if !params[:inventory_warehouses].nil?
           params[:inventory_warehouses].each do |wh|
-            if !wh["info"]["id"].nil?
-              product_inv_wh = ProductInventoryWarehouses.find(wh["info"]["id"])
-              product_inv_wh.available_inv = wh["info"]["available_inv"]
-              product_inv_wh.location_primary = wh["info"]["location_primary"]
-              product_inv_wh.location_secondary = wh["info"]["location_secondary"]
-              unless product_inv_wh.save
-                @result['status'] &= false
+            if UserInventoryPermission.where(
+                :user_id => current_user.id,
+                :inventory_warehouse_id => wh['warehouse_info']['id'],
+                :edit => true
+            ).length > 0
+              if !wh["info"]["id"].nil?
+                product_inv_wh = ProductInventoryWarehouses.find(wh["info"]["id"])
+                product_inv_wh.available_inv = wh["info"]["available_inv"]
+                product_inv_wh.location_primary = wh["info"]["location_primary"]
+                product_inv_wh.location_secondary = wh["info"]["location_secondary"]
+                unless product_inv_wh.save
+                  @result['status'] &= false
+                end
+              elsif !wh["warehouse_info"]["id"].nil?
+                product_inv_wh = ProductInventoryWarehouses.new
+                product_inv_wh.product_id = @product.id
+                product_inv_wh.inventory_warehouse_id = wh["warehouse_info"]["id"]
+                unless product_inv_wh.save
+                  @result['status'] &= false
+                end
               end
-            elsif !wh["warehouse_info"]["id"].nil?
-               product_inv_wh = ProductInventoryWarehouses.new
-               product_inv_wh.product_id = @product.id
-               product_inv_wh.inventory_warehouse_id = wh["warehouse_info"]["id"]
-               unless product_inv_wh.save
-               	@result['status'] &= false
-               end
             end
           end
         end
@@ -1417,23 +1436,22 @@ class ProductsController < ApplicationController
       @product_hash['location_primary'] = ""
       @product_hash['location_secondary'] = ""
       @product_hash['location_name'] = ""
-      @product_hash['qty'] = ""
+      @product_hash['qty'] = 0
       @product_hash['barcode'] = ""
       @product_hash['sku'] = ""
       @product_hash['cat'] = ""
 
-      @product_location = product.product_inventory_warehousess.first
+      @product_location = ProductInventoryWarehouses.where(product_id:product.id,inventory_warehouse_id: current_user.inventory_warehouse_id).first
       unless @product_location.nil?
         @product_hash['location_primary'] = @product_location.location_primary
         @product_hash['location_secondary'] = @product_location.location_secondary
+        @product_hash['qty'] = @product_location.available_inv
         if !@product_location.inventory_warehouse.nil?
         	@product_hash['location_name'] = @product_location.inventory_warehouse.name
         else
         	@product_hash['location_name'] = "not_available"
       	end
       end
-
-      @product_hash["qty"] = product.get_total_avail_loc
       @product_barcode = product.product_barcodes.order("product_barcodes.order ASC").first
       unless @product_barcode.nil?
         @product_hash['barcode'] = @product_barcode.barcode

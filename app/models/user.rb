@@ -13,9 +13,18 @@ class User < ActiveRecord::Base
   # attr_accessible :title, :body
   belongs_to :inventory_warehouse
   belongs_to :role
+  has_many :user_inventory_permissions, :dependent => :destroy
+
+  before_save :check_inventory_presence
 
   def email_required?
     false
+  end
+
+  def check_inventory_presence
+    if self.inventory_warehouse_id.nil?
+      self.inventory_warehouse_id = InventoryWarehouse.where(:is_default => true).first.id
+    end
   end
 
   def can? permission

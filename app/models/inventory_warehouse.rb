@@ -2,6 +2,7 @@ class InventoryWarehouse < ActiveRecord::Base
   attr_accessible :location, :name, :status, :is_default
 
   has_many :users, :dependent => :nullify
+  has_many :user_inventory_permissions, :dependent => :destroy
   has_many :product_inventory_warehousess
   has_many :stores
 

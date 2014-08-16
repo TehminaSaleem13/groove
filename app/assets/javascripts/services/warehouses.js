@@ -160,23 +160,12 @@ groovepacks_services.factory('warehouses',['$http','notification','$filter',func
         ).error(notification.server_error);
     };
 
-    var update_inv_wh_user = function(user_id, inv_wh_id, object, add_user) {
-        var manage_user_obj = {};
-        manage_user_obj.id = inv_wh_id;
-        manage_user_obj.user_id = user_id;
-        var url = '';
-
-        if (add_user) {
-            url = '/inventory_warehouse/adduser.json';
-        }
-        else {
-            url = '/inventory_warehouse/removeuser.json';
-        }
-
-        return $http.put(url, manage_user_obj).success(
+    var update_inv_wh_user = function(user, object) {
+        return $http.put(url = '/inventory_warehouse/edituserperms.json',{id:object.single.inv_wh_info.id, user: user}).success(
             function(data) {
                 if(data.status) {
                     get_available_users(object);
+                    notification.notify(data.success_messages,1);
                 } else {
                     notification.notify(data.error_messages,0);
                 }
@@ -184,15 +173,6 @@ groovepacks_services.factory('warehouses',['$http','notification','$filter',func
         ).error(notification.server_error);
     };
 
-    var toggle_associated_user = function(index, user_id, persist_with_server, object) {
-        if (index < object.available_users.length) {
-            object.available_users[index].checked = !object.available_users[index].checked;
-
-            if (persist_with_server) {
-                update_inv_wh_user(user_id, object.single.inv_wh_info.id, object, object.available_users[index].checked);
-            }
-        }
-    };
 
 
     //Public facing API
@@ -213,7 +193,7 @@ groovepacks_services.factory('warehouses',['$http','notification','$filter',func
             get: get_single,
             create: create_single,
             update: update_single,
-            toggle_associated_user: toggle_associated_user
+            user_permissions: update_inv_wh_user
         }
     };
 

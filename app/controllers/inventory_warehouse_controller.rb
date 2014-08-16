@@ -120,10 +120,16 @@ class InventoryWarehouseController < ApplicationController
     result['data']['inv_whs'] = []
 
     inv_whs.each do |inv_wh|
-      warehouse_info = Hash.new
-      warehouse_info['info'] = inv_wh
-      warehouse_info['users'] = inv_wh.users
-      result['data']['inv_whs'].push(warehouse_info)
+      if UserInventoryPermission.where(
+          :user_id => current_user.id,
+          :inventory_warehouse_id => inv_wh.id,
+          :see => true
+      ).length>0
+        warehouse_info = Hash.new
+        warehouse_info['info'] = inv_wh
+        warehouse_info['users'] = inv_wh.users
+        result['data']['inv_whs'].push(warehouse_info)
+      end
     end
 
     respond_to do |format|
@@ -180,27 +186,30 @@ class InventoryWarehouseController < ApplicationController
     result['data'] = Hash.new
     result['data']['available_users'] = []
 
-    #get all users of current inventory warehouses' id
-    if !params[:inv_wh_id].nil?
-      current_inv_wh_users = 
-        User.where(:inventory_warehouse_id => params[:inv_wh_id])
 
-      current_inv_wh_users.each do |user| 
-        available_user = Hash.new
-        available_user['user_info'] = user
-        available_user['checked'] = true
-        result['data']['available_users'] << available_user
-      end
-    end
-
-    #get all available users
-    available_users = 
-      User.where(:inventory_warehouse_id => nil)
-
-    available_users.each do |user|
+    User.all.each do |user|
       available_user = Hash.new
       available_user['user_info'] = user
+      available_user['user_info']['role'] = user.role
       available_user['checked'] = false
+      available_user['user_perms'] = Hash.new
+      unless params[:inv_wh_id].nil?
+        available_user['user_perms'] = UserInventoryPermission.find_or_create_by_user_id_and_inventory_warehouse_id(
+            :user_id => user.id,
+            :inventory_warehouse_id => params[:inv_wh_id].to_i
+        )
+        if user.can?('make_super_admin')
+          available_user['user_perms']['edit'] = true
+        end
+        if params[:inv_wh_id].to_i == user.inventory_warehouse_id
+          available_user['checked'] = true
+          available_user['user_perms']['see'] = true
+          if user.can?('add_edit_products')
+            available_user['user_perms']['edit'] = true
+          end
+        end
+        available_user['user_perms'].save
+      end
       result['data']['available_users'] << available_user
     end
 
@@ -210,52 +219,59 @@ class InventoryWarehouseController < ApplicationController
     end
   end
 
-  #add user to inventory warehouse where id is inventory warehouse and user_id is id of the user to 
-  #be added
-  def adduser
+  def edituserperms
     result = Hash.new
     result['status'] = true
     result['error_messages'] = []
     result['success_messages'] = []
     result['notice_messages'] = []
     
-    if !params[:id].nil?
-      inv_wh = InventoryWarehouse.find(params[:id])
-      if !inv_wh.nil?
-        if !params[:user_id].nil?
-          #if a user is already associated with an inven
-          user = User.find(params[:user_id])
-          if !user.nil?
-            if user.inventory_warehouse_id.nil?
-              user.inventory_warehouse_id  = inv_wh.id
-              if user.save
-                result['success_messages'].push('User is successfully added to the warehouse')
-              else
-                result['status'] &= false
-                user.errors.full_messages.each do |message|
-                  result['error_messages'].push(message)
-                end
-                result['error_messages'].push('There was an error adding user to inventory warehouse')
-              end
-            else
-              result['status'] &= false
-              result['error_messages'].push('User is already associated with a warehouse')
-            end
-          else
-            result['status'] &= false
-            result['error_messages'].push('There is no user with id:'+params[:user_id])
-          end
-        else
-          result['status'] &= false
-          result['error_messages'].push('Cannot add user without a user id.')
-        end
+    if params[:id].nil? || params[:user].nil? || params[:user]['user_info']['id'].nil?
+      result['status'] &= false
+      result['error_messages'].push('Cannot add user to the inventory warehouse without a warehouse id and user.')
       else
+      inv_wh = InventoryWarehouse.find(params[:id])
+      user = User.find(params[:user]['user_info']['id'])
+      if inv_wh.nil?
         result['status'] &= false
         result['error_messages'].push('There is no inventory warehouse with id: '+ params[:id])
+      elsif user.nil?
+        result['status'] &= false
+        result['error_messages'].push('There is no user with id:'+params[:user]['user_info']['id'])
+      else
+        logger.info(params[:user])
+        if params[:user]['checked']
+          user.inventory_warehouse_id  = inv_wh.id
+          logger.info inv_wh
+          if user.save
+            result['success_messages'].push('User is successfully added to the warehouse')
+          else
+            result['status'] &= false
+            user.errors.full_messages.each do |message|
+              result['error_messages'].push(message)
+            end
+            result['error_messages'].push('There was an error adding user to inventory warehouse')
+          end
+        end
+        unless params[:user]['user_perms'].nil?
+          inventory_perms = UserInventoryPermission.find(params[:user]['user_perms']['id'])
+          inventory_perms['edit'] = params[:user]['user_perms']['edit']
+          unless user.can?('add_edit_products')
+            inventory_perms['edit'] = false
+          end
+          inventory_perms['see'] = params[:user]['user_perms']['see']
+          if inventory_perms.save
+            result['success_messages'].push('User permissions successfully saved to the warehouse')
+          else
+            result['status'] &= false
+            inventory_perms.errors.full_messages.each do |message|
+              result['error_messages'].push(message)
+            end
+            result['error_messages'].push('There was an error editing user permissions with the inventory warehouse')
+          end
+        end
+
       end
-    else
-      result['status'] &= false
-      result['error_messages'].push('Cannot add user to the inventory warehouse without a warehouse id.')
     end
 
     respond_to do |format|
@@ -264,57 +280,6 @@ class InventoryWarehouseController < ApplicationController
     end
   end
 
-  #remove user from inventory warehouse where id is inventory warehouse id and user_id is id of the user to 
-  #be removed
-  def removeuser
-    result = Hash.new
-    result['status'] = true
-    result['error_messages'] = []
-    result['success_messages'] = []
-    result['notice_messages'] = []
-
-    if !params[:id].nil?
-      inv_wh = InventoryWarehouse.find(params[:id])
-      if !inv_wh.nil?
-        if !params[:user_id].nil?
-          #if a user is already associated with an inven
-          user = User.find(params[:user_id])
-          if !user.nil?
-            if !user.inventory_warehouse.nil?
-              user.inventory_warehouse  = nil
-              if user.save
-                result['success_messages'].push('User is successfully removed from the warehouse')
-              else
-                result['status'] &= false
-                result['error_messages'].push('There was an error removing user from inventory warehouse')
-              end
-            else
-              result['status'] &= false
-              result['error_messages'].push('User is not associated with any warehouse')
-            end
-          else
-            result['status'] &= false
-            result['error_messages'].push('There is no user with id:'+params[:user_id])
-          end
-        else
-          result['status'] &= false
-          result['error_messages'].push('Cannot remove user without a user id.')
-        end
-      else
-        result['status'] &= false
-        result['error_messages'].push('There is no inventory warehouse with id: '+ params[:id])
-      end
-    else
-      result['status'] &= false
-      result['error_messages'].push('Cannot remove user from the inventory warehouse without a warehouse id.')
-    end      
-    
-
-    respond_to do |format|
-      format.html # show.html.erb
-      format.json { render json: result }
-    end
-  end
 
   #change status to params[:status] for all inv_whs in the inv_wh_ids list
   def changestatus
