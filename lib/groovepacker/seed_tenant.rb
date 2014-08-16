@@ -18,7 +18,7 @@
 				manual_hold_tag = OrderTag.create(:name=>'Manual Hold', :color=>'#0000FF', :predefined => true)
 			end
 
-			if InventoryWarehouse.where(:name=>'Default Warehouse').length == 0
+			if InventoryWarehouse.where(:is_default => 1).length == 0
 			  default_location = InventoryWarehouse.create(:name=>'Default Warehouse', :location=> 'Default Warehouse', :status => 'active', :is_default => 1)
 			end
 
@@ -220,7 +220,22 @@
 			      user.role = Role.find_by_name('Scan & Pack User')
 			    end
 			    user.save
-			  end
+        end
+        if user.inventory_warehouse_id.nil?
+          user.inventory_warehouse_id = InventoryWarehouse.where(:is_default => 1).first.id
+          user.save
+        end
+        InventoryWarehouse.all.each do |inv_wh|
+          if UserInventoryPermission.where(:user_id => user.id,:inventory_warehouse_id => inv_wh.id).length == 0
+            UserInventoryPermission.create(
+                :user_id => user.id,
+                :inventory_warehouse_id => inv_wh.id,
+                :see => !(user.can?('make_super_admin') || (user.inventory_warehouse_id == inv_wh.id)).blank?,
+                :edit => !(user.can?('make_super_admin') || ((user.inventory_warehouse_id == inv_wh.id) && user.can?('add_edit_product'))).blank?
+            )
+
+          end
+        end
 			end
 		end
 	end

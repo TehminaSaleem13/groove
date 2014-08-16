@@ -55,8 +55,7 @@ function(scope,warehouse_data,warehouse_id,$state,$stateParams,$modal, $modalIns
             return warehouses.single.create(scope.warehouses).success(function(data) {
                 console.log(data);
                 if(data.status && data.inv_wh_info.id) {
-                    scope.warehouses.single.inv_wh_info.id = data.inv_wh_info.id;
-                    scope.edit_status = true;
+                    scope.warehouse_single_details(data.inv_wh_info.id);
                 }
             });
         }
@@ -116,7 +115,14 @@ function(scope,warehouse_data,warehouse_id,$state,$stateParams,$modal, $modalIns
 
         if(warehouse_id == 0) {
             scope.edit_status = false;
-            warehouses.list.get_available_users(scope.warehouses);
+            warehouses.list.get_available_users(scope.warehouses).success(function(data) {
+                for(var i =0; i< scope.warehouses.available_users.length; i++) {
+                    if(auth.user_can(scope.warehouses.available_users[i].user_info,'make_super_admin')) {
+                        scope.warehouses.available_users[i].user_perms['see'] = true;
+                        scope.warehouses.available_users[i].user_perms['edit'] = true;
+                    }
+                }
+            });
         } else {
             scope.edit_status = true;
             scope.warehouse_single_details(warehouse_id,true);

@@ -120,7 +120,7 @@ class InventoryWarehouseController < ApplicationController
     result['data']['inv_whs'] = []
 
     inv_whs.each do |inv_wh|
-      if UserInventoryPermission.where(
+      if current_user.can?('make_super_admin') || UserInventoryPermission.where(
           :user_id => current_user.id,
           :inventory_warehouse_id => inv_wh.id,
           :see => true
