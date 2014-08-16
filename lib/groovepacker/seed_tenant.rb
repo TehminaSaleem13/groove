@@ -198,6 +198,16 @@
 			  role_super_admin.save
 			end
 
+      case Rails.env
+        when "development"
+          AccessRestriction.create(
+              num_users: '12',
+              num_shipments: '50000',
+              num_import_sources: '8',
+              total_scanned_shipments: '0'
+          )
+      end
+
 
 
 			User.all.each do |user|
