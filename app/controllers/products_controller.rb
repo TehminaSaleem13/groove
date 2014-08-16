@@ -78,7 +78,7 @@ class ProductsController < ApplicationController
             if index > 0
               product_row = row.first.split(/\t/)
 
-              if !product_row[3].nil?
+              if !product_row[3].nil? && product_row[3] != ''
                 @result['total_imported']  = @result['total_imported'] + 1
                 if ProductSku.where(:sku => product_row[3]).length  == 0
                   @productdb = Product.new
@@ -126,8 +126,6 @@ class ProductsController < ApplicationController
                     end
                   end
                 else
-                  @result['status'] &= false
-                  @result['messages'].push("name: "+product_row.to_s)
                   @result['previous_imported'] = @result['previous_imported'] + 1
                 end
               end
