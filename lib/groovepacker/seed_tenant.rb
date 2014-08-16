@@ -200,12 +200,14 @@
 
       case Rails.env
         when "development"
-          AccessRestriction.create(
-              num_users: '12',
-              num_shipments: '50000',
-              num_import_sources: '8',
-              total_scanned_shipments: '0'
-          )
+          if AccessRestriction.all.length == 0
+            AccessRestriction.create(
+                num_users: '12',
+                num_shipments: '50000',
+                num_import_sources: '8',
+                total_scanned_shipments: '0'
+            )
+          end
       end
 
 
