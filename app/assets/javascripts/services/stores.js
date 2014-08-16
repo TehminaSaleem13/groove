@@ -230,16 +230,16 @@ groovepacks_services.factory('stores',['$http','notification','$filter',function
     var import_orders = function(stores) {
         return  $http.get('/orders/importorders/'+stores.single.id+'.json').success(function(data){
             if (data.status) {
-                stores.import.order_status = "Successfully imported "+data.success_imported+" of "+data.total_imported+
+                stores.import.order.status = "Successfully imported "+data.success_imported+" of "+data.total_imported+
                                              " orders. " +data.previous_imported+" orders were previously imported";
             } else {
-                stores.import.order_status = "";
+                stores.import.order.status = "";
                 for (var j=0; j< data.messages.length; j++) {
-                    stores.import.order_status += data.messages[j]+" ";
+                    stores.import.order.status += data.messages[j]+" ";
                 }
             }
         }).error(function(data) {
-            stores.import.order_status = "Import failed. Please check your credentials.";
+            stores.import.order.status = "Import failed. Please check your credentials.";
         });
     };
 
