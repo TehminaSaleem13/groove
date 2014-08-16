@@ -591,8 +591,6 @@ class ProductsController < ApplicationController
   		@result['product']['product_weight_format'] = GeneralSetting.get_product_weight_format
   		@result['product']['weight'] = @product.get_weight
   		@result['product']['shipping_weight'] = @product.get_shipping_weight
-   		@result['product']['basicinfo']['total_avail_loc'] = @product.get_total_avail_loc
-   		@result['product']['basicinfo']['total_sold_inv'] = @product.get_total_sold_qty
       @result['product']['skus'] = @product.product_skus.order("product_skus.order ASC")
   		@result['product']['cats'] = @product.product_cats
     	@result['product']['images'] = @product.product_images.order("product_images.order ASC")
@@ -601,12 +599,10 @@ class ProductsController < ApplicationController
       	@product.product_inventory_warehousess.each do |inv_wh|
       		inv_wh_result = Hash.new
       		inv_wh_result['info'] = inv_wh
-      		if !inv_wh.inventory_warehouse_id.nil?
-      		  inv_wh_result['warehouse_info'] = 
-      		  	InventoryWarehouse.find(inv_wh.inventory_warehouse_id)
-      		else
-      		  inv_wh_result['warehouse_info'] = 
-      		  	nil		
+          inv_wh_result['info']['sold_inv'] = SoldInventoryWarehouse.sum(:sold_qty,:conditions => {:product_inventory_warehouses_id => inv_wh.id})
+          inv_wh_result['warehouse_info'] = nil
+          unless inv_wh.inventory_warehouse_id.nil?
+      		  inv_wh_result['warehouse_info'] = InventoryWarehouse.find(inv_wh.inventory_warehouse_id)
       		end
       		@result['product']['inventory_warehouses'] << inv_wh_result
       	end
@@ -792,7 +788,7 @@ class ProductsController < ApplicationController
           product_inv_whs.each do |inv_wh|
             found_inv_wh = false
 
-            if !params[:inventory_warehouses].nil?
+            unless params[:inventory_warehouses].nil?
               params[:inventory_warehouses].each do |wh|
                 if wh["info"]["id"] == inv_wh.id
                   found_inv_wh = true
@@ -815,22 +811,18 @@ class ProductsController < ApplicationController
             if !wh["info"]["id"].nil?
               product_inv_wh = ProductInventoryWarehouses.find(wh["info"]["id"])
               product_inv_wh.available_inv = wh["info"]["available_inv"]
-              # product_inv_wh.location_primary = wh["location_primary"]
-              # product_inv_wh.location_secondary = wh["location_secondary"]
-              if !product_inv_wh.save
+              product_inv_wh.location_primary = wh["info"]["location_primary"]
+              product_inv_wh.location_secondary = wh["info"]["location_secondary"]
+              unless product_inv_wh.save
                 @result['status'] &= false
               end
-            else
-              # product_inv_wh = ProductInventoryWarehouses.new
-                # product_inv_wh.product_id = @product.id
-              # product_inv_wh.qty = wh["qty"]
-              # product_inv_wh.location_primary = wh["location_primary"]
-              # product_inv_wh.location_secondary = wh["location_secondary"]
-              # product_inv_wh.alert = wh["alert"]
-              # product_inv_wh.name = wh["name"]
-              # if !product_inv_wh.save
-              # 	@result['status'] &= false
-              # end
+            elsif !wh["warehouse_info"]["id"].nil?
+               product_inv_wh = ProductInventoryWarehouses.new
+               product_inv_wh.product_id = @product.id
+               product_inv_wh.inventory_warehouse_id = wh["warehouse_info"]["id"]
+               unless product_inv_wh.save
+               	@result['status'] &= false
+               end
             end
           end
         end

@@ -101,6 +101,30 @@
                 </a>
                 </div>
             </div>
+            <div class="form-group">
+                <label class="control-label col-sm-2">Categories</label>
+                <div class="controls col-sm-8">
+                    <div groov-editable="arrayEditableOptions" identifier="product_single_cats" prop="category" ng-model="products.single.cats" class="form-control input-style"></div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-sm-2">Special instructions for Packer</label>
+
+                <div class="controls col-sm-6">
+                    <textarea class="form-control input-style" ng-model="products.single.basicinfo.spl_instructions_4_packer" ng-blur="update_single_product()" class="col-sm-8" rows="4"></textarea>
+                </div>
+                <div class="controls col-sm-4">
+                    <label class="radio inline">
+                        <input type="radio" ng-change="update_single_product()"
+                               ng-model="products.single.basicinfo.spl_instructions_4_confirmation" value="1"/> Packer Confirmation Required
+                    </label>
+                    <label class="radio inline">
+                        <input type="radio" ng-change="update_single_product()"
+                               ng-model="products.single.basicinfo.spl_instructions_4_confirmation" value="0"/>Packer Confirmation Not Required
+                    </label>
+                </div>
+            </div>
             <div class="form-group" ng-show="products.single.store.store_type!='Amazon' || (products.single.store.store_type=='Amazon' && products.single.amazon_product.show_shipping_weight_only==false)">
                 <label class="control-label col-sm-2">Product Weight</label>
 
@@ -150,51 +174,6 @@
             </div>
 
             <div class="form-group">
-                <label class="control-label col-sm-2">Special instructions for Packer</label>
-
-                <div class="controls col-sm-8">
-                    <textarea class="form-control input-style" ng-model="products.single.basicinfo.spl_instructions_4_packer" ng-blur="update_single_product()" class="col-sm-8" rows="4"></textarea>
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="control-label col-sm-2">Packer Confirmation</label>
-
-                <div class="controls col-sm-4">
-                    <label class="radio inline">
-                        <input type="radio" ng-change="update_single_product()"
-                               ng-model="products.single.basicinfo.spl_instructions_4_confirmation" value="1"/> Required
-                    </label>
-                    <label class="radio inline">
-                        <input type="radio" ng-change="update_single_product()"
-                               ng-model="products.single.basicinfo.spl_instructions_4_confirmation" value="0"/> Not Required
-                    </label>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label class="control-label col-sm-2">Product can be skipped</label>
-
-                <div class="controls col-sm-2">
-                    <label class="radio inline">
-                        <input type="radio" ng-change="update_single_product()" ng-model="products.single.basicinfo.is_skippable"
-                               value="1"/> Yes
-                    </label>
-                    <label class="radio inline">
-                        <input type="radio" ng-change="update_single_product()" ng-model="products.single.basicinfo.is_skippable"
-                               value="0"/> No
-                    </label>
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="control-label col-sm-2">Categories</label>
-
-                <div class="controls col-sm-8">
-                    <div groov-editable="arrayEditableOptions" identifier="product_single_cats" prop="category" ng-model="products.single.cats" class="form-control input-style"></div>
-                </div>
-            </div>
-
-
-            <div class="form-group">
                 <label class="control-label col-sm-2">Packing placement</label>
 
                 <div class="controls col-sm-1">
@@ -208,32 +187,37 @@
                     <input type="number" class="form-control input-style" ng-blur="update_single_product()" ng-model="products.single.basicinfo.pack_time_adj"/>
                 </div>
             </div>
-            <div class="form-group">
-                <label class="control-label col-sm-2">Total Available Local Inventory (LOC)</label>
 
-                <div class="controls col-sm-8">
-                    <label class="control-label col-sm-2" style="text-align:left;">{{products.single.basicinfo.total_avail_loc}}</label>
-                </div>
-            </div>
             <div class="form-group">
-                <label class="control-label col-sm-2">Total Available External Inventory (EXT)</label>
+                <label class="control-label col-sm-2">Product can be skipped</label>
 
-                <div class="controls col-sm-8">
-                    <label class="control-label col-sm-2" style="text-align:left;">
-                        {{products.single.basicinfo.total_avail_ext}}</label>
+                <div class="controls col-sm-8 form-inline">
+                    <label class="radio col-md-2 col-lg-1">
+                        <input type="radio" ng-change="update_single_product()" ng-model="products.single.basicinfo.is_skippable"
+                               value="1"/> Yes
+                    </label>
+                    <label class="radio">
+                        <input type="radio" ng-change="update_single_product()" ng-model="products.single.basicinfo.is_skippable"
+                               value="0"/> No
+                    </label>
+                </div>
+            </div>
+            <h4>Inventory</h4>
+            <div class="form-group">
+                <div class="controls col-xs-12">
+                    <div groov-data-grid="warehouseGridOptions" groov-list="products.single.inventory_warehouses"></div>
                 </div>
             </div>
             <div class="form-group">
-                <label class="control-label col-sm-2">Total Inventory Sold</label>
-                <div class="controls col-sm-8">
-                    <label class="control-label col-sm-2" style="text-align:left;">
-                        {{products.single.basicinfo.total_sold_inv}}</label>
+                <div class="controls col-xs-12" dropdown>
+                    <button class="modal-save-button dropdown-toggle" ng-show="warehouses.list.length" >Add warehouse <span class="caret"></span></button>
+                    <button ng-click="remove_warehouses()" class="modal-remove-button">Remove selected</button>
+                    <ul class="dropdown-menu" role="menu">
+                        <li ng-repeat="warehouse in warehouses.list"><a ng-click="add_warehouse(warehouse)">{{warehouse.info.name}}</a></li>
+                    </ul>
                 </div>
             </div>
-            <h4>Inventory and Location by Warehouses</h4>
-            <div groov-data-grid="warehouseGridOptions" groov-list="products.single.inventory_warehouses"></div>
-            <button class="modal-save-button" ng-click="add_warehouse()">Add warehouse</button>
-            <button ng-click="remove_warehouses()" class="modal-remove-button">Remove selected</button>
+
             <fieldset ng-show="products.single.basicinfo.is_kit==1">
                 <legend>Kit Options</legend>
                 <table class="table table-hover table-bordered table-striped table-condensed">

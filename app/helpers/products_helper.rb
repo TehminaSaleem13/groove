@@ -110,6 +110,7 @@ module ProductsHelper
       if product_location.nil?
         product_location = ProductInventoryWarehouses.new
         product_location.product_id = product.id
+        product_location.inventory_warehouse_id = InventoryWarehouse.where(:is_default=>true).first.id
       end
         if var == "location_primary"
           product_location.location_primary = value
@@ -118,7 +119,7 @@ module ProductsHelper
         elsif var == "location_name"
           product_location.name = value
         elsif var == "qty"
-          product_location.qty = value
+          product_location.available_inv = value
         end
       product_location.save
     end

@@ -1,6 +1,6 @@
 groovepacks_controllers.
-    controller('productsSingleModal', [ '$scope', 'product_data', 'product_next', 'product_id', 'hotkeys', '$state', '$stateParams', '$modalInstance', '$timeout','$modal','products',
-    function(scope,product_data,product_next, product_id, hotkeys, $state,$stateParams,$modalInstance,$timeout,$modal,products) {
+    controller('productsSingleModal', [ '$scope', 'product_data', 'product_next', 'product_id', 'hotkeys', '$state', '$stateParams', '$modalInstance', '$timeout','$modal','products','warehouses',
+    function(scope,product_data,product_next, product_id, hotkeys, $state,$stateParams,$modalInstance,$timeout,$modal,products,warehouses) {
         var myscope = {};
 
 
@@ -34,7 +34,18 @@ groovepacks_controllers.
                 }
             }
 
-            products.single.get(id,scope.products).then(function(data) {
+            products.single.get(id,scope.products).success(function(data) {
+                warehouses.list.get(scope.warehouses).success(function() {
+                    for(var i =0; i < scope.products.single.inventory_warehouses.length;i++) {
+                        for(var j =0; j<scope.warehouses.list.length;j++) {
+                            if(scope.products.single.inventory_warehouses[i].warehouse_info.id == scope.warehouses.list[j].info.id) {
+                                scope.warehouses.list.splice(j,1);
+                                break;
+                            }
+                        }
+                    }
+                });
+
                 if(typeof new_rollback == 'boolean' && new_rollback ){
                     myscope.single = {};
                     angular.copy(scope.products.single, myscope.single);
@@ -145,19 +156,9 @@ groovepacks_controllers.
             });
         };
 
-        scope.add_warehouse = function() {
-            var new_warehouse = {
-                alert: "",
-                location: "",
-                name:"",
-                qty: 0,
-                location_primary:"",
-                location_secondary:""
-            };
-            scope.products.single.inventory_warehouses.push(new_warehouse);
-            scope.update_single_product(function() {
-                scope.$broadcast("warehouse-name-"+(scope.products.single.inventory_warehouses.length-1));
-            });
+        scope.add_warehouse = function(warehouse) {
+            scope.products.single.inventory_warehouses.push({warehouse_info:warehouse.info,info:{}});
+            scope.update_single_product();
         };
 
         scope.remove_warehouses = function() {
@@ -174,7 +175,7 @@ groovepacks_controllers.
         scope.remove_skus_from_kit = function () {
             var selected_skus = [];
             //console.log(scope.products.single.productkitskus);
-            for(var i in scope.products.single.productkitskus) {
+            for(var i =0; i< scope.products.single.productkitskus.length; i++) {
                 if(scope.products.single.productkitskus[i].checked){
                     selected_skus.push(scope.products.single.productkitskus[i].option_product_id);
                 }
@@ -202,6 +203,8 @@ groovepacks_controllers.
             /**
              * Public properties
              */
+            scope.warehouses = warehouses.model.get();
+            warehouses.list.get(scope.warehouses);
             scope.kit_products = products.model.get();
             scope.$watch('products.single.productkitskus',function(){
                 if(typeof scope.products.single.basicinfo != "undefined" && scope.products.single.basicinfo.is_kit == 1) {
@@ -211,6 +214,7 @@ groovepacks_controllers.
                     }
                 }
             });
+
 
             /**
              * private properties
@@ -232,30 +236,49 @@ groovepacks_controllers.
                 editable:{
                     update: scope.update_single_product,
                     elements: {
-                        qty: {type:'number',min:0}
+                        available_inv: {type:'number',min:0}
                     }
                 },
                 all_fields: {
                     name: {
                         name:'Warehouse Name',
                         model: 'row.warehouse_info',
+                        editable: false,
                         transclude: '<span>{{row.warehouse_info.name}}</span>'
                     },
+                    status: {
+                        name: "Status",
+                        editable:false,
+                        transclude: '<span class="label label-default" ng-class="{\'label-success\': row.warehouse_info.status==\'active\'}">' +
+                                    '{{row.warehouse_info.status}}' +
+                                    '</span>'
+                    },
                     available_inv: {
-                        name: 'Quantity on Hand',
+                        name: 'Available Inv',
                         model:'row.info',
                         transclude: '<span>{{row.info.available_inv}}</span>'
                     },
                     allocated_inv: {
-                        name: 'Allocated Qty',
+                        name: 'Allocated Inv',
                         model:'row.info',
+                        editable:false,
                         transclude: '<span>{{row.info.allocated_inv}}</span>'
                     },
-
-                    location: {
+                    sold_inv: {
+                        name: 'Sold Inv',
+                        model:'row.info',
+                        editable:false,
+                        transclude: '<span>{{row.info.sold_inv}}</span>'
+                    },
+                    location_primary: {
                         name: 'Primary Location',
-                        model:'row.warehouse_info',
-                        transclude: '<span>{{row.warehouse_info.location}}</span>'
+                        model:'row.info',
+                        transclude: '<span>{{row.info.location_primary}}</span>'
+                    },
+                    location_secondary: {
+                        name: 'Secondary Location',
+                        model:'row.info',
+                        transclude: '<span>{{row.info.location_secondary}}</span>'
                     }
                 }
             };
