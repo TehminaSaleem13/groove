@@ -61,21 +61,16 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout','$http','$sce','no
                     if(scope.options.all_fields.hasOwnProperty(i)) {
                         if(!scope.options.all_fields[i].hidden) {
                             shown.push(i);
-                            if(scope.theads.indexOf(i)<0) {
-                                scope.theads.push(i);
-                            }
                         } else {
                             hidden.push(i);
-                            if(scope.theads.indexOf(i)!=-1) {
-                                scope.theads.splice(scope.theads.indexOf(i),1);
-                            }
                         }
                     }
                 }
 
                 myscope.headOrder = shown.concat(hidden);
+                scope.theads = shown;
 
-                $http.post('settings/save_columns_state.json',{identifier:scope.options.identifier,shown:scope.theads, order:myscope.headOrder}).success(function(data) {
+                $http.post('settings/save_columns_state.json',{identifier:scope.options.identifier,shown:shown, order:myscope.headOrder}).success(function(data) {
                     if(data.status) {
                         notification.notify("Successfully saved column preferences",1);
                     } else {
@@ -140,7 +135,8 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout','$http','$sce','no
                             }
 
                             for(var j in data.data.shown) {
-                                if(typeof scope.options.all_fields[data.data.shown[j]] !=="undefined") {
+                                if(data.data.shown.hasOwnProperty(j) &&
+                                   typeof scope.options.all_fields[data.data.shown[j]] !=="undefined") {
                                     scope.options.all_fields[data.data.shown[j]].hidden = false;
                                 }
                             }

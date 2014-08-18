@@ -172,18 +172,18 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,ord
                     //transclude:'<a href="" ng-click="function(ngModel.id,false,0,true)">{{ngModel.ordernum}}</a>',
                     transclude: '<a href="" ng-click="options.editable.functions.ordernum(row,$event)" >{{row[field]}}</a>'
                 },
-                tags: {
-                    name:"Tags",
-                    editable:false,
-                    sortable:false,
-                    transclude: '<div style="width:80px;">'+
-                        '<ul class="inline tag-list">'+
-                        '<li ng-repeat = "tag in row[field]">'+
-                        '<div class="tag-top-bottom-box" ng-show="tag.mark_place == 1"></div>'+
-                        '<div class="tagbox" ng-style="{background: tag.color}"></div>'+
-                        '<div class="tag-top-bottom-box" ng-show="tag.mark_place == 0"></div>'+
-                        '</li></ul></div>'
-                },
+                //tags: {
+                //    name:"Tags",
+                //    editable:false,
+                //    sortable:false,
+                //    transclude: '<div style="width:80px;">'+
+                //        '<ul class="inline tag-list">'+
+                //        '<li ng-repeat = "tag in row[field]">'+
+                //        '<div class="tag-top-bottom-box" ng-show="tag.mark_place == 1"></div>'+
+                //        '<div class="tagbox" ng-style="{background: tag.color}"></div>'+
+                //        '<div class="tag-top-bottom-box" ng-show="tag.mark_place == 0"></div>'+
+                //        '</li></ul></div>'
+                //},
                 store_name: {
                     name:"Store",
                     editable:false
