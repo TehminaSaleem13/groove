@@ -121,6 +121,10 @@ groovepacks_services.factory('users',['$http','notification','$filter',function(
         }).error(notification.server_error);
     };
 
+    var can_create_single = function () {
+        return $http.get('/user_settings/let_user_be_created.json')
+    };
+
     var create_update_single = function(users,auto) {
         if(typeof auto !== "boolean") {
             auto = true;
@@ -157,6 +161,7 @@ groovepacks_services.factory('users',['$http','notification','$filter',function(
         },
         single: {
             get: get_single,
+            can_create: can_create_single,
             update:create_update_single
         }
     };

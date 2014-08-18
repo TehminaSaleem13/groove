@@ -15,14 +15,20 @@ class UserSettingsController < ApplicationController
       @result = Hash.new
       @result['status'] = true
       @result['messages'] = []
-    if can_user_be_created
-      if current_user.can? 'add_edit_users'
-        if !params[:id].nil?
-          @user = User.find(params[:id])
-        else
-          @user = User.new
-        end
 
+    if current_user.can? 'add_edit_users'
+      if params[:id].nil?
+        if User.can_create_new?
+            @user = User.new
+        else
+          @result['status'] = false
+          @result['messages'] = "You have reached the maximum limit of number of users for your subscription."
+        end
+      else
+        @user = User.find(params[:id])
+      end
+
+      if @result['status']
         @user.email = params[:email]
         @user.password = params[:password] if !params[:password].nil? && params[:password] != ''
         @user.username = params[:username]
@@ -72,18 +78,16 @@ class UserSettingsController < ApplicationController
         else
           @result['status'] = false
           @result['messages'] = @user.errors.full_messages
-          end
-      else
-        @result['status'] = false
-        @result['messages'].push("Current user doesn't have permission to Add or Edit users")
-      end
-
-      respond_to do |format|
-          format.html # show.html.erb
-          format.json { render json: @result}
+        end
       end
     else
-      render json:{valid: false}
+      @result['status'] = false
+      @result['messages'].push("Current user doesn't have permission to Add or Edit users")
+    end
+
+    respond_to do |format|
+        format.html # show.html.erb
+        format.json { render json: @result}
     end
   end
 
@@ -212,25 +216,30 @@ class UserSettingsController < ApplicationController
     @result['status'] = true
     if current_user.can? 'add_edit_user'
       params['_json'].each do|user|
-        @user = User.find(user["id"])
-        #@newuser = User.new
-        @newuser = @user.dup
-        index = 0
-        @newuser.username = @user.username+"(duplicate"+index.to_s+")"
-        @userslist = User.where(:username=>@newuser.username)
-        begin
-          index = index + 1
+        if User.can_create_new?
+          @user = User.find(user["id"])
+          #@newuser = User.new
+          @newuser = @user.dup
+          index = 0
           @newuser.username = @user.username+"(duplicate"+index.to_s+")"
           @userslist = User.where(:username=>@newuser.username)
-        end while(!@userslist.nil? && @userslist.length > 0)
+          begin
+            index = index + 1
+            @newuser.username = @user.username+"(duplicate"+index.to_s+")"
+            @userslist = User.where(:username=>@newuser.username)
+          end while(!@userslist.nil? && @userslist.length > 0)
 
-        @newuser.password = @user.password
-        @newuser.password_confirmation = @user.password_confirmation
-        @newuser.last_sign_in_at = ''
+          @newuser.password = @user.password
+          @newuser.password_confirmation = @user.password_confirmation
+          @newuser.last_sign_in_at = ''
 
-        if !@newuser.save(:validate => false)
+          if !@newuser.save(:validate => false)
+            @result['status'] = false
+            @result['messages'] = @newuser.errors.full_messages
+          end
+        else
           @result['status'] = false
-          @result['messages'] = @newuser.errors.full_messages
+          @result['messages'] = "You have reached the maximum limit of number of users for your subscription."
         end
       end
     else
@@ -304,12 +313,9 @@ class UserSettingsController < ApplicationController
     end
   end
 
-  private
-
-  def can_user_be_created
-    users = User.all
-    user_count = users.count
-    max_users = AccessRestriction.first.num_users
-    user_count < max_users
+  def let_user_be_created
+    render json: {
+        can_create: User.can_create_new?
+    }
   end
 end

@@ -1,10 +1,14 @@
 groovepacks_controllers.
-    controller('settingsCtrl', [ '$scope', '$http', '$timeout', '$stateParams', '$location', '$state', '$cookies',
-        function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies) {
+    controller('settingsCtrl', [ '$scope','$state','users','stores',
+        function( $scope,$state,users,stores) {
             var myscope = {};
-            myscope.init = function()
-            {
+            myscope.init = function() {
                 $scope.current_page = '';
+                $scope.settings = {
+                    users: {allow:false},
+                    stores: {allow:false}
+                };
+
                 $scope.tabs = [
                     {
                         page:'show_stores',
@@ -19,6 +23,15 @@ groovepacks_controllers.
                         open:false
                     }
                 ];
+            };
+
+            $scope.check_reset_links = function() {
+                stores.single.can_create().success(function(data) {
+                    $scope.settings.stores.allow = data.can_create;
+                });
+                users.single.can_create().success(function(data) {
+                    $scope.settings.users.allow = data.can_create;
+                });
             };
 
             $scope.setup_page = function(page,current) {

@@ -16,6 +16,7 @@ class User < ActiveRecord::Base
   has_many :user_inventory_permissions, :dependent => :destroy
 
   before_save :check_inventory_presence
+  before_create 'User.can_create_new?'
 
   def email_required?
     false
@@ -41,5 +42,9 @@ class User < ActiveRecord::Base
         return self.role[permission]
       end
     end
+  end
+
+  def self.can_create_new?
+    self.all.count < AccessRestriction.first.num_users
   end
 end

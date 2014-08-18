@@ -30,7 +30,7 @@ class StoreSettingsController < ApplicationController
 
     if current_user.can? 'add_edit_store'
       if params[:id].nil?
-        if can_store_be_created
+        if Store.can_create_new?
           @store = Store.new
         else
           @result['status'] = false
@@ -661,22 +661,28 @@ class StoreSettingsController < ApplicationController
 
     if current_user.can? 'add_edit_stores'
       params['_json'].each do|store|
-        @store = Store.find(store["id"])
+        if Store.can_create_new?
+          @store = Store.find(store["id"])
 
-        @newstore = @store.dup
-        index = 0
-        @newstore.name = @store.name+"(duplicate"+index.to_s+")"
-        @storeslist = Store.where(:name=>@newstore.name)
-        begin
-          index = index + 1
+          @newstore = @store.dup
+          index = 0
           @newstore.name = @store.name+"(duplicate"+index.to_s+")"
           @storeslist = Store.where(:name=>@newstore.name)
-        end while(!@storeslist.nil? && @storeslist.length > 0)
+          begin
+            index = index + 1
+            @newstore.name = @store.name+"(duplicate"+index.to_s+")"
+            @storeslist = Store.where(:name=>@newstore.name)
+          end while(!@storeslist.nil? && @storeslist.length > 0)
 
-        if !@newstore.save(:validate => false) || !@newstore.dupauthentications(@store.id)
+          if !@newstore.save(:validate => false) || !@newstore.dupauthentications(@store.id)
+            @result['status'] = false
+            @result['messages'] = @newstore.errors.full_messages
+          end
+        else
           @result['status'] = false
-          @result['messages'] = @newstore.errors.full_messages
+          @result['messages'] = "You have reached the maximum limit of number of stores for your subscription."
         end
+
       end
     else
       @result["status"] = false
@@ -898,15 +904,11 @@ class StoreSettingsController < ApplicationController
     redirect_to (URI::encode("https://#{tenant_name}.groovepacker.com//") + "#" + URI::encode("/settings/showstores/ebay?ebaytkn=#{ebaytkn}&tknexp=#{tknexp}&username=#{username}&redirect=#{redirect}&editstatus=#{editstatus}&name=#{name}&status=#{status}&storetype=#{storetype}&storeid=#{storeid}&inventorywarehouseid=#{inventorywarehouseid}&importimages=#{importimages}&importproducts=#{importproducts}&messagetocustomer=#{messagetocustomer}&tenantname=#{tenant_name}") )
   end
 
-  private
-
-  def can_store_be_created
-    stores = Store.where("store_type != 'system'")
-    store_count = stores.count
-    max_stores = AccessRestriction.first.num_import_sources
-    store_count < max_stores 
+  def let_store_be_created
+    render json: {
+        can_create: Store.can_create_new?
+    }
   end
-
 
 end
 

@@ -44,6 +44,7 @@ controller('usersCtrl', [ '$scope', '$http', '$timeout', '$stateParams', '$locat
         myscope.get_users = function() {
             return users.list.get($scope.users).then(function(){
                 $scope.select_all_toggle();
+                $scope.check_reset_links();
             });
         };
 

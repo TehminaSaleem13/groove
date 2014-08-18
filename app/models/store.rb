@@ -11,6 +11,8 @@ class Store < ActiveRecord::Base
   validates_presence_of :name
   validates_uniqueness_of :name
 
+  before_create 'Store.can_create_new?'
+
   def get_store_credentials
   	@result = Hash.new
     @result['status'] =false
@@ -185,5 +187,9 @@ class Store < ActiveRecord::Base
     @result['ebay_signin_url_status'] = false      
    end
     return @result
+  end
+
+  def self.can_create_new?
+    self.where("store_type != 'system'").count < AccessRestriction.first.num_import_sources
   end
 end

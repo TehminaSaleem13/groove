@@ -47,6 +47,7 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies, st
     myscope.get_stores = function() {
         return stores.list.get($scope.stores).then(function(){
             $scope.select_all_toggle();
+            $scope.check_reset_links();
         });
     };
 
