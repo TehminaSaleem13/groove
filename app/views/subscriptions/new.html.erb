@@ -1,154 +1,154 @@
-<div style="padding-top: 20px;">
-	<div class="well span6" style="margin-left: 20px;">
-		<legend>Subscribe here</legend>
-		<div>
-			<form action="" method="POST" class="form-vertical" name="myForm" id="my_form">
-  			<fieldset>
-  				<div class="control-group">
-						<input type="hidden" id="amount" value="<%=params[:amount]%>"/>
-						<input type="hidden" id="plan_id" value="<%=params[:plan_id]%>"/>
-						<label>Choose your site address<span class="help-inline">*</span></label>
-						<input type="text" placeholder="https://" class="input-mini" disabled/><input type="text" id="tenant_name" class="input-medium" autofocus/><input type="text" placeholder=".groovepacker.com" class="input-medium" disabled/>
-						<div class="control-group error" style="color: red;"><span id="help-block" class="help-inline"></span></div>
+	<div style="padding-top: 20px;">
+		<div class="well span6" style="margin-left: 20px;">
+			<legend>Subscribe here</legend>
+			<div>
+				<form action="" method="POST" class="form-vertical" name="myForm" id="my_form">
+	  			<fieldset>
+	  				<div class="control-group">
+							<input type="hidden" id="amount" value="<%=params[:amount]%>"/>
+							<input type="hidden" id="plan_id" value="<%=params[:plan_id]%>"/>
+							<label>Choose your site address<span class="help-inline">*</span></label>
+							<input type="text" placeholder="https://" class="input-mini" disabled/><input type="text" id="tenant_name" class="input-medium" autofocus/><input type="text" placeholder=".groovepacker.com" class="input-medium" disabled/>
+							<div class="control-group error" style="color: red;"><span id="help-block" class="help-inline"></span></div>
 
-				  	<label for="email">Email<span class="help-inline">*</span></label>
-						<input type="email" id="email" class="input-large"/>
-						<div class="control-group error" style="color: red;"><span id="error-block" class="help-inline"></span></div>
-					</div>
-
-					<script src="https://checkout.stripe.com/checkout.js"></script>
-					<div>
-						<button id="customButton" class="btn btn-primary" style="margin-bottom: 15px;">Purchase</button>
-						
-						<div class="alert alert-success" id="processing_alert_success" style="display:none;"><span><i class="icon-spinner icon-spin icon-large"></i></span><span> Your subscription is being processed.</span>
+					  	<label for="email">Email<span class="help-inline">*</span></label>
+							<input type="email" id="email" class="input-large"/>
+							<div class="control-group error" style="color: red;"><span id="error-block" class="help-inline"></span></div>
 						</div>
-						<div class="alert alert-error" id="processing_alert_error" style="display:none;">
-							<p>Your subscription could not be processed. Please try again.</p>
+
+						<script src="https://checkout.stripe.com/checkout.js"></script>
+						<div>
+							<button id="customButton" class="btn btn-primary" style="margin-bottom: 15px;">Purchase</button>
+							
+							<div class="alert alert-success" id="processing_alert_success" style="display:none;"><span><i class="icon-spinner icon-spin icon-large"></i></span><span> Your subscription is being processed.</span>
+							</div>
+							<div class="alert alert-error" id="processing_alert_error" style="display:none;">
+								<p>Your subscription could not be processed. Please try again.</p>
+							</div>
 						</div>
-					</div>
-				</fieldset>
-			</form>
-			<script>
-				var valid = {
-			  	tenant_name: false,
-			  	email: false
-			  }
+					</fieldset>
+				</form>
+				<script>
+					var valid = {
+				  	tenant_name: false,
+				  	email: false
+				  }
 
-			  var handler = StripeCheckout.configure({
-			    key: 'pk_test_4QS2UN3famIPlHtp2Q7ykpDf',
-			    image: '/assets/images/apple-touch-icon.png',
-			    token: function(token) {
-			      $.ajax({
-		        type: "POST",
-		        contentType: "application/json; charset=utf-8",
-		        url: "/subscriptions/confirm_payment",
-		        data: JSON.stringify({ tenant_name: $('#tenant_name').val(), stripe_user_token: token.id, email: $('#email').val(), amount: $('#amount').val(), plan_id: $('#plan_id').val()}),
-		        dataType: "json"
-		        
-		        }).error(function(response) {
-		        	$('#processing_alert_success').hide();
-	        		$('#customButton').show();
-	        	  $('#processing_alert_error').show();
-		        }).success(function(response) {
-		        	if (!response.valid) {
-
-		        		$('#processing_alert_success').hide();
-		        		$('#customButton').show();
-		        	  $('#processing_alert_error').show();
-		        	}
-		        	else {
-								window.location.href = 
-		        			response.redirect_url
-		        	}
-		        });
-		        $('#customButton').hide();
-		        $('#processing_alert_success').show();
-		        $('#processing_alert_error').hide();
-			    }
-			  });
-
-			  $('#tenant_name').blur(function() { 
-					var tenant_name = document.forms["myForm"]["tenant_name"].value;
-			    if (tenant_name == null || tenant_name == "") {
-			    	valid.tenant_name = false;
-			      $('#help-block').html("site name must be filled out");
-			    }
-			    else {
-			    	$.ajax({
-		        type: "GET",
-		        contentType: "application/json; charset=utf-8",
-		        url: "/subscriptions/valid_tenant_name",
-		        data: { tenant_name: $('#tenant_name').val() },
-		        dataType: "json"
-		        
-		        }).error(function(response) {
-
-		        }).success(function(response) {
-		        	if (!response.valid) {
-		          	$('#help-block').html("https://" + $('#tenant_name').val() +".groovepacker.com already exists");
-		          	valid.tenant_name = false;
-		        	}
-		        	else {
-								$('#help-block').html("");
-								valid.tenant_name = true;
-		        	}
-		        });
-		        email.focus();
-			    }
-				});
-
-			  $('#email').blur(function() {
-			  	var email = document.forms["myForm"]["email"].value;
-			    var atpos = email.indexOf("@");
-			    var dotpos = email.lastIndexOf(".");
-			    if (email == null || email == "") {
-			    	valid.email = false;
-			      $('#error-block').html("email must be filled out");
-			    }
-			    else if (atpos< 1 || dotpos<atpos+2 || dotpos+2>=email.length) {
-			    	valid.email = false;
-			        $('#error-block').html("email is not valid");
-			    }
-			    else {
-				  	$.ajax({
-				  		type: "GET",
+				  var handler = StripeCheckout.configure({
+				    key: 'pk_test_4QS2UN3famIPlHtp2Q7ykpDf',
+				    image: '/assets/images/apple-touch-icon.png',
+				    token: function(token) {
+				      $.ajax({
+			        type: "POST",
 			        contentType: "application/json; charset=utf-8",
-			        url: "/subscriptions/valid_email",
-			        data: { email: $('#email').val() },
+			        url: "/subscriptions/confirm_payment",
+			        data: JSON.stringify({ tenant_name: $('#tenant_name').val(), stripe_user_token: token.id, email: $('#email').val(), amount: $('#amount').val(), plan_id: $('#plan_id').val()}),
 			        dataType: "json"
 			        
-			        }).error(function(response){
-
-				  	}).success(function(response) {
+			        }).error(function(response) {
+			        	$('#processing_alert_success').hide();
+		        		$('#customButton').show();
+		        	  $('#processing_alert_error').show();
+			        }).success(function(response) {
 			        	if (!response.valid) {
-			        		$('#error-block').html($('#email').val() + " email already exists");
-			        		valid.email = false;
-			        	}		          	
-			        	else {
-			        		$('#error-block').html("");
-			        		valid.email = true;
-			        	}
-				  	});
-				  }
-			  });
 
-			  document.getElementById('customButton').addEventListener('click', function(e)	{
-			  	console.log(valid.tenant_name);
-			  	console.log(valid.email);
-			  	if (valid.tenant_name && valid.email) {
-			  		console.log("valid");
-				    // Open Checkout with further options
-				    handler.open({
-				      name: 'Groovepacker',
-				      description: '1 subscription ($' + $('#amount').val() +')',
-				      amount: $('#amount').val()*100,
-				      email: $('#email').val(),
-				      allowRememberMe: false
-				    });
-				    e.preventDefault();
-				  };
-			  });
-			</script>
-		</div>		
-	</div> 
-</div>
+			        		$('#processing_alert_success').hide();
+			        		$('#customButton').show();
+			        	  $('#processing_alert_error').show();
+			        	}
+			        	else {
+									window.location.href = 
+			        			response.redirect_url
+			        	}
+			        });
+			        $('#customButton').hide();
+			        $('#processing_alert_success').show();
+			        $('#processing_alert_error').hide();
+				    }
+				  });
+
+				  $('#tenant_name').blur(function() { 
+						var tenant_name = document.forms["myForm"]["tenant_name"].value;
+				    if (tenant_name == null || tenant_name == "") {
+				    	valid.tenant_name = false;
+				      $('#help-block').html("site name must be filled out");
+				    }
+				    else {
+				    	$.ajax({
+			        type: "GET",
+			        contentType: "application/json; charset=utf-8",
+			        url: "/subscriptions/valid_tenant_name",
+			        data: { tenant_name: $('#tenant_name').val() },
+			        dataType: "json"
+			        
+			        }).error(function(response) {
+
+			        }).success(function(response) {
+			        	if (!response.valid) {
+			          	$('#help-block').html("https://" + $('#tenant_name').val() +".groovepacker.com already exists");
+			          	valid.tenant_name = false;
+			        	}
+			        	else {
+									$('#help-block').html("");
+									valid.tenant_name = true;
+			        	}
+			        });
+			        email.focus();
+				    }
+					});
+
+				  $('#email').blur(function() {
+				  	var email = document.forms["myForm"]["email"].value;
+				    var atpos = email.indexOf("@");
+				    var dotpos = email.lastIndexOf(".");
+				    if (email == null || email == "") {
+				    	valid.email = false;
+				      $('#error-block').html("email must be filled out");
+				    }
+				    else if (atpos< 1 || dotpos<atpos+2 || dotpos+2>=email.length) {
+				    	valid.email = false;
+				        $('#error-block').html("email is not valid");
+				    }
+				    else {
+					  	$.ajax({
+					  		type: "GET",
+				        contentType: "application/json; charset=utf-8",
+				        url: "/subscriptions/valid_email",
+				        data: { email: $('#email').val() },
+				        dataType: "json"
+				        
+				        }).error(function(response){
+
+					  	}).success(function(response) {
+				        	if (!response.valid) {
+				        		$('#error-block').html($('#email').val() + " email already exists");
+				        		valid.email = false;
+				        	}		          	
+				        	else {
+				        		$('#error-block').html("");
+				        		valid.email = true;
+				        	}
+					  	});
+					  }
+				  });
+
+				  document.getElementById('customButton').addEventListener('click', function(e)	{
+				  	console.log(valid.tenant_name);
+				  	console.log(valid.email);
+				  	if (valid.tenant_name && valid.email) {
+				  		console.log("valid");
+					    // Open Checkout with further options
+					    handler.open({
+					      name: 'Groovepacker',
+					      description: '1 subscription ($' + $('#amount').val() +')',
+					      amount: $('#amount').val()*100,
+					      email: $('#email').val(),
+					      allowRememberMe: false
+					    });
+					    e.preventDefault();
+					  };
+				  });
+				</script>
+			</div>		
+		</div> 
+	</div>
