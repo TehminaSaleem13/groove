@@ -23,19 +23,23 @@ class User < ActiveRecord::Base
 
   def check_inventory_presence
     if self.inventory_warehouse_id.nil?
-      self.inventory_warehouse_id = InventoryWarehouse.where(:is_default => true).first.id
+      unless InventoryWarehouse.where(:is_default => true).first.nil?
+        self.inventory_warehouse_id = InventoryWarehouse.where(:is_default => true).first.id
+      end
     end
   end
 
   def can? permission
-    if self.role.make_super_admin
-      #Super admin has all permissions
-      return true
-    elsif ['create_edit_notes','change_order_status','import_orders'].include?(permission)
-      #A user with add_edit_order_items permission can do anything with an order
-      return (self.role.add_edit_order_items || self.role[permission])
-    else
-      return self.role[permission]
+    unless self.role.nil?
+      if self.role.make_super_admin
+        #Super admin has all permissions
+        return true
+      elsif ['create_edit_notes','change_order_status','import_orders'].include?(permission)
+        #A user with add_edit_order_items permission can do anything with an order
+        return (self.role.add_edit_order_items || self.role[permission])
+      else
+        return self.role[permission]
+      end
     end
   end
 end
