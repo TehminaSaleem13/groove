@@ -1,5 +1,5 @@
 class Subscription < ActiveRecord::Base
-  attr_accessible :email, :stripe_user_token, :tenant_name, :amount, :transaction_errors, :subscription_plan_id
+  attr_accessible :email, :stripe_user_token, :tenant_name, :amount, :transaction_errors, :subscription_plan_id, :status
   belongs_to :tenant
   has_many :transactions
   
@@ -15,9 +15,8 @@ class Subscription < ActiveRecord::Base
         #whenever you do .first, make sure null check is done
         self.stripe_customer_id = customer.id
         
-        if !customer.subscriptions.data.first.nil?
+        unless customer.subscriptions.data.first.nil?
           self.customer_subscription_id = customer.subscriptions.data.first.id
-
           # Stripe::Charge.create(
           #   # :amount => self.amount*100,
           #   :currency => "usd",
@@ -26,13 +25,12 @@ class Subscription < ActiveRecord::Base
           # )
           
           transactions = Stripe::BalanceTransaction.all(:limit => 1)
-          if !transactions.first.nil?
+          unless transactions.first.nil?
             self.stripe_transaction_identifier = transactions.first.id
             # CreateTenant.delay(:run_at => 1.seconds.from_now).create_tenant self
             CreateTenant.create_tenant self
-
             Apartment::Tenant.switch()
-            if !customer.cards.data.first.nil?
+            unless customer.cards.data.first.nil?
               card_type = customer.cards.data.first.brand
               exp_month_of_card = customer.cards.data.first.exp_month
               exp_year_of_card = customer.cards.data.first.exp_year
