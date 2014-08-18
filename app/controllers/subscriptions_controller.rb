@@ -17,7 +17,7 @@
           email: params[:email], status: "started")
 
         if @subscription.save_with_payment
-          render json: {valid: true, redirect_url: "subscriptions/show?transaction_id=#{@subscription.stripe_transaction_identifier}&notice=Thank you for your subscription!&amount=#{@subscription.amount}&email=#{@subscription.email}"}
+          render json: {valid: true, redirect_url: "subscriptions/show?transaction_id=#{@subscription.stripe_transaction_identifier}&notice=Congratulations! Your GroovePacker is being deployed!&amount=#{@subscription.amount}&email=#{@subscription.email}"}
         else
           render json: {valid: false}
         end
