@@ -20,7 +20,9 @@ group :assets do
   gem 'therubyracer', :platform => :ruby
   gem 'angularjs-rails','>= 1.2.18'
 end
-
+group :development do
+  gem 'webrick', '~> 1.3.1'
+end
 gem 'jquery-rails'
 gem 'rspec-rails', '>= 2.13.2', :group => [:development, :test]
 gem 'database_cleaner', '>= 0.9.1', :group => :test
@@ -72,6 +74,6 @@ gem 'barby'
 gem 'chunky_png'
 gem 'prawn'
 gem 'pdftk'
-gem 'apartment', :git=>'https://github.com/influitive/apartment.git'
+gem 'apartment','>=0.25.1', :git=>'https://github.com/influitive/apartment.git'
 gem 'stripe'
 gem 'ruby_odata'
