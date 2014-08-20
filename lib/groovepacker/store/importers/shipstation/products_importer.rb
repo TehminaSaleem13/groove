@@ -9,7 +9,7 @@ module Groovepacker
             client = handler[:store_handle]
             result = self.build_result
             products = client.product.all
-            if !products.nil?
+            unless products.nil?
               result[:total_imported] = products.length.to_s
               products.each do |item|
                 if ProductSku.where(:sku=>item.sku).length == 0
@@ -45,7 +45,7 @@ module Groovepacker
               sku = import_hash[:product_sku] 
               id = import_hash[:product_id]
               products = client.product.where("sku"=>sku)
-              if !products.nil?
+              unless products.nil?
                 product = products.first
                 @product = Product.find(id)
                 set_product_fields(@product,product)
@@ -61,7 +61,7 @@ module Groovepacker
             product.name = ssproduct.name
             product.inv_wh1 = ssproduct.warehouse_location
  
-            if !ssproduct.weight_oz.nil?
+            unless ssproduct.weight_oz.nil?
               product.weight = ssproduct.weight_oz
             else
               product.weight = 0

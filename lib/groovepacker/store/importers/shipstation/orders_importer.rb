@@ -13,7 +13,7 @@ module Groovepacker
               orders = client.order.where('OrderStatusID' => 2)
               result[:total_imported] = orders.length
 
-              if !orders.nil?
+              unless orders.nil?
                 result[:total_imported] = orders.length
                 orders.each do |order|
                   if Order.where(:increment_id=>order.order_id.to_s).length == 0
@@ -22,7 +22,7 @@ module Groovepacker
                     import_order(shipstation_order, order)
 
                     order_items = client.order_items.where("order_id"=>order.order_id)
-                    if !order_items.nil?
+                    unless order_items.nil?
                       order_items.each do |item|
                         order_item = OrderItem.new
                         import_order_item(order_item, item)
@@ -68,7 +68,7 @@ module Groovepacker
                       # shipstation_order.order_items << order_item
                     end
                     if shipstation_order.save
-                      if !shipstation_order.addnewitems
+                      unless shipstation_order.addnewitems
                         result[:status] &= false
                         result[:messages].push('Problem adding new items')
                       end
@@ -97,34 +97,16 @@ module Groovepacker
             shipstation_order.increment_id = order.order_id
             shipstation_order.seller_id = order.seller_id
             shipstation_order.order_status_id = order.order_status_id
-            shipstation_order.order_placed_time = order.order_date
-            # shipstation_order.sku = 
-            # shipstation_order.customer_comments = 
-            # shipstation_order.store_id = 
-            # shipstation_order.qty = 
-            # shipstation_order.price = 
+            shipstation_order.order_placed_time = order.order_date 
             shipstation_order.firstname = order.username
-            # shipstation_order.lastname =
             shipstation_order.email = order.buyer_email
             shipstation_order.address_1 = order.ship_street1
-            unless order.ship_street2.nil?
-              shipstation_order.address_2 = order.ship_street2
-            end
+            shipstation_order.address_2 = order.ship_street2 unless order.ship_street2.nil?
             shipstation_order.city = order.ship_city
             shipstation_order.state = order.ship_state
             shipstation_order.postcode = order.ship_postal_code
-            shipstation_order.country = order.ship_country_code
-            # shipstation_order.method = 
-            shipstation_order.notes_internal = order.internal_notes
-            # shipstation_order.notes_toPacker = 
-            # shipstation_order.notes_fromPacker = 
-            # shipstation_order.tracking_processed = 
-            # shipstation_order.status = 
-            # shipstation_order.scanned_on = 
-            # shipstation_order.tracking_num = 
-            # shipstation_order.company = 
-            # shipstation_order.packing_user_id = 
-            # shipstation_order.status_reason = 
+            shipstation_order.country = order.ship_country_code 
+            shipstation_order.notes_internal = order.internal_notes 
             shipstation_order.order_number = order.order_number
             shipstation_order.ship_name = order.ship_name
             shipstation_order.shipping_amount = order.shipping_amount
