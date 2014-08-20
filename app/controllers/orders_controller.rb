@@ -104,6 +104,11 @@ class OrdersController < ApplicationController
       @order.customer_comments = params[:order]['customer_comments']
       @order.scanned_on = params[:order]['scanned_on']
       @order.tracking_num = params[:order]['tracking_num']
+      @order.seller_id = params[:order]['seller_id']
+      @order.order_status_id = params[:order]['order_status_id']
+      @order.order_number = params[:order]['order_number']
+      @order.ship_name = params[:order]['ship_name']
+      @order.notes_from_buyer = params[:order]['notes_from_buyer']
     elsif @order.firstname != params[:order]['firstname'] ||
           @order.lastname != params[:order]['lastname'] ||
           @order.company != params[:order]['company'] ||
@@ -118,7 +123,12 @@ class OrdersController < ApplicationController
           @order.order_placed_time != params[:order]['order_placed_time'] ||
           @order.customer_comments != params[:order]['customer_comments'] ||
           @order.scanned_on != params[:order]['scanned_on'] ||
-          @order.tracking_num != params[:order]['tracking_num']
+          @order.tracking_num != params[:order]['tracking_num'] ||
+          @order.seller_id = params[:order]['seller_id'] ||
+          @order.order_status_id = params[:order]['order_status_id'] ||
+          @order.order_number = params[:order]['order_number'] ||
+          @order.ship_name = params[:order]['ship_name'] ||
+          @order.notes_from_buyer = params[:order]['notes_from_buyer']
       @result['status'] = false
       @result['messages'].push('You do not have enough permissions to edit the order')
     end
