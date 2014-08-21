@@ -73,7 +73,8 @@ class StoreSettingsController < ApplicationController
             end
             @magento.host = params[:host]
             @magento.username = params[:username]
-            @magento.password = params[:password]
+            # We do not need password GROOV-168
+            #@magento.password = params[:password]
             @magento.api_key  = params[:api_key]
 
             @magento.import_products = params[:import_products]
@@ -221,10 +222,9 @@ class StoreSettingsController < ApplicationController
         else
           @result['status'] = false
           @result['messages'].push("Current user does not have permission to create or edit a store")
-
-          if @store.id
-            @result["store_id"] = @store.id
-          end
+        end
+        if !@store.nil? && @store.id
+          @result["store_id"] = @store.id
         end
       end
 

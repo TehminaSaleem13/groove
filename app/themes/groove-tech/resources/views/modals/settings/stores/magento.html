@@ -2,9 +2,9 @@
     <div class="col-md-6">
     <legend>Magento Credentials</legend>
       <div class="form-group">
-        <label class="control-label col-md-4">Host</label>
+        <label class="control-label col-md-4">URL</label>
         <div class="controls col-md-8">
-          <input name="host" ng-blur="update_single_store()" ng-model="stores.single.host" class="form-control input-style" type="text" value="" required/>
+          <input name="host" ng-blur="update_single_store()" ng-model="stores.single.host" class="form-control input-style" placeholder="http://www.domain.com/store" type="text" value="" required/>
          </div>
       </div> 
 
@@ -14,13 +14,14 @@
           <input name="username" ng-blur="update_single_store()" ng-model="stores.single.username" class="form-control input-style" type="text" value="" required/>
          </div>
       </div>
-      
+      <!--
       <div class="form-group">
         <label class="control-label col-md-4">Password</label>
         <div class="controls col-md-8">
           <input name="password" ng-blur="update_single_store()"  ng-model="stores.single.password" class="form-control input-style" type="text" value="" required/>
          </div>
       </div>
+      -->
 
       <div class="form-group">
         <label class="control-label col-md-4">API Key</label>

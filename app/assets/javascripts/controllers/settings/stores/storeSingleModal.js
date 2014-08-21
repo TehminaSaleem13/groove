@@ -103,10 +103,7 @@ function(scope, store_data, $state, $stateParams, $modal, $modalInstance, $timeo
     };
 
     scope.update_single_store = function(auto) {
-        if(typeof scope.stores.single['name'] != "undefined"
-           && scope.stores.single.name != ""
-           && typeof scope.stores.single.store_type != "undefined"
-           && scope.stores.single.store_type != "") {
+        if(scope.edit_status || stores.single.validate_create(scope.stores)) {
             return stores.single.update(scope.stores,auto).success(function(data){
                 if(data.status && data.store_id) {
                     if(typeof scope.stores.single['id'] == "undefined") {
@@ -169,7 +166,6 @@ function(scope, store_data, $state, $stateParams, $modal, $modalInstance, $timeo
         myscope.store_single_details(scope.stores.list[id].id, true);
         $state.go($state.current.name, newStateParams);
     };
-
 
     myscope.init = function() {
         scope.stores = store_data;

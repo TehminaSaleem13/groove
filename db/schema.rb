@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140820094730) do
+ActiveRecord::Schema.define(:version => 20140821173305) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0, :null => false
@@ -157,7 +157,7 @@ ActiveRecord::Schema.define(:version => 20140820094730) do
   create_table "magento_credentials", :force => true do |t|
     t.string   "host",                                :null => false
     t.string   "username",                            :null => false
-    t.string   "password",                            :null => false
+    t.string   "password",         :default => ""
     t.integer  "store_id",                            :null => false
     t.datetime "created_at",                          :null => false
     t.datetime "updated_at",                          :null => false
@@ -285,6 +285,7 @@ ActiveRecord::Schema.define(:version => 20140820094730) do
     t.string   "method"
     t.datetime "created_at",                                                        :null => false
     t.datetime "updated_at",                                                        :null => false
+    t.string   "store_order_id"
     t.string   "notes_internal"
     t.string   "notes_toPacker"
     t.string   "notes_fromPacker"
@@ -397,7 +398,6 @@ ActiveRecord::Schema.define(:version => 20140820094730) do
     t.integer  "total_avail_ext",                                               :default => 0,         :null => false
     t.decimal  "weight",                          :precision => 8, :scale => 2, :default => 0.0,       :null => false
     t.decimal  "shipping_weight",                 :precision => 8, :scale => 2, :default => 0.0
-    t.boolean  "is_packing_supply",                                             :default => false
   end
 
   add_index "products", ["store_id"], :name => "index_products_on_store_id"

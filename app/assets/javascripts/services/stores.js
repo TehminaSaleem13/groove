@@ -1,10 +1,22 @@
 groovepacks_services.factory('stores',['$http','notification','$filter',function($http,notification,$filter) {
 
+    /**
+     * @typedef {object} StoresHash
+     * @property {array} list - list of stores.
+     * @property {object} single - hash of a single store data.
+     * @property {object} ebay - hash of ebay settings.
+     * @property {object} import - hash of import settings.
+     * @property {object} types - hash of supported store types.
+     * @property {number} current - index of currently open store in list.
+     * @property {object} setup - settings of stores list setup.
+     */
+
     var success_messages = {
         update_status: "Status updated Successfully",
         delete:"Deleted Successfully",
         duplicate: "Duplicated Successfully"
     };
+
     var get_default = function() {
         return {
             list: [],
@@ -141,9 +153,41 @@ groovepacks_services.factory('stores',['$http','notification','$filter',function
             }
         }).error(notification.server_error);
     };
+
+    /**
+     * Validate if we have all the data to send a store creation request.
+     * @param {StoresHash} stores - {@link StoresHash}
+     * @returns {boolean} true if the code can proceed to create a store.
+     */
+    var validate_create_single = function (stores) {
+        //Return true if the checks match, if it reaches the end it returns false by default.
+        if (stores.single.name && stores.single.store_type) {
+            switch (stores.single.store_type) {
+                case 'Magento':
+                    return (stores.single.host && stores.single.username && stores.single.api_key);
+                    break;
+                case 'Shipstation':
+                    return (stores.single.username && stores.single.password);
+                    break;
+                case 'Amazon':
+                    return (stores.single.merchant_id && stores.single.marketplace_id);
+                    break;
+                //for any other store types (ebay and csv) just return true
+                default:
+                    return true;
+            }
+        }
+        return false;
+    };
+
+    var validate_not_empty = function() {
+
+    }
+
     var can_create_single = function () {
         return $http.get('/store_settings/let_store_be_created.json')
     };
+
     var create_update_single = function(stores,auto) {
         if(typeof auto !== "boolean") {
             auto = true;
@@ -308,6 +352,7 @@ groovepacks_services.factory('stores',['$http','notification','$filter',function
         single: {
             get: get_single,
             can_create:can_create_single,
+            validate_create: validate_create_single,
             update:create_update_single
         },
         ebay: {
