@@ -93,7 +93,7 @@ class OrdersController < ApplicationController
       @order.lastname = params[:order]['lastname']
       @order.company = params[:order]['company']
       @order.address_1 = params[:order]['address_1']
-      @order.address_2 = params[:order]['address_2']
+      @order.address_2 = params[:order]['address_2'] unless params[:order]['address_2'].nil?
       @order.city = params[:order]['city']
       @order.state = params[:order]['state']
       @order.postcode = params[:order]['postcode']
@@ -104,6 +104,14 @@ class OrdersController < ApplicationController
       @order.customer_comments = params[:order]['customer_comments']
       @order.scanned_on = params[:order]['scanned_on']
       @order.tracking_num = params[:order]['tracking_num']
+      @order.seller_id = params[:order]['seller_id']
+      @order.order_status_id = params[:order]['order_status_id']
+      @order.order_number = params[:order]['order_number']
+      @order.ship_name = params[:order]['ship_name']
+      @order.notes_from_buyer = params[:order]['notes_from_buyer']
+      @order.shipping_amount = params[:order]['shipping_amount'] unless params[:order]['shipping_amount'].nil?
+      @order.order_total = params[:order]['order_total'] unless params[:order]['order_total'].nil?
+      @order.weight_oz = params[:order]['weight_oz'] unless params[:order]['weight_oz'].nil?
     elsif @order.firstname != params[:order]['firstname'] ||
           @order.lastname != params[:order]['lastname'] ||
           @order.company != params[:order]['company'] ||
@@ -118,7 +126,15 @@ class OrdersController < ApplicationController
           @order.order_placed_time != params[:order]['order_placed_time'] ||
           @order.customer_comments != params[:order]['customer_comments'] ||
           @order.scanned_on != params[:order]['scanned_on'] ||
-          @order.tracking_num != params[:order]['tracking_num']
+          @order.tracking_num != params[:order]['tracking_num'] ||
+          @order.seller_id != params[:order]['seller_id'] ||
+          @order.order_status_id != params[:order]['order_status_id'] ||
+          @order.order_number != params[:order]['order_number'] ||
+          @order.ship_name != params[:order]['ship_name'] ||
+          @order.notes_from_buyer != params[:order]['notes_from_buyer'] ||
+          @order.shipping_amount != params[:order]['shipping_amount'] ||
+          @order.order_total != params[:order]['order_total'] ||
+          @order.weight_oz != params[:order]['weight_oz']
       @result['status'] = false
       @result['messages'].push('You do not have enough permissions to edit the order')
     end
