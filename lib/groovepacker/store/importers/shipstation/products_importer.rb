@@ -44,7 +44,7 @@ module Groovepacker
               client = import_hash[:handler][:store_handle]
               sku = import_hash[:product_sku] 
               id = import_hash[:product_id]
-              products = client.product.where("sku"=>sku)
+              products = client.product.where("SKU"=>sku)
               unless products.nil?
                 product = products.first
                 @product = Product.find(id)
