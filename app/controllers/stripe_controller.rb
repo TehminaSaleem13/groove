@@ -85,6 +85,6 @@ class StripeController < ApplicationController
 	    # trial_upto = event_json.object.trial_end
 	  end
 
-	  render status: 200
+	  status 200
   end
 end
