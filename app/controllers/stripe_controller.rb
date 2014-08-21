@@ -1,5 +1,5 @@
 class StripeController < ApplicationController
- 	protect_from_forgery :except => :webhook
+ 	# protect_from_forgery :except => :webhook
   def webhook
 	  event_json = JSON.parse(request.body.read)
 	  # Webhook.create(event: event_json) 
@@ -26,6 +26,7 @@ class StripeController < ApplicationController
 		    invoice.quantity = event.data.object.lines.data.first.quantity
 	    end
 	    invoice.save
+	    StripeInvoiceEmail.send_invoice(invoice, Apartment::Tenant.current_tenant).deliver
 	  end
 
 	  if event.type == 'charge.succeeded'
@@ -84,6 +85,6 @@ class StripeController < ApplicationController
 	    # trial_upto = event_json.object.trial_end
 	  end
 
-	  status 200
+	  render status: 200
   end
 end
