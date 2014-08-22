@@ -8,6 +8,7 @@
 		  event = Stripe::Event.retrieve(event_json["id"])
 		  logger.info('event:')
 		  logger.info(event.inspect)
+		  Apartment::Tenant.switch()
 		  logger.info(Apartment::Tenant.current_tenant)
 		  if Webhook.create(event: event)
 		  	logger.info("event saved as blob") 
@@ -34,7 +35,7 @@
 		  	end
 		  	if @invoice.save
 		  		logger.info("saved the invoice for event invoice.created")
-		  		# StripeInvoiceEmail.send_invoice(@invoice).deliver
+		  		StripeInvoiceEmail.send_invoice(@invoice).deliver
 		  	end
 		  elsif event.type == 'charge.succeeded'
 		  	logger.info("in event type charge.succeeded")
