@@ -9,7 +9,9 @@
 		  logger.info('event:')
 		  logger.info(event.inspect)
 		  logger.info(Apartment::Tenant.current_tenant)
-		  Webhook.create(event: event) 
+		  if Webhook.create(event: event)
+		  	logger.info("event saved as blob") 
+		  end
 		  # Do something with event
 		  if event.type == 'invoice.created'
 		  	logger.info("in event type invoice.created")
@@ -30,8 +32,10 @@
 		  		@invoice.amount = event.data.object.lines.data.first.amount.to_f/100
 		  		@invoice.quantity = event.data.object.lines.data.first.quantity
 		  	end
-		  	@invoice.save
-		  	# StripeInvoiceEmail.send_invoice(@invoice, Apartment::Tenant.current_tenant).deliver
+		  	if @invoice.save
+		  		logger.info("saved the invoice for event invoice.created")
+		  		# StripeInvoiceEmail.send_invoice(@invoice).deliver
+		  	end
 		  elsif event.type == 'charge.succeeded'
 		  	logger.info("in event type charge.succeeded")
 		    # amount has been deducted from account
@@ -80,6 +84,6 @@
 		    # trial_days = event_json.object.plan.trial_period_days
 		    # trial_upto = event_json.object.trial_end
 		  end
-		  render :status => 200, :json => nil
+		  render :status => 200, :nothing => true
 		end
 	end
