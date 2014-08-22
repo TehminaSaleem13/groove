@@ -190,6 +190,8 @@ class Store < ActiveRecord::Base
   end
 
   def self.can_create_new?
-    self.where("store_type != 'system'").count < AccessRestriction.first.num_import_sources
+    unless AccessRestriction.first.nil?
+      self.where("store_type != 'system'").count < AccessRestriction.first.num_import_sources
+    end
   end
 end
