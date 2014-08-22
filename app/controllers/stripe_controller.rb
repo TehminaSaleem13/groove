@@ -8,26 +8,25 @@
 		  Webhook.create(event: event) 
 		  # Do something with event
 		  if event.type == 'invoice.created'
-		  	invoice = Invoice.new
-		  	invoice.date = Time.at(event.data.object.date).utc
-		  	invoice.invoice_id = event.data.object.id
-		  	invoice.subscription_id = event.data.object.subscription
-		  	invoice.customer_id = event.data.object.customer
-		  	invoice.charge_id = event.data.object.charge
-		  	invoice.attempted = event.data.object.attempted
-		  	invoice.closed = event.data.object.closed
-		  	invoice.forgiven = event.data.object.forgiven
-		  	invoice.paid = event.data.object.paid
+		  	@invoice = Invoice.new
+		  	@invoice.date = Time.at(event.data.object.date).utc
+		  	@invoice.invoice_id = event.data.object.id
+		  	@invoice.subscription_id = event.data.object.subscription
+		  	@invoice.customer_id = event.data.object.customer
+		  	@invoice.charge_id = event.data.object.charge
+		  	@invoice.attempted = event.data.object.attempted
+		  	@invoice.closed = event.data.object.closed
+		  	@invoice.forgiven = event.data.object.forgiven
+		  	@invoice.paid = event.data.object.paid
 		  	unless event.data.object.lines.data.first.nil?
-		  		invoice.plan_id = event.data.object.lines.data.first.plan.id
-		  		invoice.period_start = Time.at(event.data.object.lines.data.first.period.start).utc
-		  		invoice.period_end = Time.at(event.data.object.lines.data.first.period.end).utc
-		  		invoice.amount = event.data.object.lines.data.first.amount.to_f/100
-		  		invoice.quantity = event.data.object.lines.data.first.quantity
+		  		@invoice.plan_id = event.data.object.lines.data.first.plan.id
+		  		@invoice.period_start = Time.at(event.data.object.lines.data.first.period.start).utc
+		  		@invoice.period_end = Time.at(event.data.object.lines.data.first.period.end).utc
+		  		@invoice.amount = event.data.object.lines.data.first.amount.to_f/100
+		  		@invoice.quantity = event.data.object.lines.data.first.quantity
 		  	end
-		  	if invoice.save
-		  		StripeInvoiceEmail.send_invoice(invoice, Apartment::Tenant.current_tenant).deliver
-		  	end
+		  	@invoice.save
+		  	StripeInvoiceEmail.send_invoice(@invoice, Apartment::Tenant.current_tenant).deliver
 		  elsif event.type == 'charge.succeeded'
 		    # amount has been deducted from account
 		    # customer_id = event_json.data.object.customer
@@ -63,7 +62,7 @@
 
 		  elsif event.type == 'customer.subscription.updated'
 		    #customer updates the subscription
-		  else event.type == 'customer.subscription.created'
+		  elsif event.type == 'customer.subscription.created'
 		    # customer_id = event_json.object.customer
 		    # subscription_id = event_json.object.id
 		    # plan = event_json.object.plan.id
@@ -71,6 +70,6 @@
 		    # trial_days = event_json.object.plan.trial_period_days
 		    # trial_upto = event_json.object.trial_end
 		  end
-		  status 200
+		  render status: 200
 		end
 	end
