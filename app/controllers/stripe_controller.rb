@@ -8,6 +8,7 @@
 		  event = Stripe::Event.retrieve(event_json["id"])
 		  logger.info('event:')
 		  logger.info(event.inspect)
+		  logger.info(Apartment::Tenant.current_tenant)
 		  Webhook.create(event: event) 
 		  # Do something with event
 		  if event.type == 'invoice.created'
@@ -79,6 +80,6 @@
 		    # trial_days = event_json.object.plan.trial_period_days
 		    # trial_upto = event_json.object.trial_end
 		  end
-		  render :status => 200, json => nil
+		  render :status => 200, :json => nil
 		end
 	end
