@@ -1,5 +1,5 @@
 	class StripeController < ApplicationController
-	 	# protect_from_forgery :except => :webhook
+	 	protect_from_forgery :except => :webhook
 	 	def webhook
 	 		event_json = JSON.parse(request.body.read)
 		  # Webhook.create(event: event_json) 
