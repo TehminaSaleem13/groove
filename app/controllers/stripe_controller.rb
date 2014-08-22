@@ -26,7 +26,7 @@
 		  		@invoice.quantity = event.data.object.lines.data.first.quantity
 		  	end
 		  	@invoice.save
-		  	StripeInvoiceEmail.send_invoice(@invoice, Apartment::Tenant.current_tenant).deliver
+		  	# StripeInvoiceEmail.send_invoice(@invoice, Apartment::Tenant.current_tenant).deliver
 		  elsif event.type == 'charge.succeeded'
 		    # amount has been deducted from account
 		    # customer_id = event_json.data.object.customer
