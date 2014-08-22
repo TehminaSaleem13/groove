@@ -1,5 +1,5 @@
 	class StripeController < ApplicationController
-	 	protect_from_forgery :except => :webhook
+	 	# protect_from_forgery :except => :webhook
 	 	def webhook
 	 		event_json = JSON.parse(request.body.read)
 		  # Webhook.create(event: event_json) 
@@ -63,7 +63,7 @@
 
 		  elsif event.type == 'customer.subscription.updated'
 		    #customer updates the subscription
-		  elsif event.type == 'customer.subscription.created'
+		  else event.type == 'customer.subscription.created'
 		    # customer_id = event_json.object.customer
 		    # subscription_id = event_json.object.id
 		    # plan = event_json.object.plan.id
