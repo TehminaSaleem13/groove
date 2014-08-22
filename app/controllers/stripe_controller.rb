@@ -1,13 +1,17 @@
 	class StripeController < ApplicationController
 	 	protect_from_forgery :except => :webhook
 	 	def webhook
+	 		logger.info("in webhook")
 	 		event_json = JSON.parse(request.body.read)
 		  # Webhook.create(event: event_json) 
 		  # Verify the event by fetching it from Stripe
 		  event = Stripe::Event.retrieve(event_json["id"])
+		  logger.info('event:')
+		  logger.info(event.inspect)
 		  Webhook.create(event: event) 
 		  # Do something with event
 		  if event.type == 'invoice.created'
+		  	logger.info("in event type invoice.created")
 		  	@invoice = Invoice.new
 		  	@invoice.date = Time.at(event.data.object.date).utc
 		  	@invoice.invoice_id = event.data.object.id
@@ -28,17 +32,20 @@
 		  	@invoice.save
 		  	# StripeInvoiceEmail.send_invoice(@invoice, Apartment::Tenant.current_tenant).deliver
 		  elsif event.type == 'charge.succeeded'
+		  	logger.info("in event type charge.succeeded")
 		    # amount has been deducted from account
 		    # customer_id = event_json.data.object.customer
 		    # transaction_id = event_json.data.object.balance_transaction
 		    # amount = event_json.data.object.amount
 		  elsif event.type == 'charge.failed'
+		  	logger.info("in event type charge.failed")
 		    # the charge couldnot be completed due to some error.
 		    # customer_id = event_json.data.object.customer
 		    # transaction_id = event_json.data.object.balance_transaction
 		    # amount = event_json.data.object.amount
 		    # error = event_json.data.object.failure_message
 		  elsif event.type == 'invoice.payment_succeeded'
+		  	logger.info("in event type invoice.payment_succeeded")
 		    # customer_id = event_json.object.customer
 		    # subscription_id = event_json.object.line.data.first.id
 		    # subscription_upto = event_json.object.line.data.first.period.end
@@ -48,6 +55,7 @@
 		    # subscription.is_active = true
 		    # subscription.save
 		  elsif event.type == 'customer.created'
+		  	logger.info("in event type customer.created")
 		  	# customer_id = event_json.data.object.id
 		  	# if !event_json.data.object.subscription.data.first.nil?
 			  # 	subscription_id = event_json.data.object.subscription.data.first.id
@@ -63,6 +71,7 @@
 		  elsif event.type == 'customer.subscription.updated'
 		    #customer updates the subscription
 		  elsif event.type == 'customer.subscription.created'
+		  	logger.info("in event type customer.subscription.created")
 		    # customer_id = event_json.object.customer
 		    # subscription_id = event_json.object.id
 		    # plan = event_json.object.plan.id
