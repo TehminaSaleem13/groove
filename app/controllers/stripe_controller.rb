@@ -79,6 +79,6 @@
 		    # trial_days = event_json.object.plan.trial_period_days
 		    # trial_upto = event_json.object.trial_end
 		  end
-		  render :status => 200
+		  render :status => 200, json => nil
 		end
 	end
