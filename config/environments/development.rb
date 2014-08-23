@@ -14,7 +14,7 @@ Groovepacks::Application.configure do
   config.action_controller.perform_caching = false
 
   # Don't care if the mailer can't send
-  config.action_mailer.raise_delivery_errors = false
+  config.action_mailer.raise_delivery_errors = true
   config.action_mailer.perform_deliveries = true
 
   # Print deprecation notices to the Rails logger
@@ -59,13 +59,24 @@ Groovepacks::Application.configure do
   config.action_mailer.smtp_settings = {
     :address => "smtp.gmail.com",
     :port => 587,  
-    :authentication => "plain",
+    :authentication => 'plain',
     :enable_starttls_auto => true,
     :domain => 'gmail.com',
-    :user_name => 'uvarsity.elearn@gmail.com',
-    :password => 'uvarsity2015',
-    :openssl_verify_mode  => 'none'
+    :user_name => 'groovepacker@gmail.com',
+    :password => '1TempPass!',
+    :openssl_verify_mode  => 'none',
+    :TLS_required => 'yes'
   }
+  # config.action_mailer.smtp_settings = {
+  #   :address => "smtp.gmail.com",
+  #   :port => 587,  
+  #   :authentication => "plain",
+  #   :enable_starttls_auto => true,
+  #   :domain => 'gmail.com',
+  #   :user_name => 'uvarsity.elearn@gmail.com',
+  #   :password => 'uvarsity2015',
+  #   :openssl_verify_mode  => 'none'
+  # }
 
   Rails.logger = Logger.new(STDOUT)
   config.log_level = :warn
