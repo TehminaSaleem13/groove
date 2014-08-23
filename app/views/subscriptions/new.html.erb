@@ -131,8 +131,8 @@
 					  	});
 					  }
 				  });
-
 				  document.getElementById('customButton').addEventListener('click', function(e)	{
+				  	setTimeout(function(){
 				  	console.log(valid.tenant_name);
 				  	console.log(valid.email);
 				  	if (valid.tenant_name && valid.email) {
@@ -146,7 +146,7 @@
 					      allowRememberMe: false
 					    });
 					    e.preventDefault();
-					  };
+					  };}, 400);
 				  });
 				</script>
 			</div>		
