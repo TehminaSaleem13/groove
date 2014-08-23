@@ -8,7 +8,7 @@ class StripeInvoiceEmail < ActionMailer::Base
     Apartment::Tenant.switch(tenant)
     @tenant_name = tenant
     @invoice = invoice
-  	mail to: "ksahoo@navaratan.com",#subscription.email, 
+  	mail to: subscription.email, 
   		subject: "GroovePacker Invoice Email"
   end
 end
