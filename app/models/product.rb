@@ -253,7 +253,7 @@ class Product < ActiveRecord::Base
     else
       result['lbs'] = (self.weight / 16).floor
     end
-    result['oz'] = (self.weight % 16)
+    result['oz'] = (self.weight % 16).floor
 
     if weight_gms < 1000
       result['kgs'] = 0
