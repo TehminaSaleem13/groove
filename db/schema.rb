@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140825125716) do
+ActiveRecord::Schema.define(:version => 20140826130058) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0, :null => false
@@ -39,10 +39,9 @@ ActiveRecord::Schema.define(:version => 20140825125716) do
   create_table "column_preferences", :force => true do |t|
     t.integer  "user_id"
     t.string   "identifier"
-    t.text     "shown"
-    t.text     "order"
     t.datetime "created_at", :null => false
     t.datetime "updated_at", :null => false
+    t.text     "theads"
   end
 
   add_index "column_preferences", ["user_id"], :name => "index_column_preferences_on_user_id"

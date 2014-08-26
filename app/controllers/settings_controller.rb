@@ -221,8 +221,7 @@ class SettingsController < ApplicationController
       @result['status'] = false
     else
       preference = ColumnPreference.find_or_create_by_user_id_and_identifier(current_user.id,params[:identifier])
-      preference.order = params[:order]
-      preference.shown = params[:shown]
+      preference.theads = params[:theads]
       preference.save!
     end
     respond_to do |format|

@@ -234,8 +234,8 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,ord
                     name:"Country",
                     hidden:true
                 }
-                }
-            };
+            }
+        };
 
 
 

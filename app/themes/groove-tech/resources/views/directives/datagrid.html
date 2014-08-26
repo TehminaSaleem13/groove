@@ -6,7 +6,7 @@
 </div>
 <div class="col-md-12">
     <table groov-dragtable="dragOptions" groov-enabled="options.draggable" groov-model="theads" id="{{custom_identifier}}" class="well table-well table table-striped table-hover table-alt">
-        <thead groov-rt-click="context_menu($event)">
+        <thead groov-rt-click="context_menu_event($event)">
         <tr>
             <th ng-repeat="field in theads" class="{{options.all_fields[field].class}}" groov-draggable="{{options.all_fields[field].draggable}}" ng-class="{active: options.setup.sort == field}">
                 <div bo-if="options.all_fields[field].sortable" ng-click="options.sort_func(field); $event.preventDefault(); $event.stopPropagation();" bo-text="options.all_fields[field].name" ng-class="options.setup.order"></div>
@@ -16,7 +16,7 @@
         </tr>
         </thead>
         <tbody>
-        <tr ng-click="check_uncheck(row)" ng-repeat="row in rows" ng-class="{selected: row.checked}">
+        <tr ng-click="check_uncheck(row,$index,$event)" ng-repeat="row in rows" ng-class="{selected: row.checked}">
             <td ng-repeat="field in theads">
                 <div style="display:inline-block; width:100%;height:100%;" bo-if="options.editable != false && options.all_fields[field].editable == true" groov-rt-click="compile($parent.$parent.$index,field)">
                     <div ng-hide="editable[field][$parent.$parent.$index]">
@@ -37,8 +37,8 @@
     </table>
 </div>
     <div bo-if="options.show_hide">
-        <div class="clearfix"  ng-click="context_menu()" groov-rt-click="context_menu()" dropdown  is-open="context_menu.shown">
-            <ul class="dropdown-menu" ng-style="context_menu_style" role="menu">
+        <div class="clearfix"  ng-click="context_menu_event()" groov-rt-click="context_menu_event()" dropdown  is-open="context_menu.shown">
+            <ul class="dropdown-menu" ng-style="context_menu.style" role="menu">
                 <li ng-repeat="field in options.all_fields" ng-show="field.hideable">
 
                     <a href="" ng-click="show_hide(field); $event.stopPropagation();" groov-rt-click="show_hide(field); $event.stopPropagation();"> <i class="glyphicon pull-left" ng-class="{'glyphicon-ok':!field.hidden, 'glyphicon-remove':field.hidden}"></i> <span bo-text="field.name"></span></a>

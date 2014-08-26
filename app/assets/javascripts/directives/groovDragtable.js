@@ -7,7 +7,9 @@ groovepacks_directives.directive('groovDragtable',['$timeout', function ($timeou
         },
         link:function(scope,el,attrs) {
 
-            var persist = function(table) {
+            var myscope = {};
+
+            myscope.persist = function(table) {
                 var start = table.startIndex -1;
                 var end = table.endIndex -1;
                 scope.$apply(function() {
@@ -20,7 +22,7 @@ groovepacks_directives.directive('groovDragtable',['$timeout', function ($timeou
                 })
 
             };
-            var prefunc = function(cell) {
+            myscope.prefunc = function(cell) {
                 if(cell.attributes['groov-draggable'].value == 'true') {
                     el.addClass("draginit");
                 } else {
@@ -28,15 +30,33 @@ groovepacks_directives.directive('groovDragtable',['$timeout', function ($timeou
                 }
             };
 
-            var prePersist = function (cell) {
+            myscope.prepersist = function (cell) {
                 el.removeClass("draginit");
             };
 
-            $timeout(function() {
-                if(scope.options.enabled) {
-                    el.dragtable({persistState:persist,clickDelay:200, beforeStart: prefunc, beforeStop:prePersist, maxMovingRows:50,doRealSort:false});
+            myscope.reload = function() {
+                if(scope.options.reload) {
+                    $timeout(function () {
+                        if (scope.options.enabled) {
+                            if(el.data('akottr-dragtable')) {
+                                el.dragtable("redraw");
+                            } else {
+                                el.dragtable({
+                                    persistState: myscope.persist,
+                                    clickDelay: 200,
+                                    beforeStart: myscope.prefunc,
+                                    beforeStop: myscope.prepersist,
+                                    maxMovingRows: 50,
+                                    doRealSort: false
+                                });
+                            }
+                            scope.options.reload = false;
+                        }
+                    });
                 }
-            });
+            };
+
+            scope.$watch('options.reload',myscope.reload);
         }
     }
 }]);

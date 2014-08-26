@@ -1,4 +1,4 @@
-groovepacks_directives.directive('groovDataGrid', ['$timeout','$http','$sce','notification',function ($timeout,$http,$sce,notification) {
+groovepacks_directives.directive('groovDataGrid', ['$timeout','$http','$sce','settings','hotkeys',function ($timeout,$http,$sce,settings,hotkeys) {
     var default_options = function() {
         return {
             identifier:'datagrid',
@@ -31,14 +31,14 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout','$http','$sce','no
         templateUrl:"/assets/views/directives/datagrid.html",
         link: function(scope,el,attrs) {
             var myscope = {};
-            scope.context_menu = function(event) {
+            scope.context_menu_event = function(event) {
                 if(scope.options.show_hide) {
                     scope.context_menu.shown = !scope.context_menu.shown;
                     if(typeof event != "undefined") {
                         event.preventDefault();
                         event.stopPropagation();
                         var offset = el.offset();
-                        scope.context_menu_style = {left: event.pageX - offset.left, top: event.pageY - offset.top }
+                        scope.context_menu.style = {left: event.pageX - offset.left, top: event.pageY - offset.top }
                     }
                 }
             };
@@ -48,35 +48,31 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout','$http','$sce','no
                 scope.update();
             };
 
-            scope.check_uncheck = function(row) {
+            scope.check_uncheck = function(row,index,event) {
                 if(scope.options.selectable) {
+                    if(!myscope.last_clicked) {
+                        myscope.last_clicked = index;
+                    }
                     row.checked = !row.checked;
+                    if(event.shiftKey) {
+                        event.preventDefault();
+                        var start = index;
+                        var end = myscope.last_clicked;
+                        if(index > myscope.last_clicked) {
+                            start = end;
+                            end = index;
+                        }
+                        for (var i = start; i <= end; i++) {
+                            scope.rows[i].checked = row.checked;
+                        }
+                    }
+                    myscope.last_clicked = index;
                 }
             };
 
             scope.update = function() {
-                var shown = [];
-                var hidden = [];
-                for(var i in scope.options.all_fields) {
-                    if(scope.options.all_fields.hasOwnProperty(i)) {
-                        if(!scope.options.all_fields[i].hidden) {
-                            shown.push(i);
-                        } else {
-                            hidden.push(i);
-                        }
-                    }
-                }
-
-                myscope.headOrder = shown.concat(hidden);
-                scope.theads = shown;
-
-                $http.post('settings/save_columns_state.json',{identifier:scope.options.identifier,shown:shown, order:myscope.headOrder}).success(function(data) {
-                    if(data.status) {
-                        notification.notify("Successfully saved column preferences",1);
-                    } else {
-                        notification.notify(data.messages,0);
-                    }
-                }).error(notification.server_error);
+                myscope.make_theads(scope.theads);
+                settings.column_preferences.save(scope.options.identifier,scope.theads);
             };
 
             scope.compile = function(ind,field) {
@@ -90,8 +86,29 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout','$http','$sce','no
 
                 $timeout(function() {scope.$broadcast(scope.options.identifier+'_list-'+field+'-'+ind);},30);
             };
-            myscope._init = function() {
-                myscope.headOrder = [];
+
+            myscope.make_theads = function(theads) {
+                var shown = [];
+                for(var i in scope.options.all_fields) {
+                    if(scope.options.all_fields.hasOwnProperty(i)) {
+                        if(!scope.options.all_fields[i].hidden) {
+                            shown.push(i);
+                        }
+                    }
+                }
+                scope.theads = theads.concat(shown).filter(function(elem,idx,arr) {
+                    return (shown.indexOf(elem) != -1 && arr.indexOf(elem) >= idx);
+                });
+                scope.dragOptions.reload = true;
+            };
+
+            myscope.invert_selection = function() {
+                for(var i =0; i < scope.rows.length; i++) {
+                    scope.rows[i].checked = !scope.rows[i].checked;
+                }
+            };
+
+            myscope.init = function() {
                 scope.theads = [];
 
                 scope.editable={};
@@ -107,51 +124,50 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout','$http','$sce','no
                         if(options.all_fields[i].transclude !== '') {
                             options.all_fields[i].transclude = $sce.trustAsHtml(scope.groovDataGrid.all_fields[i].transclude);
                         }
-                        myscope.headOrder.push(i);
                         scope.theads.push(i);
                     }
                 }
                 options.setup = scope.groovDataGrid.setup;
-                scope.context_menu_shown = false;
-                scope.context_menu_style = {};
+                scope.context_menu = {
+                    shown: false,
+                    style: {}
+                };
                 scope.options = options;
                 scope.dragOptions = {
                     update: scope.update,
-                    enabled: scope.options.draggable
+                    enabled: scope.options.draggable,
+                    reload: false
                 };
                 scope.custom_identifier = scope.options.identifier + Math.floor(Math.random()*1000);
 
-
-                $http.get('settings/get_columns_state.json?identifier='+scope.options.identifier).success(function(data) {
+                settings.column_preferences.get(scope.options.identifier).success(function(data){
                     if(data.status) {
-                        if(data.data) {
-
+                        var theads = [];
+                        if(data.data && typeof data.data['theads'] != "undefined" && data.data.theads) {
+                            theads = data.data.theads;
                             for(var i in scope.options.all_fields) {
                                 if(scope.options.all_fields.hasOwnProperty(i)) {
                                     if(scope.options.all_fields[i].hideable) {
                                         scope.options.all_fields[i].hidden = true;
                                     }
+                                    if(theads.indexOf(i) != -1) {
+                                        scope.options.all_fields[i].hidden = false;
+                                    }
                                 }
                             }
-
-                            for(var j in data.data.shown) {
-                                if(data.data.shown.hasOwnProperty(j) &&
-                                   typeof scope.options.all_fields[data.data.shown[j]] !=="undefined") {
-                                    scope.options.all_fields[data.data.shown[j]].hidden = false;
-                                }
-                            }
-                            scope.theads = data.data.shown;
-                            myscope.headOrder = data.data.order;
                         }
-                    } else {
-                        notification.notify(data.messages,0);
+                        myscope.make_theads(theads);
                     }
-
-                }).error(notification.server_error);
-
+                });
+                if(scope.options.selectable) {
+                    hotkeys.add({
+                        combo: 'mod+i',
+                        callback: myscope.invert_selection
+                     });
+                }
             };
 
-            myscope._init();
+            myscope.init();
         }
     };
 }]);

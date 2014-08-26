@@ -486,6 +486,14 @@ min-width:150px;
   .label {
     text-transform: capitalize;
   }
+  table{
+    tr {
+      user-select: none; /* CSS3 (little to no support) */
+      -ms-user-select: none; /* IE 10+ */
+      -moz-user-select: none; /* Gecko (Firefox) */
+      -webkit-user-select: none; /* Webkit (Safari, Chrome) */
+    }
+  }
 }
 
 .success-form-group{
@@ -1458,7 +1466,7 @@ ul.tag-list > li {
 .dragtable-sortable {
 
   list-style-type: none;
-  margin: 12px 0px 0px;
+  margin: 0px 0px 0px;
   padding: 0;
   -moz-user-select: none;
 
