@@ -1,18 +1,18 @@
-<div class="container-fluid">
-	<div style="padding-top: 20px;" class="row bottom-well col-sm-offset-1 col-md-offset-1 col-lg-offset-1 col-md-10 col-sm-10 col-lg-10">
-		<%= form_for :confirm, url: {action: "match"} do |f| %>
-			<div style="margin-bottom:5px;">
-				<label class="col-md-4 col-sm-4 col-lg-4" style="text-align: right;">Email:</label>
-				<%= f.email_field :email %>
-			</div>
-			<div style="margin-bottom:5px;">
-				<label class="col-md-4 col-sm-4 col-lg-4" style="text-align: right;">Zip Code :</label>
-				<%= f.text_field :postcode %>
-			</div>
-			<div>
-				<label class="control-label col-md-4 col-sm-4 col-lg-4" style="text-align: right;"></label>
-				<%= f.button(:submit, {class: 'btn btn-primary'})%>
-			</div>  
-		<% end %>
+	<div class="container-fluid">
+		<div style="padding-top: 20px;" class="row bottom-well col-sm-offset-1 col-md-offset-1 col-lg-offset-1 col-md-10 col-sm-10 col-lg-10">
+			<%= form_for :confirm, url: {action: "match"} do |f| %>
+				<div style="margin-bottom:5px;">
+					<label class="col-md-4 col-sm-4 col-lg-4" style="text-align: right;">Email:</label>
+					<%= f.email_field :email %>
+				</div>
+				<div style="margin-bottom:5px;">
+					<label class="col-md-4 col-sm-4 col-lg-4" style="text-align: right;">Zip Code :</label>
+					<%= f.text_field :postcode %>
+				</div>
+				<div>
+					<label class="control-label col-md-4 col-sm-4 col-lg-4" style="text-align: right;"></label>
+					<%= f.button(:submit, {class: 'btn btn-primary'})%>
+				</div>  
+			<% end %>
+		</div>
 	</div>
-</div>
