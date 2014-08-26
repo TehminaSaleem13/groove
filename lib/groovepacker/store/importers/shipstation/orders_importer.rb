@@ -106,7 +106,7 @@ module Groovepacker
             shipstation_order.state = order.ship_state
             shipstation_order.postcode = order.ship_postal_code
             shipstation_order.country = order.ship_country_code 
-            shipstation_order.notes_internal = order.internal_notes 
+            # shipstation_order.notes_internal = order.internal_notes 
             # shipstation_order.order_number = order.order_number
             # shipstation_order.ship_name = order.ship_name
             shipstation_order.shipping_amount = order.shipping_amount
