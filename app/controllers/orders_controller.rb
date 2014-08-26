@@ -930,16 +930,14 @@ class OrdersController < ApplicationController
     
   end
   def match
-    # render :text => params.inspect and return
     email = params['confirm']['email']
     postcode = params['confirm']['postcode']
-    if postcode.length > 3
+    if postcode.length > 4
+      postcode = postcode[0..4]
       @matching_orders = Order.where('postcode LIKE ?',"#{postcode}%")
       unless @matching_orders.nil?
-        @matching_orders = @matching_orders.where(email: email)#, status: "scanned")
+        @matching_orders = @matching_orders.where(email: email, status: "scanned")
       end
-      puts @matching_orders.inspect
-      @general_setting = GeneralSetting.all.first unless GeneralSetting.all.first.nil?
       render 'match'
     end
   end

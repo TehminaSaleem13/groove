@@ -1,44 +1,26 @@
-  <div class="container-fluid">
-  	<div class="well span6">
-  		<div class="span1">
-			<%= link_to 'Back', {action: 'confirmation', controller: 'orders'}, class: "btn btn-primary"%>
-		</div>
-    <div class="row">
-    	<%if @matching_orders.nil? %>
-    		<%if !GeneralSetting.all.first.tracking_error_order_not_found.nil?%>
-		      <div class="col-sm-12" >
-		      	<p><%=GeneralSetting.all.first.tracking_error_order_not_found%></p>
-		      </div>
-		    <%else%>
-		      <div class="col-sm-12">
+  <div class="container-fluid"> 		
+    <div class="row bottom-well col-sm-offset-1 col-md-offset-1 col-lg-offset-1 col-md-10 col-sm-10 col-lg-10">
+    	<div class="span1">
+				<%= link_to 'Back', {action: 'confirmation', controller: 'orders'}, class: "btn btn-primary"%>
+			</div>
+    	<%if @matching_orders.nil? || @matching_orders.empty? %>
+    		<%if GeneralSetting.all.first.tracking_error_order_not_found.nil? || 
+    			GeneralSetting.all.first.tracking_error_order_not_found==""%>
+    			<div class="col-sm-12">
 		        <h3>I'm sorry, no orders were found matching the information given. </h3>
 		        <p>
 		        Please make sure that the zip code matches the shipping zip code of the order. (it may differ from the billing zip code) <br>
 		        The email address should match the address given when you placed your order. This is also the same address your order confirmation should have been sent to.
 		        </p>
 		      </div>
+		    <%else%>
+		      <div class="col-sm-12" >
+		      	<p><%=GeneralSetting.all.first.tracking_error_order_not_found%></p>
+		      </div>
 		    <%end%>
-	    <%end%>
-	    <%if !@matching_orders.nil?%>
-	    	<% @matching_orders.each do |order| %>
-	    		<%if order.tracking_num.nil?%>
-	    			<%if !GeneralSetting.all.first.tracking_error_info_not_found.nil?%>
-		    			<div class="col-sm-12">
-		    				<p><%=GeneralSetting.all.first.tracking_error_info_not_found%></p>
-				      </div>
-				    <%else%>
-				      <div class="col-sm-12">
-				        <h3>Your order is in our system but we do not have tracking information available yet.</h3>
-				        <p>
-				        If three or more business days have passed since the order was placed please contact our support team.
-				        </p>
-				      </div>
-				    <%end%>
-			    <%end%>
-			  <%end%>
-
+	    <%else%>
 			  <div>
-		    	<table border='1' style="border: 1px solid #98bf21; margin-top: 5px;" class="span5">
+		    	<table border='1' style="border: 1px solid #98bf21; margin-top: 5px;" class="col-sm-12 col-md-12 col-lg-12">
 						<thead style="background-color: #A7C942; text-align: center;">
 							<td>Order Number</td>
 							<td>Tracking Number</td>
@@ -46,8 +28,26 @@
 						<% @matching_orders.each do |order| %>
 						  <tr>
 						  	<td><%= order.increment_id%></td>
-						  	<!-- <td><%#= link_to order.tracking_num, "https://www.google.com/search?q=" + order.tracking_num%></td> -->
-						  	<td><%= link_to"1234567890", "https://www.google.com/search?q=" + "1234567890"%></td>
+						  	<td>
+						  		<%if order.tracking_num.nil?%>
+					    			<%if GeneralSetting.all.first.tracking_error_info_not_found.nil? || 
+					    				GeneralSetting.all.first.tracking_error_info_not_found==""%>
+					    				<div class="col-sm-12">
+								        <h3>Your order is in our system but we do not have tracking information available yet.</h3>
+								        <p>
+								        If three or more business days have passed since the order was placed please contact our support team.
+								        </p>
+								      </div>
+								    <%else%>
+								      <div class="col-sm-12">
+						    				<p><%=GeneralSetting.all.first.tracking_error_info_not_found%></p>
+								      </div>
+								    <%end%>
+								  <%else%>
+								  	<%#= link_to order.tracking_num, "https://www.google.com/search?q=" + order.tracking_num%>
+								  	<%= link_to"1234567890", "https://www.google.com/search?q=" + "1234567890"%>
+							    <%end%>
+						  	</td>	
 						  </tr>
 						<% end %>
 					</table>
