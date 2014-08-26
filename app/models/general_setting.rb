@@ -2,7 +2,7 @@ class GeneralSetting < ActiveRecord::Base
   include SettingsHelper
   attr_accessible :conf_req_on_notes_to_packer, :email_address_for_packer_notes, :hold_orders_due_to_inventory,
    :inventory_tracking, :low_inventory_alert_email, :low_inventory_email_address, :send_email_for_packer_notes,
-   :scheduled_order_import
+   :scheduled_order_import, :tracking_error_order_not_found, :tracking_error_info_not_found
 
   after_save :send_low_inventory_alert_email
   after_save :scheduled_import

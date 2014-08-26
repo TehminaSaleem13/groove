@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140821173305) do
+ActiveRecord::Schema.define(:version => 20140825125716) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0, :null => false
@@ -114,6 +114,8 @@ ActiveRecord::Schema.define(:version => 20140821173305) do
     t.boolean  "import_orders_on_sun",              :default => false
     t.datetime "time_to_import_orders",             :default => '2000-01-01 00:00:00'
     t.boolean  "scheduled_order_import",            :default => true
+    t.text     "tracking_error_order_not_found"
+    t.text     "tracking_error_info_not_found"
   end
 
   create_table "import_items", :force => true do |t|
@@ -285,7 +287,6 @@ ActiveRecord::Schema.define(:version => 20140821173305) do
     t.string   "method"
     t.datetime "created_at",                                                        :null => false
     t.datetime "updated_at",                                                        :null => false
-    t.string   "store_order_id"
     t.string   "notes_internal"
     t.string   "notes_toPacker"
     t.string   "notes_fromPacker"
@@ -398,6 +399,7 @@ ActiveRecord::Schema.define(:version => 20140821173305) do
     t.integer  "total_avail_ext",                                               :default => 0,         :null => false
     t.decimal  "weight",                          :precision => 8, :scale => 2, :default => 0.0,       :null => false
     t.decimal  "shipping_weight",                 :precision => 8, :scale => 2, :default => 0.0
+    t.boolean  "is_packing_supply",                                             :default => false
   end
 
   add_index "products", ["store_id"], :name => "index_products_on_store_id"

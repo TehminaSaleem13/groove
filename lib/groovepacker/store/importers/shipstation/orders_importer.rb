@@ -94,11 +94,11 @@ module Groovepacker
           end
 
           def import_order(shipstation_order, order)
-            shipstation_order.increment_id = order.order_id
+            shipstation_order.increment_id = order.order_number
             shipstation_order.seller_id = order.seller_id
             shipstation_order.order_status_id = order.order_status_id
             shipstation_order.order_placed_time = order.order_date 
-            shipstation_order.firstname = order.username
+            shipstation_order.firstname = order.ship_name
             shipstation_order.email = order.buyer_email
             shipstation_order.address_1 = order.ship_street1
             shipstation_order.address_2 = order.ship_street2 unless order.ship_street2.nil?
@@ -107,8 +107,8 @@ module Groovepacker
             shipstation_order.postcode = order.ship_postal_code
             shipstation_order.country = order.ship_country_code 
             shipstation_order.notes_internal = order.internal_notes 
-            shipstation_order.order_number = order.order_number
-            shipstation_order.ship_name = order.ship_name
+            # shipstation_order.order_number = order.order_number
+            # shipstation_order.ship_name = order.ship_name
             shipstation_order.shipping_amount = order.shipping_amount
             shipstation_order.order_total = order.order_total
             shipstation_order.notes_from_buyer = order.notes_from_buyer

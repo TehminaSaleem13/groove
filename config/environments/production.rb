@@ -69,8 +69,8 @@ Groovepacks::Application.configure do
     :authentication => "plain",
     :enable_starttls_auto => true,
     :domain => 'gmail.com',
-    :user_name => 'uvarsity.elearn@gmail.com',
-    :password => 'uvarsity2015',
+    :user_name => 'groovepacker@gmail.com',
+    :password => '1TempPass!',
     :openssl_verify_mode  => 'none'
   }
 
@@ -84,4 +84,7 @@ Groovepacks::Application.configure do
   ENV['EBAY_DEV_ID'] = "353bd404-651b-4431-955d-25e0a0c8140f"
   ENV['EBAY_RU_NAME'] = "DSO-DSO698331-163d--aptkv"
   ENV['EBAY_SANDBOX_MODE'] = "NO"
+
+  ENV['SHIPSTATION_USERNAME'] = "dreadhead"
+  ENV['SHIPSTATION_PASSWORD'] = "g8J$v5KLoP"
 end

@@ -1,19 +1,18 @@
-<div style="padding-top: 20px;">
-<%= form_for :confirm, url: {action: "match"} do |f| %>
-	<div class="well span6" style="margin-left: 250px;">
-		<div class="control-group">
-			<label class="control-label span1">Email:</label>
-			<div class="controls span4">
-				<%= f.email_field :email %>
-			</div>
-
-			<label class="control-label span1">Zip Code :</label>
-			<div class="controls span4">
-				<%= f.text_field :postcode %>
-			</div>
-			<div style="margin-left: 150px;"><%= f.button(:submit, {class: 'btn btn-primary span1'})%>
-			</div>
-		</div> 
-	</div> 
-<% end %>
-</div>
+	<div class="container-fluid">
+		<div style="padding-top: 20px;" class="row bottom-well col-sm-offset-1 col-md-offset-1 col-lg-offset-1 col-md-10 col-sm-10 col-lg-10">
+			<%= form_for :confirm, url: {action: "match"} do |f| %>
+				<div style="margin-bottom:5px;">
+					<label class="col-md-4 col-sm-4 col-lg-4" style="text-align: right;">Email:</label>
+					<%= f.email_field :email %>
+				</div>
+				<div style="margin-bottom:5px;">
+					<label class="col-md-4 col-sm-4 col-lg-4" style="text-align: right;">Zip Code :</label>
+					<%= f.text_field :postcode %>
+				</div>
+				<div>
+					<label class="control-label col-md-4 col-sm-4 col-lg-4" style="text-align: right;"></label>
+					<%= f.button(:submit, {class: 'btn btn-primary'})%>
+				</div>  
+			<% end %>
+		</div>
+	</div>

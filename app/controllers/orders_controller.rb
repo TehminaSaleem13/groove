@@ -354,7 +354,7 @@ class OrdersController < ApplicationController
       dummy_user.name = 'Nobody'
       dummy_user.id = 0
       @result['order']['users'].unshift(dummy_user)
-
+      
       #add packing_slip_size and packing_slip_orientation
       # @result['order']['packing_slip_size'] = GeneralSetting.get_packing_slip_size
       # @result['order']['packing_slip_orientation'] = GeneralSetting.get_packing_slip_orientation
@@ -930,14 +930,15 @@ class OrdersController < ApplicationController
     
   end
   def match
-    # render :text => params.inspect and return
     email = params['confirm']['email']
     postcode = params['confirm']['postcode']
-    @orders = Order.where(email: email, postcode: postcode, status: 'scanned')
-    if !@orders.empty?
+    if postcode.length > 4
+      postcode = postcode[0..4]
+      @matching_orders = Order.where('postcode LIKE ?',"#{postcode}%")
+      unless @matching_orders.nil?
+        @matching_orders = @matching_orders.where(email: email, status: "scanned")
+      end
       render 'match'
-    else
-      render 'confirmation'
     end
   end
 

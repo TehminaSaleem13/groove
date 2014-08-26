@@ -133,20 +133,21 @@
 				  });
 				  document.getElementById('customButton').addEventListener('click', function(e)	{
 				  	setTimeout(function(){
-				  	console.log(valid.tenant_name);
-				  	console.log(valid.email);
-				  	if (valid.tenant_name && valid.email) {
-				  		console.log("valid");
-					    // Open Checkout with further options
-					    handler.open({
-					      name: 'Groovepacker',
-					      description: '1 subscription ($' + $('#amount').val() +')',
-					      amount: $('#amount').val()*100,
-					      email: $('#email').val(),
-					      allowRememberMe: false
-					    });
-					    e.preventDefault();
-					  };}, 400);
+					  	console.log(valid.tenant_name);
+					  	console.log(valid.email);
+					  	if (valid.tenant_name && valid.email) {
+					  		console.log("valid");
+						    // Open Checkout with further options
+						    handler.open({
+						      name: 'Groovepacker',
+						      description: '1 subscription ($' + $('#amount').val() +')',
+						      amount: $('#amount').val()*100,
+						      email: $('#email').val(),
+						      allowRememberMe: false
+						    });
+						    e.preventDefault();
+						  };
+						}, 400);
 				  });
 				</script>
 			</div>		

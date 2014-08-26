@@ -19,8 +19,7 @@ module Groovepacker
                   sku = ProductSku.new
                   sku.sku = item.sku
                   @product.product_skus << sku
-
-                  if set_product_fields(@product,item)
+                  if set_product_fields(@product,item,credential)
                     result[:success_imported] = result[:success_imported] + 1
                   else
                     result[:status] &= false
@@ -48,7 +47,7 @@ module Groovepacker
               unless products.nil?
                 product = products.first
                 @product = Product.find(id)
-                set_product_fields(@product,product)
+                set_product_fields(@product,product,credential)
               end 
             rescue Exception => e
               result &= false
@@ -56,10 +55,15 @@ module Groovepacker
             end
             result
           end
-          def set_product_fields(product, ssproduct)
+          def set_product_fields(product, ssproduct,credential)
             result = false 
             product.name = ssproduct.name
             product.inv_wh1 = ssproduct.warehouse_location
+            unless credential.store.nil? && credential.store.inventory_warehouse_id.nil?
+              inv_wh = ProductInventoryWarehouses.new
+              inv_wh.inventory_warehouse_id = credential.store.inventory_warehouse_id
+              product.product_inventory_warehousess << inv_wh
+            end
  
             unless ssproduct.weight_oz.nil?
               product.weight = ssproduct.weight_oz

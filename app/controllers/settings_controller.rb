@@ -302,6 +302,9 @@ class SettingsController < ApplicationController
         general_setting.import_orders_on_sat = params[:import_orders_on_sat]
         general_setting.import_orders_on_sun = params[:import_orders_on_sun]
 
+        general_setting.tracking_error_order_not_found = params[:tracking_error_order_not_found]
+        general_setting.tracking_error_info_not_found = params[:tracking_error_info_not_found]
+
         if general_setting.save
           @result['success_messages'].push('Settings updated successfully.')
         else
