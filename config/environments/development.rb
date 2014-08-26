@@ -56,27 +56,27 @@ Groovepacks::Application.configure do
   #   :openssl_verify_mode  => 'none'
   # }
 
-  config.action_mailer.smtp_settings = {
-    :address => "smtp.gmail.com",
-    :port => 587,  
-    :authentication => 'plain',
-    :enable_starttls_auto => true,
-    :domain => 'gmail.com',
-    :user_name => 'groovepacker@gmail.com',
-    :password => '1TempPass!',
-    :openssl_verify_mode  => 'none',
-    :TLS_required => 'yes'
-  }
   # config.action_mailer.smtp_settings = {
   #   :address => "smtp.gmail.com",
   #   :port => 587,  
-  #   :authentication => "plain",
+  #   :authentication => 'plain',
   #   :enable_starttls_auto => true,
   #   :domain => 'gmail.com',
-  #   :user_name => 'uvarsity.elearn@gmail.com',
-  #   :password => 'uvarsity2015',
-  #   :openssl_verify_mode  => 'none'
+  #   :user_name => 'groovepacker@gmail.com',
+  #   :password => '1TempPass!',
+  #   :openssl_verify_mode  => 'none',
+  #   :TLS_required => 'yes'
   # }
+  config.action_mailer.smtp_settings = {
+    :address => "smtp.gmail.com",
+    :port => 587,  
+    :authentication => "plain",
+    :enable_starttls_auto => true,
+    :domain => 'gmail.com',
+    :user_name => 'uvarsity.elearn@gmail.com',
+    :password => 'uvarsity2015',
+    :openssl_verify_mode  => 'none'
+  }
 
   Rails.logger = Logger.new(STDOUT)
   config.log_level = :warn
