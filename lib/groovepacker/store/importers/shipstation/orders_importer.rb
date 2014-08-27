@@ -10,9 +10,15 @@ module Groovepacker
             result = self.build_result
 
             begin
-              orders = client.order.where('OrderStatusID' => 2)
-              result[:total_imported] = orders.length
-
+              #import only those products that have been created after the last_imported_at time
+              if credential.last_imported_at.nil?
+                orders = client.order.where('OrderStatusID' => 2)
+              else
+                orders = client.order.where('OrderDate' => credential.last_imported_at, 'OrderStatusID' => 2)
+              end
+              # result[:total_imported] = orders.length
+              credential.last_imported_at = DateTime.now
+              credential.save
               unless orders.nil?
                 result[:total_imported] = orders.length
                 orders.each do |order|
