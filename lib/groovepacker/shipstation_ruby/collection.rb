@@ -38,7 +38,12 @@ module ShipStationRuby
         puts value
         if value.is_a?(Integer) || value == true || value == false
           filter_string = "#{shipstation_style_attribute} eq #{value}"
+        elsif value.is_a?(Time)
+          puts "Date Time field"
+          value = value.to_datetime
+          filter_string = "#{shipstation_style_attribute} gt datetime'#{value}'"
         else
+          puts "string"
           filter_string = "#{shipstation_style_attribute} eq '#{value}'"
         end
 
