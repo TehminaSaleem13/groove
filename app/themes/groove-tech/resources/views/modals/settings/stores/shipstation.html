@@ -50,3 +50,21 @@
       </div>
     </div>
   </div>
+
+  <div class="row">
+    <div class="col-md-6">
+    <legend>Import Product Images</legend>
+
+      <div class="form-group">
+        <div class="controls col-md-8">
+          <button ng-click="import_images()"class="modal-save-button" ng-show="edit_status">Import Product Images</button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <div class="col-xs-12">
+          <label class="alert alert-info" ng-show="stores.import.image.status_show">{{stores.import.image.status}}</label>
+        </div>
+      </div>
+    </div>
+  </div>

@@ -289,6 +289,22 @@ groovepacks_services.factory('stores',['$http','notification','$filter',function
         });
     };
 
+    var import_images = function(stores,report_id) {
+        return $http.get('/products/importimages/'+stores.single.id+'.json').success(function(data) {
+            if(data.status) {
+                stores.import.image.status = "Successfully imported "+data.success_imported+" of "+data.total_imported+
+                                             " images. " +data.previous_imported+" images were previously imported";
+            } else {
+               stores.import.image.status = "";
+                for (var j=0; j< data.messages.length; j++) {
+                    stores.import.image.status += data.messages[j]+" ";
+                } 
+            }
+        }).error(function(data) {
+           stores.import.image.status = "Import failed. Please check your credentials."; 
+        });
+    };
+
     var import_amazon_request = function(stores) {
         return $http.get('/products/requestamazonreport/'+stores.single.id+'.json').success(function(data){
             if (data.status) {
@@ -368,6 +384,7 @@ groovepacks_services.factory('stores',['$http','notification','$filter',function
         import: {
             products: import_products,
             orders: import_orders,
+            images: import_images,
             amazon: {
                 request: import_amazon_request,
                 check: import_amazon_check

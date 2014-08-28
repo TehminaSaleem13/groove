@@ -20,22 +20,6 @@ module Groovepacker
                   sku.sku = item.sku
                   @product.product_skus << sku
 
-                  order_items = client.order_items.where("SKU"=>item.sku)
-                  unless order_items.nil?
-                    unless order_items.first.nil?
-                      unless order_items.first.thumbnail_url.nil?
-                        image = ProductImage.new
-                        image.image = order_items.first.thumbnail_url
-                        @product.product_images << image
-                      end
-                      unless order_items.first.upc.nil?
-                        barcode = ProductBarcode.new
-                        barcode.barcode = order_items.first.upc
-                        @product.product_barcodes << barcode
-                      end
-                    end
-                  end
-
                   if set_product_fields(@product,item,credential)
                     result[:success_imported] = result[:success_imported] + 1
                   else

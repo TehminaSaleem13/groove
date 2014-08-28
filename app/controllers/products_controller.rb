@@ -157,6 +157,50 @@ class ProductsController < ApplicationController
 
 	end
 
+  def importimages
+    @store = Store.find(params[:id])
+    @result = Hash.new
+
+    @result['status'] = true
+    @result['messages'] = []
+    @result['total_imported'] = 0
+    @result['success_imported'] = 0
+    @result['previous_imported'] = 0
+
+    import_result = nil
+    puts current_user.inspect
+    if current_user.can?('import_products')
+      begin
+        if @store.store_type == 'Shipstation'
+          puts "in importimages"
+          context = Groovepacker::Store::Context.new(
+            Groovepacker::Store::Handlers::ShipstationHandler.new(@store))
+          puts "returned from images_importer"
+          import_result = context.import_images
+        end
+      rescue Exception => e
+        @result['status'] = false
+        @result['messages'].push(e.message)
+      end
+    else
+      @result['status'] = false
+      @result['messages'].push('You can not import images')
+    end
+    # puts @result.inspect
+    if !import_result.nil?
+      import_result[:messages].each do |message|
+        @result['messages'].push(message)
+      end
+      @result['total_imported'] = import_result[:total_imported]
+      @result['success_imported'] = import_result[:success_imported]
+      @result['previous_imported'] = import_result[:previous_imported]
+    end
+
+    respond_to do |format|
+      format.json { render json: @result}
+    end
+  end
+
   # PS:Where is this used?
 	def import_product_details
     if current_user.can?('import_products')

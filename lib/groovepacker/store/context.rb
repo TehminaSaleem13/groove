@@ -13,6 +13,10 @@ module Groovepacker
         self.handler.import_orders
       end
 
+      def import_images
+        self.handler.import_images
+      end
+
       attr_accessor :handler
     end
   end

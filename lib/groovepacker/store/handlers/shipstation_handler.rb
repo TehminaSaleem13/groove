@@ -23,6 +23,11 @@ module Groovepacker
           Groovepacker::Store::Importers::Shipstation::OrdersImporter.new(
             self.build_handle).import
         end
+
+        def import_images
+          Groovepacker::Store::Importers::Shipstation::ImagesImporter.new(
+            self.build_handle).import
+        end
       end
     end
   end
