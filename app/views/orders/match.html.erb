@@ -29,9 +29,23 @@
 						  <tr>
 						  	<td><%= order.increment_id%></td>
 						  	<td>
-						  		<%if order.tracking_num.nil?%>
-					    			<%if GeneralSetting.all.first.tracking_error_info_not_found.nil? || 
-					    				GeneralSetting.all.first.tracking_error_info_not_found==""%>
+						  		<%if order.status=='cancelled'%>
+						  			<div class="col-sm-12">
+							        <h3>Your order is in our system but appears to have been cancelled.</h3>
+											<p>
+											If you did not cancel the order please contact support and provide your order number above so we can assist you.
+											</p>
+							      </div>
+								  <%elsif order.status=='serviceissue'%>
+								  	<div class="col-sm-12">
+							        <h3>Your order is in our system but appears to have an exception of some type. We may be waiting on a response from you.</h3>
+											<p>
+											Please contact support and provide your order number so we can assist you.
+											</p>
+							      </div>
+						  		<%elsif order.tracking_num.nil?%>
+					    			<%if (GeneralSetting.all.first.tracking_error_info_not_found.nil? || 
+					    				GeneralSetting.all.first.tracking_error_info_not_found=="") && (order.status=='scanned' || order.status=='awaiting')%>
 					    				<div class="col-sm-12">
 								        <h3>Your order is in our system but we do not have tracking information available yet.</h3>
 								        <p>
@@ -43,10 +57,10 @@
 						    				<p><%=GeneralSetting.all.first.tracking_error_info_not_found%></p>
 								      </div>
 								    <%end%>
-								  <%else%>
-								  	<%#= link_to order.tracking_num, "https://www.google.com/search?q=" + order.tracking_num%>
-								  	<%= link_to"1234567890", "https://www.google.com/search?q=" + "1234567890"%>
-							    <%end%>
+								  <%end%>
+								  <%unless order.tracking_num.nil?%>
+							  		<%= link_to order.tracking_num, "https://www.google.com/search?q=" + order.tracking_num%>
+					  			<%end%>
 						  	</td>	
 						  </tr>
 						<% end %>

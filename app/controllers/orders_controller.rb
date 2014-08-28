@@ -936,7 +936,7 @@ class OrdersController < ApplicationController
       postcode = postcode[0..4]
       @matching_orders = Order.where('postcode LIKE ?',"#{postcode}%")
       unless @matching_orders.nil?
-        @matching_orders = @matching_orders.where(email: email, status: "scanned")
+        @matching_orders = @matching_orders.where(email: email)
       end
       render 'match'
     end
