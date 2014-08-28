@@ -56,10 +56,13 @@
                         <i class="glyphicon glyphicon-remove" ng-click="remove_image($index)"></i>
                     </div>
                 </div>
+                <div class="alert alert-info" ng-show="!products.single.images.nil?">An image for a product will be imported automatically when this product occurs in an order. You can also upload images manually at any time.</div>
                 <div ng-hide="true">
                     <input name="product_image" id="product_image{{custom_identifier}}" file-upload type="file" value="Add Image" required/>
                 </div>
+                <div>
                 <button class="modal-save-button" ng-click="add_image()">Add Image</button>
+                </div>
                 </div>
             </div>
 
