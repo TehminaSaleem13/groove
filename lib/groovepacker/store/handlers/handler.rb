@@ -18,6 +18,10 @@ module Groovepacker
           {}
         end
 
+        def import_images
+          {}
+        end
+
         protected
           attr_accessor :store
 
