@@ -1,8 +1,11 @@
 <div bindonce="options" class="binder">
 
 <div bo-if="options.select_all !== false" class="select_all_box col-md-2 col-lg-2">
-    <button ng-click="options.select_all(true)" ng-hide="options.setup.select_all" type="button" class="btn groove-button">Select All<br/>{{rows.length}}</button>
-    <button ng-click="options.select_all(false)" ng-show="options.setup.select_all" type="button" class="btn groove-button">Selected:<br/>{{rows.length}}</button>
+    <button ng-click="options.select_all(true)" ng-hide="options.setup.select_all" type="button" class="btn groove-button">Select All<br/>{{options.paginate.total_items}}</button>
+    <button ng-click="options.select_all(false)" ng-show="options.setup.select_all" type="button" class="btn groove-button active">Selected:<br/>{{options.paginate.total_items}}</button>
+</div>
+<div class="col-md-12 text-center" ng-show="options.paginate.show">
+    <pagination total-items="options.paginate.total_items" ng-model="options.paginate.current_page" max-size="options.paginate.max_size" items-per-page="options.paginate.items_per_page" class="pagination-sm"  rotate="false"></pagination>
 </div>
 <div class="col-md-12">
     <table groov-dragtable="dragOptions" groov-enabled="options.draggable" groov-model="theads" id="{{custom_identifier}}" class="well table-well table table-striped table-hover table-alt">

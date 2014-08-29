@@ -542,8 +542,10 @@ class ProductsController < ApplicationController
   	@result['status'] = true
 	if !params[:search].nil? && params[:search] != ''
 
-		@products = do_search
-		@result['products'] = make_products_list(@products)
+		@products = do_search(false)
+		@result['products'] = make_products_list(@products['products'])
+    @result['products_count'] = get_products_count
+    @result['products_count']['search'] = @products['count']
 	else
 		@result['status'] = false
 		@result['message'] = 'Improper search string'
@@ -1332,7 +1334,7 @@ class ProductsController < ApplicationController
   	end		
  	end
 
-  def do_search
+  def do_search(results_only = true)
     limit = 10
     offset = 0
     # Get passed in parameter variables if they are valid.
@@ -1340,18 +1342,37 @@ class ProductsController < ApplicationController
 
     offset = params[:offset] if !params[:offset].nil? && params[:offset].to_i >= 0
     search = params[:search]
+    is_kit = 0
+    supported_kit_params = ['0', '1', '-1']
+    kit_query = ""
     query_add = ""
+
+    is_kit = params[:iskit] if !params[:iskit].nil?  &&
+        supported_kit_params.include?(params[:iskit])
+    unless is_kit == '-1'
+      kit_query = " products.is_kit="+is_kit.to_s+" AND "
+    end
     unless params[:select_all]
       query_add = " LIMIT "+limit+" OFFSET "+offset
     end
-    #todo: include sku in search as well in future.
 
-    return Product.find_by_sql("(SELECT * from products WHERE name like '%"+search+"%') UNION
-      (SELECT products.* from products, product_barcodes where products.id = product_barcodes.product_id AND product_barcodes.barcode like '%"+search+"%' ) UNION
-      (SELECT products.* from products, product_skus where products.id = product_skus.product_id AND product_skus.sku like '%"+search+"%' ) UNION
-      (SELECT products.* from products, product_cats where products.id = product_cats.product_id AND product_cats.category like '%"+search+"%' ) UNION
-      (SELECT products.* from products, product_inventory_warehouses where products.id = product_inventory_warehouses.product_id AND (product_inventory_warehouses.location_primary like '%"+search+"%' OR product_inventory_warehouses.location_secondary like '%"+search+"%') ) " +query_add)
+    base_query = "(SELECT * from products WHERE "+kit_query+" products.name like '%"+search+"%') UNION
+      (SELECT products.* from products, product_barcodes where "+kit_query+" products.id = product_barcodes.product_id AND product_barcodes.barcode like '%"+search+"%' ) UNION
+      (SELECT products.* from products, product_skus where "+kit_query+" products.id = product_skus.product_id AND product_skus.sku like '%"+search+"%' ) UNION
+      (SELECT products.* from products, product_cats where "+kit_query+" products.id = product_cats.product_id AND product_cats.category like '%"+search+"%' ) UNION
+      (SELECT products.* from products, product_inventory_warehouses where "+kit_query+" products.id = product_inventory_warehouses.product_id AND (product_inventory_warehouses.location_primary like '%"+search+"%' OR product_inventory_warehouses.location_secondary like '%"+search+"%') ) "
+    result_rows = Product.find_by_sql(base_query+query_add)
 
+    if results_only
+      result = result_rows
+    else
+      result = Hash.new
+      result['products'] = result_rows
+      result['count'] = Product.count_by_sql("SELECT count(*) as count from("+base_query+") as tmp")
+    end
+
+
+    return result
   end
 
   def do_getproducts
@@ -1540,11 +1561,22 @@ class ProductsController < ApplicationController
   end
   def get_products_count
   	count = Hash.new
-    count['all'] = Product.all.count
-    count['active'] = Product.where(:status => 'active').count
-    count['inactive'] = Product.where(:status => 'inactive').count
-    count['new'] = Product.where(:status => 'new').count
-
+    is_kit = 0
+    supported_kit_params = ['0', '1', '-1']
+    is_kit = params[:iskit] if !params[:iskit].nil?  &&
+        supported_kit_params.include?(params[:iskit])
+    if is_kit == '-1'
+      counts = Product.select('status,count(*) as count').where(:status=>['active','inactive','new']).group(:status)
+    else
+      counts = Product.select('status,count(*) as count').where(:is_kit=>is_kit.to_s,:status=>['active','inactive','new']).group(:status)
+    end
+    all = 0
+    counts.each do |single|
+      count[single.status] = single.count
+      all += single.count
+    end
+    count['all'] = all
+    count['search'] = 0
     count
   end
 end

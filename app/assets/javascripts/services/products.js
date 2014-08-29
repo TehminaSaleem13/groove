@@ -27,7 +27,7 @@ groovepacks_services.factory('products',['$http','notification',function($http,n
                 status:'',
                 productArray:[]
             },
-            products_count: {                
+            products_count: {
             }
         };
     };
@@ -50,15 +50,15 @@ groovepacks_services.factory('products',['$http','notification',function($http,n
     };
 
     //list related functions
-    var get_list = function(object,next) {
+    var get_list = function(object,page) {
         var url = '';
         var setup = object.setup;
-        next = typeof next == 'boolean' ? next : false;
-        if(!next) {
-            object.setup.offset = 0;
+        if(typeof page != 'undefined' && page > 0) {
+            page = page - 1;
         } else {
-            object.setup.offset = object.setup.offset + object.setup.limit;
+            page = 0;
         }
+        object.setup.offset = page * object.setup.limit;
         if(setup.search=='') {
             url = '/products/getproducts.json?filter='+setup.filter+'&sort='+setup.sort+'&order='+setup.order;
         } else {
@@ -70,13 +70,7 @@ groovepacks_services.factory('products',['$http','notification',function($http,n
                 if(data.status) {
                     object.load_new = (data.products.length > 0);
                     object.products_count = data.products_count;
-                    if(!next) {
-                        object.list = data.products;
-                    } else {
-                        for (var i = 0; i< data.products.length; i++) {
-                            object.list.push(data.products[i]);
-                        }
-                    }
+                    object.list = data.products;
                 } else {
                     notification.notify("Can't load list of products",0);
                 }

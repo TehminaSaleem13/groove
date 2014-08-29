@@ -7,6 +7,14 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout','$http','$sce','se
             show_hide:false,
             editable:false,
             sortable:false,
+            paginate: {
+                show:false,
+                total_items:0,
+                max_size:12,
+                current_page:1,
+                items_per_page:10,
+                callback: function(){}
+            },
             sort_func:function() {},
             setup: {},
             all_fields:{}
@@ -108,6 +116,12 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout','$http','$sce','se
                 }
             };
 
+            myscope.update_paginate = function() {
+                var options = default_options();
+                jQuery.extend(true,options.paginate,scope.groovDataGrid.paginate);
+                scope.options.paginate = options.paginate;
+            };
+
             myscope.init = function() {
                 scope.theads = [];
 
@@ -164,6 +178,10 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout','$http','$sce','se
                         combo: 'mod+i',
                         callback: myscope.invert_selection
                      });
+                }
+                if(typeof scope.groovDataGrid['paginate']  != "undefined") {
+                    scope.$watch('groovDataGrid.paginate',myscope.update_paginate,true);
+                    scope.$watch('options.paginate.current_page',scope.options.paginate.callback);
                 }
             };
 

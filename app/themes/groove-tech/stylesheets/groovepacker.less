@@ -37,6 +37,15 @@
   border: 1px solid #dcdcdc;
   border-radius: @border-radius-base + 15;
   text-transform: capitalize;
+  &.active {
+    color:#fff;
+    background-color: #85ba46;
+    &:hover,
+    &:focus {
+      color:#fff;
+      background-color: #87c14c;
+    }
+  }
   &:hover,
   &:focus {
     color: @btn-default-color;
@@ -148,9 +157,10 @@
         background-color: #ededed;
       }
       &.active {
-        background-color: #97dc57;
+        background-color: #558641;
+        color:#fff;
         &:hover {
-          background-color: #b2ed5a;
+          background-color: #628c3a;
         }
       }
     }
@@ -1577,6 +1587,31 @@ ul.tag-list > li {
     text-decoration: underline;
   }
 }
+
+.pagination-sm {
+  margin:0px auto;
+  & li.active > a {
+    background-color: #558641;
+    border: #609545;
+    &:hover {
+      background-color: #78b24c;
+      border: #78b24c;
+    }
+  }
+  & > li > a {
+    .groove-button;
+    border-radius: 2px;
+  }
+  & > li:first-child > a {
+    border-top-left-radius: @border-radius-base + 15;
+    border-bottom-left-radius: @border-radius-base + 15;
+  }
+  & > li:last-child > a {
+    border-top-right-radius: @border-radius-base + 15;
+    border-bottom-right-radius: @border-radius-base + 15;
+  }
+}
+
 
 #loading-bar .bar {
   background: #97dc57;

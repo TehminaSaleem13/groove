@@ -19,7 +19,7 @@ groovepacks_directives.directive('groovDragtable',['$timeout', function ($timeou
                             scope.options.update();
                         }
                     }
-                })
+                });
 
             };
             myscope.prefunc = function(cell) {

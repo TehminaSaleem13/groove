@@ -6,22 +6,22 @@
                     <accordion-group is-open="tabs[0].open">
                         <accordion-heading>
                             <i></i>
-                            <a ui-sref="products.type.filter.page({type:'product',filter:'active',page:1})">Products</a>
+                            <a ui-sref="products.type.filter.page({type:'product',filter:'active',page:1})" ng-click="products.setup.search=''">Products</a>
                         </accordion-heading>
                         <li ng-click="create_product()">Create</li>
-                        <li ng-class="{active: products.setup.filter=='all' && products.setup.is_kit == 0}" ui-sref="products.type.filter.page({type:'product',filter:'all',page:1})" >Show All</li>
-                        <li ng-class="{active: products.setup.filter=='active' && products.setup.is_kit == 0}"  ui-sref="products.type.filter.page({type:'product',filter:'active',page:1})">Active Products</li>
-                        <li ng-class="{active: products.setup.filter=='inactive' && products.setup.is_kit == 0}"  ui-sref="products.type.filter.page({type:'product',filter:'inactive',page:1})">Inactive Products</li>
-                        <li ng-class="{active: products.setup.filter=='new' && products.setup.is_kit == 0}"  ui-sref="products.type.filter.page({type:'product',filter:'new',page:1})">New <span class="pull-right badge badge-important" ng-show="products.products_count.new>0">{{products.products_count.new}}</span></li>
+                        <li ng-class="{active: products.setup.search=='' && products.setup.filter=='all' && products.setup.is_kit == 0}" ng-click="products.setup.search=''" ui-sref="products.type.filter.page({type:'product',filter:'all',page:1})" >Show All</li>
+                        <li ng-class="{active: products.setup.search=='' && products.setup.filter=='active' && products.setup.is_kit == 0}" ng-click="products.setup.search=''"  ui-sref="products.type.filter.page({type:'product',filter:'active',page:1})">Active Products</li>
+                        <li ng-class="{active: products.setup.search=='' && products.setup.filter=='inactive' && products.setup.is_kit == 0}" ng-click="products.setup.search=''"  ui-sref="products.type.filter.page({type:'product',filter:'inactive',page:1})">Inactive Products</li>
+                        <li ng-class="{active: products.setup.search=='' && products.setup.filter=='new' && products.setup.is_kit == 0}" ng-click="products.setup.search=''"  ui-sref="products.type.filter.page({type:'product',filter:'new',page:1})">New <span class="pull-right badge badge-important" ng-show="products.products_count.new>0">{{products.products_count.new}}</span></li>
                     </accordion-group>
                     <accordion-group is-open="tabs[1].open">
                         <accordion-heading>
-                            <a ui-sref="products.type.filter.page({type:'kit',filter:'active',page:1})">Kits</a>
+                            <a ui-sref="products.type.filter.page({type:'kit',filter:'active',page:1})" ng-click="products.setup.search=''">Kits</a>
                         </accordion-heading>
-                        <li ng-class="{active: products.setup.filter=='all' && products.setup.is_kit == 1}" ui-sref="products.type.filter.page({type:'kit',filter:'all',page:1})" >Show All</li>
-                        <li ng-class="{active: products.setup.filter=='active' && products.setup.is_kit == 1}"  ui-sref="products.type.filter.page({type:'kit',filter:'active',page:1})">Active Kits</li>
-                        <li ng-class="{active: products.setup.filter=='inactive' && products.setup.is_kit == 1}"  ui-sref="products.type.filter.page({type:'kit',filter:'inactive',page:1})">Inactive Kits</li>
-                        <li ng-class="{active: products.setup.filter=='new' && products.setup.is_kit == 1}"  ui-sref="products.type.filter.page({type:'kit',filter:'new',page:1})">New Kits</li>
+                        <li ng-class="{active: products.setup.search=='' && products.setup.filter=='all' && products.setup.is_kit == 1}" ng-click="products.setup.search=''" ui-sref="products.type.filter.page({type:'kit',filter:'all',page:1})" >Show All</li>
+                        <li ng-class="{active: products.setup.search=='' && products.setup.filter=='active' && products.setup.is_kit == 1}" ng-click="products.setup.search=''"  ui-sref="products.type.filter.page({type:'kit',filter:'active',page:1})">Active Kits</li>
+                        <li ng-class="{active: products.setup.search=='' && products.setup.filter=='inactive' && products.setup.is_kit == 1}" ng-click="products.setup.search=''"  ui-sref="products.type.filter.page({type:'kit',filter:'inactive',page:1})">Inactive Kits</li>
+                        <li ng-class="{active: products.setup.search=='' && products.setup.filter=='new' && products.setup.is_kit == 1}" ng-click="products.setup.search=''" ui-sref="products.type.filter.page({type:'kit',filter:'new',page:1})">New Kits</li>
                     </accordion-group>
                     <accordion-group is-open="tabs[2].open">
                         <accordion-heading>
@@ -63,7 +63,7 @@
             </div>
             <div class="row">
                 <div class="col-sm-12">
-                    <div groov-data-grid="gridOptions" groov-list="products.list" infinite-scroll="product_next()" infinite-scroll-disabled="{{!products.load_new}}"></div>
+                    <div groov-data-grid="gridOptions" groov-list="products.list" infinite-scroll-disabled="{{!products.load_new}}"></div>
                 </div>
             </div>
             <div ui-view></div>
