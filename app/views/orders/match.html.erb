@@ -45,7 +45,7 @@
 							      </div>
 						  		<%elsif order.tracking_num.nil?%>
 					    			<%if (GeneralSetting.all.first.tracking_error_info_not_found.nil? || 
-					    				GeneralSetting.all.first.tracking_error_info_not_found=="") && (order.status=='scanned' || order.status=='awaiting')%>
+					    				GeneralSetting.all.first.tracking_error_info_not_found=="") && (order.status=='scanned' || order.status=='awaiting' || order.status=='onhold')%>
 					    				<div class="col-sm-12">
 								        <h3>Your order is in our system but we do not have tracking information available yet.</h3>
 								        <p>
