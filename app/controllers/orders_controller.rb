@@ -67,7 +67,6 @@ class OrdersController < ApplicationController
     end
   end
 
-
   # PUT /orders/1
   # PUT /orders/1.json
   def update
@@ -932,14 +931,12 @@ class OrdersController < ApplicationController
   def match
     email = params['confirm']['email']
     postcode = params['confirm']['postcode']
-    if postcode.length > 4
-      postcode = postcode[0..4]
-      @matching_orders = Order.where('postcode LIKE ?',"#{postcode}%")
-      unless @matching_orders.nil?
-        @matching_orders = @matching_orders.where(email: email)
-      end
-      render 'match'
+
+    @matching_orders = Order.where('postcode LIKE ?',"#{postcode}%")
+    unless @matching_orders.nil?
+      @matching_orders = @matching_orders.where(email: email)
     end
+    render 'match'
   end
 
   private
