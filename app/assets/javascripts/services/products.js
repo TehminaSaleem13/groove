@@ -79,10 +79,14 @@ groovepacks_services.factory('products',['$http','notification',function($http,n
                                 object.current = i;
                             }
                         }
-                        for(var j=0; j<object.selected.length;j++) {
-                            if(object.list[i].id == object.selected[j].id) {
-                                object.list[i].checked = object.selected[j].checked;
-                                break;
+                        if(object.setup.select_all) {
+                            object.list[i].checked = object.setup.select_all
+                        } else {
+                            for (var j = 0; j < object.selected.length; j++) {
+                                if (object.list[i].id == object.selected[j].id) {
+                                    object.list[i].checked = object.selected[j].checked;
+                                    break;
+                                }
                             }
                         }
                     }
@@ -207,7 +211,6 @@ groovepacks_services.factory('products',['$http','notification',function($http,n
                     break;
                 }
             }
-            console.log(products.selected);
         }
     };
 

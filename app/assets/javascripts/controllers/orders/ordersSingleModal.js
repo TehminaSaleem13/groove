@@ -1,6 +1,6 @@
 groovepacks_controllers.
-    controller('ordersSingleModal', [ '$scope', 'order_data', 'order_next', '$state', '$stateParams','$modal', '$modalInstance', '$timeout', 'hotkeys', 'orders','products',
-        function(scope,order_data,order_next,$state,$stateParams,$modal, $modalInstance,$timeout,hotkeys,orders,products) {
+    controller('ordersSingleModal', [ '$scope', 'order_data', 'load_page', '$state', '$stateParams','$modal', '$modalInstance', '$timeout','$q', 'hotkeys', 'orders','products',
+        function(scope,order_data,load_page,$state,$stateParams,$modal, $modalInstance,$timeout,$q,hotkeys,orders,products) {
 
             var myscope = {};
 
@@ -78,8 +78,8 @@ groovepacks_controllers.
             };
 
             scope.item_remove_selected = function() {
-                ids=[];
-                for (i in scope.orders.single.items) {
+                var ids=[];
+                for (var i = 0; i< scope.orders.single.items.length; i++) {
                     if(scope.orders.single.items[i].checked ==true) {
                         ids.push(scope.orders.single.items[i].iteminfo.id);
                     }
@@ -123,7 +123,11 @@ groovepacks_controllers.
                 if(scope.orders.current > 0) {
                     myscope.load_item(scope.orders.current -1);
                 } else {
-                    alert("Already at the top of the list");
+                    load_page('previous').then(function(){
+                        myscope.load_item(scope.orders.list.length -1);
+                    },function(){
+                        alert("Already at the top of the list");
+                    });
                 }
             };
             myscope.down_key = function (event) {
@@ -132,12 +136,10 @@ groovepacks_controllers.
                 if(scope.orders.current < scope.orders.list.length -1) {
                     myscope.load_item(scope.orders.current +1);
                 } else {
-                    order_next(function(){
-                        if(scope.orders.current < scope.orders.list.length -1) {
-                            myscope.load_item(scope.orders.current +1);
-                        } else {
-                            alert("Already at the bottom of the list");
-                        }
+                    load_page('next').then(function(){
+                        myscope.load_item(0);
+                    }, function(){
+                        alert("Already at the bottom of the list");
                     });
                 }
             };
@@ -178,7 +180,11 @@ groovepacks_controllers.
                     size:'lg',
                     resolve: {
                         product_data: function(){return scope.item_products},
-                        product_next: function(){return function(func){if(typeof func=='function'){func();}}},
+                        load_page: function(){return function() {
+                            var req = $q.defer();
+                            req.reject();
+                            return req.promise;
+                        };},
                         product_id: function(){return row.productinfo.id;}
                     }
                 });

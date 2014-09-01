@@ -45,34 +45,37 @@ groovepacks_controllers.
                     var content = '<table style="font-size: 12px;">';
                     for(var i=0; i<$scope.import_summary.import_items.length; i++) {
                         var cur_item = $scope.import_summary.import_items[i];
-                        content+='<tr><td>';
-                        if(cur_item.store_info.store_type=='Ebay') {
-                            content += '<img src="https://s3.amazonaws.com/groovepacker/EBAY-BUTTON.png" width="60px" ' +
-                                'height="50px" alt="EBay"/>'
-                        } else if(cur_item.store_info.store_type=='Amazon') {
-                            content += '<img src="https://s3.amazonaws.com/groovepacker/amazonLogo.jpg" width="60px" ' +
-                                'height="50px" alt="Amazon"/>'
-                        } else if(cur_item.store_info.store_type=='Magento') {
-                            content += '<img src="https://s3.amazonaws.com/groovepacker/MagentoLogo.jpg" width="60px" ' +
-                                'height="50px" alt="Magento"/>'
-                        } else if(cur_item.store_info.store_type=='Shipstation') {
-                            content += '<img src="/assets/images/ShipStation_logo.png" width="60px" ' +
-                                'height="50px" alt="Shipstation"/>'
+                        if(cur_item && cur_item.store_info) {
+                            content+='<tr><td>';
+                            if(cur_item.store_info.store_type=='Ebay') {
+                                content += '<img src="https://s3.amazonaws.com/groovepacker/EBAY-BUTTON.png" width="60px" ' +
+                                           'height="50px" alt="EBay"/>'
+                            } else if(cur_item.store_info.store_type=='Amazon') {
+                                content += '<img src="https://s3.amazonaws.com/groovepacker/amazonLogo.jpg" width="60px" ' +
+                                           'height="50px" alt="Amazon"/>'
+                            } else if(cur_item.store_info.store_type=='Magento') {
+                                content += '<img src="https://s3.amazonaws.com/groovepacker/MagentoLogo.jpg" width="60px" ' +
+                                           'height="50px" alt="Magento"/>'
+                            } else if(cur_item.store_info.store_type=='Shipstation') {
+                                content += '<img src="/assets/images/ShipStation_logo.png" width="60px" ' +
+                                           'height="50px" alt="Shipstation"/>'
+                            }
+                            content+='</td>';
+                            content+=$interpolate('<td>{{store_info.name}}</td>')(cur_item);
+                            content+='<td style="text-align:right;">';
+                            if(cur_item.import_info.status=='completed') {
+                                content+=$interpolate('Imported {{import_info.success_imported}} of ' +
+                                                      '{{import_info.success_imported+import_info.previous_imported}} orders.')(cur_item);
+                            } else if(cur_item.import_info.status=='not_started') {
+                                content+='Import not started.';
+                            } else if(cur_item.import_info.status=='in_progress') {
+                                content+='Import in progress.';
+                            } else if(cur_item.import_info.status=='failed') {
+                                content+='Import failed..';
+                            }
+                            content+='</td></tr>';
                         }
-                        content+='</td>';
-                        content+=$interpolate('<td>{{store_info.name}}</td>')(cur_item);
-                        content+='<td style="text-align:right;">';
-                        if(cur_item.import_info.status=='completed') {
-                            content+=$interpolate('Imported {{import_info.success_imported}} of ' +
-                                '{{import_info.success_imported+import_info.previous_imported}} orders.')(cur_item);
-                        } else if(cur_item.import_info.status=='not_started') {
-                            content+='Import not started.';
-                        } else if(cur_item.import_info.status=='in_progress') {
-                            content+='Import in progress.';
-                        } else if(cur_item.import_info.status=='failed') {
-                            content+='Import failed..';
-                        }
-                        content+='</td></tr>';
+
                     }
                     content+='</table>';
 
