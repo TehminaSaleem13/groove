@@ -7,17 +7,22 @@
 </div>
 
 
-<div class="modal-body" infinite-scroll="product_next()" infinite-scroll-disabled="{{load_disabled}}">
+<div class="modal-body">
 <div class="container-fluid bottom-well">
     <div class="row">
         <div class="col-sm-offset-3 col-sm-6">
             <input type="text" id="alias-search-query-{{custom_identifier}}" autofocus="autofocus" ng-model="products.setup.search" class="form-control search-box" placeholder="Search term" />
         </div>
     </div>
+    <div class="row top-buffer">
+        <div class="col-md-12 text-center" ng-show="paginate.show">
+            <pagination total-items="paginate.total_items" ng-model="paginate.current_page" max-size="paginate.max_size" items-per-page="paginate.items_per_page" class="pagination-sm"  rotate="false"></pagination>
+        </div>
+    </div>
     <div class="row">
         <div class="col-sm-12">
 
-            <table class="well table-well table table-striped table-alt infinite-scroller aliasproductstbl" >
+            <table class="well table-well table table-striped table-alt aliasproductstbl" >
                 <thead>
                 <tr>
                     <th ng-class="{active: products.setup.sort=='name'}">
@@ -43,7 +48,6 @@
                 </tr>
                 </tbody>
             </table>
-            <button ng-show="products.load_new" class="modal-cancel-button" style="width:100%;" ng-click="product_next()">Load More</button>
         </div>
     </div>
 

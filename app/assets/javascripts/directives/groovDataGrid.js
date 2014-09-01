@@ -4,6 +4,7 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout','$http','$sce','se
             identifier:'datagrid',
             select_all:false,
             selectable:false,
+            select_single:function(){},
             show_hide:false,
             editable:false,
             sortable:false,
@@ -58,10 +59,11 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout','$http','$sce','se
 
             scope.check_uncheck = function(row,index,event) {
                 if(scope.options.selectable) {
-                    if(!myscope.last_clicked) {
+                    if(myscope.last_clicked < 0) {
                         myscope.last_clicked = index;
                     }
                     row.checked = !row.checked;
+                    scope.options.select_single(row);
                     if(event.shiftKey) {
                         event.preventDefault();
                         var start = index;
@@ -114,16 +116,19 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout','$http','$sce','se
                 for(var i =0; i < scope.rows.length; i++) {
                     scope.rows[i].checked = !scope.rows[i].checked;
                 }
+                myscope.last_clicked =-1;
             };
 
             myscope.update_paginate = function() {
                 var options = default_options();
                 jQuery.extend(true,options.paginate,scope.groovDataGrid.paginate);
                 scope.options.paginate = options.paginate;
+                myscope.last_clicked =-1;
             };
 
             myscope.init = function() {
                 scope.theads = [];
+                myscope.last_clicked =-1;
 
                 scope.editable={};
                 var options = default_options();

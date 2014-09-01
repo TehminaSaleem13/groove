@@ -11,6 +11,7 @@ groovepacks_services.factory('products',['$http','notification',function($http,n
     var get_default = function() {
         return {
             list: [],
+            selected:[],
             single: {},
             load_new: true,
             current: 0,
@@ -71,6 +72,20 @@ groovepacks_services.factory('products',['$http','notification',function($http,n
                     object.load_new = (data.products.length > 0);
                     object.products_count = data.products_count;
                     object.list = data.products;
+                    object.current = false;
+                    for(var i= 0; i< object.list.length; i++) {
+                        if(object.single && typeof object.single['basicinfo'] !="undefined") {
+                            if(object.list[i].id == object.single.basicinfo.id) {
+                                object.current = i;
+                            }
+                        }
+                        for(var j=0; j<object.selected.length;j++) {
+                            if(object.list[i].id == object.selected[j].id) {
+                                object.list[i].checked = object.selected[j].checked;
+                                break;
+                            }
+                        }
+                    }
                 } else {
                     notification.notify("Can't load list of products",0);
                 }
@@ -78,12 +93,25 @@ groovepacks_services.factory('products',['$http','notification',function($http,n
         ).error(notification.server_error);
     };
 
+    var total_items_list = function(products) {
+        var total_items;
+        if(products.setup.search != "") {
+            total_items = products.products_count['search'];
+        } else {
+            total_items = products.products_count[products.setup['filter']];
+        }
+        if(typeof total_items == 'undefined') {
+            total_items = 0;
+        }
+        return total_items;
+    };
+
     var update_list = function(action,products) {
         if(["update_status","delete","duplicate","barcode"].indexOf(action) != -1) {
             products.setup.productArray = [];
-            for(var i =0; i < products.list.length; i++) {
-                if (products.list[i].checked == true) {
-                    products.setup.productArray.push({id: products.list[i].id});
+            for(var i =0; i < products.selected.length; i++) {
+                if (products.selected[i].checked == true) {
+                    products.setup.productArray.push({id: products.selected[i].id});
                 }
             }
             var url = '';
@@ -101,6 +129,7 @@ groovepacks_services.factory('products',['$http','notification',function($http,n
                 if(data.status) {
                     notification.notify(success_messages[action],1);
                     products.setup.select_all =  false;
+                    products.selected = [];
                 } else {
                     notification.notify(data.messages,0);
                 }
@@ -166,6 +195,20 @@ groovepacks_services.factory('products',['$http','notification',function($http,n
                 }
             }
         }).error(notification.server_error);
+    };
+
+    var select_single = function(products,row) {
+        if(row.checked) {
+            products.selected.push(row);
+        } else {
+            for(var i = 0; i < products.selected.length; i++) {
+                if(products.selected[i].id == row.id) {
+                    products.selected.splice(i,1);
+                    break;
+                }
+            }
+            console.log(products.selected);
+        }
     };
 
     var add_image = function(products,image) {
@@ -240,6 +283,7 @@ groovepacks_services.factory('products',['$http','notification',function($http,n
         },
         list: {
             get: get_list,
+            total_items:total_items_list,
             update: update_list,
             update_node: update_list_node
         },
@@ -248,6 +292,7 @@ groovepacks_services.factory('products',['$http','notification',function($http,n
             get_by_barcode: get_single_product_by_barcode,
             create:create_single,
             update:update_single,
+            select: select_single,
             image_upload: add_image,
             alias: set_alias,
             reset_obj: reset_single_obj,

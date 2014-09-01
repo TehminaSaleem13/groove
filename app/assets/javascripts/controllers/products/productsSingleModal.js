@@ -1,6 +1,6 @@
 groovepacks_controllers.
-    controller('productsSingleModal', [ '$scope', 'product_data', 'product_next', 'product_id', 'hotkeys', '$state', '$stateParams', '$modalInstance', '$timeout','$modal','products','warehouses',
-    function(scope,product_data,product_next, product_id, hotkeys, $state,$stateParams,$modalInstance,$timeout,$modal,products,warehouses) {
+    controller('productsSingleModal', [ '$scope', 'product_data', 'load_page', 'product_id', 'hotkeys', '$state', '$stateParams', '$modalInstance', '$timeout','$modal','$q','products','warehouses',
+    function(scope,product_data,load_page, product_id, hotkeys, $state,$stateParams,$modalInstance,$timeout,$modal,$q,products,warehouses) {
         var myscope = {};
 
 
@@ -60,7 +60,7 @@ groovepacks_controllers.
         };
 
         scope.load_kit = function(kit,event) {
-            if(typeof event !=undefined) {
+            if(typeof event !='undefined') {
                 event.preventDefault();
                 event.stopPropagation();
             }
@@ -70,7 +70,11 @@ groovepacks_controllers.
                 size:'lg',
                 resolve: {
                     product_data: function(){return scope.kit_products},
-                    product_next: function(){return function(func){if(typeof func=='function'){func();}}},
+                    load_page: function(){return function() {
+                        var req = $q.defer();
+                        req.reject();
+                        return req.promise;
+                    };},
                     product_id: function(){return kit.option_product_id;}
                 }
             });
@@ -131,13 +135,11 @@ groovepacks_controllers.
             if(scope.products.current < scope.products.list.length -1) {
                 myscope.load_item(scope.products.current +1);
             } else {
-                product_next(function(){
-                    if(scope.products.current < scope.products.list.length -1) {
-                        myscope.load_item(scope.products.current +1);
-                    } else {
-                        alert("Already at the bottom of the list");
-                    }
-                })
+                load_page('next').then(function() {
+                    myscope.load_item(0);
+                },function() {
+                    alert("Already at the bottom of the list");
+                });
             }
         };
         myscope.up_key = function (event) {
@@ -146,7 +148,11 @@ groovepacks_controllers.
             if(scope.products.current > 0) {
                 myscope.load_item(scope.products.current -1);
             } else {
-                alert("Already at the top of the list");
+                load_page('previous').then(function() {
+                    myscope.load_item(scope.products.list.length -1);
+                },function(){
+                    alert("Already at the top of the list");
+                });
             }
         };
         scope.update_single_product = function(post_fn,auto) {

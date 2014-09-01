@@ -1,21 +1,21 @@
 groovepacks_controllers.
-controller('productsCtrl', [ '$scope', '$http', '$timeout', '$stateParams', '$location', '$state', '$cookies','$modal','products',
-function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$modal,products) {
+controller('productsCtrl', [ '$scope', '$http', '$timeout', '$stateParams', '$location', '$state', '$cookies','$q','$modal','products',
+function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,$modal,products) {
     //Definitions
 
     var myscope= {};
     /*
      * Public methods
      */
-    $scope.product_next = function(direction) {
-        if(typeof direction == 'undefined' || direction !='previous') {
-            return myscope.get_products();
-        }
-        return myscope.get_products();
+    $scope.load_page = function(direction) {
+        var page = parseInt($state.params.page,10);
+        page = (typeof direction == 'undefined' || direction !='previous')? page+1 : page-1;
+        return myscope.load_page_number(page);
     };
 
     $scope.select_all_toggle = function(val) {
         $scope.products.setup.select_all = val;
+        $scope.products.selected = [];
         for (var i =0; i < $scope.products.list.length;i++) {
             $scope.products.list[i].checked =  $scope.products.setup.select_all;
         }
@@ -84,7 +84,7 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$mo
         if(typeof childStateParams['page']=='undefined' || childStateParams['page'] <= 0) {
             childStateParams['page'] = 1;
         }
-        myscope.get_products(childStateParams['page']);
+        return myscope.get_products(childStateParams['page']);
     };
 
     /*
@@ -98,18 +98,28 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$mo
         $scope.tabs[index].open = true;
     };
 
-    myscope.load_page = function(number) {
-        if($scope.products.setup.search =='') {
-            var toParams = {};
-            for (var key in $state.params) {
-                if($state.params.hasOwnProperty(key) &&['type','filter','product_id'].indexOf(key) !=-1) {
-                    toParams[key] = $state.params[key];
+    myscope.select_single = function(row) {
+        products.single.select($scope.products,row);
+    };
+
+    myscope.load_page_number = function(page) {
+        if(page > 0 && page <= Math.ceil($scope.gridOptions.paginate.total_items/$scope.gridOptions.paginate.items_per_page)) {
+            if($scope.products.setup.search =='') {
+                var toParams = {};
+                for (var key in $state.params) {
+                    if($state.params.hasOwnProperty(key) &&['type','filter','product_id'].indexOf(key) !=-1) {
+                        toParams[key] = $state.params[key];
+                    }
                 }
+                toParams['page'] = page;
+                $state.go($state.current.name,toParams);
             }
-            toParams['page'] = number;
-            $state.go($state.current.name,toParams);
+            return myscope.get_products(page);
+        } else {
+            var req = $q.defer();
+            req.reject();
+            return req.promise;
         }
-        myscope.get_products(number);
     };
 
     //Constructor
@@ -132,6 +142,7 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$mo
         $scope.gridOptions = {
             identifier:'products',
             select_all: $scope.select_all_toggle,
+            select_single: myscope.select_single,
             sort_func: $scope.handlesort,
             setup: $scope.products.setup,
             paginate:{
@@ -140,7 +151,7 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$mo
                 total_items:50000,
                 current_page:$state.params.page,
                 items_per_page:$scope.products.setup.limit,
-                callback: myscope.load_page
+                callback: myscope.load_page_number
             },
             show_hide:true,
             selectable:true,
@@ -226,19 +237,21 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$mo
     };
 
     myscope.get_products = function(page) {
+        if(typeof page == 'undefined') {
+            page = $state.params.page;
+        }
         if($scope._can_load_products) {
             $scope._can_load_products = false;
             return products.list.get($scope.products,page).success(function(response) {
                 //console.log("got products");
-                if($scope.products.setup.search != "") {
-                    $scope.gridOptions.paginate.total_items = $scope.products.products_count['search'];
-                } else {
-                    $scope.gridOptions.paginate.total_items = $scope.products.products_count[$scope.products.setup['filter']];
-                }
+                $scope.gridOptions.paginate.total_items = products.list.total_items($scope.products);
                 $scope._can_load_products = true;
             })
         } else {
             myscope.do_load_products = true;
+            var req= $q.defer();
+            req.resolve();
+            return req.promise;
         }
     };
 
@@ -260,6 +273,7 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$mo
             }
         }
         toParams.product_id = row.id;
+        $scope.select_all_toggle(false);
 
         $state.go(toState,toParams);
 

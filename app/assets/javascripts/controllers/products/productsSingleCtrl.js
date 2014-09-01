@@ -1,6 +1,6 @@
 groovepacks_controllers.
-    controller('productsSingleCtrl', [ '$scope', '$http', '$timeout', '$stateParams', '$location', '$state', '$cookies','products','$modal','$modalStack','$previousState',
-        function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,products,$modal,$modalStack,$previousState) {
+    controller('productsSingleCtrl', [ '$scope', '$http', '$timeout', '$stateParams', '$location', '$state', '$cookies','products','$modal','$modalStack','$previousState','$q',
+        function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,products,$modal,$modalStack,$previousState,$q) {
             //Definitions
 
             var myscope = {};
@@ -10,11 +10,11 @@ groovepacks_controllers.
 
 
             myscope.init = function() {
-                if(typeof $scope.product_next !='function') {
-                    $scope.product_next = function(func) {
-                        if (typeof func == "function") {
-                            func();
-                        }
+                if(typeof $scope.load_page !='function') {
+                    $scope.load_page = function() {
+                        var req = $q.defer();
+                        req.reject();
+                        return req.promise;
                     };
                 }
                 if(typeof $scope.select_all_toggle !='function') {
@@ -28,7 +28,7 @@ groovepacks_controllers.
                         size:'lg',
                         resolve: {
                             product_data: function(){return $scope.products},
-                            product_next: function(){return $scope.product_next},
+                            load_page: function(){return $scope.load_page},
                             product_id: function(){return false;}
                         }
                     });
