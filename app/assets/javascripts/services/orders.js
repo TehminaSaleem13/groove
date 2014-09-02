@@ -211,7 +211,6 @@ groovepacks_services.factory('orders',['$http','$window','notification',function
     };
 
     var select_single = function(orders,row) {
-        orders.setup.select_all = false;
         if(row.checked) {
             orders.selected.push(row);
         } else {

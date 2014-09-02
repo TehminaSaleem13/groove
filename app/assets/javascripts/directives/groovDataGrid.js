@@ -59,6 +59,7 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout','$http','$sce','se
 
             scope.check_uncheck = function(row,index,event) {
                 if(scope.options.selectable) {
+                    scope.options.setup.select_all = false;
                     if(myscope.last_clicked < 0) {
                         myscope.last_clicked = index;
                     }
