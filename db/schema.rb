@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140827052652) do
+ActiveRecord::Schema.define(:version => 20140902115000) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0, :null => false
@@ -473,6 +473,8 @@ ActiveRecord::Schema.define(:version => 20140827052652) do
     t.string   "customer_subscription_id"
     t.string   "stripe_customer_id"
     t.boolean  "is_active"
+    t.string   "password",                                                                     :null => false
+    t.string   "user_name",                                                                    :null => false
   end
 
   create_table "tenants", :force => true do |t|

@@ -1,9 +1,8 @@
 	class SeedTenant
-		def seed
-			if User.where(:username=>'admin').length == 0
-				User.create([{:username=>'admin', :name=>'Admin', :email => "abc@gmail.com", :password => "12345678",
-					:password_confirmation => "12345678", :confirmation_code=>'1234567890', :active=> true}],:without_protection=>true)
-				#user = User.create(:username=>'admin', :password=>'12345678')
+		def seed(username, email, password)
+			if User.where(:username=>username).length == 0
+				User.create([{:username=>username, :name=>username, :email => email, :password => password,
+					:password_confirmation => password, :confirmation_code=>'1234567890', :active=> true}],:without_protection=>true)
 			end
 
 			if OrderTag.where(:name=>'Contains New').length == 0
@@ -214,7 +213,7 @@
 
 			User.all.each do |user|
 			  if user.role.nil?
-			    if user.username == 'admin'
+			    if user.username == username
 			      user.role = role_super_admin
 			    else
 			      user.role = Role.find_by_name('Scan & Pack User')
