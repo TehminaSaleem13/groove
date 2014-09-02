@@ -134,7 +134,7 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
 
     myscope.order_setup_opt = function(type,value) {
         orders.setup.update($scope.orders.setup,type,value);
-        myscope.get_orders();
+        myscope.get_orders(1);
     };
 
     myscope.get_orders = function(page) {
@@ -143,12 +143,12 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
         }
         if($scope._can_load_orders) {
             $scope._can_load_orders = false;
-            return orders.list.get($scope.orders,page).then(function(data) {
+            return orders.list.get($scope.orders,page).success(function(data) {
                 $scope.gridOptions.paginate.total_items = orders.list.total_items($scope.orders);
                 $scope._can_load_orders = true;
             });
         } else {
-            myscope.do_load_orders = true;
+            myscope.do_load_orders = page;
             var req= $q.defer();
             req.resolve();
             return req.promise;
@@ -280,14 +280,14 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
 
         $scope.$watch('orders.setup.search',function(){
             $scope.select_all_toggle(false);
-            myscope.load_page_number(1);
+            myscope.get_orders(1);
         });
 
         $scope.$watch('_can_load_orders',function() {
             if($scope._can_load_orders) {
                 if(myscope.do_load_orders) {
+                    myscope.get_orders(myscope.do_load_orders);
                     myscope.do_load_orders = false;
-                    myscope.get_orders();
                 }
             }
         });

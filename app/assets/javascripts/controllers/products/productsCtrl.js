@@ -231,7 +231,7 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
         //Register watchers
         $scope.$watch('products.setup.search',function(){
             $scope.select_all_toggle(false);
-            myscope.load_page_number(1);
+            myscope.get_products(1);
         });
         $scope.$watch('_can_load_products',myscope.can_do_load_products);
 
@@ -251,7 +251,7 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
                 $scope._can_load_products = true;
             })
         } else {
-            myscope.do_load_products = true;
+            myscope.do_load_products = page;
             var req= $q.defer();
             req.resolve();
             return req.promise;
@@ -261,7 +261,7 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
     myscope.common_setup_opt = function(type,value,selector) {
         products.setup.update($scope.products.setup,type,value);
         $scope.products.setup.is_kit = (selector == 'kit')? 1 : 0;
-        myscope.get_products($state.params.page);
+        myscope.get_products(1);
     };
 
     myscope.handle_click_fn = function(row,event) {
@@ -284,8 +284,8 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
     //Watcher ones
     myscope.can_do_load_products = function () {
         if($scope._can_load_products && myscope.do_load_products) {
+            myscope.get_products(myscope.do_load_products);
             myscope.do_load_products = false;
-            myscope.get_products($state.params.page);
         }
     };
 
