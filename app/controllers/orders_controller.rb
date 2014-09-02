@@ -1118,7 +1118,7 @@ class OrdersController < ApplicationController
 
   def get_orders_count
     count = Hash.new
-    counts = Product.select('status,count(*) as count').where(:status=>['scanned','cancelled','onhold','awaiting','serviceissue']).group(:status)
+    counts = Order.select('status,count(*) as count').where(:status=>['scanned','cancelled','onhold','awaiting','serviceissue']).group(:status)
     all = 0
     counts.each do |single|
       count[single.status] = single.count
