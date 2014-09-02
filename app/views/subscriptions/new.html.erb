@@ -1,26 +1,41 @@
 	<div style="padding-top: 20px;">
-		<div class="well span6" style="margin-left: 20px;">
+		<div class="row bottom-well col-sm-offset-1 col-md-offset-1 col-lg-offset-1 col-md-10 col-sm-10 col-lg-10">
 			<legend>Subscribe here</legend>
 			<div>
-				<form action="" method="POST" class="form-vertical" name="myForm" id="my_form">
+				<form action="" method="POST" class="form-horizontal" name="myForm" id="my_form">
 	  			<fieldset>
-	  				<div class="control-group">
+	  				<div class="form-group">
 							<input type="hidden" id="amount" value="<%=params[:amount]%>"/>
 							<input type="hidden" id="plan_id" value="<%=params[:plan_id]%>"/>
-							<label>Choose your site address<span class="help-inline">*</span></label>
-							<input type="text" placeholder="https://" class="input-mini" disabled/><input type="text" id="tenant_name" class="input-medium" autofocus/><input type="text" placeholder=".groovepacker.com" class="input-medium" disabled/>
-							<div class="control-group error" style="color: red;"><span id="help-block" class="help-inline"></span></div>
+							<label class="col-md-3 col-lg-3 col-sm-3 control-label">Choose your site address*</label>
+							<!-- <input type="text" placeholder="https://" class="input-mini" disabled/><input type="text" id="tenant_name" class="input-medium" autofocus/><input type="text" placeholder=".groovepacker.com" class="input-medium" disabled/> -->
+							<div class="input-group col-md-9 col-sm-9 col-lg-9" style="padding-left:15px; padding-right:15px;">
+								<div class="input-group-addon">https://</div><input type="text" id="tenant_name" class="form-control" autofocus/><div class="input-group-addon">.groovepacker.com</div>
+							</div>
+							<div class="form-group error col-md-12 col-sm-12 col-lg-12" style="color: red;"><div id="error-tenant-block" class="help-inline col-sm-offset-3 col-md-offset-3 col-lg-offset-3 col-sm-9 col-md-9 col-lg-9"></div></div>
+						</div>
 
-					  	<label for="email">Email<span class="help-inline">*</span></label>
-							<input type="email" id="email" class="input-large"/>
-							<div class="control-group error" style="color: red;"><span id="error-block" class="help-inline"></span></div>
+						<div class="form-group">
+					  	<label for="email" class="col-md-3 col-lg-3 col-sm-3 control-label">Email*</label>
+					  	<div class="col-md-9 col-sm-9 col-lg-9">
+								<input type="email" id="email" class="form-control"/>
+							</div>
+							<div class="form-group error col-md-12 col-sm-12 col-lg-12" style="color: red;"><div id="error-email-block" class="help-inline col-sm-offset-3 col-md-offset-3 col-lg-offset-3 col-sm-9 col-md-9 col-lg-9"></div></div>
+						</div>
+
+						<div class="form-group">
+							<label for="password" class="col-md-3 col-lg-3 col-sm-3 control-label">Password*</label>
+							<div class="col-md-9 col-sm-9 col-lg-9">
+								<input type="password" id="password" class="form-control"/>
+							</div>
+							<div class="form-group error col-md-12 col-sm-12 col-lg-12" style="color: red;"><div id="error-password-block" class="help-inline col-sm-offset-3 col-md-offset-3 col-lg-offset-3 col-sm-9 col-md-9 col-lg-9"></div></div>
 						</div>
 
 						<script src="https://checkout.stripe.com/checkout.js"></script>
-						<div>
+						<div class="col-sm-offset-3 col-md-offset-3 col-lg-offset-3 col-sm-9 col-md-9 col-lg-9">
 							<button id="customButton" class="btn btn-primary" style="margin-bottom: 15px;">Purchase</button>
 							
-							<div class="alert alert-success" id="processing_alert_success" style="display:none;"><span><i class="icon-spinner icon-spin icon-large"></i></span><span> Your subscription is being processed.</span>
+							<div class="alert alert-success" id="processing_alert_success" style="display:none;"><div><i class="icon-spinner icon-spin icon-large"></i></div><div> Your subscription is being processed.</div>
 							</div>
 							<div class="alert alert-error" id="processing_alert_error" style="display:none;">
 								<p>Your subscription could not be processed. Please try again.</p>
@@ -31,7 +46,8 @@
 				<script>
 					var valid = {
 				  	tenant_name: false,
-				  	email: false
+				  	email: false,
+				  	password: false
 				  }
 
 				  var handler = StripeCheckout.configure({
@@ -71,7 +87,7 @@
 						var tenant_name = document.forms["myForm"]["tenant_name"].value;
 				    if (tenant_name == null || tenant_name == "") {
 				    	valid.tenant_name = false;
-				      $('#help-block').html("site name must be filled out");
+				      $('#error-tenant-block').html("site name must be filled out");
 				    }
 				    else {
 				    	$.ajax({
@@ -85,11 +101,11 @@
 
 			        }).success(function(response) {
 			        	if (!response.valid) {
-			          	$('#help-block').html("https://" + $('#tenant_name').val() +".groovepacker.com already exists");
+			          	$('#error-tenant-block').html("https://" + $('#tenant_name').val() +".groovepacker.com already exists");
 			          	valid.tenant_name = false;
 			        	}
 			        	else {
-									$('#help-block').html("");
+									$('#error-tenant-block').html("");
 									valid.tenant_name = true;
 			        	}
 			        });
@@ -103,11 +119,11 @@
 				    var dotpos = email.lastIndexOf(".");
 				    if (email == null || email == "") {
 				    	valid.email = false;
-				      $('#error-block').html("email must be filled out");
+				      $('#error-email-block').html("email must be filled out");
 				    }
 				    else if (atpos< 1 || dotpos<atpos+2 || dotpos+2>=email.length) {
 				    	valid.email = false;
-				        $('#error-block').html("email is not valid");
+				        $('#error-email-block').html("email is not valid");
 				    }
 				    else {
 					  	$.ajax({
@@ -121,16 +137,24 @@
 
 					  	}).success(function(response) {
 				        	if (!response.valid) {
-				        		$('#error-block').html($('#email').val() + " email already exists");
+				        		$('#error-email-block').html($('#email').val() + " email already exists");
 				        		valid.email = false;
 				        	}		          	
 				        	else {
-				        		$('#error-block').html("");
+				        		$('#error-email-block').html("");
 				        		valid.email = true;
 				        	}
 					  	});
 					  }
 				  });
+					$('#password').blur(function() {
+						var password = document.forms["myForm"]["password"].value;
+						if (password == null || password == "") {
+				    	valid.password = false;
+				    	console.log('going to render error');
+				      $('#error-password-block').html("password must be filled out");
+				    }
+					});
 				  document.getElementById('customButton').addEventListener('click', function(e)	{
 				  	setTimeout(function(){
 					  	console.log(valid.tenant_name);
