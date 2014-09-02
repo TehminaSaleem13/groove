@@ -70,6 +70,9 @@ groovepacks_services.factory('orders',['$http','$window','notification',function
                     object.orders_count = data.orders_count;
                     object.list = data.orders;
                     object.current = false;
+                    if(object.setup.select_all) {
+                        object.selected = [];
+                    }
                     for(var i= 0; i< object.list.length; i++) {
                         if(object.single && typeof object.single['basicinfo'] !="undefined") {
                             if(object.list[i].id == object.single.basicinfo.id) {
@@ -77,7 +80,8 @@ groovepacks_services.factory('orders',['$http','$window','notification',function
                             }
                         }
                         if(object.setup.select_all) {
-                            object.list[i].checked = object.setup.select_all
+                            object.list[i].checked = object.setup.select_all;
+                            select_single(object,object.list[i]);
                         } else {
                             for(var j=0; j<object.selected.length;j++) {
                                 if(object.list[i].id == object.selected[j].id) {

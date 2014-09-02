@@ -24,6 +24,9 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
         $scope.orders.selected = [];
         for (var i =0; i< $scope.orders.list.length; i++) {
             $scope.orders.list[i].checked =  $scope.orders.setup.select_all;
+            if($scope.orders.setup.select_all) {
+                myscope.select_single($scope.orders.list[i]);
+            }
         }
     };
     $scope.update_order_list = function(order,prop) {
