@@ -278,7 +278,10 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
 
 
 
-        $scope.$watch('orders.setup.search',myscope.get_orders);
+        $scope.$watch('orders.setup.search',function(){
+            $scope.select_all_toggle(false);
+            myscope.load_page_number(1);
+        });
 
         $scope.$watch('_can_load_orders',function() {
             if($scope._can_load_orders) {

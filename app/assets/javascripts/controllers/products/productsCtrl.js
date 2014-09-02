@@ -229,7 +229,10 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
         };
 
         //Register watchers
-        $scope.$watch('products.setup.search',myscope.get_products);
+        $scope.$watch('products.setup.search',function(){
+            $scope.select_all_toggle(false);
+            myscope.load_page_number(1);
+        });
         $scope.$watch('_can_load_products',myscope.can_do_load_products);
 
         $scope.$on("product-modal-closed",myscope.get_products);
