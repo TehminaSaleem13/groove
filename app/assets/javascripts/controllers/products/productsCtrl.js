@@ -1,18 +1,21 @@
 groovepacks_controllers.
-controller('productsCtrl', [ '$scope', '$http', '$timeout', '$stateParams', '$location', '$state', '$cookies','$modal','products',
-function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$modal,products) {
+controller('productsCtrl', [ '$scope', '$http', '$timeout', '$stateParams', '$location', '$state', '$cookies','$q','$modal','products',
+function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,$modal,products) {
     //Definitions
 
     var myscope= {};
     /*
      * Public methods
      */
-    $scope.product_next = function(post_fn) {
-        myscope.get_products(true,post_fn);
+    $scope.load_page = function(direction) {
+        var page = parseInt($state.params.page,10);
+        page = (typeof direction == 'undefined' || direction !='previous')? page+1 : page-1;
+        return myscope.load_page_number(page);
     };
 
     $scope.select_all_toggle = function(val) {
         $scope.products.setup.select_all = val;
+        $scope.products.selected = [];
         for (var i =0; i < $scope.products.list.length;i++) {
             $scope.products.list[i].checked =  $scope.products.setup.select_all;
         }
@@ -26,11 +29,12 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$mo
     };
 
     $scope.create_product = function () {
+        $scope.products.setup.search = '';
         products.single.create($scope.products).success(function(data) {
             if(data.status) {
                 myscope.handle_click_fn(data.product);
             }
-        })
+        });
     };
 
     //Setup options
@@ -77,11 +81,10 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$mo
         } else if(typeof childStateParams['search']!='undefined') {
             myscope.common_setup_opt('search',childStateParams['search'],childStateParams['type']);
         }
-
-        if(typeof childStateParams['page']!='undefined') {
-            //Implement pagination after porting finishes
+        if(typeof childStateParams['page']=='undefined' || childStateParams['page'] <= 0) {
+            childStateParams['page'] = 1;
         }
-        myscope.get_products();
+        return myscope.get_products(childStateParams['page']);
     };
 
     /*
@@ -93,6 +96,30 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$mo
           $scope.tabs[i].open = false;
         }
         $scope.tabs[index].open = true;
+    };
+
+    myscope.select_single = function(row) {
+        products.single.select($scope.products,row);
+    };
+
+    myscope.load_page_number = function(page) {
+        if(page > 0 && page <= Math.ceil($scope.gridOptions.paginate.total_items/$scope.gridOptions.paginate.items_per_page)) {
+            if($scope.products.setup.search =='') {
+                var toParams = {};
+                for (var key in $state.params) {
+                    if($state.params.hasOwnProperty(key) &&['type','filter','product_id'].indexOf(key) !=-1) {
+                        toParams[key] = $state.params[key];
+                    }
+                }
+                toParams['page'] = page;
+                $state.go($state.current.name,toParams);
+            }
+            return myscope.get_products(page);
+        } else {
+            var req = $q.defer();
+            req.reject();
+            return req.promise;
+        }
     };
 
     //Constructor
@@ -115,8 +142,17 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$mo
         $scope.gridOptions = {
             identifier:'products',
             select_all: $scope.select_all_toggle,
+            select_single: myscope.select_single,
             sort_func: $scope.handlesort,
             setup: $scope.products.setup,
+            paginate:{
+                show:true,
+                //send a large number to prevent resetting page number
+                total_items:50000,
+                current_page:$state.params.page,
+                items_per_page:$scope.products.setup.limit,
+                callback: myscope.load_page_number
+            },
             show_hide:true,
             selectable:true,
             draggable:true,
@@ -193,30 +229,39 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$mo
         };
 
         //Register watchers
-        $scope.$watch('products.setup.search',myscope.search_products);
+        $scope.$watch('products.setup.search',function(){
+            $scope.select_all_toggle(false);
+            myscope.get_products(1);
+        });
         $scope.$watch('_can_load_products',myscope.can_do_load_products);
 
         $scope.$on("product-modal-closed",myscope.get_products);
         //$("#product-search-query").focus();
     };
 
-    myscope.get_products = function(next,post_fn) {
-        $scope._can_load_products = false;
-        products.list.get($scope.products,next).then(function(response) {
-            //console.log("got products");
-            if(typeof post_fn == 'function' ) {
-                //console.log("triggering post function on get products");
-                $timeout(post_fn,30);
-            }
-            $scope.select_all_toggle(false);
-            $scope._can_load_products = true;
-        })
-
+    myscope.get_products = function(page) {
+        if(typeof page == 'undefined') {
+            page = $state.params.page;
+        }
+        if($scope._can_load_products) {
+            $scope._can_load_products = false;
+            return products.list.get($scope.products,page).success(function(response) {
+                //console.log("got products");
+                $scope.gridOptions.paginate.total_items = products.list.total_items($scope.products);
+                $scope._can_load_products = true;
+            })
+        } else {
+            myscope.do_load_products = page;
+            var req= $q.defer();
+            req.resolve();
+            return req.promise;
+        }
     };
+
     myscope.common_setup_opt = function(type,value,selector) {
         products.setup.update($scope.products.setup,type,value);
         $scope.products.setup.is_kit = (selector == 'kit')? 1 : 0;
-        myscope.get_products();
+        myscope.get_products(1);
     };
 
     myscope.handle_click_fn = function(row,event) {
@@ -231,26 +276,16 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$mo
             }
         }
         toParams.product_id = row.id;
+        $scope.select_all_toggle(false);
 
         $state.go(toState,toParams);
 
     };
     //Watcher ones
     myscope.can_do_load_products = function () {
-        if($scope._can_load_products) {
-            if(myscope.do_load_products) {
-                myscope.do_load_products = false;
-                //console.log("can do load triggered");
-                myscope.get_products();
-            }
-        }
-    };
-
-    myscope.search_products = function () {
-        if($scope._can_load_products) {
-            myscope.get_products();
-        } else {
-            myscope.do_load_products = true;
+        if($scope._can_load_products && myscope.do_load_products) {
+            myscope.get_products(myscope.do_load_products);
+            myscope.do_load_products = false;
         }
     };
 

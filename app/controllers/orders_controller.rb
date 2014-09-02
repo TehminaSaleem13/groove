@@ -256,10 +256,12 @@ class OrdersController < ApplicationController
     @result['status'] = true
     if !params[:search].nil? && params[:search] != ''
 
-      @orders = do_search
+      @orders = do_search(false)
 
-      @result['orders'] = make_orders_list(@orders)
-      @result['orders_count'] = get_orders_count()      
+      @result['orders'] = make_orders_list(@orders['orders'])
+      @result['orders_count'] = get_orders_count()
+      @result['orders_count']['search'] = @orders['count']
+
     else
       @result['status'] = false
       @result['message'] = 'Improper search string'
@@ -970,7 +972,7 @@ class OrdersController < ApplicationController
     end
   end
 
-  def do_search
+  def do_search(results_only = true)
     limit = 10
     offset = 0
     # Get passed in parameter variables if they are valid.
@@ -978,13 +980,22 @@ class OrdersController < ApplicationController
 
     offset = params[:offset] if !params[:offset].nil? && params[:offset].to_i >= 0
     search = params[:search]
-    query = "SELECT * from orders WHERE
+    base_query = "from orders WHERE
                       increment_id like '%"+search+"%' OR email like '%"+search+"%' OR CONCAT(IFNULL(firstname,''),' ',IFNULL(lastname,'')) like '%"+search+"%' OR postcode like '%"+search+"%'"
+    query_add = ''
     unless params[:select_all]
-      query = query +" LIMIT #{limit} OFFSET #{offset}"
+      query_add = " LIMIT #{limit} OFFSET #{offset}"
+    end
+    result_rows = Order.find_by_sql('SELECT * '+base_query+query_add)
+    if results_only
+      result = result_rows
+    else
+      result = Hash.new
+      result['orders'] = result_rows
+      result['count'] = Order.count_by_sql('SELECT COUNT(*) as count '+ base_query)
     end
     #todo: include sku and storename in search as well in future.
-    return  Order.find_by_sql(query)
+    return result
   end
 
   def do_getorders
@@ -1107,18 +1118,15 @@ class OrdersController < ApplicationController
 
   def get_orders_count
     count = Hash.new
-    count['all'] = Order.all.count
-    count['scanned'] = Order.where(:status => 'scanned').count
-    count['cancelled'] = Order.where(:status => 'cancelled').count
-    count['onhold'] = Order.where(:status => 'onhold').count
-    count['awaiting'] = Order.where(:status => 'awaiting').count
-    count['serviceissue'] = 
-      Order.where(:status => 'serviceissue').count
-
+    counts = Order.select('status,count(*) as count').where(:status=>['scanned','cancelled','onhold','awaiting','serviceissue']).group(:status)
+    all = 0
+    counts.each do |single|
+      count[single.status] = single.count
+      all += single.count
+    end
+    count['all'] = all
+    count['search'] = 0
     count
   end
-
-
-
 
 end

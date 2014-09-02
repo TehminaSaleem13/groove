@@ -1,6 +1,6 @@
 groovepacks_controllers.
-    controller('ordersCtrl', [ '$scope', '$http', '$timeout', '$stateParams', '$location', '$state', '$cookies','orders','$modal',
-function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,orders,$modal) {
+    controller('ordersCtrl', [ '$scope', '$http', '$timeout', '$stateParams', '$location', '$state', '$cookies','$q','orders','$modal',
+function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,orders,$modal) {
     //Definitions
 
     var myscope = {};
@@ -13,13 +13,15 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,ord
         myscope.order_setup_opt('sort',value);
     };
 
-    $scope.order_next = function(post_fn) {
-        $scope.orders.setup.offset = $scope.orders.setup.offset + $scope.orders.setup.limit;
-        myscope.get_orders(true,post_fn);
+    $scope.load_page = function(direction) {
+        var page = parseInt($state.params.page,10);
+        page = (typeof direction == 'undefined' || direction !='previous')? page+1 : page-1;
+        return myscope.load_page_number(page);
     };
 
     $scope.select_all_toggle = function(val) {
         $scope.orders.setup.select_all = val;
+        $scope.orders.selected = [];
         for (var i =0; i< $scope.orders.list.length; i++) {
             $scope.orders.list[i].checked =  $scope.orders.setup.select_all;
         }
@@ -32,7 +34,7 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,ord
         }).then(function(){
                 $scope.orders.setup.status = "";
                 myscope.get_orders();
-            });
+        });
 
     };
 
@@ -76,10 +78,10 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,ord
         } else if(typeof childStateParams['search']!='undefined') {
             orders.setup.update($scope.orders.setup,'search',childStateParams['search']);
         }
-        if(typeof childStateParams['page']!='undefined') {
-            //Implement pagination after porting finishes
+        if(typeof childStateParams['page']=='undefined' || childStateParams['page'] <= 0) {
+            childStateParams['page'] = 1
         }
-        myscope.get_orders();
+        myscope.get_orders(childStateParams['page']);
     };
 
     /**
@@ -94,36 +96,64 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,ord
             $state.go("scanpack.rfp.default",{order_num: row.ordernum});
         } else {
             var toState = 'orders.filter.page.single';
-            if(typeof $state.params['search'] != 'undefined') {
-                toState = 'orders.search.page.single';
-            }
             var toParams = {};
             for (var key in $state.params) {
-                if(['filter','search','page'].indexOf(key) !=-1) {
+                if(['filter','page'].indexOf(key) !=-1) {
                     toParams[key] = $state.params[key];
                 }
             }
             toParams.order_id = row.id;
-
+            $scope.select_all_toggle(false);
             $state.go(toState,toParams);
+        }
+    };
+
+    myscope.select_single = function(row) {
+        orders.single.select($scope.orders,row);
+    };
+
+    myscope.load_page_number = function(page) {
+        if(page > 0 && page <= Math.ceil($scope.gridOptions.paginate.total_items/$scope.gridOptions.paginate.items_per_page)) {
+            if($scope.orders.setup.search =='') {
+                var toParams = {};
+                for (var key in $state.params) {
+                    if($state.params.hasOwnProperty(key) &&['filter','order_id'].indexOf(key) !=-1) {
+                        toParams[key] = $state.params[key];
+                    }
+                }
+                toParams['page'] = page;
+                $state.go($state.current.name,toParams);
+            }
+            return myscope.get_orders(page);
+        } else {
+            var req = $q.defer();
+            req.reject();
+            return req.promise;
         }
     };
 
     myscope.order_setup_opt = function(type,value) {
         orders.setup.update($scope.orders.setup,type,value);
-        myscope.get_orders();
+        myscope.get_orders(1);
     };
 
-    myscope.get_orders = function(next,post_fn) {
-        //$scope.loading = true;
-        $scope._can_load_orders = false;
-        orders.list.get($scope.orders,next).then(function(data) {
-            $scope.select_all_toggle();
-            if(typeof post_fn == 'function') {
-                $timeout(post_fn,30);
-            }
-            $scope._can_load_orders = true;
-        });
+    myscope.get_orders = function(page) {
+        if(typeof page == 'undefined') {
+            page = $state.params.page;
+        }
+        if($scope._can_load_orders) {
+            $scope._can_load_orders = false;
+            return orders.list.get($scope.orders,page).success(function(data) {
+                $scope.gridOptions.paginate.total_items = orders.list.total_items($scope.orders);
+                $scope._can_load_orders = true;
+            });
+        } else {
+            myscope.do_load_orders = page;
+            var req= $q.defer();
+            req.resolve();
+            return req.promise;
+        }
+
     };
 
     myscope.init = function() {
@@ -132,18 +162,27 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,ord
         $scope.firstOpen = true;
 
         //Private properties
-        $scope._do_load_orders = false;
+        myscope.do_load_orders = false;
         $scope._can_load_orders = true;
 
         $scope.gridOptions = {
             identifier:'orders',
             select_all: $scope.select_all_toggle,
+            select_single: myscope.select_single,
             draggable:true,
             sortable:true,
             selectable:true,
             sort_func: $scope.handlesort,
             setup: $scope.orders.setup,
             show_hide:true,
+            paginate:{
+                show:true,
+                //send a large number to prevent resetting page number
+                total_items:50000,
+                current_page:$state.params.page,
+                items_per_page:$scope.orders.setup.limit,
+                callback: myscope.load_page_number
+            },
             editable:{
                 array:false,
                 update: $scope.update_order_list,
@@ -239,19 +278,16 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,ord
 
 
 
-        $scope.$watch('orders.setup.search',function() {
-            if($scope._can_load_orders) {
-                myscope.get_orders();
-            } else {
-                $scope._do_load_orders = true;
-            }
+        $scope.$watch('orders.setup.search',function(){
+            $scope.select_all_toggle(false);
+            myscope.get_orders(1);
         });
 
         $scope.$watch('_can_load_orders',function() {
             if($scope._can_load_orders) {
-                if($scope._do_load_orders) {
-                    $scope._do_load_orders = false;
-                    myscope.get_orders();
+                if(myscope.do_load_orders) {
+                    myscope.get_orders(myscope.do_load_orders);
+                    myscope.do_load_orders = false;
                 }
             }
         });

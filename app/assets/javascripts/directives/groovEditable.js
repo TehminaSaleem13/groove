@@ -10,6 +10,7 @@ groovepacks_directives.directive('groovEditable', ['$timeout','editable',functio
             groovEditable: "="
         },
         link: function(scope,el,attrs,ctrl,transclude) {
+            var myscope = {};
             scope.save_node = function(blur) {
                 editable.unset();
                 blur = (typeof blur == "boolean")? blur : false;
@@ -25,7 +26,7 @@ groovepacks_directives.directive('groovEditable', ['$timeout','editable',functio
                 if(!blur) {
                     scope.focus_input();
                 }
-            }
+            };
 
             scope.add_node  = function () {
                 if(editable.status() == false) {
@@ -38,7 +39,7 @@ groovepacks_directives.directive('groovEditable', ['$timeout','editable',functio
                         scope.edit_node();
                     }
                 }
-            }
+            };
             scope.remove_node = function(index) {
                 if(editable.status() == false) {
                     if(scope.editable.array) {
@@ -48,7 +49,7 @@ groovepacks_directives.directive('groovEditable', ['$timeout','editable',functio
                     }
                 }
                 //scope.focus_input();
-            }
+            };
 
             scope.edit_node = function(index) {
                 if(editable.status() == false) {
@@ -67,47 +68,47 @@ groovepacks_directives.directive('groovEditable', ['$timeout','editable',functio
                     }
                     $timeout(scope.focus_input,10);
                 }
-            }
+            };
 
 
             scope.focus_event = function() {
                 scope.editable_class =  scope.editable.class +" input-text uneditable-input input-text-hover";
                 scope.tag_class = "tag-bubble tag-bubble-input span3 input-text";
                 scope._focus_lost=false;
-            }
+            };
             scope.focus_input = function() {
                 $timeout(function(){
                     $("#"+scope.custom_identifier+scope.identifier+"-"+scope.prop+"-"+scope.editing).focus();
                 },10);
-            }
+            };
             scope.blur_event = function() {
                 scope._focus_lost=true;
                 scope.editable_class =  scope.editable.class+" input-text uneditable-input";
                 scope.tag_class = "tag-bubble false-tag-bubble tag-bubble-input span3 input-text";
-            }
+            };
             scope.handle_key_event =  function(event) {
                 if(event.which == 13 || event.which == 188 || event.which == 9) {
                     event.preventDefault();
                     scope.save_node();
                 }
-            }
+            };
 
 
-            scope._prevent_and_edit = function (event) {
+            myscope.prevent_and_edit = function (event) {
                 event.preventDefault();
                 event.stopPropagation();
                 scope.edit_node();
-            }
+            };
 
-            scope._prevent_and_add = function(event) {
+            myscope.prevent_and_add = function(event) {
                 event.preventDefault();
                 event.stopPropagation();
                 if(scope.editing == -1) {
                     scope.add_node();
                 }
-            }
+            };
 
-            scope._setup_editable =function() {
+            myscope.setup_editable =function() {
                 scope.editable = editable.default();
                 angular.extend(scope.editable,scope.groovEditable);
                 if(typeof scope.editable.elements[scope.prop] == "undefined") {
@@ -117,22 +118,22 @@ groovepacks_directives.directive('groovEditable', ['$timeout','editable',functio
                     scope.editable.functions[scope.prop] = function(){};
                 }
                 if(scope.editable.array) {
-                    el.bind('dblclick',scope._prevent_and_add);
-                    el.bind('contextmenu',scope._prevent_and_add);
+                    el.bind('dblclick',myscope.prevent_and_add);
+                    el.bind('contextmenu',myscope.prevent_and_add);
                 } else {
-                    el.bind('dblclick',scope._prevent_and_edit);
-                    el.bind('contextmenu', scope._prevent_and_edit);
+                    el.bind('dblclick',myscope.prevent_and_edit);
+                    el.bind('contextmenu', myscope.prevent_and_edit);
                 }
-            }
+            };
 
-            scope._init = function() {
+            myscope.init = function() {
                 scope.is_transcluded = false;
                 scope.custom_identifier = "editable-" +Math.floor(Math.random()*1000)+"-";
                 scope.single_editable_id = scope.custom_identifier+scope.identifier+"-"+scope.prop+"-1";
                 scope.editing = -1;
                 scope.disabled = false;
                 scope._focus_lost = false;
-                scope._setup_editable();
+                myscope.setup_editable();
                 scope.function = scope.editable.functions[scope.prop];
                 scope.input = scope.editable.elements[scope.prop];
                 scope.editable_class = scope.editable.class+' input-text uneditable-input';
@@ -161,9 +162,9 @@ groovepacks_directives.directive('groovEditable', ['$timeout','editable',functio
                 });
 
                 scope.$on(scope.identifier,scope.edit_node);
-            }
+            };
 
-            scope._init();
+            myscope.init();
         }
     };
 }]);
