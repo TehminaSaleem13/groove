@@ -13,6 +13,8 @@
 
 					  	<label for="email">Email<span class="help-inline">*</span></label>
 							<input type="email" id="email" class="input-large"/>
+							<input type="hidden" id="stripe_public_key" class="input-large" 
+							value="<%= ENV['STRIPE_PUBLIC_KEY'] %>"/>
 							<div class="control-group error" style="color: red;"><span id="error-block" class="help-inline"></span></div>
 						</div>
 
@@ -35,7 +37,7 @@
 				  }
 
 				  var handler = StripeCheckout.configure({
-				    key: 'pk_test_4QS2UN3famIPlHtp2Q7ykpDf',
+				    key: $('#stripe_public_key').val(),
 				    image: '/assets/images/apple-touch-icon.png',
 				    token: function(token) {
 				      $.ajax({
