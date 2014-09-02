@@ -6,7 +6,7 @@
 #   cities = City.create([{ name: 'Chicago' }, { name: 'Copenhagen' }])
 #   Mayor.create(name: 'Emanuel', city: cities.first)
 seed_obj = SeedTenant.new
-seed_obj.seed
+seed_obj.seed('admin', 'abc@gmail.com', '12345678')
 
 # if User.where(:username=>'admin').length == 0
 # 	User.create([{:username=>'admin', :name=>'Admin', :email => "abc@gmail.com", :password => "12345678",

@@ -9,12 +9,15 @@
     end
 
     def confirm_payment
-
+      puts params.inspect
       if @subscription = Subscription.create(stripe_user_token: params[:stripe_user_token], 
           tenant_name: params[:tenant_name], 
           amount: params[:amount], 
           subscription_plan_id: params[:plan_id], 
-          email: params[:email], status: "started")
+          email: params[:email], 
+          user_name: params[:user_name], 
+          password: params[:password], 
+          status: "started")
 
         if @subscription.save_with_payment
           render json: {valid: true, redirect_url: "subscriptions/show?transaction_id=#{@subscription.stripe_transaction_identifier}&notice=Congratulations! Your GroovePacker is being deployed!&amount=#{@subscription.amount}&email=#{@subscription.email}"}
@@ -32,6 +35,10 @@
 
     def valid_email
       render json: {valid: Subscription.where(email: params[:email]).length == 0}
+    end
+
+    def valid_username
+      render json: {valid: Subscription.where(user_name: params[:user_name]).length == 0}
     end
 
     def show
