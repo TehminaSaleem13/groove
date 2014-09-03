@@ -115,6 +115,7 @@ groovepacks_controllers.controller('aliasModal',['$scope','type','exceptions','i
              show:false,
              //send a large number to prevent resetting page number
              total_items:50000,
+             max_size:12,
              current_page:1,
              items_per_page:scope.products.setup.limit
          };

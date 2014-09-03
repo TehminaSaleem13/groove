@@ -19,6 +19,12 @@
             <pagination total-items="paginate.total_items" ng-model="paginate.current_page" max-size="paginate.max_size" items-per-page="paginate.items_per_page" class="pagination-sm"  rotate="false"></pagination>
         </div>
     </div>
+    <div class="row top-buffer">
+        <div class="col-lg-offset-10 col-lg-2 col-md-offset-9 col-md-3">
+            <button ng-click="ok()" class="modal-save-button" translate>modal.save_close</button>
+            <button ng-click="cancel()" class="modal-cancel-button" translate>modal.cancel</button>
+        </div>
+    </div>
     <div class="row">
         <div class="col-sm-12">
 
@@ -55,8 +61,8 @@
 </div>
 
 <div class="modal-footer">
-    <button ng-click="ok()" class="modal-save-button">Save & close</button>
-    <button ng-click="cancel()" class="modal-cancel-button">Cancel</button>
+    <button ng-click="ok()" class="modal-save-button" translate>modal.save_close</button>
+    <button ng-click="cancel()" class="modal-cancel-button" translate>modal.cancel</button>
 </div>
 </div>
 <!-- Kit product modal ends -->

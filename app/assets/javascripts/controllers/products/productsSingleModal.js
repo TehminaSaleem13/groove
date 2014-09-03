@@ -1,6 +1,6 @@
 groovepacks_controllers.
-    controller('productsSingleModal', [ '$scope', 'product_data', 'load_page', 'product_id', 'hotkeys', '$state', '$stateParams', '$modalInstance', '$timeout','$modal','$q','products','warehouses',
-    function(scope,product_data,load_page, product_id, hotkeys, $state,$stateParams,$modalInstance,$timeout,$modal,$q,products,warehouses) {
+    controller('productsSingleModal', [ '$scope', 'product_data', 'load_page', 'product_id', 'hotkeys', '$state', '$stateParams', '$modalInstance', '$timeout','$modal','$q','groov_translator','products','warehouses',
+    function(scope,product_data,load_page, product_id, hotkeys, $state,$stateParams,$modalInstance,$timeout,$modal,$q,groov_translator,products,warehouses) {
         var myscope = {};
 
 
@@ -203,6 +203,18 @@ groovepacks_controllers.
         };
 
         myscope.init = function() {
+            scope.translations = {
+                "tooltips": {
+                    "sku":"",
+                    "barcode":"",
+                    "confirmation": "",
+                    "placement":"",
+                    "time_adjust": "",
+                    "skippable": ""
+                }
+            };
+            groov_translator.translate('products.modal',scope.translations);
+
             scope.custom_identifier = Math.floor(Math.random()*1000);
             scope.products = product_data;
 

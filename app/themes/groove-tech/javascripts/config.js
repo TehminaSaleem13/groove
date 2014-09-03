@@ -1,5 +1,5 @@
-groovepacks.config(['$stateProvider', '$urlRouterProvider','hotkeysProvider','cfpLoadingBarProvider',
-    function($stateProvider, $urlRouterProvider,hotkeysProvider,cfpLoadingBarProvider) {
+groovepacks.config(['$stateProvider', '$urlRouterProvider','hotkeysProvider','cfpLoadingBarProvider','$translateProvider',
+    function($stateProvider, $urlRouterProvider,hotkeysProvider,cfpLoadingBarProvider,$translateProvider) {
 
     $urlRouterProvider.otherwise("/home");
     $urlRouterProvider.when('/settings/', '/settings/stores');
@@ -81,6 +81,11 @@ groovepacks.config(['$stateProvider', '$urlRouterProvider','hotkeysProvider','cf
     hotkeysProvider.cheatSheetHotkey =['mod+f1','g','G'];
     hotkeysProvider.cheatSheetDescription = '(or \'g\') Show / hide this help menu';
     cfpLoadingBarProvider.includeSpinner = false;
+    $translateProvider.useStaticFilesLoader({
+        prefix: '/assets/translations/locale-',
+        suffix: '.json'
+    });
+    $translateProvider.preferredLanguage('en').fallbackLanguage('en');
 }]).run(['$rootScope','$state','$urlRouter','$timeout','auth',function($rootScope, $state, $urlRouter, $timeout, auth) {
         $rootScope.$on('$stateChangeStart', function(e, to,toParams,from,fromParams) {
             if(jQuery.isEmptyObject(auth.get())) {
