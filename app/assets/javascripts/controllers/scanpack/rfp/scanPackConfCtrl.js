@@ -9,7 +9,7 @@ groovepacks_controllers.
                     }
                    $scope.set('title',"Scan Confirmation Code or Scan a new order");
                 });
-            }
+            };
             $scope.$on('reload-scanpack-state',myscope.init);
             myscope.init();
 }]);

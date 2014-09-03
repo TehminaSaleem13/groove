@@ -147,7 +147,9 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout','$http','$sce','se
                         scope.theads.push(i);
                     }
                 }
-                options.setup = scope.groovDataGrid.setup;
+                if(angular.isObject(scope.groovDataGrid['setup'])) {
+                    options.setup = scope.groovDataGrid.setup;
+                }
                 scope.context_menu = {
                     shown: false,
                     style: {}

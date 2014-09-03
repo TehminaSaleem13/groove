@@ -110,9 +110,9 @@ groovepacks_controllers.
         myscope.get_status();
         $rootScope.$on('$stateChangeStart',function(event,toState,toParams,fromState,fromParams) {
             if($(".modal").is(':visible') && toState.name !=fromState.name) {
-                event.preventDefault();
                 var modal = $modalStack.getTop();
                 if (modal && modal.value.backdrop && modal.value.backdrop != 'static' ) {
+                    event.preventDefault();
                     $modalStack.dismiss(modal.key, 'browser-back-button');
                 }
             }

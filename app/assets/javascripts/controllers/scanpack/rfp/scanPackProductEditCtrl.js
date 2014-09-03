@@ -37,7 +37,7 @@ groovepacks_controllers.
                 return $scope.editreload();
             };
 
-            $scope.$on('products-modal-closed',function(event) {
+            $scope.$on('product-modal-closed',function(event) {
                 event.stopPropagation();
                 $scope.set('order',{});
                 $scope.editreload();
