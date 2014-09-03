@@ -207,14 +207,21 @@
 					$('#password').blur(function() {
 						var password = document.forms["myForm"]["password"].value;
 						if (password == null || password == "") {
+
 				    	valid.password = false;
 				    	if (valid.user_name) {
 				    		$('#error-password-block').html("password must be filled out");
 					      $('#error-password-conf-block').html("");
 					      this.focus();
 				    	}
-				    }
-				    else {
+				    } else if(password.length < 8){
+                            valid.password = false;
+                            if (valid.user_name) {
+                                $('#error-password-block').html("Password should be at least 8 characters");
+                                $('#error-password-conf-block').html("");
+                                this.focus();
+                            }
+                    } else {
 				    	valid.password = true;
 				    	$('#error-password-block').html("");
 				    	$('#error-password-conf-block, #error-password-block').html("");
