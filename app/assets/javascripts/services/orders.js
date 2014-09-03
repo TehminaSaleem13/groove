@@ -256,7 +256,7 @@ groovepacks_services.factory('orders',['$http','$window','notification',function
                 if(data.status) {
                     notification.notify("Item Successfully Removed",1);
                 } else {
-                    notification.notify("Error removing",0);
+                    notification.notify(data.messages,0);
                 }
             }
         ).error(notification.server_error);
