@@ -57,18 +57,21 @@ class UserSettingsController < ApplicationController
           @result.status = false
           @result['messages'].push("Invalid user Role")
         else
-
-          if params[:role]['make_super_admin'] && !current_user.can?('make_super_admin')
+          # Make sure we have at least one super admin
+          if current_user.can?('make_super_admin') && !params[:role]['make_super_admin'] && User.includes(:role).where('roles.make_super_admin = 1').length < 2
+            @result['status'] = false
+            @result['messages'].push("The app needs at least one super admin at all times")
+          elsif params[:role]['make_super_admin'] && !current_user.can?('make_super_admin') && !@user.role.make_super_admin
             params[:role]['make_super_admin'] = false
             @result['status'] = false
-            @result['messages'].push("Cannot grant super admin privileges to non super admin.")
-          end
+            @result['messages'].push("You can not grant super admin privileges.")
+          else
+            if user_role.custom && !user_role.display
+              user_role = update_role(user_role,params[:role])
+            end
 
-          if user_role.custom && !user_role.display
-            user_role = update_role(user_role,params[:role])
+            @user.role = user_role
           end
-
-          @user.role = user_role
         end
 
 

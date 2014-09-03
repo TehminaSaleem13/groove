@@ -8,6 +8,7 @@ controller('generalSettingsCtrl', [ '$scope', '$http', '$timeout', '$location', 
     myscope.init = function() {
         $scope.setup_page('system','general');
 
+        $scope.show_button = false;
         $scope.generalsettings = generalsettings.model.get();
         generalsettings.single.get($scope.generalsettings);
 
