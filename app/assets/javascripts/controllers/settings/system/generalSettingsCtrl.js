@@ -20,6 +20,7 @@ controller('generalSettingsCtrl', [ '$scope', '$http', '$timeout', '$location', 
     };
 
     $scope.update_settings = function() {
+        $scope.show_button = false;
         generalsettings.single.update($scope.generalsettings);
     };
 
