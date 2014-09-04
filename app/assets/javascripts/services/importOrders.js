@@ -2,7 +2,7 @@ groovepacks_services.factory("importOrders", ['$http',function($http) {
         return {
             do_import: function(scope) {
                $http.get('/orders/import_all.json',{ignoreLoadingBar: true}).success(function(data) {
-                 scope.notify("Getting import orders success.",1);}).error(function(data) {
+                 scope.notify("Scouring the interwebs for new orders...",1);}).error(function(data) {
                         scope.notify("Getting import orders failed.",0);
                     });
             }
