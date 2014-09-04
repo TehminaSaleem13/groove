@@ -263,14 +263,16 @@ class UserSettingsController < ApplicationController
     @result['status'] = true
     if current_user.can? 'add_edit_user'
       params['_json'].each do|user|
-        @user = User.find(user["id"])
-        if !@user.destroy
-          @result['status'] = false
+        unless user['id'] == current_user.id
+          @user = User.find(user['id'])
+          if !@user.destroy
+            @result['status'] = false
+          end
         end
       end
     else
       @result['status'] = false
-      @result['messages'].push("Current user doesn't have permission to create roles")
+      @result['messages'].push("Current user doesn't have permission to delete users")
     end
 
     respond_to do |format|
