@@ -1,5 +1,5 @@
 class User < ActiveRecord::Base
-
+  include InventoryWarehouseHelper
   # Include default devise modules. Others available are:
   # :token_authenticatable, :confirmable,
   # :lockable, :timeoutable and :omniauthable
@@ -16,6 +16,7 @@ class User < ActiveRecord::Base
   has_many :user_inventory_permissions, :dependent => :destroy
 
   before_save :check_inventory_presence
+  after_save :check_fix_permissions
   before_create 'User.can_create_new?'
 
   def email_required?
@@ -27,6 +28,12 @@ class User < ActiveRecord::Base
       unless InventoryWarehouse.where(:is_default => true).first.nil?
         self.inventory_warehouse_id = InventoryWarehouse.where(:is_default => true).first.id
       end
+    end
+  end
+
+  def check_fix_permissions
+    InventoryWarehouse.all.each do |inv_wh|
+      fix_user_inventory_permissions(self,inv_wh)
     end
   end
 
