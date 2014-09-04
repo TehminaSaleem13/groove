@@ -1397,16 +1397,16 @@ class ProductsController < ApplicationController
     offset = params[:offset] if !params[:offset].nil? && params[:offset].to_i >= 0
 
     sort_key = params[:sort] if !params[:sort].nil? &&
-        supported_sort_keys.include?(params[:sort])
+        supported_sort_keys.include?(params[:sort].to_s)
 
     sort_order = params[:order] if !params[:order].nil? &&
-        supported_order_keys.include?(params[:order])
+        supported_order_keys.include?(params[:order].to_s)
 
     status_filter = params[:filter] if !params[:filter].nil? &&
-        supported_status_filters.include?(params[:filter])
+        supported_status_filters.include?(params[:filter].to_s)
 
     is_kit = params[:is_kit] if !params[:is_kit].nil?  &&
-        supported_kit_params.include?(params[:is_kit])
+        supported_kit_params.include?(params[:is_kit].to_s)
 
     unless is_kit == '-1'
       kit_query = " WHERE products.is_kit="+is_kit.to_s
