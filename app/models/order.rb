@@ -135,25 +135,27 @@ class Order < ActiveRecord::Base
   end
 
   def set_order_status
-    result = true
-
-    self.order_items.each do |order_item|
-      product = Product.find_by_id(order_item.product_id)
-      if !product.nil?
-        if product.status == "new" or product.status == "inactive"
-            result &= false
+    if GeneralSetting.all.first.hold_orders_due_to_inventory
+      result = true
+      self.order_items.each do |order_item|
+        product = Product.find_by_id(order_item.product_id)
+        if !product.nil?
+          if product.status == "new" or product.status == "inactive"
+              result &= false
+          end
+        else
+          result &= false
         end
-      else
-        result &= false
       end
-    end
 
-    if result
-      self.status = "awaiting"
+      if result
+        self.status = "awaiting"
+      else
+        self.status = "onhold"
+      end
     else
-      self.status = "onhold"
+      self.status = "awaiting"
     end
-
     self.save
     self.apply_and_update_predefined_tags
   end

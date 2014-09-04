@@ -67,14 +67,24 @@ Groovepacks::Application.configure do
   #   :openssl_verify_mode  => 'none',
   #   :TLS_required => 'yes'
   # }
+  # config.action_mailer.smtp_settings = {
+  #   :address => "smtp.gmail.com",
+  #   :port => 587,  
+  #   :authentication => "plain",
+  #   :enable_starttls_auto => true,
+  #   :domain => 'gmail.com',
+  #   :user_name => 'uvarsity.elearn@gmail.com',
+  #   :password => 'uvarsity2015',
+  #   :openssl_verify_mode  => 'none'
+  # }
   config.action_mailer.smtp_settings = {
-    :address => "smtp.gmail.com",
+    :address => "smtp.mandrillapp.com",
     :port => 587,  
     :authentication => "plain",
     :enable_starttls_auto => true,
-    :domain => 'gmail.com',
-    :user_name => 'uvarsity.elearn@gmail.com',
-    :password => 'uvarsity2015',
+    :domain => 'groovepacker.com',
+    :user_name => 'groovepacker@gmail.com',
+    :password => 'ckWnOifHhLOJRiqZQ-ZRKA',
     :openssl_verify_mode  => 'none'
   }
 
