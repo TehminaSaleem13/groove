@@ -1,5 +1,18 @@
 	class SeedTenant
 		def seed(username, email, password)
+
+      case Rails.env
+        when "development"
+          if AccessRestriction.all.length == 0
+            AccessRestriction.create(
+                num_users: '12',
+                num_shipments: '50000',
+                num_import_sources: '8',
+                total_scanned_shipments: '0'
+            )
+          end
+      end
+
 			if User.where(:username=>username).length == 0
 				User.create([{:username=>username, :name=>username, :email => email, :password => password,
 					:password_confirmation => password, :confirmation_code=>'1234567890', :active=> true}],:without_protection=>true)
@@ -29,7 +42,7 @@
 			  general_setting = GeneralSetting.create(:inventory_tracking=>1,
 			  		:low_inventory_alert_email => 1,
 			  		:low_inventory_email_address => '',
-			  		:hold_orders_due_to_inventory=> 1,
+            :hold_orders_due_to_inventory=> 0,
 			  		:conf_req_on_notes_to_packer => 'optional',
 			  		:send_email_for_packer_notes => 'always',
 			  		:email_address_for_packer_notes => '')
@@ -197,17 +210,6 @@
 			  role_super_admin.save
 			end
 
-      case Rails.env
-        when "development"
-          if AccessRestriction.all.length == 0
-            AccessRestriction.create(
-                num_users: '12',
-                num_shipments: '50000',
-                num_import_sources: '8',
-                total_scanned_shipments: '0'
-            )
-          end
-      end
 
 
 
