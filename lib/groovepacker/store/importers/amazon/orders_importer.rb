@@ -35,16 +35,16 @@ module Groovepacker
                       mws.orders.list_order_items :amazon_order_id => order.amazon_order_id
 
                     order_items.order_items.each do |item|
-                      @order_item = OrderItem.new
+                      order_item = OrderItem.new
                       unless item.item_price.nil?
-                        @order_item.price = item.item_price.amount 
+                        order_item.price = item.item_price.amount 
                         unless item.item_price.amount.nil? && item.quantity_ordered.nil?
-                          @order_item.row_total= item.item_price.amount.to_i * 
+                          order_item.row_total= item.item_price.amount.to_i * 
                             item.quantity_ordered.to_i
                         end
                       end
-                      @order_item.qty = item.quantity_ordered
-                      @order_item.sku = item.seller_sku
+                      order_item.qty = item.quantity_ordered
+                      order_item.sku = item.seller_sku
 
                       if ProductSku.where(:sku=>item.seller_sku).length == 0
                         #create and import product
@@ -65,14 +65,14 @@ module Groovepacker
                             product_id: product.id, 
                             handler: handler
                           })
+                          order_item.product = product
                       else
-                        @order_item.product = ProductSku.where(:sku=>item.seller_sku).
+                        order_item.product = ProductSku.where(:sku=>item.seller_sku).
                           first.product
                       end
-                      @order_item.name = item.title
+                      order_item.name = item.title
+                      @order.order_items << order_item
                     end
-
-                    @order.order_items << @order_item
                     
                     unless order.shipping_address.nil?
                       @order.address_1  = order.shipping_address.address_line1
