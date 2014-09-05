@@ -1,6 +1,7 @@
 class InventoryWarehouseController < ApplicationController
   #add before filter here
   # this action creates a warehouse with a name
+  include InventoryWarehouseHelper
   def create
     result = Hash.new
     result['status'] = true
@@ -194,21 +195,10 @@ class InventoryWarehouseController < ApplicationController
       available_user['checked'] = false
       available_user['user_perms'] = Hash.new
       unless params[:inv_wh_id].nil?
-        available_user['user_perms'] = UserInventoryPermission.find_or_create_by_user_id_and_inventory_warehouse_id(
-            :user_id => user.id,
-            :inventory_warehouse_id => params[:inv_wh_id].to_i
-        )
-        if user.can?('make_super_admin')
-          available_user['user_perms']['edit'] = true
-        end
+        available_user['user_perms'] = fix_user_inventory_permissions(user,InventoryWarehouse.find(params[:inv_wh_id]))
         if params[:inv_wh_id].to_i == user.inventory_warehouse_id
           available_user['checked'] = true
-          available_user['user_perms']['see'] = true
-          if user.can?('add_edit_products')
-            available_user['user_perms']['edit'] = true
-          end
         end
-        available_user['user_perms'].save
       end
       result['data']['available_users'] << available_user
     end

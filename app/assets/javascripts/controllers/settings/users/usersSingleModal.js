@@ -93,7 +93,7 @@ groovepacks_controllers.
              * private properties
              */
             myscope.load_roles = function() {
-                users.roles.get(scope.users).then(myscope.reset_selected_role);
+                return users.roles.get(scope.users).then(myscope.reset_selected_role);
             };
 
             myscope.up_key = function(event) {
@@ -207,7 +207,16 @@ groovepacks_controllers.
                     scope.users.single.active = true;
                     scope.users.single.role = {};
                     scope.roles_data.showSelectBaseRole = true;
-                    myscope.load_roles();
+                    myscope.load_roles().then(function() {
+                        for(var i = 0; i < scope.users.roles.length; i++) {
+                            if(scope.users.roles[i].name == 'Scan & Pack User') {
+                                scope.users.single.role = scope.users.roles[i];
+                                scope.roles_data.showSelectBaseRole = false;
+                                myscope.reset_selected_role();
+                                break;
+                            }
+                        }
+                    });
                 } else {
                     scope.edit_status = true;
                     scope.show_password = false;

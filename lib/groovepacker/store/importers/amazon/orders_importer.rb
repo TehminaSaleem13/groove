@@ -14,7 +14,6 @@ module Groovepacker
                 :order_status => ['Unshipped', 'PartiallyShipped']
               
               @orders = []
-
               if !response.orders.kind_of?(Array) && 
                 !response.orders.nil?
                 @orders.push(response.orders)
@@ -36,12 +35,16 @@ module Groovepacker
                       mws.orders.list_order_items :amazon_order_id => order.amazon_order_id
 
                     order_items.order_items.each do |item|
-                      @order_item = OrderItem.new
-                      @order_item.price = item.item_price.amount
-                      @order_item.qty = item.quantity_ordered
-                      @order_item.row_total= item.item_price.amount.to_i * 
-                        item.quantity_ordered.to_i
-                      @order_item.sku = item.seller_sku
+                      order_item = OrderItem.new
+                      unless item.item_price.nil?
+                        order_item.price = item.item_price.amount 
+                        unless item.item_price.amount.nil? && item.quantity_ordered.nil?
+                          order_item.row_total= item.item_price.amount.to_i * 
+                            item.quantity_ordered.to_i
+                        end
+                      end
+                      order_item.qty = item.quantity_ordered
+                      order_item.sku = item.seller_sku
 
                       if ProductSku.where(:sku=>item.seller_sku).length == 0
                         #create and import product
@@ -62,25 +65,27 @@ module Groovepacker
                             product_id: product.id, 
                             handler: handler
                           })
+                          order_item.product = product
                       else
-                        @order_item.product = ProductSku.where(:sku=>item.seller_sku).
+                        order_item.product = ProductSku.where(:sku=>item.seller_sku).
                           first.product
                       end
-                      @order_item.name = item.title
+                      order_item.name = item.title
+                      @order.order_items << order_item
                     end
-
-                    @order.order_items << @order_item
-
-                    @order.address_1  = order.shipping_address.address_line1
-                    @order.city = order.shipping_address.city
-                    @order.country = order.shipping_address.country_code
-                    @order.postcode = order.shipping_address.postal_code
-                    @order.state = order.shipping_address.state_or_region
-                    @order.email = order.buyer_email
-                    @order.lastname = order.shipping_address.name
-                    split_name = order.shipping_address.name.split(' ')
-                    @order.lastname = split_name.pop
-                    @order.firstname = split_name.join(' ')
+                    
+                    unless order.shipping_address.nil?
+                      @order.address_1  = order.shipping_address.address_line1
+                      @order.city = order.shipping_address.city
+                      @order.country = order.shipping_address.country_code
+                      @order.postcode = order.shipping_address.postal_code
+                      @order.state = order.shipping_address.state_or_region
+                      @order.email = order.buyer_email
+                      @order.lastname = order.shipping_address.name
+                      split_name = order.shipping_address.name.split(' ')
+                      @order.lastname = split_name.pop
+                      @order.firstname = split_name.join(' ')
+                    end
 
                     if @order.save
                       if !@order.addnewitems

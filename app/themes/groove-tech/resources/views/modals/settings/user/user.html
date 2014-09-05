@@ -17,35 +17,5 @@
 
 
         </div>
-        <div class="col-md-6">
-            <legend>Section access</legend>
-
-            <div class="form-group">
-                <label class="control-label col-md-3">Settings</label>
-                <div class="controls col-md-2">
-                    <input name="access_settings" ng-model="users.single.role.access_settings" ng-disabled="roles_data.selectedRole!=null || roles_data.showSelectBaseRole==true" ng-change="update_single_user()"  type="checkbox" checked/>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label class="control-label col-md-3">Scan &amp; Pack</label>
-                <div class="controls col-md-2">
-                    <input name="access_scanpack" ng-model="users.single.role.access_scanpack" ng-change="update_single_user()"  type="checkbox" disabled/>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label class="control-label col-md-3">Orders</label>
-                <div class="controls col-md-2">
-                    <input name="access_orders" ng-model="users.single.role.access_orders" ng-disabled="roles_data.selectedRole!=null || roles_data.showSelectBaseRole==true" ng-change="update_single_user()"  type="checkbox" checked/>
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="control-label col-md-3">Products</label>
-                <div class="controls col-md-2">
-                    <input name="access_products" ng-model="users.single.role.access_products" ng-disabled="roles_data.selectedRole!=null || roles_data.showSelectBaseRole==true" ng-change="update_single_user()"  type="checkbox" checked/>
-                </div>
-            </div>
-        </div>
     </div>
 </div>

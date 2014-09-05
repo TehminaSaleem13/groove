@@ -7,7 +7,7 @@ class DeleteFiles
     dir = Dir.pwd
   	Dir.entries(dir).each do |f|
       p f
-      if f !='.' && f != '..'
+      if f !='.' && f != '..' && f != '.gitignore'
     		full_filename = File.join( Dir.pwd , f)
     		stat = File::Stat.new( full_filename )
         seconds_diff = (Time.now - stat.ctime).to_i.abs

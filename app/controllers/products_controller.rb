@@ -328,7 +328,7 @@ class ProductsController < ApplicationController
 	# then the API considers order to be descending.The API also supports a product status filter.
 	# The filter expects one of the following parameters in params[:filter] 'all', 'active', 'inactive', 'new'.
 	# If no filter is passed, then the API will default to 'active'
-	# if you would like to get Kits, specify params[:iskit] to 1. it will return product kits and the corresponding skus
+	# if you would like to get Kits, specify params[:is_kit] to 1. it will return product kits and the corresponding skus
 	#
 	def getproducts
 		@result = Hash.new
@@ -1347,8 +1347,8 @@ class ProductsController < ApplicationController
     kit_query = ""
     query_add = ""
 
-    is_kit = params[:iskit] if !params[:iskit].nil?  &&
-        supported_kit_params.include?(params[:iskit])
+    is_kit = params[:is_kit] if !params[:is_kit].nil?  &&
+        supported_kit_params.include?(params[:is_kit])
     unless is_kit == '-1'
       kit_query = " products.is_kit="+is_kit.to_s+" AND "
     end
@@ -1397,16 +1397,16 @@ class ProductsController < ApplicationController
     offset = params[:offset] if !params[:offset].nil? && params[:offset].to_i >= 0
 
     sort_key = params[:sort] if !params[:sort].nil? &&
-        supported_sort_keys.include?(params[:sort])
+        supported_sort_keys.include?(params[:sort].to_s)
 
     sort_order = params[:order] if !params[:order].nil? &&
-        supported_order_keys.include?(params[:order])
+        supported_order_keys.include?(params[:order].to_s)
 
     status_filter = params[:filter] if !params[:filter].nil? &&
-        supported_status_filters.include?(params[:filter])
+        supported_status_filters.include?(params[:filter].to_s)
 
-    is_kit = params[:iskit] if !params[:iskit].nil?  &&
-        supported_kit_params.include?(params[:iskit])
+    is_kit = params[:is_kit] if !params[:is_kit].nil?  &&
+        supported_kit_params.include?(params[:is_kit].to_s)
 
     unless is_kit == '-1'
       kit_query = " WHERE products.is_kit="+is_kit.to_s
@@ -1563,8 +1563,8 @@ class ProductsController < ApplicationController
   	count = Hash.new
     is_kit = 0
     supported_kit_params = ['0', '1', '-1']
-    is_kit = params[:iskit] if !params[:iskit].nil?  &&
-        supported_kit_params.include?(params[:iskit])
+    is_kit = params[:is_kit] if !params[:is_kit].nil?  &&
+        supported_kit_params.include?(params[:is_kit])
     if is_kit == '-1'
       counts = Product.select('status,count(*) as count').where(:status=>['active','inactive','new']).group(:status)
     else

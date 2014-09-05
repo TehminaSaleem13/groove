@@ -486,7 +486,7 @@ class OrdersController < ApplicationController
               product_sku = product_skus.first.sku
             end
             username = current_user.name
-            @order.addactivity("Item with sku " + product_sku + " added", username)
+            @order.addactivity("Item with sku " + product_sku.to_s + " added", username)
             if product.is_kit == 1
               kit_skus = ProductKitSkus.where(:product_id => @orderitem.product_id)
               kit_skus.each do |kit_sku|
@@ -565,7 +565,7 @@ class OrdersController < ApplicationController
           username = current_user.name
           if item.remove_order_item_kit_products && item.destroy
             item.order.update_order_status
-            item.order.addactivity("Item with sku " + sku + " removed", username)
+            item.order.addactivity("Item with sku " + sku.to_s + " removed", username)
           else
             @result['status'] &= false
             @result['messages'].push("Removed items from order failed")

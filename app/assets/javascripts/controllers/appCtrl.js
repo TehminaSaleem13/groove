@@ -62,16 +62,19 @@ groovepacks_controllers.
                             }
                             content+='</td>';
                             content+=$interpolate('<td>{{store_info.name}}</td>')(cur_item);
-                            content+='<td style="text-align:right;">';
+                            content+='<td style="text-align:right;">&nbsp;';
                             if(cur_item.import_info.status=='completed') {
-                                content+=$interpolate('Imported {{import_info.success_imported}} of ' +
-                                                      '{{import_info.success_imported+import_info.previous_imported}} orders.')(cur_item);
+                                if (cur_item.import_info.success_imported == 0) {
+                                    content+=' No new orders found.'; 
+                                } else {
+                                    content+=$interpolate(' {{import_info.success_imported}} New Orders Imported.')(cur_item);
+                                }
                             } else if(cur_item.import_info.status=='not_started') {
                                 content+='Import not started.';
                             } else if(cur_item.import_info.status=='in_progress') {
                                 content+='Import in progress.';
                             } else if(cur_item.import_info.status=='failed') {
-                                content+='Import failed..';
+                                content+='Import failed.';
                             }
                             content+='</td></tr>';
                         }
@@ -110,9 +113,9 @@ groovepacks_controllers.
         myscope.get_status();
         $rootScope.$on('$stateChangeStart',function(event,toState,toParams,fromState,fromParams) {
             if($(".modal").is(':visible') && toState.name !=fromState.name) {
-                event.preventDefault();
                 var modal = $modalStack.getTop();
                 if (modal && modal.value.backdrop && modal.value.backdrop != 'static' ) {
+                    event.preventDefault();
                     $modalStack.dismiss(modal.key, 'browser-back-button');
                 }
             }

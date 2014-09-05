@@ -18,6 +18,9 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
         $scope.products.selected = [];
         for (var i =0; i < $scope.products.list.length;i++) {
             $scope.products.list[i].checked =  $scope.products.setup.select_all;
+            if($scope.products.setup.select_all) {
+                myscope.select_single($scope.products.list[i]);
+            }
         }
     };
     $scope.update_product_list = function(product,prop) {

@@ -7,7 +7,7 @@ groovepacks_controllers.
                 $scope.set('title', "Ready for Order Scan");
                 $scope.set('order', {});
 
-            }
+            };
             //Initialize
             $scope.$on('reload-scanpack-state',myscope.init);
             myscope.init();

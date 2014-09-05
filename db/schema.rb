@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140827052652) do
+ActiveRecord::Schema.define(:version => 20140902115000) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0, :null => false
@@ -286,6 +286,7 @@ ActiveRecord::Schema.define(:version => 20140827052652) do
     t.string   "method"
     t.datetime "created_at",                                                        :null => false
     t.datetime "updated_at",                                                        :null => false
+    t.string   "store_order_id"
     t.string   "notes_internal"
     t.string   "notes_toPacker"
     t.string   "notes_fromPacker"
@@ -398,7 +399,6 @@ ActiveRecord::Schema.define(:version => 20140827052652) do
     t.integer  "total_avail_ext",                                               :default => 0,         :null => false
     t.decimal  "weight",                          :precision => 8, :scale => 2, :default => 0.0,       :null => false
     t.decimal  "shipping_weight",                 :precision => 8, :scale => 2, :default => 0.0
-    t.boolean  "is_packing_supply",                                             :default => false
   end
 
   add_index "products", ["store_id"], :name => "index_products_on_store_id"
@@ -473,6 +473,8 @@ ActiveRecord::Schema.define(:version => 20140827052652) do
     t.string   "customer_subscription_id"
     t.string   "stripe_customer_id"
     t.boolean  "is_active"
+    t.string   "password",                                                                     :null => false
+    t.string   "user_name",                                                                    :null => false
   end
 
   create_table "tenants", :force => true do |t|

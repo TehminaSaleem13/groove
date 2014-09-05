@@ -1,6 +1,30 @@
-
-<div> 
-	<p>Thank you for your subscription. Your login information are:</p>
-	<p>Url: 	https://<%= @tenant_name%>.groovepacker.com</p>
-	<p>Username: 	<%= @tenant_name%></p>
+<div style="background: url('http://www.groovepacker.com/site/images/background_image.png') repeat-y; font-family: 'Play', sans-serif; background-size: cover; -webkit-background-size: cover; -moz-background-size: cover; -o-background-size: cover; padding-top:20px; border: 4px solid rgba(128,128,128,1); border-radius: 25px;">
+  <div>
+    <center><%= image_tag attachments['logo.png'].url %></center>
+  </div>
+  <div style="font-size:25px; color:#95D329;">
+    <center><p><b>Thank You and Welcome!</b></p></center>
+  </div>
+  <div style="background:#C1C2C1; border: 4px solid rgba(201,201,201,.69); border-radius:20px; border-style:double; border-color:#aca3a3; margin-left:40px; margin-right:40px;"> 
+    <div style="font-size:15px; margin-left:20px;">
+      <p><b>Hi <%=@user_name%>,</b></p>
+      <p><b>Thank you for choosing GroovePacker!</b></p>
+      <p><b>Your app is now ready for you to log in. Please click the link below and log in using the following credentials.</b></p>
+      <br>
+      <p><b>Super Admin Username:   <%= @tenant_name%></b></p>
+      <br>
+      <p><b>Password: <%= @password%></b></p>
+      <br>
+      <p><b>https://<%= @tenant_name%>.groovepacker.com</b></p>
+      <br><br><br>
+      <p><b>Thanks for choosing GroovePacker!<br>
+      -Dan Gutting</b></p>
+      <br><br><br><br>
+    </div>
+  </div>
+  <div style="font-size:15px; color:#95D329;">
+    <p><center><b>Welcome to GroovePacker!</b></center></p>
+    <div><p><a href="http://groovepacker.com/support"><img height="50px" src="http://www.groovepacker.com/site/images/apple-touch-icon.png" align="right" style="margin-right:40px; margin-top:5px;"></a></p></div>
+    <div style="color:#95D329; font-size:12px; text-align:right; margin-right:30px; padding-bottom:50px; padding-top:55px;">Need Help?</div>
+  </div>
 </div>

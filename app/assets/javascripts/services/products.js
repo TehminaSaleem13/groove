@@ -65,7 +65,7 @@ groovepacks_services.factory('products',['$http','notification',function($http,n
         } else {
             url = '/products/search.json?search='+setup.search
         }
-        url += '&iskit='+setup.is_kit+'&limit='+setup.limit+'&offset='+setup.offset;
+        url += '&is_kit='+setup.is_kit+'&limit='+setup.limit+'&offset='+setup.offset;
         return $http.get(url).success(
             function(data) {
                 if(data.status) {
@@ -73,6 +73,9 @@ groovepacks_services.factory('products',['$http','notification',function($http,n
                     object.products_count = data.products_count;
                     object.list = data.products;
                     object.current = false;
+                    if(object.setup.select_all) {
+                        object.selected = [];
+                    }
                     for(var i= 0; i< object.list.length; i++) {
                         if(object.single && typeof object.single['basicinfo'] !="undefined") {
                             if(object.list[i].id == object.single.basicinfo.id) {
@@ -80,7 +83,8 @@ groovepacks_services.factory('products',['$http','notification',function($http,n
                             }
                         }
                         if(object.setup.select_all) {
-                            object.list[i].checked = object.setup.select_all
+                            object.list[i].checked = object.setup.select_all;
+                            select_single(object,object.list[i]);
                         } else {
                             for (var j = 0; j < object.selected.length; j++) {
                                 if (object.list[i].id == object.selected[j].id) {

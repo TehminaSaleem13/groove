@@ -6,11 +6,11 @@ groovepacks_services.factory('scanPack',['$http','notification','$state',functio
             notification.notify(data.notice_messages,2);
             notification.notify(data.success_messages,1);
             notification.notify(data.error_messages,0);
-            console.log("input scan response");
-            console.log(data);
+            //console.log("input scan response");
+            //console.log(data);
 
         }).error(notification.server_error);
-    }
+    };
 
     var reset = function(id) {
        return $http.post('/scan_pack/reset_order_scan.json',{order_id: id}).success(function(data) {
@@ -30,7 +30,7 @@ groovepacks_services.factory('scanPack',['$http','notification','$state',functio
                 }
             }
         }).error(notification.server_error);
-    }
+    };
 
     var order_instruction = function(id,code) {
         return $http.post('/scan_pack/order_instruction.json',{id: id,code: code}).success(function(data) {
@@ -38,7 +38,7 @@ groovepacks_services.factory('scanPack',['$http','notification','$state',functio
             notification.notify(data.success_messages,1);
             notification.notify(data.error_messages,0);
         }).error(notification.server_error);
-    }
+    };
 
     var product_instruction = function(id,next_item,code) {
         return $http.post('/scan_pack/product_instruction.json',{id: id, next_item: next_item, code: code}).success(function(data) {
@@ -46,7 +46,7 @@ groovepacks_services.factory('scanPack',['$http','notification','$state',functio
             notification.notify(data.success_messages,1);
             notification.notify(data.error_messages,0);
         }).error(notification.server_error);
-    }
+    };
 
     return {
         input: input,

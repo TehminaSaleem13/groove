@@ -57,18 +57,23 @@ class UserSettingsController < ApplicationController
           @result.status = false
           @result['messages'].push("Invalid user Role")
         else
-
-          if params[:role]['make_super_admin'] && !current_user.can?('make_super_admin')
-            params[:role]['make_super_admin'] = false
+          # Make sure we have at least one super admin
+          if current_user.can?('make_super_admin') && !params[:role]['make_super_admin'] &&
+              User.includes(:role).where('roles.make_super_admin = 1').length < 2 && !@user.role.nil? && @user.role.make_super_admin
             @result['status'] = false
-            @result['messages'].push("Cannot grant super admin privileges to non super admin.")
-          end
+            @result['messages'].push("The app needs at least one super admin at all times")
+          elsif !current_user.can?('make_super_admin') &&
+              ((params[:role]['make_super_admin'] && (@user.role.nil? || !@user.role.make_super_admin)) ||
+                  (!params[:role]['make_super_admin'] && !@user.role.nil? && @user.role.make_super_admin))
+            @result['status'] = false
+            @result['messages'].push("You can not grant or revoke super admin privileges.")
+          else
+            if user_role.custom && !user_role.display
+              user_role = update_role(user_role,params[:role])
+            end
 
-          if user_role.custom && !user_role.display
-            user_role = update_role(user_role,params[:role])
+            @user.role = user_role
           end
-
-          @user.role = user_role
         end
 
 
@@ -258,14 +263,16 @@ class UserSettingsController < ApplicationController
     @result['status'] = true
     if current_user.can? 'add_edit_user'
       params['_json'].each do|user|
-        @user = User.find(user["id"])
-        if !@user.destroy
-          @result['status'] = false
+        unless user['id'] == current_user.id
+          @user = User.find(user['id'])
+          if !@user.destroy
+            @result['status'] = false
+          end
         end
       end
     else
       @result['status'] = false
-      @result['messages'].push("Current user doesn't have permission to create roles")
+      @result['messages'].push("Current user doesn't have permission to delete users")
     end
 
     respond_to do |format|

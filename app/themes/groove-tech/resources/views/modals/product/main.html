@@ -81,8 +81,7 @@
                 <div class="controls col-sm-8">
                     <div groov-editable="arrayEditableOptions"  prop="sku" identifier="product_single_skus" ng-model="products.single.skus" class="form-control input-style"></div>
                 </div>
-                <div class="info col-sm-2" ><i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" popover="The first SKU listed is the Primary SKU.
-                                 It will be displayed during packing. Additional alias SKUs can be added by comma or enter."></i></div>
+                <div class="info col-sm-2" ><i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" popover="{{translations.tooltips.sku}}"></i></div>
             </div>
             <div class="form-group">
                 <label class="control-label col-sm-2">Barcodes</label>
@@ -94,10 +93,7 @@
                                ng-model="products.single.basicinfo.disable_conf_req"/> Disable Confirmation Requests
                     </label>
                 </div>
-                <div class="info col-sm-2"><i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" popover="Every barcode in the
-                list can be used to scan this product. The first barcode in the list is considered the 'Primary' barcode.
-                 It will be displayed in Scan & Pack and in lists. It will also be the one that is printed when you click the Print icon.
-                  Drag the barcodes to reorder them if you would like to make another barcode the primary"></i>
+                <div class="info col-sm-2"><i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" popover="{{translations.tooltips.barcode}}"></i>
                     &nbsp;&nbsp;
                     <a href="/products/generate_barcode_slip/{{products.single.basicinfo.id}}.pdf" target="_blank">
                     <i class="glyphicon glyphicon-print icon-large"></i>
@@ -114,7 +110,7 @@
             <div class="form-group">
                 <label class="control-label col-sm-2">Special instructions for Packer</label>
 
-                <div class="controls col-sm-6">
+                <div class="controls col-sm-4">
                     <textarea class="form-control input-style" ng-model="products.single.basicinfo.spl_instructions_4_packer" ng-blur="update_single_product()" class="col-sm-8" rows="4"></textarea>
                 </div>
                 <div class="controls col-sm-4">
@@ -127,6 +123,7 @@
                                ng-model="products.single.basicinfo.spl_instructions_4_confirmation" value="0"/>Packer Confirmation Not Required
                     </label>
                 </div>
+                <div class="info col-sm-2" ><i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" popover="{{translations.tooltips.confirmation}}"></i></div>
             </div>
             <div class="form-group" ng-show="products.single.store.store_type!='Amazon' || (products.single.store.store_type=='Amazon' && products.single.amazon_product.show_shipping_weight_only==false)">
                 <label class="control-label col-sm-2">Product Weight</label>
@@ -182,14 +179,18 @@
                 <div class="controls col-sm-1">
                     <input type="number" min="1" max="100" ng-blur="update_single_product()" class="form-control input-style" ng-model="products.single.basicinfo.packing_placement"/>
                 </div>
+                <div class="info col-sm-2" ><i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" popover="{{translations.tooltips.placement}}"></i></div>
             </div>
+            <!--
             <div class="form-group">
                 <label class="control-label col-sm-2">Packing time adjustment</label>
 
                 <div class="controls col-sm-1">
                     <input type="number" class="form-control input-style" ng-blur="update_single_product()" ng-model="products.single.basicinfo.pack_time_adj"/>
                 </div>
+                <div class="info col-sm-2" ><i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" popover="{{translations.tooltips.time_adjust}}"></i></div>
             </div>
+            -->
 
             <div class="form-group">
                 <label class="control-label col-sm-2">Product can be skipped</label>
@@ -199,11 +200,13 @@
                         <input type="radio" ng-change="update_single_product()" ng-model="products.single.basicinfo.is_skippable"
                                value="1"/> Yes
                     </label>
-                    <label class="radio">
+                    <label class="radio col-md-2 col-lg-1">
                         <input type="radio" ng-change="update_single_product()" ng-model="products.single.basicinfo.is_skippable"
                                value="0"/> No
                     </label>
+                    <div class="info col-sm-4" ><i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" popover="{{translations.tooltips.skippable}}"></i></div>
                 </div>
+
             </div>
             <h4>Inventory</h4>
             <div class="form-group">
@@ -271,8 +274,8 @@
     </div>
 
     <div class="modal-footer">
-        <button ng-click="ok()" class="modal-save-button">Save & close</button>
-        <button ng-click="cancel()" class="modal-cancel-button">Cancel</button>
+        <button ng-click="ok()" class="modal-save-button" translate>modal.save_close</button>
+        <button ng-click="cancel()" class="modal-cancel-button" translate>modal.cancel</button>
     </div>
 </div>
 <!-- Kit product modal ends -->
