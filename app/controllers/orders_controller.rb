@@ -838,7 +838,7 @@ class OrdersController < ApplicationController
     end
     @header = ""
     @footer = ""
-    time = Time.now
+
     @file_name = time.strftime("%d_%b_%Y_%I:%M_%p")
     @orders = list_selected_orders
     packing_slip_obj = 
@@ -846,23 +846,19 @@ class OrdersController < ApplicationController
     unless @orders.nil?
       @orders.each do|order|
         @order = Order.find(order['id'])
-
-        generate_pdf(@result,@order,@page_height,@page_width,@orientation,@file_name,@header,@footer)
+        puts Time.now
+        generate_pdf(@result,@order,@page_height,@page_width,@orientation,@file_name)
 
         reader = PDF::Reader.new(Rails.root.join('public', 'pdfs', "#{@order.increment_id}.pdf"))
         page_count = reader.page_count
-
-        #delete the file
-        File.delete(Rails.root.join('public', 'pdfs', @order.increment_id+".pdf"))
         
         if page_count > 1
+          # delete the pdf and regenerate if the pdf page-count exceeds 1
+          File.delete(Rails.root.join('public', 'pdfs', @order.increment_id+".pdf"))
           @header = "Multi-Slip Order # " + @order.increment_id
           @footer = "Multi-Slip Order # " + @order.increment_id
-        else
-          @header = ""
-          @footer = ""
+          generate_pdf(@result,@order,@page_height,@page_width,@orientation,@file_name,@header,@footer)
         end
-        generate_pdf(@result,@order,@page_height,@page_width,@orientation,@file_name,@header,@footer)
          
         @result['data']['packing_slip_file_paths'].push(Rails.root.join('public','pdfs', "#{@order.increment_id}.pdf"))
 
@@ -943,7 +939,7 @@ class OrdersController < ApplicationController
 
   private
 
-  def generate_pdf(result,order,page_height,page_width,orientation,file_name,header,footer)
+  def generate_pdf(result,order,page_height,page_width,orientation,file_name)
     respond_to do |format|
       format.json{
         render :pdf => file_name, 
