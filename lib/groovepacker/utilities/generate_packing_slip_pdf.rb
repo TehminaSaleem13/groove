@@ -1,0 +1,70 @@
+class GeneratePackingSlipPdf
+  def self.generate_packing_slip_pdf(orders, tenant_name, result, page_height, page_width, orientation, file_name, size, header)
+    Apartment::Tenant.switch(tenant_name)
+    packing_slip_obj = 
+          Groovepacker::PackingSlip::PdfMerger.new
+    unless GenerateBarcode.all.first.nil?
+      generate_barcode = GenerateBarcode.all.first
+      generate_barcode.status = "in_progress"
+      generate_barcode.save
+      orders.each do |item|
+        order = Order.find(item)
+
+        GeneratePackingSlipPdf.generate_pdf(order,page_height,page_width,orientation,file_name,header)
+
+        reader = PDF::Reader.new(Rails.root.join('public', 'pdfs', "#{order.increment_id}.pdf"))
+        page_count = reader.page_count
+        
+        if page_count > 1
+          # delete the pdf and regenerate if the pdf page-count exceeds 1
+          File.delete(Rails.root.join('public', 'pdfs', order.increment_id+".pdf"))
+          header = "Multi-Slip Order # " + order.increment_id
+          GeneratePackingSlipPdf.generate_pdf(order,page_height,page_width,orientation,file_name, header)
+        end
+        result['data']['packing_slip_file_paths'].push(Rails.root.join('public','pdfs', "#{order.increment_id}.pdf"))
+      end
+      result['data']['destination'] =  Rails.root.join('public','pdfs', "#{file_name}_packing_slip.pdf")
+      result['data']['merged_packing_slip_url'] =  '/pdfs/'+ file_name + '_packing_slip.pdf'
+      
+      #merge the packing-slips
+      packing_slip_obj.merge(result,orientation,size,file_name)
+      generate_barcode.url = result['data'] ['merged_packing_slip_url']
+      generate_barcode.status = "completed"
+      generate_barcode.save
+    end
+  end
+  def self.generate_pdf(order,page_height,page_width,orientation,file_name, header)
+    require 'wicked_pdf'
+    ActionView::Base.send(:define_method, :protect_against_forgery?) { false }
+    av = ActionView::Base.new()
+    av.view_paths = ActionController::Base.view_paths
+    av.class_eval do
+      include Rails.application.routes.url_helpers
+      include ApplicationHelper
+    end
+    @order = order
+    pdf_html = av.render :template => "orders/generate_packing_slip.html.erb", :layout => nil, :locals => {:@order => @order}
+    doc_pdf = WickedPdf.new.pdf_from_string(
+      pdf_html,
+      :orientation => orientation,
+      :page_height => page_height+'in', 
+      :page_width => page_width+'in',
+      :save_only => true,
+      :no_background => false,
+      :margin => {:top => '5',                     
+                  :bottom => '10',
+                  :left => '2',
+                  :right => '2'},
+      :footer => {
+        :content => av.render(:template => 'orders/generate_packing_slip_header.pdf.erb', :locals => {:@header => header})
+      },
+      :header => {
+        :content => av.render(:template => 'orders/generate_packing_slip_header.pdf.erb', :locals => {:@header => header})
+      }
+    )
+    pdf_path = Rails.root.join('public', 'pdfs', "#{@order.increment_id}.pdf")
+    File.open(pdf_path, 'wb') do |file|
+      file << doc_pdf
+    end
+  end
+end

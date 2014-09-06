@@ -107,7 +107,8 @@ groovepacks_services.factory('orders',['$http','$window','notification',function
                 }
             }
             var url = '';
-
+            var myscope = {};
+            var interval = null;
             //set url for each action.
             if(action == "pick_list") {
                 url = '/orders/generate_pick_list.json';
@@ -123,10 +124,25 @@ groovepacks_services.factory('orders',['$http','$window','notification',function
                     $window.open(response.data.pick_list_file_paths); 
                 }
                 else if(action == "packing_slip") {
-
-                    $window.open(response.data.merged_packing_slip_url);    
+                    myscope.get_status = function() {
+                        console.log("in get_status");
+                        $http.get('/orders/pdf_generation_status.json',{ignoreLoadingBar: true}).success(function(result) {
+                            if (result.status) {
+                                if(result.data.status == 'scheduled') {
+                                    console.log("scheduled");
+                                }else if (result.data.status == 'in_progress') {
+                                    console.log("in_progress");
+                                }else if (result.data.status == 'completed') {
+                                    console.log("in completed.");
+                                    clearInterval(interval);
+                                    $window.open(result.data.url);
+                                }
+                            }
+                        });
+                    };
+                    interval = setInterval(myscope.get_status, 1000);   
                 }
-            }).error(notification.server_error);
+            }).error(notification.server_error); 
     };
 
     var update_list = function(action,orders) {

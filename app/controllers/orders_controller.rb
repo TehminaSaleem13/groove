@@ -818,7 +818,6 @@ class OrdersController < ApplicationController
   end
 
   def generate_packing_slip
-
     if GeneralSetting.get_packing_slip_size == '4 x 6'
       @page_height = '6'
       @page_width = '4'
@@ -837,44 +836,34 @@ class OrdersController < ApplicationController
       @page_height = @page_height.to_s
     end
     @header = ""
-    @footer = ""
-    time = Time.now
-    @file_name = time.strftime("%d_%b_%Y_%I:%M_%p")
-    @orders = list_selected_orders
-    packing_slip_obj = 
-          Groovepacker::PackingSlip::PdfMerger.new 
-    unless @orders.nil?
-      @orders.each do|order|
-        @order = Order.find(order['id'])
 
-        generate_pdf(@result,@order,@page_height,@page_width,@orientation,@file_name,@header,@footer)
-
-        reader = PDF::Reader.new(Rails.root.join('public', 'pdfs', "#{@order.increment_id}.pdf"))
-        page_count = reader.page_count
-
-        #delete the file
-        File.delete(Rails.root.join('public', 'pdfs', @order.increment_id+".pdf"))
-        
-        if page_count > 1
-          @header = "Multi-Slip Order # " + @order.increment_id
-          @footer = "Multi-Slip Order # " + @order.increment_id
-        else
-          @header = ""
-          @footer = ""
-        end
-        generate_pdf(@result,@order,@page_height,@page_width,@orientation,@file_name,@header,@footer)
-         
-        @result['data']['packing_slip_file_paths'].push(Rails.root.join('public','pdfs', "#{@order.increment_id}.pdf"))
-
-      end
-      @result['data']['destination'] =  Rails.root.join('public','pdfs', "#{@file_name}_packing_slip.pdf")
-      @result['data']['merged_packing_slip_url'] =  '/pdfs/'+ @file_name + '_packing_slip.pdf'
-      
-      #merge the packing-slips
-      packing_slip_obj.merge(@result,@orientation,@size,@file_name)
-      
-      render json: @result        
+    @file_name = Time.now.strftime("%d_%b_%Y_%I:%M_%p")
+    @orders = []
+    orders = list_selected_orders
+    orders.each do |order|
+      @orders.push(order['id'])
     end
+ 
+    unless @orders.nil?
+      GenerateBarcode.delete_all
+      @generate_barcode = GenerateBarcode.new
+      @generate_barcode.status = "scheduled"
+      @generate_barcode.save
+
+      GeneratePackingSlipPdf.delay(:run_at => 1.seconds.from_now).generate_packing_slip_pdf(@orders, Apartment::Tenant.current_tenant, @result, @page_height,@page_width,@orientation,@file_name, @size, @header)
+      render json: {status: true}        
+    end
+  end
+  
+  def pdf_generation_status
+    puts "in pdf_generation_status"
+    result = Hash.new
+    result['status'] = true
+    result['data'] = Hash.new
+    generate_barcode_data = GenerateBarcode.all.first unless GenerateBarcode.all.nil?
+    result['data'] = generate_barcode_data
+    
+    render json: result
   end
   
   def import_all
@@ -942,35 +931,6 @@ class OrdersController < ApplicationController
   end
 
   private
-
-  def generate_pdf(result,order,page_height,page_width,orientation,file_name,header,footer)
-    respond_to do |format|
-      format.json{
-        render :pdf => file_name, 
-                :template => 'orders/generate_packing_slip.html.erb',
-                :orientation => @orientation,
-                :page_height => @page_height+'in', 
-                :page_width => @page_width+'in',
-                :save_only => true,
-                :no_background => false,
-                :margin => {:top => '5',                     
-                            :bottom => '10',
-                            :left => '2',
-                            :right => '2'},
-                :header => {
-                  :html => { 
-                    :template => 'orders/generate_packing_slip_header.pdf.erb'
-                    }
-                },
-                :footer => {
-                  :html => { 
-                    :template => 'orders/generate_packing_slip_header.pdf.erb'
-                    }
-                },
-                :save_to_file => Rails.root.join('public', 'pdfs', "#{order.increment_id}.pdf")
-      }
-    end
-  end
 
   def do_search(results_only = true)
     limit = 10
