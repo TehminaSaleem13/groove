@@ -3,27 +3,35 @@ class GeneratePackingSlipPdf
     Apartment::Tenant.switch(tenant_name)
     packing_slip_obj = 
           Groovepacker::PackingSlip::PdfMerger.new
-    orders.each do |item|
-      order = Order.find(item['id'])
+    unless GenerateBarcode.all.first.nil?
+      generate_barcode = GenerateBarcode.all.first
+      generate_barcode.status = "in_progress"
+      generate_barcode.save
+      orders.each do |item|
+        order = Order.find(item['id'])
 
-      GeneratePackingSlipPdf.generate_pdf(order,page_height,page_width,orientation,file_name,header)
+        GeneratePackingSlipPdf.generate_pdf(order,page_height,page_width,orientation,file_name,header)
 
-      reader = PDF::Reader.new(Rails.root.join('public', 'pdfs', "#{order.increment_id}.pdf"))
-      page_count = reader.page_count
-      
-      if page_count > 1
-        # delete the pdf and regenerate if the pdf page-count exceeds 1
-        File.delete(Rails.root.join('public', 'pdfs', order.increment_id+".pdf"))
-        header = "Multi-Slip Order # " + order.increment_id
-        GeneratePackingSlipPdf.generate_pdf(order,page_height,page_width,orientation,file_name, header)
+        reader = PDF::Reader.new(Rails.root.join('public', 'pdfs', "#{order.increment_id}.pdf"))
+        page_count = reader.page_count
+        
+        if page_count > 1
+          # delete the pdf and regenerate if the pdf page-count exceeds 1
+          File.delete(Rails.root.join('public', 'pdfs', order.increment_id+".pdf"))
+          header = "Multi-Slip Order # " + order.increment_id
+          GeneratePackingSlipPdf.generate_pdf(order,page_height,page_width,orientation,file_name, header)
+        end
+        result['data']['packing_slip_file_paths'].push(Rails.root.join('public','pdfs', "#{order.increment_id}.pdf"))
       end
-      result['data']['packing_slip_file_paths'].push(Rails.root.join('public','pdfs', "#{order.increment_id}.pdf"))
+      result['data']['destination'] =  Rails.root.join('public','pdfs', "#{file_name}_packing_slip.pdf")
+      result['data']['merged_packing_slip_url'] =  '/pdfs/'+ file_name + '_packing_slip.pdf'
+      
+      #merge the packing-slips
+      packing_slip_obj.merge(result,orientation,size,file_name)
+      generate_barcode.url = result['data'] ['merged_packing_slip_url']
+      generate_barcode.status = "completed"
+      generate_barcode.save
     end
-    result['data']['destination'] =  Rails.root.join('public','pdfs', "#{file_name}_packing_slip.pdf")
-    result['data']['merged_packing_slip_url'] =  '/pdfs/'+ file_name + '_packing_slip.pdf'
-    
-    #merge the packing-slips
-    packing_slip_obj.merge(result,orientation,size,file_name) 
   end
   def self.generate_pdf(order,page_height,page_width,orientation,file_name, header)
     require 'wicked_pdf'

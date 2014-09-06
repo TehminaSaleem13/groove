@@ -841,12 +841,26 @@ class OrdersController < ApplicationController
     @orders = list_selected_orders
  
     unless @orders.nil?
+      GenerateBarcode.delete_all
+      @generate_barcode = GenerateBarcode.new
+      @generate_barcode.status = "scheduled"
+      @generate_barcode.save
+
       GeneratePackingSlipPdf.delay(:run_at => 1.seconds.from_now).generate_packing_slip_pdf(@orders, Apartment::Tenant.current_tenant, @result, @page_height,@page_width,@orientation,@file_name, @size, @header)
-  
-      render json: @result        
+      render json: {status: true}        
     end
   end
   
+  def pdf_generation_status
+    puts "in pdf_generation_status"
+    result = Hash.new
+    result['status'] = true
+    result['data'] = Hash.new
+    generate_barcode_data = GenerateBarcode.all.first unless GenerateBarcode.all.nil?
+    result['data'] = generate_barcode_data
+    
+    render json: result
+  end
   
   def import_all
     # import_orders_helper()
