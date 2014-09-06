@@ -838,7 +838,11 @@ class OrdersController < ApplicationController
     @header = ""
 
     @file_name = Time.now.strftime("%d_%b_%Y_%I:%M_%p")
-    @orders = list_selected_orders
+    @orders = []
+    orders = list_selected_orders
+    orders.each do |order|
+      @orders.push(order['id'])
+    end
  
     unless @orders.nil?
       GenerateBarcode.delete_all

@@ -8,7 +8,7 @@ class GeneratePackingSlipPdf
       generate_barcode.status = "in_progress"
       generate_barcode.save
       orders.each do |item|
-        order = Order.find(item['id'])
+        order = Order.find(item)
 
         GeneratePackingSlipPdf.generate_pdf(order,page_height,page_width,orientation,file_name,header)
 
