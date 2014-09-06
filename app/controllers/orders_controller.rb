@@ -818,7 +818,6 @@ class OrdersController < ApplicationController
   end
 
   def generate_packing_slip
-
     if GeneralSetting.get_packing_slip_size == '4 x 6'
       @page_height = '6'
       @page_width = '4'
@@ -839,39 +838,42 @@ class OrdersController < ApplicationController
     @header = ""
     @footer = ""
 
-    @file_name = time.strftime("%d_%b_%Y_%I:%M_%p")
+    @file_name = Time.now.strftime("%d_%b_%Y_%I:%M_%p")
     @orders = list_selected_orders
-    packing_slip_obj = 
-          Groovepacker::PackingSlip::PdfMerger.new 
+    # packing_slip_obj = 
+    #       Groovepacker::PackingSlip::PdfMerger.new 
     unless @orders.nil?
-      @orders.each do|order|
-        @order = Order.find(order['id'])
-        puts Time.now
-        generate_pdf(@result,@order,@page_height,@page_width,@orientation,@file_name)
+      GeneratePackingSlipPdf.delay(:run_at => 1.seconds.from_now).generate_packing_slip_pdf(@orders, Apartment::Tenant.current_tenant, @result, @page_height,@page_width,@orientation,@file_name, @size)
+      # @orders.each do|order|
+      #   @order = Order.find(order['id'])
+      #   GeneratePackingSlipPdf.delay(:run_at => 1.seconds.from_now).generate_packing_slip_pdf(@order, Apartment::Tenant.current_tenant, @result, @page_height,@page_width,@orientation,@file_name, @size)
+    
+        # puts Time.now
+        # generate_pdf(@result,@order,@page_height,@page_width,@orientation,@file_name)
 
-        reader = PDF::Reader.new(Rails.root.join('public', 'pdfs', "#{@order.increment_id}.pdf"))
-        page_count = reader.page_count
+        # reader = PDF::Reader.new(Rails.root.join('public', 'pdfs', "#{@order.increment_id}.pdf"))
+        # page_count = reader.page_count
         
-        if page_count > 1
-          # delete the pdf and regenerate if the pdf page-count exceeds 1
-          File.delete(Rails.root.join('public', 'pdfs', @order.increment_id+".pdf"))
-          @header = "Multi-Slip Order # " + @order.increment_id
-          @footer = "Multi-Slip Order # " + @order.increment_id
-          generate_pdf(@result,@order,@page_height,@page_width,@orientation,@file_name,@header,@footer)
-        end
+        # if page_count > 1
+        #   # delete the pdf and regenerate if the pdf page-count exceeds 1
+        #   File.delete(Rails.root.join('public', 'pdfs', @order.increment_id+".pdf"))
+        #   @header = "Multi-Slip Order # " + @order.increment_id
+        #   @footer = "Multi-Slip Order # " + @order.increment_id
+        #   generate_pdf(@result,@order,@page_height,@page_width,@orientation,@file_name,@header,@footer)
+        # end
          
-        @result['data']['packing_slip_file_paths'].push(Rails.root.join('public','pdfs', "#{@order.increment_id}.pdf"))
+      #   @result['data']['packing_slip_file_paths'].push(Rails.root.join('public','pdfs', "#{@order.increment_id}.pdf"))
 
-      end
-      @result['data']['destination'] =  Rails.root.join('public','pdfs', "#{@file_name}_packing_slip.pdf")
-      @result['data']['merged_packing_slip_url'] =  '/pdfs/'+ @file_name + '_packing_slip.pdf'
+      # end
+      # @result['data']['destination'] =  Rails.root.join('public','pdfs', "#{@file_name}_packing_slip.pdf")
+      # @result['data']['merged_packing_slip_url'] =  '/pdfs/'+ @file_name + '_packing_slip.pdf'
       
-      #merge the packing-slips
-      packing_slip_obj.merge(@result,@orientation,@size,@file_name)
-      
+      # #merge the packing-slips
+      # packing_slip_obj.merge(@result,@orientation,@size,@file_name)
       render json: @result        
     end
   end
+  
   
   def import_all
     # import_orders_helper()
@@ -940,32 +942,50 @@ class OrdersController < ApplicationController
   private
 
   def generate_pdf(result,order,page_height,page_width,orientation,file_name)
-    respond_to do |format|
-      format.json{
-        render :pdf => file_name, 
-                :template => 'orders/generate_packing_slip.html.erb',
-                :orientation => @orientation,
-                :page_height => @page_height+'in', 
-                :page_width => @page_width+'in',
-                :save_only => true,
-                :no_background => false,
-                :margin => {:top => '5',                     
-                            :bottom => '10',
-                            :left => '2',
-                            :right => '2'},
-                :header => {
-                  :html => { 
-                    :template => 'orders/generate_packing_slip_header.pdf.erb'
-                    }
-                },
-                :footer => {
-                  :html => { 
-                    :template => 'orders/generate_packing_slip_header.pdf.erb'
-                    }
-                },
-                :save_to_file => Rails.root.join('public', 'pdfs', "#{order.increment_id}.pdf")
+    # respond_to do |format|
+    #   format.json{
+    #     render :pdf => file_name, 
+    #             :template => 'orders/generate_packing_slip.html.erb',
+    #             :orientation => @orientation,
+    #             :page_height => @page_height+'in', 
+    #             :page_width => @page_width+'in',
+    #             :save_only => true,
+    #             :no_background => false,
+    #             :margin => {:top => '5',                     
+    #                         :bottom => '10',
+    #                         :left => '2',
+    #                         :right => '2'},
+    #             :header => {
+    #               :html => { 
+    #                 :template => 'orders/generate_packing_slip_header.pdf.erb'
+    #                 }
+    #             },
+    #             :footer => {
+    #               :html => { 
+    #                 :template => 'orders/generate_packing_slip_header.pdf.erb'
+    #                 }
+    #             },
+    #             :save_to_file => Rails.root.join('public', 'pdfs', "#{order.increment_id}.pdf")
+    #   }
+    # end
+    WickedPdf.new.pdf_from_string(
+      render_to_string('orders/generate_packing_slip.html.erb'),
+      :orientation => @orientation,
+      :page_height => @page_height+'in', 
+      :page_width => @page_width+'in',
+      :save_only => true,
+      :no_background => false,
+      :margin => {:top => '5',                     
+                  :bottom => '10',
+                  :left => '2',
+                  :right => '2'},
+      :footer => {
+        :content => render_to_string('orders/generate_packing_slip_header.pdf.erb')
+      },
+      :header => {
+        :content => render_to_string('orders/generate_packing_slip_header.pdf.erb')
       }
-    end
+    )
   end
 
   def do_search(results_only = true)
