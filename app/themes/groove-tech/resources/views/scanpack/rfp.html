@@ -73,7 +73,7 @@
                     <h5>
                         &nbsp;
                         <span class="pull-left"><strong>{{data.order.next_item.name}}</strong></span>
-                        <span class="pull-right"><strong>{{data.order.next_item.sku}}</strong></span>
+                        <span class="pull-right pointer" ng-click="autoscan_barcode()"><strong>{{data.order.next_item.sku}}</strong></span>
                     </h5>
                     <h4>{{data.order.next_item.qty_remaining}} more to scan.</h4>
 

@@ -22,6 +22,11 @@ groovepacks_controllers.
 
             };
 
+            $scope.autoscan_barcode = function() {
+                $scope.set('input',$scope.data.order.next_item.barcodes[0].barcode);
+                $scope.input_enter({which:13});
+            };
+
             $scope.product_details = function(id) {
                 if($scope.current_user.can('add_edit_products')) {
                     var item_modal = $modal.open({
@@ -86,20 +91,20 @@ groovepacks_controllers.
                 $scope.scanned_count = 0;
                 $scope.item_image_index = 0;
 
-                for (i = 0;  i < $scope.data.order.unscanned_items.length; i++) {
+                for (var i = 0;  i < $scope.data.order.unscanned_items.length; i++) {
                     if ($scope.data.order.unscanned_items[i].product_type == 'single') {
                         $scope.unscanned_count = $scope.unscanned_count + $scope.data.order.unscanned_items[i].qty_remaining;
                     }
                     else if ($scope.data.order.unscanned_items[i].product_type == 'individual') {
-                        for (j=0; j< $scope.data.order.unscanned_items[i].child_items.length;  j++) {
+                        for (var j=0; j< $scope.data.order.unscanned_items[i].child_items.length;  j++) {
                             $scope.unscanned_count += $scope.data.order.unscanned_items[i].child_items[j].qty_remaining;
                         }
                     }
                 }
 
-                for (i = 0;  i < $scope.data.order.scanned_items.length; i++) {
-                    if ($scope.data.order.scanned_items[i].product_type == 'single'){
-                        $scope.scanned_count = $scope.scanned_count + $scope.data.order.scanned_items[i].scanned_qty;
+                for (var k = 0;  k < $scope.data.order.scanned_items.length; k++) {
+                    if ($scope.data.order.scanned_items[k].product_type == 'single'){
+                        $scope.scanned_count = $scope.scanned_count + $scope.data.order.scanned_items[k].scanned_qty;
                     }
                 }
 
