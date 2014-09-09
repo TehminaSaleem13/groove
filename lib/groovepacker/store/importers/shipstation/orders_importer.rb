@@ -43,41 +43,39 @@ module Groovepacker
                           sku = ProductSku.new
                           sku.sku = item.sku
                           product.product_skus << sku
+
+                          #Build Image
+                          unless item.thumbnail_url.nil?
+                            if ProductImage.where(:product_id=>product.id).length==0
+                              image = ProductImage.new
+                              image.image = item.thumbnail_url
+                              product.product_images << image
+                            end
+                          end                          
+
+                          #build barcode
+                          unless item.upc.nil?
+                            if ProductImage.where(:product_id=>product.id).length==0
+                              barcode = ProductBarcode.new
+                              barcode.barcode = item.upc
+                              product.product_barcodes << barcode
+                            end
+                          end
+                          product.save
+                          #import other product details
+                          Groovepacker::Store::Importers::Shipstation::
+                            ProductsImporter.new(handler).import_single({ 
+                              product_sku: item.sku,
+                              product_id: product.id,
+                              handler: handler
+                            })
                         else
                           order_item.product = ProductSku.where(:sku=>item.sku).
                           first.product
-                          product = order_item.product
                         end
-
-                        #Build Image
-                        unless item.thumbnail_url.nil?
-                          if ProductImage.where(:product_id=>product.id).length==0
-                            image = ProductImage.new
-                            image.image = item.thumbnail_url
-                            product.product_images << image
-                          end
-                        end                          
-
-                        #build barcode
-                        unless item.upc.nil?
-                          if ProductImage.where(:product_id=>product.id).length==0
-                            barcode = ProductBarcode.new
-                            barcode.barcode = item.upc
-                            product.product_barcodes << barcode
-                          end
-                        end
-                        product.save
-                        #import other product details
-                        Groovepacker::Store::Importers::Shipstation::
-                          ProductsImporter.new(handler).import_single({ 
-                            product_sku: item.sku,
-                            product_id: product.id,
-                            handler: handler
-                          })
       
                         shipstation_order.order_items << order_item
                       end
-                      # shipstation_order.order_items << order_item
                     end
                     if shipstation_order.save
                       unless shipstation_order.addnewitems
