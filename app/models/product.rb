@@ -52,10 +52,28 @@ class Product < ActiveRecord::Base
       product_inventory_warehouses:ProductInventoryWarehouses
     }
     tables.each do |ident,model|
-      CSV.open("#{folder}/#{ident}.csv","w",options) do |csv|
-        csv << model.column_names
+      CSV.open("#{folder}/#{ident}.csv",'w',options) do |csv|
+        headers= model.column_names.dup
+        if ident == :products
+          headers.push('primary_sku','primary_barcode','primary_category','primary_image','default_wh_avbl','default_wh_loc_primary','default_wh_loc_secondary')
+        end
+
+
+        csv << headers
         model.all.each do |item|
-          csv << item.attributes.values_at(*model.column_names)
+          data = []
+          data = item.attributes.values_at(*model.column_names).dup
+          if ident == :products
+            data.push(item.product_skus.length > 0 ? item.product_skus.order('product_skus.order ASC').first.sku : '')
+            data.push(item.product_barcodes.length > 0 ? item.product_barcodes.order('product_barcodes.order ASC').first.barcode : '')
+            data.push(item.product_cats.length> 0? item.product_cats.first.category : '')
+            data.push(item.product_images.length> 0? item.product_images.order('product_images.order ASC').first.image : '')
+            inventory_wh = ProductInventoryWarehouses.where(:product_id=>item.id,:inventory_warehouse_id => InventoryWarehouse.where(:is_default => true).first.id).first
+            data.push(inventory_wh.available_inv,inventory_wh.location_primary,inventory_wh.location_secondary)
+          end
+
+          logger.info data
+          csv << data
         end
         response[ident] = "#{folder}/#{ident}.csv"
       end

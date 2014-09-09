@@ -31,6 +31,10 @@ class SettingsController < ApplicationController
                   'kit_parsing' => 'kit_parsing',
                   'is_kit' => 'is_kit',
                   'disable_conf_req' => 'disable_conf_req',
+                  'total_avail_ext' =>'total_avail_ext',
+                  'weight' =>'weight',
+                  'shipping_weight'=>'shipping_weight',
+                  'is_packing_supply' =>'is_packing_supply'
               }
           },
 
@@ -104,9 +108,17 @@ class SettingsController < ApplicationController
                   'location_primary' => 'location_primary',
                   'location_secondary' => 'location_secondary',
                   'name'=> 'name',
-                  'inventory_warehouse_id' => 'inventory_warehouse_id'
+                  'inventory_warehouse_id' => 'inventory_warehouse_id',
+                  'available_inv' => 'available_inv',
+                  'allocated_inv' =>'allocated_inv'
               }
           }
+      }
+
+      default_warehouse_map = {
+          'default_wh_avbl' => 'available_inv',
+          'default_wh_loc_primary' =>'location_primary',
+          'default_wh_loc_secondary' => 'location_secondary'
       }
 
 
@@ -134,9 +146,38 @@ class SettingsController < ApplicationController
             if mapping.key?(current_mapping)
               # Parse the file by it's data
               CSV.parse(zipfile.read(file.name),:headers=> true) do |csv_row|
+                single_row = nil
                 # Create new row if deleted all else find and select by id for updating
                 if params[:method] == 'del_import'
-                  single_row = mapping[current_mapping][:model].new
+                  if current_mapping == 'product_barcodes'
+                    all_rows = mapping[current_mapping][:model].where(:barcode =>csv_row['barcode'],:product_id=>csv_row['product_id'])
+                    if all_rows.length >0
+                      single_row = all_rows.first
+                    end
+                  elsif current_mapping == 'product_skus'
+                    all_rows = mapping[current_mapping][:model].where(:sku =>csv_row['sku'],:product_id=>csv_row['product_id'])
+                    if all_rows.length >0
+                      single_row = all_rows.first
+                    end
+                  elsif current_mapping == 'product_cats'
+                    all_rows = mapping[current_mapping][:model].where(:category =>csv_row['category'],:product_id=>csv_row['product_id'])
+                    if all_rows.length >0
+                      single_row = all_rows.first
+                    end
+                  elsif current_mapping == 'product_images'
+                    all_rows = mapping[current_mapping][:model].where(:image =>csv_row['image'],:product_id=>csv_row['product_id'])
+                    if all_rows.length > 0
+                      single_row = all_rows.first
+                    end
+                  elsif current_mapping == 'product_inventory_warehouses'
+                    all_rows = mapping[current_mapping][:model].where(:inventory_warehouse_id =>csv_row['inventory_warehouse_id'],:product_id=>csv_row['product_id'])
+                    if all_rows.length > 0
+                      single_row = all_rows.first
+                    end
+                  end
+                  if single_row.nil?
+                    single_row = mapping[current_mapping][:model].new
+                  end
                 else
                   single_row = mapping[current_mapping][:model].find_by_id(csv_row['id'])
                 end
@@ -154,6 +195,34 @@ class SettingsController < ApplicationController
                     # happy coding!
                   end
                   single_row.save!
+                  if current_mapping == 'products'
+                    unless csv_row['primary_sku'].blank?
+                      sku =  ProductSku.find_or_create_by_sku_and_product_id(csv_row['primary_sku'],single_row.id)
+                      sku.order = 0
+                      sku.save
+                    end
+                    unless csv_row['primary_barcode'].blank?
+                      barcode = ProductBarcode.find_or_create_by_barcode_and_product_id(csv_row['primary_barcode'],single_row.id)
+                      barcode.order = 0
+                      barcode.save
+                    end
+                    unless csv_row['primary_category'].blank?
+                      category = ProductCat.find_or_create_by_category_and_product_id(csv_row['primary_category'],single_row.id)
+                      category.save
+                    end
+                    unless csv_row['primary_image'].blank?
+                      image = ProductImage.find_or_create_by_image_and_product_id(csv_row['primary_image'],single_row.id)
+                      image.order = 0
+                      image.save
+                    end
+                    warehouse = ProductInventoryWarehouses.find_or_create_by_product_id_and_inventory_warehouse_id(single_row.id, InventoryWarehouse.where(:is_default => true).first.id)
+                    default_warehouse_map.each do |warehouse_map|
+                      warehouse[warehouse_map[1]] = csv_row[warehouse_map[0]]
+                    end
+                    warehouse.save
+                    single_row.update_product_status
+                  end
+
                 end
               end
             end
