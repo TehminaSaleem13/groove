@@ -405,7 +405,6 @@ ActiveRecord::Schema.define(:version => 20140906094211) do
     t.integer  "total_avail_ext",                                               :default => 0,         :null => false
     t.decimal  "weight",                          :precision => 8, :scale => 2, :default => 0.0,       :null => false
     t.decimal  "shipping_weight",                 :precision => 8, :scale => 2, :default => 0.0
-    t.boolean  "is_packing_supply",                                             :default => false
   end
 
   add_index "products", ["store_id"], :name => "index_products_on_store_id"

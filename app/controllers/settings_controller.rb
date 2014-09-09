@@ -33,8 +33,7 @@ class SettingsController < ApplicationController
                   'disable_conf_req' => 'disable_conf_req',
                   'total_avail_ext' =>'total_avail_ext',
                   'weight' =>'weight',
-                  'shipping_weight'=>'shipping_weight',
-                  'is_packing_supply' =>'is_packing_supply'
+                  'shipping_weight'=>'shipping_weight'
               }
           },
 
