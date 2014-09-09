@@ -10,6 +10,7 @@ source /usr/local/rvm/scripts/rvm
 cd ~/groove
 git remote set-url origin git@bitbucket.org:jonnyclean/groovepacker.git
 
+git stash
 git pull origin master
 
 RAILS_ENV=production script/delayed_job stop
