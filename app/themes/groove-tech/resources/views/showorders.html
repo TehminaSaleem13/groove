@@ -31,9 +31,9 @@
                         Printing <span class="caret"></span>
                     </button>
                     <ul class="dropdown-menu" role="menu">
-                        <li><a class="dropdown-toggle" ng-click="generate_orders_pick_list_and_packing_slip()">Print Pick List and Packing Slips for selected</a></li>
-                        <li><a class="dropdown-toggle" ng-click="generate_orders_pick_list()">Print Only Pick list for selected</a></li>
-                        <li><a class="dropdown-toggle" ng-click="generate_orders_packing_slip()">Print Only Packing Slips for selected</a></li>
+                        <li><a class="dropdown-toggle" ng-click="generate_orders_pick_list_and_packing_slip()">Print Pick List and Packing Slips <span class="badge badge-important">{{orders.setup.select_all? gridOptions.paginate.total_items: orders.selected.length}}</span></a></li>
+                        <li><a class="dropdown-toggle" ng-click="generate_orders_pick_list()">Print Only Pick list <span class="pull-right badge badge-important">{{orders.setup.select_all? gridOptions.paginate.total_items: orders.selected.length}}</span></a></li>
+                        <li><a class="dropdown-toggle" ng-click="generate_orders_packing_slip()">Print Only Packing Slips <span class="pull-right badge badge-important">{{orders.setup.select_all? gridOptions.paginate.total_items: orders.selected.length}}</span></a></li>
                     </ul>
                 </div>
                 <div class="col-lg-1 col-md-1" dropdown>
@@ -41,8 +41,8 @@
                         Edit <span class="caret"></span>
                     </button>
                     <ul class="dropdown-menu" role="menu">
-                        <li><a class="dropdown-toggle" ng-click="order_delete()">Delete</a></li>
-                        <li><a class="dropdown-toggle" ng-click="order_duplicate()">Duplicate</a></li>
+                        <li><a class="dropdown-toggle" ng-click="order_delete()">Delete <span class="pull-right badge badge-important">{{orders.setup.select_all? gridOptions.paginate.total_items: orders.selected.length}}</span></a></li>
+                        <li><a class="dropdown-toggle" ng-click="order_duplicate()">Duplicate <span class="pull-right badge badge-important">{{orders.setup.select_all? gridOptions.paginate.total_items: orders.selected.length}}</span></a></li>
                     </ul>
                 </div>
                 <div class="col-lg-2 col-md-2" dropdown>
@@ -50,11 +50,11 @@
                         Change Status <span class="caret"></span>
                     </button>
                     <ul class="dropdown-menu" role="menu">
-                        <li><a ng-click="order_change_status('awaiting')">Awaiting </a></li>
-                        <li><a ng-click="order_change_status('onhold')">On Hold</a></li>
-                        <li><a ng-click="order_change_status('serviceissue')">Service Issue</a></li>
-                        <li><a ng-click="order_change_status('cancelled')">Cancelled</a></li>
-                        <li><a ng-click="order_change_status('scanned')">Scanned</a></li>
+                        <li><a ng-click="order_change_status('awaiting')">Awaiting <span class="pull-right badge badge-important">{{orders.setup.select_all? gridOptions.paginate.total_items: orders.selected.length}}</span></a></li>
+                        <li><a ng-click="order_change_status('onhold')">On Hold <span class="pull-right badge badge-important">{{orders.setup.select_all? gridOptions.paginate.total_items: orders.selected.length}}</span></a></li>
+                        <li><a ng-click="order_change_status('serviceissue')">Service Issue <span class="pull-right badge badge-important">{{orders.setup.select_all? gridOptions.paginate.total_items: orders.selected.length}}</span></a></li>
+                        <li><a ng-click="order_change_status('cancelled')">Cancelled <span class="pull-right badge badge-important">{{orders.setup.select_all? gridOptions.paginate.total_items: orders.selected.length}}</span></a></li>
+                        <li><a ng-click="order_change_status('scanned')">Scanned <span class="pull-right badge badge-important">{{orders.setup.select_all? gridOptions.paginate.total_items: orders.selected.length}}</span></a></li>
                     </ul>
                 </div>
 

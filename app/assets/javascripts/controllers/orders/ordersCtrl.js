@@ -114,6 +114,39 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
     myscope.select_single = function(row) {
         orders.single.select($scope.orders,row);
     };
+    myscope.show_selected = function() {
+        if(!$scope.orders.setup.select_all && $scope.orders.selected.length > 0 ) {
+            $modal.open({
+                templateUrl: '/assets/views/modals/selections.html',
+                controller: 'selectionModal',
+                resolve: {
+                    selected_data: function(){return $scope.orders.selected},
+                    selected_table_options: function() {return {
+                        identifier:'order_selections',
+                        selectable:true,
+                        selections: {
+                            single_callback:myscope.select_single,
+                            unbind:true
+                        },
+                        all_fields: {
+                            ordernum: {
+                                name: "Order #"
+                            },
+                            order_date: {
+                                name:"Order Date",
+                                transclude:"<span>{{row[field] | date:'EEEE MM/dd/yyyy hh:mm:ss a'}}</span>"
+                            },
+                            store_name: {
+                                name:"Store"
+                            }
+                        }
+                    };}
+                },
+                size:'lg'
+            });
+        }
+
+    };
 
     myscope.load_page_number = function(page) {
         if(page > 0 && page <= Math.ceil($scope.gridOptions.paginate.total_items/$scope.gridOptions.paginate.items_per_page)) {
@@ -171,7 +204,12 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
         $scope.gridOptions = {
             identifier:'orders',
             select_all: $scope.select_all_toggle,
-            select_single: myscope.select_single,
+            selections:{
+                show_dropdown:true,
+                single_callback: myscope.select_single,
+                selected_count:0,
+                show:myscope.show_selected
+            },
             draggable:true,
             sortable:true,
             selectable:true,
@@ -294,6 +332,9 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
                 }
             }
         });
+        $scope.$watch('orders.selected',function(){
+            $scope.gridOptions.selections.selected_count = $scope.orders.selected.length;
+        },true);
 
         $scope.$on("order-modal-closed",myscope.get_orders);
 

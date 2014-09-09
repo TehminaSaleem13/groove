@@ -432,14 +432,14 @@ class StoreSettingsController < ApplicationController
           "price",
           "qty"
         ]
-        final_record.delete_at(0) if final_record.length > 0
+        #final_record.delete_at(0) if final_record.length > 0
         final_record.each_with_index do |single_row,index|
-          if params[:type] == "order"
-            order = Order.new
+          if params[:type] == 'order'
+            order = Order.find_or_create_by_increment_id(single_row[mapping['increment_id']])
             order.store = @store
             #order_placed_time,price,qty
             logger.info mapping.to_s
-            order_required = ["qty","sku","increment_id"]
+            order_required = ['qty','sku','increment_id']
             order_map.each do |single_map|
               if !mapping[single_map].nil? && mapping[single_map] >= 0
                 #if sku, create order item with product id, qty
@@ -487,29 +487,32 @@ class StoreSettingsController < ApplicationController
             end
             logger.info order_required.to_s
             if order_required.length > 0
-              @result["status"] = false
+              @result['status'] = false
               order_required.each do |required_element|
-                @result["messages"].push("#{required_element} is missing.")
+                @result['messages'].push("#{required_element} is missing.")
               end
             end
-            if @result["status"]
-              if !mapping["order_placed_time"].nil? && mapping["order_placed_time"] > 0
+            if @result['status']
+              if !mapping['order_placed_time'].nil? && mapping['order_placed_time'] > 0
                 begin
                   require 'time'
-                  time = Time.parse(single_row[mapping["order_placed_time"]])
-                  order["order_placed_time"] = time
+                  time = Time.parse(single_row[mapping['order_placed_time']])
+                  order['order_placed_time'] = time
                 rescue ArgumentError => e
                   #@result["status"] = true
-                  @result["messages"].push("Order Placed has bad parameter - #{single_row[mapping['order_placed_time']]}")
+                  @result['messages'].push("Order Placed has bad parameter - #{single_row[mapping['order_placed_time']]}")
                 end
+              else
+                @result['status'] = false
+                @result['messages'].push('Order Placed is missing.')
               end
-              if @result["status"]
+              if @result['status']
                 begin
-                if Order.where(:increment_id=> order.increment_id).length == 0
+                #if Order.where(:increment_id=> order.increment_id).length == 0
                   order.status = 'onhold'
                   order.save!
                   order.update_order_status
-                end
+                #end
                 rescue ActiveRecord::RecordInvalid => e
                   @result['status'] = false
                   @result['messages'].push(order.errors.full_messages)
@@ -524,7 +527,7 @@ class StoreSettingsController < ApplicationController
             product = Product.new
             product.store = @store
             product.store_product_id = 0
-            product.name = ""
+            product.name = ''
             if !mapping['product_name'].nil? && mapping['product_name'] > 0 &&
               Product.where(:name=>single_row[mapping['product_name']]).length == 0
               product.name = single_row[mapping['product_name']]
@@ -536,6 +539,7 @@ class StoreSettingsController < ApplicationController
             #add inventory warehouses
             if !!mapping['location_primary'].nil? && !mapping['inv_wh1'].nil?
               product_inventory = ProductInventoryWarehouses.new
+              product_inventory.inventory_warehouse = InventoryWarehouse.where(:is_default => true).first
               valid_inventory = false
               if !mapping['inv_wh1'].nil? && mapping['inv_wh1'] > 0
                 product_inventory.qty = single_row[mapping['inv_wh1']]
@@ -551,7 +555,7 @@ class StoreSettingsController < ApplicationController
             #add product categories
             if !mapping['category_name'].nil? && mapping['category_name'] > 0
               unless single_row[mapping['category_name']].nil?
-                cats = single_row[mapping['category_name']].split(",")
+                cats = single_row[mapping['category_name']].split(',')
                 cats.each do |single_cat|
                   product_cat = ProductCat.new
                   product_cat.category = single_cat
@@ -562,7 +566,7 @@ class StoreSettingsController < ApplicationController
 
             if !mapping['product_images'].nil? && mapping['product_images'] > 0
               unless single_row[mapping['product_images']].nil?
-                images = single_row[mapping['product_images']].split(",")
+                images = single_row[mapping['product_images']].split(',')
                 images.each do |single_image|
                   product_image = ProductImage.new
                   product_image.image = single_image
@@ -573,12 +577,12 @@ class StoreSettingsController < ApplicationController
 
             if !mapping['sku'].nil? && mapping['sku'] > 0
               unless single_row[mapping['sku']].nil?
-                skus = single_row[mapping['sku']].split(",")
+                skus = single_row[mapping['sku']].split(',')
                 skus.each do |single_sku|
                   if ProductSku.where(:sku=>single_sku).length == 0
                     product_sku = ProductSku.new
                     product_sku.sku = single_sku
-                    product_sku.purpose = "primary"
+                    product_sku.purpose = 'primary'
                     product.product_skus << product_sku
                   end
                 end
@@ -586,7 +590,7 @@ class StoreSettingsController < ApplicationController
             end
             if !mapping['barcode'].nil? && mapping['barcode'] > 0
               unless single_row[mapping['barcode']].nil?
-                barcodes = single_row[mapping['barcode']].split(",")
+                barcodes = single_row[mapping['barcode']].split(',')
                 barcodes.each do |single_barcode|
                   if ProductBarcode.where(:barcode => single_barcode).length == 0
                     product_barcode = ProductBarcode.new
@@ -611,16 +615,16 @@ class StoreSettingsController < ApplicationController
               end
             end
           end
-          unless @result["status"]
-            @result["last_row"] = index
+          unless @result['status']
+            @result['last_row'] = index
             if index != 0
-              @result["messages"].push("Import halted because of errors, we have adjusted rows to the ones already imported.")
+              @result['messages'].push('Import halted because of errors, we have adjusted rows to the ones already imported.')
             end
             break
           end
         end
       else
-        @result["messages"].push("No file present to import #{params[:type]}")
+        @result['messages'].push("No file present to import #{params[:type]}")
       end
     end
 
@@ -643,7 +647,7 @@ class StoreSettingsController < ApplicationController
       end
     else
       @result["status"] = false
-      @result["messages"].push("User does not have permissions to change store status")
+      @result["messages"].push('User does not have permissions to change store status')
     end
 
 

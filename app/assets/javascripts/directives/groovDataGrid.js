@@ -4,7 +4,13 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout','$http','$sce','se
             identifier:'datagrid',
             select_all:false,
             selectable:false,
-            select_single:function(){},
+            selections: {
+                single_callback:function(){},
+                show_dropdown: false,
+                selected_count:0,
+                unbind:false,
+                show:function(){}
+            },
             show_hide:false,
             editable:false,
             sortable:false,
@@ -64,7 +70,7 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout','$http','$sce','se
                         myscope.last_clicked = index;
                     }
                     row.checked = !row.checked;
-                    scope.options.select_single(row);
+                    scope.options.selections.single_callback(row);
                     if(event.shiftKey) {
                         event.preventDefault();
                         var start = index;
@@ -78,6 +84,14 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout','$http','$sce','se
                         }
                     }
                     myscope.last_clicked = index;
+                }
+            };
+            scope.show_dropdown = function() {
+                scope.dropdown.show = false;
+                if (scope.options.selections.show_dropdown && !scope.options.setup.select_all) {
+                    $timeout.cancel(myscope.dropdown_promise);
+                    myscope.dropdown_promise = null;
+                    scope.dropdown.show = true;
                 }
             };
 
@@ -115,7 +129,7 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout','$http','$sce','se
 
             myscope.invert_selection = function() {
                 for(var i =0; i < scope.rows.length; i++) {
-                    scope.rows[i].checked = !scope.rows[i].checked;
+                    scope.check_uncheck(scope.rows[i],i, {shiftKey:false});
                 }
                 myscope.last_clicked =-1;
             };
@@ -127,6 +141,15 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout','$http','$sce','se
                 myscope.last_clicked =-1;
             };
 
+            myscope.update_selections = function() {
+                var options = default_options();
+                jQuery.extend(true,options.selections,scope.groovDataGrid.selections);
+                scope.options.selections = options.selections;
+            };
+
+            scope.start_dropdown_timer = function() {
+                myscope.dropdown_promise = $timeout(function(){scope.dropdown.show = false},500);
+            };
             myscope.init = function() {
                 scope.theads = [];
                 myscope.last_clicked =-1;
@@ -160,6 +183,9 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout','$http','$sce','se
                     enabled: scope.options.draggable,
                     reload: false
                 };
+                scope.dropdown = {
+                    show:false
+                };
                 scope.custom_identifier = scope.options.identifier + Math.floor(Math.random()*1000);
 
                 settings.column_preferences.get(scope.options.identifier).success(function(data){
@@ -181,7 +207,7 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout','$http','$sce','se
                         myscope.make_theads(theads);
                     }
                 });
-                if(scope.options.selectable) {
+                if(scope.options.selectable && !scope.options.selections.unbind) {
                     hotkeys.add({
                         combo: 'mod+i',
                         callback: myscope.invert_selection
@@ -190,6 +216,9 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout','$http','$sce','se
                 if(typeof scope.groovDataGrid['paginate']  != "undefined") {
                     scope.$watch('groovDataGrid.paginate',myscope.update_paginate,true);
                     scope.$watch('options.paginate.current_page',scope.options.paginate.callback);
+                }
+                if(typeof scope.groovDataGrid['selections']  != "undefined" && scope.groovDataGrid.selections.show_dropdown) {
+                    scope.$watch('groovDataGrid.selections',myscope.update_selections,true);
                 }
             };
 

@@ -37,6 +37,8 @@ class Product < ActiveRecord::Base
   has_many :product_kit_skuss, :dependent => :destroy
   has_many :product_inventory_warehousess, :dependent => :destroy
 
+  after_save :check_inventory_warehouses
+
   def self.to_csv(folder,options= {})
     require 'csv'
     response = {}
@@ -59,6 +61,17 @@ class Product < ActiveRecord::Base
       end
     end
     response
+  end
+
+  def check_inventory_warehouses
+    if self.product_inventory_warehousess.length == 0
+      inventory = ProductInventoryWarehouses.new
+      inventory.product = self
+      inventory.inventory_warehouse = InventoryWarehouse.where(:is_default => true).first
+      inventory.save
+      self.product_inventory_warehousess << inventory
+      self.save
+    end
   end
 
   def update_product_status (force_from_inactive_state = false)

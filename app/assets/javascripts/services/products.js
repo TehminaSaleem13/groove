@@ -158,9 +158,15 @@ groovepacks_services.factory('products',['$http','notification',function($http,n
     //single product related functions
     var get_single = function(id,products) {
         return $http.get('/products/getdetails/'+ id+'.json').success(function(data) {
-            products.single = {};
             if(data.product) {
-                products.single = data.product;
+                if(typeof products.single['basicinfo'] != "undefined" && data.product.basicinfo.id == products.single.basicinfo.id) {
+                    angular.extend(products.single,data.product);
+                } else {
+                    products.single = {};
+                    products.single = data.product;
+                }
+            } else {
+                products.single = {};
             }
         }).error(notification.server_error);
     };

@@ -104,6 +104,38 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
     myscope.select_single = function(row) {
         products.single.select($scope.products,row);
     };
+    myscope.show_selected = function() {
+        if(!$scope.products.setup.select_all && $scope.products.selected.length > 0 ) {
+            $modal.open({
+                templateUrl: '/assets/views/modals/selections.html',
+                controller: 'selectionModal',
+                resolve: {
+                    selected_data: function(){return $scope.products.selected},
+                    selected_table_options: function() {return {
+                        identifier:'product_selections',
+                        selectable:true,
+                        selections: {
+                            single_callback:myscope.select_single,
+                            unbind:true
+                        },
+                        all_fields: {
+                            name: {
+                                name: "Item Name"
+                            },
+                            sku: {
+                                name:"SKU"
+                            },
+                            barcode: {
+                                name:"Barcode"
+                            }
+                        }
+                    };}
+                },
+                size:'lg'
+            });
+        }
+
+    };
 
     myscope.load_page_number = function(page) {
         if(page > 0 && page <= Math.ceil($scope.gridOptions.paginate.total_items/$scope.gridOptions.paginate.items_per_page)) {
@@ -145,9 +177,14 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
         $scope.gridOptions = {
             identifier:'products',
             select_all: $scope.select_all_toggle,
-            select_single: myscope.select_single,
             sort_func: $scope.handlesort,
             setup: $scope.products.setup,
+            selections: {
+                show_dropdown: true,
+                single_callback: myscope.select_single,
+                selected_count:0,
+                show:myscope.show_selected
+            },
             paginate:{
                 show:true,
                 //send a large number to prevent resetting page number
@@ -239,6 +276,9 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
         $scope.$watch('_can_load_products',myscope.can_do_load_products);
 
         $scope.$on("product-modal-closed",myscope.get_products);
+        $scope.$watch('products.selected',function() {
+           $scope.gridOptions.selections.selected_count = $scope.products.selected.length;
+        },true);
         //$("#product-search-query").focus();
     };
 
