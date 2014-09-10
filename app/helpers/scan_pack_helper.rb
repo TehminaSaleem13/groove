@@ -12,6 +12,8 @@ module ScanPackHelper
     result['data'] = Hash.new
     result['data']['next_state'] = 'scanpack.rfo'
 
+    scanpack_settings = ScanPackSetting.all.first
+
     session[:most_recent_scanned_products] = []
     if !input.nil? && input != ""
       single_order = Order.find_by_increment_id(input)
@@ -85,7 +87,12 @@ module ScanPackHelper
           #if order has status of Awaiting Scanning
           if single_order.status == 'awaiting'
             if !single_order.has_unscanned_items
-              single_order_result['next_state'] = 'scanpack.rfp.tracking'
+              if scanpack_settings.ask_tracking_number?
+                single_order_result['next_state'] = 'scanpack.rfp.tracking'
+              else
+                order.set_order_to_scanned_state(current_user.username)
+                single_order_result['next_state'] = 'scanpack.rfo'
+              end
             else
               single_order_result['next_state'] = 'scanpack.rfp.default'
             end

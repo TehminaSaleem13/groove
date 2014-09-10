@@ -5,7 +5,7 @@
             subscription.tenant = tenant
             Apartment::Tenant.switch(subscription.tenant_name)
             CreateTenant.apply_restrictions(subscription.subscription_plan_id)
-            SeedTenant.new.seed(subscription.user_name, subscription.email, subscription.password)
+            SeedTenant.new.seed(true,subscription.user_name, subscription.email, subscription.password)
             TransactionEmail.send_email(subscription).deliver
     	end
         

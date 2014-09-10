@@ -393,6 +393,64 @@ class SettingsController < ApplicationController
     end
   end
 
+
+  def get_scan_pack_settings
+    @result = Hash.new
+    @result['status'] = true
+    @result['error_messages'] = []
+    @result['success_messages'] = []
+    @result['notice_messages'] = []
+    @result['settings'] = Hash.new
+
+    scan_pack_setting = ScanPackSetting.all.first
+
+    if !scan_pack_setting.nil?
+      @result['settings'] = scan_pack_setting
+    else
+      @result['status'] &= false
+      @result['error_messages'].push('No Scan Pack settings available for the system. Contact administrator.')
+    end
+
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json: @result }
+    end
+  end
+
+  def update_scan_pack_settings
+    @result = Hash.new
+    @result['status'] = true
+    @result['error_messages'] = []
+    @result['success_messages'] = []
+    @result['notice_messages'] = []
+
+    scan_pack_setting = ScanPackSetting.all.first
+
+    if !scan_pack_setting.nil?
+      if current_user.can? 'edit_scanning_prefs'
+        scan_pack_setting.enable_click_sku = params[:enable_click_sku]
+        scan_pack_setting.ask_tracking_number = params[:ask_tracking_number]
+        if scan_pack_setting.save
+          @result['success_messages'].push('Settings updated successfully.')
+        else
+          @result['status'] &= false
+          @result['error_messages'].push('Error saving Scan Pack settings.')
+        end
+      else
+        @result['status'] &= false
+        @result['error_messages'].push('You are not authorized to update scan pack preferences.')
+      end
+    else
+      @result['status'] &= false
+      @result['error_messages'].push('No Scan pack settings available for the system. Contact administrator.')
+    end
+
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json: @result }
+    end
+  end
+
   def send_test_mail
     LowInventoryLevel.notify(GeneralSetting.all.first, Apartment::Tenant.current_tenant).deliver
     render json: "ok"

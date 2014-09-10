@@ -23,8 +23,10 @@ groovepacks_controllers.
             };
 
             $scope.autoscan_barcode = function() {
-                $scope.set('input',$scope.data.order.next_item.barcodes[0].barcode);
-                $scope.input_enter({which:13});
+                if($scope.scan_pack.settings.enable_click_sku) {
+                    $scope.set('input',$scope.data.order.next_item.barcodes[0].barcode);
+                    $scope.input_enter({which:13});
+                }
             };
 
             $scope.product_details = function(id) {

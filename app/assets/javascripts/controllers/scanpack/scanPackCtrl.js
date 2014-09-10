@@ -3,6 +3,8 @@ groovepacks_controllers.
         function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies, scanPack, orders) {
             var myscope = {};
             $scope.init = function() {
+                $scope.scan_pack = scanPack.settings.model();
+                scanPack.settings.get($scope.scan_pack);
                 myscope.callbacks = {};
                 $scope.current_state = $state.current.name;
                 if(typeof $scope.data == "undefined") {

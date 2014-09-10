@@ -1,6 +1,6 @@
 	class SeedTenant
     include InventoryWarehouseHelper
-		def seed(username, email, password)
+		def seed(create = false, username='admin', email='abc@gmail.com', password='12345678')
 
       case Rails.env
         when "development"
@@ -13,11 +13,6 @@
             )
           end
       end
-
-			if User.where(:username=>username).length == 0
-				User.create([{:username=>username, :name=>username, :email => email, :password => password,
-					:password_confirmation => password, :confirmation_code=>'1234567890', :active=> true}],:without_protection=>true)
-			end
 
 			if OrderTag.where(:name=>'Contains New').length == 0
 				contains_new_tag = OrderTag.create(:name=>'Contains New', :color=>'#FF0000', :predefined => true)
@@ -66,6 +61,10 @@
 			  general_setting.import_orders_on_sun = false
 			  general_setting.save
 			end
+
+      if ScanPackSetting.all.length == 0
+        ScanPackSetting.create(:enable_click_sku => false, :ask_tracking_number=>true)
+      end
 
       [
           {
@@ -208,7 +207,7 @@
 			role_super_admin = Role.find_by_name('Super Admin')
 			unless role_super_admin.nil?
 			  Role.columns.each do |col|
-			    if col.type == :boolean && col.name != "custom"
+			    if col.type == :boolean && col.name != 'custom'
 			      role_super_admin[col.name] = true
 			    end
 
@@ -216,16 +215,17 @@
 			  role_super_admin.save
 			end
 
-
+      if User.all.length == 0 || (User.where(:username=>username).length == 0 && create)
+        created_user = User.create([{:username=>username, :name=>username, :email => email, :password => password,
+                      :password_confirmation => password, :confirmation_code=>'1234567890', :active=> true}],:without_protection=>true)
+        created_user.role = role_super_admin
+        created_user.save
+      end
 
 
 			User.all.each do |user|
 			  if user.role.nil?
-			    if user.username == username
-			      user.role = role_super_admin
-			    else
-			      user.role = Role.find_by_name('Scan & Pack User')
-			    end
+  	      user.role = Role.find_by_name('Scan & Pack User')
 			    user.save
         end
         if user.inventory_warehouse_id.nil?
@@ -235,6 +235,31 @@
         InventoryWarehouse.all.each do |inv_wh|
           fix_user_inventory_permissions(user,inv_wh)
         end
-			end
+      end
+
+      ProductBarcode.all.each do |barcode|
+        if barcode.barcode.blank? || ProductBarcode.where(:barcode=>barcode.barcode).length > 1
+          barcode.destroy
+        end
+      end
+
+      ProductSku.all.each do |sku|
+        if sku.sku.blank? || ProductSku.where(:sku=>sku.sku).length > 1
+          sku.destroy
+        end
+      end
+
+      ProductCat.all.each do |cat|
+        if cat.category.blank?
+          cat.destroy
+        end
+      end
+
+      ProductImage.all.each do |image|
+        if image.image.blank?
+          image.destroy
+        end
+      end
+
 		end
 	end

@@ -16,6 +16,7 @@ git pull origin master
 RAILS_ENV=production script/delayed_job stop
 RAILS_ENV=production bundle install --deployment
 RAILS_ENV=production rake db:migrate
+RAILS_ENV=production rake db:seed
 RAILS_ENV=production rake assets:precompile
 RAILS_ENV=production rake fs:delete_pdfs
 RAILS_ENV=production script/delayed_job start
