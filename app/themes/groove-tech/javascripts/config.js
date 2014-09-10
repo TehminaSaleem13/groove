@@ -73,6 +73,8 @@ groovepacks.config(['$stateProvider', '$urlRouterProvider','hotkeysProvider','cf
         .state('settings.system',{url:'/system', template:'<div ui-view></div>', abstract:true})
         .state('settings.system.general', {url:'/general',templateUrl:'/assets/views/settings/system/general.html',
                 controller:'generalSettingsCtrl'})
+        .state('settings.system.scan_pack', {url:'/scan_pack',templateUrl:'/assets/views/settings/system/scan_pack.html',
+                controller:'scanPackSettingsCtrl'})
         .state('settings.system.backup', {url:'/backup', templateUrl:'/assets/views/settings/system/backup.html',
                        controller:'showBackupCtrl'})
         .state('settings.system.warehouses', {url:'/warehouses',templateUrl:'/assets/views/settings/system/warehouses.html',

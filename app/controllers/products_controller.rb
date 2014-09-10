@@ -1338,29 +1338,31 @@ class ProductsController < ApplicationController
     limit = 10
     offset = 0
     # Get passed in parameter variables if they are valid.
-    limit = params[:limit] if !params[:limit].nil? && params[:limit].to_i > 0
+    limit = params[:limit].to_i if !params[:limit].nil? && params[:limit].to_i > 0
 
-    offset = params[:offset] if !params[:offset].nil? && params[:offset].to_i >= 0
-    search = params[:search]
+    offset = params[:offset].to_i if !params[:offset].nil? && params[:offset].to_i >= 0
+    search = ActiveRecord::Base::sanitize('%'+params[:search]+'%')
     is_kit = 0
     supported_kit_params = ['0', '1', '-1']
     kit_query = ""
     query_add = ""
 
-    is_kit = params[:is_kit] if !params[:is_kit].nil?  &&
+    is_kit = params[:is_kit].to_i if !params[:is_kit].nil?  &&
         supported_kit_params.include?(params[:is_kit])
     unless is_kit == '-1'
       kit_query = " products.is_kit="+is_kit.to_s+" AND "
     end
     unless params[:select_all]
-      query_add = " LIMIT "+limit+" OFFSET "+offset
+      query_add = " LIMIT "+limit.to_s+" OFFSET "+offset.to_s
     end
 
-    base_query = "(SELECT * from products WHERE "+kit_query+" products.name like '%"+search+"%') UNION
-      (SELECT products.* from products, product_barcodes where "+kit_query+" products.id = product_barcodes.product_id AND product_barcodes.barcode like '%"+search+"%' ) UNION
-      (SELECT products.* from products, product_skus where "+kit_query+" products.id = product_skus.product_id AND product_skus.sku like '%"+search+"%' ) UNION
-      (SELECT products.* from products, product_cats where "+kit_query+" products.id = product_cats.product_id AND product_cats.category like '%"+search+"%' ) UNION
-      (SELECT products.* from products, product_inventory_warehouses where "+kit_query+" products.id = product_inventory_warehouses.product_id AND (product_inventory_warehouses.location_primary like '%"+search+"%' OR product_inventory_warehouses.location_secondary like '%"+search+"%') ) "
+    base_query = "(SELECT * from products WHERE "+kit_query+" products.name like "+search+") UNION
+      (SELECT products.* from products, product_barcodes where "+kit_query+" products.id = product_barcodes.product_id AND product_barcodes.barcode like "+search+" ) UNION
+      (SELECT products.* from products, product_skus where "+kit_query+" products.id = product_skus.product_id AND product_skus.sku like "+search+" ) UNION
+      (SELECT products.* from products, product_cats where "+kit_query+" products.id = product_cats.product_id AND product_cats.category like "+search+" ) UNION
+      (SELECT products.* from products, product_inventory_warehouses where "+kit_query+" products.id = product_inventory_warehouses.product_id AND (product_inventory_warehouses.location_primary like "+search+" OR product_inventory_warehouses.location_secondary like "+search+") ) "
+
+    logger.info base_query;
     result_rows = Product.find_by_sql(base_query+query_add)
 
     if results_only
@@ -1392,9 +1394,9 @@ class ProductsController < ApplicationController
     supported_kit_params = ['0', '1', '-1']
 
     # Get passed in parameter variables if they are valid.
-    limit = params[:limit] if !params[:limit].nil? && params[:limit].to_i > 0
+    limit = params[:limit].to_i if !params[:limit].nil? && params[:limit].to_i > 0
 
-    offset = params[:offset] if !params[:offset].nil? && params[:offset].to_i >= 0
+    offset = params[:offset].to_i if !params[:offset].nil? && params[:offset].to_i >= 0
 
     sort_key = params[:sort] if !params[:sort].nil? &&
         supported_sort_keys.include?(params[:sort].to_s)

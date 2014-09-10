@@ -19,6 +19,21 @@
                 "skippable": " Skippable products are usually stickers, freebies and other optional items that the order should not be held for"
             }
         }
+    },
+    "settings":{
+        "system": {
+            "scan_pack": {
+               "labels":{
+                   "enable_click_sku":"Click SKU to Scan",
+                   "ask_tracking_number":"Ask for Tracking Number"
+               },
+               "tooltips" :{
+                    "enable_click_sku":"When this option is enabled the packer can click the SKU of the item currently suggested for packing to add the item to the order. This prevents the packer from having to type in damaged or unreadable barcodes.",
+                    "ask_tracking_number":"When this option is enabled the packer will be prompted to scan a tracking number after the last item of an order has been packed."
+               }
+            }
+        }
+
     }
 
 }

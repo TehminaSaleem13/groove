@@ -138,6 +138,14 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
                             },
                             store_name: {
                                 name:"Store"
+                            },
+                            status: {
+                                name:"Status",
+                                transclude:"<span class='label label-default' ng-class=\"{" +
+                                           "'label-success': row[field] == 'awaiting', " +
+                                           "'label-warning': row[field] == 'onhold', " +
+                                           "'label-danger': row[field] == 'serviceissue' }\">" +
+                                           "{{row[field]}}</span>"
                             }
                         }
                     };}
@@ -320,7 +328,9 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
 
 
         $scope.$watch('orders.setup.search',function(){
-            $scope.select_all_toggle(false);
+            if($scope.orders.setup.select_all) {
+                $scope.select_all_toggle(false);
+            }
             myscope.get_orders(1);
         });
 

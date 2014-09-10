@@ -81,6 +81,7 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout','$http','$sce','se
                         }
                         for (var i = start; i <= end; i++) {
                             scope.rows[i].checked = row.checked;
+                            scope.options.selections.single_callback(scope.rows[i]);
                         }
                     }
                     myscope.last_clicked = index;

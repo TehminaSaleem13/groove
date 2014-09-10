@@ -936,12 +936,12 @@ class OrdersController < ApplicationController
     limit = 10
     offset = 0
     # Get passed in parameter variables if they are valid.
-    limit = params[:limit] if !params[:limit].nil? && params[:limit].to_i > 0
+    limit = params[:limit].to_i if !params[:limit].nil? && params[:limit].to_i > 0
 
-    offset = params[:offset] if !params[:offset].nil? && params[:offset].to_i >= 0
-    search = params[:search]
+    offset = params[:offset].to_i if !params[:offset].nil? && params[:offset].to_i >= 0
+    search = ActiveRecord::Base::sanitize('%'+params[:search]+'%')
     base_query = "from orders WHERE
-                      increment_id like '%"+search+"%' OR email like '%"+search+"%' OR CONCAT(IFNULL(firstname,''),' ',IFNULL(lastname,'')) like '%"+search+"%' OR postcode like '%"+search+"%'"
+                      increment_id like "+search+" OR email like "+search+" OR CONCAT(IFNULL(firstname,''),' ',IFNULL(lastname,'')) like "+search+" OR postcode like "+search
     query_add = ''
     unless params[:select_all]
       query_add = " LIMIT #{limit} OFFSET #{offset}"
@@ -973,12 +973,12 @@ class OrdersController < ApplicationController
 
 
     # Get passed in parameter variables if they are valid.
-    limit = params[:limit] if !params[:limit].nil? && params[:limit].to_i > 0
+    limit = params[:limit].to_i if !params[:limit].nil? && params[:limit].to_i > 0
 
-    offset = params[:offset] if !params[:offset].nil? && params[:offset].to_i >= 0
+    offset = params[:offset].to_i if !params[:offset].nil? && params[:offset].to_i >= 0
 
     unless params[:select_all]
-      query_add = " LIMIT "+limit+" OFFSET "+offset
+      query_add = " LIMIT "+limit.to_s+" OFFSET "+offset.to_s
     end
 
     sort_key = params[:sort] if !params[:sort].nil? &&

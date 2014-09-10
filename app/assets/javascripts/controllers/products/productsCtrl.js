@@ -87,6 +87,9 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
         if(typeof childStateParams['page']=='undefined' || childStateParams['page'] <= 0) {
             childStateParams['page'] = 1;
         }
+        if($scope.products.setup.select_all) {
+            $scope.select_all_toggle(false);
+        }
         return myscope.get_products(childStateParams['page']);
     };
 
@@ -127,6 +130,13 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
                             },
                             barcode: {
                                 name:"Barcode"
+                            },
+                            status :{
+                                name:"Status",
+                                transclude:"<span class='label label-default' ng-class=\"{" +
+                                           "'label-success': row[field] == 'active', " +
+                                           "'label-info': row[field] == 'new' }\">" +
+                                           "{{row[field]}}</span>"
                             }
                         }
                     };}
@@ -269,8 +279,10 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
         };
 
         //Register watchers
-        $scope.$watch('products.setup.search',function(){
-            $scope.select_all_toggle(false);
+        $scope.$watch('products.setup.search',function() {
+            if($scope.products.setup.select_all) {
+                $scope.select_all_toggle(false);
+            }
             myscope.get_products(1);
         });
         $scope.$watch('_can_load_products',myscope.can_do_load_products);

@@ -1,0 +1,46 @@
+<div class="col-lg-10 col-md-10">
+<div class="row">
+
+    <div class="col-xs-12">
+        <h3>Scan & Pack Options</h3>
+        <div class="form-horizontal general-settings-form">
+            <fieldset>
+                <div class="form-group">
+                    <label class="control-label col-md-3">{{translations.labels.ask_tracking_number}}</label>
+                    <div class="controls col-sm-2 form-inline">
+                        <label class="radio col-sm-6">
+                            <input type="radio" ng-model="scan_pack.settings.ask_tracking_number" value="1" ng-change="update_settings()"/>  On
+                        </label>
+                        <label class="radio">
+                            <input type="radio" ng-model="scan_pack.settings.ask_tracking_number" value="0" ng-change="update_settings()"/>  Off
+                        </label>
+                    </div>
+                    <div class="info col-sm-2">
+                        <i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" popover="{{translations.tooltips.ask_tracking_number}}"></i>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="control-label col-md-3">{{translations.labels.enable_click_sku}}</label>
+                    <div class="controls col-md-2 form-inline">
+                        <label class="radio col-sm-6">
+                            <input type="radio" ng-model="scan_pack.settings.enable_click_sku" value="1" ng-change="update_settings()"/>  On
+                        </label>
+                        <label class="radio ">
+                            <input type="radio" ng-model="scan_pack.settings.enable_click_sku" value="0" ng-change="update_settings()"/>  Off
+                        </label>
+                    </div>
+                    <div class="info col-sm-2">
+                        <i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" popover="{{translations.tooltips.enable_click_sku}}"></i>
+                    </div>
+                </div>
+
+            </fieldset>
+        </div>
+    </div>
+</div>
+
+
+</div>
+
+

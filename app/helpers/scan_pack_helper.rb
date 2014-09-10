@@ -90,7 +90,7 @@ module ScanPackHelper
               if scanpack_settings.ask_tracking_number?
                 single_order_result['next_state'] = 'scanpack.rfp.tracking'
               else
-                order.set_order_to_scanned_state(current_user.username)
+                single_order.set_order_to_scanned_state(current_user.username)
                 single_order_result['next_state'] = 'scanpack.rfo'
               end
             else
@@ -108,6 +108,7 @@ module ScanPackHelper
         else
           result['status'] &= false
           result['error_messages'].push("You have reached the maximum limit of number of shipments for your subscription.")
+          single_order_result['next_state'] = 'scanpack.rfo'
         end
         result['data'] = single_order_result
       end
@@ -150,6 +151,7 @@ module ScanPackHelper
     else
       #check if order status is On Hold
       single_order = Order.find(id)
+      scanpack_settings = ScanPackSetting.all.first
       if single_order.nil?
         result['status'] &= false
         result['error_messages'].push("Could not find order with id:"+id)
@@ -209,7 +211,12 @@ module ScanPackHelper
           #puts "Barcode "+input+" found: "+barcode_found.to_s
           if barcode_found
             if !single_order.has_unscanned_items
-              result['data']['next_state'] = 'scanpack.rfp.tracking'
+              if scanpack_settings.ask_tracking_number?
+                result['data']['next_state'] = 'scanpack.rfp.tracking'
+              else
+                single_order.set_order_to_scanned_state(current_user.username)
+                result['data']['next_state'] = 'scanpack.rfo'
+              end
             end
             #puts "Length of unscanned items:" + result['data']['unscanned_items'].length.to_s
             #puts result['data']['unscanned_items'].to_s
