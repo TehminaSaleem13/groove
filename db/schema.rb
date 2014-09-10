@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140910131018) do
+ActiveRecord::Schema.define(:version => 20140910164215) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0, :null => false
@@ -437,8 +437,8 @@ ActiveRecord::Schema.define(:version => 20140910131018) do
   end
 
   create_table "scan_pack_settings", :force => true do |t|
-    t.boolean  "enable_click_sku",    :default => false
-    t.boolean  "ask_tracking_number", :default => true
+    t.boolean  "enable_click_sku",    :default => true
+    t.boolean  "ask_tracking_number", :default => false
     t.datetime "created_at",                             :null => false
     t.datetime "updated_at",                             :null => false
   end

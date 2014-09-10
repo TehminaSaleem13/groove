@@ -63,7 +63,7 @@
 			end
 
       if ScanPackSetting.all.length == 0
-        ScanPackSetting.create(:enable_click_sku => false, :ask_tracking_number=>true)
+        ScanPackSetting.create(:enable_click_sku => true, :ask_tracking_number=>false)
       end
 
       [
