@@ -304,7 +304,9 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
                 //console.log("got products");
                 $scope.gridOptions.paginate.total_items = products.list.total_items($scope.products);
                 $scope._can_load_products = true;
-            })
+            }).error(function(){
+                $scope._can_load_products = true;
+            });
         } else {
             myscope.do_load_products = page;
             var req= $q.defer();

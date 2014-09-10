@@ -190,6 +190,8 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
             return orders.list.get($scope.orders,page).success(function(data) {
                 $scope.gridOptions.paginate.total_items = orders.list.total_items($scope.orders);
                 $scope._can_load_orders = true;
+            }).error(function(){
+                $scope._can_load_orders = true;
             });
         } else {
             myscope.do_load_orders = page;
