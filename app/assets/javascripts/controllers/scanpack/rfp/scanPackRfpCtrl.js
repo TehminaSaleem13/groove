@@ -5,8 +5,21 @@ groovepacks_controllers.
              * Checks if call is on direct url and returns promise to support .then in both cases
              */
             $scope.rfpinit = function() {
+                $scope.alternate_orders = [];
                 $scope.init();
                 var result = $q.defer();
+                result.promise.then(function() {
+                    if(typeof $scope.data.raw.data != "undefined"
+                           && typeof $scope.data.raw.data.matched_orders != "undefined"
+                        &&  $scope.data.raw.data.matched_orders.length > 0) {
+                        var index = $scope.data.raw.data.matched_orders.indexOf($scope.data.order.increment_id);
+                        if(index!= -1) {
+                            $scope.data.raw.data.matched_orders.splice(index,1);
+                        }
+                        $scope.alternate_orders = $scope.data.raw.data.matched_orders;
+
+                    }
+                });
                 if(typeof $scope.data.order != 'undefined' && typeof $scope.data.order.status != 'undefined') {
                     result.resolve();
                 } else {
@@ -17,7 +30,6 @@ groovepacks_controllers.
                                 $state.go(data.data.data['next_state'],{order_num: $stateParams.order_num});
                             }
                             $scope.set('order', data.data.data.order);
-
                         }
                     }).then(result.resolve);
                 }

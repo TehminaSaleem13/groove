@@ -23,13 +23,24 @@
     "settings":{
         "system": {
             "scan_pack": {
+               "headings":{
+                    "options" :"Scan & Pack Options",
+                    "feedback" :"Scanning Feedback"
+               },
                "labels":{
                    "enable_click_sku":"Click SKU to Scan",
-                   "ask_tracking_number":"Ask for Tracking Number"
+                   "ask_tracking_number":"Ask for Tracking Number",
+                   "show_success_image":"Display Success Image",
+                   "show_fail_image":"Display Fail Image",
+                   "for":"for",
+                   "seconds":"seconds",
+                   "play_success_sound":"Play Success Sound",
+                   "play_fail_sound":"Play Fail Sound"
                },
                "tooltips" :{
-                    "enable_click_sku":"When this option is enabled the packer can click the SKU of the item currently suggested for packing to add the item to the order. This prevents the packer from having to type in damaged or unreadable barcodes.",
-                    "ask_tracking_number":"When this option is enabled the packer will be prompted to scan a tracking number after the last item of an order has been packed."
+                   "enable_click_sku": "When this option is enabled the packer can click the SKU of the item currently suggested for packing to add the item to the order. This prevents the packer from having to type in damaged or unreadable barcodes.",
+                   "ask_tracking_number": "When this option is enabled the packer will be prompted to scan a tracking number after the last item of an order has been packed.",
+                   "feedback": "Scan Success and scan fail messages are visual feedback to let the packer know if they scanned the correct product."
                }
             }
         }

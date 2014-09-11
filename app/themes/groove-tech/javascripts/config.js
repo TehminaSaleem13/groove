@@ -43,10 +43,10 @@ groovepacks.config(['$stateProvider', '$urlRouterProvider','hotkeysProvider','cf
         .state('scanpack',{url: '/scanandpack', templateUrl: '/assets/views/scanpack/base.html', controller: 'scanPackCtrl'
                        ,abstract:true})
         .state('scanpack.rfo',{url: '', templateUrl:'/assets/views/scanpack/multi.html', controller: 'scanPackRfoCtrl'})
-        .state('scanpack.rfp',{url: '/rfp/:order_num', template:"<div ui-view></div>",  controller: 'scanPackRfpCtrl',
+        .state('scanpack.rfp',{url: '/rfp/:order_num', templateUrl:"/assets/views/scanpack/rfpbase.html",  controller: 'scanPackRfpCtrl',
                        abstract:true })
         .state('scanpack.rfp.default', {url: '', controller:'scanPackRfpDefaultCtrl',
-                       templateUrl:'/assets/views/scanpack/rfp.html'})
+                       templateUrl:'/assets/views/scanpack/rfpdefault.html'})
         .state('scanpack.rfp.tracking', {url: '/tracking', templateUrl:'/assets/views/scanpack/multi.html',
                        controller:'scanPackTrackingCtrl'})
         .state('scanpack.rfp.product_edit', {url: '/product_edit', templateUrl:'/assets/views/scanpack/productedit.html',

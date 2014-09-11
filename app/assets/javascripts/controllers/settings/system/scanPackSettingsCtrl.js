@@ -8,13 +8,24 @@ function( $scope, $http, $timeout, $location, $state, $cookies, scanPack,groov_t
     myscope.init = function() {
         $scope.setup_page('system','scan_pack');
         $scope.translations = {
+            "headings":{
+              "options": "",
+              "feedback": ""
+            },
             "labels":{
                 "enable_click_sku":"",
-                "ask_tracking_number":""
+                "ask_tracking_number":"",
+                "show_success_image":"",
+                "show_fail_image":"",
+                "for":"",
+                "seconds":"",
+                "play_success_sound":"",
+                "play_fail_sound":""
             },
             "tooltips" :{
                 "enable_click_sku":"",
-                "ask_tracking_number":""
+                "ask_tracking_number":"",
+                "feedback":""
             }
         };
         groov_translator.translate('settings.system.scan_pack',$scope.translations);

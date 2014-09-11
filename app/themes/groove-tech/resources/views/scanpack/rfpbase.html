@@ -1,0 +1,4 @@
+<div class="row" ng-show="alternate_orders.length">
+    <div class="alert alert-info"><h4>Did you mean <span ng-repeat="inc_id in alternate_orders"><a ui-sref="scanpack.rfp({order_num: inc_id})">{{inc_id}}</a> <span ng-show="!$last">or </span></span></h4></div>
+</div>
+<div ui-view></div>

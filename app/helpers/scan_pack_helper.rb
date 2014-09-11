@@ -10,7 +10,6 @@ module ScanPackHelper
     result['success_messages'] = []
     result['notice_messages'] = []
     result['data'] = Hash.new
-    result['data']['orders'] = []
     result['data']['next_state'] = 'scanpack.rfo'
 
     scanpack_settings = ScanPackSetting.all.first
@@ -18,13 +17,37 @@ module ScanPackHelper
     session[:most_recent_scanned_products] = []
     if !input.nil? && input != ""
       orders = Order.where(['increment_id = ? or non_hyphen_increment_id =?', input, input])
+      logger.info orders
+      single_order = nil
+      single_order_result = Hash.new
+      single_order_result['matched_orders'] = []
 
-      result['notice_messages'].push('Order with number '+ 
-        input +' cannot be found. It may not have been imported yet') if orders.length == 0
+      if orders.length == 1
+        single_order = orders.first
+      else
+        orders.each do |matched_single|
+          if single_order.nil?
+            single_order = matched_single
+          elsif matched_single.status == 'awaiting' &&
+              (single_order.status != 'awaiting' || single_order.order_placed_time < matched_single.order_placed_time)
+            single_order = matched_single
+          elsif matched_single.status == 'onhold' && single_order.status != 'awaiting' &&
+              (single_order.status != 'onhold' || single_order.order_placed_time < matched_single.order_placed_time)
+            single_order = matched_single
+          elsif matched_single.status == 'serviceissue' && single_order.status != 'awaiting' && single_order.status != 'onhold' &&
+              (single_order.status != 'serviceissue' || single_order.order_placed_time < matched_single.order_placed_time)
+            single_order = matched_single
+          end
+          unless ['scanned','cancelled'].include?(matched_single.status)
+            single_order_result['matched_orders'].push(matched_single.increment_id)
+          end
+        end
+      end
 
-      orders.each do |single_order|
-        single_order_result = Hash.new
-
+      if single_order.nil?
+        result['notice_messages'].push('Order with number '+
+          input +' cannot be found. It may not have been imported yet')
+      else
         single_order_result['status'] = single_order.status
         single_order_result['order_num'] = single_order.increment_id
 
@@ -112,7 +135,7 @@ module ScanPackHelper
           result['error_messages'].push("You have reached the maximum limit of number of shipments for your subscription.")
           single_order_result['next_state'] = 'scanpack.rfo'
         end
-        result['data']['orders'].push(single_order_result)
+        result['data'] = single_order_result
       end
     else
       result['status'] &= false
