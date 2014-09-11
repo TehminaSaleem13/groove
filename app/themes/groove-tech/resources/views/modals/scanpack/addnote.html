@@ -1,20 +1,22 @@
-<div class="modal-header">
-    <div class="modal-title">Note from packer</div>
-    <button type="button" class="close-btn" ng-click="ok()"><i class="glyphicon glyphicon-remove"></i></button>
-</div>
-<div class="modal-body">
-    <div class="container-fluid">
-        <div class="form-horizontal form-horizontal-create row" >
-            <div class="control-group col-xs-12">
-                <fieldset>
-                    <legend>Add Note to Order</legend>
-                    <textarea id="note_from_packer" tabindex="-1" class="col-lg-12 col-md-12 col-sm-12 col-xs-12" ng-model="order.notes_fromPacker" ></textarea>
-                </fieldset>
+<div>
+    <div class="modal-header">
+        <div class="modal-title">Note from packer</div>
+        <button type="button" class="close-btn" ng-click="ok()"><i class="glyphicon glyphicon-remove"></i></button>
+    </div>
+    <div class="modal-body">
+        <div class="container-fluid">
+            <div class="row" >
+                <div class="control-group col-xs-12">
+                    <fieldset>
+                        <legend>Add Note to Order</legend>
+                        <textarea id="note_from_packer" tabindex="-1" class="form-control col-lg-12 col-md-12 col-sm-12 col-xs-12" ng-model="order.notes_fromPacker" ></textarea>
+                    </fieldset>
+                </div>
             </div>
         </div>
     </div>
-</div>
-<div class="modal-footer">
-    <button ng-click="ok()" class="modal-save-button" translate>modal.save_close</button>
-</div>
+    <div class="modal-footer">
+        <button ng-click="ok()" class="modal-save-button" translate>modal.save_close</button>
+    </div>
 
+</div>

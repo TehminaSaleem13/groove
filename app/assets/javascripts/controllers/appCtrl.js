@@ -89,7 +89,7 @@ groovepacks_controllers.
             }).error(function(data) {});
         };
         $interval(myscope.get_status, 2000);
-        myscope.focus_search = function(event) {
+        $rootScope.focus_search = function(event) {
             if (typeof event != 'undefined') {
                 event.preventDefault();
             }
@@ -107,7 +107,7 @@ groovepacks_controllers.
         hotkeys.bindTo($scope).add({
             combo: ['return'],
             description:'Focus search/scan bar (if present)',
-            callback:myscope.focus_search
+            callback:$rootScope.focus_search
         });
 
         myscope.get_status();
@@ -121,6 +121,6 @@ groovepacks_controllers.
             }
         });
         $rootScope.$on('$viewContentLoaded',function() {
-            //$timeout(myscope.focus_search);
+            $timeout($rootScope.focus_search);
         });
 }]);
