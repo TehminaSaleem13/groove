@@ -1,7 +1,26 @@
 groovepacks_services.factory('scanPack',['$http','notification','$state',function($http,notification,$state) {
 
+    var get_state = function() {
+        return {
+            image:{
+                enabled:false,
+                time:0,
+                src:''
+            },
+            sound: {
+                enabled:false,
+                object:{}
+            }
+        }
+    };
+
     var get_default = function() {
         return {
+            state:'none',
+            scan_states:{
+                success:get_state(),
+                fail:get_state()
+            },
             settings: {}
         };
     };
@@ -82,6 +101,9 @@ groovepacks_services.factory('scanPack',['$http','notification','$state',functio
             model: get_default,
             get: get_settings,
             update: update_settings
+        },
+        states:{
+            model:get_state
         },
         order_instruction: order_instruction,
         product_instruction: product_instruction

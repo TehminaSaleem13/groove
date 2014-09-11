@@ -440,8 +440,20 @@ ActiveRecord::Schema.define(:version => 20140911020959) do
   create_table "scan_pack_settings", :force => true do |t|
     t.boolean  "enable_click_sku",    :default => true
     t.boolean  "ask_tracking_number", :default => false
-    t.datetime "created_at",                             :null => false
-    t.datetime "updated_at",                             :null => false
+    t.datetime "created_at",                                                         :null => false
+    t.datetime "updated_at",                                                         :null => false
+    t.boolean  "show_success_image",  :default => true
+    t.string   "success_image_src",   :default => "/assets/images/scan_success.png"
+    t.float    "success_image_time",  :default => 1.5
+    t.boolean  "show_fail_image",     :default => true
+    t.string   "fail_image_src",      :default => "/assets/images/scan_fail.png"
+    t.float    "fail_image_time",     :default => 1.5
+    t.boolean  "play_success_sound",  :default => true
+    t.string   "success_sound_url",   :default => "/assets/sounds/scan_success.mp3"
+    t.float    "success_sound_vol",   :default => 0.75
+    t.boolean  "play_fail_sound",     :default => true
+    t.string   "fail_sound_url",      :default => "/assets/sounds/scan_fail.mp3"
+    t.float    "fail_sound_vol",      :default => 0.75
   end
 
   create_table "shipstation_credentials", :force => true do |t|

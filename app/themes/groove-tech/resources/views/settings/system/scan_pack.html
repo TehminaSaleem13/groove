@@ -2,7 +2,7 @@
 <div class="row">
 
     <div class="col-xs-12">
-        <h3>Scan & Pack Options</h3>
+        <h3>{{translations.headings.options}}</h3>
         <div class="form-horizontal general-settings-form">
             <fieldset>
                 <div class="form-group">
@@ -40,7 +40,78 @@
     </div>
 </div>
 
+<div class="row">
 
+    <div class="col-xs-12">
+        <h3>{{translations.headings.feedback}}</h3>
+        <div class="form-horizontal general-settings-form">
+            <fieldset>
+                <div class="form-group">
+                    <label class="control-label col-sm-3">{{translations.labels.show_success_image}}</label>
+                    <div class="controls col-sm-2 form-inline">
+                        <label class="radio col-sm-6">
+                            <input type="radio" ng-model="scan_pack.settings.show_success_image" value="1" ng-change="update_settings()"/>  On
+                        </label>
+                        <label class="radio">
+                            <input type="radio" ng-model="scan_pack.settings.show_success_image" value="0" ng-change="update_settings()"/>  Off
+                        </label>
+                    </div>
+                    <div class="col-sm-4" ng-show="scan_pack.settings.show_success_image">
+                        <label class="control-label col-sm-1">{{translations.labels.for}}</label>
+                        <div class="col-sm-5">
+                            <input class="form-control input-style" type="number" step="0.1" min="0.3" ng-blur="update_settings()" ng-model="scan_pack.settings.success_image_time"/>
+                        </div>
+                        <label class="control-label col-sm-1">{{translations.labels.seconds}}</label>
+                    </div>
+                    <div class="info col-sm-2">
+                        <i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" popover="{{translations.tooltips.feedback}}"></i>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-md-3">{{translations.labels.show_fail_image}}</label>
+                    <div class="controls col-sm-2 form-inline">
+                        <label class="radio col-sm-6">
+                            <input type="radio" ng-model="scan_pack.settings.show_fail_image" value="1" ng-change="update_settings()"/>  On
+                        </label>
+                        <label class="radio">
+                            <input type="radio" ng-model="scan_pack.settings.show_fail_image" value="0" ng-change="update_settings()"/>  Off
+                        </label>
+                    </div>
+                    <div class="col-sm-4" ng-show="scan_pack.settings.show_fail_image">
+                        <label class="control-label col-sm-1">{{translations.labels.for}}</label>
+                        <div class="col-sm-5">
+                            <input class="form-control input-style" type="number" step="0.1" min="0.3" ng-blur="update_settings()" ng-model="scan_pack.settings.fail_image_time"/>
+                        </div>
+                        <label class="control-label col-sm-1">{{translations.labels.seconds}}</label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-md-3">{{translations.labels.play_success_sound}}</label>
+                    <div class="controls col-sm-2 form-inline">
+                        <label class="radio col-sm-6">
+                            <input type="radio" ng-model="scan_pack.settings.play_success_sound" value="1" ng-change="update_settings()"/>  On
+                        </label>
+                        <label class="radio">
+                            <input type="radio" ng-model="scan_pack.settings.play_success_sound" value="0" ng-change="update_settings()"/>  Off
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-md-3">{{translations.labels.play_fail_sound}}</label>
+                    <div class="controls col-sm-2 form-inline">
+                        <label class="radio col-sm-6">
+                            <input type="radio" ng-model="scan_pack.settings.play_fail_sound" value="1" ng-change="update_settings()"/>  On
+                        </label>
+                        <label class="radio">
+                            <input type="radio" ng-model="scan_pack.settings.play_fail_sound" value="0" ng-change="update_settings()"/>  Off
+                        </label>
+                    </div>
+                </div>
+
+            </fieldset>
+        </div>
+    </div>
+</div>
 </div>
 
 

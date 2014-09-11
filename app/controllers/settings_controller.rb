@@ -430,6 +430,19 @@ class SettingsController < ApplicationController
       if current_user.can? 'edit_scanning_prefs'
         scan_pack_setting.enable_click_sku = params[:enable_click_sku]
         scan_pack_setting.ask_tracking_number = params[:ask_tracking_number]
+        scan_pack_setting.show_success_image = params[:show_success_image]
+        #scan_pack_setting.success_image_src = params[:success_image_src]
+        scan_pack_setting.success_image_time = params[:success_image_time]
+        scan_pack_setting.play_success_sound = params[:play_success_sound]
+        #scan_pack_setting.success_sound_vol = params[:success_sound_vol]
+        #scan_pack_setting.success_sound_url = params[:success_sound_url]
+        scan_pack_setting.show_fail_image = params[:show_fail_image]
+        #scan_pack_setting.fail_image_src = params[:fail_image_src]
+        scan_pack_setting.fail_image_time = params[:fail_image_time]
+        scan_pack_setting.play_fail_sound = params[:play_fail_sound]
+        #scan_pack_setting.fail_sound_vol = params[:fail_sound_vol]
+        #scan_pack_setting.fail_sound_url = params[:fail_sound_url]
+
         if scan_pack_setting.save
           @result['success_messages'].push('Settings updated successfully.')
         else

@@ -6,18 +6,16 @@ groovepacks_controllers.
             $scope.reset_order = function () {
                 scanPack.reset($scope.data.order.id);
             };
-            myscope.resolve = function() {
-                return $scope.data.order;
-            };
+
             $scope.add_note = function() {
                 myscope.note_obj = $modal.open({
                     templateUrl: '/assets/views/modals/scanpack/addnote.html',
                     controller: 'scanPackRfpAddNote',
                     size:'lg',
-                    resolve: {order_data: myscope.resolve}
+                    resolve: {order_data: function() {return $scope.data.order;}}
                 });
-                myscope.note_obj.result.finally(function(reason) {
-                    $('.col-xs-12 input.search-box').focus();
+                myscope.note_obj.result.finally(function() {
+                    $timeout($scope.focus_search,500);
                 });
 
             };
@@ -50,33 +48,39 @@ groovepacks_controllers.
             };
 
             myscope.show_order_instructions = function () {
-                myscope.order_instruction_obj = $modal.open({
-                    templateUrl: '/assets/views/modals/scanpack/orderinstructions.html',
-                    controller: 'scanPackRfpOrderInstructions',
-                    size:'lg',
-                    resolve: {order_data: myscope.resolve}
-                });
-                myscope.order_instruction_obj.result.finally(function(reason) {
-                    if(reason=="finished") {
-                        myscope.order_instruction_confirmed = true;
-                    }
-                    $('.col-xs-12 input.search-box').focus();
-                });
+                if(!myscope.order_instruction_confirmed) {
+                    myscope.order_instruction_obj = $modal.open({
+                        templateUrl: '/assets/views/modals/scanpack/orderinstructions.html',
+                        controller: 'scanPackRfpOrderInstructions',
+                        size:'lg',
+                        resolve: {
+                            order_data: function(){return $scope.data.order;},
+                            confirm:function(){return function(){myscope.order_instruction_confirmed = true;}}
+                        }
+                    });
+                    myscope.order_instruction_obj.result.finally(function() {
+                        $timeout($scope.focus_search,500);
+                        //$timeout(myscope.show_order_instructions,100);
+                    });
+                }
             };
 
             myscope.show_product_instructions = function () {
-                myscope.product_instruction_obj = $modal.open({
-                    templateUrl: '/assets/views/modals/scanpack/productinstructions.html',
-                    controller: 'scanPackRfpProductInstructions',
-                    size:'lg',
-                    resolve: {order_data: myscope.resolve}
-                });
-                myscope.product_instruction_obj.result.finally(function(reason) {
-                    if(reason=="finished") {
-                        myscope.product_instruction_confirmed_id = $scope.data.order.next_item.product_id;
-                    }
-                    $('.col-xs-12 input.search-box').focus();
-                });
+                if(myscope.product_instruction_confirmed_id != $scope.data.order.next_item.product_id) {
+                    myscope.product_instruction_obj = $modal.open({
+                        templateUrl: '/assets/views/modals/scanpack/productinstructions.html',
+                        controller: 'scanPackRfpProductInstructions',
+                        size:'lg',
+                        resolve: {
+                            order_data: function() {return $scope.data.order;},
+                            confirm:function(){return function(){myscope.product_instruction_confirmed_id = $scope.data.order.next_item.product_id;}}
+                        }
+                    });
+                    myscope.product_instruction_obj.result.finally(function() {
+                        $timeout($scope.focus_search,500);
+                        //$timeout(myscope.show_product_instructions,100);
+                    });
+                }
             };
 
             myscope.compute_counts = function() {

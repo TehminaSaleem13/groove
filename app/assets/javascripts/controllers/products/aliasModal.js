@@ -138,6 +138,7 @@ groovepacks_controllers.controller('aliasModal',['$scope','type','exceptions','i
              myscope.exceptions.push(id);
          }
          myscope.get_products();
+         $timeout(scope.focus_search,200);
          scope.$watch('products.setup.search',myscope.search_products);
          scope.$watch('_can_load_products',myscope.can_do_load_products);
          scope.$watch('paginate.current_page',myscope.get_products);
