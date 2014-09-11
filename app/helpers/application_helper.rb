@@ -1,9 +1,11 @@
 module ApplicationHelper
+
  def pdf_image_tag(image, options = {})
   options[:src] = File.expand_path(Rails.root) + '/public/images/' + image
   puts options.to_s
  	tag(:img, options)
  end	
+
  def generate_order_barcode(increment_id)
     order_barcode = Barby::Code128B.new(increment_id)
     outputter = Barby::PngOutputter.new(order_barcode)
@@ -15,5 +17,9 @@ module ApplicationHelper
       f.write blob
     end
     increment_id
+  end
+
+  def non_hyphenated_string(string)
+    string.tr('-', '')
   end
 end

@@ -3,6 +3,7 @@ class OrdersController < ApplicationController
   include OrdersHelper
   include ProductsHelper
   include SettingsHelper
+  include ApplicationHelper
 
 
   # Import orders from store based on store id
@@ -941,7 +942,8 @@ class OrdersController < ApplicationController
     offset = params[:offset].to_i if !params[:offset].nil? && params[:offset].to_i >= 0
     search = ActiveRecord::Base::sanitize('%'+params[:search]+'%')
     base_query = "from orders WHERE
-                      increment_id like "+search+" OR email like "+search+" OR CONCAT(IFNULL(firstname,''),' ',IFNULL(lastname,'')) like "+search+" OR postcode like "+search
+                      increment_id like "+search+" OR non_hyphen_increment_id like "+ search +
+                      " OR email like "+search+" OR CONCAT(IFNULL(firstname,''),' ',IFNULL(lastname,'')) like "+search+" OR postcode like "+search
     query_add = ''
     unless params[:select_all]
       query_add = " LIMIT #{limit} OFFSET #{offset}"
