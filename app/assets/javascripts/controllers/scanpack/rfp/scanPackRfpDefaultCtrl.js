@@ -60,7 +60,7 @@ groovepacks_controllers.
                     });
                     myscope.order_instruction_obj.result.finally(function() {
                         $timeout($scope.focus_search,500);
-                        $timeout(myscope.show_order_instructions,100);
+                        //$timeout(myscope.show_order_instructions,100);
                     });
                 }
             };
@@ -78,7 +78,7 @@ groovepacks_controllers.
                     });
                     myscope.product_instruction_obj.result.finally(function() {
                         $timeout($scope.focus_search,500);
-                        $timeout(myscope.show_product_instructions,100);
+                        //$timeout(myscope.show_product_instructions,100);
                     });
                 }
             };
