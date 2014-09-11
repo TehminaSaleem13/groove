@@ -10,17 +10,19 @@ module ScanPackHelper
     result['success_messages'] = []
     result['notice_messages'] = []
     result['data'] = Hash.new
+    result['data']['orders'] = []
     result['data']['next_state'] = 'scanpack.rfo'
 
     scanpack_settings = ScanPackSetting.all.first
 
     session[:most_recent_scanned_products] = []
     if !input.nil? && input != ""
-      single_order = Order.find_by_increment_id(input)
+      orders = Order.where(['increment_id = ? or non_hyphen_increment_id =?', input, input])
 
-      if single_order.nil?
-        result['notice_messages'].push('Order with number '+ input +' cannot be found. It may not have been imported yet')
-      else
+      result['notice_messages'].push('Order with number '+ 
+        input +' cannot be found. It may not have been imported yet') if orders.length == 0
+
+      orders.each do |single_order|
         single_order_result = Hash.new
 
         single_order_result['status'] = single_order.status
@@ -110,7 +112,7 @@ module ScanPackHelper
           result['error_messages'].push("You have reached the maximum limit of number of shipments for your subscription.")
           single_order_result['next_state'] = 'scanpack.rfo'
         end
-        result['data'] = single_order_result
+        result['data']['orders'].push(single_order_result)
       end
     else
       result['status'] &= false

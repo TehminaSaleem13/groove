@@ -5,7 +5,7 @@ class Order < ActiveRecord::Base
   :increment_id, :lastname,
   		:method, :order_placed_time, :postcode, :price, :qty, :sku, :state, :store_id, :notes_internal,
   		:notes_toPacker, :notes_fromPacker, :tracking_processed, :scanned_on, :tracking_num, :company,
-      :packing_user_id, :status_reason
+      :packing_user_id, :status_reason, :non_hyphen_increment_id
 
   has_many :order_items, :dependent => :destroy
   has_one :order_shipping, :dependent => :destroy
@@ -13,9 +13,11 @@ class Order < ActiveRecord::Base
   has_many :order_activities, :dependent => :destroy
   has_and_belongs_to_many :order_tags
   after_update :update_inventory_levels_for_items
+  before_save :update_non_hyphen_increment_id
 
   include ProductsHelper
   include OrdersHelper
+  include ApplicationHelper
 
   def addactivity (order_activity_message, username)
   	@activity = OrderActivity.new
@@ -602,4 +604,7 @@ class Order < ActiveRecord::Base
     end
   end
 
+  def update_non_hyphen_increment_id
+    self.non_hyphen_increment_id = non_hyphenated_string(self.increment_id)
+  end
 end
