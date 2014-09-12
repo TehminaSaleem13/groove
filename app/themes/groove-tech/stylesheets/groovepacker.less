@@ -79,12 +79,8 @@
 }
 
 .container-well{
-  background: url('/assets/images/background_image.png') repeat-y;
+  background: asset-url('images/background_large.png') fixed;
   font-family: 'Play', sans-serif;
-  background-size: cover;
-  -webkit-background-size: cover;
-  -moz-background-size: cover;
-  -o-background-size: cover;
   padding-top:20px;
 }
 .gradient-well{
@@ -100,7 +96,7 @@
   padding-top:20px;
   padding-bottom:10px;
   .box-shadow(~"inset 1px 1px 4px rgba(140,140,145,.75)");
-  background: url('/assets/images/brush_metal_bkg_large.png') no-repeat center center fixed;
+  background: asset-url('images/brush_metal_bkg_large.png') no-repeat center center fixed;
 }
 
 .box-outer{
@@ -640,7 +636,7 @@ li{
   -o-filter: blur(6px);
   -ms-filter: blur(6px);
   filter: blur(6px);
-  filter: url(/assets/images/blur.svg#blur);
+  filter: asset-url('images/blur.svg#blur');
   filter:progid:DXImageTransform.Microsoft.Blur(PixelRadius='6');
 }
 .modal-content {
@@ -670,7 +666,7 @@ li{
   }*/
 
   position:relative;
-  background: url('/assets/images/top-pixel-repeat.png') repeat-x ;
+  background: asset-url('images/top-pixel-repeat.png') repeat-x ;
   padding:1px 0px 0px 0px;
   height:53px;
   border:0px;
@@ -684,12 +680,12 @@ li{
     top: 0px;
   }
   &::before {
-    background: url('/assets/images/top-corner-left.png');
+    background: asset-url('images/top-corner-left.png');
     left: -46px;
     width: 46px;
   }
   &::after {
-    background: url('/assets/images/top-corner-right.png');
+    background: asset-url('images/top-corner-right.png');
     right: -54px;
     width: 54px;
   }
@@ -726,7 +722,7 @@ li{
 
 .modal-nav{
   margin-top:-10px;
-  background: url('/assets/images/modal_tabbed_bg.png') no-repeat ;
+  background: asset-url('images/modal_tabbed_bg.png') no-repeat ;
 
   > ul {
     width:100%;
@@ -889,7 +885,7 @@ hr{
     background-color:transparent;
     -moz-transition: all 0.3s ease-in 0s; -webkit-transition: all 0.3s ease-in 0s;
     -o-transition: all 0.3s ease-in 0s; transition: all 0.3s ease-in 0s;
-    content:url('/assets/images/switch.png');
+    content:asset-url('images/switch.png');
     height:100%;
     width:50%;
 }
@@ -1152,7 +1148,7 @@ ul.tag-list > li {
 }
 .product-scan-outside-well{
    .bottom-well;
-   background: url('/assets/images/search-well.png') no-repeat;
+   background: asset-url('images/search-well.png') no-repeat;
    margin-top:-25px;
    margin-left:-25px;
    padding: 10px;
@@ -1228,12 +1224,12 @@ ul.tag-list > li {
   border-radius: 13px;
   .box-shadow(~" inset 0 1px 1px rgba(0,0,0,0.05)");
   margin-top: -21px;
-  background: url('/assets/images/scan-details.png') no-repeat;
+  background: asset-url('images/scan-details.png') no-repeat;
   background-size: 100%;
 }
 .packing-well{
   .bottom-well;
-  background: url('/assets/images/packing-well.png') no-repeat;
+  background: asset-url('images/packing-well.png') no-repeat;
   border: 4px solid rgba(235, 233, 233, 0.69);
   border-radius: 10px;
   padding: 3px;
@@ -1261,7 +1257,7 @@ ul.tag-list > li {
   margin-left:1.6%;
 }
 .time-display{
-  background: url('/assets/images/timer.png') no-repeat;
+  background: asset-url('images/timer.png') no-repeat;
   background-size: 100px;
   color: #554f4f;
   font-family: 'Play', sans-serif;
@@ -1301,10 +1297,10 @@ ul.tag-list > li {
   opacity:0.5;
 }
 .media-list > .media > a > span:first-of-type > img{
- background-image:url('/assets/images/top.png');
+ background-image:asset-url('images/top.png');
 }
 .sub-products {
-  background: url('/assets/images/middle.png') repeat-y;
+  background: asset-url('images/middle.png') repeat-y;
   margin-top: -20px;
 }
 .sub-products-position{
@@ -1633,7 +1629,7 @@ ul.tag-list > li {
   -o-filter: blur(6px);
   -ms-filter: blur(6px);
   filter: blur(6px);
-  filter: url(/assets/images/blur.svg#blur);
+  filter: asset-url('images/blur.svg#blur');
   filter:progid:DXImageTransform.Microsoft.Blur(PixelRadius='6');
   .box-shadow(~'#97dc57 19px 0 5px 7px');
 }
