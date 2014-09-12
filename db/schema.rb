@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140911020959) do
+ActiveRecord::Schema.define(:version => 20140912144619) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0, :null => false
@@ -444,10 +444,10 @@ ActiveRecord::Schema.define(:version => 20140911020959) do
     t.datetime "updated_at",                                                         :null => false
     t.boolean  "show_success_image",  :default => true
     t.string   "success_image_src",   :default => "/assets/images/scan_success.png"
-    t.float    "success_image_time",  :default => 1.5
+    t.float    "success_image_time",  :default => 0.5
     t.boolean  "show_fail_image",     :default => true
     t.string   "fail_image_src",      :default => "/assets/images/scan_fail.png"
-    t.float    "fail_image_time",     :default => 1.5
+    t.float    "fail_image_time",     :default => 1.0
     t.boolean  "play_success_sound",  :default => true
     t.string   "success_sound_url",   :default => "/assets/sounds/scan_success.mp3"
     t.float    "success_sound_vol",   :default => 0.75
