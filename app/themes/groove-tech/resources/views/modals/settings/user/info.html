@@ -79,13 +79,13 @@
                 <div class="controls col-md-5">
                     <input class="form-control input-style" type="text" ng-model="users.single.role.new_name" placeholder="Role name" />
                 </div>
-                <div class="col-md-2"><btn class="modal-save-button" ng-click="make_new_role()">Save</btn></div>
+                <div class="col-md-2"><button class="modal-save-button" ng-click="make_new_role()">Save</button></div>
             </div>
 
             <div ng-show="!roles_data.showSelectBaseRole && roles_data.selectedRole != null && users.single.role.custom && users.single.role.display"  class="form-group">
                 <label class="control-label col-md-4">Delete current Role</label>
                 <div class="controls col-md-7">
-                    <btn class="modal-remove-button" ng-click="delete_role()">Delete</btn>
+                    <button class="modal-remove-button" ng-click="delete_role()">Delete</button>
                 </div>
             </div>
             <div class="col-md-12">

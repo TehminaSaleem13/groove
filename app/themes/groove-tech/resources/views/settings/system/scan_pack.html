@@ -8,12 +8,7 @@
                 <div class="form-group">
                     <label class="control-label col-md-3">{{translations.labels.ask_tracking_number}}</label>
                     <div class="controls col-sm-2 form-inline">
-                        <label class="radio col-sm-6">
-                            <input type="radio" ng-model="scan_pack.settings.ask_tracking_number" value="1" ng-change="update_settings()"/>  On
-                        </label>
-                        <label class="radio">
-                            <input type="radio" ng-model="scan_pack.settings.ask_tracking_number" value="0" ng-change="update_settings()"/>  Off
-                        </label>
+                        <div toggle-switch ng-model="scan_pack.settings.ask_tracking_number" groov-click="update_settings()"></div>
                     </div>
                     <div class="info col-sm-2">
                         <i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" popover="{{translations.tooltips.ask_tracking_number}}"></i>
@@ -23,12 +18,7 @@
                 <div class="form-group">
                     <label class="control-label col-md-3">{{translations.labels.enable_click_sku}}</label>
                     <div class="controls col-md-2 form-inline">
-                        <label class="radio col-sm-6">
-                            <input type="radio" ng-model="scan_pack.settings.enable_click_sku" value="1" ng-change="update_settings()"/>  On
-                        </label>
-                        <label class="radio ">
-                            <input type="radio" ng-model="scan_pack.settings.enable_click_sku" value="0" ng-change="update_settings()"/>  Off
-                        </label>
+                        <div toggle-switch ng-model="scan_pack.settings.enable_click_sku" groov-click="update_settings()"></div>
                     </div>
                     <div class="info col-sm-2">
                         <i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" popover="{{translations.tooltips.enable_click_sku}}"></i>
@@ -49,12 +39,7 @@
                 <div class="form-group">
                     <label class="control-label col-sm-3">{{translations.labels.show_success_image}}</label>
                     <div class="controls col-sm-2 form-inline">
-                        <label class="radio col-sm-6">
-                            <input type="radio" ng-model="scan_pack.settings.show_success_image" value="1" ng-change="update_settings()"/>  On
-                        </label>
-                        <label class="radio">
-                            <input type="radio" ng-model="scan_pack.settings.show_success_image" value="0" ng-change="update_settings()"/>  Off
-                        </label>
+                        <div toggle-switch ng-model="scan_pack.settings.show_success_image" groov-click="update_settings()"></div>
                     </div>
                     <div class="col-sm-4" ng-show="scan_pack.settings.show_success_image">
                         <label class="control-label col-sm-1">{{translations.labels.for}}</label>
@@ -70,12 +55,7 @@
                 <div class="form-group">
                     <label class="control-label col-md-3">{{translations.labels.show_fail_image}}</label>
                     <div class="controls col-sm-2 form-inline">
-                        <label class="radio col-sm-6">
-                            <input type="radio" ng-model="scan_pack.settings.show_fail_image" value="1" ng-change="update_settings()"/>  On
-                        </label>
-                        <label class="radio">
-                            <input type="radio" ng-model="scan_pack.settings.show_fail_image" value="0" ng-change="update_settings()"/>  Off
-                        </label>
+                        <div toggle-switch ng-model="scan_pack.settings.show_fail_image" groov-click="update_settings()"></div>
                     </div>
                     <div class="col-sm-4" ng-show="scan_pack.settings.show_fail_image">
                         <label class="control-label col-sm-1">{{translations.labels.for}}</label>
@@ -88,23 +68,13 @@
                 <div class="form-group">
                     <label class="control-label col-md-3">{{translations.labels.play_success_sound}}</label>
                     <div class="controls col-sm-2 form-inline">
-                        <label class="radio col-sm-6">
-                            <input type="radio" ng-model="scan_pack.settings.play_success_sound" value="1" ng-change="update_settings()"/>  On
-                        </label>
-                        <label class="radio">
-                            <input type="radio" ng-model="scan_pack.settings.play_success_sound" value="0" ng-change="update_settings()"/>  Off
-                        </label>
+                        <div toggle-switch ng-model="scan_pack.settings.play_success_sound" groov-click="update_settings()"></div>
                     </div>
                 </div>
                 <div class="form-group">
                     <label class="control-label col-md-3">{{translations.labels.play_fail_sound}}</label>
                     <div class="controls col-sm-2 form-inline">
-                        <label class="radio col-sm-6">
-                            <input type="radio" ng-model="scan_pack.settings.play_fail_sound" value="1" ng-change="update_settings()"/>  On
-                        </label>
-                        <label class="radio">
-                            <input type="radio" ng-model="scan_pack.settings.play_fail_sound" value="0" ng-change="update_settings()"/>  Off
-                        </label>
+                        <div toggle-switch ng-model="scan_pack.settings.play_fail_sound" groov-click="update_settings()"></div>
                     </div>
                 </div>
 
