@@ -217,9 +217,7 @@
 
       if User.all.length == 0 || (User.where(:username=>username).length == 0 && create)
         created_user = User.create([{:username=>username, :name=>username, :email => email, :password => password,
-                      :password_confirmation => password, :confirmation_code=>'1234567890', :active=> true}],:without_protection=>true)
-        created_user.role = role_super_admin
-        created_user.save
+                      :password_confirmation => password, :role_id=>role_super_admin.id, :confirmation_code=>'1234567890', :active=> true}],:without_protection=>true)
       end
 
 
@@ -236,30 +234,5 @@
           fix_user_inventory_permissions(user,inv_wh)
         end
       end
-
-      ProductBarcode.all.each do |barcode|
-        if barcode.barcode.blank? || ProductBarcode.where(:barcode=>barcode.barcode).length > 1
-          barcode.destroy
-        end
-      end
-
-      ProductSku.all.each do |sku|
-        if sku.sku.blank? || ProductSku.where(:sku=>sku.sku).length > 1
-          sku.destroy
-        end
-      end
-
-      ProductCat.all.each do |cat|
-        if cat.category.blank?
-          cat.destroy
-        end
-      end
-
-      ProductImage.all.each do |image|
-        if image.image.blank?
-          image.destroy
-        end
-      end
-
 		end
 	end
