@@ -64,7 +64,7 @@ groovepacks.config(['$stateProvider', '$urlRouterProvider','hotkeysProvider','cf
         .state('settings.users.single',{url:'/{user_id:[0-9]+}',controller:'usersSingleCtrl'})
         .state('settings.stores', {url:'/stores', templateUrl:'/assets/views/settings/stores.html', controller: 'storesCtrl'})
         .state('settings.stores.ebay', {
-                       url:'/ebay?ebaytkn&tknexp&username&redirect&editstatus&name&status&storetype&storeid&inventorywarehouseid',
+                       url:'/ebay?ebaytkn&tknexp&username&redirect&editstatus&name&status&storetype&storeid&inventorywarehouseid&importimages&importproducts&messagetocustomer&tenantname',
                        controller: 'storeSingleCtrl' })
         .state('settings.stores.create', {url:'/create', controller: 'storeSingleCtrl'})
         .state('settings.stores.single', {url:'/{storeid:[0-9]+}', controller: 'storeSingleCtrl'})
