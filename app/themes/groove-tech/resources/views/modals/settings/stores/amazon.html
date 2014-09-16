@@ -69,7 +69,7 @@
       <legend>Import Orders</legend>
       <div class="form-group">
         <div class="controls col-md-9">
-          <button ng-click="import_orders()" class="modal-save-button" ng-show="edit_status">Import Orders</button>
+          <button ng-click="import_orders()" class="modal-save-button">Import Orders</button>
         </div>
       </div>
       <div class="form-group">
@@ -95,9 +95,9 @@
                   <button ng-click="check_request_import_products()" class="modal-save-button" ng-show="edit_status">Check Report Status</button>
                 </div>
             </div>
-            <div class="form-group" ng-show="stores.single.productgenerated_report_id">
+            <div class="form-group">
                 <div class="controls col-md-9">
-                  <button ng-click="import_products(stores.single.productgenerated_report_id)" class="modal-save-button" ng-show="edit_status">Import Products</button>
+                  <button ng-click="import_products(stores.single.productgenerated_report_id)" class="modal-save-button" >Import Products</button>
                 </div>
             </div>
             <div class="form-group">
