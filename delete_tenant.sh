@@ -35,7 +35,7 @@ fi
 
 if [ $CONFIRMED == 1 ]; then
     if [ $TENANT  != "groovepacks_production" ]; then
-        sudo service nginx stop
+        #sudo service nginx stop
         sudo su groovepacker <<EOF
             source /usr/local/rvm/scripts/rvm
 
@@ -44,7 +44,7 @@ if [ $CONFIRMED == 1 ]; then
             exit
 EOF
         #mysql -u root -ppassword -Be "DROP SCHEMA IF EXISTS ${TENANT}; DELETE FROM groovepacks_production.tenants where tenants.name='${TENANT}' LIMIT 1;"
-        sudo service nginx start
+        #sudo service nginx start
     else
         echo "Cannot delete groovepacks_production"
     fi
