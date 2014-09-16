@@ -72,12 +72,11 @@ module ShipStationRuby
       result = @client.execute
       result = result.first
       puts result.inspect
-      if sku == '58-V2EA-BLD1'
-        puts "update location"
-        result.WarehouseLocation = 'P-3'
+      unless location.nil? || location == ''
+        result.WarehouseLocation = location 
+        @client.update_object(result)
+        puts @client.save_changes
       end
-      @client.update_object(result)
-      puts @client.save_changes
       #puts "Updating location:"
       #puts location
     end

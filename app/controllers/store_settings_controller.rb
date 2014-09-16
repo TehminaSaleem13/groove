@@ -921,9 +921,7 @@ class StoreSettingsController < ApplicationController
       context = Groovepacker::Store::Context.new(
         Groovepacker::Store::Handlers::ShipstationHandler.new(store))
       store.products.each do |product|
-        if product.id <= 1
-          context.update_product(product)
-        end
+        context.update_product(product)
       end
     end
     render json: 'ok'
