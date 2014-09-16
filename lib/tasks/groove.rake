@@ -11,17 +11,19 @@ namespace :groove do
       end
     end.parse!
     unless options[:tenant].nil?
-      begin
+
         del_tenant = Tenant.find_by_name(options[:tenant])
         if del_tenant.nil?
           puts "Tenant #{options[:tenant]} not found"
         else
-          Apartment::Tenant.drop(options[:tenant])
+          begin
+            Apartment::Tenant.drop(options[:tenant])
+          rescue Exception=>e
+            puts e.message
+          end
           del_tenant.destroy
         end
-      rescue Exception=>e
-        puts e.message
-      end
+
     end
     exit(1)
   end

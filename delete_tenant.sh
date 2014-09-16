@@ -36,7 +36,7 @@ fi
 if [ $CONFIRMED == 1 ]; then
     if [ $TENANT  != "groovepacks_production" ]; then
         sudo service nginx stop
-        sudo su groovepacker <<'EOF'
+        sudo su groovepacker <<EOF
             source /usr/local/rvm/scripts/rvm
 
             cd ~/groove
