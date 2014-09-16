@@ -29,7 +29,7 @@ groovepacks_controllers.
         myscope.get_status = function() {
             $http.get('/orders/import_status.json',{ignoreLoadingBar: true}).success(function(response) {
 
-                if (response.status) {
+                if (response.status && typeof(response.data.import_summary) != 'undefined') {
                     $scope.import_summary = response.data.import_summary;
                     $scope.import_groov_popover = {title:'',content:''};
 

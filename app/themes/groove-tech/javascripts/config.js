@@ -69,7 +69,6 @@ groovepacks.config(['$stateProvider', '$urlRouterProvider','hotkeysProvider','cf
         .state('settings.stores.create', {url:'/create', controller: 'storeSingleCtrl'})
         .state('settings.stores.single', {url:'/{storeid:[0-9]+}', controller: 'storeSingleCtrl'})
 
-
         .state('settings.system',{url:'/system', template:'<div ui-view></div>', abstract:true})
         .state('settings.system.general', {url:'/general',templateUrl:'/assets/views/settings/system/general.html',
                 controller:'generalSettingsCtrl'})
