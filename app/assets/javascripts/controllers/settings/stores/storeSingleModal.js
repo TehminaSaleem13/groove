@@ -29,20 +29,28 @@ function(scope, store_data, $state, $stateParams, $modal, $modalInstance, $timeo
     scope.import_orders = function(report_id) {
         scope.stores.import.order.status = "Import in progress";
         scope.stores.import.order.status_show = true;
-        stores.import.orders(scope.stores);
+        scope.update_single_store(false).then(function() {
+            stores.import.orders(scope.stores);
+        });
+
     };
 
     scope.import_images = function(report_id) {
-        console.log("in import_images")
+        console.log("in import_images");
         scope.stores.import.image.status = "Import in progress";
         scope.stores.import.image.status_show = true;
-        stores.import.images(scope.stores,report_id);
+        scope.update_single_store(false).then(function() {
+            stores.import.images(scope.stores,report_id);
+        });
+
     };
 
     scope.import_products = function(report_id) {
         scope.stores.import.product.status = "Import in progress";
         scope.stores.import.product.status_show = true;
-        stores.import.products(scope.stores,report_id);
+        scope.update_single_store(false).then(function() {
+            stores.import.products(scope.stores, scope.stores.single.productgenerated_report_id);
+        });
     };
 
     scope.request_import_products = function() {
