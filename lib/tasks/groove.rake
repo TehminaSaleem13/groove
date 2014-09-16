@@ -13,6 +13,7 @@ namespace :groove do
     unless options[:tenant].nil?
 
         del_tenant = Tenant.find_by_name(options[:tenant])
+        puts 'Owner Tenant is: '+Apartment::Tenant.current.to_s
         if del_tenant.nil?
           puts "Tenant #{options[:tenant]} not found"
         else
@@ -20,8 +21,12 @@ namespace :groove do
             Apartment::Tenant.drop(options[:tenant])
           rescue Exception=>e
             puts e.message
+          else
+            puts 'Removed tenant Database'
           end
-          del_tenant.destroy
+          if del_tenant.destroy
+            puts 'Removed entry from tenants table'
+          end
         end
 
     end
