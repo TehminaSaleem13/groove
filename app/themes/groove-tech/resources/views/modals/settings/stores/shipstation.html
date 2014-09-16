@@ -68,3 +68,21 @@
       </div>
     </div>
   </div>
+
+  <div class="row">
+    <div class="col-md-6">
+    <legend>Update Products</legend>
+
+      <div class="form-group">
+        <div class="controls col-md-8">
+          <button ng-click="update_products()" class="modal-save-button" ng-show="edit_status">Update Products</button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <div class="col-xs-12">
+          <label class="alert alert-info" ng-show="stores.update.products.status_show">{{stores.update.products.status}}</label>
+        </div>
+      </div>
+    </div>
+  </div>

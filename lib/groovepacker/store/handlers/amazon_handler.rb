@@ -33,6 +33,11 @@ module Groovepacker
           Groovepacker::Store::Importers::Amazon::OrdersImporter.new(
             self.build_handle).import
         end
+
+        def update_product
+          Groovepacker::Store::Updaters::Amazon::ProductUpdater.new(
+            self.build_handle).import
+        end
       end
     end
   end
