@@ -69,7 +69,9 @@ class Product < ActiveRecord::Base
             data.push(item.product_cats.length> 0? item.product_cats.first.category : '')
             data.push(item.product_images.length> 0? item.product_images.order('product_images.order ASC').first.image : '')
             inventory_wh = ProductInventoryWarehouses.where(:product_id=>item.id,:inventory_warehouse_id => InventoryWarehouse.where(:is_default => true).first.id).first
-            data.push(inventory_wh.available_inv,inventory_wh.location_primary,inventory_wh.location_secondary)
+            unless inventory_wh.nil?
+              data.push(inventory_wh.available_inv,inventory_wh.location_primary,inventory_wh.location_secondary)
+            end
           end
 
           logger.info data
