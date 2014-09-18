@@ -59,13 +59,13 @@ module Groovepacker
           def set_product_fields(product, ssproduct,credential)
             result = false 
             product.name = ssproduct.name
-            product.inv_wh1 = ssproduct.warehouse_location
 
             unless credential.store.nil? or 
               credential.store.inventory_warehouse_id.nil? or 
               product.product_inventory_warehousess.pluck(:inventory_warehouse_id).include?(credential.store.inventory_warehouse_id) then
               inv_wh = ProductInventoryWarehouses.new
               inv_wh.inventory_warehouse_id = credential.store.inventory_warehouse_id
+              inv_wh.location_primary = ssproduct.warehouse_location
               product.product_inventory_warehousess << inv_wh
             end
  
