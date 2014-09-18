@@ -1,5 +1,6 @@
 #!/bin/sh
-
+bold=`tput bold`
+normal=`tput sgr0`
 while getopts ":e:" opt; do
     case $opt in
         e)
@@ -19,11 +20,11 @@ while getopts ":e:" opt; do
 done
 
 if [ -z "$ENV"  ]; then
-    ENV='production'
+    ENV='Unkown'
 fi
 
 if [ ${ENV} != 'staging' ] && [ ${ENV} != 'production' ]; then
-    echo "$ENV environment not recognized. Please select an environment"
+    echo "${bold}$ENV${normal} environment not recognized. Please select an environment"
     PS3="p/s/n: "
     select yn in "Staging" "Production" "Quit"; do
         case "$REPLY" in
@@ -34,7 +35,7 @@ if [ ${ENV} != 'staging' ] && [ ${ENV} != 'production' ]; then
         esac
     done
 fi
-echo "$ENV environment selected"
+echo "${bold}$ENV${normal} environment selected"
 
 sudo service nginx stop
 

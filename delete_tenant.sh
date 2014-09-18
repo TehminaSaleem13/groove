@@ -27,11 +27,11 @@ while getopts ":n:e:f" opt; do
 done
 
 if [ -z "$ENV"  ]; then
-    ENV='production'
+    ENV='Unknown'
 fi
 
 if [ ${ENV} != 'staging' ] && [ ${ENV} != 'production' ]; then
-    echo "$ENV environment not recognized. Please select an environment"
+    echo "${bold}$ENV${normal} environment not recognized. Please select an environment"
     PS3="p/s/n: "
     select yn in "Staging" "Production" "Quit"; do
         case "$REPLY" in
@@ -42,7 +42,7 @@ if [ ${ENV} != 'staging' ] && [ ${ENV} != 'production' ]; then
         esac
     done
 fi
-echo "$ENV environment selected"
+echo "${bold}$ENV${normal} environment selected"
 
 if [ -z "$TENANT"  ]; then
     echo "Enter name of tenant to delete"
