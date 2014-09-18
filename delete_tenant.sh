@@ -32,7 +32,7 @@ fi
 
 if [ ${ENV} != 'staging' ] && [ ${ENV} != 'production' ]; then
     echo "${bold}$ENV${normal} environment not recognized. Please select an environment"
-    PS3="p/s/n: "
+    PS3="p/s/q: "
     select yn in "Staging" "Production" "Quit"; do
         case "$REPLY" in
             ("Production"|"P"|"p"|"PRODUCTION"|"prod"|"PROD"|"Prod"|1)  ENV='production'; break;;
