@@ -1,21 +1,25 @@
 groovepacks_controllers.
-    controller('scanPackCtrl', [ '$scope', '$http', '$timeout', '$stateParams', '$location', '$state', '$cookies','scanPack','ngAudio',
-        function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies, scanPack, ngAudio) {
+    controller('scanPackCtrl', [ '$scope', '$http', '$timeout', '$stateParams', '$location', '$state', '$cookies','scanPack','groov_audio',
+        function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies, scanPack, groov_audio) {
             var myscope = {};
             $scope.init = function() {
                 $scope.scan_pack = scanPack.settings.model();
+                if(typeof myscope['sounds'] == 'undefined'){
+                    myscope.sounds = {};
+                }
                 //$scope.scan_pack_state = 'none';
                 scanPack.settings.get($scope.scan_pack).success(function() {
                     angular.forEach(['success','fail'],function(i) {
                         if($scope.scan_pack.settings['show_'+i+'_image']) {
                             $scope.scan_pack.scan_states[i].image.enabled = $scope.scan_pack.settings['show_'+i+'_image'];
-                             $scope.scan_pack.scan_states[i].image.src = $scope.scan_pack.settings[i+'_image_src'];
-                             $scope.scan_pack.scan_states[i].image.time = $scope.scan_pack.settings[i+'_image_time']*1000;
+                            $scope.scan_pack.scan_states[i].image.src = $scope.scan_pack.settings[i+'_image_src'];
+                            $scope.scan_pack.scan_states[i].image.time = $scope.scan_pack.settings[i+'_image_time']*1000;
                         }
                         if($scope.scan_pack.settings['play_'+i+'_sound']) {
-                             $scope.scan_pack.scan_states[i].sound.enabled = $scope.scan_pack.settings['play_'+i+'_sound'];
-                             $scope.scan_pack.scan_states[i].sound.object = ngAudio.load($scope.scan_pack.settings[i+'_sound_url']);
-                             $scope.scan_pack.scan_states[i].sound.object.volume = $scope.scan_pack.settings[i+'_sound_vol'];
+                            $scope.scan_pack.scan_states[i].sound.enabled = $scope.scan_pack.settings['play_'+i+'_sound'];
+                            if(typeof myscope.sounds[i] == 'undefined') {
+                                myscope.sounds[i] = groov_audio.load($scope.scan_pack.settings[i+'_sound_url'],$scope.scan_pack.settings[i+'_sound_vol']);
+                            }
                         }
                     });
                 });
@@ -43,7 +47,7 @@ groovepacks_controllers.
                         },object.image.time);
                     }
                     if(object.sound.enabled) {
-                        object.sound.object.play();
+                        groov_audio.play(myscope.sounds[type]);
                     }
                 }
             };

@@ -8,8 +8,7 @@ groovepacks_services.factory('scanPack',['$http','notification','$state',functio
                 src:''
             },
             sound: {
-                enabled:false,
-                object:{}
+                enabled:false
             }
         }
     };
