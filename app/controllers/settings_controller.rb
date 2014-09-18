@@ -146,6 +146,7 @@ class SettingsController < ApplicationController
               # Parse the file by it's data
               CSV.parse(zipfile.read(file.name),:headers=> true) do |csv_row|
                 single_row = nil
+                create_new = false
                 # Create new row if deleted all else find and select by id for updating
                 if params[:method] == 'del_import'
                   if current_mapping == 'product_barcodes'
@@ -176,6 +177,7 @@ class SettingsController < ApplicationController
                   end
                   if single_row.nil?
                     single_row = mapping[current_mapping][:model].new
+                    create_new = true
                   end
                 else
                   single_row = mapping[current_mapping][:model].find_by_id(csv_row['id'])
@@ -184,8 +186,15 @@ class SettingsController < ApplicationController
                 unless single_row.nil?
                   # Now loop through all our defined mappings to check and update values
                   mapping[current_mapping][:map].each do |column|
+                    if current_mapping=='product_skus' && column[1] =='id' && !create_new
+                      break;
+                    end
                     # If mapping's CSV index is present, update row
-                    unless csv_row[column[0]].nil?
+                    if csv_row[column[0]].blank?
+                      if current_mapping=='products' && column[1] =='name'
+                        single_row['name'] = 'Product from Restore'
+                      end
+                    else
                       single_row[column[1]] = csv_row[column[0]]
                     end
                     # Add special mapping rules here. current_mapping is the key of mapping variable above
@@ -193,7 +202,7 @@ class SettingsController < ApplicationController
                     # column[0] is csv_header column[1] is db_table_header
                     # happy coding!
                   end
-                  single_row.save!
+                  single_row.save
                   if current_mapping == 'products'
                     unless csv_row['primary_sku'].blank?
                       sku =  ProductSku.find_or_create_by_sku_and_product_id(csv_row['primary_sku'],single_row.id)
