@@ -28,6 +28,11 @@ module Groovepacker
           Groovepacker::Store::Importers::Shipstation::ImagesImporter.new(
             self.build_handle).import
         end
+
+        def update_product(hash)
+          Groovepacker::Store::Updaters::Shipstation::ProductsUpdater.new(
+            self.build_handle).update_single(hash)
+        end
       end
     end
   end

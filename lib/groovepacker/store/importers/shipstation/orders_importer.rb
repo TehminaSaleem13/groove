@@ -14,15 +14,14 @@ module Groovepacker
               if credential.last_imported_at.nil?
                 orders = client.order.where('OrderStatusID' => 2)
               else
-                orders = client.order.where('OrderDate' => credential.last_imported_at, 'OrderStatusID' => 2)
+                orders = client.order.where('CreateDate' => credential.last_imported_at, 'OrderStatusID' => 2)
               end
+              importing_time = DateTime.now
               # result[:total_imported] = orders.length
-              credential.last_imported_at = DateTime.now
-              credential.save
               unless orders.nil?
                 result[:total_imported] = orders.length
                 orders.each do |order|
-                  if Order.where(:increment_id=>order.order_id.to_s).length == 0
+                  if Order.where(:increment_id=>order.order_number).length == 0
                     shipstation_order = Order.new
                     shipstation_order.store = credential.store
                     import_order(shipstation_order, order)
@@ -100,6 +99,11 @@ module Groovepacker
               puts "Exception"
               puts e.message.inspect
             end
+
+            if result[:status]
+              credential.last_imported_at = importing_time
+              credential.save
+            end
             result
           end
 
@@ -122,7 +126,6 @@ module Groovepacker
             shipstation_order.order_total = order.order_total
             shipstation_order.notes_from_buyer = order.notes_from_buyer unless order.notes_from_buyer.nil?
             shipstation_order.weight_oz = order.weight_oz unless order.weight_oz.nil?
-
           end
 
           def import_order_item(order_item, item)

@@ -17,6 +17,10 @@ module Groovepacker
         self.handler.import_images
       end
 
+      def update_product(hash)
+        self.handler.update_product(hash)
+      end
+
       attr_accessor :handler
     end
   end

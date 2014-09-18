@@ -914,6 +914,18 @@ class StoreSettingsController < ApplicationController
     }
   end
 
+  def update_products
+    store = Store.find(params[:id])
+
+    if store.store_type == 'Shipstation'
+      context = Groovepacker::Store::Context.new(
+        Groovepacker::Store::Handlers::ShipstationHandler.new(store))
+      store.products.each do |product|
+        context.update_product(product)
+      end
+    end
+    render json: 'ok'
+  end
 end
 
 

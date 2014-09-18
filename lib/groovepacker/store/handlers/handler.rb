@@ -22,6 +22,10 @@ module Groovepacker
           {}
         end
 
+        def update_single(hash)
+          {}
+        end
+
         protected
           attr_accessor :store
 

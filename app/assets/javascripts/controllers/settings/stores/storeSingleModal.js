@@ -45,6 +45,15 @@ function(scope, store_data, $state, $stateParams, $modal, $modalInstance, $timeo
 
     };
 
+    scope.update_products = function() {
+        console.log("in update products");
+        scope.stores.update.products.status = "Update in progress";
+        scope.stores.update.products.status_show = true;
+        stores.update.products($stateParams.storeid).then(function(){
+          scope.stores.update.products.status = "Update completed";
+        });
+    };
+
     scope.import_products = function(report_id) {
         scope.stores.import.product.status = "Import in progress";
         scope.stores.import.product.status_show = true;

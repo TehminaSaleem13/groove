@@ -62,5 +62,24 @@ module ShipStationRuby
       return formatted_results
     end
 
+    def update_primary_location(location, sku)
+      final_string_array = []
+      sku_string = "SKU eq '#{sku}'"
+      final_string_array << sku_string
+      final_string = final_string_array.join(' and ')
+      puts final_string_array
+      @client.send("#{@resource}").filter("#{final_string}")
+      result = @client.execute
+      result = result.first
+      puts result.inspect
+      unless location.nil? || location == ''
+        result.WarehouseLocation = location 
+        @client.update_object(result)
+        puts @client.save_changes
+      end
+      #puts "Updating location:"
+      #puts location
+    end
+
   end
 end
