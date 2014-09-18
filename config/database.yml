@@ -43,3 +43,15 @@ production:
   username: root
   password: password
   socket: /var/run/mysqld/mysqld.sock
+
+staging:
+  adapter: mysql2
+  encoding: utf8
+  reconnect: false
+  database: groovepacks_production
+  pool: 5
+  host: groove-db-1
+  username: groovepacker
+  password: groove123pass
+  port: 3306
+  #socket: /var/run/mysqld/mysqld.sock
