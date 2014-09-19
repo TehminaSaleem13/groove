@@ -69,8 +69,6 @@ module Groovepacker
                               handler: handler
                             })
                         else
-                          # order_item.product = ProductSku.where(:sku=>item.sku).
-                          # first.product
                           order_item_product = ProductSku.where(:sku=>item.sku).
                           first.product
                           
