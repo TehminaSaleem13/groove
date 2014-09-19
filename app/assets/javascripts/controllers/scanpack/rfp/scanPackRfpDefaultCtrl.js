@@ -17,7 +17,6 @@ groovepacks_controllers.
                 myscope.note_obj.result.finally(function() {
                     $timeout($scope.focus_search,500);
                 });
-
             };
 
             $scope.autoscan_barcode = function() {
@@ -116,6 +115,29 @@ groovepacks_controllers.
 
             };
 
+            myscope.handle_known_codes = function(){
+                if($scope.data.input == $scope.scan_pack.settings.note_from_packer_code) {
+                    $scope.add_note();
+                    myscope.note_obj.result.finally(function() {
+                        $scope.set('input','');
+                        console.log("inputed");
+                    });
+                    return false;
+                } else if($scope.data.input == $scope.scan_pack.settings.service_issue_code && !myscope.service_issue_message_saved) {
+                    $scope.add_note();
+                    $scope.notify("Please add a message with the service issue",2);
+                    myscope.note_obj.result.finally(function() {
+                        $scope.set('input',$scope.scan_pack.settings.service_issue_code);
+                        myscope.service_issue_message_saved = true;
+                        $scope.input_enter({which:13});
+                    });
+                    return false;
+                } else if($scope.data.input ==$scope.scan_pack.settings.restart_code) {
+                    $scope.reset_order();
+                }
+                return true;
+            };
+
             myscope.check_reload_compute = function () {
                 $scope.rfpinit().then(function () {
                     $scope.set('title', "Ready for Product Scan");
@@ -125,6 +147,7 @@ groovepacks_controllers.
                     } else {
                         myscope.compute_counts();
                     }
+                    $scope.reg_callback(myscope.handle_known_codes);
                 });
             };
 
@@ -135,6 +158,7 @@ groovepacks_controllers.
                 myscope.product_instruction_obj = null;
                 myscope.product_instruction_confirmed_id = 0;
                 $scope.confirmation_code = "";
+                myscope.service_issue_message_saved = false;
                 myscope.check_reload_compute();
             };
 

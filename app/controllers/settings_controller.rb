@@ -451,6 +451,14 @@ class SettingsController < ApplicationController
         scan_pack_setting.play_fail_sound = params[:play_fail_sound]
         #scan_pack_setting.fail_sound_vol = params[:fail_sound_vol]
         #scan_pack_setting.fail_sound_url = params[:fail_sound_url]
+        scan_pack_setting.skip_code_enabled = params[:skip_code_enabled]
+        scan_pack_setting.skip_code = params[:skip_code]
+        scan_pack_setting.note_from_packer_code_enabled = params[:note_from_packer_code_enabled]
+        scan_pack_setting.note_from_packer_code = params[:note_from_packer_code]
+        scan_pack_setting.service_issue_code_enabled = params[:service_issue_code_enabled]
+        scan_pack_setting.service_issue_code = params[:service_issue_code]
+        scan_pack_setting.restart_code_enabled = params[:restart_code_enabled]
+        scan_pack_setting.restart_code = params[:restart_code]
 
         if scan_pack_setting.save
           @result['success_messages'].push('Settings updated successfully.')

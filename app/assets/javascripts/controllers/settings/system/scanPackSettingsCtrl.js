@@ -9,8 +9,10 @@ function( $scope, $http, $timeout, $location, $state, $cookies, scanPack,groov_t
         $scope.setup_page('system','scan_pack');
         $scope.translations = {
             "headings":{
-              "options": "",
-              "feedback": ""
+                "options": "",
+                "feedback": "",
+                "scan_actions": "",
+                "scan_actions_sub_head": ""
             },
             "labels":{
                 "enable_click_sku":"",
@@ -20,12 +22,21 @@ function( $scope, $http, $timeout, $location, $state, $cookies, scanPack,groov_t
                 "for":"",
                 "seconds":"",
                 "play_success_sound":"",
-                "play_fail_sound":""
+                "play_fail_sound":"",
+                "scan":"",
+                "skip_code":"",
+                "note_from_packer_code":"",
+                "service_issue_code":"",
+                "restart_code":""
             },
             "tooltips" :{
                 "enable_click_sku":"",
                 "ask_tracking_number":"",
-                "feedback":""
+                "feedback":"",
+                "skip_code":"",
+                "note_from_packer_code":"",
+                "service_issue_code":"",
+                "restart_code":""
             }
         };
         groov_translator.translate('settings.system.scan_pack',$scope.translations);

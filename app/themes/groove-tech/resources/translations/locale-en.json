@@ -25,7 +25,9 @@
             "scan_pack": {
                "headings":{
                     "options" :"Scan & Pack Options",
-                    "feedback" :"Scanning Feedback"
+                    "feedback" :"Scanning Feedback",
+                    "scan_actions": "Scan Actions",
+                    "scan_actions_sub_head": "Scanning these special action barcodes during order processing will perform the listed actions."
                },
                "labels":{
                    "enable_click_sku":"Click SKU to Scan",
@@ -33,14 +35,23 @@
                    "show_success_image":"Display Success Image",
                    "show_fail_image":"Display Fail Image",
                    "for":"for",
+                   "scan": "scan",
                    "seconds":"seconds",
                    "play_success_sound":"Play Success Sound",
-                   "play_fail_sound":"Play Fail Sound"
+                   "play_fail_sound":"Play Fail Sound",
+                   "skip_code":"Skip the current item",
+                   "note_from_packer_code":"Create a 'note from packer' for the current order",
+                   "service_issue_code":"Give current order service issue status",
+                   "restart_code":"Restart current Order"
                },
                "tooltips" :{
                    "enable_click_sku": "When this option is enabled the packer can click the SKU of the item currently suggested for packing to add the item to the order. This prevents the packer from having to type in damaged or unreadable barcodes.",
                    "ask_tracking_number": "When this option is enabled the packer will be prompted to scan a tracking number after the last item of an order has been packed.",
-                   "feedback": "Scan Success and scan fail messages are visual feedback to let the packer know if they scanned the correct product."
+                   "feedback": "Scan Success and scan fail messages are visual feedback to let the packer know if they scanned the correct product.",
+                   "skip_code":"This will skip the current item if it is skippable",
+                   "note_from_packer_code":"This will open the text area so the packer can begin typing.",
+                   "service_issue_code":"If a packer realizes during the packing of an order that packing can not be completed due to damaged items or an inventory issue, they can scan this code to save the current order as a service issue and leave a note from packer explaining the issue.",
+                   "restart_code":"Rather than clicking the Restart Order button on the Scan & Pack interface you can scan this barcode. All items already scanned for the current order will be removed and GroovePacker will be ready for you to rescan the same order or another order."
                }
             }
         }

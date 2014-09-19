@@ -3,6 +3,7 @@ groovepacks_controllers.
         function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies, scanPack, groov_audio) {
             var myscope = {};
             $scope.init = function() {
+                myscope.callback = function(){ return true;};
                 $scope.scan_pack = scanPack.settings.model();
                 if(typeof myscope['sounds'] == 'undefined'){
                     myscope.sounds = {};
@@ -52,8 +53,14 @@ groovepacks_controllers.
                 }
             };
 
+            $scope.reg_callback = function(func) {
+                if (typeof func == 'function') {
+                    myscope.callback = func;
+                }
+            };
             $scope.input_enter = function(event) {
                 if(event.which != '13') return;
+                if(!myscope.callback()) return;
                 var id = null;
                 if(typeof $scope.data.order.id !== "undefined") {
                     id = $scope.data.order.id;

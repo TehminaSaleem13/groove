@@ -167,8 +167,9 @@ groovepacks_services.factory('orders',['$http','$window','notification',function
                 if(data.status) {
                     orders.setup.select_all =  false;
                     notification.notify(success_messages[action],1);
+                    notification.notify(data.notice_messages,2);
                 } else {
-                    notification.notify(data.messages,0);
+                    notification.notify(data.error_messages,0);
                 }
             }).error(notification.server_error);
         }

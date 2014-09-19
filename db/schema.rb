@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140912144619) do
+ActiveRecord::Schema.define(:version => 20140919145900) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0, :null => false
@@ -438,22 +438,30 @@ ActiveRecord::Schema.define(:version => 20140912144619) do
   end
 
   create_table "scan_pack_settings", :force => true do |t|
-    t.boolean  "enable_click_sku",    :default => true
-    t.boolean  "ask_tracking_number", :default => false
-    t.datetime "created_at",                                                         :null => false
-    t.datetime "updated_at",                                                         :null => false
-    t.boolean  "show_success_image",  :default => true
-    t.string   "success_image_src",   :default => "/assets/images/scan_success.png"
-    t.float    "success_image_time",  :default => 0.5
-    t.boolean  "show_fail_image",     :default => true
-    t.string   "fail_image_src",      :default => "/assets/images/scan_fail.png"
-    t.float    "fail_image_time",     :default => 1.0
-    t.boolean  "play_success_sound",  :default => true
-    t.string   "success_sound_url",   :default => "/assets/sounds/scan_success.mp3"
-    t.float    "success_sound_vol",   :default => 0.75
-    t.boolean  "play_fail_sound",     :default => true
-    t.string   "fail_sound_url",      :default => "/assets/sounds/scan_fail.mp3"
-    t.float    "fail_sound_vol",      :default => 0.75
+    t.boolean  "enable_click_sku",              :default => true
+    t.boolean  "ask_tracking_number",           :default => false
+    t.datetime "created_at",                                                                   :null => false
+    t.datetime "updated_at",                                                                   :null => false
+    t.boolean  "show_success_image",            :default => true
+    t.string   "success_image_src",             :default => "/assets/images/scan_success.png"
+    t.float    "success_image_time",            :default => 0.5
+    t.boolean  "show_fail_image",               :default => true
+    t.string   "fail_image_src",                :default => "/assets/images/scan_fail.png"
+    t.float    "fail_image_time",               :default => 1.0
+    t.boolean  "play_success_sound",            :default => true
+    t.string   "success_sound_url",             :default => "/assets/sounds/scan_success.mp3"
+    t.float    "success_sound_vol",             :default => 0.75
+    t.boolean  "play_fail_sound",               :default => true
+    t.string   "fail_sound_url",                :default => "/assets/sounds/scan_fail.mp3"
+    t.float    "fail_sound_vol",                :default => 0.75
+    t.boolean  "skip_code_enabled",             :default => true
+    t.string   "skip_code",                     :default => "SKIP"
+    t.boolean  "note_from_packer_code_enabled", :default => true
+    t.string   "note_from_packer_code",         :default => "NOTE"
+    t.boolean  "service_issue_code_enabled",    :default => true
+    t.string   "service_issue_code",            :default => "ISSUE"
+    t.boolean  "restart_code_enabled",          :default => true
+    t.string   "restart_code",                  :default => "RESTART"
   end
 
   create_table "shipstation_credentials", :force => true do |t|

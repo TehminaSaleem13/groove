@@ -6,7 +6,7 @@
         <div class="form-horizontal general-settings-form">
             <fieldset>
                 <div class="form-group">
-                    <label class="control-label col-md-3">{{translations.labels.ask_tracking_number}}</label>
+                    <label class="control-label col-sm-3">{{translations.labels.ask_tracking_number}}</label>
                     <div class="controls col-sm-2 form-inline">
                         <div toggle-switch ng-model="scan_pack.settings.ask_tracking_number" groov-click="update_settings()"></div>
                     </div>
@@ -16,8 +16,8 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="control-label col-md-3">{{translations.labels.enable_click_sku}}</label>
-                    <div class="controls col-md-2 form-inline">
+                    <label class="control-label col-sm-3">{{translations.labels.enable_click_sku}}</label>
+                    <div class="controls col-sm-2 form-inline">
                         <div toggle-switch ng-model="scan_pack.settings.enable_click_sku" groov-click="update_settings()"></div>
                     </div>
                     <div class="info col-sm-2">
@@ -31,14 +31,84 @@
 </div>
 
 <div class="row">
+    <div class="col-xs-12">
+        <h3>{{translations.headings.scan_actions}}</h3>
+        <h4>{{translations.headings.scan_actions_sub_head}}</h4>
+        <div class="form-horizontal general-settings-form">
+            <fieldset>
+                <div class="form-group">
+                    <label class="control-label col-sm-3">{{translations.labels.skip_code}}</label>
+                    <div class="controls col-sm-2 col-md-1 form-inline">
+                        <div toggle-switch ng-model="scan_pack.settings.skip_code_enabled" groov-click="update_settings()"></div>
+                    </div>
+                    <div class="col-sm-4" ng-show="scan_pack.settings.skip_code_enabled">
+                        <label class="control-label col-sm-3 col-md-2">{{translations.labels.scan}}</label>
+                        <div class="col-sm-9 col-md-10">
+                            <input class="form-control input-style" type="text" ng-blur="update_settings()" ng-model="scan_pack.settings.skip_code"/>
+                        </div>
+                    </div>
+                    <div class="info col-sm-2">
+                        <i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" popover="{{translations.tooltips.skip_code}}"></i>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-sm-3">{{translations.labels.note_from_packer_code}}</label>
+                    <div class="controls col-sm-2 col-md-1 form-inline">
+                        <div toggle-switch ng-model="scan_pack.settings.note_from_packer_code_enabled" groov-click="update_settings()"></div>
+                    </div>
+                    <div class="col-sm-4" ng-show="scan_pack.settings.note_from_packer_code_enabled">
+                        <label class="control-label col-sm-3 col-md-2">{{translations.labels.scan}}</label>
+                        <div class="col-sm-9 col-md-10">
+                            <input class="form-control input-style" type="text" ng-blur="update_settings()" ng-model="scan_pack.settings.note_from_packer_code"/>
+                        </div>
+                    </div>
+                    <div class="info col-sm-2">
+                        <i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" popover="{{translations.tooltips.note_from_packer_code}}"></i>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-sm-3">{{translations.labels.service_issue_code}}</label>
+                    <div class="controls col-sm-2 col-md-1 form-inline">
+                        <div toggle-switch ng-model="scan_pack.settings.service_issue_code_enabled" groov-click="update_settings()"></div>
+                    </div>
+                    <div class="col-sm-4" ng-show="scan_pack.settings.service_issue_code_enabled">
+                        <label class="control-label col-sm-3 col-md-2">{{translations.labels.scan}}</label>
+                        <div class="col-sm-9 col-md-10">
+                            <input class="form-control input-style" type="text" ng-blur="update_settings()" ng-model="scan_pack.settings.service_issue_code"/>
+                        </div>
+                    </div>
+                    <div class="info col-sm-2">
+                        <i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" popover="{{translations.tooltips.service_issue_code}}"></i>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-sm-3">{{translations.labels.restart_code}}</label>
+                    <div class="controls col-sm-2 col-md-1 form-inline">
+                        <div toggle-switch ng-model="scan_pack.settings.restart_code_enabled" groov-click="update_settings()"></div>
+                    </div>
+                    <div class="col-sm-4" ng-show="scan_pack.settings.restart_code_enabled">
+                        <label class="control-label col-sm-3 col-md-2">{{translations.labels.scan}}</label>
+                        <div class="col-sm-9 col-md-10">
+                            <input class="form-control input-style" type="text" ng-blur="update_settings()" ng-model="scan_pack.settings.restart_code"/>
+                        </div>
+                    </div>
+                    <div class="info col-sm-2">
+                        <i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" popover="{{translations.tooltips.restart_code}}"></i>
+                    </div>
+                </div>
+            </fieldset>
+        </div>
+    </div>
+</div>
 
+<div class="row">
     <div class="col-xs-12">
         <h3>{{translations.headings.feedback}}</h3>
         <div class="form-horizontal general-settings-form">
             <fieldset>
                 <div class="form-group">
                     <label class="control-label col-sm-3">{{translations.labels.show_success_image}}</label>
-                    <div class="controls col-sm-2 form-inline">
+                    <div class="controls col-sm-2 col-md-1 form-inline">
                         <div toggle-switch ng-model="scan_pack.settings.show_success_image" groov-click="update_settings()"></div>
                     </div>
                     <div class="col-sm-4" ng-show="scan_pack.settings.show_success_image">
@@ -53,8 +123,8 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="control-label col-md-3">{{translations.labels.show_fail_image}}</label>
-                    <div class="controls col-sm-2 form-inline">
+                    <label class="control-label col-sm-3">{{translations.labels.show_fail_image}}</label>
+                    <div class="controls col-sm-2 col-md-1 form-inline">
                         <div toggle-switch ng-model="scan_pack.settings.show_fail_image" groov-click="update_settings()"></div>
                     </div>
                     <div class="col-sm-4" ng-show="scan_pack.settings.show_fail_image">
@@ -66,13 +136,13 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="control-label col-md-3">{{translations.labels.play_success_sound}}</label>
-                    <div class="controls col-sm-2 form-inline">
+                    <label class="control-label col-sm-3">{{translations.labels.play_success_sound}}</label>
+                    <div class="controls col-sm-2 col-md-1 form-inline">
                         <div toggle-switch ng-model="scan_pack.settings.play_success_sound" groov-click="update_settings()"></div>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="control-label col-md-3">{{translations.labels.play_fail_sound}}</label>
+                    <label class="control-label col-sm-3">{{translations.labels.play_fail_sound}}</label>
                     <div class="controls col-sm-2 form-inline">
                         <div toggle-switch ng-model="scan_pack.settings.play_fail_sound" groov-click="update_settings()"></div>
                     </div>
@@ -83,5 +153,3 @@
     </div>
 </div>
 </div>
-
-

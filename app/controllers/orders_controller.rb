@@ -176,7 +176,8 @@ class OrdersController < ApplicationController
 
     @result = Hash.new
     @result['status'] = true
-    @result['messages'] = []
+    @result['error_messages'] = []
+    @result['notice_messages'] = []
     @orders = list_selected_orders
 
     if current_user.can?('add_edit_order_items')
@@ -198,7 +199,7 @@ class OrdersController < ApplicationController
 
           if !@neworder.save(:validate => false)
             @result['status'] = false
-            @result['messages'] = @neworder.errors.full_messages
+            @result['error_messages'] = @neworder.errors.full_messages
           else
             #add activity
             @order_items = @order.order_items
@@ -214,7 +215,7 @@ class OrdersController < ApplicationController
       end
     else
       @result['status'] = false
-      @result['messages'].push("You do not have enough permissions to duplicate order")
+      @result['error_messages'].push("You do not have enough permissions to duplicate order")
     end
 
     respond_to do |format|
@@ -226,7 +227,8 @@ class OrdersController < ApplicationController
   def deleteorder
     @result = Hash.new
     @result['status'] = true
-    @result['messages'] = []
+    @result['error_messages'] = []
+    @result['notice_messages'] = []
     @orders = list_selected_orders
     if current_user.can? 'add_edit_order_items'
       unless @orders.nil?
@@ -236,13 +238,13 @@ class OrdersController < ApplicationController
             @result['status'] &= true
           else
             @result['status'] &= false
-            @result['messages'] = @order.errors.full_messages
+            @result['error_messages'] = @order.errors.full_messages
           end
         end
       end
     else
       @result['status'] = false
-      @result['messages'].push("You do not have enough permissions to delete order")
+      @result['error_messages'].push("You do not have enough permissions to delete order")
     end
 
     respond_to do |format|
@@ -278,23 +280,28 @@ class OrdersController < ApplicationController
   def changeorderstatus
     @result = Hash.new
     @result['status'] = true
-    @result['messages'] = []
+    @result['error_messages'] = []
+    @result['notice_messages'] = []
 
     @orders = list_selected_orders
     if current_user.can? 'change_order_status'
       unless @orders.nil?
         @orders.each do|order|
-          @order = Order.find(order["id"])
+          @order = Order.find(order['id'])
+          if @order.status =='scanned' && params[:status] =='awaiting'
+            @order.reset_scanned_status
+            @result['notice_messages'].push('Items in scanned orders have already been removed from inventory so no further inventory adjustments will be made during packing.')
+          end
           @order.status = params[:status]
           unless @order.save
             @result['status'] = false
-            @result['messages'] = @order.errors.full_messages
+            @result['error_messages'] = @order.errors.full_messages
           end
         end
       end
     else
       @result['status'] = false
-      @result['messages'].push("You do not have enough permissions to delete order")
+      @result['error_messages'].push("You do not have enough permissions to delete order")
     end
 
     respond_to do |format|
