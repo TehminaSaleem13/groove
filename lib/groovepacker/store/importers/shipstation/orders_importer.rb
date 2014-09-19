@@ -69,8 +69,20 @@ module Groovepacker
                               handler: handler
                             })
                         else
-                          order_item.product = ProductSku.where(:sku=>item.sku).
+                          # order_item.product = ProductSku.where(:sku=>item.sku).
+                          # first.product
+                          order_item_product = ProductSku.where(:sku=>item.sku).
                           first.product
+                          
+                          unless item.thumbnail_url.nil?
+                            if order_item_product.product_images.length == 0
+                              image = ProductImage.new
+                              image.image = item.thumbnail_url
+                              order_item_product.product_images << image
+                            end
+                          end
+                          order_item_product.save
+                          order_item.product = order_item_product
                         end
       
                         shipstation_order.order_items << order_item
