@@ -180,7 +180,7 @@ module ScanPackHelper
       if single_order.nil?
         result['status'] &= false
         result['error_messages'].push('Could not find order with id:'+id)
-      elsif input == scanpack_settings.restart_code
+      elsif scanpack_settings.restart_code_enabled? && input == scanpack_settings.restart_code
         if single_order.status != 'scanned'
           single_order.reset_scanned_status
           result['data']['next_state'] = 'scanpack.rfo'
@@ -189,7 +189,7 @@ module ScanPackHelper
           result['error_messages'].push('Order with id: '+id+' is already in scanned state')
         end
 
-      elsif input == scanpack_settings.service_issue_code
+      elsif scanpack_settings.service_issue_code_enabled? && input == scanpack_settings.service_issue_code
         if single_order.status !='scanned'
           single_order.reset_scanned_status
           single_order.status = 'serviceissue'
@@ -217,7 +217,7 @@ module ScanPackHelper
                   #puts child_item.to_s
                   if !child_item['barcodes'].nil?
                     child_item['barcodes'].each do |barcode|
-                      if barcode.barcode == input || (input == scanpack_settings.skip_code && child_item['skippable'])
+                      if barcode.barcode == input || (scanpack_settings.skip_code_enabled? && input == scanpack_settings.skip_code && child_item['skippable'])
                         barcode_found = true
                         #process product barcode scan
                         order_item_kit_product =
@@ -237,7 +237,7 @@ module ScanPackHelper
               end
             elsif item['product_type'] == 'single'
               item['barcodes'].each do |barcode|
-                if barcode.barcode == input || (input == scanpack_settings.skip_code && item['skippable'])
+                if barcode.barcode == input || (scanpack_settings.skip_code_enabled? && input == scanpack_settings.skip_code && item['skippable'])
                   barcode_found = true
                   #process product barcode scan
                   order_item = OrderItem.find(item['order_item_id'])

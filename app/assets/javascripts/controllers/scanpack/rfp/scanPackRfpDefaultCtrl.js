@@ -116,14 +116,14 @@ groovepacks_controllers.
             };
 
             myscope.handle_known_codes = function(){
-                if($scope.data.input == $scope.scan_pack.settings.note_from_packer_code) {
+                if($scope.scan_pack.settings.note_from_packer_code_enabled && $scope.data.input == $scope.scan_pack.settings.note_from_packer_code) {
                     $scope.add_note();
                     myscope.note_obj.result.finally(function() {
                         $scope.set('input','');
                         console.log("inputed");
                     });
                     return false;
-                } else if($scope.data.input == $scope.scan_pack.settings.service_issue_code && !myscope.service_issue_message_saved) {
+                } else if($scope.scan_pack.settings.service_issue_code_enabled && $scope.data.input == $scope.scan_pack.settings.service_issue_code && !myscope.service_issue_message_saved) {
                     $scope.add_note();
                     $scope.notify("Please add a message with the service issue",2);
                     myscope.note_obj.result.finally(function() {
@@ -132,7 +132,7 @@ groovepacks_controllers.
                         $scope.input_enter({which:13});
                     });
                     return false;
-                } else if($scope.data.input ==$scope.scan_pack.settings.restart_code) {
+                } else if($scope.scan_pack.settings.restart_code_enabled && $scope.data.input == $scope.scan_pack.settings.restart_code) {
                     $scope.reset_order();
                 }
                 return true;
