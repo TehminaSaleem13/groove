@@ -90,15 +90,15 @@ groovepacks.config(['$stateProvider', '$urlRouterProvider','hotkeysProvider','cf
 }]).run(['$rootScope','$state','$urlRouter','$timeout','auth',function($rootScope, $state, $urlRouter, $timeout, auth) {
         $rootScope.$on('$stateChangeStart', function(e, to,toParams,from,fromParams) {
             if(jQuery.isEmptyObject(auth.get())) {
-                if(!from.abstract) {
+                if(!from.abstract || from.name =='') {
                     e.preventDefault();
                 }
                 auth.check().then(function() {
                     var result = auth.prevent(to.name,toParams);
                     if (result && result.to) {
                         $state.go(result.to, result.params);
-                    } else {
-                        //$urlRouter.sync();
+                    } else if (!jQuery.isEmptyObject(auth.get())){
+                        $urlRouter.sync();
                     }
                 })
             } else {

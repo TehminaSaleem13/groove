@@ -855,7 +855,7 @@ class StoreSettingsController < ApplicationController
       @result['status'] = false;
     end
     respond_to do |format|
-        format.html # show.html.erb
+        format.html  {render layout: 'close_window'}
         format.json { render json: @result }
     end
   end
@@ -905,7 +905,7 @@ class StoreSettingsController < ApplicationController
     tenant_name = params['tenantname']
 
     # redirect_to (URI::encode("https://#{tenant_name}.groovepacker.com:3001//") + "#" + URI::encode("/settings/showstores/ebay?ebaytkn=#{ebaytkn}&tknexp=#{tknexp}&username=#{username}&redirect=#{redirect}&editstatus=#{editstatus}&name=#{name}&status=#{status}&storetype=#{storetype}&storeid=#{storeid}&inventorywarehouseid=#{inventorywarehouseid}&importimages=#{importimages}&importproducts=#{importproducts}&messagetocustomer=#{messagetocustomer}&tenantname=#{tenant_name}") ) 
-    redirect_to (URI::encode("https://#{tenant_name}.#{ENV['HOST_NAME']}//") + "#" + URI::encode("/settings/stores/ebay?ebaytkn=#{ebaytkn}&tknexp=#{tknexp}&username=#{username}&redirect=#{redirect}&editstatus=#{editstatus}&name=#{name}&status=#{status}&storetype=#{storetype}&storeid=#{storeid}&inventorywarehouseid=#{inventorywarehouseid}&importimages=#{importimages}&importproducts=#{importproducts}&messagetocustomer=#{messagetocustomer}&tenantname=#{tenant_name}") )
+    redirect_to (URI::encode("https://#{tenant_name}.#{ENV['HOST_NAME']}/") + URI::encode("store_settings/updateebayusertoken?storeid=#{storeid}") )
   end
 
   def let_store_be_created

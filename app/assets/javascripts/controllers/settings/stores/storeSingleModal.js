@@ -1,6 +1,6 @@
-groovepacks_controllers.controller('storeSingleModal', [ '$scope', 'store_data', '$state', '$stateParams','$modal',
-                             '$modalInstance', '$timeout', 'hotkeys', 'stores','warehouses','notification',
-function(scope, store_data, $state, $stateParams, $modal, $modalInstance, $timeout, hotkeys, stores, warehouses, notification) {
+groovepacks_controllers.controller('storeSingleModal', [ '$scope', 'store_data', '$window', '$sce', '$interval', '$state', '$stateParams','$modal',
+                             '$modalInstance', '$timeout', 'hotkeys', 'stores','warehouses', 'notification',
+function(scope, store_data, $window, $sce, $interval, $state, $stateParams, $modal, $modalInstance, $timeout, hotkeys, stores, warehouses, notification) {
     var myscope = {};
 
     /**
@@ -152,6 +152,42 @@ function(scope, store_data, $state, $stateParams, $modal, $modalInstance, $timeo
                 }
             });
         }
+    };
+
+    scope.launch_ebay_popup= function() {
+
+        //TODO: Move this into a service/directive after some testing is done
+        var ebay_url = $sce.trustAsResourceUrl(scope.stores.ebay.signin_url+'&ruparams=redirect%3Dtrue%26editstatus%3D'+scope.edit_status+'%26name%3D'+
+                                scope.stores.single.name+'%26status%3D'+scope.stores.single.status+'%26storetype%3D'+
+                                scope.stores.single.store_type+'%26storeid%3D'+scope.stores.single.id+'%26inventorywarehouseid%3D'+scope.stores.single.inventory_warehouse_id+'%26importimages%3D'+scope.stores.single.import_images+
+                                '%26importproducts%3D'+scope.stores.single.import_products+'%26messagetocustomer%3D'+scope.stores.single.thank_you_message_to_customer+'%26tenantname%3D'+scope.stores.ebay.current_tenant);
+
+        var w = 1000;
+        var h = 400;
+        var left_adjust = angular.isDefined($window.screenLeft) ? $window.screenLeft : $window.screen.left;
+        var top_adjust = angular.isDefined($window.screenTop) ? $window.screenTop : $window.screen.top;
+        var width = $window.innerWidth ? $window.innerWidth : $window.document.documentElement.clientWidth ? $window.document.documentElement.clientWidth : $window.screen.width;
+        var height = $window.innerHeight ? $window.innerHeight : $window.document.documentElement.clientHeight ? $window.document.documentElement.clientHeight : $window.screen.height;
+
+        var left = ((width / 2) - (w / 2)) + left_adjust;
+        var top = ((height / 2) - (h / 2)) + top_adjust;
+
+        var popup = $window.open(ebay_url, '', "top=" + top + ", left=" + left + ", width="+w+", height="+h);
+        var interval = 1000;
+
+        var i = $interval(function() {
+            try {
+                console.log("Tick-popup");
+                // value is the user_id returned from paypal
+                if (popup==null || popup.closed){
+                    $interval.cancel(i);
+                    //TODO: move this out to a callback
+                    myscope.store_single_details(scope.stores.single.id,true);
+                }
+            } catch(e){
+                console.error(e);
+            }
+        },interval);
     };
 
     myscope.rollback = function() {

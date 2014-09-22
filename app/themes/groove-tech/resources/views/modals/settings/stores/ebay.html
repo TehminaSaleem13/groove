@@ -23,7 +23,7 @@
       <div class="form-group" ng-show="stores.ebay.show_url==true && stores.ebay.signin_url_status==true">
         <label class="control-label col-md-4"></label>
         <div class="controls col-md-8">
-          <a href="{{stores.ebay.signin_url}}&ruparams=redirect%3Dtrue%26editstatus%3D{{edit_status}}%26name%3D{{stores.single.name}}%26status%3D{{stores.single.status}}%26storetype%3D{{stores.single.store_type}}%26storeid%3D{{stores.single.id}}%26inventorywarehouseid%3D{{stores.single.inventory_warehouse_id}}%26importimages%3D{{stores.single.import_images}}%26importproducts%3D{{stores.single.import_products}}%26messagetocustomer%3D{{stores.single.thank_you_message_to_customer}}%26tenantname%3D{{stores.ebay.current_tenant}}">Click here to access ebay</a>
+          <a href="" ng-click="launch_ebay_popup()" >Click here to access ebay</a>
          </div>
       </div>
       <div ng-hide="stores.ebay.show_url">
