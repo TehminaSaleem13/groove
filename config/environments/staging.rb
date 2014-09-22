@@ -102,7 +102,7 @@ Groovepacks::Application.configure do
   ENV['EBAY_APP_ID'] = "DSO698331-163d-4ffd-be1a-0eceb5ae5be"
   ENV['EBAY_CERT_ID'] = "a5b0c5cb-7863-4ade-92f0-1331997def8c"
   ENV['EBAY_DEV_ID'] = "353bd404-651b-4431-955d-25e0a0c8140f"
-  ENV['EBAY_RU_NAME'] = "DSO-DSO698331-163d--aptkv"
+  ENV['EBAY_RU_NAME'] = "DSO-DSO698331-163d--otkbuvijt"
   ENV['EBAY_SANDBOX_MODE'] = "NO"
 
   ENV['SHIPSTATION_USERNAME'] = "dreadhead"
