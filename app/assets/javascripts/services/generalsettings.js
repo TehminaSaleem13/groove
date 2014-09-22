@@ -16,7 +16,6 @@ groovepacks_services.factory('generalsettings',['$http','notification',function(
                 if(data.status) {
                     settings.single = data.data.settings;
                     settings.single.time_to_send_email = new Date(data.data.settings.time_to_send_email);
-                    console.log(settings);
                 } else {
                     notification.notify(data.error_messages,0);
                 }
@@ -24,9 +23,25 @@ groovepacks_services.factory('generalsettings',['$http','notification',function(
         ).error(notification.server_error);
     };
 
+    var fix_times =function (settings) {
+        var today = null;
+        var all = ['time_to_import_orders','time_to_send_email'];
+        var config_date = null;
+        for(var i=0; i< all.length; i++) {
+            config_date = new Date(settings.single[all[i]]);
+            today = new Date();
+            today.setHours(config_date.getHours());
+            today.setMinutes(config_date.getMinutes());
+            today.setSeconds(0);
+            settings.single[all[i]] = today;
+        }
+
+    };
+
     var update_settings = function(settings) {
         var url = '/settings/update_settings.json';
-        console.log(settings);
+        fix_times(settings);
+
         return $http.put(url, settings.single).success(
             function(data) {
                 if(data.status) {

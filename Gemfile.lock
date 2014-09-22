@@ -177,8 +177,6 @@ GEM
       net-ssh (>= 2.1.3)
       nokogiri (~> 1.5)
       ruby-hmac
-    font-awesome-rails (3.2.1.3)
-      railties (>= 3.2, < 5.0)
     formatador (0.2.4)
     gelf (1.4.0)
       json
@@ -417,7 +415,6 @@ DEPENDENCIES
   factory_girl_rails (>= 4.1.0)
   figaro (>= 0.5.0)
   fog (~> 1.15.0)
-  font-awesome-rails
   gelf
   jquery-fileupload-rails
   jquery-rails
