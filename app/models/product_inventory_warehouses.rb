@@ -5,6 +5,8 @@ class ProductInventoryWarehouses < ActiveRecord::Base
   belongs_to :inventory_warehouse
   has_many :sold_inventory_warehouses
 
+  after_save :update_store
+
   def update_available_inventory_level(purchase_qty, reason)
   	result = true
 
@@ -48,6 +50,21 @@ class ProductInventoryWarehouses < ActiveRecord::Base
       result &= false
     end
     result
+  end
+
+  def update_store
+    changed_hash = self.changes
+
+    unless changed_hash['location_primary'].nil?
+      #update product store
+      store = self.product.store
+
+      if self.product.store.store_type == 'Shipstation' && self.product.store.auto_update_products
+        context = Groovepacker::Store::Context.new(
+          Groovepacker::Store::Handlers::ShipstationHandler.new(self.product.store))
+        context.update_product(self.product)
+      end
+    end
   end
 
 end

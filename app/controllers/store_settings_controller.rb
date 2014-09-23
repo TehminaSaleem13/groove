@@ -51,6 +51,7 @@ class StoreSettingsController < ApplicationController
           @store.status = params[:status]
           @store.thank_you_message_to_customer = params[:thank_you_message_to_customer]
           @store.inventory_warehouse_id = params[:inventory_warehouse_id] || get_default_warehouse_id
+          @store.auto_update_products = params[:auto_update_products]
         end
 
         if @result['status']
@@ -112,7 +113,6 @@ class StoreSettingsController < ApplicationController
             @amazon.import_products = params[:import_products]
             @amazon.import_images = params[:import_images]
             @amazon.show_shipping_weight_only = params[:show_shipping_weight_only]
-
 
             @store.amazon_credentials = @amazon
 
@@ -914,18 +914,6 @@ class StoreSettingsController < ApplicationController
     }
   end
 
-  def update_products
-    store = Store.find(params[:id])
-
-    if store.store_type == 'Shipstation'
-      context = Groovepacker::Store::Context.new(
-        Groovepacker::Store::Handlers::ShipstationHandler.new(store))
-      store.products.each do |product|
-        context.update_product(product)
-      end
-    end
-    render json: 'ok'
-  end
 end
 
 

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140919145900) do
+ActiveRecord::Schema.define(:version => 20140923142217) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0, :null => false
@@ -490,6 +490,7 @@ ActiveRecord::Schema.define(:version => 20140919145900) do
     t.datetime "updated_at",                                       :null => false
     t.integer  "inventory_warehouse_id"
     t.text     "thank_you_message_to_customer"
+    t.boolean  "auto_update_products",          :default => false
   end
 
   create_table "subscriptions", :force => true do |t|
