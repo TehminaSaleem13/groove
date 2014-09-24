@@ -58,7 +58,7 @@ RAILS_ENV=${ENV} rake db:seed
 RAILS_ENV=${ENV} rake assets:clean
 RAILS_ENV=${ENV} rake assets:precompile
 RAILS_ENV=${ENV} rake fs:delete_pdfs
-RAILS_ENV=${ENV} script/delayed_job start
+RAILS_ENV=${ENV} script/delayed_job -n 2 start
 
 exit
 EOF
