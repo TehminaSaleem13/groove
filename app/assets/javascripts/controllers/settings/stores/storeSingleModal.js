@@ -23,7 +23,9 @@ function(scope, store_data, $window, $sce, $interval, $state, $stateParams, $mod
     };
 
     scope.disconnect_ebay_seller = function() {
-        stores.ebay.user_token.delete(stores);
+        stores.ebay.user_token.delete(scope.stores).then(function() {
+            myscope.store_single_details(scope.stores.single.id,true);
+        });
     };
 
     scope.import_orders = function(report_id) {

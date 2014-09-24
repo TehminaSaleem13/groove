@@ -380,7 +380,7 @@ groovepacks_services.factory('stores',['$http','notification','$filter',function
         },
         list: {
             get: get_list,
-            update: update_list,
+            update: update_list
         },
         single: {
             get: get_single,
