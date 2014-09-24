@@ -1,10 +1,11 @@
 groovepacks_controllers.
-    controller('scanPackCtrl', [ '$scope', '$http', '$timeout', '$stateParams', '$location', '$state', '$cookies','scanPack','groov_audio',
-        function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies, scanPack, groov_audio) {
+    controller('scanPackCtrl', [ '$scope', '$http', '$timeout', '$stateParams', '$location', '$state', '$cookies','scanPack','generalsettings','groov_audio',
+        function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies, scanPack,generalsettings, groov_audio) {
             var myscope = {};
             $scope.init = function() {
                 myscope.callback = function(){ return true;};
                 $scope.scan_pack = scanPack.settings.model();
+                $scope.general_settings = generalsettings.model.get();
                 if(typeof myscope['sounds'] == 'undefined'){
                     myscope.sounds = {};
                 }
@@ -24,6 +25,7 @@ groovepacks_controllers.
                         }
                     });
                 });
+                generalsettings.single.get($scope.general_settings);
                 myscope.callbacks = {};
                 $scope.current_state = $state.current.name;
                 if(typeof $scope.data == "undefined") {

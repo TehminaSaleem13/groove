@@ -73,6 +73,51 @@ class ScanPackController < ApplicationController
     end
   end
 
+  def add_note
+    @result = Hash.new
+    @result['status'] = true
+    @result['error_messages'] = []
+    @result['success_messages'] = []
+    @result['notice_messages'] = []
+    email = !params[:email].blank?
+    if params[:id].nil? || params[:note].nil?
+      @result['status'] &= false
+      @result['error_messages'].push('Order id and note from packer required')
+    else
+      @order = Order.find(params[:id])
+      if @order.nil?
+        @result['status'] &= false
+        @result['error_messages'].push('Could not find order with id: '+params[:id].to_s)
+      else
+        @order.notes_fromPacker = params[:note].to_s
+        if @order.save
+          @result['success_messages'].push('Note from Packer saved successfully')
+          general_settings = GeneralSetting.all.first
+          if general_settings.send_email_for_packer_notes == 'always' ||
+              (general_settings.send_email_for_packer_notes == 'optional' && email)
+            #send email
+            mail_settings = Hash.new
+            mail_settings['email'] = general_settings.email_address_for_packer_notes
+            mail_settings['sender'] = current_user.name + ' ('+current_user.username+')'
+            mail_settings['tenant_name'] = Apartment::Tenant.current_tenant
+            mail_settings['order_number'] = @order.increment_id
+            mail_settings['order_id'] = @order.id
+            mail_settings['note_from_packer'] = @order.notes_fromPacker
+
+            NotesFromPacker.send_email(mail_settings).deliver
+          end
+        else
+          @result['status'] &= false
+          @result['error_messages'].push('There was an error saving note from packer, please try again')
+        end
+      end
+    end
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json: @result }
+    end
+
+  end
 
   def order_instruction
     @result = Hash.new

@@ -55,6 +55,14 @@ groovepacks_services.factory('scanPack',['$http','notification','$state',functio
         }).error(notification.server_error);
     };
 
+    var add_note =function (id,send_email,note) {
+        return $http.post('/scan_pack/add_note.json',{id:id,email:send_email,note:note}).success(function(data){
+            notification.notify(data.notice_messages,2);
+            notification.notify(data.success_messages,1);
+            notification.notify(data.error_messages,0);
+        }).error(notification.server_error);
+    };
+
     var get_settings = function(model) {
         return $http.get('/settings/get_scan_pack_settings.json').success(function(data) {
             if(data.status) {
@@ -101,6 +109,7 @@ groovepacks_services.factory('scanPack',['$http','notification','$state',functio
             get: get_settings,
             update: update_settings
         },
+        add_note: add_note,
         states:{
             model:get_state
         },
