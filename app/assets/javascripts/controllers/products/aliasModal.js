@@ -71,26 +71,20 @@ groovepacks_controllers.controller('aliasModal',['$scope','type','exceptions','i
         products.setup.update(scope.products.setup,type,value);
         scope.products.setup.is_kit = (selector == 'kit')? 1 : 0;
         scope.products.setup.is_kit = scope.is_order ? -1 : scope.products.setup.is_kit;
-        myscope.get_products();
+        myscope.get_products(1);
     };
 
 
     //Watcher ones
     myscope.can_do_load_products = function () {
-        if(scope._can_load_products) {
-            if(myscope.do_load_products) {
-                myscope.do_load_products = false;
-                myscope.get_products();
-            }
+        if(scope._can_load_products && myscope.do_load_products) {
+            myscope.get_products(1);
+            myscope.do_load_products = false;
         }
     };
 
     myscope.search_products = function () {
-        if(scope._can_load_products) {
-            myscope.get_products(1);
-        } else {
-            myscope.do_load_products = true;
-        }
+        myscope.get_products(1);
     };
 
      //Constructor
@@ -137,7 +131,7 @@ groovepacks_controllers.controller('aliasModal',['$scope','type','exceptions','i
          if(typeof id !== 'undefined') {
              myscope.exceptions.push(id);
          }
-         myscope.get_products();
+         myscope.get_products(1);
          $timeout(scope.focus_search,200);
          scope.$watch('products.setup.search',myscope.search_products);
          scope.$watch('_can_load_products',myscope.can_do_load_products);

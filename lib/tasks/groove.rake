@@ -22,10 +22,10 @@ namespace :groove do
           rescue Exception=>e
             puts e.message
           else
-            puts 'Removed tenant Database'
+            puts 'Removed tenant '+options[:tenant]+' Database'
           end
           if del_tenant.destroy
-            puts 'Removed entry from tenants table'
+            puts 'Removed '+options[:tenant]+' from tenants table'
           end
         end
 

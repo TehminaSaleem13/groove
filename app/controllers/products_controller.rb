@@ -1344,25 +1344,24 @@ class ProductsController < ApplicationController
     search = ActiveRecord::Base::sanitize('%'+params[:search]+'%')
     is_kit = 0
     supported_kit_params = ['0', '1', '-1']
-    kit_query = ""
-    query_add = ""
+    kit_query = ''
+    query_add = ''
 
     is_kit = params[:is_kit].to_i if !params[:is_kit].nil?  &&
         supported_kit_params.include?(params[:is_kit])
-    unless is_kit == '-1'
-      kit_query = " products.is_kit="+is_kit.to_s+" AND "
+    unless is_kit == -1
+      kit_query = ' products.is_kit='+is_kit.to_s+' AND '
     end
     unless params[:select_all]
-      query_add = " LIMIT "+limit.to_s+" OFFSET "+offset.to_s
+      query_add = ' LIMIT '+limit.to_s+' OFFSET '+offset.to_s
     end
 
-    base_query = "(SELECT * from products WHERE "+kit_query+" products.name like "+search+") UNION
-      (SELECT products.* from products, product_barcodes where "+kit_query+" products.id = product_barcodes.product_id AND product_barcodes.barcode like "+search+" ) UNION
-      (SELECT products.* from products, product_skus where "+kit_query+" products.id = product_skus.product_id AND product_skus.sku like "+search+" ) UNION
-      (SELECT products.* from products, product_cats where "+kit_query+" products.id = product_cats.product_id AND product_cats.category like "+search+" ) UNION
-      (SELECT products.* from products, product_inventory_warehouses where "+kit_query+" products.id = product_inventory_warehouses.product_id AND (product_inventory_warehouses.location_primary like "+search+" OR product_inventory_warehouses.location_secondary like "+search+") ) "
+    base_query = '(SELECT * from products WHERE '+kit_query+' products.name like '+search+') UNION
+      (SELECT products.* from products, product_barcodes where '+kit_query+' products.id = product_barcodes.product_id AND product_barcodes.barcode like '+search+' ) UNION
+      (SELECT products.* from products, product_skus where '+kit_query+' products.id = product_skus.product_id AND product_skus.sku like '+search+' ) UNION
+      (SELECT products.* from products, product_cats where '+kit_query+' products.id = product_cats.product_id AND product_cats.category like '+search+' ) UNION
+      (SELECT products.* from products, product_inventory_warehouses where '+kit_query+' products.id = product_inventory_warehouses.product_id AND (product_inventory_warehouses.location_primary like '+search+' OR product_inventory_warehouses.location_secondary like '+search+') ) '
 
-    logger.info base_query;
     result_rows = Product.find_by_sql(base_query+query_add)
 
     if results_only
@@ -1370,7 +1369,7 @@ class ProductsController < ApplicationController
     else
       result = Hash.new
       result['products'] = result_rows
-      result['count'] = Product.count_by_sql("SELECT count(*) as count from("+base_query+") as tmp")
+      result['count'] = Product.count_by_sql('SELECT count(*) as count from('+base_query+') as tmp')
     end
 
 
