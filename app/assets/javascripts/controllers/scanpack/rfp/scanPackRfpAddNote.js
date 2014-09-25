@@ -37,7 +37,6 @@ function($scope,$modalInstance,$timeout,order_data,generalsettings,scanPack) {
 
     $scope.update = function(reason) {
         if(reason != "cancel-button-click") {
-            console.log($scope.email.send);
             scanPack.add_note($scope.order.id,$scope.email.send,$scope.order.notes_fromPacker);
         }
     };

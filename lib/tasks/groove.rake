@@ -32,4 +32,23 @@ namespace :groove do
     end
     exit(1)
   end
+
+  task :upgrade => :environment do
+    Tenant.all.each do |tenant|
+      Apartment::Tenant.process(tenant.name) do
+        puts 'Upgrading Tenant: '+Apartment::Tenant.current.to_s
+        #Add upgrade code to run for every tenant after this line
+
+        Order.all.each do |single_order|
+          if Order.where(:increment_id => single_order.increment_id).length > 1
+            single_order.destroy
+          end
+        end
+        #Add upgrade code to run for every tenant before this line
+      end
+    end
+
+    # Add all non-tenant upgrade code after this line
+    # Add all non-tenant upgrade code before this line
+  end
 end

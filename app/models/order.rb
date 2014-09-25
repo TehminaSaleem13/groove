@@ -14,6 +14,7 @@ class Order < ActiveRecord::Base
   has_and_belongs_to_many :order_tags
   after_update :update_inventory_levels_for_items
   before_save :update_non_hyphen_increment_id
+  validates_uniqueness_of :increment_id
 
   include ProductsHelper
   include OrdersHelper
