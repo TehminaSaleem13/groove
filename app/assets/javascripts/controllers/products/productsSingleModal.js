@@ -16,6 +16,8 @@ groovepacks_controllers.
         };
 
         scope.update = function(reason) {
+            hotkeys.del('up');
+            hotkeys.del('down');
             if(reason == "cancel-button-click") {
                 myscope.rollback();
             } else {
@@ -80,6 +82,7 @@ groovepacks_controllers.
             });
             kit_modal.result.finally(function(){
                 myscope.product_single_details(scope.products.single.basicinfo.id);
+                myscope.add_hotkeys();
             });
         };
 
@@ -155,6 +158,29 @@ groovepacks_controllers.
                 });
             }
         };
+
+        myscope.add_hotkeys = function() {
+            hotkeys.del('up');
+            hotkeys.del('down');
+            hotkeys.del('esc');
+            $timeout(function(){
+                hotkeys.bindTo(scope).add({
+                    combo: 'up',
+                    description: 'Previous product',
+                    callback: myscope.up_key
+                })
+                .add({
+                    combo: 'down',
+                    description: 'Next product',
+                    callback: myscope.down_key
+                }).add({
+                    combo: 'esc',
+                    description: 'Save and close modal',
+                    callback: function(){}
+                });
+            },2000);
+        };
+
         scope.update_single_product = function(post_fn,auto) {
             //console.log(scope.products.single);
             products.single.update(scope.products,auto).then(function() {
@@ -312,21 +338,7 @@ groovepacks_controllers.
                     name: scope.load_kit
                 }
             };
-
-            hotkeys.bindTo(scope).add({
-                combo: 'up',
-                description: 'Previous product',
-                callback: myscope.up_key
-            })
-            .add({
-                combo: 'down',
-                description: 'Next product',
-                callback: myscope.down_key
-            }).add({
-                combo: 'esc',
-                description: 'Save and close modal',
-                callback: function(){}
-            });
+            myscope.add_hotkeys();
 
             if(product_id) {
                 myscope.update_state = false;

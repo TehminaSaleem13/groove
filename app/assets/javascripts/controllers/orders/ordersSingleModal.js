@@ -176,6 +176,38 @@ groovepacks_controllers.
                 }
             };
 
+            myscope.add_hotkeys = function() {
+                hotkeys.del('up');
+                hotkeys.del('down');
+                hotkeys.del('left');
+                hotkeys.del('right');
+                hotkeys.del('esc');
+
+                $timeout(function() {
+                    hotkeys.bindTo(scope).add({
+                        combo: 'up',
+                        description: 'Previous order',
+                        callback: myscope.up_key
+                    }).add({
+                        combo: 'down',
+                        description: 'Next order',
+                        callback: myscope.down_key
+                    }).add({
+                        combo: 'left',
+                        description: 'Previous tab',
+                        callback: myscope.left_key
+                    }).add({
+                        combo: 'right',
+                        description: 'Next tab',
+                        callback: myscope.right_key
+                    }).add({
+                        combo: 'esc',
+                        description: 'Save and close modal',
+                        callback: function(){}
+                    });
+
+                },2000);
+            };
 
             myscope.handle_click_fn = function(row,event) {
                 if(typeof event !='undefined') {
@@ -198,6 +230,7 @@ groovepacks_controllers.
                 });
                 item_modal.result.finally(function(){
                     myscope.order_single_details(scope.orders.single.basicinfo.id);
+                    myscope.add_hotkeys();
                 });
             };
             scope.item_order = function(type,exceptions,id) {
@@ -258,7 +291,7 @@ groovepacks_controllers.
                 scope.$watch('orders.single.items',function() {
                     if(typeof scope.orders.single.basicinfo != "undefined") {
                         scope.item_products.list = [];
-                        for(i in scope.orders.single.items) {
+                        for(var i = 0; i< scope.orders.single.items.length; i++) {
                             scope.item_products.list.push({id:scope.orders.single.items[i].iteminfo.product_id});
                         }
                     }
@@ -333,29 +366,7 @@ groovepacks_controllers.
                         }
                     }
                 };
-
-                hotkeys.bindTo(scope).add({
-                    combo: 'up',
-                    description: 'Previous order',
-                    callback: myscope.up_key
-                }).add({
-                    combo: 'down',
-                    description: 'Next order',
-                    callback: myscope.down_key
-                }).add({
-                    combo: 'left',
-                    description: 'Previous tab',
-                    callback: myscope.left_key
-                }).add({
-                    combo: 'right',
-                    description: 'Next tab',
-                    callback: myscope.right_key
-                }).add({
-                    combo: 'esc',
-                    description: 'Save and close modal',
-                    callback: function(){}
-                });
-
+                myscope.add_hotkeys();
                 myscope.order_single_details($stateParams.order_id,true);
             };
             myscope.init();

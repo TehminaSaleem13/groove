@@ -1,5 +1,5 @@
-/*!
- * angular-hotkeys v1.4.0
+/*! 
+ * angular-hotkeys v1.4.5
  * https://chieffancypants.github.io/angular-hotkeys
  * Copyright (c) 2014 Wes Cruver
  * License: MIT
@@ -26,21 +26,28 @@
         this.includeCheatSheet = true;
 
         /**
+         * Configurable setting for the cheat sheet title
+         * @type {String}
+         */
+
+        this.templateTitle = 'Keyboard Shortcuts:';
+
+        /**
          * Cheat sheet template in the event you want to totally customize it.
          * @type {String}
          */
-        this.template = '<div class="cfp-hotkeys-container fade" ng-class="{in: helpVisible}"><div class="cfp-hotkeys">' +
-            '<h4 class="cfp-hotkeys-title">{{ title }}</h4>' +
-            '<table><tbody>' +
-            '<tr ng-repeat="hotkey in hotkeys | filter:{ description: \'!$$undefined$$\' }">' +
-            '<td class="cfp-hotkeys-keys">' +
-            '<span ng-repeat="key in hotkey.format() track by $index" class="cfp-hotkeys-key">{{ key }}</span>' +
-            '</td>' +
-            '<td class="cfp-hotkeys-text">{{ hotkey.description }}</td>' +
-            '</tr>' +
-            '</tbody></table>' +
-            '<div class="cfp-hotkeys-close" ng-click="helpVisible = false">×</div>' +
-            '</div></div>';
+        this.template = '<div class="cfp-hotkeys-container fade" ng-class="{in: helpVisible}" style="display: none;"><div class="cfp-hotkeys">' +
+                        '<h4 class="cfp-hotkeys-title">{{ title }}</h4>' +
+                        '<table><tbody>' +
+                        '<tr ng-repeat="hotkey in hotkeys | filter:{ description: \'!$$undefined$$\' }">' +
+                        '<td class="cfp-hotkeys-keys">' +
+                        '<span ng-repeat="key in hotkey.format() track by $index" class="cfp-hotkeys-key">{{ key }}</span>' +
+                        '</td>' +
+                        '<td class="cfp-hotkeys-text">{{ hotkey.description }}</td>' +
+                        '</tr>' +
+                        '</tbody></table>' +
+                        '<div class="cfp-hotkeys-close" ng-click="toggleCheatSheet()">×</div>' +
+                        '</div></div>';
 
         /**
          * Configurable setting for the cheat sheet hotkey
@@ -169,7 +176,14 @@
              * Holds the title string for the help menu
              * @type {String}
              */
-            scope.title = 'Keyboard Shortcuts:';
+            scope.title = this.templateTitle;
+
+            /**
+             * Expose toggleCheatSheet to hotkeys scope so we can call it using
+             * ng-click from the template
+             * @type {function}
+             */
+            scope.toggleCheatSheet = toggleCheatSheet;
 
 
             /**
@@ -185,7 +199,7 @@
             $rootScope.$on('$routeChangeSuccess', function (event, route) {
                 purgeHotkeys();
 
-                if (route.hotkeys) {
+                if (route && route.hotkeys) {
                     angular.forEach(route.hotkeys, function (hotkey) {
                         // a string was given, which implies this is a function that is to be
                         // $eval()'d within that controller's scope
@@ -382,9 +396,10 @@
 
                 Mousetrap.unbind(combo);
 
-                if (combo instanceof Array) {
+                if (angular.isArray(combo)) {
                     var retStatus = true;
-                    for (var i = 0; i < combo.length; i++) {
+                    var i = combo.length;
+                    while (i--) {
                         retStatus = _del(combo[i]) && retStatus;
                     }
                     return retStatus;
@@ -434,17 +449,20 @@
              * @param  {Object} scope The scope to bind to
              */
             function bindTo (scope) {
-                // Add the scope to the list of bound scopes
-                boundScopes[scope.$id] = [];
+                // Only initialize once to allow multiple calls for same scope.
+                if (!(scope.$id in boundScopes)) {
 
-                scope.$on('$destroy', function () {
-                    var i = boundScopes[scope.$id].length;
-                    while (i--) {
-                        _del(boundScopes[scope.$id][i]);
-                        delete boundScopes[scope.$id][i];
-                    }
-                });
+                    // Add the scope to the list of bound scopes
+                    boundScopes[scope.$id] = [];
 
+                    scope.$on('$destroy', function () {
+                        var i = boundScopes[scope.$id].length;
+                        while (i--) {
+                            _del(boundScopes[scope.$id][i]);
+                            delete boundScopes[scope.$id][i];
+                        }
+                    });
+                }
                 // return an object with an add function so we can keep track of the
                 // hotkeys and their scope that we added via this chaining method
                 return {
@@ -473,7 +491,6 @@
             function wrapApply (callback) {
                 // return mousetrap a function to call
                 return function (event, combo) {
-
                     // if this is an array, it means we provided a route object
                     // because the scope wasn't available yet, so rewrap the callback
                     // now that the scope is available:
@@ -502,10 +519,11 @@
                 bindTo                : bindTo,
                 template              : this.template,
                 toggleCheatSheet      : toggleCheatSheet,
-                includeCheatSheat     : this.includeCheatSheat,
+                includeCheatSheet     : this.includeCheatSheet,
                 cheatSheetHotkey      : this.cheatSheetHotkey,
                 cheatSheetDescription : this.cheatSheetDescription,
-                purgeHotkeys          : purgeHotkeys
+                purgeHotkeys          : purgeHotkeys,
+                templateTitle         : this.templateTitle
             };
 
             return publicApi;
@@ -513,39 +531,39 @@
         }];
     })
 
-        .directive('hotkey', function (hotkeys) {
-            return {
-                restrict: 'A',
-                link: function (scope, el, attrs) {
-                    var key, allowIn;
+        .directive('hotkey', ['hotkeys', function (hotkeys) {
+                       return {
+                           restrict: 'A',
+                           link: function (scope, el, attrs) {
+                               var key, allowIn;
 
-                    angular.forEach(scope.$eval(attrs.hotkey), function (func, hotkey) {
-                        // split and trim the hotkeys string into array
-                        allowIn = attrs.hotkeyAllowIn.split(/[\s,]+/);
+                               angular.forEach(scope.$eval(attrs.hotkey), function (func, hotkey) {
+                                   // split and trim the hotkeys string into array
+                                   allowIn = typeof attrs.hotkeyAllowIn === "string" ? attrs.hotkeyAllowIn.split(/[\s,]+/) : [];
 
-                        key = hotkey;
+                                   key = hotkey;
 
-                        hotkeys.add({
-                            combo: hotkey,
-                            description: attrs.hotkeyDescription,
-                            callback: func,
-                            action: attrs.hotkeyAction,
-                            allowIn: allowIn
-                        });
-                    });
+                                   hotkeys.add({
+                                                   combo: hotkey,
+                                                   description: attrs.hotkeyDescription,
+                                                   callback: func,
+                                                   action: attrs.hotkeyAction,
+                                                   allowIn: allowIn
+                                               });
+                               });
 
-                    // remove the hotkey if the directive is destroyed:
-                    el.bind('$destroy', function() {
-                        hotkeys.del(key);
-                    });
-                }
-            };
-        })
+                               // remove the hotkey if the directive is destroyed:
+                               el.bind('$destroy', function() {
+                                   hotkeys.del(key);
+                               });
+                           }
+                       };
+                   }])
 
-        .run(function(hotkeys) {
-            // force hotkeys to run by injecting it. Without this, hotkeys only runs
-            // when a controller or something else asks for it via DI.
-        });
+        .run(['hotkeys', function(hotkeys) {
+                 // force hotkeys to run by injecting it. Without this, hotkeys only runs
+                 // when a controller or something else asks for it via DI.
+             }]);
 
 })();
 
@@ -583,162 +601,162 @@
      * @type {Object}
      */
     var _MAP = {
-            8: 'backspace',
-            9: 'tab',
-            13: 'enter',
-            16: 'shift',
-            17: 'ctrl',
-            18: 'alt',
-            20: 'capslock',
-            27: 'esc',
-            32: 'space',
-            33: 'pageup',
-            34: 'pagedown',
-            35: 'end',
-            36: 'home',
-            37: 'left',
-            38: 'up',
-            39: 'right',
-            40: 'down',
-            45: 'ins',
-            46: 'del',
-            91: 'meta',
-            93: 'meta',
-            224: 'meta'
-        },
+        8: 'backspace',
+        9: 'tab',
+        13: 'enter',
+        16: 'shift',
+        17: 'ctrl',
+        18: 'alt',
+        20: 'capslock',
+        27: 'esc',
+        32: 'space',
+        33: 'pageup',
+        34: 'pagedown',
+        35: 'end',
+        36: 'home',
+        37: 'left',
+        38: 'up',
+        39: 'right',
+        40: 'down',
+        45: 'ins',
+        46: 'del',
+        91: 'meta',
+        93: 'meta',
+        224: 'meta'
+    },
 
-        /**
-         * mapping for special characters so they can support
-         *
-         * this dictionary is only used incase you want to bind a
-         * keyup or keydown event to one of these keys
-         *
-         * @type {Object}
-         */
-        _KEYCODE_MAP = {
-            106: '*',
-            107: '+',
-            109: '-',
-            110: '.',
-            111 : '/',
-            186: ';',
-            187: '=',
-            188: ',',
-            189: '-',
-            190: '.',
-            191: '/',
-            192: '`',
-            219: '[',
-            220: '\\',
-            221: ']',
-            222: '\''
-        },
+    /**
+     * mapping for special characters so they can support
+     *
+     * this dictionary is only used incase you want to bind a
+     * keyup or keydown event to one of these keys
+     *
+     * @type {Object}
+     */
+    _KEYCODE_MAP = {
+        106: '*',
+        107: '+',
+        109: '-',
+        110: '.',
+        111 : '/',
+        186: ';',
+        187: '=',
+        188: ',',
+        189: '-',
+        190: '.',
+        191: '/',
+        192: '`',
+        219: '[',
+        220: '\\',
+        221: ']',
+        222: '\''
+    },
 
-        /**
-         * this is a mapping of keys that require shift on a US keypad
-         * back to the non shift equivelents
-         *
-         * this is so you can use keyup events with these keys
-         *
-         * note that this will only work reliably on US keyboards
-         *
-         * @type {Object}
-         */
-        _SHIFT_MAP = {
-            '~': '`',
-            '!': '1',
-            '@': '2',
-            '#': '3',
-            '$': '4',
-            '%': '5',
-            '^': '6',
-            '&': '7',
-            '*': '8',
-            '(': '9',
-            ')': '0',
-            '_': '-',
-            '+': '=',
-            ':': ';',
-            '\"': '\'',
-            '<': ',',
-            '>': '.',
-            '?': '/',
-            '|': '\\'
-        },
+    /**
+     * this is a mapping of keys that require shift on a US keypad
+     * back to the non shift equivelents
+     *
+     * this is so you can use keyup events with these keys
+     *
+     * note that this will only work reliably on US keyboards
+     *
+     * @type {Object}
+     */
+    _SHIFT_MAP = {
+        '~': '`',
+        '!': '1',
+        '@': '2',
+        '#': '3',
+        '$': '4',
+        '%': '5',
+        '^': '6',
+        '&': '7',
+        '*': '8',
+        '(': '9',
+        ')': '0',
+        '_': '-',
+        '+': '=',
+        ':': ';',
+        '\"': '\'',
+        '<': ',',
+        '>': '.',
+        '?': '/',
+        '|': '\\'
+    },
 
-        /**
-         * this is a list of special strings you can use to map
-         * to modifier keys when you specify your keyboard shortcuts
-         *
-         * @type {Object}
-         */
-        _SPECIAL_ALIASES = {
-            'option': 'alt',
-            'command': 'meta',
-            'return': 'enter',
-            'escape': 'esc',
-            'mod': /Mac|iPod|iPhone|iPad/.test(navigator.platform) ? 'meta' : 'ctrl'
-        },
+    /**
+     * this is a list of special strings you can use to map
+     * to modifier keys when you specify your keyboard shortcuts
+     *
+     * @type {Object}
+     */
+    _SPECIAL_ALIASES = {
+        'option': 'alt',
+        'command': 'meta',
+        'return': 'enter',
+        'escape': 'esc',
+        'mod': /Mac|iPod|iPhone|iPad/.test(navigator.platform) ? 'meta' : 'ctrl'
+    },
 
-        /**
-         * variable to store the flipped version of _MAP from above
-         * needed to check if we should use keypress or not when no action
-         * is specified
-         *
-         * @type {Object|undefined}
-         */
-        _REVERSE_MAP,
+    /**
+     * variable to store the flipped version of _MAP from above
+     * needed to check if we should use keypress or not when no action
+     * is specified
+     *
+     * @type {Object|undefined}
+     */
+    _REVERSE_MAP,
 
-        /**
-         * a list of all the callbacks setup via Mousetrap.bind()
-         *
-         * @type {Object}
-         */
-        _callbacks = {},
+    /**
+     * a list of all the callbacks setup via Mousetrap.bind()
+     *
+     * @type {Object}
+     */
+    _callbacks = {},
 
-        /**
-         * direct map of string combinations to callbacks used for trigger()
-         *
-         * @type {Object}
-         */
-        _directMap = {},
+    /**
+     * direct map of string combinations to callbacks used for trigger()
+     *
+     * @type {Object}
+     */
+    _directMap = {},
 
-        /**
-         * keeps track of what level each sequence is at since multiple
-         * sequences can start out with the same sequence
-         *
-         * @type {Object}
-         */
-        _sequenceLevels = {},
+    /**
+     * keeps track of what level each sequence is at since multiple
+     * sequences can start out with the same sequence
+     *
+     * @type {Object}
+     */
+    _sequenceLevels = {},
 
-        /**
-         * variable to store the setTimeout call
-         *
-         * @type {null|number}
-         */
-        _resetTimer,
+    /**
+     * variable to store the setTimeout call
+     *
+     * @type {null|number}
+     */
+    _resetTimer,
 
-        /**
-         * temporary state where we will ignore the next keyup
-         *
-         * @type {boolean|string}
-         */
-        _ignoreNextKeyup = false,
+    /**
+     * temporary state where we will ignore the next keyup
+     *
+     * @type {boolean|string}
+     */
+    _ignoreNextKeyup = false,
 
-        /**
-         * temporary state where we will ignore the next keypress
-         *
-         * @type {boolean}
-         */
-        _ignoreNextKeypress = false,
+    /**
+     * temporary state where we will ignore the next keypress
+     *
+     * @type {boolean}
+     */
+    _ignoreNextKeypress = false,
 
-        /**
-         * are we currently inside of a sequence?
-         * type of action ("keyup" or "keydown" or "keypress") or false
-         *
-         * @type {boolean|string}
-         */
-        _nextExpectedAction = false;
+    /**
+     * are we currently inside of a sequence?
+     * type of action ("keyup" or "keydown" or "keypress") or false
+     *
+     * @type {boolean|string}
+     */
+    _nextExpectedAction = false;
 
     /**
      * loop through the f keys, f1 to f19 and add them to the map
@@ -1372,13 +1390,13 @@
         // this is important because the way these are processed expects
         // the sequence ones to come first
         _callbacks[info.key][sequenceName ? 'unshift' : 'push']({
-            callback: callback,
-            modifiers: info.modifiers,
-            action: info.action,
-            seq: sequenceName,
-            level: level,
-            combo: combination
-        });
+                                                                    callback: callback,
+                                                                    modifiers: info.modifiers,
+                                                                    action: info.action,
+                                                                    seq: sequenceName,
+                                                                    level: level,
+                                                                    combo: combination
+                                                                });
     }
 
     /**
