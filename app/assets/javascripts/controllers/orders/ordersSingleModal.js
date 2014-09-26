@@ -64,9 +64,17 @@ groovepacks_controllers.
             };
 
             scope.update_single_order = function(auto) {
+                scope.date_picker.show_button=false;
                 orders.single.update(scope.orders,auto).then(function(response) {
                     myscope.order_single_details(scope.orders.single.basicinfo.id);
                 });
+            };
+
+            scope.open_date_picker = function(event){
+                event.stopPropagation();
+                event.preventDefault();
+
+                scope.date_picker.opened = true;
             };
 
             scope.add_item_order = function(args) {
@@ -241,7 +249,10 @@ groovepacks_controllers.
                 /**
                  * Public properties
                  */
-
+                scope.date_picker = {};
+                scope.date_picker.opened = false;
+                scope.date_picker.format = 'dd-MMMM-yyyy';
+                scope.date_picker.show_button =false;
                 scope.item_products = products.model.get();
                 scope.item_products.setup.is_kit = -1;
                 scope.$watch('orders.single.items',function() {

@@ -203,6 +203,7 @@ groovepacks_services.factory('orders',['$http','$window','notification',function
         return $http.get('/orders/getdetails/'+ id+'.json').success(function(data) {
             orders.single = {};
             if(data.order) {
+                data.order.basicinfo.order_placed_time = new Date(data.order.basicinfo.order_placed_time);
                 orders.single = data.order;
             }
         }).error(notification.server_error);

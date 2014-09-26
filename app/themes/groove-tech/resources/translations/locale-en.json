@@ -6,7 +6,8 @@
     },
     "modal": {
         "save_close":"Save & Close",
-        "cancel":"Cancel"
+        "cancel":"Cancel",
+        "update":"Update"
     },
     "products": {
         "modal": {
