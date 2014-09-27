@@ -9,6 +9,7 @@ exports.config = {
     baseUrl: env.baseUrl,
 
     onPrepare: function() {
+        browser.driver.manage().window().maximize();
         browser.driver.get(env.baseUrl + '/users/sign_in');
 
         browser.driver.findElement(by.id('user_username')).sendKeys('admin');
