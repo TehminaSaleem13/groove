@@ -51,13 +51,14 @@ class OrdersController < ApplicationController
       end
     else
       @result['status'] = false
-      @result['messages'].push("You do not have the permission to import orders")
+      @result['messages'].push('You do not have the permission to import orders')
     end
 
     if !import_result.nil?
       import_result[:messages].each do |message|
         @result['messages'].push(message)
       end
+      @result['status'] = import_result.status
       @result['total_imported'] = import_result[:total_imported]
       @result['success_imported'] = import_result[:success_imported]
       @result['previous_imported'] = import_result[:previous_imported]
