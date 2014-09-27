@@ -52,7 +52,7 @@ namespace :groove do
     # Add all non-tenant upgrade code before this line
   end
 
-  task :spec do
+  task :long_spec do
     begin
       webdriver_pid = fork do
         Rake::Task['protractor:webdriver'].invoke
@@ -60,24 +60,33 @@ namespace :groove do
       rails_server_pid = fork do
         Rake::Task['protractor:rails'].invoke
       end
-      #Added cleanup here to delay startup some more while webdriver loads
-      Rake::Task["protractor:cleanup"].invoke
       puts "webdriver PID: #{webdriver_pid}".yellow.bold
       puts "Rails Server PID: #{rails_server_pid}".yellow.bold
-      puts "Waiting for servers to finish starting up...."
+      puts 'Waiting for servers to finish starting up....'
       sleep 6
-      success = system 'protractor spec/javascripts/protractor/conf.js'
+      Rake::Task['groove:spec'].invoke
+    rescue Exception => e
+      puts e
+    ensure
+      sleep 1
       Process.kill 'TERM', webdriver_pid
       Process.kill 'TERM', rails_server_pid
       Process.wait webdriver_pid
       Process.wait rails_server_pid
-      puts "Waiting to shut down cleanly.........".yellow.bold
+      puts 'Waiting to shut down cleanly.........'.yellow.bold
       sleep 5
-    rescue Exception => e
-      puts e
-    ensure
-      Rake::Task["protractor:kill"].invoke
-      exit success
+      Rake::Task['protractor:kill'].invoke
+      exit(1)
     end
+  end
+
+  task :spec do
+    #Added cleanup here to delay startup some more while webrick loads
+    puts 'Cleaning and seeding test db'.green.bold
+    Rake::Task['protractor:cleanup'].invoke
+    puts 'Starting Protractor tests'.green.bold
+    system 'protractor spec/javascripts/protractor/conf.js'
+    puts 'Finished Running Protractor Tests! Bye!'.green.bold
+    exit(1)
   end
 end
