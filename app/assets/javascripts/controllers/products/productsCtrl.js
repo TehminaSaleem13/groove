@@ -35,6 +35,7 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
         $scope.products.setup.search = '';
         products.single.create($scope.products).success(function(data) {
             if(data.status) {
+                $state.params.filter = 'new';
                 myscope.handle_click_fn(data.product);
             }
         });

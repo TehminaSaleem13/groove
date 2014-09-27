@@ -51,4 +51,33 @@ namespace :groove do
     # Add all non-tenant upgrade code after this line
     # Add all non-tenant upgrade code before this line
   end
+
+  task :spec do
+    begin
+      webdriver_pid = fork do
+        Rake::Task['protractor:webdriver'].invoke
+      end
+      rails_server_pid = fork do
+        Rake::Task['protractor:rails'].invoke
+      end
+      #Added cleanup here to delay startup some more while webdriver loads
+      Rake::Task["protractor:cleanup"].invoke
+      puts "webdriver PID: #{webdriver_pid}".yellow.bold
+      puts "Rails Server PID: #{rails_server_pid}".yellow.bold
+      puts "Waiting for servers to finish starting up...."
+      sleep 6
+      success = system 'protractor spec/javascripts/protractor/conf.js'
+      Process.kill 'TERM', webdriver_pid
+      Process.kill 'TERM', rails_server_pid
+      Process.wait webdriver_pid
+      Process.wait rails_server_pid
+      puts "Waiting to shut down cleanly.........".yellow.bold
+      sleep 5
+    rescue Exception => e
+      puts e
+    ensure
+      Rake::Task["protractor:kill"].invoke
+      exit success
+    end
+  end
 end
