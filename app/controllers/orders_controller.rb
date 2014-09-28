@@ -58,7 +58,7 @@ class OrdersController < ApplicationController
       import_result[:messages].each do |message|
         @result['messages'].push(message)
       end
-      @result['status'] = import_result.status
+      @result['status'] = !!import_result[:status]
       @result['total_imported'] = import_result[:total_imported]
       @result['success_imported'] = import_result[:success_imported]
       @result['previous_imported'] = import_result[:previous_imported]

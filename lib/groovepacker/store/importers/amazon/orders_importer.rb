@@ -106,7 +106,7 @@ module Groovepacker
               end
             rescue Exception => e
               result[:status] &= false
-              result[:messages].push(e)
+              result[:messages].push(e.message)
             end
             result
           end #import order ends
