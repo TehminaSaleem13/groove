@@ -35,6 +35,7 @@ namespace :groove do
 
   task :upgrade => :environment do
     Tenant.all.each do |tenant|
+      begin
       Apartment::Tenant.process(tenant.name) do
         puts 'Upgrading Tenant: '+Apartment::Tenant.current.to_s
         #Add upgrade code to run for every tenant after this line
@@ -45,6 +46,15 @@ namespace :groove do
           end
         end
         #Add upgrade code to run for every tenant before this line
+      end
+      rescue Exception => e
+        puts e.message
+        if e.message == 'Cannot find tenant '+tenant.name
+          puts 'Trying to delete missing tenant '+tenant.name.bold
+          if tenant.destroy
+            puts 'Success!'.green.bold
+          end
+        end
       end
     end
 
