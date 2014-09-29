@@ -52,7 +52,7 @@ namespace :groove do
         if e.message == 'Cannot find tenant '+tenant.name
           puts 'Trying to delete missing tenant '+tenant.name
           if tenant.destroy
-            puts 'Success!'.green.bold
+            puts 'Success!'
           end
         end
       end
