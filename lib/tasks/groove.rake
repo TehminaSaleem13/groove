@@ -50,7 +50,7 @@ namespace :groove do
       rescue Exception => e
         puts e.message
         if e.message == 'Cannot find tenant '+tenant.name
-          puts 'Trying to delete missing tenant '+tenant.name.bold
+          puts 'Trying to delete missing tenant '+tenant.name
           if tenant.destroy
             puts 'Success!'.green.bold
           end
