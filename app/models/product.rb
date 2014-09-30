@@ -326,4 +326,19 @@ class Product < ActiveRecord::Base
       where(:product_id => self.id)
     product_inventory_warehouses.first
   end
+
+  # provides primary sku if exists
+  def primary_sku
+    product_skus.find_by_order(0).sku unless product_skus.find_by_order(0).nil?
+  end
+
+  # provides primary image if exists
+  def primary_image
+    product_images.find_by_order(0).image unless product_images.find_by_order(0).nil?
+  end
+
+  # provides primary barcode if exists
+  def primary_barcode
+    product_barcodes.find_by_order(0).barcode unless product_barcodes.find_by_order(0).nil?
+  end
 end
