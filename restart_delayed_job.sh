@@ -46,7 +46,7 @@ source /usr/local/rvm/scripts/rvm
 cd ~/groove
 
 RAILS_ENV=${ENV} script/delayed_job stop
-RAILS_ENV=${ENV} script/delayed_job -n 2 start
+RAILS_ENV=${ENV} script/delayed_job -n 10 start
 
 exit
 EOF

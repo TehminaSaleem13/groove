@@ -59,7 +59,7 @@ RAILS_ENV=${ENV} rake groove:upgrade
 RAILS_ENV=${ENV} rake assets:clean
 RAILS_ENV=${ENV} rake assets:precompile
 RAILS_ENV=${ENV} rake fs:delete_pdfs
-RAILS_ENV=${ENV} script/delayed_job -n 2 start
+RAILS_ENV=${ENV} script/delayed_job -n 10 start
 
 exit
 EOF
