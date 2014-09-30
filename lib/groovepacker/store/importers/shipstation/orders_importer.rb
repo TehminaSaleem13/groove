@@ -31,6 +31,8 @@ module Groovepacker
                       order_items.each do |item|
                         order_item = OrderItem.new
                         import_order_item(order_item, item)
+  
+                        logger.info("SKU: " + item.sku)
 
                         if ProductSku.where(:sku=>item.sku).length == 0
                           #create and import product

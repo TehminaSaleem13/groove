@@ -11,4 +11,11 @@ class ProductSku < ActiveRecord::Base
     end
   end
 
+  def self.get_temp_sku
+    temp_skus = ProductSku.where("sku LIKE TSKU% ORDER BY sku")
+    last_sku = temp_skus.last.sku
+
+    
+  end
+
 end
