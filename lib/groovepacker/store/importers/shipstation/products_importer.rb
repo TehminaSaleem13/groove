@@ -2,6 +2,7 @@ module Groovepacker
   module Store
     module Importers
       module Shipstation
+        include ProductsHelper
         class ProductsImporter < Groovepacker::Store::Importers::Importer
           def import
             handler = self.get_handler
@@ -18,17 +19,16 @@ module Groovepacker
                 previous_import = false
                 if item.sku.nil? or item.sku == ''
                   # if sku is empty
-                  puts "*************** SKU is NIL ****************" + item.name
                   if Product.find_by_name(item.name).nil?
                     # product does not exist create one with temp sku
                     import_result = create_new_product(item, ProductSku.get_temp_sku, credential)
                   else
                     # product exists add temp sku if it does not exist
-                    product = Product.find_by_name(item.name)
-                    unless product.product_skus.length > 0
-                      product.product_skus.create(sku: ProductSku.get_temp_sku)
+                    unless contains_temp_skus(Product.where(name: item.name))
+                      import_result = create_new_product(item, ProductSku.get_temp_sku, credential)
+                    else
+                      previous_import = true
                     end
-                    previous_import = true
                   end
                 elsif ProductSku.where(:sku => item.sku).length == 0 
                   # valid sku but not found earlier

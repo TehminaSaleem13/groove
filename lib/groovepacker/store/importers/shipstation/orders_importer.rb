@@ -2,6 +2,7 @@ module Groovepacker
   module Store
     module Importers
       module Shipstation
+        include ProductsHelper
         class OrdersImporter < Groovepacker::Store::Importers::Importer
           def import
             handler = self.get_handler
@@ -40,10 +41,12 @@ module Groovepacker
                             # if item is not found by name then create the item
                             order_item.product = create_new_product_from_order(item, credential.store, ProductSku.get_temp_sku)
                           else
-                            # if item is found by name check if it contains SKU. if not, then add temp SKU
-                            product = Product.find_by_name(item.description)
-                            unless product.product_skus.length > 0
-                              product.product_skus.create(sku: ProductSku.get_temp_sku)
+                            # product exists add temp sku if it does not exist
+                            products = Product.where(name: item.description)
+                            unless contains_temp_skus(products)
+                              order_item.product = create_new_product_from_order(item, credential.store, ProductSku.get_temp_sku)
+                            else
+                              order_item.product = get_product_with_temp_skus(products)
                             end
                           end
                         elsif ProductSku.where(:sku=>item.sku).length == 0

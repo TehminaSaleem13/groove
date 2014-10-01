@@ -29,6 +29,29 @@ module Groovepacker
           }
         end
 
+        # checks if product contains temp skus
+        def contains_temp_skus(products)
+          result = false
+          products.each do |prod_item|
+            if prod_item.product_skus.where("sku LIKE 'TSKU-%'").length > 0
+              result = true
+              break
+            end
+          end
+          result
+        end
+
+        def get_product_with_temp_skus(products)
+          result = nil
+          products.each do |prod_item|
+            if prod_item.product_skus.where("sku LIKE 'TSKU-%'").length > 0
+              result = prod_item
+              break
+            end
+          end
+          result
+        end
+
         protected
           attr_accessor :handler
 
