@@ -31,43 +31,31 @@ module Groovepacker
                       order_items.each do |item|
                         order_item = OrderItem.new
                         import_order_item(order_item, item)
+  
+                        Rails.logger.info("SKU Product Id: " + item.to_s) 
 
-                        if ProductSku.where(:sku=>item.sku).length == 0
-                          #create and import product
-                          product = Product.new
-                          product.name = 'New imported item'
-                          product.store_product_id = 0
-                          product.store = credential.store
-
-                          sku = ProductSku.new
-                          sku.sku = item.sku
-                          product.product_skus << sku
-
-                          #Build Image
-                          unless item.thumbnail_url.nil?
-                            if ProductImage.where(:product_id=>product.id).length==0
-                              image = ProductImage.new
-                              image.image = item.thumbnail_url
-                              product.product_images << image
-                            end
-                          end                          
-
-                          #build barcode
-                          unless item.upc.nil?
-                            if ProductImage.where(:product_id=>product.id).length==0
-                              barcode = ProductBarcode.new
-                              barcode.barcode = item.upc
-                              product.product_barcodes << barcode
+                        if item.sku.nil? or item.sku == ''
+                          # if sku is nil or empty
+                          if Product.find_by_name(item.description).nil?
+                            # if item is not found by name then create the item
+                            order_item.product = create_new_product_from_order(item, credential.store, ProductSku.get_temp_sku)
+                          else
+                            # if item is found by name check if it contains SKU. if not, then add temp SKU
+                            product = Product.find_by_name(item.description)
+                            unless product.product_skus.length > 0
+                              product.product_skus.create(sku: ProductSku.get_temp_sku)
                             end
                           end
-                          product.save
-                          #import other product details
+                        elsif ProductSku.where(:sku=>item.sku).length == 0
+                          # if non-nil sku is not found
+                          product = create_new_product_from_order(item, credential.store, item.sku)
                           Groovepacker::Store::Importers::Shipstation::
                             ProductsImporter.new(handler).import_single({ 
                               product_sku: item.sku,
                               product_id: product.id,
                               handler: handler
                             })
+                          order_item.product = product
                         else
                           order_item_product = ProductSku.where(:sku=>item.sku).
                           first.product
@@ -87,13 +75,11 @@ module Groovepacker
                       end
                     end
                     if shipstation_order.save
-                      unless shipstation_order.addnewitems
-                        result[:status] &= false
-                        result[:messages].push('Problem adding new items')
-                      end
                       shipstation_order.addactivity("Order Import", credential.store.name+" Import")
                       shipstation_order.order_items.each do |item|
-                        shipstation_order.addactivity("Item with SKU: "+item.sku+" Added", credential.store.name+" Import")
+                        unless item.product.nil? || item.product.primary_sku.nil?
+                          shipstation_order.addactivity("Item with SKU: "+item.product.primary_sku+" Added", credential.store.name+" Import")
+                        end
                       end
                       shipstation_order.set_order_status
                       result[:success_imported] = result[:success_imported] + 1
@@ -108,6 +94,7 @@ module Groovepacker
               result[:messages].push(e.message)
               puts "Exception"
               puts e.message.inspect
+              puts e.backtrace.join("\n")
             end
 
             if result[:status]
@@ -149,9 +136,26 @@ module Groovepacker
             order_item.order_id = item.order_id
           end
 
+          def create_new_product_from_order(item, store, sku)
+            #create and import product
+            product = Product.create(name: item.description, store: store,
+              store_product_id: 0)
+            product.product_skus.create(sku: sku)
+            #Build Image
+            unless item.thumbnail_url.nil? || product.product_images.length > 0
+              product.product_images.create(image: item.thumbnail_url)
+            end                          
+
+            #build barcode
+            unless item.upc.nil? || product.product_barcodes.length > 0
+              product.product_barcodes.create(barcode: item.upc)
+            end
+            product
+          end
+
           def import_single(hash)
             {}
-          end  
+          end
         end
       end
     end

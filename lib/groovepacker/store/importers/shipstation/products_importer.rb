@@ -11,23 +11,40 @@ module Groovepacker
             products = client.product.all
             unless products.nil?
               result[:total_imported] = products.length.to_s
-              products.each do |item|
-                if ProductSku.where(:sku=>item.sku).length == 0
-                  @product = Product.new
-                  @product.store_id = credential.store_id
-                  @product.store_product_id = 0
-                  sku = ProductSku.new
-                  sku.sku = item.sku
-                  @product.product_skus << sku
 
-                  if set_product_fields(@product,item,credential)
-                    result[:success_imported] = result[:success_imported] + 1
+              # loop through the products
+              products.each do |item|
+                import_result = false
+                previous_import = false
+                if item.sku.nil? or item.sku == ''
+                  # if sku is empty
+                  puts "*************** SKU is NIL ****************" + item.name
+                  if Product.find_by_name(item.name).nil?
+                    # product does not exist create one with temp sku
+                    import_result = create_new_product(item, ProductSku.get_temp_sku, credential)
                   else
-                    result[:status] &= false
-                    result[:messages] = "The product information could not be saved."
+                    # product exists add temp sku if it does not exist
+                    product = Product.find_by_name(item.name)
+                    unless product.product_skus.length > 0
+                      product.product_skus.create(sku: ProductSku.get_temp_sku)
+                    end
+                    previous_import = true
                   end
-                else
+                elsif ProductSku.where(:sku => item.sku).length == 0 
+                  # valid sku but not found earlier
+                  import_result = create_new_product(item, item.sku, credential)
+                else 
+                  # sku is already found
+                  previous_import = true
+                end
+
+                if previous_import
                   result[:previous_imported] = result[:previous_imported] + 1
+                elsif import_result
+                  result[:success_imported] = result[:success_imported] + 1
+                else
+                  result[:status] &= false
+                  result[:messages] = "The product information could not be saved."
                 end
               end
             else
@@ -56,7 +73,17 @@ module Groovepacker
             end
             result
           end
-          def set_product_fields(product, ssproduct,credential)
+
+          private 
+
+          def create_new_product(item, sku, credential)
+            product = Product.create(store: credential.store, store_product_id: 0,
+              name: item.name)
+            product.product_skus.create(sku: sku)
+            set_product_fields(product, item, credential)
+          end
+
+          def set_product_fields(product, ssproduct, credential)
             result = false 
             product.name = ssproduct.name
 
