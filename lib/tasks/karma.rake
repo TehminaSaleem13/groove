@@ -2,7 +2,11 @@ namespace :karma  do
   task :install do
     system 'npm install -g karma'
     system 'npm install -g karma-cli'
+    system 'npm install -g karma-jasmine'
     system 'npm install -g karma-bdd-using'
+    system 'npm install -g karma-phantomjs-launcher'
+    system 'npm install -g karma-chrome-launcher'
+
     exit(1)
   end
 

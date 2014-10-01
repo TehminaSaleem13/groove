@@ -2,7 +2,7 @@ module.exports = function(config) {
   var env = require('../spec/javascripts/environment.js');
   var selected_browser = function() {
     var name = env.capabilities['browserName'];
-    var browsers = {chrome:'Chrome',phantomjs:'PhantomJs', default:'chrome'};
+    var browsers = {chrome:'Chrome',phantomjs:'PhantomJS', default:'chrome'};
     if(typeof name !='string' || typeof browsers[name] == 'undefined') {
         name = browsers['default'];
     }
