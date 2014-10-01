@@ -16,15 +16,16 @@ module Groovepacker
               products.each do |item|
                 import_result = false
                 previous_import = false
-                if item.sku == ''
+                if item.sku.nil? or item.sku == ''
                   # if sku is empty
-                  unless Product.find_by_name(item.name).nil?
+                  puts "*************** SKU is NIL ****************" + item.name
+                  if Product.find_by_name(item.name).nil?
                     # product does not exist create one with temp sku
                     import_result = create_new_product(item, ProductSku.get_temp_sku, credential)
                   else
                     # product exists add temp sku if it does not exist
                     product = Product.find_by_name(item.name)
-                    unless product.contains_temp_skus?
+                    unless product.product_skus.length > 0
                       product.product_skus.create(sku: ProductSku.get_temp_sku)
                     end
                     previous_import = true
@@ -76,13 +77,9 @@ module Groovepacker
           private 
 
           def create_new_product(item, sku, credential)
-            product = Product.new
-            product.store_id = credential.store_id
-            product.store_product_id = 0
-            sku = ProductSku.new
-            sku.sku = item.sku
-            product.product_skus << sku
-
+            product = Product.create(store: credential.store, store_product_id: 0,
+              name: item.name)
+            product.product_skus.create(sku: sku)
             set_product_fields(product, item, credential)
           end
 
