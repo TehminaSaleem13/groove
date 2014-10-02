@@ -24,6 +24,8 @@ if [ -z "$ENV"  ]; then
     ENV='Unkown'
 fi
 
+NUM_JOBS=10
+
 if [ ${ENV} != 'staging' ] && [ ${ENV} != 'production' ]; then
     echo "${bold}$ENV${normal} environment not recognized. Please select an environment"
     PS3="p/s/q: "
@@ -42,16 +44,22 @@ sudo service nginx stop
 
 sudo chown groovepacker:groovepacker /home/groovepacker/groove -R
 
+if [ ${ENV} == 'staging' ]; then
+    NUM_JOBS=1
+fi
+
 sudo su groovepacker <<EOF
 source /usr/local/rvm/scripts/rvm
 
 cd ~/groove
+RAILS_ENV=${ENV} script/delayed_job stop
+
 git remote set-url origin git@bitbucket.org:jonnyclean/groovepacker.git
 
 git stash
 git pull origin master
 
-RAILS_ENV=${ENV} script/delayed_job stop
+
 RAILS_ENV=${ENV} bundle install --deployment
 RAILS_ENV=${ENV} rake db:migrate
 RAILS_ENV=${ENV} rake db:seed
@@ -59,7 +67,7 @@ RAILS_ENV=${ENV} rake groove:upgrade
 RAILS_ENV=${ENV} rake assets:clean
 RAILS_ENV=${ENV} rake assets:precompile
 RAILS_ENV=${ENV} rake fs:delete_pdfs
-RAILS_ENV=${ENV} script/delayed_job -n 10 start
+RAILS_ENV=${ENV} script/delayed_job -n ${NUM_JOBS} start
 
 exit
 EOF

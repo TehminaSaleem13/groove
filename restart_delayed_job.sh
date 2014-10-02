@@ -24,6 +24,8 @@ if [ -z "$ENV"  ]; then
     ENV='Unknown'
 fi
 
+NUM_JOBS=10
+
 if [ ${ENV} != 'staging' ] && [ ${ENV} != 'production' ]; then
     echo "${bold}$ENV${normal} environment not recognized. Please select an environment"
     PS3="p/s/q: "
@@ -40,13 +42,17 @@ echo "${bold}$ENV${normal} environment selected"
 
 sudo chown groovepacker:groovepacker /home/groovepacker/groove -R
 
+if [ ${ENV} == 'staging' ]; then
+    NUM_JOBS=1
+fi
+
 sudo su groovepacker <<EOF
 source /usr/local/rvm/scripts/rvm
 
 cd ~/groove
 
 RAILS_ENV=${ENV} script/delayed_job stop
-RAILS_ENV=${ENV} script/delayed_job -n 10 start
+RAILS_ENV=${ENV} script/delayed_job -n ${NUM_JOBS} start
 
 exit
 EOF
