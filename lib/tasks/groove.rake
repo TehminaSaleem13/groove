@@ -40,11 +40,6 @@ namespace :groove do
         puts 'Upgrading Tenant: '+Apartment::Tenant.current.to_s
         #Add upgrade code to run for every tenant after this line
 
-        Order.all.each do |single_order|
-          if Order.where(:increment_id => single_order.increment_id).length > 1
-            single_order.destroy
-          end
-        end
         #Add upgrade code to run for every tenant before this line
       end
       rescue Exception => e
