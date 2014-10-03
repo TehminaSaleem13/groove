@@ -1,5 +1,5 @@
 groovepacks_controllers. 
-controller('scanPackSettingsCtrl', [ '$scope', '$http', '$timeout', '$location', '$state', '$cookies', 'scanPack','groov_translator',
+controller('scanPackSettingsCtrl', [ '$scope', '$http', '$timeout', '$location', '$state', '$cookies', 'scanPack', 'groov_translator',
 function( $scope, $http, $timeout, $location, $state, $cookies, scanPack,groov_translator) {
 
     var myscope = {};

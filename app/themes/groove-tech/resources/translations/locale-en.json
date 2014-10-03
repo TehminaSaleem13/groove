@@ -1,36 +1,79 @@
 {
     "common": {
-        "search":"Search",
+        "search": "Search",
         "select_all": "Select All",
         "select_none": "Select None"
     },
     "modal": {
-        "save_close":"Save & Close",
-        "cancel":"Cancel",
-        "update":"Update"
+        "save_close": "Save & Close",
+        "cancel": "Cancel",
+        "update": "Update"
     },
     "products": {
         "modal": {
             "tooltips": {
-                "sku":"The first SKU listed is the Primary SKU. It will be displayed during packing. If the same product exists under other SKUs in other stores the alternate SKUs will be added here when the products are Aliased. Additional alias SKUs can be added by comma or enter.",
-                "barcode":"The first barcode in the list is considered the 'Primary' barcode. It will be displayed during packing. It will also be the one that is printed when you click the Print icon. Drag the barcodes to reorder them if you would like to make another barcode the primary. Every barcode in the list can be used to scan this product.",
+                "sku": "The first SKU listed is the Primary SKU. It will be displayed during packing. If the same product exists under other SKUs in other stores the alternate SKUs will be added here when the products are Aliased. Additional alias SKUs can be added by comma or enter.",
+                "barcode": "The first barcode in the list is considered the 'Primary' barcode. It will be displayed during packing. It will also be the one that is printed when you click the Print icon. Drag the barcodes to reorder them if you would like to make another barcode the primary. Every barcode in the list can be used to scan this product.",
                 "confirmation": "Text here will be displayed when this product is being scanned. Unless packer confirmations are disabled for the user, confirmations will be required when the Packer Confirmation Required option is selected here.",
-                "placement":"This value from 1-100 controls when the product will be packed in relation to other products in the same box. Lower values are packed first, Higher values later",
+                "placement": "This value from 1-100 controls when the product will be packed in relation to other products in the same box. Lower values are packed first, Higher values later",
                 "time_adjust": "A positive or negative number of seconds can be specified here to increase or decrease the amount of time it should take to scan and pack this item",
                 "skippable": " Skippable products are usually stickers, freebies and other optional items that the order should not be held for"
             }
         }
     },
-    "settings":{
+    "settings": {
         "system": {
+            "general": {
+                "headings": {
+                    "inventory": "Inventory Related",
+                    "conf_notif": "Confirmations & Notifications",
+                    "printing_option": "Printing Options"
+                },
+                "labels": {
+                    "inventory_tracking": "Inventory Tracking",
+                    "low_inventory_alert_email": "Low Inventory Alert Email",
+                    "time_to_send_email": "Time for sending low inventory email",
+                    "send_email_on": "Send email on",
+                    "mon":"Mon",
+                    "tue":"Tue",
+                    "wed":"Wed",
+                    "thu":"Thu",
+                    "fri":"Fri",
+                    "sat":"Sat",
+                    "sun":"Sun",
+                    "default_low_inventory_alert_limit":"Set Default low inventory alert limit",
+                    "hold_orders_due_to_inventory": "Hold Order due to Inventory",
+                    "conf_req_on_notes_to_packer": "Should confirmation be required on \"Notes to Packer\"?",
+                    "always": "Always",
+                    "optional": "Make it optional",
+                    "never": "Never",
+                    "send_email_for_packer_notes": "Should an email be sent when \"Notes from Packer\" are added?",
+                    "email_address": "Email Address",
+                    "packing_slip_size": "Packing Slip Size:",
+                    "packing_slip_orientation": "Packing Slip Orientation:",
+                    "portrait": "Portrait",
+                    "landscape": "Landscape",
+                    "packing_slip_message_to_customer": "Custom Packing-Slip Message-All Stores"
+                },
+                "tooltips": {
+                    "inventory_tracking": "If you do not wish to track inventory for any items you can disable it here. Disabling Inventory Tracking will automatically disable Low Inventory Alert and Hold Orders due to Inventory. If you only need to disable inventory tracking for specific items you can do so on their product page.",
+                    "low_inventory_alert_email": "Low Inventory Alerts limits can be set on the product edit page. If you're not using alerts they can be disabled for all products here. To disable alerts for individual products set their alert level to 0 on their page",
+                    "default_low_inventory_alert_limit": "The Alert level set here will be assigned to all products that do not have a value set.",
+                    "hold_orders_due_to_inventory": "If an order contains a product with an inventory level less than zero, it is automatically placed On Hold when this option is turned on. Turning this off will prevent inventory levels from changing the orders status.",
+                    "conf_req_on_notes_to_packer": "Notes to Packer can be added for any order from the notes tab of the Order detail window. If a confirmation is required the Packer will be prompted to scan their unique confirmation code to proceed when the note is shown. If you want to ensure that confirmations are always required or never required for this type of notification you can do that here. Leaving it optional allows the user creating the Note to choose if confirmation is required.",
+                    "send_email_for_packer_notes": "Notes from Packer can be added by a packer during the scanning of an order. They are often used to make a supervisor aware of a stock situation or exception but the feature can be used in any way that fits your workflow. If you want to ensure that these notes are always emailed to a supervisor you can do that with this setting.",
+                    "packing_slip_size": "Choose the paper size you use for printing packing slips 4x6 is usually used for thermal printers. Standard 8.5x11 will print two packing slips per page.",
+                    "packing_slip_message_to_customer": "This is usually used for a thank you message and possibly instructions for receiving support. A store specific message can be set on the store setup page which will override this general message. Leave Blank to disable this general packing slip message"
+                }
+            },
             "scan_pack": {
-               "headings":{
+               "headings": {
                     "options" :"Scan & Pack Options",
                     "feedback" :"Scanning Feedback",
                     "scan_actions": "Scan Actions",
                     "scan_actions_sub_head": "Scanning these special action barcodes during order processing will perform the listed actions."
                },
-               "labels":{
+               "labels": {
                    "enable_click_sku":"Click SKU to Scan",
                    "ask_tracking_number":"Ask for Tracking Number",
                    "show_success_image":"Display Success Image",
@@ -45,7 +88,7 @@
                    "service_issue_code":"Give current order service issue status",
                    "restart_code":"Restart current Order"
                },
-               "tooltips" :{
+               "tooltips": {
                    "enable_click_sku": "When this option is enabled the packer can click the SKU of the item currently suggested for packing to add the item to the order. This prevents the packer from having to type in damaged or unreadable barcodes.",
                    "ask_tracking_number": "When this option is enabled the packer will be prompted to scan a tracking number after the last item of an order has been packed.",
                    "feedback": "Scan Success and scan fail messages are visual feedback to let the packer know if they scanned the correct product.",
