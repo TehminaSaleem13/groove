@@ -128,48 +128,57 @@
             <div class="form-group" ng-show="products.single.store.store_type!='Amazon' || (products.single.store.store_type=='Amazon' && products.single.amazon_product.show_shipping_weight_only==false)">
                 <label class="control-label col-sm-2">Product Weight</label>
 
-                <div class="controls form-inline" ng-show="products.single.product_weight_format=='English'">
-                    <div class="col-sm-2">
+                <div class="controls form-horizontal" ng-show="products.single.product_weight_format=='English'">
+                    <label class="control-label col-sm-1">lbs</label>
+                    <div class="col-sm-1 controls">
                         <input class="form-control input-style" type="number" ng-model="products.single.weight.lbs" ng-blur="update_single_product()"/>
-                        <label class="control-label">lbs</label>
                     </div>
-                    <div class="col-sm-2">
+
+                    <label class="control-label col-sm-1">oz</label>
+                    <div class="col-sm-1 controls">
                         <input class="form-control input-style" type="number" ng-model="products.single.weight.oz" ng-blur="update_single_product()"/>
-                        <label class="control-label">oz</label>
                     </div>
+
                 </div>
-                <div class="controls form-inline" ng-hide="products.single.product_weight_format=='English'">
+                <div class="controls form-horizontal" ng-hide="products.single.product_weight_format=='English'">
+                    <label class="control-label col-sm-1">kgs</label>
                     <div class="col-sm-1">
                         <input class=" form-control input-style" type="number" ng-model="products.single.weight.kgs" ng-blur="update_single_product()"/>
                     </div>
-                    <label class="control-label col-sm-1">kgs</label>
+                    <label class="control-label col-sm-1">gms</label>
                     <div class="col-sm-1">
                         <input class="form-control input-style" type="number" ng-model="products.single.weight.gms" ng-blur="update_single_product()"/>
                     </div>
-                    <label class="control-label col-sm-1">gms</label>
+
                 </div>
             </div>
             <div class="form-group" ng-show="products.single.store.store_type=='Amazon' && products.single.amazon_product.show_shipping_weight_only==true">
                 <label class="control-label col-sm-2">Shipping Weight</label>
-                <div class="controls form-inline" ng-show="products.single.product_weight_format=='English'">
+                <div class="controls form-horizontal" ng-show="products.single.product_weight_format=='English'">
+                    <label class="control-label col-sm-1" > lbs</label>
                     <div class="col-sm-2">
                         <input class="form-control input-style" type="text" ng-model="products.single.shipping_weight.lbs" ng-blur="update_single_product()"/>
-                        <label class="control-label" > lbs </label>
+
                     </div>
+                    <label class="control-label col-sm-1" > oz</label>
                     <div class="col-sm-2">
                         <input class="form-control input-style" type="text" ng-model="products.single.shipping_weight.oz" ng-blur="update_single_product()"/>
-                        <label class="control-label" > oz </label>
+
                     </div>
+
                 </div>
-                <div class="controls form-inline" ng-hide="products.single.product_weight_format=='English'">
+                <div class="controls form-horizontal" ng-hide="products.single.product_weight_format=='English'">
+                    <label class="control-label col-sm-1" > kgs</label>
                     <div class="col-sm-2">
                         <input class="form-control input-style" type="text" ng-model="products.single.shipping_weight.kgs" ng-blur="update_single_product()"/>
-                        <label class="control-label" > kgs </label>
+
                     </div>
+                    <label class="control-label col-sm-1" > gms</label>
                     <div class="col-sm-2">
                         <input class="form-control input-style" type="text" ng-model="products.single.shipping_weight.gms" ng-blur="update_single_product()"/>
-                        <label class="control-label" > gms </label>
+
                     </div>
+
                 </div>
             </div>
 
