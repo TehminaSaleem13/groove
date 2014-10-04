@@ -132,7 +132,28 @@ function($parse, $timeout, $rootElement) {
           element.addClass(ACTIVE_CLASS_NAME);
 
           startTime = Date.now();
+          $timeout(function(){
+              var diff = Date.now() - startTime;
 
+              var touches = (event.changedTouches && event.changedTouches.length) ? event.changedTouches :
+                            ((event.touches && event.touches.length) ? event.touches : [event]);
+              var e = touches[0].originalEvent || touches[0];
+              var x = e.clientX;
+              var y = e.clientY;
+              var dist = Math.sqrt( Math.pow(x - touchStartX, 2) + Math.pow(y - touchStartY, 2) );
+
+              if (tapping && diff > TAP_DURATION && dist < MOVE_TOLERANCE) {
+                  preventGhostClick(x, y);
+
+                  if (tapElement) {
+                      tapElement.blur();
+                  }
+
+                  if (!angular.isDefined(attr.disabled) || attr.disabled === false) {
+                      element.triggerHandler('contextmenu', [event]);
+                  }
+              }
+          },TAP_DURATION+2,false);
           var touches = event.touches && event.touches.length ? event.touches : [event];
           var e = touches[0].originalEvent || touches[0];
           touchStartX = e.clientX;
@@ -148,26 +169,6 @@ function($parse, $timeout, $rootElement) {
       });
 
       element.on('touchend', function(event) {
-          var diff = Date.now() - startTime;
-
-          var touches = (event.changedTouches && event.changedTouches.length) ? event.changedTouches :
-                        ((event.touches && event.touches.length) ? event.touches : [event]);
-          var e = touches[0].originalEvent || touches[0];
-          var x = e.clientX;
-          var y = e.clientY;
-          var dist = Math.sqrt( Math.pow(x - touchStartX, 2) + Math.pow(y - touchStartY, 2) );
-
-          if (tapping && diff > TAP_DURATION && dist < MOVE_TOLERANCE) {
-              preventGhostClick(x, y);
-
-              if (tapElement) {
-                  tapElement.blur();
-              }
-
-              if (!angular.isDefined(attr.disabled) || attr.disabled === false) {
-                  element.triggerHandler('contextmenu', [event]);
-              }
-          }
 
           resetState();
       });
@@ -175,6 +176,8 @@ function($parse, $timeout, $rootElement) {
       element.onclick = function(event) { };
 
       element.on('contextmenu', function(event, touchend) {
+          event.preventDefault();
+          event.stopPropagation();
           scope.$apply(function() {
               clickHandler(scope, {$event: (touchend || event)});
           });
