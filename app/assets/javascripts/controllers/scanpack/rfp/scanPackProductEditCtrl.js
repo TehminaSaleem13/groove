@@ -9,6 +9,7 @@ groovepacks_controllers.
                         && typeof $scope.data.raw.data.inactive_or_new_products != "undefined"
                         &&  $scope.data.raw.data.inactive_or_new_products.length > 0) {
                         $scope.products.list = $scope.data.raw.data.inactive_or_new_products;
+                        $state.go('scanpack.rfp.product_edit',{order_num: $stateParams.order_num});
                     } else if($scope.data.order.status != 'onhold') {
                         $state.go('scanpack.rfp.default',{order_num: $stateParams.order_num});
                     } else {
@@ -37,12 +38,11 @@ groovepacks_controllers.
                 return $scope.editreload();
             };
 
-            $scope.$on('product-modal-closed',function(event) {
-                event.stopPropagation();
+
+            $scope.product_modal_closed_callback = function() {
                 $scope.set('order',{});
                 $scope.editreload();
-                $state.go('scanpack.rfp.product_edit',{order_num: $stateParams.order_num});
-            });
+            };
 
             $scope.editinit();
         }]);

@@ -20,6 +20,9 @@ groovepacks_controllers.
                 if(typeof $scope.select_all_toggle !='function') {
                     $scope.select_all_toggle = function() {};
                 }
+                if(typeof $scope.product_modal_closed_callback !='function') {
+                    $scope.product_modal_closed_callback = function() {};
+                }
                 if(!$previousState.get("product-modal-previous") || $modalStack.getTop() == null) {
                     //Show modal here
                     myscope.prod_obj= $modal.open({
@@ -36,7 +39,7 @@ groovepacks_controllers.
                     $previousState.memo("product-modal-previous");
                     myscope.prod_obj.result.finally(function(){
                         $scope.select_all_toggle(false);
-                        $scope.$emit("product-modal-closed");
+                        $scope.product_modal_closed_callback();
                         if($previousState.get("product-modal-previous").state.name == "" ||
                             $previousState.get("product-modal-previous").state.name.indexOf('single', $previousState.get("product-modal-previous").state.name.length - 6) !== -1) {
                             //If you landed directly on this URL, we assume that the last part of the state is the modal

@@ -288,7 +288,7 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
         });
         $scope.$watch('_can_load_products',myscope.can_do_load_products);
 
-        $scope.$on("product-modal-closed",myscope.get_products);
+        $scope.product_modal_closed_callback = myscope.get_products;
         $scope.$watch('products.selected',function() {
            $scope.gridOptions.selections.selected_count = $scope.products.selected.length;
         },true);

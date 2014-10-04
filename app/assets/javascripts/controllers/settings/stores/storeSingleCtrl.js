@@ -19,7 +19,7 @@ groovepacks_controllers.
                     $previousState.memo("store-modal-previous");
                     myscope.store_obj.result.finally(function(){
                         $scope.select_all_toggle(false);
-                        $scope.$emit("store-modal-closed");
+                        $scope.store_modal_closed_callback();
                         if($previousState.get("store-modal-previous").state.name == "" ||
                            $previousState.get("store-modal-previous").state.name.indexOf(
                                'single', $previousState.get("store-modal-previous").state.name.length - 6) !== -1) {

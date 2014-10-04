@@ -114,7 +114,7 @@ controller('usersCtrl', [ '$scope', '$http', '$timeout', '$stateParams', '$locat
 
 
             $scope.$watch('users.setup.search',myscope.get_users);
-            $scope.$on("user-modal-closed",myscope.get_users);
+            $scope.user_modal_closed_callback = myscope.get_users;
             //$('.modal-backdrop').remove();
             //$scope.user_modal = null;
             //$scope.currently_open = 0;

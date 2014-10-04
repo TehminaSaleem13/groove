@@ -25,7 +25,7 @@ groovepacks_controllers.
                     $previousState.memo("order-modal-previous");
                     myscope.order_obj.result.finally(function(){
                         $scope.select_all_toggle(false);
-                        $scope.$emit("order-modal-closed");
+                        $scope.order_modal_closed_callback();
                         if($previousState.get("order-modal-previous").state.name == "" ||
                             $previousState.get("order-modal-previous").state.name.indexOf('single', $previousState.get("order-modal-previous").state.name.length - 6) !== -1) {
                             //If you landed directly on this URL, we assume that the last part of the state is the modal

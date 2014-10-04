@@ -24,7 +24,7 @@ groovepacks_controllers.
                     $previousState.memo("user-modal-previous");
                     myscope.user_obj.result.finally(function(){
                         $scope.select_all_toggle(false);
-                        $scope.$emit("user-modal-closed");
+                        $scope.user_modal_closed_callback();
                         if($previousState.get("user-modal-previous").state.name == "" ||
                             $previousState.get("user-modal-previous").state.name.indexOf(
                                 'single', $previousState.get("user-modal-previous").state.name.length - 6) !== -1) {

@@ -348,7 +348,7 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
             $scope.gridOptions.selections.selected_count = $scope.orders.selected.length;
         },true);
 
-        $scope.$on("order-modal-closed",myscope.get_orders);
+        $scope.order_modal_closed_callback = myscope.get_orders;
 
     };
 
