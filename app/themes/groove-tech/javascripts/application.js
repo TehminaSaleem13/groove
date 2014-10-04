@@ -2,6 +2,7 @@
 //= require jquery
 //= require jquery_ujs
 //= require angular
+//= require angular-touch
 //= require angular-cookies
 //= require angular-ui-bootstrap-tpls
 //= require jquery.ui.sortable
