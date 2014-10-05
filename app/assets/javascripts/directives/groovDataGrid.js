@@ -51,7 +51,11 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout','$http','$sce','se
                     scope.context_menu.shown = !scope.context_menu.shown;
                     if(typeof event != "undefined") {
                         event.preventDefault();
-                        event.stopPropagation();
+                        if(typeof event['pointerType'] != 'undefined') {
+                            if(event.pointerType != 'mouse') {
+                                event = event.srcEvent;
+                            }
+                        }
                         var offset = el.offset();
                         scope.context_menu.style = {left: event.pageX - offset.left, top: event.pageY - offset.top }
                     }

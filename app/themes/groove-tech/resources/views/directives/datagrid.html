@@ -52,11 +52,11 @@
         <pagination total-items="options.paginate.total_items" ng-model="options.paginate.current_page" max-size="options.paginate.max_size" items-per-page="options.paginate.items_per_page" class="pagination-sm"  rotate="false"></pagination>
     </div>
     <div bo-if="options.show_hide">
-        <div class="clearfix"  ng-click="context_menu_event()" hm-press="context_menu_event()" groov-rt-click="context_menu_event()" dropdown  is-open="context_menu.shown">
+        <div class="clearfix"  ng-click="context_menu_event()" groov-rt-click="context_menu_event()" dropdown  is-open="context_menu.shown">
             <ul class="dropdown-menu" ng-style="context_menu.style" role="menu">
                 <li ng-repeat="field in options.all_fields" ng-show="field.hideable">
 
-                    <a href="" ng-click="show_hide(field); $event.stopPropagation();" hm-press="show_hide(field);" groov-rt-click="show_hide(field); $event.stopPropagation();"> <i class="glyphicon pull-left" ng-class="{'glyphicon-ok':!field.hidden, 'glyphicon-remove':field.hidden}"></i> <span bo-text="field.name"></span></a>
+                    <a href="" ng-click="show_hide(field); $event.stopPropagation();" groov-rt-click="show_hide(field); $event.stopPropagation();"> <i class="glyphicon pull-left" ng-class="{'glyphicon-ok':!field.hidden, 'glyphicon-remove':field.hidden}"></i> <span bo-text="field.name"></span></a>
                 </li>
             </ul>
         </div>
