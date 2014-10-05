@@ -1,6 +1,6 @@
 <div ng-if="editable.array" ng-class="editable_class" >
     <div ui-sortable="editable.sortableOptions" ng-model="ngModel">
-        <div class="tag-bubble" ng-dblclick="edit_node($index)" groov-rt-click="edit_node($index)" ng-repeat="single in ngModel">
+        <div class="tag-bubble" ng-dblclick="edit_node($index)" hm-press="edit_node($index)" groov-rt-click="edit_node($index)" ng-repeat="single in ngModel">
             <div ng-show="editing != $index || disabled == true" class="tag tag-blue" ng-class="{'tag-green':$first}">
                 {{single[prop]}}
                 <span ng-show="disabled == false && editing == -1">

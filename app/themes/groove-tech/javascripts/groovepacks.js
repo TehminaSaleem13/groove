@@ -1,7 +1,7 @@
 
 var groovepacks = angular.module('groovepacks', ['groovepacks.filters', 'groovepacks.services',
 	 'groovepacks.directives', 'groovepacks.controllers','ui.sortable','pasvaz.bindonce', 'ngCookies',
-	 'ct.ui.router.extras','ngAnimate', 'ui.bootstrap','cfp.hotkeys','angular-loading-bar','pascalprecht.translate','toggle-switch','ngTouch']);
+	 'ct.ui.router.extras','ngAnimate', 'ui.bootstrap','cfp.hotkeys','angular-loading-bar','pascalprecht.translate','toggle-switch','ngTouch','hmTouchEvents']);
 var groovepacks_controllers = angular.module('groovepacks.controllers', []);
 var groovepacks_filters = angular.module('groovepacks.filters', []);
 var groovepacks_services = angular.module('groovepacks.services', []);
