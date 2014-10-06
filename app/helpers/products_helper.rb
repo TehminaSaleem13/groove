@@ -76,54 +76,38 @@ module ProductsHelper
   end
 
   def updatelist(product,var,value)
-    if ["name","status","is_skippable"].include?(var)
+    begin
+    if ['name','status','is_skippable'].include?(var)
       product[var] = value
       product.save
-    elsif var ==  "sku"
-      product_sku = product.product_skus.order("product_skus.order ASC").first
-      if product_sku.nil?
-        product_sku = ProductSku.new
-        product_sku.product_id = product.id
-      end
-      product_sku.sku = value
-      product_sku.save
-    elsif var ==  "cat"
-      product_cat = product.product_cats.first
-      if product_cat.nil?
-        product_cat = ProductCat.new
-        product_cat.product_id = product.id
-      end
-      product_cat.category = value
-      product_cat.save
-    elsif var ==  "barcode"
-      if ProductBarcode.where(:barcode => value).length == 0
-        product_barcode = product.product_barcodes.order("product_barcodes.order ASC").first
-        if product_barcode.nil?
-          product_barcode = ProductBarcode.new
-          product_barcode.product_id = product.id
-        end
-        product_barcode.barcode = value
-        product_barcode.save
-      end
-    elsif ["location_primary" ,"location_secondary","location_name","qty"].include?(var)
-      product_location = ProductInventoryWarehouses.where(product_id:product.id,inventory_warehouse_id: current_user.inventory_warehouse_id).first
+    elsif var ==  'sku'
+      product.primary_sku = value
+    elsif var ==  'cat'
+      product.primary_category = value
+    elsif var ==  'barcode'
+      product.primary_barcode = value
+    elsif ['location_primary' ,'location_secondary','location_name','qty'].include?(var)
+      product_location = product.primary_warehouse(current_user)
       if product_location.nil?
         product_location = ProductInventoryWarehouses.new
         product_location.product_id = product.id
         product_location.inventory_warehouse_id = current_user.inventory_warehouse_id
       end
-        if var == "location_primary"
+        if var == 'location_primary'
           product_location.location_primary = value
-        elsif var == "location_secondary"
+        elsif var == 'location_secondary'
           product_location.location_secondary = value
-        elsif var == "location_name"
+        elsif var == 'location_name'
           product_location.name = value
-        elsif var == "qty"
+        elsif var == 'qty'
           product_location.available_inv = value
         end
       product_location.save
     end
     product.update_product_status
+    rescue Exception => e
+      puts e.inspect
+    end
   end
 
   #gets called from orders helper

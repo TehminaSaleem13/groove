@@ -65,10 +65,10 @@ class Product < ActiveRecord::Base
           data = []
           data = item.attributes.values_at(*model.column_names).dup
           if ident == :products
-            data.push(item.product_skus.length > 0 ? item.product_skus.order('product_skus.order ASC').first.sku : '')
-            data.push(item.product_barcodes.length > 0 ? item.product_barcodes.order('product_barcodes.order ASC').first.barcode : '')
-            data.push(item.product_cats.length> 0? item.product_cats.first.category : '')
-            data.push(item.product_images.length> 0? item.product_images.order('product_images.order ASC').first.image : '')
+            data.push(item.primary_sku)
+            data.push(item.primary_barcode)
+            data.push(item.primary_category)
+            data.push(item.primary_image)
             inventory_wh = ProductInventoryWarehouses.where(:product_id=>item.id,:inventory_warehouse_id => InventoryWarehouse.where(:is_default => true).first.id).first
             if inventory_wh.nil?
               data.push('','','')
@@ -330,16 +330,65 @@ class Product < ActiveRecord::Base
 
   # provides primary sku if exists
   def primary_sku
-    product_skus.find_by_order(0).sku unless product_skus.find_by_order(0).nil?
+    self.product_skus.order('product_skus.order ASC').first.sku unless self.product_skus.order('product_skus.order ASC').first.nil?
+  end
+
+  def primary_sku=(value)
+    primary = self.product_skus.order('product_skus.order ASC').first
+    if primary.nil?
+      primary = self.product_skus.new
+    end
+    primary.order = 0
+    primary.sku = value
+    primary.save
   end
 
   # provides primary image if exists
   def primary_image
-    product_images.find_by_order(0).image unless product_images.find_by_order(0).nil?
+    self.product_images.order('product_images.order ASC').first.image unless  self.product_images.order('product_images.order ASC').first.nil?
+  end
+
+  def primary_image=(value)
+    primary = self.product_images.order('product_images.order ASC').first
+    if primary.nil?
+      primary = self.product_images.new
+    end
+    primary.order = 0
+    primary.image = value
+    primary.save
   end
 
   # provides primary barcode if exists
   def primary_barcode
-    product_barcodes.find_by_order(0).barcode unless product_barcodes.find_by_order(0).nil?
+    self.product_barcodes.order('product_barcodes.order ASC').first.barcode unless self.product_barcodes.order('product_barcodes.order ASC').first.nil?
   end
+
+  def primary_barcode=(value)
+    primary = self.product_barcodes.order('product_barcodes.order ASC').first
+    if primary.nil?
+      primary = self.product_barcodes.new
+    end
+    primary.order = 0
+    primary.barcode = value
+    primary.save
+  end
+
+  # provides primary category if exists
+  def primary_category
+    self.product_cats.first.category unless self.product_cats.first.nil?
+  end
+
+  def primary_category=(value)
+    primary = self.product_cats.first
+    if primary.nil?
+      primary = self.product_cats.new
+    end
+    primary.category = value
+    primary.save
+  end
+
+  def primary_warehouse(user)
+    self.product_inventory_warehousess.where(inventory_warehouse_id: user.inventory_warehouse_id).first
+  end
+
 end

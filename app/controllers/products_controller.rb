@@ -1499,39 +1499,26 @@ class ProductsController < ApplicationController
       @product_hash['id'] = product.id
       @product_hash['name'] = product.name
       @product_hash['status'] = product.status
-      @product_hash['location_primary'] = ""
-      @product_hash['location_secondary'] = ""
-      @product_hash['location_name'] = ""
+      @product_hash['location_primary'] = ''
+      @product_hash['location_secondary'] = ''
+      @product_hash['location_name'] = 'not_available'
       @product_hash['qty'] = 0
-      @product_hash['barcode'] = ""
-      @product_hash['sku'] = ""
-      @product_hash['cat'] = ""
+      @product_hash['barcode'] = ''
+      @product_hash['sku'] = ''
+      @product_hash['cat'] = ''
 
-      @product_location = ProductInventoryWarehouses.where(product_id:product.id,inventory_warehouse_id: current_user.inventory_warehouse_id).first
+      @product_location = product.primary_warehouse(current_user)
       unless @product_location.nil?
         @product_hash['location_primary'] = @product_location.location_primary
         @product_hash['location_secondary'] = @product_location.location_secondary
         @product_hash['qty'] = @product_location.available_inv
         if !@product_location.inventory_warehouse.nil?
         	@product_hash['location_name'] = @product_location.inventory_warehouse.name
-        else
-        	@product_hash['location_name'] = "not_available"
       	end
       end
-      @product_barcode = product.product_barcodes.order("product_barcodes.order ASC").first
-      unless @product_barcode.nil?
-        @product_hash['barcode'] = @product_barcode.barcode
-      end
-
-      @product_sku = product.product_skus.order("product_skus.order ASC").first
-      unless @product_sku.nil?
-        @product_hash['sku'] = @product_sku.sku
-      end
-
-      @product_cat = product.product_cats.first
-      unless @product_cat.nil?
-        @product_hash['cat'] = @product_cat.category
-      end
+      @product_hash['barcode'] = product.primary_barcode
+      @product_hash['sku'] = product.primary_sku
+      @product_hash['cat'] = product.primary_category
       unless product.store.nil?
         @product_hash['store_type'] = product.store.store_type
       end

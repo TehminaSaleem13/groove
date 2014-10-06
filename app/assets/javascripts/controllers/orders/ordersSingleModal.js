@@ -117,7 +117,7 @@ groovepacks_controllers.
                 } else {
                     var obj = {
                         id: (prop == 'name' || prop == 'is_skippable' || prop == 'status')? model.id : model.iteminfo.product_id,
-                        var: (prop == 'qty_on_hand')? 'qty': ((prop == 'location')? 'location_name': prop),
+                        var: prop,
                         value: model[prop]
                     };
                     products.list.update_node(obj).then(function(response) {
@@ -343,8 +343,8 @@ groovepacks_controllers.
                         sku: {
                             name:"Primary SKU"
                         },
-                        location: {
-                            name:"Primary Warehouse"
+                        location_primary: {
+                            name:"Primary location"
                         },
                         status: {
                             name:"Status",
@@ -357,7 +357,8 @@ groovepacks_controllers.
                             transclude: '<span>{{row.iteminfo.qty}}</span>'
                         },
                         qty_on_hand: {
-                            name:"On hand"
+                            name:"On hand",
+                            editable:false
                         },
                         is_skippable: {
                             name: "Is Skippable",

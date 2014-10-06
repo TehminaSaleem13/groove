@@ -205,23 +205,16 @@ class SettingsController < ApplicationController
                   single_row.save
                   if current_mapping == 'products'
                     unless csv_row['primary_sku'].blank?
-                      sku =  ProductSku.find_or_create_by_sku_and_product_id(csv_row['primary_sku'],single_row.id)
-                      sku.order = 0
-                      sku.save
+                      single_row.primary_sku = csv_row['primary_sku']
                     end
                     unless csv_row['primary_barcode'].blank?
-                      barcode = ProductBarcode.find_or_create_by_barcode_and_product_id(csv_row['primary_barcode'],single_row.id)
-                      barcode.order = 0
-                      barcode.save
+                      single_row.primary_barcode = csv_row['primary_barcode']
                     end
                     unless csv_row['primary_category'].blank?
-                      category = ProductCat.find_or_create_by_category_and_product_id(csv_row['primary_category'],single_row.id)
-                      category.save
+                      single_row.primary_category = csv_row['primary_category']
                     end
                     unless csv_row['primary_image'].blank?
-                      image = ProductImage.find_or_create_by_image_and_product_id(csv_row['primary_image'],single_row.id)
-                      image.order = 0
-                      image.save
+                      single_row.primary_image = csv_row['primary_image']
                     end
                     warehouse = ProductInventoryWarehouses.find_or_create_by_product_id_and_inventory_warehouse_id(single_row.id, InventoryWarehouse.where(:is_default => true).first.id)
                     default_warehouse_map.each do |warehouse_map|
