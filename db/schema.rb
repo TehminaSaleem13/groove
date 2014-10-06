@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140923142217) do
+ActiveRecord::Schema.define(:version => 20141006191532) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0, :null => false
@@ -82,7 +82,7 @@ ActiveRecord::Schema.define(:version => 20140923142217) do
   end
 
   create_table "general_settings", :force => true do |t|
-    t.boolean  "inventory_tracking",                :default => true
+    t.boolean  "inventory_tracking",                :default => false
     t.boolean  "low_inventory_alert_email",         :default => true
     t.string   "low_inventory_email_address",       :default => ""
     t.boolean  "hold_orders_due_to_inventory",      :default => true
