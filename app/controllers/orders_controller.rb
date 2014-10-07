@@ -879,26 +879,34 @@ class OrdersController < ApplicationController
     # import_orders_helper()
 
     result = Hash.new
+    result['status'] = true
     result['success_messages'] = []
     result['error_messages'] = []
     order_summary = OrderImportSummary.where(
       status: 'in_progress')
 
     if order_summary.empty?
-      order_summary_info = OrderImportSummary.new
-      order_summary_info.user_id = current_user.id
-      order_summary_info.status = 'not_started'
-      order_summary_info.save
-      # call delayed job
-      tenant = Apartment::Tenant.current_tenant
-      import_orders_obj = ImportOrders.new
-      Delayed::Job.where(queue: "importing_orders_#{tenant}").destroy_all
-      import_orders_obj.delay(:run_at => 1.seconds.from_now,:queue => "importing_orders_#{tenant}").import_orders  tenant    # import_orders_obj.import_orders
+      if Store.where("status = '1' AND store_type != 'system'").length > 0
+        order_summary_info = OrderImportSummary.new
+        order_summary_info.user_id = current_user.id
+        order_summary_info.status = 'not_started'
+        order_summary_info.save
+        # call delayed job
+        tenant = Apartment::Tenant.current_tenant
+        import_orders_obj = ImportOrders.new
+        Delayed::Job.where(queue: "importing_orders_#{tenant}").destroy_all
+        import_orders_obj.delay(:run_at => 1.seconds.from_now,:queue => "importing_orders_#{tenant}").import_orders  tenant    # import_orders_obj.import_orders
+        result['success_messages'].push('Scouring the interwebs for new orders...')
+      else
+        result['error_messages'].push('You currently have no Active Stores in your Store List')
+        result['status'] = false
+      end
     else
       #Send a message back to the user saying that import is already in progress
       result['error_messages'].push('Import is in progress')
+      result['status'] = false
     end
-    render json: "ok"
+    render json: result
   end
 
   def import_status

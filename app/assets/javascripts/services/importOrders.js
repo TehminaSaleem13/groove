@@ -1,10 +1,13 @@
-groovepacks_services.factory("importOrders", ['$http',function($http) {
+groovepacks_services.factory("importOrders", ['$http','notification',function($http,notification) {
         return {
-            do_import: function(scope) {
-               $http.get('/orders/import_all.json',{ignoreLoadingBar: true}).success(function(data) {
-                 scope.notify("Scouring the interwebs for new orders...",1);}).error(function(data) {
-                        scope.notify("Getting import orders failed.",0);
-                    });
+            do_import: function() {
+                $http.get('/orders/import_all.json',{ignoreLoadingBar: true}).success(function(data) {
+                    if(data.status) {
+                        notification.notify(data.success_messages,1);
+                    } else {
+                        notification.notify(data.error_messages);
+                    }
+                }).error(notification.server_error);
             }
             // do_import: function(scope) {
 
