@@ -1506,6 +1506,7 @@ class ProductsController < ApplicationController
       @product_hash['barcode'] = ''
       @product_hash['sku'] = ''
       @product_hash['cat'] = ''
+      @product_hash['image'] = ''
 
       @product_location = product.primary_warehouse(current_user)
       unless @product_location.nil?
@@ -1519,6 +1520,7 @@ class ProductsController < ApplicationController
       @product_hash['barcode'] = product.primary_barcode
       @product_hash['sku'] = product.primary_sku
       @product_hash['cat'] = product.primary_category
+      @product_hash['image'] = product.primary_image
       unless product.store.nil?
         @product_hash['store_type'] = product.store.store_type
       end

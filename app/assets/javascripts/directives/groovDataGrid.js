@@ -48,13 +48,13 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout','$http','$sce','se
             var myscope = {};
             scope.context_menu_event = function(event) {
                 if(scope.options.show_hide) {
-                    scope.context_menu.shown = !scope.context_menu.shown;
+                    if (typeof event == 'undefined' || typeof event['pointerType'] == 'undefined') {
+                        scope.context_menu.shown = !scope.context_menu.shown;
+                    }
                     if(typeof event != "undefined") {
                         event.preventDefault();
                         if(typeof event['pointerType'] != 'undefined') {
-                            if(event.pointerType != 'mouse') {
-                                event = event.srcEvent;
-                            }
+                            event = event.srcEvent;
                         }
                         var offset = el.offset();
                         scope.context_menu.style = {left: event.pageX - offset.left, top: event.pageY - offset.top }

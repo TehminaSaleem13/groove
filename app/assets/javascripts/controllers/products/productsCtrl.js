@@ -246,6 +246,11 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
                         "'label-info': row[field] == 'new' }\">" +
                         "{{row[field]}}</span>"
                 },
+                image: {
+                    name: "Image",
+                    editable:false,
+                    transclude:'<div class="single-image"><img class="img-responsive" ng-src="{{row.image}}" /></div>'
+                },
                 barcode: {
                     name:"Barcode"
                 },

@@ -300,7 +300,7 @@ groovepacks_controllers.
 
                 scope.gridOptions = {
                     identifier:'orderitems',
-                    draggable:false,
+                    draggable:true,
                     show_hide:true,
                     selectable:true,
                     editable: {
@@ -338,10 +338,13 @@ groovepacks_controllers.
                         image: {
                             name:"Primary Image",
                             editable:false,
-                            transclude:'<div class="single-image"><img class="img-responsive" ng-src="{{row.productimages[0].image}}" /></div>'
+                            transclude:'<div class="single-image"><img class="img-responsive" ng-src="{{row.image}}" /></div>'
                         },
                         sku: {
                             name:"Primary SKU"
+                        },
+                        barcode: {
+                          name:"Primary Barcode"
                         },
                         location_primary: {
                             name:"Primary location"

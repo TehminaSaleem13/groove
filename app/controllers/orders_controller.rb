@@ -339,10 +339,9 @@ class OrdersController < ApplicationController
             @orderitem['location_primary'] = product.primary_warehouse(current_user).location_primary
                 #ProductInventoryWarehouses.where(product_id:product.id,inventory_warehouse_id: current_user.inventory_warehouse_id).first.location_primary
           end
-          if product.product_skus.length > 0
-            @orderitem['sku'] = product.product_skus.order('product_skus.order ASC').first.sku
-          end
-          @orderitem['productimages'] = product.product_images.order('product_images.order ASC')
+          @orderitem['sku'] = product.primary_sku
+          @orderitem['barcode'] = product.primary_barcode
+          @orderitem['image'] = product.primary_image
 
         end
         @result['order']['items'].push(@orderitem)
