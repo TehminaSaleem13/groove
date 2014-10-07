@@ -4,9 +4,6 @@ class ScanPackController < ApplicationController
 
 
   def scan_barcode
-    puts "Scan barcode **************"
-    puts "Current User:\n"
-    puts current_user.inspect
     @result = Hash.new
     @result['status'] = true
     @result['error_messages'] = []

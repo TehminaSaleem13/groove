@@ -1,17 +1,15 @@
-require 'spec_helper'
-include Devise::TestHelpers
+require 'rails_helper'
+#include Devise::TestHelpers
 
 RSpec.describe ScanPackController, :type => :controller do
 
   before(:each) do
-    SeedTenant.new.seed
+    #SeedTenant.new.seed
     @user_role =FactoryGirl.create(:role, :name=>'scan_pack', :import_orders=>true)
     @user = FactoryGirl.create(:user, :username=>"scan_pack_spec_user", :name=>'Scan Pack user', :role=>@user_role)
     # puts "Signing in **************"
     # sign_in @user
     request.env["devise.mapping"] = Devise.mappings[:user]
-    @user.reload
-    puts @user.inspect
     sign_in :user, @user 
 
     #puts current_user.inspect
