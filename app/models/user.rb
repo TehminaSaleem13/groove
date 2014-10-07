@@ -17,7 +17,7 @@ class User < ActiveRecord::Base
 
   before_save :check_inventory_presence
   after_save :check_fix_permissions
-  before_create 'User.can_create_new?'
+  #before_create 'User.can_create_new?'
 
   def email_required?
     false

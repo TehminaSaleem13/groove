@@ -1,11 +1,21 @@
 require 'spec_helper'
+include Devise::TestHelpers
 
-describe ScanPackController do
+RSpec.describe ScanPackController, :type => :controller do
 
   before(:each) do
-    @user_role =FactoryGirl.create(:role,:name=>'scan_pack',:import_orders=>true)
-    @user = FactoryGirl.create(:user,:username=>"scan_pack_spec_user", :name=>'Scan Pack user', :role=>@user_role)
-    sign_in @user
+    SeedTenant.new.seed
+    @user_role =FactoryGirl.create(:role, :name=>'scan_pack', :import_orders=>true)
+    @user = FactoryGirl.create(:user, :username=>"scan_pack_spec_user", :name=>'Scan Pack user', :role=>@user_role)
+    # puts "Signing in **************"
+    # sign_in @user
+    request.env["devise.mapping"] = Devise.mappings[:user]
+    @user.reload
+    puts @user.inspect
+    sign_in :user, @user 
+
+    #puts current_user.inspect
+    #@request.env["devise.mapping"] = Devise.mappings[:user]
 
     @child_item_l = lambda do |name, images, sku, qty_remaining,
       scanned_qty, packing_placement, kit_packing_placement,
@@ -24,7 +34,7 @@ describe ScanPackController do
       child_item['order_item_id'] = 0
       child_item['scanned_qty'] = scanned_qty
       child_item['qty_remaining'] = qty_remaining
-      child_item['kit_packing_placement'] =kit_packing_placement
+      child_item['kit_packing_placement'] = kit_packing_placement
       child_item['kit_product_id'] = kit_product_id
 
       return child_item
@@ -152,7 +162,7 @@ describe ScanPackController do
 
    	it "should not scan orders with no barcode" do
       request.accept = "application/json"
-
+      request.env["devise.mapping"] = Devise.mappings[:user]
       @order = FactoryGirl.create(:order)
 
       get :scan_barcode, {:state => "scanpack.rfo"}

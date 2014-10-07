@@ -24,6 +24,7 @@ describe OrdersController do
     @user_role = FactoryGirl.create(:role,:name=>'order_controller_tester_scan_pack')
     @user = FactoryGirl.create(:user,:name=>'Order Controller Tester', :username=>"order_controller_tester", :role=>@user_role)
     sign_in @user
+
     @copy_order_l = lambda do |order|
       order_data = Hash.new
       order_data['notes_fromPacker'] =  order.notes_fromPacker

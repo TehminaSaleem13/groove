@@ -1,9 +1,12 @@
 class ScanPackController < ApplicationController
-  before_filter :authenticate_user!
+  #before_filter :authenticate_user!
   include ScanPackHelper
 
 
   def scan_barcode
+    puts "Scan barcode **************"
+    puts "Current User:\n"
+    puts current_user.inspect
     @result = Hash.new
     @result['status'] = true
     @result['error_messages'] = []

@@ -3,7 +3,7 @@
 FactoryGirl.define do
   factory :order do
     
-    increment_id 12345678
+    increment_id "12345678"
     order_placed_time "2013-09-03 23:21:02"
     store_id 1
     firstname "Shyam"
