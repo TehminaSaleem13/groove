@@ -23,6 +23,10 @@ class User < ActiveRecord::Base
     false
   end
 
+  def active_for_authentication?
+    super && self.active
+  end
+
   def check_inventory_presence
     if self.inventory_warehouse_id.nil?
       unless InventoryWarehouse.where(:is_default => true).first.nil?
