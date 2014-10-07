@@ -815,7 +815,7 @@ class ProductsController < ApplicationController
         @product.kit_parsing = params[:basicinfo][:kit_parsing]
         @product.name = params[:basicinfo][:name]
         @product.pack_time_adj = params[:basicinfo][:pack_time_adj]
-        @product.packing_placement = params[:basicinfo][:packing_placement]
+        @product.packing_placement = params[:basicinfo][:packing_placement] if params[:basicinfo][:packing_placement].is_a?(Integer)
         @product.product_type = params[:basicinfo][:product_type]
         @product.spl_instructions_4_confirmation =
           params[:basicinfo][:spl_instructions_4_confirmation]
