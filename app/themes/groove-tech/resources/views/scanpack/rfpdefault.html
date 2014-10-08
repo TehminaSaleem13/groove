@@ -131,7 +131,7 @@
                 <div class="row" ng-repeat="scanned_item in data.order.scanned_items" ng-show= "scanned_item.product_type =='single'">
                     <div class="media">
                         <a class="pull-left" href="">
-                            <img class="media-object" ng-src="{{scanned_item.images[0].image}}" height="64px" width="64px">
+                            <img class="media-object" ng-src="{{scanned_item.images[0].image}}" width="64px">
                         </a>
                         <div class="media-body">
                             <span class="item-count pull-right">X {{scanned_item.scanned_qty}}</span>
