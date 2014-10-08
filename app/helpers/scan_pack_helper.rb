@@ -157,7 +157,7 @@ module ScanPackHelper
     true
   end
 
-  def product_scan(input,state,id)
+  def product_scan(input,state,id,clicked=false)
     result = Hash.new
     result['status'] = true
     result['matched'] = true
@@ -225,7 +225,7 @@ module ScanPackHelper
                             OrderItemKitProduct.find(child_item['kit_product_id'])
 
                         unless order_item_kit_product.nil?
-                          order_item_kit_product.process_item
+                          order_item_kit_product.process_item(clicked)
                           (session[:most_recent_scanned_products] ||= []) << child_item['product_id']
                         end
 
@@ -244,7 +244,7 @@ module ScanPackHelper
                   order_item = OrderItem.find(item['order_item_id'])
 
                   unless order_item.nil?
-                    order_item.process_item
+                    order_item.process_item(clicked)
                     (session[:most_recent_scanned_products] ||= []) << order_item.product_id
                   end
                   break

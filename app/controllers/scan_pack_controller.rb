@@ -149,6 +149,13 @@ class ScanPackController < ApplicationController
     end
   end
 
+  def click_scan
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json: product_scan(params[:barcode],'scanpack.rfp.default',params[:id],true) }
+    end
+  end
+
   def product_instruction
     @result = Hash.new
     @result['status'] = true

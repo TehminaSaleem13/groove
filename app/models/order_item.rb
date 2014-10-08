@@ -157,7 +157,7 @@ class OrderItem < ActiveRecord::Base
   end
 
 
-  def process_item
+  def process_item(clicked)
     order_unscanned = false
 
     if self.scanned_qty < self.qty

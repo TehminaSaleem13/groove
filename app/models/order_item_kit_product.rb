@@ -3,7 +3,7 @@ class OrderItemKitProduct < ActiveRecord::Base
   belongs_to :product_kit_skus
   attr_accessible :scanned_qty, :scanned_status
 
-  def process_item
+  def process_item(clicked)
   	order_item_unscanned = false
   	order_unscanned = false
   	

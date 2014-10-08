@@ -76,6 +76,8 @@ groovepacks.config(['$stateProvider', '$urlRouterProvider','hotkeysProvider','cf
                 controller:'scanPackSettingsCtrl'})
         .state('settings.system.backup', {url:'/backup', templateUrl:'/assets/views/settings/system/backup.html',
                        controller:'showBackupCtrl'})
+        .state('settings.system.order_exception', {url:'/order_exception', templateUrl:'/assets/views/settings/system/order_exception.html',
+                       controller:'exportOrderExceptionCtrl'})
         .state('settings.system.warehouses', {url:'/warehouses',templateUrl:'/assets/views/settings/system/warehouses.html',
             controller:'warehousesCtrl'});
 

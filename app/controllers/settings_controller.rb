@@ -244,7 +244,7 @@ class SettingsController < ApplicationController
 
     if current_user.can? 'create_backups'
       dir = Dir.mktmpdir([current_user.username+'groov-export-',Time.now.to_s])
-      filename = 'groov-export-'+Time.now.to_s+'.zip'
+      filename = 'groove-export-'+Time.now.to_s+'.zip'
       begin
         data = zip_to_files(filename,Product.to_csv(dir))
 
@@ -260,6 +260,68 @@ class SettingsController < ApplicationController
     respond_to do |format|
       format.html # show.html.erb
       format.zip { send_data  data,:type => 'application/zip', :filename => filename }
+    end
+  end
+
+  def order_exceptions
+    require 'csv'
+    result = Hash.new
+    result['status'] = true
+    result['messages'] = []
+    if current_user.can? 'view_packing_ex'
+      if params[:start].nil? || params[:end].nil?
+        result['status'] = false
+        result['messages'].push('We need a start and an end time')
+      else
+        exceptions = OrderExceptions.where(updated_at: Time.parse(params[:start])..Time.parse(params[:end]))
+        filename = 'groove-order-exceptions-'+Time.now.to_s+'.csv'
+        row_map = {
+            :order_number => '',
+            :order_date =>'',
+            :scanned_date =>'',
+            :packing_user =>'',
+            :reason =>'',
+            :description =>'',
+            :associated_user =>'',
+            :order_item_count => ''
+        }
+        data = CSV.generate do |csv|
+          csv << row_map.keys
+
+          exceptions.each do |exception|
+            single_row = row_map.dup
+            single_row[:order_number] = exception.order.increment_id
+            single_row[:order_date] = exception.order.order_placed_time
+            single_row[:scanned_date] = exception.order.scanned_on
+            packing_user = User.find(exception.order.packing_user_id)
+            unless packing_user.nil?
+              single_row[:packing_user] = packing_user.name + ' ('+packing_user.username+')'
+            end
+            single_row[:reason] = exception.reason
+            single_row[:description] = exception.description
+            single_row[:associated_user] =  exception.user.name + ' ('+exception.user.username+')'
+            single_row[:order_item_count] = exception.order.get_items_count
+
+            csv << single_row.values
+          end
+        end
+
+      end
+    else
+      result['status'] = false
+      result['messages'].push('You do not have enough permissions to view packing exceptions')
+    end
+
+    unless result['status']
+      data = CSV.generate do |csv|
+        csv << result['messages']
+      end
+      filename = 'error.csv'
+    end
+
+    respond_to do |format|
+      format.html # show.html.erb
+      format.csv { send_data  data, :type => 'text/csv', :filename => filename }
     end
   end
 

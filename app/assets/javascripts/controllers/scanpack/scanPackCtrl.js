@@ -60,6 +60,26 @@ groovepacks_controllers.
                     myscope.callback = func;
                 }
             };
+            $scope.handle_scan_return = function(data) {
+                $scope.set('raw',data);
+                if(typeof data.data != "undefined") {
+                    if(typeof data.data.order != "undefined") {
+                        $scope.set('order',data.data.order);
+                    }
+                    if(typeof data.data.next_state != "undefined") {
+                        if($state.current.name == data.data.next_state) {
+                            if(data.data.next_state == 'scanpack.rfp.default') {
+                                $scope.trigger_scan_message((data.status)? 'success':'fail');
+                                $scope.focus_search();
+                            }
+                            $scope.$broadcast('reload-scanpack-state');
+                        } else {
+                            $state.go(data.data.next_state,data.data);
+                        }
+                    }
+                }
+            };
+
             $scope.input_enter = function(event) {
                 if(event.which != '13') return;
                 if(!myscope.callback()) return;
@@ -67,24 +87,6 @@ groovepacks_controllers.
                 if(typeof $scope.data.order.id !== "undefined") {
                     id = $scope.data.order.id;
                 }
-                scanPack.input($scope.data.input,$scope.current_state,id).success(function(data) {
-                    $scope.set('raw',data);
-                    if(typeof data.data != "undefined") {
-                        if(typeof data.data.order != "undefined") {
-                            $scope.set('order',data.data.order);
-                        }
-                        if(typeof data.data.next_state != "undefined") {
-                            if($state.current.name == data.data.next_state) {
-                                if(data.data.next_state == 'scanpack.rfp.default') {
-                                    $scope.trigger_scan_message((data.status)? 'success':'fail');
-                                    $scope.focus_search();
-                                }
-                                $scope.$broadcast('reload-scanpack-state');
-                            } else {
-                                $state.go(data.data.next_state,data.data);
-                            }
-                        }
-                    }
-                });
+                scanPack.input($scope.data.input,$scope.current_state,id).success($scope.handle_scan_return);
             }
 }]);
