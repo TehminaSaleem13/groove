@@ -329,44 +329,50 @@ groovepacks_controllers.
                         }
                     },
                     all_fields: {
+                        image: {
+                            name:"Primary Image",
+                            editable:false,
+                            transclude:'<div class="single-image"><img class="img-responsive" ng-src="{{row.image}}" /></div>'
+                        },
                         name: {
                             name:"Product",
                             hideable: false,
                             model:"row.productinfo",
                             transclude: '<a href="" ng-click="options.editable.functions.name(row,event)" >{{row.productinfo.name}}</a>'
                         },
-                        image: {
-                            name:"Primary Image",
-                            editable:false,
-                            transclude:'<div class="single-image"><img class="img-responsive" ng-src="{{row.image}}" /></div>'
-                        },
                         sku: {
                             name:"Primary SKU"
-                        },
-                        barcode: {
-                          name:"Primary Barcode"
-                        },
-                        location_primary: {
-                            name:"Primary location"
                         },
                         status: {
                             name:"Status",
                             model:"row.productinfo",
-                            transclude: '<span>{{row.productinfo.status}}</span>'
+                            transclude: "<span class='label label-default' ng-class=\"{" +
+                                        "'label-success': row.productinfo.status == 'active', " +
+                                        "'label-info': row.productinfo.status == 'new' }\">" +
+                                        "{{row.productinfo.status}}</span>"
+
+                        },
+                        barcode: {
+                          name:"Primary Barcode"
                         },
                         qty: {
                             name:"Qty ordered",
                             model:"row.iteminfo",
                             transclude: '<span>{{row.iteminfo.qty}}</span>'
                         },
+                        location_primary: {
+                            name:"Primary location"
+                        },
                         qty_on_hand: {
-                            name:"On hand",
-                            editable:false
+                            name:"Available Inv",
+                            editable:false,
+                            hidden:true
                         },
                         is_skippable: {
                             name: "Is Skippable",
                             model:"row.productinfo",
-                            transclude: '<span ng-show="row.productinfo.is_skippable">Yes</span> <span ng-hide="row.productinfo.is_skippable">No</span>'
+                            transclude: '<div toggle-switch ng-model="row.productinfo.is_skippable" groov-click="options.editable.update(row.productinfo,\'is_skippable\')"></div>',
+                            hidden:true
                         }
                     }
                 };
