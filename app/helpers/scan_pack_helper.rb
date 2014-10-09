@@ -15,7 +15,6 @@ module ScanPackHelper
     scanpack_settings = ScanPackSetting.all.first
 
     session[:most_recent_scanned_products] = []
-    puts "Most recent scannedproducts"
     if !input.nil? && input != ""
       orders = Order.where(['increment_id = ? or non_hyphen_increment_id =?', input, input])
       logger.info orders

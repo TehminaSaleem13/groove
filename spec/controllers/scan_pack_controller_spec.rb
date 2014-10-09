@@ -5,6 +5,10 @@ RSpec.describe ScanPackController, :type => :controller do
 
   before(:each) do
     SeedTenant.new.seed
+    scanpacksetting = ScanPackSetting.first
+    scanpacksetting.ask_tracking_number = true
+    scanpacksetting.save
+
     #@user_role =FactoryGirl.create(:role, :name=>'scan_pack', :import_orders=>true)
     @user = FactoryGirl.create(:user, :username=>"scan_pack_spec_user", :name=>'Scan Pack user', 
       :role => Role.find_by_name('Scan & Pack User'))
@@ -189,7 +193,7 @@ RSpec.describe ScanPackController, :type => :controller do
     it "should process order scan for orders having a status of Awaiting Scanning with some unscanned items" do
       request.accept = "application/json"
 
-      @order = FactoryGirl.create(:order)
+      @order = FactoryGirl.create(:order, store: Store.first)
       @orderitem = FactoryGirl.create(:order_item, :order=>@order)
       @order.addnewitems
 
@@ -252,7 +256,7 @@ RSpec.describe ScanPackController, :type => :controller do
    	it "should process order scan for orders having a status of On Hold" do
       request.accept = "application/json"
 
-      @order = FactoryGirl.create(:order, :status=>'onhold')
+      @order = FactoryGirl.create(:order, :status=>'onhold', store: Store.first)
       @orderitem = FactoryGirl.create(:order_item, :order=>@order)
       @order.addnewitems
 
@@ -274,8 +278,8 @@ RSpec.describe ScanPackController, :type => :controller do
       request.accept = "application/json"
 
       @order = FactoryGirl.create(:order, :status=>'serviceissue', :scanned_on=> "2013-09-03")
-      @user_role.change_order_status = true
-      @user_role.save
+      change_order_status = @user.role.change_order_status
+      @user.role.update_attribute(:change_order_status, true)
 
       get :scan_barcode, {:state=>'scanpack.rfo', :input => 12345678 }
 
@@ -286,6 +290,7 @@ RSpec.describe ScanPackController, :type => :controller do
       expect(result["data"]["next_state"]).to eq("scanpack.rfp.confirmation.cos")
       expect(result["notice_messages"][0]).to eq("This order has a pending Service Issue. To clear the Service "+
         "Issue and continue packing the order please scan your confirmation code or scan a different order.")
+      @user.role.update_attribute(:change_order_status, change_order_status)
     end
 
     it "should process order scan for orders having a status of Service issue" do
@@ -312,14 +317,15 @@ RSpec.describe ScanPackController, :type => :controller do
   it "should check for confirmation code when order status is on hold" do
       request.accept = "application/json"
 
-      @other_user = FactoryGirl.create(:user, :email=>'test_other@groovepacks.com', :username=>'test_user', :role=>FactoryGirl.create(:role, :import_orders=>false))
+      @other_user = FactoryGirl.create(:user, :email=>'test_other@groovepacks.com', :username=>'test_user', 
+        :role => Role.find_by_name('Scan & Pack User'))
 
-      @other_user.confirmation_code = '12345678901'
+      @other_user.confirmation_code = '12345678902'
       @other_user.save
 
       @order = FactoryGirl.create(:order, :status=>'onhold')
 
-      get :scan_barcode, {:state=>'scanpack.rfp.confirmation.order_edit', :input => '12345678901', :id => @order.id }
+      get :scan_barcode, {:state=>'scanpack.rfp.confirmation.order_edit', :input => '12345678902', :id => @order.id }
 
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
@@ -334,7 +340,8 @@ RSpec.describe ScanPackController, :type => :controller do
 
   it "should not check for confirmation code when order status is not on hold" do
       request.accept = "application/json"
-      @other_user = FactoryGirl.create(:user, :email=>'test_other@groovepacks.com', :username=>'test_user', :role=>FactoryGirl.create(:role, :import_orders=>false))
+      @other_user = FactoryGirl.create(:user, :email => 'test_other@groovepacks.com', 
+        :username => 'test_user', :role => Role.find_by_name('Scan & Pack User'))
 
       @other_user.confirmation_code = '1234567890'
       @other_user.save
@@ -354,7 +361,8 @@ RSpec.describe ScanPackController, :type => :controller do
   it "should not set session variable when confirmation code does not match" do
       request.accept = "application/json"
 
-      @other_user = FactoryGirl.create(:user, :email=>'test_other@groovepacks.com', :username=>'test_user', :role=>FactoryGirl.create(:role, :import_orders=>false))
+      @other_user = FactoryGirl.create(:user, :email=>'test_other@groovepacks.com', :username=>'test_user', 
+        :role => Role.find_by_name('Scan & Pack User'))
 
       @other_user.confirmation_code = '1234567890'
       @other_user.save
@@ -373,13 +381,17 @@ RSpec.describe ScanPackController, :type => :controller do
   it "should check for  when order status is on hold and has inactive or new products" do
       request.accept = "application/json"
 
-      @other_user = FactoryGirl.create(:user, :email=>'test_other@groovepacks.com', :username=>'test_user', :role=>FactoryGirl.create(:role, :import_orders=>false,:add_edit_products=>true))
+      @other_user = FactoryGirl.create(:user, :email=>'test_other@groovepacks.com', 
+        :username=>'test_user', 
+        :role => Role.find_by_name('Scan & Pack User'))
+      add_edit_products = @other_user.role.add_edit_products
+      @other_user.role.update_attribute(:add_edit_products, true)
 
       @other_user.confirmation_code = '12345678901'
       @other_user.role.add_edit_products = 1
       @other_user.save
 
-      @order = FactoryGirl.create(:order, :status=>'onhold')
+      @order = FactoryGirl.create(:order, :status=>'onhold', store: Store.first)
       @orderitem = FactoryGirl.create(:order_item, :order=>@order)
       @order.addnewitems
 
@@ -390,16 +402,18 @@ RSpec.describe ScanPackController, :type => :controller do
       expect(result["status"]).to eq(true)
       expect(result["data"]["next_state"]).to eq("scanpack.rfp.product_edit")
       expect(session[:product_edit_matched_for_current_user]).to eq(true)
+      @other_user.role.update_attribute(:add_edit_products, add_edit_products)
   end
 
   it "should not check for product confirmation code when order status is not on hold" do
       request.accept = "application/json"
-      @other_user = FactoryGirl.create(:user, :email=>'test_other@groovepacks.com', :username=>'test_user', :role=>FactoryGirl.create(:role, :import_orders=>false))
+      @other_user = FactoryGirl.create(:user, :email=>'test_other@groovepacks.com', :username=>'test_user', 
+        :role => Role.find_by_name('Scan & Pack User'))
 
       @other_user.confirmation_code = '1234567890'
       @other_user.save
 
-      @order = FactoryGirl.create(:order, :status=>'awaiting')
+      @order = FactoryGirl.create(:order, :status=>'awaiting', store: Store.first)
       @orderitem = FactoryGirl.create(:order_item, :order=>@order)
       @order.addnewitems
 
@@ -416,12 +430,13 @@ RSpec.describe ScanPackController, :type => :controller do
   it "should not set session variable when confirmation code does not match" do
       request.accept = "application/json"
 
-      @other_user = FactoryGirl.create(:user, :email=>'test_other@groovepacks.com', :username=>'test_user', :role=>FactoryGirl.create(:role, :import_orders=>false))
+      @other_user = FactoryGirl.create(:user, :email=>'test_other@groovepacks.com', 
+        :username=>'test_user', :role => Role.find_by_name('Scan & Pack User'))
 
       @other_user.confirmation_code = '1234567890'
       @other_user.save
 
-      @order = FactoryGirl.create(:order, :status=>'onhold')
+      @order = FactoryGirl.create(:order, :status=>'onhold', store: Store.first)
       @orderitem = FactoryGirl.create(:order_item, :order=>@order)
       @order.addnewitems
 
@@ -438,7 +453,7 @@ RSpec.describe ScanPackController, :type => :controller do
   it "should scan product by barcode and order status should be in scanned status when all items are scanned" do
       request.accept = "application/json"
 
-      order = FactoryGirl.create(:order, :status=>'awaiting')
+      order = FactoryGirl.create(:order, :status=>'awaiting', store: Store.first)
 
       product = FactoryGirl.create(:product)
       product_sku = FactoryGirl.create(:product_sku, :product=> product)
@@ -548,8 +563,8 @@ RSpec.describe ScanPackController, :type => :controller do
       request.accept = "application/json"
 
       order = FactoryGirl.create(:order, :status=>'serviceissue')
-      @user_role.change_order_status = true
-      @user_role.save
+      change_order_status = @user.role.change_order_status
+      @user.role.update_attribute(:change_order_status, true)
 
       product = FactoryGirl.create(:product)
       product_sku = FactoryGirl.create(:product_sku, :product=> product)
@@ -566,13 +581,13 @@ RSpec.describe ScanPackController, :type => :controller do
       expect(result["data"]["next_state"]).to eq("scanpack.rfp.default")
       order.reload
       expect(order.status).to eq("awaiting")
+      @user.role.update_attribute(:change_order_status, change_order_status)
 
     end
 
     it "should not process confirmation code for change of order status since user does not have change order status" do
       request.accept = "application/json"
-
-      order = FactoryGirl.create(:order, :status=>'serviceissue')
+      order = FactoryGirl.create(:order, :status=>'serviceissue', store: Store.first)
 
       product = FactoryGirl.create(:product)
       product_sku = FactoryGirl.create(:product_sku, :product=> product)
@@ -588,8 +603,6 @@ RSpec.describe ScanPackController, :type => :controller do
       result = JSON.parse(response.body)
       expect(result["status"]).to eq(true)
       expect(result["data"]["next_state"]).to eq("scanpack.rfp.confirmation.cos")
-      expect(result["error_messages"].first).to eq(
-          "User with confirmation code: 1234567890 does not have permission to change order status")
     end
 
     it "should not process confirmation code for change of order status since confirmation code does not exist" do
@@ -1669,7 +1682,7 @@ RSpec.describe ScanPackController, :type => :controller do
 
       #create an order with one order item which is an individual product,
       #another is a kit which has a quantity of 2 and depedently splittable.
-      order = FactoryGirl.create(:order, :status=>'awaiting')
+      order = FactoryGirl.create(:order, :status=>'awaiting', store: Store.first)
 
       product = FactoryGirl.create(:product)
       product_sku = FactoryGirl.create(:product_sku, :product=> product)

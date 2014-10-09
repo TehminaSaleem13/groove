@@ -31,7 +31,8 @@
 			end
 
 			if Store.where(:store_type=>'system').length == 0
-			  system_store = Store.create(:name=>'GroovePacker', :store_type=>'system',:status=>true)
+			  system_store = Store.create(:name=>'GroovePacker', :store_type=>'system',
+          :status=>true, inventory_warehouse: InventoryWarehouse.first)
 			end
 
 			if GeneralSetting.all.length == 0
@@ -217,7 +218,7 @@
 
       if User.all.length == 0 || (User.where(:username=>username).length == 0 && create)
         created_user = User.create([{:username=>username, :name=>username, :email => email, :password => password,
-                      :password_confirmation => password, :role_id=>role_super_admin.id, :confirmation_code=>'1234567890', :active=> true}],:without_protection=>true)
+                      :password_confirmation => password, :role_id=>role_super_admin.id, :confirmation_code=>'12345678901', :active=> true}],:without_protection=>true)
       end
 
 
