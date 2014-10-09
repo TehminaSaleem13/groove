@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20141006225229) do
+ActiveRecord::Schema.define(:version => 20141009032053) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0, :null => false
@@ -115,6 +115,8 @@ ActiveRecord::Schema.define(:version => 20141006225229) do
     t.boolean  "scheduled_order_import",            :default => true
     t.text     "tracking_error_order_not_found"
     t.text     "tracking_error_info_not_found"
+    t.boolean  "strict_cc",                         :default => false
+    t.string   "conf_code_product_instruction",     :default => "optional"
   end
 
   create_table "generate_barcodes", :force => true do |t|
@@ -291,8 +293,8 @@ ActiveRecord::Schema.define(:version => 20141006225229) do
     t.string   "postcode"
     t.string   "country"
     t.string   "method"
-    t.datetime "created_at",                                                             :null => false
-    t.datetime "updated_at",                                                             :null => false
+    t.datetime "created_at",                                                               :null => false
+    t.datetime "updated_at",                                                               :null => false
     t.string   "notes_internal"
     t.string   "notes_toPacker"
     t.string   "notes_fromPacker"
@@ -312,6 +314,7 @@ ActiveRecord::Schema.define(:version => 20141006225229) do
     t.string   "notes_from_buyer"
     t.integer  "weight_oz"
     t.string   "non_hyphen_increment_id"
+    t.boolean  "note_confirmation",                                     :default => false
   end
 
   create_table "product_barcodes", :force => true do |t|

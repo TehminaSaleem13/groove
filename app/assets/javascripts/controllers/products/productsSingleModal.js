@@ -1,6 +1,6 @@
 groovepacks_controllers.
-    controller('productsSingleModal', [ '$scope', 'product_data', 'load_page', 'product_id', 'hotkeys', '$state', '$stateParams', '$modalInstance', '$timeout','$modal','$q','groov_translator','products','warehouses',
-    function(scope,product_data,load_page, product_id, hotkeys, $state,$stateParams,$modalInstance,$timeout,$modal,$q,groov_translator,products,warehouses) {
+    controller('productsSingleModal', [ '$scope','auth', 'product_data', 'load_page', 'product_id', 'hotkeys', '$state', '$stateParams', '$modalInstance', '$timeout','$modal','$q','groov_translator','products','warehouses','generalsettings',
+    function(scope,auth,product_data,load_page, product_id, hotkeys, $state,$stateParams,$modalInstance,$timeout,$modal,$q,groov_translator,products,warehouses,generalsettings) {
         var myscope = {};
 
 
@@ -203,6 +203,10 @@ groovepacks_controllers.
             }
             scope.update_single_product();
         };
+        scope.change_opt = function(key,value) {
+            scope.general_settings.single[key] = value;
+            generalsettings.single.update(scope.general_settings);
+        };
 
         scope.remove_skus_from_kit = function () {
             var selected_skus = [];
@@ -240,6 +244,28 @@ groovepacks_controllers.
                 }
             };
             groov_translator.translate('products.modal',scope.translations);
+
+
+            scope.confirmation_setting_text = "Ask someone with \"Edit General Preferences\" permission to change the setting in <b>General Settings</b> page if you need to override it per product";
+            if(auth.can('edit_general_prefs')) {
+                scope.general_settings = generalsettings.model.get();
+                generalsettings.single.get(scope.general_settings);
+                scope.confirmation_setting_text = "<p><strong>You can change the global setting here</strong></p>" +
+                     "<div class=\"controls col-sm-offset-4 col-sm-3 \" ng-class=\"{'col-sm-offset-3':general_settings.single.conf_code_product_instruction=='optional' }\" dropdown>"+
+                     "<button class=\"dropdown-toggle groove-button label label-default\" ng-class=\"{'label-success':general_settings.single.conf_code_product_instruction=='always'," +
+                     " 'label-warning':general_settings.single.conf_code_product_instruction=='optional'}\">" +
+                     "<span ng-show=\"general_settings.single.conf_code_product_instruction=='always'\" translate>common.always</span>" +
+                     "<span ng-show=\"general_settings.single.conf_code_product_instruction=='optional'\" translate>common.optional</span>" +
+                     "<span ng-show=\"general_settings.single.conf_code_product_instruction=='never'\" translate>common.never</span>" +
+                     "<span class=\"caret\"></span>" +
+                     "</button>" +
+                     "<ul class=\"dropdown-menu\" role=\"menu\">" +
+                     "<li><a class=\"dropdown-toggle\" ng-click=\"change_opt('conf_code_product_instruction','always')\" translate>common.always</a></li>" +
+                     "<li><a class=\"dropdown-toggle\" ng-click=\"change_opt('conf_code_product_instruction','optional')\" translate>common.optional</a></li>" +
+                     "<li><a class=\"dropdown-toggle\" ng-click=\"change_opt('conf_code_product_instruction','never')\" translate>common.never</a></li>" +
+                     "</ul>"+
+                     "</div><div class=\"well-main\">&nbsp;</div>";
+            }
 
             scope.custom_identifier = Math.floor(Math.random()*1000);
             scope.products = product_data;

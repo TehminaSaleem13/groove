@@ -1,6 +1,6 @@
 groovepacks_controllers.
-    controller('ordersSingleModal', [ '$scope', 'order_data', 'load_page', '$state', '$stateParams','$modal', '$modalInstance', '$timeout','$q', 'hotkeys', 'orders','products',
-        function(scope,order_data,load_page,$state,$stateParams,$modal, $modalInstance,$timeout,$q,hotkeys,orders,products) {
+    controller('ordersSingleModal', [ '$scope', 'order_data', 'load_page', '$state', '$stateParams','$modal', '$modalInstance', '$timeout','$q', 'hotkeys', 'orders','products','generalsettings','auth','groov_translator',
+        function(scope,order_data,load_page,$state,$stateParams,$modal, $modalInstance,$timeout,$q,hotkeys,orders,products,generalsettings,auth,groov_translator) {
 
             var myscope = {};
 
@@ -163,6 +163,10 @@ groovepacks_controllers.
                     }
                 }
             };
+            scope.change_opt = function(key,value) {
+                scope.general_settings.single[key] = value;
+                generalsettings.single.update(scope.general_settings);
+            };
             myscope.right_key = function (event) {
                 event.preventDefault();
                 event.stopPropagation();
@@ -255,6 +259,34 @@ groovepacks_controllers.
 
             myscope.init = function() {
                 scope.orders = order_data;
+                scope.translations = {
+                    "tooltips": {
+                        "confirmation": ""
+                    }
+                };
+                groov_translator.translate('orders.modal',scope.translations);
+                scope.confirmation_setting_text = "Ask someone with \"Edit General Preferences\" permission to change the setting in <b>General Settings</b> page if you need to override it per order";
+                if(auth.can('edit_general_prefs')) {
+                    scope.general_settings = generalsettings.model.get();
+                    generalsettings.single.get(scope.general_settings);
+                    scope.confirmation_setting_text ="<p><strong>You can change the global setting here</strong></p>" +
+                     "<div class=\"controls col-sm-offset-4 col-sm-3 \" ng-class=\"{'col-sm-offset-3':general_settings.single.conf_req_on_notes_to_packer=='optional' }\" dropdown>"+
+                     "<button class=\"dropdown-toggle groove-button label label-default\" ng-class=\"{'label-success':general_settings.single.conf_req_on_notes_to_packer=='always'," +
+                     " 'label-warning':general_settings.single.conf_req_on_notes_to_packer=='optional'}\">" +
+                     "<span ng-show=\"general_settings.single.conf_req_on_notes_to_packer=='always'\" translate>common.always</span>" +
+                     "<span ng-show=\"general_settings.single.conf_req_on_notes_to_packer=='optional'\" translate>common.optional</span>" +
+                     "<span ng-show=\"general_settings.single.conf_req_on_notes_to_packer=='never'\" translate>common.never</span>" +
+                     "<span class=\"caret\"></span>" +
+                     "</button>" +
+                     "<ul class=\"dropdown-menu\" role=\"menu\">" +
+                     "<li><a class=\"dropdown-toggle\" ng-click=\"change_opt('conf_req_on_notes_to_packer','always')\" translate>common.always</a></li>" +
+                     "<li><a class=\"dropdown-toggle\" ng-click=\"change_opt('conf_req_on_notes_to_packer','optional')\" translate>common.optional</a></li>" +
+                     "<li><a class=\"dropdown-toggle\" ng-click=\"change_opt('conf_req_on_notes_to_packer','never')\" translate>common.never</a></li>" +
+                     "</ul>"+
+                     "</div><div class=\"well-main\">&nbsp;</div>";
+                }
+
+
                 //All tabs
                 scope.modal_tabs = [
                     {

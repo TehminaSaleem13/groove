@@ -113,17 +113,17 @@
                 <div class="controls col-sm-4">
                     <textarea class="form-control input-style" ng-model="products.single.basicinfo.spl_instructions_4_packer" ng-blur="update_single_product()" class="col-sm-8" rows="4"></textarea>
                 </div>
-                <div class="controls col-sm-4">
-                    <label class="radio inline">
-                        <input type="radio" ng-change="update_single_product()"
-                               ng-model="products.single.basicinfo.spl_instructions_4_confirmation" value="1"/> Packer Confirmation Required
-                    </label>
-                    <label class="radio inline">
-                        <input type="radio" ng-change="update_single_product()"
-                               ng-model="products.single.basicinfo.spl_instructions_4_confirmation" value="0"/>Packer Confirmation Not Required
-                    </label>
+                <label class="control-label col-sm-2">Packer Confirmation</label>
+                <div class="controls col-sm-2 col-lg-1" ng-show="general_settings.single.conf_code_product_instruction =='optional'">
+                    <div toggle-switch ng-model="products.single.basicinfo.spl_instructions_4_confirmation" groov-click="update_single_product()"></div>
                 </div>
-                <div class="info col-sm-2" ><i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" popover="{{translations.tooltips.confirmation}}"></i></div>
+                <div class="control-label col-sm-2 col-lg-1" ng-show="general_settings.single.conf_code_product_instruction !='optional'">
+                    <div class="label col-xs-12 label-default" ng-class="{'label-success':general_settings.single.conf_code_product_instruction=='always'}">
+                        <span ng-show="general_settings.single.conf_code_product_instruction=='always'" translate>common.always</span>
+                        <span ng-show="general_settings.single.conf_code_product_instruction=='never'" translate>common.never</span>
+                    </div>
+                </div>
+                <div class="info col-sm-2" ><i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" groov-popover="{{translations.tooltips.confirmation}} <br/> {{confirmation_setting_text}}"></i></div>
             </div>
             <div class="form-group" ng-show="products.single.store.store_type!='Amazon' || (products.single.store.store_type=='Amazon' && products.single.amazon_product.show_shipping_weight_only==false)">
                 <label class="control-label col-sm-2">Product Weight</label>
@@ -204,17 +204,10 @@
             <div class="form-group">
                 <label class="control-label col-sm-2">Product can be skipped</label>
 
-                <div class="controls col-sm-8 form-inline">
-                    <label class="radio col-md-2 col-lg-1">
-                        <input type="radio" ng-change="update_single_product()" ng-model="products.single.basicinfo.is_skippable"
-                               value="1"/> Yes
-                    </label>
-                    <label class="radio col-md-2 col-lg-1">
-                        <input type="radio" ng-change="update_single_product()" ng-model="products.single.basicinfo.is_skippable"
-                               value="0"/> No
-                    </label>
-                    <div class="info col-sm-4" ><i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" popover="{{translations.tooltips.skippable}}"></i></div>
+                <div class="controls col-sm-2 col-lg-1">
+                    <div toggle-switch ng-model="products.single.basicinfo.is_skippable" groov-click="update_single_product()"></div>
                 </div>
+                <div class="info col-sm-2" ><i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" popover="{{translations.tooltips.skippable}}"></i></div>
 
             </div>
             <h4>Inventory</h4>

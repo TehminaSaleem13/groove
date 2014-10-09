@@ -405,6 +405,9 @@ class SettingsController < ApplicationController
           general_setting.packing_slip_orientation = params[:packing_slip_orientation]
         end
         general_setting.conf_req_on_notes_to_packer = params[:conf_req_on_notes_to_packer]
+        general_setting.strict_cc = params[:strict_cc]
+        general_setting.conf_code_product_instruction = params[:conf_code_product_instruction]
+        general_setting.conf_req_on_notes_to_packer = params[:conf_req_on_notes_to_packer]
         general_setting.email_address_for_packer_notes = params[:email_address_for_packer_notes]
         general_setting.hold_orders_due_to_inventory = params[:hold_orders_due_to_inventory]
         general_setting.inventory_tracking = params[:inventory_tracking]

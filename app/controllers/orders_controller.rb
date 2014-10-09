@@ -110,6 +110,7 @@ class OrdersController < ApplicationController
       @order.order_number = params[:order]['order_number']
       @order.ship_name = params[:order]['ship_name']
       @order.notes_from_buyer = params[:order]['notes_from_buyer']
+      @order.note_confirmation = params[:order]['note_confirmation']
       @order.shipping_amount = params[:order]['shipping_amount'] unless params[:order]['shipping_amount'].nil?
       @order.order_total = params[:order]['order_total'] unless params[:order]['order_total'].nil?
       @order.weight_oz = params[:order]['weight_oz'] unless params[:order]['weight_oz'].nil?
@@ -135,7 +136,8 @@ class OrdersController < ApplicationController
           @order.notes_from_buyer != params[:order]['notes_from_buyer'] ||
           @order.shipping_amount != params[:order]['shipping_amount'] ||
           @order.order_total != params[:order]['order_total'] ||
-          @order.weight_oz != params[:order]['weight_oz']
+          @order.weight_oz != params[:order]['weight_oz'] ||
+          @order.note_confirmation != params[:order]['note_confirmation']
       @result['status'] = false
       @result['messages'].push('You do not have enough permissions to edit the order')
     end

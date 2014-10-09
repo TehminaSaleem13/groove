@@ -129,17 +129,18 @@ class ScanPackController < ApplicationController
 
     if params[:id].nil? || params[:code].nil?
       @result['status'] &= false
-      @result['error_messages'].push("Order id and confirmation code required")
+      @result['error_messages'].push('Order id and confirmation code required')
     else
+      general_setting = GeneralSetting.all.first
       @order = Order.find(params[:id])
       if @order.nil?
         @result['status'] &= false
-        @result['error_messages'].push("Could not find order with id: "+params[:id].to_s)
-      elsif current_user.confirmation_code == params[:code]
-        @order.addactivity("Order instructions confirmed", current_user.username)
+        @result['error_messages'].push('Could not find order with id: '+params[:id].to_s)
+      elsif !general_setting.strict_cc || current_user.confirmation_code == params[:code]
+        @order.addactivity('Order instructions confirmed', current_user.username)
       else
         @result['status'] &= false
-        @result['error_messages'].push("Confirmation code doesn't match")
+        @result['error_messages'].push('Confirmation code doesn\'t match')
       end
     end
 
@@ -166,35 +167,36 @@ class ScanPackController < ApplicationController
 
     if params[:id].nil? || params[:code].nil? || params[:next_item].nil?
       @result['status'] &= false
-      @result['error_messages'].push("Order id and confirmation code required")
+      @result['error_messages'].push('Order id, Item id and confirmation code required')
     else
       @order = Order.find(params[:id])
+      general_setting = GeneralSetting.all.first
 
       if @order.nil?
         @result['status'] &= false
-        @result['error_messages'].push("Could not find order with id: "+params[:id].to_s)
-      elsif current_user.confirmation_code == params[:code]
+        @result['error_messages'].push('Could not find order with id: '+params[:id].to_s)
+      elsif !general_setting.strict_cc || current_user.confirmation_code == params[:code]
         @order_item = OrderItem.find(params[:next_item]['order_item_id'])
         unless params[:next_item]['kit_product_id'].nil?
           @order_kit_product = OrderItemKitProduct.find(params[:next_item]['kit_product_id'])
         end
         if @order_item.nil?
           @result['status'] &= false
-          @result['error_messages'].push("Couldnt find order item")
+          @result['error_messages'].push('Couldnt find order item')
         elsif !params[:next_item]['kit_product_id'].nil? && (@order_kit_product.nil?  ||
             @order_kit_product.order_item_id != @order_item.id)
           @result['status'] &= false
-          @result['error_messages'].push("Couldnt find child item")
+          @result['error_messages'].push('Couldnt find child item')
         elsif @order_item.order_id != @order.id
           @result['status'] &= false
-          @result['error_messages'].push("Item doesnt belong to current order")
+          @result['error_messages'].push('Item doesnt belong to current order')
         else
           @order.addactivity("Item instruction scanned for product - #{params[:next_item]['name']}", current_user.username)
         end
 
       else
         @result['status'] &= false
-        @result['error_messages'].push("Confirmation code doesn't match")
+        @result['error_messages'].push('Confirmation code doesn\'t match')
       end
     end
 

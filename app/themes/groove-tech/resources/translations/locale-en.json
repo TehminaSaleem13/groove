@@ -2,7 +2,10 @@
     "common": {
         "search": "Search",
         "select_all": "Select All",
-        "select_none": "Select None"
+        "select_none": "Select None",
+        "always": "Always",
+        "optional": "Make it optional",
+        "never": "Never"
     },
     "modal": {
         "save_close": "Save & Close",
@@ -18,6 +21,13 @@
                 "placement": "This value from 1-100 controls when the product will be packed in relation to other products in the same box. Lower values are packed first, Higher values later",
                 "time_adjust": "A positive or negative number of seconds can be specified here to increase or decrease the amount of time it should take to scan and pack this item",
                 "skippable": " Skippable products are usually stickers, freebies and other optional items that the order should not be held for"
+            }
+        }
+    },
+    "orders": {
+        "modal": {
+            "tooltips": {
+               "confirmation": "Text here will be displayed when this order is being scanned. Unless packer confirmations are disabled, confirmations will be required when the Packer Confirmation is \"On\" or \"Always\"."
             }
         }
     },
@@ -41,12 +51,11 @@
                     "fri":"Fri",
                     "sat":"Sat",
                     "sun":"Sun",
+                    "strict_cc": "Strict Confirmation Codes?",
+                    "conf_code_product_instruction": "Should confirmation be required on \"Special Instructions to Packer\"?",
                     "default_low_inventory_alert_limit":"Set Default low inventory alert limit",
                     "hold_orders_due_to_inventory": "Hold Order due to Inventory",
                     "conf_req_on_notes_to_packer": "Should confirmation be required on \"Notes to Packer\"?",
-                    "always": "Always",
-                    "optional": "Make it optional",
-                    "never": "Never",
                     "send_email_for_packer_notes": "Should an email be sent when \"Notes from Packer\" are added?",
                     "email_address": "Email Address",
                     "packing_slip_size": "Packing Slip Size:",
@@ -62,6 +71,8 @@
                     "hold_orders_due_to_inventory": "If an order contains a product with an inventory level less than zero, it is automatically placed On Hold when this option is turned on. Turning this off will prevent inventory levels from changing the orders status.",
                     "conf_req_on_notes_to_packer": "Notes to Packer can be added for any order from the notes tab of the Order detail window. If a confirmation is required the Packer will be prompted to scan their unique confirmation code to proceed when the note is shown. If you want to ensure that confirmations are always required or never required for this type of notification you can do that here. Leaving it optional allows the user creating the Note to choose if confirmation is required.",
                     "send_email_for_packer_notes": "Notes from Packer can be added by a packer during the scanning of an order. They are often used to make a supervisor aware of a stock situation or exception but the feature can be used in any way that fits your workflow. If you want to ensure that these notes are always emailed to a supervisor you can do that with this setting.",
+                    "strict_cc": "When Strict Confirmation Codes are disabled a user can just use the enter key to acknowledge that they've seen a packing or order notification. When enabled a user must scan or enter their own confirmation code to proceed. About Packing notifications: There are two types of packing notifications. The first, \"Notes to Packer\" may be added to an order. It will appear when the order is packed. The second, \"Special Instructions to Packer\" can be added to a product. This notification will appear each time that product is packed. The user's Confirmation Code can be requested for either of these notifications. The strict confirmation code setting controls how the user is required to confirm.",
+                    "conf_code_product_instruction": "Special instructions to Packer can be added for any product from the product detail window. If a confirmation is required the Packer will be prompted to scan their unique confirmation code to proceed when the instructions are shown. If you want to ensure that confirmations are always required or never required for this type of notification you can do that here. Leaving it optional allows this setting to be controlled on a per product basis.",
                     "packing_slip_size": "Choose the paper size you use for printing packing slips 4x6 is usually used for thermal printers. Standard 8.5x11 will print two packing slips per page.",
                     "packing_slip_message_to_customer": "This is usually used for a thank you message and possibly instructions for receiving support. A store specific message can be set on the store setup page which will override this general message. Leave Blank to disable this general packing slip message"
                 }

@@ -58,7 +58,7 @@ groovepacks_controllers.
                     });
                     myscope.order_instruction_obj.result.finally(function() {
                         $timeout($scope.focus_search,500);
-                        //$timeout(myscope.show_order_instructions,100);
+                        $timeout(myscope.show_order_instructions,100);
                     });
                 }
             };
@@ -76,18 +76,17 @@ groovepacks_controllers.
                     });
                     myscope.product_instruction_obj.result.finally(function() {
                         $timeout($scope.focus_search,500);
-                        //$timeout(myscope.show_product_instructions,100);
+                        $timeout(myscope.show_product_instructions,100);
                     });
                 }
             };
 
             myscope.compute_counts = function() {
-
-                if(!myscope.order_instruction_confirmed && $scope.data.order.notes_toPacker) {
+                if(!myscope.order_instruction_confirmed && ($scope.general_settings.single.conf_req_on_notes_to_packer ==="always" || ($scope.general_settings.single.conf_req_on_notes_to_packer ==="optional" && $scope.data.order.note_confirmation)) && $scope.data.order.notes_toPacker) {
                     $timeout(myscope.show_order_instructions);
                 }
 
-                if(typeof $scope.data.order['next_item'] !== 'undefined' && myscope.product_instruction_confirmed_id != $scope.data.order.next_item.product_id && $scope.data.order.next_item.confirmation ) {
+                if(typeof $scope.data.order['next_item'] !== 'undefined' && ($scope.general_settings.single.conf_code_product_instruction ==="always" || ($scope.general_settings.single.conf_code_product_instruction ==="optional" && $scope.data.order.next_item.confirmation)) && myscope.product_instruction_confirmed_id !== $scope.data.order.next_item.product_id) {
                     $timeout(myscope.show_product_instructions);
                 }
 
