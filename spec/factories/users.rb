@@ -7,5 +7,6 @@ FactoryGirl.define do
     password "12345678" 
     password_confirmation "12345678"
     confirmation_code "1234567890"
+    active true
   end
 end

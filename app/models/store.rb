@@ -1,5 +1,5 @@
 class Store < ActiveRecord::Base
-  attr_accessible :name, :order_date, :status, :store_type
+  attr_accessible :name, :order_date, :status, :store_type, :inventory_warehouse
   has_many :orders
   has_many :products
   has_one :magento_credentials
@@ -10,6 +10,7 @@ class Store < ActiveRecord::Base
 
   validates_presence_of :name
   validates_uniqueness_of :name
+  validates_presence_of :inventory_warehouse
 
   before_create 'Store.can_create_new?'
 

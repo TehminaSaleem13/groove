@@ -293,8 +293,9 @@ ActiveRecord::Schema.define(:version => 20141009032053) do
     t.string   "postcode"
     t.string   "country"
     t.string   "method"
-    t.datetime "created_at",                                                               :null => false
-    t.datetime "updated_at",                                                               :null => false
+    t.datetime "created_at",                                                             :null => false
+    t.datetime "updated_at",                                                             :null => false
+    t.string   "store_order_id"
     t.string   "notes_internal"
     t.string   "notes_toPacker"
     t.string   "notes_fromPacker"

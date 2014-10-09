@@ -75,8 +75,10 @@ class Order < ActiveRecord::Base
     self.addactivity('Order Scanning Complete', username)
     self.save
     restriction = AccessRestriction.first
-    restriction.total_scanned_shipments += 1
-    restriction.save
+    unless restriction.nil?
+      restriction.total_scanned_shipments += 1
+      restriction.save
+    end
   end
 
   def has_inactive_or_new_products
