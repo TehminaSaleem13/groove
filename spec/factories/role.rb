@@ -6,31 +6,31 @@ FactoryGirl.define do
     display true
     custom false
 
-    add_edit_order_items true
+    add_edit_order_items false
     import_orders true
-    change_order_status true
-    create_edit_notes true
-    view_packing_ex true
-    create_packing_ex true
-    edit_packing_ex true
+    change_order_status false
+    create_edit_notes false
+    view_packing_ex false
+    create_packing_ex false
+    edit_packing_ex false
 
-    delete_products true
-    import_products true
-    add_edit_products true
+    delete_products false
+    import_products false
+    add_edit_products false
 
-    add_edit_users true
-    make_super_admin true
+    add_edit_users false
+    make_super_admin false
 
     access_scanpack true
-    access_orders true
-    access_products true
-    access_settings true
+    access_orders false
+    access_products false
+    access_settings false
 
 
-    edit_general_prefs true
-    edit_scanning_prefs true
-    add_edit_stores true
-    create_backups true
-    restore_backups true
+    edit_general_prefs false
+    edit_scanning_prefs false
+    add_edit_stores false
+    create_backups false
+    restore_backups false
   end
 end
