@@ -276,6 +276,7 @@ class StoreSettingsController < ApplicationController
           # end check for mapping
 
           csv_directory = "uploads/csv"
+          current_tenant = Apartment::Tenant.current
           if ["both","order"].include?(params[:type])
             @result["order"] = Hash.new
             @result["order"]["map_options"] = [
@@ -297,7 +298,7 @@ class StoreSettingsController < ApplicationController
                 { value: "method", name: "Shipping Method"}
             ]
             @result["order"]["settings"] = csv_map.order_map
-            order_file_path = File.join(csv_directory, "#{@store.id}.order.csv")
+            order_file_path = File.join(csv_directory, "#{current_tenant}.#{@store.id}.order.csv")
             if File.exists? order_file_path
               # read 4 mb data
               order_file_data = IO.read(order_file_path,4096)
@@ -317,7 +318,7 @@ class StoreSettingsController < ApplicationController
                 { value: "barcode", name: "Barcode Value"}
             ]
             @result["product"]["settings"] = csv_map.product_map
-            product_file_path = File.join(csv_directory, "#{@store.id}.product.csv")
+            product_file_path = File.join(csv_directory, "#{current_tenant}.#{@store.id}.product.csv")
             if File.exists? product_file_path
               product_file_data = IO.read(product_file_path,4096)
               @result["product"]["data"] = product_file_data
@@ -391,7 +392,7 @@ class StoreSettingsController < ApplicationController
     logger.info "CSV Map stored."
     if @result["status"]
       csv_directory = "uploads/csv"
-      file_path = File.join(csv_directory, "#{params[:store_id]}.#{params[:type]}.csv")
+      file_path = File.join(csv_directory, "#{Apartment::Tenant.current_tenant}.#{params[:store_id]}.#{params[:type]}.csv")
       if File.exists? file_path
         final_record = []
         if params[:fix_width] == 1
@@ -623,6 +624,7 @@ class StoreSettingsController < ApplicationController
             break
           end
         end
+        File.delete(file_path)
       else
         @result['messages'].push("No file present to import #{params[:type]}")
       end
