@@ -300,7 +300,7 @@ class StoreSettingsController < ApplicationController
             order_file_path = File.join(csv_directory, "#{@store.id}.order.csv")
             if File.exists? order_file_path
               # read 4 mb data
-              order_file_data = IO.read(order_file_path,4194304)
+              order_file_data = IO.read(order_file_path,4096)
               @result["order"]["data"] = order_file_data
             end
           end
@@ -319,7 +319,7 @@ class StoreSettingsController < ApplicationController
             @result["product"]["settings"] = csv_map.product_map
             product_file_path = File.join(csv_directory, "#{@store.id}.product.csv")
             if File.exists? product_file_path
-              product_file_data = IO.read(product_file_path,4194304)
+              product_file_data = IO.read(product_file_path,4096)
               @result["product"]["data"] = product_file_data
             end
           end
