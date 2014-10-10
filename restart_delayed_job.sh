@@ -31,8 +31,8 @@ if [ ${ENV} != 'staging' ] && [ ${ENV} != 'production' ]; then
     PS3="p/s/q: "
     select yn in "Staging" "Production" "Quit"; do
         case "$REPLY" in
-            ("Production"|"P"|"p"|"PRODUCTION"|"prod"|"PROD"|"Prod"|1)  ENV='production'; break;;
             ("Staging"|"S"|"s"|"STAGING"|"staging"|"STAGE"|"Stage"|1)  ENV='staging'; break;;
+            ("Production"|"P"|"p"|"PRODUCTION"|"prod"|"PROD"|"Prod"|2)  ENV='production'; break;;
             ("Quit"|"q"|"QUIT"|"quit"|3|0)  echo "Bye.."; exit;;
             *) echo "Unknown input, please try again!";;
         esac

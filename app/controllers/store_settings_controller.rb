@@ -180,13 +180,14 @@ class StoreSettingsController < ApplicationController
             if @store.id
               @result["store_id"] = @store.id
               csv_directory = "uploads/csv"
+              current_tenant = Apartment::Tenant.current_tenant
               unless params[:orderfile].nil?
-                path = File.join(csv_directory, "#{@store.id}.order.csv")
+                path = File.join(csv_directory, "#{current_tenant}.#{@store.id}.order.csv")
                 File.open(path, "wb") { |f| f.write(params[:orderfile].read) }
                 @result['csv_import'] = true
               end
               unless params[:productfile].nil?
-                path = File.join(csv_directory, "#{@store.id}.product.csv")
+                path = File.join(csv_directory, "#{current_tenant}.#{@store.id}.product.csv")
                 File.open(path, "wb") { |f| f.write(params[:productfile].read) }
                 @result['csv_import'] = true
               end
@@ -300,7 +301,7 @@ class StoreSettingsController < ApplicationController
             @result["order"]["settings"] = csv_map.order_map
             order_file_path = File.join(csv_directory, "#{current_tenant}.#{@store.id}.order.csv")
             if File.exists? order_file_path
-              # read 4 mb data
+              # read 4 kb data
               order_file_data = IO.read(order_file_path,4096)
               @result["order"]["data"] = order_file_data
             end
