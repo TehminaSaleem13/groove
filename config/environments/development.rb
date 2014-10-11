@@ -90,7 +90,8 @@ Groovepacks::Application.configure do
 
   Rails.logger = Logger.new(STDOUT)
   config.log_level = :info
-  
+
+  $redis = Redis.new(:host => 'localhost', :port=> 6379)
   ENV['AMAZON_MWS_ACCESS_KEY_ID'] = "AKIAJ4VZ2GY7HZUL277Q"
   ENV['AMAZON_MWS_SECRET_ACCESS_KEY'] = "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"
 

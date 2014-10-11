@@ -38,6 +38,8 @@ Groovepacks::Application.configure do
   #   :openssl_verify_mode  => 'none'
   # }
 
+  $redis = Redis.new(:host => 'localhost', :port=> 6379)
+
   config.action_mailer.smtp_settings = {
     :address => "smtp.gmail.com",
     :port => 587,  

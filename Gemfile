@@ -47,7 +47,7 @@ group :test do
   gem 'mocha', :require => 'mocha/api'
 end
 
-
+gem 'redis-session-store'
 gem 'airbrake'
 gem 'devise', '>= 2.1.2'
 gem 'simple_form', '>= 2.0.4'

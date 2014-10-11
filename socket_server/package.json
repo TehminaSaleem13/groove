@@ -1,0 +1,11 @@
+{
+    "name": "groove-socket",
+    "version": "0.0.1",
+    "description": "my first socket.io app",
+    "dependencies": {
+        "socket.io": "~1.1.0",
+        "redis":"~0.12.1",
+        "cookie":"~0.1.2"
+    },
+    "private": true
+}
