@@ -16,7 +16,7 @@ class ApplicationController < ActionController::Base
       # an unique MD5 key
       cookies['_validation_token_key'] = Digest::MD5.hexdigest("#{current_user.id}:#{session.to_json}:#{Apartment::Tenant.current_tenant}")
       # store session data or any authentication data you want here, generate to JSON data
-      stored_session = JSON.generate({'session'=>session.to_json,'tenant'=>Apartment::Tenant.current_tenant, 'user_id'=> current_user.id, 'username'=>current_user.username})
+      stored_session = JSON.generate({'tenant'=>Apartment::Tenant.current_tenant, 'user_id'=> current_user.id, 'username'=>current_user.username})
       $redis.hset('groovehacks:session',cookies['_validation_token_key'],stored_session)
       super(resource_or_scope)
     end

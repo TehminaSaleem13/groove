@@ -1,18 +1,12 @@
 groovepacks_controllers.
-    controller('appCtrl', [ '$rootScope', '$scope', '$http', '$timeout', '$interval', '$stateParams','$modalStack', '$location', '$state', '$cookies', '$filter','$document','hotkeys', 'auth','notification','importOrders','$interpolate','$window',
-    function( $rootScope, $scope, $http, $timeout, $interval, $stateParams, $modalStack, $location, $state, $cookies, $filter, $document, hotkeys, auth,notification,importOrders,$interpolate,$window) {
-        $scope.$on("user-data-reloaded", function(){
+    controller('appCtrl', [ '$rootScope', '$scope', '$http', '$timeout', '$interval', '$stateParams','$modalStack', '$location', '$state', '$cookies', '$filter','$document','hotkeys', 'auth','notification','importOrders','$interpolate','groovIO',
+    function( $rootScope, $scope, $http, $timeout, $interval, $stateParams, $modalStack, $location, $state, $cookies, $filter, $document, hotkeys, auth,notification,importOrders,$interpolate,groovIO) {
+
+        $scope.$on("user-data-reloaded", function() {
             $scope.current_user = auth;
         });
-        var local_io = io("/v1");
-        local_io.on('logout',function(msg) {
-            console.log("yeah");
-            $http.delete('/users/sign_out.json').then(function(data) {
-                $window.location.href = '/users/sign_in';
-            });
-            console.log('logout',msg);
-        });
-        local_io.on('test',function(msg){
+
+        groovIO.on('test',function(msg){
             console.log('test',msg);
         });
 

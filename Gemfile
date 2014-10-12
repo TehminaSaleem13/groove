@@ -23,6 +23,7 @@ group :assets do
   gem 'less-rails-bootstrap'
   gem 'angular-ui-bootstrap-rails'
   gem 'momentjs-rails'
+  gem 'fingerprintjs-rails'
 end
 
 group :development do

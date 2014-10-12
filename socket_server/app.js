@@ -28,32 +28,31 @@ io.use(function(socket, next) {
             }
 
         });
-
     } else {
         return next(new Error('Unauthorized user'));
     }
 });
 
-io.on('connection', setup_socket);
-
-
-function setup_socket(socket) {
+io.on('connection', function (socket) {
     var tenant_name = socket.request.session.tenant;
     var user_id = socket.request.session.user_id;
-
-    check_setup_user(user_id,tenant_name,socket);
-    console.log("User connected, here is all the data");
-    console.log(socket.request.session);
+    var fingerprint = socket.request.sessionID;
+    socket.on('fingerprint',function(data) {
+        fingerprint = socket.request.sessionID + data['headers']['fingerprint'];
+        check_setup_user(socket,fingerprint);
+    });
 
     socket.on('disconnect', function() {
-        console.log("Disconnected:",socket.request.sessionID);
-        var index = redis_clients.tenants[tenant_name].users[user_id].instances.indexOf(socket.request.sessionID);
-        if(index > -1) {
-            redis_clients.tenants[tenant_name].users[user_id].instances.splice(index,1);
+        log("Disconnected: "+fingerprint);
+        if(redis_clients.tenants[tenant_name] && redis_clients.tenants[tenant_name].users[user_id]) {
+            var index = redis_clients.tenants[tenant_name].users[user_id].instances.indexOf(fingerprint);
+            if(index > -1) {
+                redis_clients.tenants[tenant_name].users[user_id].instances.splice(index,1);
+            }
         }
         //TODO: Add some logic to set a time-out for disconnected connections.
     });
-}
+});
 
 function setup_redis_client(namespace) {
     var client = redis.createClient();
@@ -70,10 +69,12 @@ function setup_redis_client(namespace) {
     return client;
 }
 
-function check_setup_user(user_id,tenant_name,socket) {
+function check_setup_user(socket,fingerprint) {
+    var tenant_name = socket.request.session.tenant;
+    var user_id = socket.request.session.user_id;
     check_setup_tenant(tenant_name,socket);
     socket.join(global_namespace);
-    socket.join(socket.request.sessionID);
+    socket.join(fingerprint);
     socket.join(global_namespace+':'+tenant_name+':'+user_id);
     if(typeof redis_clients.tenants[tenant_name].users[user_id] === "undefined") {
         redis_clients.tenants[tenant_name].users[user_id] = {};
@@ -81,15 +82,12 @@ function check_setup_user(user_id,tenant_name,socket) {
         redis_clients.tenants[tenant_name].users[user_id].instances = [];
     }
 
-    if(redis_clients.tenants[tenant_name].users[user_id].instances.indexOf(socket.request.sessionID) === -1) {
-        redis_clients.tenants[tenant_name].users[user_id].instances.push(socket.request.sessionID);
+    if(redis_clients.tenants[tenant_name].users[user_id].instances.indexOf(fingerprint) === -1) {
+        redis_clients.tenants[tenant_name].users[user_id].instances.push(fingerprint);
     }
-    console.log(socket.id, "->",socket.request.sessionID);
-    console.log(redis_clients.tenants[tenant_name].users[user_id].instances);
     while(redis_clients.tenants[tenant_name].users[user_id].instances.length > 1) {
-        var current = redis_clients.tenants[tenant_name].users[user_id].instances.shift();
-        console.log("logging out",current);
-        io.to(current).emit('logout',{message:'too many connections'});
+        var current = redis_clients.tenants[tenant_name].users[user_id].instances.pop();
+        logout(current,'Too many connections. Closing this session. Please logout from other sessions to continue here.');
     }
 }
 
@@ -100,6 +98,10 @@ function check_setup_tenant(tenant_name,socket) {
         redis_clients.tenants[tenant_name].global = setup_redis_client(global_namespace+':'+tenant_name);
         redis_clients.tenants[tenant_name].users = {};
     }
+}
+
+function logout(room,message) {
+    io.to(room).emit('logout',{message:message});
 }
 
 function log(type) {
