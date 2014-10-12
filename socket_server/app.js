@@ -36,9 +36,9 @@ io.use(function(socket, next) {
 io.on('connection', function (socket) {
     var tenant_name = socket.request.session.tenant;
     var user_id = socket.request.session.user_id;
-    var fingerprint = socket.request.sessionID;
+    var fingerprint = 'groov_'+socket.request.sessionID;
     socket.on('fingerprint',function(data) {
-        fingerprint = socket.request.sessionID + data['headers']['fingerprint'];
+        fingerprint = 'groov_'+socket.request.sessionID + data['headers']['fingerprint'];
         check_setup_user(socket,fingerprint);
     });
 
