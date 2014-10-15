@@ -36,14 +36,11 @@ io.use(function(socket, next) {
 io.on('connection', function (socket) {
     var tenant_name = socket.request.session.tenant;
     var user_id = socket.request.session.user_id;
-    var fingerprint = 'groov_'+socket.request.sessionID;
-    socket.on('fingerprint',function(data) {
-        fingerprint = 'groov_'+socket.request.sessionID + data['headers']['fingerprint'];
-        check_setup_user(socket,fingerprint);
-    });
+    var fingerprint = 'groov_'+socket.request.sessionID + socket.request._query.fingerprint;
+    check_setup_user(socket,fingerprint);
 
     socket.on('disconnect', function() {
-        log("Disconnected: "+fingerprint);
+        groov_log("Disconnected:")(fingerprint);
         if(redis_clients.tenants[tenant_name] && redis_clients.tenants[tenant_name].users[user_id]) {
             var index = redis_clients.tenants[tenant_name].users[user_id].instances.indexOf(fingerprint);
             if(index > -1) {
@@ -56,11 +53,11 @@ io.on('connection', function (socket) {
 
 function setup_redis_client(namespace) {
     var client = redis.createClient();
-    client.on('connect'     , log('redis connect: '+namespace));
-    client.on('ready'       , log('redis ready: '+namespace));
-    client.on('reconnecting', log('redis reconnecting: '+namespace));
-    client.on('error'       , log('redis error: '+namespace));
-    client.on('end'         , log('redis end: '+namespace));
+    client.on('connect'     , groov_log('redis connect: '+namespace));
+    client.on('ready'       , groov_log('redis ready: '+namespace));
+    client.on('reconnecting', groov_log('redis reconnecting: '+namespace));
+    client.on('error'       , groov_log('redis error: '+namespace));
+    client.on('end'         , groov_log('redis end: '+namespace));
     client.subscribe(namespace);
     client.on('message',function(channel,message) {
         message = JSON.parse(message);
@@ -104,7 +101,7 @@ function logout(room,message) {
     io.to(room).emit('logout',{message:message});
 }
 
-function log(type) {
+function groov_log(type) {
     return function() {
         console.log(type, arguments);
     }

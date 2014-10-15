@@ -3,7 +3,7 @@
 Groovepacks::Application.config.session_store :redis_session_store, {
     key: '_groovepacks_session',
     redis: {
-        expire_after: 120.minutes,
+        expire_after: 12.hours,
         key_prefix: 'groovepacks:session:',
         host:'localhost',
         port:6379

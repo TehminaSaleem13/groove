@@ -4,20 +4,18 @@ groovepacks_services.factory("groovIO", ['socketFactory', '$http', '$window','no
     var connect = function () {
         if(groov_socket === null) {
             if(typeof io !== "undefined") {
-                var socket_conn = io("/v1");
+                var socket_conn = io("/v1",{query:'fingerprint='+new Fingerprint({canvas: true,screen_resolution: true}).get()});
                 groov_socket = socketFactory({ioSocket: socket_conn, prefix:'groove_socket:'});
-                groov_socket.on('connect',fingerprint);
                 groov_socket.on('reconnect',function() {
                     notification.notify("Server connection re-established!",1);
-                    fingerprint();
                 });
-                groov_socket.on('disconnect',function(){
-                    notification.notify("Server connection lost. Please bear with us.",2);
+                groov_socket.on('disconnect',function() {
+                    notification.notify("Server connection lost. Retrying...",2);
                 });
                 groov_socket.on('logout',function(msg) {
                     notification.notify(msg.message);
                     notification.notify("Logging out in 10 seconds",2);
-                    $timeout(function(){
+                    $timeout(function() {
                         $http.delete('/users/sign_out.json').then(function(data) {
                             $window.location.href = '/users/sign_in';
                         });
@@ -31,16 +29,11 @@ groovepacks_services.factory("groovIO", ['socketFactory', '$http', '$window','no
         return true;
     };
 
-    var fingerprint = function() {
-        console.log("Sending fingerprint");
-        emit('fingerprint');
-    };
 
     var emit = function (eventName,data,callback) {
         if(connect()){
             data = data || {};
             data['headers'] = data['headers'] || {};
-            data['headers']['fingerprint'] = new Fingerprint({canvas: true,screen_resolution: true}).get();
             return groov_socket.emit(eventName,data,callback);
         }
         return angular.noop;
