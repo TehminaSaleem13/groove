@@ -1522,7 +1522,7 @@ class ProductsController < ApplicationController
       @product_hash['cat'] = product.primary_category
       @product_hash['image'] = product.primary_image
       unless product.store.nil?
-        @product_hash['store_type'] = product.store.store_type
+        @product_hash['store_name'] = product.store.name
       end
 
       @product_kit_skus = ProductKitSkus.where(:product_id=>product.id)

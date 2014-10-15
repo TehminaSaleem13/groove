@@ -258,7 +258,7 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
                     name: "Primary Location",
                     class:"span3"
                 },
-                store_type: {
+                store_name: {
                     name: "Store",
                     editable:false
                 },
