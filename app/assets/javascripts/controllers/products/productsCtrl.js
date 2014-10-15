@@ -231,6 +231,11 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
 
             },
             all_fields: {
+                image: {
+                    name: "Image",
+                    editable:false,
+                    transclude:'<div class="single-image"><img class="img-responsive" ng-src="{{row.image}}" /></div>'
+                },
                 name: {
                     name: "Item Name",
                     hideable: false,
@@ -246,11 +251,6 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
                         "'label-info': row[field] == 'new' }\">" +
                         "{{row[field]}}</span>"
                 },
-                image: {
-                    name: "Image",
-                    editable:false,
-                    transclude:'<div class="single-image"><img class="img-responsive" ng-src="{{row.image}}" /></div>'
-                },
                 barcode: {
                     name:"Barcode"
                 },
@@ -261,6 +261,9 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
                 store_type: {
                     name: "Store",
                     editable:false
+                },
+                qty: {
+                    name:"Avbl Inv"
                 },
                 cat:{
                     name:"Category",
@@ -275,10 +278,6 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
                     name:"Warehouse Name",
                     class:"span3",
                     editable:false,
-                    hidden:true
-                },
-                qty: {
-                    name:"Avbl Inv",
                     hidden:true
                 }
             }
