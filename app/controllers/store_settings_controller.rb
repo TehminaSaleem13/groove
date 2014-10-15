@@ -302,7 +302,7 @@ class StoreSettingsController < ApplicationController
             order_file_path = File.join(csv_directory, "#{current_tenant}.#{@store.id}.order.csv")
             if File.exists? order_file_path
               # read 4 kb data
-              order_file_data = IO.read(order_file_path,4096)
+              order_file_data = IO.read(order_file_path,40960)
               @result["order"]["data"] = order_file_data
             end
           end
@@ -321,7 +321,7 @@ class StoreSettingsController < ApplicationController
             @result["product"]["settings"] = csv_map.product_map
             product_file_path = File.join(csv_directory, "#{current_tenant}.#{@store.id}.product.csv")
             if File.exists? product_file_path
-              product_file_data = IO.read(product_file_path,4096)
+              product_file_data = IO.read(product_file_path,40960)
               @result["product"]["data"] = product_file_data
             end
           end
@@ -530,32 +530,32 @@ class StoreSettingsController < ApplicationController
             product.store = @store
             product.store_product_id = 0
             product.name = ''
-            if !mapping['product_name'].nil? && mapping['product_name'] > 0 &&
+            if !mapping['product_name'].nil? && mapping['product_name'] >= 0 &&
               Product.where(:name=>single_row[mapping['product_name']]).length == 0
               product.name = single_row[mapping['product_name']]
             end
-            if !mapping['product_type'].nil? && mapping['product_type'] > 0
+            if !mapping['product_type'].nil? && mapping['product_type'] >= 0
               product.product_type = single_row[mapping['product_type']]
             end
 
             #add inventory warehouses
-            if !!mapping['location_primary'].nil? && !mapping['inv_wh1'].nil?
+            if !mapping['location_primary'].nil? && !mapping['inv_wh1'].nil?
               product_inventory = ProductInventoryWarehouses.new
               product_inventory.inventory_warehouse = InventoryWarehouse.where(:is_default => true).first
               valid_inventory = false
-              if !mapping['inv_wh1'].nil? && mapping['inv_wh1'] > 0
-                product_inventory.qty = single_row[mapping['inv_wh1']]
-                valid_inventory &= true
+              if !mapping['inv_wh1'].nil? && mapping['inv_wh1'] >= 0
+                product_inventory.available_inv = single_row[mapping['inv_wh1']]
+                valid_inventory = true
               end
-              if !mapping['location_primary'].nil? && mapping['location_primary'] != ''
+              if !mapping['location_primary'].nil? && mapping['location_primary'] >= 0
                 product_inventory.location_primary = single_row[mapping['location_primary']]
-                valid_inventory &= true
+                valid_inventory = true
               end
               product.product_inventory_warehousess << product_inventory if valid_inventory
             end
 
             #add product categories
-            if !mapping['category_name'].nil? && mapping['category_name'] > 0
+            if !mapping['category_name'].nil? && mapping['category_name'] >= 0
               unless single_row[mapping['category_name']].nil?
                 cats = single_row[mapping['category_name']].split(',')
                 cats.each do |single_cat|
@@ -566,7 +566,7 @@ class StoreSettingsController < ApplicationController
               end
             end
 
-            if !mapping['product_images'].nil? && mapping['product_images'] > 0
+            if !mapping['product_images'].nil? && mapping['product_images'] >= 0
               unless single_row[mapping['product_images']].nil?
                 images = single_row[mapping['product_images']].split(',')
                 images.each do |single_image|
@@ -577,7 +577,7 @@ class StoreSettingsController < ApplicationController
               end
             end
 
-            if !mapping['sku'].nil? && mapping['sku'] > 0
+            if !mapping['sku'].nil? && mapping['sku'] >= 0
               unless single_row[mapping['sku']].nil?
                 skus = single_row[mapping['sku']].split(',')
                 skus.each do |single_sku|
@@ -590,7 +590,7 @@ class StoreSettingsController < ApplicationController
                 end
               end
             end
-            if !mapping['barcode'].nil? && mapping['barcode'] > 0
+            if !mapping['barcode'].nil? && mapping['barcode'] >= 0
               unless single_row[mapping['barcode']].nil?
                 barcodes = single_row[mapping['barcode']].split(',')
                 barcodes.each do |single_barcode|
