@@ -234,7 +234,7 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
                 image: {
                     name: "Image",
                     editable:false,
-                    transclude:'<div class="single-image"><img class="img-responsive" ng-src="{{row.image}}" /></div>'
+                    transclude:'<div ng-click="options.editable.functions.name(row,$event)" class="pointer single-image"><img class="img-responsive" ng-src="{{row.image}}" /></div>'
                 },
                 name: {
                     name: "Item Name",
