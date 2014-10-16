@@ -15,7 +15,7 @@ provider('socketFactory', function () {
      ioSocket;
 
  // expose to provider
- this.$get = function ($rootScope, $timeout) {
+ this.$get = ['$rootScope','$timeout',function ($rootScope, $timeout) {
 
      var asyncAngularify = function (socket, callback) {
          return callback ? function () {
@@ -94,5 +94,5 @@ provider('socketFactory', function () {
 
          return wrappedSocket;
      };
- };
+ }];
 });

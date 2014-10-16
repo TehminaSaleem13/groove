@@ -6,8 +6,9 @@ groovepacks_controllers.
             $scope.current_user = auth;
         });
 
-        groovIO.on('test',function(msg){
-            console.log('test',msg);
+        groovIO.on('import_status_update',function(message) {
+            console.log("socket",message);
+            myscope.get_status();
         });
 
         $scope.$on("editing-a-var",function(event,data) {
@@ -35,6 +36,7 @@ groovepacks_controllers.
             $http.get('/orders/import_status.json',{ignoreLoadingBar: true}).success(function(response) {
 
                 if (response.status && typeof(response.data.import_summary) != 'undefined') {
+                    console.log("http",response.data.import_summary);
                     $scope.import_summary = response.data.import_summary;
                     $scope.import_groov_popover = {title:'',content:''};
 
@@ -70,7 +72,7 @@ groovepacks_controllers.
                             content+='<td style="text-align:right;">&nbsp;';
                             if(cur_item.import_info.status=='completed') {
                                 if (cur_item.import_info.success_imported == 0) {
-                                    content+=' No new orders found.'; 
+                                    content+=' No new orders found.';
                                 } else {
                                     content+=$interpolate(' {{import_info.success_imported}} New Orders Imported.')(cur_item);
                                 }
@@ -93,7 +95,7 @@ groovepacks_controllers.
                 }
             }).error(function(data) {});
         };
-        $interval(myscope.get_status, 2000);
+        //$interval(myscope.get_status, 2000);
         $rootScope.focus_search = function(event) {
             if (typeof event != 'undefined') {
                 event.preventDefault();

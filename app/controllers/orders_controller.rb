@@ -168,7 +168,7 @@ class OrdersController < ApplicationController
     @orders = do_getorders
     #GroovRealtime::emit('test',{does:'it work for user '+current_user.username+'?'})
     #GroovRealtime::emit('test',{does:'it work for tenant '+Apartment::Tenant.current_tenant+'+'?'},:tenant)
-    GroovRealtime::emit('test',{does:'it work for global?'},:global)
+    #GroovRealtime::emit('test',{does:'it work for global?'},:global)
     @result['orders'] = make_orders_list(@orders)
     @result['orders_count'] = get_orders_count()
 
