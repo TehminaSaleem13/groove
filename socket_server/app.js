@@ -61,7 +61,7 @@ function setup_redis_client(namespace) {
     client.subscribe(namespace);
     client.on('message',function(channel,message) {
         message = JSON.parse(message);
-        io.to(channel).emit(message.type,message.data);
+        io.to(channel).emit(message.event,message.data);
     });
     return client;
 }

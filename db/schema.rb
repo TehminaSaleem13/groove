@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20141009032053) do
+ActiveRecord::Schema.define(:version => 20141017044634) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0, :null => false
@@ -122,9 +122,17 @@ ActiveRecord::Schema.define(:version => 20141009032053) do
   create_table "generate_barcodes", :force => true do |t|
     t.string   "status"
     t.string   "url"
-    t.datetime "created_at", :null => false
-    t.datetime "updated_at", :null => false
+    t.datetime "created_at",             :null => false
+    t.datetime "updated_at",             :null => false
+    t.integer  "user_id"
+    t.string   "hash"
+    t.string   "current_increment_id"
+    t.string   "current_order_position"
+    t.string   "total_orders"
   end
+
+  add_index "generate_barcodes", ["hash"], :name => "index_generate_barcodes_on_hash"
+  add_index "generate_barcodes", ["user_id"], :name => "index_generate_barcodes_on_user_id"
 
   create_table "import_items", :force => true do |t|
     t.string   "status"

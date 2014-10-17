@@ -831,6 +831,8 @@ class OrdersController < ApplicationController
   end
 
   def generate_packing_slip
+    result = Hash.new
+    result['status'] = false
     if GeneralSetting.get_packing_slip_size == '4 x 6'
       @page_height = '6'
       @page_width = '4'
@@ -844,28 +846,33 @@ class OrdersController < ApplicationController
     @result['data'] = Hash.new
     @result['data']['packing_slip_file_paths'] = []
 
-    if @orientation == "landscape"
+    if @orientation == 'landscape'
       @page_height = @page_height.to_f/2
       @page_height = @page_height.to_s
     end
-    @header = ""
+    @header = ''
 
-    @file_name = Time.now.strftime("%d_%b_%Y_%I:%M_%p")
+    @file_name = Apartment::Tenant.current_tenant+Time.now.strftime('%d_%b_%Y_%I:%M_%p')
     @orders = []
     orders = list_selected_orders
     orders.each do |order|
       @orders.push(order['id'])
     end
- 
-    unless @orders.nil?
-      GenerateBarcode.delete_all
+    unless @orders.empty?
+      hash= Digest::MD5.hexdigest(@orders.to_json)
+      GenerateBarcode.where('updated_at < ?',24.hours.ago).delete_all
       @generate_barcode = GenerateBarcode.new
-      @generate_barcode.status = "scheduled"
-      @generate_barcode.save
+      @generate_barcode.user_id = current_user.id
+      @generate_barcode.hash = hash
+      @generate_barcode.status = 'scheduled'
 
-      GeneratePackingSlipPdf.delay(:run_at => 1.seconds.from_now).generate_packing_slip_pdf(@orders, Apartment::Tenant.current_tenant, @result, @page_height,@page_width,@orientation,@file_name, @size, @header)
-      render json: {status: true}        
+      @generate_barcode.save
+      GroovRealtime::emit('barcode_generation',{status:'scheduled',hash:hash},:user)
+      GeneratePackingSlipPdf.delay(:run_at => 1.seconds.from_now).generate_packing_slip_pdf(@orders, Apartment::Tenant.current_tenant, @result, @page_height,@page_width,@orientation,@file_name, @size, @header,@generate_barcode.id)
+      result['status'] = true
+      result['hash'] = hash
     end
+    render json: result
   end
   
   def pdf_generation_status

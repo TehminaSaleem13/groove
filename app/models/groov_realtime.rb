@@ -8,14 +8,15 @@ class GroovRealtime
       Thread.current[:current_user_id]
     end
 
-    def emit(type,data,scope = :user)
+    def emit(event,data,scope = :tenant)
       allowed_scopes = [:global,:tenant,:user]
+      selected_scope = scope
       unless allowed_scopes.include? scope
-        scope = :user
+        selected_scope = :tenant
       end
-      channel = self.make_channel(scope)
+      channel = self.make_channel(selected_scope)
 
-      $redis.publish(channel,{type:type,data:data}.to_json)
+      $redis.publish(channel,{event:event,data:data}.to_json)
     end
 
     def make_channel(scope)
