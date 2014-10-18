@@ -1,5 +1,5 @@
 class StoreSettingsController < ApplicationController
-  before_filter :authenticate_user!, :except => [:handle_ebay_redirect, :import_shipworks]
+  before_filter :authenticate_user!, :except => [:handle_ebay_redirect]
 
   include StoreSettingsHelper
   def storeslist
@@ -255,11 +255,7 @@ class StoreSettingsController < ApplicationController
     end
   end
 
-  # temporary method for importing shipworks
-  def import_shipworks
-    puts "********* IMPORT SHIPWORKS *********"
-    puts params.inspect
-  end
+
 
   def csvImportData
     @result = Hash.new

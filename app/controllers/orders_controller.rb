@@ -69,6 +69,15 @@ class OrdersController < ApplicationController
     end
   end
 
+  def import_shipworks
+    #find store by using the auth_token
+    store = Store.first
+    Groovepacker::Store::Context.new(
+      Groovepacker::Store::Handlers::ShipworksHandler.new(store)).import_order(params["Order"])
+
+    render nothing: true
+  end
+
   # PUT /orders/1
   # PUT /orders/1.json
   def update

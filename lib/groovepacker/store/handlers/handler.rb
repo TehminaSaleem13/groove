@@ -17,6 +17,10 @@ module Groovepacker
         def import_orders
           {}
         end
+        
+        def import_order(order)
+          {}
+        end
 
         def import_images
           {}
