@@ -1,5 +1,6 @@
 class StoreSettingsController < ApplicationController
-  before_filter :authenticate_user!, :except => [:handle_ebay_redirect]
+  before_filter :authenticate_user!, :except => [:handle_ebay_redirect, :import_shipworks]
+
   include StoreSettingsHelper
   def storeslist
     @stores = Store.where("store_type != 'system'")
@@ -252,6 +253,12 @@ class StoreSettingsController < ApplicationController
     respond_to do |format|
         format.json { render json: @result}
     end
+  end
+
+  # temporary method for importing shipworks
+  def import_shipworks
+    puts "********* IMPORT SHIPWORKS *********"
+    puts params.inspect
   end
 
   def csvImportData
