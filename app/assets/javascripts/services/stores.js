@@ -150,6 +150,8 @@ groovepacks_services.factory('stores',['$http','notification','$filter',function
                     } else if(data.store.store_type == 'Shipstation') {
                         stores.single.username = data.credentials.shipstation_credentials.username;
                         stores.single.password = data.credentials.shipstation_credentials.password;
+                    } else if(data.store.store_type == 'Shipworks') {
+                        stores.single.auth_token = data.credentials.shipworks_credentials.auth_token;
                     }
 
                 }
@@ -176,6 +178,7 @@ groovepacks_services.factory('stores',['$http','notification','$filter',function
                     return (stores.single.merchant_id && stores.single.marketplace_id);
                     break;
                 //for any other store types (ebay and csv) just return true
+                case 'Shipworks':
                 default:
                     return true;
             }

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20141009032053) do
+ActiveRecord::Schema.define(:version => 20141016124724) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0, :null => false
@@ -293,9 +293,8 @@ ActiveRecord::Schema.define(:version => 20141009032053) do
     t.string   "postcode"
     t.string   "country"
     t.string   "method"
-    t.datetime "created_at",                                                             :null => false
-    t.datetime "updated_at",                                                             :null => false
-    t.string   "store_order_id"
+    t.datetime "created_at",                                                               :null => false
+    t.datetime "updated_at",                                                               :null => false
     t.string   "notes_internal"
     t.string   "notes_toPacker"
     t.string   "notes_fromPacker"
@@ -475,6 +474,13 @@ ActiveRecord::Schema.define(:version => 20141009032053) do
     t.datetime "updated_at",       :null => false
     t.integer  "store_id"
     t.datetime "last_imported_at"
+  end
+
+  create_table "shipworks_credentials", :force => true do |t|
+    t.string   "auth_token", :null => false
+    t.integer  "store_id",   :null => false
+    t.datetime "created_at", :null => false
+    t.datetime "updated_at", :null => false
   end
 
   create_table "sold_inventory_warehouses", :force => true do |t|
