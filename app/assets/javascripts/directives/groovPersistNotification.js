@@ -1,4 +1,4 @@
-groovepacks_directives.directive('groovPersistNotification',['groovIO','$window','$sce','$timeout','$interval',function (groovIO,$window,$sce,$timeout,$interval) {
+groovepacks_directives.directive('groovPersistNotification',['groovIO','auth','$window','$sce','$timeout','$rootScope',function (groovIO,auth,$window,$sce,$timeout,$rootScope) {
     return {
         restrict:"A",
         templateUrl:"/assets/views/directives/persistnotification.html",
@@ -36,8 +36,7 @@ groovepacks_directives.directive('groovPersistNotification',['groovIO','$window'
 
 
 
-
-            groovIO.on('generate_barcode_status',function(message) {
+            $rootScope.$on('generate_barcode_status',function(event,message) {
                 if(typeof scope.notifications['generate_barcode_status'] == 'undefined') {
                     scope.notifications['generate_barcode_status'] = myscope.default();
                 }

@@ -10,6 +10,9 @@ groovepacks_controllers.
             console.log("socket",message);
             myscope.get_status();
         });
+        groovIO.on('generate_barcode_status',function(message) {
+            $rootScope.$emit('generate_barcode_status',message);
+        });
 
         $scope.$on("editing-a-var",function(event,data) {
             $scope.current_editing = data.ident;
