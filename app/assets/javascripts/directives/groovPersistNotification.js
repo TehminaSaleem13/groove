@@ -45,7 +45,7 @@ groovepacks_directives.directive('groovPersistNotification',['groovIO','$window'
                 scope.selected = 'generate_barcode_status';
                 scope.notifications['generate_barcode_status'].show = true;
                 scope.notifications['generate_barcode_status'].percent = (message['current_order_position']/message['total_orders'])*100;
-                var notif_message = '<b>Printing&nbsp;Packing&nbsp;Slips:</b>&nbsp;';
+                var notif_message = '<b>Generating&nbsp;Packing&nbsp;Slips:</b>&nbsp;';
                 if(message['status'] == "scheduled") {
                     scope.notifications['generate_barcode_status'].type = 'info';
                     notif_message += 'Queued&nbsp;'+message['total_orders']+'&nbsp;Orders';
