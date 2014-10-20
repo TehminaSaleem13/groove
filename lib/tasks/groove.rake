@@ -55,6 +55,7 @@ namespace :groove do
 
     # Add all non-tenant upgrade code after this line
     # Add all non-tenant upgrade code before this line
+    exit(1)
   end
 
   task :long_spec do

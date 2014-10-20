@@ -1,4 +1,4 @@
-groovepacks_directives.directive('groovPersistNotification',['groovIO','auth','$window','$sce','$timeout','$rootScope',function (groovIO,auth,$window,$sce,$timeout,$rootScope) {
+groovepacks_directives.directive('groovPersistNotification',['$window','$sce','$timeout','$rootScope',function ($window,$sce,$timeout,$rootScope) {
     return {
         restrict:"A",
         templateUrl:"/assets/views/directives/persistnotification.html",
