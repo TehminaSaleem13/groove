@@ -1,0 +1,6 @@
+<div class="persist-notifications">
+    <progressbar ng-show="notifications[selected].show" class="progress-striped" value="notifications[selected].percent" type="{{notifications[selected].type}}"><span ng-bind-html="notifications[selected].message"></span></progressbar>
+    <div class="details">
+        {{scope.notifications['generate_barcode_status'].message}}
+    </div>
+</div>

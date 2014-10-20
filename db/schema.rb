@@ -125,13 +125,13 @@ ActiveRecord::Schema.define(:version => 20141017044634) do
     t.datetime "created_at",             :null => false
     t.datetime "updated_at",             :null => false
     t.integer  "user_id"
-    t.string   "hash"
+    t.string   "hash_value"
     t.string   "current_increment_id"
-    t.string   "current_order_position"
-    t.string   "total_orders"
+    t.integer  "current_order_position"
+    t.integer  "total_orders"
   end
 
-  add_index "generate_barcodes", ["hash"], :name => "index_generate_barcodes_on_hash"
+  add_index "generate_barcodes", ["hash_value"], :name => "index_generate_barcodes_on_hash_value"
   add_index "generate_barcodes", ["user_id"], :name => "index_generate_barcodes_on_user_id"
 
   create_table "import_items", :force => true do |t|
@@ -301,8 +301,8 @@ ActiveRecord::Schema.define(:version => 20141017044634) do
     t.string   "postcode"
     t.string   "country"
     t.string   "method"
-    t.datetime "created_at",                                                             :null => false
-    t.datetime "updated_at",                                                             :null => false
+    t.datetime "created_at",                                                               :null => false
+    t.datetime "updated_at",                                                               :null => false
     t.string   "store_order_id"
     t.string   "notes_internal"
     t.string   "notes_toPacker"

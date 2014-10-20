@@ -14,20 +14,23 @@ class GroovRealtime
       unless allowed_scopes.include? scope
         selected_scope = :tenant
       end
-      channel = self.make_channel(selected_scope)
-
-      $redis.publish(channel,{event:event,data:data}.to_json)
+      self.emit_to_channel(selected_scope,{event:event,data:data},self.current_user_id)
     end
 
-    def make_channel(scope)
-      result = 'groovepacker'
+    def user_emit(event,data,uid)
+      self.emit_to_channel(:user,{event:event,data:data},uid)
+    end
+
+    def emit_to_channel(scope,data,uid)
+      channel = 'groovepacker'
       if [:tenant,:user].include?(scope)
-        result+= ':'+Apartment::Tenant.current_tenant
+        channel+= ':'+Apartment::Tenant.current_tenant
       end
       if scope == :user
-        result+= ':'+ self.current_user_id.to_s
+        channel+= ':'+ uid.to_s
       end
-      result
+
+      $redis.publish(channel,data.to_json)
     end
   end
 end

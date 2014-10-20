@@ -859,18 +859,19 @@ class OrdersController < ApplicationController
       @orders.push(order['id'])
     end
     unless @orders.empty?
-      hash= Digest::MD5.hexdigest(@orders.to_json)
+      hash_value= Digest::MD5.hexdigest(@orders.to_json+Time.now.strftime('%d_%b_%Y_%I:%M_%p'))
       GenerateBarcode.where('updated_at < ?',24.hours.ago).delete_all
       @generate_barcode = GenerateBarcode.new
       @generate_barcode.user_id = current_user.id
-      @generate_barcode.hash = hash
+      @generate_barcode.current_order_position = 0
+      @generate_barcode.total_orders = @orders.length
+      @generate_barcode.hash_value = hash_value
       @generate_barcode.status = 'scheduled'
 
       @generate_barcode.save
-      GroovRealtime::emit('barcode_generation',{status:'scheduled',hash:hash},:user)
       GeneratePackingSlipPdf.delay(:run_at => 1.seconds.from_now).generate_packing_slip_pdf(@orders, Apartment::Tenant.current_tenant, @result, @page_height,@page_width,@orientation,@file_name, @size, @header,@generate_barcode.id)
       result['status'] = true
-      result['hash'] = hash
+      result['hash_value'] = hash_value
     end
     render json: result
   end
@@ -880,7 +881,7 @@ class OrdersController < ApplicationController
     result = Hash.new
     result['status'] = true
     result['data'] = Hash.new
-    generate_barcode_data = GenerateBarcode.all.first unless GenerateBarcode.all.nil?
+    generate_barcode_data = GenerateBarcode.find_by_hash_value(params[:hash_value]) unless GenerateBarcode.find_by_hash_value(params[:hash_value]).nil?
     result['data'] = generate_barcode_data
     
     render json: result

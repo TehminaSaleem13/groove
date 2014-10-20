@@ -123,25 +123,6 @@ groovepacks_services.factory('orders',['$http','$window','notification',function
                 if (action == "pick_list") {
                     $window.open(response.data.pick_list_file_paths); 
                 }
-                else if(action == "packing_slip") {
-                    myscope.get_status = function() {
-                        console.log("in get_status");
-                        $http.get('/orders/pdf_generation_status.json',{ignoreLoadingBar: true}).success(function(result) {
-                            if (result.status) {
-                                if(result.data.status == 'scheduled') {
-                                    console.log("scheduled");
-                                }else if (result.data.status == 'in_progress') {
-                                    console.log("in_progress");
-                                }else if (result.data.status == 'completed') {
-                                    console.log("in completed.");
-                                    clearInterval(interval);
-                                    $window.open(result.data.url);
-                                }
-                            }
-                        });
-                    };
-                    interval = setInterval(myscope.get_status, 1000);   
-                }
             }).error(notification.server_error); 
     };
 

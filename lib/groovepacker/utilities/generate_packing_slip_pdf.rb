@@ -5,23 +5,24 @@ class GeneratePackingSlipPdf
           Groovepacker::PackingSlip::PdfMerger.new
     generate_barcode = GenerateBarcode.find_by_id(gen_barcode_id)
     unless generate_barcode.nil?
-      GroovRealtime.current_user_id= generate_barcode.user_id
       generate_barcode.status = 'in_progress'
       generate_barcode.save
       orders.each do |item|
         order = Order.find(item)
+        generate_barcode.current_increment_id = order.increment_id
+        generate_barcode.current_order_position = (generate_barcode.current_order_position.to_i + 1)
+        generate_barcode.save
         reader_file_path = Rails.root.join('public', 'pdfs', "#{Apartment::Tenant.current_tenant}.#{order.increment_id}.pdf")
 
-        GeneratePackingSlipPdf.generate_pdf(order,page_height,page_width,orientation,reader_file_path,header,generate_barcode)
-
+        GeneratePackingSlipPdf.generate_pdf(order,page_height,page_width,orientation,reader_file_path,header)
         reader = PDF::Reader.new(reader_file_path)
         page_count = reader.page_count
-        
+
         if page_count > 1
           # delete the pdf and regenerate if the pdf page-count exceeds 1
           File.delete(reader_file_path)
-          header = 'Multi-Slip Order # ' + order.increment_id
-          GeneratePackingSlipPdf.generate_pdf(order,page_height,page_width,orientation,reader_file_path, header,generate_barcode)
+          multi_header = 'Multi-Slip Order # ' + order.increment_id
+          GeneratePackingSlipPdf.generate_pdf(order,page_height,page_width,orientation,reader_file_path, multi_header)
         end
         result['data']['packing_slip_file_paths'].push(reader_file_path)
       end
@@ -35,7 +36,7 @@ class GeneratePackingSlipPdf
       generate_barcode.save
     end
   end
-  def self.generate_pdf(order,page_height,page_width,orientation,pdf_path, header, generate_barcode)
+  def self.generate_pdf(order,page_height,page_width,orientation,pdf_path, header)
     require 'wicked_pdf'
     ActionView::Base.send(:define_method, :protect_against_forgery?) { false }
     av = ActionView::Base.new()
@@ -49,11 +50,11 @@ class GeneratePackingSlipPdf
     doc_pdf = WickedPdf.new.pdf_from_string(
       pdf_html,
       :orientation => orientation,
-      :page_height => page_height+'in', 
+      :page_height => page_height+'in',
       :page_width => page_width+'in',
       :save_only => true,
       :no_background => false,
-      :margin => {:top => '5',                     
+      :margin => {:top => '5',
                   :bottom => '10',
                   :left => '2',
                   :right => '2'},
