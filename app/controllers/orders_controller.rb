@@ -79,7 +79,7 @@ class OrdersController < ApplicationController
         puts credential.inspect
         unless credential.nil?
           Groovepacker::Store::Context.new(
-            Groovepacker::Store::Handlers::ShipworksHandler.new(credential.store)).import_order(params["Order"])
+            Groovepacker::Store::Handlers::ShipworksHandler.new(credential.store)).import_order(params["ShipWorks"]["Order"])
         end
       # rescue Exception => e
       #   puts e.inspect
