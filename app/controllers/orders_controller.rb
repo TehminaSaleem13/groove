@@ -71,9 +71,18 @@ class OrdersController < ApplicationController
 
   def import_shipworks
     #find store by using the auth_token
-    store = Store.first
-    Groovepacker::Store::Context.new(
-      Groovepacker::Store::Handlers::ShipworksHandler.new(store)).import_order(params["Order"])
+    auth_token = request.headers["HTTP_X_GROOVEPACKER_AUTH_TOKEN"]
+    unless auth_token.nil?
+      #begin
+        credential = ShipworksCredential.find_by_auth_token(auth_token)
+        unless credential.nil?
+          Groovepacker::Store::Context.new(
+            Groovepacker::Store::Handlers::ShipworksHandler.new(credential.store)).import_order(params["Order"])
+        end
+      # rescue Exception => e
+      #   puts e.inspect
+      # end
+    end
 
     render nothing: true
   end
