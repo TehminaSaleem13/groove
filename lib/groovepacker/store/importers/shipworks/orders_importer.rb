@@ -21,7 +21,7 @@ module Groovepacker
                 increment_id: order["Number"],
                 order_placed_time: order["Date"],
                 store: store,
-                email: ship_address["Email"]
+                email: ship_address["Email"],
                 lastname: ship_address["LastName"],
                 firstname: ship_address["FirstName"],
                 address_1: ship_address["Line1"],
