@@ -1,6 +1,6 @@
 class ProductInventoryWarehouses < ActiveRecord::Base
   belongs_to :product
-  attr_accessible :qty, :alert
+  attr_accessible :qty, :alert, :inventory_warehouse, :location_primary, :location_secondary
 
   belongs_to :inventory_warehouse
   has_many :sold_inventory_warehouses

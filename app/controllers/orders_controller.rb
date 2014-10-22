@@ -75,11 +75,12 @@ class OrdersController < ApplicationController
     # unless auth_token.nil?
     #   #begin
         credential = ShipworksCredential.first
-        puts "****** Import Shipworks ******"
-        puts credential.inspect
+        # puts "****** Import Shipworks ******"
+        # puts credential.inspect
+        # puts params["ShipWorks"]["Order"].inspect
         unless credential.nil?
           Groovepacker::Store::Context.new(
-            Groovepacker::Store::Handlers::ShipworksHandler.new(credential.store)).import_order(params["ShipWorks"]["Order"])
+            Groovepacker::Store::Handlers::ShipworksHandler.new(credential.store)).import_order(params["ShipWorks"]["Customer"]["Order"])
         end
       # rescue Exception => e
       #   puts e.inspect
