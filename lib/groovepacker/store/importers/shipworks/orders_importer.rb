@@ -16,18 +16,20 @@ module Groovepacker
 
             if order["OnlineStatus"] == 'Processing' &&
               Order.find_by_increment_id(order["Number"]).nil?
+              ship_address = get_ship_address(order)
               order_m = Order.create(
                 increment_id: order["Number"],
                 order_placed_time: order["Date"],
                 store: store,
-                lastname: order["Address"][0]["LastName"],
-                firstname: order["Address"][0]["FirstName"],
-                address_1: order["Address"][0]["Line1"],
-                address_2: order["Address"][0]["Line2"],
-                city: order["Address"][0]["City"],
-                state: order["Address"][0]["StateName"],
-                postcode: order["Address"][0]["PostalCode"],
-                country: order["Address"][0]["CountryCode"],
+                email: ship_address["Email"]
+                lastname: ship_address["LastName"],
+                firstname: ship_address["FirstName"],
+                address_1: ship_address["Line1"],
+                address_2: ship_address["Line2"],
+                city: ship_address["City"],
+                state: ship_address["StateName"],
+                postcode: ship_address["PostalCode"],
+                country: ship_address["CountryCode"],
                 order_total: order["Total"])
 
               order["Item"].each do |item|
@@ -48,6 +50,19 @@ module Groovepacker
             end
 
             private
+
+            def get_ship_address(order)
+              result = nil
+
+              order["Address"].each do |addr|
+                if addr["type"] == "ship"
+                  result = addr
+                  break
+                end
+              end
+
+              result
+            end
 
             def import_product(item, store)
               product = Product.create(
