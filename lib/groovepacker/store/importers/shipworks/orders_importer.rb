@@ -9,11 +9,6 @@ module Groovepacker
             credential = handler[:credential]
             store = handler[:store_handle]
 
-            puts "****** ORDER ******"
-            puts order.inspect
-            puts "****** STORE ******"
-            puts store.inspect
-
             if order["OnlineStatus"] == 'Processing' &&
               Order.find_by_increment_id(order["Number"]).nil?
               ship_address = get_ship_address(order)
@@ -56,14 +51,6 @@ module Groovepacker
                 end
               end
             end
-
-            #create order items
-            # shipstation_order.postcode = order.ship_postal_code unless order.ship_postal_code.nil?
-            # shipstation_order.country = order.ship_country_code 
-            # shipstation_order.shipping_amount = order.shipping_amount unless order.shipping_amount.nil?
-            # shipstation_order.order_total = order.order_total
-            # shipstation_order.notes_from_buyer = order.notes_from_buyer unless order.notes_from_buyer.nil?
-            # shipstation_order.weight_oz = order.weight_oz unless order.weight_oz.nil?
           end
 
           private
