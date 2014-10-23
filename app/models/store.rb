@@ -6,6 +6,7 @@ class Store < ActiveRecord::Base
   has_one :ebay_credentials
   has_one :amazon_credentials
   has_one :shipstation_credential
+  has_one :shipworks_credential
   belongs_to :inventory_warehouse
 
   validates_presence_of :name
@@ -45,6 +46,10 @@ class Store < ActiveRecord::Base
         @result['shipstation_credentials'] = @credentials.first
         @result['status'] =true
       end
+    end
+    if self.store_type == 'Shipworks'
+      @result['shipworks_credentials'] = shipworks_credential
+      @result['status'] =true
     end
   	@result
   end

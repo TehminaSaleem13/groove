@@ -29,7 +29,8 @@ class Product < ActiveRecord::Base
 					:inv_wh7_qty,
 					:inv_alert_wh7,
 					:disable_conf_req,
-          :store
+          :store,
+          :weight
 
   has_many :product_skus, :dependent => :destroy
   has_many :product_cats, :dependent => :destroy

@@ -1,5 +1,6 @@
 class StoreSettingsController < ApplicationController
   before_filter :authenticate_user!, :except => [:handle_ebay_redirect]
+
   include StoreSettingsHelper
   def storeslist
     @stores = Store.where("store_type != 'system'")
@@ -220,6 +221,24 @@ class StoreSettingsController < ApplicationController
               @result['messages'] = [e.message]
             end
           end
+
+          if @store.store_type == 'Shipworks'
+            @shipworks = ShipworksCredential.find_by_store_id(@store.id)
+            begin
+              if @shipworks.nil?
+                @store.shipworks_credential = ShipworksCredential.new(auth_token: SecureRandom.base64(10))
+                new_record = true
+              end
+              @store.save
+            rescue ActiveRecord::RecordInvalid => e
+              @result['status'] = false
+              @result['messages'] = [@store.errors.full_messages, @store.shipstation_credential.errors.full_messages]
+
+            rescue ActiveRecord::StatementInvalid => e
+              @result['status'] = false
+              @result['messages'] = [e.message]
+            end
+          end
         else
           @result['status'] = false
           @result['messages'].push("Current user does not have permission to create or edit a store")
@@ -235,6 +254,8 @@ class StoreSettingsController < ApplicationController
         format.json { render json: @result}
     end
   end
+
+
 
   def csvImportData
     @result = Hash.new

@@ -486,6 +486,13 @@ ActiveRecord::Schema.define(:version => 20141022162501) do
     t.datetime "last_imported_at"
   end
 
+  create_table "shipworks_credentials", :force => true do |t|
+    t.string   "auth_token", :null => false
+    t.integer  "store_id",   :null => false
+    t.datetime "created_at", :null => false
+    t.datetime "updated_at", :null => false
+  end
+
   create_table "sold_inventory_warehouses", :force => true do |t|
     t.integer  "product_inventory_warehouses_id"
     t.integer  "sold_qty"

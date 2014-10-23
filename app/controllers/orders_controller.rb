@@ -69,6 +69,28 @@ class OrdersController < ApplicationController
     end
   end
 
+  def import_shipworks
+    #find store by using the auth_token
+    auth_token = params[:auth_token]
+    logger.info(auth_token)
+    unless auth_token.nil? || request.headers["HTTP_USER_AGENT"] != 'shipworks'
+      begin
+        credential = ShipworksCredential.find_by_auth_token(auth_token)
+        unless credential.nil?
+          Groovepacker::Store::Context.new(
+            Groovepacker::Store::Handlers::ShipworksHandler.new(credential.store)).import_order(params["ShipWorks"]["Customer"]["Order"])
+          render nothing: true
+        else
+          render status: 401, nothing: true
+        end
+      rescue Exception => e
+        logger.info(e)
+      end
+    else
+      render status: 401, nothing: true
+    end
+  end
+
   # PUT /orders/1
   # PUT /orders/1.json
   def update
@@ -340,7 +362,8 @@ class OrdersController < ApplicationController
             @orderitem['qty_on_hand'] +=  inventory.qty.to_i
           end
           if product.product_inventory_warehousess.length > 0
-            @orderitem['location_primary'] = product.primary_warehouse(current_user).location_primary
+            @orderitem['location_primary'] = 
+            product.primary_warehouse(current_user).nil? ? "" : product.primary_warehouse(current_user).location_primary
                 #ProductInventoryWarehouses.where(product_id:product.id,inventory_warehouse_id: current_user.inventory_warehouse_id).first.location_primary
           end
           @orderitem['sku'] = product.primary_sku
