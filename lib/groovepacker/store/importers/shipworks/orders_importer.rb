@@ -38,6 +38,7 @@ module Groovepacker
                 else
                   product = import_product(item, store)
                 end
+
                 order_m.order_items.create(
                   product: product, 
                   price: item["UnitPrice"],
@@ -105,6 +106,7 @@ module Groovepacker
             ) unless item["Location"].nil?
 
             product.set_product_status
+            product
           end
         end
       end
