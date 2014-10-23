@@ -73,18 +73,24 @@ class OrdersController < ApplicationController
     #find store by using the auth_token
     auth_token = params[:auth_token]
     logger.info(auth_token)
-    unless auth_token.nil?
+    unless auth_token.nil? || request.headers["HTTP_USER_AGENT"] != 'shipworks'
       begin
         credential = ShipworksCredential.find_by_auth_token(auth_token)
+        logger.info "valid params"
         unless credential.nil?
+          logger.info "credentials available"
           Groovepacker::Store::Context.new(
             Groovepacker::Store::Handlers::ShipworksHandler.new(credential.store)).import_order(params["ShipWorks"]["Customer"]["Order"])
+          render nothing: true
+        else
+          logger.info "invalid credentials"
+          render status: 401, nothing: true
         end
       rescue Exception => e
         logger.info(e)
       end
-      render nothing: true
     else
+      logger.info "invalid params"
       render status: 401, nothing: true
     end
   end
