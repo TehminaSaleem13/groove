@@ -50,10 +50,9 @@ module Groovepacker
               order_m.set_order_status
 
               order_m.addactivity("Order Import", store.name+" Import")
-                order_m.order_items.each do |item|
-                  unless item.product.nil? || item.product.primary_sku.nil?
-                    order_m.addactivity("Item with SKU: "+item.product.primary_sku+" Added", store.name+" Import")
-                  end
+              order_m.order_items.each do |item|
+                unless item.product.nil? || item.product.primary_sku.nil?
+                  order_m.addactivity("Item with SKU: "+item.product.primary_sku+" Added", store.name+" Import")
                 end
               end
             end
