@@ -74,7 +74,7 @@ class OrdersController < ApplicationController
     # auth_token = request.headers["HTTP_X_GROOVEPACKER_AUTH_TOKEN"]
     # unless auth_token.nil?
     #   #begin
-      puts request.headers.inspect
+      logger.info (request.headers)
         credential = ShipworksCredential.first
         # puts "****** Import Shipworks ******"
         # puts credential.inspect
