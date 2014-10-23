@@ -1,5 +1,12 @@
 
 <div class="row"  ng-controller="appCtrl">
+  <div class="logout-box fade" ng-class="{in:show_logout_box}" ng-show="show_logout_box">
+    <div class="center-message">
+      <h2>Continue session?</h2>
+      <button class="modal-save-button" ng-click="log_out('everyone_else')">Yes, Sign Out all other sessions</button>
+      <button ng-click="log_out('me')" class="modal-cancel-button">No, Sign this session out</button>
+    </div>
+  </div>
   <div class="container-fluid">
     <div class="row">
       <div class="box-outer top-nav-bar">

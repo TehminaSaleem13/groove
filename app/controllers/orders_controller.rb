@@ -856,37 +856,61 @@ class OrdersController < ApplicationController
     @orders = []
     orders = list_selected_orders
     orders.each do |order|
-      @orders.push(order['id'])
+      single_order = Order.find(order['id'])
+      unless single_order.nil?
+        @orders.push({id:single_order.id, increment_id:single_order.increment_id})
+      end
     end
     unless @orders.empty?
-      hash_value= Digest::MD5.hexdigest(@orders.to_json+Time.now.strftime('%d_%b_%Y_%I:%M_%p'))
+
       GenerateBarcode.where('updated_at < ?',24.hours.ago).delete_all
       @generate_barcode = GenerateBarcode.new
       @generate_barcode.user_id = current_user.id
       @generate_barcode.current_order_position = 0
       @generate_barcode.total_orders = @orders.length
-      @generate_barcode.hash_value = hash_value
+      @generate_barcode.next_order_increment_id = @orders.first[:increment_id] unless @orders.first.nil?
       @generate_barcode.status = 'scheduled'
 
       @generate_barcode.save
-      GeneratePackingSlipPdf.delay(:run_at => 1.seconds.from_now).generate_packing_slip_pdf(@orders, Apartment::Tenant.current_tenant, @result, @page_height,@page_width,@orientation,@file_name, @size, @header,@generate_barcode.id)
+      delayed_job = GeneratePackingSlipPdf.delay(:run_at => 1.seconds.from_now).generate_packing_slip_pdf(@orders, Apartment::Tenant.current_tenant, @result, @page_height,@page_width,@orientation,@file_name, @size, @header,@generate_barcode.id)
+      @generate_barcode.delayed_job_id = delayed_job.id
+      @generate_barcode.save
       result['status'] = true
-      result['hash_value'] = hash_value
     end
     render json: result
   end
-  
-  def pdf_generation_status
-    puts "in pdf_generation_status"
+
+  def cancel_packing_slip
     result = Hash.new
     result['status'] = true
-    result['data'] = Hash.new
-    generate_barcode_data = GenerateBarcode.find_by_hash_value(params[:hash_value]) unless GenerateBarcode.find_by_hash_value(params[:hash_value]).nil?
-    result['data'] = generate_barcode_data
-    
-    render json: result
+    result['success_messages'] = []
+    result['notice_messages'] = []
+    result['error_messages'] = []
+
+    if params[:id].nil?
+      result['status'] = false
+      result['error_messages'].push('No id given. Can not cancel generating')
+    else
+      barcode = GenerateBarcode.find_by_id(params[:id])
+      barcode.cancel = true
+      unless barcode.status =='in_progress'
+        barcode.status = 'cancelled'
+        Delayed::Job.find(barcode.delayed_job_id).destroy
+      end
+
+      if barcode.save
+        result['notice_messages'].push('Pdf generation marked for cancellation. Please wait for acknowledgement.')
+      end
+
+    end
+
+
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json: result }
+    end
   end
-  
+
   def import_all
     # import_orders_helper()
 

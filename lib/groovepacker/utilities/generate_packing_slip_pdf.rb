@@ -7,9 +7,17 @@ class GeneratePackingSlipPdf
     unless generate_barcode.nil?
       generate_barcode.status = 'in_progress'
       generate_barcode.save
-      orders.each do |item|
-        order = Order.find(item)
+      orders.each_with_index do |item,index|
+
+        order = Order.find(item[:id])
+        generate_barcode.reload
+        if generate_barcode.cancel
+          generate_barcode.status = 'cancelled'
+          generate_barcode.save
+          return true
+        end
         generate_barcode.current_increment_id = order.increment_id
+        generate_barcode.next_order_increment_id = orders[(index.to_i+1)][:increment_id] unless index == (orders.length - 1)
         generate_barcode.current_order_position = (generate_barcode.current_order_position.to_i + 1)
         generate_barcode.save
         reader_file_path = Rails.root.join('public', 'pdfs', "#{Apartment::Tenant.current_tenant}.#{order.increment_id}.pdf")

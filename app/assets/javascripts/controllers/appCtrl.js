@@ -10,13 +10,32 @@ groovepacks_controllers.
             console.log("socket",message);
             myscope.get_status();
         });
-        groovIO.on('generate_barcode_status',function(message) {
-            $rootScope.$emit('generate_barcode_status',message);
+        $scope.show_logout_box = false;
+        groovIO.on('ask_logout',function(msg) {
+            if(! $scope.show_logout_box) {
+                notification.notify(msg.message);
+                $scope.show_logout_box = true;
+            }
+        });
+
+        groovIO.on('hide_logout',function(msg) {
+            if($scope.show_logout_box) {
+                notification.notify(msg.message, 1);
+                $scope.show_logout_box = false;
+            }
         });
 
         $scope.$on("editing-a-var",function(event,data) {
             $scope.current_editing = data.ident;
         });
+
+        $scope.log_out = function(who) {
+            if(who === 'me') {
+                groovIO.log_out({message:''});
+            } else if (who === 'everyone_else') {
+                groovIO.emit('logout_everyone_else');
+            }
+        };
 
         $scope.is_active_tab = function(string) {
                 var name = $state.current.name;

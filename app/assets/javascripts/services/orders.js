@@ -125,6 +125,13 @@ groovepacks_services.factory('orders',['$http','$window','notification',function
                 }
             }).error(notification.server_error); 
     };
+    var cancel_pdf_gen = function(id) {
+        return $http.post('/orders/cancel_packing_slip.json',{id:id}).success(function(data) {
+           notification.notify(data['error_messages']);
+           notification.notify(data['success_messages'],1);
+           notification.notify(data['notice_messages'],2);
+        }).error(notification.server_error);
+    };
 
     var update_list = function(action,orders) {
         if(["update_status","delete","duplicate"].indexOf(action) != -1) {
@@ -305,13 +312,15 @@ groovepacks_services.factory('orders',['$http','$window','notification',function
         },
         setup: {
             update:update_setup
+
         },
         list: {
             get: get_list,
             update: update_list,
             total_items:total_items_list,
             update_node: update_list_node,
-            generate: generate_list
+            generate: generate_list,
+            cancel_pdf_gen: cancel_pdf_gen
         },
         single: {
             get: get_single,
