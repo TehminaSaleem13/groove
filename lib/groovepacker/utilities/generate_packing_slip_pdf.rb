@@ -1,39 +1,50 @@
 class GeneratePackingSlipPdf
-  def self.generate_packing_slip_pdf(orders, tenant_name, result, page_height, page_width, orientation, file_name, size, header)
+  def self.generate_packing_slip_pdf(orders, tenant_name, result, page_height, page_width, orientation, file_name, size, header,gen_barcode_id)
     Apartment::Tenant.switch(tenant_name)
     packing_slip_obj = 
           Groovepacker::PackingSlip::PdfMerger.new
-    unless GenerateBarcode.all.first.nil?
-      generate_barcode = GenerateBarcode.all.first
-      generate_barcode.status = "in_progress"
+    generate_barcode = GenerateBarcode.find_by_id(gen_barcode_id)
+    unless generate_barcode.nil?
+      generate_barcode.status = 'in_progress'
       generate_barcode.save
-      orders.each do |item|
-        order = Order.find(item)
+      orders.each_with_index do |item,index|
 
-        GeneratePackingSlipPdf.generate_pdf(order,page_height,page_width,orientation,file_name,header)
+        order = Order.find(item[:id])
+        generate_barcode.reload
+        if generate_barcode.cancel
+          generate_barcode.status = 'cancelled'
+          generate_barcode.save
+          return true
+        end
+        generate_barcode.current_increment_id = order.increment_id
+        generate_barcode.next_order_increment_id = orders[(index.to_i+1)][:increment_id] unless index == (orders.length - 1)
+        generate_barcode.current_order_position = (generate_barcode.current_order_position.to_i + 1)
+        generate_barcode.save
+        reader_file_path = Rails.root.join('public', 'pdfs', "#{Apartment::Tenant.current_tenant}.#{order.increment_id}.pdf")
 
-        reader = PDF::Reader.new(Rails.root.join('public', 'pdfs', "#{order.increment_id}.pdf"))
+        GeneratePackingSlipPdf.generate_pdf(order,page_height,page_width,orientation,reader_file_path,header)
+        reader = PDF::Reader.new(reader_file_path)
         page_count = reader.page_count
-        
+
         if page_count > 1
           # delete the pdf and regenerate if the pdf page-count exceeds 1
-          File.delete(Rails.root.join('public', 'pdfs', order.increment_id+".pdf"))
-          header = "Multi-Slip Order # " + order.increment_id
-          GeneratePackingSlipPdf.generate_pdf(order,page_height,page_width,orientation,file_name, header)
+          File.delete(reader_file_path)
+          multi_header = 'Multi-Slip Order # ' + order.increment_id
+          GeneratePackingSlipPdf.generate_pdf(order,page_height,page_width,orientation,reader_file_path, multi_header)
         end
-        result['data']['packing_slip_file_paths'].push(Rails.root.join('public','pdfs', "#{order.increment_id}.pdf"))
+        result['data']['packing_slip_file_paths'].push(reader_file_path)
       end
       result['data']['destination'] =  Rails.root.join('public','pdfs', "#{file_name}_packing_slip.pdf")
       result['data']['merged_packing_slip_url'] =  '/pdfs/'+ file_name + '_packing_slip.pdf'
       
       #merge the packing-slips
       packing_slip_obj.merge(result,orientation,size,file_name)
-      generate_barcode.url = result['data'] ['merged_packing_slip_url']
-      generate_barcode.status = "completed"
+      generate_barcode.url = result['data']['merged_packing_slip_url']
+      generate_barcode.status = 'completed'
       generate_barcode.save
     end
   end
-  def self.generate_pdf(order,page_height,page_width,orientation,file_name, header)
+  def self.generate_pdf(order,page_height,page_width,orientation,pdf_path, header)
     require 'wicked_pdf'
     ActionView::Base.send(:define_method, :protect_against_forgery?) { false }
     av = ActionView::Base.new()
@@ -47,11 +58,11 @@ class GeneratePackingSlipPdf
     doc_pdf = WickedPdf.new.pdf_from_string(
       pdf_html,
       :orientation => orientation,
-      :page_height => page_height+'in', 
+      :page_height => page_height+'in',
       :page_width => page_width+'in',
       :save_only => true,
       :no_background => false,
-      :margin => {:top => '5',                     
+      :margin => {:top => '5',
                   :bottom => '10',
                   :left => '2',
                   :right => '2'},
@@ -62,7 +73,6 @@ class GeneratePackingSlipPdf
         :content => av.render(:template => 'orders/generate_packing_slip_header.pdf.erb', :locals => {:@header => header})
       }
     )
-    pdf_path = Rails.root.join('public', 'pdfs', "#{@order.increment_id}.pdf")
     File.open(pdf_path, 'wb') do |file|
       file << doc_pdf
     end

@@ -23,6 +23,7 @@ group :assets do
   gem 'less-rails-bootstrap'
   gem 'angular-ui-bootstrap-rails'
   gem 'momentjs-rails'
+  gem 'fingerprintjs-rails'
 end
 
 group :development do
@@ -47,7 +48,7 @@ group :test do
   gem 'mocha', :require => 'mocha/api'
 end
 
-
+gem 'redis-session-store'
 gem 'airbrake'
 gem 'devise', '>= 2.1.2'
 gem 'simple_form', '>= 2.0.4'

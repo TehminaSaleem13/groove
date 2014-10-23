@@ -1,13 +1,41 @@
 groovepacks_controllers.
-    controller('appCtrl', [ '$rootScope', '$scope', '$http', '$timeout', '$interval', '$stateParams','$modalStack', '$location', '$state', '$cookies', '$filter','$document','hotkeys', 'auth','notification','importOrders','$interpolate',
-    function( $rootScope, $scope, $http, $timeout, $interval, $stateParams, $modalStack, $location, $state, $cookies, $filter, $document, hotkeys, auth,notification,importOrders,$interpolate) {
-        $scope.$on("user-data-reloaded", function(){
+    controller('appCtrl', [ '$rootScope', '$scope', '$http', '$timeout', '$interval', '$stateParams','$modalStack', '$location', '$state', '$cookies', '$filter','$document','hotkeys', 'auth','notification','importOrders','$interpolate','groovIO',
+    function( $rootScope, $scope, $http, $timeout, $interval, $stateParams, $modalStack, $location, $state, $cookies, $filter, $document, hotkeys, auth,notification,importOrders,$interpolate,groovIO) {
+
+        $scope.$on("user-data-reloaded", function() {
             $scope.current_user = auth;
+        });
+
+        groovIO.on('import_status_update',function(message) {
+            console.log("socket",message);
+            myscope.get_status();
+        });
+        $scope.show_logout_box = false;
+        groovIO.on('ask_logout',function(msg) {
+            if(! $scope.show_logout_box) {
+                notification.notify(msg.message);
+                $scope.show_logout_box = true;
+            }
+        });
+
+        groovIO.on('hide_logout',function(msg) {
+            if($scope.show_logout_box) {
+                notification.notify(msg.message, 1);
+                $scope.show_logout_box = false;
+            }
         });
 
         $scope.$on("editing-a-var",function(event,data) {
             $scope.current_editing = data.ident;
         });
+
+        $scope.log_out = function(who) {
+            if(who === 'me') {
+                groovIO.log_out({message:''});
+            } else if (who === 'everyone_else') {
+                groovIO.emit('logout_everyone_else');
+            }
+        };
 
         $scope.is_active_tab = function(string) {
                 var name = $state.current.name;
@@ -30,6 +58,7 @@ groovepacks_controllers.
             $http.get('/orders/import_status.json',{ignoreLoadingBar: true}).success(function(response) {
 
                 if (response.status && typeof(response.data.import_summary) != 'undefined') {
+                    console.log("http",response.data.import_summary);
                     $scope.import_summary = response.data.import_summary;
                     $scope.import_groov_popover = {title:'',content:''};
 
@@ -65,7 +94,7 @@ groovepacks_controllers.
                             content+='<td style="text-align:right;">&nbsp;';
                             if(cur_item.import_info.status=='completed') {
                                 if (cur_item.import_info.success_imported == 0) {
-                                    content+=' No new orders found.'; 
+                                    content+=' No new orders found.';
                                 } else {
                                     content+=$interpolate(' {{import_info.success_imported}} New Orders Imported.')(cur_item);
                                 }
@@ -88,7 +117,7 @@ groovepacks_controllers.
                 }
             }).error(function(data) {});
         };
-        $interval(myscope.get_status, 2000);
+        //$interval(myscope.get_status, 2000);
         $rootScope.focus_search = function(event) {
             if (typeof event != 'undefined') {
                 event.preventDefault();

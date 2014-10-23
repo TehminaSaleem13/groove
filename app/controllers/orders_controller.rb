@@ -188,7 +188,9 @@ class OrdersController < ApplicationController
     @result['status'] = true
 
     @orders = do_getorders
-
+    #GroovRealtime::emit('test',{does:'it work for user '+current_user.username+'?'})
+    #GroovRealtime::emit('test',{does:'it work for tenant '+Apartment::Tenant.current_tenant+'+'?'},:tenant)
+    #GroovRealtime::emit('test',{does:'it work for global?'},:global)
     @result['orders'] = make_orders_list(@orders)
     @result['orders_count'] = get_orders_count()
 
@@ -852,6 +854,8 @@ class OrdersController < ApplicationController
   end
 
   def generate_packing_slip
+    result = Hash.new
+    result['status'] = false
     if GeneralSetting.get_packing_slip_size == '4 x 6'
       @page_height = '6'
       @page_width = '4'
@@ -865,41 +869,71 @@ class OrdersController < ApplicationController
     @result['data'] = Hash.new
     @result['data']['packing_slip_file_paths'] = []
 
-    if @orientation == "landscape"
+    if @orientation == 'landscape'
       @page_height = @page_height.to_f/2
       @page_height = @page_height.to_s
     end
-    @header = ""
+    @header = ''
 
-    @file_name = Time.now.strftime("%d_%b_%Y_%I:%M_%p")
+    @file_name = Apartment::Tenant.current_tenant+Time.now.strftime('%d_%b_%Y_%I:%M_%p')
     @orders = []
     orders = list_selected_orders
     orders.each do |order|
-      @orders.push(order['id'])
+      single_order = Order.find(order['id'])
+      unless single_order.nil?
+        @orders.push({id:single_order.id, increment_id:single_order.increment_id})
+      end
     end
- 
-    unless @orders.nil?
-      GenerateBarcode.delete_all
-      @generate_barcode = GenerateBarcode.new
-      @generate_barcode.status = "scheduled"
-      @generate_barcode.save
+    unless @orders.empty?
 
-      GeneratePackingSlipPdf.delay(:run_at => 1.seconds.from_now).generate_packing_slip_pdf(@orders, Apartment::Tenant.current_tenant, @result, @page_height,@page_width,@orientation,@file_name, @size, @header)
-      render json: {status: true}        
+      GenerateBarcode.where('updated_at < ?',24.hours.ago).delete_all
+      @generate_barcode = GenerateBarcode.new
+      @generate_barcode.user_id = current_user.id
+      @generate_barcode.current_order_position = 0
+      @generate_barcode.total_orders = @orders.length
+      @generate_barcode.next_order_increment_id = @orders.first[:increment_id] unless @orders.first.nil?
+      @generate_barcode.status = 'scheduled'
+
+      @generate_barcode.save
+      delayed_job = GeneratePackingSlipPdf.delay(:run_at => 1.seconds.from_now).generate_packing_slip_pdf(@orders, Apartment::Tenant.current_tenant, @result, @page_height,@page_width,@orientation,@file_name, @size, @header,@generate_barcode.id)
+      @generate_barcode.delayed_job_id = delayed_job.id
+      @generate_barcode.save
+      result['status'] = true
     end
-  end
-  
-  def pdf_generation_status
-    puts "in pdf_generation_status"
-    result = Hash.new
-    result['status'] = true
-    result['data'] = Hash.new
-    generate_barcode_data = GenerateBarcode.all.first unless GenerateBarcode.all.nil?
-    result['data'] = generate_barcode_data
-    
     render json: result
   end
-  
+
+  def cancel_packing_slip
+    result = Hash.new
+    result['status'] = true
+    result['success_messages'] = []
+    result['notice_messages'] = []
+    result['error_messages'] = []
+
+    if params[:id].nil?
+      result['status'] = false
+      result['error_messages'].push('No id given. Can not cancel generating')
+    else
+      barcode = GenerateBarcode.find_by_id(params[:id])
+      barcode.cancel = true
+      unless barcode.status =='in_progress'
+        barcode.status = 'cancelled'
+        Delayed::Job.find(barcode.delayed_job_id).destroy
+      end
+
+      if barcode.save
+        result['notice_messages'].push('Pdf generation marked for cancellation. Please wait for acknowledgement.')
+      end
+
+    end
+
+
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json: result }
+    end
+  end
+
   def import_all
     # import_orders_helper()
 

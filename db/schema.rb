@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20141016124724) do
+ActiveRecord::Schema.define(:version => 20141022162501) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0, :null => false
@@ -122,9 +122,18 @@ ActiveRecord::Schema.define(:version => 20141016124724) do
   create_table "generate_barcodes", :force => true do |t|
     t.string   "status"
     t.string   "url"
-    t.datetime "created_at", :null => false
-    t.datetime "updated_at", :null => false
+    t.datetime "created_at",                                 :null => false
+    t.datetime "updated_at",                                 :null => false
+    t.integer  "user_id"
+    t.string   "current_increment_id"
+    t.integer  "current_order_position"
+    t.integer  "total_orders"
+    t.boolean  "cancel",                  :default => false
+    t.string   "next_order_increment_id"
+    t.integer  "delayed_job_id"
   end
+
+  add_index "generate_barcodes", ["user_id"], :name => "index_generate_barcodes_on_user_id"
 
   create_table "import_items", :force => true do |t|
     t.string   "status"
@@ -295,6 +304,7 @@ ActiveRecord::Schema.define(:version => 20141016124724) do
     t.string   "method"
     t.datetime "created_at",                                                               :null => false
     t.datetime "updated_at",                                                               :null => false
+    t.string   "store_order_id"
     t.string   "notes_internal"
     t.string   "notes_toPacker"
     t.string   "notes_fromPacker"

@@ -123,26 +123,14 @@ groovepacks_services.factory('orders',['$http','$window','notification',function
                 if (action == "pick_list") {
                     $window.open(response.data.pick_list_file_paths); 
                 }
-                else if(action == "packing_slip") {
-                    myscope.get_status = function() {
-                        console.log("in get_status");
-                        $http.get('/orders/pdf_generation_status.json',{ignoreLoadingBar: true}).success(function(result) {
-                            if (result.status) {
-                                if(result.data.status == 'scheduled') {
-                                    console.log("scheduled");
-                                }else if (result.data.status == 'in_progress') {
-                                    console.log("in_progress");
-                                }else if (result.data.status == 'completed') {
-                                    console.log("in completed.");
-                                    clearInterval(interval);
-                                    $window.open(result.data.url);
-                                }
-                            }
-                        });
-                    };
-                    interval = setInterval(myscope.get_status, 1000);   
-                }
             }).error(notification.server_error); 
+    };
+    var cancel_pdf_gen = function(id) {
+        return $http.post('/orders/cancel_packing_slip.json',{id:id}).success(function(data) {
+           notification.notify(data['error_messages']);
+           notification.notify(data['success_messages'],1);
+           notification.notify(data['notice_messages'],2);
+        }).error(notification.server_error);
     };
 
     var update_list = function(action,orders) {
@@ -324,13 +312,15 @@ groovepacks_services.factory('orders',['$http','$window','notification',function
         },
         setup: {
             update:update_setup
+
         },
         list: {
             get: get_list,
             update: update_list,
             total_items:total_items_list,
             update_node: update_list_node,
-            generate: generate_list
+            generate: generate_list,
+            cancel_pdf_gen: cancel_pdf_gen
         },
         single: {
             get: get_single,

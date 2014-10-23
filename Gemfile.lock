@@ -172,6 +172,7 @@ GEM
     figaro (0.7.0)
       bundler (~> 1.0)
       rails (>= 3, < 5)
+    fingerprintjs-rails (0.5.3)
     fog (1.15.0)
       builder
       excon (~> 0.25.0)
@@ -304,6 +305,10 @@ GEM
       ffi (>= 0.5.0)
     rdoc (3.12.2)
       json (~> 1.4)
+    redis (3.1.0)
+    redis-session-store (0.8.0)
+      actionpack (>= 3, < 5)
+      redis
     ref (1.0.5)
     responders (1.1.1)
       railties (>= 3.2, < 4.2)
@@ -430,6 +435,7 @@ DEPENDENCIES
   excon
   factory_girl_rails (>= 4.1.0)
   figaro (>= 0.5.0)
+  fingerprintjs-rails
   fog (~> 1.15.0)
   gelf
   jquery-fileupload-rails
@@ -452,6 +458,7 @@ DEPENDENCIES
   protractor-rails
   quiet_assets (>= 1.0.1)
   rails (= 3.2.13)
+  redis-session-store
   rspec-rails (>= 2.13.2)
   rubber
   ruby-mws (~> 0.0.8)!

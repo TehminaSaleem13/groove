@@ -1,7 +1,12 @@
-groovepacks_services.factory("auth", ['$http','$rootScope',function($http,$rootScope) {
+groovepacks_services.factory("auth", ['$http','$rootScope','groovIO',function($http,$rootScope,groovIO) {
     var current_user = {};
     var check = function () {
-        return $http.get('/home/userinfo.json',{ignoreLoadingBar: true}).success(function(data){
+        return $http.get('/home/userinfo.json',{ignoreLoadingBar: true}).success(function(data) {
+            if(!jQuery.isEmptyObject(data)) {
+                groovIO.connect();
+            } else {
+                groovIO.disconnect();
+            }
             current_user = data;
             $rootScope.$broadcast("user-data-reloaded");
         });

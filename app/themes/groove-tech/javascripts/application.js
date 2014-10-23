@@ -5,6 +5,7 @@
 //= require angular-touch
 //= require angular-cookies
 //= require angular-ui-bootstrap-tpls
+//= require fingerprint
 //= require jquery.ui.sortable
 //= require lib
 //= require angular-animate
