@@ -76,7 +76,7 @@ class OrdersController < ApplicationController
     unless auth_token.nil? || request.headers["HTTP_USER_AGENT"] != 'shipworks'
       begin
         credential = ShipworksCredential.find_by_auth_token(auth_token)
-        unless credential.nil?
+        unless credential.nil? || !credential.store.active
           Groovepacker::Store::Context.new(
             Groovepacker::Store::Handlers::ShipworksHandler.new(credential.store)).import_order(params["ShipWorks"]["Customer"]["Order"])
           render nothing: true

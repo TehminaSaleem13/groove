@@ -49,6 +49,7 @@ class Store < ActiveRecord::Base
     end
     if self.store_type == 'Shipworks'
       @result['shipworks_credentials'] = shipworks_credential
+      @result['shipworks_hook_url'] = "https://"+Apartment::Database.current_tenant+"."+ENV['HOST_NAME']+"/orders/import_shipworks?auth_token="
       @result['status'] =true
     end
   	@result
@@ -122,6 +123,9 @@ class Store < ActiveRecord::Base
           @result = false
         end
       end
+    end
+    if self.store_type == 'Shipworks'
+      result = false unless ShipworksCredential.create(auth_token: SecureRandom.base64(16), store: self)
     end
     @result
   end

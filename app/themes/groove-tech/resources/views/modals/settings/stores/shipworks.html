@@ -13,6 +13,44 @@
     </div>
   </div>
 
+  <div class="row">
+    <div class="col-md-12">
+      <legend>Instructions to setup Shipworks to import orders in Groovepacker</legend>
+      <ol class="list-group">
+          <li class="list-group-item">
+              <h4 class="list-group-item-heading">1. Create an action in Shipworks</h4>
+              <p class="list-group-item-text">Open ShipWorks & click on Manage > Actions > New Action (name the new action).</p>
+          </li>
+          <li class="list-group-item active">
+              <h4 class="list-group-item-heading">2. Setup the action</h4>
+              <p class="list-group-item-text">Under Actions, Select "An order is downloaded"</p>
+               <p class="list-group-item-text">From the Add Task dropdown Select External > Send web request</p>
+               <p class="list-group-item-text">For template: Select "XML Source"</p>
+          </li>
+          <li class="list-group-item">
+              <h4 class="list-group-item-heading">3. Integrate with Groovepacker</h4>
+              <p class="list-group-item-text">Copy (ctrl-C) and Paste (ctrl-V) your Request URL to the ShipWorks Request URL blank. Here is your Request URL:</p>
+              <p class="list-group-item-text"><strong>{{stores.single.request_url}}{{stores.single.auth_token}}</strong></p>
+          </li>
+          <li class="list-group-item">
+              <h4 class="list-group-item-heading">Setup is complete!</h4>
+              <p class="list-group-item-text">Now, when orders are downloaded into ShipWorks they will be automatically imported into GroovePacker. Setting the ShipWorks store to Inactive in GroovePacker will disable the import.</p>
+          </li>
+      </ol>
+    </div>
+  </div>
+
+<!--   <ol>
+    <li>Open ShipWorks & click on Manage > Actions > New Action (name the new action)</li>
+    <li>Under Actions, Select "An order is downloaded"</li>
+    <li>From the Add Task dropdown Select External>Send web request</li>
+    <li>Under send the request: Select "Using the results of processing a template" as a “POST” (scrolling may be necessary to see the field)</li>
+    <li>For template: Select "XML Source"</li>
+    <li>Copy (ctrl-C) and Paste (ctrl-V) your Request URL to the ShipWorks Request URL blank.</li>
+    <li>Here is your Request URL: [Their full request url would be right here in the list]</li>
+    <li>Click on Ok to save the action</li>
+  </ol> -->
+
 <!--   <div class="row">
     <div class="col-md-6">
       <legend>Import Orders</legend>

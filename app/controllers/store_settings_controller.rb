@@ -226,7 +226,7 @@ class StoreSettingsController < ApplicationController
             @shipworks = ShipworksCredential.find_by_store_id(@store.id)
             begin
               if @shipworks.nil?
-                @store.shipworks_credential = ShipworksCredential.new(auth_token: SecureRandom.base64(10))
+                @store.shipworks_credential = ShipworksCredential.new(auth_token: SecureRandom.base64(16))
                 new_record = true
               end
               @store.save
