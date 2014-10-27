@@ -1,7 +1,8 @@
-<div class="persist-notifications" ng-class="{'progress-shown':selected != '','detail-shown':detail_open}">
+<div class="persist-notifications-background" ng-click="toggle_detail()"></div>
+<div class="persist-notifications" ng-click="$event.preventDefault();$event.stopPropagation();" ng-class="{'progress-shown':selected != ''}">
     <progressbar ng-show="selected != '' && !detail_open" ng-click="toggle_detail()" class="progress-striped" value="notifications[selected].percent" type="{{notifications[selected].type}}"><span ng-bind-html="notifications[selected].message"></span></progressbar>
     <div ng-show="selected != '' && !detail_open" class="pull-right"><a href="" ng-click="notifications[selected].cancel($event)">Cancel</a></div>
-    <div class="details" ng-show="detail_open">
+    <div class="details">
         <div ng-show="selected==''" class="text-center"><h3>No notifications here</h3></div>
         <div ng-show="selected!=''" class="single-notification">
             <progressbar class="progress-striped" value="notifications[selected].percent" type="{{notifications[selected].type}}"><div ng-bind-html="notifications[selected].message"></div></progressbar>

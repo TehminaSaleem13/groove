@@ -8,12 +8,11 @@
 			if OrderImportSummary.where(status: 'in_progress').empty?
 				order_import_summaries = OrderImportSummary.where(status: 'not_started')
 				if !order_import_summaries.empty?
-					ordered_import_summaries = order_import_summaries.order('updated_at' + " " + 'desc')
+					ordered_import_summaries = order_import_summaries.order('updated_at' + ' ' + 'desc')
 					ordered_import_summaries.each do |order_import_summary|
 						if order_import_summary == ordered_import_summaries.first
 							order_import_summary.status = 'in_progress'
 							order_import_summary.save
-              GroovRealtime::emit('import_status_update',{},:tenant)
 							ImportItem.delete_all
 							# add import item for each store
 							stores = Store.where("status = '1' AND store_type != 'system'")
@@ -41,7 +40,6 @@
 						if store_type == 'Amazon'
 							import_item.status = 'in_progress'
 							import_item.save
-              GroovRealtime::emit('import_status_update',{},:tenant)
 							context = Groovepacker::Store::Context.new(
 								Groovepacker::Store::Handlers::AmazonHandler.new(store))
 							result = context.import_orders
@@ -53,11 +51,9 @@
 								import_item.status = 'completed'
 							end 	
 							import_item.save
-              GroovRealtime::emit('import_status_update',{},:tenant)
 						elsif store_type == 'Ebay'
 							import_item.status = 'in_progress'
 							import_item.save
-              GroovRealtime::emit('import_status_update',{},:tenant)
 							context = Groovepacker::Store::Context.new(
 								Groovepacker::Store::Handlers::EbayHandler.new(store))
 							result = context.import_orders
@@ -69,11 +65,9 @@
 								import_item.status = 'completed'
 							end
 							import_item.save
-              GroovRealtime::emit('import_status_update',{},:tenant)
 						elsif store_type == 'Magento'
 							import_item.status = 'in_progress'
 							import_item.save
-              GroovRealtime::emit('import_status_update',{},:tenant)
 							context = Groovepacker::Store::Context.new(
 								Groovepacker::Store::Handlers::MagentoHandler.new(store))
 							result = context.import_orders
@@ -85,11 +79,9 @@
 								import_item.status = 'completed'
 							end
 							import_item.save
-              GroovRealtime::emit('import_status_update',{},:tenant)
 						elsif store_type == 'Shipstation'
 							import_item.status = 'in_progress'
 							import_item.save
-              GroovRealtime::emit('import_status_update',{},:tenant)
 							context = Groovepacker::Store::Context.new(
 								Groovepacker::Store::Handlers::ShipstationHandler.new(store))
 							result = context.import_orders
@@ -101,12 +93,10 @@
 								import_item.status = 'completed'
 							end
 							import_item.save
-              GroovRealtime::emit('import_status_update',{},:tenant)
 						end
 					end
 					@order_import_summary.status = 'completed'
 					@order_import_summary.save
-          GroovRealtime::emit('import_status_update',{},:tenant)
 				end
 			end	
 			result

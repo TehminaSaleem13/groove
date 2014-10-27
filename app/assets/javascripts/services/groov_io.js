@@ -20,6 +20,10 @@ groovepacks_services.factory("groovIO", ['socketFactory', '$http', '$window','no
                     delete forwards[to_del[j]];
                 }
 
+                groov_socket.on('connect',function() {
+                    $http.get('/home/request_socket_notifs.json');
+                });
+
                 groov_socket.on('reconnect',function() {
                     notification.notify("Server connection re-established!",1);
                 });

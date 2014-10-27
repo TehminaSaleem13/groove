@@ -1,4 +1,5 @@
 class HomeController < ApplicationController
+  layout 'angular'
   def index
   	#if current user is not signed in, show login page
   	if !user_signed_in?
@@ -21,5 +22,15 @@ class HomeController < ApplicationController
       format.html # show.html.erb
       format.json { render json: user}
     end
+  end
+
+  def request_socket_notifs
+    GenerateBarcode.where("status != 'completed' AND status !='cancelled'").each do |barcode|
+      barcode.emit_data_to_user
+    end
+    OrderImportSummary.all.each do |summary|
+      summary.emit_data_to_user
+    end
+    render json:{status:true}
   end
 end

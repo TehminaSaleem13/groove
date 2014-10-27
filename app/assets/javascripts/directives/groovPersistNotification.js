@@ -1,4 +1,4 @@
-groovepacks_directives.directive('groovPersistNotification',['$window','$sce','$timeout','groovIO','orders',function ($window,$sce,$timeout,groovIO,orders) {
+groovepacks_directives.directive('groovPersistNotification',['$window','$document','$sce','$timeout','groovIO','orders',function ($window,$document,$sce,$timeout,groovIO,orders) {
     return {
         restrict:"A",
         templateUrl:"/assets/views/directives/persistnotification.html",
@@ -104,6 +104,7 @@ groovepacks_directives.directive('groovPersistNotification',['$window','$sce','$
             };
 
             scope.toggle_detail = function() {
+                $document.find('body').eq(0).toggleClass('pnotif-open');
                 scope.detail_open = !scope.detail_open;
                 if(scope.detail_open) {
                     if(scope.selected == '') {

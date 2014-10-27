@@ -2,8 +2,9 @@ module Groovepacker
   module Store
     module Handlers
       class Handler
-        def initialize(store)
+        def initialize(store,import_item = nil)
           self.store = store
+          self.import_item = import_item
         end
 
         def build_handle
@@ -31,7 +32,7 @@ module Groovepacker
         end
 
         protected
-          attr_accessor :store
+          attr_accessor :store,:import_item
 
         def make_handle(credential, store_handle)
           {

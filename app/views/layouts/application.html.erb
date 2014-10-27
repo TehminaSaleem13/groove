@@ -14,8 +14,7 @@
     <%= yield(:head) %>
     <%= airbrake_javascript_notifier %>
   </head>
-  <body class="container-well" ng-app="groovepacks">
-    <div groov-persist-notification></div>
+  <body class="container-well">
     <div class="container main-body">
       <div class="gradient-well">
           <div class="container-fluid gradient-well-inner">
@@ -23,7 +22,6 @@
           </div>
       </div>
     </div>
-    <div groov-notification></div>
     <script>
         // Include the UserVoice JavaScript SDK (only needed once on a page)
         UserVoice=window.UserVoice||[];(function(){var uv=document.createElement('script');uv.type='text/javascript';uv.async=true;uv.src='//widget.uservoice.com/3ZTbdvkPQEdrJEP5n2nndA.js';var s=document.getElementsByTagName('script')[0];s.parentNode.insertBefore(uv,s)})();
