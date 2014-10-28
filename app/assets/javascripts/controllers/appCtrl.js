@@ -66,6 +66,9 @@ groovepacks_controllers.
                             }
                         } else if(cur_item.import_info.status=='failed') {
                             content+='Import failed.';
+                            if(cur_item.import_info.message != '') {
+                                content+='<br/>'+cur_item.import_info.message;
+                            }
                         }
                         content+='</td></tr>';
                     }

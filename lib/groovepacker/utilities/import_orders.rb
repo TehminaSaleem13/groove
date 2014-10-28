@@ -35,6 +35,8 @@
 				if !@order_import_summary.nil? && !@order_import_summary.id.nil?
 					import_items = @order_import_summary.import_items
 					import_items.each do |import_item|
+            begin
+
 						store_type = import_item.store.store_type
 						store = import_item.store
 						if store_type == 'Amazon'
@@ -93,7 +95,12 @@
 								import_item.status = 'completed'
 							end
 							import_item.save
-						end
+            end
+            rescue Exception => e
+              import_item.message = e.message
+              import_item.status = 'failed'
+              import_item.save
+            end
 					end
 					@order_import_summary.status = 'completed'
 					@order_import_summary.save
