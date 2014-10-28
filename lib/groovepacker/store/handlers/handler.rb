@@ -4,6 +4,9 @@ module Groovepacker
       class Handler
         def initialize(store,import_item = nil)
           self.store = store
+          if import_item.nil?
+            import_item = Groovepacker::Store::Handlers::MockImportItem.new
+          end
           self.import_item = import_item
         end
 
@@ -37,8 +40,20 @@ module Groovepacker
         def make_handle(credential, store_handle)
           {
             credential: credential,
-            store_handle: store_handle
+            store_handle: store_handle,
+            import_item: self.import_item
           }
+        end
+      end
+
+      class MockImportItem
+        attr_accessor :to_import, :current_increment_id, :current_order_items, :current_order_imported_item, :message, :success_imported, :previous_imported
+        def initialize
+
+        end
+
+        def save
+
         end
       end
     end

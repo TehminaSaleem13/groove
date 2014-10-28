@@ -53,7 +53,17 @@ groovepacks_controllers.
                         } else if(cur_item.import_info.status=='not_started') {
                             content+='Import not started.';
                         } else if(cur_item.import_info.status=='in_progress') {
-                            content+='Import in progress.';
+                            if(cur_item.import_info.to_import > 0) {
+                                content+='Imported '+(cur_item.import_info.success_imported+cur_item.import_info.previous_imported)+'/'+cur_item.import_info.to_import+' Orders';
+                                if(cur_item.import_info.current_increment_id !='') {
+                                    content+='<br/>Order #'+cur_item.import_info.current_increment_id;
+                                }
+                                if(cur_item.import_info.current_order_items >0) {
+                                    content+= '<br/> Imported '+cur_item.import_info.current_order_imported_item+'/'+cur_item.import_info.current_order_items+' Products';
+                                }
+                            } else {
+                                content+='Import in progress.';
+                            }
                         } else if(cur_item.import_info.status=='failed') {
                             content+='Import failed.';
                         }

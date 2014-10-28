@@ -8,6 +8,7 @@ module Groovepacker
             credential = handler[:credential]
             client = handler[:store_handle][:handle]
             session = handler[:store_handle][:session]
+            import_item = handler[:import_item]
             result = self.build_result
             @filters_array = {}
             @filters = {}
@@ -38,8 +39,19 @@ module Groovepacker
               if response.success?
                 if !response.body[:sales_order_list_response][:result][:item].nil?
                   result[:total_imported] =  response.body[:sales_order_list_response][:result][:item].length
+                  import_item.current_increment_id = ''
+                  import_item.success_imported = 0
+                  import_item.previous_imported = 0
+                  import_item.current_order_items = -1
+                  import_item.current_order_imported_item = -1
+                  import_item.to_import = result[:total_imported]
+                  import_item.save
 
                   response.body[:sales_order_list_response][:result][:item].each do |item|
+                    import_item.current_increment_id = item[:increment_id]
+                    import_item.current_order_items = -1
+                    import_item.current_order_imported_item = -1
+                    import_item.save
                     order_info = client.call(:sales_order_info,
                       message:{sessionId: session, orderIncrementId: item[:increment_id]})
 
@@ -53,6 +65,9 @@ module Groovepacker
                       @order.store = credential.store
                       line_items = order_info[:items]
                       if line_items[:item].is_a?(Hash)
+                        import_item.current_order_items = 1
+                        import_item.current_order_imported_item = 0
+                        import_item.save
                           if line_items[:item][:product_type] == 'simple'
                             @order_item = OrderItem.new
                             @order_item.price = line_items[:item][:price]
@@ -77,7 +92,12 @@ module Groovepacker
                                   sku:line_items[:item][:sku] })
                             end
                           end
+                        import_item.current_order_imported_item = 1
+                        import_item.save
                       else
+                        import_item.current_order_items = line_items[:item].length
+                        import_item.current_order_imported_item = 0
+                        import_item.save
                         line_items[:item].each do |line_item|
                           if line_item[:product_type] == 'simple'
                             @order_item = OrderItem.new
@@ -89,7 +109,7 @@ module Groovepacker
 
                             if ProductSku.where(:sku=>@order_item.sku).length == 0
                               product_id = Groovepacker::Store::Importers::Magento::
-                                ProductsImporter.new(handler).import_single({ 
+                                ProductsImporter.new(handler).import_single({
                                   sku: @order_item.sku })
                             else
                               product_id = ProductSku.where(:sku=>@order_item.sku).first.product_id
@@ -99,10 +119,12 @@ module Groovepacker
                           else
                             if ProductSku.where(:sku=>line_item[:sku]).length == 0
                               Groovepacker::Store::Importers::Magento::
-                                ProductsImporter.new(handler).import_single({ 
+                                ProductsImporter.new(handler).import_single({
                                   sku: line_item[:sku] })
                             end
                           end
+                          import_item.current_order_imported_item = import_item.current_order_imported_item + 1
+                          import_item.save
                         end
                       end
 
@@ -126,16 +148,24 @@ module Groovepacker
                         end
                         @order.set_order_status
                         result[:success_imported] = result[:success_imported] + 1
+                        import_item.success_imported = result[:success_imported]
+                        import_item.save
                       end
                     else
                       result[:previous_imported] = result[:previous_imported] + 1
+                      import_item.previous_imported = result[:previous_imported]
+                      import_item.save
                     end
                   end
                 end
+              else
+
               end
             rescue Exception => e
               result[:status] &= false
-              result[:messages].push(e)
+              result[:messages].push(e.message)
+              import_item.message = e.message
+              import_item.save
             end
             result
           end

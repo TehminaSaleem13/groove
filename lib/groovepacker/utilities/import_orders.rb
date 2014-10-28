@@ -41,7 +41,7 @@
 							import_item.status = 'in_progress'
 							import_item.save
 							context = Groovepacker::Store::Context.new(
-								Groovepacker::Store::Handlers::AmazonHandler.new(store))
+								Groovepacker::Store::Handlers::AmazonHandler.new(store,import_item))
 							result = context.import_orders
 							import_item.previous_imported = result[:previous_imported]
 							import_item.success_imported = result[:success_imported]
@@ -55,7 +55,7 @@
 							import_item.status = 'in_progress'
 							import_item.save
 							context = Groovepacker::Store::Context.new(
-								Groovepacker::Store::Handlers::EbayHandler.new(store))
+								Groovepacker::Store::Handlers::EbayHandler.new(store,import_item))
 							result = context.import_orders
 							import_item.previous_imported = result[:previous_imported]
 							import_item.success_imported = result[:success_imported]
@@ -69,7 +69,7 @@
 							import_item.status = 'in_progress'
 							import_item.save
 							context = Groovepacker::Store::Context.new(
-								Groovepacker::Store::Handlers::MagentoHandler.new(store))
+								Groovepacker::Store::Handlers::MagentoHandler.new(store,import_item))
 							result = context.import_orders
 							import_item.previous_imported = result[:previous_imported]
 							import_item.success_imported = result[:success_imported]
@@ -83,7 +83,7 @@
 							import_item.status = 'in_progress'
 							import_item.save
 							context = Groovepacker::Store::Context.new(
-								Groovepacker::Store::Handlers::ShipstationHandler.new(store))
+								Groovepacker::Store::Handlers::ShipstationHandler.new(store,import_item))
 							result = context.import_orders
 							import_item.previous_imported = result[:previous_imported]
 							import_item.success_imported = result[:success_imported]

@@ -7,6 +7,7 @@ module Groovepacker
             handler = self.get_handler
             mws = handler[:store_handle][:main_handle]
             credential = handler[:credential]
+            import_item = handler[:import_item]
             result = self.build_result
 
             begin
@@ -23,7 +24,18 @@ module Groovepacker
 
               if !@orders.nil?
                 result[:total_imported] = @orders.length
+                import_item.current_increment_id = ''
+                import_item.success_imported = 0
+                import_item.previous_imported = 0
+                import_item.current_order_items = -1
+                import_item.current_order_imported_item = -1
+                import_item.to_import = result[:total_imported]
+                import_item.save
                 @orders.each do |order|
+                  import_item.current_increment_id = order.amazon_order_id
+                  import_item.current_order_items = -1
+                  import_item.current_order_imported_item = -1
+                  import_item.save
                   if Order.where(:increment_id=>order.amazon_order_id).length == 0
                     @order = Order.new
                     @order.status = 'awaiting'
@@ -33,7 +45,9 @@ module Groovepacker
                     
                     order_items  = 
                       mws.orders.list_order_items :amazon_order_id => order.amazon_order_id
-
+                    import_item.current_order_items = order_items.length
+                    import_item.current_order_imported_item = 0
+                    import_item.save
                     order_items.order_items.each do |item|
                       order_item = OrderItem.new
                       unless item.item_price.nil?
@@ -72,6 +86,8 @@ module Groovepacker
                       end
                       order_item.name = item.title
                       @order.order_items << order_item
+                      import_item.current_order_imported_item = import_item.current_order_imported_item + 1
+                      import_item.save
                     end
                     
                     unless order.shipping_address.nil?
@@ -98,15 +114,21 @@ module Groovepacker
                       end
                       @order.set_order_status
                       result[:success_imported] = result[:success_imported] + 1
+                      import_item.success_imported = result[:success_imported]
+                      import_item.save
                     end
                   else
                     result[:previous_imported] = result[:previous_imported] + 1
+                    import_item.previous_imported = result[:previous_imported]
+                    import_item.save
                   end
                 end
               end
             rescue Exception => e
               result[:status] &= false
               result[:messages].push(e.message)
+              import_item.message = e.message
+              import_item.save
             end
             result
           end #import order ends
