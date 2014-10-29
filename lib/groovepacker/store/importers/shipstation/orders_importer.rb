@@ -8,6 +8,7 @@ module Groovepacker
             handler = self.get_handler
             credential = handler[:credential]
             client = handler[:store_handle]
+            import_item = handler[:import_item]
             result = self.build_result
 
             begin
@@ -21,7 +22,19 @@ module Groovepacker
               # result[:total_imported] = orders.length
               unless orders.nil?
                 result[:total_imported] = orders.length
+                import_item.current_increment_id = ''
+                import_item.success_imported = 0
+                import_item.previous_imported = 0
+                import_item.current_order_items = -1
+                import_item.current_order_imported_item = -1
+                import_item.to_import = result[:total_imported]
+                import_item.save
+
                 orders.each do |order|
+                  import_item.current_increment_id = order.order_number
+                  import_item.current_order_items = -1
+                  import_item.current_order_imported_item = -1
+                  import_item.save
                   if Order.where(:increment_id=>order.order_number).length == 0
                     shipstation_order = Order.new
                     shipstation_order.store = credential.store
@@ -29,6 +42,9 @@ module Groovepacker
 
                     order_items = client.order_items.where("order_id"=>order.order_id)
                     unless order_items.nil?
+                      import_item.current_order_items = order_items.length
+                      import_item.current_order_imported_item = 0
+                      import_item.save
                       order_items.each do |item|
                         order_item = OrderItem.new
                         import_order_item(order_item, item)
@@ -75,6 +91,8 @@ module Groovepacker
                         end
       
                         shipstation_order.order_items << order_item
+                        import_item.current_order_imported_item = import_item.current_order_imported_item + 1
+                        import_item.save
                       end
                     end
                     if shipstation_order.save
@@ -86,15 +104,21 @@ module Groovepacker
                       end
                       shipstation_order.set_order_status
                       result[:success_imported] = result[:success_imported] + 1
+                      import_item.success_imported = result[:success_imported]
+                      import_item.save
                     end
                   else
                       result[:previous_imported] = result[:previous_imported] + 1
+                      import_item.previous_imported = result[:previous_imported]
+                      import_item.save
                   end
                 end
               end
             rescue Exception => e
               result[:status] &= false
               result[:messages].push(e.message)
+              import_item.message = e.message
+              import_item.save
               puts "Exception"
               puts e.message.inspect
               puts e.backtrace.join("\n")

@@ -7,6 +7,7 @@ module Groovepacker
             handler = self.get_handler
             credential = handler[:credential]
             ebay = handler[:store_handle]
+            import_item = handler[:import_item]
             result = self.build_result
             
             begin
@@ -21,7 +22,13 @@ module Groovepacker
 
                 result[:total_imported] = 
                   seller_list.soldList.orderTransactionArray.length
-
+                import_item.current_increment_id = ''
+                import_item.success_imported = 0
+                import_item.previous_imported = 0
+                import_item.current_order_items = -1
+                import_item.current_order_imported_item = -1
+                import_item.to_import = result[:total_imported]
+                import_item.save
                 @ordercnt = 0
 
                 order_or_transactionArray.each do |order_transaction|
@@ -37,7 +44,10 @@ module Groovepacker
                       transaction = item_transactions.transactionArray.first
                       sellingManagerSalesRecordNumber =
                         transaction.shippingDetails.sellingManagerSalesRecordNumber
-
+                      import_item.current_increment_id = sellingManagerSalesRecordNumber
+                      import_item.current_order_items = -1
+                      import_item.current_order_imported_item = -1
+                      import_item.save
                       if Order.where(:increment_id=>sellingManagerSalesRecordNumber).length == 0
                         order = Order.new
 
@@ -50,9 +60,13 @@ module Groovepacker
                           end
                           order.set_order_status
                           result[:success_imported] = result[:success_imported] + 1
+                          import_item.success_imported = result[:success_imported]
+                          import_item.save
                         end
                       else # transaction is already imported
                         result[:previous_imported] = result[:previous_imported] + 1
+                        import_item.previous_imported = result[:previous_imported]
+                        import_item.save
                       end
                     else # transactions Array is not equal to 1
                       result[:status] &= false
@@ -74,7 +88,10 @@ module Groovepacker
                       else
                        sellingManagerSalesRecordNumber = nil
                       end
-
+                      import_item.current_increment_id = sellingManagerSalesRecordNumber
+                      import_item.current_order_items = -1
+                      import_item.current_order_imported_item = -1
+                      import_item.save
                       if Order.where(:increment_id=>sellingManagerSalesRecordNumber).length == 0
                         order = Order.new
                         order = build_order_with_multiple_items_from_ebay(order, order_detail, handler)
@@ -85,9 +102,13 @@ module Groovepacker
                           end
                           order.set_order_status
                           result[:success_imported] = result[:success_imported] + 1
+                          import_item.success_imported = result[:success_imported]
+                          import_item.save
                         end
                       else #order is already imported
                         result[:previous_imported] = result[:previous_imported] + 1
+                        import_item.previous_imported = result[:previous_imported]
+                        import_item.save
                       end
                     else
                       #order detail cannot be more than 1
@@ -117,6 +138,7 @@ module Groovepacker
               order_transaction, handler)
             credential = handler[:credential]
             ebay = handler[:store_handle]
+            import_item = handler[:import_item]
             
             order.status = 'awaiting'
             order.store = credential.store
@@ -137,7 +159,9 @@ module Groovepacker
                 order.firstname = split_name.join(' ')
               end
             end
-
+            import_item.current_order_items = 1
+            import_item.current_order_imported_item = 0
+            import_item.save
             #single item transaction does not have transaction array
             order_item = OrderItem.new
             order_item.price = transaction.transactionPrice
@@ -154,13 +178,15 @@ module Groovepacker
                   credential: credential
                 })
             order.order_items << order_item
-
+            import_item.current_order_imported_item = 1
+            import_item.save
             order
           end
 
           def build_order_with_multiple_items_from_ebay(order, order_detail, handler)
             credential = handler[:credential]
             ebay = handler[:store_handle]
+            import_item = handler[:import_item]
             order.status = 'awaiting'
             order.store = credential.store
             order.increment_id = order_detail.shippingDetails.sellingManagerSalesRecordNumber
@@ -179,7 +205,9 @@ module Groovepacker
                 order.firstname = split_name.join(' ')
               end
             end
-
+            import_item.current_order_items = order_detail.transactionArray.length
+            import_item.current_order_imported_item = 0
+            import_item.save
             #multiple order items from transaction array
             order_detail.transactionArray.each do |transaction|
               order_item = OrderItem.new
@@ -197,6 +225,8 @@ module Groovepacker
                     credential: credential
                   })
               order.order_items << order_item
+              import_item.current_order_imported_item = import_item.current_order_imported_item + 1
+              import_item.save
             end
 
             order
