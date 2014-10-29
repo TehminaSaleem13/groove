@@ -13,17 +13,17 @@ groovepacks_services.factory('editable', ['$rootScope',function($rootScope) {
     };
     var set_editing = function(value) {
         editing = value;
-        $rootScope.$broadcast("editing-a-var",{ident:value});
-    }
+        $rootScope.$emit("editing-a-var",{ident:value});
+    };
 
     var unset_editing = function() {
         editing = false;
-        $rootScope.$broadcast("editing-a-var",{ident:false});
-    }
+        $rootScope.$emit("editing-a-var",{ident:false});
+    };
 
     var editing_status = function() {
         return editing;
-    }
+    };
 
     return {
         default: config,

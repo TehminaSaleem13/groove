@@ -43,7 +43,7 @@ body {
     text-align:left;
     background:#888888;
     .progress-bar {
-      padding-left:25px;
+      padding-left:10px;
       text-align:left;
     }
   }
@@ -57,6 +57,7 @@ body {
   .btn;
   &.label {
     color:#f4f4f4;
+    border:none;
     &:hover,
     &:focus {
       color:#fff;
@@ -1547,7 +1548,7 @@ div.input-style {
 }
 .persist-notifications-background {
   position:fixed;
-  z-index:9900;
+  z-index:8000;
   width:100%;
   top:0px;
   height:0%;
@@ -1566,7 +1567,7 @@ div.input-style {
 }
 .persist-notifications {
   position:fixed;
-  z-index:9900;
+  z-index:8000;
   width:100%;
   top:0px;
   background: rgba(129, 142, 133, 0.40);
@@ -1677,17 +1678,17 @@ div.input-style {
   width:100%;
   background: rgba(255,255,255,0.98);
   &.fade {
-    z-index: -3000;
-    visibility: hidden;
-    opacity: 0;
+    z-index:9000;
+    visibility: visible;
+    opacity: 1;
     -webkit-transition: opacity 0.15s linear;
     -moz-transition: opacity 0.15s linear;
     -o-transition: opacity 0.15s linear;
     transition: opacity 0.15s linear;
-    &.in {
-      z-index:3000;
-      visibility: visible;
-      opacity: 1;
+    &.ng-hide {
+      z-index: -9000;
+      visibility: hidden;
+      opacity: 0;
     }
   }
 
@@ -1703,6 +1704,25 @@ div.input-style {
     button+button {
       margin-left:10px;
     }
+  }
+}
+.editing-mode {
+  position:fixed;
+
+  right:50px;
+  padding:16px 10px 10px 10px;
+  border-radius: 0px 0px 15px 15px;
+  background: #f5f5f5;
+  border:1px #ccc solid;
+  box-shadow:0px 1px 15px 1px #ccc;
+  top: -100px;
+  z-index:3000;
+  -webkit-transition: 2s ease-in top;
+  -moz-transition: 2s ease-in top;
+  -o-transition: 2s ease-in top;
+  transition: 2s ease-in top;
+  &.in {
+    top:0px;
   }
 }
 .alert {

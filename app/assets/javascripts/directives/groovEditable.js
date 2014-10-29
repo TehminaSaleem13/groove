@@ -1,4 +1,4 @@
-groovepacks_directives.directive('groovEditable', ['$timeout','editable',function ($timeout,editable) {
+groovepacks_directives.directive('groovEditable', ['$timeout','editable','$rootScope',function ($timeout,editable,$rootScope) {
     return {
         restrict:"A",
         transclude: true,
@@ -153,8 +153,8 @@ groovepacks_directives.directive('groovEditable', ['$timeout','editable',functio
                     }
                 });
 
-                scope.$on("editing-a-var",function(event,data) {
-                    if(data.ident == false || data.ident == scope.custom_identifier) {
+                $rootScope.$on("editing-a-var",function(event,data) {
+                    if(data.ident === false || data.ident === scope.custom_identifier) {
                         scope.disabled = false;
                     } else {
                         scope.disabled = true;

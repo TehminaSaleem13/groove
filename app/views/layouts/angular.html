@@ -14,7 +14,19 @@
     <%= yield(:head) %>
     <%= airbrake_javascript_notifier %>
 </head>
-<body class="container-well" ng-app="groovepacks">
+<body class="container-well" ng-app="groovepacks" ng-controller="appCtrl">
+<div class="logout-box fade" ng-show="show_logout_box">
+    <div class="center-message">
+        <h2>Continue session?</h2>
+        <button class="modal-save-button" ng-click="log_out('everyone_else')">Yes, Sign Out all other sessions</button>
+        <button ng-click="log_out('me')" class="modal-cancel-button">No, Sign this session out</button>
+    </div>
+</div>
+<div class="editing-mode" ng-class="{in: currently_editing}">
+    <div class="top-message">
+        <button class="groove-button label label-info" ng-click="stop_editing()">Exit Edit Mode</button>
+    </div>
+</div>
 <div groov-persist-notification></div>
 <div class="container main-body">
     <div class="gradient-well">
