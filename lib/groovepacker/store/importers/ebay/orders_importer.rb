@@ -123,7 +123,9 @@ module Groovepacker
               end # end of sellers list's sold list
             rescue Exception => e
               result[:status] &= false
-              result[:messages].push(e)
+              result[:messages].push(e.message)
+              import_item.message = e.message
+              import_item.save
             end
             result
           end
