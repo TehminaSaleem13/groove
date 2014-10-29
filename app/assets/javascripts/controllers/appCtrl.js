@@ -10,74 +10,103 @@ groovepacks_controllers.
 
             if (typeof(message) != 'undefined') {
 
-                console.log("socket",message);
+                //console.log("socket",message);
                 $scope.import_summary = message;
-                $scope.import_groov_popover = {title:'',content:''};
+                $scope.import_groov_popover = {title:'',content:'',data:[]};
 
                 if($scope.import_summary.import_info.status =='completed') {
-                    $scope.import_groov_popover.title = $interpolate('Last import: ' +
-                                                                     '{{import_summary.import_info.updated_at | date:\'EEE MM/dd/yy hh:mm a\'}}')($scope);
+                    $scope.import_groov_popover.title = 'Last import: '+$filter('date')($scope.import_summary.import_info.updated_at,'EEE MM/dd/yy hh:mm a');
                 } else if($scope.import_summary.import_info.status == 'in_progress') {
                     $scope.import_groov_popover.title = 'Import in Progress';
                 }  else if($scope.import_summary.import_info.status == 'not_started') {
-                    $scope.import_groov_popover.title = 'Click to Start Import';
+                    $scope.import_groov_popover.title = 'Import not started';
                 }
-
-                var content = '<table style="font-size: 12px;">';
-                for(var i=0; i<$scope.import_summary.import_items.length; i++) {
-                    var cur_item = $scope.import_summary.import_items[i];
-                    if(cur_item && cur_item.store_info) {
-                        content+='<tr><td>';
-                        if(cur_item.store_info.store_type=='Ebay') {
-                            content += '<img src="https://s3.amazonaws.com/groovepacker/EBAY-BUTTON.png" width="60px" ' +
-                                       'height="50px" alt="EBay"/>'
-                        } else if(cur_item.store_info.store_type=='Amazon') {
-                            content += '<img src="https://s3.amazonaws.com/groovepacker/amazonLogo.jpg" width="60px" ' +
-                                       'height="50px" alt="Amazon"/>'
-                        } else if(cur_item.store_info.store_type=='Magento') {
-                            content += '<img src="https://s3.amazonaws.com/groovepacker/MagentoLogo.jpg" width="60px" ' +
-                                       'height="50px" alt="Magento"/>'
-                        } else if(cur_item.store_info.store_type=='Shipstation') {
-                            content += '<img src="/assets/images/ShipStation_logo.png" width="60px" ' +
-                                       'height="50px" alt="Shipstation"/>'
-                        }
-                        content+='</td>';
-                        content+=$interpolate('<td>{{store_info.name}}</td>')(cur_item);
-                        content+='<td style="text-align:right;">&nbsp;';
-                        if(cur_item.import_info.status=='completed') {
-                            if (cur_item.import_info.success_imported == 0) {
-                                content+=' No new orders found.';
-                            } else {
-                                content+=$interpolate(' {{import_info.success_imported}} New Orders Imported.')(cur_item);
-                            }
-                        } else if(cur_item.import_info.status=='not_started') {
-                            content+='Import not started.';
-                        } else if(cur_item.import_info.status=='in_progress') {
-                            if(cur_item.import_info.to_import > 0) {
-                                content+='Imported '+(cur_item.import_info.success_imported+cur_item.import_info.previous_imported)+'/'+cur_item.import_info.to_import+' Orders';
-                                if(cur_item.import_info.current_increment_id !='') {
-                                    content+='<br/>Order #'+cur_item.import_info.current_increment_id;
-                                }
-                                if(cur_item.import_info.current_order_items >0) {
-                                    content+= '<br/> Imported '+cur_item.import_info.current_order_imported_item+'/'+cur_item.import_info.current_order_items+' Products';
-                                }
-                            } else {
-                                content+='Import in progress.';
-                            }
-                        } else if(cur_item.import_info.status=='failed') {
-                            content+='Import failed.';
-                            if(cur_item.import_info.message != '') {
-                                content+='<br/>'+cur_item.import_info.message;
-                            }
-                        }
-                        content+='</td></tr>';
+                var logos = {
+                    Ebay: {
+                          alt:"Ebay",
+                          src: "https://s3.amazonaws.com/groovepacker/EBAY-BUTTON.png"
+                    },
+                    Amazon: {
+                            alt:"Amazon",
+                            src: "https://s3.amazonaws.com/groovepacker/amazonLogo.jpg"
+                    },
+                    Magento: {
+                        alt:"Magento",
+                        src: "https://s3.amazonaws.com/groovepacker/MagentoLogo.jpg"
+                    },
+                    Shipstation: {
+                        alt:"ShipStation",
+                        src: "https://s3.amazonaws.com/groovepacker/ShipStation_logo.jpg"
                     }
 
+                };
+                for (var i= 0; i< $scope.import_summary.import_items.length; i++) {
+                    var import_item =$scope.import_summary.import_items[i];
+                    if(import_item && import_item.store_info) {
+                        var single_data = {progress:{},progress_product:{},name:''};
+                        single_data.logo = logos[import_item.store_info.store_type];
+                        single_data.name = import_item.store_info.name;
+                        single_data.progress.type = import_item.import_info.status;
+                        single_data.progress.value = 0;
+                        single_data.progress.message = '';
+                        single_data.progress_product.show = false;
+                        single_data.progress_product.value = 0;
+                        single_data.progress_product.message = '';
+                        single_data.progress_product.type = 'in_progress';
+
+
+                        if(import_item.import_info.status=='completed') {
+                            single_data.progress.value = 100;
+                            if (import_item.import_info.success_imported <= 0) {
+                                single_data.progress.message +=' No new orders found.';
+                            } else {
+                                single_data.progress.message += import_item.import_info.success_imported+' New Orders Imported.';
+                            }
+                        } else if(import_item.import_info.status=='not_started') {
+                            single_data.progress.message += 'Import not started.';
+                        } else if(import_item.import_info.status == 'in_progress') {
+                            if(import_item.import_info.to_import > 0) {
+                                single_data.progress.value =(((import_item.import_info.success_imported + import_item.import_info.previous_imported)/import_item.import_info.to_import)*100);
+                                single_data.progress.message += 'Imported '+(import_item.import_info.success_imported+import_item.import_info.previous_imported)+'/'+import_item.import_info.to_import+' Orders ';
+                                if(import_item.import_info.current_increment_id !='') {
+                                    single_data.progress.message += 'Current #'+import_item.import_info.current_increment_id+' ';
+                                }
+                                if(import_item.import_info.current_order_items > 0 ) {
+                                    single_data.progress_product.show = true;
+                                    single_data.progress_product.value = (import_item.import_info.current_order_imported_item/import_item.import_info.current_order_items) *100;
+                                    if(single_data.progress_product.value == 0 ) {
+                                        single_data.progress_product.type = 'not_started';
+                                    } else if(single_data.progress_product.value == 100) {
+                                        single_data.progress_product.type = 'completed';
+                                    }
+                                    single_data.progress_product.message += 'Imported '+import_item.import_info.current_order_imported_item+'/'+import_item.import_info.current_order_items+' Products';
+                                }
+                            } else {
+                                single_data.progress.message += 'Import in progress.';
+                            }
+                        } else if(import_item.import_info.status=='failed') {
+                            single_data.progress.value = 100;
+                            single_data.progress.message += 'Import failed';
+                            if(import_item.import_info.message != '') {
+                                single_data.progress.message += ': '+import_item.import_info.message;
+                            }
+                        }
+                        $scope.import_groov_popover.data.push(single_data);
+                    }
                 }
-                content+='</table>';
-
-
-                $scope.import_groov_popover.content =  content;
+                $scope.import_groov_popover.content =
+                '<table style="font-size: 12px;width:100%;">' +
+                    '<tr ng-repeat="store in import_groov_popover.data">' +
+                        '<td width="60px;" style="white-space: nowrap;">' +
+                            '<img ng-src="{{store.logo.src}}" width="60px" height="50px" alt="{{store.logo.alt}}"/>' +
+                        '</td>' +
+                        '<td style="white-space: nowrap;">{{store.name}}</td>' +
+                        '<td style="text-align:right;width:99%;padding:3px;">' +
+                            '<progressbar type="{{store.progress.type}}" value="store.progress.value"> {{store.progress.message}}</progressbar>' +
+                            '<progressbar ng-show="store.progress_product.show" type="{{store.progress_product.type}}" value="store.progress_product.value">{{store.progress_product.message}}</progressbar>' +
+                        '</td>'+
+                    '</tr>' +
+                '</table>';
 
             }
         });

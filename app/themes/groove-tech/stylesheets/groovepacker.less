@@ -34,6 +34,24 @@ body {
   width: 400px;
 }
 
+.nav .popover {
+  max-width:700px;
+  width:500px;
+  .progress {
+    white-space: nowrap;
+    margin:0px;
+    text-align:left;
+    background:#888888;
+    .progress-bar {
+      padding-left:25px;
+      text-align:left;
+    }
+  }
+  .progress+.progress {
+    margin-top:10px;
+  }
+}
+
 /* Button Style in list layout */
 .groove-button{
   .btn;
@@ -1509,8 +1527,11 @@ div.input-style {
 
 
 }
-.progress-bar-scheduled {
+.progress-bar-scheduled, .progress-bar-not_started {
   .progress-bar-warning;
+}
+.progress-bar-failed {
+  .progress-bar-danger;
 }
 .progress-bar-in_progress {
   .progress-bar-info;
@@ -1567,6 +1588,7 @@ div.input-style {
     margin-bottom:0px;
     height:22px;
     border-radius:0px;
+    white-space: nowrap;
     background:transparent;
     .progress-bar {
       text-align:left;
