@@ -176,6 +176,11 @@ groovepacks_controllers.
             description:'Focus search/scan bar (if present)',
             callback:$rootScope.focus_search
         });
+        hotkeys.bindTo($scope).add({
+           combo: ['mod+shift+e'],
+           description:'Exit Editing mode',
+           callback:$scope.stop_editing
+        });
 
         //myscope.get_status();
         $rootScope.$on('$stateChangeStart',function(event,toState,toParams,fromState,fromParams) {

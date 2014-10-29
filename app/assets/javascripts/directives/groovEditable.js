@@ -156,6 +156,7 @@ groovepacks_directives.directive('groovEditable', ['$timeout','editable','$rootS
                 $rootScope.$on("editing-a-var",function(event,data) {
                     if(data.ident === false || data.ident === scope.custom_identifier) {
                         scope.disabled = false;
+                        scope.editing = -1;
                     } else {
                         scope.disabled = true;
                     }
