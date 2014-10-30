@@ -77,14 +77,33 @@ class OrdersController < ApplicationController
       begin
         credential = ShipworksCredential.find_by_auth_token(auth_token)
         unless credential.nil? || !credential.store.status
+          import_item = ImportItem.find_by_store_id(credential.store.id)
+          if import_item.nil?
+            import_item = ImportItem.new
+            import_item.store_id = credential.store.id
+          end
+          import_item.status = 'in_progress'
+          import_item.current_increment_id = ''
+          import_item.success_imported = 0
+          import_item.previous_imported = 0
+          import_item.current_order_items = -1
+          import_item.current_order_imported_item = -1
+          import_item.to_import = 1
+          import_item.save
           Groovepacker::Store::Context.new(
-            Groovepacker::Store::Handlers::ShipworksHandler.new(credential.store)).import_order(params["ShipWorks"]["Customer"]["Order"])
+            Groovepacker::Store::Handlers::ShipworksHandler.new(credential.store,import_item)).import_order(params["ShipWorks"]["Customer"]["Order"])
+          import_item.status = 'completed'
+          import_item.save
           render nothing: true
         else
           render status: 401, nothing: true
         end
       rescue Exception => e
-        logger.info(e)
+        logger.info(e.message)
+        logger.info(e.backtrace.inspect)
+        import_item.status = 'failed'
+        import_item.message = e.message
+        import_item.save
       end
     else
       render status: 401, nothing: true
@@ -967,30 +986,6 @@ class OrdersController < ApplicationController
     end
     render json: result
   end
-
-  def import_status
-    result = Hash.new
-    result['status'] = true
-    result['error_messages'] = []
-    result['success_messages'] = []
-    result['notice_messages'] = []
-    result['data'] = Hash.new
-
-    order_import_summaries = OrderImportSummary.order('updated_at' + " " + 'desc')
-    if !order_import_summaries.empty?
-      order_import_summary = order_import_summaries.first
-      result['data']['import_summary'] = Hash.new
-      if !order_import_summary.nil?
-        result['data']['import_summary']['import_info'] = order_import_summary
-        result['data']['import_summary']['import_items'] = []
-        order_import_summary.import_items.each do |import_item|
-          result['data']['import_summary']['import_items'].push(
-            {store_info: import_item.store, import_info: import_item})
-        end
-      end
-    end
-    render json: result
-  end  
 
   def confirmation
     

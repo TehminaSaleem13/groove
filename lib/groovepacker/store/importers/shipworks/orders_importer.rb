@@ -8,6 +8,9 @@ module Groovepacker
             handler = self.get_handler
             credential = handler[:credential]
             store = handler[:store_handle]
+            import_item = handler[:import_item]
+            import_item.current_increment_id = order["Number"]
+            import_item.save
 
             if order["OnlineStatus"] == 'Processing' &&
               Order.find_by_increment_id(order["Number"]).nil?
@@ -27,6 +30,9 @@ module Groovepacker
                 country: ship_address["CountryCode"],
                 order_total: order["Total"])
 
+              import_item.current_order_items = order["Item"].length
+              import_item.current_order_imported_item = 0
+              import_item.save
               order["Item"].each do |item|
                 if !item["SKU"].nil? && ProductSku.find_by_sku(item["SKU"])
                   product = ProductSku.find_by_sku(item["SKU"]).product
@@ -40,9 +46,13 @@ module Groovepacker
                   qty: item["Quantity"],
                   row_total: item["TotalPrice"]
                 )
+                import_item.current_order_imported_item = import_item.current_order_imported_item + 1
+                import_item.save
               end
 
               order_m.set_order_status
+              import_item.success_imported = 1
+              import_item.save
 
               order_m.addactivity("Order Import", store.name+" Import")
               order_m.order_items.each do |item|

@@ -13,9 +13,9 @@
 						if order_import_summary == ordered_import_summaries.first
 							order_import_summary.status = 'in_progress'
 							order_import_summary.save
-							ImportItem.delete_all
+							ImportItem.where('order_import_summary_id IS NOT NULL').delete_all
 							# add import item for each store
-							stores = Store.where("status = '1' AND store_type != 'system'")
+							stores = Store.where("status = '1' AND store_type != 'system' AND store_type != 'Shipworks'")
 							if stores.length != 0	
 								stores.each do |store|
 									import_item = ImportItem.new

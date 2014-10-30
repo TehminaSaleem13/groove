@@ -28,8 +28,9 @@ class HomeController < ApplicationController
     GenerateBarcode.where("status != 'completed' AND status !='cancelled'").each do |barcode|
       barcode.emit_data_to_user
     end
-    OrderImportSummary.all.each do |summary|
-      summary.emit_data_to_user
+    import_summary = OrderImportSummary.top_summary
+    unless import_summary.nil?
+      import_summary.emit_data_to_user
     end
     render json:{status:true}
   end

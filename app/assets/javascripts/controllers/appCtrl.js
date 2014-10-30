@@ -36,12 +36,16 @@ groovepacks_controllers.
                     },
                     Shipstation: {
                         alt:"ShipStation",
-                        src: "https://s3.amazonaws.com/groovepacker/ShipStation_logo.jpg"
+                        src: "/assets/images/ShipStation_logo.png"
+                    },
+                    Shipworks: {
+                        alt:"ShipWorks",
+                        src: "/assets/images/shipworks_logo.png"
                     }
 
                 };
-                for (var i= 0; i< $scope.import_summary.import_items.length; i++) {
-                    var import_item =$scope.import_summary.import_items[i];
+                for (var i = 0; i < $scope.import_summary.import_items.length; i++) {
+                    var import_item = $scope.import_summary.import_items[i];
                     if(import_item && import_item.store_info) {
                         var single_data = {progress:{},progress_product:{},name:''};
                         single_data.logo = logos[import_item.store_info.store_type];
@@ -57,7 +61,9 @@ groovepacks_controllers.
 
                         if(import_item.import_info.status=='completed') {
                             single_data.progress.value = 100;
-                            if (import_item.import_info.success_imported <= 0) {
+                            if(import_item.store_info.store_type == 'Shipworks') {
+                                single_data.progress.message += 'Last Imported Order #'+import_item.import_info.current_increment_id+' at '+$filter('date')(import_item.import_info.updated_at,'dd MMM hh:mm a');
+                            } else if (import_item.import_info.success_imported <= 0) {
                                 single_data.progress.message +=' No new orders found.';
                             } else {
                                 single_data.progress.message += import_item.import_info.success_imported+' New Orders Imported.';
@@ -65,21 +71,27 @@ groovepacks_controllers.
                         } else if(import_item.import_info.status=='not_started') {
                             single_data.progress.message += 'Import not started.';
                         } else if(import_item.import_info.status == 'in_progress') {
+                            $scope.import_summary.import_info.status = 'in_progress';
                             if(import_item.import_info.to_import > 0) {
                                 single_data.progress.value =(((import_item.import_info.success_imported + import_item.import_info.previous_imported)/import_item.import_info.to_import)*100);
                                 single_data.progress.message += 'Imported '+(import_item.import_info.success_imported+import_item.import_info.previous_imported)+'/'+import_item.import_info.to_import+' Orders ';
                                 if(import_item.import_info.current_increment_id !='') {
                                     single_data.progress.message += 'Current #'+import_item.import_info.current_increment_id+' ';
                                 }
+                                single_data.progress_product.show = true;
                                 if(import_item.import_info.current_order_items > 0 ) {
-                                    single_data.progress_product.show = true;
                                     single_data.progress_product.value = (import_item.import_info.current_order_imported_item/import_item.import_info.current_order_items) *100;
-                                    if(single_data.progress_product.value == 0 ) {
-                                        single_data.progress_product.type = 'not_started';
-                                    } else if(single_data.progress_product.value == 100) {
-                                        single_data.progress_product.type = 'completed';
-                                    }
                                     single_data.progress_product.message += 'Imported '+import_item.import_info.current_order_imported_item+'/'+import_item.import_info.current_order_items+' Products';
+                                } else {
+                                    single_data.progress_product.value = 0;
+                                }
+                                if(single_data.progress_product.value == 0 ) {
+                                    if(import_item.import_info.current_order_items <= 0 ) {
+                                        single_data.progress_product.type = 'not_started';
+                                        single_data.progress_product.message = 'Import not started';
+                                    }
+                                } else if(single_data.progress_product.value == 100) {
+                                    single_data.progress_product.type = 'completed';
                                 }
                             } else {
                                 single_data.progress.message += 'Import in progress.';
@@ -98,7 +110,7 @@ groovepacks_controllers.
                 '<table style="font-size: 12px;width:100%;">' +
                     '<tr ng-repeat="store in import_groov_popover.data">' +
                         '<td width="60px;" style="white-space: nowrap;">' +
-                            '<img ng-src="{{store.logo.src}}" width="60px" height="50px" alt="{{store.logo.alt}}"/>' +
+                            '<img ng-src="{{store.logo.src}}" width="60px" alt="{{store.logo.alt}}"/>' +
                         '</td>' +
                         '<td style="white-space: nowrap;">{{store.name}}</td>' +
                         '<td style="text-align:right;width:99%;padding:3px;">' +
