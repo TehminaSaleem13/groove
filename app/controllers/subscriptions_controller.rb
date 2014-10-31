@@ -10,7 +10,7 @@
 
     def confirm_payment
       puts params.inspect
-      if @subscription = Subscription.create(stripe_user_token: params[:stripe_user_token], 
+      @subscription = Subscription.create(stripe_user_token: params[:stripe_user_token], 
           tenant_name: params[:tenant_name], 
           amount: params[:amount], 
           subscription_plan_id: params[:plan_id], 
@@ -18,7 +18,7 @@
           user_name: params[:user_name], 
           password: params[:password], 
           status: "started")
-
+      if @subscription
         if @subscription.save_with_payment
           render json: {valid: true, redirect_url: "subscriptions/show?transaction_id=#{@subscription.stripe_transaction_identifier}&notice=Congratulations! Your GroovePacker is being deployed!&amount=#{@subscription.amount}&email=#{@subscription.email}"}
         else

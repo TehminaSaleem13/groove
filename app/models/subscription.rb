@@ -23,13 +23,12 @@ class Subscription < ActiveRecord::Base
           #   :customer => customer.id,
           #   :description => self.email
           # )
-          
+          CreateTenant.create_tenant self
+          Apartment::Tenant.switch()
           transactions = Stripe::BalanceTransaction.all(:limit => 1)
           unless transactions.first.nil?
             self.stripe_transaction_identifier = transactions.first.id
             # CreateTenant.delay(:run_at => 1.seconds.from_now).create_tenant self
-            CreateTenant.create_tenant self
-            Apartment::Tenant.switch()
             unless customer.cards.data.first.nil?
               card_type = customer.cards.data.first.brand
               exp_month_of_card = customer.cards.data.first.exp_month

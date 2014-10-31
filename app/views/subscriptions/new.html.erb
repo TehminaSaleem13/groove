@@ -244,6 +244,7 @@
 						}
 					});
 				  document.getElementById('customButton').addEventListener('click', function(e)	{
+				  	e.preventDefault();
 				  	setTimeout(function(){
 					  	console.log(valid.tenant_name);
 					  	console.log(valid.email);
@@ -257,7 +258,6 @@
 						      email: $('#email').val(),
 						      allowRememberMe: false
 						    });
-						    e.preventDefault();
 						  };
 						}, 400);
 				  });
