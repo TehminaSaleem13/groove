@@ -226,8 +226,16 @@ class StoreSettingsController < ApplicationController
             @shipworks = ShipworksCredential.find_by_store_id(@store.id)
             begin
               if @shipworks.nil?
-                @store.shipworks_credential = ShipworksCredential.new(auth_token: SecureRandom.base64(16))
+                @store.shipworks_credential = ShipworksCredential.new(
+                  auth_token: SecureRandom.base64(16),
+                  shall_import_in_process: params[:shall_import_in_process],
+                  shall_import_new_order: params[:shall_import_new_order],
+                  shall_import_not_shipped: params[:shall_import_not_shipped])
                 new_record = true
+              else
+                @shipworks.update_attributes(shall_import_in_process: params[:shall_import_in_process],
+                  shall_import_new_order: params[:shall_import_new_order],
+                  shall_import_not_shipped: params[:shall_import_not_shipped])
               end
               @store.save
             rescue ActiveRecord::RecordInvalid => e

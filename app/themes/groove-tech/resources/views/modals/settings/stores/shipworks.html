@@ -14,6 +14,33 @@
   </div>
 
   <div class="row">
+    <div class="col-md-6">
+      <legend>Import Orders with following statuses</legend>
+
+      <div class="form-group">
+        <label class="control-label col-md-4 form-inline">In Process</label>
+        <div class="controls col-md-8 form-inline">
+          <div toggle-switch ng-model="stores.single.shall_import_in_process" groov-click="update_single_store()"></div>
+          </div>
+      </div>
+
+      <div class="form-group">
+        <label class="control-label col-md-4 form-inline">New Order</label>
+        <div class="controls col-md-8 form-inline">
+          <div toggle-switch ng-model="stores.single.shall_import_new_order" groov-click="update_single_store()"></div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="control-label col-md-4">Not Shipped</label>
+        <div class="controls col-md-8">
+          <div toggle-switch ng-model="stores.single.shall_import_not_shipped" groov-click="update_single_store()"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
     <div class="col-md-12">
       <legend>Instructions to setup Shipworks to import orders in Groovepacker</legend>
       <ol class="list-group">

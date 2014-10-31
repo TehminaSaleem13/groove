@@ -152,6 +152,9 @@ groovepacks_services.factory('stores',['$http','notification','$filter',function
                         stores.single.password = data.credentials.shipstation_credentials.password;
                     } else if(data.store.store_type == 'Shipworks') {
                         stores.single.auth_token = data.credentials.shipworks_credentials.auth_token;
+                        stores.single.shall_import_in_process = data.credentials.shipworks_credentials.shall_import_in_process;
+                        stores.single.shall_import_new_order = data.credentials.shipworks_credentials.shall_import_new_order;
+                        stores.single.shall_import_not_shipped = data.credentials.shipworks_credentials.shall_import_not_shipped;
                         stores.single.request_url = data.credentials.shipworks_hook_url;
                     }
 
