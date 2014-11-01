@@ -8,7 +8,7 @@ module.exports = {
     },
 
     baseUrl:
-        'http://' + (process.env.HTTP_HOST || 'localhost') +
-        ':' + (process.env.HTTP_PORT || '4000')
+        'http://' + (process.env.HTTP_HOST || 'test.testpacker.com') +
+        (process.env.HTTP_PORT ? ':'+ process.env.HTTP_PORT : '')
 
 };
