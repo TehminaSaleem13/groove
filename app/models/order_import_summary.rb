@@ -19,7 +19,11 @@ class OrderImportSummary < ActiveRecord::Base
     result['import_items'] = []
     import_items = ImportItem.where('order_import_summary_id = '+self.id.to_s+' OR order_import_summary_id is null')
     import_items.all.each do |import_item|
-      result['import_items'].push({store_info: import_item.store, import_info: import_item})
+      if import_item.store.nil?
+        import_item.destroy
+      else
+        result['import_items'].push({store_info: import_item.store, import_info: import_item})
+      end
     end
     GroovRealtime::emit('import_status_update',result,:tenant)
   end

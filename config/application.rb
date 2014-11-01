@@ -1,7 +1,7 @@
 require File.expand_path('../boot', __FILE__)
 
 require 'rails/all'
-
+require 'apartment/elevators/subdomain'
 if defined?(Bundler)
   # If you precompile assets before deploying to production, use this line
   Bundler.require(*Rails.groups(:assets => %w(development test)))
@@ -9,7 +9,6 @@ if defined?(Bundler)
   # Bundler.require(:default, :assets, Rails.env)
 end
 
-require File.dirname(__FILE__) + '/../lib/groovepacker/custom_logger.rb'
 module Groovepacks
   class Application < Rails::Application
     # Settings in config/environments/* take precedence over those specified here.
@@ -66,7 +65,6 @@ module Groovepacks
     # Autoload lib/ folder including all subdirectories
     config.autoload_paths += Dir["#{config.root}/lib/**/"]
     config.middleware.use 'Apartment::Elevators::Subdomain'
-    config.middleware.swap Rails::Rack::Logger, CustomLogger, :silenced => ["/orders/import_status.json"]
   end
 end
 require Rails.root.join('config','initializers','groove_constants.rb')
