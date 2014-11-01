@@ -33,21 +33,13 @@ module Groovepacker
               import_item.current_order_items = order["Item"].length
               import_item.current_order_imported_item = 0
               import_item.save
-              order["Item"].each do |item|
-                if !item["SKU"].nil? && ProductSku.find_by_sku(item["SKU"])
-                  product = ProductSku.find_by_sku(item["SKU"]).product
-                else
-                  product = import_product(item, store)
-                end
 
-                order_m.order_items.create(
-                  product: product, 
-                  price: item["UnitPrice"],
-                  qty: item["Quantity"],
-                  row_total: item["TotalPrice"]
-                )
-                import_item.current_order_imported_item = import_item.current_order_imported_item + 1
-                import_item.save
+              if order["Item"].is_a? (Array)
+                order["Item"].each do |item|
+                  import_order_item(item, import_item, order_m)
+                end
+              else
+                import_order_item(item, import_item, order_m)
               end
 
               order_m.set_order_status
@@ -83,6 +75,23 @@ module Groovepacker
             end
 
             result
+          end
+          
+          def import_order_item(item, import_item, order)
+            if !item["SKU"].nil? && ProductSku.find_by_sku(item["SKU"])
+              product = ProductSku.find_by_sku(item["SKU"]).product
+            else
+              product = import_product(item, store)
+            end
+
+            order.order_items.create(
+              product: product, 
+              price: item["UnitPrice"],
+              qty: item["Quantity"],
+              row_total: item["TotalPrice"]
+            )
+            import_item.current_order_imported_item = import_item.current_order_imported_item + 1
+            import_item.save
           end
 
           def import_product(item, store)
