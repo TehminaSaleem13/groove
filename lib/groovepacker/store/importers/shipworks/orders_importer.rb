@@ -12,7 +12,7 @@ module Groovepacker
             import_item.current_increment_id = order["Number"]
             import_item.save
             #order["OnlineStatus"] == 'Processing'
-            if allowed_status_to_import?(credential, order["LocalStatus"])  &&
+            if allowed_status_to_import?(credential, order["Status"])  &&
               Order.find_by_increment_id(order["Number"]).nil?
               ship_address = get_ship_address(order)
               order_m = Order.create(
@@ -68,7 +68,7 @@ module Groovepacker
             return true if status == 'In Process' && credential.shall_import_in_process
             return true if status == 'New Order' && credential.shall_import_new_order
             return true if status == 'Not Shipped' && credential.shall_import_not_shipped
-            return true if credential.shall_import_not_shipped.nil?
+            return true if status.nil?
             return false
           end
 
