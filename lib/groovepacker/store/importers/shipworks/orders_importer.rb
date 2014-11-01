@@ -39,7 +39,7 @@ module Groovepacker
                   import_order_item(item, import_item, order_m)
                 end
               else
-                import_order_item(item, import_item, order_m)
+                import_order_item(order["Item"], import_item, order_m)
               end
 
               order_m.set_order_status
