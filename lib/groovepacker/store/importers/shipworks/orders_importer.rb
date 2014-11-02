@@ -9,11 +9,13 @@ module Groovepacker
             credential = handler[:credential]
             store = handler[:store_handle]
             import_item = handler[:import_item]
-            import_item.current_increment_id = order["Number"]
-            import_item.save
+
             #order["OnlineStatus"] == 'Processing'
-            if allowed_status_to_import?(credential, order["Status"])  &&
+            if allowed_status_to_import?(credential, order["Status"]) &&
               Order.find_by_increment_id(order["Number"]).nil?
+              puts "Importing Order"
+              import_item.current_increment_id = order["Number"]
+              import_item.save
               ship_address = get_ship_address(order)
               order_m = Order.create(
                 increment_id: order["Number"],
@@ -52,6 +54,8 @@ module Groovepacker
                   order_m.addactivity("Item with SKU: "+item.product.primary_sku+" Added", store.name+" Import")
                 end
               end
+            else
+              puts "Not Importing Order invalid status"
             end
           end
 
