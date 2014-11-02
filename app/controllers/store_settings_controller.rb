@@ -572,7 +572,7 @@ class StoreSettingsController < ApplicationController
             end
 
             #add inventory warehouses
-            if !mapping['location_primary'].nil? && !mapping['inv_wh1'].nil?
+            if !mapping['location_primary'].nil? || !mapping['inv_wh1'].nil?
               product_inventory = ProductInventoryWarehouses.new
               product_inventory.inventory_warehouse = InventoryWarehouse.where(:is_default => true).first
               valid_inventory = false
