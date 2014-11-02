@@ -38,10 +38,10 @@ module Groovepacker
 
               if order["Item"].is_a? (Array)
                 order["Item"].each do |item|
-                  import_order_item(item, import_item, order_m)
+                  import_order_item(item, import_item, order_m, store)
                 end
               else
-                import_order_item(order["Item"], import_item, order_m)
+                import_order_item(order["Item"], import_item, order_m, store)
               end
 
               order_m.set_order_status
@@ -81,7 +81,7 @@ module Groovepacker
             result
           end
           
-          def import_order_item(item, import_item, order)
+          def import_order_item(item, import_item, order, store)
             if !item["SKU"].nil? && ProductSku.find_by_sku(item["SKU"])
               product = ProductSku.find_by_sku(item["SKU"]).product
             else
