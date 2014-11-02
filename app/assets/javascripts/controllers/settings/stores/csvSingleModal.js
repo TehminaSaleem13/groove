@@ -11,6 +11,8 @@ function(scope, store_data, $state, $stateParams, $modal, $modalInstance, $timeo
         stores.csv.do_import(scope.csv).success(function(data) {
             if(data.status) {
                 $modalInstance.close("ok-button-click");
+            } else {
+                scope.parse();
             }
         });
     };
@@ -134,6 +136,7 @@ function(scope, store_data, $state, $stateParams, $modal, $modalInstance, $timeo
         }
 
         scope.csv.current.data = final_record.slice(scope.csv.current.rows-1);
+
         scope.csv.current.data.pop(1);
         final_record = [];
         row_array = [];

@@ -23,7 +23,7 @@
                     </div>
                     <legend>Separator Options</legend>
                     <div class="container-fluid">
-                        <label class="radio">
+                        <label class="radio col-sm-2">
                             <input type="radio" name="fixed_width" ng-model="csv.current.fix_width" ng-change="parse()" value="1"/>  Fixed width
                         </label>
                         <div class="form-group" ng-show="csv.current.fix_width == '1'">
@@ -33,7 +33,7 @@
                             </div>
                         </div>
 
-                        <label class="radio">
+                        <label class="radio col-sm-12">
                             <input type="radio" name="fixed_width" ng-model="csv.current.fix_width" ng-change="parse()" value="0"  > Separated by
                         </label>
                         <div class="container-fluid" ng-show="csv.current.fix_width == '0'" >

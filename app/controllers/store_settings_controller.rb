@@ -563,6 +563,10 @@ class StoreSettingsController < ApplicationController
               Product.where(:name=>single_row[mapping['product_name']]).length == 0
               product.name = single_row[mapping['product_name']]
             end
+            if product.name.blank?
+              product.name = 'Product from CSV Import'
+            end
+            product.name = product.name
             if !mapping['product_type'].nil? && mapping['product_type'] >= 0
               product.product_type = single_row[mapping['product_type']]
             end
@@ -633,7 +637,7 @@ class StoreSettingsController < ApplicationController
             end
             if @result["status"]
               begin
-                if product.name != 'name' && product.name != ''
+                if product.name != 'name' && !product.name.empty?
                   product.save!
                   product.update_product_status
                 end
@@ -643,6 +647,9 @@ class StoreSettingsController < ApplicationController
               rescue ActiveRecord::StatementInvalid => e
                 @result['status'] = false
                 @result['messages'].push(e.message)
+              rescue Exception => e
+                  @result['status'] = false
+                  @result['messages'].push(e.message)
               end
             end
           end
