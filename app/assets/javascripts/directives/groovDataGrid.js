@@ -6,6 +6,7 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout','$http','$sce','se
             selectable:false,
             selections: {
                 single_callback:function(){},
+                multi_page:function(){},
                 show_dropdown: false,
                 selected_count:0,
                 unbind:false,
@@ -70,25 +71,37 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout','$http','$sce','se
             scope.check_uncheck = function(row,index,event) {
                 if(scope.options.selectable) {
                     scope.options.setup.select_all = false;
-                    if(myscope.last_clicked < 0) {
-                        myscope.last_clicked = index;
-                    }
                     row.checked = !row.checked;
                     scope.options.selections.single_callback(row);
-                    if(event.shiftKey) {
+                    if(event.shiftKey && myscope.last_clicked !== null) {
                         event.preventDefault();
                         var start = index;
-                        var end = myscope.last_clicked;
-                        if(index > myscope.last_clicked) {
-                            start = end;
-                            end = index;
+                        var end = myscope.last_clicked.index;
+                        if(myscope.last_clicked.page == scope.options.paginate.current_page) {
+                            if(index > myscope.last_clicked.index) {
+                                start = end;
+                                end = index;
+                            }
+                        } else {
+
+                            if(scope.options.paginate.current_page > myscope.last_clicked.page) {
+                                start = 0;
+                                end = index;
+                                scope.options.selections.multi_page(myscope.last_clicked,{page:scope.options.paginate.current_page,index:index},row.checked);
+                            } else if (myscope.last_clicked.page > scope.options.paginate.current_page) {
+                                start = index;
+                                end = scope.rows.length -1;
+                                scope.options.selections.multi_page({page:scope.options.paginate.current_page,index:index},myscope.last_clicked,row.checked);
+                            }
                         }
                         for (var i = start; i <= end; i++) {
                             scope.rows[i].checked = row.checked;
                             scope.options.selections.single_callback(scope.rows[i]);
                         }
+
                     }
-                    myscope.last_clicked = index;
+                    myscope.last_clicked = {page:scope.options.paginate.current_page,index:index};
+                    console.log(myscope.last_clicked);
                 }
             };
             scope.show_dropdown = function() {
@@ -136,14 +149,14 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout','$http','$sce','se
                 for(var i =0; i < scope.rows.length; i++) {
                     scope.check_uncheck(scope.rows[i],i, {shiftKey:false});
                 }
-                myscope.last_clicked =-1;
+                myscope.last_clicked =null;
             };
 
             myscope.update_paginate = function() {
                 var options = default_options();
                 jQuery.extend(true,options.paginate,scope.groovDataGrid.paginate);
                 scope.options.paginate = options.paginate;
-                myscope.last_clicked =-1;
+                myscope.last_clicked =null;
             };
 
             myscope.update_selections = function() {
@@ -157,7 +170,7 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout','$http','$sce','se
             };
             myscope.init = function() {
                 scope.theads = [];
-                myscope.last_clicked =-1;
+                myscope.last_clicked =null;
 
                 scope.editable={};
                 var options = default_options();

@@ -108,6 +108,9 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
     myscope.select_single = function(row) {
         products.single.select($scope.products,row);
     };
+    myscope.select_pages = function(from,to,state) {
+        products.list.select($scope.products,from,to,state);
+    };
     myscope.show_selected = function() {
         if(!$scope.products.setup.select_all && $scope.products.selected.length > 0 ) {
             $modal.open({
@@ -193,6 +196,7 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
             selections: {
                 show_dropdown: true,
                 single_callback: myscope.select_single,
+                multi_page: myscope.select_pages,
                 selected_count:0,
                 show:myscope.show_selected
             },
