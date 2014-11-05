@@ -61,10 +61,10 @@ module Groovepacker
 
           private
           def allowed_status_to_import?(credential, status)
-            return true if status == 'In Process' && credential.shall_import_in_process
-            return true if status == 'New Order' && credential.shall_import_new_order
-            return true if status == 'Not Shipped' && credential.shall_import_not_shipped
             return true if status.nil?
+            return true if status.strip == 'In Process' && credential.shall_import_in_process
+            return true if status.strip == 'New Order' && credential.shall_import_new_order
+            return true if status.strip == 'Not Shipped' && credential.shall_import_not_shipped
             return false
           end
 
