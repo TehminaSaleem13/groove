@@ -65,6 +65,7 @@ module Groovepacker
             return true if status.strip == 'In Process' && credential.shall_import_in_process
             return true if status.strip == 'New Order' && credential.shall_import_new_order
             return true if status.strip == 'Not Shipped' && credential.shall_import_not_shipped
+            return true if status.strip == 'Shipped' && credential.shall_import_not_shipped
             return false
           end
 
