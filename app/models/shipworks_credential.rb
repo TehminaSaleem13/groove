@@ -7,7 +7,8 @@ class ShipworksCredential < ActiveRecord::Base
   validates_uniqueness_of :auth_token
 
   attr_accessible :auth_token, :store, :shall_import_in_process, 
-    :shall_import_new_order, :shall_import_not_shipped, :shall_import_shipped
+    :shall_import_new_order, :shall_import_not_shipped, :shall_import_shipped,
+    :shall_import_no_status
 
   belongs_to :store
 end

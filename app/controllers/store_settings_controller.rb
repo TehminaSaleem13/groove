@@ -231,13 +231,15 @@ class StoreSettingsController < ApplicationController
                   shall_import_in_process: params[:shall_import_in_process],
                   shall_import_new_order: params[:shall_import_new_order],
                   shall_import_not_shipped: params[:shall_import_not_shipped],
-                  shall_import_shipped: params[:shall_import_shipped])
+                  shall_import_shipped: params[:shall_import_shipped],
+                  shall_import_no_status: params[:shall_import_no_status])
                 new_record = true
               else
                 @shipworks.update_attributes(shall_import_in_process: params[:shall_import_in_process],
                   shall_import_new_order: params[:shall_import_new_order],
                   shall_import_not_shipped: params[:shall_import_not_shipped],
-                  shall_import_shipped: params[:shall_import_shipped])
+                  shall_import_shipped: params[:shall_import_shipped],
+                  shall_import_no_status: params[:shall_import_no_status])
               end
               @store.save
             rescue ActiveRecord::RecordInvalid => e
