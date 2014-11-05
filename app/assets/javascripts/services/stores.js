@@ -155,6 +155,7 @@ groovepacks_services.factory('stores',['$http','notification','$filter',function
                         stores.single.shall_import_in_process = data.credentials.shipworks_credentials.shall_import_in_process;
                         stores.single.shall_import_new_order = data.credentials.shipworks_credentials.shall_import_new_order;
                         stores.single.shall_import_not_shipped = data.credentials.shipworks_credentials.shall_import_not_shipped;
+                        stores.single.shall_import_shipped = data.credentials.shipworks_credentials.shall_import_shipped;
                         stores.single.request_url = data.credentials.shipworks_hook_url;
                     }
 
