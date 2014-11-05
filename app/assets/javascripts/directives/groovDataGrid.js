@@ -101,7 +101,6 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout','$http','$sce','se
 
                     }
                     myscope.last_clicked = {page:scope.options.paginate.current_page,index:index};
-                    console.log(myscope.last_clicked);
                 }
             };
             scope.show_dropdown = function() {
