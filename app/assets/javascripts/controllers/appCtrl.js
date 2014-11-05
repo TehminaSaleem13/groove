@@ -149,7 +149,7 @@ groovepacks_controllers.
             }
         };
         $scope.stop_editing = function() {
-            editable.unset();
+            editable.force_exit();
         };
 
         $scope.is_active_tab = function(string) {

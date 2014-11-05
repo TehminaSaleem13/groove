@@ -21,6 +21,11 @@ groovepacks_services.factory('editable', ['$rootScope',function($rootScope) {
         $rootScope.$emit("editing-a-var",{ident:false});
     };
 
+    var force_reset = function() {
+        editing = false;
+        $rootScope.$emit("force-exit-edit-var");
+    };
+
     var editing_status = function() {
         return editing;
     };
@@ -29,6 +34,7 @@ groovepacks_services.factory('editable', ['$rootScope',function($rootScope) {
         default: config,
         set: set_editing,
         unset: unset_editing,
-        status: editing_status
+        status: editing_status,
+        force_exit: force_reset
     }
 }]);

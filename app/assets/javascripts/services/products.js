@@ -63,7 +63,7 @@ groovepacks_services.factory('products',['$http','notification',function($http,n
         if(setup.search=='') {
             url = '/products/getproducts.json?filter='+setup.filter+'&sort='+setup.sort+'&order='+setup.order;
         } else {
-            url = '/products/search.json?search='+setup.search
+            url = '/products/search.json?search='+setup.search;
         }
         url += '&is_kit='+setup.is_kit+'&limit='+setup.limit+'&offset='+setup.offset;
         return $http.get(url).success(
@@ -145,8 +145,42 @@ groovepacks_services.factory('products',['$http','notification',function($http,n
         }
     };
 
+    var select_list = function(products,from,to,state) {
+        var url = '';
+        var setup = products.setup;
+        var from_page = 0;
+        var to_page = 0;
+
+        if(typeof from.page != 'undefined' && from.page > 0) {
+            from_page = from.page - 1;
+        }
+        if(typeof to.page != 'undefined' && to.page > 0) {
+            to_page = to.page - 1;
+        }
+        var from_offset = from_page * setup.limit +from.index;
+        var to_limit = to_page * setup.limit + to.index + 1 - from_offset;
+
+        if(setup.search=='') {
+            url = '/products/getproducts.json?filter='+setup.filter+'&sort='+setup.sort+'&order='+setup.order;
+        } else {
+            url = '/products/search.json?search='+setup.search
+        }
+        url += '&is_kit='+setup.is_kit+'&limit='+to_limit+'&offset='+from_offset;
+        return $http.get(url).success(function(data) {
+            if(data.status) {
+                for(var i = 0; i < data.products.length; i++) {
+                    data.products[i].checked = state;
+                    select_single(products,data.products[i]);
+                }
+            } else {
+                notification.notify("Some error occurred in loading the selection.");
+            }
+        });
+
+    };
+
     var update_list_node = function(obj) {
-        return $http.post('/products/updateproductlist.json',obj).success(function(data){
+        return $http.post('/products/updateproductlist.json',obj).success(function(data) {
             if(data.status) {
                 notification.notify("Successfully Updated",1);
             } else {
@@ -212,14 +246,21 @@ groovepacks_services.factory('products',['$http','notification',function($http,n
     };
 
     var select_single = function(products,row) {
-        if(row.checked) {
-            products.selected.push(row);
+        var found = false;
+        for(var i = 0; i < products.selected.length; i++) {
+            if(products.selected[i].id == row.id) {
+                found = i;
+                break;
+            }
+        }
+
+        if(found !== false) {
+            if (!row.checked) {
+                products.selected.splice(found,1);
+            }
         } else {
-            for(var i = 0; i < products.selected.length; i++) {
-                if(products.selected[i].id == row.id) {
-                    products.selected.splice(i,1);
-                    break;
-                }
+            if(row.checked) {
+                products.selected.push(row);
             }
         }
     };
@@ -298,6 +339,7 @@ groovepacks_services.factory('products',['$http','notification',function($http,n
             get: get_list,
             total_items:total_items_list,
             update: update_list,
+            select: select_list,
             update_node: update_list_node
         },
         single: {

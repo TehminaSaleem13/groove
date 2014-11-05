@@ -31,7 +31,7 @@ groovepacks_directives.directive('groovEditable', ['$timeout','editable','$rootS
             scope.add_node  = function () {
                 if(editable.status() == false) {
                     if(scope.editable.array) {
-                        mytemp = {};
+                        var mytemp = {};
                         mytemp[scope.prop] = "";
                         scope.ngModel.push(mytemp);
                         scope.edit_node(-1);
@@ -145,7 +145,7 @@ groovepacks_directives.directive('groovEditable', ['$timeout','editable','$rootS
                 });
                 scope.$watch('_focus_lost',function() {
                     if(scope._focus_lost) {
-                        $timeout(function(){
+                        $timeout(function() {
                             if(scope._focus_lost) {
                                 scope.save_node(true);
                             }
@@ -153,13 +153,13 @@ groovepacks_directives.directive('groovEditable', ['$timeout','editable','$rootS
                     }
                 });
 
+                $rootScope.$on('force-exit-edit-var',function() {
+                    scope.disabled = false;
+                    scope._focus_lost = false;
+                    scope.save_node(true);
+                });
                 $rootScope.$on("editing-a-var",function(event,data) {
-                    if(data.ident === false || data.ident === scope.custom_identifier) {
-                        scope.disabled = false;
-                        scope.editing = -1;
-                    } else {
-                        scope.disabled = true;
-                    }
+                    scope.disabled = !(data.ident === false || data.ident === scope.custom_identifier);
                 });
 
                 scope.$on(scope.identifier,scope.edit_node);
