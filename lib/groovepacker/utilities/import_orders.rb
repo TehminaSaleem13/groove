@@ -15,7 +15,7 @@
 							order_import_summary.save
 							ImportItem.where('order_import_summary_id IS NOT NULL').delete_all
 							# add import item for each store
-							stores = Store.where("status = '1' AND store_type != 'system' AND store_type != 'Shipworks'")
+							stores = Store.where("status = '1' AND store_type != 'system' AND store_type != 'Shipworks' AND store_type != 'CSV'")
 							if stores.length != 0	
 								stores.each do |store|
 									import_item = ImportItem.new
