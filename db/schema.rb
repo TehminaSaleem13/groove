@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20141031164919) do
+ActiveRecord::Schema.define(:version => 20141105193112) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0, :null => false
@@ -498,6 +498,8 @@ ActiveRecord::Schema.define(:version => 20141031164919) do
     t.boolean  "shall_import_in_process",  :default => false
     t.boolean  "shall_import_new_order",   :default => false
     t.boolean  "shall_import_not_shipped", :default => false
+    t.boolean  "shall_import_shipped",     :default => false
+    t.boolean  "shall_import_no_status",   :default => false
   end
 
   create_table "sold_inventory_warehouses", :force => true do |t|

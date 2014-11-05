@@ -1,5 +1,5 @@
 class InventoryWarehouseController < ApplicationController
-  #add before filter here
+  before_filter :authenticate_user!
   # this action creates a warehouse with a name
   include InventoryWarehouseHelper
   def create

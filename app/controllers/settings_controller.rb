@@ -1,5 +1,5 @@
 class SettingsController < ApplicationController
-
+  before_filter :authenticate_user!
   include SettingsHelper
   def restore
     @result = Hash.new

@@ -1,4 +1,5 @@
 class UserSettingsController < ApplicationController
+  before_filter :authenticate_user!
   include UserSettingsHelper
 
   def userslist
