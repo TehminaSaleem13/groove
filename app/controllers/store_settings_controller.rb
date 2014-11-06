@@ -436,7 +436,7 @@ class StoreSettingsController < ApplicationController
           end
         else
           require 'csv'
-          CSV.foreach(file_path,:col_sep => params[:sep], :quote_char => params[:delimiter] ) do |single|
+          CSV.foreach(file_path,:col_sep => params[:sep], :quote_char => params[:delimiter] ,:encoding => 'windows-1251:utf-8') do |single|
             final_record.push(single)
           end
         end
