@@ -438,6 +438,18 @@ class StoreSettingsController < ApplicationController
       import_csv = ImportCsv.new
       import_csv.delay(:run_at =>1.seconds.from_now).import Apartment::Tenant.current_tenant, data
 
+      if params[:type] == 'order'
+        import_item = ImportItem.find_by_store_id(@store.id)
+        if import_item.nil?
+          import_item = ImportItem.new
+          import_item.store_id = @store.id
+        end
+        import_item.status = 'not_started'
+        import_item.save
+      else
+        
+        #add to notification drawer
+      end
 
     end
 

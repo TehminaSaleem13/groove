@@ -48,20 +48,39 @@ class ImportCsv
           "qty"
       ]
       imported_orders = {}
-      #final_record.delete_at(0) if final_record.length > 0
-      final_record.each_with_index do |single_row,index|
-        if params[:type] == 'order'
+      if params[:type] == 'order'
+        import_item = ImportItem.find_by_store_id(params[:store_id])
+        if import_item.nil?
+          import_item = ImportItem.new
+          import_item.store_id = params[:store_id]
+        end
+        import_item.status = 'in_progress'
+        import_item.current_increment_id = ''
+        import_item.success_imported = 0
+        import_item.previous_imported = 0
+        import_item.current_order_items = -1
+        import_item.current_order_imported_item = -1
+        import_item.to_import = final_record.length
+        import_item.save
+
+        final_record.each_with_index do |single_row,index|
           if !mapping['increment_id'].nil? && mapping['increment_id'] >= 0 && !single_row[mapping['increment_id']].blank?
+            import_item.current_increment_id = single_row[mapping['increment_id']]
+            import_item.current_order_items = -1
+            import_item.current_order_imported_item = -1
+            import_item.save
             if imported_orders.has_key?(single_row[mapping['increment_id']]) || Order.where(:increment_id => single_row[mapping['increment_id']]).length == 0
               order = Order.find_or_create_by_increment_id(single_row[mapping['increment_id']])
               order.store_id = params[:store_id]
               #order_placed_time,price,qty
-              logger.info mapping.to_s
               order_required = ['qty','sku','increment_id']
               order_map.each do |single_map|
                 if !mapping[single_map].nil? && mapping[single_map] >= 0
                   #if sku, create order item with product id, qty
                   if single_map == 'sku'
+                    import_item.current_order_items = 1
+                    import_item.current_order_imported_item = 0
+                    import_item.save
                     product_skus = ProductSku.where(:sku => single_row[mapping[single_map]])
                     if product_skus.length > 0
                       if OrderItem.where(:product_id => product_skus.first.product.id, :order_id => order.id).length == 0
@@ -94,6 +113,8 @@ class ImportCsv
                       end
                       order.order_items << order_item
                     end
+                    import_item.current_order_imported_item = 1
+                    import_item.save
                   end
                   #if product id cannot be found with SKU, then create product with product name and SKU
 
@@ -105,7 +126,6 @@ class ImportCsv
                   end
                 end
               end
-              logger.info order_required.to_s
               if order_required.length > 0
                 result['status'] = false
                 order_required.each do |required_element|
@@ -133,23 +153,52 @@ class ImportCsv
                     order.save!
                     imported_orders[order.increment_id] = true
                     order.update_order_status
+                    import_item.success_imported = import_item.success_imported + 1
+                    import_item.save
+
                       #end
                   rescue ActiveRecord::RecordInvalid => e
                     result['status'] = false
                     result['messages'].push(order.errors.full_messages)
+                    import_item.status = 'failed'
+                    import_item.message = order.errors.full_messages
+                    import_item.save
+
                   rescue ActiveRecord::StatementInvalid => e
                     result['status'] = false
                     result['messages'].push(e.message)
+                    import_item.status = 'failed'
+                    import_item.message = e.message
+                    import_item.save
                   end
                 end
               end
             else
+              import_item.previous_imported = import_item.previous_imported + 1
+              import_item.save
               #Skipped because of duplicate order
             end
           else
             #No increment id found
+            import_item.status = 'failed'
+            import_item.message = 'No increment id was found on current order'
+            import_item.save
+            result['status'] = false
           end
-        else
+          unless result['status']
+            import_item.status = 'failed'
+            import_item.message = 'Import halted because of errors, the last imported row was '+index.to_s
+            import_item.save
+            break
+          end
+        end
+
+        import_item.status = 'completed'
+        import_item.save
+      else
+        #products notification drawer
+        final_record.each_with_index do |single_row,index|
+
           if !mapping['sku'].nil? && mapping['sku'] >= 0 && !single_row[mapping['sku']].blank?
             duplicate_found = false
             skus = single_row[mapping['sku']].split(',')
@@ -265,15 +314,12 @@ class ImportCsv
           else
             #Skipped because of no SKU
           end
-        end
-        unless result['status']
-          result['last_row'] = index
-          if index != 0
-            result['messages'].push('Import halted because of errors, we have adjusted rows to the ones already imported.')
+          unless result['status']
+            break
           end
-          break
         end
       end
+
       File.delete(file_path)
     else
       result['messages'].push("No file present to import #{params[:type]}")
