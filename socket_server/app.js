@@ -37,7 +37,8 @@ io.on('connection', function (socket) {
     var tenant_name = socket.request.session.tenant;
     var user_id = socket.request.session.user_id;
     var fingerprint = 'groov_'+socket.request.sessionID + socket.request._query.fingerprint;
-    var user_room = global_namespace+':'+tenant_name+':'+user_id;
+    var tenant_room = global_namespace+':'+tenant_name;
+    var user_room = tenant_room+':'+user_id;
     check_setup_user(socket,fingerprint);
     push_persistent_notifications(socket);
 
@@ -58,8 +59,13 @@ io.on('connection', function (socket) {
     },5000);
 
     socket.on('delete_pnotif',function(hash) {
-        groov_log("Deleting pnotif hash:")(hash);
+        groov_log("Deleting user pnotif hash:")(hash);
         redis_clients.hasher.hdel("groove_node:pnotif:"+user_room,hash);
+    });
+
+    socket.on('delete_tenant_pnotif',function(hash){
+        groov_log("Deleting tenant pnotif hash:")(hash);
+        redis_clients.hasher.hdel("groove_node:pnotif:"+tenant_room,hash);
     });
 
     socket.on('disconnect', function() {

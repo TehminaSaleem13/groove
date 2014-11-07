@@ -15,8 +15,10 @@ function(scope, store_data, $window, $sce, $interval, $state, $stateParams, $mod
     };
 
     scope.update = function(reason) {
-        if(reason == "cancel-button-click") {
+        if (reason == "cancel-button-click") {
             myscope.rollback();
+        } else if (reason == "csv-modal-closed") {
+            scope.update_single_store(true);
         } else if(typeof scope.stores.single.id != "undefined") {
             scope.update_single_store(false);
         }
@@ -146,7 +148,9 @@ function(scope, store_data, $window, $sce, $interval, $state, $stateParams, $mod
                                     store_data: function(){return scope.stores}
                                 }
                             });
-                            csv_modal.result.finally(scope.ok);
+                            csv_modal.result.finally(function(){
+                                $modalInstance.close("csv-modal-closed")
+                            });
                         }
                     }
                 }

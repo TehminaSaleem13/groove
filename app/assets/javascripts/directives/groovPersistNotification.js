@@ -1,4 +1,4 @@
-groovepacks_directives.directive('groovPersistNotification',['$window','$document','$sce','$timeout','groovIO','orders',function ($window,$document,$sce,$timeout,groovIO,orders) {
+groovepacks_directives.directive('groovPersistNotification',['$window','$document','$sce','$timeout','groovIO','orders','stores',function ($window,$document,$sce,$timeout,groovIO,orders,stores) {
     return {
         restrict:"A",
         templateUrl:"/assets/views/directives/persistnotification.html",
@@ -100,6 +100,41 @@ groovepacks_directives.directive('groovPersistNotification',['$window','$documen
                     orders.list.cancel_pdf_gen(message.id).then(function() {
                         myscope.repurpose_selected();
                     });
+                };
+            };
+
+            myscope.csv_product_import = function(message,hash) {
+                scope.notifications[hash].percent = (message['success']/message['total'])*100;
+                scope.notifications[hash].type = message['status'];
+                myscope.repurpose_selected();
+                var notif_message = '<b>Product CSV import:</b> ';
+                var notif_details = '';
+                if(message['status'] == 'scheduled') {
+                    notif_message += 'Queued';
+                } else if(message['status'] =='in_progress') {
+                    notif_message += message['success']+'/'+message['total']+' ';
+                    notif_details = '<b>Current Product SKU: '+message['current_sku']+'</b> <br/>';
+                } else if(message['status'] == 'completed' || message['status'] == 'cancelled') {
+                    notif_details = '';
+                    $timeout(function() {
+                        delete scope.notifications[hash];
+                        myscope.repurpose_selected();
+                    },5000);
+                    groovIO.emit('delete_tenant_pnotif',hash);
+                    if(message['status'] == "completed" ) {
+                        notif_message += "Complete!";
+                        scope.notifications[hash].percent = 100;
+                    } else if(message['status'] == "cancelled") {
+                        notif_message += "Cancelled";
+                    }
+                }
+
+                scope.notifications[hash].message = $sce.trustAsHtml(notif_message);
+                scope.notifications[hash].details = $sce.trustAsHtml(notif_details);
+                scope.notifications[hash].cancel = function($event) {
+                    $event.preventDefault();
+                    $event.stopPropagation();
+                    stores.csv.cancel_product_import(message.id).then(myscope.repurpose_selected);
                 };
             };
 

@@ -154,6 +154,7 @@ class ImportCsv
                     imported_orders[order.increment_id] = true
                     order.update_order_status
                     import_item.success_imported = import_item.success_imported + 1
+                    import_item.success_imported = import_item.success_imported + 1
                     import_item.save
 
                       #end
@@ -193,15 +194,37 @@ class ImportCsv
           end
         end
 
-        import_item.status = 'completed'
-        import_item.save
+        if result['status']
+          import_item.status = 'completed'
+          import_item.save
+        end
       else
+
+        product_import = CsvProductImport.find_by_store_id(params[:store_id])
+        if product_import.nil?
+          product_import = CsvProductImport.new
+          product_import.store_id = params[:store_id]
+        end
+        product_import.status = 'in_progress'
+        product_import.success = 0
+        product_import.current_sku = ''
+        product_import.total = final_record.length
+        product_import.save
+
         #products notification drawer
         final_record.each_with_index do |single_row,index|
+          product_import.reload
+          if product_import.cancel
+            product_import.status = 'cancelled'
+            product_import.save
+            return true
+          end
 
           if !mapping['sku'].nil? && mapping['sku'] >= 0 && !single_row[mapping['sku']].blank?
             duplicate_found = false
             skus = single_row[mapping['sku']].split(',')
+            product_import.current_sku = skus.first
+            product_import.save
 
             skus.each do |single_sku|
               if ProductSku.where(:sku=>single_sku).length > 0
@@ -314,9 +337,18 @@ class ImportCsv
           else
             #Skipped because of no SKU
           end
+          product_import.success = product_import.success + 1
+          product_import.save
           unless result['status']
+            product_import.status = 'failed'
+            product_import.message = 'Import halted because of errors, the last imported row was '+index.to_s
+            product_import.save
             break
           end
+        end
+        if result['status']
+          product_import.status = 'completed'
+          product_import.save
         end
       end
 

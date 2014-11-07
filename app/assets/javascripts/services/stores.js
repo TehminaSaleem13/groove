@@ -352,15 +352,23 @@ groovepacks_services.factory('stores',['$http','notification','$filter',function
     };
 
     var csv_do_import = function(csv) {
-        return $http.post('store_settings/csvDoImport.json',csv.current).success(function(data){
+        return $http.post('/store_settings/csvDoImport.json',csv.current).success(function(data){
             if(data.status) {
-                notification.notify("CSV import queued successfully. It will keep importing in the background automatically",1);
+                notification.notify("CSV import queued successfully.",1);
                 csv.current = {};
                 csv.importer = {};
             } else {
                 notification.notify(data.messages,0);
                 csv.current.rows = csv.current.rows + data.last_row;
             }
+        }).error(notification.server_error);
+    };
+
+    var csv_product_import_cancel = function(id) {
+        return $http.post('/store_settings/csvProductImportCancel.json',{id:id}).success(function(data) {
+            notification.notify(data['error_messages']);
+            notification.notify(data['success_messages'],1);
+            notification.notify(data['notice_messages'],2);
         }).error(notification.server_error);
     };
 
@@ -376,7 +384,7 @@ groovepacks_services.factory('stores',['$http','notification','$filter',function
                 csv.current.rows = csv.current.rows + data.last_row;
             }
         }).error(notification.server_error);
-    }
+    };
 
 
     //Public facing API
@@ -418,7 +426,8 @@ groovepacks_services.factory('stores',['$http','notification','$filter',function
         },
         csv: {
              import: csv_import_data,
-             do_import: csv_do_import
+             do_import: csv_do_import,
+             cancel_product_import: csv_product_import_cancel
         },
         update: {
             products: update_products

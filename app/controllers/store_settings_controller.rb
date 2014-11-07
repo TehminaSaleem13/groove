@@ -436,7 +436,7 @@ class StoreSettingsController < ApplicationController
       data[:store_id] = params[:store_id]
 
       import_csv = ImportCsv.new
-      import_csv.delay(:run_at =>1.seconds.from_now).import Apartment::Tenant.current_tenant, data
+      delayed_job = import_csv.delay(:run_at =>1.seconds.from_now).import Apartment::Tenant.current_tenant, data
 
       if params[:type] == 'order'
         import_item = ImportItem.find_by_store_id(@store.id)
@@ -447,14 +447,54 @@ class StoreSettingsController < ApplicationController
         import_item.status = 'not_started'
         import_item.save
       else
-        
-        #add to notification drawer
+        product_import = CsvProductImport.find_by_store_id(@store.id)
+        if product_import.nil?
+          product_import = CsvProductImport.new
+          product_import.store_id = @store.id
+        end
+        product_import.delayed_job_id = delayed_job.id
+        product_import.total = 0
+        product_import.success = 0
+        product_import.cancel = false
+        product_import.status = 'scheduled'
+        product_import.save
       end
 
     end
 
     respond_to do |format|
       format.json { render json: @result}
+    end
+  end
+
+  def csvProductImportCancel
+    result = Hash.new
+    result['status'] = true
+    result['success_messages'] = []
+    result['notice_messages'] = []
+    result['error_messages'] = []
+
+    if params[:id].nil?
+      result['status'] = false
+      result['error_messages'].push('No id given. Can not cancel product import')
+    else
+      product_import = CsvProductImport.find_by_id(params[:id])
+      product_import.cancel = true
+      unless product_import.status == 'in_progress'
+        product_import.status = 'cancelled'
+        Delayed::Job.find(product_import.delayed_job_id).destroy
+      end
+
+      if product_import.save
+        result['notice_messages'].push('Product Import marked for cancellation. Please wait for acknowledgement.')
+      end
+
+    end
+
+
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json: result }
     end
   end
 
