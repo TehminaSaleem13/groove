@@ -1,5 +1,5 @@
 class OrdersController < ApplicationController
-  before_filter :authenticate_user!
+  before_filter :authenticate_user!, except: [:import_shipworks]
   include OrdersHelper
   include ProductsHelper
   include SettingsHelper
