@@ -21,7 +21,7 @@ module Groovepacker
 
                   if Product.where(:store_product_id => product[:product_id]).length  == 0
                     result_product_id = 
-                      self.import_single({sku: product[:sku]})
+                      self.import_single({sku: product[:sku], product_id: product[:product_id]})
                     result[:success_imported] = result[:success_imported] + 1 unless 
                       result_product_id == 0
                   else
@@ -46,11 +46,12 @@ module Groovepacker
             client = handler[:store_handle][:handle]
             session = handler[:store_handle][:session]
             sku = hash[:sku]
+            product_id = hash[:product_id]
             result_product_id = 0
 
             begin
             response = client.call(:catalog_product_info, 
-              message: {session: session, productId: sku})
+              message: {session: session, productId: product_id})
 
             if response.success?
                 @product  = response.body[:catalog_product_info_response][:info]
@@ -81,7 +82,7 @@ module Groovepacker
               #get images and categories
               if !@product[:sku].nil? && credential.import_images
                 getimages = client.call(:catalog_product_attribute_media_list, message: {session: session,
-                  productId: sku})
+                  productId: product_id})
                 if getimages.success?
                   @images = getimages.body[:catalog_product_attribute_media_list_response][:result][:item]
                   if !@images.nil?
