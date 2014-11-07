@@ -354,7 +354,7 @@ groovepacks_services.factory('stores',['$http','notification','$filter',function
     var csv_do_import = function(csv) {
         return $http.post('store_settings/csvDoImport.json',csv.current).success(function(data){
             if(data.status) {
-                notification.notify("CSV imported successfully",1);
+                notification.notify("CSV import queued successfully. It will keep importing in the background automatically",1);
                 csv.current = {};
                 csv.importer = {};
             } else {

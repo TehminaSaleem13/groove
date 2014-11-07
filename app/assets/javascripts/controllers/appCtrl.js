@@ -41,6 +41,10 @@ groovepacks_controllers.
                     Shipworks: {
                         alt:"ShipWorks",
                         src: "/assets/images/shipworks_logo.png"
+                    },
+                    CSV: {
+                         alt:"CSV",
+                        src: "/assets/images/csv_logo.png"
                     }
 
                 };
@@ -61,7 +65,7 @@ groovepacks_controllers.
 
                         if(import_item.import_info.status=='completed') {
                             single_data.progress.value = 100;
-                            if(import_item.store_info.store_type == 'Shipworks') {
+                            if(import_item.store_info.store_type == 'Shipworks' ||import_item.store_info.store_type == 'CSV') {
                                 single_data.progress.message += 'Last Imported Order #'+import_item.import_info.current_increment_id+' at '+$filter('date')(import_item.import_info.updated_at,'dd MMM hh:mm a');
                             } else if (import_item.import_info.success_imported <= 0) {
                                 single_data.progress.message +=' No new orders found.';

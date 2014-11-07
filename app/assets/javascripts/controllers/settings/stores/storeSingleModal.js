@@ -146,9 +146,7 @@ function(scope, store_data, $window, $sce, $interval, $state, $stateParams, $mod
                                     store_data: function(){return scope.stores}
                                 }
                             });
-                            csv_modal.result.finally(function() {
-                                myscope.store_single_details(scope.stores.single.id,false);
-                            });
+                            csv_modal.result.finally(scope.ok);
                         }
                     }
                 }
