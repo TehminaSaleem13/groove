@@ -116,6 +116,11 @@ module Groovepacker
             end
             product.product_skus.create(sku: sku)
 
+            #create Secondary Sku also from the Code parameter
+            unless item["Code"].nil? || item["Code"] == item["SKU"] do
+              product.product_skus.create(sku: item["Code"])
+            end
+
             #Barcodes
             product.product_barcodes.create(
               barcode: item["UPC"]
