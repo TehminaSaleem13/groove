@@ -291,12 +291,23 @@ class ImportCsv
 
               if !mapping['sku'].nil? && mapping['sku'] >= 0
                 unless single_row[mapping['sku']].nil?
-                  skus = single_row[mapping['sku']].split(',')
-                  skus.each do |single_sku|
-                    if ProductSku.where(:sku=>single_sku).length == 0
+                  prim_skus = single_row[mapping['sku']].split(',')
+                  prim_skus.each do |prim_single_sku|
+                    if ProductSku.where(:sku=>prim_single_sku).length == 0
                       product_sku = ProductSku.new
-                      product_sku.sku = single_sku
-                      product_sku.purpose = 'primary'
+                      product_sku.sku = prim_single_sku
+                      product.product_skus << product_sku
+                    end
+                  end
+                end
+              end
+              if !mapping['secondary_sku'].nil? && mapping['secondary_sku'] >= 0
+                unless single_row[mapping['secondary_sku']].nil?
+                  sec_skus = single_row[mapping['secondary_sku']].split(',')
+                  sec_skus.each do |sec_single_sku|
+                    if ProductSku.where(:sku=>sec_single_sku).length == 0
+                      product_sku = ProductSku.new
+                      product_sku.sku = sec_single_sku
                       product.product_skus << product_sku
                     end
                   end

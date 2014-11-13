@@ -343,6 +343,7 @@ class StoreSettingsController < ApplicationController
             @result["product"] = Hash.new
             @result["product"]["map_options"] = [
                 { value:"sku" , name:"SKU"},
+                {value:"secondary_sku", name:"Secondary Sku"},
                 { value: "product_name", name: "Product Name"},
                 { value: "category_name", name: "Category Name"},
                 { value: "inv_wh1", name: "Inventory"},
