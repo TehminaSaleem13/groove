@@ -1352,7 +1352,7 @@ class ProductsController < ApplicationController
     unless is_kit == -1
       kit_query = ' products.is_kit='+is_kit.to_s+' AND '
     end
-    unless params[:select_all]
+    unless params[:select_all] || params[:inverted]
       query_add = ' LIMIT '+limit.to_s+' OFFSET '+offset.to_s
     end
 
@@ -1369,7 +1369,11 @@ class ProductsController < ApplicationController
     else
       result = Hash.new
       result['products'] = result_rows
-      result['count'] = Product.count_by_sql('SELECT count(*) as count from('+base_query+') as tmp')
+      if params[:select_all] || params[:inverted]
+        result['count'] = result_rows.length
+      else
+        result['count'] = Product.count_by_sql('SELECT count(*) as count from('+base_query+') as tmp')
+      end
     end
 
 
@@ -1413,7 +1417,7 @@ class ProductsController < ApplicationController
       kit_query = " WHERE products.is_kit="+is_kit.to_s
     end
 
-    unless params[:select_all]
+    unless params[:select_all] || params[:inverted]
       query_add += " LIMIT "+limit.to_s+" OFFSET "+offset.to_s
     end
 
@@ -1472,7 +1476,7 @@ class ProductsController < ApplicationController
       unless status_filter == 'all'
           products = products.where(:status=>status_filter)
       end
-      unless params[:select_all]
+      unless params[:select_all] || params[:inverted]
         products =  products.limit(limit).offset(offset)
       end
     end
@@ -1485,7 +1489,7 @@ class ProductsController < ApplicationController
       unless status_filter == 'all'
         products = products.where(:status=>status_filter)
       end
-      unless params[:select_all]
+      unless params[:select_all] || params[:inverted]
         products =  products.limit(limit).offset(offset)
       end
     end
@@ -1539,16 +1543,34 @@ class ProductsController < ApplicationController
   end
 
   def list_selected_products
-    if params[:select_all]
+    if params[:select_all] || params[:inverted]
       if !params[:search].nil? && params[:search] != ''
-        return do_search
+        result = do_search
       else
-        return do_getproducts
+        result = do_getproducts
       end
     else
-      return params[:productArray]
+      result = params[:productArray]
     end
+
+    result_rows = []
+    if params[:inverted] && !params[:productArray].blank?
+      not_in = []
+      params[:productArray].each do |product|
+        not_in.push(product['id'])
+      end
+      result.each do |single_product|
+        unless not_in.include? single_product['id']
+          result_rows.push(single_product)
+        end
+      end
+    else
+      result_rows = result
+    end
+
+    return result_rows
   end
+
   def get_products_count
   	count = Hash.new
     is_kit = 0

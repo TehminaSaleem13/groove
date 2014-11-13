@@ -94,6 +94,15 @@ body {
       background-color: #87c14c;
     }
   }
+  &.inverted {
+    color:#fff;
+    background-color: #999999;
+    &:hover,
+    &:focus {
+      color:#fff;
+      background-color: #a8a8a8;
+    }
+  }
   &:hover,
   &:focus {
     color: @btn-default-color;
@@ -316,7 +325,17 @@ body {
     //color: #5cb85c;
   }
 }
-.table-striped>tbody>tr.selected>td{ background-color: transparent; }
+.table-striped>tbody>tr.selected>td, .table-striped>tbody>tr.inverted>td { background-color: transparent; }
+.table tbody tr.selected:nth-child(odd), .table tbody tr.inverted:nth-child(odd) {
+  background-color: #97dc57;
+}
+
+.table tbody tr.selected:nth-child(even), .table tbody tr.inverted:nth-child(even) {
+  background-color: #b2ed5a;
+}
+.table tbody tr.selected.inverted:nth-child(odd)>td{ background-color: #dcdcdc; }
+.table tbody tr.selected.inverted:nth-child(even)>td{ background-color: #ededed; }
+
 .table-roles  {
   border-radius:8px;
   tbody {
@@ -410,13 +429,6 @@ opacity: .61;
 background-color: #e9e7e7;
 }
 
-.table tbody tr.selected:nth-child(odd) {
-  background-color: #97dc57;
-}
-
-.table tbody tr.selected:nth-child(even) {
-  background-color: #b2ed5a;
-}
 /* Badge in Accordion*/
 .badge-style{
   .badge;

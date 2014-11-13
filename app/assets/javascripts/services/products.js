@@ -21,6 +21,7 @@ groovepacks_services.factory('products',['$http','notification',function($http,n
                 filter: "active",
                 search: '',
                 select_all: false,
+                inverted:false,
                 is_kit: 0,
                 limit: 20,
                 offset: 0,
@@ -137,6 +138,7 @@ groovepacks_services.factory('products',['$http','notification',function($http,n
                 if(data.status) {
                     notification.notify(success_messages[action],1);
                     products.setup.select_all =  false;
+                    products.setup.inverted = false;
                     products.selected = [];
                 } else {
                     notification.notify(data.messages,0);
@@ -157,13 +159,13 @@ groovepacks_services.factory('products',['$http','notification',function($http,n
         if(typeof to.page != 'undefined' && to.page > 0) {
             to_page = to.page - 1;
         }
-        var from_offset = from_page * setup.limit +from.index;
-        var to_limit = to_page * setup.limit + to.index + 1 - from_offset;
+        var from_offset = (from_page * setup.limit) + from.index;
+        var to_limit = (to_page * setup.limit) + to.index + 1 - from_offset;
 
         if(setup.search=='') {
             url = '/products/getproducts.json?filter='+setup.filter+'&sort='+setup.sort+'&order='+setup.order;
         } else {
-            url = '/products/search.json?search='+setup.search
+            url = '/products/search.json?search='+setup.search;
         }
         url += '&is_kit='+setup.is_kit+'&limit='+to_limit+'&offset='+from_offset;
         return $http.get(url).success(function(data) {
@@ -219,7 +221,7 @@ groovepacks_services.factory('products',['$http','notification',function($http,n
     };
 
     var create_single = function(products) {
-        return $http.post('/products/create.json').success(function(data){
+        return $http.post('/products/create.json').success(function(data) {
             products.single = {};
             if(!data.status) {
                 notification.notify(data.messages,0);

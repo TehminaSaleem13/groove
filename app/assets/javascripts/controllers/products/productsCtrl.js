@@ -14,7 +14,8 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
     };
 
     $scope.select_all_toggle = function(val) {
-        $scope.products.setup.select_all = val;
+        $scope.products.setup.select_all = !!val;
+        myscope.invert(false);
         $scope.products.selected = [];
         for (var i =0; i < $scope.products.list.length;i++) {
             $scope.products.list[i].checked =  $scope.products.setup.select_all;
@@ -23,6 +24,7 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
             }
         }
     };
+
     $scope.update_product_list = function(product,prop) {
         products.list.update_node({
             id: product.id,
@@ -45,6 +47,7 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
     $scope.product_setup_opt = function(type,value) {
         myscope.common_setup_opt(type,value,'product');
     };
+
     $scope.kit_setup_opt = function(type,value) {
         myscope.common_setup_opt(type,value,'kit');
     };
@@ -60,21 +63,25 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
             myscope.get_products();
         });
     };
+
     $scope.product_delete = function() {
         products.list.update('delete',$scope.products).then(function(data) {
             myscope.get_products();
         });
     };
+
     $scope.product_duplicate = function() {
         products.list.update('duplicate',$scope.products).then(function(data) {
             myscope.get_products();
         });
     };
+
     $scope.product_barcode = function() {
         products.list.update('barcode',$scope.products).then(function(data) {
             myscope.get_products();
         });
     };
+
     $scope.setup_child = function(childStateParams) {
         if(typeof childStateParams['type'] == 'undefined') {
             childStateParams['type'] = 'product';
@@ -108,9 +115,24 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
     myscope.select_single = function(row) {
         products.single.select($scope.products,row);
     };
+
     myscope.select_pages = function(from,to,state) {
         products.list.select($scope.products,from,to,state);
     };
+
+    myscope.invert = function(val) {
+        $scope.products.setup.inverted = !!val;
+
+        if($scope.products.setup.inverted) {
+            if($scope.products.setup.select_all) {
+                $scope.select_all_toggle(false);
+            } else if($scope.products.selected.length == 0) {
+                $scope.select_all_toggle(true);
+            }
+        }
+        myscope.update_selected_count();
+    };
+
     myscope.show_selected = function() {
         if(!$scope.products.setup.select_all && $scope.products.selected.length > 0 ) {
             $modal.open({
@@ -123,7 +145,8 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
                         selectable:true,
                         selections: {
                             single_callback:myscope.select_single,
-                            unbind:true
+                            unbind:true,
+                            inverted: $scope.products.setup.inverted
                         },
                         all_fields: {
                             name: {
@@ -189,44 +212,45 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
         myscope.do_load_products = false;
         $scope._can_load_products = true;
         $scope.gridOptions = {
-            identifier:'products',
+            identifier: 'products',
             select_all: $scope.select_all_toggle,
+            invert: myscope.invert,
             sort_func: $scope.handlesort,
             setup: $scope.products.setup,
             selections: {
                 show_dropdown: true,
                 single_callback: myscope.select_single,
                 multi_page: myscope.select_pages,
-                selected_count:0,
-                show:myscope.show_selected
+                selected_count: 0,
+                show: myscope.show_selected
             },
             paginate:{
                 show:true,
                 //send a large number to prevent resetting page number
-                total_items:50000,
-                current_page:$state.params.page,
-                items_per_page:$scope.products.setup.limit,
+                total_items: 50000,
+                current_page: $state.params.page,
+                items_per_page: $scope.products.setup.limit,
                 callback: myscope.load_page_number
             },
-            show_hide:true,
-            selectable:true,
-            draggable:true,
-            sortable:true,
+            show_hide: true,
+            selectable: true,
+            draggable: true,
+            sortable: true,
             editable:{
-                array:false,
+                array: false,
                 update: $scope.update_product_list,
                 elements: {
                     status: {
-                        type:'select',
-                        options:[
-                            {name:"Active",value:'active'},
-                            {name:"Inactive",value:'inactive'},
-                            {name:"New",value:'new'}
+                        type: 'select',
+                        options: [
+                            {name: "Active", value: 'active'},
+                            {name: "Inactive", value: 'inactive'},
+                            {name: "New", value: 'new'}
                         ]
                     },
                     qty:{
-                        type:'number',
-                        min:0
+                        type: 'number',
+                        min: 0
                     }
                 },
                 functions: {
@@ -237,52 +261,52 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
             all_fields: {
                 image: {
                     name: "Image",
-                    editable:false,
-                    transclude:'<div ng-click="options.editable.functions.name(row,$event)" class="pointer single-image"><img class="img-responsive" ng-src="{{row.image}}" /></div>'
+                    editable: false,
+                    transclude: '<div ng-click="options.editable.functions.name(row,$event)" class="pointer single-image"><img class="img-responsive" ng-src="{{row.image}}" /></div>'
                 },
                 name: {
                     name: "Item Name",
                     hideable: false,
-                    transclude:'<a href="" ng-click="options.editable.functions.name(row,$event)" >{{row[field]}}</a>'
+                    transclude: '<a href="" ng-click="options.editable.functions.name(row,$event)" >{{row[field]}}</a>'
                 },
                 sku: {
                     name: "SKU"
                 },
                 status: {
                     name: "Status",
-                    transclude:"<span class='label label-default' ng-class=\"{" +
+                    transclude: "<span class='label label-default' ng-class=\"{" +
                     "'label-success': row[field] == 'active', " +
                         "'label-info': row[field] == 'new' }\">" +
                         "{{row[field]}}</span>"
                 },
                 barcode: {
-                    name:"Barcode"
+                    name: "Barcode"
                 },
                 location_primary: {
                     name: "Primary Location",
-                    class:"span3"
+                    class: "span3"
                 },
                 store_name: {
                     name: "Store",
-                    editable:false
+                    editable: false
                 },
                 qty: {
-                    name:"Avbl Inv"
+                    name: "Avbl Inv"
                 },
                 cat:{
-                    name:"Category",
-                    hidden:true
+                    name: "Category",
+                    hidden: true
                 },
                 location_secondary: {
                     name: "Secondary Location",
-                    class:"span3",
-                    hidden:true
+                    class: "span3",
+                    hidden: true
                 },
                 location_name: {
-                    name:"Warehouse Name",
-                    class:"span3",
-                    editable:false,
-                    hidden:true
+                    name: "Warehouse Name",
+                    class: "span3",
+                    editable: false,
+                    hidden: true
                 }
             }
         };
@@ -297,9 +321,7 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
         $scope.$watch('_can_load_products',myscope.can_do_load_products);
 
         $scope.product_modal_closed_callback = myscope.get_products;
-        $scope.$watch('products.selected',function() {
-           $scope.gridOptions.selections.selected_count = $scope.products.selected.length;
-        },true);
+        $scope.$watch('products.selected', myscope.update_selected_count,true);
         //$("#product-search-query").focus();
     };
 
@@ -312,6 +334,7 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
             return products.list.get($scope.products,page).success(function(response) {
                 //console.log("got products");
                 $scope.gridOptions.paginate.total_items = products.list.total_items($scope.products);
+                myscope.update_selected_count();
                 $scope._can_load_products = true;
             }).error(function(){
                 $scope._can_load_products = true;
@@ -321,6 +344,14 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
             var req= $q.defer();
             req.resolve();
             return req.promise;
+        }
+    };
+
+    myscope.update_selected_count = function() {
+        if($scope.products.setup.inverted && $scope.gridOptions.paginate.show) {
+            $scope.gridOptions.selections.selected_count = $scope.gridOptions.paginate.total_items - $scope.products.selected.length;
+        } else {
+            $scope.gridOptions.selections.selected_count = $scope.products.selected.length;
         }
     };
 

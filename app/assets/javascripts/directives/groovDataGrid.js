@@ -1,34 +1,35 @@
 groovepacks_directives.directive('groovDataGrid', ['$timeout','$http','$sce','settings','hotkeys',function ($timeout,$http,$sce,settings,hotkeys) {
     var default_options = function() {
         return {
-            identifier:'datagrid',
-            select_all:false,
-            selectable:false,
+            identifier: 'datagrid',
+            select_all: false,
+            invert: false,
+            selectable: false,
             selections: {
-                single_callback:function(){},
-                multi_page:function(){},
+                single_callback: function() {},
+                multi_page: function() {},
                 show_dropdown: false,
-                selected_count:0,
-                unbind:false,
-                show:function(){}
+                selected_count: 0,
+                unbind: false,
+                show: function() {}
             },
-            show_hide:false,
-            editable:false,
-            sortable:false,
+            show_hide: false,
+            editable: false,
+            sortable: false,
             paginate: {
-                show:false,
-                total_items:0,
-                max_size:12,
-                current_page:1,
-                items_per_page:10,
-                callback: function(){}
+                show: false,
+                total_items: 0,
+                max_size: 12,
+                current_page: 1,
+                items_per_page: 10,
+                callback: function() {}
             },
-            sort_func:function() {},
+            sort_func: function() {},
             setup: {},
             all_fields:{}
         }
     };
-    var default_field_options = function (){
+    var default_field_options = function () {
         return {
             name: "field",
             class: "col-xs-2",
@@ -105,7 +106,7 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout','$http','$sce','se
             };
             scope.show_dropdown = function() {
                 scope.dropdown.show = false;
-                if (scope.options.selections.show_dropdown && !scope.options.setup.select_all) {
+                if (scope.options.selections.show_dropdown && !(scope.options.setup.select_all || scope.options.setup.inverted)) {
                     $timeout.cancel(myscope.dropdown_promise);
                     myscope.dropdown_promise = null;
                     scope.dropdown.show = true;
@@ -138,17 +139,21 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout','$http','$sce','se
                         }
                     }
                 }
-                scope.theads = theads.concat(shown).filter(function(elem,idx,arr) {
+                scope.theads = theads.concat(shown).filter(function(elem, idx, arr) {
                     return (shown.indexOf(elem) != -1 && arr.indexOf(elem) >= idx);
                 });
                 scope.dragOptions.reload = true;
             };
 
             myscope.invert_selection = function() {
-                for(var i =0; i < scope.rows.length; i++) {
-                    scope.check_uncheck(scope.rows[i],i, {shiftKey:false});
+                if(scope.options.invert === false) {
+                    for(var i =0; i < scope.rows.length; i++) {
+                        scope.check_uncheck(scope.rows[i],i, {shiftKey:false});
+                    }
+                } else {
+                    scope.options.invert(!scope.options.setup.inverted);
                 }
-                myscope.last_clicked =null;
+                myscope.last_clicked = null;
             };
 
             myscope.update_paginate = function() {
