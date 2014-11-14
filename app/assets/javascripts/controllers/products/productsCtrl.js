@@ -301,6 +301,11 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
                     class: "span3",
                     hidden: true
                 },
+                location_tertiary: {
+                    name: "Tertiary Location",
+                    class: "span3",
+                    hidden: true
+                },
                 location_name: {
                     name: "Warehouse Name",
                     class: "span3",

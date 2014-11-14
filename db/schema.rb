@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20141107093933) do
+ActiveRecord::Schema.define(:version => 20141114154958) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0, :null => false
@@ -386,6 +386,7 @@ ActiveRecord::Schema.define(:version => 20141107093933) do
     t.integer  "inventory_warehouse_id"
     t.integer  "available_inv",                        :default => 0, :null => false
     t.integer  "allocated_inv",                        :default => 0, :null => false
+    t.string   "location_tertiary",      :limit => 50
   end
 
   add_index "product_inventory_warehouses", ["inventory_warehouse_id"], :name => "index_product_inventory_warehouses_on_inventory_warehouse_id"

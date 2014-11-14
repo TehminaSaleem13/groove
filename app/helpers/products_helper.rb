@@ -86,7 +86,7 @@ module ProductsHelper
       product.primary_category = value
     elsif var ==  'barcode'
       product.primary_barcode = value
-    elsif ['location_primary' ,'location_secondary','location_name','qty'].include?(var)
+    elsif ['location_primary' ,'location_secondary', 'location_tertiary','location_name','qty'].include?(var)
       product_location = product.primary_warehouse(current_user)
       if product_location.nil?
         product_location = ProductInventoryWarehouses.new
@@ -97,6 +97,8 @@ module ProductsHelper
           product_location.location_primary = value
         elsif var == 'location_secondary'
           product_location.location_secondary = value
+        elsif var == 'location_tertiary'
+          product_location.location_tertiary = value
         elsif var == 'location_name'
           product_location.name = value
         elsif var == 'qty'

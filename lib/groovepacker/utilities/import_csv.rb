@@ -251,7 +251,7 @@ class ImportCsv
               end
 
               #add inventory warehouses
-              if !mapping['location_primary'].nil? || !mapping['inv_wh1'].nil?
+              if !mapping['location_primary'].nil? || !mapping['inv_wh1'].nil? || !mapping['location_secondary'].nil? || !mapping['location_tertiary'].nil?
                 product_inventory = ProductInventoryWarehouses.new
                 product_inventory.inventory_warehouse = InventoryWarehouse.where(:is_default => true).first
                 valid_inventory = false
@@ -261,6 +261,14 @@ class ImportCsv
                 end
                 if !mapping['location_primary'].nil? && mapping['location_primary'] >= 0
                   product_inventory.location_primary = single_row[mapping['location_primary']]
+                  valid_inventory = true
+                end
+                if !mapping['location_secondary'].nil? && mapping['location_secondary'] >= 0
+                  product_inventory.location_secondary = single_row[mapping['location_secondary']]
+                  valid_inventory = true
+                end
+                if !mapping['location_tertiary'].nil? && mapping['location_tertiary'] >= 0
+                  product_inventory.location_tertiary = single_row[mapping['location_tertiary']]
                   valid_inventory = true
                 end
                 product.product_inventory_warehousess << product_inventory if valid_inventory

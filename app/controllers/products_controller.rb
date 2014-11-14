@@ -875,6 +875,7 @@ class ProductsController < ApplicationController
                 product_inv_wh.available_inv = wh["info"]["available_inv"]
                 product_inv_wh.location_primary = wh["info"]["location_primary"]
                 product_inv_wh.location_secondary = wh["info"]["location_secondary"]
+                product_inv_wh.location_tertiary = wh["info"]["location_tertiary"]
                 unless product_inv_wh.save
                   @result['status'] &= false
                 end
@@ -1360,7 +1361,7 @@ class ProductsController < ApplicationController
       (SELECT products.* from products, product_barcodes where '+kit_query+' products.id = product_barcodes.product_id AND product_barcodes.barcode like '+search+' ) UNION
       (SELECT products.* from products, product_skus where '+kit_query+' products.id = product_skus.product_id AND product_skus.sku like '+search+' ) UNION
       (SELECT products.* from products, product_cats where '+kit_query+' products.id = product_cats.product_id AND product_cats.category like '+search+' ) UNION
-      (SELECT products.* from products, product_inventory_warehouses where '+kit_query+' products.id = product_inventory_warehouses.product_id AND (product_inventory_warehouses.location_primary like '+search+' OR product_inventory_warehouses.location_secondary like '+search+') ) '
+      (SELECT products.* from products, product_inventory_warehouses where '+kit_query+' products.id = product_inventory_warehouses.product_id AND (product_inventory_warehouses.location_primary like '+search+' OR product_inventory_warehouses.location_secondary like '+search+' OR product_inventory_warehouses.location_tertiary like '+search+') ) '
 
     result_rows = Product.find_by_sql(base_query+query_add)
 
@@ -1391,7 +1392,7 @@ class ProductsController < ApplicationController
     status_filter_text = ""
     is_kit = 0
     supported_sort_keys = ['updated_at', 'name', 'sku',
-                           'status', 'barcode', 'location_primary','location_secondary','location_name','cat','qty', 'store_type' ]
+                           'status', 'barcode', 'location_primary','location_secondary','location_tertiary','location_name','cat','qty', 'store_type' ]
     supported_order_keys = ['ASC', 'DESC' ] #Caps letters only
     supported_status_filters = ['all', 'active', 'inactive', 'new']
     supported_kit_params = ['0', '1', '-1']
@@ -1455,6 +1456,10 @@ class ProductsController < ApplicationController
       products = Product.find_by_sql("SELECT products.* FROM products LEFT JOIN product_inventory_warehouses ON ( "+
                                             "products.id = product_inventory_warehouses.product_id ) "+kit_query+
                                             status_filter_text+" ORDER BY product_inventory_warehouses.location_secondary "+sort_order+query_add)
+    elsif sort_key == 'location_tertiary'
+      products = Product.find_by_sql("SELECT products.* FROM products LEFT JOIN product_inventory_warehouses ON ( "+
+                                         "products.id = product_inventory_warehouses.product_id ) "+kit_query+
+                                         status_filter_text+" ORDER BY product_inventory_warehouses.location_tertiary "+sort_order+query_add)
     elsif sort_key == 'location_name'
       products = Product.find_by_sql("SELECT products.* FROM products LEFT JOIN product_inventory_warehouses ON ( "+
                                             "products.id = product_inventory_warehouses.product_id )  LEFT JOIN inventory_warehouses ON("+
@@ -1505,6 +1510,7 @@ class ProductsController < ApplicationController
       @product_hash['status'] = product.status
       @product_hash['location_primary'] = ''
       @product_hash['location_secondary'] = ''
+      @product_hash['location_tertiary'] = ''
       @product_hash['location_name'] = 'not_available'
       @product_hash['qty'] = 0
       @product_hash['barcode'] = ''
@@ -1516,6 +1522,7 @@ class ProductsController < ApplicationController
       unless @product_location.nil?
         @product_hash['location_primary'] = @product_location.location_primary
         @product_hash['location_secondary'] = @product_location.location_secondary
+        @product_hash['location_tertiary'] = @product_location.location_tertiary
         @product_hash['qty'] = @product_location.available_inv
         if !@product_location.inventory_warehouse.nil?
         	@product_hash['location_name'] = @product_location.inventory_warehouse.name

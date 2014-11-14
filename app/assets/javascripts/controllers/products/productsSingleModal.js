@@ -349,6 +349,11 @@ groovepacks_controllers.
                         name: 'Secondary Location',
                         model:'row.info',
                         transclude: '<span>{{row.info.location_secondary}}</span>'
+                    },
+                    location_tertiary: {
+                        name: 'Tertiary Location',
+                        model:'row.info',
+                        transclude: '<span>{{row.info.location_tertiary}}</span>'
                     }
                 }
             };

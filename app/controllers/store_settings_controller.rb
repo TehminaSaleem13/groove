@@ -315,7 +315,7 @@ class StoreSettingsController < ApplicationController
             @result["order"] = Hash.new
             @result["order"]["map_options"] = [
                 { value: "increment_id", name: "Order number"},
-                { value: "order_placed_time", name: "Order placed"},
+                { value: "order_placed_time", name: "Order placed time"},
                 { value: "sku", name: "SKU"},
                 { value: "customer_comments", name: "Customer Comments"},
                 { value: "qty", name: "Qty"},
@@ -349,7 +349,9 @@ class StoreSettingsController < ApplicationController
                 { value: "inv_wh1", name: "Inventory"},
                 { value: "product_images", name: "Product Images"},
                 { value: "product_type", name: "Product Type"},
-                { value: "location_primary", name: "Location/Bin"},
+                { value: "location_primary", name: "Location Primary"},
+                { value: "location_secondary", name: "Location Secondary"},
+                { value: "location_tertiary", name: "Location Tertiary"},
                 { value: "barcode", name: "Barcode Value"}
             ]
             @result["product"]["settings"] = csv_map.product_map
