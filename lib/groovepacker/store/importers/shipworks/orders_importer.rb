@@ -61,8 +61,8 @@ module Groovepacker
 
           private
           def allowed_status_to_import?(credential, status)
-            return false if status.nil? && !credential.shall_import_in_process
-            return true if status.nil? && credential.shall_import_in_process
+            return false if status.nil? && !credential.shall_import_no_status
+            return true if status.nil? && credential.shall_import_no_status
             return true if status.strip == 'In Process' && credential.shall_import_in_process
             return true if status.strip == 'New Order' && credential.shall_import_new_order
             return true if status.strip == 'Not Shipped' && credential.shall_import_not_shipped
@@ -108,17 +108,19 @@ module Groovepacker
               store_product_id: item["ID"]
             )
 
+            found_sku = false
             #SKU
-            if item["SKU"].nil?
-              sku = ProductSku.get_temp_sku
-            else
-              sku = item["SKU"]
+            unless item["SKU"].nil?
+              product.product_skus.create(sku: item["SKU"])
+              found_sku = true
             end
-            product.product_skus.create(sku: sku)
-
-            #create Secondary Sku also from the Code parameter
             unless item["Code"].nil? || item["Code"] == item["SKU"]
               product.product_skus.create(sku: item["Code"])
+              found_sku = true
+            end
+
+            unless found_sku
+              product.product_skus.create(sku:  ProductSku.get_temp_sku)
             end
 
             #Barcodes
