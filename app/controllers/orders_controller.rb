@@ -1015,7 +1015,7 @@ class OrdersController < ApplicationController
                       increment_id like "+search+" OR non_hyphen_increment_id like "+ search +
                       " OR email like "+search+" OR CONCAT(IFNULL(firstname,''),' ',IFNULL(lastname,'')) like "+search+" OR postcode like "+search
     query_add = ''
-    unless params[:select_all]
+    unless params[:select_all] || params[:inverted]
       query_add = " LIMIT #{limit} OFFSET #{offset}"
     end
     result_rows = Order.find_by_sql('SELECT * '+base_query+query_add)
@@ -1049,7 +1049,7 @@ class OrdersController < ApplicationController
 
     offset = params[:offset].to_i if !params[:offset].nil? && params[:offset].to_i >= 0
 
-    unless params[:select_all]
+    unless params[:select_all] || params[:inverted]
       query_add = " LIMIT "+limit.to_s+" OFFSET "+offset.to_s
     end
 
@@ -1100,7 +1100,7 @@ class OrdersController < ApplicationController
       unless status_filter == "all"
         orders = orders.where(:status=>status_filter)
       end
-      unless params[:select_all]
+      unless params[:select_all] || params[:inverted]
         orders = orders.limit(limit).offset(offset)
       end
     end
@@ -1137,15 +1137,31 @@ class OrdersController < ApplicationController
   end
 
   def list_selected_orders
-    if params[:select_all]
+    if params[:select_all] || params[:inverted]
       if !params[:search].nil? && params[:search] != ''
-        return do_search
+        result = do_search
       else
-        return do_getorders
+        result = do_getorders
       end
     else
-      return params[:orderArray]
+      result =  params[:orderArray]
     end
+
+    result_rows = []
+    if params[:inverted] && !params[:orderArray].blank?
+      not_in = []
+      params[:orderArray].each do |order|
+        not_in.push(order['id'])
+      end
+      result.each do |single_order|
+        unless not_in.include? single_order['id']
+          result_rows.push(single_order)
+        end
+      end
+    else
+      result_rows = result
+    end
+    return result_rows
   end
 
   def get_orders_count

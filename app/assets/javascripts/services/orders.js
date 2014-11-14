@@ -19,6 +19,7 @@ groovepacks_services.factory('orders',['$http','$window','notification',function
                 filter: "awaiting",
                 search: '',
                 select_all: false,
+                inverted:false,
                 limit: 20,
                 offset: 0,
                 //used for updating only
@@ -154,6 +155,7 @@ groovepacks_services.factory('orders',['$http','$window','notification',function
                 orders.selected = [];
                 if(data.status) {
                     orders.setup.select_all =  false;
+                    orders.setup.inverted = false;
                     notification.notify(success_messages[action],1);
                     notification.notify(data.notice_messages,2);
                 } else {

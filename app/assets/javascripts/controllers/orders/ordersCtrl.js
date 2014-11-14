@@ -20,7 +20,8 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
     };
 
     $scope.select_all_toggle = function(val) {
-        $scope.orders.setup.select_all = val;
+        $scope.orders.setup.select_all = !!val;
+        myscope.invert(false);
         $scope.orders.selected = [];
         for (var i =0; i< $scope.orders.list.length; i++) {
             $scope.orders.list[i].checked =  $scope.orders.setup.select_all;
@@ -111,12 +112,22 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
         }
     };
 
+    myscope.update_selected_count = function() {
+        if($scope.orders.setup.inverted && $scope.gridOptions.paginate.show) {
+            $scope.gridOptions.selections.selected_count = $scope.gridOptions.paginate.total_items - $scope.orders.selected.length;
+        } else {
+            $scope.gridOptions.selections.selected_count = $scope.orders.selected.length;
+        }
+    };
+
     myscope.select_single = function(row) {
         orders.single.select($scope.orders,row);
     };
+
     myscope.select_pages = function(from,to,state) {
         orders.list.select($scope.orders,from,to,state);
     };
+
     myscope.show_selected = function() {
         if(!$scope.orders.setup.select_all && $scope.orders.selected.length > 0 ) {
             $modal.open({
@@ -192,6 +203,7 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
             $scope._can_load_orders = false;
             return orders.list.get($scope.orders,page).success(function(data) {
                 $scope.gridOptions.paginate.total_items = orders.list.total_items($scope.orders);
+                myscope.update_selected_count();
                 $scope._can_load_orders = true;
             }).error(function(){
                 $scope._can_load_orders = true;
@@ -203,6 +215,19 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
             return req.promise;
         }
 
+    };
+
+    myscope.invert = function(val) {
+        $scope.orders.setup.inverted = !!val;
+
+        if($scope.orders.setup.inverted) {
+            if($scope.orders.setup.select_all) {
+                $scope.select_all_toggle(false);
+            } else if($scope.orders.selected.length == 0) {
+                $scope.select_all_toggle(true);
+            }
+        }
+        myscope.update_selected_count();
     };
 
     myscope.init = function() {
@@ -217,6 +242,7 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
         $scope.gridOptions = {
             identifier:'orders',
             select_all: $scope.select_all_toggle,
+            invert: myscope.invert,
             selections:{
                 show_dropdown:true,
                 single_callback: myscope.select_single,
@@ -348,9 +374,7 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
                 }
             }
         });
-        $scope.$watch('orders.selected',function(){
-            $scope.gridOptions.selections.selected_count = $scope.orders.selected.length;
-        },true);
+        $scope.$watch('orders.selected',myscope.update_selected_count,true);
 
         $scope.order_modal_closed_callback = myscope.get_orders;
 

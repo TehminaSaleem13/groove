@@ -144,23 +144,22 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
                         identifier:'product_selections',
                         selectable:true,
                         selections: {
-                            single_callback:myscope.select_single,
-                            unbind:true,
-                            inverted: $scope.products.setup.inverted
+                            single_callback: myscope.select_single,
+                            unbind: true
                         },
                         all_fields: {
                             name: {
                                 name: "Item Name"
                             },
                             sku: {
-                                name:"SKU"
+                                name: "SKU"
                             },
                             barcode: {
-                                name:"Barcode"
+                                name: "Barcode"
                             },
                             status :{
-                                name:"Status",
-                                transclude:"<span class='label label-default' ng-class=\"{" +
+                                name: "Status",
+                                transclude: "<span class='label label-default' ng-class=\"{" +
                                            "'label-success': row[field] == 'active', " +
                                            "'label-info': row[field] == 'new' }\">" +
                                            "{{row[field]}}</span>"
