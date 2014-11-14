@@ -117,7 +117,7 @@ module Groovepacker
             product.product_skus.create(sku: sku)
 
             #create Secondary Sku also from the Code parameter
-            unless item["Code"].nil? || item["Code"] == item["SKU"] do
+            unless item["Code"].nil? || item["Code"] == item["SKU"]
               product.product_skus.create(sku: item["Code"])
             end
 
