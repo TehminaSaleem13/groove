@@ -119,9 +119,7 @@ module Groovepacker
               result[:messages].push(e.message)
               import_item.message = e.message
               import_item.save
-              puts "Exception"
-              puts e.message.inspect
-              puts e.backtrace.join("\n")
+              logger.info e.backtrace.join("\n")
             end
 
             if result[:status]
