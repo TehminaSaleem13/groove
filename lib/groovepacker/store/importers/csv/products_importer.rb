@@ -134,12 +134,12 @@ module Groovepacker
             found_skus_raw = ProductSku.find_all_by_sku(all_skus)
             found_skus = {}
             found_barcodes_raw = ProductBarcode.find_all_by_barcode(all_barcodes)
-            found_barcodes = {}
+            found_barcodes = []
             found_skus_raw.each do |found_sku|
               found_skus[found_sku.sku] = found_sku
             end
             found_barcodes_raw.each do |found_barcode|
-              found_barcodes[found_barcode.barcode] = found_barcode
+              found_barcodes << found_barcode.barcode
             end
             found_skus_raw = nil
             found_barcodes_raw = nil
@@ -178,10 +178,12 @@ module Groovepacker
 
                 if record[:barcodes].length > 0
                   record[:barcodes].each_with_index do |barcode,barcode_order|
-                    product_barcode = ProductBarcode.new
-                    product_barcode.barcode = barcode
-                    product_barcode.order = barcode_order
-                    single_import.product_barcodes << product_barcode
+                    unless found_barcodes.include? barcode
+                      product_barcode = ProductBarcode.new
+                      product_barcode.barcode = barcode
+                      product_barcode.order = barcode_order
+                      single_import.product_barcodes << product_barcode
+                    end
                   end
                 end
 
