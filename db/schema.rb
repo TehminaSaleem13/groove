@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20141114154958) do
+ActiveRecord::Schema.define(:version => 20141118175232) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0, :null => false
@@ -351,6 +351,7 @@ ActiveRecord::Schema.define(:version => 20141114154958) do
     t.integer  "order",      :default => 0
   end
 
+  add_index "product_barcodes", ["barcode"], :name => "index_product_barcodes_on_barcode"
   add_index "product_barcodes", ["product_id"], :name => "index_product_barcodes_on_product_id"
 
   create_table "product_cats", :force => true do |t|
@@ -413,6 +414,7 @@ ActiveRecord::Schema.define(:version => 20141114154958) do
   end
 
   add_index "product_skus", ["product_id"], :name => "index_product_skus_on_product_id"
+  add_index "product_skus", ["sku"], :name => "index_product_skus_on_sku"
 
   create_table "products", :force => true do |t|
     t.string   "store_product_id",                                                                     :null => false

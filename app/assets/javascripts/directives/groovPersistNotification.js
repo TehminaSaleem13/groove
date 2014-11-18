@@ -1,19 +1,45 @@
-groovepacks_directives.directive('groovPersistNotification',['$window','$document','$sce','$timeout','groovIO','orders','stores',function ($window,$document,$sce,$timeout,groovIO,orders,stores) {
+groovepacks_directives.directive('groovPersistNotification',['$window','$document','$sce','$timeout','$interval','groovIO','orders','stores',function ($window,$document,$sce,$timeout,$interval,groovIO,orders,stores) {
     return {
         restrict:"A",
         templateUrl:"/assets/views/directives/persistnotification.html",
         scope: {},
         link: function(scope,el,attrs) {
             var myscope = {};
+            myscope.timers = {};
             myscope.default = function() {
                 return {
                     glow:false,
                     percent:0,
+                    ticker: null,
                     type:'success',
                     details:'',
                     message:''
                 };
             };
+
+            /* For dev lazy logging
+            myscope.timer = function(hash,action) {
+                if(typeof myscope.timers[hash] == "undefined") {
+                    myscope.timers[hash] = {
+                        start_time: null
+                    };
+                }
+                if (typeof action == "undefined" || action == "start") {
+                    if (myscope.timers[hash].start_time === null) {
+                        myscope.timers[hash].start_time = (new Date()).getTime();
+                        console.log('started');
+                    }
+                } else if (action == "stop") {
+                    console.log((new Date()).getTime() - myscope.timers[hash].start_time, " Milliseconds. Stopped.");
+                    delete myscope.timers[hash];
+                } else if(action == "tick") {
+                    console.log((new Date()).getTime() - myscope.timers[hash].start_time, "Milliseconds. Tick.");
+                    myscope.timers[hash].start_time = (new Date()).getTime();
+                }
+
+
+            };
+            */
 
             myscope.repurpose_selected = function () {
                 if(typeof scope.notifications[scope.selected] == "undefined") {
@@ -111,11 +137,47 @@ groovepacks_directives.directive('groovPersistNotification',['$window','$documen
                 var notif_details = '';
                 if(message['status'] == 'scheduled') {
                     notif_message += 'Queued';
-                } else if(message['status'] =='in_progress') {
-                    notif_message += message['success']+'/'+message['total']+' ';
-                    notif_details = '<b>Current Product SKU: '+message['current_sku']+'</b> <br/>';
+                } else if(['in_progress','processing','importing'].indexOf(message['status']) >= 0) {
+                    if(message['status'] == 'processing') {
+                        notif_message += 'Processing CSV file ';
+                    } else if(message['status'] == 'in_progress') {
+                        notif_message += 'Preparing to import records ';
+                    }
+                    if (message['status'] == 'importing') {
+                        notif_message = 'Import in progress.';
+                        scope.notifications[hash].percent = 5;
+                        scope.notifications[hash].ticker = $interval(function() {
+                            var percent = scope.notifications[hash].percent;
+                            if(percent <= 25) {
+                                percent += 0.5;
+                            }
+                            if(percent  <= 50) {
+                                percent  += 0.5;
+                            }
+                            if(percent  <= 75) {
+                                percent  += 0.5;
+                            }
+                            if(percent  <= 90) {
+                                percent += 0.5;
+                            }
+                            if( percent  <= 95 && percent > 90 ) {
+                                percent  += 0.2;
+                            }
+                            if( percent  < 99.5 && percent > 95 ) {
+                                percent  += 0.1;
+                            }
+                            scope.notifications[hash].percent = percent;
+                        },1000);
+                        notif_details = '<b>Cancel will not work now.</b>';
+                    } else {
+                        notif_details = '<b>Processed: '+message['success']+'/'+message['total']+'</b> <br/>';
+                        notif_details += '<b>Current Product SKU: '+message['current_sku']+'</b> <br/>';
+                    }
                 } else if(message['status'] == 'completed' || message['status'] == 'cancelled') {
                     notif_details = '';
+                    if(scope.notifications[hash].ticker !== null) {
+                        $interval.cancel(scope.notifications[hash].ticker);
+                    }
                     $timeout(function() {
                         delete scope.notifications[hash];
                         myscope.repurpose_selected();
@@ -128,7 +190,6 @@ groovepacks_directives.directive('groovPersistNotification',['$window','$documen
                         notif_message += "Cancelled";
                     }
                 }
-
                 scope.notifications[hash].message = $sce.trustAsHtml(notif_message);
                 scope.notifications[hash].details = $sce.trustAsHtml(notif_details);
                 scope.notifications[hash].cancel = function($event) {
