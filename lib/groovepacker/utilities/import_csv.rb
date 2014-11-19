@@ -32,8 +32,8 @@ class ImportCsv
           result = Groovepacker::Store::Importers::CSV::OrdersImporter.new.import_old(params,final_record,mapping)
           #result = Groovepacker::Store::Importers::CSV::OrdersImporter.new.import(params,final_record,mapping)
         else
-          result = Groovepacker::Store::Importers::CSV::ProductsImporter.new.import_old(params,final_record,mapping)
-          #result = Groovepacker::Store::Importers::CSV::ProductsImporter.new.import(params,final_record,mapping)
+          #result = Groovepacker::Store::Importers::CSV::ProductsImporter.new.import_old(params,final_record,mapping)
+          result = Groovepacker::Store::Importers::CSV::ProductsImporter.new.import(params,final_record,mapping)
         end
         File.delete(file_path)
       else

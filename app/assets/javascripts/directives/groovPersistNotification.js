@@ -130,21 +130,44 @@ groovepacks_directives.directive('groovPersistNotification',['$window','$documen
             };
 
             myscope.csv_product_import = function(message,hash) {
+                var import_stock_messages = {
+                    importing_products: 'Product Import in progress',
+                    importing_skus:'SKU Import in progress',
+                    importing_barcodes:'Barcode Import in Progress',
+                    importing_cats: 'Categories Import in Progress',
+                    importing_images: 'Images import in Progress',
+                    importing_inventory: 'Inventory Data import in Progress'
+                };
                 scope.notifications[hash].percent = (message['success']/message['total'])*100;
-                scope.notifications[hash].type = message['status'];
                 myscope.repurpose_selected();
                 var notif_message = '<b>Product CSV import:</b> ';
                 var notif_details = '';
                 if(message['status'] == 'scheduled') {
+                    scope.notifications[hash].type = 'scheduled';
                     notif_message += 'Queued';
-                } else if(['in_progress','processing','importing'].indexOf(message['status']) >= 0) {
-                    if(message['status'] == 'processing') {
+                } else if(['processing_csv','processing_products','importing_products','processing_rest','importing_skus','importing_barcodes','importing_cats','importing_images','importing_inventory'].indexOf(message['status']) >= 0) {
+                    scope.notifications[hash].type = message.status.split('_').shift();
+                    if(message['status'] == 'processing_csv') {
                         notif_message += 'Processing CSV file ';
-                    } else if(message['status'] == 'in_progress') {
-                        notif_message += 'Preparing to import records ';
+                    } else if(message['status'] == 'processing_products') {
+                        notif_message += 'Preparing to import products';
+                    } else if(message['status'] == 'processing_rest') {
+                        if(scope.notifications[hash].ticker !== null) {
+                            $interval.cancel(scope.notifications[hash].ticker);
+                            scope.notifications[hash].ticker = null;
+                        }
+                        notif_message += 'Preparing to import Skus, Barcodes, Categories, Images and Inventory Data.';
                     }
-                    if (message['status'] == 'importing') {
-                        notif_message = 'Import in progress.';
+
+                    if (['importing_products','importing_skus','importing_barcodes','importing_cats','importing_images','importing_inventory'].indexOf(message['status']) >= 0) {
+                        notif_message += import_stock_messages[message['status']];
+                        if (notif_message == '') {
+                            notif_message += 'Import in Progress.';
+                        }
+                        if(scope.notifications[hash].ticker !== null) {
+                            $interval.cancel(scope.notifications[hash].ticker);
+                            scope.notifications[hash].ticker = null;
+                        }
                         scope.notifications[hash].percent = 5;
                         scope.notifications[hash].ticker = $interval(function() {
                             var percent = scope.notifications[hash].percent;
@@ -174,6 +197,7 @@ groovepacks_directives.directive('groovPersistNotification',['$window','$documen
                         notif_details += '<b>Current Product SKU: '+message['current_sku']+'</b> <br/>';
                     }
                 } else if(message['status'] == 'completed' || message['status'] == 'cancelled') {
+                    scope.notifications[hash].type = message['status'];
                     notif_details = '';
                     if(scope.notifications[hash].ticker !== null) {
                         $interval.cancel(scope.notifications[hash].ticker);
