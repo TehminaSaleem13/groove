@@ -1,6 +1,6 @@
 groovepacks_controllers.
-    controller('usersSingleModal', [ '$scope', 'user_data', '$state', '$stateParams','$modal', '$modalInstance', '$timeout', 'hotkeys', 'users','auth','notification',
-        function(scope,user_data,$state,$stateParams,$modal, $modalInstance,$timeout,hotkeys,users,auth, notification) {
+    controller('usersSingleModal', [ '$scope', 'user_data', '$state', '$stateParams','$modal', '$modalInstance', '$timeout', 'hotkeys', 'users','auth','notification','groov_translator',
+        function(scope,user_data,$state,$stateParams,$modal, $modalInstance,$timeout,hotkeys,users,auth, notification,groov_translator) {
 
             var myscope = {};
 
@@ -42,7 +42,9 @@ groovepacks_controllers.
             };
 
             scope.update_single_user = function(auto) {
-                return users.single.update(scope.users,auto).then(myscope.load_roles);
+                if(users.single.validate(scope.users,auto,scope.edit_status)) {
+                    return users.single.update(scope.users,auto).then(myscope.load_roles);
+                }
             };
 
             scope.make_new_role = function() {
@@ -166,6 +168,16 @@ groovepacks_controllers.
             };
 
             myscope.init = function() {
+                scope.translations = {
+                    "tooltips": {
+                        "conf_code": "",
+                        "name": "",
+                        role:"",
+                        "base_role": "",
+                        "section_access": ""
+                    }
+                };
+                groov_translator.translate('settings.users.modal',scope.translations);
                 scope.users = user_data;
                 //All tabs
                 scope.modal_tabs = [

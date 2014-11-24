@@ -78,7 +78,7 @@ function(scope, store_data, $window, $sce, $interval, $state, $stateParams, $mod
         stores.import.amazon.check(scope.stores);
     };
 
-    scope.copydata =function(event) {
+    scope.copydata = function(event) {
         if(event) {
             if(scope.stores.single.store_type == 'Magento') {
                 scope.stores.single.producthost = scope.stores.single.host;
@@ -110,6 +110,11 @@ function(scope, store_data, $window, $sce, $interval, $state, $stateParams, $mod
                 scope.stores.single.productpassword = "";
             }
         }
+    };
+
+    scope.change_opt = function(id,value) {
+        scope.stores.single[id] = value;
+        scope.update_single_store();
     };
 
     myscope.store_single_details = function(id,new_rollback) {
@@ -145,11 +150,11 @@ function(scope, store_data, $window, $sce, $interval, $state, $stateParams, $mod
                                 controller: 'csvSingleModal',
                                 size:'lg',
                                 resolve: {
-                                    store_data: function(){return scope.stores}
+                                    store_data: function(){return scope.stores;}
                                 }
                             });
                             csv_modal.result.finally(function(){
-                                $modalInstance.close("csv-modal-closed")
+                                $modalInstance.close("csv-modal-closed");
                             });
                         }
                     }

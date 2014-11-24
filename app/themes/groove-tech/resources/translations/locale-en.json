@@ -32,6 +32,18 @@
         }
     },
     "settings": {
+        "users": {
+            "modal": {
+                "tooltips": {
+                    "conf_code": "Any value can be chosen for the confirmation code as long as it is unique for each user. The code will be requested when performing various operations, like changing an order from \"Service Issue\" to \"Awaiting\". Their purpose is to confirm intent or allow a manager to grant permission for an action, as well as to provide an audit trail. Each user can optionally have a barcoded ID badge, a scan of their barcode can automatically enter their confirmation id. ",
+                    "name": "Include the users name here or leave blank to use Username for both Username and Name.",
+                    "role":"Choose a role to apply the default permissions for that role or chose <strong>Custom</strong> to adjust individual permissions.",
+                    "base_role": "Start your custom role by choosing from any of the default roles. Then adjust any of the permissions as needed on the Products, Orders, User & Systems tabs. When finished you can save your role so it can be applied to users you create in the future.",
+                    "section_access": "Users only have access to sections that are checked. This is an easy way to block certain areas. For more precise control the other user tabs offer permissions for each of the sections. Only a SuperAdmin can change permissions for other users. SuperAdmins always have full permissions. "
+                }
+            }
+
+        },
         "system": {
             "general": {
                 "headings": {

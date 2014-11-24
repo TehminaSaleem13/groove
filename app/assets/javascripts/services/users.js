@@ -102,11 +102,9 @@ groovepacks_services.factory('users',['$http','notification','$filter',function(
             if (data.status) {
                 notification.notify("Role successfully deleted",1);
                 users.single.role = data.role;
-
             }
-            else
-            {
-                $scope.notify(data.messages,0);
+            else {
+                notification.notify(data.messages,0);
             }
         }).error(notification.server_error);
     };
@@ -123,6 +121,12 @@ groovepacks_services.factory('users',['$http','notification','$filter',function(
 
     var can_create_single = function () {
         return $http.get('/user_settings/let_user_be_created.json')
+    };
+
+    var validate_single = function(users, auto) {
+        if (typeof auto !== 'boolean') auto = true;
+        if(!auto) return true;
+        return (users.single.username && users.single.password && users.single.conf_password && users.single.email && users.single.confirmation_code);
     };
 
     var create_update_single = function(users,auto) {
@@ -162,6 +166,7 @@ groovepacks_services.factory('users',['$http','notification','$filter',function(
         single: {
             get: get_single,
             can_create: can_create_single,
+            validate:validate_single,
             update:create_update_single
         }
     };

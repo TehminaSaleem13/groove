@@ -23,23 +23,33 @@ class UserSettingsController < ApplicationController
             @user = User.new
         else
           @result['status'] = false
-          @result['messages'] = "You have reached the maximum limit of number of users for your subscription."
+          @result['messages'].push('You have reached the maximum limit of number of users for your subscription.')
         end
       else
         @user = User.find(params[:id])
       end
 
+      if !params[:password].nil? && params[:password] != '' && ( params[:conf_password].blank? || params[:conf_password].length < 8)
+        @result['status'] = false
+        @result['messages'].push('Password and Confirm Password can not be less than 8 characters')
+      end
       if @result['status']
         @user.email = params[:email]
         @user.password = params[:password] if !params[:password].nil? && params[:password] != ''
         @user.username = params[:username]
         @user.other = params[:other] if !params[:other].nil?
-        @user.password_confirmation = params[:password] if !params[:password].nil? && params[:password] != ''
-        if params[:active].nil?
+        @user.password_confirmation = params[:conf_password] if !params[:conf_password].nil? && params[:conf_password] != ''
+        if params[:active].blank?
           params[:active] = false
         end
         @user.active = params[:active]
-        @user.name = params[:name]
+        if params[:name].blank?
+          @user.name = params[:username]
+        else
+          @user.name = params[:name]
+        end
+
+
         @user.confirmation_code = params[:confirmation_code]
 
         if params[:role].nil? || params[:role]['id'].nil?
@@ -56,18 +66,18 @@ class UserSettingsController < ApplicationController
 
         if user_role.nil?
           @result.status = false
-          @result['messages'].push("Invalid user Role")
+          @result['messages'].push('Invalid user Role')
         else
           # Make sure we have at least one super admin
           if current_user.can?('make_super_admin') && !params[:role]['make_super_admin'] &&
               User.includes(:role).where('roles.make_super_admin = 1').length < 2 && !@user.role.nil? && @user.role.make_super_admin
             @result['status'] = false
-            @result['messages'].push("The app needs at least one super admin at all times")
+            @result['messages'].push('The app needs at least one super admin at all times')
           elsif !current_user.can?('make_super_admin') &&
               ((params[:role]['make_super_admin'] && (@user.role.nil? || !@user.role.make_super_admin)) ||
                   (!params[:role]['make_super_admin'] && !@user.role.nil? && @user.role.make_super_admin))
             @result['status'] = false
-            @result['messages'].push("You can not grant or revoke super admin privileges.")
+            @result['messages'].push('You can not grant or revoke super admin privileges.')
           else
             if user_role.custom && !user_role.display
               user_role = update_role(user_role,params[:role])

@@ -16,8 +16,10 @@ groovepacks_directives.directive('groovEditable', ['$timeout','editable','$rootS
                 blur = (typeof blur == "boolean")? blur : false;
                 if(scope.editing != -1) {
                     if(scope.editable.array) {
-                        if(scope.ngModel[scope.editing][scope.prop] == "") {
-                            scope.remove_node(scope.editing);
+                        if(typeof scope.ngModel[scope.editing] !== "undefined") {
+                            if(scope.ngModel[scope.editing][scope.prop] == "") {
+                                scope.remove_node(scope.editing);
+                            }
                         }
                     }
                     scope.editable.update(scope.ngModel,scope.prop);
