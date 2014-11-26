@@ -34,7 +34,11 @@ body {
   width: 400px;
 }
 
-.nav .popover {
+.mini-popover+.popover {
+  min-width:100px;
+  max-width:300px;
+}
+.top-nav-bar .nav .popover {
   min-width: 500px;
   width: auto;
   max-width: 700px;
@@ -1389,6 +1393,14 @@ div.input-style {
 
 .form-control {
   font-size:18px;
+  &.ng-invalid {
+    background: rgb(255, 240, 240);
+    border-color: #DDCCCC;
+    &:focus {
+      border: 1px solid rgb(223, 65, 43);
+      box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(223, 65, 43, 0.9);
+    }
+  }
 }
 .login-form {
   font-family: 'Play',sans-serif;

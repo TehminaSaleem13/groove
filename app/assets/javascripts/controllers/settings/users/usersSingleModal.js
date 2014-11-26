@@ -9,7 +9,16 @@ groovepacks_controllers.
              */
 
             scope.ok = function() {
-                $modalInstance.close("ok-button-click");
+                if(scope.users.single.username && (!scope.show_password || (scope.users.single.password && scope.users.single.conf_password)) && scope.users.single.email && scope.users.single.confirmation_code){
+                    if (!scope.show_password || (scope.users.single.password == scope.users.single.conf_password)) {
+                        $modalInstance.close("ok-button-click");
+                    } else {
+                        notification.notify("Password and confirm password do not match, please update before saving");
+                    }
+                } else {
+                    notification.notify("Oops, looks like some additional info may be required to create the user")
+                }
+
             };
             scope.cancel = function () {
                 $modalInstance.dismiss("cancel-button-click");
