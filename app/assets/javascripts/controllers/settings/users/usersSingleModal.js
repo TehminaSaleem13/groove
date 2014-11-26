@@ -9,16 +9,15 @@ groovepacks_controllers.
              */
 
             scope.ok = function() {
-                if(scope.users.single.username && (!scope.show_password || (scope.users.single.password && scope.users.single.conf_password)) && scope.users.single.email && scope.users.single.confirmation_code){
-                    if (!scope.show_password || (scope.users.single.password == scope.users.single.conf_password)) {
-                        $modalInstance.close("ok-button-click");
-                    } else {
-                        notification.notify("Password and confirm password do not match, please update before saving");
-                    }
+                if(scope.users.single.username && (!scope.show_password || (scope.users.single.password && scope.users.single.conf_password)) && scope.users.single.email && scope.users.single.confirmation_code) {
+                    $modalInstance.close("ok-button-click");
                 } else {
-                    notification.notify("Oops, looks like some additional info may be required to create the user")
+                    if(!(scope.users.single.username && scope.users.single.email && scope.users.single.confirmation_code)) {
+                        notification.notify("Oops, looks like some additional info is required");
+                    } else if(scope.show_password && (typeof scope.users.single.password == "undefined" || typeof scope.users.single.conf_password == "undefined")) {
+                            notification.notify("Both password and confirm password must be at least 8 characters");
+                    }
                 }
-
             };
             scope.cancel = function () {
                 $modalInstance.dismiss("cancel-button-click");
