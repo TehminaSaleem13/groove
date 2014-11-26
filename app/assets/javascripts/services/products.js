@@ -1,4 +1,4 @@
-groovepacks_services.factory('products',['$http','notification',function($http,notification) {
+groovepacks_services.factory('products',['$http','notification','editable',function($http,notification,editable) {
 
     var success_messages = {
         update_status: "Status updated Successfully",
@@ -204,7 +204,7 @@ groovepacks_services.factory('products',['$http','notification',function($http,n
             } else {
                 products.single = {};
             }
-        }).error(notification.server_error);
+        }).error(notification.server_error).then(editable.force_exit);
     };
 
     //single product retrieval by barcode
