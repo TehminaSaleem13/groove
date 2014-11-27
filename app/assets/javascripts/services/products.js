@@ -204,7 +204,7 @@ groovepacks_services.factory('products',['$http','notification','editable',funct
             } else {
                 products.single = {};
             }
-        }).error(notification.server_error).then(editable.force_exit);
+        }).error(notification.server_error).success(editable.force_exit).error(editable.force_exit);
     };
 
     //single product retrieval by barcode
