@@ -801,9 +801,10 @@ class ProductsController < ApplicationController
   	@result['status'] = true
     @result['messages'] = []
   	@result['params'] = params
-    if current_user.can?('add_edit_products') ||
-        (session[:product_edit_matched_for_current_user] && session[:product_edit_matched_for_products].include?(@product_id))
-      if !@product.nil?
+
+    if !@product.nil?
+      if current_user.can?('add_edit_products') ||
+          (session[:product_edit_matched_for_current_user] && session[:product_edit_matched_for_products].include?(@product.id))
         @product.reload
         #Update Basic Info
         @product.alternate_location = params[:basicinfo][:alternate_location]
@@ -817,17 +818,14 @@ class ProductsController < ApplicationController
         @product.pack_time_adj = params[:basicinfo][:pack_time_adj]
         @product.packing_placement = params[:basicinfo][:packing_placement] if params[:basicinfo][:packing_placement].is_a?(Integer)
         @product.product_type = params[:basicinfo][:product_type]
-        @product.spl_instructions_4_confirmation =
-          params[:basicinfo][:spl_instructions_4_confirmation]
+        @product.spl_instructions_4_confirmation = params[:basicinfo][:spl_instructions_4_confirmation]
         @product.spl_instructions_4_packer = params[:basicinfo][:spl_instructions_4_packer]
         @product.status = params[:basicinfo][:status]
         @product.store_id = params[:basicinfo][:store_id]
         @product.store_product_id = params[:basicinfo][:store_product_id]
 
-        @product.weight =
-          get_product_weight(params[:weight])
-        @product.shipping_weight =
-          get_product_weight(params[:shipping_weight])
+        @product.weight = get_product_weight(params[:weight])
+        @product.shipping_weight = get_product_weight(params[:shipping_weight])
 
         if !@product.save
           @result['status'] &= false
@@ -992,7 +990,7 @@ class ProductsController < ApplicationController
         #Update product barcodes
         #check if a product barcode is defined.
         product_barcodes = ProductBarcode.where(:product_id=>@product.id)
-      product_barcodes.reload
+        product_barcodes.reload
         if product_barcodes.length > 0
           product_barcodes.each do |productbarcode|
             found_barcode = false
@@ -1097,7 +1095,7 @@ class ProductsController < ApplicationController
         #if product is a kit, update product_kit_skus
         if !params[:productkitskus].nil?
           params[:productkitskus].each do |kit_product|
-                  actual_product = ProductKitSkus.where(:option_product_id => kit_product["option_product_id"], :product_id => @product.id)
+            actual_product = ProductKitSkus.where(:option_product_id => kit_product["option_product_id"], :product_id => @product.id)
             if actual_product.length > 0
               actual_product = actual_product.first
               actual_product.qty = kit_product["qty"]
@@ -1111,12 +1109,13 @@ class ProductsController < ApplicationController
         @product.update_product_status
       else
         @result['status'] = false
-        @result['message'] = 'Cannot find product information.'
+        @result['message'] = 'You do not have enough permissions to update a product'
       end
     else
       @result['status'] = false
-      @result['message'] = 'You do not have enough permissions to update a product'
+      @result['message'] = 'Cannot find product information.'
     end
+
 
     respond_to do |format|
       format.html # show.html.erb
