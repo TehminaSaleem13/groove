@@ -293,7 +293,8 @@ class SettingsController < ApplicationController
             single_row[:order_number] = exception.order.increment_id
             single_row[:order_date] = exception.order.order_placed_time
             single_row[:scanned_date] = exception.order.scanned_on
-            packing_user = User.find(exception.order.packing_user_id)
+            packing_user = nil
+            packing_user = User.find(exception.order.packing_user_id) unless exception.order.packing_user_id.blank?
             unless packing_user.nil?
               single_row[:packing_user] = packing_user.name + ' ('+packing_user.username+')'
             end
