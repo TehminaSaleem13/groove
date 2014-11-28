@@ -813,6 +813,7 @@ class ProductsController < ApplicationController
 
         @product.is_kit = params[:basicinfo][:is_kit]
         @product.is_skippable = params[:basicinfo][:is_skippable]
+        @product.record_serial= params[:basicinfo][:record_serial]
         @product.kit_parsing = params[:basicinfo][:kit_parsing]
         @product.name = params[:basicinfo][:name]
         @product.pack_time_adj = params[:basicinfo][:pack_time_adj]

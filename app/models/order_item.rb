@@ -42,6 +42,7 @@ class OrderItem < ActiveRecord::Base
     result['barcodes'] = item.product_barcodes.order("product_barcodes.order ASC")
     result['product_id'] = item.id
     result['skippable'] = item.is_skippable
+    result['record_serial'] = item.record_serial
     result['order_item_id'] = self.id
 
     result

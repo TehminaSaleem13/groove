@@ -240,7 +240,8 @@ groovepacks_controllers.
                     "confirmation": "",
                     "placement":"",
                     "time_adjust": "",
-                    "skippable": ""
+                    "skippable": "",
+                    record_serial:""
                 }
             };
             groov_translator.translate('products.modal',scope.translations);

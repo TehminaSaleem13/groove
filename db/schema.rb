@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20141118175232) do
+ActiveRecord::Schema.define(:version => 20141127153406) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0, :null => false
@@ -269,6 +269,17 @@ ActiveRecord::Schema.define(:version => 20141118175232) do
 
   add_index "order_items", ["order_id"], :name => "index_order_items_on_order_id"
 
+  create_table "order_serials", :force => true do |t|
+    t.integer  "order_id"
+    t.integer  "product_id"
+    t.string   "serial"
+    t.datetime "created_at", :null => false
+    t.datetime "updated_at", :null => false
+  end
+
+  add_index "order_serials", ["order_id"], :name => "index_order_serials_on_order_id"
+  add_index "order_serials", ["product_id"], :name => "index_order_serials_on_product_id"
+
   create_table "order_shippings", :force => true do |t|
     t.string   "firstname"
     t.string   "lastname"
@@ -438,6 +449,7 @@ ActiveRecord::Schema.define(:version => 20141118175232) do
     t.integer  "total_avail_ext",                                               :default => 0,         :null => false
     t.decimal  "weight",                          :precision => 8, :scale => 2, :default => 0.0,       :null => false
     t.decimal  "shipping_weight",                 :precision => 8, :scale => 2, :default => 0.0
+    t.boolean  "record_serial",                                                 :default => false
   end
 
   add_index "products", ["store_id"], :name => "index_products_on_store_id"

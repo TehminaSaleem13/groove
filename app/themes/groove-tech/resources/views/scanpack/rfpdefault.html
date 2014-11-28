@@ -1,6 +1,9 @@
 <div class="row" ng-show="data.order.next_item.instruction.length">
     <div class="alert alert-warning"><h4>Special instruction for the product: {{data.order.next_item.instruction}}</h4></div>
 </div>
+<div class="row" ng-show="data.order.next_item.record_serial">
+    <div class="alert alert-info"><h4>Serial number will be needed for this product</h4></div>
+</div>
 <div class="row">
     <div class="icons-list-style">
         <div class="col-lg-1  col-md-1" ng-click="reset_order()">

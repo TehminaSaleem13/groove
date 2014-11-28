@@ -73,6 +73,49 @@ class ScanPackController < ApplicationController
     end
   end
 
+  def serial_scan
+    @result = Hash.new
+    @result['status'] = true
+    @result['error_messages'] = []
+    @result['success_messages'] = []
+    @result['notice_messages'] = []
+    if params[:serial].blank?
+      params[:serial] = 'N/A'
+    end
+    if params[:order_id].nil? || params[:product_id].nil?
+      @result['status'] = false
+      @result['error_messages'].push('Order id and Product id are required')
+    else
+      order = Order.find(params[:order_id])
+      product = Product.find(params[:product_id])
+
+      if order.nil?
+        @result['status'] &= false
+        @result['error_messages'].push('Could not find order with id: '+params[:order_id].to_s)
+      elsif product.nil?
+        @result['status'] &= false
+        @result['error_messages'].push('Could not find product with id: '+params[:product_id].to_s)
+      else
+        if barcode_found_or_special_code(params[:serial])
+          @result['status'] &= false
+          @result['error_messages'].push('Product Serial number: '+params[:product_id].to_s+' can not be the same as a confirmation code, one of the action codes or any product barcode')
+        else
+          order_serial = OrderSerial.new
+          order_serial.order = order
+          order_serial.product_id = product.id
+          order_serial.serial = params[:serial].to_s
+          order_serial.save
+          @result = product_scan(params[:barcode],'scanpack.rfp.default',params[:order_id],params[:clicked],true)
+          order.addactivity('Product: "'+product.name.to_s+'" Serial scanned: "'+params[:serial]+'"',current_user.name)
+        end
+      end
+    end
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json: @result }
+    end
+  end
+
   def add_note
     @result = Hash.new
     @result['status'] = true

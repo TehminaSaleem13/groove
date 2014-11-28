@@ -157,7 +157,7 @@ module ScanPackHelper
     true
   end
 
-  def product_scan(input,state,id,clicked=false)
+  def product_scan(input,state,id,clicked=false,serial_added=false)
     result = Hash.new
     result['status'] = true
     result['matched'] = true
@@ -166,6 +166,8 @@ module ScanPackHelper
     result['notice_messages'] = []
     result['data'] = Hash.new
     result['data']['next_state'] = 'scanpack.rfp.default'
+    result['data']['serial'] = Hash.new
+    result['data']['serial']['ask'] = false
 
     session[:product_edit_matched_for_current_user] = false
     session[:order_edit_matched_for_current_user] = false
@@ -201,6 +203,9 @@ module ScanPackHelper
           result['error_messages'].push('Order with id: '+id+' is already in scanned state')
         end
       else
+        result['data']['serial']['clicked'] = clicked
+        result['data']['serial']['barcode'] = input
+        result['data']['serial']['order_id'] = id
 
         result['data']['order_num'] = single_order.increment_id
 
@@ -225,8 +230,18 @@ module ScanPackHelper
                             OrderItemKitProduct.find(child_item['kit_product_id'])
 
                         unless order_item_kit_product.nil?
-                          order_item_kit_product.process_item(clicked)
-                          (session[:most_recent_scanned_products] ||= []) << child_item['product_id']
+                          if child_item['record_serial']
+                            if serial_added
+                              order_item_kit_product.process_item(clicked)
+                              (session[:most_recent_scanned_products] ||= []) << child_item['product_id']
+                            else
+                              result['data']['serial']['ask'] = true
+                              result['data']['serial']['product_id'] = child_item['product_id']
+                            end
+                          else
+                            order_item_kit_product.process_item(clicked)
+                            (session[:most_recent_scanned_products] ||= []) << child_item['product_id']
+                          end
                         end
 
                         break
@@ -244,8 +259,18 @@ module ScanPackHelper
                   order_item = OrderItem.find(item['order_item_id'])
 
                   unless order_item.nil?
-                    order_item.process_item(clicked)
-                    (session[:most_recent_scanned_products] ||= []) << order_item.product_id
+                    if item['record_serial']
+                      if serial_added
+                        order_item.process_item(clicked)
+                        (session[:most_recent_scanned_products] ||= []) << order_item.product_id
+                      else
+                        result['data']['serial']['ask'] = true
+                        result['data']['serial']['product_id'] = order_item.product_id
+                      end
+                    else
+                      order_item.process_item(clicked)
+                      (session[:most_recent_scanned_products] ||= []) << order_item.product_id
+                    end
                   end
                   break
                 end
@@ -518,6 +543,18 @@ module ScanPackHelper
     end
 
     return data
+  end
+
+  def barcode_found_or_special_code(barcode)
+    confirmation_code = User.find_by_confirmation_code(barcode)
+    unless confirmation_code.nil?
+      return true
+    end
+    if ScanPackSetting.is_action_code(barcode)
+      return true
+    end
+    barcode_data = ProductBarcode.find_by_barcode(barcode)
+    return !barcode_data.nil?
   end
 
 end

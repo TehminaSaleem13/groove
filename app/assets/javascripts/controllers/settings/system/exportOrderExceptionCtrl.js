@@ -1,14 +1,22 @@
 groovepacks_controllers.controller('exportOrderExceptionCtrl', [ '$scope','$window',function($scope,$window) {
     var myscope = {};
+    myscope.defaults = function() {
+        return {
+            start: {
+                open:false,
+                time: new Date()
+            },
+            end: {
+                open:false,
+                time: new Date()
+            }
+        }
+    };
+
     myscope.init = function() {
-        $scope.start = {
-            open:false,
-            time: new Date()
-        };
-        $scope.end = {
-            open:false,
-            time: new Date()
-        };
+        $scope.exception = myscope.defaults();
+        $scope.serial = myscope.defaults();
+
         $scope.setup_page('system','order_exception');
     };
 
@@ -18,12 +26,17 @@ groovepacks_controllers.controller('exportOrderExceptionCtrl', [ '$scope','$wind
         object.open =true;
     };
 
-    $scope.download_csv = function() {
-        if($scope.start.time <= $scope.end.time) {
-            $window.open('/settings/order_exceptions.csv?start='+$scope.start.time+'&end='+$scope.end.time);
+    $scope.download_csv = function(which) {
+        if(['exception','serial'].indexOf(which) != -1) {
+            if($scope[which].start.time <= $scope[which].end.time) {
+                $window.open('/settings/order_'+which+'s.csv?start='+$scope[which].start.time+'&end='+$scope[which].end.time);
+            } else {
+                $scope.notify('Start time can not be after End time');
+            }
         } else {
-            $scope.notify('Start time can not be after End time');
+            $scope.notify('Unknown csv requested');
         }
+
     };
     myscope.init();
 }]);

@@ -326,6 +326,73 @@ class SettingsController < ApplicationController
     end
   end
 
+  def order_serials
+    require 'csv'
+    result = Hash.new
+    result['status'] = true
+    result['messages'] = []
+    if current_user.can? 'view_packing_ex'
+      if params[:start].nil? || params[:end].nil?
+        result['status'] = false
+        result['messages'].push('We need a start and an end time')
+      else
+        serials = OrderSerial.where(updated_at: Time.parse(params[:start])..Time.parse(params[:end]))
+        filename = 'groove-order-serials-'+Time.now.to_s+'.csv'
+        row_map = {
+            :order_number => '',
+            :order_date =>'',
+            :scanned_date =>'',
+            :packing_user =>'',
+            :order_item_count => '',
+            :product_name=>'',
+            :serial =>'',
+            :primary_sku =>'',
+            :primary_barcode =>'',
+            :warehouse_name =>''
+        }
+        data = CSV.generate do |csv|
+          csv << row_map.keys
+
+          serials.each do |serial|
+            single_row = row_map.dup
+            single_row[:order_number] = serial.order.increment_id
+            single_row[:order_date] = serial.order.order_placed_time
+            single_row[:scanned_date] = serial.order.scanned_on
+            packing_user = nil
+            packing_user = User.find(serial.order.packing_user_id) unless serial.order.packing_user_id.blank?
+            unless packing_user.nil?
+              single_row[:packing_user] = packing_user.name + ' ('+packing_user.username+')'
+              single_row[:warehouse_name] =  serial.product.primary_warehouse(packing_user).inventory_warehouse.name unless serial.product.primary_warehouse(packing_user).nil? || serial.product.primary_warehouse(packing_user).inventory_warehouse.nil?
+            end
+            single_row[:serial] = serial.serial
+            single_row[:product_name] = serial.product.name
+            single_row[:primary_sku] =  serial.product.primary_sku
+            single_row[:primary_barcode] =  serial.product.primary_barcode
+            single_row[:order_item_count] = serial.order.get_items_count
+
+            csv << single_row.values
+          end
+        end
+
+      end
+    else
+      result['status'] = false
+      result['messages'].push('You do not have enough permissions to view order serials')
+    end
+
+    unless result['status']
+      data = CSV.generate do |csv|
+        csv << result['messages']
+      end
+      filename = 'error.csv'
+    end
+
+    respond_to do |format|
+      format.html # show.html.erb
+      format.csv { send_data  data, :type => 'text/csv', :filename => filename }
+    end
+  end
+
   def get_columns_state
     @result = Hash.new
     @result['status'] = true

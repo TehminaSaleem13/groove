@@ -210,6 +210,15 @@
                 <div class="info col-sm-2" ><i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" popover="{{translations.tooltips.skippable}}"></i></div>
 
             </div>
+            <div class="form-group">
+                <label class="control-label col-sm-2">Record a Serial Number for this item during packing?</label>
+
+                <div class="controls col-sm-2 col-lg-1">
+                    <div toggle-switch ng-model="products.single.basicinfo.record_serial" groov-click="update_single_product()"></div>
+                </div>
+                <div class="info col-sm-2" ><i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" popover="{{translations.tooltips.record_serial}}"></i></div>
+
+            </div>
             <h4>Inventory</h4>
             <div class="form-group">
                 <div class="controls col-xs-12">

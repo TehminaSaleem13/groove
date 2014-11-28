@@ -81,6 +81,22 @@ groovepacks_controllers.
                 }
             };
 
+            myscope.ask_serial = function(serial) {
+                myscope.serial_obj = $modal.open({
+                    templateUrl: '/assets/views/modals/scanpack/productserial.html',
+                    controller: 'scanPackRfpProductSerial',
+                    size:'lg',
+                    resolve: {
+                        order_data: function() {return $scope.data.order;},
+                        serial_data:function(){return serial; },
+                        confirm: function(){return $scope.handle_scan_return;}
+                    }
+                });
+                myscope.serial_obj.result.finally(function() {
+                    $timeout($scope.focus_search,500);
+                });
+            };
+
             myscope.compute_counts = function() {
                 if(!myscope.order_instruction_confirmed && ($scope.general_settings.single.conf_req_on_notes_to_packer ==="always" || ($scope.general_settings.single.conf_req_on_notes_to_packer ==="optional" && $scope.data.order.note_confirmation)) && $scope.data.order.notes_toPacker) {
                     $timeout(myscope.show_order_instructions);
@@ -139,6 +155,9 @@ groovepacks_controllers.
             myscope.check_reload_compute = function () {
                 $scope.rfpinit().then(function () {
                     $scope.set('title', "Ready for Product Scan");
+                    if(typeof $scope.data.raw.data.serial != 'undefined' && $scope.data.raw.data.serial.ask) {
+                        myscope.ask_serial($scope.data.raw.data.serial);
+                    }
                     if($scope.data.order.status != "awaiting") {
                         $scope.set('order',{});
                         $scope.rfpinit().then(myscope.compute_counts);
@@ -151,6 +170,7 @@ groovepacks_controllers.
 
             myscope.init = function() {
                 myscope.note_obj = null;
+                myscope.serial_obj = null;
                 myscope.order_instruction_confirmed = false;
                 myscope.order_instruction_obj = null;
                 myscope.product_instruction_obj = null;

@@ -108,6 +108,14 @@ groovepacks_services.factory('scanPack',['$http','notification','$state',functio
         }).error(notification.server_error);
     };
 
+    var serial_scan = function(serial) {
+        return $http.post('/scan_pack/serial_scan.json',serial).success(function(data) {
+            notification.notify(data.notice_messages,2);
+            notification.notify(data.success_messages,1);
+            notification.notify(data.error_messages,0);
+        }).error(notification.server_error);
+    };
+
     return {
 
         input: input,
@@ -123,6 +131,7 @@ groovepacks_services.factory('scanPack',['$http','notification','$state',functio
         },
         click_scan:click_scan,
         order_instruction: order_instruction,
-        product_instruction: product_instruction
+        product_instruction: product_instruction,
+        product_serial:serial_scan
     };
 }]);

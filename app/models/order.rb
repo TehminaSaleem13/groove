@@ -11,6 +11,7 @@ class Order < ActiveRecord::Base
   has_one :order_shipping, :dependent => :destroy
   has_one :order_exceptions, :dependent => :destroy
   has_many :order_activities, :dependent => :destroy
+  has_many :order_serials, :dependent => :destroy
   has_and_belongs_to_many :order_tags
   after_update :update_inventory_levels_for_items
   before_save :update_non_hyphen_increment_id
@@ -478,6 +479,7 @@ class Order < ActiveRecord::Base
       order_item.save
     end
 
+    self.order_serials.destroy_all
     self.set_order_status
     self.tracking_num = ''
     self.update_inventory_levels_for_items(true)
