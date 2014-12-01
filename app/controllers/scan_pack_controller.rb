@@ -98,7 +98,7 @@ class ScanPackController < ApplicationController
       else
         if barcode_found_or_special_code(params[:serial])
           @result['status'] &= false
-          @result['error_messages'].push('Product Serial number: '+params[:product_id].to_s+' can not be the same as a confirmation code, one of the action codes or any product barcode')
+          @result['error_messages'].push('Product Serial number: "'+params[:serial].to_s+'" can not be the same as a confirmation code, one of the action codes or any product barcode')
         else
           order_serial = OrderSerial.new
           order_serial.order = order

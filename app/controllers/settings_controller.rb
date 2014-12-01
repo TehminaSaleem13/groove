@@ -339,15 +339,15 @@ class SettingsController < ApplicationController
         serials = OrderSerial.where(updated_at: Time.parse(params[:start])..Time.parse(params[:end]))
         filename = 'groove-order-serials-'+Time.now.to_s+'.csv'
         row_map = {
-            :order_number => '',
             :order_date =>'',
-            :scanned_date =>'',
-            :packing_user =>'',
-            :order_item_count => '',
-            :product_name=>'',
+            :order_number => '',
             :serial =>'',
             :primary_sku =>'',
             :primary_barcode =>'',
+            :product_name=>'',
+            :packing_user =>'',
+            :order_item_count => '',
+            :scanned_date =>'',
             :warehouse_name =>''
         }
         data = CSV.generate do |csv|

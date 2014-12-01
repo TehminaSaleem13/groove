@@ -1,6 +1,6 @@
 groovepacks_controllers.
-    controller('appCtrl', [ '$rootScope', '$scope', '$timeout','$modalStack', '$state', '$filter','$document','hotkeys', 'auth','notification','importOrders','groovIO','editable',
-    function( $rootScope, $scope, $timeout, $modalStack, $state, $filter, $document, hotkeys, auth,notification,importOrders,groovIO,editable) {
+    controller('appCtrl', [ '$rootScope', '$scope', '$timeout','$modalStack', '$state', '$filter','$document','$window','hotkeys', 'auth','notification','importOrders','groovIO','editable',
+    function( $rootScope, $scope, $timeout, $modalStack, $state, $filter, $document, $window, hotkeys, auth,notification,importOrders,groovIO,editable) {
 
         $scope.$on("user-data-reloaded", function() {
             $scope.current_user = auth;
@@ -198,11 +198,26 @@ groovepacks_controllers.
            callback:$scope.stop_editing
         });
 
+        document.onmouseover = function() {
+            if(!$scope.mouse_in_page) {
+                $scope.$apply(function() {
+                    $scope.mouse_in_page = true;
+                });
+            }
+        };
+        document.onmouseleave = function() {
+            if($scope.mouse_in_page) {
+                $scope.$apply(function () {
+                    $scope.mouse_in_page = false;
+                });
+            }
+        };
+
         //myscope.get_status();
         $rootScope.$on('$stateChangeStart',function(event,toState,toParams,fromState,fromParams) {
             if($(".modal").is(':visible') && toState.name !=fromState.name) {
                 var modal = $modalStack.getTop();
-                if (modal && modal.value.backdrop && modal.value.backdrop != 'static' ) {
+                if (modal && modal.value.backdrop && modal.value.backdrop != 'static' && !$scope.mouse_in_page) {
                     event.preventDefault();
                     $modalStack.dismiss(modal.key, 'browser-back-button');
                 }
