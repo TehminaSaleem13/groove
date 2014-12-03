@@ -9,30 +9,31 @@ module Groovepacker
             credential = handler[:credential]
             client = handler[:store_handle]
             result = self.build_result
-            products = client.product.all
-            unless products.nil?
-              result[:total_imported] = products.length.to_s
+            product_result = client.get_products
+            puts product_result.inspect
+            unless product_result["products"].nil?
+              result[:total_imported] = product_result["products"].length.to_s
 
               # loop through the products
-              products.each do |item|
+              product_result["products"].each do |item|
                 import_result = false
                 previous_import = false
-                if item.sku.nil? or item.sku == ''
+                if item["sku"].nil? or item["sku"] == ''
                   # if sku is empty
-                  if Product.find_by_name(item.name).nil?
+                  if Product.find_by_name(item["name"]).nil?
                     # product does not exist create one with temp sku
                     import_result = create_new_product(item, ProductSku.get_temp_sku, credential)
                   else
                     # product exists add temp sku if it does not exist
-                    unless contains_temp_skus(Product.where(name: item.name))
+                    unless contains_temp_skus(Product.where(name: item["name"]))
                       import_result = create_new_product(item, ProductSku.get_temp_sku, credential)
                     else
                       previous_import = true
                     end
                   end
-                elsif ProductSku.where(:sku => item.sku).length == 0 
+                elsif ProductSku.where(:sku => item["sku"]).length == 0 
                   # valid sku but not found earlier
-                  import_result = create_new_product(item, item.sku, credential)
+                  import_result = create_new_product(item, item["sku"], credential)
                 else 
                   # sku is already found
                   previous_import = true
@@ -78,26 +79,31 @@ module Groovepacker
 
           def create_new_product(item, sku, credential)
             product = Product.create(store: credential.store, store_product_id: 0,
-              name: item.name)
+              name: item["name"])
             product.product_skus.create(sku: sku)
             set_product_fields(product, item, credential)
           end
 
           def set_product_fields(product, ssproduct, credential)
             result = false 
-            product.name = ssproduct.name
+            product.name = ssproduct["name"]
 
             unless credential.store.nil? or 
               credential.store.inventory_warehouse_id.nil? or 
               product.product_inventory_warehousess.pluck(:inventory_warehouse_id).include?(credential.store.inventory_warehouse_id) then
               inv_wh = ProductInventoryWarehouses.new
               inv_wh.inventory_warehouse_id = credential.store.inventory_warehouse_id
-              inv_wh.location_primary = ssproduct.warehouse_location
+              inv_wh.location_primary = ssproduct["warehouseLocation"]
               product.product_inventory_warehousess << inv_wh
             end
- 
-            unless ssproduct.weight_oz.nil?
-              product.weight = ssproduct.weight_oz
+            
+            unless ssproduct["productCategory"].nil?
+              product.product_cats.create(category: 
+                ssproduct["productCategory"]["name"])
+            end
+
+            unless ssproduct["weightOz"].nil?
+              product.weight = ssproduct["weightOz"]
             else
               product.weight = 0
             end

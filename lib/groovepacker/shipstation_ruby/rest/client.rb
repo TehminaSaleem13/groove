@@ -25,6 +25,16 @@ module Groovepacker
           response.parsed_response
         end
 
+        def get_products
+          Rails.logger.info "Getting all active products"
+          response = HTTParty.get('https://shipstation.p.mashape.com/Products?showInactive=false',
+            headers: {
+              "Authorization" => "Basic "+ Base64.encode64(@auth[:api_key] + ":" + @auth[:api_secret]).gsub(/\n/, ''),
+              "X-Mashape-Key" => "E6cSux0BVQmshJh0VacUkqXP1sJgp1I1APKjsntC26JSOTy0pP"
+            })
+          response.parsed_response
+        end
+
         def inspect
           "#<ShipStationRuby::Client:#{object_id}>"
         end
