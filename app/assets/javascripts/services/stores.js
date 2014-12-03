@@ -150,6 +150,9 @@ groovepacks_services.factory('stores',['$http','notification','$filter',function
                     } else if(data.store.store_type == 'Shipstation') {
                         stores.single.username = data.credentials.shipstation_credentials.username;
                         stores.single.password = data.credentials.shipstation_credentials.password;
+                    } else if(data.store.store_type == 'Shipstation New') {
+                        stores.single.api_key = data.credentials.shipstation_rest_credentials.api_key;
+                        stores.single.api_secret = data.credentials.shipstation_rest_credentials.api_secret;
                     } else if(data.store.store_type == 'Shipworks') {
                         stores.single.auth_token = data.credentials.shipworks_credentials.auth_token;
                         stores.single.shall_import_in_process = data.credentials.shipworks_credentials.shall_import_in_process;
@@ -179,6 +182,9 @@ groovepacks_services.factory('stores',['$http','notification','$filter',function
                     break;
                 case 'Shipstation':
                     return (stores.single.username && stores.single.password);
+                    break;
+                case 'Shipstation New':
+                    return (stores.single.api_key && stores.single.api_secret);
                     break;
                 case 'Amazon':
                     return (stores.single.merchant_id && stores.single.marketplace_id);

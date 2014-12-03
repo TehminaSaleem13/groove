@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20141127153406) do
+ActiveRecord::Schema.define(:version => 20141201104336) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0, :null => false
@@ -515,6 +515,15 @@ ActiveRecord::Schema.define(:version => 20141127153406) do
     t.datetime "updated_at",       :null => false
     t.integer  "store_id"
     t.datetime "last_imported_at"
+  end
+
+  create_table "shipstation_rest_credentials", :force => true do |t|
+    t.string   "api_key",          :null => false
+    t.string   "api_secret",       :null => false
+    t.date     "last_imported_at"
+    t.integer  "store_id",         :null => false
+    t.datetime "created_at",       :null => false
+    t.datetime "updated_at",       :null => false
   end
 
   create_table "shipworks_credentials", :force => true do |t|

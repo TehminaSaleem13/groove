@@ -222,6 +222,34 @@ class StoreSettingsController < ApplicationController
             end
           end
 
+          if @store.store_type == 'Shipstation New'
+            @shipstation = ShipstationRestCredential.where(:store_id => @store.id)
+            if @shipstation.nil? || @shipstation.length == 0
+              @shipstation = ShipstationRestCredential.new
+              new_record = true
+            else
+              @shipstation = @shipstation.first
+            end
+
+            @shipstation.api_key = params[:api_key]
+            @shipstation.api_secret = params[:api_secret]
+            @store.shipstation_rest_credential = @shipstation
+
+            begin
+              @store.save!
+              if !new_record
+                @store.shipstation_rest_credential.save
+              end
+            rescue ActiveRecord::RecordInvalid => e
+              @result['status'] = false
+              @result['messages'] = [@store.errors.full_messages, @store.shipstation_rest_credential.errors.full_messages]
+
+            rescue ActiveRecord::StatementInvalid => e
+              @result['status'] = false
+              @result['messages'] = [e.message]
+            end
+          end
+
           if @store.store_type == 'Shipworks'
             @shipworks = ShipworksCredential.find_by_store_id(@store.id)
             begin

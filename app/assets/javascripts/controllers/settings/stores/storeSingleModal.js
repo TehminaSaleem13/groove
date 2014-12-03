@@ -280,6 +280,10 @@ function(scope, store_data, $window, $sce, $interval, $state, $stateParams, $mod
                 name: "Shipstation",
                 file: "/assets/views/modals/settings/stores/shipstation.html"
             },
+            "Shipstation New": {
+                name: "Shipstation New",
+                file: "/assets/views/modals/settings/stores/shipstation_rest.html"
+            },
             Shipworks: {
                 name: "Shipworks",
                 file: "/assets/views/modals/settings/stores/shipworks.html"

@@ -6,6 +6,7 @@ class Store < ActiveRecord::Base
   has_one :ebay_credentials
   has_one :amazon_credentials
   has_one :shipstation_credential
+  has_one :shipstation_rest_credential
   has_one :shipworks_credential
   belongs_to :inventory_warehouse
 
@@ -44,6 +45,13 @@ class Store < ActiveRecord::Base
       @credentials = ShipstationCredential.where(:store_id => self.id)
       if !@credentials.nil? && @credentials.length > 0
         @result['shipstation_credentials'] = @credentials.first
+        @result['status'] =true
+      end
+    end
+    if self.store_type == 'Shipstation New'
+      @credentials = ShipstationRestCredential.where(:store_id => self.id)
+      if !@credentials.nil? && @credentials.length > 0
+        @result['shipstation_rest_credentials'] = @credentials.first
         @result['status'] =true
       end
     end
