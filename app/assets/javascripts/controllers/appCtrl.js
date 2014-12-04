@@ -38,6 +38,10 @@ groovepacks_controllers.
                         alt:"ShipStation",
                         src: "/assets/images/ShipStation_logo.png"
                     },
+                    "Shipstation API 2": {
+                        alt:"ShipStation",
+                        src: "/assets/images/ShipStation_logo.png"
+                    },
                     Shipworks: {
                         alt:"ShipWorks",
                         src: "/assets/images/shipworks_logo.png"
