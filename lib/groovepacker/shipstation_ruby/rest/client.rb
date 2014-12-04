@@ -16,13 +16,24 @@ module Groovepacker
             orderDateStart = '&orderDateStart=' + order_placed_after.to_s
             Rails.logger.info "Getting orders placed after: " + order_placed_after.to_s
           end
-          response = HTTParty.get('https://shipstation.p.mashape.com/Orders/List?orderStatus=' + 
-            status + '&page=1&pageSize=100' + orderDateStart,
-            headers: {
-              "Authorization" => "Basic "+ Base64.encode64(@auth[:api_key] + ":" + @auth[:api_secret]).gsub(/\n/, ''),
-              "X-Mashape-Key" => "E6cSux0BVQmshJh0VacUkqXP1sJgp1I1APKjsntC26JSOTy0pP"
-            })
-          response.parsed_response
+          page_index = 1
+          combined_response = {}
+          combined_response["orders"] = []
+          begin
+            response = HTTParty.get('https://shipstation.p.mashape.com/Orders/List?orderStatus=' + 
+              status + '&page=' + page_index.to_s + '&pageSize=100' + orderDateStart,
+              headers: {
+                "Authorization" => "Basic "+ Base64.encode64(@auth[:api_key] + ":" + @auth[:api_secret]).gsub(/\n/, ''),
+                "X-Mashape-Key" => "E6cSux0BVQmshJh0VacUkqXP1sJgp1I1APKjsntC26JSOTy0pP"
+              })
+            handle_exceptions(response)
+            combined_response["orders"] = 
+              combined_response["orders"] + 
+                response.parsed_response["orders"] unless response.parsed_response["orders"].length == 0
+            page_index = page_index + 1
+          end while response.parsed_response["orders"].length > 0
+          puts combined_response
+          combined_response
         end
 
         def get_products
@@ -32,11 +43,19 @@ module Groovepacker
               "Authorization" => "Basic "+ Base64.encode64(@auth[:api_key] + ":" + @auth[:api_secret]).gsub(/\n/, ''),
               "X-Mashape-Key" => "E6cSux0BVQmshJh0VacUkqXP1sJgp1I1APKjsntC26JSOTy0pP"
             })
+          handle_exceptions(response)
           response.parsed_response
         end
 
         def inspect
           "#<ShipStationRuby::Client:#{object_id}>"
+        end
+
+        private
+
+        def handle_exceptions(response)
+          raise Exception, "Authorization with Shipstation store failed. Please check your API credentials" if response.code == 401
+          raise Exception, response.body if response.code == 500
         end
       end
     end

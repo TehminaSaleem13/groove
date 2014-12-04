@@ -98,6 +98,10 @@ module Groovepacker
                   end
                   shipstation_order.store = credential.store
                   shipstation_order.save
+                else
+                  import_item.previous_imported = import_item.previous_imported + 1
+                  import_item.save
+                  result[:previous_imported] = result[:previous_imported] + 1
                 end
               end
             end
