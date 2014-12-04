@@ -48,7 +48,7 @@ class Store < ActiveRecord::Base
         @result['status'] =true
       end
     end
-    if self.store_type == 'Shipstation New'
+    if self.store_type == 'Shipstation API 2'
       @credentials = ShipstationRestCredential.where(:store_id => self.id)
       if !@credentials.nil? && @credentials.length > 0
         @result['shipstation_rest_credentials'] = @credentials.first

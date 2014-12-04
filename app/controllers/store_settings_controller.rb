@@ -222,7 +222,7 @@ class StoreSettingsController < ApplicationController
             end
           end
 
-          if @store.store_type == 'Shipstation New'
+          if @store.store_type == 'Shipstation API 2'
             @shipstation = ShipstationRestCredential.where(:store_id => @store.id)
             if @shipstation.nil? || @shipstation.length == 0
               @shipstation = ShipstationRestCredential.new

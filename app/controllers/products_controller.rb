@@ -28,7 +28,7 @@ class ProductsController < ApplicationController
         context = Groovepacker::Store::Context.new(
           Groovepacker::Store::Handlers::ShipstationHandler.new(@store))
         import_result = context.import_products
-      elsif @store.store_type == 'Shipstation New'
+      elsif @store.store_type == 'Shipstation API 2'
         context = Groovepacker::Store::Context.new(
           Groovepacker::Store::Handlers::ShipstationRestHandler.new(@store))
         import_result = context.import_products

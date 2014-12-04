@@ -43,7 +43,7 @@ class OrdersController < ApplicationController
           context = Groovepacker::Store::Context.new(
             Groovepacker::Store::Handlers::ShipstationHandler.new(store))
           import_result = context.import_orders
-        elsif store.store_type == 'Shipstation New'
+        elsif store.store_type == 'Shipstation API 2'
           context = Groovepacker::Store::Context.new(
             Groovepacker::Store::Handlers::ShipstationRestHandler.new(store))
           import_result = context.import_orders
@@ -977,7 +977,8 @@ class OrdersController < ApplicationController
         tenant = Apartment::Tenant.current_tenant
         import_orders_obj = ImportOrders.new
         Delayed::Job.where(queue: "importing_orders_#{tenant}").destroy_all
-        import_orders_obj.delay(:run_at => 1.seconds.from_now,:queue => "importing_orders_#{tenant}").import_orders  tenant    # import_orders_obj.import_orders
+        import_orders_obj.delay(:run_at => 1.seconds.from_now,:queue => "importing_orders_#{tenant}").import_orders  tenant    
+        # import_orders_obj.import_orders
         result['success_messages'].push('Scouring the interwebs for new orders...')
       else
         result['error_messages'].push('You currently have no Active Stores in your Store List')
