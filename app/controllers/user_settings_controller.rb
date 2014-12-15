@@ -34,7 +34,6 @@ class UserSettingsController < ApplicationController
         @result['messages'].push('Password and Confirm Password can not be less than 8 characters')
       end
       if @result['status']
-        @user.email = params[:email]
         @user.password = params[:password] if !params[:password].nil? && params[:password] != ''
         @user.username = params[:username]
         @user.other = params[:other] if !params[:other].nil?

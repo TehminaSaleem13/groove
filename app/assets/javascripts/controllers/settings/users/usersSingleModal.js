@@ -9,13 +9,14 @@ groovepacks_controllers.
              */
 
             scope.ok = function() {
-                if(scope.users.single.username && (!scope.show_password || (scope.users.single.password && scope.users.single.conf_password)) && scope.users.single.email && scope.users.single.confirmation_code) {
+                if(scope.users.single.username && (!scope.show_password || (scope.users.single.password && scope.users.single.conf_password)) && scope.users.single.confirmation_code) {
                     $modalInstance.close("ok-button-click");
                 } else {
-                    if(!(scope.users.single.username && scope.users.single.email && scope.users.single.confirmation_code)) {
+                    if(!users.single.validate(scope.users, true, scope.edit_status)) {
                         notification.notify("Oops, looks like some additional info is required");
+                        myscope.rollback();
                     } else if(scope.show_password && (typeof scope.users.single.password == "undefined" || typeof scope.users.single.conf_password == "undefined")) {
-                            notification.notify("Both password and confirm password must be at least 8 characters");
+                        notification.notify("Both password and confirm password must be at least 8 characters");
                     }
                 }
             };
@@ -51,7 +52,9 @@ groovepacks_controllers.
 
             scope.update_single_user = function(auto) {
                 if(users.single.validate(scope.users,auto,scope.edit_status)) {
-                    return users.single.update(scope.users,auto).then(myscope.load_roles);
+                    return users.single.update(scope.users,auto).then(myscope.load_roles).then(function(){
+                        scope.show_password = false;
+                    });
                 }
             };
 
@@ -71,7 +74,9 @@ groovepacks_controllers.
                 if(scope.roles_data.selectedRole != null) {
                     if(confirm("Are you sure?")) {
                         scope.users.single.role = scope.roles_data.selectedRole;
-                        scope.update_single_user();
+                        scope.update_single_user().then(function(){
+
+                        });
                     }
                 } else {
                     scope.roles_data.showSelectBaseRole = true;

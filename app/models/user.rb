@@ -7,9 +7,12 @@ class User < ActiveRecord::Base
          :recoverable, :rememberable, :trackable, :validatable
 
   # Setup accessible (or protected) attributes for your model
-  attr_accessible :email, :username, :password, :password_confirmation, :remember_me, :confirmation_code
-  validates_presence_of  :username, :confirmation_code,:email
+  attr_accessible :username, :password, :password_confirmation, :remember_me, :confirmation_code
+  validates_presence_of  :username, :confirmation_code
   validates_uniqueness_of :username, :case_sensitive => false
+  validates_uniqueness_of :confirmation_code
+  validates :confirmation_code, length: { maximum: 25 }
+
   # attr_accessible :title, :body
   belongs_to :inventory_warehouse
   belongs_to :role
@@ -18,8 +21,13 @@ class User < ActiveRecord::Base
   before_save :check_inventory_presence
   after_save :check_fix_permissions
   before_create 'User.can_create_new?'
+  before_validation :assign_confirmation_code
 
   def email_required?
+    false
+  end
+
+  def email_changed?
     false
   end
 
@@ -58,6 +66,17 @@ class User < ActiveRecord::Base
   def self.can_create_new?
     unless AccessRestriction.first.nil?
       self.all.count < AccessRestriction.first.num_users
+    end
+  end
+
+  def assign_confirmation_code
+    puts 
+    while true && self.confirmation_code.nil?
+      random_code = rand(9999999999).to_s.center(10, rand(9).to_s).to_s
+      if User.where(confirmation_code: random_code).length == 0
+        self.confirmation_code = random_code
+        break
+      end
     end
   end
 end

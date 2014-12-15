@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20141201104336) do
+ActiveRecord::Schema.define(:version => 20141215160922) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0, :null => false
@@ -129,6 +129,7 @@ ActiveRecord::Schema.define(:version => 20141201104336) do
     t.text     "tracking_error_info_not_found"
     t.boolean  "strict_cc",                         :default => false
     t.string   "conf_code_product_instruction",     :default => "optional"
+    t.string   "admin_email"
   end
 
   create_table "generate_barcodes", :force => true do |t|
@@ -617,7 +618,6 @@ ActiveRecord::Schema.define(:version => 20141201104336) do
     t.datetime "created_at",                                :null => false
     t.datetime "updated_at",                                :null => false
     t.string   "username",               :default => "",    :null => false
-    t.string   "email",                  :default => "",    :null => false
     t.boolean  "active",                 :default => false, :null => false
     t.string   "other"
     t.string   "name"

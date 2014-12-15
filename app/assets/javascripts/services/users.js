@@ -123,10 +123,38 @@ groovepacks_services.factory('users',['$http','notification','$filter',function(
         return $http.get('/user_settings/let_user_be_created.json')
     };
 
-    var validate_single = function(users, auto) {
+    var validate_single = function(users, auto, edit_status) {
         if (typeof auto !== 'boolean') auto = true;
         if(!auto) return true;
-        return (users.single.username && users.single.password && users.single.conf_password && users.single.email && users.single.confirmation_code);
+        var valid = true;
+        console.log(users.single);
+        if (typeof users.single.username == 'undefined' ||
+            users.single.username == null || users.single.username == '') {
+            valid &= false;
+        }
+        if (edit_status) {
+                    console.log(users.single.confirmation_code);
+            if (typeof users.single.confirmation_code == 'undefined' ||
+            users.single.confirmation_code == null || 
+            users.single.confirmation_code == '') {
+                valid &= false;
+            }
+        } else {
+            if (typeof users.single.password == 'undefined' ||
+            users.single.password == null || 
+            users.single.password == '') {
+                valid &= false;
+            }
+
+            if (typeof users.single.conf_password == 'undefined' ||
+            users.single.conf_password == null || 
+            users.single.conf_password == '') {
+                valid &= false;
+            }
+        }
+        notification.notify(valid);
+
+        return (valid);
     };
 
     var create_update_single = function(users,auto) {
@@ -135,7 +163,7 @@ groovepacks_services.factory('users',['$http','notification','$filter',function(
         }
         return $http.post('/user_settings/createUpdateUser.json',users.single).success(function(data) {
             if(data.status) {
-                users.single.id = data.user.id;
+                users.single = data.user;
                 users.single.role = data.user.role;
                 if(!auto) {
                     notification.notify("Successfully Updated",1);
