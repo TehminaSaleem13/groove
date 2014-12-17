@@ -283,7 +283,8 @@ class SettingsController < ApplicationController
             :reason =>'',
             :description =>'',
             :associated_user =>'',
-            :order_item_count => ''
+            :total_packed_items => '',
+            :total_clicked_items => ''
         }
         data = CSV.generate do |csv|
           csv << row_map.keys
@@ -300,9 +301,9 @@ class SettingsController < ApplicationController
             end
             single_row[:reason] = exception.reason
             single_row[:description] = exception.description
-            single_row[:associated_user] =  exception.user.name + ' ('+exception.user.username+')'
-            single_row[:order_item_count] = exception.order.get_items_count
-
+            single_row[:associated_user] =  exception.user.name + ' ('+exception.user.username+')' unless exception.user.nil?
+            single_row[:total_packed_items] = exception.order.scanned_items_count
+            single_row[:total_clicked_items] = exception.order.clicked_items_count
             csv << single_row.values
           end
         end

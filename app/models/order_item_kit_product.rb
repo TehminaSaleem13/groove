@@ -3,7 +3,7 @@ class OrderItemKitProduct < ActiveRecord::Base
   belongs_to :product_kit_skus
   attr_accessible :scanned_qty, :scanned_status
 
-  def process_item(clicked)
+  def process_item(clicked, username)
   	order_item_unscanned = false
   	order_unscanned = false
   	
@@ -16,6 +16,11 @@ class OrderItemKitProduct < ActiveRecord::Base
   	#puts "Processng Kit product"+self.scanned_qty.to_s
   	if self.scanned_qty < total_qty * self.product_kit_skus.qty
   		self.scanned_qty = self.scanned_qty + 1
+      if clicked
+        self.clicked_qty = self.clicked_qty + 1
+        self.order_item.order.addactivity("Item with SKU: " + 
+          self.product_kit_skus.option_product.primary_sku + " has been click scanned", username)
+      end
   		if self.scanned_qty ==  total_qty * self.product_kit_skus.qty
   			self.scanned_status = 'scanned'
   		else

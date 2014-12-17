@@ -232,14 +232,14 @@ module ScanPackHelper
                         unless order_item_kit_product.nil?
                           if child_item['record_serial']
                             if serial_added
-                              order_item_kit_product.process_item(clicked)
+                              order_item_kit_product.process_item(clicked, current_user.username)
                               (session[:most_recent_scanned_products] ||= []) << child_item['product_id']
                             else
                               result['data']['serial']['ask'] = true
                               result['data']['serial']['product_id'] = child_item['product_id']
                             end
                           else
-                            order_item_kit_product.process_item(clicked)
+                            order_item_kit_product.process_item(clicked, current_user.username)
                             (session[:most_recent_scanned_products] ||= []) << child_item['product_id']
                           end
                         end
@@ -261,14 +261,14 @@ module ScanPackHelper
                   unless order_item.nil?
                     if item['record_serial']
                       if serial_added
-                        order_item.process_item(clicked)
+                        order_item.process_item(clicked, current_user.username)
                         (session[:most_recent_scanned_products] ||= []) << order_item.product_id
                       else
                         result['data']['serial']['ask'] = true
                         result['data']['serial']['product_id'] = order_item.product_id
                       end
                     else
-                      order_item.process_item(clicked)
+                      order_item.process_item(clicked, current_user.username)
                       (session[:most_recent_scanned_products] ||= []) << order_item.product_id
                     end
                   end

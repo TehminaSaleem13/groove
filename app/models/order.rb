@@ -612,4 +612,50 @@ class Order < ActiveRecord::Base
   def update_non_hyphen_increment_id
     self.non_hyphen_increment_id = non_hyphenated_string(self.increment_id)
   end
+
+  def scanned_items_count
+    count = 0
+      self.order_items.each do |item|
+        if item.product.is_kit
+          if item.product.kit_parsing == 'depends'
+            count = count + item.single_scanned_qty
+            item.order_item_kit_products.each do |kit_product|
+              count = count + kit_product.scanned_qty
+            end
+          elsif item.product.kit_parsing == 'individual'
+            item.order_item_kit_products.each do |kit_product|
+              count = count + kit_product.scanned_qty
+            end
+          else
+            count = count + item.scanned_qty
+          end
+        else
+          count = count + item.scanned_qty
+        end
+      end
+    count
+  end
+
+  def clicked_items_count
+    count = 0
+      self.order_items.each do |item|
+        if item.product.is_kit
+          if item.product.kit_parsing == 'depends'
+            count = count + item.clicked_qty
+            item.order_item_kit_products.each do |kit_product|
+              count = count + kit_product.clicked_qty
+            end
+          elsif item.product.kit_parsing == 'individual'
+            item.order_item_kit_products.each do |kit_product|
+              count = count + kit_product.clicked_qty
+            end
+          else
+            count = count + item.clicked_qty
+          end
+        else
+          count = count + item.clicked_qty
+        end
+      end
+    count
+  end
 end

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20141215160922) do
+ActiveRecord::Schema.define(:version => 20141217175355) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0, :null => false
@@ -243,6 +243,7 @@ ActiveRecord::Schema.define(:version => 20141215160922) do
     t.integer  "scanned_qty",         :default => 0
     t.datetime "created_at",                                   :null => false
     t.datetime "updated_at",                                   :null => false
+    t.integer  "clicked_qty",         :default => 0
   end
 
   add_index "order_item_kit_products", ["order_item_id"], :name => "index_order_item_kit_products_on_order_item_id"
@@ -266,6 +267,7 @@ ActiveRecord::Schema.define(:version => 20141215160922) do
     t.integer  "single_scanned_qty",                                   :default => 0
     t.string   "inv_status",                                           :default => "unprocessed"
     t.string   "inv_status_reason",                                    :default => ""
+    t.integer  "clicked_qty",                                          :default => 0
   end
 
   add_index "order_items", ["order_id"], :name => "index_order_items_on_order_id"
