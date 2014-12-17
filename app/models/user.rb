@@ -72,7 +72,7 @@ class User < ActiveRecord::Base
   def assign_confirmation_code
     puts 
     while true && self.confirmation_code.nil?
-      random_code = rand(9999999999).to_s.center(10, rand(9).to_s).to_s
+      random_code = rand(9999).to_s.center(4, rand(3).to_s).to_s
       if User.where(confirmation_code: random_code).length == 0
         self.confirmation_code = random_code
         break

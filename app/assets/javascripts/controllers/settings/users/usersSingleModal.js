@@ -14,7 +14,6 @@ groovepacks_controllers.
                 } else {
                     if(!users.single.validate(scope.users, true, scope.edit_status)) {
                         notification.notify("Oops, looks like some additional info is required");
-                        myscope.rollback();
                     } else if(scope.show_password && (typeof scope.users.single.password == "undefined" || typeof scope.users.single.conf_password == "undefined")) {
                         notification.notify("Both password and confirm password must be at least 8 characters");
                     }

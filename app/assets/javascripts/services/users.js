@@ -161,12 +161,20 @@ groovepacks_services.factory('users',['$http','notification','$filter',function(
         if(typeof auto !== "boolean") {
             auto = true;
         }
-        return $http.post('/user_settings/createUpdateUser.json',users.single).success(function(data) {
+        var confirmation_code_auto_generated = false;
+        if (typeof users.single.confirmation_code == 'undefined' || 
+            users.single.confirmation_code == null) {
+            confirmation_code_auto_generated = true;
+        }
+        return $http.post('/user_settings/createUpdateUser.json', users.single).success(function(data) {
             if(data.status) {
                 users.single = data.user;
                 users.single.role = data.user.role;
                 if(!auto) {
                     notification.notify("Successfully Updated",1);
+                }
+                if (confirmation_code_auto_generated) {
+                    notification.notify("A unique confirmation code has been generated for this user, you can change the confirmation code to another value if you like.", 1);
                 }
             } else {
                 notification.notify(data.messages,0);
