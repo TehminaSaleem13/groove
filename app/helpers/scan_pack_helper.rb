@@ -189,7 +189,7 @@ module ScanPackHelper
           result['data']['next_state'] = 'scanpack.rfo'
         else
           result['status'] &= false
-          result['error_messages'].push('Order with id: '+id+' is already in scanned state')
+          result['error_messages'].push('Order with id: '+id.to_s+' is already in scanned state')
         end
 
       elsif scanpack_settings.service_issue_code_enabled? && input == scanpack_settings.service_issue_code
