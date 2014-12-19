@@ -82,7 +82,7 @@ module Groovepacker
 
             result
           end
-          
+
           def import_order_item(item, import_item, order, store)
             sku = nil
             sku = item["SKU"] unless item["SKU"].nil?
@@ -94,7 +94,7 @@ module Groovepacker
             end
 
             order.order_items.create(
-              product: product, 
+              product: product,
               price: item["UnitPrice"],
               qty: item["Quantity"],
               row_total: item["TotalPrice"]
@@ -105,7 +105,7 @@ module Groovepacker
 
           def import_product(item, store)
             product = Product.create(
-              store: store, 
+              store: store,
               name: item["Name"],
               weight: item["Weight"],
               store_product_id: item["ID"]
@@ -137,10 +137,11 @@ module Groovepacker
             ) unless item["Image"].nil?
 
             #Location
-            product.product_inventory_warehousess.create(
-              inventory_warehouse: store.inventory_warehouse,
-              location_primary: item["Location"]
-            ) unless item["Location"].nil?
+            unless item["Location"].nil?
+              inv_wh = ProductInventoryWarehouses.find_or_create_by_product_id_and_inventory_warehouse_id(product.id , store.inventory_warehouse_id)
+              inv_wh.location_primary = item["Location"]
+              inv_wh.save
+            end
 
             product.set_product_status
             product
