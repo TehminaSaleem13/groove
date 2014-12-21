@@ -302,8 +302,8 @@ class SettingsController < ApplicationController
             single_row[:reason] = exception.reason
             single_row[:description] = exception.description
             single_row[:associated_user] =  exception.user.name + ' ('+exception.user.username+')' unless exception.user.nil?
-            single_row[:total_packed_items] = exception.order.scanned_items_count
-            single_row[:total_clicked_items] = exception.order.clicked_items_count
+            single_row[:order_item_count] = exception.order.scanned_items_count
+            single_row[:click_scanned_items] = exception.order.clicked_items_count
             csv << single_row.values
           end
         end
