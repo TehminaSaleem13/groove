@@ -9,16 +9,17 @@ module Groovepacker
             credential = handler[:credential]
             store = handler[:store_handle]
             import_item = handler[:import_item]
-
             #order["OnlineStatus"] == 'Processing'
+            order_number = get_order_number(order)
             if allowed_status_to_import?(credential, order["Status"]) &&
-              Order.find_by_increment_id(order["Number"]).nil?
+              Order.find_by_increment_id(order_number).nil?
               puts "Importing Order"
-              import_item.current_increment_id = order["Number"]
+
+              import_item.current_increment_id =order_number
               import_item.save
               ship_address = get_ship_address(order)
               order_m = Order.create(
-                increment_id: order["Number"],
+                increment_id: order_number,
                 order_placed_time: order["Date"],
                 store: store,
                 email: ship_address["Email"],
@@ -68,6 +69,14 @@ module Groovepacker
             return true if status.strip == 'Not Shipped' && credential.shall_import_not_shipped
             return true if status.strip == 'Shipped' && credential.shall_import_shipped
             return false
+          end
+
+          def get_order_number(order)
+            if order["Amazon"].nil?
+              order["Number"]
+            else
+              order["Amazon"]["AmazonOrderID"]
+            end
           end
 
           def get_ship_address(order)
