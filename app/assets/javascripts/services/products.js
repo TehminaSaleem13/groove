@@ -64,7 +64,7 @@ groovepacks_services.factory('products',['$http','notification','editable',funct
         if(setup.search=='') {
             url = '/products/getproducts.json?filter='+setup.filter+'&sort='+setup.sort+'&order='+setup.order;
         } else {
-            url = '/products/search.json?search='+setup.search;
+            url = '/products/search.json?search='+setup.search+'&sort='+setup.sort+'&order='+setup.order;
         }
         url += '&is_kit='+setup.is_kit+'&limit='+setup.limit+'&offset='+setup.offset;
         return $http.get(url).success(
@@ -215,7 +215,7 @@ groovepacks_services.factory('products',['$http','notification','editable',funct
                 products.single = data.product;
             }
             else {
-               notification.notify('Cannot find product with barcode: '+barcode, 0); 
+               notification.notify('Cannot find product with barcode: '+barcode, 0);
             }
         }).error(notification.server_error);
     };

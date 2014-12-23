@@ -77,7 +77,7 @@ class ProductsController < ApplicationController
 
           require 'csv'
           csv = CSV.parse(response.body,:quote_char => "|")
-          
+
           csv.each_with_index do | row, index|
             if index > 0
               product_row = row.first.split(/\t/)
@@ -1129,21 +1129,21 @@ class ProductsController < ApplicationController
   end
 
   #params[:id]
-  def generate_barcode_slip 
-		@product = Product.find(params[:id]) 
+  def generate_barcode_slip
+		@product = Product.find(params[:id])
 
     respond_to do |format|
       format.html
       format.pdf {
-        render :pdf => "file_name", 
+        render :pdf => "file_name",
         :template => 'products/generate_barcode_slip.html.erb',
         :orientation => 'Portrait',
-        :page_height => '1in', 
+        :page_height => '1in',
         :page_width => '3in',
-        :margin => {:top => '0',                     
+        :margin => {:top => '0',
                     :bottom => '0',
                     :left => '0',
-                    :right => '0'}       	
+                    :right => '0'}
        }
     end
   end
@@ -1282,13 +1282,13 @@ class ProductsController < ApplicationController
     result['success_messages'] = []
     result['notice_messages'] = []
 
-    unless params[:id].nil? || params[:inv_wh_id].nil? || params[:inventory_count].nil? || 
+    unless params[:id].nil? || params[:inv_wh_id].nil? || params[:inventory_count].nil? ||
     	params[:method].nil?
       product = Product.find(params[:id])
       unless product.nil?
         product_inv_whs = ProductInventoryWarehouses.where(:product_id=> product.id).
         	where(:inventory_warehouse_id=>params[:inv_wh_id])
-        
+
         unless product_inv_whs.length == 1
         	product_inv_wh = ProductInventoryWarehouses.new
         	product_inv_wh.inventory_warehouse_id = params[:inv_wh_id]
@@ -1315,7 +1315,7 @@ class ProductsController < ApplicationController
       end
     else
       result['status'] &= false
-      result['error_messages'].push('Cannot recount inventory without product id and 
+      result['error_messages'].push('Cannot recount inventory without product id and
       		inventory_warehouse_id')
     end
 
@@ -1336,12 +1336,24 @@ class ProductsController < ApplicationController
 			@kgs = 1000 * weight[:kgs].to_i
 			@gms = weight[:gms].to_f
 			(@kgs + @gms) * 0.035274
-  	end		
+  	end
  	end
 
   def do_search(results_only = true)
     limit = 10
     offset = 0
+    sort_key = 'updated_at'
+    sort_order = 'DESC'
+    supported_sort_keys = ['updated_at', 'name', 'sku',
+                           'status', 'barcode', 'location_primary','location_secondary','location_tertiary','location_name','cat','qty', 'store_type' ]
+    supported_order_keys = ['ASC', 'DESC' ] #Caps letters only
+
+    sort_key = params[:sort] if !params[:sort].nil? &&
+        supported_sort_keys.include?(params[:sort].to_s)
+
+    sort_order = params[:order] if !params[:order].nil? &&
+        supported_order_keys.include?(params[:order].to_s)
+
     # Get passed in parameter variables if they are valid.
     limit = params[:limit].to_i if !params[:limit].nil? && params[:limit].to_i > 0
 
@@ -1361,13 +1373,28 @@ class ProductsController < ApplicationController
       query_add = ' LIMIT '+limit.to_s+' OFFSET '+offset.to_s
     end
 
-    base_query = '(SELECT * from products WHERE '+kit_query+' products.name like '+search+') UNION
-      (SELECT products.* from products, product_barcodes where '+kit_query+' products.id = product_barcodes.product_id AND product_barcodes.barcode like '+search+' ) UNION
-      (SELECT products.* from products, product_skus where '+kit_query+' products.id = product_skus.product_id AND product_skus.sku like '+search+' ) UNION
-      (SELECT products.* from products, product_cats where '+kit_query+' products.id = product_cats.product_id AND product_cats.category like '+search+' ) UNION
-      (SELECT products.* from products, product_inventory_warehouses where '+kit_query+' products.id = product_inventory_warehouses.product_id AND (product_inventory_warehouses.location_primary like '+search+' OR product_inventory_warehouses.location_secondary like '+search+' OR product_inventory_warehouses.location_tertiary like '+search+') ) '
+    base_query = 'SELECT products.id as id, products.name as name, products.status as status, products.updated_at as updated_at, product_skus.sku as sku, product_barcodes.barcode as barcode, product_cats.category as cat, product_inventory_warehouses.location_primary, product_inventory_warehouses.location_secondary, product_inventory_warehouses.location_tertiary, product_inventory_warehouses.available_inv as qty, inventory_warehouses.name as location_name, stores.name as store_type, products.store_id as store_id
+      FROM products
+        LEFT JOIN product_skus ON (products.id = product_skus.product_id)
+        LEFT JOIN product_barcodes ON (product_barcodes.product_id = products.id)
+            LEFT JOIN product_cats ON (products.id = product_cats.product_id)
+            LEFT JOIN product_inventory_warehouses ON (product_inventory_warehouses.product_id = products.id)
+            LEFT JOIN inventory_warehouses ON (product_inventory_warehouses.inventory_warehouse_id =  inventory_warehouses.id)
+            LEFT JOIN stores ON (products.store_id = stores.id)
+        WHERE '+kit_query+' (product_skus.`order` = 0 OR product_skus.`order` is NULL) AND (product_barcodes.`order` = 0 OR product_barcodes.`order` is NULL)
+          AND  (
+            products.name like '+search+' OR product_barcodes.barcode like '+search+'
+            OR product_skus.sku like '+search+' OR product_cats.category like '+search+'
+            OR (
+              product_inventory_warehouses.location_primary like '+search+'
+              OR product_inventory_warehouses.location_secondary like '+search+'
+              OR product_inventory_warehouses.location_tertiary like '+search+'
+            )
+          )
+        GROUP BY products.id ORDER BY '+sort_key+' '+sort_order
 
     result_rows = Product.find_by_sql(base_query+query_add)
+
 
     if results_only
       result = result_rows
