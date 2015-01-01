@@ -10,7 +10,9 @@ module Groovepacker
             store = handler[:store_handle]
             import_item = handler[:import_item]
             #order["OnlineStatus"] == 'Processing'
-            order_number = get_order_number(order)
+            #order_number = get_order_number(order)
+            order_number = order["Number"]
+
             if allowed_status_to_import?(credential, order["Status"]) &&
               Order.find_by_increment_id(order_number).nil?
               puts "Importing Order"
