@@ -1,25 +1,13 @@
   <div class="row">
     <div class="col-md-6">
-      <legend>Shipworks Credentials</legend>
-
-      <div class="form-group">
-        <label class="control-label col-md-4">Auth Token</label>
-        <div class="controls col-md-8">
-          <label class="control-label">
-            {{stores.single.auth_token}}
-          </label>
-        </div>
-      </div>
-
       <div class="form-group">
         <label class="control-label col-md-4 form-inline">
-          Import order number from store
+          Use order number from original order source if available
         </label>
         <div class="controls col-md-8 form-inline">
           <div toggle-switch ng-model="stores.single.import_store_order_number" groov-click="update_single_store()"></div>
         </div>
       </div>
-
     </div>
   </div>
 
