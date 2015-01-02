@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20141217175355) do
+ActiveRecord::Schema.define(:version => 20150102143000) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0, :null => false
@@ -530,15 +530,16 @@ ActiveRecord::Schema.define(:version => 20141217175355) do
   end
 
   create_table "shipworks_credentials", :force => true do |t|
-    t.string   "auth_token",                                  :null => false
-    t.integer  "store_id",                                    :null => false
-    t.datetime "created_at",                                  :null => false
-    t.datetime "updated_at",                                  :null => false
-    t.boolean  "shall_import_in_process",  :default => false
-    t.boolean  "shall_import_new_order",   :default => false
-    t.boolean  "shall_import_not_shipped", :default => false
-    t.boolean  "shall_import_shipped",     :default => false
-    t.boolean  "shall_import_no_status",   :default => false
+    t.string   "auth_token",                                   :null => false
+    t.integer  "store_id",                                     :null => false
+    t.datetime "created_at",                                   :null => false
+    t.datetime "updated_at",                                   :null => false
+    t.boolean  "shall_import_in_process",   :default => false
+    t.boolean  "shall_import_new_order",    :default => false
+    t.boolean  "shall_import_not_shipped",  :default => false
+    t.boolean  "shall_import_shipped",      :default => false
+    t.boolean  "shall_import_no_status",    :default => false
+    t.boolean  "import_store_order_number", :default => false
   end
 
   create_table "sold_inventory_warehouses", :force => true do |t|
