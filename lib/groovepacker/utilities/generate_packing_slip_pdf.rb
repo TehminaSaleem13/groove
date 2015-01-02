@@ -1,46 +1,54 @@
 class GeneratePackingSlipPdf
   def self.generate_packing_slip_pdf(orders, tenant_name, result, page_height, page_width, orientation, file_name, size, header,gen_barcode_id)
-    Apartment::Tenant.switch(tenant_name)
-    packing_slip_obj = 
-          Groovepacker::PackingSlip::PdfMerger.new
-    generate_barcode = GenerateBarcode.find_by_id(gen_barcode_id)
-    unless generate_barcode.nil?
-      generate_barcode.status = 'in_progress'
-      generate_barcode.save
-      orders.each_with_index do |item,index|
-
-        order = Order.find(item[:id])
-        generate_barcode.reload
-        if generate_barcode.cancel
-          generate_barcode.status = 'cancelled'
-          generate_barcode.save
-          return true
-        end
-        generate_barcode.current_increment_id = order.increment_id
-        generate_barcode.next_order_increment_id = orders[(index.to_i+1)][:increment_id] unless index == (orders.length - 1)
-        generate_barcode.current_order_position = (generate_barcode.current_order_position.to_i + 1)
+    begin
+      Apartment::Tenant.switch(tenant_name)
+      packing_slip_obj =
+            Groovepacker::PackingSlip::PdfMerger.new
+      generate_barcode = GenerateBarcode.find_by_id(gen_barcode_id)
+      unless generate_barcode.nil?
+        generate_barcode.status = 'in_progress'
+        generate_barcode.current_order_position = 0
+        generate_barcode.total_orders = orders.length
+        generate_barcode.next_order_increment_id = orders.first[:increment_id] unless orders.first.nil?
         generate_barcode.save
-        reader_file_path = Rails.root.join('public', 'pdfs', "#{Apartment::Tenant.current_tenant}.#{order.increment_id}.pdf")
+        orders.each_with_index do |item,index|
 
-        GeneratePackingSlipPdf.generate_pdf(order,page_height,page_width,orientation,reader_file_path,header)
-        reader = PDF::Reader.new(reader_file_path)
-        page_count = reader.page_count
+          order = Order.find(item[:id])
+          generate_barcode.reload
+          if generate_barcode.cancel
+            generate_barcode.status = 'cancelled'
+            generate_barcode.save
+            return true
+          end
+          generate_barcode.current_increment_id = order.increment_id
+          generate_barcode.next_order_increment_id = orders[(index.to_i+1)][:increment_id] unless index == (orders.length - 1)
+          generate_barcode.current_order_position = (generate_barcode.current_order_position.to_i + 1)
+          generate_barcode.save
+          reader_file_path = Rails.root.join('public', 'pdfs', "#{Apartment::Tenant.current_tenant}.#{order.increment_id}.pdf")
 
-        if page_count > 1
-          # delete the pdf and regenerate if the pdf page-count exceeds 1
-          File.delete(reader_file_path)
-          multi_header = 'Multi-Slip Order # ' + order.increment_id
-          GeneratePackingSlipPdf.generate_pdf(order,page_height,page_width,orientation,reader_file_path, multi_header)
+          GeneratePackingSlipPdf.generate_pdf(order,page_height,page_width,orientation,reader_file_path,header)
+          reader = PDF::Reader.new(reader_file_path)
+          page_count = reader.page_count
+
+          if page_count > 1
+            # delete the pdf and regenerate if the pdf page-count exceeds 1
+            File.delete(reader_file_path)
+            multi_header = 'Multi-Slip Order # ' + order.increment_id
+            GeneratePackingSlipPdf.generate_pdf(order,page_height,page_width,orientation,reader_file_path, multi_header)
+          end
+          result['data']['packing_slip_file_paths'].push(reader_file_path)
         end
-        result['data']['packing_slip_file_paths'].push(reader_file_path)
+        result['data']['destination'] =  Rails.root.join('public','pdfs', "#{file_name}_packing_slip.pdf")
+        result['data']['merged_packing_slip_url'] =  '/pdfs/'+ file_name + '_packing_slip.pdf'
+
+        #merge the packing-slips
+        packing_slip_obj.merge(result,orientation,size,file_name)
+        generate_barcode.url = result['data']['merged_packing_slip_url']
+        generate_barcode.status = 'completed'
+        generate_barcode.save
       end
-      result['data']['destination'] =  Rails.root.join('public','pdfs', "#{file_name}_packing_slip.pdf")
-      result['data']['merged_packing_slip_url'] =  '/pdfs/'+ file_name + '_packing_slip.pdf'
-      
-      #merge the packing-slips
-      packing_slip_obj.merge(result,orientation,size,file_name)
-      generate_barcode.url = result['data']['merged_packing_slip_url']
-      generate_barcode.status = 'completed'
+    rescue Exception=> e
+      generate_barcode.status = 'failed'
       generate_barcode.save
     end
   end

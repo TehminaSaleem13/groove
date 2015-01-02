@@ -6260,15 +6260,15 @@ p{
       <%order_items.each do |order_item|%>
         <%order_count = order_count + order_item.qty%>
       <%end%>
-      
+
     	<div class="row">
         <br>
     		<div class="span4">
           <label style="margin-top: 30px; margin-left: 30px; font-size: 30px; text-alignment: top;">Total<br>Items:</label>
-    			
+
           <span style="font-size: 160px; margin-left: 120px;"><%= order_count%></span>
     		</div>
-	    	<div class="span8">  	
+	    	<div class="span8">
 	      	<% barcode_string = generate_order_barcode(@order.increment_id)%>
 	      	<label style="margin-top: 30px;margin-bottom: 0px; margin-left: 10px; padding-bottom: 0px"><%= pdf_image_tag(barcode_string+".png", {:width => 550, :height => 50}) %></label><br>
 	      	<span style="margin-top: 0px; padding-top: 0px; line-height: 0px;"><center><%= @order.increment_id%></center></span>
@@ -6285,7 +6285,7 @@ p{
     		</div>
     		<div class="span2" style= "text-align: right;">
     			<span class="span2" style="font-size: 25px;"><strong>Order#</strong></span>
-    			
+
     			<span class="span2" style="font-size: 25px;"><strong>Date</strong></span>
         </div>
 
@@ -6304,11 +6304,11 @@ p{
     				<td> Description</td>
     				<td><center> Qty</center></td>
     			</thead>
-    			
+
     			<%order_items.each do |order_item|%>
     				<tr>
-    					<td><%=order_item.sku%></td>
-    					<td><%=order_item.name%></td>
+    					<td><%=order_item.product.primary_sku%></td>
+    					<td><%=order_item.product.name%></td>
     					<td><center><%=order_item.qty%></center></td>
     				</tr>
     			<%end%>
@@ -6318,20 +6318,20 @@ p{
         <br>
     		<p><i>
           <%if !@order.store.nil?%>
-            <%if !@order.store.thank_you_message_to_customer.nil?%>
+            <%if !@order.store.thank_you_message_to_customer.nil? && !@order.store.thank_you_message_to_customer == 'null' %>
               <%=@order.store.thank_you_message_to_customer%>
-            <%else%>
+            <%elsif !GeneralSetting.get_packing_slip_message_to_customer.nil? %>
               <%=GeneralSetting.get_packing_slip_message_to_customer%>
             <% end %>
-          <%end%>    
+          <%end%>
         </i></p>
     	<div>
         <center>
-      		<textarea>
-            <%if !@order.nil?%>
-              <%= @order.customer_comments%>
+            <%if !@order.nil? && !@order.customer_comments.nil? %>
+              <textarea>
+                <%= @order.customer_comments %>
+              </textarea>
             <%end%>
-  				</textarea>
         </center>
     	</div>
     <%else%>
@@ -6341,4 +6341,4 @@ p{
 </body>
 </html>
 
- 
+

@@ -25,7 +25,7 @@ class HomeController < ApplicationController
   end
 
   def request_socket_notifs
-    GenerateBarcode.where("status != 'completed' AND status != 'cancelled'").each do |barcode|
+    GenerateBarcode.where("status != 'completed' AND status != 'failed' AND status != 'cancelled'").each do |barcode|
       barcode.emit_data_to_user
     end
     CsvProductImport.where("status != 'completed' AND status != 'cancelled'").each do |product_import|
