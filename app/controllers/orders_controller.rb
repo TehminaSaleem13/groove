@@ -385,7 +385,7 @@ class OrdersController < ApplicationController
             @orderitem['qty_on_hand'] +=  inventory.qty.to_i
           end
           if product.product_inventory_warehousess.length > 0
-            @orderitem['location_primary'] = 
+            @orderitem['location_primary'] =
             product.primary_warehouse(current_user).nil? ? "" : product.primary_warehouse(current_user).location_primary
                 #ProductInventoryWarehouses.where(product_id:product.id,inventory_warehouse_id: current_user.inventory_warehouse_id).first.location_primary
           end
@@ -414,7 +414,7 @@ class OrdersController < ApplicationController
       dummy_user.name = 'Nobody'
       dummy_user.id = 0
       @result['order']['users'].unshift(dummy_user)
-      
+
       #add packing_slip_size and packing_slip_orientation
       # @result['order']['packing_slip_size'] = GeneralSetting.get_packing_slip_size
       # @result['order']['packing_slip_orientation'] = GeneralSetting.get_packing_slip_orientation
@@ -813,12 +813,12 @@ class OrdersController < ApplicationController
         if !store.nil? && !store.inventory_warehouse.nil?
           inventory_warehouse_id = store.inventory_warehouse_id
         end
-        single_pick_list_obj = 
-          Groovepacker::PickList::SinglePickListBuilder.new 
-        individual_pick_list_obj = 
+        single_pick_list_obj =
+          Groovepacker::PickList::SinglePickListBuilder.new
+        individual_pick_list_obj =
           Groovepacker::PickList::IndividualPickListBuilder.new
-        depends_pick_list_obj = 
-          Groovepacker::PickList::DependsPickListBuilder.new                  
+        depends_pick_list_obj =
+          Groovepacker::PickList::DependsPickListBuilder.new
         order.order_items.each do |order_item|
           if !order_item.product.nil?
             # for single products which are not kit
@@ -828,11 +828,11 @@ class OrdersController < ApplicationController
             else # for products which are kits
               if order_item.product.kit_parsing == 'single'
                 @pick_list = single_pick_list_obj.build(
-                  order_item.qty, order_item.product, @pick_list, inventory_warehouse_id)    
+                  order_item.qty, order_item.product, @pick_list, inventory_warehouse_id)
               else #for individual kits
                 if order_item.product.kit_parsing == 'individual'
                   @pick_list = individual_pick_list_obj.build(
-                  order_item.qty, order_item.product, @pick_list, inventory_warehouse_id) 
+                  order_item.qty, order_item.product, @pick_list, inventory_warehouse_id)
                 else #for automatic depends kits
                   if order_item.product.kit_parsing == 'depends'
                     @depends_pick_list = depends_pick_list_obj.build(
@@ -854,24 +854,24 @@ class OrdersController < ApplicationController
         time = Time.now
         file_name = 'pick_list_'+time.strftime("%d_%b_%Y")
         result['data']['pick_list_file_paths'] = '/pdfs/'+ file_name + '.pdf'
-        render :pdf => file_name, 
+        render :pdf => file_name,
         :template => 'orders/generate_pick_list',
         :orientation => 'portrait',
-        :page_height => '8in', 
+        :page_height => '8in',
         :save_only => true,
         :page_width => '11.5in',
-        :margin => {:top => '20',                     
+        :margin => {:top => '20',
                     :bottom => '20',
                     :left => '0',
                     :right => '0'},
         :handlers =>[:erb],
         :formats => [:html],
         :save_to_file => Rails.root.join('public','pdfs', "#{file_name}.pdf")
-        
+
         render json: result
       }
       format.pdf {
-          
+
       }
     end
   end
@@ -977,7 +977,7 @@ class OrdersController < ApplicationController
         tenant = Apartment::Tenant.current_tenant
         import_orders_obj = ImportOrders.new
         Delayed::Job.where(queue: "importing_orders_#{tenant}").destroy_all
-        import_orders_obj.delay(:run_at => 1.seconds.from_now,:queue => "importing_orders_#{tenant}").import_orders  tenant    
+        import_orders_obj.delay(:run_at => 1.seconds.from_now,:queue => "importing_orders_#{tenant}").import_orders  tenant
         # import_orders_obj.import_orders
         result['success_messages'].push('Scouring the interwebs for new orders...')
       else
@@ -993,7 +993,7 @@ class OrdersController < ApplicationController
   end
 
   def confirmation
-    
+
   end
   def match
     email = params['confirm']['email']
@@ -1009,27 +1009,55 @@ class OrdersController < ApplicationController
   private
 
   def do_search(results_only = true)
+    sort_key = 'updated_at'
+    sort_order = 'DESC'
     limit = 10
     offset = 0
+    supported_sort_keys = ['updated_at', 'notes',
+                           'ordernum', 'order_date', 'itemslength', 'recipient', 'status','email','tracking_num','city','state','postcode','country' ]
+    supported_order_keys = ['ASC', 'DESC' ] #Caps letters only
+    sort_key = params[:sort] if !params[:sort].nil? &&
+        supported_sort_keys.include?(params[:sort])
+
+    sort_order = params[:order] if !params[:order].nil? &&
+        supported_order_keys.include?(params[:order])
+
+    if sort_key == 'ordernum'
+      sort_key = 'increment_id'
+    end
+
+    if sort_key == 'order_date'
+      sort_key = 'order_placed_time'
+    end
+
+    if sort_key == 'notes'
+      sort_key = 'notes_toPacker'
+    end
+
+    if sort_key == 'recipient'
+      sort_key = 'firstname '+sort_order+', lastname'
+    end
+
     # Get passed in parameter variables if they are valid.
     limit = params[:limit].to_i if !params[:limit].nil? && params[:limit].to_i > 0
 
     offset = params[:offset].to_i if !params[:offset].nil? && params[:offset].to_i >= 0
     search = ActiveRecord::Base::sanitize('%'+params[:search]+'%')
-    base_query = "from orders WHERE
-                      increment_id like "+search+" OR non_hyphen_increment_id like "+ search +
-                      " OR email like "+search+" OR CONCAT(IFNULL(firstname,''),' ',IFNULL(lastname,'')) like "+search+" OR postcode like "+search
+    base_query = 'Select orders.*, sum(order_items.qty) AS itemslength from orders LEFT JOIN stores ON (orders.store_id = stores.id)
+                      LEFT JOIN order_items ON (order_items.order_id = orders.id) WHERE
+                      increment_id like '+search+' OR non_hyphen_increment_id like '+ search +
+                      ' OR email like '+search+' OR CONCAT(IFNULL(firstname,"")," ",IFNULL(lastname,"")) like '+search+' OR postcode like '+search+' GROUP BY orders.id Order BY '+sort_key+' '+sort_order
     query_add = ''
     unless params[:select_all] || params[:inverted]
       query_add = " LIMIT #{limit} OFFSET #{offset}"
     end
-    result_rows = Order.find_by_sql('SELECT * '+base_query+query_add)
+    result_rows = Order.find_by_sql(base_query+query_add)
     if results_only
       result = result_rows
     else
       result = Hash.new
       result['orders'] = result_rows
-      result['count'] = Order.count_by_sql('SELECT COUNT(*) as count '+ base_query)
+      result['count'] = Order.count_by_sql('SELECT COUNT(*) as count from ('+ base_query+') as tmp_order')
     end
     #todo: include sku and storename in search as well in future.
     return result

@@ -61,7 +61,7 @@ groovepacks_services.factory('orders',['$http','$window','notification',function
         if(setup.search=='') {
             url = '/orders/getorders.json?filter='+setup.filter+'&sort='+setup.sort+'&order='+setup.order;
         } else {
-            url = '/orders/search.json?search='+setup.search;
+            url = '/orders/search.json?search='+setup.search+'&sort='+setup.sort+'&order='+setup.order;
         }
         url += '&limit='+setup.limit+'&offset='+setup.offset;
         return $http.get(url).success(
@@ -122,9 +122,9 @@ groovepacks_services.factory('orders',['$http','$window','notification',function
             return $http.post(url,orders.setup)
             .success(function(response) {
                 if (action == "pick_list") {
-                    $window.open(response.data.pick_list_file_paths); 
+                    $window.open(response.data.pick_list_file_paths);
                 }
-            }).error(notification.server_error); 
+            }).error(notification.server_error);
     };
     var cancel_pdf_gen = function(id) {
         return $http.post('/orders/cancel_packing_slip.json',{id:id}).success(function(data) {
