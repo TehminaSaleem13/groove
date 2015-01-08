@@ -320,10 +320,10 @@ RSpec.describe ScanPackController, :type => :controller do
   it "should check for confirmation code when order status is on hold" do
       request.accept = "application/json"
 
-      @other_user = FactoryGirl.create(:user, :email=>'test_other@groovepacks.com', :username=>'test_user', 
-        :role => Role.find_by_name('Scan & Pack User'))
+      @other_user = FactoryGirl.create(:user, :username=>'test_user', 
+        :role => Role.find_by_name('Scan & Pack User'), :confirmation_code => '12345678902')
 
-      @other_user.confirmation_code = '12345678902'
+      # @other_user.confirmation_code = '12345678902'
       @other_user.save
 
       @order = FactoryGirl.create(:order, :status=>'onhold')
@@ -343,10 +343,10 @@ RSpec.describe ScanPackController, :type => :controller do
 
   it "should not check for confirmation code when order status is not on hold" do
       request.accept = "application/json"
-      @other_user = FactoryGirl.create(:user, :email => 'test_other@groovepacks.com', 
-        :username => 'test_user', :role => Role.find_by_name('Scan & Pack User'))
+      @other_user = FactoryGirl.create(:user, 
+        :username => 'test_user', :role => Role.find_by_name('Scan & Pack User'), :confirmation_code => '12345678902')
 
-      @other_user.confirmation_code = '1234567890'
+      # @other_user.confirmation_code = '1234567890'
       @other_user.save
 
       @order = FactoryGirl.create(:order, :status=>'awaiting')
@@ -364,10 +364,10 @@ RSpec.describe ScanPackController, :type => :controller do
   it "should not set session variable when confirmation code does not match" do
       request.accept = "application/json"
 
-      @other_user = FactoryGirl.create(:user, :email=>'test_other@groovepacks.com', :username=>'test_user', 
-        :role => Role.find_by_name('Scan & Pack User'))
+      @other_user = FactoryGirl.create(:user, :username=>'test_user', 
+        :role => Role.find_by_name('Scan & Pack User'), :confirmation_code => '12345678902')
 
-      @other_user.confirmation_code = '1234567890'
+      # @other_user.confirmation_code = '1234567890'
       @other_user.save
 
       @order = FactoryGirl.create(:order, :status=>'onhold')
@@ -384,13 +384,13 @@ RSpec.describe ScanPackController, :type => :controller do
   it "should check for  when order status is on hold and has inactive or new products" do
       request.accept = "application/json"
 
-      @other_user = FactoryGirl.create(:user, :email=>'test_other@groovepacks.com', 
+      @other_user = FactoryGirl.create(:user, 
         :username=>'test_user', 
-        :role => Role.find_by_name('Scan & Pack User'))
+        :role => Role.find_by_name('Scan & Pack User'), :confirmation_code => '12345678902')
       add_edit_products = @other_user.role.add_edit_products
       @other_user.role.update_attribute(:add_edit_products, true)
 
-      @other_user.confirmation_code = '12345678901'
+      # @other_user.confirmation_code = '12345678901'
       @other_user.role.add_edit_products = 1
       @other_user.save
 
@@ -410,10 +410,10 @@ RSpec.describe ScanPackController, :type => :controller do
 
   it "should not check for product confirmation code when order status is not on hold" do
       request.accept = "application/json"
-      @other_user = FactoryGirl.create(:user, :email=>'test_other@groovepacks.com', :username=>'test_user', 
-        :role => Role.find_by_name('Scan & Pack User'))
+      @other_user = FactoryGirl.create(:user, :username=>'test_user', 
+        :role => Role.find_by_name('Scan & Pack User'), :confirmation_code => '12345678902')
 
-      @other_user.confirmation_code = '1234567890'
+      # @other_user.confirmation_code = '1234567890'
       @other_user.save
 
       @order = FactoryGirl.create(:order, :status=>'awaiting', store: Store.first)
@@ -433,10 +433,10 @@ RSpec.describe ScanPackController, :type => :controller do
   it "should not set session variable when confirmation code does not match" do
       request.accept = "application/json"
 
-      @other_user = FactoryGirl.create(:user, :email=>'test_other@groovepacks.com', 
-        :username=>'test_user', :role => Role.find_by_name('Scan & Pack User'))
+      @other_user = FactoryGirl.create(:user, 
+        :username=>'test_user', :role => Role.find_by_name('Scan & Pack User'), :confirmation_code => '12345678902')
 
-      @other_user.confirmation_code = '1234567890'
+      # @other_user.confirmation_code = '1234567890'
       @other_user.save
 
       @order = FactoryGirl.create(:order, :status=>'onhold', store: Store.first)

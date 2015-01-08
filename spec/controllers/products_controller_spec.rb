@@ -1,6 +1,7 @@
-require 'spec_helper'
+# require 'spec_helper'
+require 'rails_helper'
 
-describe ProductsController do
+RSpec.describe ProductsController, :type => :controller do
   before(:each) do
     sup_ad = FactoryGirl.create(:role,:name=>'super_admin1',:make_super_admin=>true)
     @user = FactoryGirl.create(:user,:username=>"new_admin1", :role=>sup_ad)

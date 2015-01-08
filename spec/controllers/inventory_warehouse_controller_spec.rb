@@ -1,4 +1,5 @@
-require 'spec_helper'
+# require 'spec_helper'
+require 'rails_helper'
 
 describe InventoryWarehouseController do
 

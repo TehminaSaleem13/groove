@@ -217,7 +217,7 @@
 			end
 
       if User.all.length == 0 || (User.where(:username=>username).length == 0 && create)
-        created_user = User.create([{:username=>username, :name=>username, :email => email, :password => password,
+        created_user = User.create([{:username=>username, :name=>username, :password => password,
                       :password_confirmation => password, :role_id=>role_super_admin.id, :confirmation_code=>'12345678901', :active=> true}],:without_protection=>true)
       end
 
