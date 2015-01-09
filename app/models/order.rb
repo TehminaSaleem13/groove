@@ -448,7 +448,7 @@ class Order < ActiveRecord::Base
               new_item = build_pack_item(child_item['name'], 'single', child_item['images'], child_item['sku'],
                 child_item['qty_remaining'],
                 child_item['scanned_qty'], child_item['packing_placement'], child_item['barcodes'],
-                child_item['product_id'], scanned_item['order_item_id'], nil,child_item['instruction'],child_item['confirmation'],child_item['skippable'])
+                child_item['product_id'], scanned_item['order_item_id'], nil,child_item['instruction'],child_item['confirmation'],child_item['skippable'], child_item['record_serial'])
               scanned_list.push(new_item)
             end
           end

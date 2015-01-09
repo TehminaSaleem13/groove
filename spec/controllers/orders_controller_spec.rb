@@ -266,7 +266,6 @@ describe OrdersController do
       expect(result["status"]).to eq(true)
 
       expect(result["data"]["pick_list"].length).to eq(2)
-  		puts result["data"]["pick_list"].inspect
       expect(result["data"]["pick_list"][0]["sku"]).
       	to eq("IPHONE5S")
       expect(result["data"]["pick_list"][0]["primary_location"]).
@@ -341,7 +340,6 @@ describe OrdersController do
       expect(result["status"]).to eq(true)
 
       expect(result["data"]["pick_list"].length).to eq(2)
-      puts result["data"]["pick_list"].inspect
 
       expect(result["data"]["pick_list"][0]["sku"]).
         to eq("IPHONE5S")
@@ -440,8 +438,6 @@ describe OrdersController do
       result = JSON.parse(response.body)
       expect(result["status"]).to eq(true)
 
-      puts "pick_list:"
-      puts result["data"]["pick_list"].inspect
       expect(result["data"]["pick_list"].length).to eq(3)
 
       expect(result["data"]["pick_list"][0]["sku"]).
@@ -544,8 +540,6 @@ describe OrdersController do
       result = JSON.parse(response.body)
       expect(result["status"]).to eq(true)
 
-      puts "pick_list:"
-      puts result["data"]["depends_pick_list"].inspect
       expect(result["data"]["depends_pick_list"].first["single"].length).to eq(1)
 
       expect(result["data"]["depends_pick_list"].first["single"][0]["sku"]).
