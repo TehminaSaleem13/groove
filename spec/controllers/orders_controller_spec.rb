@@ -70,6 +70,7 @@ describe OrdersController do
       order = FactoryGirl.create(:order, :status=>'awaiting', :packing_user_id=> @user.id)
       order_data = @copy_order_l.call(order)
       order_data['firstname'] = "Test"
+      order_data['increment_id'] = '12345678'
       @user_role.add_edit_order_items = true
       @user_role.save
 
@@ -99,8 +100,9 @@ describe OrdersController do
       order = FactoryGirl.create(:order, :status=>'awaiting', :packing_user_id=> @user.id)
       order_data = @copy_order_l.call(order)
       order_data['notes_internal'] = "Test"
-
+      order_data['increment_id'] = '12345678'
       @user_role.create_edit_notes = true
+      @user_role.add_edit_order_items = true
       @user_role.save
 
       post :update, {id: order.id, order: order_data}
@@ -115,7 +117,7 @@ describe OrdersController do
       order = FactoryGirl.create(:order, :status=>'awaiting', :packing_user_id=> @user.id)
       order_data = @copy_order_l.call(order)
       order_data['notes_internal'] = "Test2"
-
+      order_data['increment_id'] = '12345678'
       @user_role.add_edit_order_items = true
       @user_role.save
 

@@ -805,6 +805,7 @@ class OrdersController < ApplicationController
     @depends_pick_list = []
 
     @orders = list_selected_orders
+    
     unless @orders.nil?
       @orders.each do |order|
         order = Order.find(order['id'])
@@ -1176,8 +1177,16 @@ class OrdersController < ApplicationController
       else
         result = do_getorders
       end
-    else
+    elsif !params[:orderArray].nil?
       result =  params[:orderArray]
+    elsif !params[:id].nil?
+      result = Order.find_by_sql("SELECT orders.* FROM orders WHERE orders.id = '"+params[:id]+"'")
+    else
+      result = []
+      order_ids = params[:order_ids]
+      order_ids.each do |order_id|
+        result.push(Order.find_by_sql("SELECT orders.* FROM orders WHERE orders.id = '"+order_id+"'").first)
+      end
     end
 
     result_rows = []
