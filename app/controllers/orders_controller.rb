@@ -941,7 +941,10 @@ class OrdersController < ApplicationController
       barcode.cancel = true
       unless barcode.status =='in_progress'
         barcode.status = 'cancelled'
-        Delayed::Job.find(barcode.delayed_job_id).destroy
+        the_delayed_job = Delayed::Job.find(barcode.delayed_job_id)
+        unless the_delayed_job.nil?
+          the_delayed_job.destroy
+        end
       end
 
       if barcode.save

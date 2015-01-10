@@ -166,7 +166,7 @@ class StoreSettingsController < ApplicationController
             @result['tenant_name'] = Apartment::Tenant.current_tenant
           end
 
-          if @store.store_type == 'CSV'
+          if @store.store_type == 'CSV' || @store.store_type == 'system'
             begin
               @store.save!
             rescue ActiveRecord::RecordInvalid => e
@@ -640,6 +640,23 @@ class StoreSettingsController < ApplicationController
     end
   end
 
+  def getSystem
+    @store = Store.find_by_store_type('system')
+    @result = Hash.new
+
+    if @store.nil?
+      @result['status'] = false
+    else
+      @result['status'] = true
+      @result['store'] = @store
+    end
+
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json: @result }
+    end
+  end
+
   def getebaysigninurl
     @result = Hash.new
     @result[:status] = true
@@ -803,7 +820,7 @@ class StoreSettingsController < ApplicationController
     messagetocustomer = params['messagetocustomer']
     tenant_name = params['tenantname']
 
-    # redirect_to (URI::encode("https://#{tenant_name}.groovepacker.com:3001//") + "#" + URI::encode("/settings/showstores/ebay?ebaytkn=#{ebaytkn}&tknexp=#{tknexp}&username=#{username}&redirect=#{redirect}&editstatus=#{editstatus}&name=#{name}&status=#{status}&storetype=#{storetype}&storeid=#{storeid}&inventorywarehouseid=#{inventorywarehouseid}&importimages=#{importimages}&importproducts=#{importproducts}&messagetocustomer=#{messagetocustomer}&tenantname=#{tenant_name}") ) 
+    # redirect_to (URI::encode("https://#{tenant_name}.groovepacker.com:3001//") + "#" + URI::encode("/settings/showstores/ebay?ebaytkn=#{ebaytkn}&tknexp=#{tknexp}&username=#{username}&redirect=#{redirect}&editstatus=#{editstatus}&name=#{name}&status=#{status}&storetype=#{storetype}&storeid=#{storeid}&inventorywarehouseid=#{inventorywarehouseid}&importimages=#{importimages}&importproducts=#{importproducts}&messagetocustomer=#{messagetocustomer}&tenantname=#{tenant_name}") )
     redirect_to (URI::encode("https://#{tenant_name}.#{ENV['HOST_NAME']}/") + URI::encode("store_settings/updateebayusertoken?storeid=#{storeid}") )
   end
 

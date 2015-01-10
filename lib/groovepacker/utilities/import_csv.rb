@@ -9,7 +9,7 @@ class ImportCsv
         if params[:fix_width] == 1
           initial_split = IO.readlines(file_path)
           initial_split.each do |single|
-            final_record.push(single.scsan(/.{1,#{params[:fixed_width]}}/m))
+            final_record.push(single.scan(/.{1,#{params[:fixed_width]}}/m))
           end
         else
           require 'csv'
@@ -23,7 +23,13 @@ class ImportCsv
         mapping = {}
         params[:map].each do |map_single|
           if map_single[1][:value] != 'none'
-            mapping[map_single[1][:value]] = map_single[0].to_i
+            mapping[map_single[1][:value]] = {}
+            mapping[map_single[1][:value]][:position] = map_single[0].to_i
+            if map_single[1][:action].nil?
+              mapping[map_single[1][:value]][:action] = 'skip'
+            else
+              mapping[map_single[1][:value]][:action] = map_single[1][:action]
+            end
           end
         end
 

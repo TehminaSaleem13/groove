@@ -59,6 +59,10 @@ groovepacks.config(['$stateProvider', '$urlRouterProvider','hotkeysProvider','cf
         .state('scanpack.rfp.confirmation.cos',{url:'/cos'})
 
         .state('settings',{url: '/settings', templateUrl:'/assets/views/settings/base.html', controller:'settingsCtrl', abstract:true })
+
+        .state('settings.detailed_import', {url:'/detailed_import',templateUrl:'/assets/views/settings/csv_detailed.html',
+            controller:'csvDetailed'})
+
         .state('settings.users',{url: '/users', templateUrl: '/assets/views/settings/users.html', controller: 'usersCtrl'})
         .state('settings.users.create',{url: '/create', controller: 'usersSingleCtrl'})
         .state('settings.users.single',{url:'/{user_id:[0-9]+}',controller:'usersSingleCtrl'})

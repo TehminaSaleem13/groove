@@ -168,6 +168,13 @@ groovepacks_services.factory('stores',['$http','notification','$filter',function
             }
         }).error(notification.server_error);
     };
+    var get_system = function(stores) {
+        return $http.get('/store_settings/getSystem.json').success(function(data) {
+            if (data.status) {
+                stores.single = data.store;
+            }
+        }).error(notification.server_error);
+    };
 
     /**
      * Validate if we have all the data to send a store creation request.
@@ -317,10 +324,10 @@ groovepacks_services.factory('stores',['$http','notification','$filter',function
                stores.import.image.status = "";
                 for (var j=0; j< data.messages.length; j++) {
                     stores.import.image.status += data.messages[j]+" ";
-                } 
+                }
             }
         }).error(function(data) {
-           stores.import.image.status = "Import failed. Please check your credentials."; 
+           stores.import.image.status = "Import failed. Please check your credentials.";
         });
     };
 
@@ -408,6 +415,7 @@ groovepacks_services.factory('stores',['$http','notification','$filter',function
         },
         single: {
             get: get_single,
+            get_system: get_system,
             can_create:can_create_single,
             validate_create: validate_create_single,
             update:create_update_single
