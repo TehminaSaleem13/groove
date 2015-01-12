@@ -1046,7 +1046,7 @@ RSpec.describe ScanPackController, :type => :controller do
       #expect()
     end
 
-    it "should scan orders with multiple kit products" do
+    it "should scan orders with multiple kit products 1" do
 
       request.accept = "application/json"
 
