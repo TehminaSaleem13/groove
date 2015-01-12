@@ -101,30 +101,36 @@ groovepacks_services.factory('orders',['$http','$window','notification',function
 
     var generate_list = function(action, orders) {
 
-            orders.setup.orderArray = [];
-            for(var i =0; i< orders.list.length; i++) {
-                if (orders.list[i].checked == true) {
-                    orders.setup.orderArray.push({id: orders.list[i].id});
-                }
+        orders.setup.orderArray = [];
+        for(var i =0; i< orders.list.length; i++) {
+            if (orders.list[i].checked == true) {
+                orders.setup.orderArray.push({id: orders.list[i].id});
             }
-            var url = '';
-            var myscope = {};
-            var interval = null;
-            //set url for each action.
-            if(action == "pick_list") {
-                url = '/orders/generate_pick_list.json';
-            }
-            else if(action == "packing_slip") {
-                url = '/orders/generate_packing_slip.json';
-            }
+        }
+        var url = '';
+        var myscope = {};
+        var interval = null;
+        //set url for each action.
+        if(action == "pick_list") {
+            url = '/orders/generate_pick_list.json';
+        }
+        else if(action == "packing_slip") {
+            url = '/orders/generate_packing_slip.json';
+        } else if(action=='items_list') {
+            url = '/orders/order_items_export.json';
+        }
 
-            //send post http request and catch the response to display the pdfs.
-            return $http.post(url,orders.setup)
+        //send post http request and catch the response to display the pdfs.
+        return $http.post(url,orders.setup)
             .success(function(response) {
                 if (action == "pick_list") {
                     $window.open(response.data.pick_list_file_paths);
+                } else if (action == 'items_list') {
+                    $window.open(response.filename);
                 }
             }).error(notification.server_error);
+
+
     };
     var cancel_pdf_gen = function(id) {
         return $http.post('/orders/cancel_packing_slip.json',{id:id}).success(function(data) {

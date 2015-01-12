@@ -960,6 +960,145 @@ class OrdersController < ApplicationController
     end
   end
 
+  def order_items_export
+    require 'csv'
+    result = Hash.new
+    result['status'] = true
+    result['messages'] = []
+    result['filename'] = ''
+    selected_orders = list_selected_orders
+    items_list = {}
+
+
+    unless selected_orders.nil?
+      filename = 'groove-order-items-'+Apartment::Tenant.current_tenant+'-'+Time.now.strftime('%d_%b_%Y_%H_%M_%S_%Z')+'.csv'
+      row_map = {
+          :quantity =>'',
+          :product_name=>'',
+          :primary_sku =>'',
+          :primary_barcode =>'',
+          :secondary_barcode => '',
+          :tertiary_barcode => '',
+          :location_primary => '',
+          :location_secondary => '',
+          :location_tertiary => '',
+          :image_url => '',
+          :available_inventory=>'',
+          :product_status => '',
+          :order_number => '',
+      }
+      selected_orders.each do |single_order|
+        order = Order.find(single_order['id'].to_i)
+        inventory_warehouse_id = InventoryWarehouse.where(:is_default => 1).first.id
+        unless order.store.nil? || order.store.inventory_warehouse.nil?
+          inventory_warehouse_id = order.store.inventory_warehouse_id
+        end
+        order.order_items.each do |single_item|
+          unless single_item.product.nil?
+            if single_item.product.is_kit == 0 || single_item.product.kit_parsing == 'single'
+              product_sku = single_item.product.product_skus.order("product_skus.order ASC").first
+              unless product_sku.nil?
+                product_barcodes = single_item.product.product_barcodes.order("product_barcodes.order ASC")
+                product_inventory_warehouse = single_item.product.get_inventory_warehouse_info(inventory_warehouse_id)
+                if items_list.has_key? product_sku.sku
+                  items_list[product_sku.sku][:quantity] += single_item.qty
+                else
+                  single_row_list = row_map.dup
+                  single_row_list[:quantity] = single_item.qty
+                  single_row_list[:product_name]= single_item.product.name
+                  single_row_list[:primary_sku] = product_sku.sku
+                  unless product_barcodes.length == 0
+                    single_row_list[:primary_barcode] = product_barcodes[0].barcode
+                    unless product_barcodes.length < 2
+                      single_row_list[:secondary_barcode] = product_barcodes[1].barcode
+                    end
+                    unless product_barcodes.length < 3
+                      single_row_list[:tertiary_barcode] = product_barcodes[2].barcode
+                    end
+                  end
+
+                  unless product_inventory_warehouse.nil?
+                    single_row_list[:location_primary] = product_inventory_warehouse.location_primary
+                    single_row_list[:location_secondary] = product_inventory_warehouse.location_secondary
+                    single_row_list[:location_tertiary] = product_inventory_warehouse.location_tertiary
+                    single_row_list[:available_inventory]=product_inventory_warehouse.available_inv
+                  end
+                  unless single_item.product.primary_image.nil?
+                    single_row_list[:image_url] = single_item.product.primary_image
+                  end
+
+
+                  single_row_list[:product_status] = single_item.product.status
+                  single_row_list[:order_number] = order.increment_id
+                  items_list[product_sku.sku] = single_row_list
+                end
+              end
+            else
+              single_item.product.product_kit_skuss.each do |kit_item|
+                product_sku = kit_item.option_product.product_skus.order("product_skus.order ASC").first
+                unless product_sku.nil?
+                  product_barcodes = kit_item.option_product.product_barcodes.order("product_barcodes.order ASC")
+                  product_inventory_warehouse = kit_item.option_product.get_inventory_warehouse_info(inventory_warehouse_id)
+                  if items_list.has_key? product_sku.sku
+                    items_list[product_sku.sku][:quantity] += (kit_item.qty*single_item.qty)
+                  else
+                    single_row_list = row_map.dup
+                    single_row_list[:quantity] = (kit_item.qty*single_item.qty)
+                    single_row_list[:product_name]= kit_item.option_product.name
+                    single_row_list[:primary_sku] = product_sku.sku
+                    unless product_barcodes.length == 0
+                      single_row_list[:primary_barcode] = product_barcodes[0].barcode
+                      unless product_barcodes.length < 2
+                        single_row_list[:secondary_barcode] = product_barcodes[1].barcode
+                      end
+                      unless product_barcodes.length < 3
+                        single_row_list[:tertiary_barcode] = product_barcodes[2].barcode
+                      end
+                    end
+
+                    unless product_inventory_warehouse.nil?
+                      single_row_list[:location_primary] = product_inventory_warehouse.location_primary
+                      single_row_list[:location_secondary] = product_inventory_warehouse.location_secondary
+                      single_row_list[:location_tertiary] = product_inventory_warehouse.location_tertiary
+                      single_row_list[:available_inventory]=product_inventory_warehouse.available_inv
+                    end
+                    unless kit_item.option_product.primary_image.nil?
+                      single_row_list[:image_url] = kit_item.option_product.primary_image
+                    end
+
+
+                    single_row_list[:product_status] = kit_item.option_product.status
+                    single_row_list[:order_number] = order.increment_id
+                    items_list[product_sku.sku] = single_row_list
+                  end
+                end
+              end
+            end
+
+          end
+        end
+      end
+      CSV.open(Rails.root.join('public','pdfs', filename ),'wb') do |csv|
+        csv << row_map.keys
+        items_list.values.each do |line|
+          csv << line.values
+        end
+      end
+    end
+    unless result['status'] || filename.blank?
+      filename = 'groove-order-items-'+Apartment::Tenant.current_tenant+'-'+Time.now.strftime('%d_%b_%Y_%H_%M_%S_%Z')+'.csv'
+      CSV.open(Rails.root.join('public','pdfs', filename ),'wb') do |csv|
+        csv << result['messages']
+      end
+
+    end
+    result['filename'] = 'pdfs/'+filename
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json: result }
+    end
+  end
+
   def import_all
     # import_orders_helper()
 
