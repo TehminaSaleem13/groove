@@ -263,7 +263,7 @@ class Product < ActiveRecord::Base
 
   def get_total_avail_loc
   	total_avail_loc = 0
-  	self.product_inventory_warehousess.each do |inv_wh|
+  	self.product_inventory_warehousess.all.each do |inv_wh|
   		total_avail_loc = total_avail_loc + inv_wh.available_inv
   	end
   	total_avail_loc
