@@ -1085,7 +1085,7 @@ class OrdersController < ApplicationController
         end
       end
     end
-    unless result['status'] || filename.blank?
+    unless filename.blank?
       filename = 'groove-order-items-'+Apartment::Tenant.current_tenant+'-'+Time.now.strftime('%d_%b_%Y_%H_%M_%S_%Z')+'.csv'
       CSV.open(Rails.root.join('public','pdfs', filename ),'wb') do |csv|
         csv << result['messages']
