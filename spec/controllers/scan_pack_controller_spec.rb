@@ -105,7 +105,7 @@ RSpec.describe ScanPackController, :type => :controller do
       return scanned_item
     end
 
-    @expected_result_l = lambda do |order|
+    @expected_result_l = lambda do |order, kit_product_barcode|
       expected_result = Hash.new
       expected_result['status'] = true
       expected_result['error_messages'] = []
@@ -113,8 +113,14 @@ RSpec.describe ScanPackController, :type => :controller do
       expected_result['notice_messages'] = []
 
       order.reload
+      kit_product_barcode.reload
       expected_result['data'] = Hash.new
       expected_result['data']['next_state'] = 'scanpack.rfp.default'
+      expected_result['data']['serial'] = Hash.new
+      expected_result['data']['serial']['ask'] = false
+      expected_result['data']['serial']['clicked'] = false
+      expected_result['data']['serial']['barcode'] = kit_product_barcode.barcode
+      expected_result['data']['serial']['order_id'] = order.id.to_s
       expected_result['data']['order_num'] = order.increment_id.to_s
       expected_result['data']['order'] = order.attributes
       expected_result['data']['order']['increment_id'] = order.increment_id.to_s
@@ -320,10 +326,10 @@ RSpec.describe ScanPackController, :type => :controller do
   it "should check for confirmation code when order status is on hold" do
       request.accept = "application/json"
 
-      @other_user = FactoryGirl.create(:user, :email=>'test_other@groovepacks.com', :username=>'test_user', 
-        :role => Role.find_by_name('Scan & Pack User'))
+      @other_user = FactoryGirl.create(:user, :username=>'test_user', 
+        :role => Role.find_by_name('Scan & Pack User'), :confirmation_code => '12345678902')
 
-      @other_user.confirmation_code = '12345678902'
+      # @other_user.confirmation_code = '12345678902'
       @other_user.save
 
       @order = FactoryGirl.create(:order, :status=>'onhold')
@@ -343,10 +349,10 @@ RSpec.describe ScanPackController, :type => :controller do
 
   it "should not check for confirmation code when order status is not on hold" do
       request.accept = "application/json"
-      @other_user = FactoryGirl.create(:user, :email => 'test_other@groovepacks.com', 
-        :username => 'test_user', :role => Role.find_by_name('Scan & Pack User'))
+      @other_user = FactoryGirl.create(:user, 
+        :username => 'test_user', :role => Role.find_by_name('Scan & Pack User'), :confirmation_code => '12345678902')
 
-      @other_user.confirmation_code = '1234567890'
+      # @other_user.confirmation_code = '1234567890'
       @other_user.save
 
       @order = FactoryGirl.create(:order, :status=>'awaiting')
@@ -364,10 +370,10 @@ RSpec.describe ScanPackController, :type => :controller do
   it "should not set session variable when confirmation code does not match" do
       request.accept = "application/json"
 
-      @other_user = FactoryGirl.create(:user, :email=>'test_other@groovepacks.com', :username=>'test_user', 
-        :role => Role.find_by_name('Scan & Pack User'))
+      @other_user = FactoryGirl.create(:user, :username=>'test_user', 
+        :role => Role.find_by_name('Scan & Pack User'), :confirmation_code => '12345678902')
 
-      @other_user.confirmation_code = '1234567890'
+      # @other_user.confirmation_code = '1234567890'
       @other_user.save
 
       @order = FactoryGirl.create(:order, :status=>'onhold')
@@ -384,13 +390,13 @@ RSpec.describe ScanPackController, :type => :controller do
   it "should check for  when order status is on hold and has inactive or new products" do
       request.accept = "application/json"
 
-      @other_user = FactoryGirl.create(:user, :email=>'test_other@groovepacks.com', 
+      @other_user = FactoryGirl.create(:user, 
         :username=>'test_user', 
-        :role => Role.find_by_name('Scan & Pack User'))
+        :role => Role.find_by_name('Scan & Pack User'), :confirmation_code => '12345678902')
       add_edit_products = @other_user.role.add_edit_products
       @other_user.role.update_attribute(:add_edit_products, true)
 
-      @other_user.confirmation_code = '12345678901'
+      # @other_user.confirmation_code = '12345678901'
       @other_user.role.add_edit_products = 1
       @other_user.save
 
@@ -410,10 +416,10 @@ RSpec.describe ScanPackController, :type => :controller do
 
   it "should not check for product confirmation code when order status is not on hold" do
       request.accept = "application/json"
-      @other_user = FactoryGirl.create(:user, :email=>'test_other@groovepacks.com', :username=>'test_user', 
-        :role => Role.find_by_name('Scan & Pack User'))
+      @other_user = FactoryGirl.create(:user, :username=>'test_user', 
+        :role => Role.find_by_name('Scan & Pack User'), :confirmation_code => '12345678902')
 
-      @other_user.confirmation_code = '1234567890'
+      # @other_user.confirmation_code = '1234567890'
       @other_user.save
 
       @order = FactoryGirl.create(:order, :status=>'awaiting', store: Store.first)
@@ -433,10 +439,10 @@ RSpec.describe ScanPackController, :type => :controller do
   it "should not set session variable when confirmation code does not match" do
       request.accept = "application/json"
 
-      @other_user = FactoryGirl.create(:user, :email=>'test_other@groovepacks.com', 
-        :username=>'test_user', :role => Role.find_by_name('Scan & Pack User'))
+      @other_user = FactoryGirl.create(:user, 
+        :username=>'test_user', :role => Role.find_by_name('Scan & Pack User'), :confirmation_code => '12345678902')
 
-      @other_user.confirmation_code = '1234567890'
+      # @other_user.confirmation_code = '1234567890'
       @other_user.save
 
       @order = FactoryGirl.create(:order, :status=>'onhold', store: Store.first)
@@ -1092,8 +1098,8 @@ RSpec.describe ScanPackController, :type => :controller do
 
       result = @get_response_l.call(response)
 
-      expected_result = @expected_result_l.call(order)
-
+      expected_result = @expected_result_l.call(order,kit_product_barcode)
+      
       unscanned_item = @unscanned_item_l.call('iPhone Protection Kit', 'single', [],
               'IPROTO', 2, 0, 50, product_kit.product_barcodes,
               product_kit.id, order_item_kit.id, nil,nil,false)
@@ -1122,7 +1128,7 @@ RSpec.describe ScanPackController, :type => :controller do
 
       result = @get_response_l.call(response)
 
-      expected_result = @expected_result_l.call(order)
+      expected_result = @expected_result_l.call(order, kit_product_barcode)
 
       unscanned_item = @unscanned_item_l.call('iPhone Protection Kit', 'single', [],
               'IPROTO', 2, 0, 50, product_kit.product_barcodes,
@@ -1152,7 +1158,7 @@ RSpec.describe ScanPackController, :type => :controller do
 
       result = @get_response_l.call(response)
 
-      expected_result = @expected_result_l.call(order)
+      expected_result = @expected_result_l.call(order, kit_product_barcode)
 
       child_items = []
 
@@ -1206,7 +1212,7 @@ RSpec.describe ScanPackController, :type => :controller do
 
       result = @get_response_l.call(response)
 
-      expected_result = @expected_result_l.call(order)
+      expected_result = @expected_result_l.call(order, kit_product_barcode)
 
       child_items = []
 
@@ -1254,7 +1260,7 @@ RSpec.describe ScanPackController, :type => :controller do
 
       result = @get_response_l.call(response)
 
-      expected_result = @expected_result_l.call(order)
+      expected_result = @expected_result_l.call(order,kit_product_barcode)
 
       child_items = []
 
@@ -1313,7 +1319,7 @@ RSpec.describe ScanPackController, :type => :controller do
 
       result = @get_response_l.call(response)
 
-      expected_result = @expected_result_l.call(order)
+      expected_result = @expected_result_l.call(order, kit_product_barcode)
 
       expected_result['data']['next_state'] ='scanpack.rfp.tracking'
 
@@ -1406,7 +1412,7 @@ RSpec.describe ScanPackController, :type => :controller do
 
       result = @get_response_l.call(response)
 
-      expected_result = @expected_result_l.call(order)
+      expected_result = @expected_result_l.call(order, kit_product_barcode)
 
       unscanned_item = @unscanned_item_l.call('iPhone Protection Kit', 'single', [],
               'IPROTO', 2, 0, 50, product_kit.product_barcodes,
@@ -1436,7 +1442,7 @@ RSpec.describe ScanPackController, :type => :controller do
 
       result = @get_response_l.call(response)
 
-      expected_result = @expected_result_l.call(order)
+      expected_result = @expected_result_l.call(order, kit_product_barcode)
 
       unscanned_item = @unscanned_item_l.call('iPhone Protection Kit', 'single', [],
               'IPROTO', 2, 0, 50, product_kit.product_barcodes,
@@ -1466,7 +1472,7 @@ RSpec.describe ScanPackController, :type => :controller do
 
       result = @get_response_l.call(response)
 
-      expected_result = @expected_result_l.call(order)
+      expected_result = @expected_result_l.call(order, kit_product_barcode)
 
       child_items = []
 
@@ -1521,7 +1527,7 @@ RSpec.describe ScanPackController, :type => :controller do
 
       result = @get_response_l.call(response)
 
-      expected_result = @expected_result_l.call(order)
+      expected_result = @expected_result_l.call(order, kit_product_barcode)
 
       child_items = []
 
@@ -1570,7 +1576,7 @@ RSpec.describe ScanPackController, :type => :controller do
 
       result = @get_response_l.call(response)
 
-      expected_result = @expected_result_l.call(order)
+      expected_result = @expected_result_l.call(order, kit_product_barcode)
 
       child_items = []
 
@@ -1631,7 +1637,7 @@ RSpec.describe ScanPackController, :type => :controller do
 
       result = @get_response_l.call(response)
 
-      expected_result = @expected_result_l.call(order)
+      expected_result = @expected_result_l.call(order, kit_product_barcode)
 
       expected_result['data']['next_state'] ='scanpack.rfp.tracking'
 
@@ -1725,7 +1731,7 @@ RSpec.describe ScanPackController, :type => :controller do
 
       result = @get_response_l.call(response)
 
-      expected_result = @expected_result_l.call(order)
+      expected_result = @expected_result_l.call(order, product_barcode)
 
       unscanned_item = @unscanned_item_l.call('Apple iPhone 5S', 'single', [],
               'IPHONE5S', 1, 1, 50, product.product_barcodes,
@@ -1762,7 +1768,7 @@ RSpec.describe ScanPackController, :type => :controller do
 
       result = @get_response_l.call(response)
 
-      expected_result = @expected_result_l.call(order)
+      expected_result = @expected_result_l.call(order, product_barcode)
 
       unscanned_item = @unscanned_item_l.call('iPhone Protection Kit', 'single', [],
               'IPROTO', 2, 0, 50, product_kit.product_barcodes,
@@ -1793,7 +1799,7 @@ RSpec.describe ScanPackController, :type => :controller do
 
       result = @get_response_l.call(response)
 
-      expected_result = @expected_result_l.call(order)
+      expected_result = @expected_result_l.call(order, kit_product2_barcode)
 
       unscanned_item = @unscanned_item_l.call('iPhone Protection Kit', 'single', [],
               'IPROTO', 2, 0, 50, product_kit.product_barcodes,
@@ -1823,7 +1829,7 @@ RSpec.describe ScanPackController, :type => :controller do
 
       result = @get_response_l.call(response)
 
-      expected_result = @expected_result_l.call(order)
+      expected_result = @expected_result_l.call(order, kit_product2_barcode)
 
       child_items = []
 
@@ -1883,7 +1889,7 @@ RSpec.describe ScanPackController, :type => :controller do
 
       result = @get_response_l.call(response)
 
-      expected_result = @expected_result_l.call(order)
+      expected_result = @expected_result_l.call(order, kit_product2_barcode)
 
       child_items = []
 
@@ -1945,7 +1951,7 @@ RSpec.describe ScanPackController, :type => :controller do
 
       result = @get_response_l.call(response)
 
-      expected_result = @expected_result_l.call(order)
+      expected_result = @expected_result_l.call(order, kit_product2_barcode)
 
       order_item_kit.reload
 
@@ -2011,7 +2017,7 @@ RSpec.describe ScanPackController, :type => :controller do
 
       result = @get_response_l.call(response)
 
-      expected_result = @expected_result_l.call(order)
+      expected_result = @expected_result_l.call(order, kit_product2_barcode)
 
       order_item_kit.reload
 
@@ -2076,7 +2082,7 @@ RSpec.describe ScanPackController, :type => :controller do
 
       result = @get_response_l.call(response)
 
-      expected_result = @expected_result_l.call(order)
+      expected_result = @expected_result_l.call(order, kit_product2_barcode)
 
       order_item_kit.reload
 
@@ -2138,7 +2144,7 @@ RSpec.describe ScanPackController, :type => :controller do
 
       result = @get_response_l.call(response)
 
-      expected_result = @expected_result_l.call(order)
+      expected_result = @expected_result_l.call(order, kit_product2_barcode)
 
       order_item_kit.reload
 
@@ -2200,7 +2206,7 @@ RSpec.describe ScanPackController, :type => :controller do
 
       result = @get_response_l.call(response)
 
-      expected_result = @expected_result_l.call(order)
+      expected_result = @expected_result_l.call(order, kit_product2_barcode)
 
       order_item_kit.reload
 
@@ -2261,7 +2267,7 @@ RSpec.describe ScanPackController, :type => :controller do
 
       result = @get_response_l.call(response)
 
-      expected_result = @expected_result_l.call(order)
+      expected_result = @expected_result_l.call(order, kit_product2_barcode)
 
       order_item_kit.reload
 
@@ -2316,7 +2322,7 @@ RSpec.describe ScanPackController, :type => :controller do
 
       result = @get_response_l.call(response)
 
-      expected_result = @expected_result_l.call(order)
+      expected_result = @expected_result_l.call(order, kit_product_barcode)
 
       order_item_kit.reload
 
@@ -2385,7 +2391,7 @@ RSpec.describe ScanPackController, :type => :controller do
 
       result = @get_response_l.call(response)
 
-      expected_result = @expected_result_l.call(order)
+      expected_result = @expected_result_l.call(order, kit_product_barcode)
 
       order_item_kit.reload
 
@@ -2450,7 +2456,7 @@ RSpec.describe ScanPackController, :type => :controller do
 
       result = @get_response_l.call(response)
 
-      expected_result = @expected_result_l.call(order)
+      expected_result = @expected_result_l.call(order, kit_product_barcode)
 
       order_item_kit.reload
 
@@ -2515,7 +2521,7 @@ RSpec.describe ScanPackController, :type => :controller do
 
       result = @get_response_l.call(response)
 
-      expected_result = @expected_result_l.call(order)
+      expected_result = @expected_result_l.call(order, kit_product_barcode)
 
       order_item_kit.reload
 
@@ -2580,7 +2586,7 @@ RSpec.describe ScanPackController, :type => :controller do
 
       result = @get_response_l.call(response)
 
-      expected_result = @expected_result_l.call(order)
+      expected_result = @expected_result_l.call(order, kit_product_barcode)
 
       order_item_kit.reload
 
@@ -2645,7 +2651,7 @@ RSpec.describe ScanPackController, :type => :controller do
 
       result = @get_response_l.call(response)
 
-      expected_result = @expected_result_l.call(order)
+      expected_result = @expected_result_l.call(order, kit_product_barcode)
 
       order_item_kit.reload
 

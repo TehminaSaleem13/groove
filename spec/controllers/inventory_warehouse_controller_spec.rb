@@ -1,7 +1,21 @@
-require 'spec_helper'
+# require 'spec_helper'
+require 'rails_helper'
 
 describe InventoryWarehouseController do
+  before(:each) do
+    SeedTenant.new.seed
+    scanpacksetting = ScanPackSetting.first
+    scanpacksetting.ask_tracking_number = true
+    scanpacksetting.save
 
+    #@user_role =FactoryGirl.create(:role, :name=>'scan_pack', :import_orders=>true)
+    @user = FactoryGirl.create(:user, :username=>"scan_pack_spec_user", :name=>'Scan Pack user', 
+      :role => Role.find_by_name('Scan & Pack User'))
+    # puts "Signing in **************"
+    # sign_in @user
+    request.env["devise.mapping"] = Devise.mappings[:user]
+    sign_in :user, @user 
+  end
   describe "POST 'create'" do
     it "creates an inventory warehouse" do
       request.accept = "application/json"

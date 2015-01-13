@@ -1,6 +1,7 @@
-require 'spec_helper'
+# require 'spec_helper'
+require 'rails_helper'
 
-describe ProductsController do
+RSpec.describe ProductsController, :type => :controller do
   before(:each) do
     sup_ad = FactoryGirl.create(:role,:name=>'super_admin1',:make_super_admin=>true)
     @user = FactoryGirl.create(:user,:username=>"new_admin1", :role=>sup_ad)
@@ -93,12 +94,12 @@ describe ProductsController do
       put :adjust_available_inventory, { :id => product.id, :inv_wh_id => inv_wh.id, 
           :inventory_count =>50, :method=>'recount' }
 
+
+      product.reload    
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
       expect(result["status"]).to eq(true)
-      expect(product.product_inventory_warehousess.length).to eq(1)
-      expect(product.product_inventory_warehousess.first.available_inv).to eq(50)
-
+      expect(product.product_inventory_warehousess.find_by_inventory_warehouse_id(inv_wh.id).available_inv).to eq(50)
     end
   end
 
