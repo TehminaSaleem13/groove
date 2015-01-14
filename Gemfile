@@ -35,6 +35,7 @@ end
 
 group :development,:test do
   gem 'rspec-rails', '>= 2.13.2'
+  gem 'rspec_junit_formatter'
   gem 'factory_girl_rails', '>= 4.1.0'
   gem 'protractor-rails'
 end
