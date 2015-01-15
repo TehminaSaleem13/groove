@@ -566,7 +566,7 @@ class Order < ActiveRecord::Base
     count
   end
 
-  def update_inventory_levels_for_items(override = false)
+  def update_inventory_levels_for_items(override = true)
     changed_hash = self.changes
 
     logger.debug(changed_hash)
@@ -583,13 +583,12 @@ class Order < ActiveRecord::Base
         #update_inventory_levels_for_return
         reason = 'return'
       end
-    end
-
-    self.order_items.each do |order_item|
-      if reason == 'packing'
-        order_item.update_inventory_levels_for_packing(true)
-      elsif reason == 'return'
-        order_item.update_inventory_levels_for_return(true)
+      self.order_items.each do |order_item|
+        if reason == 'packing'
+          order_item.update_inventory_levels_for_packing(true)
+        elsif reason == 'return'
+          order_item.update_inventory_levels_for_return(true)
+        end
       end
     end
 

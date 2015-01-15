@@ -91,13 +91,13 @@ module Groovepacker
                         shipstation_order.addactivity("Item with SKU: "+item.product.primary_sku+" Added", credential.store.name+" Import")
                       end
                     end
+                    shipstation_order.store = credential.store
+                    shipstation_order.save
                     shipstation_order.set_order_status
                     result[:success_imported] = result[:success_imported] + 1
                     import_item.success_imported = result[:success_imported]
                     import_item.save
                   end
-                  shipstation_order.store = credential.store
-                  shipstation_order.save
                 else
                   import_item.previous_imported = import_item.previous_imported + 1
                   import_item.save
