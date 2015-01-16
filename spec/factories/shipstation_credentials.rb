@@ -1,10 +1,9 @@
 # Read about factories at https://github.com/thoughtbot/factory_girl
 
 FactoryGirl.define do
-  factory :magento_credential, :class => 'MagentoCredentials' do
-    host "MyString"
+  factory :shipstation_credential, :class => 'ShipstationCredential' do
+
     username "MyString"
     password "MyString"
-    api_key "MyString"
   end
 end

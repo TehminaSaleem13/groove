@@ -53,7 +53,6 @@ class StoreSettingsController < ApplicationController
           @store.thank_you_message_to_customer = params[:thank_you_message_to_customer]
           @store.inventory_warehouse_id = params[:inventory_warehouse_id] || get_default_warehouse_id
           @store.auto_update_products = params[:auto_update_products]
-          @store.status = true
         end
 
         if @result['status']
