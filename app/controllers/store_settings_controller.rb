@@ -66,11 +66,9 @@ class StoreSettingsController < ApplicationController
             @magento = MagentoCredentials.where(:store_id=>@store.id)
 
             if @magento.nil? || @magento.length == 0
-              puts "nil or 0"
               @magento = MagentoCredentials.new
               new_record = true
             else
-              puts "not nil"
               @magento = @magento.first
             end
             @magento.host = params[:host]
