@@ -1549,7 +1549,7 @@ class ProductsController < ApplicationController
       @product_hash['cat'] = ''
       @product_hash['image'] = ''
 
-      @product_location = product.primary_warehouse(current_user)
+      @product_location = product.primary_warehouse
       unless @product_location.nil?
         @product_hash['location_primary'] = @product_location.location_primary
         @product_hash['location_secondary'] = @product_location.location_secondary

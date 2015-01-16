@@ -87,7 +87,7 @@ module ProductsHelper
     elsif var ==  'barcode'
       product.primary_barcode = value
     elsif ['location_primary' ,'location_secondary', 'location_tertiary','location_name','qty'].include?(var)
-      product_location = product.primary_warehouse(current_user)
+      product_location = product.primary_warehouse
       if product_location.nil?
         product_location = ProductInventoryWarehouses.new
         product_location.product_id = product.id

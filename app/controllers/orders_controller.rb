@@ -386,7 +386,7 @@ class OrdersController < ApplicationController
           end
           if product.product_inventory_warehousess.length > 0
             @orderitem['location_primary'] =
-            product.primary_warehouse(current_user).nil? ? "" : product.primary_warehouse(current_user).location_primary
+            product.primary_warehouse.nil? ? "" : product.primary_warehouse.location_primary
                 #ProductInventoryWarehouses.where(product_id:product.id,inventory_warehouse_id: current_user.inventory_warehouse_id).first.location_primary
           end
           @orderitem['sku'] = product.primary_sku

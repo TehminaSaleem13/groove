@@ -389,8 +389,9 @@ class Product < ActiveRecord::Base
     primary.save
   end
 
-  def primary_warehouse(user)
-    self.product_inventory_warehousess.where(inventory_warehouse_id: user.inventory_warehouse_id).first
+  def primary_warehouse
+    self.product_inventory_warehousess.where(inventory_warehouse_id:
+      InventoryWarehouse.find_by_name('Default Warehouse').id).first
   end
 
 end
