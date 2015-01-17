@@ -38,6 +38,7 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
         products.single.create($scope.products).success(function(data) {
             if(data.status) {
                 $state.params.filter = 'new';
+                data.product.new_product = true;
                 myscope.handle_click_fn(data.product);
             }
         });
@@ -377,8 +378,10 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
             }
         }
         toParams.product_id = row.id;
+        if (row.new_product) {
+            toParams.new_product = true;
+        }
         $scope.select_all_toggle(false);
-
         $state.go(toState,toParams);
 
     };

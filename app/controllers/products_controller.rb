@@ -1214,6 +1214,7 @@ class ProductsController < ApplicationController
           result['messages'].push('Error saving order item with id'+order_item.id)
         end
       end
+      @product_orig.set_product_status
 
       #destroy the aliased object
       if !@product_alias.destroy
@@ -1301,12 +1302,12 @@ class ProductsController < ApplicationController
        		product_inv_whs.first.available_inv = params[:inventory_count]
        		product_inv_whs.first.save
        	elsif params[:method] == 'receive'
-       		product_inv_whs.first.available_inv = 
+       		product_inv_whs.first.available_inv =
        			product_inv_whs.first.available_inv + (params[:inventory_count].to_i)
        		product_inv_whs.first.save
        	else
        		result['status'] &= false
-	    	result['error_messages'].push("Invalid method passed in parameter. 
+	    	result['error_messages'].push("Invalid method passed in parameter.
 	    		Only 'receive' and 'recount' are valid. Passed in parameter: "+params[:method])
        	end
       else
@@ -1367,7 +1368,7 @@ class ProductsController < ApplicationController
     is_kit = params[:is_kit].to_i if !params[:is_kit].nil?  &&
         supported_kit_params.include?(params[:is_kit])
     unless is_kit == -1
-      kit_query = ' products.is_kit='+is_kit.to_s+' AND '
+      kit_query = 'AND products.is_kit='+is_kit.to_s+' '
     end
     unless params[:select_all] || params[:inverted]
       query_add = ' LIMIT '+limit.to_s+' OFFSET '+offset.to_s
@@ -1381,8 +1382,8 @@ class ProductsController < ApplicationController
             LEFT JOIN product_inventory_warehouses ON (product_inventory_warehouses.product_id = products.id)
             LEFT JOIN inventory_warehouses ON (product_inventory_warehouses.inventory_warehouse_id =  inventory_warehouses.id)
             LEFT JOIN stores ON (products.store_id = stores.id)
-        WHERE '+kit_query+' (product_skus.`order` = 0 OR product_skus.`order` is NULL) AND (product_barcodes.`order` = 0 OR product_barcodes.`order` is NULL)
-          AND  (
+        WHERE
+          (
             products.name like '+search+' OR product_barcodes.barcode like '+search+'
             OR product_skus.sku like '+search+' OR product_cats.category like '+search+'
             OR (
@@ -1391,6 +1392,7 @@ class ProductsController < ApplicationController
               OR product_inventory_warehouses.location_tertiary like '+search+'
             )
           )
+          '+kit_query+'
         GROUP BY products.id ORDER BY '+sort_key+' '+sort_order
 
     result_rows = Product.find_by_sql(base_query+query_add)

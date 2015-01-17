@@ -56,9 +56,15 @@ groovepacks_controllers.
         };
 
         myscope.rollback = function() {
-            scope.products.single = {};
-            angular.copy(myscope.single,scope.products.single);
-            scope.update_single_product(false);
+            if ($state.params.new_product) {
+                products.list.update('delete',{selected: [{id:scope.products.single.basicinfo.id,checked:true}], setup:{ select_all: false, inverted: false, productArray:[]}}).then(function(){
+                    $state.reload();
+                });
+            } else {
+                scope.products.single = {};
+                angular.copy(myscope.single,scope.products.single);
+                scope.update_single_product(false);
+            }
         };
 
         scope.load_kit = function(kit,event) {

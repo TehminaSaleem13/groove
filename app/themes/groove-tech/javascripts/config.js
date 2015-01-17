@@ -4,22 +4,22 @@ groovepacks.config(['$stateProvider', '$urlRouterProvider','hotkeysProvider','cf
     $urlRouterProvider.otherwise("/home");
     $urlRouterProvider.when('/settings/', '/settings/stores');
     $urlRouterProvider.when('/settings', '/settings/stores');
-    $urlRouterProvider.when('/scanandpack/rfp', '/scanandpack');
     $urlRouterProvider.when('/scanandpack/rfp/', '/scanandpack');
-    $urlRouterProvider.when('/orders', '/orders/awaiting/1');
+    $urlRouterProvider.when('/scanandpack/rfp', '/scanandpack');
     $urlRouterProvider.when('/orders/', '/orders/awaiting/1');
-    $urlRouterProvider.when('/orders/:filter', '/orders/:filter/1');
+    $urlRouterProvider.when('/orders', '/orders/awaiting/1');
     $urlRouterProvider.when('/orders/:filter/', '/orders/:filter/1');
+    $urlRouterProvider.when('/orders/:filter', '/orders/:filter/1');
     $urlRouterProvider.when('/orders/:filter/:page/', '/orders/:filter/:page');
-    $urlRouterProvider.when('/products', '/products/product/active/1');
     $urlRouterProvider.when('/products/', '/products/product/active/1');
-    $urlRouterProvider.when('/products/:type', '/products/:type/active/1');
+    $urlRouterProvider.when('/products', '/products/product/active/1');
     $urlRouterProvider.when('/products/:type/', '/products/:type/active/1');
-    $urlRouterProvider.when('/products/:type/:filter', '/products/:type/:filter/1');
+    $urlRouterProvider.when('/products/:type', '/products/:type/active/1');
     $urlRouterProvider.when('/products/:type/:filter/', '/products/:type/:filter/1');
+    $urlRouterProvider.when('/products/:type/:filter', '/products/:type/:filter/1');
     $urlRouterProvider.when('/products/:type/:filter/:page/', '/products/:type/:filter/:page');
-    $urlRouterProvider.when('/system', '/system/general');
     $urlRouterProvider.when('/system/', '/system/general');
+    $urlRouterProvider.when('/system', '/system/general');
 
     $stateProvider
         .state('home',{url:'/home'})
@@ -37,7 +37,7 @@ groovepacks.config(['$stateProvider', '$urlRouterProvider','hotkeysProvider','cf
                        abstract:true})
         .state('products.type.filter.page', {url: '/{page:[0-9]+}', template:"<div ui-view></div>",
                        controller: 'productsFilterCtrl'})
-        .state('products.type.filter.page.single', {url: '/{product_id:[0-9]+}',template:"<div ui-view></div>",
+        .state('products.type.filter.page.single', {url: '/{product_id:[0-9]+}', params:{new_product:{value:false}}, template:"<div ui-view></div>",
                        controller:'productsSingleCtrl'})
 
         .state('scanpack',{url: '/scanandpack', templateUrl: '/assets/views/scanpack/base.html', controller: 'scanPackCtrl'
