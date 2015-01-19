@@ -29,7 +29,7 @@ class StoreSettingsController < ApplicationController
     @result['csv_import'] = false
     @result['messages'] =[]
 
-    if current_user.can? 'add_edit_store'
+    if current_user.can? 'add_edit_stores'
       if params[:id].nil?
         if Store.can_create_new?
           @store = Store.new
@@ -66,11 +66,9 @@ class StoreSettingsController < ApplicationController
             @magento = MagentoCredentials.where(:store_id=>@store.id)
 
             if @magento.nil? || @magento.length == 0
-              puts "nil or 0"
               @magento = MagentoCredentials.new
               new_record = true
             else
-              puts "not nil"
               @magento = @magento.first
             end
             @magento.host = params[:host]
@@ -81,9 +79,7 @@ class StoreSettingsController < ApplicationController
 
             @magento.import_products = params[:import_products]
             @magento.import_images = params[:import_images]
-            puts "@magento:" + @magento.inspect
             @store.magento_credentials = @magento
-            puts "@store..:" + @store.inspect
             begin
               @store.save!
               if !new_record
@@ -114,9 +110,7 @@ class StoreSettingsController < ApplicationController
             @amazon.import_products = params[:import_products]
             @amazon.import_images = params[:import_images]
             @amazon.show_shipping_weight_only = params[:show_shipping_weight_only]
-
             @store.amazon_credentials = @amazon
-
             begin
               @store.save!
               if !new_record
