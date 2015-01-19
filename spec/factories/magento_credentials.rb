@@ -2,9 +2,9 @@
 
 FactoryGirl.define do
   factory :magento_credential, :class => 'MagentoCredentials' do
-    host "MyString"
-    username "MyString"
-    password "MyString"
-    api_key "MyString"
+    host "http://www.groovepacker.com/store"
+    username "gpacker"
+    password "gpaker"
+    api_key "gpacker"
   end
 end
