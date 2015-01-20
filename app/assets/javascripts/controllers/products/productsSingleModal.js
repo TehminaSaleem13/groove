@@ -58,7 +58,9 @@ groovepacks_controllers.
         myscope.rollback = function() {
             if ($state.params.new_product) {
                 products.list.update('delete',{selected: [{id:scope.products.single.basicinfo.id,checked:true}], setup:{ select_all: false, inverted: false, productArray:[]}}).then(function(){
-                    $state.reload();
+                    if($state.current.name=='products.type.filter.page') {
+                        $state.reload();
+                    }
                 });
             } else {
                 scope.products.single = {};
