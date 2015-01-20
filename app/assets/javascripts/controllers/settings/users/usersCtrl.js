@@ -105,7 +105,7 @@ controller('usersCtrl', [ '$scope', '$http', '$timeout', '$stateParams', '$locat
             };
             if(typeof $scope.current_user!= 'undefined' && $scope.current_user.can('add_edit_users')) {
                 $scope.gridOptions.all_fields.username.transclude ='<a ui-sref="settings.users.single({user_id:row.id})"' +
-                                                                  ' ng-click="$event.preventDefault();$event.stopPropagation();">{{row[field]}}</a>';
+                                                                  ' ng-click="$event.stopPropagation();">{{row[field]}}</a>';
             }
 
 
