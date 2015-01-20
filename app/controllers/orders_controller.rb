@@ -939,19 +939,22 @@ class OrdersController < ApplicationController
       result['error_messages'].push('No id given. Can not cancel generating')
     else
       barcode = GenerateBarcode.find_by_id(params[:id])
-      barcode.cancel = true
-      unless barcode.status =='in_progress'
-        barcode.status = 'cancelled'
-        the_delayed_job = Delayed::Job.find(barcode.delayed_job_id)
-        unless the_delayed_job.nil?
-          the_delayed_job.destroy
+      unless barcode.nil?
+        barcode.cancel = true
+        unless barcode.status =='in_progress'
+          barcode.status = 'cancelled'
+          the_delayed_job = Delayed::Job.find(barcode.delayed_job_id)
+          unless the_delayed_job.nil?
+            the_delayed_job.destroy
+          end
         end
-      end
 
-      if barcode.save
-        result['notice_messages'].push('Pdf generation marked for cancellation. Please wait for acknowledgement.')
+        if barcode.save
+          result['notice_messages'].push('Pdf generation marked for cancellation. Please wait for acknowledgement.')
+        end
+      else
+        result['error_messages'].push('No barcode found with the id.')
       end
-
     end
 
 

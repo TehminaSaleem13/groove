@@ -760,6 +760,7 @@ class ProductsController < ApplicationController
   def removeproductsfromkit
     @result = Hash.new
     @result['status'] = true
+    @result['messages'] = []
 
     if current_user.can?('add_edit_products')
       @kit = Product.find_by_id(params[:kit_id])
