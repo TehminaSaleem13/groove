@@ -805,7 +805,7 @@ class OrdersController < ApplicationController
     @depends_pick_list = []
 
     @orders = list_selected_orders
-    
+
     unless @orders.nil?
       @orders.each do |order|
         order = Order.find(order['id'])
@@ -943,9 +943,12 @@ class OrdersController < ApplicationController
         barcode.cancel = true
         unless barcode.status =='in_progress'
           barcode.status = 'cancelled'
-          the_delayed_job = Delayed::Job.find(barcode.delayed_job_id)
-          unless the_delayed_job.nil?
-            the_delayed_job.destroy
+          begin
+            the_delayed_job = Delayed::Job.find(barcode.delayed_job_id)
+            unless the_delayed_job.nil?
+              the_delayed_job.destroy
+            end
+          rescue Exception => e
           end
         end
 

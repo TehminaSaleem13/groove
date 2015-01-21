@@ -11,7 +11,7 @@
             <div class="form-group">
                 <label class="control-label col-md-4">Password *</label>
                 <div class="controls col-md-7" ng-show="show_password">
-                    <input class="form-control input-style" ng-minlength="8" name="password" ng-blur="update_single_user()" ng-model="users.single.password" type="password" required/>
+                    <input class="form-control input-style" ng-minlength="6" name="password" ng-blur="update_single_user()" ng-model="users.single.password" type="password" required/>
                 </div>
                 <div class="controls col-md-7" ng-hide="show_password">
                     <a href="" ng-click='change_password()'> Change Password</a>
@@ -21,9 +21,10 @@
             <div class="form-group" ng-show="show_password">
                 <label class="control-label col-md-4">Confirm Password *</label>
                 <div class="controls col-md-7" >
-                    <input class="form-control input-style" ng-minlength="8" name="conf_password" ng-blur="update_single_user()" ng-model="users.single.conf_password" type="password" required/>
+                    <input class="form-control input-style" ng-minlength="6" name="conf_password" ng-blur="update_single_user()" ng-model="users.single.conf_password" type="password" required/>
                 </div>
             </div>
+            <div ng-show="show_password" class="label-info">Please choose a password with at least 6 characters.</div>
             <div class="form-group">
                 <label class="control-label col-md-4">Confirmation Code *</label>
                 <div class="controls col-md-7">

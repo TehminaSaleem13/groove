@@ -29,9 +29,9 @@ class UserSettingsController < ApplicationController
         @user = User.find(params[:id])
       end
 
-      if !params[:password].nil? && params[:password] != '' && ( params[:conf_password].blank? || params[:conf_password].length < 8)
+      if !params[:password].nil? && params[:password] != '' && ( params[:conf_password].blank? || params[:conf_password].length < 6)
         @result['status'] = false
-        @result['messages'].push('Password and Confirm Password can not be less than 8 characters')
+        @result['messages'].push('Password and Confirm Password can not be less than 6 characters')
       end
       if @result['status']
         @user.password = params[:password] if !params[:password].nil? && params[:password] != ''
