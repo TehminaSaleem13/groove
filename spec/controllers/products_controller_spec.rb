@@ -24,7 +24,7 @@ RSpec.describe ProductsController, :type => :controller do
       order_item = FactoryGirl.create(:order_item, :product_id=>product_alias.id,
                     :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>product_alias.name)
 
-      put :setalias, { :product_orig_id => product_orig.id, :product_alias_id => product_alias.id }
+      put :setalias, { :product_orig_id => product_orig.id, product_alias_ids: [product_alias.id] }
 
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
