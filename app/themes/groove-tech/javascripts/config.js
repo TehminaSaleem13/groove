@@ -1,41 +1,27 @@
-groovepacks.config(['$stateProvider', '$urlRouterProvider','hotkeysProvider','cfpLoadingBarProvider','$translateProvider',
-    function($stateProvider, $urlRouterProvider,hotkeysProvider,cfpLoadingBarProvider,$translateProvider) {
+groovepacks.config(['$stateProvider', '$urlRouterProvider','hotkeysProvider','cfpLoadingBarProvider','$translateProvider','$urlMatcherFactoryProvider',
+function($stateProvider, $urlRouterProvider,hotkeysProvider,cfpLoadingBarProvider,$translateProvider,$urlMatcherFactoryProvider) {
 
     $urlRouterProvider.otherwise("/home");
-    $urlRouterProvider.when('/settings/', '/settings/stores');
-    $urlRouterProvider.when('/settings', '/settings/stores');
-    $urlRouterProvider.when('/scanandpack/rfp/', '/scanandpack');
     $urlRouterProvider.when('/scanandpack/rfp', '/scanandpack');
-    $urlRouterProvider.when('/orders/', '/orders/awaiting/1');
-    $urlRouterProvider.when('/orders', '/orders/awaiting/1');
-    $urlRouterProvider.when('/orders/:filter/', '/orders/:filter/1');
-    $urlRouterProvider.when('/orders/:filter', '/orders/:filter/1');
-    $urlRouterProvider.when('/orders/:filter/:page/', '/orders/:filter/:page');
-    $urlRouterProvider.when('/products/', '/products/product/active/1');
-    $urlRouterProvider.when('/products', '/products/product/active/1');
-    $urlRouterProvider.when('/products/:type/', '/products/:type/active/1');
-    $urlRouterProvider.when('/products/:type', '/products/:type/active/1');
-    $urlRouterProvider.when('/products/:type/:filter/', '/products/:type/:filter/1');
-    $urlRouterProvider.when('/products/:type/:filter', '/products/:type/:filter/1');
-    $urlRouterProvider.when('/products/:type/:filter/:page/', '/products/:type/:filter/:page');
-    $urlRouterProvider.when('/system/', '/system/general');
-    $urlRouterProvider.when('/system', '/system/general');
+    $urlRouterProvider.when('/settings', '/settings/stores');
+    $urlRouterProvider.when('/settings/system', '/settings/system/general');
 
+    $urlMatcherFactoryProvider.strictMode(false);
     $stateProvider
         .state('home',{url:'/home'})
         .state('orders', {url: '/orders', templateUrl: '/assets/views/showorders.html', controller: 'ordersCtrl'})
-        .state('orders.filter', {url: '/{filter:all|awaiting|onhold|serviceissue|cancelled|scanned}',
+        .state('orders.filter', {url: '/{filter:all|awaiting|onhold|serviceissue|cancelled|scanned}', params:{filter:'awaiting'},
                        template:"<div ui-view></div>", abstract:true})
-        .state('orders.filter.page', {url: '/{page:[0-9]+}', template:"<div ui-view></div>",
+        .state('orders.filter.page', {url: '/{page:[0-9]+}', template:"<div ui-view></div>", params:{page:'1'},
                        controller: 'ordersFilterCtrl'})
         .state('orders.filter.page.single', {url: '/{order_id:[0-9]+}',template:"<div ui-view></div>",
                        controller:'ordersSingleCtrl'})
 
         .state('products',{url:'/products', templateUrl: '/assets/views/showproducts.html', controller: 'productsCtrl'})
-        .state('products.type',{url:'/{type:product|kit}',template:"<div ui-view></div>",abstract:true})
-        .state('products.type.filter', {url:'/{filter:all|active|inactive|new}', template:"<div ui-view></div>",
+        .state('products.type',{url:'/{type:product|kit}', params:{type:'product'}, template:"<div ui-view></div>",abstract:true})
+        .state('products.type.filter', {url:'/{filter:all|active|inactive|new}', params:{filter:'active'}, template:"<div ui-view></div>",
                        abstract:true})
-        .state('products.type.filter.page', {url: '/{page:[0-9]+}', template:"<div ui-view></div>",
+        .state('products.type.filter.page', {url: '/{page:[0-9]+}', params:{page:'1'}, template:"<div ui-view></div>",
                        controller: 'productsFilterCtrl'})
         .state('products.type.filter.page.single', {url: '/{product_id:[0-9]+}', params:{new_product:{value:false}}, template:"<div ui-view></div>",
                        controller:'productsSingleCtrl'})
@@ -112,6 +98,15 @@ groovepacks.config(['$stateProvider', '$urlRouterProvider','hotkeysProvider','cf
                 if (result && result.to) {
                     e.preventDefault();
                     $state.go(result.to, result.params);
+                } else {
+                    if (to.name ==='products' || to.name ==='products.type' || to.name ==='products.type.filter') {
+                        e.preventDefault();
+                        $state.go('products.type.filter.page');
+                    } else if(to.name === 'orders' || to.name === 'orders.filter') {
+                        e.preventDefault();
+                        $state.go('orders.filter.page');
+
+                    }
                 }
             }
 

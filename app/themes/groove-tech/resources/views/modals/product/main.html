@@ -29,9 +29,12 @@
                         </p>
 
                         <p ng-show="products.single.basicinfo.is_kit==0">
-                            <i class="icon-large glyphicon glyphicon-link"></i>
+                            <i class="icon-large glyphicon glyphicon-export"></i>
                             <a href="" ng-click="product_alias('alias',[],products.single.basicinfo.id)">Make this product an alias of another product</a>
                         </p>
+                        <p><i class="icon-large glyphicon glyphicon-import"></i>
+                        <a href="" ng-click="product_alias('master_alias',[],products.single.basicinfo.id)">Choose aliases of this product</a> &nbsp;&nbsp;
+                            <i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" popover-placement="bottom" groov-popover="{{translations.tooltips.master_alias}}"></i></p>
                     </td>
                     <td>
                         <h5>Status </h5>

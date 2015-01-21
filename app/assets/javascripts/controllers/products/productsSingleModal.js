@@ -105,7 +105,9 @@ groovepacks_controllers.
                     id: function(){return id;}
                 }
             });
-            alias_modal.result.then(myscope.add_alias_product);
+            alias_modal.result.then(function(data) {
+                myscope.add_alias_product(type,data);
+            });
         };
         scope.add_image = function () {
             $("#product_image"+scope.custom_identifier).click();
@@ -125,11 +127,15 @@ groovepacks_controllers.
             }
         });
 
-        myscope.add_alias_product = function(args) {
+        myscope.add_alias_product = function(type,args) {
             if(typeof args !="undefined") {
-                if(scope.products.single.basicinfo.is_kit) {
+                if(type == 'kit') {
                     products.single.kit.add(scope.products,args.selected).then(function(response) {
                         //console.log(response.data);
+                        myscope.product_single_details(scope.products.single.basicinfo.id);
+                    });
+                } else if(type =='master_alias') {
+                    products.single.master_alias(scope.products,args.selected).then(function() {
                         myscope.product_single_details(scope.products.single.basicinfo.id);
                     });
                 } else {
@@ -249,7 +255,8 @@ groovepacks_controllers.
                     "placement":"",
                     "time_adjust": "",
                     "skippable": "",
-                    record_serial:""
+                    "record_serial":"",
+                    "master_alias":""
                 }
             };
             groov_translator.translate('products.modal',scope.translations);
