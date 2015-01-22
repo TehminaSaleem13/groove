@@ -363,7 +363,7 @@ class SettingsController < ApplicationController
             packing_user = User.find(serial.order.packing_user_id) unless serial.order.packing_user_id.blank?
             unless packing_user.nil?
               single_row[:packing_user] = packing_user.name + ' ('+packing_user.username+')'
-              single_row[:warehouse_name] =  serial.product.primary_warehouse.inventory_warehouse.name unless serial.product.primary_warehouse(packing_user).nil? || serial.product.primary_warehouse(packing_user).inventory_warehouse.nil?
+              single_row[:warehouse_name] =  serial.product.primary_warehouse.inventory_warehouse.name unless serial.product.primary_warehouse.nil? || serial.product.primary_warehouse.inventory_warehouse.nil?
             end
             single_row[:serial] = serial.serial
             single_row[:product_name] = serial.product.name

@@ -8,9 +8,9 @@ module Groovepacker
           if !shipstation_credential.nil?
             ShipStationRuby.username  = shipstation_credential.username
             ShipStationRuby.password  = shipstation_credential.password
-            client = ShipStationRuby::Client.new
+            client = Groovepacker::ShipStationRuby::Client.new
           end
-            
+
           self.make_handle(shipstation_credential, client)
         end
 
