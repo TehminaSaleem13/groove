@@ -1,32 +1,91 @@
 require 'rails_helper'
 require 'spec_helper'
 describe ScanPackController do
-  it "synchronizes allocated inventory count and sold inventory count" do
-  	@user = FactoryGirl.create(:user,:name=>'Admin Tester', :username=>"admin", :password=>'12345678')
-    sign_in @user
-  	@inv_wh = FactoryGirl.create(:inventory_warehouse, :name=>'test_inventory_warehouse', :is_default=>true, :status=>"active")
-  	@general_settings = FactoryGirl.create(:general_setting, :inventory_tracking=>true, :hold_orders_due_to_inventory=>true)
-  	@store = FactoryGirl.create(:store, :name=>'amazon_store', :inventory_warehouse=>@inv_wh, :store_type=> 'Amazon')
-  	@product = FactoryGirl.create(:product, :total_avail_ext=>50, :barcode=> '12345678', :store=>@store)
-    @product_barcode = FactoryGirl.create(:product_barcode, :barcode=>@product.barcode, :product=>@product)
-  	@prod_inv_wh = @product.product_inventory_warehousess.first
-  	@prod_inv_wh.available_inv = 50
-  	@prod_inv_wh.allocated_inv = 50
-  	@prod_inv_wh.inventory_warehouse = @store.inventory_warehouse
-  	@prod_inv_wh.product = @product
-  	@prod_inv_wh.save!
-  	@order = FactoryGirl.create(:order, :status=>"awaiting", :store=>@store)
-    @order_item = FactoryGirl.create(:order_item, :order=>@order, :qty=>10)
-    @scan_pack_settings = ScanPackSetting.new
-    @scan_pack_settings.save!
+  it "synchronizes available inventory count ,allocated inventory count and sold_qty for non-kit item" do
+  	user = FactoryGirl.create(:user,:name=>'Admin Tester', :username=>"admin", :password=>'12345678')
+    sign_in user
+  	inv_wh = FactoryGirl.create(:inventory_warehouse, :name=>'test_inventory_warehouse', :is_default=>true, :status=>"active")
+  	general_settings = FactoryGirl.create(:general_setting, :inventory_tracking=>true, :hold_orders_due_to_inventory=>true)
+  	store = FactoryGirl.create(:store, :name=>'amazon_store', :inventory_warehouse=>inv_wh, :store_type=> 'Amazon')
+  	product = FactoryGirl.create(:product, :total_avail_ext=>50, :barcode=> '12345678', :store=>store)
+    product_barcode = FactoryGirl.create(:product_barcode, :barcode=>product.barcode, :product=>product)
+  	prod_inv_wh = ProductInventoryWarehouses.find(product.id)
+    prod_inv_wh.available_inv = 50
+    prod_inv_wh.allocated_inv = 50
+    prod_inv_wh.product = product
+    prod_inv_wh.save!
+  	order = FactoryGirl.create(:order, :status=>"awaiting", :store=>store)
+    order_item = FactoryGirl.create(:order_item, :order=>order, :qty=>10)
+    scan_pack_settings = ScanPackSetting.new
+    scan_pack_settings.save!
     request.accept = "application/json"
-    for i in 1..@order_item.qty
-    post :scan_barcode, {:input=>@product.barcode, :state=>"scanpack.rfp.default" , :id=>@order.id}
+    for i in 1..order_item.qty
+      post :scan_barcode, {:input=>product.barcode, :state=>"scanpack.rfp.default" , :id=>order.id}
     end
     expect(response.status).to eq(200)
-    @prod_inv_wh.reload
-    expect(@prod_inv_wh.available_inv).to eq(40)
-    expect(@prod_inv_wh.allocated_inv).to eq(50)
-    expect(@prod_inv_wh.sold_inventory_warehouses.first.sold_qty).to eq(10)
+    prod_inv_wh.reload
+    expect(prod_inv_wh.available_inv).to eq(40)
+    expect(prod_inv_wh.allocated_inv).to eq(50)
+    expect(prod_inv_wh.sold_inventory_warehouses.first.sold_qty).to eq(10)
+  end
+  it "synchronizes available inventory, allocated inventory and sold_qty for kit items with kit_parsing as single" do
+    user = FactoryGirl.create(:user,:name=>'Admin Tester', :username=>"admin", :password=>'12345678')
+    sign_in user
+    inv_wh = FactoryGirl.create(:inventory_warehouse, :name=>'test_inventory_warehouse', :is_default=>true, :status=>"active")
+    general_settings = FactoryGirl.create(:general_setting, :inventory_tracking=>true, :hold_orders_due_to_inventory=>true)
+    store = FactoryGirl.create(:store, :name=>'amazon_store', :inventory_warehouse=>inv_wh, :store_type=> 'Amazon')
+    product = FactoryGirl.create(:product, :name=>'KIT_PRODUCT', :total_avail_ext=>50, :is_kit=>true, :store=>store, :kit_parsing=>'single')
+    product_barcode = FactoryGirl.create(:product_barcode, :product=> product, :barcode => '12345678')
+
+    prod_inv_wh = ProductInventoryWarehouses.find(product.id)
+    prod_inv_wh.available_inv = 50
+    prod_inv_wh.allocated_inv = 50
+    prod_inv_wh.product = product
+    prod_inv_wh.save!
+
+    order = FactoryGirl.create(:order, :status=>"awaiting", :store=>store)
+    order_item = FactoryGirl.create(:order_item, :order=>order, :qty=>10, :product_id=>product.id)
+
+    kit_product1 = FactoryGirl.create(:product, :name=>'kit_product1',:packing_placement=>50)
+    kit_product_barcode1 = FactoryGirl.create(:product_barcode, :product=> kit_product1, :barcode => 'kit_barcode1')
+    product_kit_sku1 = FactoryGirl.create(:product_kit_sku, :product => product, :option_product_id=>kit_product1.id)
+    prod_inv_wh1 = ProductInventoryWarehouses.find(kit_product1.id)
+    prod_inv_wh1.available_inv = 50
+    prod_inv_wh1.allocated_inv = 50
+    prod_inv_wh1.product = kit_product1
+    prod_inv_wh1.save!
+    order_item_kit_product1 = FactoryGirl.create(:order_item_kit_product, :order_item => order_item,
+          :product_kit_skus=> product_kit_sku1)
+
+    kit_product2 = FactoryGirl.create(:product, :name=>'kit_product2',:packing_placement=>50)
+    kit_product_barcode2 = FactoryGirl.create(:product_barcode, :product=> kit_product2, :barcode => 'kit_barcode2')
+    product_kit_sku2 = FactoryGirl.create(:product_kit_sku, :product => product, :option_product_id=>kit_product2.id)
+    prod_inv_wh2 = ProductInventoryWarehouses.find(kit_product2.id)
+    prod_inv_wh2.available_inv = 50
+    prod_inv_wh2.allocated_inv = 50
+    prod_inv_wh2.product = kit_product2
+    prod_inv_wh2.save!
+    order_item_kit_product2 = FactoryGirl.create(:order_item_kit_product, :order_item => order_item,
+          :product_kit_skus=> product_kit_sku2)
+
+    scan_pack_settings = ScanPackSetting.new
+    scan_pack_settings.save!
+
+    request.accept = "application/json"
+    for i in 1..order_item.qty
+      post :scan_barcode, {:state=>'scanpack.rfp.default', :input => product_barcode.barcode, :id => order.id }
+    end
+    expect(response.status).to eq(200)
+    prod_inv_wh.reload
+    prod_inv_wh1.reload
+    prod_inv_wh2.reload
+
+    expect(prod_inv_wh.available_inv).to eq(40)
+    expect(prod_inv_wh.allocated_inv).to eq(50)
+    expect(prod_inv_wh1.available_inv).to eq(50)
+    expect(prod_inv_wh1.allocated_inv).to eq(50)
+    expect(prod_inv_wh2.available_inv).to eq(50)
+    expect(prod_inv_wh2.allocated_inv).to eq(50)
+    expect(prod_inv_wh.sold_inventory_warehouses.first.sold_qty).to eq(10)
   end
 end
