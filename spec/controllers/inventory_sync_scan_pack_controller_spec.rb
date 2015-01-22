@@ -11,19 +11,12 @@ describe ScanPackController do
     @scan_pack_settings.save!
   end
   it "synchronizes available inventory count ,allocated inventory count and sold_qty for non-kit item" do
-  	@product = FactoryGirl.create(:product, :total_avail_ext=>50, :barcode=> '12345678', :store=>@store)
-    @product_barcode = FactoryGirl.create(:product_barcode, :barcode=>@product.barcode, :product=>@product)
-    @prod_inv_wh = ProductInventoryWarehouses.find(@product.id)
-    @prod_inv_wh.available_inv = 50
-    @prod_inv_wh.allocated_inv = 0
-    @prod_inv_wh.product = @product
-    @prod_inv_wh.save!
-    @order = FactoryGirl.create(:order, :status=>"onhold", :store=>@store)
-    @order_item = FactoryGirl.create(:order_item, :order=>@order, :qty=>10)
+  	@product = FactoryGirl.create(:product, :total_avail_ext=>50, :store=>@store)
+    create_order_info
     @order.set_order_status
     request.accept = "application/json"
     for i in 1..@order_item.qty
-      post :scan_barcode, {:input=>@product.barcode, :state=>"scanpack.rfp.default" , :id=>@order.id}
+      post :scan_barcode, {:input=>@product_barcode.barcode, :state=>"scanpack.rfp.default" , :id=>@order.id}
     end
     expect(response.status).to eq(200)
     @prod_inv_wh.reload
@@ -33,7 +26,7 @@ describe ScanPackController do
   end
   it "synchronizes available inventory, allocated inventory and sold_qty for kit items with kit_parsing as single" do
     @product = FactoryGirl.create(:product, :name=>'KIT_PRODUCT', :total_avail_ext=>50, :is_kit=>true, :store=>@store, :kit_parsing=>'single')
-    create_kit_info
+    create_order_info
     create_kit_item_info
 
     request.accept = "application/json"
@@ -56,7 +49,7 @@ describe ScanPackController do
   end
   it "synchronizes available inventory, allocated inventory and sold_qty for kit items with kit_parsing as individual" do
     @product = FactoryGirl.create(:product, :name=>'KIT_PRODUCT', :total_avail_ext=>50, :is_kit=>true, :store=>@store, :kit_parsing=>'individual')
-    create_kit_info
+    create_order_info
     create_kit_item_info
 
     request.accept = "application/json"
@@ -81,7 +74,7 @@ describe ScanPackController do
   end
   it "synchronizes available inventory, allocated inventory and sold_qty for kit items with kit_parsing as depends" do
     @product = FactoryGirl.create(:product, :name=>'KIT_PRODUCT', :total_avail_ext=>50, :is_kit=>true, :store=>@store, :kit_parsing=>'depends')
-    create_kit_info
+    create_order_info
     
     create_kit_item_info
 
@@ -113,7 +106,7 @@ describe ScanPackController do
     expect(@prod_inv_wh2.allocated_inv).to eq(0)
     expect(@prod_inv_wh.sold_inventory_warehouses.first.sold_qty).to eq(10)
   end
-  def create_kit_info
+  def create_order_info
     @product_barcode = FactoryGirl.create(:product_barcode, :product=> @product, :barcode => '12345678')
 
     @prod_inv_wh = ProductInventoryWarehouses.find(@product.id)
@@ -124,6 +117,7 @@ describe ScanPackController do
 
     @order = FactoryGirl.create(:order, :status=>"onhold", :store=>@store)
     @order_item = FactoryGirl.create(:order_item, :order=>@order, :qty=>10, :product_id=>@product.id)
+
   end
   def create_kit_item_info
     @kit_product1 = FactoryGirl.create(:product, :name=>'kit_product1',:packing_placement=>50)
