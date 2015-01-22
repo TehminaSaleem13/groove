@@ -598,10 +598,15 @@ class StoreSettingsController < ApplicationController
     @result['status'] = false
     @result['messages'] = []
     if current_user.can? 'add_edit_stores'
+      system_store_id = Store.find_by_store_type('system').id.to_s
       params['_json'].each do|store|
         @store = Store.find(store["id"])
-        if @store.deleteauthentications && @store.destroy
-          @result['status'] = true
+        unless @store.nil?
+          Product.update_all('store_id = '+system_store_id,'store_id ='+@store.id.to_s)
+          Order.update_all('store_id = '+system_store_id,'store_id ='+@store.id.to_s)
+          if @store.deleteauthentications && @store.destroy
+            @result['status'] = true
+          end
         end
       end
     else
