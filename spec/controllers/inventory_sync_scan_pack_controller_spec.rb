@@ -72,7 +72,7 @@ describe ScanPackController do
     expect(@prod_inv_wh1.sold_inventory_warehouses.first.sold_qty).to eq(10)
     expect(@prod_inv_wh2.sold_inventory_warehouses.first.sold_qty).to eq(10)
   end
-  it "synchronizes available inventory, allocated inventory and sold_qty for kit items with kit_parsing as depends" do
+  it "synchronizes available inventory, allocated inventory and sold_qty for kit items with kit_parsing as depends scan as single" do
     @product = FactoryGirl.create(:product, :name=>'KIT_PRODUCT', :total_avail_ext=>50, :is_kit=>true, :store=>@store, :kit_parsing=>'depends')
     create_order_info
     
@@ -80,23 +80,27 @@ describe ScanPackController do
 
     request.accept = "application/json"
     @order.set_order_status
+    @prod_inv_wh.reload
+    @prod_inv_wh1.reload
+    @prod_inv_wh2.reload
+
+    expect(@prod_inv_wh.available_inv).to eq(40)
+    expect(@prod_inv_wh.allocated_inv).to eq(10)
+    expect(@prod_inv_wh1.available_inv).to eq(50)
+    expect(@prod_inv_wh1.allocated_inv).to eq(0)
+    expect(@prod_inv_wh2.available_inv).to eq(50)
+    expect(@prod_inv_wh2.allocated_inv).to eq(0)
+
+
     for i in 1..@order_item.qty
       post :scan_barcode, {:state=>'scanpack.rfp.default', :input => @product_barcode.barcode, :id => @order.id }
     end
-    # for i in 1..order_item.qty
-    #   post :scan_barcode, {:state=>'scanpack.rfp.default', :input => kit_product_barcode1.barcode, :id => order.id }
-    #   post :scan_barcode, {:state=>'scanpack.rfp.default', :input => kit_product_barcode2.barcode, :id => order.id }
-    # end
+    
     expect(response.status).to eq(200)
     @prod_inv_wh.reload
     @prod_inv_wh1.reload
     @prod_inv_wh2.reload
-    # puts prod_inv_wh.inspect
-    # puts prod_inv_wh1.inspect
-    # puts prod_inv_wh2.inspect
-    # puts prod_inv_wh.sold_inventory_warehouses.first.inspect
-    # puts prod_inv_wh1.sold_inventory_warehouses.first.inspect
-    # puts prod_inv_wh2.sold_inventory_warehouses.first.inspect
+    
 
     expect(@prod_inv_wh.available_inv).to eq(40)
     expect(@prod_inv_wh.allocated_inv).to eq(0)
@@ -105,6 +109,47 @@ describe ScanPackController do
     expect(@prod_inv_wh2.available_inv).to eq(50)
     expect(@prod_inv_wh2.allocated_inv).to eq(0)
     expect(@prod_inv_wh.sold_inventory_warehouses.first.sold_qty).to eq(10)
+  end
+  it "synchronizes available inventory, allocated inventory and sold_qty for kit items with kit_parsing as depends scan as individual" do
+    @product = FactoryGirl.create(:product, :name=>'KIT_PRODUCT', :total_avail_ext=>50, :is_kit=>true, :store=>@store, :kit_parsing=>'depends')
+    create_order_info
+    
+    create_kit_item_info
+
+    request.accept = "application/json"
+    @order.set_order_status
+    @prod_inv_wh.reload
+    @prod_inv_wh1.reload
+    @prod_inv_wh2.reload
+
+    expect(@prod_inv_wh.available_inv).to eq(40)
+    expect(@prod_inv_wh.allocated_inv).to eq(10)
+    expect(@prod_inv_wh1.available_inv).to eq(50)
+    expect(@prod_inv_wh1.allocated_inv).to eq(0)
+    expect(@prod_inv_wh2.available_inv).to eq(50)
+    expect(@prod_inv_wh2.allocated_inv).to eq(0)
+
+
+    for i in 1..@order_item.qty
+      post :scan_barcode, {:state=>'scanpack.rfp.default', :input => @kit_product_barcode1.barcode, :id => @order.id }
+      post :scan_barcode, {:state=>'scanpack.rfp.default', :input => @kit_product_barcode2.barcode, :id => @order.id }
+    end
+    
+    expect(response.status).to eq(200)
+    @prod_inv_wh.reload
+    @prod_inv_wh1.reload
+    @prod_inv_wh2.reload
+    
+
+    expect(@prod_inv_wh.available_inv).to eq(50)
+    expect(@prod_inv_wh.allocated_inv).to eq(0)
+    expect(@prod_inv_wh1.available_inv).to eq(40)
+    expect(@prod_inv_wh1.allocated_inv).to eq(0)
+    expect(@prod_inv_wh2.available_inv).to eq(40)
+    expect(@prod_inv_wh2.allocated_inv).to eq(0)
+    expect(@prod_inv_wh1.sold_inventory_warehouses.first.sold_qty).to eq(10)
+    expect(@prod_inv_wh2.sold_inventory_warehouses.first.sold_qty).to eq(10)
+
   end
   def create_order_info
     @product_barcode = FactoryGirl.create(:product_barcode, :product=> @product, :barcode => '12345678')
