@@ -5,7 +5,7 @@ class ProductInventoryWarehouses < ActiveRecord::Base
   belongs_to :inventory_warehouse
   has_many :sold_inventory_warehouses
 
-  after_update :update_store
+  #after_update :update_store
 
   def update_available_inventory_level(purchase_qty, reason)
   	result = true
@@ -25,8 +25,8 @@ class ProductInventoryWarehouses < ActiveRecord::Base
         self.save
       else
         result &= false
-      end      
-    end 
+      end
+    end
 
   	result
   end
@@ -37,7 +37,7 @@ class ProductInventoryWarehouses < ActiveRecord::Base
     logger.info(self.allocated_inv)
     if self.allocated_inv >= allocated_qty && allocated_qty!= 0
       logger.info('Allocated Qty3:'+self.allocated_inv.to_s)
-      
+
       sold_inv = SoldInventoryWarehouse.new
       sold_inv.sold_qty = allocated_qty
       sold_inv.product_inventory_warehouses = self
