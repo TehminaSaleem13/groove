@@ -31,53 +31,58 @@ module Groovepacker
 
             final_record.each_with_index do |single_row,index|
               if !mapping['sku'].nil? && mapping['sku'][:position] >= 0 && !single_row[mapping['sku'][:position]].blank?
-                usable_record = {}
-                usable_record[:name] = ''
-                usable_record[:skus] = []
-                usable_record[:barcodes] = []
-                usable_record[:store_product_id] = store_product_id_base+index.to_s
-                usable_record[:cats] = []
-                usable_record[:images] = []
-                usable_record[:inventory] = []
-                usable_record[:product_type] = ''
-
-                if !mapping['product_name'].nil? && mapping['product_name'][:position] >= 0 && !single_row[mapping['product_name'][:position]].blank?
-                  usable_record[:name] = single_row[mapping['product_name'][:position]]
-                end
-                if usable_record[:name].blank?
-                  usable_record[:name] = 'Product from CSV Import'
-                end
+                single_row_skus = []
                 prim_skus = single_row[mapping['sku'][:position]].split(',')
                 prim_skus.each do |prim_single_sku|
-                  all_skus << prim_single_sku
-                  usable_record[:skus] << prim_single_sku
+                  single_row_skus << prim_single_sku
                 end
                 if !mapping['secondary_sku'].nil? && mapping['secondary_sku'][:position] >= 0
                   unless single_row[mapping['secondary_sku'][:position]].nil?
                     sec_skus = single_row[mapping['secondary_sku'][:position]].split(',')
                     sec_skus.each do |sec_single_sku|
-                      unless usable_record[:skus].include? sec_single_sku
-                        all_skus << sec_single_sku
-                        usable_record[:skus] << sec_single_sku
+                      unless single_row_skus.include? sec_single_sku
+                        single_row_skus << sec_single_sku
                       end
                     end
                   end
                 end
+                puts (all_skus & single_row_skus).length
+                unless (all_skus & single_row_skus).length > 0
+                  usable_record = {}
+                  usable_record[:name] = ''
+                  usable_record[:skus] = []
+                  usable_record[:barcodes] = []
+                  usable_record[:store_product_id] = store_product_id_base+index.to_s
+                  usable_record[:cats] = []
+                  usable_record[:images] = []
+                  usable_record[:inventory] = []
+                  usable_record[:product_type] = ''
 
-                if !mapping['barcode'].nil? && mapping['barcode'][:position] >= 0
-                  unless single_row[mapping['barcode'][:position]].nil?
-                    barcodes = single_row[mapping['barcode'][:position]].split(',')
-                    barcodes.each do |single_barcode|
-                      all_barcodes << single_barcode
-                      usable_record[:barcodes] << single_barcode
+                  all_skus = all_skus + single_row_skus
+                  usable_record[:skus] = single_row_skus
+
+                  if !mapping['product_name'].nil? && mapping['product_name'][:position] >= 0 && !single_row[mapping['product_name'][:position]].blank?
+                    usable_record[:name] = single_row[mapping['product_name'][:position]]
+                  end
+                  if usable_record[:name].blank?
+                    usable_record[:name] = 'Product from CSV Import'
+                  end
+
+
+                  if !mapping['barcode'].nil? && mapping['barcode'][:position] >= 0
+                    unless single_row[mapping['barcode'][:position]].nil?
+                      barcodes = single_row[mapping['barcode'][:position]].split(',')
+                      barcodes.each do |single_barcode|
+                        all_barcodes << single_barcode
+                        usable_record[:barcodes] << single_barcode
+                      end
                     end
                   end
-                end
 
-                if !mapping['product_type'].nil? && mapping['product_type'][:position] >= 0
-                  usable_record[:product_type] = single_row[mapping['product_type'][:position]]
-                end
-                #add inventory warehouses
+                  if !mapping['product_type'].nil? && mapping['product_type'][:position] >= 0
+                    usable_record[:product_type] = single_row[mapping['product_type'][:position]]
+                  end
+                  #add inventory warehouses
                   product_inventory = {}
                   product_inventory[:inventory_warehouse_id] = default_inventory_warehouse_id
                   product_inventory[:available_inv] = 0
@@ -98,22 +103,26 @@ module Groovepacker
                   end
                   usable_record[:inventory] << product_inventory
 
-                #add product categories
-                if !mapping['category_name'].nil? && mapping['category_name'][:position] >= 0
-                  unless single_row[mapping['category_name'][:position]].nil?
-                    usable_record[:cats] = single_row[mapping['category_name'][:position]].split(',')
+                  #add product categories
+                  if !mapping['category_name'].nil? && mapping['category_name'][:position] >= 0
+                    unless single_row[mapping['category_name'][:position]].nil?
+                      usable_record[:cats] = single_row[mapping['category_name'][:position]].split(',')
+                    end
                   end
+
+                  if !mapping['product_images'].nil? && mapping['product_images'][:position] >= 0
+                    unless single_row[mapping['product_images'][:position]].nil?
+                      usable_record[:images] =  single_row[mapping['product_images'][:position]].split(',')
+                    end
+                  end
+
+                  usable_records << usable_record
+
+                  success = success + 1
                 end
 
-                if !mapping['product_images'].nil? && mapping['product_images'][:position] >= 0
-                  unless single_row[mapping['product_images'][:position]].nil?
-                    usable_record[:images] =  single_row[mapping['product_images'][:position]].split(',')
-                  end
-                end
 
-                usable_records << usable_record
 
-                success = success + 1
               end
 
               if (index + 1) % check_length === 0 || index === (final_record.length - 1)
