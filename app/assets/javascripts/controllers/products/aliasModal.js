@@ -24,7 +24,7 @@ groovepacks_controllers.controller('aliasModal',['$scope','type','exceptions','i
 
     scope.add_alias_product = function(product) {
         product.checked = !product.checked;
-        if(scope.is_kit || scope.is_order) {
+        if(scope.is_kit || scope.is_order || type == 'master_alias') {
             if(product.checked) {
                 scope.selected_aliases.push(product.id);
             } else {
@@ -104,7 +104,7 @@ groovepacks_controllers.controller('aliasModal',['$scope','type','exceptions','i
          myscope.exceptions = [];
          myscope.do_load_products = false;
          scope._can_load_products = true;
-         myscope.accepted_types = ['alias','kit','order'];
+         myscope.accepted_types = ['alias','kit','order','master_alias'];
          scope.paginate = {
              show:false,
              //send a large number to prevent resetting page number
@@ -122,7 +122,7 @@ groovepacks_controllers.controller('aliasModal',['$scope','type','exceptions','i
          myscope.exceptions = [];
          scope.is_order = (type == 'order');
          scope.is_kit = (type == 'kit');
-         scope.products.setup.is_kit = (scope.is_order || type == 'alias') ? -1 : scope.products.setup.is_kit;
+         scope.products.setup.is_kit = (scope.is_order || type == 'alias' || type == 'master_alias') ? -1 : scope.products.setup.is_kit;
          if(typeof exceptions != 'undefined') {
              for(var i = 0; i < exceptions.length; i++) {
                  myscope.exceptions.push(exceptions[i].id);

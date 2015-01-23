@@ -805,7 +805,7 @@ class OrdersController < ApplicationController
     @depends_pick_list = []
 
     @orders = list_selected_orders
-    
+
     unless @orders.nil?
       @orders.each do |order|
         order = Order.find(order['id'])
@@ -939,19 +939,25 @@ class OrdersController < ApplicationController
       result['error_messages'].push('No id given. Can not cancel generating')
     else
       barcode = GenerateBarcode.find_by_id(params[:id])
-      barcode.cancel = true
-      unless barcode.status =='in_progress'
-        barcode.status = 'cancelled'
-        the_delayed_job = Delayed::Job.find(barcode.delayed_job_id)
-        unless the_delayed_job.nil?
-          the_delayed_job.destroy
+      unless barcode.nil?
+        barcode.cancel = true
+        unless barcode.status =='in_progress'
+          barcode.status = 'cancelled'
+          begin
+            the_delayed_job = Delayed::Job.find(barcode.delayed_job_id)
+            unless the_delayed_job.nil?
+              the_delayed_job.destroy
+            end
+          rescue Exception => e
+          end
         end
-      end
 
-      if barcode.save
-        result['notice_messages'].push('Pdf generation marked for cancellation. Please wait for acknowledgement.')
+        if barcode.save
+          result['notice_messages'].push('Pdf generation marked for cancellation. Please wait for acknowledgement.')
+        end
+      else
+        result['error_messages'].push('No barcode found with the id.')
       end
-
     end
 
 
@@ -1086,12 +1092,11 @@ class OrdersController < ApplicationController
         end
       end
     end
-    unless filename.blank?
+    if filename.blank?
       filename = 'groove-order-items-'+Apartment::Tenant.current_tenant+'-'+Time.now.strftime('%d_%b_%Y_%H_%M_%S_%Z')+'.csv'
       CSV.open(Rails.root.join('public','pdfs', filename ),'wb') do |csv|
         csv << result['messages']
       end
-
     end
     result['filename'] = 'pdfs/'+filename
     respond_to do |format|

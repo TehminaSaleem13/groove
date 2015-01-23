@@ -760,6 +760,7 @@ class ProductsController < ApplicationController
   def removeproductsfromkit
     @result = Hash.new
     @result['status'] = true
+    @result['messages'] = []
 
     if current_user.can?('add_edit_products')
       @kit = Product.find_by_id(params[:kit_id])
@@ -1184,42 +1185,54 @@ class ProductsController < ApplicationController
 
     if current_user.can?('add_edit_products') && current_user.can?('delete_products')
       @product_orig = Product.find(params[:product_orig_id])
-      @product_alias = Product.find(params[:product_alias_id])
+      skus_len = @product_orig.product_skus.all.length
+      barcodes_len = @product_orig.product_barcodes.all.length
+      logger.info
+      @product_aliases = Product.find_all_by_id(params[:product_alias_ids])
+      if @product_aliases.length > 0
+        @product_aliases.each do |product_alias|
+          #all SKUs of the alias will be copied. dont use product_alias.product_skus
+          @product_skus = ProductSku.where(:product_id=>product_alias.id)
+          @product_skus.each do |alias_sku|
+            alias_sku.product_id = @product_orig.id
+            alias_sku.order = skus_len
+            skus_len+=1
+            if !alias_sku.save
+              result['status'] &= false
+              result['messages'].push('Error saving Sku for sku id'+alias_sku.id.to_s)
+            end
+          end
 
-      #all SKUs of the alias will be copied. dont use @product_alias.product_skus
-      @product_skus = ProductSku.where(:product_id=>@product_alias.id)
-      @product_skus.each do |alias_sku|
-        alias_sku.product_id = @product_orig.id
-        if !alias_sku.save
-          result['status'] &= false
-          result['messages'].push('Error saving Sku for sku id'+alias_sku.id)
+          @product_barcodes = ProductBarcode.where(:product_id=>product_alias.id)
+          @product_barcodes.each do |alias_barcode|
+            alias_barcode.product_id = @product_orig.id
+            alias_barcode.order = barcodes_len
+            barcodes_len+=1
+            if !alias_barcode.save
+              result['status'] &= false
+              result['messages'].push('Error saving Barcode for barcode id'+alias_barcode.id)
+            end
+          end
+
+          #update order items of aliased products to original products
+          @order_items = OrderItem.where(:product_id=>product_alias.id)
+          @order_items.each do |order_item|
+            order_item.product_id = @product_orig.id
+            if !order_item.save
+              result['status'] &= false
+              result['messages'].push('Error saving order item with id'+order_item.id)
+            end
+          end
+          #destroy the aliased object
+          if !product_alias.destroy
+            result['status'] &= false
+            result['messages'].push('Error deleting the product alias id:'+product_alias.id)
+          end
         end
-      end
-
-      @product_barcodes = ProductBarcode.where(:product_id=>@product_alias.id)
-      @product_barcodes.each do |alias_barcode|
-        alias_barcode.product_id = @product_orig.id
-        if !alias_barcode.save
-          result['status'] &= false
-          result['messages'].push('Error saving Barcode for barcode id'+alias_barcode.id)
-        end
-      end
-
-      #update order items of aliased products to original products
-      @order_items = OrderItem.where(:product_id=>@product_alias.id)
-      @order_items.each do |order_item|
-        order_item.product_id = @product_orig.id
-        if !order_item.save
-          result['status'] &= false
-          result['messages'].push('Error saving order item with id'+order_item.id)
-        end
-      end
-      @product_orig.set_product_status
-
-      #destroy the aliased object
-      if !@product_alias.destroy
-        result['status'] &= false
-        result['messages'].push('Error deleting the product alias id:'+@product_alias.id)
+        @product_orig.set_product_status
+      else
+        @result['status'] = false
+        @result['messages'].push('No products found to alias')
       end
     else
       @result['status'] = false

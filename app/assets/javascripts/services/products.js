@@ -292,7 +292,18 @@ groovepacks_services.factory('products',['$http','notification','editable',funct
     };
 
     var set_alias = function (products,ids) {
-        return $http.post("products/setalias.json",{product_orig_id: ids[0] , product_alias_id: products.single.basicinfo.id}).success(
+        return $http.post("products/setalias.json",{product_orig_id: ids[0] , product_alias_ids: [products.single.basicinfo.id]}).success(
+            function(data) {
+                if(data.status) {
+                    notification.notify("Successfully Updated",1);
+                } else {
+                    notification.notify("Some error Occurred",0);
+                }
+            }
+        ).error(notification.server_error);
+    };
+    var master_alias = function(products,selected) {
+        return $http.post("products/setalias.json",{product_orig_id: products.single.basicinfo.id , product_alias_ids: selected}).success(
             function(data) {
                 if(data.status) {
                     notification.notify("Successfully Updated",1);
@@ -352,6 +363,7 @@ groovepacks_services.factory('products',['$http','notification','editable',funct
             select: select_single,
             image_upload: add_image,
             alias: set_alias,
+            master_alias: master_alias,
             reset_obj: reset_single_obj,
             kit:{
                 add: add_to_kit,

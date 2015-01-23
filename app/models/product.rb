@@ -177,7 +177,7 @@ class Product < ActiveRecord::Base
   def update_available_product_inventory_level(inventory_warehouse_id, purchase_qty, reason)
   	result = true
 
-  	if self.is_kit != 1 or 
+  	if self.is_kit != 1 or
   		(self.is_kit == 1 and (self.kit_parsing == 'single' or self.kit_parsing == 'depends'))
 	     result &= self.update_warehouses_inventory_level(inventory_warehouse_id, self.id,
 	 		purchase_qty, reason)
@@ -194,11 +194,11 @@ class Product < ActiveRecord::Base
 	result
   end
 
-  def update_allocated_product_sold_level(inventory_warehouse_id, allocated_qty, 
+  def update_allocated_product_sold_level(inventory_warehouse_id, allocated_qty,
     order_item =nil)
    	result = true
 
-  	if self.is_kit != 1 or 
+  	if self.is_kit != 1 or
   		(self.is_kit == 1 and self.kit_parsing == 'single')
 	     result &= self.update_warehouses_sold_level(inventory_warehouse_id, self.id,
 	 		allocated_qty)
@@ -213,7 +213,7 @@ class Product < ActiveRecord::Base
         logger.info "saving order to scanned"
         logger.info order_item.inspect
         self.product_kit_skuss.each do |kit_sku|
-          result &= self.update_warehouses_sold_level(inventory_warehouse_id, 
+          result &= self.update_warehouses_sold_level(inventory_warehouse_id,
             kit_sku.option_product_id,
           order_item.kit_split_scanned_qty)
         end
@@ -227,12 +227,12 @@ class Product < ActiveRecord::Base
 
   def update_warehouses_inventory_level(inv_wh_id, product_id, purchase_qty, reason)
 	result = true
-  	prod_warehouses = ProductInventoryWarehouses.where(:inventory_warehouse_id => 
+  	prod_warehouses = ProductInventoryWarehouses.where(:inventory_warehouse_id =>
   		inv_wh_id).where(:product_id => product_id)
 
-  	unless prod_warehouses.length == 1 
-  		result &= false 
-  	end 
+  	unless prod_warehouses.length == 1
+  		result &= false
+  	end
 
   	unless !result
   		prod_warehouses.each do |wh|
@@ -245,12 +245,12 @@ class Product < ActiveRecord::Base
 
   def update_warehouses_sold_level(inv_wh_id, product_id, allocated_qty)
  	result = true
-  	prod_warehouses = ProductInventoryWarehouses.where(:inventory_warehouse_id => 
+  	prod_warehouses = ProductInventoryWarehouses.where(:inventory_warehouse_id =>
   		inv_wh_id).where(:product_id => product_id)
 
-  	unless prod_warehouses.length == 1 
-  		result &= false 
-  	end 
+  	unless prod_warehouses.length == 1
+  		result &= false
+  	end
     logger.info('Allocated Qty which has been sold:'+allocated_qty.to_s)
   	unless !result
   		prod_warehouses.each do |wh|
@@ -282,7 +282,7 @@ class Product < ActiveRecord::Base
 
   def get_weight
     result = Hash.new
-    
+
     #converting oz to gms
     weight_gms = self.weight * 28.349523125
 
@@ -322,9 +322,9 @@ class Product < ActiveRecord::Base
 
     result
   end
-  
+
   def get_inventory_warehouse_info(inventory_warehouse_id)
-    product_inventory_warehouses = 
+    product_inventory_warehouses =
      ProductInventoryWarehouses.where(:inventory_warehouse_id => inventory_warehouse_id).
       where(:product_id => self.id)
     product_inventory_warehouses.first
@@ -391,7 +391,7 @@ class Product < ActiveRecord::Base
 
   def primary_warehouse
     self.product_inventory_warehousess.where(inventory_warehouse_id:
-      InventoryWarehouse.find_by_name('Default Warehouse').id).first
+      InventoryWarehouse.where(:is_default => true).first.id).first
   end
 
 end

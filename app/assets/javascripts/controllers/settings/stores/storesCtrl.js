@@ -85,7 +85,7 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies, st
         };
         if(typeof $scope.current_user['can']!= 'undefined' && $scope.current_user.can('add_edit_stores')) {
             $scope.gridOptions.all_fields.name.transclude ='<a ui-sref="settings.stores.single({storeid:row.id})"' +
-                                                          ' ng-click="$event.preventDefault();$event.stopPropagation();">{{row[field]}}</a>';
+                                                          ' ng-click="$event.stopPropagation();">{{row[field]}}</a>';
         }
 
         $scope.$watch('stores.setup.search',myscope.get_stores);

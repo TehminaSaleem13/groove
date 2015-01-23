@@ -1608,6 +1608,7 @@ div.input-style {
   .pull-right {
     margin-top:-20px;
     margin-right:20px;
+    position:relative;
     a {
       color:#fff;
     }
@@ -1618,6 +1619,7 @@ div.input-style {
     border-radius:0px;
     white-space: nowrap;
     background:transparent;
+    position:relative;
     .progress-bar {
       text-align:left;
       padding-left:25px;
@@ -1958,6 +1960,29 @@ div.input-style {
   pointer-events:none;
   top: 0;
   left: 0;
+}
+
+.groov-list-bulleted {
+  li::before{
+    content:"";
+    border-radius: 50%;
+    background-color: rgb( 0, 0, 0 );
+    opacity: 0.729;
+    width: 7px;
+    height: 7px;
+    margin: 0 -10px;
+    left: -15px;
+    position: relative;
+    display:inline-block;
+
+  }
+}
+
+.password-label {
+  background-color: #AEB2B3;
+  border-radius: 8px;
+  text-align: center;
+  margin-bottom: 10px;
 }
 
 @-moz-keyframes spin {
