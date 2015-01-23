@@ -154,7 +154,7 @@ describe ScanPackController do
   def create_order_info
     @product_barcode = FactoryGirl.create(:product_barcode, :product=> @product, :barcode => '12345678')
 
-    @prod_inv_wh = ProductInventoryWarehouses.find(@product.id)
+    @prod_inv_wh = ProductInventoryWarehouses.where(product_id: @product.id).first
     @prod_inv_wh.available_inv = 50
     @prod_inv_wh.allocated_inv = 0
     @prod_inv_wh.product = @product
@@ -168,7 +168,7 @@ describe ScanPackController do
     @kit_product1 = FactoryGirl.create(:product, :name=>'kit_product1',:packing_placement=>50)
     @kit_product_barcode1 = FactoryGirl.create(:product_barcode, :product=> @kit_product1, :barcode => 'kit_barcode1')
     @product_kit_sku1 = FactoryGirl.create(:product_kit_sku, :product => @product, :option_product_id=>@kit_product1.id, :qty=>1)
-    @prod_inv_wh1 = ProductInventoryWarehouses.find(@kit_product1.id)
+    @prod_inv_wh1 = ProductInventoryWarehouses.where(product_id: @kit_product1.id).first
     @prod_inv_wh1.available_inv = 50
     @prod_inv_wh1.allocated_inv = 0
     @prod_inv_wh1.product = @kit_product1
@@ -179,7 +179,7 @@ describe ScanPackController do
     @kit_product2 = FactoryGirl.create(:product, :name=>'kit_product2',:packing_placement=>50)
     @kit_product_barcode2 = FactoryGirl.create(:product_barcode, :product=> @kit_product2, :barcode => 'kit_barcode2')
     @product_kit_sku2 = FactoryGirl.create(:product_kit_sku, :product => @product, :option_product_id=>@kit_product2.id, :qty=>1)
-    @prod_inv_wh2 = ProductInventoryWarehouses.find(@kit_product2.id)
+    @prod_inv_wh2 = ProductInventoryWarehouses.where(product_id: @kit_product2.id).first
     @prod_inv_wh2.available_inv = 50
     @prod_inv_wh2.allocated_inv = 0
     @prod_inv_wh2.product = @kit_product2
