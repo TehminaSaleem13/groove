@@ -9,6 +9,9 @@ module Groovepacker
             result['messages'] = []
             check_length = check_after_every(final_record.length)
             success = 0
+            success_imported = 0
+            duplicate_file = 0
+            duplicate_db = 0
             duplicate_action = 'skip'
             if !mapping['sku'].nil? && !mapping['sku'][:action].nil?
               duplicate_action = mapping['sku'][:action]
@@ -30,8 +33,9 @@ module Groovepacker
             default_inventory_warehouse_id = InventoryWarehouse.where(:is_default => true).first.id
 
             final_record.each_with_index do |single_row,index|
+              single_row_skus = []
               if !mapping['sku'].nil? && mapping['sku'][:position] >= 0 && !single_row[mapping['sku'][:position]].blank?
-                single_row_skus = []
+
                 prim_skus = single_row[mapping['sku'][:position]].split(',')
                 prim_skus.each do |prim_single_sku|
                   single_row_skus << prim_single_sku
@@ -46,8 +50,11 @@ module Groovepacker
                     end
                   end
                 end
-                puts (all_skus & single_row_skus).length
-                unless (all_skus & single_row_skus).length > 0
+
+                if (all_skus & single_row_skus).length > 0
+                  duplicate_file = duplicate_file + 1
+                  duplicate_skus << (all_skus & single_row_skus)
+                else
                   usable_record = {}
                   usable_record[:name] = ''
                   usable_record[:skus] = []
@@ -152,6 +159,7 @@ module Groovepacker
             found_barcodes = []
             found_skus_raw.each do |found_sku|
               found_skus[found_sku.sku] = found_sku
+              duplicate_db = duplicate_db + 1
             end
             found_barcodes_raw.each do |found_barcode|
               found_barcodes << found_barcode.barcode
@@ -340,6 +348,7 @@ module Groovepacker
                 product_import.save
               end
             end
+            success_imported =  products_to_import.length
 
             usable_records.clear
             found_skus = nil
@@ -463,6 +472,9 @@ module Groovepacker
             import_product_inventory_warehouses.clear
 
             Product.where(:store_id => params[:store_id]).update_all(:store_product_id => 0)
+            product_import.success_imported = success_imported
+            product_import.duplicate_file = duplicate_file
+            product_import.duplicate_db = duplicate_db
             product_import.status = 'completed'
             product_import.save
             result

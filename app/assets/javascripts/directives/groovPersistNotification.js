@@ -1,4 +1,4 @@
-groovepacks_directives.directive('groovPersistNotification',['$window','$document','$sce','$timeout','$interval','groovIO','orders','stores',function ($window,$document,$sce,$timeout,$interval,groovIO,orders,stores) {
+groovepacks_directives.directive('groovPersistNotification',['$window','$document','$sce','$timeout','$interval','groovIO','orders','stores','notification',function ($window,$document,$sce,$timeout,$interval,groovIO,orders,stores,notification) {
     return {
         restrict:"A",
         templateUrl:"/assets/views/directives/persistnotification.html",
@@ -208,7 +208,13 @@ groovepacks_directives.directive('groovPersistNotification',['$window','$documen
                     },5000);
                     groovIO.emit('delete_tenant_pnotif',hash);
                     if(message['status'] == "completed" ) {
-                        notif_message += "Complete!";
+                        notif_message += "Complete! Imported "+message["success_imported"]+" Products";
+                        if(message["duplicate_file"] > 0 ) {
+                            notification.notify(message["duplicate_file"]+' items appeared in the import file more than once and were skipped.',2);
+                        }
+                        if(message["duplicate_db"] > 0 ) {
+                            notification.notify(message["duplicate_db"]+' items existed in the database and were skipped.',2);
+                        }
                         scope.notifications[hash].percent = 100;
                     } else if(message['status'] == "cancelled") {
                         notif_message += "Cancelled";

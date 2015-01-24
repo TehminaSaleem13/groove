@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150102143000) do
+ActiveRecord::Schema.define(:version => 20150124163939) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0, :null => false
@@ -56,14 +56,17 @@ ActiveRecord::Schema.define(:version => 20150102143000) do
 
   create_table "csv_product_imports", :force => true do |t|
     t.string   "status"
-    t.integer  "success",        :default => 0
-    t.integer  "total",          :default => 0
+    t.integer  "success",          :default => 0
+    t.integer  "total",            :default => 0
     t.integer  "store_id"
     t.string   "current_sku"
     t.integer  "delayed_job_id"
-    t.boolean  "cancel",         :default => false
-    t.datetime "created_at",                        :null => false
-    t.datetime "updated_at",                        :null => false
+    t.boolean  "cancel",           :default => false
+    t.datetime "created_at",                          :null => false
+    t.datetime "updated_at",                          :null => false
+    t.integer  "success_imported", :default => 0
+    t.integer  "duplicate_file",   :default => 0
+    t.integer  "duplicate_db",     :default => 0
   end
 
   create_table "delayed_jobs", :force => true do |t|
