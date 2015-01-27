@@ -486,6 +486,9 @@ class SettingsController < ApplicationController
         general_setting.default_low_inventory_alert_limit = params[:default_low_inventory_alert_limit]
 
 
+        general_setting.export_items = params[:export_items]
+
+
         general_setting.time_to_send_email = params[:time_to_send_email]
         general_setting.send_email_on_mon = params[:send_email_on_mon]
         general_setting.send_email_on_tue = params[:send_email_on_tue]

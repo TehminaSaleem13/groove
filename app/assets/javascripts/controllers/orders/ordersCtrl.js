@@ -1,6 +1,6 @@
 groovepacks_controllers.
-    controller('ordersCtrl', [ '$scope', '$http', '$timeout', '$stateParams', '$location', '$state', '$cookies','$q','orders','$modal',
-function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,orders,$modal) {
+    controller('ordersCtrl', [ '$scope', '$http', '$timeout', '$stateParams', '$location', '$state', '$cookies','$q','orders','$modal','generalsettings',
+function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,orders,$modal,generalsettings) {
     //Definitions
 
     var myscope = {};
@@ -237,6 +237,8 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
         //Public properties
         $scope.orders = orders.model.get();
         $scope.firstOpen = true;
+        $scope.general_settings = generalsettings.model.get();
+        generalsettings.single.get($scope.general_settings);
 
         //Private properties
         myscope.do_load_orders = false;

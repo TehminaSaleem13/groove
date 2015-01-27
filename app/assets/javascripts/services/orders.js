@@ -126,7 +126,15 @@ groovepacks_services.factory('orders',['$http','$window','notification',function
                 if (action == "pick_list") {
                     $window.open(response.data.pick_list_file_paths);
                 } else if (action == 'items_list') {
-                    $window.open(response.filename);
+                    console.log(response);
+                    if(response['status']) {
+                        if(response.filename != '') {
+                            $window.open(response.filename);
+                        }
+                    } else {
+
+                        notification.notify(response['messages']);
+                    }
                 }
             }).error(notification.server_error);
 

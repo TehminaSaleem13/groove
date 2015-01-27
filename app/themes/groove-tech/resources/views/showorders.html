@@ -41,7 +41,7 @@
                         Edit <span class="caret"></span>
                     </button>
                     <ul class="dropdown-menu" role="menu">
-                        <li><a class="dropdown-toggle" ng-click="generate_orders_items_list()">Export Items <span class="pull-right badge badge-important">{{orders.setup.select_all? gridOptions.paginate.total_items: gridOptions.selections.selected_count}}</span></a></li>
+                        <li ng-if="general_settings.single.export_items != 'disabled'"><a class="dropdown-toggle"  ng-click="generate_orders_items_list()">Export Items <span class="pull-right badge badge-important">{{orders.setup.select_all? gridOptions.paginate.total_items: gridOptions.selections.selected_count}}</span></a></li>
                         <li><a class="dropdown-toggle" ng-click="order_delete()">Delete <span class="pull-right badge badge-important">{{orders.setup.select_all? gridOptions.paginate.total_items: gridOptions.selections.selected_count}}</span></a></li>
                         <li><a class="dropdown-toggle" ng-click="order_duplicate()">Duplicate <span class="pull-right badge badge-important">{{orders.setup.select_all? gridOptions.paginate.total_items: gridOptions.selections.selected_count}}</span></a></li>
                     </ul>

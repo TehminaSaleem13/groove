@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150124163939) do
+ActiveRecord::Schema.define(:version => 20150126170323) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0, :null => false
@@ -133,6 +133,7 @@ ActiveRecord::Schema.define(:version => 20150124163939) do
     t.boolean  "strict_cc",                         :default => false
     t.string   "conf_code_product_instruction",     :default => "optional"
     t.string   "admin_email"
+    t.string   "export_items",                      :default => "disabled"
   end
 
   create_table "generate_barcodes", :force => true do |t|
