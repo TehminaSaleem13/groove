@@ -25,7 +25,7 @@ describe('Products:',function() {
 
         it('Clicking Create should open modal',function() {
             element(by.cssContainingText('.panel-collapse.in .panel-body li','Create')).click();
-            expect(browser.getLocationAbsUrl()).toMatch('/#/products/product/new/1/1');
+            expect(browser.getLocationAbsUrl()).toContain('/#/products/product/new/1/');
             expect(element(by.css('body')).getAttribute('class')).toMatch('modal-open');
             expect(element(by.css('.modal-dialog')).isDisplayed()).toBeTruthy();
         });
@@ -65,6 +65,11 @@ describe('Products:',function() {
         describe('Special Instructions:',function() {
             var special_instructions = {};
             special_instructions.textarea = element(by.model('products.single.basicinfo.spl_instructions_4_packer'));
+
+            // packing_placement is to blur out the special_instructions textarea field, so that the changes will be saved
+            var packing_placement = {};
+            packing_placement.input = element(by.model('products.single.basicinfo.packing_placement'));
+            
             special_instructions.default = '';
             special_instructions.new = 'Test Instructions';
 
@@ -79,7 +84,8 @@ describe('Products:',function() {
             });
 
             it('Reloading the modal should\'ve saved the test instructions', function() {
-                name_text.click();
+                // blur out special_instructions textarea field
+                packing_placement.input.click();
                 browser.refresh();
                 expect(special_instructions.textarea.getAttribute('value')).toEqual(special_instructions.new);
             });
@@ -88,6 +94,10 @@ describe('Products:',function() {
         describe('Packing Placement:',function() {
             var packing_placement = {};
             packing_placement.input = element(by.model('products.single.basicinfo.packing_placement'));
+
+            // special_instructions is to blur out the packing_placement input field, so that the changes will be saved
+            var special_instructions = {};
+            special_instructions.textarea = element(by.model('products.single.basicinfo.spl_instructions_4_packer'));
             
             packing_placement.default = '50';
             packing_placement.new = '55';
@@ -96,22 +106,28 @@ describe('Products:',function() {
             
 
             it('Editing packing placement should work',function() {
+                packing_placement.input.click();
                 packing_placement.input.clear();
                 packing_placement.input.sendKeys(packing_placement.new);
                 expect(packing_placement.input.getAttribute('value')).toEqual(packing_placement.new);
             });
 
             it('Reloading the modal should\'ve saved the packing placement value', function() {
-                name_text.click();
+                // blur out packing_placement input field
+                special_instructions.textarea.click();
                 browser.refresh();
                 expect(packing_placement.input.getAttribute('value')).toEqual(packing_placement.new);
             });
 
             it('Feeding non numbers to packing placement should reset to default',function() {
                 packing_placement.input.clear();
+                packing_placement.input.sendKeys(packing_placement.default);
+                special_instructions.textarea.click();
+                packing_placement.input.clear();
                 packing_placement.input.sendKeys(packing_placement.bad);
-                name_text.click();
-                browser.refresh();
+
+                // blur out packing_placement input field
+                special_instructions.textarea.click();
                 expect(packing_placement.input.getAttribute('value')).toEqual(packing_placement.default);
             });
         });
