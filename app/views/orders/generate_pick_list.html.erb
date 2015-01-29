@@ -6260,85 +6260,94 @@ p{
 .page {
 display: block;
 clear: both;
-border: 2px solid #ccc;}
+}
+table, thead, tbody, tr, td, tfoot {
+    page-break-inside: avoid;
+}
+body {
+    text-rendering: geometricPrecision;
+}
 </style>
 
 <body>
-  <div class="container" style="margin-left: 70px; margin-top: 20px; margin-bottom: 20px;">
+  <div class="container">
     <div class="page">
       <% if !@pick_list.nil?%>
-        <div style="padding: 10px;">
+        <div>
+          <% unless @pick_list.empty? %>
           <table class="table table-condensed" style="border: solid 2px #eeeeee;">
             <thead>
               <td>Location Primary</td>
               <td> Product SKU</td>
-              <td style="text-align:right;">Pick</td>
               <td>Quantity</td>
               <td>Product Name</td>
               <td>Location Secondary</td>
             </thead>
-            
+
             <%@pick_list.each do |pick|%>
               <tr>
                 <td><%=pick['primary_location']%></td>
                 <td><%=pick['sku']%></td>
-                <td></td>
                 <td><%=pick['qty']%></td>
                 <td><%=pick['name']%></td>
                 <td><%=pick['secondary_location']%></td>
               </tr>
             <%end%>
-            <tr><td colspan="6"></td></tr>
-            
-            <% if !@depends_pick_list.empty? %>
-              <tr><td colspan="6"><center>Kits below are set to automatically split during packing. Their inventory is listed separately so it can be picked as needed.</center></td></tr>
-              <thead>
-                <td>Location Primary</td>
-                <td> Product SKU</td>
-                <td style="text-align:right;">Pick</td>
-                <td>Quantity</td>                
-                <td>Product Name</td>
-                <td>Location Secondary</td>
-              </thead>
-              <%@depends_pick_list.each do |depends_pick|%>
-                <%if !depends_pick['single'].nil?%>
-                  <%depends_pick['single'].each do |pick|%>
-                    <tr style="margin-bottom:0px; padding-bottom:0px;">
-                      <td style="border-bottom:0px;"><%=pick['primary_location']%></td>
-                      <td style="border-bottom:0px;"><%=pick['sku']%></td>
-                      <td class="autoResizeImage" style="vertical-align:bottom; text-align:right; padding-top:0px; padding-bottom:0px;"><%= wicked_pdf_image_tag 'images/Pick-List-TopArrow.png' %></td>
-                      <td style="border-bottom:0px;"><%=pick['qty']%></td>
-                      <td style="border-bottom:0px;"><%=pick['name']%></td>
-                      <td style="border-bottom:0px;"><%=pick['secondary_location']%></td>
-                    </tr>
-                  <%end%>
-                <%end%>               
-                <%if !depends_pick['individual'].nil?%>
-                  <%depends_pick['individual'].each do |pick|%>
-                    <% if pick == depends_pick['individual'].first%>
-                      <tr>
-                        <td style="padding-left: 20px;"><%=pick['primary_location']%></td>
-                        <td style="padding-left: 20px;"><%=pick['sku']%></td>
-                        <td class="autoResizeImage" style="text-align:right; padding-top:0px; padding-bottom:0px;"><%= wicked_pdf_image_tag 'images/Pick-List-ORArrow.png' %></td>
-                        <td style="padding-left: 20px;"><%=pick['qty']%></td>
-                        <td style="padding-left: 20px;"><%=pick['name']%></td>
-                        <td style="padding-left: 20px;"><%=pick['secondary_location']%></td>
-                      </tr>
-                    <%else%>
-                      <tr>
-                        <td style="padding-left: 20px;"><%=pick['primary_location']%></td>
-                        <td style="padding-left: 20px;"><%=pick['sku']%></td>
-                        <td class="autoResizeImage" style="text-align:right; padding-top:0px; padding-bottom:0px;"><%= wicked_pdf_image_tag 'images/Pick-List-MidArrow.png' %></td>
-                        <td style="padding-left: 20px;"><%=pick['qty']%></td>
-                        <td style="padding-left: 20px;"><%=pick['name']%></td>
-                        <td style="padding-left: 20px;"><%=pick['secondary_location']%></td>
-                      </tr>
-                    <%end%>
-                  <%end%>
-                <%end%>
-              <%end%>    
-            <%end%>
           </table>
+          <% end %>
+            <% unless @depends_pick_list.empty? %>
+              <div style="page-break-inside: avoid;">
+                <label style="font-size:16px;"><center>Kits below are set to automatically split during packing. Their inventory is listed separately so it can be picked as needed.</center></label>
+                <table class="table table-condensed" style="border: solid 2px #eeeeee;">
+                  <thead>
+                  <td>Location Primary</td>
+                  <td> Product SKU</td>
+                  <td style="text-align:right;">Pick</td>
+                  <td>Quantity</td>
+                  <td>Product Name</td>
+                  <td>Location Secondary</td>
+                  </thead>
+                  <%@depends_pick_list.each do |depends_pick|%>
+                      <%if !depends_pick['single'].nil?%>
+                          <%depends_pick['single'].each do |pick|%>
+                              <tr style="margin-bottom:0px; padding-bottom:0px;">
+                                <td style="border-bottom:0px;"><%=pick['primary_location']%></td>
+                                <td style="border-bottom:0px;"><%=pick['sku']%></td>
+                                <td class="autoResizeImage" style="vertical-align:bottom; text-align:right; padding-top:0px; padding-bottom:0px;"><%= wicked_pdf_image_tag 'images/Pick-List-TopArrow.png' %></td>
+                                <td style="border-bottom:0px;"><%=pick['qty']%></td>
+                                <td style="border-bottom:0px;"><%=pick['name']%></td>
+                                <td style="border-bottom:0px;"><%=pick['secondary_location']%></td>
+                              </tr>
+                          <%end%>
+                      <%end%>
+                      <%if !depends_pick['individual'].nil?%>
+                          <%depends_pick['individual'].each do |pick|%>
+                              <% if pick == depends_pick['individual'].first%>
+                                  <tr>
+                                    <td style="padding-left: 20px;"><%=pick['primary_location']%></td>
+                                    <td style="padding-left: 20px;"><%=pick['sku']%></td>
+                                    <td class="autoResizeImage" style="text-align:right; padding-top:0px; padding-bottom:0px;"><%= wicked_pdf_image_tag 'images/Pick-List-ORArrow.png' %></td>
+                                    <td style="padding-left: 20px;"><%=pick['qty']%></td>
+                                    <td style="padding-left: 20px;"><%=pick['name']%></td>
+                                    <td style="padding-left: 20px;"><%=pick['secondary_location']%></td>
+                                  </tr>
+                              <%else%>
+                                  <tr>
+                                    <td style="padding-left: 20px;"><%=pick['primary_location']%></td>
+                                    <td style="padding-left: 20px;"><%=pick['sku']%></td>
+                                    <td class="autoResizeImage" style="text-align:right; padding-top:0px; padding-bottom:0px;"><%= wicked_pdf_image_tag 'images/Pick-List-MidArrow.png' %></td>
+                                    <td style="padding-left: 20px;"><%=pick['qty']%></td>
+                                    <td style="padding-left: 20px;"><%=pick['name']%></td>
+                                    <td style="padding-left: 20px;"><%=pick['secondary_location']%></td>
+                                  </tr>
+                              <%end%>
+                          <%end%>
+                      <%end%>
+                  <%end%>
+                </table>
+              </div>
+            <%end%>
+
         </div>
       <%end%>
     </div>
@@ -6346,4 +6355,4 @@ border: 2px solid #ccc;}
 </body>
 </html>
 
- 
+

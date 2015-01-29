@@ -6231,10 +6231,15 @@ table{
   line-height: 40px;
   width: 900px;
 }
-thead td{
+thead td {
   border: solid 1px black;
   font-size: 30px;
   font-weight: bold;
+}
+td {
+    vertical-align: top;
+    padding:5px;
+    border: 1px solid #000;
 }
 hr{
   border: solid 2px #eeeeee;
@@ -6248,6 +6253,12 @@ textarea{
 p{
   margin-left: 30px;
   font-size: 30px;
+}
+table, thead, tbody, tr, td, tfoot {
+    page-break-inside: avoid;
+}
+body {
+    text-rendering: geometricPrecision;
 }
 
 </style>
@@ -6264,13 +6275,13 @@ p{
     	<div class="row">
         <br>
     		<div class="span4">
-          <label style="margin-top: 30px; margin-left: 30px; font-size: 30px; text-alignment: top;">Total<br>Items:</label>
-
-          <span style="font-size: 160px; margin-left: 120px;"><%= order_count%></span>
+          <label style="margin-top: 30px; margin-left: 30px; font-size: 30px;width:100%;">Total Items:</label>
+<br /><br/>
+          <span style="width:100%;font-size: 160px; margin-left:60px; text-align:center;"><%= order_count%></span>
     		</div>
 	    	<div class="span8">
 	      	<% barcode_string = generate_order_barcode(@order.increment_id)%>
-	      	<label style="margin-top: 30px;margin-bottom: 0px; margin-left: 10px; padding-bottom: 0px"><%= pdf_image_tag(barcode_string+".png", {:width => 550, :height => 50}) %></label><br>
+	      	<div style="margin-top: 30px;margin-bottom: 0px; margin-left: 10px; padding-bottom: 0px; position:relative; height:150px; width:550px; overflow:hidden;"><div style="position:absolute; top:0; left:0;"><%= pdf_image_tag(barcode_string+".png", {:width => 550}) %></div></div><br>
 	      	<span style="margin-top: 0px; padding-top: 0px; line-height: 0px;"><center><%= @order.increment_id%></center></span>
 	    	</div>
 	    </div>

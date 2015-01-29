@@ -62,7 +62,7 @@ class GeneratePackingSlipPdf
       include ApplicationHelper
     end
     @order = order
-    pdf_html = av.render :template => "orders/generate_packing_slip.html.erb", :layout => nil, :locals => {:@order => @order}
+    pdf_html = av.render :template => 'orders/generate_packing_slip.html', :layout => nil, :locals => {:@order => @order}
     doc_pdf = WickedPdf.new.pdf_from_string(
       pdf_html,
       :orientation => orientation,
@@ -70,15 +70,18 @@ class GeneratePackingSlipPdf
       :page_width => page_width+'in',
       :save_only => true,
       :no_background => false,
-      :margin => {:top => '5',
-                  :bottom => '10',
+      :zoom => 0.5,
+      :margin => {:top => '8',
+                  :bottom => '5',
                   :left => '2',
                   :right => '2'},
-      :footer => {
-        :content => av.render(:template => 'orders/generate_packing_slip_header.pdf.erb', :locals => {:@header => header})
-      },
       :header => {
-        :content => av.render(:template => 'orders/generate_packing_slip_header.pdf.erb', :locals => {:@header => header})
+          :content => av.render(:template => 'orders/generate_packing_slip_header', :formats => [:pdf], :locals => {:@header => header}),
+          :spacing => 3
+      },
+      :footer => {
+        :content => av.render(:template => 'orders/generate_packing_slip_header', :formats => [:pdf], :locals => {:@header => header}),
+        :spacing => 0
       }
     )
     File.open(pdf_path, 'wb') do |file|

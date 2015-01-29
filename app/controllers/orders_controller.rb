@@ -863,8 +863,10 @@ class OrdersController < ApplicationController
         :page_width => '11.5in',
         :margin => {:top => '20',
                     :bottom => '20',
-                    :left => '0',
-                    :right => '0'},
+                    :left => '10',
+                    :right => '10'},
+        :header=> {:spacing=>5,:right => '[page] of [topage]'},
+        :footer=> {:spacing=>1},
         :handlers =>[:erb],
         :formats => [:html],
         :save_to_file => Rails.root.join('public','pdfs', "#{file_name}.pdf")
