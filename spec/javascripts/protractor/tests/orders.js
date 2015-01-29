@@ -110,6 +110,82 @@ describe('Orders:',function() {
                 .click(protractor.Button.RIGHT)
                 .perform();
         }
+
+        describe('Select:',function() {
+            it('Duplicates the selected order',function() {
+                var table = {};
+                var edit = {};
+                table.tbodies = element.all(by.tagName("tbody"));
+                table.tbody = table.tbodies.first();
+                table.rows = table.tbody.all(by.tagName("tr"));
+                table.columns = table.rows.get(0).all(by.tagName('td'));
+                table.order_number = table.columns.get(0);
+                table.columns.get(0).click();
+
+                edit.button = element.all(by.buttonText('Edit')).first().click();
+                edit.parent = edit.button.element(by.xpath(".."));
+                edit.ul = edit.parent.element(by.tagName("ul"));
+                edit.li = edit.ul.all(by.tagName("li")).get(2).click();
+
+                table.tbodies = element.all(by.tagName("tbody"));
+                table.tbody = table.tbodies.first();
+                table.rows = table.tbody.all(by.tagName("tr"));
+                table.columns = table.rows.get(0).all(by.tagName('td'));
+                table.order_number_duplicate = table.columns.get(0);
+                expect(table.order_number_duplicate.getText()).toContain("duplicate");
+            });
+            it('Modifies the status of selected order',function() {
+                var table = {};
+                var status = {};
+                table.tbodies = element.all(by.tagName("tbody"));
+                table.tbody = table.tbodies.first();
+                table.rows = table.tbody.all(by.tagName("tr"));
+                table.columns = table.rows.get(0).all(by.tagName('td'));
+                table.order_number = table.columns.get(0).getText();
+                table.columns.get(0).click();
+
+                status.button = element.all(by.buttonText('Change Status')).first().click();
+                status.parent = status.button.element(by.xpath(".."));
+                status.ul = status.parent.element(by.tagName("ul"));
+                status.li = status.ul.all(by.tagName("li")).get(1).click();
+
+                table.panel_body = element.all(by.className('panel-body'));
+                table.panel_body_li = table.panel_body.get(0).all(by.tagName("li"));
+                table.panel_body_span = table.panel_body_li.get(2).all(by.tagName("span"));
+                browser.actions().mouseMove(table.panel_body_span.get(0)).perform();
+                browser.actions().click().perform();
+
+                table.tbodies = element.all(by.tagName("tbody"));
+                table.tbody = table.tbodies.first();
+                table.rows = table.tbody.all(by.tagName("tr"));
+                table.columns = table.rows.get(0).all(by.tagName('td'));
+                table.order_number1 = table.columns.get(0).getText();
+                expect(table.order_number).toContain(table.order_number1);
+            });
+            it('Deletes the selected order from the list',function() {
+                var table = {};
+                var edit = {};
+
+                table.tbody = element.all(by.tagName("tbody")).first();
+                table.rows = table.tbody.all(by.tagName("tr"));
+                table.columns = table.rows.get(0).all(by.tagName('td'));
+                table.order_number = table.columns.get(0).getText();
+                table.columns.get(0).click();
+
+                edit.button = element.all(by.buttonText('Edit')).first().click();
+                edit.parent = edit.button.element(by.xpath(".."));
+                edit.ul = edit.parent.element(by.tagName("ul"));
+                edit.li = edit.ul.all(by.tagName("li")).get(1).click();
+
+                table.tbody = element.all(by.tagName("tbody")).first();
+                table.rows = table.tbody.all(by.tagName("tr"));
+                table.columns = table.rows.get(0).all(by.tagName('td'));
+                table.order_number1 = table.columns.get(0).getText();
+
+                expect(table.order_number1).not.toEqual(table.order_number);
+            });
+            
+        });
         
     });
 });
