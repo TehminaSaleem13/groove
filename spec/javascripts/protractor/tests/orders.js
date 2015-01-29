@@ -30,14 +30,19 @@ describe('Orders:',function() {
                 elem.list_elements = element.all(by.repeater('field in options.all_fields'));
                 elem.list_elements.get(2).click();
             });
+        });
+
+        describe('Select:',function() {
+            var table = {};
+            var edit = {};
+            var status = {};
             it('Right click on the Recipient makes the field editable for the order',function() {
                 var table = {};
                 var recipient = {};
                 recipient.name = "Kalakar Sahoo";
-                table.tbodies = element.all(by.tagName("tbody"));
-                table.tbody = table.tbodies.first();
-                table.rows = table.tbody.all(by.tagName("tr"));
-                table.columns = table.rows.get(0).all(by.tagName('td'));
+                table.tbody = element.all(by.tagName("tbody")).first();
+                table.row = table.tbody.all(by.tagName("tr")).first();
+                table.columns = table.row.all(by.tagName('td'));
                 table.recipient = table.columns.get(5);
                 recipient.name_actual = table.recipient.getText();
                 browser.actions().mouseMove(table.recipient).perform();
@@ -61,46 +66,88 @@ describe('Orders:',function() {
                 browser.actions().sendKeys(recipient.name_actual).perform();
             });
             it('Right click on the Status makes the field editable for the order',function() {
-                var table = {};
-                var status = {};
                 status.value = "On Hold";
-                table.tbodies = element.all(by.tagName("tbody"));
-                table.tbody = table.tbodies.first();
-                table.rows = table.tbody.all(by.tagName("tr"));
-                table.columns = table.rows.get(0).all(by.tagName('td'));
+                table.tbody = element.all(by.tagName("tbody")).first();
+                table.row = table.tbody.all(by.tagName("tr")).first();
+                table.columns = table.row.all(by.tagName('td'));
                 table.status = table.columns.get(6);
                 table.order_number = table.columns.get(0).getText();
                 browser.actions().mouseMove(table.status).perform();
                 browser.actions().click(protractor.Button.RIGHT).perform();
                 browser.actions().sendKeys(status.value).perform();
 
-                table.panel_body = element.all(by.className('panel-body'));
-                table.panel_body_li = table.panel_body.get(0).all(by.tagName("li"));
-                table.panel_body_span = table.panel_body_li.get(2).all(by.tagName("span"));
-                browser.actions().mouseMove(table.panel_body_span.get(0)).perform();
-                browser.actions().click().perform();
-
-                table.tbodies = element.all(by.tagName("tbody"));
-                table.tbody = table.tbodies.first();
-                table.rows = table.tbody.all(by.tagName("tr"));
-                table.columns = table.rows.get(0).all(by.tagName('td'));
+                browser.executeScript('window.scrollTo(0,0);').then(function () {
+                    new clickOnHold();
+                })
+                
+                new getFirstTableCell();
                 table.order_number1 = table.columns.get(0).getText();
                 expect(table.order_number).toContain(table.order_number1);
             });
             it('Clicking on order number should open modal',function() {
-                var table = {};
+                var panel = {};
 
-                table.panel_body = element.all(by.className('panel-body'));
-                table.panel_body_li = table.panel_body.get(0).all(by.tagName("li"));
-                table.panel_body_li.get(1).click();
-                table.tbodies = element.all(by.tagName("tbody"));
-                table.tbody = table.tbodies.first();
-                table.rows = table.tbody.all(by.tagName("tr"));
-                table.columns = table.rows.get(0).all(by.tagName('td'));
-                table.order_number = table.columns.get(0);
-                table.order_number.all(by.tagName('a')).first().click();
+                panel.panel_body = element.all(by.className('panel-body'));
+                panel.panel_body_li = panel.panel_body.get(0).all(by.tagName("li"));
+                panel.panel_body_li.get(1).click();
+
+                new getFirstTableCell();
+
+                table.column.element(by.tagName('a')).click();
                 expect(browser.getLocationAbsUrl()).toContain('/#/orders/awaiting/1/');
+                element(by.className("close-btn")).click();
             });
+            it('Duplicates the selected order',function() {
+                new selectFirstRowInList();
+                table.order_number = table.column.getText();
+
+                edit.button = element.all(by.buttonText('Edit')).first().click();
+                edit.parent = edit.button.element(by.xpath(".."));
+                edit.ul = edit.parent.element(by.tagName("ul"));
+                edit.li = edit.ul.all(by.tagName("li")).get(2).click();
+
+                new getFirstTableCell();
+                table.order_number_duplicate = table.column.getText();
+                expect(table.order_number_duplicate).toContain("duplicate");
+            });
+            it('Modifies the status of selected order',function() {
+                new selectFirstRowInList();
+                table.order_number = table.column.getText();
+
+                status.button = element.all(by.buttonText('Change Status')).first().click();
+                status.parent = status.button.element(by.xpath(".."));
+                status.ul = status.parent.element(by.tagName("ul"));
+                status.li = status.ul.all(by.tagName("li")).get(1).click();
+
+                new clickOnHold();
+
+                new getFirstTableCell();
+                table.order_number1 = table.column.getText();
+                expect(table.order_number).toContain(table.order_number1);
+            });
+            it('Deletes the selected order from the list',function() {
+                new selectFirstRowInList();
+                table.order_number = table.column.getText();
+
+                edit.button = element.all(by.buttonText('Edit')).first().click();
+                edit.parent = edit.button.element(by.xpath(".."));
+                edit.ul = edit.parent.element(by.tagName("ul"));
+                edit.li = edit.ul.all(by.tagName("li")).get(1).click();
+
+                new getFirstTableCell();
+                table.order_number1 = table.column.getText();
+
+                expect(table.order_number1).not.toEqual(table.order_number);
+            });
+            var selectFirstRowInList = function() {
+                new getFirstTableCell();
+                table.column.click();
+            }
+            var getFirstTableCell = function() {
+                table.tbody = element.all(by.tagName("tbody")).first();
+                table.row = table.tbody.all(by.tagName("tr")).first();
+                table.column = table.row.all(by.tagName('td')).first();
+            }
         });
         var showTitleList = function() {
             var thead;
@@ -110,82 +157,13 @@ describe('Orders:',function() {
                 .click(protractor.Button.RIGHT)
                 .perform();
         }
-
-        describe('Select:',function() {
-            it('Duplicates the selected order',function() {
-                var table = {};
-                var edit = {};
-                table.tbodies = element.all(by.tagName("tbody"));
-                table.tbody = table.tbodies.first();
-                table.rows = table.tbody.all(by.tagName("tr"));
-                table.columns = table.rows.get(0).all(by.tagName('td'));
-                table.order_number = table.columns.get(0);
-                table.columns.get(0).click();
-
-                edit.button = element.all(by.buttonText('Edit')).first().click();
-                edit.parent = edit.button.element(by.xpath(".."));
-                edit.ul = edit.parent.element(by.tagName("ul"));
-                edit.li = edit.ul.all(by.tagName("li")).get(2).click();
-
-                table.tbodies = element.all(by.tagName("tbody"));
-                table.tbody = table.tbodies.first();
-                table.rows = table.tbody.all(by.tagName("tr"));
-                table.columns = table.rows.get(0).all(by.tagName('td'));
-                table.order_number_duplicate = table.columns.get(0);
-                expect(table.order_number_duplicate.getText()).toContain("duplicate");
-            });
-            it('Modifies the status of selected order',function() {
-                var table = {};
-                var status = {};
-                table.tbodies = element.all(by.tagName("tbody"));
-                table.tbody = table.tbodies.first();
-                table.rows = table.tbody.all(by.tagName("tr"));
-                table.columns = table.rows.get(0).all(by.tagName('td'));
-                table.order_number = table.columns.get(0).getText();
-                table.columns.get(0).click();
-
-                status.button = element.all(by.buttonText('Change Status')).first().click();
-                status.parent = status.button.element(by.xpath(".."));
-                status.ul = status.parent.element(by.tagName("ul"));
-                status.li = status.ul.all(by.tagName("li")).get(1).click();
-
-                table.panel_body = element.all(by.className('panel-body'));
-                table.panel_body_li = table.panel_body.get(0).all(by.tagName("li"));
-                table.panel_body_span = table.panel_body_li.get(2).all(by.tagName("span"));
-                browser.actions().mouseMove(table.panel_body_span.get(0)).perform();
-                browser.actions().click().perform();
-
-                table.tbodies = element.all(by.tagName("tbody"));
-                table.tbody = table.tbodies.first();
-                table.rows = table.tbody.all(by.tagName("tr"));
-                table.columns = table.rows.get(0).all(by.tagName('td'));
-                table.order_number1 = table.columns.get(0).getText();
-                expect(table.order_number).toContain(table.order_number1);
-            });
-            it('Deletes the selected order from the list',function() {
-                var table = {};
-                var edit = {};
-
-                table.tbody = element.all(by.tagName("tbody")).first();
-                table.rows = table.tbody.all(by.tagName("tr"));
-                table.columns = table.rows.get(0).all(by.tagName('td'));
-                table.order_number = table.columns.get(0).getText();
-                table.columns.get(0).click();
-
-                edit.button = element.all(by.buttonText('Edit')).first().click();
-                edit.parent = edit.button.element(by.xpath(".."));
-                edit.ul = edit.parent.element(by.tagName("ul"));
-                edit.li = edit.ul.all(by.tagName("li")).get(1).click();
-
-                table.tbody = element.all(by.tagName("tbody")).first();
-                table.rows = table.tbody.all(by.tagName("tr"));
-                table.columns = table.rows.get(0).all(by.tagName('td'));
-                table.order_number1 = table.columns.get(0).getText();
-
-                expect(table.order_number1).not.toEqual(table.order_number);
-            });
-            
-        });
-        
+        var clickOnHold = function() {
+            var panel = {};
+            panel.panel_body = element.all(by.className('panel-body'));
+            panel.panel_body_li = panel.panel_body.get(0).all(by.tagName("li"));
+            panel.panel_body_span = panel.panel_body_li.get(2).all(by.tagName("span")).first();
+            browser.actions().mouseMove(panel.panel_body_span).perform();
+            browser.actions().click().perform();
+        }
     });
 });
