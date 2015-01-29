@@ -6282,7 +6282,6 @@ body {
 	    	<div class="span8">
 	      	<% barcode_string = generate_order_barcode(@order.increment_id)%>
 	      	<div style="margin-top: 30px;margin-bottom: 0px; margin-left: 10px; padding-bottom: 0px; position:relative; height:150px; width:550px; overflow:hidden;"><div style="position:absolute; top:0; left:0;"><%= pdf_image_tag(barcode_string+".png", {:width => 550}) %></div></div><br>
-	      	<span style="margin-top: 0px; padding-top: 0px; line-height: 0px;"><center><%= @order.increment_id%></center></span>
 	    	</div>
 	    </div>
       <br><br><br>
@@ -6330,18 +6329,24 @@ body {
     		<p><i>
           <%if !@order.store.nil?%>
             <%if !@order.store.thank_you_message_to_customer.nil? && !@order.store.thank_you_message_to_customer == 'null' %>
-              <%=@order.store.thank_you_message_to_customer%>
+              <div style="page-break-inside: avoid;">
+                  <%=@order.store.thank_you_message_to_customer%>
+              </div>
             <%elsif !GeneralSetting.get_packing_slip_message_to_customer.nil? %>
-              <%=GeneralSetting.get_packing_slip_message_to_customer%>
+                <div style="page-break-inside: avoid;">
+                    <%=GeneralSetting.get_packing_slip_message_to_customer%>
+                </div>
             <% end %>
           <%end%>
         </i></p>
     	<div>
         <center>
             <%if !@order.nil? && !@order.customer_comments.nil? %>
-              <textarea>
-                <%= @order.customer_comments %>
-              </textarea>
+                <div style="page-break-inside: avoid;">
+                    <textarea>
+                        <%= @order.customer_comments %>
+                    </textarea>
+                </div>
             <%end%>
         </center>
     	</div>
