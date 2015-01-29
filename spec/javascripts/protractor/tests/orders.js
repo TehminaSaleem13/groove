@@ -25,8 +25,8 @@ describe('Orders:',function() {
                 elem.list_elements.get(2).click();
                 var titles = element.all(by.css('div.ng-scope.DESC'));
                 expect(titles.get(11).getText()).toEqual('Email');
-                // return new showTitleList();
-                console.log("printed................");
+
+                // Remove the title from table header
                 elem.list_elements = element.all(by.repeater('field in options.all_fields'));
                 elem.list_elements.get(2).click();
             });
@@ -39,6 +39,7 @@ describe('Orders:',function() {
                 table.rows = table.tbody.all(by.tagName("tr"));
                 table.columns = table.rows.get(0).all(by.tagName('td'));
                 table.recipient = table.columns.get(5);
+                recipient.name_actual = table.recipient.getText();
                 browser.actions().mouseMove(table.recipient).perform();
                 browser.actions().click(protractor.Button.RIGHT).perform().then(function() {
                     for (var i = 0; i < 30; i++) {
@@ -49,6 +50,15 @@ describe('Orders:',function() {
                 table.exit_button = element(by.className("top-message"));
                 table.exit_button.element(by.buttonText('Exit Edit Mode')).click();
                 expect(table.recipient.getText()).toContain(recipient.name);
+
+                // Set the recipient name to the original name
+                browser.actions().mouseMove(table.recipient).perform();
+                browser.actions().click(protractor.Button.RIGHT).perform().then(function() {
+                    for (var i = 0; i < 30; i++) {
+                        browser.actions().sendKeys(protractor.Key.BACK_SPACE).perform();
+                    }
+                });
+                browser.actions().sendKeys(recipient.name_actual).perform();
             });
             it('Right click on the Status makes the field editable for the order',function() {
                 var table = {};
@@ -66,9 +76,9 @@ describe('Orders:',function() {
 
                 table.panel_body = element.all(by.className('panel-body'));
                 table.panel_body_li = table.panel_body.get(0).all(by.tagName("li"));
-                browser.actions().mouseMove(table.panel_body_li.get(2)).perform();
-                // browser.actions().click().perform();
-                table.panel_body_li.get(2).click();
+                table.panel_body_span = table.panel_body_li.get(2).all(by.tagName("span"));
+                browser.actions().mouseMove(table.panel_body_span.get(0)).perform();
+                browser.actions().click().perform();
 
                 table.tbodies = element.all(by.tagName("tbody"));
                 table.tbody = table.tbodies.first();
@@ -80,6 +90,9 @@ describe('Orders:',function() {
             it('Clicking on order number should open modal',function() {
                 var table = {};
 
+                table.panel_body = element.all(by.className('panel-body'));
+                table.panel_body_li = table.panel_body.get(0).all(by.tagName("li"));
+                table.panel_body_li.get(1).click();
                 table.tbodies = element.all(by.tagName("tbody"));
                 table.tbody = table.tbodies.first();
                 table.rows = table.tbody.all(by.tagName("tr"));
