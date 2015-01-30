@@ -149,85 +149,89 @@ describe('Products:',function() {
             var elem = {};
             elem.list_elements = element.all(by.repeater('field in options.all_fields'));
             elem.list_elements.get(6).click();
-            var titles = element.all(by.css('div.ng-scope.DESC'));
-            expect(titles.get(8).getText()).toEqual('Tertiary Location');
 
-            // Remove the title from table header
-            elem.list_elements = element.all(by.repeater('field in options.all_fields'));
-            elem.list_elements.get(6).click();
+            element.all(by.repeater('field in theads')).getText().then (function(text) {
+                expect(text).toContain('Tertiary Location');
+                elem.list_elements = element.all(by.repeater('field in options.all_fields'));
+                elem.list_elements.get(6).click();
+            });
         });
     });
     describe('Select:',function() {
         var table = {};
         var edit = {};
         var status = {};
-        // it('Right click on the Barcode makes the field editable for the product',function() {
-        //     var barcode = {};
-        //     var column_no = 0;
-        //     barcode.new = "BARCODE";
-        //     table.thead = element.all(by.tagName("thead")).first();
-        //     table.tr = table.thead.all(by.tagName("tr")).first();
-        //     // console.log("text:");
-        //     table.ths = table.tr.all(by.tagName("th")).getText();
-        //     // .then (function(text) {
-        //     //     console.log(text);
-        //     //     console.log(text.length);
-        //     //     console.log(text[5]);
-        //     //     var column_count = text.length;
-        //     //     var flag = false;
-        //     //     for(var i=0; i<=text.length; i++) {
-        //     //         console.log("index:");
-                    
-        //     //         if(String(text[i])=="Barcode") {
-        //     //             console.log("in if");
-        //     //             column_no = i;
-        //     //             flag = true;
-        //     //         }
-        //     //         if(flag) break;
-        //     //     }
-        //     //     if(column_no == 7) {
-        //     //         console.log("true...");
-        //     //         // console.log(column_no);
-        //     //     }
-        //     // });
-        //     column_no = table.ths.length.then (function(text) {
-        //         console.log("text:");
-        //         console.log(text);
-        //     });
-        //     if(table.ths.length == 8) {
-        //         console.log("true...true");
-        //         // console.log(column_no);
-        //     }
-        //     console.log("printed");
-           
-        //     // table.tbody = element.all(by.tagName("tbody")).first();
-        //     // table.row = table.tbody.all(by.tagName("tr")).first();
-        //     // table.columns = table.row.all(by.tagName('td'));
-        //     // table.barcode = table.columns.get(column_no);
-        //     // barcode.actual = table.barcode.getText();
-        //     // browser.actions().mouseMove(table.barcode).perform();
-        //     // browser.actions().click(protractor.Button.RIGHT).perform().then(function() {
-        //     //     for (var i = 0; i < 30; i++) {
-        //     //         browser.actions().sendKeys(protractor.Key.BACK_SPACE).perform();
-        //     //     }
-        //     // });
-        //     // browser.actions().sendKeys(barcode.new).perform();
-        //     // table.exit_button = element(by.className("top-message"));
-        //     // table.exit_button.element(by.buttonText('Exit Edit Mode')).click();
-        //     // expect(table.barcode.getText()).toContain(barcode.new);
-        // });
-        it('Duplicates the selected order item',function() {
+        it('Right click on the Barcode makes the field editable for the product',function() {
+            var barcode = {};
+            var column_no = 0;
+            barcode.new = "BARCODE";
             new showTitleList();
-            new selectFirstRowInList();
-            table.item_name = element.all(by.css("td.ng-scope")).first().getText();
+            element.all(by.repeater('field in theads')).getText().then (function(text) {
+                var titles_count = text.indexOf('Barcode');
+                table.tbody = element.all(by.tagName("tbody")).first();
+                table.row = table.tbody.all(by.tagName("tr")).first();
+                table.row.all(by.tagName('td')).get(titles_count).then(function(td) {
+                    barcode.actual = td.getText();
+                    browser.actions().mouseMove(td).perform();
+                    browser.actions().click(protractor.Button.RIGHT).perform().then(function() {
+                        for (var i = 0; i<25; i++) {
+                            browser.actions().sendKeys(protractor.Key.BACK_SPACE).perform();
+                        }
+                    });
+                    browser.actions().sendKeys(barcode.new).perform();
+                    table.exit_button = element(by.className("top-message"));
+                    table.exit_button.element(by.buttonText('Exit Edit Mode')).click();
+                    expect(td.getText()).toContain(barcode.new);
 
-            edit.button = element.all(by.buttonText('Edit')).first().click();
-            edit.parent = edit.button.element(by.xpath(".."));
-            edit.ul = edit.parent.element(by.tagName("ul"));
-            edit.li = edit.ul.all(by.tagName("li")).get(1).click();
+                    browser.actions().mouseMove(td).perform();
+                    browser.actions().click(protractor.Button.RIGHT).perform().then(function() {
+                        for (var i = 0; i<25; i++) {
+                            browser.actions().sendKeys(protractor.Key.BACK_SPACE).perform();
+                        }
+                    });
+                    browser.actions().sendKeys(barcode.actual).perform();
+                    table.exit_button = element(by.className("top-message"));
+                    table.exit_button.element(by.buttonText('Exit Edit Mode')).click();
+                });
+            });
+        });
+        it('Duplicates the selected order item',function() {
+            browser.executeScript('window.scrollTo(0,0);').then(function () {
+                // new showTitleList();
+                new selectFirstRowInList();
+            })
+            
+            // new selectFirstRowInList();
+            // table.item_name = element.all(by.css("td.ng-scope")).first().getText();
+            element.all(by.repeater('field in theads')).getText().then (function(text) {
+                var titles_count = text.indexOf('Item Name');
+                table.tbody = element.all(by.tagName("tbody")).first();
+                table.row = table.tbody.all(by.tagName("tr")).first();
+                browser.actions().mouseMove(table.row).perform();
+                browser.actions().click().perform();
+                table.row.all(by.tagName('td')).get(titles_count).then (function(td) {
+                    table.item_name = td.getText();
+                    // browser.actions().mouseMove(td).perform();
+                    // browser.actions().click().perform();
 
-            table.item_name1 = element.all(by.css("td.ng-scope")).first().getText();
-            expect(table.item_name1).toContain(table.item_name);
+                    edit.button = element.all(by.buttonText('Edit')).first().click();
+                    edit.parent = edit.button.element(by.xpath(".."));
+                    edit.ul = edit.parent.element(by.tagName("ul"));
+                    edit.li = edit.ul.all(by.tagName("li")).get(1).click();
+
+                    table.tbody = element.all(by.tagName("tbody")).first();
+                    table.row = table.tbody.all(by.tagName("tr")).first();
+                    table.row.all(by.tagName('td')).get(titles_count).then (function(td1) {
+                        table.item_name1 = td1.getText();
+                        expect(table.item_name1).toContain(table.item_name);
+                    });
+                });
+            });
+
+            
+
+            // table.item_name1 = element.all(by.css("td.ng-scope")).first().getText();
+            // expect(table.item_name1).toContain(table.item_name);
         });
         it('Modifies the status of selected order item',function() {
             new selectFirstRowInList();
