@@ -41,7 +41,6 @@ describe OrdersController do
       order_data['postcode'] = order.postcode
       order_data['country'] = order.country
       order_data['email'] = order.email
-      order_data['store_order_id'] = order.store_order_id
       order_data['order_placed_time'] = order.order_placed_time
       order_data['customer_comments'] = order.customer_comments
       order_data['scanned_on'] = order.scanned_on
