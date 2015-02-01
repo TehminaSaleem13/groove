@@ -194,7 +194,7 @@ class SettingsController < ApplicationController
                       if current_mapping=='products' && column[1] =='name'
                         single_row['name'] = 'Product from Restore'
                       end
-                    else
+                    elsif !(current_mapping != 'products' && column[1] =='id')
                       single_row[column[1]] = csv_row[column[0]]
                     end
                     # Add special mapping rules here. current_mapping is the key of mapping variable above

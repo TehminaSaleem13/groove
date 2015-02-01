@@ -1457,10 +1457,10 @@ class ProductsController < ApplicationController
     status_filter = params[:filter] if !params[:filter].nil? &&
         supported_status_filters.include?(params[:filter].to_s)
 
-    is_kit = params[:is_kit] if !params[:is_kit].nil?  &&
+    is_kit = params[:is_kit].to_i if !params[:is_kit].nil?  &&
         supported_kit_params.include?(params[:is_kit].to_s)
 
-    unless is_kit == '-1'
+    unless is_kit == -1
       kit_query = " WHERE products.is_kit="+is_kit.to_s
     end
 
@@ -1521,8 +1521,8 @@ class ProductsController < ApplicationController
                                             status_filter_text+" ORDER BY product_cats.category "+sort_order+query_add)
     else
       products = Product.order(sort_key+" "+sort_order)
-      unless is_kit == '-1'
-        products = products.where(:is_kit=> is_kit)
+      unless is_kit == -1
+        products = products.where(:is_kit=> is_kit.to_s)
       end
       unless status_filter == 'all'
           products = products.where(:status=>status_filter)
@@ -1534,8 +1534,8 @@ class ProductsController < ApplicationController
 
     if products.length == 0
       products = Product.where(1)
-      unless is_kit == '-1'
-        products = products.where(:is_kit=> is_kit)
+      unless is_kit == -1
+        products = products.where(:is_kit=> is_kit.to_s)
       end
       unless status_filter == 'all'
         products = products.where(:status=>status_filter)
