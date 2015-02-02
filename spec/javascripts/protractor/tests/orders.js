@@ -14,8 +14,8 @@ describe('Orders:',function() {
             });
             it('Right click on header should show list of titles',function() {
                 var elem = {};
-                return new showTitleList();
-                elem.list_element = element(by.repeater('field in options.all_fields'));
+                new showTitleList();
+                elem.list_element = element.all(by.repeater('field in options.all_fields')).first();
                 elem.parent1 = elem.list_element.element(by.xpath(".."));
                 expect(elem.parent1.element(by.xpath("..")).getAttribute("class")).toEqual("clearfix open");
             });
@@ -23,12 +23,12 @@ describe('Orders:',function() {
                 var elem = {};
                 elem.list_elements = element.all(by.repeater('field in options.all_fields'));
                 elem.list_elements.get(2).click();
-                var titles = element.all(by.css('div.ng-scope.DESC'));
-                expect(titles.get(11).getText()).toEqual('Email');
-
-                // Remove the title from table header
-                elem.list_elements = element.all(by.repeater('field in options.all_fields'));
-                elem.list_elements.get(2).click();
+                element.all(by.repeater('field in theads')).getText().then (function(text) {
+                    expect(text).toContain('Email');
+                    // Remove the title from table header
+                    elem.list_elements = element.all(by.repeater('field in options.all_fields'));
+                    elem.list_elements.get(2).click();
+                });
             });
         });
 
@@ -39,31 +39,42 @@ describe('Orders:',function() {
             it('Right click on the Recipient makes the field editable for the order',function() {
                 var table = {};
                 var recipient = {};
-                recipient.name = "Kalakar Sahoo";
-                table.tbody = element.all(by.tagName("tbody")).first();
-                table.row = table.tbody.all(by.tagName("tr")).first();
-                table.columns = table.row.all(by.tagName('td'));
-                table.recipient = table.columns.get(5);
-                recipient.name_actual = table.recipient.getText();
-                browser.actions().mouseMove(table.recipient).perform();
-                browser.actions().click(protractor.Button.RIGHT).perform().then(function() {
-                    for (var i = 0; i < 30; i++) {
-                        browser.actions().sendKeys(protractor.Key.BACK_SPACE).perform();
-                    }
-                });
-                browser.actions().sendKeys(recipient.name).perform();
-                table.exit_button = element(by.className("top-message"));
-                table.exit_button.element(by.buttonText('Exit Edit Mode')).click();
-                expect(table.recipient.getText()).toContain(recipient.name);
+                recipient.new = "Kalakar Sahoo";
 
-                // Set the recipient name to the original name
-                browser.actions().mouseMove(table.recipient).perform();
-                browser.actions().click(protractor.Button.RIGHT).perform().then(function() {
-                    for (var i = 0; i < 30; i++) {
-                        browser.actions().sendKeys(protractor.Key.BACK_SPACE).perform();
-                    }
+                element.all(by.repeater('field in theads')).getText().then (function(text) {
+                    var titles_count = text.indexOf('Recipient');
+
+                    table.tbody = element.all(by.tagName("tbody")).first();
+                    table.row = table.tbody.all(by.tagName("tr")).first();
+                    table.row.all(by.tagName('td')).get(titles_count).then(function(td) {
+                        recipient.actual = td.getText();
+                        browser.actions().mouseMove(td).perform();
+                        browser.actions().click(protractor.Button.RIGHT).perform().then(function() {
+                            for (var i = 0; i<25; i++) {
+                                browser.actions().sendKeys(protractor.Key.BACK_SPACE).perform();
+                            }
+                        });
+                        browser.actions().sendKeys(recipient.new).perform();
+                        table.exit_button = element(by.className("top-message"));
+                        table.exit_button.element(by.buttonText('Exit Edit Mode')).click();
+                        expect(td.getText()).toContain(recipient.new);
+
+                        table.tbody = element.all(by.tagName("tbody")).first();
+                        table.row = table.tbody.all(by.tagName("tr")).first();
+                        table.row.all(by.tagName('td')).get(titles_count).then(function(td) {
+                            browser.actions().mouseMove(td).perform();
+                            browser.actions().click(protractor.Button.RIGHT).perform().then(function() {
+                                for (var i = 0; i<25; i++) {
+                                    browser.actions().sendKeys(protractor.Key.BACK_SPACE).perform();
+                                }
+                            });
+                            browser.actions().sendKeys(recipient.new).perform();
+
+                            table.exit_button = element(by.className("top-message"));
+                            table.exit_button.element(by.buttonText('Exit Edit Mode')).click();
+                        });
+                    });
                 });
-                browser.actions().sendKeys(recipient.name_actual).perform();
             });
             it('Right click on the Status makes the field editable for the order',function() {
                 status.value = "On Hold";
@@ -77,7 +88,7 @@ describe('Orders:',function() {
                 browser.actions().sendKeys(status.value).perform();
 
                 browser.executeScript('window.scrollTo(0,0);').then(function () {
-                    new clickOnHold();
+                    element(by.cssContainingText('.panel-collapse.in .panel-body li','On Hold')).click();
                 })
                 
                 new getFirstTableCell();
@@ -119,7 +130,7 @@ describe('Orders:',function() {
                 status.ul = status.parent.element(by.tagName("ul"));
                 status.li = status.ul.all(by.tagName("li")).get(1).click();
 
-                new clickOnHold();
+                element(by.cssContainingText('.panel-collapse.in .panel-body li','On Hold')).click();
 
                 new getFirstTableCell();
                 table.order_number1 = table.column.getText();
@@ -140,8 +151,9 @@ describe('Orders:',function() {
                 expect(table.order_number1).not.toEqual(table.order_number);
             });
             var selectFirstRowInList = function() {
-                new getFirstTableCell();
-                table.column.click();
+                table.tbody = element.all(by.tagName("tbody")).first();
+                table.row = table.tbody.all(by.tagName("tr")).first();
+                table.row.click();
             }
             var getFirstTableCell = function() {
                 table.tbody = element.all(by.tagName("tbody")).first();
@@ -152,18 +164,8 @@ describe('Orders:',function() {
         var showTitleList = function() {
             var thead;
             thead = element.all(by.css('div.ng-scope.DESC')).first();
-            browser.actions()
-                .mouseMove(thead)
-                .click(protractor.Button.RIGHT)
-                .perform();
-        }
-        var clickOnHold = function() {
-            var panel = {};
-            panel.panel_body = element.all(by.className('panel-body'));
-            panel.panel_body_li = panel.panel_body.get(0).all(by.tagName("li"));
-            panel.panel_body_span = panel.panel_body_li.get(2).all(by.tagName("span")).first();
-            browser.actions().mouseMove(panel.panel_body_span).perform();
-            browser.actions().click().perform();
+            browser.actions().mouseMove(thead).perform();
+            browser.actions().click(protractor.Button.RIGHT).perform();
         }
     });
 });
