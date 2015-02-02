@@ -11,7 +11,7 @@ groovepacks_controllers.
                 }
                 //$scope.scan_pack_state = 'none';
                 scanPack.settings.get($scope.scan_pack).success(function() {
-                    angular.forEach(['success','fail'],function(i) {
+                    angular.forEach(['success','fail','order_complete'],function(i) {
                         if($scope.scan_pack.settings['show_'+i+'_image']) {
                             $scope.scan_pack.scan_states[i].image.enabled = $scope.scan_pack.settings['show_'+i+'_image'];
                             $scope.scan_pack.scan_states[i].image.src = $scope.scan_pack.settings[i+'_image_src'];
@@ -42,7 +42,7 @@ groovepacks_controllers.
             $scope.trigger_scan_message = function(type) {
 
                 $scope.scan_pack_state = type;
-                if(['success','fail'].indexOf(type) != -1) {
+                if(['success','fail','order_complete'].indexOf(type) != -1) {
                     var object = $scope.scan_pack.scan_states[type];
                     if(object.image.enabled) {
                         $timeout(function(){
@@ -74,6 +74,9 @@ groovepacks_controllers.
                             }
                             $scope.$broadcast('reload-scanpack-state');
                         } else {
+                            if(data.data.order_complete) {
+                                $scope.trigger_scan_message('order_complete');
+                            }
                             $state.go(data.data.next_state,data.data);
                         }
                     }

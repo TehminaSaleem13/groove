@@ -1,4 +1,4 @@
-groovepacks_controllers. 
+groovepacks_controllers.
 controller('scanPackSettingsCtrl', [ '$scope', '$http', '$timeout', '$location', '$state', '$cookies', 'scanPack', 'groov_translator',
 function( $scope, $http, $timeout, $location, $state, $cookies, scanPack,groov_translator) {
 
@@ -18,11 +18,13 @@ function( $scope, $http, $timeout, $location, $state, $cookies, scanPack,groov_t
                 "enable_click_sku":"",
                 "ask_tracking_number":"",
                 "show_success_image":"",
+                "show_order_complete_image":"",
                 "show_fail_image":"",
                 "for":"",
                 "seconds":"",
                 "play_success_sound":"",
                 "play_fail_sound":"",
+                "play_order_complete_sound":"",
                 "scan":"",
                 "skip_code":"",
                 "note_from_packer_code":"",

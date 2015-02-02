@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150126170323) do
+ActiveRecord::Schema.define(:version => 20150202180051) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0, :null => false
@@ -492,8 +492,8 @@ ActiveRecord::Schema.define(:version => 20150126170323) do
   create_table "scan_pack_settings", :force => true do |t|
     t.boolean  "enable_click_sku",              :default => true
     t.boolean  "ask_tracking_number",           :default => false
-    t.datetime "created_at",                                                                   :null => false
-    t.datetime "updated_at",                                                                   :null => false
+    t.datetime "created_at",                                                                          :null => false
+    t.datetime "updated_at",                                                                          :null => false
     t.boolean  "show_success_image",            :default => true
     t.string   "success_image_src",             :default => "/assets/images/scan_success.png"
     t.float    "success_image_time",            :default => 0.5
@@ -514,6 +514,12 @@ ActiveRecord::Schema.define(:version => 20150126170323) do
     t.string   "service_issue_code",            :default => "ISSUE"
     t.boolean  "restart_code_enabled",          :default => true
     t.string   "restart_code",                  :default => "RESTART"
+    t.boolean  "show_order_complete_image",     :default => true
+    t.string   "order_complete_image_src",      :default => "/assets/images/scan_order_complete.png"
+    t.float    "order_complete_image_time",     :default => 1.0
+    t.boolean  "play_order_complete_sound",     :default => true
+    t.string   "order_complete_sound_url",      :default => "/assets/sounds/scan_order_complete.mp3"
+    t.float    "complete_sound_sound_vol",      :default => 0.75
   end
 
   create_table "shipstation_credentials", :force => true do |t|

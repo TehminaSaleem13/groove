@@ -18,7 +18,8 @@ groovepacks_services.factory('scanPack',['$http','notification','$state',functio
             state:'none',
             scan_states:{
                 success:get_state(),
-                fail:get_state()
+                fail:get_state(),
+                order_complete:get_state()
             },
             settings: {}
         };

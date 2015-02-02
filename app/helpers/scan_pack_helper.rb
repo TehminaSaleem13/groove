@@ -282,9 +282,11 @@ module ScanPackHelper
           if barcode_found
             if !single_order.has_unscanned_items
               if scanpack_settings.ask_tracking_number?
+                result['data']['order_complete'] = true
                 result['data']['next_state'] = 'scanpack.rfp.tracking'
               else
                 single_order.set_order_to_scanned_state(current_user.username)
+                result['data']['order_complete'] = true
                 result['data']['next_state'] = 'scanpack.rfo'
               end
             end
@@ -339,7 +341,7 @@ module ScanPackHelper
           order.set_order_to_scanned_state(current_user.username)
           result['data']['next_state'] = 'scanpack.rfo'
           #update inventory when inventory warehouses is implemented.
-          order.save   
+          order.save
         end
       else
         result['status'] &= false

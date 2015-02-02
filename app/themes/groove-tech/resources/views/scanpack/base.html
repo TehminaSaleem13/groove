@@ -16,5 +16,8 @@
         <div class="middle col-xs-12" ng-show="scan_pack.scan_states.fail.image.enabled && scan_pack_state=='fail'">
             <img class="col-xs-8 col-xs-offset-2" ng-src="{{scan_pack.scan_states.fail.image.src}}" alt="" />
         </div>
+        <div class="middle col-xs-12" ng-show="scan_pack.scan_states.order_complete.image.enabled && scan_pack_state=='order_complete'">
+            <img class="col-xs-8 col-xs-offset-2" ng-src="{{scan_pack.scan_states.order_complete.image.src}}" alt="" />
+        </div>
     </div>
 </div>
