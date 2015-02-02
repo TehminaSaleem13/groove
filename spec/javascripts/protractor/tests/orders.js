@@ -78,22 +78,28 @@ describe('Orders:',function() {
             });
             it('Right click on the Status makes the field editable for the order',function() {
                 status.value = "On Hold";
-                table.tbody = element.all(by.tagName("tbody")).first();
-                table.row = table.tbody.all(by.tagName("tr")).first();
-                table.columns = table.row.all(by.tagName('td'));
-                table.status = table.columns.get(6);
-                table.order_number = table.columns.get(0).getText();
-                browser.actions().mouseMove(table.status).perform();
-                browser.actions().click(protractor.Button.RIGHT).perform();
-                browser.actions().sendKeys(status.value).perform();
 
-                browser.executeScript('window.scrollTo(0,0);').then(function () {
-                    element(by.cssContainingText('.panel-collapse.in .panel-body li','On Hold')).click();
-                })
-                
-                new getFirstTableCell();
-                table.order_number1 = table.columns.get(0).getText();
-                expect(table.order_number).toContain(table.order_number1);
+                element.all(by.repeater('field in theads')).getText().then (function(text) {
+                    var titles_count_status = text.indexOf('Status');
+                    var titles_count_order_number = text.indexOf('Order #')
+                    table.tbody = element.all(by.tagName("tbody")).first();
+                    table.row = table.tbody.all(by.tagName("tr")).first();
+                    table.order_number = table.row.all(by.tagName('td')).get(titles_count_order_number).getText();
+                    table.row.all(by.tagName('td')).get(titles_count_status).then(function(td) {
+                        browser.actions().mouseMove(td).perform();
+                        browser.actions().click(protractor.Button.RIGHT).perform();
+                        browser.actions().sendKeys(status.value).perform();
+
+                        browser.executeScript('window.scrollTo(0,0);').then(function () {
+                            element(by.cssContainingText('.panel-collapse.in .panel-body li','On Hold')).click();
+                        });
+
+                        table.tbody = element.all(by.tagName("tbody")).first();
+                        table.row = table.tbody.all(by.tagName("tr")).first();
+                        table.order_number1 = table.row.all(by.tagName('td')).get(titles_count_order_number).getText();
+                        expect(table.order_number).toEqual(table.order_number1);
+                    });
+                });
             });
             it('Clicking on order number should open modal',function() {
                 var panel = {};
@@ -110,16 +116,22 @@ describe('Orders:',function() {
             });
             it('Duplicates the selected order',function() {
                 new selectFirstRowInList();
-                table.order_number = table.column.getText();
+                element.all(by.repeater('field in theads')).getText().then (function(text) {
+                    var titles_count_order_number = text.indexOf('Order #')
+                    table.tbody = element.all(by.tagName("tbody")).first();
+                    table.row = table.tbody.all(by.tagName("tr")).first();
+                    table.order_number = table.row.all(by.tagName('td')).get(titles_count_order_number).getText();
 
-                edit.button = element.all(by.buttonText('Edit')).first().click();
-                edit.parent = edit.button.element(by.xpath(".."));
-                edit.ul = edit.parent.element(by.tagName("ul"));
-                edit.li = edit.ul.all(by.tagName("li")).get(2).click();
+                    edit.button = element.all(by.buttonText('Edit')).first().click();
+                    edit.parent = edit.button.element(by.xpath(".."));
+                    edit.ul = edit.parent.element(by.tagName("ul"));
+                    edit.li = edit.ul.all(by.tagName("li")).get(2).click();
 
-                new getFirstTableCell();
-                table.order_number_duplicate = table.column.getText();
-                expect(table.order_number_duplicate).toContain("duplicate");
+                    table.tbody = element.all(by.tagName("tbody")).first();
+                    table.row = table.tbody.all(by.tagName("tr")).first();
+                    table.order_number1 = table.row.all(by.tagName('td')).get(titles_count_order_number).getText();
+                    expect(table.order_number1).toContain(table.order_number);
+                });
             });
             it('Modifies the status of selected order',function() {
                 new selectFirstRowInList();
