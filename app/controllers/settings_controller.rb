@@ -150,17 +150,17 @@ class SettingsController < ApplicationController
                 # Create new row if deleted all else find and select by id for updating
                 if params[:method] == 'del_import'
                   if current_mapping == 'product_barcodes'
-                    all_rows = mapping[current_mapping][:model].where(:barcode =>csv_row['barcode'],:product_id=>csv_row['product_id'])
+                    all_rows = mapping[current_mapping][:model].where(:barcode =>csv_row['barcode'].strip,:product_id=>csv_row['product_id'])
                     if all_rows.length >0
                       single_row = all_rows.first
                     end
                   elsif current_mapping == 'product_skus'
-                    all_rows = mapping[current_mapping][:model].where(:sku =>csv_row['sku'],:product_id=>csv_row['product_id'])
+                    all_rows = mapping[current_mapping][:model].where(:sku =>csv_row['sku'].strip,:product_id=>csv_row['product_id'])
                     if all_rows.length >0
                       single_row = all_rows.first
                     end
                   elsif current_mapping == 'product_cats'
-                    all_rows = mapping[current_mapping][:model].where(:category =>csv_row['category'],:product_id=>csv_row['product_id'])
+                    all_rows = mapping[current_mapping][:model].where(:category =>csv_row['category'].strip,:product_id=>csv_row['product_id'])
                     if all_rows.length >0
                       single_row = all_rows.first
                     end
@@ -195,7 +195,11 @@ class SettingsController < ApplicationController
                         single_row['name'] = 'Product from Restore'
                       end
                     elsif !(current_mapping != 'products' && column[1] =='id')
-                      single_row[column[1]] = csv_row[column[0]]
+                      if ['barcode','sku','category'].include? column[0]
+                        single_row[column[1]] = csv_row[column[0]].strip
+                      else
+                        single_row[column[1]] = csv_row[column[0]]
+                      end
                     end
                     # Add special mapping rules here. current_mapping is the key of mapping variable above
                     # single_row is the selected row of model marked under mapping[current_mapping]
