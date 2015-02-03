@@ -37,47 +37,46 @@ describe('Orders:',function() {
             var table = {};
             var edit = {};
             var status = {};
-            it('Right click on the Recipient makes the field editable for the order',function() {
-                var table = {};
-                var recipient = {};
-                recipient.new = "Kalakar Sahoo";
+            // it('Right click on the Recipient makes the field editable for the order',function() {
+            //     var table = {};
+            //     var recipient = {};
+            //     recipient.new = "Kalakar Sahoo";
 
-                element.all(by.repeater('field in theads')).getText().then (function(text) {
-                    var titles_count = text.indexOf('Recipient');
+            //     element.all(by.repeater('field in theads')).getText().then (function(text) {
+            //         var titles_count = text.indexOf('Recipient');
 
-                    table.tbody = element.all(by.tagName("tbody")).first();
-                    table.row = table.tbody.all(by.tagName("tr")).first();
-                    recipient.actual = table.row.all(by.tagName('td')).get(titles_count).all(by.tagName('div')).first().getText();
-                    table.row.all(by.tagName('td')).get(titles_count).all(by.tagName('div')).first().all(by.tagName('div')).last().then(function(td) {
-                        browser.actions().mouseMove(td).perform();
-                        browser.actions().click(protractor.Button.RIGHT).perform().then(function() {
-                            for (var i = 0; i<25; i++) {
-                                browser.actions().sendKeys(protractor.Key.BACK_SPACE).perform();
-                            }
-                            browser.actions().sendKeys(recipient.new).perform().then(function() {
-                                table.exit_button = element(by.className("top-message"));
-                                table.exit_button.element(by.buttonText('Exit Edit Mode')).click();
-                                expect(table.row.all(by.tagName('td')).get(titles_count).all(by.tagName('div')).first().getText()).toContain(recipient.new);
-
-                                table.tbody = element.all(by.tagName("tbody")).first();
-                                table.row = table.tbody.all(by.tagName("tr")).first();
-                                table.row.all(by.tagName('td')).get(titles_count).all(by.tagName('div')).first().all(by.tagName('div')).last().then(function(td) {
-                                    browser.actions().mouseMove(td).perform();
-                                    browser.actions().click(protractor.Button.RIGHT).perform().then(function() {
-                                        for (var i = 0; i<25; i++) {
-                                            browser.actions().sendKeys(protractor.Key.BACK_SPACE).perform();
-                                        }
-                                        browser.actions().sendKeys(recipient.actual).perform().then(function() {
-                                            table.exit_button = element(by.className("top-message"));
-                                            table.exit_button.element(by.buttonText('Exit Edit Mode')).click();
-                                        });
-                                    });
-                                });
-                            });
-                        });
-                    });
-                });
-            });
+            //         table.tbody = element.all(by.tagName("tbody")).first();
+            //         table.row = table.tbody.all(by.tagName("tr")).first();
+            //         recipient.actual = table.row.all(by.tagName('td')).get(titles_count).all(by.tagName('div')).first().getText();
+            //         table.row.all(by.tagName('td')).get(titles_count).all(by.tagName('div')).first().all(by.tagName('div')).last().then(function(td) {
+            //             browser.actions().mouseMove(td).perform();
+            //             browser.actions().click(protractor.Button.RIGHT).perform().then(function() {
+            //                 for (var i = 0; i<25; i++) {
+            //                     browser.actions().sendKeys(protractor.Key.BACK_SPACE).perform();
+            //                 }
+            //                 browser.actions().sendKeys(recipient.new).perform().then(function() {
+            //                     table.exit_button = element(by.className("top-message"));
+            //                     table.exit_button.element(by.buttonText('Exit Edit Mode')).click();
+            //                     expect(table.row.all(by.tagName('td')).get(titles_count).all(by.tagName('div')).first().getText()).toContain(recipient.new);
+            //                 });
+            //                 table.tbody = element.all(by.tagName("tbody")).first();
+            //                 table.row = table.tbody.all(by.tagName("tr")).first();
+            //                 table.row.all(by.tagName('td')).get(titles_count).all(by.tagName('div')).first().all(by.tagName('div')).last().then(function(td) {
+            //                     browser.actions().mouseMove(td).perform();
+            //                     browser.actions().click(protractor.Button.RIGHT).perform().then(function() {
+            //                         for (var i = 0; i<25; i++) {
+            //                             browser.actions().sendKeys(protractor.Key.BACK_SPACE).perform();
+            //                         }
+            //                         browser.actions().sendKeys(recipient.actual).perform().then(function() {
+            //                             table.exit_button = element(by.className("top-message"));
+            //                             table.exit_button.element(by.buttonText('Exit Edit Mode')).click();
+            //                         });
+            //                     });
+            //                 });
+            //             });
+            //         });
+            //     });
+            // });
             it('Right click on the Status makes the field editable for the order',function() {
                 status.value = "On Hold";
 
@@ -100,19 +99,6 @@ describe('Orders:',function() {
                             expect(table.order_number).toEqual(table.order_number1);
                         });
                     });
-                });
-            });
-            it('Clicking on order number should open modal',function() {
-                element(by.cssContainingText('.panel-collapse.in .panel-body li','Awaiting')).click();
-
-                element.all(by.repeater('field in theads')).getText().then (function(text) {
-                    var titles_count_order_number = text.indexOf('Order #')
-                    table.tbody = element.all(by.tagName("tbody")).first();
-                    table.row = table.tbody.all(by.tagName("tr")).first();
-                    table.row.all(by.tagName('td')).get(titles_count_order_number).all(by.tagName('a')).first().click();
-                    
-                    expect(browser.getLocationAbsUrl()).toContain('/#/orders/awaiting/1/');
-                    element(by.className("close-btn")).click();
                 });
             });
             it('Duplicates the selected order',function() {
@@ -173,12 +159,121 @@ describe('Orders:',function() {
                     expect(table.order_number).not.toEqual(table.order_number1);
                 });
             });
+            it('Clicking on order number should open modal',function() {
+                element(by.cssContainingText('.panel-collapse.in .panel-body li','Awaiting')).click();
+
+                element.all(by.repeater('field in theads')).getText().then (function(text) {
+                    var titles_count_order_number = text.indexOf('Order #')
+                    table.tbody = element.all(by.tagName("tbody")).first();
+                    table.row = table.tbody.all(by.tagName("tr")).first();
+                    table.row.all(by.tagName('td')).get(titles_count_order_number).all(by.tagName('a')).first().click();
+                    
+                    expect(browser.getLocationAbsUrl()).toContain('/#/orders/awaiting/1/');
+                    element(by.className("close-btn")).click();
+                });
+            });
+            
+            describe('Modal:',function() {
+                var order = {};
+                it('asserts the information in Order modal',function() {
+                    element.all(by.repeater('field in theads')).getText().then (function(text) {
+                        var titles_count_order_number = text.indexOf('Order #')
+                        table.tbody = element.all(by.tagName("tbody")).first();
+                        table.row = table.tbody.all(by.tagName("tr")).first();
+                        table.row.all(by.tagName('td')).get(titles_count_order_number).all(by.tagName('a')).first().click();
+                        order.first_field_set = element.all(by.tagName('fieldset')).first();
+
+                        order.first_name_label = order.first_field_set.element(by.cssContainingText('.row .container-fluid .form-group label', 'First Name'));
+                        order.first_name_div = order.first_name_label.element(by.xpath('..'));
+                        order.first_name_value = order.first_name_div.element(by.tagName('input')).getAttribute('value');
+                        expect(order.first_name_value).toEqual(element(by.model('orders.single.basicinfo.firstname')).getAttribute('value'));
+
+                        order.last_name_label = order.first_field_set.element(by.cssContainingText('.row .container-fluid .form-group label', 'Last Name'));
+                        order.last_name_div = order.last_name_label.element(by.xpath('..'));
+                        order.last_name_value = order.last_name_div.element(by.tagName('input')).getAttribute('value');
+                        expect(order.last_name_value).toEqual(element(by.model('orders.single.basicinfo.lastname')).getAttribute('value'));
+
+                        order.company_label = order.first_field_set.element(by.cssContainingText('.row .container-fluid .form-group label', 'Company'));
+                        order.company_div = order.company_label.element(by.xpath('..'));
+                        order.company_value = order.company_div.element(by.tagName('input')).getAttribute('value');
+                        expect(order.company_value).toEqual(element(by.model('orders.single.basicinfo.company')).getAttribute('value'));
+
+                        order.address1_label = order.first_field_set.element(by.cssContainingText('.row .container-fluid .form-group label', 'Address line 1'));
+                        order.address1_div = order.address1_label.element(by.xpath('..'));
+                        order.address1_value = order.address1_div.element(by.tagName('input')).getAttribute('value');
+                        expect(order.address1_value).toEqual(element(by.model('orders.single.basicinfo.address_1')).getAttribute('value'));
+
+                        order.address2_label = order.first_field_set.element(by.cssContainingText('.row .container-fluid .form-group label', 'Address line 2'));
+                        order.address2_div = order.address2_label.element(by.xpath('..'));
+                        order.address2_value = order.address2_div.element(by.tagName('input')).getAttribute('value');
+                        expect(order.address2_value).toEqual(element(by.model('orders.single.basicinfo.address_2')).getAttribute('value'));
+
+                        order.city_label = order.first_field_set.element(by.cssContainingText('.row .container-fluid .form-group label', 'City'));
+                        order.city_div = order.city_label.element(by.xpath('..'));
+                        order.city_value = order.city_div.element(by.tagName('input')).getAttribute('value');
+                        expect(order.city_value).toEqual(element(by.model('orders.single.basicinfo.city')).getAttribute('value'));
+
+                        order.state_label = order.first_field_set.element(by.cssContainingText('.row .container-fluid .form-group label', 'State'));
+                        order.state_div = order.state_label.element(by.xpath('..'));
+                        order.state_value = order.state_div.element(by.tagName('input')).getAttribute('value');
+                        expect(order.state_value).toEqual(element(by.model('orders.single.basicinfo.state')).getAttribute('value'));
+
+                        order.increment_id_label = order.first_field_set.element(by.cssContainingText('.row .container-fluid .form-group label', 'Order #'));
+                        order.increment_id_div = order.increment_id_label.element(by.xpath('..'));
+                        order.increment_id_value = order.increment_id_div.element(by.tagName('input')).getAttribute('value');
+                        expect(order.increment_id_value).toEqual(element(by.model('orders.single.basicinfo.increment_id')).getAttribute('value'));
+
+                        order.email_label = order.first_field_set.element(by.cssContainingText('.row .container-fluid .form-group label', 'Buyer Email'));
+                        order.email_div = order.email_label.element(by.xpath('..'));
+                        order.email_value = order.email_div.element(by.tagName('input')).getAttribute('value');
+                        expect(order.email_value).toEqual(element(by.model('orders.single.basicinfo.email')).getAttribute('value'));
+
+                        order.store_order_id_label = order.first_field_set.element(by.cssContainingText('.row .container-fluid .form-group label', 'Store Order id'));
+                        order.store_order_id_div = order.store_order_id_label.element(by.xpath('..'));
+                        order.store_order_id_value = order.store_order_id_div.element(by.tagName('input')).getAttribute('value');
+                        expect(order.store_order_id_value).toEqual(element(by.model('orders.single.basicinfo.store_order_id')).getAttribute('value'));
+
+                        order.postcode_label = order.first_field_set.element(by.cssContainingText('.row .container-fluid .form-group label', 'Zip'));
+                        order.postcode_div = order.postcode_label.element(by.xpath('..'));
+                        order.postcode_value = order.postcode_div.element(by.tagName('input')).getAttribute('value');
+                        expect(order.postcode_value).toEqual(element(by.model('orders.single.basicinfo.postcode')).getAttribute('value'));
+
+                        order.country_label = order.first_field_set.element(by.cssContainingText('.row .container-fluid .form-group label', 'Country'));
+                        order.country_div = order.country_label.element(by.xpath('..'));
+                        order.country_value = order.country_div.element(by.tagName('input')).getAttribute('value');
+                        expect(order.country_value).toEqual(element(by.model('orders.single.basicinfo.country')).getAttribute('value'));
+
+                        order.last_field_set = element.all(by.tagName('fieldset')).last();
+                        order.scanned_on_label = order.last_field_set.element(by.cssContainingText('.row .form-group label', 'Scanned on'));
+                        order.scanned_on_div = order.scanned_on_label.element(by.xpath('..'));
+                        order.scanned_on_value = order.scanned_on_div.element(by.tagName('input')).getAttribute('value');
+                        expect(order.scanned_on_value).toEqual(element(by.model('orders.single.basicinfo.scanned_on')).getAttribute('value'));
+
+                        order.tracking_num_label = order.last_field_set.element(by.cssContainingText('.row .form-group label', 'Tracking id #'));
+                        order.tracking_num_div = order.tracking_num_label.element(by.xpath('..'));
+                        order.tracking_num_value = order.tracking_num_div.element(by.tagName('input')).getAttribute('value');
+                        expect(order.tracking_num_value).toEqual(element(by.model('orders.single.basicinfo.tracking_num')).getAttribute('value'));
+                        element(by.className("close-btn")).click();
+                    });
+                    
+                });
+                it('asserts the information in Order modal',function() {
+                    element.all(by.repeater('field in theads')).getText().then (function(text) {
+                        var titles_count_order_number = text.indexOf('Order #')
+                        table.tbody = element.all(by.tagName("tbody")).first();
+                        table.row = table.tbody.all(by.tagName("tr")).first();
+                        table.row.all(by.tagName('td')).get(titles_count_order_number).all(by.tagName('a')).first().click();
+                    });
+                });
+            });
+
             var selectFirstRowInList = function() {
                 table.tbody = element.all(by.tagName("tbody")).first();
                 table.row = table.tbody.all(by.tagName("tr")).first();
                 table.row.click();
             }
         });
+
         var showTitleList = function() {
             var thead;
             thead = element.all(by.css('div.ng-scope.DESC')).first();
