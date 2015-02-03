@@ -40,14 +40,27 @@
 							<input type="password" id="password_conf" class="form-control"/>
 							<div class="form-group error" style="color: red;"><div id="error-password-conf-block" class="help-inline"></div></div>
 
-							<input type="hidden" id="stripe_public_key" class="input-large" 
+							<input type="hidden" id="stripe_public_key" class="input-large"
 							value="<%= ENV['STRIPE_PUBLIC_KEY'] %>"/>
 						</div>
+                        <div class="form-group">
+
+                          <div class="checkbox control-label" style="font-weight:bold;"><input type="checkbox" id="tos_checkbox" />
+                          I agree with the <a href="" id="tos_link">Terms of Service</a> and <a href="" id="privacy_link">Privacy Policy</a></div>
+                          <div class="form-group error" style="color: red;"><div id="error-tos-block" class="help-inline"></div></div>
+                        </div>
+                        <div class="form-group" id="privacy_iframe" style="display:none;">
+                            <iframe src="/assets/views/privacypolicy.html" width="100%" height="200px"></iframe>
+                        </div>
+                        <div class="form-group" id="tos_iframe" style="display:none;">
+                            <iframe src="/assets/views/termsofservicetos.html" width="100%" height="200px"></iframe>
+                        </div>
+
 
 						<script src="https://checkout.stripe.com/checkout.js"></script>
 						<div class="">
 							<button id="customButton" class="btn btn-primary" style="margin-bottom: 15px;">Purchase</button>
-							
+
 							<div class="alert alert-success" id="processing_alert_success" style="display:none;"><div><i class="icon-spinner icon-spin icon-large"></i></div><div> Your subscription is being processed.</div>
 							</div>
 							<div class="alert alert-error" id="processing_alert_error" style="display:none;">
@@ -62,8 +75,25 @@
 				  	email: false,
 				  	user_name: false,
 				  	password: false,
-				  	password_conf: false
-				  }
+				  	password_conf: false,
+                    tos: false
+				  };
+                    $('html').click(function(){
+                        $('#tos_iframe').hide();
+                        $('#privacy_iframe').hide();
+                    });
+                    $('#tos_link').click(function(event){
+                        event.preventDefault();
+                        event.stopPropagation();
+                        $('#privacy_iframe').hide();
+                        $('#tos_iframe').show();
+                    });
+                    $('#privacy_link').click(function(event){
+                        event.preventDefault();
+                        event.stopPropagation();
+                        $('#tos_iframe').hide();
+                        $('#privacy_iframe').show();
+                    });
 
 				  var handler = StripeCheckout.configure({
 				    key: $('#stripe_public_key').val(),
@@ -75,7 +105,7 @@
 			        url: "/subscriptions/confirm_payment",
 			        data: JSON.stringify({ tenant_name: $('#tenant_name').val(), stripe_user_token: token.id, email: $('#email').val(), amount: $('#amount').val(), plan_id: $('#plan_id').val(), user_name: $('#user_name').val(), password: $('#password').val()}),
 			        dataType: "json"
-			        
+
 			        }).error(function(response) {
 			        	$('#processing_alert_success').hide();
 		        		$('#customButton').show();
@@ -88,7 +118,7 @@
 			        	  $('#processing_alert_error').show();
 			        	}
 			        	else {
-									window.location.href = 
+									window.location.href =
 			        			response.redirect_url
 			        	}
 			        });
@@ -98,12 +128,12 @@
 				    }
 				  });
 
-				  $('#tenant_name').blur(function() { 
+				  $('#tenant_name').blur(function() {
 						var tenant_name = document.forms["myForm"]["tenant_name"].value;
 				    if (tenant_name == null || tenant_name == "") {
 				    	valid.tenant_name = false;
 				      $('#error-tenant-block').html("site name must be filled out");
-				      this.focus();
+				      //this.focus();
 				    }
 				    else {
 				    	$.ajax({
@@ -112,7 +142,7 @@
 			        url: "/subscriptions/valid_tenant_name",
 			        data: { tenant_name: $('#tenant_name').val() },
 			        dataType: "json"
-			        
+
 			        }).error(function(response) {
 
 			        }).success(function(response) {
@@ -124,7 +154,7 @@
 			        	else {
 									$('#error-tenant-block').html("");
 									valid.tenant_name = true;
-									email.focus();
+									//email.focus();
 			        	}
 			        });
 				    }
@@ -138,7 +168,7 @@
 				    	valid.email = false;
 				      if(valid.tenant_name) {
 				      	$('#error-email-block').html("email must be filled out");
-				      	this.focus();				      	
+				      	//this.focus();
 				      }
 
 				    }
@@ -153,19 +183,19 @@
 				        url: "/subscriptions/valid_email",
 				        data: { email: $('#email').val() },
 				        dataType: "json"
-				        
+
 				        }).error(function(response){
 
 					  	}).success(function(response) {
 				        	if (!response.valid) {
 				        		$('#error-email-block').html($('#email').val() + " email already exists");
 				        		valid.email = false;
-				        		$('#email').focus();
-				        	}		          	
+				        		//$('#email').focus();
+				        	}
 				        	else {
 				        		$('#error-email-block').html("");
 				        		valid.email = true;
-				        		user_name.focus();
+				        		//user_name.focus();
 				        	}
 					  	});
 					  }
@@ -177,7 +207,7 @@
 				    	valid.user_name = false;
 				    	if (valid.email) {
 				    		$('#error-password-block').html("username must be filled out");
-				      	this.focus();
+				      	//this.focus();
 				    	}
 				    }
 				    else {
@@ -187,19 +217,19 @@
 				        url: "/subscriptions/valid_username",
 				        data: { email: $('#user_name').val() },
 				        dataType: "json"
-				        
+
 				        }).error(function(response){
 
 					  	}).success(function(response) {
 				        	if (!response.valid) {
 				        		$('#error-username-block').html($('#user_name').val() + " email already exists");
 				        		valid.email = false;
-				        		$('#user_name').focus();
-				        	}		          	
+				        		//$('#user_name').focus();
+				        	}
 				        	else {
 				        		$('#error-username-block').html("");
 				        		valid.user_name = true;
-				        		password.focus();
+				        		//password.focus();
 				        	}
 					  	});
 				    }
@@ -212,20 +242,20 @@
 				    	if (valid.user_name) {
 				    		$('#error-password-block').html("password must be filled out");
 					      $('#error-password-conf-block').html("");
-					      this.focus();
+					      //this.focus();
 				    	}
-				    } else if(password.length < 8){
+				    } else if(password.length < 6){
                             valid.password = false;
                             if (valid.user_name) {
-                                $('#error-password-block').html("Password should be at least 8 characters");
+                                $('#error-password-block').html("Password should be at least 6 characters");
                                 $('#error-password-conf-block').html("");
-                                this.focus();
+                                //this.focus();
                             }
                     } else {
 				    	valid.password = true;
 				    	$('#error-password-block').html("");
 				    	$('#error-password-conf-block, #error-password-block').html("");
-				    	password_conf.focus();
+				    	//password_conf.focus();
 				    }
 					});
 					$('#password_conf').blur(function() {
@@ -235,20 +265,30 @@
 							$('#error-password-conf-block, #error-password-block').html("password and password confirmation must match");
 							password.value = "";
 							this.value = "";
-							password.focus();
+							//password.focus();
 						}
 						else {
 							valid.password_conf = true;
 							$('#error-password-conf-block, #error-password-block').html("");
-							customButton.focus();
+							//customButton.focus();
 						}
 					});
+                    $('#tos_checkbox').click(function(){
+                        var tos = document.forms["myForm"]["tos_checkbox"].checked;
+                        if (tos == null || tos == "" || tos ==false) {
+                            valid.tos = false;
+                            $('#error-tos-block').html("Please click I agree for TOS and Privacy Policy");
+                        } else {
+                            valid.tos = true;
+                            $('#error-tos-block').html("");
+                        }
+                    });
 				  document.getElementById('customButton').addEventListener('click', function(e)	{
 				  	e.preventDefault();
 				  	setTimeout(function(){
 					  	console.log(valid.tenant_name);
 					  	console.log(valid.email);
-					  	if (valid.tenant_name && valid.email) {
+					  	if (valid.tenant_name && valid.email && valid.tos) {
 					  		console.log("valid");
 						    // Open Checkout with further options
 						    handler.open({
@@ -262,6 +302,6 @@
 						}, 400);
 				  });
 				</script>
-			</div>		
-		</div> 
+			</div>
+		</div>
 	</div>
