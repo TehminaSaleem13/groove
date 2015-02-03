@@ -178,60 +178,69 @@ describe('Products:',function() {
                         for (var i = 0; i<25; i++) {
                             browser.actions().sendKeys(protractor.Key.BACK_SPACE).perform();
                         }
-                    });
-                    browser.actions().sendKeys(barcode.new).perform();
-                    table.exit_button = element(by.className("top-message"));
-                    table.exit_button.element(by.buttonText('Exit Edit Mode')).click();
-                    expect(td.getText()).toContain(barcode.new);
+                        browser.actions().sendKeys(barcode.new).perform();
+                        table.exit_button = element(by.className("top-message"));
+                        table.exit_button.element(by.buttonText('Exit Edit Mode')).click();
+                        expect(td.getText()).toContain(barcode.new);
 
-                    browser.actions().mouseMove(td).perform();
-                    browser.actions().click(protractor.Button.RIGHT).perform().then(function() {
-                        for (var i = 0; i<25; i++) {
-                            browser.actions().sendKeys(protractor.Key.BACK_SPACE).perform();
-                        }
+                        browser.actions().mouseMove(td).perform();
+                        browser.actions().click(protractor.Button.RIGHT).perform().then(function() {
+                            for (var i = 0; i<25; i++) {
+                                browser.actions().sendKeys(protractor.Key.BACK_SPACE).perform();
+                            }
+                            browser.actions().sendKeys(barcode.actual).perform();
+                            table.exit_button = element(by.className("top-message"));
+                            table.exit_button.element(by.buttonText('Exit Edit Mode')).click();
+                        });
                     });
-                    browser.actions().sendKeys(barcode.actual).perform();
-                    table.exit_button = element(by.className("top-message"));
-                    table.exit_button.element(by.buttonText('Exit Edit Mode')).click();
                 });
             });
         });
         it('Duplicates the selected order item',function() {
             browser.executeScript('window.scrollTo(0,0);').then(function () {
                 new selectFirstRowInList();
-            })
-            
-            element.all(by.repeater('field in theads')).getText().then (function(text) {
-                var titles_count = text.indexOf('Item Name');
-                table.tbody = element.all(by.tagName("tbody")).first();
-                table.row = table.tbody.all(by.tagName("tr")).first();
-                table.row.all(by.tagName('td')).get(titles_count).then (function(td) {
-                    table.item_name = td.getText();
-
-                    edit.button = element.all(by.buttonText('Edit')).first().click();
-                    edit.parent = edit.button.element(by.xpath(".."));
-                    edit.ul = edit.parent.element(by.tagName("ul"));
-                    edit.li = edit.ul.all(by.tagName("li")).get(1).click();
-
+                element.all(by.repeater('field in theads')).getText().then (function(text) {
+                    var titles_count = text.indexOf('Item Name');
                     table.tbody = element.all(by.tagName("tbody")).first();
                     table.row = table.tbody.all(by.tagName("tr")).first();
-                    table.row.all(by.tagName('td')).get(titles_count).then (function(td1) {
-                        table.item_name1 = td1.getText();
-                        expect(table.item_name1).toContain(table.item_name);
+                    table.row.all(by.tagName('td')).get(titles_count).then (function(td) {
+                        table.item_name = td.getText();
+
+                        edit.button = element.all(by.buttonText('Edit')).first().click();
+                        edit.parent = edit.button.element(by.xpath(".."));
+                        edit.ul = edit.parent.element(by.tagName("ul"));
+                        edit.li = edit.ul.all(by.tagName("li")).get(1).click();
+
+                        table.tbody = element.all(by.tagName("tbody")).first();
+                        table.row = table.tbody.all(by.tagName("tr")).first();
+                        table.row.all(by.tagName('td')).get(titles_count).then (function(td1) {
+                            table.item_name1 = td1.getText();
+                            expect(table.item_name1).toContain(table.item_name);
+                        });
                     });
                 });
-            });
+            })
         });
         it('Modifies the status of selected order item',function() {
             new selectFirstRowInList();
-            table.item_name = element.all(by.css("td.ng-scope")).first().getText();
-            status.button = element.all(by.buttonText('Change Status')).first().click();
-            status.parent = status.button.element(by.xpath(".."));
-            status.ul = status.parent.element(by.tagName("ul"));
-            status.li = status.ul.all(by.tagName("li")).get(1).click();
-            expect(element(by.css('.panel-collapse.in .panel-body li.active')).getText()).toEqual('Active Products');
-            table.item_name1 = element.all(by.css("td.ng-scope")).first().getText();
-            expect(table.order_number).toEqual(table.order_number1);
+            element.all(by.repeater('field in theads')).getText().then (function(text) {
+                var titles_count_item_name = text.indexOf('Order #')
+                table.tbody = element.all(by.tagName("tbody")).first();
+                table.row = table.tbody.all(by.tagName("tr")).first();
+                table.item_name = table.row.all(by.tagName('td')).get(titles_count_item_name).getText();
+                
+                status.button = element.all(by.buttonText('Change Status')).first().click();
+                status.parent = status.button.element(by.xpath(".."));
+                status.ul = status.parent.element(by.tagName("ul"));
+                status.li = status.ul.all(by.tagName("li")).get(1).click();
+                element(by.cssContainingText('.panel-collapse.in .panel-body li','Inactive Products')).click();
+
+                table.tbody = element.all(by.tagName("tbody")).first();
+                table.row = table.tbody.all(by.tagName("tr")).first();
+                table.item_name1 = table.row.all(by.tagName('td')).get(titles_count_item_name).getText();
+                expect(table.item_name).toEqual(table.item_name1);
+                element(by.cssContainingText('.panel-collapse.in .panel-body li','Active Products')).click();
+            });
         });
         it('Deletes the selected order item',function() {
             new selectFirstRowInList();

@@ -28,6 +28,7 @@ describe('Orders:',function() {
                     // Remove the title from table header
                     elem.list_elements = element.all(by.repeater('field in options.all_fields'));
                     elem.list_elements.get(2).click();
+                    new showTitleList();
                 });
             });
         });
@@ -46,32 +47,33 @@ describe('Orders:',function() {
 
                     table.tbody = element.all(by.tagName("tbody")).first();
                     table.row = table.tbody.all(by.tagName("tr")).first();
-                    table.row.all(by.tagName('td')).get(titles_count).then(function(td) {
-                        recipient.actual = td.getText();
+                    recipient.actual = table.row.all(by.tagName('td')).get(titles_count).all(by.tagName('div')).first().getText();
+                    table.row.all(by.tagName('td')).get(titles_count).all(by.tagName('div')).first().all(by.tagName('div')).last().then(function(td) {
                         browser.actions().mouseMove(td).perform();
                         browser.actions().click(protractor.Button.RIGHT).perform().then(function() {
                             for (var i = 0; i<25; i++) {
                                 browser.actions().sendKeys(protractor.Key.BACK_SPACE).perform();
                             }
-                        });
-                        browser.actions().sendKeys(recipient.new).perform();
-                        table.exit_button = element(by.className("top-message"));
-                        table.exit_button.element(by.buttonText('Exit Edit Mode')).click();
-                        expect(td.getText()).toContain(recipient.new);
+                            browser.actions().sendKeys(recipient.new).perform().then(function() {
+                                table.exit_button = element(by.className("top-message"));
+                                table.exit_button.element(by.buttonText('Exit Edit Mode')).click();
+                                expect(table.row.all(by.tagName('td')).get(titles_count).all(by.tagName('div')).first().getText()).toContain(recipient.new);
 
-                        table.tbody = element.all(by.tagName("tbody")).first();
-                        table.row = table.tbody.all(by.tagName("tr")).first();
-                        table.row.all(by.tagName('td')).get(titles_count).then(function(td) {
-                            browser.actions().mouseMove(td).perform();
-                            browser.actions().click(protractor.Button.RIGHT).perform().then(function() {
-                                for (var i = 0; i<25; i++) {
-                                    browser.actions().sendKeys(protractor.Key.BACK_SPACE).perform();
-                                }
+                                table.tbody = element.all(by.tagName("tbody")).first();
+                                table.row = table.tbody.all(by.tagName("tr")).first();
+                                table.row.all(by.tagName('td')).get(titles_count).all(by.tagName('div')).first().all(by.tagName('div')).last().then(function(td) {
+                                    browser.actions().mouseMove(td).perform();
+                                    browser.actions().click(protractor.Button.RIGHT).perform().then(function() {
+                                        for (var i = 0; i<25; i++) {
+                                            browser.actions().sendKeys(protractor.Key.BACK_SPACE).perform();
+                                        }
+                                        browser.actions().sendKeys(recipient.actual).perform().then(function() {
+                                            table.exit_button = element(by.className("top-message"));
+                                            table.exit_button.element(by.buttonText('Exit Edit Mode')).click();
+                                        });
+                                    });
+                                });
                             });
-                            browser.actions().sendKeys(recipient.new).perform();
-
-                            table.exit_button = element(by.className("top-message"));
-                            table.exit_button.element(by.buttonText('Exit Edit Mode')).click();
                         });
                     });
                 });
@@ -92,27 +94,26 @@ describe('Orders:',function() {
 
                         browser.executeScript('window.scrollTo(0,0);').then(function () {
                             element(by.cssContainingText('.panel-collapse.in .panel-body li','On Hold')).click();
+                            table.tbody = element.all(by.tagName("tbody")).first();
+                            table.row = table.tbody.all(by.tagName("tr")).first();
+                            table.order_number1 = table.row.all(by.tagName('td')).get(titles_count_order_number).getText();
+                            expect(table.order_number).toEqual(table.order_number1);
                         });
-
-                        table.tbody = element.all(by.tagName("tbody")).first();
-                        table.row = table.tbody.all(by.tagName("tr")).first();
-                        table.order_number1 = table.row.all(by.tagName('td')).get(titles_count_order_number).getText();
-                        expect(table.order_number).toEqual(table.order_number1);
                     });
                 });
             });
             it('Clicking on order number should open modal',function() {
-                var panel = {};
+                element(by.cssContainingText('.panel-collapse.in .panel-body li','Awaiting')).click();
 
-                panel.panel_body = element.all(by.className('panel-body'));
-                panel.panel_body_li = panel.panel_body.get(0).all(by.tagName("li"));
-                panel.panel_body_li.get(1).click();
-
-                new getFirstTableCell();
-
-                table.column.element(by.tagName('a')).click();
-                expect(browser.getLocationAbsUrl()).toContain('/#/orders/awaiting/1/');
-                element(by.className("close-btn")).click();
+                element.all(by.repeater('field in theads')).getText().then (function(text) {
+                    var titles_count_order_number = text.indexOf('Order #')
+                    table.tbody = element.all(by.tagName("tbody")).first();
+                    table.row = table.tbody.all(by.tagName("tr")).first();
+                    table.row.all(by.tagName('td')).get(titles_count_order_number).all(by.tagName('a')).first().click();
+                    
+                    expect(browser.getLocationAbsUrl()).toContain('/#/orders/awaiting/1/');
+                    element(by.className("close-btn")).click();
+                });
             });
             it('Duplicates the selected order',function() {
                 new selectFirstRowInList();
@@ -135,42 +136,47 @@ describe('Orders:',function() {
             });
             it('Modifies the status of selected order',function() {
                 new selectFirstRowInList();
-                table.order_number = table.column.getText();
+                element.all(by.repeater('field in theads')).getText().then (function(text) {
+                    var titles_count_order_number = text.indexOf('Order #')
+                    table.tbody = element.all(by.tagName("tbody")).first();
+                    table.row = table.tbody.all(by.tagName("tr")).first();
+                    table.order_number = table.row.all(by.tagName('td')).get(titles_count_order_number).getText();
+                    
+                    status.button = element.all(by.buttonText('Change Status')).first().click();
+                    status.parent = status.button.element(by.xpath(".."));
+                    status.ul = status.parent.element(by.tagName("ul"));
+                    status.li = status.ul.all(by.tagName("li")).get(1).click();
+                    element(by.cssContainingText('.panel-collapse.in .panel-body li','On Hold')).click();
 
-                status.button = element.all(by.buttonText('Change Status')).first().click();
-                status.parent = status.button.element(by.xpath(".."));
-                status.ul = status.parent.element(by.tagName("ul"));
-                status.li = status.ul.all(by.tagName("li")).get(1).click();
-
-                element(by.cssContainingText('.panel-collapse.in .panel-body li','On Hold')).click();
-
-                new getFirstTableCell();
-                table.order_number1 = table.column.getText();
-                expect(table.order_number).toContain(table.order_number1);
+                    table.tbody = element.all(by.tagName("tbody")).first();
+                    table.row = table.tbody.all(by.tagName("tr")).first();
+                    table.order_number1 = table.row.all(by.tagName('td')).get(titles_count_order_number).getText();
+                    expect(table.order_number).toEqual(table.order_number1);
+                });
             });
             it('Deletes the selected order from the list',function() {
                 new selectFirstRowInList();
-                table.order_number = table.column.getText();
+                element.all(by.repeater('field in theads')).getText().then (function(text) {
+                    var titles_count_order_number = text.indexOf('Order #')
+                    table.tbody = element.all(by.tagName("tbody")).first();
+                    table.row = table.tbody.all(by.tagName("tr")).first();
+                    table.order_number = table.row.all(by.tagName('td')).get(titles_count_order_number).getText();
+                    
+                    edit.button = element.all(by.buttonText('Edit')).first().click();
+                    edit.parent = edit.button.element(by.xpath(".."));
+                    edit.ul = edit.parent.element(by.tagName("ul"));
+                    edit.li = edit.ul.all(by.tagName("li")).get(1).click();
 
-                edit.button = element.all(by.buttonText('Edit')).first().click();
-                edit.parent = edit.button.element(by.xpath(".."));
-                edit.ul = edit.parent.element(by.tagName("ul"));
-                edit.li = edit.ul.all(by.tagName("li")).get(1).click();
-
-                new getFirstTableCell();
-                table.order_number1 = table.column.getText();
-
-                expect(table.order_number1).not.toEqual(table.order_number);
+                    table.tbody = element.all(by.tagName("tbody")).first();
+                    table.row = table.tbody.all(by.tagName("tr")).first();
+                    table.order_number1 = table.row.all(by.tagName('td')).get(titles_count_order_number).getText();
+                    expect(table.order_number).not.toEqual(table.order_number1);
+                });
             });
             var selectFirstRowInList = function() {
                 table.tbody = element.all(by.tagName("tbody")).first();
                 table.row = table.tbody.all(by.tagName("tr")).first();
                 table.row.click();
-            }
-            var getFirstTableCell = function() {
-                table.tbody = element.all(by.tagName("tbody")).first();
-                table.row = table.tbody.all(by.tagName("tr")).first();
-                table.column = table.row.all(by.tagName('td')).first();
             }
         });
         var showTitleList = function() {
