@@ -243,7 +243,7 @@ describe('Orders:',function() {
                         order.country_value = order.country_div.element(by.tagName('input')).getAttribute('value');
                         expect(order.country_value).toEqual(element(by.model('orders.single.basicinfo.country')).getAttribute('value'));
 
-                        order.last_field_set = element.all(by.tagName('fieldset')).last();
+                        order.last_field_set = element.all(by.tagName('fieldset')).get(1);
                         order.scanned_on_label = order.last_field_set.element(by.cssContainingText('.row .form-group label', 'Scanned on'));
                         order.scanned_on_div = order.scanned_on_label.element(by.xpath('..'));
                         order.scanned_on_value = order.scanned_on_div.element(by.tagName('input')).getAttribute('value');
@@ -257,12 +257,33 @@ describe('Orders:',function() {
                     });
                     
                 });
-                it('asserts the information in Order modal',function() {
+                it('asserts the items in Order modal',function() {
                     element.all(by.repeater('field in theads')).getText().then (function(text) {
-                        var titles_count_order_number = text.indexOf('Order #')
+                        var titles_count_order_number = text.indexOf('Order #');
+                        var titles_items_count = text.indexOf('Items');
                         table.tbody = element.all(by.tagName("tbody")).first();
                         table.row = table.tbody.all(by.tagName("tr")).first();
+                        table.items_count = table.row.all(by.tagName('td')).get(titles_items_count).getText();
                         table.row.all(by.tagName('td')).get(titles_count_order_number).all(by.tagName('a')).first().click();
+                        element(by.cssContainingText('.modal-body .tabbable .nav.nav-tabs.modal-nav.ng-isolate-scope .nav.nav-tabs li','Items')).all(by.tagName('a')).first().click();
+
+                        var row = element(by.className('tab-content'));
+                        var table_pane = row.all(by.cssContainingText('.ng-isolate-scope .binder', 'Primary Image')).first().all(by.tagName('div')).get(1);
+
+                        table_pane.all(by.repeater('field in theads')).getText().then (function(items_title) {
+                            var total_qty_ordered = 0;
+                            var total_qty;
+                            var title_qty_ordered_count = items_title.indexOf('Qty ordered');
+                            var table_body = table_pane.all(by.tagName('tbody')).first();
+                            table_body.all(by.tagName('tr')).then(function(trs) {
+                                for(var i = 0; i<trs.length;i++) {
+                                    total_qty = trs[i].all(by.tagName('td')).getText().then(function(tds) {
+                                        return total_qty_ordered = String(Number(total_qty_ordered) + Number(tds[title_qty_ordered_count]));
+                                    });
+                                }
+                                expect(table.items_count).toEqual(total_qty);
+                            });
+                        });
                     });
                 });
             });
