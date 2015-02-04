@@ -2692,7 +2692,7 @@ RSpec.describe ScanPackController, :type => :controller do
               kit_product.id, order_item_kit.id, nil)
 
       expected_result['data']['order']['scanned_items'] << scanned_item
-
+      expected_result['data']['order_complete'] =  true
       #expected_result['data']['most_recent_scanned_products'] = session[:most_recent_scanned_products]
 
       expect(result).to eq(JSON.parse(expected_result.to_json))
