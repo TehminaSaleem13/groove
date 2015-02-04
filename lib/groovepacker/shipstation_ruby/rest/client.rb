@@ -20,7 +20,7 @@ module Groovepacker
           combined_response = {}
           combined_response["orders"] = []
           begin
-            response = HTTParty.get('https://ssapi.shipstation.com/Orders/List?orderStatus=' + 
+            response = HTTParty.get('https://shipstation.p.mashape.com/Orders/List?orderStatus=' + 
               status + '&page=' + page_index.to_s + '&pageSize=100' + orderDateStart,
               headers: {
                 "Authorization" => "Basic "+ Base64.encode64(@auth[:api_key] + ":" + @auth[:api_secret]).gsub(/\n/, ''),
