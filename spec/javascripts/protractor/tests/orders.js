@@ -284,6 +284,66 @@ describe('Orders:',function() {
                                 expect(table.items_count).toEqual(total_qty);
                             });
                         });
+                        element(by.className("close-btn")).click();
+                    });
+                });
+                it('\'Add Item\', adds an item to the existing items',function() {
+                    element.all(by.repeater('field in theads')).getText().then (function(text) {
+                        var titles_count_order_number = text.indexOf('Order #');
+                        var titles_items_count = text.indexOf('Items');
+                        table.tbody = element.all(by.tagName("tbody")).first();
+                        table.row = table.tbody.all(by.tagName("tr")).first();
+                        table.items_count = table.row.all(by.tagName('td')).get(titles_items_count).getText();
+                        table.row.all(by.tagName('td')).get(titles_count_order_number).all(by.tagName('a')).first().click();
+                        element(by.cssContainingText('.modal-body .tabbable .nav.nav-tabs.modal-nav.ng-isolate-scope .nav.nav-tabs li','Items')).all(by.tagName('a')).first().click();
+                        var row = element(by.className('tab-content'));
+                        var table_pane = row.all(by.cssContainingText('.ng-isolate-scope .binder', 'Primary Image')).first().all(by.tagName('div')).get(1);
+                        var table_body = table_pane.all(by.tagName('tbody')).first();
+                        table_body.all(by.tagName('tr')).then(function(trs) {
+                            table.row_count = trs.length;
+                        });
+                        row.all(by.cssContainingText('.btn-group.pull-right', 'Add Item')).first().all(by.tagName('button')).first().click();
+                        var header = element.all(by.cssContainingText('.modal-dialog.modal-lg .modal-content .modal-header div','Select Product to ')).first();
+                        var modal_header = header.element(by.xpath('..'));
+                        var modal_scope = modal_header.element(by.xpath('..'));
+                        var modal_body = modal_scope.element(by.className('modal-body'));
+                        var modal_rows = modal_body.all(by.className('row'));
+                        modal_rows.get(3).all(by.tagName('tbody')).first().all(by.tagName('tr')).first().click();
+                        modal_rows.get(2).element(by.cssContainingText('button','Save & Close')).click();
+                        var row = element(by.className('tab-content'));
+                        var table_pane = row.all(by.cssContainingText('.ng-isolate-scope .binder', 'Primary Image')).first().all(by.tagName('div')).get(1);
+                        var table_body = table_pane.all(by.tagName('tbody')).first();
+                        table_body.all(by.tagName('tr')).then(function(trs) {
+                            table.row_count1 = trs.length;
+                            expect(table.row_count1).toEqual(table.row_count + 1);
+                        });
+                        element(by.className("close-btn")).click();
+                    });
+                });
+                it('\'Remove Selected Items\', removes items from the existing items list',function() {
+                    element.all(by.repeater('field in theads')).getText().then (function(text) {
+                        var titles_count_order_number = text.indexOf('Order #');
+                        var titles_items_count = text.indexOf('Items');
+                        table.tbody = element.all(by.tagName("tbody")).first();
+                        table.row = table.tbody.all(by.tagName("tr")).first();
+                        table.items_count = table.row.all(by.tagName('td')).get(titles_items_count).getText();
+                        table.row.all(by.tagName('td')).get(titles_count_order_number).all(by.tagName('a')).first().click();
+                        element(by.cssContainingText('.modal-body .tabbable .nav.nav-tabs.modal-nav.ng-isolate-scope .nav.nav-tabs li','Items')).all(by.tagName('a')).first().click();
+                        var row = element(by.className('tab-content'));
+                        var table_pane = row.all(by.cssContainingText('.ng-isolate-scope .binder', 'Primary Image')).first().all(by.tagName('div')).get(1);
+                        var table_body = table_pane.all(by.tagName('tbody')).first();
+                        table_body.all(by.tagName('tr')).then(function(trs) {
+                            table.row_count = trs.length;
+                        });
+                        table_body.all(by.tagName('tr')).first().click();
+                        row.all(by.cssContainingText('.btn-group.pull-right', 'Remove selected Items')).first().all(by.tagName('button')).last().click();
+                        var row = element(by.className('tab-content'));
+                        var table_pane = row.all(by.cssContainingText('.ng-isolate-scope .binder', 'Primary Image')).first().all(by.tagName('div')).get(1);
+                        var table_body = table_pane.all(by.tagName('tbody')).first();
+                        table_body.all(by.tagName('tr')).then(function(trs) {
+                            table.row_count1 = trs.length;
+                            expect(table.row_count1).toEqual(table.row_count - 1);
+                        });
                     });
                 });
             });
