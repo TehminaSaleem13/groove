@@ -267,10 +267,104 @@ describe('Products:',function() {
                 });
             });
         });
+        it('Clicking on the \'Item Name\' opens the product modal',function() {
+            element.all(by.repeater('field in theads')).getText().then (function(text) {
+                new openProductModal(text);
+                expect(browser.getLocationAbsUrl()).toContain('/#/products/product/active/1/');
+                element(by.className("close-btn")).click();
+            });
+        });
+        it('Changing the status on product modal changes the status of the item',function() {
+            element.all(by.repeater('field in theads')).getText().then (function(text) {
+                new openProductModal(text);
+                table.status = element(by.cssContainingText('.modal-dialog.modal-lg .modal-content .modal-body .container-fluid.form-horizontal .product_single_top_table td','Status '));
+                table.status.all(by.tagName('label')).get(1).click();
+                element(by.className("close-btn")).click();
+                element(by.cssContainingText('.panel-collapse.in .panel-body li','Inactive Products')).click();
+
+                element.all(by.repeater('field in theads')).getText().then (function(text) {
+                    new getTitleName(text);
+                    expect(table.item_name1).toEqual(table.item_name);
+                });
+                element(by.cssContainingText('.panel-collapse.in .panel-body li','Active Products')).click();
+            });
+        });
+        it('Clicking the link changes the item to a kit',function() {
+            element.all(by.repeater('field in theads')).getText().then (function(text) {
+                new openProductModal(text);
+                table.change_to_kit = element(by.cssContainingText('.modal-dialog.modal-lg .modal-content .modal-body .container-fluid.form-horizontal .product_single_top_table td','Change'));
+                table.change_to_kit.all(by.tagName('p')).first().all(by.tagName('a')).first().click();
+                element(by.className("close-btn")).click();
+                element(by.cssContainingText('.panel-heading .panel-title .accordion-toggle a','Kits')).click();
+                element(by.cssContainingText('.panel-collapse.in .panel-body li','New Kits ')).click();
+                element.all(by.repeater('field in theads')).getText().then (function(text) {
+                    new getTitleName(text);
+                    expect(table.item_name1).toEqual(table.item_name);
+                    table.row.all(by.tagName('td')).get(table.titles_count).all(by.tagName('div')).first().all(by.tagName('div')).first().click();
+                    table.change_back_to_product = element(by.cssContainingText('.modal-dialog.modal-lg .modal-content .modal-body .container-fluid.form-horizontal .product_single_top_table td','back to'));
+                    table.change_back_to_product.all(by.tagName('p')).get(1).all(by.tagName('a')).first().click();
+                    element(by.className("close-btn")).click();
+                    element(by.cssContainingText('.panel-heading .panel-title .accordion-toggle a','Products')).click();
+                    element(by.cssContainingText('.panel-collapse.in .panel-body li','Active Products')).click();
+                    element.all(by.repeater('field in theads')).getText().then (function(text) {
+                        new getTitleName(text);
+                        expect(table.item_name1).toEqual(table.item_name);
+                    });
+                });
+            });
+        });
+        // it('Modifying the available inventory in product modal reflects in the products list',function() {
+        //     var new_available_inv = 5;
+        //     element.all(by.repeater('field in theads')).getText().then (function(text) {
+        //         new openProductModal(text);
+        //         element.all(by.cssContainingText('.modal-dialog.modal-lg .modal-content .modal-body .container-fluid.form-horizontal table','Warehouse Name')).then(function(inventory_table) {
+        //             console.log(inventory_table.length);
+        //             inventory_table(by.repeater('field in theads')).getText().then (function(text) {
+        //                 table.titles_available_inv_count = text.indexOf('Item Name');
+        //                 table.tbody = inventory_table.all(by.tagName("tbody")).first();
+        //                 table.row = table.tbody.all(by.tagName("tr")).first();
+        //                 table.available_inv = table.row.all(by.tagName('td')).get(table.titles_available_inv_count).getText();
+        //                 table.row.all(by.tagName('td')).get(table.titles_available_inv_count).then(function(td) {
+        //                     browser.actions().mouseMove(td).perform();
+        //                     browser.actions().click(protractor.Button.RIGHT).perform().then(function() {
+        //                         for(var i=0; i<10; i++) {
+        //                             browser.actions().sendKeys(protractor.Key.BACK_SPACE).perform();
+        //                         }
+        //                         browser.actions().sendKeys(new_available_inv);
+        //                         table.exit_button = element(by.className("top-message"));
+        //                         table.exit_button.element(by.buttonText('Exit Edit Mode')).click();
+        //                         element(by.className("close-btn")).click();
+        //                         element.all(by.repeater('field in theads')).getText().then (function(text) {
+        //                             table.titles_available_inv_count = text.indexOf('Item Name');
+        //                             table.tbody = element.all(by.tagName("tbody")).first();
+        //                             table.row = table.tbody.all(by.tagName("tr")).first();
+        //                             table.available_inv1 = table.row.all(by.tagName('td')).get(table.titles_available_inv_count).getText();
+        //                             expect(table.available_inv1).toEqual(table.available_inv);
+        //                         });
+        //                     });
+        //                 });
+        //             });
+        //         });
+        //     });
+        // });
         var selectFirstRowInList = function() {
             table.tbody = element.all(by.tagName("tbody")).first();
             table.row = table.tbody.all(by.tagName("tr")).first();
+            table.item_name = table.row.all(by.tagName('td')).get(titles_count).getText();
             table.row.click();
+        }
+        var openProductModal = function(text) {
+            table.titles_count = text.indexOf('Item Name');
+            table.tbody = element.all(by.tagName("tbody")).first();
+            table.row = table.tbody.all(by.tagName("tr")).first();
+            table.item_name = table.row.all(by.tagName('td')).get(table.titles_count).getText();
+            table.row.all(by.tagName('td')).get(table.titles_count).all(by.tagName('div')).first().all(by.tagName('div')).first().click();
+        }
+        var getTitleName = function(text) {
+            table.titles_count = text.indexOf('Item Name');
+            table.tbody = element.all(by.tagName("tbody")).first();
+            table.row = table.tbody.all(by.tagName("tr")).first();
+            table.item_name1 = table.row.all(by.tagName('td')).get(table.titles_count).getText();
         }
     });
     var showTitleList = function() {
