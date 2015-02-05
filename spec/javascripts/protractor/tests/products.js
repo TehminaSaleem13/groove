@@ -168,10 +168,10 @@ describe('Products:',function() {
             barcode.new = "BARCODE";
             new showTitleList();
             element.all(by.repeater('field in theads')).getText().then (function(text) {
-                var titles_count = text.indexOf('Barcode');
+                table.titles_count = text.indexOf('Barcode');
                 table.tbody = element.all(by.tagName("tbody")).first();
                 table.row = table.tbody.all(by.tagName("tr")).first();
-                table.row.all(by.tagName('td')).get(titles_count).then(function(td) {
+                table.row.all(by.tagName('td')).get(table.titles_count).then(function(td) {
                     barcode.actual = td.getText();
                     browser.actions().mouseMove(td).perform();
                     browser.actions().click(protractor.Button.RIGHT).perform().then(function() {
@@ -200,10 +200,10 @@ describe('Products:',function() {
             browser.executeScript('window.scrollTo(0,0);').then(function () {
                 new selectFirstRowInList();
                 element.all(by.repeater('field in theads')).getText().then (function(text) {
-                    var titles_count = text.indexOf('Item Name');
+                    table.titles_count = text.indexOf('Item Name');
                     table.tbody = element.all(by.tagName("tbody")).first();
                     table.row = table.tbody.all(by.tagName("tr")).first();
-                    table.row.all(by.tagName('td')).get(titles_count).then (function(td) {
+                    table.row.all(by.tagName('td')).get(table.titles_count).then (function(td) {
                         table.item_name = td.getText();
 
                         edit.button = element.all(by.buttonText('Edit')).first().click();
@@ -213,7 +213,7 @@ describe('Products:',function() {
 
                         table.tbody = element.all(by.tagName("tbody")).first();
                         table.row = table.tbody.all(by.tagName("tr")).first();
-                        table.row.all(by.tagName('td')).get(titles_count).then (function(td1) {
+                        table.row.all(by.tagName('td')).get(table.titles_count).then (function(td1) {
                             table.item_name1 = td1.getText();
                             expect(table.item_name1).toContain(table.item_name);
                         });
@@ -224,10 +224,10 @@ describe('Products:',function() {
         it('Modifies the status of selected order item',function() {
             new selectFirstRowInList();
             element.all(by.repeater('field in theads')).getText().then (function(text) {
-                var titles_count_item_name = text.indexOf('Order #')
+                table.titles_count_item_name = text.indexOf('Order #')
                 table.tbody = element.all(by.tagName("tbody")).first();
                 table.row = table.tbody.all(by.tagName("tr")).first();
-                table.item_name = table.row.all(by.tagName('td')).get(titles_count_item_name).getText();
+                table.item_name = table.row.all(by.tagName('td')).get(table.titles_count_item_name).getText();
                 
                 status.button = element.all(by.buttonText('Change Status')).first().click();
                 status.parent = status.button.element(by.xpath(".."));
@@ -237,7 +237,7 @@ describe('Products:',function() {
 
                 table.tbody = element.all(by.tagName("tbody")).first();
                 table.row = table.tbody.all(by.tagName("tr")).first();
-                table.item_name1 = table.row.all(by.tagName('td')).get(titles_count_item_name).getText();
+                table.item_name1 = table.row.all(by.tagName('td')).get(table.titles_count_item_name).getText();
                 expect(table.item_name).toEqual(table.item_name1);
                 element(by.cssContainingText('.panel-collapse.in .panel-body li','Active Products')).click();
             });
@@ -246,11 +246,11 @@ describe('Products:',function() {
             new selectFirstRowInList();
 
             element.all(by.repeater('field in theads')).getText().then (function(text) {
-                var titles_count = text.indexOf('Item Name');
+                table.titles_count = text.indexOf('Item Name');
                 table.tbody = element.all(by.tagName("tbody")).first();
                 table.row = table.tbody.all(by.tagName("tr")).first();
 
-                table.row.all(by.tagName('td')).get(titles_count).then (function(td) {
+                table.row.all(by.tagName('td')).get(table.titles_count).then (function(td) {
                     table.item_name = td.getText();
 
                     edit.button = element.all(by.buttonText('Edit')).first().click();
@@ -260,7 +260,7 @@ describe('Products:',function() {
 
                     table.tbody = element.all(by.tagName("tbody")).first();
                     table.row = table.tbody.all(by.tagName("tr")).first();
-                    table.row.all(by.tagName('td')).get(titles_count).then (function(td1) {
+                    table.row.all(by.tagName('td')).get(table.titles_count).then (function(td1) {
                         table.item_name1 = td1.getText();
                         expect(table.item_name1).not.toEqual(table.item_name);
                     });
@@ -313,44 +313,42 @@ describe('Products:',function() {
                 });
             });
         });
-        // it('Modifying the available inventory in product modal reflects in the products list',function() {
-        //     var new_available_inv = 5;
-        //     element.all(by.repeater('field in theads')).getText().then (function(text) {
-        //         new openProductModal(text);
-        //         element.all(by.cssContainingText('.modal-dialog.modal-lg .modal-content .modal-body .container-fluid.form-horizontal table','Warehouse Name')).then(function(inventory_table) {
-        //             console.log(inventory_table.length);
-        //             inventory_table(by.repeater('field in theads')).getText().then (function(text) {
-        //                 table.titles_available_inv_count = text.indexOf('Item Name');
-        //                 table.tbody = inventory_table.all(by.tagName("tbody")).first();
-        //                 table.row = table.tbody.all(by.tagName("tr")).first();
-        //                 table.available_inv = table.row.all(by.tagName('td')).get(table.titles_available_inv_count).getText();
-        //                 table.row.all(by.tagName('td')).get(table.titles_available_inv_count).then(function(td) {
-        //                     browser.actions().mouseMove(td).perform();
-        //                     browser.actions().click(protractor.Button.RIGHT).perform().then(function() {
-        //                         for(var i=0; i<10; i++) {
-        //                             browser.actions().sendKeys(protractor.Key.BACK_SPACE).perform();
-        //                         }
-        //                         browser.actions().sendKeys(new_available_inv);
-        //                         table.exit_button = element(by.className("top-message"));
-        //                         table.exit_button.element(by.buttonText('Exit Edit Mode')).click();
-        //                         element(by.className("close-btn")).click();
-        //                         element.all(by.repeater('field in theads')).getText().then (function(text) {
-        //                             table.titles_available_inv_count = text.indexOf('Item Name');
-        //                             table.tbody = element.all(by.tagName("tbody")).first();
-        //                             table.row = table.tbody.all(by.tagName("tr")).first();
-        //                             table.available_inv1 = table.row.all(by.tagName('td')).get(table.titles_available_inv_count).getText();
-        //                             expect(table.available_inv1).toEqual(table.available_inv);
-        //                         });
-        //                     });
-        //                 });
-        //             });
-        //         });
-        //     });
-        // });
+        it('Modifying the available inventory in product modal reflects in the products list',function() {
+            var new_available_inv = 5;
+            element.all(by.repeater('field in theads')).getText().then (function(text) {
+                new openProductModal(text);
+                element.all(by.cssContainingText('.modal-dialog.modal-lg .modal-content .modal-body .container-fluid.form-horizontal table','Warehouse Name')).first().then(function(inventory_table) {
+                    console.log(inventory_table.length);
+                    inventory_table.all(by.repeater('field in theads')).getText().then (function(text) {
+                        table.titles_available_inv_count = text.indexOf('Available Inv');
+                        table.tbody = inventory_table.all(by.tagName("tbody")).first();
+                        table.row = table.tbody.all(by.tagName("tr")).first();
+                    
+                        table.row.all(by.tagName('td')).get(table.titles_available_inv_count).then(function(td) {
+                            browser.actions().mouseMove(td).perform();
+                            browser.actions().click(protractor.Button.RIGHT).perform();
+                            browser.actions().sendKeys(protractor.Key.ARROW_UP).perform();
+
+                            table.exit_button = element(by.className("top-message"));
+                            table.exit_button.element(by.buttonText('Exit Edit Mode')).click();
+                            table.available_inv = td.getText();
+                            element(by.className("close-btn")).click();
+                            element.all(by.repeater('field in theads')).getText().then (function(text) {
+                                table.titles_available_inv_count = text.indexOf('Avbl Inv');
+                                table.tbody = element.all(by.tagName("tbody")).first();
+                                table.row = table.tbody.all(by.tagName("tr")).first();
+                                table.available_inv1 = table.row.all(by.tagName('td')).get(table.titles_available_inv_count).getText();
+                                expect(String(table.available_inv1)).toEqual(String(table.available_inv).trim());
+                            });
+                        });
+                    });
+                });
+            });
+        });
         var selectFirstRowInList = function() {
             table.tbody = element.all(by.tagName("tbody")).first();
             table.row = table.tbody.all(by.tagName("tr")).first();
-            table.item_name = table.row.all(by.tagName('td')).get(titles_count).getText();
+            table.item_name = table.row.all(by.tagName('td')).get(table.titles_count).getText();
             table.row.click();
         }
         var openProductModal = function(text) {
