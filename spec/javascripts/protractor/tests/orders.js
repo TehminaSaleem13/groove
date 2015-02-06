@@ -9,6 +9,7 @@ describe('Orders:',function() {
         });
 
         describe('Title:',function() {
+            var table = {};
             it('First title should be orders',function() {
                 expect(element.all(by.css('.panel-title')).first().getText()).toEqual('Orders');
             });
@@ -23,7 +24,9 @@ describe('Orders:',function() {
                 var elem = {};
                 elem.list_elements = element.all(by.repeater('field in options.all_fields'));
                 elem.list_elements.get(2).click();
-                element.all(by.repeater('field in theads')).getText().then (function(text) {
+                table.list_table = element.all(by.tagName('table')).first();
+                table.thead = table.list_table.element(by.tagName('thead'));
+                table.thead.all(by.repeater('field in theads')).getText().then (function(text) {
                     expect(text).toContain('Email');
                     // Remove the title from table header
                     elem.list_elements = element.all(by.repeater('field in options.all_fields'));
@@ -112,7 +115,9 @@ describe('Orders:',function() {
             // });
             it('Duplicates the selected order',function() {
                 new selectFirstRowInList();
-                element.all(by.repeater('field in theads')).getText().then (function(text) {
+                table.list_table = element.all(by.tagName('table')).first();
+                table.thead = table.list_table.element(by.tagName('thead'));
+                table.thead.all(by.repeater('field in theads')).getText().then (function(text) {
                     var titles_count_order_number = text.indexOf('Order #')
                     table.tbody = element.all(by.tagName("tbody")).first();
                     table.row = table.tbody.all(by.tagName("tr")).first();
@@ -131,7 +136,9 @@ describe('Orders:',function() {
             });
             it('Modifies the status of selected order',function() {
                 new selectFirstRowInList();
-                element.all(by.repeater('field in theads')).getText().then (function(text) {
+                table.list_table = element.all(by.tagName('table')).first();
+                table.thead = table.list_table.element(by.tagName('thead'));
+                table.thead.all(by.repeater('field in theads')).getText().then (function(text) {
                     var titles_count_order_number = text.indexOf('Order #')
                     table.tbody = element.all(by.tagName("tbody")).first();
                     table.row = table.tbody.all(by.tagName("tr")).first();
@@ -151,7 +158,9 @@ describe('Orders:',function() {
             });
             it('Deletes the selected order from the list',function() {
                 new selectFirstRowInList();
-                element.all(by.repeater('field in theads')).getText().then (function(text) {
+                table.list_table = element.all(by.tagName('table')).first();
+                table.thead = table.list_table.element(by.tagName('thead'));
+                table.thead.all(by.repeater('field in theads')).getText().then (function(text) {
                     var titles_count_order_number = text.indexOf('Order #')
                     table.tbody = element.all(by.tagName("tbody")).first();
                     table.row = table.tbody.all(by.tagName("tr")).first();
@@ -170,8 +179,9 @@ describe('Orders:',function() {
             });
             it('Clicking on order number should open modal',function() {
                 element(by.cssContainingText('.panel-collapse.in .panel-body li','Awaiting')).click();
-
-                element.all(by.repeater('field in theads')).getText().then (function(text) {
+                table.list_table = element.all(by.tagName('table')).first();
+                table.thead = table.list_table.element(by.tagName('thead'));
+                table.thead.all(by.repeater('field in theads')).getText().then (function(text) {
                     new openOrderModal(text);
                     
                     expect(browser.getLocationAbsUrl()).toContain('/#/orders/awaiting/1/');
@@ -182,7 +192,9 @@ describe('Orders:',function() {
             describe('Modal:',function() {
                 var order = {};
                 it('asserts the information in Order modal',function() {
-                    element.all(by.repeater('field in theads')).getText().then (function(text) {
+                    table.list_table = element.all(by.tagName('table')).first();
+                    table.thead = table.list_table.element(by.tagName('thead'));
+                    table.thead.all(by.repeater('field in theads')).getText().then (function(text) {
                         new openOrderModal(text);
                         order.first_field_set = element.all(by.tagName('fieldset')).first();
 
@@ -261,7 +273,9 @@ describe('Orders:',function() {
                     
                 });
                 it('asserts the items in Order modal',function() {
-                    element.all(by.repeater('field in theads')).getText().then (function(text) {
+                    table.list_table = element.all(by.tagName('table')).first();
+                    table.thead = table.list_table.element(by.tagName('thead'));
+                    table.thead.all(by.repeater('field in theads')).getText().then (function(text) {
                         var titles_items_count = text.indexOf('Items');
                         new openOrderModal(text);
                         element(by.cssContainingText('.modal-body .tabbable .nav.nav-tabs.modal-nav.ng-isolate-scope .nav.nav-tabs li','Items')).all(by.tagName('a')).first().click();
@@ -287,7 +301,9 @@ describe('Orders:',function() {
                     });
                 });
                 it('\'Add Item\', adds an item to the existing items',function() {
-                    element.all(by.repeater('field in theads')).getText().then (function(text) {
+                    table.list_table = element.all(by.tagName('table')).first();
+                    table.thead = table.list_table.element(by.tagName('thead'));
+                    table.thead.all(by.repeater('field in theads')).getText().then (function(text) {
                         var titles_items_count = text.indexOf('Items');
                         new openOrderModal(text);
                         element(by.cssContainingText('.modal-body .tabbable .nav.nav-tabs.modal-nav.ng-isolate-scope .nav.nav-tabs li','Items')).all(by.tagName('a')).first().click();
@@ -316,7 +332,10 @@ describe('Orders:',function() {
                     });
                 });
                 it('\'Remove Selected Items\', removes items from the existing items list',function() {
-                    element.all(by.repeater('field in theads')).getText().then (function(text) {
+                    element(by.cssContainingText('.panel-collapse.in .panel-body li','On Hold')).click();
+                    table.list_table = element.all(by.tagName('table')).first();
+                    table.thead = table.list_table.element(by.tagName('thead'));
+                    table.thead.all(by.repeater('field in theads')).getText().then (function(text) {
                         var titles_items_count = text.indexOf('Items');
                         new openOrderModal(text);
                         element(by.cssContainingText('.modal-body .tabbable .nav.nav-tabs.modal-nav.ng-isolate-scope .nav.nav-tabs li','Items')).all(by.tagName('a')).first().click();

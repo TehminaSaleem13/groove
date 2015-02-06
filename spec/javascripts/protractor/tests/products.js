@@ -148,10 +148,13 @@ describe('Products:',function() {
         });
         it('Click on a title in the list to view it in the table',function() {
             var elem = {};
+            var table = {};
             elem.list_elements = element.all(by.repeater('field in options.all_fields'));
             elem.list_elements.get(6).click();
 
-            element.all(by.repeater('field in theads')).getText().then (function(text) {
+            table.list_table = element.all(by.tagName('table')).first();
+            table.thead = table.list_table.element(by.tagName('thead'));
+            table.thead.all(by.repeater('field in theads')).getText().then (function(text) {
                 expect(text).toContain('Tertiary Location');
                 elem.list_elements = element.all(by.repeater('field in options.all_fields'));
                 elem.list_elements.get(6).click();
@@ -167,31 +170,32 @@ describe('Products:',function() {
             var column_no = 0;
             barcode.new = "BARCODE";
             new showTitleList();
-            element.all(by.repeater('field in theads')).getText().then (function(text) {
+            table.list_table = element.all(by.tagName('table')).first();
+            table.thead = table.list_table.element(by.tagName('thead'));
+            table.thead.all(by.repeater('field in theads')).getText().then (function(text) {
                 table.titles_count = text.indexOf('Barcode');
                 table.tbody = element.all(by.tagName("tbody")).first();
                 table.row = table.tbody.all(by.tagName("tr")).first();
                 table.row.all(by.tagName('td')).get(table.titles_count).then(function(td) {
                     barcode.actual = td.getText();
                     browser.actions().mouseMove(td).perform();
-                    browser.actions().click(protractor.Button.RIGHT).perform().then(function() {
+                    browser.actions().click(protractor.Button.RIGHT).perform();
+                    for (var i = 0; i<25; i++) {
+                        browser.actions().sendKeys(protractor.Key.BACK_SPACE).perform();
+                    }
+                    browser.actions().sendKeys(barcode.new).perform();
+                    table.exit_button = element(by.className("top-message"));
+                    table.exit_button.element(by.buttonText('Exit Edit Mode')).click();
+                    expect(table.row.all(by.tagName('td')).get(table.titles_count).getText()).toContain(barcode.new);
+                    table.row.all(by.tagName('td')).get(table.titles_count).then(function(td) {
+                        browser.actions().mouseMove(td).perform();
+                        browser.actions().click(protractor.Button.RIGHT).perform();
                         for (var i = 0; i<25; i++) {
                             browser.actions().sendKeys(protractor.Key.BACK_SPACE).perform();
                         }
-                        browser.actions().sendKeys(barcode.new).perform();
+                        browser.actions().sendKeys(barcode.actual).perform();
                         table.exit_button = element(by.className("top-message"));
                         table.exit_button.element(by.buttonText('Exit Edit Mode')).click();
-                        expect(td.getText()).toContain(barcode.new);
-
-                        browser.actions().mouseMove(td).perform();
-                        browser.actions().click(protractor.Button.RIGHT).perform().then(function() {
-                            for (var i = 0; i<25; i++) {
-                                browser.actions().sendKeys(protractor.Key.BACK_SPACE).perform();
-                            }
-                            browser.actions().sendKeys(barcode.actual).perform();
-                            table.exit_button = element(by.className("top-message"));
-                            table.exit_button.element(by.buttonText('Exit Edit Mode')).click();
-                        });
                     });
                 });
             });
@@ -199,7 +203,9 @@ describe('Products:',function() {
         it('Duplicates the selected order item',function() {
             browser.executeScript('window.scrollTo(0,0);').then(function () {
                 new selectFirstRowInList();
-                element.all(by.repeater('field in theads')).getText().then (function(text) {
+                table.list_table = element.all(by.tagName('table')).first();
+                table.thead = table.list_table.element(by.tagName('thead'));
+                table.thead.all(by.repeater('field in theads')).getText().then (function(text) {
                     table.titles_count = text.indexOf('Item Name');
                     table.tbody = element.all(by.tagName("tbody")).first();
                     table.row = table.tbody.all(by.tagName("tr")).first();
@@ -223,7 +229,9 @@ describe('Products:',function() {
         });
         it('Modifies the status of selected order item',function() {
             new selectFirstRowInList();
-            element.all(by.repeater('field in theads')).getText().then (function(text) {
+            table.list_table = element.all(by.tagName('table')).first();
+            table.thead = table.list_table.element(by.tagName('thead'));
+            table.thead.all(by.repeater('field in theads')).getText().then (function(text) {
                 table.titles_count_item_name = text.indexOf('Order #')
                 table.tbody = element.all(by.tagName("tbody")).first();
                 table.row = table.tbody.all(by.tagName("tr")).first();
@@ -244,8 +252,9 @@ describe('Products:',function() {
         });
         it('Deletes the selected order item',function() {
             new selectFirstRowInList();
-
-            element.all(by.repeater('field in theads')).getText().then (function(text) {
+            table.list_table = element.all(by.tagName('table')).first();
+            table.thead = table.list_table.element(by.tagName('thead'));
+            table.thead.all(by.repeater('field in theads')).getText().then (function(text) {
                 table.titles_count = text.indexOf('Item Name');
                 table.tbody = element.all(by.tagName("tbody")).first();
                 table.row = table.tbody.all(by.tagName("tr")).first();
@@ -268,21 +277,27 @@ describe('Products:',function() {
             });
         });
         it('Clicking on the \'Item Name\' opens the product modal',function() {
-            element.all(by.repeater('field in theads')).getText().then (function(text) {
+            table.list_table = element.all(by.tagName('table')).first();
+            table.thead = table.list_table.element(by.tagName('thead'));
+            table.thead.all(by.repeater('field in theads')).getText().then (function(text) {
                 new openProductModal(text);
                 expect(browser.getLocationAbsUrl()).toContain('/#/products/product/active/1/');
                 element(by.className("close-btn")).click();
             });
         });
         it('Changing the status on product modal changes the status of the item',function() {
-            element.all(by.repeater('field in theads')).getText().then (function(text) {
+            table.list_table = element.all(by.tagName('table')).first();
+            table.thead = table.list_table.element(by.tagName('thead'));
+            table.thead.all(by.repeater('field in theads')).getText().then (function(text) {
                 new openProductModal(text);
                 table.status = element(by.cssContainingText('.modal-dialog.modal-lg .modal-content .modal-body .container-fluid.form-horizontal .product_single_top_table td','Status '));
                 table.status.all(by.tagName('label')).get(1).click();
                 element(by.className("close-btn")).click();
                 element(by.cssContainingText('.panel-collapse.in .panel-body li','Inactive Products')).click();
 
-                element.all(by.repeater('field in theads')).getText().then (function(text) {
+                table.list_table = element.all(by.tagName('table')).first();
+                table.thead = table.list_table.element(by.tagName('thead'));
+                table.thead.all(by.repeater('field in theads')).getText().then (function(text) {
                     new getTitleName(text);
                     expect(table.item_name1).toEqual(table.item_name);
                 });
@@ -290,14 +305,18 @@ describe('Products:',function() {
             });
         });
         it('Clicking the link changes the item to a kit',function() {
-            element.all(by.repeater('field in theads')).getText().then (function(text) {
+            table.list_table = element.all(by.tagName('table')).first();
+            table.thead = table.list_table.element(by.tagName('thead'));
+            table.thead.all(by.repeater('field in theads')).getText().then (function(text) {
                 new openProductModal(text);
                 table.change_to_kit = element(by.cssContainingText('.modal-dialog.modal-lg .modal-content .modal-body .container-fluid.form-horizontal .product_single_top_table td','Change'));
                 table.change_to_kit.all(by.tagName('p')).first().all(by.tagName('a')).first().click();
                 element(by.className("close-btn")).click();
                 element(by.cssContainingText('.panel-heading .panel-title .accordion-toggle a','Kits')).click();
                 element(by.cssContainingText('.panel-collapse.in .panel-body li','New Kits ')).click();
-                element.all(by.repeater('field in theads')).getText().then (function(text) {
+                table.list_table = element.all(by.tagName('table')).first();
+                table.thead = table.list_table.element(by.tagName('thead'));
+                table.thead.all(by.repeater('field in theads')).getText().then (function(text) {
                     new getTitleName(text);
                     expect(table.item_name1).toEqual(table.item_name);
                     table.row.all(by.tagName('td')).get(table.titles_count).all(by.tagName('div')).first().all(by.tagName('div')).first().click();
@@ -306,7 +325,9 @@ describe('Products:',function() {
                     element(by.className("close-btn")).click();
                     element(by.cssContainingText('.panel-heading .panel-title .accordion-toggle a','Products')).click();
                     element(by.cssContainingText('.panel-collapse.in .panel-body li','Active Products')).click();
-                    element.all(by.repeater('field in theads')).getText().then (function(text) {
+                    table.list_table = element.all(by.tagName('table')).first();
+                    table.thead = table.list_table.element(by.tagName('thead'));
+                    table.thead.all(by.repeater('field in theads')).getText().then (function(text) {
                         new getTitleName(text);
                         expect(table.item_name1).toEqual(table.item_name);
                     });
@@ -314,11 +335,11 @@ describe('Products:',function() {
             });
         });
         it('Modifying the available inventory in product modal reflects in the products list',function() {
-            var new_available_inv = 5;
-            element.all(by.repeater('field in theads')).getText().then (function(text) {
+            table.list_table = element.all(by.tagName('table')).first();
+            table.thead = table.list_table.element(by.tagName('thead'));
+            table.thead.all(by.repeater('field in theads')).getText().then (function(text) {
                 new openProductModal(text);
                 element.all(by.cssContainingText('.modal-dialog.modal-lg .modal-content .modal-body .container-fluid.form-horizontal table','Warehouse Name')).first().then(function(inventory_table) {
-                    console.log(inventory_table.length);
                     inventory_table.all(by.repeater('field in theads')).getText().then (function(text) {
                         table.titles_available_inv_count = text.indexOf('Available Inv');
                         table.tbody = inventory_table.all(by.tagName("tbody")).first();
@@ -331,9 +352,11 @@ describe('Products:',function() {
 
                             table.exit_button = element(by.className("top-message"));
                             table.exit_button.element(by.buttonText('Exit Edit Mode')).click();
-                            table.available_inv = td.getText();
+                            table.available_inv = table.row.all(by.tagName('td')).get(table.titles_available_inv_count).getText();
                             element(by.className("close-btn")).click();
-                            element.all(by.repeater('field in theads')).getText().then (function(text) {
+                            table.list_table = element.all(by.tagName('table')).first();
+                            table.thead = table.list_table.element(by.tagName('thead'));
+                            table.thead.all(by.repeater('field in theads')).getText().then (function(text) {
                                 table.titles_available_inv_count = text.indexOf('Avbl Inv');
                                 table.tbody = element.all(by.tagName("tbody")).first();
                                 table.row = table.tbody.all(by.tagName("tr")).first();

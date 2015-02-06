@@ -1,6 +1,8 @@
 var env= require('../environment.js');
 exports.config = {
-    seleniumAddress: env.seleniumAddress,
+    sauceUser: process.env.SAUCE_USERNAME || 'groovetech',
+    sauceKey: process.env.SAUCE_ACCESS_KEY || '1f05e3d9-4eb7-456a-a710-364d27172713',
+    // seleniumAddress: env.seleniumAddress,
 
     capabilities: env.capabilities,
 
@@ -26,6 +28,6 @@ exports.config = {
     jasmineNodeOpts: {
         showColors: true,
         isVerbose:true,
-        defaultTimeoutInterval: 30000
+        defaultTimeoutInterval: 150000
     }
 };
