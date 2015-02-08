@@ -3,20 +3,20 @@
     def new
       @subscription = Subscription.new
     end
-    
+
     def select_plan
-    	
+
     end
 
     def confirm_payment
       puts params.inspect
-      @subscription = Subscription.create(stripe_user_token: params[:stripe_user_token], 
-          tenant_name: params[:tenant_name], 
-          amount: params[:amount], 
-          subscription_plan_id: params[:plan_id], 
-          email: params[:email], 
-          user_name: params[:user_name], 
-          password: params[:password], 
+      @subscription = Subscription.create(stripe_user_token: params[:stripe_user_token],
+          tenant_name: params[:tenant_name],
+          amount: params[:amount],
+          subscription_plan_id: params[:plan_id],
+          email: params[:email],
+          user_name: params[:user_name],
+          password: params[:password],
           status: "started")
       if @subscription
         if @subscription.save_with_payment
@@ -30,7 +30,19 @@
     end
 
     def valid_tenant_name
-      render json: {valid: Tenant.where(name: params[:tenant_name]).length == 0}
+      result = {}
+      result['valid'] = true
+      result['message'] = ''
+      if Tenant.where(name: params[:tenant_name]).length == 0
+        if (params[:tenant_name] =~ /^[a-zA-Z0-9][a-zA-Z0-9_]*[a-zA-Z0-9]$/).nil?
+          result['valid'] = false
+          result['message'] = 'Site name can only have alphabets, numbers and underscores. They cannot start or end with an underscore'
+        end
+      else
+        result['valid'] = false
+        result['message'] = 'https://' + params[:tenant_name] +'.groovepacker.com already exists'
+      end
+      render json: result
     end
 
     def valid_email
@@ -42,7 +54,7 @@
     end
 
     def show
-      flash[:notice] = params[:notice]   
+      flash[:notice] = params[:notice]
     end
 
   end
