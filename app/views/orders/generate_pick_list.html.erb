@@ -6296,20 +6296,22 @@ body {
           </table>
           <% end %>
             <% unless @depends_pick_list.empty? %>
-              <div style="page-break-inside: avoid;">
+              <div>
                 <label style="font-size:16px;"><center>Kits below are set to automatically split during packing. Their inventory is listed separately so it can be picked as needed.</center></label>
-                <table class="table table-condensed" style="border: solid 2px #eeeeee;">
-                  <thead>
-                  <td>Location Primary</td>
-                  <td> Product SKU</td>
-                  <td style="text-align:right;">Pick</td>
-                  <td>Quantity</td>
-                  <td>Product Name</td>
-                  <td>Location Secondary</td>
-                  </thead>
+
                   <%@depends_pick_list.each do |depends_pick|%>
                       <%if !depends_pick['single'].nil?%>
                           <%depends_pick['single'].each do |pick|%>
+                            <table class="table table-condensed" style="border: solid 2px #eeeeee;">
+                              <thead>
+                              <td>Location Primary</td>
+                              <td> Product SKU</td>
+                              <td style="text-align:right;">Pick</td>
+                              <td>Quantity</td>
+                              <td>Product Name</td>
+                              <td>Location Secondary</td>
+                              </thead>
+                              <tbody>
                               <tr style="margin-bottom:0px; padding-bottom:0px;">
                                 <td style="border-bottom:0px;"><%=pick['primary_location']%></td>
                                 <td style="border-bottom:0px;"><%=pick['sku']%></td>
@@ -6341,10 +6343,14 @@ body {
                                     <td style="padding-left: 20px;"><%=pick['secondary_location']%></td>
                                   </tr>
                               <%end%>
+                              <% if pick == depends_pick['individual'].last%>
+                                  </tbody>
+                                </table>
+                              <%end%>
                           <%end%>
                       <%end%>
                   <%end%>
-                </table>
+
               </div>
             <%end%>
 

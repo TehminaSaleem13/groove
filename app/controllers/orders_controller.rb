@@ -846,6 +846,35 @@ class OrdersController < ApplicationController
         end
       end
     end
+    unless @pick_list.length == 0
+      @pick_list = @pick_list.sort_by  do |h|
+        if h['primary_location'].blank?
+          ''
+        else
+          h['primary_location']
+        end
+      end
+    end
+    unless @depends_pick_list.length == 0
+      @depends_pick_list = @depends_pick_list.sort_by  do |h|
+        unless h['individual'].length == 0
+          h['individual'] = h['individual'].sort_by do |hash|
+            if hash['primary_location'].blank?
+              ''
+            else
+              hash['primary_location']
+            end
+          end
+        end
+        if h['single'].length == 0 || h['single'][0]['primary_location'].blank?
+          ''
+        else
+          h['single'][0]['primary_location']
+        end
+      end
+
+    end
+    puts @depends_pick_list
 
     respond_to do |format|
       format.html

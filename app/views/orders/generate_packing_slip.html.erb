@@ -6254,7 +6254,7 @@ p{
   margin-left: 30px;
   font-size: 30px;
 }
-table, thead, tbody, tr, td, tfoot {
+ thead, tr, td, tfoot {
     page-break-inside: avoid;
 }
 body {
@@ -6324,32 +6324,29 @@ body {
     			<%end%>
     		</table>
     	</div>
-    		<center><hr></center>
-        <br>
-    		<p><i>
+
           <%if !@order.store.nil?%>
             <%if !@order.store.thank_you_message_to_customer.nil? && !@order.store.thank_you_message_to_customer == 'null' %>
               <div style="page-break-inside: avoid;">
-                  <%=@order.store.thank_you_message_to_customer%>
+                <p><i><%=@order.store.thank_you_message_to_customer%></i></p>
               </div>
             <%elsif !GeneralSetting.get_packing_slip_message_to_customer.nil? %>
                 <div style="page-break-inside: avoid;">
-                    <%=GeneralSetting.get_packing_slip_message_to_customer%>
+                  <p><i><%=GeneralSetting.get_packing_slip_message_to_customer%></i></p>
                 </div>
             <% end %>
           <%end%>
-        </i></p>
-    	<div>
-        <center>
+
+
             <%if !@order.nil? && !@order.customer_comments.nil? %>
+              <center>
                 <div style="page-break-inside: avoid;">
                     <textarea>
                         <%= @order.customer_comments %>
                     </textarea>
                 </div>
+              </center>
             <%end%>
-        </center>
-    	</div>
     <%else%>
     	<span>No orders</span>
     <%end%>
