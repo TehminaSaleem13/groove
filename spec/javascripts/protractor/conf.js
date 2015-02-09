@@ -11,6 +11,7 @@ exports.config = {
     baseUrl: env.baseUrl,
 
     onPrepare: function() {
+        require('jasmine-reporters');
         browser.driver.manage().window().maximize();
         browser.driver.get(env.baseUrl + '/users/sign_in');
 
@@ -23,6 +24,7 @@ exports.config = {
                 return /\/#\//.test(url);
             });
         });
+        jasmine.getEnv().addReporter(new jasmine.JUnitXmlReporter('protractor_report', true, true));
     },
 
     jasmineNodeOpts: {
