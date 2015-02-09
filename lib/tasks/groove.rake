@@ -88,11 +88,11 @@ namespace :groove do
 
   task :spec do
     #Added cleanup here to delay startup some more while webrick loads
-    #puts 'Cleaning and seeding test db'.green.bold
-    #Rake::Task['protractor:cleanup'].invoke
-    #puts 'Starting Protractor tests'.green.bold
+    puts 'Cleaning and seeding test db'.green.bold
+    Rake::Task['protractor:cleanup'].invoke
+    puts 'Starting Protractor tests'.green.bold
     system 'protractor spec/javascripts/protractor/conf.js'
-    #puts 'Finished Running Protractor Tests! Bye!'.green.bold
-    exit(1)
+    puts 'Finished Running Protractor Tests! Bye!'.green.bold
+    exit(0)
   end
 end
