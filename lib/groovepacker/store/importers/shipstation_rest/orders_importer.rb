@@ -11,9 +11,11 @@ module Groovepacker
             import_item = handler[:import_item]
             result = self.build_result
             puts result.inspect
+            statuses = []
+            statuses.push('awaiting_shipment') if credential.import_awaiting_shipment?
+            statuses.push('shipped') if credential.import_shipped?
 
-
-            response = client.get_orders('awaiting_shipment', credential.last_imported_at)
+            response = client.get_orders(statuses.join(", "), credential.last_imported_at)
             puts response.inspect
             importing_time = Date.today - 1.day
 
