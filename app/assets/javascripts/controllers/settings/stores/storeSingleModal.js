@@ -305,6 +305,7 @@ function(scope, store_data, $window, $sce, $interval, $state, $stateParams, $mod
             stores.ebay.sign_in_url.get(scope.stores);
             scope.stores.single.import_images = true;
             scope.stores.single.import_products = true;
+            scope.stores.single.shall_import_awaiting_shipment = true;
         } else {
             scope.edit_status = true;
             scope.redirect = ($stateParams.redirect || ($stateParams.action == "create"));
