@@ -10,100 +10,106 @@ module Groovepacker
             client = handler[:store_handle]
             import_item = handler[:import_item]
             result = self.build_result
-            puts result.inspect
 
+            statuses = []
+            statuses.push('awaiting_shipment') if credential.shall_import_awaiting_shipment?
+            statuses.push('shipped') if credential.shall_import_shipped?
+            unless statuses.empty?
+              response = client.get_orders(statuses.join(","), credential.last_imported_at)
+              importing_time = Date.today - 1.day
 
-            response = client.get_orders('awaiting_shipment', credential.last_imported_at)
-            puts response.inspect
-            importing_time = Date.today - 1.day
-
-            unless response["orders"].nil?   
-              result[:total_imported] = response["orders"].length          
-              import_item.current_increment_id = ''
-              import_item.success_imported = 0
-              import_item.previous_imported = 0
-              import_item.current_order_items = -1
-              import_item.current_order_imported_item = -1
-              import_item.to_import = result[:total_imported]
-              import_item.save
-              response["orders"].each do |order|
-                import_item.current_increment_id = order["orderNumber"]
+              unless response["orders"].nil?   
+                result[:total_imported] = response["orders"].length          
+                import_item.current_increment_id = ''
+                import_item.success_imported = 0
+                import_item.previous_imported = 0
                 import_item.current_order_items = -1
                 import_item.current_order_imported_item = -1
+                import_item.to_import = result[:total_imported]
                 import_item.save
-                if Order.where(increment_id: order["orderNumber"]).length == 0
-                  shipstation_order = Order.new
-                  ship_to = order["shipTo"]["name"].split(" ")
-                  import_order(shipstation_order, order)
-                  
-                  unless order["items"].nil?
-                    import_item.current_order_items = order["items"].length
-                    import_item.current_order_imported_item = 0
-                    import_item.save
-                    order["items"].each do |item|
-                      order_item = OrderItem.new
-                      import_order_item(order_item, item)
+                response["orders"].each do |order|
+                  import_item.current_increment_id = order["orderNumber"]
+                  import_item.current_order_items = -1
+                  import_item.current_order_imported_item = -1
+                  import_item.save
+                  if Order.where(increment_id: order["orderNumber"]).length == 0
+                    shipstation_order = Order.new
+                    ship_to = order["shipTo"]["name"].split(" ")
+                    import_order(shipstation_order, order)
+                    
+                    unless order["items"].nil?
+                      import_item.current_order_items = order["items"].length
+                      import_item.current_order_imported_item = 0
+                      import_item.save
+                      order["items"].each do |item|
+                        order_item = OrderItem.new
+                        import_order_item(order_item, item)
 
-                      Rails.logger.info("SKU Product Id: " + item.to_s) 
+                        Rails.logger.info("SKU Product Id: " + item.to_s) 
 
-                      if item["sku"].nil? or item["sku"] == ''
-                        # if sku is nil or empty
-                        if Product.find_by_name(item["name"]).nil?
-                          # if item is not found by name then create the item
-                          order_item.product = create_new_product_from_order(item, credential.store, ProductSku.get_temp_sku)
-                        else
-                          # product exists add temp sku if it does not exist
-                          products = Product.where(name: item["name"])
-                          unless contains_temp_skus(products)
+                        if item["sku"].nil? or item["sku"] == ''
+                          # if sku is nil or empty
+                          if Product.find_by_name(item["name"]).nil?
+                            # if item is not found by name then create the item
                             order_item.product = create_new_product_from_order(item, credential.store, ProductSku.get_temp_sku)
                           else
-                            order_item.product = get_product_with_temp_skus(products)
+                            # product exists add temp sku if it does not exist
+                            products = Product.where(name: item["name"])
+                            unless contains_temp_skus(products)
+                              order_item.product = create_new_product_from_order(item, credential.store, ProductSku.get_temp_sku)
+                            else
+                              order_item.product = get_product_with_temp_skus(products)
+                            end
                           end
-                        end
-                      elsif ProductSku.where(sku: item["sku"]).length == 0
-                        # if non-nil sku is not found
-                        product = create_new_product_from_order(item, credential.store, item["sku"])
-                        order_item.product = product
-                      else
-                        order_item_product = ProductSku.where(sku: item["sku"]).
-                        first.product
-                        
-                        unless item["imageUrl"].nil?
-                          if order_item_product.product_images.length == 0
-                            image = ProductImage.new
-                            image.image = item["imageUrl"]
-                            order_item_product.product_images << image
+                        elsif ProductSku.where(sku: item["sku"]).length == 0
+                          # if non-nil sku is not found
+                          product = create_new_product_from_order(item, credential.store, item["sku"])
+                          order_item.product = product
+                        else
+                          order_item_product = ProductSku.where(sku: item["sku"]).
+                          first.product
+                          
+                          unless item["imageUrl"].nil?
+                            if order_item_product.product_images.length == 0
+                              image = ProductImage.new
+                              image.image = item["imageUrl"]
+                              order_item_product.product_images << image
+                            end
                           end
+                          order_item_product.save
+                          order_item.product = order_item_product
                         end
-                        order_item_product.save
-                        order_item.product = order_item_product
+      
+                        shipstation_order.order_items << order_item
+                        import_item.current_order_imported_item = import_item.current_order_imported_item + 1
+                        import_item.save
                       end
-    
-                      shipstation_order.order_items << order_item
-                      import_item.current_order_imported_item = import_item.current_order_imported_item + 1
+                    end
+                    if shipstation_order.save
+                      shipstation_order.addactivity("Order Import", credential.store.name+" Import")
+                      shipstation_order.order_items.each do |item|
+                        unless item.product.nil? || item.product.primary_sku.nil?
+                          shipstation_order.addactivity("Item with SKU: "+item.product.primary_sku+" Added", credential.store.name+" Import")
+                        end
+                      end
+                      shipstation_order.store = credential.store
+                      shipstation_order.save
+                      shipstation_order.set_order_status
+                      result[:success_imported] = result[:success_imported] + 1
+                      import_item.success_imported = result[:success_imported]
                       import_item.save
                     end
-                  end
-                  if shipstation_order.save
-                    shipstation_order.addactivity("Order Import", credential.store.name+" Import")
-                    shipstation_order.order_items.each do |item|
-                      unless item.product.nil? || item.product.primary_sku.nil?
-                        shipstation_order.addactivity("Item with SKU: "+item.product.primary_sku+" Added", credential.store.name+" Import")
-                      end
-                    end
-                    shipstation_order.store = credential.store
-                    shipstation_order.save
-                    shipstation_order.set_order_status
-                    result[:success_imported] = result[:success_imported] + 1
-                    import_item.success_imported = result[:success_imported]
+                  else
+                    import_item.previous_imported = import_item.previous_imported + 1
                     import_item.save
+                    result[:previous_imported] = result[:previous_imported] + 1
                   end
-                else
-                  import_item.previous_imported = import_item.previous_imported + 1
-                  import_item.save
-                  result[:previous_imported] = result[:previous_imported] + 1
                 end
               end
+            else
+              result[:status] = false
+              result[:messages].push(
+                'Cannot import orders as none of the statuses are chosen in the store modal')
             end
             if result[:status]
               credential.last_imported_at = importing_time

@@ -3,4 +3,6 @@ class ShipstationRestCredential < ActiveRecord::Base
   validates_presence_of :api_key, :api_secret
 
   belongs_to :store
+
 end
+
