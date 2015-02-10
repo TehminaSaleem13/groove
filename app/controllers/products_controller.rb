@@ -1296,7 +1296,7 @@ class ProductsController < ApplicationController
     result['success_messages'] = []
     result['notice_messages'] = []
 
-    unless params[:id].nil? || params[:inv_wh_id].nil? || params[:inventory_count].nil? ||
+    unless params[:id].nil? || params[:inv_wh_id].nil? ||
     	params[:method].nil?
       product = Product.find(params[:id])
       unless product.nil?
@@ -1311,18 +1311,29 @@ class ProductsController < ApplicationController
         	product_inv_whs.reload
         end
 
-        if params[:method] == 'recount'
-       		product_inv_whs.first.available_inv = params[:inventory_count]
-       		product_inv_whs.first.save
-       	elsif params[:method] == 'receive'
-       		product_inv_whs.first.available_inv =
-       			product_inv_whs.first.available_inv + (params[:inventory_count].to_i)
-       		product_inv_whs.first.save
-       	else
-       		result['status'] &= false
-	    	result['error_messages'].push("Invalid method passed in parameter.
+        unless params[:inventory_count].blank?
+          if params[:method] == 'recount'
+            product_inv_whs.first.available_inv = params[:inventory_count]
+          elsif params[:method] == 'receive'
+            product_inv_whs.first.available_inv =
+                product_inv_whs.first.available_inv + (params[:inventory_count].to_i)
+          else
+            result['status'] &= false
+            result['error_messages'].push("Invalid method passed in parameter.
 	    		Only 'receive' and 'recount' are valid. Passed in parameter: "+params[:method])
-       	end
+          end
+        end
+        unless params[:location_primary].blank?
+          product_inv_whs.first.location_primary = params[:location_primary]
+        end
+        unless params[:location_secondary].blank?
+          product_inv_whs.first.location_secondary = params[:location_secondary]
+        end
+        unless params[:location_tertiary].blank?
+          product_inv_whs.first.location_tertiary = params[:location_tertiary]
+        end
+        product_inv_whs.first.save
+
       else
 	    result['status'] &= false
 	    result['error_messages'].push('Cannot find product with id: ' +params[:id])

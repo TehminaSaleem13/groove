@@ -81,14 +81,14 @@ controller('usersCtrl', [ '$scope', '$http', '$timeout', '$stateParams', '$locat
                         transclude: "<span>{{row[field] | date:'EEEE MM/dd/yyyy hh:mm:ss a'}}</span>",
                         class:''
                     },
-                    online:{
-                        name:"Online",
-                        transclude:'<span class=\'label label-default\' ng-class="{\'label-success\': row.online}">' +
-                                  '<span ng-show="row.online" class="active">Online</span>' +
-                                  '<span ng-hide="row.online" class="inactive">Not Online</span>' +
-                                  '</span>',
-                        class:''
-                    },
+                    //online:{
+                    //    name:"Online",
+                    //    transclude:'<span class=\'label label-default\' ng-class="{\'label-success\': row.online}">' +
+                    //              '<span ng-show="row.online" class="active">Online</span>' +
+                    //              '<span ng-hide="row.online" class="inactive">Not Online</span>' +
+                    //              '</span>',
+                    //    class:''
+                    //},
                     'role.name':{
                         name:"Type",
                         transclude: '<span class=\'label label-default\' ng-class="{' +

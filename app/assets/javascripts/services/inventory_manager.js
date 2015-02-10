@@ -8,7 +8,7 @@ groovepacks_services.factory('inventory_manager',['$http','notification',functio
               method: 'receive'
             }
         };
-    }
+    };
 
 
 	var post_receive_or_recount_inventory = function(inventory_manager_obj) {
@@ -21,7 +21,7 @@ groovepacks_services.factory('inventory_manager',['$http','notification',functio
                 }
             }
         ).error(notification.server_error);
-    }
+    };
 
     //Public facing API
     return {

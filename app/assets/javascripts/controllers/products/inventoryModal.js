@@ -33,6 +33,10 @@ function($scope, hotkeys, $state,$stateParams,$modalInstance,$timeout,warehouses
                     console.log($scope.products_inv_manager);
                     $scope._inventory_count_inputObj = $('input#inventory_count');
                     $scope.inventory_manager.single.id = $scope.products_inv_manager.single.basicinfo.id;
+                    $scope.inventory_manager.single.inventory_count = '';
+                    $scope.inventory_manager.single.location_primary = '';
+                    $scope.inventory_manager.single.location_secondary = '';
+                    $scope.inventory_manager.single.location_tertiary = '';
                     $scope.check_if_inv_wh_is_associated_with_product();
                     $timeout(function() {$scope._inventory_count_inputObj.focus()},20);
                 });
@@ -59,13 +63,19 @@ function($scope, hotkeys, $state,$stateParams,$modalInstance,$timeout,warehouses
                 products.single.reset_obj($scope.products_inv_manager);
                 $scope.inventory_manager.single.product_barcode = '';
                 $scope.inventory_manager.single.inventory_count = '';
+                $scope.inventory_manager.single.location_primary = '';
+                $scope.inventory_manager.single.location_secondary = '';
+                $scope.inventory_manager.single.location_tertiary = '';
                 $timeout(function() {$scope._inventory_warehouse_inputObj.focus()},20);
             });
             event.preventDefault();
         }
     };
 
-    $scope.handle_change_event = function() {
+    $scope.handle_change_event = function(id) {
+        if(typeof id != "undefined" && id) {
+            $scope.inventory_manager.single.inv_wh_id = id;
+        }
         $scope.check_if_inv_wh_is_associated_with_product();
         $timeout(function() {$scope._inventory_warehouse_inputObj.focus()},20);
     };
@@ -78,6 +88,14 @@ function($scope, hotkeys, $state,$stateParams,$modalInstance,$timeout,warehouses
         warehouses.list.get($scope.warehouses).then(function() {
             //register events for recount and receive inventory
             $scope._inventory_warehouse_inputObj = $('input#inventorymanagerbarcode');
+            if(typeof $scope.inventory_manager.single['inv_wh_id'] != "number") {
+                for(var i=0; i < $scope.warehouses.list.length; i++) {
+                    if ($scope.warehouses.list[i].info.is_default) {
+                        $scope.inventory_manager.single.inv_wh_id = $scope.warehouses.list[i].info.id;
+                        break;
+                    }
+                }
+            }
             //$('#showProductInv').modal('show');
             $timeout(function() {$scope._inventory_warehouse_inputObj.focus()},20);
         });
