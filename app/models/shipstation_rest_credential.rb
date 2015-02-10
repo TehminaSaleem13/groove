@@ -4,12 +4,5 @@ class ShipstationRestCredential < ActiveRecord::Base
 
   belongs_to :store
 
-  def import_awaiting_shipment?
-    true
-  end
-
-  def import_shipped?
-    true
-  end
 end
 

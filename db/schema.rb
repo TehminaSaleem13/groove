@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150202180051) do
+ActiveRecord::Schema.define(:version => 20150210133426) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0, :null => false
@@ -339,7 +339,6 @@ ActiveRecord::Schema.define(:version => 20150202180051) do
     t.string   "method"
     t.datetime "created_at",                                                               :null => false
     t.datetime "updated_at",                                                               :null => false
-    t.string   "store_order_id"
     t.string   "notes_internal"
     t.string   "notes_toPacker"
     t.string   "notes_fromPacker"
@@ -532,12 +531,14 @@ ActiveRecord::Schema.define(:version => 20150202180051) do
   end
 
   create_table "shipstation_rest_credentials", :force => true do |t|
-    t.string   "api_key",          :null => false
-    t.string   "api_secret",       :null => false
+    t.string   "api_key",                                           :null => false
+    t.string   "api_secret",                                        :null => false
     t.date     "last_imported_at"
-    t.integer  "store_id",         :null => false
-    t.datetime "created_at",       :null => false
-    t.datetime "updated_at",       :null => false
+    t.integer  "store_id",                                          :null => false
+    t.datetime "created_at",                                        :null => false
+    t.datetime "updated_at",                                        :null => false
+    t.boolean  "shall_import_awaiting_shipment", :default => true
+    t.boolean  "shall_import_shipped",           :default => false
   end
 
   create_table "shipworks_credentials", :force => true do |t|

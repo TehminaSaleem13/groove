@@ -227,6 +227,8 @@ class StoreSettingsController < ApplicationController
 
             @shipstation.api_key = params[:api_key]
             @shipstation.api_secret = params[:api_secret]
+            @shipstation.shall_import_awaiting_shipment = params[:shall_import_awaiting_shipment]
+            @shipstation.shall_import_shipped = params[:shall_import_shipped]
             @store.shipstation_rest_credential = @shipstation
 
             begin

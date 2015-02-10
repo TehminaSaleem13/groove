@@ -16,7 +16,24 @@
       </div>
     </div>
   </div>
+  <div class="row">
+    <div class="col-md-6">
+      <legend>Import Orders with following statuses</legend>
+      <div class="form-group">
+        <label class="control-label col-md-4">Awaiting Shipment</label>
+        <div class="controls col-md-8">
+          <div toggle-switch ng-model="stores.single.shall_import_awaiting_shipment" groov-click="update_single_store()"></div>
+        </div>
+      </div>
 
+      <div class="form-group">
+        <label class="control-label col-md-4">Shipped</label>
+        <div class="controls col-md-8">
+          <div toggle-switch ng-model="stores.single.shall_import_shipped" groov-click="update_single_store()"></div>
+        </div>
+      </div>
+    </div>
+  </div>
   <div class="row" ng-hide="true">
     <div class="col-md-6">
       <legend>Import Orders</legend>
