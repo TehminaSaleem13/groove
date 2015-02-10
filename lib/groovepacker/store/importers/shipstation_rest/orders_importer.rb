@@ -38,7 +38,7 @@ module Groovepacker
                     shipstation_order = Order.new
                     ship_to = order["shipTo"]["name"].split(" ")
                     import_order(shipstation_order, order)
-                    
+                    shipstation_order.tracking_num = client.get_tracking_number(order["orderNumber"])
                     unless order["items"].nil?
                       import_item.current_order_items = order["items"].length
                       import_item.current_order_imported_item = 0
