@@ -15,7 +15,9 @@ module Groovepacker
             statuses.push('awaiting_shipment') if credential.shall_import_awaiting_shipment?
             statuses.push('shipped') if credential.shall_import_shipped?
             unless statuses.empty?
-              response = client.get_orders(statuses.join(","), credential.last_imported_at)
+              import_from = 
+                credential.last_imported_at.nil? ? Date.today - 2.weeks : credential.last_imported_at
+              response = client.get_orders(statuses.join(","), import_from)
               importing_time = Date.today - 1.day
 
               unless response["orders"].nil?   

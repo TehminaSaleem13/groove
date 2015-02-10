@@ -32,7 +32,6 @@ module Groovepacker
                 response.parsed_response["orders"] unless response.parsed_response["orders"].length == 0
             page_index = page_index + 1
           end while response.parsed_response["orders"].length > 0
-          puts combined_response
           combined_response
         end
 
