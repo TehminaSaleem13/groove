@@ -53,7 +53,7 @@ module Groovepacker
 
                 if (all_skus & single_row_skus).length > 0
                   duplicate_file = duplicate_file + 1
-                  duplicate_skus << (all_skus & single_row_skus)
+                  #duplicate_skus << (all_skus & single_row_skus)
                 else
                   usable_record = {}
                   usable_record[:name] = ''
