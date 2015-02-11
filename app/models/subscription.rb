@@ -64,4 +64,47 @@ class Subscription < ActiveRecord::Base
   	false
   end
 
+  def card_list
+    subscriber = get_current_subscriber
+    customer = Stripe::Customer.retrieve(subscriber.stripe_customer_id)
+    @cards = customer.cards
+    return @cards
+  end
+
+  def add_card(card_info)
+    subscriber = get_current_subscriber
+    token = Stripe::Token.create(
+      card: {
+        number: card_info[:number],
+        exp_month: card_info[:exp_month],
+        exp_year: card_info[:exp_year],
+        cvc: card_info[:cvc]
+      }
+    )
+    customer = Stripe::Customer.retrieve(subscriber.stripe_customer_id)
+    card = customer.cards.create(card: token.id)
+    card.save
+    customer.default_card = card.id
+    customer.save
+  end
+
+  def make_default_card(card)
+    subscriber = get_current_subscriber
+    customer = Stripe::Customer.retrieve(subscriber.stripe_customer_id)
+    customer.default_card = card.id
+    customer.save
+  end
+
+  def delete_a_card(card)
+    subscriber = get_current_subscriber
+    customer = Stripe::Customer.retrieve(subscriber.stripe_customer_id)
+    Stripe::Token.retrieve(card.id).delete()
+  end
+
+  def get_current_subscriber(current_tenant)
+    Apartment::Tenant.switch()
+    tenant = Tenant.find(name: current_tenant)
+    return tenant.subscription
+  end
+
 end
