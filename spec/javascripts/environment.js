@@ -5,7 +5,8 @@ module.exports = {
         'browserName':
             (process.env.TEST_BROWSER_NAME || 'chrome'),
         'version':
-            (process.env.TEST_BROWSER_VERSION || '38')
+            (process.env.TEST_BROWSER_VERSION || '38'),
+        'platform':'WINDOWS'
     },
 
     baseUrl:
