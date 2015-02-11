@@ -1,0 +1,9 @@
+{
+    "name": "groove-npm-modules",
+    "version": "0.0.1",
+    "description": "NPM modules required for groovepacker app",
+    "dependencies": {
+        "jasmine-reporters": "~1.0.0"
+    },
+    "private": true
+}
