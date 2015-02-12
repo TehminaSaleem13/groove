@@ -8,33 +8,33 @@
             SeedTenant.new.seed(true,subscription.user_name, subscription.email, subscription.password)
             TransactionEmail.send_email(subscription).deliver
     	end
-        
+
     	def self.apply_restrictions(plan)
-    		if plan == "groove1"
-                AccessRestriction.create( 
-                    num_users: '1', 
+    		if plan == "groove-solo"
+                AccessRestriction.create(
+                    num_users: '1',
                     num_shipments: '500',
                     num_import_sources: '1',
                     total_scanned_shipments: '0')
-            elsif plan == 'groove2'
+            elsif plan == 'groove-duo'
                 AccessRestriction.create(
                     num_users: '2',
                     num_shipments: '2000',
                     num_import_sources: '2',
                     total_scanned_shipments: '0')
-            elsif plan == 'groove3'
+            elsif plan == 'groove-trio'
                 AccessRestriction.create(
                     num_users: '3',
                     num_shipments: '6000',
                     num_import_sources: '3',
                     total_scanned_shipments: '0')
-            elsif plan == 'groove4'
+            elsif plan == 'groove-quintet'
                 AccessRestriction.create(
                     num_users: '5',
                     num_shipments: '12000',
                     num_import_sources: '5',
                     total_scanned_shipments: '0')
-            elsif plan == 'groove5'
+            elsif plan == 'groove-symphony'
                 AccessRestriction.create(
                     num_users: '12',
                     num_shipments: '50000',
