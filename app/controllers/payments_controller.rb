@@ -36,7 +36,6 @@ class PaymentsController < ApplicationController
     current_tenant = Apartment::Tenant.current_tenant
     subscription = Subscription.new
     @card = subscription.get_default_card(current_tenant)
-    puts @card.instpect
     render json: @card
   end
 end

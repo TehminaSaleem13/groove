@@ -18,12 +18,9 @@ function( $scope, $http, $timeout, $location, $state, $cookies, payments, groov_
             }
         };
         groov_translator.translate('settings.system.general',$scope.translations);
-
-        $scope.show_button = false;
         $scope.payments = payments.model.get();
-        // console.log($scope.payments);
         payments.list.get($scope.payments);
-        // console.log($scope.payments.list);
+        payments.single.get($scope.payments);
     };
 
     // $scope.get_card_list = function() {

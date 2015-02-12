@@ -67,6 +67,7 @@ Groovepacks::Application.routes.draw do
   resources :payments do
     collection do
       get 'card_details'
+      get 'default_card'
     end
     # member do
     #   get 'default_card'

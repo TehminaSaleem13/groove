@@ -96,7 +96,7 @@ class Subscription < ActiveRecord::Base
   end
 
   def get_default_card(current_tenant)
-    subscriber = get_current_subscriber
+    subscriber = get_current_subscriber(current_tenant)
     customer = Stripe::Customer.retrieve(subscriber.stripe_customer_id)
     return customer.default_card
   end
