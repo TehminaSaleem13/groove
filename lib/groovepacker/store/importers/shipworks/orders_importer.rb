@@ -60,9 +60,7 @@ module Groovepacker
                 puts "Not Importing Order invalid status"
               end
             else
-              result[:status] = false
-              result[:messages].push(
-                'All import statuses disabled. Import skipped.')
+              import_item.status = 'failed'
               import_item.message = 'All import statuses disabled. Import skipped.'
               import_item.save
             end
