@@ -11,7 +11,8 @@ function( $scope, $http, $timeout, $location, $state, $cookies, generalsettings,
             "headings": {
                 "inventory": "",
                 "conf_notif": "",
-                "printing_option": ""
+                "printing_option": "",
+                "credit_cards": ""
             },
             "labels": {
                 "inventory_tracking": "",
@@ -36,7 +37,8 @@ function( $scope, $http, $timeout, $location, $state, $cookies, generalsettings,
                 "packing_slip_orientation": "",
                 "portrait": "",
                 "landscape": "",
-                "packing_slip_message_to_customer": ""
+                "packing_slip_message_to_customer": "",
+                "all_cards": ""
             },
             "tooltips": {
                 "inventory_tracking": "",

@@ -93,6 +93,7 @@
             </div>
         </div>
     </div>
+    
     <!-- Confirmation and Notifications -->
     <div class="row">
         <div class="col-xs-12">
@@ -327,6 +328,50 @@
         </div>
     </div>
 
+    <!-- Payment Cards -->
+    <div class="row">
+        <div class="col-xs-12">
+            <h3>{{translations.headings.credit_cards}}</h3>
+            <div class="form-group">
+            <!-- <div class="form-horizontal general-settings-form"> -->
+                <!-- <fieldset>
+                    <div class="form-group">
+                        <label class="control-label col-sm-3">{{translations.labels.all_cards}}</label>
+                        <div class="controls col-sm-7">
+                            <input type="text" class="form-control input-style" ng-model="general_settings.single.email_address_for_packer_notes" placeholder="{{translations.labels.email_address}}" ng-blur="update_settings()"/>                        
+                        </div>
+                    </div>
+                </fieldset> -->
+                <fieldset>
+                    <table class="table table-hover table-bordered table-striped table-condensed">
+                        <thead>
+                        <tr>
+                            <th><div>Card Number</div></th>
+                            <th><div>Expiry Month</div></th>
+                            <th><div>Expiry Year</div></th>
+                            <th><div>CVC</div></th>
+                            <th><div>Default</div></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr ng-repeat="" ng-class="{}"
+                            ng-click="">
+                            <td groov-editable="" ng-model="" prop="" identifier=""><a href="" ng-click="">{{}}</a></td>
+                            <td groov-editable="" ng-model="" prop="" identifier=""></td>
+                            <td groov-editable="" ng-model="" prop="" identifier=""></td>
+                            <td groov-editable="" ng-model="" prop="" identifier=""></td>
+                            <td groov-editable="" ng-model="" prop="" identifier="}"></td>
+                        </tr>
+                        </tbody>
+                    </table>
+
+
+                    <button class="modal-save-button" ng-click="">Add a new card</button>
+                    <button ng-click="" class="modal-remove-button">Remove selected</button>
+                </fieldset>
+            </div>
+        </div>
+    </div>
 </div>
 
 

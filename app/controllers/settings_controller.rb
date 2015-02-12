@@ -618,29 +618,6 @@ class SettingsController < ApplicationController
     end
   end
 
-  def get_card_list
-    current_tenant = Apartment::Tenant.current_tenant
-    subscription = Subscription.new
-    @cards = subscription.card_list()
-    respond_to do |format|
-      format.html
-      format.json {render json: @cards}
-    end
-  end
-
-  def add_new_card
-    current_tenant = Apartment::Tenant.current_tenant
-    subscription = Subscription.new
-
-    subscription.add_card(params)
-  end
-
-  def make_default
-    current_tenant = Apartment::Tenant.current_tenant
-    subscription = Subscription.new
-    subscription.make_default_Card(params[:id])
-  end
-
   def send_test_mail
     LowInventoryLevel.notify(GeneralSetting.all.first, Apartment::Tenant.current_tenant).deliver
     render json: "ok"

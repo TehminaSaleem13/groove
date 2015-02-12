@@ -64,14 +64,14 @@ class Subscription < ActiveRecord::Base
   	false
   end
 
-  def card_list
-    subscriber = get_current_subscriber
+  def card_list(current_tenant)
+    subscriber = get_current_subscriber(current_tenant)
     customer = Stripe::Customer.retrieve(subscriber.stripe_customer_id)
     @cards = customer.cards
     return @cards
   end
 
-  def add_card(card_info)
+  def add_card(card_info, current_tenant)
     subscriber = get_current_subscriber
     token = Stripe::Token.create(
       card: {
@@ -88,14 +88,14 @@ class Subscription < ActiveRecord::Base
     customer.save
   end
 
-  def make_default_card(card)
+  def make_default_card(card, current_tenant)
     subscriber = get_current_subscriber
     customer = Stripe::Customer.retrieve(subscriber.stripe_customer_id)
     customer.default_card = card.id
     customer.save
   end
 
-  def delete_a_card(card)
+  def delete_a_card(card, current_tenant)
     subscriber = get_current_subscriber
     customer = Stripe::Customer.retrieve(subscriber.stripe_customer_id)
     Stripe::Token.retrieve(card.id).delete()
