@@ -111,7 +111,7 @@
 							import_item.save
             end
             rescue Exception => e
-              import_item.message = e.message
+              import_item.message = "Import failed: " + e.message
               import_item.status = 'failed'
               import_item.save
             end
