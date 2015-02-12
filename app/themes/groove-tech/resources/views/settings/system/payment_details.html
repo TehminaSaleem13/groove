@@ -1,0 +1,43 @@
+<div class="col-lg-10 col-sm-10 general-settings">
+	<!-- Payment Cards -->
+  <div class="row">
+    <div class="col-xs-12">
+      <h3>{{translations.headings.credit_cards}}</h3>
+        <fieldset>
+          <table class="table table-hover table-bordered table-striped table-condensed">
+            <thead>
+            <tr>
+              <th><div>Card Number</div></th>
+              <th><div>Expiry Month</div></th>
+              <th><div>Expiry Year</div></th>
+              <th><div>CVC</div></th>
+              <th><div>Default</div></th>
+            </tr>
+            </thead>
+            <tbody>
+	            <tr ng-repeat="payment in payments.list">   
+	              <td>{{payment.last4}}</td>
+	              <td>{{payment.exp_month}}</td>
+	              <td>{{payment.exp_year}}</td>
+	              <td>{{payment.cvc_check}}</td>
+	              <td></td>
+	            </tr>
+	            <!-- <tr ng-repeat="payment in payments.list" ng-class=""
+	                ng-click="">
+	              <td groov-editable="" ng-model="" prop="" identifier="">{{payment.last4}}</td>
+	              <td groov-editable="" ng-model="" prop="" identifier="">{{payment.exp_month}}</td>
+	              <td groov-editable="" ng-model="" prop="" identifier="">{{payment.exp_year}}</td>
+	              <td groov-editable="" ng-model="" prop="" identifier="">{{payment.cvc_check}}</td>
+	              <td groov-editable="" ng-model="" prop="" identifier=""></td>
+	            </tr> -->
+            </tbody>
+          </table>
+
+
+          <button class="modal-save-button" ng-click="">Add a new card</button>
+          <button ng-click="" class="modal-remove-button">Remove selected</button>
+        </fieldset>
+      </div>
+    </div>
+  </div>
+</div>

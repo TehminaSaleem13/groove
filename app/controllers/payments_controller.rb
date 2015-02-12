@@ -1,12 +1,15 @@
 class PaymentsController < ApplicationController  
-  def get_card_list
+  def card_details
     current_tenant = Apartment::Tenant.current_tenant
     subscription = Subscription.new
     @cards = subscription.card_list(current_tenant)
-    respond_to do |format|
-      format.html
-      format.json {render json: @cards}
-    end
+    puts @cards.inspect
+    render json: @cards
+    # respond_to do |format|
+    #   puts "......................."
+    #   format.html
+    #   format.json {render json: @cards}
+    # end
   end
 
   def add_new_card
@@ -26,5 +29,14 @@ class PaymentsController < ApplicationController
     current_tenant = Apartment::Tenant.current_tenant
     subscription = Subscription.new
     subscription.delete_a_card(params[:id],current_tenant)
+  end
+
+  def default_card
+    puts "in default_card"
+    current_tenant = Apartment::Tenant.current_tenant
+    subscription = Subscription.new
+    @card = subscription.get_default_card(current_tenant)
+    puts @card.instpect
+    render json: @card
   end
 end

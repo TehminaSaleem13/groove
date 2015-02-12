@@ -63,6 +63,16 @@ Groovepacks::Application.routes.draw do
   # Sample resource route (maps HTTP verbs to controller actions automatically):
   #   resources :products
   root :to => "home#index"
+
+  resources :payments do
+    collection do
+      get 'card_details'
+    end
+    # member do
+    #   get 'default_card'
+    # end
+  end
+  
   
   # Sample resource route with options:
   #   resources :products do

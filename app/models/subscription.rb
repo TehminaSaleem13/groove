@@ -95,6 +95,12 @@ class Subscription < ActiveRecord::Base
     customer.save
   end
 
+  def get_default_card(current_tenant)
+    subscriber = get_current_subscriber
+    customer = Stripe::Customer.retrieve(subscriber.stripe_customer_id)
+    return customer.default_card
+  end
+
   def delete_a_card(card, current_tenant)
     subscriber = get_current_subscriber
     customer = Stripe::Customer.retrieve(subscriber.stripe_customer_id)
@@ -102,8 +108,8 @@ class Subscription < ActiveRecord::Base
   end
 
   def get_current_subscriber(current_tenant)
-    Apartment::Tenant.switch()
-    tenant = Tenant.find(name: current_tenant)
+    # Apartment::Tenant.switch()
+    tenant = Tenant.where(name: current_tenant).first
     return tenant.subscription
   end
 
