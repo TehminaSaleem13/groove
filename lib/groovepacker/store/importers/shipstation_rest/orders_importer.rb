@@ -111,7 +111,9 @@ module Groovepacker
             else
               result[:status] = false
               result[:messages].push(
-                'Cannot import orders as none of the statuses are chosen in the store modal')
+                'All import statuses disabled. Import skipped.')
+              import_item.message = 'All import statuses disabled. Import skipped.'
+              import_item.save
             end
             if result[:status]
               credential.last_imported_at = importing_time
