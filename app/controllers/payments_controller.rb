@@ -12,11 +12,13 @@ class PaymentsController < ApplicationController
     # end
   end
 
-  def add_new_card
+  def create
+    puts params.inspect
+    puts params[:payment]
     current_tenant = Apartment::Tenant.current_tenant
     subscription = Subscription.new
 
-    subscription.add_card(params,current_tenant)
+    subscription.add_card(params[:payment],current_tenant)
   end
 
   def make_default
@@ -29,6 +31,7 @@ class PaymentsController < ApplicationController
     current_tenant = Apartment::Tenant.current_tenant
     subscription = Subscription.new
     subscription.delete_a_card(params[:id],current_tenant)
+    render status: 200
   end
 
   def default_card

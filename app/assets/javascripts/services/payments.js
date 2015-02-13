@@ -2,7 +2,8 @@ groovepacks_services.factory('payments',['$http','notification',function($http, 
 	var get_default = function() {
     return {
       list: [],
-      single: {}
+      single: {
+      }
     };
   };
   var get_card_list = function(payments) {
@@ -28,6 +29,14 @@ groovepacks_services.factory('payments',['$http','notification',function($http, 
   	).error(notification.server_error);
   }
 
+  var create_card = function(payments) {
+  	console.log("card_info");
+  	console.log(payments);
+  	var url = '/payments';
+  	console.log(url);
+  	$http.post(url,payments).success().error(notification.server_error);
+  }
+
 	return {
     model: {
         get:get_default
@@ -36,7 +45,8 @@ groovepacks_services.factory('payments',['$http','notification',function($http, 
     	get:get_card_list
     },
     single: {
-    	get:get_default_card
+    	get: get_default_card,
+    	create: create_card
     }
   };
 }]);

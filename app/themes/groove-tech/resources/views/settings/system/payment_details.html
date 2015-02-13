@@ -20,7 +20,7 @@
 	              <td ng-bind = "payment.exp_month"></td>
 	              <td ng-bind = "payment.exp_year"></td>
 	              <td ng-bind = "payment.cvc_check"></td>
-	              <td ng-show="payment.id == payments.single"> <span class="label label-success"> Default</span></td>
+	              <td> <span class="label label-success" ng-show="payment.id == payments.single"> Default</span></td>
 	            </tr>
 	            <!-- <tr ng-repeat="payment in payments.list" ng-class=""
 	                ng-click="">

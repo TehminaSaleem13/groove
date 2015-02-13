@@ -72,10 +72,10 @@ class Subscription < ActiveRecord::Base
   end
 
   def add_card(card_info, current_tenant)
-    subscriber = get_current_subscriber
+    subscriber = get_current_subscriber(current_tenant)
     token = Stripe::Token.create(
       card: {
-        number: card_info[:number],
+        number: card_info[:last4],
         exp_month: card_info[:exp_month],
         exp_year: card_info[:exp_year],
         cvc: card_info[:cvc]

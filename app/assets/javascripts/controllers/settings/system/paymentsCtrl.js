@@ -41,16 +41,16 @@ function( $scope, $http, $timeout, $location, $state, $cookies, $modal, payments
 
     $scope.openNewForm = function () {
         console.log("openNewForm");
-        // var alias_modal = $modal.open({
-        //     controller: 'aliasModal',
-        //     templateUrl: '/assets/views/modals/product/alias.html',
+        var alias_modal = $modal.open({
+            controller: 'paymentsModal',
+            templateUrl: '/assets/views/modals/settings/system/new_card.html'//,
         //     size:'lg',
         //     resolve: {
         //         // type: function(){return type},
         //         // exceptions: function(){return exceptions},
         //         // id: function(){return id;}
         //     }
-        // });
+        });
         // alias_modal.result.then(scope.add_item_order);
     }
 
