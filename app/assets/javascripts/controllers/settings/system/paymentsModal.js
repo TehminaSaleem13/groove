@@ -1,6 +1,6 @@
 groovepacks_controllers.controller('paymentsModal',['$scope','$timeout',
-	'$modalInstance','$q','notification','payments',
- function(scope,$timeout,$modalInstance, $q, notification, payments) {
+	'$modalInstance','$q','notification','payments','$rootScope',
+ function(scope,$timeout,$modalInstance, $q, notification, payments,$rootScope) {
  	var myscope = {};
  	myscope.init = function() {    
     scope.payments = payments.model.get();
@@ -18,6 +18,8 @@ groovepacks_controllers.controller('paymentsModal',['$scope','$timeout',
   	console.log("addThisCard");
   	console.log(scope.payments.single);
   	payments.single.create(scope.payments.single);
+  	scope.ok();
+  	$rootScope.$broadcast("myEvent");
   }
   myscope.init();
 }]);

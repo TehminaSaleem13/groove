@@ -41,22 +41,24 @@ function( $scope, $http, $timeout, $location, $state, $cookies, $modal, payments
 
     $scope.openNewForm = function () {
         console.log("openNewForm");
-        var alias_modal = $modal.open({
+        var cards_modal = $modal.open({
             controller: 'paymentsModal',
-            templateUrl: '/assets/views/modals/settings/system/new_card.html'//,
-        //     size:'lg',
-        //     resolve: {
-        //         // type: function(){return type},
-        //         // exceptions: function(){return exceptions},
-        //         // id: function(){return id;}
-        //     }
+            templateUrl: '/assets/views/modals/settings/system/new_card.html' 
         });
-        // alias_modal.result.then(scope.add_item_order);
+        
+    }
+
+    $scope.deleteCard = function() {
+        console.log($scope.payments.list);
+        // payments.list.destroy(payments);
     }
 
     // $scope.get_card_list = function() {
     //     payments.list.get($scope.payments);
     // }
+    $scope.$on("myEvent",function () {
+        myscope.init();
+        console.log('my event occurred')});
 
 	myscope.init();
 }]);

@@ -37,12 +37,19 @@ groovepacks_services.factory('payments',['$http','notification',function($http, 
   	$http.post(url,payments).success().error(notification.server_error);
   }
 
+  var delete_cards = function(payments) {
+  	paymens.forEach(function(payment) {
+  		console.log(payment);
+  	});
+  }
+
 	return {
     model: {
         get:get_default
     },
     list: {
-    	get:get_card_list
+    	get: get_card_list,
+    	destroy: delete_cards
     },
     single: {
     	get: get_default_card,
