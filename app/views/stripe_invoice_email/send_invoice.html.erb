@@ -8,7 +8,7 @@
     <p>Your current GroovePacker Plan is <b><%=@invoice.plan_id%></b> </p>
     <p>The amount of the invoice is: <b><%=@invoice.amount%></b></p>
     <p>This invoice is for the following billing period:</p>
-    <p><b><%=@invoice.period_start%></b> to <b><%=@invoice.period_end%></b></p>
+    <p><b><%=@invoice.period_start.strftime('%B %d, %Y')%></b> to <b><%=@invoice.period_end.strftime('%B %d, %Y')%></b></p>
     <p>Thank you for using GroovePacker!</p>
     <p>If you require assistance or have any questions please do not hesitate to contact us at:</p>
     <p>Support@GroovePacker.com</p>
