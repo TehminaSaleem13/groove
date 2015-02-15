@@ -118,6 +118,27 @@ class UserSettingsController < ApplicationController
     end
   end
 
+  def print_confirmation_code
+    user = User.find(params[:id])
+    @action_code = user.confirmation_code
+
+    respond_to do |format|
+      format.html
+      format.pdf {
+        render :pdf => 'confirmation_code_'+user.username.to_s,
+               :template => 'settings/action_barcodes.html.erb',
+               :orientation => 'Portrait',
+               :page_height => '1in',
+               :page_width => '3in',
+               :margin => {
+                   :top => '0',
+                   :bottom => '0',
+                   :left => '0',
+                   :right => '0'
+               }
+      }
+    end
+  end
   def createRole
     @result = Hash.new
     @result['status'] = true

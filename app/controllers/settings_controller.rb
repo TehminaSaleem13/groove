@@ -560,6 +560,28 @@ class SettingsController < ApplicationController
     end
   end
 
+  def print_action_barcode
+    scan_pack_setting = ScanPackSetting.all.first
+    @action_code = scan_pack_setting[params[:id]]
+
+    respond_to do |format|
+      format.html
+      format.pdf {
+        render :pdf => 'action_barcode_'+params[:id].to_s,
+               :template => 'settings/action_barcodes.html.erb',
+               :orientation => 'Portrait',
+               :page_height => '1in',
+               :page_width => '3in',
+               :margin => {
+                   :top => '0',
+                   :bottom => '0',
+                   :left => '0',
+                   :right => '0'
+               }
+      }
+    end
+  end
+
   def update_scan_pack_settings
     @result = Hash.new
     @result['status'] = true
