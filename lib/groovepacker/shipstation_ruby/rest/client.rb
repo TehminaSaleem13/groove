@@ -52,13 +52,14 @@ module Groovepacker
             orderNumber = '&orderNumber=' + orderNumber.to_s
             Rails.logger.info "Getting shipment with order number: " + orderNumber
             response = HTTParty.get('https://shipstation.p.mashape.com/Shipments/List?' + 
-                'page=1&pageSize=100' + orderNumber,
+                'page=1&pageSize=100' + URI.encode(orderNumber),
                 headers: {
                   "Authorization" => "Basic "+ Base64.encode64(@auth[:api_key] + ":" + @auth[:api_secret]).gsub(/\n/, ''),
                   "X-Mashape-Key" => "E6cSux0BVQmshJh0VacUkqXP1sJgp1I1APKjsntC26JSOTy0pP"
                 })
             handle_exceptions(response)
-            unless response.parsed_response["shipments"].empty?
+            unless response.parsed_response["shipments"].nil? ||
+             response.parsed_response["shipments"].empty?
               tracking_number = response.parsed_response["shipments"].first["trackingNumber"]
             end
           end
