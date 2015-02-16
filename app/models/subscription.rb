@@ -89,9 +89,9 @@ class Subscription < ActiveRecord::Base
   end
 
   def make_default_card(card, current_tenant)
-    subscriber = get_current_subscriber
+    subscriber = get_current_subscriber(current_tenant)
     customer = Stripe::Customer.retrieve(subscriber.stripe_customer_id)
-    customer.default_card = card.id
+    customer.default_card = card
     customer.save
   end
 

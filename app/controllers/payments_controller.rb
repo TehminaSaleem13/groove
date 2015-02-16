@@ -22,10 +22,13 @@ class PaymentsController < ApplicationController
     render nothing: true
   end
 
-  def make_default
+  def edit
+    puts "in edit"
+    puts params.inspect
     current_tenant = Apartment::Tenant.current_tenant
     subscription = Subscription.new
-    subscription.make_default_Card(params[:id],current_tenant)
+    subscription.make_default_card(params[:id],current_tenant)
+    render nothing: true
   end
 
   def destroy

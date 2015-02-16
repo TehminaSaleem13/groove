@@ -1,6 +1,6 @@
 groovepacks_controllers. 
-controller('paymentsCtrl', [ '$scope', '$http', '$timeout', '$location', '$state', '$cookies', '$modal', '$rootScope', 'payments', 'groov_translator',
-function( $scope, $http, $timeout, $location, $state, $cookies, $modal, $rootScope, payments, groov_translator) {
+controller('paymentsCtrl', [ '$scope', '$http', '$timeout', '$location', '$state', '$cookies', '$modal', '$rootScope', 'notification', 'payments', 'groov_translator',
+function( $scope, $http, $timeout, $location, $state, $cookies, $modal, $rootScope, notification, payments, groov_translator) {
 
     var myscope = {};
     $scope.selectedPayments = [];
@@ -61,9 +61,25 @@ function( $scope, $http, $timeout, $location, $state, $cookies, $modal, $rootSco
         $rootScope.$broadcast("myEvent");
     }
 
-    // $scope.get_card_list = function() {
-    //     payments.list.get($scope.payments);
-    // }
+    $scope.setAsDefault = function() {
+        $scope.payments.list.forEach(function(payment) {
+            console.log("payment: ");
+            console.log(payment);
+            if(payment.checked)
+                $scope.selectedPayments.push(payment);
+        });
+        if($scope.selectedPayments.length == 1) {
+            console.log("error here");
+            payments.single.edit($scope.selectedPayments[0]).then(function() {
+                $rootScope.$broadcast("myEvent");
+            });
+        }
+        else if($scope.selectedPayments.length > 1)
+            notification.notify("Select only a single row to make it default");
+        else
+            notification.notify("Select a row to make it default");
+    }
+
     $scope.$on("myEvent",function () {
         myscope.init();
         console.log('my event occurred')
