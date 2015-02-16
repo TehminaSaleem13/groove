@@ -17,9 +17,19 @@ groovepacks_controllers.controller('paymentsModal',['$scope','$timeout',
   scope.addThisCard = function() {
   	console.log("addThisCard");
   	console.log(scope.payments.single);
-  	payments.single.create(scope.payments.single).then(function() {
-  		scope.ok();
-	  	$rootScope.$broadcast("myEvent");
+  	payments.single.create(scope.payments.single).then(function(response) {
+  		console.log("response");
+  		console.log(response);
+  		if(response.data.status == false) {
+  			response.data.messages.forEach(function(message) {
+  				notification.notify(message);
+  			});
+  		}
+  		else {
+  			scope.ok();
+  			notification.notify("Added Your Card Successfully",1);
+	  		$rootScope.$broadcast("myEvent");
+  		}
   	});
   }
   myscope.init();

@@ -1,49 +1,36 @@
-class PaymentsController < ApplicationController  
+class PaymentsController < ApplicationController
+
+  before_filter :get_current_tenant
+  include PaymentsHelper
+
   def card_details
-    current_tenant = Apartment::Tenant.current_tenant
-    subscription = Subscription.new
-    @cards = subscription.card_list(current_tenant)
-    puts @cards.inspect
+    @cards = card_list(@current_tenant) unless @current_tenant.nil?
     render json: @cards
-    # respond_to do |format|
-    #   puts "......................."
-    #   format.html
-    #   format.json {render json: @cards}
-    # end
   end
 
   def create
-    puts params.inspect
-    puts params[:payment]
-    current_tenant = Apartment::Tenant.current_tenant
-    subscription = Subscription.new
-
-    subscription.add_card(params[:payment],current_tenant)
-    render nothing: true
+    add_card(params[:payment],@current_tenant) unless @current_tenant.nil?
+    render json: @result
   end
 
   def edit
-    puts "in edit"
-    puts params.inspect
-    current_tenant = Apartment::Tenant.current_tenant
-    subscription = Subscription.new
-    subscription.make_default_card(params[:id],current_tenant)
+    make_default_card(params[:id],@current_tenant) unless @current_tenant.nil?
     render nothing: true
   end
 
   def destroy
-    puts params.inspect
-    current_tenant = Apartment::Tenant.current_tenant
-    subscription = Subscription.new
-    subscription.delete_a_card(params[:id],current_tenant)
+    delete_a_card(params[:id],@current_tenant) unless @current_tenant.nil?
     render nothing: true
   end
 
   def default_card
-    puts "in default_card"
-    current_tenant = Apartment::Tenant.current_tenant
-    subscription = Subscription.new
-    @card = subscription.get_default_card(current_tenant)
+    @card = get_default_card(@current_tenant) unless @current_tenant.nil?
     render json: @card
+  end
+
+  private
+
+  def get_current_tenant
+    @current_tenant = Apartment::Tenant.current_tenant
   end
 end
