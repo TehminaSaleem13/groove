@@ -56,7 +56,6 @@ function( $scope, $http, $timeout, $location, $state, $cookies, generalsettings,
         $scope.show_button = false;
         $scope.general_settings = generalsettings.model.get();
         generalsettings.single.get($scope.general_settings);
-
     };
 
     $scope.change_opt = function(key,value) {

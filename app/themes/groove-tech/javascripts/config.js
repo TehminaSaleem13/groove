@@ -69,7 +69,9 @@ function($stateProvider, $urlRouterProvider,hotkeysProvider,cfpLoadingBarProvide
         .state('settings.system.order_exception', {url:'/order_exception', templateUrl:'/assets/views/settings/system/order_exception.html',
                        controller:'exportOrderExceptionCtrl'})
         .state('settings.system.warehouses', {url:'/warehouses',templateUrl:'/assets/views/settings/system/warehouses.html',
-            controller:'warehousesCtrl'});
+            controller:'warehousesCtrl'})
+        .state('settings.system.payment_details', {url:'/payment_details', templateUrl:'/assets/views/settings/system/payment_details.html',
+            controller:'paymentsCtrl'});
 
     hotkeysProvider.cheatSheetHotkey =['mod+f1','g','G'];
     hotkeysProvider.cheatSheetDescription = '(or \'g\') Show / hide this help menu';

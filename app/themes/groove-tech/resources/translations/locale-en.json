@@ -51,7 +51,8 @@
                 "headings": {
                     "inventory": "Inventory Related",
                     "conf_notif": "Confirmations & Notifications",
-                    "printing_option": "Printing Options"
+                    "printing_option": "Printing Options",
+                    "credit_cards": "Payment Cards"
                 },
                 "labels": {
                     "inventory_tracking": "Inventory Tracking",
@@ -76,7 +77,8 @@
                     "packing_slip_orientation": "Packing Slip Orientation:",
                     "portrait": "Portrait",
                     "landscape": "Landscape",
-                    "packing_slip_message_to_customer": "Custom Packing-Slip Message-All Stores"
+                    "packing_slip_message_to_customer": "Custom Packing-Slip Message-All Stores",
+                    "all_cards": "Your Cards"
                 },
                 "tooltips": {
                     "inventory_tracking": "If you do not wish to track inventory for any items you can disable it here. Disabling Inventory Tracking will automatically disable Low Inventory Alert and Hold Orders due to Inventory. If you only need to disable inventory tracking for specific items you can do so on their product page.",
