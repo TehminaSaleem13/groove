@@ -9,7 +9,6 @@ module PaymentsHelper
   	@result['status'] = true
   	@result['messages'] = []
     customer = get_current_customer(current_tenant)
-    puts "1"
     begin
     	token = Stripe::Token.create(
 	      card: {
@@ -20,13 +19,19 @@ module PaymentsHelper
 	      }
 	    ) 
 	    card = customer.cards.create(card: token.id)
-	    if card.save
-		    customer.default_card = card.id
-		    customer.save
-		  else
-		  	@result['status'] = false
-		  	@result['messages'].push("The card could not be created because of server problem")
-		  end
+	    unless card.cvc_check.nil?
+		    if card.save
+			    # customer.default_card = card.id
+			    customer.save
+			  else
+			  	@result['status'] = false
+			  	@result['messages'].push("The card could not be created because of server problem")
+			  end
+			else
+				card.delete();
+				@result['status'] = false
+				@result['messages'].push("The CVC entered is not correct. Modify it.")
+			end
 		rescue Stripe::CardError => e
     	@result['status'] = false
     	@result['messages'].push(e.message)

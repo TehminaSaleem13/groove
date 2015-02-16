@@ -20,21 +20,15 @@ function( $scope, $http, $timeout, $location, $state, $cookies, $modal, $rootSco
         };
         groov_translator.translate('settings.system.general',$scope.translations);
         $scope.payments = payments.model.get();
-        console.log("about to get list");
         new $scope.getTableData();
     };
     $scope.getTableData = function() {
         payments.list.get($scope.payments).then(function(list) {
-            console.log("list: count:");
-            console.log(list.data.data);
             for(var i=0; i<list.data.data.length; i++) {
-                console.log("list :");
-                console.log(list.data.data[i]);
                 list.data.data[i].checked = false;
             }
         });
         payments.single.get($scope.payments).then(function() {
-            console.log("found default card");
             $scope.show_table_data = true;
         });
     }
@@ -49,7 +43,6 @@ function( $scope, $http, $timeout, $location, $state, $cookies, $modal, $rootSco
     };
 
     $scope.openNewForm = function () {
-        console.log("openNewForm");
         var cards_modal = $modal.open({
             controller: 'paymentsModal',
             templateUrl: '/assets/views/modals/settings/system/new_card.html' 
@@ -58,11 +51,8 @@ function( $scope, $http, $timeout, $location, $state, $cookies, $modal, $rootSco
     }
 
     $scope.deleteCard = function() {
-        console.log("list: ");
-        console.log($scope.payments.list);
+        $scope.selectedPayments = [];
         $scope.payments.list.forEach(function(payment) {
-            console.log("payment: ");
-            console.log(payment);
             if(payment.checked)
                 $scope.selectedPayments.push(payment);
         });
@@ -73,8 +63,6 @@ function( $scope, $http, $timeout, $location, $state, $cookies, $modal, $rootSco
     $scope.setAsDefault = function() {
         $scope.selectedPayments = [];
         $scope.payments.list.forEach(function(payment) {
-            console.log("payment: ");
-            console.log(payment);
             if(payment.checked)
                 $scope.selectedPayments.push(payment);
         });
@@ -83,21 +71,14 @@ function( $scope, $http, $timeout, $location, $state, $cookies, $modal, $rootSco
                 $rootScope.$broadcast("myEvent");
             });
         }
-        else if($scope.selectedPayments.length > 1) {
-            console.log($scope.selectedPayments.length);
-            $scope.selectedPayments.forEach(function(payment) {
-                console.log(payment);
-            });
+        else if($scope.selectedPayments.length > 1)
             notification.notify("Select only a single row to make it default");
-        }
         else
             notification.notify("Select a row to make it default");
     }
 
     $scope.$on("myEvent",function () {
-        // myscope.init();
         new $scope.getTableData();
-        console.log('my event occurred')
     });
 
 	myscope.init();

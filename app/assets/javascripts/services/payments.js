@@ -11,8 +11,7 @@ groovepacks_services.factory('payments',['$http','notification',function($http, 
     return $http.get(url).success(
       function(data) {
         if (data.data.length > 0) {
-        	payments.list = data.data;
-        	console.log(payments.list);
+        	return payments.list = data.data;
         } else {
         	notification.notify("No cards found for the subscriber");
         }
@@ -30,25 +29,17 @@ groovepacks_services.factory('payments',['$http','notification',function($http, 
   }
 
   var create_card = function(payments) {
-  	console.log("card_info");
-  	console.log(payments);
   	var url = '/payments';
-  	console.log(url);
   	return $http.post(url,payments).success(function() {}).error(notification.server_error);
   }
 
   var delete_cards = function(cards) {
-  	console.log(cards.length);
   	cards.forEach(function(card) {
-  		console.log(card);
-  		var url = '/payments';
-  		return $http.delete(url + "/" + card.id).success(function() {}).error(notification.server_error);
+  		return $http.delete("payments/" + card.id).success(function() {}).error(notification.server_error);
   	});
   }
 
   var make_card_default = function(card) {
-  	console.log("card: ");
-  	console.log(card.id);
   	return $http.get("payments/" + card.id + "/edit").success(function() {}).error(notification.server_error);
   }
 

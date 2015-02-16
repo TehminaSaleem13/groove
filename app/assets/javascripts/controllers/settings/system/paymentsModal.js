@@ -4,9 +4,6 @@ groovepacks_controllers.controller('paymentsModal',['$scope','$timeout',
  	var myscope = {};
  	myscope.init = function() {    
     scope.payments = payments.model.get();
-    // scope.payments.single.
-    console.log("payments");
-    console.log(payments);
   };
  	scope.ok = function() {
     $modalInstance.close("ok-button-click");
@@ -15,11 +12,7 @@ groovepacks_controllers.controller('paymentsModal',['$scope','$timeout',
     $modalInstance.dismiss("cancel-button-click");
   };
   scope.addThisCard = function() {
-  	console.log("addThisCard");
-  	console.log(scope.payments.single);
   	payments.single.create(scope.payments.single).then(function(response) {
-  		console.log("response");
-  		console.log(response);
   		if(response.data.status == false) {
   			response.data.messages.forEach(function(message) {
   				notification.notify(message);
