@@ -29,10 +29,11 @@ class PaymentsController < ApplicationController
   end
 
   def destroy
+    puts params.inspect
     current_tenant = Apartment::Tenant.current_tenant
     subscription = Subscription.new
     subscription.delete_a_card(params[:id],current_tenant)
-
+    render nothing: true
   end
 
   def default_card

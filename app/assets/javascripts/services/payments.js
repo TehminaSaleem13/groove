@@ -34,12 +34,15 @@ groovepacks_services.factory('payments',['$http','notification',function($http, 
   	console.log(payments);
   	var url = '/payments';
   	console.log(url);
-  	$http.post(url,payments).success().error(notification.server_error);
+  	return $http.post(url,payments).success().error(notification.server_error);
   }
 
-  var delete_cards = function(payments) {
-  	paymens.forEach(function(payment) {
-  		console.log(payment);
+  var delete_cards = function(cards) {
+  	console.log(cards.length);
+  	cards.forEach(function(card) {
+  		console.log(card);
+  		var url = '/payments';
+  		return $http.delete(url + "/" + card.id).success().error(notification.server_error);
   	});
   }
 

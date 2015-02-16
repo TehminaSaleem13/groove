@@ -1,6 +1,6 @@
 groovepacks_controllers. 
-controller('paymentsCtrl', [ '$scope', '$http', '$timeout', '$location', '$state', '$cookies', '$modal', 'payments', 'groov_translator',
-function( $scope, $http, $timeout, $location, $state, $cookies, $modal, payments, groov_translator) {
+controller('paymentsCtrl', [ '$scope', '$http', '$timeout', '$location', '$state', '$cookies', '$modal', '$rootScope', 'payments', 'groov_translator',
+function( $scope, $http, $timeout, $location, $state, $cookies, $modal, $rootScope, payments, groov_translator) {
 
     var myscope = {};
     $scope.selectedPayments = [];
@@ -49,8 +49,16 @@ function( $scope, $http, $timeout, $location, $state, $cookies, $modal, payments
     }
 
     $scope.deleteCard = function() {
+        console.log("list: ");
         console.log($scope.payments.list);
-        // payments.list.destroy(payments);
+        $scope.payments.list.forEach(function(payment) {
+            console.log("payment: ");
+            console.log(payment);
+            if(payment.checked)
+                $scope.selectedPayments.push(payment);
+        });
+        payments.list.destroy($scope.selectedPayments);
+        $rootScope.$broadcast("myEvent");
     }
 
     // $scope.get_card_list = function() {
@@ -58,7 +66,8 @@ function( $scope, $http, $timeout, $location, $state, $cookies, $modal, payments
     // }
     $scope.$on("myEvent",function () {
         myscope.init();
-        console.log('my event occurred')});
+        console.log('my event occurred')
+    });
 
 	myscope.init();
 }]);

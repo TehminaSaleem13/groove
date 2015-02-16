@@ -102,9 +102,9 @@ class Subscription < ActiveRecord::Base
   end
 
   def delete_a_card(card, current_tenant)
-    subscriber = get_current_subscriber
+    subscriber = get_current_subscriber(current_tenant)
     customer = Stripe::Customer.retrieve(subscriber.stripe_customer_id)
-    Stripe::Token.retrieve(card.id).delete()
+    customer.cards.retrieve(card).delete()
   end
 
   def get_current_subscriber(current_tenant)
