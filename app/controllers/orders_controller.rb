@@ -108,6 +108,7 @@ class OrdersController < ApplicationController
         import_item.status = 'failed'
         import_item.message = e.message
         import_item.save
+        render status: 401, nothing: true
       end
     else
       render status: 401, nothing: true
