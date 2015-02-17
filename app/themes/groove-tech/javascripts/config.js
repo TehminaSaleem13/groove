@@ -70,7 +70,8 @@ function($stateProvider, $urlRouterProvider,hotkeysProvider,cfpLoadingBarProvide
                        controller:'exportOrderExceptionCtrl'})
         .state('settings.system.warehouses', {url:'/warehouses',templateUrl:'/assets/views/settings/system/warehouses.html',
             controller:'warehousesCtrl'})
-        .state('settings.system.payment_details', {url:'/payment_details', templateUrl:'/assets/views/settings/system/payment_details.html',
+        .state('settings.accounts',{url:'/accounts', template:'<div ui-view></div>', abstract:true})
+        .state('settings.accounts.card_details', {url:'/card_details', templateUrl:'/assets/views/settings/accounts/payment_details.html',
             controller:'paymentsCtrl'});
 
     hotkeysProvider.cheatSheetHotkey =['mod+f1','g','G'];

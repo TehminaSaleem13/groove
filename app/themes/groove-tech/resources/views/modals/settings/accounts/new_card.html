@@ -1,0 +1,55 @@
+<div>
+  <div class="modal-header">
+    <button type="button" class="close-btn" ng-click="ok()"><i class="glyphicon glyphicon-remove"></i></button>
+    <div class="modal-title">
+      <span>Add a New Card</span>
+    </div>
+   </div>
+   <form name="payments_form" role="form" class="form-validation" novalidate>
+    <div class="modal-body" >
+      <div class="container-fluid form-horizontal">
+      	<div><br></div>
+        <div class="form-group">
+          <label class="control-label col-md-3">Card Number </label>
+          <div class="controls col-md-6" ng-class="{'has-error' : payments_form.number.$invalid && (!payments_form.number.$pristine || submitted) }">
+            <input class="form-control input-style" ng-model="payments.single.last4" name="number" type="text" required/>
+            <span class="has-error help-block" ng-show="payments_form.number.$invalid && (!payments_form.number.$pristine || submitted)">Card number is required.
+            </span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="control-label col-md-3">Expiry Month </label>
+          <div class="controls col-md-6" ng-class="{'has-error' : payments_form.exp_month.$invalid && (!payments_form.exp_month.$pristine || submitted) }">
+            <input class="form-control input-style" ng-model="payments.single.exp_month" name="exp_month" type="text" required/>
+            <span class="has-error help-block" ng-show="payments_form.exp_month.$invalid && (!payments_form.exp_month.$pristine || submitted)">Epiry month is required.
+            </span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="control-label col-md-3">Expiry Year </label>
+          <div class="controls col-md-6" ng-class="{'has-error' : payments_form.exp_year.$invalid && (!payments_form.exp_year.$pristine || submitted) }">
+            <input class="form-control input-style" ng-model="payments.single.exp_year" name="exp_year" type="text" required/>
+            <span class="has-error help-block" ng-show="payments_form.exp_year.$invalid && (!payments_form.exp_year.$pristine || submitted)">Epiry year is required.
+            </span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="control-label col-md-3">CVC </label>
+          <div class="controls col-md-6" ng-class="{'has-error' : payments_form.cvc.$invalid && (!payments_form.cvc.$pristine || submitted) }">
+            <input class="form-control input-style" ng-model="payments.single.cvc" name="cvc" type="text" required/>
+            <span class="has-error help-block" ng-show="payments_form.cvc.$invalid && (!payments_form.cvc.$pristine || submitted)">CVC is required.
+            </span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button ng-click="addThisCard(payments_form.$valid)" class="modal-save-button" translate>Add This Card</button>
+      <button ng-click="cancel()" class="modal-cancel-button" translate>modal.cancel</button>
+    </div>
+  </form>
+</div>

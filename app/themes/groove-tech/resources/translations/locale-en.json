@@ -51,8 +51,7 @@
                 "headings": {
                     "inventory": "Inventory Related",
                     "conf_notif": "Confirmations & Notifications",
-                    "printing_option": "Printing Options",
-                    "credit_cards": "Payment Cards"
+                    "printing_option": "Printing Options"
                 },
                 "labels": {
                     "inventory_tracking": "Inventory Tracking",
@@ -77,8 +76,7 @@
                     "packing_slip_orientation": "Packing Slip Orientation:",
                     "portrait": "Portrait",
                     "landscape": "Landscape",
-                    "packing_slip_message_to_customer": "Custom Packing-Slip Message-All Stores",
-                    "all_cards": "Your Cards"
+                    "packing_slip_message_to_customer": "Custom Packing-Slip Message-All Stores"
                 },
                 "tooltips": {
                     "inventory_tracking": "If you do not wish to track inventory for any items you can disable it here. Disabling Inventory Tracking will automatically disable Low Inventory Alert and Hold Orders due to Inventory. If you only need to disable inventory tracking for specific items you can do so on their product page.",
@@ -126,6 +124,14 @@
                    "service_issue_code":"If a packer realizes during the packing of an order that packing can not be completed due to damaged items or an inventory issue, they can scan this code to save the current order as a service issue and leave a note from packer explaining the issue.",
                    "restart_code":"Rather than clicking the Restart Order button on the Scan & Pack interface you can scan this barcode. All items already scanned for the current order will be removed and GroovePacker will be ready for you to rescan the same order or another order."
                }
+            }
+        },
+        "accounts": {
+            "headings": {
+                "credit_cards": "Payment Cards"
+            },
+            "labels": {
+              "all_cards": "Your Cards"
             }
         }
 
