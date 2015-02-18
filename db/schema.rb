@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150210133426) do
+ActiveRecord::Schema.define(:version => 20150218140836) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0, :null => false
@@ -518,7 +518,7 @@ ActiveRecord::Schema.define(:version => 20150210133426) do
     t.float    "order_complete_image_time",     :default => 1.0
     t.boolean  "play_order_complete_sound",     :default => true
     t.string   "order_complete_sound_url",      :default => "/assets/sounds/scan_order_complete.mp3"
-    t.float    "complete_sound_sound_vol",      :default => 0.75
+    t.float    "order_complete_sound_vol",      :default => 0.75
   end
 
   create_table "shipstation_credentials", :force => true do |t|

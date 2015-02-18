@@ -1,6 +1,3 @@
-<div class="row" ng-show="data.order.next_item.instruction.length">
-    <div class="alert alert-warning"><h4>Special instruction for the product: {{data.order.next_item.instruction}}</h4></div>
-</div>
 <div class="row" ng-show="data.order.next_item.record_serial">
     <div class="alert alert-info"><h4>Serial number will be needed for this product</h4></div>
 </div>
@@ -91,14 +88,18 @@
                     <div ng-click="item_image_index = item_image_index - 1" ng-show="item_image_index > 0" class="nav-left img-circle"><i class="glyphicon glyphicon-step-backward"></i></div>
                     <span class="img-style-helper"></span>
                     <img ng-repeat="image in data.order.next_item.images" ng-show="item_image_index == $index" class="img-style" ng-src="{{ image.image }}" />
+                    <div class="special_product_instructions" ng-show="data.order.next_item.instruction.length">
+                        <h4>Special instruction for the product:</h4> <h3> {{data.order.next_item.instruction}}</h3>
+                    </div>
                 </div>
+
             </div>
             <div class="product-scan-outside-well">
                 <span class="indicator-ready pull-left"></span>
                 <div class="product-scan-well">
 
                     <span class="col-lg-1 col-md-1  glyphicon glyphicon-barcode barcode-icon"></span>
-                    <span class="col-lg-11 col-md-11 product-scan-status">Ready For Scan Product</span>
+                    <span class="col-lg-11 col-md-11 product-scan-status">Ready For Product Scan</span>
                 </div>
             </div>
             <!--
