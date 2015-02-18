@@ -5,27 +5,25 @@ function( $scope, $http, $timeout, $location, $state, $cookies, $modal, $rootSco
     var myscope = {};
     $scope.selectedPayments = [];
     myscope.init = function() {
+        $scope.current_page = '';
         $scope.show_table_data = false;
-        $scope.setup_page('system','payment_details');
+        $scope.setup_page('show_card_details');
         $scope.translations = {
             "headings": {
                 "credit_cards": ""
             },
             "labels": {
                 "all_cards": ""
-            },
-            "tooltips": {
-                
             }
         };
-        groov_translator.translate('settings.system.general',$scope.translations);
+        groov_translator.translate('settings.accounts',$scope.translations);
         $scope.payments = payments.model.get();
         new $scope.getTableData();
     };
     $scope.getTableData = function() {
         payments.list.get($scope.payments).then(function(list) {
-            for(var i=0; i<list.data.data.length; i++) {
-                list.data.data[i].checked = false;
+            for(var i=0; i<list.data.cards.data.length; i++) {
+                list.data.cards.data[i].checked = false;
             }
         });
         payments.single.get($scope.payments).then(function() {
@@ -45,7 +43,7 @@ function( $scope, $http, $timeout, $location, $state, $cookies, $modal, $rootSco
     $scope.openNewForm = function () {
         var cards_modal = $modal.open({
             controller: 'paymentsModal',
-            templateUrl: '/assets/views/modals/settings/system/new_card.html' 
+            templateUrl: '/assets/views/modals/settings/accounts/new_card.html' 
         });
         
     }
@@ -54,10 +52,15 @@ function( $scope, $http, $timeout, $location, $state, $cookies, $modal, $rootSco
         $scope.selectedPayments = [];
         $scope.payments.list.forEach(function(payment) {
             if(payment.checked)
-                $scope.selectedPayments.push(payment);
+                $scope.selectedPayments.push(payment.id);
         });
-        payments.list.destroy($scope.selectedPayments);
-        $rootScope.$broadcast("myEvent");
+        if($scope.selectedPayments.length > 0) {
+            payments.list.destroy($scope.selectedPayments).then(function() {
+                $rootScope.$broadcast("myEvent");
+            });
+        }
+        else
+            notification.notify("Select one or more rows to remove");
     }
 
     $scope.setAsDefault = function() {

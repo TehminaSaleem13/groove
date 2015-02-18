@@ -21,6 +21,10 @@ groovepacks_controllers.
                     {
                         page:'system',
                         open:false
+                    },
+                    {
+                        page: 'show_card_details',
+                        open:false
                     }
                 ];
             };
