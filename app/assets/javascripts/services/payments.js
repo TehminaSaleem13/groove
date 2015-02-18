@@ -7,14 +7,22 @@ groovepacks_services.factory('payments',['$http','notification',function($http, 
     };
   };
   var get_card_list = function(payments) {
-    var url = '/payments/card_details';
+    var url = '/payments';
     return $http.get(url).success(
       function(data) {
-        if (data.data.length > 0) {
-        	return payments.list = data.data;
-        } else {
-        	notification.notify("No cards found for the subscriber");
-        }
+      	if(data.status == true) {
+      		if (data.cards.data.length > 0) {
+	        	return payments.list = data.cards.data;
+	        } else {
+	        	notification.notify("No cards found for the subscriber");
+	        }
+      	}
+      	else {
+      		data.messages.forEach(function(message) {
+            notification.notify(message);
+          });
+      	}
+        
       }
     ).error(notification.server_error);
   }
@@ -23,24 +31,46 @@ groovepacks_services.factory('payments',['$http','notification',function($http, 
   	var url = '/payments/default_card';
   	return $http.get(url).success(
   		function(response) {
-  			payments.single = response;
+  			if(response.status == true)
+  				payments.single = response.default_card;
+  			else {
+  				response.messages.forEach(function(message) {
+            notification.notify(message);
+          });
+  			}
   		}
   	).error(notification.server_error);
   }
 
   var create_card = function(payments) {
   	var url = '/payments';
-  	return $http.post(url,payments).success(function() {}).error(notification.server_error);
+  	return $http.post(url,payments).success(function(response) {
+  		if(response.status == false) {
+				response.messages.forEach(function(message) {
+          notification.notify(message);
+        });
+			}
+  	}).error(notification.server_error);
   }
 
   var delete_cards = function(cards) {
-  	cards.forEach(function(card) {
-  		return $http.delete("payments/" + card.id).success(function() {}).error(notification.server_error);
-  	});
+  	return $http.delete("payments/delete_cards",{params: {"id[]": cards}}).success(function(response) {
+  		if(response.status == false) {
+				response.messages.forEach(function(message) {
+          notification.notify(message);
+        });
+			}
+  	}).error(notification.server_error);
   }
 
   var make_card_default = function(card) {
-  	return $http.get("payments/" + card.id + "/edit").success(function() {}).error(notification.server_error);
+  	return $http.get("payments/" + card.id + "/edit").success(function(response) {
+  		if(response.status == false) {
+				response.messages.forEach(function(message) {
+          notification.notify(message);
+        });
+			}
+  	}).error(notification.server_error);
   }
 
 	return {

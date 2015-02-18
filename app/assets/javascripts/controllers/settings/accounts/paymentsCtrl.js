@@ -22,8 +22,8 @@ function( $scope, $http, $timeout, $location, $state, $cookies, $modal, $rootSco
     };
     $scope.getTableData = function() {
         payments.list.get($scope.payments).then(function(list) {
-            for(var i=0; i<list.data.data.length; i++) {
-                list.data.data[i].checked = false;
+            for(var i=0; i<list.data.cards.data.length; i++) {
+                list.data.cards.data[i].checked = false;
             }
         });
         payments.single.get($scope.payments).then(function() {
@@ -52,7 +52,7 @@ function( $scope, $http, $timeout, $location, $state, $cookies, $modal, $rootSco
         $scope.selectedPayments = [];
         $scope.payments.list.forEach(function(payment) {
             if(payment.checked)
-                $scope.selectedPayments.push(payment);
+                $scope.selectedPayments.push(payment.id);
         });
         if($scope.selectedPayments.length > 0) {
             payments.list.destroy($scope.selectedPayments).then(function() {

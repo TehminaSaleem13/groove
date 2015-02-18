@@ -1,11 +1,11 @@
 class PaymentsController < ApplicationController
 
-  before_filter :get_current_tenant
+  before_filter :get_current_tenant, :authenticate_user!
   include PaymentsHelper
 
-  def card_details
-    @cards = card_list(@current_tenant) unless @current_tenant.nil?
-    render json: @cards
+  def index
+    card_list(@current_tenant) unless @current_tenant.nil?
+    render json: @result
   end
 
   def create
@@ -15,17 +15,19 @@ class PaymentsController < ApplicationController
 
   def edit
     make_default_card(params[:id],@current_tenant) unless @current_tenant.nil?
-    render nothing: true
+    render json: @result
   end
 
-  def destroy
-    delete_a_card(params[:id],@current_tenant) unless @current_tenant.nil?
-    render nothing: true
+  def delete_cards
+    params[:id].each do |id|
+      delete_a_card(id,@current_tenant) unless @current_tenant.nil?
+    end
+    render json: @result
   end
 
   def default_card
-    @card = get_default_card(@current_tenant) unless @current_tenant.nil?
-    render json: @card
+    get_default_card(@current_tenant) unless @current_tenant.nil?
+    render json: @result
   end
 
   private

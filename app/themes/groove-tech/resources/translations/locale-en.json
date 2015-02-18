@@ -128,7 +128,7 @@
         },
         "accounts": {
             "headings": {
-                "credit_cards": "Payment Cards"
+                "credit_cards": "Card Details"
             },
             "labels": {
               "all_cards": "Your Cards"

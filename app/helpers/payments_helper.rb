@@ -1,13 +1,17 @@
 module PaymentsHelper
 	def card_list(current_tenant)
+		create_result_hash
+		@result['cards'] = []
     customer = get_current_customer(current_tenant)
-    @cards = customer.cards
+    unless customer.nil?
+    	@result['cards'] = customer.cards 
+    else
+    	@result['status'] = false
+    end
   end
 
   def add_card(card_info, current_tenant)
-  	@result = Hash.new
-  	@result['status'] = true
-  	@result['messages'] = []
+  	create_result_hash
     customer = get_current_customer(current_tenant)
     begin
     	token = Stripe::Token.create(
@@ -42,23 +46,50 @@ module PaymentsHelper
   end
 
   def make_default_card(card, current_tenant)
+  	create_result_hash
     customer = get_current_customer(current_tenant)
-    customer.default_card = card
-    customer.save
+    unless customer.nil?
+	    customer.default_card = card
+	    customer.save
+	  else
+	  	@result['status'] = false
+	  end
   end
 
   def get_default_card(current_tenant)
+  	create_result_hash
+  	@result['default_card'] = nil
     customer = get_current_customer(current_tenant)
-    customer.default_card
+    unless customer.nil?
+    	@result['default_card'] = customer.default_card 
+    else
+    	@result['status'] = false
+    end
   end
 
   def delete_a_card(card, current_tenant)
+  	create_result_hash
     customer = get_current_customer(current_tenant)
-    customer.cards.retrieve(card).delete()
+    unless customer.nil?
+    	customer.cards.retrieve(card).delete()
+    else
+    	@result['status'] = false
+    end 
   end
 
   def get_current_customer(current_tenant)
     tenant = Tenant.where(name: current_tenant).first unless Tenant.where(name: current_tenant).first.nil?
-    Stripe::Customer.retrieve(tenant.subscription.stripe_customer_id) 
+    begin
+    	Stripe::Customer.retrieve(tenant.subscription.stripe_customer_id) unless tenant.subscription.stripe_customer_id.nil?
+    rescue Stripe::InvalidRequestError => er
+    	@result['messages'].push(er.message)
+    	return nil
+    end
+  end
+
+  def create_result_hash
+  	@result = Hash.new
+  	@result['status'] = true
+  	@result['messages'] = []
   end
 end

@@ -66,11 +66,11 @@ Groovepacks::Application.routes.draw do
 
   resources :payments do
     collection do
-      get 'card_details'
       get 'default_card'
+      delete 'delete_cards'
     end
     # member do
-    #   get 'default_card'
+    #   put 'add_new_card'
     # end
   end
   
