@@ -21,7 +21,7 @@
         <div class="form-group">
           <label class="control-label col-md-3">Expiry Month </label>
           <div class="controls col-md-6" ng-class="{'has-error' : payments_form.exp_month.$invalid && (!payments_form.exp_month.$pristine || submitted) }">
-            <input class="form-control input-style" ng-model="payments.single.exp_month" name="exp_month" type="text" required/>
+            <input class="form-control input-style" ng-model="payments.single.exp_month" name="exp_month" type="text" placeholder="MM" required/>
             <span class="has-error help-block" ng-show="payments_form.exp_month.$invalid && (!payments_form.exp_month.$pristine || submitted)">Expiry month is required.
             </span>
           </div>
@@ -30,7 +30,7 @@
         <div class="form-group">
           <label class="control-label col-md-3">Expiry Year </label>
           <div class="controls col-md-6" ng-class="{'has-error' : payments_form.exp_year.$invalid && (!payments_form.exp_year.$pristine || submitted) }">
-            <input class="form-control input-style" ng-model="payments.single.exp_year" name="exp_year" type="text" required/>
+            <input class="form-control input-style" ng-model="payments.single.exp_year" name="exp_year" type="text" placeholder="YYYY" required/>
             <span class="has-error help-block" ng-show="payments_form.exp_year.$invalid && (!payments_form.exp_year.$pristine || submitted)">Expiry year is required.
             </span>
           </div>
