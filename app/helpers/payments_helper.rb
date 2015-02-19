@@ -4,7 +4,7 @@ module PaymentsHelper
 		@result['cards'] = []
     customer = get_current_customer(current_tenant)
     unless customer.nil?
-    	@result['cards'] = customer.cards 
+    	@result['cards'] = customer.cards unless customer.cards.nil?
     else
     	@result['status'] = false
     end
@@ -80,7 +80,14 @@ module PaymentsHelper
   def get_current_customer(current_tenant)
     tenant = Tenant.where(name: current_tenant).first unless Tenant.where(name: current_tenant).first.nil?
     begin
-    	Stripe::Customer.retrieve(tenant.subscription.stripe_customer_id) unless tenant.subscription.stripe_customer_id.nil?
+    	@customer_info = Stripe::Customer.retrieve(tenant.subscription.stripe_customer_id) unless tenant.subscription.nil? || tenant.subscription.stripe_customer_id.nil?
+      if(defined?(@customer_info.deleted).nil?)
+        return @customer_info
+      else 
+        @result['status'] = false
+        @result['messages'].push("This customer account has been permanently closed.")
+        return nil
+      end
     rescue Stripe::InvalidRequestError => er
     	@result['messages'].push(er.message)
     	return nil
@@ -88,7 +95,7 @@ module PaymentsHelper
   end
 
   def create_result_hash
-  	@result = Hash.new
+  	@result = {}
   	@result['status'] = true
   	@result['messages'] = []
   end

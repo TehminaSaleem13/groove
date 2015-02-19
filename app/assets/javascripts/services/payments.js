@@ -14,6 +14,7 @@ groovepacks_services.factory('payments',['$http','notification',function($http, 
       		if (data.cards.data.length > 0) {
 	        	return payments.list = data.cards.data;
 	        } else {
+            return payments.list = [];
 	        	notification.notify("No cards found for the subscriber");
 	        }
       	}
