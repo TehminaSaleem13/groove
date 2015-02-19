@@ -75,6 +75,20 @@
           <div class="form-group" id="tos_iframe" style="display:none;">
             <iframe src="/assets/views/termsofservicetos.html" width="100%" height="200px"></iframe>
           </div>
+          <div><h4>Risk Free 30-day Evaluation</h4></div>
+          <div class="form-group">
+            <div>
+              <!-- <label class="control-label">Monthly</label> -->
+              <h5><b>Monthly:</b></h5>
+              <label class="radio"><input type="radio" id="radio_subscription1" class="radio" name="radio_subscription" value="monthly" checked/>The first monthly billing will be charged after 30 days. An initialization charge of $500 is paid on deployment.</label>
+            </div>
+            <div>
+              <!-- <label class="control-label">Annually</label> -->
+              <h5><b>Annually:</b></h5>
+              <label class="radio"><input type="radio" id="radio_subscription2" name="radio_subscription" value="annually" class="radio"/>The first annual billing will be charged after 30 days at a 10% discount. An initialization fee of $500 is paid on deployment.</label>
+            </div>
+            <label>If you are not completely satisfied, please let us know at any time during the evaluation period and charges will be credited in full.</label>
+          </div>
 
 
           <script src="https://checkout.stripe.com/checkout.js"></script>
@@ -100,6 +114,15 @@
               password_conf: false,
               tos: false
           };
+          var radio_button_value=null;
+          var amount=0;
+
+          // if ($("input[name='radio_subscription']:checked").length > 0){
+          //     radio_button_value = $('input:radio[name=radio_subscription]:checked').val();
+          //     console.log("radio_button_value: ");
+          //     console.log(radio_button_value);
+          // }
+
           $('html').click(function () {
               $('#tos_iframe').hide();
               $('#privacy_iframe').hide();
@@ -132,7 +155,8 @@
                           amount: $('#amount').val(),
                           plan_id: $('#plan_id').val(),
                           user_name: $('#user_name').val(),
-                          password: $('#password').val()
+                          password: $('#password').val(),
+                          radio_subscription: radio_button_value
                       }),
                       dataType: "json"
 
@@ -312,23 +336,70 @@
               }
           });
           document.getElementById('customButton').addEventListener('click', function (e) {
+              var plan_id
               e.preventDefault();
-              setTimeout(function () {
-                  console.log(valid.tenant_name);
-                  console.log(valid.email);
-                  if (valid.tenant_name && valid.email && valid.tos) {
-                      console.log("valid");
-                      // Open Checkout with further options
-                      handler.open({
-                          name: 'Groovepacker',
-                          description: '1 subscription ($' + $('#amount').val() + ')',
-                          amount: $('#amount').val() * 100,
-                          email: $('#email').val(),
-                          allowRememberMe: false
-                      });
-                  }
-                  ;
-              }, 400);
+              if ($("input[name='radio_subscription']:checked").length > 0){
+                radio_button_value = $('input:radio[name=radio_subscription]:checked').val();
+                if(radio_button_value == 'annually') {
+                  plan_id = 'annual-' + $('#plan_id').val();
+                }
+                else {
+                  plan_id = $('#plan_id').val();
+                }
+                console.log("plan_id :");
+                console.log(plan_id);
+                $.ajax({
+                      type: "GET",
+                      contentType: "application/json; charset=utf-8",
+                      url: "/subscriptions/planInfo",
+                      data: {plan_id: plan_id},
+                      dataType: "json"
+
+                  }).error(function (response) {
+
+                  }).success(function(response) {
+                    console.log("response: ");
+                    console.log(response);
+                    if(response.status == true) {
+                      amount = response.plan_info.amount;
+                      console.log(amount);
+                    }
+                    setTimeout(function () {
+                      console.log(valid.tenant_name);
+                      console.log(valid.email);
+                      if (valid.tenant_name && valid.email && valid.tos) {
+                          console.log("valid");
+                          // Open Checkout with further options
+                          handler.open({
+                              name: 'Groovepacker',
+                              description: '1 subscription ($' + amount/100 + '.' + amount%100.toFixed(2) + ')',
+                              // amount: $('#amount').val() * 100,
+                              amount: amount,
+                              email: $('#email').val(),
+                              allowRememberMe: false
+                          });
+                      }
+                      ;
+                  }, 400);
+                  });
+              }
+              // setTimeout(function () {
+              //     console.log(valid.tenant_name);
+              //     console.log(valid.email);
+              //     if (valid.tenant_name && valid.email && valid.tos) {
+              //         console.log("valid");
+              //         // Open Checkout with further options
+              //         handler.open({
+              //             name: 'Groovepacker',
+              //             description: '1 subscription ($' + amount + ')',
+              //             // amount: $('#amount').val() * 100,
+              //             amount: amount,
+              //             email: $('#email').val(),
+              //             allowRememberMe: false
+              //         });
+              //     }
+              //     ;
+              // }, 400);
           });
       </script>
     </div>
