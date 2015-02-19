@@ -1,4 +1,4 @@
-groovepacks_services.factory("notification", ['$timeout','$rootScope',function($timeout,$rootScope) {
+groovepacks_services.factory("notification", ['$timeout','$rootScope','$window',function($timeout,$rootScope,$window) {
     var id = 0;
     var notif_types =  {
         0: "danger",
@@ -45,6 +45,10 @@ groovepacks_services.factory("notification", ['$timeout','$rootScope',function($
     return {
         notify: notify,
         server_error: function(data) {
+            if(typeof data == 'object' && typeof data['error'] != "undefined" && data['error'] == "You need to sign in or sign up before continuing.") {
+                $window.location.href ='/users/sign_in';
+            }
+            console.log(data);
             notify("Error contacting server",0);
         }
     };

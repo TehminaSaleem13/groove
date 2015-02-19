@@ -88,8 +88,8 @@ class UserSettingsController < ApplicationController
 
 
         if @user.save
-          @result['user'] = @user
-          @result['user']['role'] = @user.role
+          @result['user'] = @user.attributes
+          @result['user']['role'] = @user.role.attributes
         else
           @result['status'] = false
           @result['messages'] = @user.errors.full_messages

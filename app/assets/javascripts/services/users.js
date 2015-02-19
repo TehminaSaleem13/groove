@@ -135,19 +135,30 @@ groovepacks_services.factory('users',['$http','notification','$filter',function(
         if (edit_status) {
                     console.log(users.single.confirmation_code);
             if (typeof users.single.confirmation_code == 'undefined' ||
-            users.single.confirmation_code == null || 
+            users.single.confirmation_code == null ||
             users.single.confirmation_code == '') {
+                valid &= false;
+            }
+            //If password or conf password is blank while the other is not
+            if (
+                    (!(typeof users.single.password == 'undefined' || users.single.password == null || users.single.password == '')
+                        && (typeof users.single.conf_password == 'undefined' || users.single.conf_password == null || users.single.conf_password == '')
+                    ) ||
+                    (!(typeof users.single.conf_password == 'undefined' || users.single.conf_password == null || users.single.conf_password == '')
+                        && (typeof users.single.password == 'undefined' || users.single.password == null || users.single.password == '')
+                    )
+            ) {
                 valid &= false;
             }
         } else {
             if (typeof users.single.password == 'undefined' ||
-            users.single.password == null || 
+            users.single.password == null ||
             users.single.password == '') {
                 valid &= false;
             }
 
             if (typeof users.single.conf_password == 'undefined' ||
-            users.single.conf_password == null || 
+            users.single.conf_password == null ||
             users.single.conf_password == '') {
                 valid &= false;
             }
@@ -162,7 +173,7 @@ groovepacks_services.factory('users',['$http','notification','$filter',function(
             auto = true;
         }
         var confirmation_code_auto_generated = false;
-        if (typeof users.single.confirmation_code == 'undefined' || 
+        if (typeof users.single.confirmation_code == 'undefined' ||
             users.single.confirmation_code == null) {
             confirmation_code_auto_generated = true;
         }
