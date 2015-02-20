@@ -97,8 +97,7 @@ module PaymentsHelper
     create_result_hash
     @result['plan_info'] = nil
     begin
-      @result['plan_info'] = Stripe::Plan.retrieve(plan_id) 
-      puts @plan_info.inspect
+      @result['plan_info'] = Stripe::Plan.retrieve(plan_id)
     rescue Stripe::InvalidRequestError => e
       @result['status'] = false
       @result['messages'].push(e.message);

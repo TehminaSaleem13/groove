@@ -5,7 +5,7 @@
       <form action="" method="POST" class="form-vertical" name="myForm" id="my_form">
         <fieldset>
           <div class="form-group">
-            <input type="hidden" id="amount" value="<%= params[:amount] %>"/>
+            <!-- <input type="hidden" id="amount" value="<%#= params[:amount] %>"/> -->
             <input type="hidden" id="plan_id" value="<%= params[:plan_id] %>"/>
             <label class="control-label">Choose your site address*</label>
 
@@ -116,6 +116,7 @@
           };
           var radio_button_value=null;
           var amount=0;
+          var plan_id = null;
 
           // if ($("input[name='radio_subscription']:checked").length > 0){
           //     radio_button_value = $('input:radio[name=radio_subscription]:checked').val();
@@ -152,8 +153,8 @@
                           tenant_name: $('#tenant_name').val(),
                           stripe_user_token: token.id,
                           email: $('#email').val(),
-                          amount: $('#amount').val(),
-                          plan_id: $('#plan_id').val(),
+                          amount: amount,
+                          plan_id: plan_id,
                           user_name: $('#user_name').val(),
                           password: $('#password').val(),
                           radio_subscription: radio_button_value
@@ -336,7 +337,6 @@
               }
           });
           document.getElementById('customButton').addEventListener('click', function (e) {
-              var plan_id
               e.preventDefault();
               if ($("input[name='radio_subscription']:checked").length > 0){
                 radio_button_value = $('input:radio[name=radio_subscription]:checked').val();
@@ -372,7 +372,7 @@
                           // Open Checkout with further options
                           handler.open({
                               name: 'Groovepacker',
-                              description: '1 subscription ($' + amount/100 + '.' + amount%100.toFixed(2) + ')',
+                              description: '1 subscription ($' + Number(amount/100).toFixed(2) + ')',
                               // amount: $('#amount').val() * 100,
                               amount: amount,
                               email: $('#email').val(),

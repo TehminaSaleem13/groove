@@ -10,9 +10,6 @@
     end
 
     def confirm_payment
-      puts "params"
-      puts params.inspect
-      puts params[:plan_id].inspect
       @subscription = Subscription.create(stripe_user_token: params[:stripe_user_token],
           tenant_name: params[:tenant_name],
           amount: params[:amount],
@@ -21,14 +18,6 @@
           user_name: params[:user_name],
           password: params[:password],
           status: "started")
-      if(params[:radio_subscription]=='annually') 
-        @subscription.subscription_plan_id = 'annaul_'+params[:plan_id]
-      else
-        @subscription.subscription_plan_id = params[:plan_id]
-      end
-      @subscription.save
-      puts "plan_id: "
-      puts @subscription.subscription_plan_id
       if @subscription
         if @subscription.save_with_payment
           render json: {valid: true, redirect_url: "subscriptions/show?transaction_id=#{@subscription.stripe_transaction_identifier}&notice=Congratulations! Your GroovePacker is being deployed!&amount=#{@subscription.amount}&email=#{@subscription.email}"}
@@ -69,8 +58,6 @@
     end
 
     def planInfo
-      puts "params for ajax request"
-      puts params.inspect
       getPlanInfo(params[:plan_id])
       render json: @result
     end

@@ -10,7 +10,8 @@ class Subscription < ActiveRecord::Base
         customer = Stripe::Customer.create(
           :card => self.stripe_user_token,
           :description => self.email,
-          :plan => self.subscription_plan_id
+          :plan => self.subscription_plan_id,
+          :account_balance => 50000
         )
         #whenever you do .first, make sure null check is done
         self.stripe_customer_id = customer.id
