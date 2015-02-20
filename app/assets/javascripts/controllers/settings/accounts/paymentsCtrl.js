@@ -22,8 +22,10 @@ function( $scope, $http, $timeout, $location, $state, $cookies, $modal, $rootSco
     };
     $scope.getTableData = function() {
         payments.list.get($scope.payments).then(function(list) {
-            for(var i=0; i<list.data.cards.data.length; i++) {
-                list.data.cards.data[i].checked = false;
+            if(typeof list.data.cards.data != 'undefined') {
+                for(var i=0; i<list.data.cards.data.length; i++) {
+                    list.data.cards.data[i].checked = false;
+                }
             }
         });
         payments.single.get($scope.payments).then(function() {

@@ -13,35 +13,39 @@ module PaymentsHelper
   def add_card(card_info, current_tenant)
   	create_result_hash
     customer = get_current_customer(current_tenant)
-    begin
-    	token = Stripe::Token.create(
-	      card: {
-	        number: card_info[:last4],
-	        exp_month: card_info[:exp_month],
-	        exp_year: card_info[:exp_year],
-	        cvc: card_info[:cvc]
-	      }
-	    ) 
-	    card = customer.cards.create(card: token.id)
-	    unless card.cvc_check.nil?
-		    if card.save
-			    # customer.default_card = card.id
-			    customer.save
-			  else
-			  	@result['status'] = false
-			  	@result['messages'].push("The card could not be created because of server problem")
-			  end
-			else
-				card.delete();
-				@result['status'] = false
-				@result['messages'].push("The CVC entered is not correct. Modify it.")
-			end
-		rescue Stripe::CardError => e
-    	@result['status'] = false
-    	@result['messages'].push(e.message)
-    rescue Stripe::InvalidRequestError => er
-    	@result['status'] = false
-    	@result['messages'].push(er.message)
+    unless customer.nil?
+      begin
+      	token = Stripe::Token.create(
+  	      card: {
+  	        number: card_info[:last4],
+  	        exp_month: card_info[:exp_month],
+  	        exp_year: card_info[:exp_year],
+  	        cvc: card_info[:cvc]
+  	      }
+  	    ) 
+  	    card = customer.cards.create(card: token.id)
+  	    unless card.cvc_check.nil?
+  		    if card.save
+  			    # customer.default_card = card.id
+  			    customer.save
+  			  else
+  			  	@result['status'] = false
+  			  	@result['messages'].push("The card could not be created because of server problem")
+  			  end
+  			else
+  				card.delete();
+  				@result['status'] = false
+  				@result['messages'].push("The CVC entered is not correct. Modify it.")
+  			end
+  		rescue Stripe::CardError => e
+      	@result['status'] = false
+      	@result['messages'].push(e.message)
+      rescue Stripe::InvalidRequestError => er
+      	@result['status'] = false
+      	@result['messages'].push(er.message)
+      end
+    else
+      @result['status'] = false
     end
   end
 
@@ -61,7 +65,7 @@ module PaymentsHelper
   	@result['default_card'] = nil
     customer = get_current_customer(current_tenant)
     unless customer.nil?
-    	@result['default_card'] = customer.default_card 
+    	@result['default_card'] = customer.default_card unless customer.default_card.nil?
     else
     	@result['status'] = false
     end
