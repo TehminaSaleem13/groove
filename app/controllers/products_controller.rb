@@ -626,7 +626,8 @@ class ProductsController < ApplicationController
   		stores = Store.where(:id=>store_id)
   		if !stores.nil?
   			@store = stores.first
-  		end
+      end
+      general_setting = GeneralSetting.all.first
   		amazon_products = AmazonCredentials.where(:store_id=>store_id)
   		if !amazon_products.nil?
   			@amazon_product = amazon_products.first
@@ -651,11 +652,17 @@ class ProductsController < ApplicationController
             :see => true
         ).length > 0
           inv_wh_result = Hash.new
-          inv_wh_result['info'] = inv_wh
+          inv_wh_result['info'] = inv_wh.attributes
           inv_wh_result['info']['sold_inv'] = SoldInventoryWarehouse.sum(
               :sold_qty,
               :conditions => {:product_inventory_warehouses_id => inv_wh.id}
           )
+          unless general_setting.low_inventory_alert_email
+            inv_wh_result['info']['product_inv_alert'] = false
+          end
+          unless inv_wh_result['info']['product_inv_alert']
+            inv_wh_result['info']['product_inv_alert_level'] = general_setting.default_low_inventory_alert_limit
+          end
           inv_wh_result['warehouse_info'] = nil
           unless inv_wh.inventory_warehouse_id.nil?
             inv_wh_result['warehouse_info'] = InventoryWarehouse.find(inv_wh.inventory_warehouse_id)
@@ -868,6 +875,7 @@ class ProductsController < ApplicationController
         #Update product inventory warehouses
         #check if a product category is defined.
         if !params[:inventory_warehouses].nil?
+          general_setting = GeneralSetting.all.first
           params[:inventory_warehouses].each do |wh|
             if UserInventoryPermission.where(
                 :user_id => current_user.id,
@@ -880,6 +888,14 @@ class ProductsController < ApplicationController
                 product_inv_wh.location_primary = wh["info"]["location_primary"]
                 product_inv_wh.location_secondary = wh["info"]["location_secondary"]
                 product_inv_wh.location_tertiary = wh["info"]["location_tertiary"]
+                if general_setting.low_inventory_alert_email
+                  if !product_inv_wh.product_inv_alert && product_inv_wh.product_inv_alert_level != wh["info"]["product_inv_alert_level"]
+                    product_inv_wh.product_inv_alert = true
+                  else
+                    product_inv_wh.product_inv_alert = wh["info"]["product_inv_alert"]
+                  end
+                  product_inv_wh.product_inv_alert_level = wh["info"]["product_inv_alert_level"]
+                end
                 unless product_inv_wh.save
                   @result['status'] &= false
                 end

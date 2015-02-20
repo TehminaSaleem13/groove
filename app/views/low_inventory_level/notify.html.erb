@@ -1,158 +1,169 @@
-
 <div style="background-color: #B4D3CA; padding: 20px; border-color: #D6E0DE; border-width: 3px; border-radius: 6px; border-style: dotted;">
-	<%= image_tag attachments['logo.png'].url %>
-	<hr style="border-color:#999999;"/>
-	<div style="text-align:center; padding-left:40px; padding-right: 40px;">
-		<div style="width: 500px; margin-left: 100px;">
-			<div style="border: 1px solid #F5D099; background-color: yellow;height: auto; border-radius: 4px; border-style: dotted; border-width: 2px; padding-top:5px; margin-bottom:-20px;">
-				<p style="text-align:center"><%= image_tag attachments['caution_alert.png'].url %></p>
-				<p style="text-align: center; color:red;font-size: 18px; font-weight: bold;">Low Inventory Alert</p>
-			</div>
-		</div>
-		<div style="width: 500px; margin-left: 100px;">
-			<div style="color: black; border-bottom:1px solid #999999;">
-			<b>This email was sent to let you know that the following items are currently at or below their low inventory threshold.</b>
-			</div>
-			<div style="color:black; font-size: 12px;">
-				You can control Low Inventory Alert emails in GroovePacker's
-				General Settings Area
-			</div>
-		</div>
-	<table style="margin-top: 40px; border-spacing: 0px; background-color:white;" >
-		<thead>
-			<th style="border: 1px solid rgb(117, 116, 116); border-left: 0px; margin-left: 0px; margin-right: 0px; background-color: #AFCAAF; width: 150px; border-radius: 4px; border-bottom-width: 3px; border-top-width: 2px; border-top-color: #E6EBE6;">Image</th>
-			<th style="border: 1px solid rgb(117, 116, 116); border-left: 0px; margin-left: 0px; margin-right: 0px; background-color: #AFCAAF; width: 150px; border-radius: 4px; border-bottom-width: 3px; border-top-width: 2px; border-top-color: #E6EBE6;">SKU</th>
-			<th style="border: 1px solid rgb(117, 116, 116); border-left: 0px; margin-left: 0px; margin-right: 0px; background-color: #AFCAAF; width: 150px; border-radius: 4px; border-bottom-width: 3px; border-top-width: 2px; border-top-color: #E6EBE6;">Product Name</th>
-			<th style="border: 1px solid rgb(117, 116, 116); border-left: 0px; margin-left: 0px; margin-right: 0px; background-color: #AFCAAF; width: 150px; border-radius: 4px; border-bottom-width: 3px; border-top-width: 2px; border-top-color: #E6EBE6;">Warehouse name</th>
-			<th style="border: 1px solid rgb(117, 116, 116); border-left: 0px; margin-left: 0px; margin-right: 0px; background-color: #AFCAAF; width: 150px; border-radius: 4px; border-bottom-width: 3px; border-top-width: 2px; border-top-color: #E6EBE6;">available/threshold</th>			
-			<th style="border: 1px solid rgb(117, 116, 116); border-left: 0px; margin-left: 0px; margin-right: 0px; background-color: #AFCAAF; width: 150px; border-radius: 4px; border-bottom-width: 3px; border-top-width: 2px; border-top-color: #E6EBE6;">Primary Location</th>						
-			<th style="border: 1px solid rgb(117, 116, 116); border-left: 0px; margin-left: 0px; margin-right: 0px; background-color: #AFCAAF; width: 150px; border-radius: 4px; border-bottom-width: 3px; border-top-width: 2px; border-top-color: #E6EBE6;">Secondary Location</th>		
-		</thead>
-		<tbody>
-		<%
-		  	@products = []
-		  	@products_list = Product.all
-		  	@products_list.each do |product|
-				product_hash = Hash.new
-		  		product_hash['id'] = product.id
-		  		product_hash['name'] = product.name
-		  		if product.product_skus.length > 0
-		  			product_hash['sku'] = product.product_skus.first.sku
-		  		else
-		  			product_hash['sku'] = '-'
-		  		end
-		 	  	if product.product_images.length > 0
-		  			product_hash['image'] = product.product_images.first.image
-		  		else
-		  			product_hash['image'] = '-'
-		  		end
-		  		product_hash['warehouses'] = []
-		  		low_inv_found = false
-				product.product_inventory_warehousess.each do |wh|
-					wh_hash = Hash.new
-							if !wh.inventory_warehouse.nil?
-		  	  			wh_hash['name'] = wh.inventory_warehouse.name 
-		  	  		else
-		  	  			wh_hash['name'] = 'Not Available'
-		  	  		end
-		  	  		wh_hash['available_inv'] = wh.available_inv
-		  	  		
-		  	  		if !wh.location_primary.nil?
-		  	  			wh_hash['primary_location'] = wh.location_primary
-		  	  		else
-		  	  			wh_hash['primary_location'] = 'Not Available'
-		  	  		end
+  <%= image_tag attachments['logo.png'].url %>
+  <hr style="border-color:#999999;"/>
+  <div style="text-align:center; padding-left:40px; padding-right: 40px;">
+    <div style="width: 500px; margin-left: 100px;">
+      <div style="border: 1px solid #F5D099; background-color: yellow;height: auto; border-radius: 4px; border-style: dotted; border-width: 2px; padding-top:5px; margin-bottom:-20px;">
+        <p style="text-align:center"><%= image_tag attachments['caution_alert.png'].url %></p>
 
-							if !wh.location_secondary.nil?
-		  	  			wh_hash['secondary_location'] = wh.location_secondary
-		  	  		else
-		  	  			wh_hash['secondary_location'] = 'Not Available'
-		  	  		end
+        <p style="text-align: center; color:red;font-size: 18px; font-weight: bold;">Low Inventory Alert</p>
+      </div>
+    </div>
+    <div style="width: 500px; margin-left: 100px;">
+      <div style="color: black; border-bottom:1px solid #999999;">
+        <b>This email was sent to let you know that the following items are currently at or below their low inventory
+          threshold.</b>
+      </div>
+      <div style="color:black; font-size: 12px;">
+        You can control Low Inventory Alert emails in GroovePacker's
+        General Settings Area
+      </div>
+    </div>
+    <table style="margin-top: 40px; border-spacing: 0px; background-color:white;">
+      <thead>
+      <th style="border: 1px solid rgb(117, 116, 116); border-left: 0px; margin-left: 0px; margin-right: 0px; background-color: #AFCAAF; width: 150px; border-radius: 4px; border-bottom-width: 3px; border-top-width: 2px; border-top-color: #E6EBE6;">Image</th>
+      <th style="border: 1px solid rgb(117, 116, 116); border-left: 0px; margin-left: 0px; margin-right: 0px; background-color: #AFCAAF; width: 150px; border-radius: 4px; border-bottom-width: 3px; border-top-width: 2px; border-top-color: #E6EBE6;">SKU</th>
+      <th style="border: 1px solid rgb(117, 116, 116); border-left: 0px; margin-left: 0px; margin-right: 0px; background-color: #AFCAAF; width: 150px; border-radius: 4px; border-bottom-width: 3px; border-top-width: 2px; border-top-color: #E6EBE6;">Product
+        Name
+      </th>
+      <th style="border: 1px solid rgb(117, 116, 116); border-left: 0px; margin-left: 0px; margin-right: 0px; background-color: #AFCAAF; width: 150px; border-radius: 4px; border-bottom-width: 3px; border-top-width: 2px; border-top-color: #E6EBE6;">Warehouse
+        name
+      </th>
+      <th style="border: 1px solid rgb(117, 116, 116); border-left: 0px; margin-left: 0px; margin-right: 0px; background-color: #AFCAAF; width: 150px; border-radius: 4px; border-bottom-width: 3px; border-top-width: 2px; border-top-color: #E6EBE6;">available/threshold</th>
+      <th style="border: 1px solid rgb(117, 116, 116); border-left: 0px; margin-left: 0px; margin-right: 0px; background-color: #AFCAAF; width: 150px; border-radius: 4px; border-bottom-width: 3px; border-top-width: 2px; border-top-color: #E6EBE6;">Primary
+        Location
+      </th>
+      <th style="border: 1px solid rgb(117, 116, 116); border-left: 0px; margin-left: 0px; margin-right: 0px; background-color: #AFCAAF; width: 150px; border-radius: 4px; border-bottom-width: 3px; border-top-width: 2px; border-top-color: #E6EBE6;">Secondary
+        Location
+      </th>
+      </thead>
+      <tbody>
+      <%
+         @products = []
+         @products_list = Product.all
+         @products_list.each do |product|
+           product_hash = Hash.new
+           product_hash['id'] = product.id
+           product_hash['name'] = product.name
+           if product.product_skus.length > 0
+             product_hash['sku'] = product.product_skus.first.sku
+           else
+             product_hash['sku'] = '-'
+           end
+           if product.product_images.length > 0
+             product_hash['image'] = product.product_images.first.image
+           else
+             product_hash['image'] = '-'
+           end
+           product_hash['warehouses'] = []
+           low_inv_found = false
+           product.product_inventory_warehousess.each do |wh|
+             wh_hash = Hash.new
+             if !wh.inventory_warehouse.nil?
+               wh_hash['name'] = wh.inventory_warehouse.name
+             else
+               wh_hash['name'] = 'Not Available'
+             end
+             wh_hash['available_inv'] = wh.available_inv
 
-		  	  		wh_hash['threshold'] = GeneralSetting.all.first.default_low_inventory_alert_limit
-			  	  	if wh.available_inv <=  GeneralSetting.all.first.default_low_inventory_alert_limit
-			  	  		wh_hash['style'] = 'color:red;'
-			  	  		low_inv_found = true
-				  		else
-								wh_hash['style'] = 'color:black;'	  		
-			  	  	end
-				  	product_hash['warehouses'].push(wh_hash)
-		  	  	end
+             if !wh.location_primary.nil?
+               wh_hash['primary_location'] = wh.location_primary
+             else
+               wh_hash['primary_location'] = 'Not Available'
+             end
 
-		  	  	@products.push(product_hash) if low_inv_found
-		  	end
-		%>
-		<%= @my_name %>
-			<% if !@products.nil? %>
-				<% @products.each do |product| %>
+             if !wh.location_secondary.nil?
+               wh_hash['secondary_location'] = wh.location_secondary
+             else
+               wh_hash['secondary_location'] = 'Not Available'
+             end
 
-						<tr>
-							<td>
-								<img width="" height="45px" src="<%= product['image'] %>" />
-							</td>
-							<td>
-								<%= product['sku']%>
-							</td>
-							<td>
-								<%= product['name']%>
-							</td>
-							<td style="padding-left: 25px; padding-right: 25px;">
+             wh_hash['threshold'] = GeneralSetting.all.first.default_low_inventory_alert_limit
+             if ((wh.available_inv <= GeneralSetting.all.first.default_low_inventory_alert_limit) && !wh.product_inv_alert) ||
+                (wh.product_inv_alert && wh.product_inv_alert_level > 0)
+               wh_hash['style'] = 'color:red;'
+               low_inv_found = true
+             else
+               wh_hash['style'] = 'color:black;'
+             end
+             product_hash['warehouses'].push(wh_hash)
+           end
+
+           @products.push(product_hash) if low_inv_found
+         end
+      %>
+      <%= @my_name %>
+      <% if !@products.nil? %>
+          <% @products.each do |product| %>
+
+              <tr>
+                <td>
+                  <img width="" height="45px" src="<%= product['image'] %>"/>
+                </td>
+                <td>
+                  <%= product['sku'] %>
+                </td>
+                <td>
+                  <%= product['name'] %>
+                </td>
+                <td style="padding-left: 25px; padding-right: 25px;">
 								<span>
 								<table>
-									<% product['warehouses'].each do |pro_wh|%>
-									<tr>
-										<td>
-											<%= pro_wh['name'] %>
-										</td>
-									</tr>
-									<% end %>
-								</table>
+                                  <% product['warehouses'].each do |pro_wh| %>
+                                      <tr>
+                                        <td>
+                                          <%= pro_wh['name'] %>
+                                        </td>
+                                      </tr>
+                                  <% end %>
+                                </table>
 								</span>
-							</td>
-							<td style="padding-left: 60px; padding-right: 60px;">
+                </td>
+                <td style="padding-left: 60px; padding-right: 60px;">
 								<span>
 								<table>
-									<% product['warehouses'].each do |pro_wh|%>
-									<tr style="text-align:center;">
-										<td style="<%= pro_wh['style'] %>">
-											<span style="text-align:center;"><%= pro_wh['available_inv'] %>/<%= pro_wh['threshold']%> </span>
-										</td>
-									</tr>
-									<% end %>
-								</table>
+                                  <% product['warehouses'].each do |pro_wh| %>
+                                      <tr style="text-align:center;">
+                                        <td style="<%= pro_wh['style'] %>">
+                                          <span style="text-align:center;"><%= pro_wh['available_inv'] %>
+                                            /<%= pro_wh['threshold'] %> </span>
+                                        </td>
+                                      </tr>
+                                  <% end %>
+                                </table>
 								</span>
-							</td>
-							<td style="padding-left: 25px; padding-right: 25px;">
+                </td>
+                <td style="padding-left: 25px; padding-right: 25px;">
 								<span>
 								<table>
-									<% product['warehouses'].each do |pro_wh|%>
-									<tr>
-										<td>
-											<%= pro_wh['primary_location'] %>
-										</td>
-									</tr>
-									<% end %>
-								</table>
+                                  <% product['warehouses'].each do |pro_wh| %>
+                                      <tr>
+                                        <td>
+                                          <%= pro_wh['primary_location'] %>
+                                        </td>
+                                      </tr>
+                                  <% end %>
+                                </table>
 								</span>
-							</td>
-							<td style="padding-left: 25px; padding-right: 25px;">
+                </td>
+                <td style="padding-left: 25px; padding-right: 25px;">
 								<span>
 								<table>
-									<% product['warehouses'].each do |pro_wh|%>
-									<tr>
-										<td>
-											<%= pro_wh['secondary_location'] %>
-										</td>
-									</tr>
-									<% end %>
-								</table>
+                                  <% product['warehouses'].each do |pro_wh| %>
+                                      <tr>
+                                        <td>
+                                          <%= pro_wh['secondary_location'] %>
+                                        </td>
+                                      </tr>
+                                  <% end %>
+                                </table>
 								</span>
-							</td>																			
-						</tr>
-				<%end%>
-			<% end %>
-		</tbody>
-	</table>
-	</div>
+                </td>
+              </tr>
+          <% end %>
+      <% end %>
+      </tbody>
+    </table>
+  </div>
 
 </div>

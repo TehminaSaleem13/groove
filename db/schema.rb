@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150218140836) do
+ActiveRecord::Schema.define(:version => 20150220201519) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0, :null => false
@@ -98,7 +98,7 @@ ActiveRecord::Schema.define(:version => 20150218140836) do
 
   create_table "general_settings", :force => true do |t|
     t.boolean  "inventory_tracking",                :default => false
-    t.boolean  "low_inventory_alert_email",         :default => true
+    t.boolean  "low_inventory_alert_email",         :default => false
     t.string   "low_inventory_email_address",       :default => ""
     t.boolean  "hold_orders_due_to_inventory",      :default => true
     t.string   "conf_req_on_notes_to_packer",       :default => "optional"
@@ -106,7 +106,7 @@ ActiveRecord::Schema.define(:version => 20150218140836) do
     t.string   "email_address_for_packer_notes",    :default => ""
     t.datetime "created_at",                                                           :null => false
     t.datetime "updated_at",                                                           :null => false
-    t.integer  "default_low_inventory_alert_limit", :default => 0
+    t.integer  "default_low_inventory_alert_limit", :default => 1
     t.boolean  "send_email_on_mon",                 :default => false
     t.boolean  "send_email_on_tue",                 :default => false
     t.boolean  "send_email_on_wed",                 :default => false
@@ -396,16 +396,18 @@ ActiveRecord::Schema.define(:version => 20150218140836) do
     t.string   "location"
     t.integer  "qty"
     t.integer  "product_id"
-    t.datetime "created_at",                                          :null => false
-    t.datetime "updated_at",                                          :null => false
+    t.datetime "created_at",                                               :null => false
+    t.datetime "updated_at",                                               :null => false
     t.string   "alert"
-    t.string   "location_primary",       :limit => 50
-    t.string   "location_secondary",     :limit => 50
+    t.string   "location_primary",        :limit => 50
+    t.string   "location_secondary",      :limit => 50
     t.string   "name"
     t.integer  "inventory_warehouse_id"
-    t.integer  "available_inv",                        :default => 0, :null => false
-    t.integer  "allocated_inv",                        :default => 0, :null => false
-    t.string   "location_tertiary",      :limit => 50
+    t.integer  "available_inv",                         :default => 0,     :null => false
+    t.integer  "allocated_inv",                         :default => 0,     :null => false
+    t.string   "location_tertiary",       :limit => 50
+    t.integer  "product_inv_alert_level",               :default => 0
+    t.boolean  "product_inv_alert",                     :default => false
   end
 
   add_index "product_inventory_warehouses", ["inventory_warehouse_id"], :name => "index_product_inventory_warehouses_on_inventory_warehouse_id"

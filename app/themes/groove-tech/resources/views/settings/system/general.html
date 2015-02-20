@@ -70,10 +70,10 @@
                                 </label>
                             </div>
                         </div>
-                        <div class="form-group">
+                        <div class="form-group" ng-show="general_settings.single.low_inventory_alert_email== '1'">
                             <label class="control-label col-sm-3">{{translations.labels.default_low_inventory_alert_limit}}</label>
                             <div class="controls col-sm-2">
-                                <input class="form-control input-style" type="number" ng-model="general_settings.single.default_low_inventory_alert_limit" placeholder="Default low inventory alert limit" ng-blur="update_settings()"/>
+                                <input class="form-control input-style" type="number" min="1" ng-model="general_settings.single.default_low_inventory_alert_limit" placeholder="Default low inventory alert limit" ng-blur="update_settings()"/>
                             </div>
                             <div class="info col-sm-2">
                                 <i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" popover="{{translations.tooltips.default_low_inventory_alert_limit}}"></i>
@@ -93,7 +93,7 @@
             </div>
         </div>
     </div>
-    
+
     <!-- Confirmation and Notifications -->
     <div class="row">
         <div class="col-xs-12">

@@ -923,17 +923,20 @@ hr{
   width:70px;
   min-width:70px;
 
+  &, &.disabled {
+    .switch-on {
+      .knob {
+        background-color: #17C017;
+      }
+    }
+    .switch-off {
+      .knob {
+        background-color: #999999;
+      }
+    }
+  }
 
-  .switch-on {
-    .knob {
-      background-color: #17C017;
-    }
-  }
-  .switch-off {
-    .knob {
-      background-color: #999999;
-    }
-  }
+
   .switch-right,.switch-left{
     height: 35px;
     background:transparent;
@@ -953,6 +956,14 @@ hr{
     color: #FFFFFF;
     padding-top: 5px;
     padding-left: 5px;
+  }
+  &.disabled {
+    .switch-right {
+      color: #777;
+    }
+    .switch-left {
+      color: #DDD;
+    }
   }
   .knob {
     height:35px;

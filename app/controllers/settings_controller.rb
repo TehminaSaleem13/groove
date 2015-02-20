@@ -487,7 +487,10 @@ class SettingsController < ApplicationController
         general_setting.low_inventory_alert_email = params[:low_inventory_alert_email]
         general_setting.low_inventory_email_address = params[:low_inventory_email_address]
         general_setting.send_email_for_packer_notes = params[:send_email_for_packer_notes]
-        general_setting.default_low_inventory_alert_limit = params[:default_low_inventory_alert_limit]
+        if params[:default_low_inventory_alert_limit].to_i < 1
+          params[:default_low_inventory_alert_limit] = 1
+        end
+        general_setting.default_low_inventory_alert_limit = params[:default_low_inventory_alert_limit].to_i
 
 
         general_setting.export_items = params[:export_items]

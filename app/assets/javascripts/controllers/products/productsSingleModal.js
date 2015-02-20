@@ -319,6 +319,9 @@ groovepacks_controllers.
             scope.warehouseGridOptions = {
                 identifier:'warehousesgrid',
                 selectable:true,
+                setup: {
+                    enable_inv_alert: function() {return scope.general_settings.single.low_inventory_alert_email;}
+                },
                 editable:{
                     update: scope.update_single_product,
                     elements: {
@@ -370,6 +373,17 @@ groovepacks_controllers.
                         name: 'Tertiary Location',
                         model:'row.info',
                         transclude: '<span>{{row.info.location_tertiary}}</span>'
+                    },
+                    product_inv_alert: {
+                        name: "Override Global Inv Alert Lvl",
+                        model:'row.info',
+                        editable:false,
+                        transclude: '<div> <span ng-hide="{{options.setup.enable_inv_alert()}}">Disabled</span><div ng-show="{{options.setup.enable_inv_alert()}}" toggle-switch ng-model="row.info.product_inv_alert" groov-click="options.editable.update()"></div></div>'
+                    },
+                    product_inv_alert_level: {
+                        name:"Inv Alert Level",
+                        model:'row.info',
+                        transclude: '<span>{{row.info.product_inv_alert_level}}</span>'
                     }
                 }
             };
