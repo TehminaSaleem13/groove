@@ -101,7 +101,6 @@ groovepacks_controllers.
                 if(!myscope.order_instruction_confirmed && ($scope.general_settings.single.conf_req_on_notes_to_packer ==="always" || ($scope.general_settings.single.conf_req_on_notes_to_packer ==="optional" && $scope.data.order.note_confirmation)) && $scope.data.order.notes_toPacker) {
                     $timeout(myscope.show_order_instructions);
                 }
-
                 if(typeof $scope.data.order['next_item'] !== 'undefined' && ($scope.general_settings.single.conf_code_product_instruction ==="always" || ($scope.general_settings.single.conf_code_product_instruction ==="optional" && $scope.data.order.next_item.confirmation)) && myscope.product_instruction_confirmed_id !== $scope.data.order.next_item.product_id) {
                     $timeout(myscope.show_product_instructions);
                 }

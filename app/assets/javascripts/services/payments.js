@@ -14,12 +14,14 @@ groovepacks_services.factory('payments',['$http','notification',function($http, 
       		if (data.cards.data.length > 0) {
 	        	return payments.list = data.cards.data;
 	        } else {
-	        	notification.notify("No cards found for the subscriber");
+            notification.notify("No cards found for the subscriber");
+            return payments.list = [];
 	        }
       	}
       	else {
       		data.messages.forEach(function(message) {
             notification.notify(message);
+            return payments.list = [];
           });
       	}
         
@@ -44,13 +46,7 @@ groovepacks_services.factory('payments',['$http','notification',function($http, 
 
   var create_card = function(payments) {
   	var url = '/payments';
-  	return $http.post(url,payments).success(function(response) {
-  		if(response.status == false) {
-				response.messages.forEach(function(message) {
-          notification.notify(message);
-        });
-			}
-  	}).error(notification.server_error);
+  	return $http.post(url,payments).success(function() {}).error(notification.server_error);
   }
 
   var delete_cards = function(cards) {
