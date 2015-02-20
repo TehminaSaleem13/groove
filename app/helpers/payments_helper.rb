@@ -3,11 +3,7 @@ module PaymentsHelper
 		create_result_hash
 		@result['cards'] = []
     customer = get_current_customer(current_tenant)
-    unless customer.nil?
-    	@result['cards'] = customer.cards unless customer.cards.nil?
-    else
-    	@result['status'] = false
-    end
+    @result['cards'] = customer.cards unless customer.nil? || customer.cards.nil?
   end
 
   def add_card(card_info, current_tenant)
@@ -44,8 +40,6 @@ module PaymentsHelper
       	@result['status'] = false
       	@result['messages'].push(er.message)
       end
-    else
-      @result['status'] = false
     end
   end
 
@@ -55,8 +49,6 @@ module PaymentsHelper
     unless customer.nil?
 	    customer.default_card = card
 	    customer.save
-	  else
-	  	@result['status'] = false
 	  end
   end
 
@@ -64,35 +56,34 @@ module PaymentsHelper
   	create_result_hash
   	@result['default_card'] = nil
     customer = get_current_customer(current_tenant)
-    unless customer.nil?
-    	@result['default_card'] = customer.default_card unless customer.default_card.nil?
-    else
-    	@result['status'] = false
-    end
+    @result['default_card'] = customer.default_card unless customer.nil? || customer.default_card.nil?
   end
 
   def delete_a_card(card, current_tenant)
   	create_result_hash
     customer = get_current_customer(current_tenant)
-    unless customer.nil?
-    	customer.cards.retrieve(card).delete()
-    else
-    	@result['status'] = false
-    end 
+    customer.cards.retrieve(card).delete() unless customer.nil? || customer.cards.retrieve(card).nil?
   end
 
   def get_current_customer(current_tenant)
     tenant = Tenant.where(name: current_tenant).first unless Tenant.where(name: current_tenant).first.nil?
     begin
-    	@customer_info = Stripe::Customer.retrieve(tenant.subscription.stripe_customer_id) unless tenant.subscription.nil? || tenant.subscription.stripe_customer_id.nil?
-      if(defined?(@customer_info.deleted).nil?)
-        return @customer_info
-      else 
+      unless tenant.subscription.nil? || tenant.subscription.stripe_customer_id.nil?
+      	@customer_info = Stripe::Customer.retrieve(tenant.subscription.stripe_customer_id) 
+        if(defined?(@customer_info.deleted).nil?)
+          return @customer_info
+        else 
+          @result['status'] = false
+          @result['messages'].push("This customer account has been permanently closed.")
+          return nil
+        end
+      else
         @result['status'] = false
-        @result['messages'].push("This customer account has been permanently closed.")
+        @result['messages'].push("You don't have a valid customer id")
         return nil
       end
     rescue Stripe::InvalidRequestError => er
+      @result['status'] = false
     	@result['messages'].push(er.message)
     	return nil
     end
