@@ -5,7 +5,7 @@
 		</i></b></center></div>
 		<hr>
 		<div>
-			<center>You have been charged $<%=params[:amount].to_i%>.00 for this transaction. Your transaction id is: <%=params[:transaction_id]%>.</center>
+			<center>You have been charged $<%=(ENV['ONE_TIME_PAYMENT'].to_i/100.0).round(2)%> as initialization fee. Your transaction id is: <%=params[:transaction_id]%>.You will be charged $<%=(params[:amount].to_i/100.0).round(2)%> at the end of your evaluation period.</center>
 			<center>You will be receiving an email momentarily at <i><%=params[:email]%> </i>providing you the login details for your account.</center>
 		</div>
 	</div>

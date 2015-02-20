@@ -3,6 +3,8 @@
 
     def new
       @subscription = Subscription.new
+      @monthly_amount = Stripe::Plan.retrieve(params[:plan_id]).amount
+      @annually_amount = Stripe::Plan.retrieve('annual-' + params[:plan_id]).amount
     end
 
     def select_plan

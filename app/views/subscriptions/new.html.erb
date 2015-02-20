@@ -5,7 +5,6 @@
       <form action="" method="POST" class="form-vertical" name="myForm" id="my_form">
         <fieldset>
           <div class="form-group">
-            <!-- <input type="hidden" id="amount" value="<%#= params[:amount] %>"/> -->
             <input type="hidden" id="plan_id" value="<%= params[:plan_id] %>"/>
             <label class="control-label">Choose your site address*</label>
 
@@ -59,6 +58,8 @@
 
             <input type="hidden" id="stripe_public_key" class="input-large"
                    value="<%= ENV['STRIPE_PUBLIC_KEY'] %>"/>
+            <input type="hidden" id="one_time_payment" class="input-large"
+                   value="<%= ENV['ONE_TIME_PAYMENT'] %>"/>
           </div>
           <div class="form-group">
 
@@ -78,13 +79,11 @@
           <div><h4>Risk Free 30-day Evaluation</h4></div>
           <div class="form-group">
             <div>
-              <!-- <label class="control-label">Monthly</label> -->
-              <h5><b>Monthly:</b></h5>
+              <h5><b>Monthly:($</b><label><%=@monthly_amount/100%></label><b>.00)</b></h5>
               <label class="radio"><input type="radio" id="radio_subscription1" class="radio" name="radio_subscription" value="monthly" checked/>The first monthly billing will be charged after 30 days. An initialization charge of $500 is paid on deployment.</label>
             </div>
             <div>
-              <!-- <label class="control-label">Annually</label> -->
-              <h5><b>Annually:</b></h5>
+              <h5><b>Annually:($</b><label><%=@annually_amount/100%></label><b>.00)</b></h5>
               <label class="radio"><input type="radio" id="radio_subscription2" name="radio_subscription" value="annually" class="radio"/>The first annual billing will be charged after 30 days at a 10% discount. An initialization fee of $500 is paid on deployment.</label>
             </div>
             <label>If you are not completely satisfied, please let us know at any time during the evaluation period and charges will be credited in full.</label>
@@ -117,12 +116,6 @@
           var radio_button_value=null;
           var amount=0;
           var plan_id = null;
-
-          // if ($("input[name='radio_subscription']:checked").length > 0){
-          //     radio_button_value = $('input:radio[name=radio_subscription]:checked').val();
-          //     console.log("radio_button_value: ");
-          //     console.log(radio_button_value);
-          // }
 
           $('html').click(function () {
               $('#tos_iframe').hide();
@@ -372,9 +365,8 @@
                           // Open Checkout with further options
                           handler.open({
                               name: 'Groovepacker',
-                              description: '1 subscription ($' + Number(amount/100).toFixed(2) + ')',
-                              // amount: $('#amount').val() * 100,
-                              amount: amount,
+                              description: 'initialization fee ($' + Number($('#one_time_payment').val()/100).toFixed(2) + ')',
+                              amount: $('#one_time_payment').val(),
                               email: $('#email').val(),
                               allowRememberMe: false
                           });
@@ -383,23 +375,6 @@
                   }, 400);
                   });
               }
-              // setTimeout(function () {
-              //     console.log(valid.tenant_name);
-              //     console.log(valid.email);
-              //     if (valid.tenant_name && valid.email && valid.tos) {
-              //         console.log("valid");
-              //         // Open Checkout with further options
-              //         handler.open({
-              //             name: 'Groovepacker',
-              //             description: '1 subscription ($' + amount + ')',
-              //             // amount: $('#amount').val() * 100,
-              //             amount: amount,
-              //             email: $('#email').val(),
-              //             allowRememberMe: false
-              //         });
-              //     }
-              //     ;
-              // }, 400);
           });
       </script>
     </div>
