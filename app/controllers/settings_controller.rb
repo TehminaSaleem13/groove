@@ -136,6 +136,7 @@ class SettingsController < ApplicationController
             single_map[1][:model].delete_all
           end
         end
+        products_to_check_later = []
         # Open uploaded zip file
         Zip::File.open(params[:file].path) do |zipfile|
           # For each csv in the zip
@@ -225,6 +226,9 @@ class SettingsController < ApplicationController
                       warehouse[warehouse_map[1]] = csv_row[warehouse_map[0]]
                     end
                     warehouse.save
+                    unless csv_row['is_kit'].blank?
+                      products_to_check_later << single_row
+                    end
                     single_row.update_product_status
                   end
 
@@ -232,6 +236,9 @@ class SettingsController < ApplicationController
               end
             end
           end
+        end
+        products_to_check_later.each do |product|
+          product.update_product_status
         end
       end
     else
