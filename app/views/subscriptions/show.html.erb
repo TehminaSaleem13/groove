@@ -1,11 +1,27 @@
+<div class="row">
+  <div class="box-outer">
+    <div class="box"></div>
+    <div class="col-sm-offset-3 col-sm-6">
+      <img src="/assets/images/logo.png" class="col-xs-12" alt="GroovePacker"/>
+    </div>
+  </div>
+</div>
+<div class="row bottom-well col-sm-offset-1 col-sm-10">
+  <div class="row">
+    <div class="col-sm-12" style="font-size: 30px;">
+      <center><b><i>
+        <%= flash[:notice] %>
+      </i></b></center>
+      <hr>
+    </div>
 
-	<div class="row bottom-well col-sm-offset-1 col-md-offset-1 col-lg-offset-1 col-md-10 col-sm-10 col-lg-10">
-		<div class="" style="font-size: 30px;"><center><b><i>
-			<%= flash[:notice]%>
-		</i></b></center></div>
-		<hr>
-		<div>
-			<center>You have been charged $<%=params[:amount].to_i%>.00 for this transaction. Your transaction id is: <%=params[:transaction_id]%>.</center>
-			<center>You will be receiving an email momentarily at <i><%=params[:email]%> </i>providing you the login details for your account.</center>
-		</div>
-	</div>
+  </div>
+  <div class="row">
+    <div class="col-sm-12">
+      <center>You will be receiving an email momentarily at <i><%= params[:email] %></i> with information about your
+        account.
+      </center>
+    </div>
+  </div>
+
+</div>

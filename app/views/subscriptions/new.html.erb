@@ -1,336 +1,344 @@
-<div style="padding-top: 20px;">
-  <div class="row bottom-well col-sm-offset-3 col-md-offset-3 col-lg-offset-3 col-md-6 col-sm-6 col-lg-6">
-    <legend>Subscribe here</legend>
-    <div>
-      <form action="" method="POST" class="form-vertical" name="myForm" id="my_form">
-        <fieldset>
-          <div class="form-group">
-            <input type="hidden" id="amount" value="<%= params[:amount] %>"/>
-            <input type="hidden" id="plan_id" value="<%= params[:plan_id] %>"/>
-            <label class="control-label">Choose your site address*</label>
-
-            <div class="input-group">
-              <div class="input-group-addon">https://</div>
-              <input type="text" id="tenant_name" class="form-control" autofocus/>
-
-              <div class="input-group-addon">.groovepacker.com</div>
-            </div>
-            <div class="form-group error" style="color: red;">
-              <div id="error-tenant-block" class="help-inline"></div>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label for="email" class="control-label">Email*</label>
-            <input type="email" id="email" class="form-control"/>
-
-            <div class="form-group error" style="color: red;">
-              <div id="error-email-block" class="help-inline"></div>
-            </div>
-          </div>
-
-          <hr>
-
-          <div class="form-group">
-            <label for="user_name" class="control-label">Username*</label>
-            <input type="text" id="user_name" class="form-control"/>
-
-            <div class="form-group error" style="color: red;">
-              <div id="error-username-block" class="help-inline"></div>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label for="password" class="control-label">Password*</label>
-            <input type="password" id="password" class="form-control"/>
-
-            <div class="form-group error" style="color: red;">
-              <div id="error-password-block" class="help-inline"></div>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label class="control-label">Password Confirmation*</label>
-            <input type="password" id="password_conf" class="form-control"/>
-
-            <div class="form-group error" style="color: red;">
-              <div id="error-password-conf-block" class="help-inline"></div>
-            </div>
-
-            <input type="hidden" id="stripe_public_key" class="input-large"
-                   value="<%= ENV['STRIPE_PUBLIC_KEY'] %>"/>
-          </div>
-          <div class="form-group">
-
-            <div class="checkbox control-label" style="font-weight:bold;"><input type="checkbox" id="tos_checkbox"/>
-              I agree with the <a href="" id="tos_link">Terms of Service</a> and
-              <a href="" id="privacy_link">Privacy Policy</a></div>
-            <div class="form-group error" style="color: red;">
-              <div id="error-tos-block" class="help-inline"></div>
-            </div>
-          </div>
-          <div class="form-group" id="privacy_iframe" style="display:none;">
-            <iframe src="/assets/views/privacypolicy.html" width="100%" height="200px"></iframe>
-          </div>
-          <div class="form-group" id="tos_iframe" style="display:none;">
-            <iframe src="/assets/views/termsofservicetos.html" width="100%" height="200px"></iframe>
-          </div>
-
-
-          <script src="https://checkout.stripe.com/checkout.js"></script>
-          <div class="">
-            <button id="customButton" class="btn btn-primary" style="margin-bottom: 15px;">Purchase</button>
-
-            <div class="alert alert-success" id="processing_alert_success" style="display:none;">
-              <div><i class="icon-spinner icon-spin icon-large"></i></div>
-              <div> Your subscription is being processed.</div>
-            </div>
-            <div class="alert alert-error" id="processing_alert_error" style="display:none;">
-              <p>Your subscription could not be processed. Please try again.</p>
-            </div>
-          </div>
-        </fieldset>
-      </form>
-      <script>
-          var valid = {
-              tenant_name: false,
-              email: false,
-              user_name: false,
-              password: false,
-              password_conf: false,
-              tos: false
-          };
-          $('html').click(function () {
-              $('#tos_iframe').hide();
-              $('#privacy_iframe').hide();
-          });
-          $('#tos_link').click(function (event) {
-              event.preventDefault();
-              event.stopPropagation();
-              $('#privacy_iframe').hide();
-              $('#tos_iframe').show();
-          });
-          $('#privacy_link').click(function (event) {
-              event.preventDefault();
-              event.stopPropagation();
-              $('#tos_iframe').hide();
-              $('#privacy_iframe').show();
-          });
-
-          var handler = StripeCheckout.configure({
-              key: $('#stripe_public_key').val(),
-              image: '/assets/images/apple-touch-icon.png',
-              token: function (token) {
-                  $.ajax({
-                      type: "POST",
-                      contentType: "application/json; charset=utf-8",
-                      url: "/subscriptions/confirm_payment",
-                      data: JSON.stringify({
-                          tenant_name: $('#tenant_name').val(),
-                          stripe_user_token: token.id,
-                          email: $('#email').val(),
-                          amount: $('#amount').val(),
-                          plan_id: $('#plan_id').val(),
-                          user_name: $('#user_name').val(),
-                          password: $('#password').val()
-                      }),
-                      dataType: "json"
-
-                  }).error(function (response) {
-                      $('#processing_alert_success').hide();
-                      $('#customButton').show();
-                      $('#processing_alert_error').show();
-                  }).success(function (response) {
-                      if (!response.valid) {
-
-                          $('#processing_alert_success').hide();
-                          $('#customButton').show();
-                          $('#processing_alert_error').show();
-                      }
-                      else {
-                          window.location.href =
-                                  response.redirect_url
-                      }
-                  });
-                  $('#customButton').hide();
-                  $('#processing_alert_success').show();
-                  $('#processing_alert_error').hide();
-              }
-          });
-
-          $('#tenant_name').blur(function () {
-              var tenant_name = document.forms["myForm"]["tenant_name"].value;
-              if (tenant_name == null || tenant_name == "" || tenant_name.length < 4) {
-                  valid.tenant_name = false;
-                  $('#error-tenant-block').html("Site name must be at least 4 characters long");
-                  //this.focus();
-              }
-              else {
-                  $.ajax({
-                      type: "GET",
-                      contentType: "application/json; charset=utf-8",
-                      url: "/subscriptions/valid_tenant_name",
-                      data: {tenant_name: $('#tenant_name').val()},
-                      dataType: "json"
-
-                  }).error(function (response) {
-
-                  }).success(function (response) {
-                      if (!response.valid) {
-                          $('#error-tenant-block').html(response.message);
-                          valid.tenant_name = false;
-                          //$('#tenant_name').focus();
-                      }
-                      else {
-                          $('#error-tenant-block').html("");
-                          valid.tenant_name = true;
-                          //email.focus();
-                      }
-                  });
-              }
-          });
-
-          $('#email').blur(function () {
-              var email = document.forms["myForm"]["email"].value;
-              var atpos = email.indexOf("@");
-              var dotpos = email.lastIndexOf(".");
-              if (email == null || email == "") {
-                  valid.email = false;
-                  if (valid.tenant_name) {
-                      $('#error-email-block').html("email must be filled out");
-                      //this.focus();
-                  }
-
-              }
-              else if (atpos < 1 || dotpos < atpos + 2 || dotpos + 2 >= email.length) {
-                  valid.email = false;
-                  $('#error-email-block').html("email is not valid");
-              } else {
-                  $.ajax({
-                      type: "GET",
-                      contentType: "application/json; charset=utf-8",
-                      url: "/subscriptions/valid_email",
-                      data: {email: $('#email').val()},
-                      dataType: "json"
-
-                  }).error(function (response) {
-
-                  }).success(function (response) {
-                      if (!response.valid) {
-                          $('#error-email-block').html($('#email').val() + " email already exists");
-                          valid.email = false;
-                          //$('#email').focus();
-                      }
-                      else {
-                          $('#error-email-block').html("");
-                          valid.email = true;
-                          //user_name.focus();
-                      }
-                  });
-              }
-          });
-
-          $('#user_name').blur(function () {
-              var user_name = document.forms["myForm"]["user_name"].value;
-              if (user_name == null || user_name == "") {
-                  valid.user_name = false;
-                  if (valid.email) {
-                      $('#error-password-block').html("username must be filled out");
-                      //this.focus();
-                  }
-              } else {
-                  $.ajax({
-                      type: "GET",
-                      contentType: "application/json; charset=utf-8",
-                      url: "/subscriptions/valid_username",
-                      data: {email: $('#user_name').val()},
-                      dataType: "json"
-
-                  }).error(function (response) {
-
-                  }).success(function (response) {
-                      if (!response.valid) {
-                          $('#error-username-block').html($('#user_name').val() + " email already exists");
-                          valid.email = false;
-                          //$('#user_name').focus();
-                      }
-                      else {
-                          $('#error-username-block').html("");
-                          valid.user_name = true;
-                          //password.focus();
-                      }
-                  });
-              }
-          });
-          $('#password').blur(function () {
-              var password = document.forms["myForm"]["password"].value;
-              if (password == null || password == "") {
-
-                  valid.password = false;
-                  if (valid.user_name) {
-                      $('#error-password-block').html("password must be filled out");
-                      $('#error-password-conf-block').html("");
-                      //this.focus();
-                  }
-              } else if (password.length < 6) {
-                  valid.password = false;
-                  if (valid.user_name) {
-                      $('#error-password-block').html("Password should be at least 6 characters");
-                      $('#error-password-conf-block').html("");
-                      //this.focus();
-                  }
-              } else {
-                  valid.password = true;
-                  $('#error-password-block').html("");
-                  $('#error-password-conf-block, #error-password-block').html("");
-                  //password_conf.focus();
-              }
-          });
-          $('#password_conf').blur(function () {
-              var password_conf = document.forms["myForm"]["password_conf"].value;
-              if (password_conf == null || password_conf == "" || password_conf != password.value) {
-                  valid.password_conf = false;
-                  $('#error-password-conf-block, #error-password-block').html("password and password confirmation must match");
-                  //password.value = "";
-                  //this.value = "";
-                  //password.focus();
-              }
-              else {
-                  valid.password_conf = true;
-                  $('#error-password-conf-block, #error-password-block').html("");
-                  //customButton.focus();
-              }
-          });
-          $('#tos_checkbox').click(function () {
-              var tos = document.forms["myForm"]["tos_checkbox"].checked;
-              if (tos == null || tos == "" || tos == false) {
-                  valid.tos = false;
-                  $('#error-tos-block').html("Please click I agree for TOS and Privacy Policy");
-              } else {
-                  valid.tos = true;
-                  $('#error-tos-block').html("");
-              }
-          });
-          document.getElementById('customButton').addEventListener('click', function (e) {
-              e.preventDefault();
-              setTimeout(function () {
-                  console.log(valid.tenant_name);
-                  console.log(valid.email);
-                  if (valid.tenant_name && valid.email && valid.tos) {
-                      console.log("valid");
-                      // Open Checkout with further options
-                      handler.open({
-                          name: 'Groovepacker',
-                          description: '1 subscription ($' + $('#amount').val() + ')',
-                          amount: $('#amount').val() * 100,
-                          email: $('#email').val(),
-                          allowRememberMe: false
-                      });
-                  }
-                  ;
-              }, 400);
-          });
-      </script>
+<div class="row">
+  <div class="box-outer">
+    <div class="box"></div>
+    <div class="col-sm-offset-3 col-sm-6">
+      <img src="/assets/images/logo.png" class="col-xs-12" alt="GroovePacker"/>
     </div>
   </div>
 </div>
+
+<div class="row bottom-well col-sm-offset-3 col-md-offset-3 col-lg-offset-3 col-md-6 col-sm-6 col-lg-6">
+  <legend class="text-center">Subscribe here</legend>
+  <div>
+    <form action="" method="POST" class="form-vertical" name="myForm" id="my_form">
+      <fieldset>
+        <div class="form-group">
+          <input type="hidden" id="amount" value="<%= params[:amount] %>"/>
+          <input type="hidden" id="plan_id" value="<%= params[:plan_id] %>"/>
+          <label class="control-label">Choose your site address*</label>
+
+          <div class="input-group">
+            <div class="input-group-addon">https://</div>
+            <input type="text" id="tenant_name" class="form-control" autofocus/>
+
+            <div class="input-group-addon">.groovepacker.com</div>
+          </div>
+          <div class="form-group error" style="color: red;">
+            <div id="error-tenant-block" class="help-inline"></div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="email" class="control-label">Email*</label>
+          <input type="email" id="email" class="form-control"/>
+
+          <div class="form-group error" style="color: red;">
+            <div id="error-email-block" class="help-inline"></div>
+          </div>
+        </div>
+
+        <hr>
+
+        <div class="form-group">
+          <label for="user_name" class="control-label">Username*</label>
+          <input type="text" id="user_name" class="form-control"/>
+
+          <div class="form-group error" style="color: red;">
+            <div id="error-username-block" class="help-inline"></div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="password" class="control-label">Password*</label>
+          <input type="password" id="password" class="form-control"/>
+
+          <div class="form-group error" style="color: red;">
+            <div id="error-password-block" class="help-inline"></div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="control-label">Password Confirmation*</label>
+          <input type="password" id="password_conf" class="form-control"/>
+
+          <div class="form-group error" style="color: red;">
+            <div id="error-password-conf-block" class="help-inline"></div>
+          </div>
+
+          <input type="hidden" id="stripe_public_key" class="input-large"
+                 value="<%= ENV['STRIPE_PUBLIC_KEY'] %>"/>
+        </div>
+        <div class="form-group">
+
+          <div class="checkbox control-label" style="font-weight:bold;"><input type="checkbox" id="tos_checkbox"/>
+            I agree with the <a href="" id="tos_link">Terms of Service</a> and
+            <a href="" id="privacy_link">Privacy Policy</a></div>
+          <div class="form-group error" style="color: red;">
+            <div id="error-tos-block" class="help-inline"></div>
+          </div>
+        </div>
+        <div class="form-group" id="privacy_iframe" style="display:none;">
+          <iframe src="/assets/views/privacypolicy.html" width="100%" height="200px"></iframe>
+        </div>
+        <div class="form-group" id="tos_iframe" style="display:none;">
+          <iframe src="/assets/views/termsofservicetos.html" width="100%" height="200px"></iframe>
+        </div>
+
+
+        <script src="https://checkout.stripe.com/checkout.js"></script>
+        <div class="">
+          <button id="customButton" class="btn btn-primary" style="margin-bottom: 15px;">Purchase</button>
+
+          <div class="alert alert-success" id="processing_alert_success" style="display:none;">
+            <div><i class="icon-spinner icon-spin icon-large"></i></div>
+            <div> Your subscription is being processed.</div>
+          </div>
+          <div class="alert alert-error" id="processing_alert_error" style="display:none;">
+            <p>Your subscription could not be processed. Please try again.</p>
+          </div>
+        </div>
+      </fieldset>
+    </form>
+    <script>
+        var valid = {
+            tenant_name: false,
+            email: false,
+            user_name: false,
+            password: false,
+            password_conf: false,
+            tos: false
+        };
+        $('html').click(function () {
+            $('#tos_iframe').hide();
+            $('#privacy_iframe').hide();
+        });
+        $('#tos_link').click(function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+            $('#privacy_iframe').hide();
+            $('#tos_iframe').show();
+        });
+        $('#privacy_link').click(function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+            $('#tos_iframe').hide();
+            $('#privacy_iframe').show();
+        });
+
+        var handler = StripeCheckout.configure({
+            key: $('#stripe_public_key').val(),
+            image: '/assets/images/apple-touch-icon.png',
+            token: function (token) {
+                $.ajax({
+                    type: "POST",
+                    contentType: "application/json; charset=utf-8",
+                    url: "/subscriptions/confirm_payment",
+                    data: JSON.stringify({
+                        tenant_name: $('#tenant_name').val(),
+                        stripe_user_token: token.id,
+                        email: $('#email').val(),
+                        amount: $('#amount').val(),
+                        plan_id: $('#plan_id').val(),
+                        user_name: $('#user_name').val(),
+                        password: $('#password').val()
+                    }),
+                    dataType: "json"
+
+                }).error(function (response) {
+                    $('#processing_alert_success').hide();
+                    $('#customButton').show();
+                    $('#processing_alert_error').show();
+                }).success(function (response) {
+                    if (!response.valid) {
+
+                        $('#processing_alert_success').hide();
+                        $('#customButton').show();
+                        $('#processing_alert_error').show();
+                    }
+                    else {
+                        window.location.href =
+                                response.redirect_url
+                    }
+                });
+                $('#customButton').hide();
+                $('#processing_alert_success').show();
+                $('#processing_alert_error').hide();
+            }
+        });
+
+        $('#tenant_name').blur(function () {
+            var tenant_name = document.forms["myForm"]["tenant_name"].value;
+            if (tenant_name == null || tenant_name == "" || tenant_name.length < 4) {
+                valid.tenant_name = false;
+                $('#error-tenant-block').html("Site name must be at least 4 characters long");
+                //this.focus();
+            }
+            else {
+                $.ajax({
+                    type: "GET",
+                    contentType: "application/json; charset=utf-8",
+                    url: "/subscriptions/valid_tenant_name",
+                    data: {tenant_name: $('#tenant_name').val()},
+                    dataType: "json"
+
+                }).error(function (response) {
+
+                }).success(function (response) {
+                    if (!response.valid) {
+                        $('#error-tenant-block').html(response.message);
+                        valid.tenant_name = false;
+                        //$('#tenant_name').focus();
+                    }
+                    else {
+                        $('#error-tenant-block').html("");
+                        valid.tenant_name = true;
+                        //email.focus();
+                    }
+                });
+            }
+        });
+
+        $('#email').blur(function () {
+            var email = document.forms["myForm"]["email"].value;
+            var atpos = email.indexOf("@");
+            var dotpos = email.lastIndexOf(".");
+            if (email == null || email == "") {
+                valid.email = false;
+                if (valid.tenant_name) {
+                    $('#error-email-block').html("email must be filled out");
+                    //this.focus();
+                }
+
+            }
+            else if (atpos < 1 || dotpos < atpos + 2 || dotpos + 2 >= email.length) {
+                valid.email = false;
+                $('#error-email-block').html("email is not valid");
+            } else {
+                $.ajax({
+                    type: "GET",
+                    contentType: "application/json; charset=utf-8",
+                    url: "/subscriptions/valid_email",
+                    data: {email: $('#email').val()},
+                    dataType: "json"
+
+                }).error(function (response) {
+
+                }).success(function (response) {
+                    if (!response.valid) {
+                        $('#error-email-block').html($('#email').val() + " email already exists");
+                        valid.email = false;
+                        //$('#email').focus();
+                    }
+                    else {
+                        $('#error-email-block').html("");
+                        valid.email = true;
+                        //user_name.focus();
+                    }
+                });
+            }
+        });
+
+        $('#user_name').blur(function () {
+            var user_name = document.forms["myForm"]["user_name"].value;
+            if (user_name == null || user_name == "") {
+                valid.user_name = false;
+                if (valid.email) {
+                    $('#error-password-block').html("username must be filled out");
+                    //this.focus();
+                }
+            } else {
+                $.ajax({
+                    type: "GET",
+                    contentType: "application/json; charset=utf-8",
+                    url: "/subscriptions/valid_username",
+                    data: {email: $('#user_name').val()},
+                    dataType: "json"
+
+                }).error(function (response) {
+
+                }).success(function (response) {
+                    if (!response.valid) {
+                        $('#error-username-block').html($('#user_name').val() + " email already exists");
+                        valid.email = false;
+                        //$('#user_name').focus();
+                    }
+                    else {
+                        $('#error-username-block').html("");
+                        valid.user_name = true;
+                        //password.focus();
+                    }
+                });
+            }
+        });
+        $('#password').blur(function () {
+            var password = document.forms["myForm"]["password"].value;
+            if (password == null || password == "") {
+
+                valid.password = false;
+                if (valid.user_name) {
+                    $('#error-password-block').html("password must be filled out");
+                    $('#error-password-conf-block').html("");
+                    //this.focus();
+                }
+            } else if (password.length < 6) {
+                valid.password = false;
+                if (valid.user_name) {
+                    $('#error-password-block').html("Password should be at least 6 characters");
+                    $('#error-password-conf-block').html("");
+                    //this.focus();
+                }
+            } else {
+                valid.password = true;
+                $('#error-password-block').html("");
+                $('#error-password-conf-block, #error-password-block').html("");
+                //password_conf.focus();
+            }
+        });
+        $('#password_conf').blur(function () {
+            var password_conf = document.forms["myForm"]["password_conf"].value;
+            if (password_conf == null || password_conf == "" || password_conf != password.value) {
+                valid.password_conf = false;
+                $('#error-password-conf-block, #error-password-block').html("password and password confirmation must match");
+                //password.value = "";
+                //this.value = "";
+                //password.focus();
+            }
+            else {
+                valid.password_conf = true;
+                $('#error-password-conf-block, #error-password-block').html("");
+                //customButton.focus();
+            }
+        });
+        $('#tos_checkbox').click(function () {
+            var tos = document.forms["myForm"]["tos_checkbox"].checked;
+            if (tos == null || tos == "" || tos == false) {
+                valid.tos = false;
+                $('#error-tos-block').html("Please click I agree for TOS and Privacy Policy");
+            } else {
+                valid.tos = true;
+                $('#error-tos-block').html("");
+            }
+        });
+        document.getElementById('customButton').addEventListener('click', function (e) {
+            e.preventDefault();
+            setTimeout(function () {
+                console.log(valid.tenant_name);
+                console.log(valid.email);
+                if (valid.tenant_name && valid.email && valid.tos) {
+                    console.log("valid");
+                    // Open Checkout with further options
+                    handler.open({
+                        name: 'Groovepacker',
+                        description: '1 subscription ($' + $('#amount').val() + ')',
+                        amount: $('#amount').val() * 100,
+                        email: $('#email').val(),
+                        allowRememberMe: false
+                    });
+                }
+                ;
+            }, 400);
+        });
+    </script>
+  </div>
+</div>
+

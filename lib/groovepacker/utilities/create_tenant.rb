@@ -6,7 +6,8 @@
             Apartment::Tenant.switch(subscription.tenant_name)
             CreateTenant.apply_restrictions(subscription.subscription_plan_id)
             SeedTenant.new.seed(true,subscription.user_name, subscription.email, subscription.password)
-            TransactionEmail.send_email(subscription).deliver
+            TransactionEmail.delay(run_at: 2.hours.from_now).send_email(subscription)
+            TransactionEmail.welcome_email(subscription).deliver
     	end
 
     	def self.apply_restrictions(plan)
