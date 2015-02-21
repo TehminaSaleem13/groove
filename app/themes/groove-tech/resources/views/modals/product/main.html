@@ -222,7 +222,7 @@
                 <div class="info col-sm-2" ><i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" popover="{{translations.tooltips.record_serial}}"></i></div>
 
             </div>
-            <h4>Inventory</h4>
+            <h4>Inventory <a href="" ng-click="print_receive_label($event)"><i class="icon-large glyphicon glyphicon-print"></i></a></h4>
             <div class="form-group">
                 <div class="controls col-xs-12">
                     <div groov-data-grid="warehouseGridOptions" groov-list="products.single.inventory_warehouses"></div>

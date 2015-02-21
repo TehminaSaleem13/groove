@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link href='http://fonts.googleapis.com/css?family=Play' rel='stylesheet' type='text/css'>
+  <style>
+    div {
+        word-wrap: break-word; overflow:hidden;
+    }
+  </style>
+</head>
+<body style="font-family:'Play'; width:95%;background:#fff;">
+<% @products.each_with_index  do |product,index| %>
+    <% unless index == 0 %>
+        <div style="page-break-before: always;"></div>
+    <%end%>
+    <div style="page-break-inside: avoid;height:405pt;">
+        <div style="font-size:40pt; word-break: break-all;line-height:41pt;max-height:202pt;">
+          <%= truncate(product.name, length: 70) %>
+        </div>
+        <div style="margin-top:1pt;font-size:12pt;line-height:13pt;max-height:13pt;">
+          <%=  truncate(product.primary_sku, length:39) %>
+        </div>
+        <div style="font-size:15pt;word-break: break-all;line-height:16pt;margin-top:5pt;">
+          <%= product.primary_warehouse.location_primary %>
+        </div>
+        <div style="font-size:15pt;word-break: break-all;line-height:16pt;max-height:32pt;margin-top:3pt;">
+          <%= product.primary_warehouse.location_secondary %>
+        </div>
+        <div style="font-size:15pt;word-break: break-all;line-height:16pt;max-height:32pt;margin-top:3pt;">
+          <%= product.primary_warehouse.location_tertiary %>
+        </div>
+        <div style="font-size:12pt;line-height:13pt;max-height:13pt;margin-top:5pt;">
+          <%= truncate(product.primary_category,length:39) %>
+        </div>
+
+        <div style="margin-top:3pt;font-size:18pt; line-height:19pt;max-height:19pt;">
+          QTY:&nbsp;<span style="text-decoration: underline">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>&nbsp;&nbsp;&nbsp;<span style="text-decoration: underline">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>&nbsp;OF&nbsp;<span style="text-decoration: underline">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+        </div>
+
+        <% barcode_string =  generate_barcode(product.primary_barcode)%>
+        <div style="margin-top:4pt;text-align:center;font-size:10pt;line-height:11pt;max-height:11pt;"><%=truncate(barcode_string,length: 40) %></div>
+        <div style="margin-top:1pt;text-align:center;"><%= pdf_image_tag(product.primary_barcode+'.png', {:width => 300, :height => 50}) %></div>
+
+    </div>
+<% end %>
+</body>
+</html>

@@ -1,10 +1,11 @@
-groovepacks_services.factory('products',['$http','notification','editable',function($http,notification,editable) {
+groovepacks_services.factory('products',['$http','notification','editable','$window', function($http,notification,editable,$window) {
 
     var success_messages = {
         update_status: "Status updated Successfully",
         delete: "Deleted Successfully",
         duplicate: "Duplicated Successfully",
-        barcode: "Barcodes generated Successfully"
+        barcode: "Barcodes generated Successfully",
+        receiving_label: "Labels generated Successfully"
     };
 
     //default object
@@ -116,7 +117,7 @@ groovepacks_services.factory('products',['$http','notification','editable',funct
     };
 
     var update_list = function(action,products) {
-        if(["update_status","delete","duplicate","barcode"].indexOf(action) != -1) {
+        if(["update_status","delete","duplicate","barcode","receiving_label"].indexOf(action) != -1) {
             products.setup.productArray = [];
             for(var i =0; i < products.selected.length; i++) {
                 if (products.selected[i].checked == true) {
@@ -132,6 +133,8 @@ groovepacks_services.factory('products',['$http','notification','editable',funct
                 url = '/products/changeproductstatus.json';
             } else if(action == "barcode") {
                 url = '/products/generatebarcode.json';
+            } else if(action == "receiving_label") {
+                url = '/products/print_receiving_label.json';
             }
 
             return $http.post(url,products.setup).success(function(data) {
@@ -140,6 +143,9 @@ groovepacks_services.factory('products',['$http','notification','editable',funct
                     products.setup.select_all =  false;
                     products.setup.inverted = false;
                     products.selected = [];
+                    if (action == "receiving_label") {
+                        $window.open(data.receiving_label_path);
+                    }
                 } else {
                     notification.notify(data.messages,0);
                 }

@@ -71,6 +71,12 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
         });
     };
 
+    $scope.product_receiving_label = function() {
+        products.list.update('receiving_label',$scope.products).then(function(data) {
+            myscope.get_products();
+        });
+    };
+
     $scope.product_duplicate = function() {
         products.list.update('duplicate',$scope.products).then(function(data) {
             myscope.get_products();

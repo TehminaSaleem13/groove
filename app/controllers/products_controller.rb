@@ -505,6 +505,43 @@ class ProductsController < ApplicationController
     end
   end
 
+  def print_receiving_label
+    result = Hash.new
+    result['status'] = true
+    result['messages'] = []
+    products = list_selected_products
+    @products = []
+    unless products.nil?
+      products.each do |product|
+        list_product = Product.find(product['id'])
+        @products << list_product
+      end
+    end
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json {
+        time = Time.now
+        file_name = 'receiving_label_'+time.strftime('%d_%b_%Y')
+        result['receiving_label_path'] = '/pdfs/'+ file_name + '.pdf'
+        render :pdf => file_name,
+               :template => 'products/print_receiving_label',
+               :orientation => 'portrait',
+               :page_height => '6in',
+               :save_only => true,
+               :page_width => '4in',
+               :margin => {:top => '1',
+                           :bottom => '0',
+                           :left => '2',
+                           :right => '2'},
+               :handlers =>[:erb],
+               :formats => [:html],
+               :save_to_file => Rails.root.join('public','pdfs', "#{file_name}.pdf")
+
+        render json: result
+      }
+    end
+  end
+
   def generatebarcode
     @result = Hash.new
     @result['status'] = true
