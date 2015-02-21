@@ -222,6 +222,12 @@ groovepacks_controllers.
             generalsettings.single.update(scope.general_settings);
         };
 
+        scope.check_remove_prod_name = function() {
+            if(scope.products.single.basicinfo.name == "New Product") {
+                scope.products.single.basicinfo.name='';
+            }
+        };
+
         scope.remove_skus_from_kit = function () {
             var selected_skus = [];
             //console.log(scope.products.single.productkitskus);

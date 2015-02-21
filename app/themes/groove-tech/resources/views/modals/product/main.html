@@ -75,7 +75,7 @@
                 <label class="control-label col-sm-2">Name</label>
 
                 <div class="controls col-sm-8">
-                    <input type="text" ng-model="products.single.basicinfo.name" ng-blur="update_single_product()" class="form-control input-style"/>
+                    <input type="text" ng-model="products.single.basicinfo.name" ng-focus="check_remove_prod_name()" ng-blur="update_single_product()" class="form-control input-style"/>
                 </div>
             </div>
             <div class="form-group">
