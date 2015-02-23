@@ -3,7 +3,7 @@ class StripeInvoiceEmail < ActionMailer::Base
   
   def send_invoice(invoice)
     Apartment::Tenant.switch()
-    unless Subscription.where(customer_subscription_id: invoice.subscription_id).nil?
+    unless Subscription.where(customer_subscription_id: invoice.subscription_id).empty?
       subscription = Subscription.where(customer_subscription_id: invoice.subscription_id).first
       unless subscription.tenant.nil? || subscription.tenant.name.nil?
         tenant = subscription.tenant.name
