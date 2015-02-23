@@ -29,7 +29,7 @@ describe OrdersController do
     expect(@prod_inv_wh.allocated_inv).to eq(10)
   end
   it "synchronizes available inventory and allocated inventory for kit items for kit_parsing as single" do
-  	@product = FactoryGirl.create(:product, :barcode=>'12345678', :name=>'KIT_PRODUCT', :total_avail_ext=>50, :is_kit=>true, :store=>@store, :kit_parsing=>'single')
+  	@product = FactoryGirl.create(:product, :name=>'KIT_PRODUCT', :total_avail_ext=>50, :is_kit=>true, :store=>@store, :kit_parsing=>'single')
 
     create_order_info
     create_kit_item_info
@@ -48,7 +48,8 @@ describe OrdersController do
     expect(@prod_inv_wh2.allocated_inv).to eq(0)
   end
   it "synchronizes available inventory and allocated inventory for kit items for kit_parsing as individual" do
-  	@product = FactoryGirl.create(:product, :barcode=>'12345678', :name=>'KIT_PRODUCT', :total_avail_ext=>50, :is_kit=>true, :store=>@store, :kit_parsing=>'individual')
+  	@product = FactoryGirl.create(:product, :name=>'KIT_PRODUCT', :total_avail_ext=>50, 
+      :is_kit=>true, :store=>@store, :kit_parsing=>'individual')
 
     create_order_info
     create_kit_item_info
@@ -68,7 +69,7 @@ describe OrdersController do
     expect(@prod_inv_wh2.allocated_inv).to eq(10)
   end
   it "synchronizes available inventory and allocated inventory for kit items for kit_parsing as depends" do
-  	@product = FactoryGirl.create(:product, :barcode=>'12345678', :name=>'KIT_PRODUCT', :total_avail_ext=>50, :is_kit=>true, :store=>@store, :kit_parsing=>'depends')
+  	@product = FactoryGirl.create(:product, :name=>'KIT_PRODUCT', :total_avail_ext=>50, :is_kit=>true, :store=>@store, :kit_parsing=>'depends')
 
 	  create_order_info
     create_kit_item_info
@@ -98,7 +99,7 @@ describe OrdersController do
     @order_item = FactoryGirl.create(:order_item, :order=>@order, :qty=>10, :product_id=>@product.id)
   end
   def create_kit_item_info
-    @kit_product1 = FactoryGirl.create(:product, :barcode=>'kit_barcode1', :name=>'kit_product1',:packing_placement=>50)
+    @kit_product1 = FactoryGirl.create(:product, :name=>'kit_product1',:packing_placement=>50)
     @product_kit_sku1 = FactoryGirl.create(:product_kit_sku, :product => @product, :option_product_id=>@kit_product1.id)
     @prod_inv_wh1 = ProductInventoryWarehouses.where(product_id: @kit_product1.id).first
     @prod_inv_wh1.available_inv = 50
