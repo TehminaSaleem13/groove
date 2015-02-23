@@ -1,5 +1,6 @@
   class SubscriptionsController < ApplicationController
     include PaymentsHelper 
+    before_filter :check_tenant_name
 
     def new
       @subscription = Subscription.new
@@ -62,5 +63,9 @@
     def planInfo
       getPlanInfo(params[:plan_id])
       render json: @result
+    end
+
+    def check_tenant_name
+      Apartment::Tenant.current_tenant==""?true:(render status: 401)
     end
   end
