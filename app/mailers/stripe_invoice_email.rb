@@ -3,12 +3,16 @@ class StripeInvoiceEmail < ActionMailer::Base
   
   def send_invoice(invoice)
     Apartment::Tenant.switch()
-    subscription = Subscription.where(customer_subscription_id: invoice.subscription_id).first
-    tenant = subscription.tenant.name
-    Apartment::Tenant.switch(tenant)
-    @tenant_name = tenant
-    @invoice = invoice
-  	mail to: subscription.email, 
-  		subject: "GroovePacker Invoice Email"
+    unless Subscription.where(customer_subscription_id: invoice.subscription_id).nil?
+      subscription = Subscription.where(customer_subscription_id: invoice.subscription_id).first
+      unless subscription.tenant.nil? || subscription.tenant.name.nil?
+        tenant = subscription.tenant.name
+        Apartment::Tenant.switch(tenant)
+        @tenant_name = tenant
+        @invoice = invoice
+        mail to: subscription.email, 
+          subject: "GroovePacker Invoice Email"
+      end
+    end
   end
 end
