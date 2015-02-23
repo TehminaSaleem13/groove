@@ -856,10 +856,7 @@ class ProductsController < ApplicationController
           (session[:product_edit_matched_for_current_user] && session[:product_edit_matched_for_products].include?(@product.id))
         @product.reload
         #Update Basic Info
-        @product.alternate_location = params[:basicinfo][:alternate_location]
-        @product.barcode = params[:basicinfo][:barcode]
         @product.disable_conf_req = params[:basicinfo][:disable_conf_req]
-
         @product.is_kit = params[:basicinfo][:is_kit]
         @product.is_skippable = params[:basicinfo][:is_skippable]
         @product.record_serial= params[:basicinfo][:record_serial]

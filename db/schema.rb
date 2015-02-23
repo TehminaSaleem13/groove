@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150220201519) do
+ActiveRecord::Schema.define(:version => 20150223200010) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0, :null => false
@@ -443,12 +443,9 @@ ActiveRecord::Schema.define(:version => 20150220201519) do
     t.integer  "store_id",                                                                             :null => false
     t.datetime "created_at",                                                                           :null => false
     t.datetime "updated_at",                                                                           :null => false
-    t.string   "inv_wh1"
     t.string   "status",                                                        :default => "new"
     t.text     "spl_instructions_4_packer"
     t.boolean  "spl_instructions_4_confirmation",                               :default => false
-    t.text     "alternate_location"
-    t.text     "barcode"
     t.boolean  "is_skippable",                                                  :default => false
     t.integer  "packing_placement",                                             :default => 50
     t.integer  "pack_time_adj"

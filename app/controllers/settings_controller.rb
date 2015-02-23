@@ -23,7 +23,6 @@ class SettingsController < ApplicationController
                   'status' => 'status',
                   'spl_instructions_4_packer' => 'spl_instructions_4_packer',
                   'spl_instructions_4_confirmation' => 'spl_instructions_4_confirmation',
-                  'alternate_location' => 'alternate_location',
                   'barcode' => 'barcode',
                   'is_skippable' => 'is_skippable',
                   'packing_placement' => 'packing_placement',
