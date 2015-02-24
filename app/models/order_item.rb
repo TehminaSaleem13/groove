@@ -3,7 +3,7 @@ class OrderItem < ActiveRecord::Base
   belongs_to :product
 
   has_many :order_item_kit_products
-  attr_accessible :price, :qty, :row_total, :sku, :product
+  attr_accessible :price, :qty, :row_total, :sku, :product, :product_is_deleted
 
   after_create :update_inventory_levels_for_packing, :add_kit_products
   before_destroy :update_inventory_levels_for_return

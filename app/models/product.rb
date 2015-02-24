@@ -23,6 +23,7 @@ class Product < ActiveRecord::Base
   has_many :product_kit_skuss, :dependent => :destroy
   has_many :product_inventory_warehousess, :dependent => :destroy
   has_many :order_serial
+  has_many :order_items
 
   after_save :check_inventory_warehouses
 

@@ -44,10 +44,10 @@
                         Edit <span class="caret"></span>
                     </button>
                     <ul class="dropdown-menu" role="menu">
-                        <li class="dropdown-toggle"><a ng-click="product_delete()">Delete <span class="pull-right badge badge-important">{{products.setup.select_all? gridOptions.paginate.total_items: gridOptions.selections.selected_count}}</span></a></li>
+                        <li class="dropdown-toggle" ng-show="gridOptions.selections.show_delete"><a ng-click="product_delete()">Delete<span class="pull-right badge badge-important">{{products.setup.select_all? gridOptions.paginate.total_items: gridOptions.selections.selected_count}}</span></a></li>
                         <li class="dropdown-toggle"><a ng-click="product_duplicate()">Duplicate <span class=" pull-right badge badge-important">{{products.setup.select_all? gridOptions.paginate.total_items: gridOptions.selections.selected_count}}</span></a></li>
                         <li class="dropdown-toggle"><a ng-click="product_barcode()">Generate barcode from SKU <span class="badge badge-important">{{products.setup.select_all? gridOptions.paginate.total_items: gridOptions.selections.selected_count}}</span></a></li>
-                        <li class="dropdown-toggle"><a ng-click="product_receiving_label()">Print Receiving Labels <span class="badge badge-important">{{products.setup.select_all? gridOptions.paginate.total_items: gridOptions.selections.selected_count}}</span></a></li>
+                        <li class="dropdown-toggle"><a ng-click="product_receiving_label()">Print Receiving Labels <span class="pull-right badge badge-important">{{products.setup.select_all? gridOptions.paginate.total_items: gridOptions.selections.selected_count}}</span></a></li>
                     </ul>
                 </div>
                 <div class="col-lg-2 col-md-2" dropdown>

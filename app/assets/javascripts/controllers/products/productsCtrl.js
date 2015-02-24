@@ -66,9 +66,11 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
     };
 
     $scope.product_delete = function() {
-        products.list.update('delete',$scope.products).then(function(data) {
-            myscope.get_products();
-        });
+        if (confirm('All orders with these product(s) will be put On Hold. Are you sure you want to delete the selected product(s)?')) {
+            products.list.update('delete',$scope.products).then(function(data) {
+                myscope.get_products();
+            });
+        }
     };
 
     $scope.product_receiving_label = function() {
@@ -200,6 +202,13 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
         }
     };
 
+    myscope.show_delete = function() {
+        if ($state.params.filter == 'inactive') {
+            return true;
+        }
+        return false;
+    }
+
     //Constructor
     myscope.init = function() {
         //Public properties
@@ -212,6 +221,7 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
             //accordian inventory tab
             {open:false}
         ];
+
 
         //Private properties
 
@@ -228,10 +238,11 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
                 single_callback: myscope.select_single,
                 multi_page: myscope.select_pages,
                 selected_count: 0,
-                show: myscope.show_selected
+                show: myscope.show_selected,
+                show_delete: myscope.show_delete()
             },
             paginate:{
-                show:true,
+                show: true,
                 //send a large number to prevent resetting page number
                 total_items: 50000,
                 current_page: $state.params.page,
@@ -337,13 +348,14 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
     };
 
     myscope.get_products = function(page) {
+
         if(typeof page == 'undefined') {
             page = $state.params.page;
         }
+        $scope.gridOptions.selections.show_delete = myscope.show_delete();
         if($scope._can_load_products) {
             $scope._can_load_products = false;
             return products.list.get($scope.products,page).success(function(response) {
-                //console.log("got products");
                 $scope.gridOptions.paginate.total_items = products.list.total_items($scope.products);
                 myscope.update_selected_count();
                 $scope._can_load_products = true;

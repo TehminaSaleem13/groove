@@ -486,6 +486,10 @@ class ProductsController < ApplicationController
       unless @products.nil?
         @products.each do|product|
           @product = Product.find(product["id"])
+          @product.order_items.each do |order_item|
+            order_item.update_attributes(product_is_deleted: true)
+            order_item.order.set_order_status
+          end
           if @product.destroy
             @result['status'] &= true
           else
