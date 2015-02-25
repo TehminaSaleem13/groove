@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150225222656) do
+ActiveRecord::Schema.define(:version => 20150225225529) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0, :null => false
@@ -273,7 +273,6 @@ ActiveRecord::Schema.define(:version => 20150225222656) do
     t.string   "inv_status",                                           :default => "unprocessed"
     t.string   "inv_status_reason",                                    :default => ""
     t.integer  "clicked_qty",                                          :default => 0
-    t.boolean  "product_is_deleted",                                   :default => false
   end
 
   add_index "order_items", ["order_id"], :name => "index_order_items_on_order_id"
