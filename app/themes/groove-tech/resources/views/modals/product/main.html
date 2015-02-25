@@ -262,9 +262,23 @@
                     </tbody>
                 </table>
 
+                <div class="form-group">
+                    <div class="controls col-sm-8">
+                        <button class="modal-save-button" ng-click="product_alias('kit',kit_products.list,products.single.basicinfo.id)">Add product to kit</button>
+                        <button ng-click="remove_skus_from_kit()" class="modal-remove-button">Remove selected</button>
+                    </div>
+                </div>
+                <span ng-show="products.single.product_kit_activities.length > 0">
+                    <h4>Activity Log</h4>
+                    <div class="form-group">
+                        <div class="controls col-sm-8"
+                            ng-repeat="activity in products.single.product_kit_activities">
+                            <h5>{{ activity.created_at | date:'EEEE MM/dd/yyyy hh:mm:ss a'}}</h5>
+                            {{ activity.activity_message}} - by: {{ activity.username }}
+                        </div>
+                    </div>
+                </span>
 
-                <button class="modal-save-button" ng-click="product_alias('kit',kit_products.list,products.single.basicinfo.id)">Add product to kit</button>
-                <button ng-click="remove_skus_from_kit()" class="modal-remove-button">Remove selected</button>
                 <h4>This Kit Should</h4>
 
                 <div class="form-group">

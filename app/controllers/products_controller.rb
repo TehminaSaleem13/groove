@@ -496,6 +496,19 @@ class ProductsController < ApplicationController
             )
             order_item.destroy
           end
+
+          ProductKitSkus.where(option_product_id: @product.id).each do |product_kit_sku|
+            product_kit_sku.product.status = "new"
+            product_kit_sku.product.save
+            product_kit_sku.product.product_kit_activities.create(
+              activity_message: "An item with Name #{@product.name} and " + 
+              "SKU #{@product.primary_sku} has been deleted", 
+              username: current_user.username, 
+              activity_type: "deleted_item"
+            )
+            product_kit_sku.destroy
+          end
+
           if @product.destroy
             @result['status'] &= true
           else
@@ -739,6 +752,7 @@ class ProductsController < ApplicationController
 				end
 				@result['product']['productkitskus'] =
 					@result['product']['productkitskus'].sort_by {|hsh| hsh['packing_order']}
+        @result['product']['product_kit_activities'] = @product.product_kit_activities
       end
 
   		if @product.product_skus.length > 0

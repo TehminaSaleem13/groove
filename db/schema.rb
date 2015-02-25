@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150225214603) do
+ActiveRecord::Schema.define(:version => 20150225222656) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0, :null => false
@@ -414,6 +414,15 @@ ActiveRecord::Schema.define(:version => 20150225214603) do
 
   add_index "product_inventory_warehouses", ["inventory_warehouse_id"], :name => "index_product_inventory_warehouses_on_inventory_warehouse_id"
   add_index "product_inventory_warehouses", ["product_id"], :name => "index_product_inventory_warehouses_on_product_id"
+
+  create_table "product_kit_activities", :force => true do |t|
+    t.integer  "product_id"
+    t.string   "activity_message"
+    t.string   "username"
+    t.string   "activity_type"
+    t.datetime "created_at",       :null => false
+    t.datetime "updated_at",       :null => false
+  end
 
   create_table "product_kit_skus", :force => true do |t|
     t.integer  "product_id"
