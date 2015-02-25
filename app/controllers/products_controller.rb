@@ -487,8 +487,14 @@ class ProductsController < ApplicationController
         @products.each do|product|
           @product = Product.find(product["id"])
           @product.order_items.each do |order_item|
-            order_item.update_attributes(product_is_deleted: true)
-            order_item.order.set_order_status
+            order_item.order.status = "onhold"
+            order_item.order.save
+            order_item.order.addactivity("An item with Name #{@product.name} and " + 
+              "SKU #{@product.primary_sku} has been deleted", 
+              current_user.username, 
+              "deleted_item"
+            )
+            order_item.destroy
           end
           if @product.destroy
             @result['status'] &= true

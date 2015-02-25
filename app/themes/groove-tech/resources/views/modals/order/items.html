@@ -20,6 +20,19 @@
             <div groov-data-grid="gridOptions" groov-list="orders.single.items"></div>
         </div>
     </div>
+    <hr/>
 
-
+    <div class="row">
+        <div class="col-sm-12" style="margin-left: 18px;">
+            <fieldset>
+                <h4>Activity Log</h4>
+                <span ng-repeat="activity in orders.single.activities" >
+                    <div class="form-group" ng-show="activity.activity_type=='deleted_item'">
+                        <h5>{{ activity.activitytime | date:'EEEE MM/dd/yyyy hh:mm:ss a'}}</h5>
+                        {{ activity.action}} - by: {{ activity.username }}
+                    </div>
+                </span>
+            </fieldset>
+        </div>
+    </div>
 </div>

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150224221411) do
+ActiveRecord::Schema.define(:version => 20150225214603) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0, :null => false
@@ -213,9 +213,10 @@ ActiveRecord::Schema.define(:version => 20150224221411) do
     t.integer  "order_id"
     t.integer  "user_id"
     t.string   "action"
-    t.datetime "created_at",   :null => false
-    t.datetime "updated_at",   :null => false
+    t.datetime "created_at",    :null => false
+    t.datetime "updated_at",    :null => false
     t.string   "username"
+    t.string   "activity_type"
   end
 
   add_index "order_activities", ["order_id"], :name => "index_order_activities_on_order_id"
