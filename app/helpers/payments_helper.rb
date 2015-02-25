@@ -94,4 +94,15 @@ module PaymentsHelper
   	@result['status'] = true
   	@result['messages'] = []
   end
+
+  def getPlanInfo(plan_id)
+    create_result_hash
+    @result['plan_info'] = nil
+    begin
+      @result['plan_info'] = Stripe::Plan.retrieve(plan_id)
+    rescue Stripe::InvalidRequestError => e
+      @result['status'] = false
+      @result['messages'].push(e.message);
+    end
+  end
 end

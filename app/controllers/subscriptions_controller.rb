@@ -1,7 +1,11 @@
   class SubscriptionsController < ApplicationController
+    include PaymentsHelper 
+    # before_filter :check_tenant_name
 
     def new
       @subscription = Subscription.new
+      @monthly_amount = Stripe::Plan.retrieve(params[:plan_id]).amount
+      @annually_amount = Stripe::Plan.retrieve('annual-' + params[:plan_id]).amount
     end
 
     def select_plan
@@ -9,7 +13,6 @@
     end
 
     def confirm_payment
-      puts params.inspect
       @subscription = Subscription.create(stripe_user_token: params[:stripe_user_token],
           tenant_name: params[:tenant_name],
           amount: params[:amount],
@@ -57,4 +60,12 @@
       flash[:notice] = params[:notice]
     end
 
+    def planInfo
+      getPlanInfo(params[:plan_id])
+      render json: @result
+    end
+
+    def check_tenant_name
+      Apartment::Tenant.current_tenant==""?true:(render status: 401)
+    end
   end
