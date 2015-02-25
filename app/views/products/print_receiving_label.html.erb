@@ -9,7 +9,7 @@
       }
   </style>
 </head>
-<body style="font-family:'Play'; width:95%;background:#fff;">
+<body style="font-family:'Play'; width:95%;background:#fff;font-weight: bold;">
 <% @products.each_with_index do |product, index| %>
     <% unless index == 0 %>
         <div style="page-break-before: always;"></div>
@@ -22,7 +22,7 @@
         <div style="margin-top:1pt;font-size:17pt;line-height:18pt;max-height:18pt;">
           <%= truncate(product.primary_sku, length: 39) %>
         </div>
-        <div style="font-size:15pt;line-height:16pt; max-height:16pt;margin-top:5pt;">
+        <div style="font-size:17pt;line-height:18pt; max-height:18pt;margin-top:5pt;">
           <% unless product.primary_warehouse.location_primary.blank? %>
               <strong>L1:</strong>&nbsp;<%= product.primary_warehouse.location_primary %>
           <% end %>
@@ -49,11 +49,11 @@
           <span style="text-decoration: underline">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>&nbsp;OF&nbsp;<span style="text-decoration: underline">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
         </div>
       </div>
-
-      <% barcode_string = generate_barcode(product.primary_barcode) %>
-      <div style="margin-top:4pt;text-align:center;font-size:10pt;line-height:11pt;max-height:11pt;"><%= truncate(barcode_string, length: 40) %></div>
-      <div style="margin-top:1pt;text-align:center;"><%= pdf_image_tag(product.primary_barcode+'.png', {:width => 300, :height => 50}) %></div>
-
+      <% unless product.primary_barcode.blank? %>
+          <% barcode_string = generate_barcode(product.primary_barcode) %>
+          <div style="font-weight:normal;margin-top:4pt;text-align:center;font-size:10pt;line-height:11pt;max-height:11pt;"><%= truncate(barcode_string, length: 40) %></div>
+          <div style="margin-top:1pt;text-align:center;"><%= pdf_image_tag(product.primary_barcode+'.png', {:width => 300, :height => 50}) %></div>
+      <% end %>
     </div>
 <% end %>
 </body>
