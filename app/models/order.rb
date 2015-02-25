@@ -145,17 +145,13 @@ class Order < ActiveRecord::Base
     result = true
 
     self.order_items.each do |order_item|
-      if order_item.product_is_deleted
-        result &= false
-      else
-        product = Product.find_by_id(order_item.product_id)
-        if !product.nil?
-          if product.status == "new" or product.status == "inactive"
-              result &= false
-          end
-        else
-          result &= false
+      product = Product.find_by_id(order_item.product_id)
+      if !product.nil?
+        if product.status == "new" or product.status == "inactive"
+            result &= false
         end
+      else
+        result &= false
       end
     end
 
