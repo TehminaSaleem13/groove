@@ -765,9 +765,9 @@ class OrdersController < ApplicationController
       }
       if accepted_data.has_key?(params[:var])
         if params[:var] == "recipient"
-          arr = params[:value].blank? ? [] : params[:value].split(" ")
-          @order.lastname = arr.pop()
-          @order.firstname = arr.join(" ")
+          arr = params[:value].blank? ? [] : params[:value].split(' ')
+          @order.firstname = arr.shift
+          @order.lastname = arr.join(' ')
         elsif params[:var] == 'notes_from_packer' ||
               (params[:var] == 'notes' && current_user.can?('create_edit_notes')) ||
               current_user.can?('add_edit_order_items')
@@ -780,12 +780,12 @@ class OrdersController < ApplicationController
         if @result['status']
           unless @order.save
             @result['status'] &= false
-            @result['error_msg'] = "Could not save order info"
+            @result['error_msg'] = 'Could not save order info'
           end
         end
       else
         @result['status'] &= false
-        @result['error_msg'] = "Unknown field"
+        @result['error_msg'] = 'Unknown field'
       end
     end
     respond_to do |format|
@@ -883,7 +883,7 @@ class OrdersController < ApplicationController
         result['data']['pick_list'] = @pick_list
         result['data']['depends_pick_list'] = @depends_pick_list
         time = Time.now
-        file_name = 'pick_list_'+time.strftime("%d_%b_%Y")
+        file_name = 'pick_list_'+time.strftime('%d_%b_%Y')
         result['data']['pick_list_file_paths'] = '/pdfs/'+ file_name + '.pdf'
         render :pdf => file_name,
         :template => 'orders/generate_pick_list',

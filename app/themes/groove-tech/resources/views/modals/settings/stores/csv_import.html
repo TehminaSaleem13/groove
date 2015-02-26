@@ -87,7 +87,7 @@
 
 
                                         <ul class="dropdown-menu" role="menu">
-                                            <li ng-repeat="opt in csv.importer[csv.importer.type]['map_options']" ng-class="{disabled:opt.disabled}">
+                                            <li ng-repeat="opt in csv.importer[csv.importer.type]['map_options'] | orderBy:'disabled':'false'" ng-class="{disabled:opt.disabled}">
                                                 <a dropdown-toggle ng-click="column_map(column,opt)">{{opt.name}}</a>
                                             </li>
                                         </ul>
