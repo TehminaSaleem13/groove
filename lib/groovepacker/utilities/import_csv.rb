@@ -1,5 +1,6 @@
 class ImportCsv
   def import(tenant,params)
+    result = {}
     begin
       Apartment::Tenant.switch(tenant)
       csv_directory = 'uploads/csv'
@@ -48,6 +49,7 @@ class ImportCsv
     rescue Exception => e
       raise e
     end
+    result
   end
 
 end
