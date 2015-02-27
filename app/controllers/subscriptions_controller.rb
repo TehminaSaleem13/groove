@@ -20,10 +20,11 @@
           email: params[:email],
           user_name: params[:user_name],
           password: params[:password],
-          status: "started")
+          status: "started") 
       if @subscription
         if @subscription.save_with_payment
-          render json: {valid: true, redirect_url: "subscriptions/show?transaction_id=#{@subscription.stripe_transaction_identifier}&notice=Congratulations! Your GroovePacker is being deployed!&amount=#{@subscription.amount}&email=#{@subscription.email}"}
+          @result = getNextPaymentDate(@subscription)
+          render json: {valid: true, redirect_url: "subscriptions/show?transaction_id=#{@subscription.stripe_transaction_identifier}&notice=Congratulations! Your GroovePacker is being deployed!&email=#{@subscription.email}&next_date=#{@result['next_date']}"}
         else
           render json: {valid: false}
         end
