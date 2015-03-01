@@ -15,6 +15,7 @@ class ScanPackController < ApplicationController
         'scanpack.rfp.default' => ['product_scan'],
         'scanpack.rfp.tracking' => ['scan_tracking'],
         'scanpack.rfp.product_edit' => ['order_scan'],
+        'scanpack.rfp.product_edit.single' => ['order_scan'],
         'scanpack.rfp.confirmation.product_edit' => ['product_edit_conf','order_scan'],
         'scanpack.rfp.confirmation.order_edit' => ['order_edit_conf','order_scan'],
         'scanpack.rfp.confirmation.cos' => ['cos_conf','order_scan']
@@ -24,6 +25,7 @@ class ScanPackController < ApplicationController
       @result['status'] &= false
       @result['error_messages'].push("Please specify a state")
     else
+
       @matcher[params[:state]].each do |state_func|
         output = send(state_func,params[:input],params[:state],params[:id])
         @result['error_messages'] = @result['error_messages'] + output['error_messages']
