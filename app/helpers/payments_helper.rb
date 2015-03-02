@@ -107,17 +107,11 @@ module PaymentsHelper
   end
 
   def getNextPaymentDate(subscription) 
-    begin
-      create_result_hash
-      @result['next_date'] = nil
-      unless subscription.nil? || subscription.stripe_customer_id.nil?
-        customer = Stripe::Customer.retrieve(subscription.stripe_customer_id)
-        @result['next_date'] = (Time.at(customer.subscriptions.data.first.current_period_end).to_datetime).strftime "%B %d %Y" unless customer.subscriptions.data.empty?
-      else
-        @result['status'] = false
-      end
-    rescue Stripe::InvalidRequestError => er
-      @result['status'] = false
+    create_result_hash
+    @result['next_date'] = nil
+    unless subscription.nil? || subscription.stripe_customer_id.nil?
+      customer = Stripe::Customer.retrieve(subscription.stripe_customer_id)
+      @result['next_date'] = (Time.at(customer.subscriptions.data.first.current_period_end).to_datetime).strftime "%B %d %Y" unless customer.subscriptions.data.empty?
     end
     @result
   end
