@@ -39,6 +39,7 @@
       </thead>
       <tbody>
       <%
+         tenant_name = Apartment::Tenant.current_tenant
          @products = []
          @products_list = Product.all
          @products_list.each do |product|
@@ -78,7 +79,14 @@
                wh_hash['secondary_location'] = 'Not Available'
              end
 
-             wh_hash['threshold'] = GeneralSetting.all.first.default_low_inventory_alert_limit
+             if ((wh.available_inv <= GeneralSetting.all.first.default_low_inventory_alert_limit) && !wh.product_inv_alert) ||
+                     (wh.product_inv_alert && wh.product_inv_alert_level > 0)
+               wh_hash['threshold'] = wh.product_inv_alert_level
+             else
+               wh_hash['threshold'] = GeneralSetting.all.first.default_low_inventory_alert_limit
+             end
+
+
              if ((wh.available_inv <= GeneralSetting.all.first.default_low_inventory_alert_limit) && !wh.product_inv_alert) ||
                 (wh.product_inv_alert && wh.product_inv_alert_level > 0)
                wh_hash['style'] = 'color:red;'
@@ -104,7 +112,7 @@
                   <%= product['sku'] %>
                 </td>
                 <td>
-                  <%= product['name'] %>
+                  <a href="https://<%=tenant_name%>.groovepacker.com/products/product/all/1/<%= product['id']%>"><%= product['name'] %></a>
                 </td>
                 <td style="padding-left: 25px; padding-right: 25px;">
 								<span>

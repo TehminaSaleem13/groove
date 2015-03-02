@@ -89,7 +89,7 @@
         <div style ="padding-left:12px;font-size: 14px;">
           <label>If you are not completely satisfied, please let us know at any time during the evaluation period and all charges will be credited in full.</label>
         </div>
-        
+
         <div style ="padding-left:23px;"><h4>Please choose how you would like to be billed:</h4></div>
         <div class="form-group" style="padding-top: 2px;margin-top: -5px;">
           <div>
@@ -111,8 +111,7 @@
           <button id="customButton" class="btn btn-primary" style="margin-bottom: 15px;">Purchase</button>
 
           <div class="alert alert-success" id="processing_alert_success" style="display:none;">
-            <div><i class="icon-spinner icon-spin icon-large"></i></div>
-            <div> Your subscription is being processed.</div>
+            <div><i class="glyphicon glyphicon-refresh spin" style="font-size: 12px;"></i> Your subscription is being processed.</div>
           </div>
           <div class="alert alert-error" id="processing_alert_error" style="display:none;">
             <p>Your subscription could not be processed. Please try again.</p>
@@ -120,7 +119,7 @@
         </div>
       </fieldset>
     </form>
-      <script>   
+      <script>
           var valid = {
               tenant_name: false,
               email: false,
@@ -194,6 +193,8 @@
 
           $('#tenant_name').blur(function () {
               var tenant_name = document.forms["myForm"]["tenant_name"].value;
+              tenant_name = tenant_name.toLowerCase();
+              document.forms["myForm"]["tenant_name"].value = tenant_name;
               if (tenant_name == null || tenant_name == "" || tenant_name.length < 4) {
                   valid.tenant_name = false;
                   $('#error-tenant-block').html("Site name must be at least 4 characters long");

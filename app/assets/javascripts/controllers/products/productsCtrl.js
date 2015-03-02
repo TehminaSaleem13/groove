@@ -207,7 +207,7 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
             return true;
         }
         return false;
-    }
+    };
 
     //Constructor
     myscope.init = function() {

@@ -142,11 +142,17 @@ module Groovepacker
                         end
                         import_item.current_order_imported_item = 1
                         import_item.save
+                      elsif single_map == 'firstname'
+                        if mapping['lastname'].nil? || mapping['lastname'][:position] == 0
+                          arr = single_row[mapping[single_map][:position]].blank? ? [] : single_row[mapping[single_map][:position]].split(' ')
+                          order.firstname = arr.shift
+                          order.lastname = arr.join(' ')
+                        else
+                          order.firstname = single_row[mapping[single_map][:position]]
+                        end
+                      else
+                        order[single_map] = single_row[mapping[single_map][:position]]
                       end
-                      #if product id cannot be found with SKU, then create product with product name and SKU
-
-
-                      order[single_map] = single_row[mapping[single_map][:position]]
 
                       if order_required.include? single_map
                         order_required.delete(single_map)
@@ -178,6 +184,7 @@ module Groovepacker
                         #if Order.where(:increment_id=> order.increment_id).length == 0
                         order.status = 'onhold'
                         order.save!
+                        order.addactivity('Order Import CSV Import')
                         imported_orders[order.increment_id] = true
                         order.update_order_status
                         import_item.success_imported = import_item.success_imported + 1

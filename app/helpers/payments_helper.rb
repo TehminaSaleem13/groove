@@ -105,4 +105,14 @@ module PaymentsHelper
       @result['messages'].push(e.message);
     end
   end
+
+  def getNextPaymentDate(subscription) 
+    create_result_hash
+    @result['next_date'] = nil
+    unless subscription.nil? || subscription.stripe_customer_id.nil?
+      customer = Stripe::Customer.retrieve(subscription.stripe_customer_id)
+      @result['next_date'] = (Time.at(customer.subscriptions.data.first.current_period_end).to_datetime).strftime "%B %d %Y" unless customer.subscriptions.data.empty?
+    end
+    @result
+  end
 end

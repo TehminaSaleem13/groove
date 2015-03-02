@@ -1,5 +1,5 @@
   class SubscriptionsController < ApplicationController
-    include PaymentsHelper 
+    include PaymentsHelper
     # before_filter :check_tenant_name
 
     def new
@@ -20,10 +20,11 @@
           email: params[:email],
           user_name: params[:user_name],
           password: params[:password],
-          status: "started")
+          status: "started") 
       if @subscription
         if @subscription.save_with_payment
-          render json: {valid: true, redirect_url: "subscriptions/show?transaction_id=#{@subscription.stripe_transaction_identifier}&notice=Congratulations! Your GroovePacker is being deployed!&amount=#{@subscription.amount}&email=#{@subscription.email}"}
+          @result = getNextPaymentDate(@subscription)
+          render json: {valid: true, redirect_url: "subscriptions/show?transaction_id=#{@subscription.stripe_transaction_identifier}&notice=Congratulations! Your GroovePacker is being deployed!&email=#{@subscription.email}&next_date=#{@result['next_date']}"}
         else
           render json: {valid: false}
         end
@@ -37,9 +38,9 @@
       result['valid'] = true
       result['message'] = ''
       if Tenant.where(name: params[:tenant_name]).length == 0
-        if (params[:tenant_name] =~ /^[a-zA-Z0-9][a-zA-Z0-9_]*[a-zA-Z0-9]$/).nil?
+        if (params[:tenant_name] =~ /^[a-z0-9][a-z0-9_]*[a-z0-9]$/).nil?
           result['valid'] = false
-          result['message'] = 'Site name can only have alphabets, numbers and underscores. They cannot start or end with an underscore'
+          result['message'] = 'Site name can only have lower case alphabets, numbers and underscores. They cannot start or end with an underscore'
         end
       else
         result['valid'] = false

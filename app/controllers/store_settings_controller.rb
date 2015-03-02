@@ -336,50 +336,51 @@ class StoreSettingsController < ApplicationController
           end
           # end check for mapping
 
-          csv_directory = "uploads/csv"
+          csv_directory = 'uploads/csv'
           current_tenant = Apartment::Tenant.current
-          if ["both","order"].include?(params[:type])
-            @result["order"] = Hash.new
-            @result["order"]["map_options"] = [
-                { value: "increment_id", name: "Order number"},
-                { value: "order_placed_time", name: "Order placed time"},
-                { value: "sku", name: "SKU"},
-                { value: "customer_comments", name: "Customer Comments"},
-                { value: "qty", name: "Qty"},
-                { value: "price", name: "Price"},
-                { value: "firstname", name: "First name"},
-                { value: "lastname", name: "Last name"},
-                { value: "email", name: "Email"},
-                { value: "address_1", name: "Address 1"},
-                { value: "address_2", name: "Address 2"},
-                { value: "city", name: "City"},
-                { value: "state", name: "State"},
-                { value: "postcode", name: "Postal Code"},
-                { value: "country", name: "Country"},
-                { value: "method", name: "Shipping Method"}
+          if ['both','order'].include?(params[:type])
+            @result['order'] = Hash.new
+            @result['order']['map_options'] = [
+                { value: 'increment_id', name: 'Order number'},
+                { value: 'order_placed_time', name: 'Order Date/Time'},
+                { value: 'sku', name: 'SKU'},
+                { value: 'qty', name: 'Quantity Ordered'},
+                { value: 'price', name: 'Order Total'},
+                { value: 'firstname', name: '(First) Name'},
+                { value: 'lastname', name: 'Last Name'},
+                { value: 'email', name: 'Email'},
+                { value: 'address_1', name: 'Address 1'},
+                { value: 'address_2', name: 'Address 2'},
+                { value: 'city', name: 'City'},
+                { value: 'state', name: 'State'},
+                { value: 'postcode', name: 'Postal Code'},
+                { value: 'country', name: 'Country'},
+                { value: 'method', name: 'Shipping Method'},
+                { value: 'customer_comments', name: 'Customer Comments'}
             ]
-            @result["order"]["settings"] = csv_map.order_map
+            @result['order']['settings'] = csv_map.order_map
             order_file_path = File.join(csv_directory, "#{current_tenant}.#{@store.id}.order.csv")
             if File.exists? order_file_path
               # read 4 kb data
               order_file_data = IO.read(order_file_path,40960)
-              @result["order"]["data"] = order_file_data
+              @result['order']['data'] = order_file_data
             end
           end
-          if ["both","product"].include?(params[:type])
-            @result["product"] = Hash.new
-            @result["product"]["map_options"] = [
-                { value:"sku" , name:"SKU"},
-                {value:"secondary_sku", name:"Secondary Sku"},
-                { value: "product_name", name: "Product Name"},
-                { value: "category_name", name: "Category Name"},
-                { value: "inv_wh1", name: "Inventory"},
-                { value: "product_images", name: "Product Images"},
-                { value: "product_type", name: "Product Type"},
-                { value: "location_primary", name: "Location Primary"},
-                { value: "location_secondary", name: "Location Secondary"},
-                { value: "location_tertiary", name: "Location Tertiary"},
-                { value: "barcode", name: "Barcode Value"}
+          if ['both','product'].include?(params[:type])
+            @result['product'] = Hash.new
+            @result['product']['map_options'] = [
+                { value:'sku' , name:'SKU'},
+                {value:'secondary_sku', name:'Secondary Sku'},
+                { value: 'product_name', name: 'Product Name'},
+                { value: 'category_name', name: 'Category Name'},
+                { value: 'inv_wh1', name: 'Inventory Count'},
+                { value: 'product_images', name: 'Image URL(absolute)'},
+                { value: 'location_primary', name: 'Location Primary'},
+                { value: 'location_secondary', name: 'Location Secondary'},
+                { value: 'location_tertiary', name: 'Location Tertiary'},
+                { value: 'barcode', name: 'UPC/Barcode'},
+                { value: 'secondary_barcode', name: 'Secondary Barcode'},
+                { value: 'product_weight', name: 'Product Weight'}
             ]
             @result["product"]["settings"] = csv_map.product_map
             product_file_path = File.join(csv_directory, "#{current_tenant}.#{@store.id}.product.csv")
