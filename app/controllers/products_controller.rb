@@ -1297,6 +1297,17 @@ class ProductsController < ApplicationController
               result['messages'].push('Error saving order item with id'+order_item.id)
             end
           end
+
+          #update kit. Replace the alias product with original product
+          product_kit_skus = ProductKitSkus.where(option_product_id: product_alias.id)
+          product_kit_skus.each do |product_kit_sku|
+            product_kit_sku.option_product_id = @product_orig.id
+            unless product_kit_sku.save
+              result['status'] &= false
+              result['messages'].push('Error replacing aliased product in the kits')
+            end
+          end
+
           #destroy the aliased object
           if !product_alias.destroy
             result['status'] &= false
