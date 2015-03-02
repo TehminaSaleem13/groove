@@ -682,14 +682,16 @@ class OrdersController < ApplicationController
                   end
                 end
                 single_item.save!
-
-              current_product = Product.find(current_item['iteminfo']['product_id'])
-              updatelist(current_product,'name',current_item['productinfo']['name'])
-              updatelist(current_product,'is_skippable',current_item['productinfo']['is_skippable'])
-              updatelist(current_product,'qty',current_item['qty_on_hand'])
-              updatelist(current_product,'location_name',current_item['location'])
-              updatelist(current_product,'sku',current_item['sku'])
-
+              begin
+                current_product = Product.find(current_item['iteminfo']['product_id'])
+                updatelist(current_product,'name',current_item['productinfo']['name'])
+                updatelist(current_product,'is_skippable',current_item['productinfo']['is_skippable'])
+                updatelist(current_product,'qty',current_item['qty_on_hand'])
+                updatelist(current_product,'location_name',current_item['location'])
+                updatelist(current_product,'sku',current_item['sku'])
+              rescue Exception => e
+                
+              end
             end
           end
 
