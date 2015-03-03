@@ -247,7 +247,7 @@ describe('Products:',function() {
                 table.row = table.tbody.all(by.tagName("tr")).first();
                 table.item_name1 = table.row.all(by.tagName('td')).get(table.titles_count_item_name).getText();
                 expect(table.item_name).toEqual(table.item_name1);
-                element(by.cssContainingText('.panel-collapse.in .panel-body li','Active Products')).click();
+                // element(by.cssContainingText('.panel-collapse.in .panel-body li','Active Products')).click();
             });
         });
         it('Deletes the selected order item',function() {
@@ -266,12 +266,14 @@ describe('Products:',function() {
                     edit.parent = edit.button.element(by.xpath(".."));
                     edit.ul = edit.parent.element(by.tagName("ul"));
                     edit.li = edit.ul.all(by.tagName("li")).get(0).click();
+                    browser.switchTo().alert().accept();
 
                     table.tbody = element.all(by.tagName("tbody")).first();
                     table.row = table.tbody.all(by.tagName("tr")).first();
                     table.row.all(by.tagName('td')).get(table.titles_count).then (function(td1) {
                         table.item_name1 = td1.getText();
                         expect(table.item_name1).not.toEqual(table.item_name);
+                        element(by.cssContainingText('.panel-collapse.in .panel-body li','Active Products')).click();
                     });
                 });
             });
