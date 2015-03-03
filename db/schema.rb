@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150225225529) do
+ActiveRecord::Schema.define(:version => 20150302194249) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0, :null => false
@@ -213,10 +213,11 @@ ActiveRecord::Schema.define(:version => 20150225225529) do
     t.integer  "order_id"
     t.integer  "user_id"
     t.string   "action"
-    t.datetime "created_at",    :null => false
-    t.datetime "updated_at",    :null => false
+    t.datetime "created_at",                       :null => false
+    t.datetime "updated_at",                       :null => false
     t.string   "username"
     t.string   "activity_type"
+    t.boolean  "acknowledged",  :default => false
   end
 
   add_index "order_activities", ["order_id"], :name => "index_order_activities_on_order_id"
@@ -340,6 +341,7 @@ ActiveRecord::Schema.define(:version => 20150225225529) do
     t.string   "method"
     t.datetime "created_at",                                                               :null => false
     t.datetime "updated_at",                                                               :null => false
+    t.string   "store_order_id"
     t.string   "notes_internal"
     t.string   "notes_toPacker"
     t.string   "notes_fromPacker"
@@ -419,8 +421,9 @@ ActiveRecord::Schema.define(:version => 20150225225529) do
     t.string   "activity_message"
     t.string   "username"
     t.string   "activity_type"
-    t.datetime "created_at",       :null => false
-    t.datetime "updated_at",       :null => false
+    t.datetime "created_at",                          :null => false
+    t.datetime "updated_at",                          :null => false
+    t.boolean  "acknowledged",     :default => false
   end
 
   create_table "product_kit_skus", :force => true do |t|

@@ -14,14 +14,10 @@
       </i></b></center>
       <hr>
     </div>
-  <div class="row bottom-well col-sm-offset-1 col-md-offset-1 col-lg-offset-1 col-md-10 col-sm-10 col-lg-10">
-    <div class="" style="font-size: 30px;"><center><b><i>
-      <%= flash[:notice]%>
-    </i></b></center></div>
-    <hr>
-    <div>
-      <center>You have been charged $<%=(ENV['ONE_TIME_PAYMENT'].to_i/100.0).round(2)%> as initialization fee. Your transaction id is: <%=params[:transaction_id]%>.You will be charged $<%=(params[:amount].to_i/100.0).round(2)%> at the end of your evaluation period.</center>
-      <center>You will be receiving an email momentarily at <i><%=params[:email]%> </i>providing you the login details for your account.</center>
+  </div>
+  <div class="row">
+    <div class="col-sm-12">
+      Payment of your initialization fee is complete. Your transaction id is: <%=params[:transaction_id]%>. Your subscription will begin billing at the end of your evaluation period on <%=params[:next_date]%>. When your server deployment is complete an email will be sent to <i><%=params[:email]%> </i>providing you the login details for your account. 
     </div>
   </div>
 </div>

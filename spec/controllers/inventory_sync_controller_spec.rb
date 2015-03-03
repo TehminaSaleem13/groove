@@ -7,7 +7,7 @@ describe OrdersController do
     @store = FactoryGirl.create(:store, :name=>'amazon_store', :inventory_warehouse=>@inv_wh, :store_type=> 'Amazon')
   end
   it "synchronizes available inventory count and allocated inventory count" do
-  	@product = FactoryGirl.create(:product, :total_avail_ext=>50, :barcode=> '12345678', :store=>@store)
+  	@product = FactoryGirl.create(:product, :total_avail_ext=>50, :store=>@store)
 
     create_order_info
     request.accept = "application/json"
@@ -18,7 +18,7 @@ describe OrdersController do
     expect(@prod_inv_wh.allocated_inv).to eq(10)
   end
   it "inventory count remains unchanged if inventory_tracking is false " do
-  	@product = FactoryGirl.create(:product, :total_avail_ext=>50, :barcode=> '12345678', :store=>@store)
+  	@product = FactoryGirl.create(:product, :total_avail_ext=>50, :store=>@store)
 
     create_order_info
     request.accept = "application/json"
