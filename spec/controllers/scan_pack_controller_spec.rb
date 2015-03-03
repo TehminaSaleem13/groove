@@ -486,6 +486,36 @@ RSpec.describe ScanPackController, :type => :controller do
       expect(order.status).to eq("awaiting")
   end
 
+  it "should scan product by barcode and updates the order activity log after each product is scanned" do
+      request.accept = "application/json"
+
+      order = FactoryGirl.create(:order, :status=>'awaiting', store: Store.first)
+
+      product = FactoryGirl.create(:product)
+      product_sku = FactoryGirl.create(:product_sku, :product=> product)
+      product_barcode = FactoryGirl.create(:product_barcode, :product=> product, :barcode=>"987654321")
+      order_item = FactoryGirl.create(:order_item, :product_id=>product.id,
+                    :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>product.name)
+
+      product2 = FactoryGirl.create(:product, :name=>"Apple iPhone5C")
+      product_sku2 = FactoryGirl.create(:product_sku, :product=> product2, :sku=>'iPhone5C')
+      product_barcode2 = FactoryGirl.create(:product_barcode, :product=> product2, :barcode=>"2456789")
+      order_item2 = FactoryGirl.create(:order_item, :product_id=>product2.id,
+                    :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>product2.name)
+
+      get :scan_barcode, {:state=>'scanpack.rfp.default', :input => '987654321', :id => order.id }
+
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["status"]).to eq(true)
+
+      get :scan_barcode, {:state=>'scanpack.rfp.default', :input => '2456789', :id => order.id }
+
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["status"]).to eq(true)
+  end
+
   it "should scan product by barcode and order status should still be in awaiting status when there are unscanned items" do
       request.accept = "application/json"
 
