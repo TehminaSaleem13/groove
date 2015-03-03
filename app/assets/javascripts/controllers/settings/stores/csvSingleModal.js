@@ -156,9 +156,10 @@ function(scope, store_data, $state, $stateParams, $modal, $modalInstance, $timeo
                  scope.csv.importer.order = data["order"];
                  scope.csv.importer.type = "order";
              }
-             scope.csv.current = scope.csv.importer[scope.csv.importer.type]["settings"];
+             scope.csv.current = scope.csv.importer[scope.csv.importer.type]["settings"].map;
              scope.csv.current.store_id = data["store_id"];
              scope.csv.current.type = scope.csv.importer.type;
+             scope.csv.current.name = scope.csv.importer[scope.csv.importer.type]["settings"].name;
              angular.forEach(scope.csv.importer[scope.csv.importer.type]["map_options"],function(opt) {
                 opt.disabled = false;
              });

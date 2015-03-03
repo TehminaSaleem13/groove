@@ -294,7 +294,59 @@ class StoreSettingsController < ApplicationController
     end
   end
 
+  def csvMapData
+    result = Hash.new
+    result['product'] = CsvMap.find_all_by_kind('product')
+    result['order'] = CsvMap.find_all_by_kind('order')
+    respond_to do |format|
+      format.json { render json: result}
+    end
+  end
 
+  def deleteCsvMap
+    result = Hash.new
+    result['status'] = true
+    result['messages'] = []
+    if params[:kind].nil? || params[:store_id].nil?
+      result['status'] = false
+      result['messages'].push('You need kind and store id to delete csv map')
+    else
+      mapping = CsvMapping.find_or_create_by_store_id(params[:store_id])
+
+      if params[:kind] == 'order'
+        mapping.order_csv_map_id = nil
+      elsif  params[:kind] == 'product'
+        mapping.product_csv_map_id = nil
+      end
+      mapping.save
+    end
+
+    respond_to do |format|
+      format.json {render json: result}
+    end
+  end
+
+  def updateCsvMap
+    result = Hash.new
+    result['status'] = true
+    result['messages'] = []
+    if params[:map].nil? || params[:store_id].nil?
+      result['status'] = false
+      result['messages'].push('You need map and store id to update csv map')
+    else
+      mapping = CsvMapping.find_or_create_by_store_id(params[:store_id])
+      if params[:map]['kind'] == 'order'
+        mapping.order_csv_map_id = params[:map]['id']
+      elsif params[:map]['kind'] == 'product'
+        mapping.product_csv_map_id = params[:map]['id']
+      end
+      mapping.save
+    end
+
+    respond_to do |format|
+      format.json {render json: result}
+    end
+  end
 
   def csvImportData
     @result = Hash.new
@@ -320,20 +372,8 @@ class StoreSettingsController < ApplicationController
 
           #check if previous mapping exists
           #else fill in defaults
-          default_csv_map = {:rows => 1, :sep => ',' , :other_sep => 0, :delimiter=>'"', :fix_width => 0, :fixed_width =>4, :map => {} }
+          default_csv_map ={ 'name' =>'', 'map' =>{'rows' => 1, 'sep' => ',' , 'other_sep' => 0, 'delimiter'=>'"', 'fix_width' => 0, 'fixed_width' =>4, 'map' => {} }}
           csv_map = CsvMapping.find_or_create_by_store_id(@store.id)
-          csv_map_save = false
-          if csv_map.order_map.blank?
-            csv_map.order_map = default_csv_map
-            csv_map_save = true
-          end
-          if csv_map.product_map.blank?
-            csv_map.product_map = default_csv_map
-            csv_map_save = true
-          end
-          if csv_map_save
-            csv_map.save
-          end
           # end check for mapping
 
           csv_directory = 'uploads/csv'
@@ -358,7 +398,12 @@ class StoreSettingsController < ApplicationController
                 { value: 'method', name: 'Shipping Method'},
                 { value: 'customer_comments', name: 'Customer Comments'}
             ]
-            @result['order']['settings'] = csv_map.order_map
+            if csv_map.order_csv_map.nil?
+              @result['order']['settings'] = default_csv_map
+            else
+              @result['order']['settings'] = csv_map.order_csv_map
+            end
+
             order_file_path = File.join(csv_directory, "#{current_tenant}.#{@store.id}.order.csv")
             if File.exists? order_file_path
               # read 4 kb data
@@ -382,7 +427,12 @@ class StoreSettingsController < ApplicationController
                 { value: 'secondary_barcode', name: 'Secondary Barcode'},
                 { value: 'product_weight', name: 'Product Weight'}
             ]
-            @result["product"]["settings"] = csv_map.product_map
+            if csv_map.product_csv_map.nil?
+              @result["product"]["settings"] = default_csv_map
+            else
+              @result["product"]["settings"] = csv_map.product_csv_map
+            end
+
             product_file_path = File.join(csv_directory, "#{current_tenant}.#{@store.id}.product.csv")
             if File.exists? product_file_path
               product_file_data = IO.read(product_file_path,40960)
@@ -435,7 +485,32 @@ class StoreSettingsController < ApplicationController
     if @result["status"]
       #store mapping for later
       csv_map = CsvMapping.find_by_store_id(@store.id)
-      csv_map["#{params[:type]}_map"] = {
+      if params[:type] =='product'
+        if csv_map.product_csv_map.nil?
+          if params[:name] == ''
+            params[:name] = csv_map.store.name+' - Default Product Map'
+          end
+          map_data = CsvMap.create(:kind=>'product',:name=>params[:name], :map=>{})
+          csv_map.product_csv_map_id = map_data.id
+          csv_map.save
+        else
+          map_data = csv_map.product_csv_map
+        end
+
+      else
+        if csv_map.order_csv_map.nil?
+          if params[:name] == ''
+            params[:name] = csv_map.store.name+' - Default Order Map'
+          end
+          map_data = CsvMap.create(:kind=>'order',:name=>params[:name], :map=>{})
+          csv_map.order_csv_map_id = map_data.id
+          csv_map.save
+        else
+          map_data = csv_map.order_csv_map
+        end
+      end
+
+      map_data.map = {
           :rows => params[:rows],
           :sep => params[:sep] ,
           :other_sep => params[:other_sep],
@@ -444,6 +519,7 @@ class StoreSettingsController < ApplicationController
           :fixed_width => params[:fixed_width],
           :map => params[:map]
       }
+      map_data.save
       begin
         csv_map.save!
       rescue ActiveRecord::RecordInvalid => e
@@ -632,6 +708,9 @@ class StoreSettingsController < ApplicationController
       @result['status'] = true
       @result['store'] = @store
       @result['credentials'] = @store.get_store_credentials
+      if @store.store_type == 'CSV'
+        @result['mapping'] = CsvMapping.find_by_store_id(@store.id)
+      end
     else
       @result['status'] = false
     end
