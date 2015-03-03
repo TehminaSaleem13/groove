@@ -364,6 +364,16 @@ groovepacks_services.factory('orders',['$http','$window','notification',function
         }).error(notification.server_error);
     };
 
+    var acknowledge_activity = function(activity_id) {
+        return $http.post('/order_activities/acknowledge/'+activity_id, null).success(function(data) {
+            if(data.status) {
+                notification.notify("Activity Acknowledged.",1);
+            } else {
+                notification.notify(data.messages,0);
+            }
+        }).error(notification.server_error);
+    };
+
     return {
         model: {
             get:get_default
@@ -394,6 +404,9 @@ groovepacks_services.factory('orders',['$http','$window','notification',function
             exception: {
                 record: single_record_exception,
                 clear: single_clear_exception
+            },
+            activity: {
+                acknowledge: acknowledge_activity
             }
         }
     }

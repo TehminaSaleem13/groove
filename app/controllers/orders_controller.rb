@@ -404,6 +404,8 @@ class OrdersController < ApplicationController
       @result['order']['remove_items_permitted'] = current_user.can? 'add_edit_order_items'
       @result['order']['activities'] = @order.order_activities
 
+      #Retrieve Unacknowledged activities
+      @result['order']['unacknowledged_activities'] = @order.unacknowledged_activities
       @result['order']['exception'] = @order.order_exceptions if current_user.can?('view_packing_ex')
       @result['order']['exception']['assoc'] =
         User.find(@order.order_exceptions.user_id) if current_user.can?('view_packing_ex') && !@order.order_exceptions.nil? && @order.order_exceptions.user_id !=0
@@ -709,6 +711,7 @@ class OrdersController < ApplicationController
               current_activity.destroy
             end
           end
+
         else
           @result['status'] = false
           @result['messages'].push('Couldn\'t rollback because you can not add or edit order items')
