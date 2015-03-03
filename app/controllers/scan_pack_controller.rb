@@ -35,9 +35,11 @@ class ScanPackController < ApplicationController
         @result['data'] = output['data']
         break if output["matched"]
       end
-
     end
 
+    if params[:state] == "scanpack.rfp.default" && @result['status'] == true
+      Order.find(params[:id]).addactivity("Product with barcode: " + params[:input] + " scanned", current_user.name)
+    end
 
     respond_to do |format|
       format.html # show.html.erb

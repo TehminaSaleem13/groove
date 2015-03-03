@@ -247,6 +247,12 @@ groovepacks_controllers.
             });
         };
 
+        scope.acknowledge_activity = function(activity_id) {
+            products.single.activity.acknowledge(activity_id).then(function(response){
+                myscope.product_single_details(scope.products.single.basicinfo.id);
+            })
+        }
+
 
 
         myscope.load_item = function(id) {

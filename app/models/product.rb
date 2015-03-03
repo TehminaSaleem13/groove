@@ -380,4 +380,9 @@ class Product < ActiveRecord::Base
       InventoryWarehouse.where(:is_default => true).first.id).first
   end
 
+  def unacknowledged_kit_activities
+    product_kit_activities.
+      where('activity_type in (:types)', types: 'deleted_item').
+      where(acknowledged: false)
+  end
 end

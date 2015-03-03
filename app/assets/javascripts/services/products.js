@@ -346,6 +346,16 @@ groovepacks_services.factory('products',['$http','notification','editable','$win
         products.single = {};
     };
 
+    var acknowledge_activity = function(activity_id) {
+        return $http.post('/product_kit_activities/acknowledge/'+activity_id, null).success(function(data) {
+            if(data.status) {
+                notification.notify("Activity Acknowledged.", 1);
+            } else {
+                notification.notify(data.messages, 0);
+            }
+        }).error(notification.server_error);
+    };
+
     //Public facing API
     return {
         model: {
@@ -374,6 +384,9 @@ groovepacks_services.factory('products',['$http','notification','editable','$win
             kit:{
                 add: add_to_kit,
                 remove:remove_from_kit
+            },
+            activity: {
+                acknowledge: acknowledge_activity
             }
         }
     };
