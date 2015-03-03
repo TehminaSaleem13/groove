@@ -1,21 +1,5 @@
 <div class="container-fluid">
-    <div class="row" ng-show="orders.single.unacknowledged_activities.length > 0">
-      <div class="col-sm-12">
-        <fieldset>
-          <h4>There have been changes to the order. Kindly acknowledge the activity if the change is expected or contact your administrator</h4>
-          <span ng-repeat="activity in orders.single.unacknowledged_activities" >
-              <div class="form-group alert alert-info" ng-show="activity.activity_type=='deleted_item'">
-                  <div class="pull-right">
-                      <button class="btn btn-success btn-xs" 
-                        ng-click="acknowledge_activity(activity.id)">Acknowledge</button>
-                  </div>
-                  <h5>{{ activity.activitytime | date:'EEEE MM/dd/yyyy hh:mm:ss a'}}</h5>
-                  {{ activity.action}} - by: {{ activity.username }}
-              </div>
-          </span>
-        </fieldset>
-      </div>
-    </div>
+
     <fieldset>
         <legend>Order Details</legend>
         <div class="row">

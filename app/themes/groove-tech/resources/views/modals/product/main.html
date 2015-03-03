@@ -9,6 +9,23 @@
 
     <div class="modal-body">
         <div class="container-fluid form-horizontal">
+            <div class="row" ng-show="products.single.unacknowledged_kit_activities.length > 0">
+              <div class="col-sm-12">
+                <fieldset>
+                  <h4>There have been changes to the kit. Kindly acknowledge the activity if the change is expected or contact your administrator</h4>
+                  <span ng-repeat="activity in products.single.unacknowledged_kit_activities" >
+                      <div class="alert alert-info" ng-show="activity.activity_type=='deleted_item'">
+                          <div class="pull-right">
+                              <button class="btn btn-success btn-xs" 
+                                ng-click="acknowledge_activity(activity.id)">Acknowledge</button>
+                          </div>
+                          <h5>{{ activity.activitytime | date:'EEEE MM/dd/yyyy hh:mm:ss a'}}</h5>
+                          {{ activity.activity_message}} - by: {{ activity.username }}
+                      </div>
+                  </span>
+                </fieldset>
+              </div>
+            </div>
             <table class="product_single_top_table">
                 <tr>
                     <td>
@@ -268,11 +285,12 @@
                         <button ng-click="remove_skus_from_kit()" class="modal-remove-button">Remove selected</button>
                     </div>
                 </div>
-                <span ng-show="products.single.product_kit_activities.length > 0">
+                <span ng-show="products.single.unacknowledged_kit_activities.length > 0">
                     <h4>Activity Log</h4>
                     <div class="form-group">
                         <div class="controls col-sm-8"
-                            ng-repeat="activity in products.single.product_kit_activities">
+                            ng-repeat="activity in products.single.unacknowledged_kit_activities">
+                            {{activity}}
                             <h5>{{ activity.created_at | date:'EEEE MM/dd/yyyy hh:mm:ss a'}}</h5>
                             {{ activity.activity_message}} - by: {{ activity.username }}
                         </div>

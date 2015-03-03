@@ -79,7 +79,12 @@ Groovepacks::Application.routes.draw do
       put 'acknowledge'
     end
   end
-  
+
+  resources :product_kit_activities do
+    member do
+      put 'acknowledge'
+    end
+  end
   
   # Sample resource route with options:
   #   resources :products do
