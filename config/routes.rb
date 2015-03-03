@@ -73,6 +73,12 @@ Groovepacks::Application.routes.draw do
     #   put 'add_new_card'
     # end
   end
+
+  resources :order_activities do
+    member do
+      put 'acknowledge'
+    end
+  end
   
   
   # Sample resource route with options:

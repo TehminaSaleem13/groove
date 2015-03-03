@@ -658,4 +658,10 @@ class Order < ActiveRecord::Base
       end
     count
   end
+
+  def unacknowledged_activities
+    order_activities.
+      where('activity_type in (:types)', types: 'deleted_item').
+      where(acknowledged: false)
+  end
 end

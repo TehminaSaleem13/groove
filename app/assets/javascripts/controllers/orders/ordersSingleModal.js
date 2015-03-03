@@ -125,6 +125,13 @@ groovepacks_controllers.
                     });
                 }
             };
+
+            scope.acknowledge_activity = function(activity_id) {
+                orders.single.activity.acknowledge(activity_id).then(function(response){
+                    myscope.order_single_details(scope.orders.single.basicinfo.id);
+                })
+            }
+
             myscope.up_key = function(event) {
                 event.preventDefault();
                 event.stopPropagation();
