@@ -1,7 +1,7 @@
 class MoveCsvMapToNewTable < ActiveRecord::Migration
   def up
     CsvMapping.find_each do |mapping|
-      unless mapping.product_map.blank?
+      unless mapping.product_map.blank? || mapping.store.nil?
         product_csv_map = CsvMap.create(
                   :custom => true,
                   :name => mapping.store.name.to_s+' - Default Product Mapping',
@@ -11,7 +11,7 @@ class MoveCsvMapToNewTable < ActiveRecord::Migration
         mapping.product_csv_map = product_csv_map
       end
 
-      unless mapping.order_map.blank?
+      unless mapping.order_map.blank? || mapping.store.nil?
         order_csv_map = CsvMap.create(
             :custom => true,
             :name => mapping.store.name.to_s+' - Default Order Mapping',

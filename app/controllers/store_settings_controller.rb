@@ -372,7 +372,7 @@ class StoreSettingsController < ApplicationController
 
           #check if previous mapping exists
           #else fill in defaults
-          default_csv_map ={ 'name' =>'', 'map' =>{'rows' => 1, 'sep' => ',' , 'other_sep' => 0, 'delimiter'=>'"', 'fix_width' => 0, 'fixed_width' =>4, 'map' => {} }}
+          default_csv_map ={ 'name' =>'', 'map' =>{'rows' => 1, 'sep' => ',' , 'other_sep' => 0, 'delimiter'=> '"', 'fix_width' => 0, 'fixed_width' => 4, 'map' => {} }}
           csv_map = CsvMapping.find_or_create_by_store_id(@store.id)
           # end check for mapping
 
@@ -384,7 +384,7 @@ class StoreSettingsController < ApplicationController
                 { value: 'increment_id', name: 'Order number'},
                 { value: 'order_placed_time', name: 'Order Date/Time'},
                 { value: 'sku', name: 'SKU'},
-                { value: 'qty', name: 'Quantity Ordered'},
+                { value: 'qty', name: 'Quantity'},
                 { value: 'price', name: 'Order Total'},
                 { value: 'firstname', name: '(First) Name'},
                 { value: 'lastname', name: 'Last Name'},
