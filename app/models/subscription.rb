@@ -11,7 +11,7 @@ class Subscription < ActiveRecord::Base
           :card => self.stripe_user_token,
           :description => self.email,
           :plan => self.subscription_plan_id,
-          :account_balance => ENV['ONE_TIME_PAYMENT']
+          # :account_balance => ENV['ONE_TIME_PAYMENT']
         )
         #whenever you do .first, make sure null check is done
         self.stripe_customer_id = customer.id
