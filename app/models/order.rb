@@ -21,7 +21,7 @@ class Order < ActiveRecord::Base
   include OrdersHelper
   include ApplicationHelper
 
-  def addactivity(order_activity_message, username, activity_type = "regular")
+  def addactivity(order_activity_message, username='', activity_type ='regular')
   	@activity = OrderActivity.new
   	@activity.order_id = self.id
   	@activity.action = order_activity_message

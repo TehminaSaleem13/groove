@@ -145,22 +145,55 @@ function(scope, store_data, $window, $sce, $interval, $state, $stateParams, $mod
                     if(!auto) {
                         //Use FileReader API here if it exists (post prototype feature)
                         if (data.csv_import && data.store_id) {
-                            var csv_modal = $modal.open({
-                                templateUrl: '/assets/views/modals/settings/stores/csv_import.html',
-                                controller: 'csvSingleModal',
-                                size:'lg',
-                                resolve: {
-                                    store_data: function(){return scope.stores;}
+                            if(scope.stores.csv.mapping[scope.stores.single.type+'_csv_map_id']) {
+
+                                for (var i=0; i <scope.stores.csv.maps[scope.stores.single.type].length; i++){
+                                    if (scope.stores.csv.mapping[scope.stores.single.type+'_csv_map_id'] == scope.stores.csv.maps[scope.stores.single.type][i].id) {
+                                        var current_map = jQuery.extend(true,{},scope.stores.csv.maps[scope.stores.single.type][i]);
+                                        break;
+                                    }
                                 }
-                            });
-                            csv_modal.result.finally(function(){
+
+
+                                current_map.store_id = scope.stores.single.id;
+                                current_map.type = scope.stores.single.type;
+                                stores.csv.do_import({current:current_map});
                                 $modalInstance.close("csv-modal-closed");
-                            });
+
+                            } else {
+                                var csv_modal = $modal.open({
+                                    templateUrl: '/assets/views/modals/settings/stores/csv_import.html',
+                                    controller: 'csvSingleModal',
+                                    size: 'lg',
+                                    resolve: {
+                                        store_data: function () {
+                                            return scope.stores;
+                                        }
+                                    }
+                                });
+                                csv_modal.result.finally(function () {
+                                    $modalInstance.close("csv-modal-closed");
+                                });
+                            }
+                            delete scope.stores.single['orderfile'] ;
+                            delete scope.stores.single['productfile'];
                         }
                     }
                 }
             });
         }
+    };
+
+    scope.import_map = function () {
+        scope.update_single_store(false);
+    };
+
+    scope.select_map= function( map){
+        stores.csv.map.update(scope.stores,map);
+    };
+
+    scope.clear_map = function(kind) {
+        stores.csv.map.delete(scope.stores,kind);
     };
 
     scope.launch_ebay_popup= function() {
@@ -186,7 +219,7 @@ function(scope, store_data, $window, $sce, $interval, $state, $stateParams, $mod
 
         var i = $interval(function() {
             try {
-                console.log("Tick-popup");
+                //console.log("Tick-popup");
                 // value is the user_id returned from paypal
                 if (popup==null || popup.closed){
                     $interval.cancel(i);
@@ -240,6 +273,9 @@ function(scope, store_data, $window, $sce, $interval, $state, $stateParams, $mod
         scope.stores = store_data;
         scope.stores.single = {};
         scope.stores.ebay = {};
+        scope.stores.csv ={};
+        scope.stores.csv.maps = {order:[],product:[]};
+        scope.stores.csv.mapping = {};
         scope.stores.import = {
             order:{},
             product: {},
@@ -252,12 +288,16 @@ function(scope, store_data, $window, $sce, $interval, $state, $stateParams, $mod
                 for(var i=0; i<scope.warehouses.list.length; i++) {
                     if (scope.warehouses.list[i].info.is_default) {
                         scope.stores.single.inventory_warehouse_id = scope.warehouses.list[i].info.id;
-                        //console.log(scope.stores.single);
+                        //console.log(scope.stores);
                         break;
                     }
                 }
             }
         });
+
+        stores.csv.map.get(scope.stores);
+
+
 
         scope.stores.types = {
             Magento: {
@@ -361,7 +401,7 @@ function(scope, store_data, $window, $sce, $interval, $state, $stateParams, $mod
                 } else {
                     scope.stores.single.type = 'product';
                 }
-                scope.update_single_store(false);
+                //scope.update_single_store(false);
             }
 
         });

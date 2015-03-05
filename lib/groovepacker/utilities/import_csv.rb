@@ -1,6 +1,7 @@
 class ImportCsv
   def import(tenant,params)
     result = {}
+    result['messages'] = []
     begin
       Apartment::Tenant.switch(tenant)
       csv_directory = 'uploads/csv'

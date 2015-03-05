@@ -90,6 +90,7 @@ module Groovepacker
             import_item.to_import = final_record.length
             import_item.save
 
+
             final_record.each_with_index do |single_row,index|
               if !mapping['increment_id'].nil? && mapping['increment_id'][:position] >= 0 && !single_row[mapping['increment_id'][:position]].blank?
                 import_item.current_increment_id = single_row[mapping['increment_id'][:position]]
@@ -166,7 +167,7 @@ module Groovepacker
                     end
                   end
                   if result['status']
-                    if !mapping['order_placed_time'].nil? && mapping['order_placed_time'][:position] > 0
+                    if !mapping['order_placed_time'].nil? && mapping['order_placed_time'][:position] >= 0
                       begin
                         require 'time'
                         time = Time.parse(single_row[mapping['order_placed_time'][:position]])
@@ -221,7 +222,7 @@ module Groovepacker
               end
               unless result['status']
                 import_item.status = 'failed'
-                import_item.message = 'Import halted because of errors, the last imported row was '+index.to_s
+                import_item.message = 'Import halted because of errors, the last imported row was '+index.to_s+'Errors: '+ result['messages'].join(',')
                 import_item.save
                 break
               end

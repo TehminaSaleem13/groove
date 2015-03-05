@@ -22,6 +22,13 @@ groovepacks_services.factory('stores',['$http','notification','$filter',function
             list: [],
             single: {},
             ebay:{},
+            csv: {
+              mapping: {},
+                maps: {
+                    order:[],
+                    product:[]
+                }
+            },
             import:{
                order:{},
                product:{}
@@ -110,6 +117,9 @@ groovepacks_services.factory('stores',['$http','notification','$filter',function
             stores.import.order.status_show = false;
             if(data.status) {
                 stores.single = data.store;
+                if(data.mapping) {
+                    stores.csv.mapping = data.mapping;
+                }
                 if(data.credentials.status == true) {
                     if(data.store.store_type == 'Magento') {
                         stores.single.host = data.credentials.magento_credentials.host;
@@ -387,6 +397,40 @@ groovepacks_services.factory('stores',['$http','notification','$filter',function
             notification.notify(data['notice_messages'],2);
         }).error(notification.server_error);
     };
+    var update_csv_map =function (stores,map){
+        return $http.post('/store_settings/updateCsvMap.json',{store_id: stores.single.id,map:map}).success(function(data){
+            if(data.status) {
+                if(map.kind == 'order') {
+                    stores.csv.mapping.order_csv_map_id = map.id;
+                } else {
+                    stores.csv.mapping.product_csv_map_id = map.id;
+                }
+
+            } else {
+                notification.notify(data['messages']);
+            }
+        }).error(notification.server_error);
+    };
+
+    var delete_csv_map = function(stores,kind) {
+        return $http.post('/store_settings/deleteCsvMap.json',{store_id: stores.single.id,kind:kind}).success(function(data){
+            if(data.status) {
+                if(kind == 'order') {
+                    stores.csv.mapping.order_csv_map_id = null;
+                } else {
+                    stores.csv.mapping.product_csv_map_id = null;
+                }
+
+            } else {
+                notification.notify(data['messages']);
+            }
+        }).error(notification.server_error);
+    };
+    var get_csv_maps =function(stores) {
+      return $http.get('/store_settings/csvMapData.json').success(function(data){
+          stores.csv.maps = data;
+      }).error(notification.server_error);
+    };
 
     var update_products = function(store_id) {
         return $http.put('/store_settings/update_products/' + store_id + '.json', null).success(
@@ -442,9 +486,14 @@ groovepacks_services.factory('stores',['$http','notification','$filter',function
             }
         },
         csv: {
-             import: csv_import_data,
-             do_import: csv_do_import,
-             cancel_product_import: csv_product_import_cancel
+            import: csv_import_data,
+            do_import: csv_do_import,
+            cancel_product_import: csv_product_import_cancel,
+            map: {
+                get: get_csv_maps,
+                update: update_csv_map,
+                delete: delete_csv_map
+            }
         },
         update: {
             products: update_products

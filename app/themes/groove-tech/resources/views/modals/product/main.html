@@ -257,6 +257,7 @@
 
             <fieldset ng-show="products.single.basicinfo.is_kit==1">
                 <legend>Kit Options</legend>
+                
                 <table class="table table-hover table-bordered table-striped table-condensed">
                     <thead>
                     <tr>
@@ -270,10 +271,10 @@
                     <tbody>
                     <tr ng-repeat="kit_sku in products.single.productkitskus" ng-class="{selected:kit_sku.checked}"
                         ng-click="kit_sku.checked = !kit_sku.checked">
-                        <td groov-editable="kitEditableOptions" ng-model="kit_sku" prop="name" identifier="kit_sku-name-{{$index}}"><a href="" ng-click="load_kit(kit_sku,$event)">{{kit_sku.name}}</a></td>
-                        <td groov-editable="kitEditableOptions" ng-model="kit_sku" prop="sku" identifier="kit_sku-sku-{{$index}}"></td>
+                        <td><a href="" ng-click="load_kit(kit_sku,$event)">{{kit_sku.name}}</a></td>
+                        <td>{{kit_sku.sku}}</td>
                         <td groov-editable="kitEditableOptions" ng-model="kit_sku" prop="qty" identifier="kit_sku-qty-{{$index}}"></td>
-                        <td groov-editable="kitEditableOptions" ng-model="kit_sku" prop="qty_on_hand" identifier="kit_sku-qty_on_hand-{{$index}}"></td>
+                        <td>{{kit_sku.qty_on_hand}}</td>
                         <td groov-editable="kitEditableOptions" ng-model="kit_sku" prop="packing_order" identifier="kit_sku-packing_order-{{$index}}"></td>
                     </tr>
                     </tbody>
