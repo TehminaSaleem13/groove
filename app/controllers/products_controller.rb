@@ -1179,11 +1179,7 @@ class ProductsController < ApplicationController
             actual_product = ProductKitSkus.where(:option_product_id => kit_product["option_product_id"], :product_id => @product.id)
             if actual_product.length > 0
               actual_product = actual_product.first
-              unless Product.find(kit_product["option_product_id"]).nil?
-                product_location = Product.find(kit_product["option_product_id"]).primary_warehouse
-                product_location.available_inv = kit_product["qty_on_hand"]
-                product_location.save
-              end
+              actual_product.qty = kit_product["qty"]
               actual_product.packing_order = kit_product["packing_order"]
               actual_product.save
             end
