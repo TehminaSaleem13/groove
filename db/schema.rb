@@ -50,10 +50,10 @@ ActiveRecord::Schema.define(:version => 20150302194249) do
     t.integer  "store_id"
     t.text     "order_map"
     t.text     "product_map"
-    t.datetime "created_at",                        :null => false
-    t.datetime "updated_at",                        :null => false
-    t.integer  "product_csv_map_id", :default => 0
-    t.integer  "order_csv_map_id",   :default => 0
+    t.datetime "created_at",         :null => false
+    t.datetime "updated_at",         :null => false
+    t.integer  "product_csv_map_id"
+    t.integer  "order_csv_map_id"
   end
 
   create_table "csv_maps", :force => true do |t|
@@ -67,8 +67,8 @@ ActiveRecord::Schema.define(:version => 20150302194249) do
 
   create_table "csv_product_imports", :force => true do |t|
     t.string   "status"
-    t.integer  "success"
-    t.integer  "total"
+    t.integer  "success",          :default => 0
+    t.integer  "total",            :default => 0
     t.integer  "store_id"
     t.string   "current_sku"
     t.integer  "delayed_job_id"
