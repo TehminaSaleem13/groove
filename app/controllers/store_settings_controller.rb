@@ -683,6 +683,12 @@ class StoreSettingsController < ApplicationController
         unless @store.nil?
           Product.update_all('store_id = '+system_store_id,'store_id ='+@store.id.to_s)
           Order.update_all('store_id = '+system_store_id,'store_id ='+@store.id.to_s)
+          if @store.store_type == 'CSV'
+            csv_mapping = CsvMapping.find_by_store_id(@store.id)
+            unless csv_mapping.nil?
+              csv_mapping.destroy
+            end
+          end
           if @store.deleteauthentications && @store.destroy
             @result['status'] = true
           end

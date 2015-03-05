@@ -489,9 +489,9 @@ class ProductsController < ApplicationController
           @product.order_items.each do |order_item|
             order_item.order.status = "onhold"
             order_item.order.save
-            order_item.order.addactivity("An item with Name #{@product.name} and " + 
-              "SKU #{@product.primary_sku} has been deleted", 
-              current_user.username, 
+            order_item.order.addactivity("An item with Name #{@product.name} and " +
+              "SKU #{@product.primary_sku} has been deleted",
+              current_user.username,
               "deleted_item"
             )
             order_item.destroy
@@ -501,9 +501,9 @@ class ProductsController < ApplicationController
             product_kit_sku.product.status = "new"
             product_kit_sku.product.save
             product_kit_sku.product.product_kit_activities.create(
-              activity_message: "An item with Name #{@product.name} and " + 
-              "SKU #{@product.primary_sku} has been deleted", 
-              username: current_user.username, 
+              activity_message: "An item with Name #{@product.name} and " +
+              "SKU #{@product.primary_sku} has been deleted",
+              username: current_user.username,
               activity_type: "deleted_item"
             )
             product_kit_sku.destroy
@@ -943,18 +943,19 @@ class ProductsController < ApplicationController
             ).length > 0
               if !wh["info"]["id"].nil?
                 product_inv_wh = ProductInventoryWarehouses.find(wh["info"]["id"])
-                product_inv_wh.available_inv = wh["info"]["available_inv"]
-                product_inv_wh.location_primary = wh["info"]["location_primary"]
-                product_inv_wh.location_secondary = wh["info"]["location_secondary"]
-                product_inv_wh.location_tertiary = wh["info"]["location_tertiary"]
+
                 if general_setting.low_inventory_alert_email
-                  if !product_inv_wh.product_inv_alert && product_inv_wh.product_inv_alert_level != wh["info"]["product_inv_alert_level"]
-                    product_inv_wh.product_inv_alert = true
+                  if !product_inv_wh.product_inv_alert && product_inv_wh.product_inv_alert_level != wh["info"]["product_inv_alert_level"] && product_inv_wh.available_inv == wh["info"]["available_inv"] && product_inv_wh.location_primary == wh["info"]["location_primary"] && product_inv_wh.location_secondary == wh["info"]["location_secondary"] && product_inv_wh.location_tertiary == wh["info"]["location_tertiary"]
+                      product_inv_wh.product_inv_alert = true
                   else
                     product_inv_wh.product_inv_alert = wh["info"]["product_inv_alert"]
                   end
                   product_inv_wh.product_inv_alert_level = wh["info"]["product_inv_alert_level"]
                 end
+                product_inv_wh.available_inv = wh["info"]["available_inv"]
+                product_inv_wh.location_primary = wh["info"]["location_primary"]
+                product_inv_wh.location_secondary = wh["info"]["location_secondary"]
+                product_inv_wh.location_tertiary = wh["info"]["location_tertiary"]
                 unless product_inv_wh.save
                   @result['status'] &= false
                 end

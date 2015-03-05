@@ -88,7 +88,7 @@
 
 
              if ((wh.available_inv <= GeneralSetting.all.first.default_low_inventory_alert_limit) && !wh.product_inv_alert) ||
-                (wh.product_inv_alert && wh.product_inv_alert_level > 0)
+                (wh.product_inv_alert && wh.product_inv_alert_level > 0 && wh.available_inv <= wh.product_inv_alert_level)
                wh_hash['style'] = 'color:red;'
                low_inv_found = true
              else
@@ -96,12 +96,17 @@
              end
              product_hash['warehouses'].push(wh_hash)
            end
-
+           unless product_hash['warehouses'].length <= 1
+             product_hash['warehouses'] = product_hash['warehouses'].sort_by{|hash| hash['threshold']}.reverse!
+           end
            @products.push(product_hash) if low_inv_found
          end
       %>
       <%= @my_name %>
       <% if !@products.nil? %>
+      <%  unless @products.length <=1
+            @products =  @products.sort_by{|hsh| hsh['warehouse'][0]['threshold']}.reverse!
+          end %>
           <% @products.each do |product| %>
 
               <tr>
@@ -112,7 +117,7 @@
                   <%= product['sku'] %>
                 </td>
                 <td>
-                  <a href="https://<%=tenant_name%>.groovepacker.com/products/product/all/1/<%= product['id']%>"><%= product['name'] %></a>
+                  <a href="https://<%=tenant_name%>.groovepacker.com/#/products/product/all/1/<%= product['id']%>"><%= product['name'] %></a>
                 </td>
                 <td style="padding-left: 25px; padding-right: 25px;">
 								<span>

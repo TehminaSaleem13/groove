@@ -45,6 +45,11 @@ namespace :groove do
         end
         general_setting.save
 
+        CsvMapping.find_each do |map|
+          if map.store.nil?
+            map.destroy
+          end
+        end
         #Add upgrade code to run for every tenant before this line
       end
       rescue Exception => e
