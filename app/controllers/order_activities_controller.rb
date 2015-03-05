@@ -11,7 +11,7 @@ class OrderActivitiesController < ApplicationController
       result['status'] = false
       result['messages'].push('There was an error while acknowledging activity.')
     end
-
+    activity.order.set_order_status
     render json: result
   end
 end

@@ -1,3 +1,8 @@
 /**
  *= require lib
  */
+.alert-acknowledge {
+  background-color: #3918D3;
+  border-color: #3918D3;
+  color: #FFFFFF;
+}

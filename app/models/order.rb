@@ -125,6 +125,8 @@ class Order < ActiveRecord::Base
         end
       end
 
+      result &= false if self.unacknowledged_activities.length > 0
+
       if result
         if self.status == "onhold"
          self.status = "awaiting"
@@ -154,7 +156,9 @@ class Order < ActiveRecord::Base
         result &= false
       end
     end
-
+    
+    result &= false if self.unacknowledged_activities.length > 0
+    
     if result
       self.status = "awaiting"
     else

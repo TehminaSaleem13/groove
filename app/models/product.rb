@@ -106,6 +106,7 @@ class Product < ActiveRecord::Base
 	  	  		result &= false
 	  	  	end
 	  	  end
+        result &= false if unacknowledged_kit_activities.length > 0
 	  	end
 
 	  	if result
@@ -146,11 +147,13 @@ class Product < ActiveRecord::Base
   def set_product_status
   	result = true
 
-	@skus = ProductSku.where(:product_id=>self.id)
+	  @skus = ProductSku.where(:product_id=>self.id)
   	result &= false if @skus.length == 0
 
   	@barcodes = ProductBarcode.where(:product_id=>self.id)
   	result &= false if @barcodes.length == 0
+
+    result &= false if unacknowledged_kit_activities.length > 0
 
   	if result
   		self.status = 'active'

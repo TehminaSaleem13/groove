@@ -14,9 +14,9 @@
                 <fieldset>
                   <h4>There have been changes to the kit. Kindly acknowledge the activity if the change is expected or contact your administrator</h4>
                   <span ng-repeat="activity in products.single.unacknowledged_kit_activities" >
-                      <div class="alert alert-info" ng-show="activity.activity_type=='deleted_item'">
+                      <div class="alert alert-acknowledge" ng-show="activity.activity_type=='deleted_item'">
                           <div class="pull-right">
-                              <button class="btn btn-success btn-xs" 
+                              <button class="btn btn-info btn-xs" 
                                 ng-click="acknowledge_activity(activity.id)">Acknowledge</button>
                           </div>
                           <h5>{{ activity.activitytime | date:'EEEE MM/dd/yyyy hh:mm:ss a'}}</h5>
