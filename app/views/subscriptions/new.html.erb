@@ -109,7 +109,6 @@
         <script src="https://checkout.stripe.com/checkout.js"></script>
         <div class="">
           <button id="customButton" class="btn btn-primary" style="margin-bottom: 15px;">Purchase</button>
-          <button id="freeSubscriptionButton" class="btn btn-primary pull-right" style="margin-bottom: 15px;">Free Purchase</button>
 
           <div class="alert alert-success" id="processing_alert_success" style="display:none;">
             <div><i class="glyphicon glyphicon-refresh spin" style="font-size: 12px;"></i> Your subscription is being processed.</div>
@@ -368,38 +367,6 @@
                   });
               }
           });
-          document.getElementById('freeSubscriptionButton').addEventListener('click', function (e1) {
-              e1.preventDefault();
-              if ($("input[name='radio_subscription']:checked").length > 0){
-                radio_button_value = $('input:radio[name=radio_subscription]:checked').val();
-                if(radio_button_value == 'annually') {
-                  plan_id = 'annual-groove-solo';
-                }
-                else {
-                  plan_id = 'groove-solo';
-                }
-                $.ajax({
-                      type: "POST",
-                                  contentType: "application/json; charset=utf-8",
-                                  url: "/subscriptions/confirm_payment",
-                                  data: JSON.stringify({
-                                      tenant_name: $('#tenant_name').val(),
-                                      stripe_user_token: null,
-                                      email: $('#email').val(),
-                                      amount: amount,
-                                      plan_id: plan_id,
-                                      user_name: $('#user_name').val(),
-                                      password: $('#password').val(),
-                                      radio_subscription: radio_button_value
-                                  }),
-                                  dataType: "json"
-                  }).error(function (response) {
-
-                  }).success(function(response) {
-                    
-                  });
-                }
-              });
       </script>
     </div>
   </div>

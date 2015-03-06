@@ -22,7 +22,7 @@
           password: params[:password],
           status: "started") 
       if @subscription
-        if @subscription.save_with_payment
+        if @subscription.save_with_payment(ENV['ONE_TIME_PAYMENT'])
           @result = getNextPaymentDate(@subscription)
           render json: {valid: true, redirect_url: "subscriptions/show?transaction_id=#{@subscription.stripe_transaction_identifier}&notice=Congratulations! Your GroovePacker is being deployed!&email=#{@subscription.email}&next_date=#{@result['next_date']}"}
         else
@@ -69,4 +69,5 @@
     def check_tenant_name
       Apartment::Tenant.current_tenant==""?true:(render status: 401)
     end
+
   end
