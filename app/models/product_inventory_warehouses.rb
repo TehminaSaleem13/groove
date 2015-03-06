@@ -5,7 +5,7 @@ class ProductInventoryWarehouses < ActiveRecord::Base
   belongs_to :inventory_warehouse
   has_many :sold_inventory_warehouses
 
-  after_update :update_store
+  #after_update :update_store
 
   def update_available_inventory_level(purchase_qty, reason)
   	result = true
