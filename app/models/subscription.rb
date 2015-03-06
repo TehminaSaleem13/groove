@@ -4,15 +4,24 @@ class Subscription < ActiveRecord::Base
   has_many :transactions
   
 
-  def save_with_payment
+  def save_with_payment(one_time_payment)
   	if valid?
       begin
-        customer = Stripe::Customer.create(
+        if one_time_payment == 0
+          customer = Stripe::Customer.create(
+          :description => self.email,
+          :plan => self.subscription_plan_id,
+          :account_balance => one_time_payment
+        )
+        else
+          customer = Stripe::Customer.create(
           :card => self.stripe_user_token,
           :description => self.email,
           :plan => self.subscription_plan_id,
-          :account_balance => ENV['ONE_TIME_PAYMENT']
+          :account_balance => one_time_payment
         )
+        end
+        
         #whenever you do .first, make sure null check is done
         self.stripe_customer_id = customer.id
         
