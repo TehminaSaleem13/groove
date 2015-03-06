@@ -120,7 +120,7 @@ module PaymentsHelper
     create_result_hash
     @result['all_plans'] = []
     begin
-      plans = Stripe::Plan.all
+      plans = Stripe::Plan.all(limit: 20)
       plans.each do |plan|
         @result['all_plans'].push(plan.name)
       end
@@ -130,11 +130,11 @@ module PaymentsHelper
     end
   end
 
-  def getPlanInfo(plan_index)
+  def getPlanWithIndex(plan_index)
     create_result_hash
     @result['plan'] = []
     begin
-      plans = Stripe::Plan.all
+      plans = Stripe::Plan.all(limit: 20)
       @result['plan'].push(plans.data[plan_index.to_i])
     rescue Stripe::InvalidRequestError => e
       @result['status'] = false

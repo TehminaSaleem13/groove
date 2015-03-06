@@ -6,19 +6,13 @@
       getAllPlans()
       if @result['status']==true
         @result = @result['all_plans']
-        puts "@result:::::::" + @result.inspect
-      else
-        puts "result is false................"
       end
     end
 
     def get_plan_info
-      getPlanInfo(params[:plan_index])
+      getPlanWithIndex(params[:plan_index])
       if @result['status']==true
         @result = @result['plan']
-        puts "@result:::::::" + @result.inspect
-      else
-        puts "result is false................"
       end
       render json: @result
     end
@@ -34,7 +28,7 @@
       if @subscription
         if @subscription.save_with_payment(0)
           @result = getNextPaymentDate(@subscription)
-          render json: {valid: true, redirect_url: "tenants/show?transaction_id=#{@subscription.stripe_transaction_identifier}&notice=Congratulations! Your GroovePacker is being deployed!&email=#{@subscription.email}&next_date=#{@result['next_date']}"}
+          render json: {valid: true, redirect_url: "show?transaction_id=#{@subscription.stripe_transaction_identifier}&notice=Congratulations! Your GroovePacker is being deployed!&email=#{@subscription.email}&next_date=#{@result['next_date']}"}
         else
           render json: {valid: false}
         end

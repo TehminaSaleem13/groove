@@ -100,7 +100,7 @@
           <button id="freeSubscriptionButton" class="btn btn-primary" style="margin-bottom: 15px;">Create Tenant</button>
 
           <div class="alert alert-success" id="processing_alert_success" style="display:none;">
-            <div><i class="glyphicon glyphicon-refresh spin" style="font-size: 12px;"></i> Your subscription is being processed.</div>
+            <div><i class="glyphicon glyphicon-refresh spin" style="font-size: 12px;"></i> The subscription is being processed.</div>
           </div>
           <div class="alert alert-error" id="processing_alert_error" style="display:none;">
             <p>Your subscription could not be processed. Please try again.</p>
@@ -126,25 +126,13 @@
         });
 
         window.onload = function getDefault() {
-          console.log("in getDefault...");
-            $.ajax({
-                    type: "GET",
-                    contentType: "application/json; charset=utf-8",
-                    url: "/tenants/get_plan_info",
-                    data: {plan_index: $('#select_plan').val()},
-                    dataType: "json"
-
-                }).error(function (response) {
-
-                }).success(function(response) {
-                  console.log(response[0]);
-                  $('#trial_period').val(response[0].trial_period_days);
-                  $('#price').val(response[0].amount);
-                  plan_id = response[0].id;
-                });
+          retrievePlanInfo();
         }
 
         $('#select_plan').change(function() {
+          retrievePlanInfo();
+        });
+        function retrievePlanInfo() {
           $.ajax({
                     type: "GET",
                     contentType: "application/json; charset=utf-8",
@@ -155,12 +143,11 @@
                 }).error(function (response) {
 
                 }).success(function(response) {
-                  console.log(response[0]);
                   $('#trial_period').val(response[0].trial_period_days);
                   $('#price').val(response[0].amount/100);
                   plan_id = response[0].id;
                 });
-        });
+        }
 
         $('#tenant_name').blur(function () {
             var tenant_name = document.forms["myForm"]["tenant_name"].value;
@@ -308,8 +295,18 @@
                 }).error(function (response) {
 
                 }).success(function(response) {
-                  
+                  if (!response.valid) {
+                      $('#processing_alert_success').hide();
+                      $('#customButton').show();
+                      $('#processing_alert_error').show();
+                  }
+                  else {
+                    window.location.href = response.redirect_url
+                  }
                 });
+                $('#freeSubscriptionButton').hide();
+                $('#processing_alert_success').show();
+                $('#processing_alert_error').hide();
             });
     </script>
   </div>
