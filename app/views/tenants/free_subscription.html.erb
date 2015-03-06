@@ -8,7 +8,6 @@
 </div>
 
 <div class="row bottom-well col-sm-offset-3 col-md-offset-3 col-lg-offset-3 col-md-6 col-sm-6 col-lg-6">
-<%= @result%>
   <legend class="text-center">Subscribe here</legend>
   <div>
     <form action="" method="POST" class="form-vertical" name="myForm" id="my_form">
@@ -100,10 +99,10 @@
           <button id="freeSubscriptionButton" class="btn btn-primary" style="margin-bottom: 15px;">Create Tenant</button>
 
           <div class="alert alert-success" id="processing_alert_success" style="display:none;">
-            <div><i class="glyphicon glyphicon-refresh spin" style="font-size: 12px;"></i> The subscription is being processed.</div>
+            <div><i class="glyphicon glyphicon-refresh spin" style="font-size: 12px;"></i> Tenant is being created.</div>
           </div>
           <div class="alert alert-error" id="processing_alert_error" style="display:none;">
-            <p>Your subscription could not be processed. Please try again.</p>
+            <p>Tenant could not be created. Please try again.</p>
           </div>
         </div>
       </fieldset>
@@ -279,6 +278,7 @@
     
         document.getElementById('freeSubscriptionButton').addEventListener('click', function (e1) {
             e1.preventDefault();
+            if (valid.tenant_name && valid.email && valid.user_name && valid.password && valid.password_conf) {
               $.ajax({
                     type: "POST",
                                 contentType: "application/json; charset=utf-8",
@@ -307,7 +307,8 @@
                 $('#freeSubscriptionButton').hide();
                 $('#processing_alert_success').show();
                 $('#processing_alert_error').hide();
-            });
+            }
+          });
     </script>
   </div>
 </div>
