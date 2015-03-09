@@ -12,11 +12,12 @@ module ApplicationHelper
     outputter.margin = 0
     outputter.xdim = 2
     blob = outputter.to_png #Raw PNG data
-    File.open("#{Rails.root}/public/images/#{increment_id}.png", 
+    image_name = Digest::MD5.hexdigest(increment_id)
+    File.open("#{Rails.root}/public/images/#{image_name}.png", 
       'w') do |f|
       f.write blob
     end
-    increment_id
+    image_name
   end
 
   def non_hyphenated_string(string)
