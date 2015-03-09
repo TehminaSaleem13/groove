@@ -1,5 +1,7 @@
 describe('Products:',function() {
-
+    var table = {};
+    var edit = {};
+    var status = {};
     describe('List:', function() {
         beforeEach(function(){
             element(by.cssContainingText('.top-nav-bar a','Products')).click();
@@ -133,8 +135,28 @@ describe('Products:',function() {
                 expect(packing_placement.input.getAttribute('value')).toEqual(packing_placement.default);
                 element(by.className("close-btn")).click();
             });
+            it('deletes the newly created product, because it doesn\'t have sku and barcode',function(){
+                table.list_table = element.all(by.tagName('table')).first();
+                table.thead = table.list_table.element(by.tagName('thead'));
+                table.thead.all(by.repeater('field in theads')).getText().then (function(text) {
+                    table.titles_count = text.indexOf('Item Name');
+                    element(by.cssContainingText('.panel-collapse.in .panel-body li','New')).click();
+                    new selectFirstRowInList();
+                    status.button = element.all(by.buttonText('Change Status')).first().click();
+                    status.parent = status.button.element(by.xpath(".."));
+                    status.ul = status.parent.element(by.tagName("ul"));
+                    status.li = status.ul.all(by.tagName("li")).get(1).click();
+                    element(by.cssContainingText('.panel-collapse.in .panel-body li','Inactive Products')).click();
+                    new selectFirstRowInList();
+                    edit.button = element.all(by.buttonText('Edit')).first().click();
+                    edit.parent = edit.button.element(by.xpath(".."));
+                    edit.ul = edit.parent.element(by.tagName("ul"));
+                    edit.li = edit.ul.all(by.tagName("li")).get(0).click();
+                    browser.switchTo().alert().accept();
+                    element(by.cssContainingText('.panel-collapse.in .panel-body li','Active Products')).click();
+                });
+            });
         });
-
     });
     
     describe('Title:',function() {
@@ -148,7 +170,6 @@ describe('Products:',function() {
         });
         it('Click on a title in the list to view it in the table',function() {
             var elem = {};
-            var table = {};
             elem.list_elements = element.all(by.repeater('field in options.all_fields'));
             elem.list_elements.get(6).click();
 
@@ -162,9 +183,6 @@ describe('Products:',function() {
         });
     });
     describe('Select:',function() {
-        var table = {};
-        var edit = {};
-        var status = {};
         it('Right click on the Barcode makes the field editable for the product',function() {
             var barcode = {};
             var column_no = 0;
@@ -215,7 +233,7 @@ describe('Products:',function() {
                         edit.button = element.all(by.buttonText('Edit')).first().click();
                         edit.parent = edit.button.element(by.xpath(".."));
                         edit.ul = edit.parent.element(by.tagName("ul"));
-                        edit.li = edit.ul.all(by.tagName("li")).get(1).click();
+                        edit.li = edit.ul.all(by.tagName("li")).get(0).click();
 
                         table.tbody = element.all(by.tagName("tbody")).first();
                         table.row = table.tbody.all(by.tagName("tr")).first();
@@ -241,6 +259,7 @@ describe('Products:',function() {
                 status.parent = status.button.element(by.xpath(".."));
                 status.ul = status.parent.element(by.tagName("ul"));
                 status.li = status.ul.all(by.tagName("li")).get(1).click();
+
                 element(by.cssContainingText('.panel-collapse.in .panel-body li','Inactive Products')).click();
 
                 table.tbody = element.all(by.tagName("tbody")).first();
@@ -267,14 +286,7 @@ describe('Products:',function() {
                     edit.ul = edit.parent.element(by.tagName("ul"));
                     edit.li = edit.ul.all(by.tagName("li")).get(0).click();
                     browser.switchTo().alert().accept();
-
-                    table.tbody = element.all(by.tagName("tbody")).first();
-                    table.row = table.tbody.all(by.tagName("tr")).first();
-                    table.row.all(by.tagName('td')).get(table.titles_count).then (function(td1) {
-                        table.item_name1 = td1.getText();
-                        expect(table.item_name1).not.toEqual(table.item_name);
-                        element(by.cssContainingText('.panel-collapse.in .panel-body li','Active Products')).click();
-                    });
+                    element(by.cssContainingText('.panel-collapse.in .panel-body li','Active Products')).click();
                 });
             });
         });
@@ -370,26 +382,26 @@ describe('Products:',function() {
                 });
             });
         });
-        var selectFirstRowInList = function() {
-            table.tbody = element.all(by.tagName("tbody")).first();
-            table.row = table.tbody.all(by.tagName("tr")).first();
-            table.item_name = table.row.all(by.tagName('td')).get(table.titles_count).getText();
-            table.row.click();
-        }
-        var openProductModal = function(text) {
-            table.titles_count = text.indexOf('Item Name');
-            table.tbody = element.all(by.tagName("tbody")).first();
-            table.row = table.tbody.all(by.tagName("tr")).first();
-            table.item_name = table.row.all(by.tagName('td')).get(table.titles_count).getText();
-            table.row.all(by.tagName('td')).get(table.titles_count).all(by.tagName('div')).first().all(by.tagName('div')).first().click();
-        }
-        var getTitleName = function(text) {
-            table.titles_count = text.indexOf('Item Name');
-            table.tbody = element.all(by.tagName("tbody")).first();
-            table.row = table.tbody.all(by.tagName("tr")).first();
-            table.item_name1 = table.row.all(by.tagName('td')).get(table.titles_count).getText();
-        }
     });
+    var selectFirstRowInList = function() {
+        table.tbody = element.all(by.tagName("tbody")).first();
+        table.row = table.tbody.all(by.tagName("tr")).first();
+        table.item_name = table.row.all(by.tagName('td')).get(table.titles_count).getText();
+        table.row.click();
+    }
+    var openProductModal = function(text) {
+        table.titles_count = text.indexOf('Item Name');
+        table.tbody = element.all(by.tagName("tbody")).first();
+        table.row = table.tbody.all(by.tagName("tr")).first();
+        table.item_name = table.row.all(by.tagName('td')).get(table.titles_count).getText();
+        table.row.all(by.tagName('td')).get(table.titles_count).all(by.tagName('div')).first().all(by.tagName('div')).first().click();
+    }
+    var getTitleName = function(text) {
+        table.titles_count = text.indexOf('Item Name');
+        table.tbody = element.all(by.tagName("tbody")).first();
+        table.row = table.tbody.all(by.tagName("tr")).first();
+        table.item_name1 = table.row.all(by.tagName('td')).get(table.titles_count).getText();
+    }
     var showTitleList = function() {
         var thead;
         thead = element.all(by.css('div.ng-scope.DESC')).first();
