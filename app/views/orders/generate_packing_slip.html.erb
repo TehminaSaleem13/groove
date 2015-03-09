@@ -6264,7 +6264,7 @@ body {
 </style>
 
 <body>
-	<div class="container" style="margin-left: 60px; margin-top: 50px; margin-bottom: 50px; margin-right: 50px;">
+  <div class="container" style="margin-left: 60px; margin-top: 50px; margin-bottom: 50px; margin-right: 50px;">
     <% if !@order.nil?%>
       <%order_items = @order.order_items%>
       <%order_count = 0%>
@@ -6272,71 +6272,70 @@ body {
         <%order_count = order_count + order_item.qty%>
       <%end%>
 
-    	<div class="row">
+      <div class="row">
         <br>
-    		<div class="span4">
+        <div class="span4">
           <label style="margin-top: 30px; margin-left: 30px; font-size: 30px;width:100%;">Total Items:</label>
 <br /><br/>
           <span style="width:100%;font-size: 160px; margin-left:60px; text-align:center;"><%= order_count%></span>
-    		</div>
-	    	<div class="span8">
-	      	<% barcode_string = generate_order_barcode(@order.increment_id)%>
-	      	<div style="margin-top: 30px;margin-bottom: 0px; margin-left: 10px; padding-bottom: 0px; position:relative; height:150px; width:550px; overflow:hidden;"><div style="position:absolute; top:0; left:0;"><%= pdf_image_tag(barcode_string+".png", {:width => 550}) %></div></div><br>
-	    	</div>
-	    </div>
+        </div>
+        <div class="span8">
+          <% barcode_string = generate_order_barcode(@order.increment_id)%>
+          <div style="margin-top: 30px;margin-bottom: 0px; margin-left: 10px; padding-bottom: 0px; position:relative; height:150px; width:550px; overflow:hidden;"><div style="position:absolute; top:0; left:0;"><%= pdf_image_tag(barcode_string+".png", {:width => 550}) %></div></div><br>
+        </div>
+      </div>
       <br>
-    	<div class="row">
-    		<div class="span6">
-    			<span>
+      <div class="row">
+        <div class="span6">
+          <span>
             <span class="span2" style="font-size: 25px; text-align: left;"><strong>Ship To:</strong></span>
-    			  <span class="span3" style="font-size: 25px; text-align: left; line-height: 30px;"><%=@order.firstname%> <%=@order.lastname%><br><%=@order.address_1%> <%=@order.city%><br><%=@order.state%> <%=@order.postcode%>
+            <span class="span3" style="font-size: 25px; text-align: left; line-height: 30px;"><%=@order.firstname%> <%=@order.lastname%><br><%=@order.address_1%> <%=@order.city%><br><%=@order.state%> <%=@order.postcode%>
             </span>
           </span>
-    		</div>
-    		<div class="span2" style= "text-align: right;">
-    			<span class="span2" style="font-size: 25px;"><strong>Order#</strong></span>
+        </div>
+        <div class="span2" style= "text-align: right;">
+          <span class="span2" style="font-size: 25px;"><strong>Order#</strong></span>
 
-    			<span class="span2" style="font-size: 25px;"><strong>Date</strong></span>
+          <span class="span2" style="font-size: 25px;"><strong>Date</strong></span>
         </div>
 
         <%order_placed_time = @order.order_placed_time%>
         <%date = order_placed_time.to_s.split(" ")[0]%>
         <div class="span4">
           <span class="span4" style="font-size: 25px; text-align: left;"><%=@order.increment_id%></span>
-    			<span class="span4" style="font-size: 25px; text-align: left;"><%=date%></span>
-    		</div>
-    	</div>
+          <span class="span4" style="font-size: 25px; text-align: left;"><%=date%></span>
+        </div>
+      </div>
       <br>
-    	<div class="span12">
-    		<table>
-    			<thead>
-    				<td> Item</td>
-    				<td> Description</td>
-    				<td><center> Qty</center></td>
-    			</thead>
+      <div class="span12">
+        <table>
+          <thead>
+            <td> Item</td>
+            <td> Description</td>
+            <td><center> Qty</center></td>
+          </thead>
 
-    			<%order_items.each do |order_item|%>
-    				<tr>
-    					<td><%=order_item.product.primary_sku%></td>
-    					<td><%=order_item.product.name%></td>
-    					<td><center><%=order_item.qty%></center></td>
-    				</tr>
-    			<%end%>
-    		</table>
-    	</div>
+          <%order_items.each do |order_item|%>
+            <tr>
+              <td><%=order_item.product.primary_sku%></td>
+              <td><%=order_item.product.name%></td>
+              <td><center><%=order_item.qty%></center></td>
+            </tr>
+          <%end%>
+        </table>
+      </div>
 
           <%if !@order.store.nil?%>
-            <%if !@order.store.thank_you_message_to_customer.nil? && !@order.store.thank_you_message_to_customer == 'null' %>
+            <%if !@order.store.thank_you_message_to_customer.nil? %>
               <div style="page-break-inside: avoid;">
-                <p><i><%=@order.store.thank_you_message_to_customer%></i></p>
+                <p><%=@order.store.thank_you_message_to_customer.html_safe%></p>
               </div>
             <%elsif !GeneralSetting.get_packing_slip_message_to_customer.nil? %>
                 <div style="page-break-inside: avoid;">
-                  <p><i><%=GeneralSetting.get_packing_slip_message_to_customer%></i></p>
+                  <p><%=GeneralSetting.get_packing_slip_message_to_customer.html_safe%></p>
                 </div>
             <% end %>
           <%end%>
-
 
             <%if !@order.nil? && !@order.customer_comments.nil? %>
               <center>
@@ -6348,7 +6347,7 @@ body {
               </center>
             <%end%>
     <%else%>
-    	<span>No orders</span>
+      <span>No orders</span>
     <%end%>
   </div>
 </body>
