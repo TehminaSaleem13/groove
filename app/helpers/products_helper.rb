@@ -188,11 +188,11 @@ module ProductsHelper
     outputter = Barby::PngOutputter.new(barcode)
     outputter.margin = 0
     blob = outputter.to_png #Raw PNG data
-    File.open("#{Rails.root}/public/images/#{barcode_string}.png", 
+    image_name = Digest::MD5.hexdigest(barcode_string)
+    File.open("#{Rails.root}/public/images/#{image_name}.png", 
       'w') do |f|
       f.write blob
     end
-    barcode_string
-    #puts barcode.to_ascii #Implicitly uses the AsciiOutputter
+    image_name
   end  
 end
