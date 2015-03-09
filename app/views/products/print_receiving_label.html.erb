@@ -51,8 +51,8 @@
       </div>
       <% unless product.primary_barcode.blank? %>
           <% barcode_string = generate_barcode(product.primary_barcode) %>
-          <div style="font-weight:normal;margin-top:4pt;text-align:center;font-size:10pt;line-height:11pt;max-height:11pt;"><%= truncate(barcode_string, length: 40) %></div>
-          <div style="margin-top:1pt;text-align:center;"><%= pdf_image_tag(product.primary_barcode+'.png', {:width => 300, :height => 50}) %></div>
+          <div style="font-weight:normal;margin-top:4pt;text-align:center;font-size:10pt;line-height:11pt;max-height:11pt;"><%= truncate(product.primary_barcode, length: 40) %></div>
+          <div style="margin-top:1pt;text-align:center;"><%= pdf_image_tag(barcode_string+'.png', {:width => 300, :height => 50}) %></div>
       <% end %>
     </div>
 <% end %>
