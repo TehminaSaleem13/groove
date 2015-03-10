@@ -149,7 +149,7 @@ function(scope, store_data, $window, $sce, $interval, $state, $stateParams, $mod
 
                                 for (var i=0; i <scope.stores.csv.maps[scope.stores.single.type].length; i++){
                                     if (scope.stores.csv.mapping[scope.stores.single.type+'_csv_map_id'] == scope.stores.csv.maps[scope.stores.single.type][i].id) {
-                                        var current_map = jQuery.extend(true,{},scope.stores.csv.maps[scope.stores.single.type][i]);
+                                        var current_map = (jQuery.extend(true,{},scope.stores.csv.maps[scope.stores.single.type][i])).map;
                                         break;
                                     }
                                 }
@@ -186,6 +186,10 @@ function(scope, store_data, $window, $sce, $interval, $state, $stateParams, $mod
 
     scope.import_map = function () {
         scope.update_single_store(false);
+    };
+
+    scope.edit_map = function() {
+        scope.start_editing_map = true;
     };
 
     scope.select_map= function( map){
