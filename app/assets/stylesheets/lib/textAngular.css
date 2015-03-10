@@ -200,3 +200,7 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
 	border-top-width: 0;
 	border-bottom-color: #fff;
 }
+.btn.btn-ta {
+	padding: 1px 6px;
+	font-size: 12.5px;
+}
