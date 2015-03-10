@@ -486,7 +486,7 @@ class StoreSettingsController < ApplicationController
       #store mapping for later
       csv_map = CsvMapping.find_by_store_id(@store.id)
       if params[:type] =='product'
-        if csv_map.product_csv_map.nil?
+        if csv_map.product_csv_map_id.nil?
           if params[:name] == ''
             params[:name] = csv_map.store.name+' - Default Product Map'
           end
@@ -498,7 +498,7 @@ class StoreSettingsController < ApplicationController
         end
 
       else
-        if csv_map.order_csv_map.nil?
+        if csv_map.order_csv_map_id.nil?
           if params[:name] == ''
             params[:name] = csv_map.store.name+' - Default Order Map'
           end
