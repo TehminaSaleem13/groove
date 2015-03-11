@@ -59,11 +59,11 @@ class ProductInventoryWarehouses < ActiveRecord::Base
       #update product store
       store = self.product.store
 
-      #if self.product.store.store_type == 'Shipstation' && self.product.store.auto_update_products
+      if store.store_type == 'Shipstation API 2'
         context = Groovepacker::Store::Context.new(
-          Groovepacker::Store::Handlers::ShipstationHandler.new(self.product.store))
+          Groovepacker::Store::Handlers::ShipstationRestHandler.new(store))
         context.update_product(self.product)
-      #end
+      end
     end
   end
 

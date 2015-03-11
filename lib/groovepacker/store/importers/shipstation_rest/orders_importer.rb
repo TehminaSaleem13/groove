@@ -124,6 +124,7 @@ module Groovepacker
 
           def import_order(shipstation_order, order)
             shipstation_order.increment_id = order["orderNumber"]
+            shipstation_order.store_order_id = order["orderId"]
             shipstation_order.order_placed_time = order["orderDate"]
             shipstation_order.email = order["customerEmail"] unless order["customerEmail"].nil?
             unless order["shipTo"].nil?
@@ -164,6 +165,13 @@ module Groovepacker
             unless item["imageUrl"].nil? || product.product_images.length > 0
               product.product_images.create(image: item["imageUrl"])
             end
+            
+            unless item["warehouseLocation"].nil?
+              product.primary_warehouse.update_attributes(
+                location_primary: item["warehouseLocation"]
+              )
+            end
+
             product
           end
         end

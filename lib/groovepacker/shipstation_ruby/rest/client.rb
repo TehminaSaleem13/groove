@@ -20,7 +20,7 @@ module Groovepacker
           combined_response = {}
           combined_response["orders"] = []
           begin
-            response = HTTParty.get('https://shipstation.p.mashape.com/Orders/List?orderStatus=' + 
+            response = HTTParty.get('https://ssapi.shipstation.com/Orders/List?orderStatus=' + 
               status + '&page=' + page_index.to_s + '&pageSize=100' + orderDateStart,
               headers: {
                 "Authorization" => "Basic "+ Base64.encode64(@auth[:api_key] + ":" + @auth[:api_secret]).gsub(/\n/, ''),
@@ -37,7 +37,7 @@ module Groovepacker
 
         def get_products
           Rails.logger.info "Getting all active products"
-          response = HTTParty.get('https://shipstation.p.mashape.com/Products?showInactive=false',
+          response = HTTParty.get('https://ssapi.shipstation.com/Products?showInactive=false',
             headers: {
               "Authorization" => "Basic "+ Base64.encode64(@auth[:api_key] + ":" + @auth[:api_secret]).gsub(/\n/, ''),
               "X-Mashape-Key" => "E6cSux0BVQmshJh0VacUkqXP1sJgp1I1APKjsntC26JSOTy0pP"
@@ -51,7 +51,7 @@ module Groovepacker
           unless orderNumber.nil?
             orderNumber = '&orderNumber=' + orderNumber.to_s
             Rails.logger.info "Getting shipment with order number: " + orderNumber
-            response = HTTParty.get('https://shipstation.p.mashape.com/Shipments/List?' + 
+            response = HTTParty.get('https://ssapi.shipstation.com/Shipments/List?' + 
                 'page=1&pageSize=100' + URI.encode(orderNumber),
                 headers: {
                   "Authorization" => "Basic "+ Base64.encode64(@auth[:api_key] + ":" + @auth[:api_secret]).gsub(/\n/, ''),
@@ -66,6 +66,32 @@ module Groovepacker
           tracking_number
         end
 
+        def update_order(orderId, order)
+          Rails.logger.info "Updating order with orderId: " + orderId.to_s
+          response = HTTParty.post('https://ssapi.shipstation.com/Orders/CreateOrder',{
+            body: order,
+            headers: {
+              "Authorization" => "Basic "+ Base64.encode64(@auth[:api_key] + ":" + @auth[:api_secret]).gsub(/\n/, ''),
+              "X-Mashape-Key" => "E6cSux0BVQmshJh0VacUkqXP1sJgp1I1APKjsntC26JSOTy0pP"
+            }, :debug_output => $stdout})
+          handle_exceptions(response)
+          puts response.inspect
+          response
+        end
+
+        def get_order(orderId)
+          puts "retrieving order"
+          Rails.logger.info "Getting orders with orderId: " + orderId
+          response = HTTParty.get('https://ssapi.shipstation.com/Orders/' + orderId,
+            headers: {
+              "Authorization" => "Basic "+ Base64.encode64(@auth[:api_key] + ":" + @auth[:api_secret]).gsub(/\n/, ''),
+              "X-Mashape-Key" => "E6cSux0BVQmshJh0VacUkqXP1sJgp1I1APKjsntC26JSOTy0pP"
+            })
+          handle_exceptions(response)
+          puts response.inspect
+          response
+        end
+
         def inspect
           "#<ShipStationRuby::Client:#{object_id}>"
         end
@@ -74,7 +100,7 @@ module Groovepacker
 
         def handle_exceptions(response)
           raise Exception, "Authorization with Shipstation store failed. Please check your API credentials" if response.code == 401
-          raise Exception, response.body if response.code == 500
+          raise Exception, response.inspect if response.code == 500
         end
       end
     end
