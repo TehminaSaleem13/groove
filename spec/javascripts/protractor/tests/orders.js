@@ -126,7 +126,7 @@ describe('Orders:',function() {
                     edit.button = element.all(by.buttonText('Edit')).first().click();
                     edit.parent = edit.button.element(by.xpath(".."));
                     edit.ul = edit.parent.element(by.tagName("ul"));
-                    edit.li = edit.ul.all(by.tagName("li")).get(1).click();
+                    edit.li = edit.ul.all(by.tagName("li")).get(2).click();
 
                     table.tbody = element.all(by.tagName("tbody")).first();
                     table.row = table.tbody.all(by.tagName("tr")).first();
@@ -169,7 +169,7 @@ describe('Orders:',function() {
                     edit.button = element.all(by.buttonText('Edit')).first().click();
                     edit.parent = edit.button.element(by.xpath(".."));
                     edit.ul = edit.parent.element(by.tagName("ul"));
-                    edit.li = edit.ul.all(by.tagName("li")).get(0).click();
+                    edit.li = edit.ul.all(by.tagName("li")).get(1).click();
 
                     table.tbody = element.all(by.tagName("tbody")).first();
                     table.row = table.tbody.all(by.tagName("tr")).first();
@@ -347,7 +347,7 @@ describe('Orders:',function() {
                     });
                 });
                 it('\'Remove Selected Items\', removes items from the existing items list',function() {
-                    element(by.cssContainingText('.panel-collapse.in .panel-body li','On Hold')).click();
+                    // element(by.cssContainingText('.panel-collapse.in .panel-body li','On Hold')).click();
                     table.list_table = element.all(by.tagName('table')).first();
                     table.thead = table.list_table.element(by.tagName('thead'));
                     table.thead.all(by.repeater('field in theads')).getText().then (function(text) {
