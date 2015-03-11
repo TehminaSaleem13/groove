@@ -11,9 +11,9 @@
       <br/>
       <br/>
       <% barcode_string = generate_barcode(@product.primary_barcode)%>
-      <center><%= pdf_image_tag(@product.primary_barcode+".png", {:width => 255, :height => 42}) %></center>
+      <center><%= pdf_image_tag(barcode_string+".png", {:width => 255, :height => 42}) %></center>
 
-      <p style="text-align:center; font-size:8px; line-height: 0px;">*<%=barcode_string%>*</p>
+      <p style="text-align:center; font-size:8px; line-height: 0px;">*<%=@product.primary_barcode%>*</p>
     <%else%>
       <br/>
       <span style="font-size: 20px; margin-bottom: 10px; margin-left: 45px;">Barcode not available</span>
