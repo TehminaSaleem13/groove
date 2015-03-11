@@ -50,7 +50,7 @@ class StoreSettingsController < ApplicationController
           @store.name = params[:name] || get_default_warehouse_name
           @store.store_type = params[:store_type]
           @store.status = params[:status]
-          @store.thank_you_message_to_customer = params[:thank_you_message_to_customer]
+          @store.thank_you_message_to_customer = params[:thank_you_message_to_customer] unless params[:thank_you_message_to_customer] == 'null'
           @store.inventory_warehouse_id = params[:inventory_warehouse_id] || get_default_warehouse_id
           @store.auto_update_products = params[:auto_update_products]
         end
@@ -486,7 +486,7 @@ class StoreSettingsController < ApplicationController
       #store mapping for later
       csv_map = CsvMapping.find_by_store_id(@store.id)
       if params[:type] =='product'
-        if csv_map.product_csv_map.nil?
+        if csv_map.product_csv_map_id.nil?
           if params[:name] == ''
             params[:name] = csv_map.store.name+' - Default Product Map'
           end
@@ -498,7 +498,7 @@ class StoreSettingsController < ApplicationController
         end
 
       else
-        if csv_map.order_csv_map.nil?
+        if csv_map.order_csv_map_id.nil?
           if params[:name] == ''
             params[:name] = csv_map.store.name+' - Default Order Map'
           end

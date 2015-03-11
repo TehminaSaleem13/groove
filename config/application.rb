@@ -65,6 +65,8 @@ module Groovepacks
     # Autoload lib/ folder including all subdirectories
     config.autoload_paths += Dir["#{config.root}/lib/**/"]
     config.middleware.use 'Apartment::Elevators::Subdomain'
+    config.assets.paths << Rails.root.join("app", "assets", "fonts")
+    config.assets.precompile += %w(*.png *.jpg *.jpeg *.gif *.woff *.ttf *.svg)
   end
 end
 require Rails.root.join('config','initializers','groove_constants.rb')
