@@ -151,6 +151,7 @@ groovepacks_services.factory('orders',['$http','$window','notification',function
     var update_list = function(action,orders) {
         if(["update_status","delete","duplicate"].indexOf(action) != -1) {
             orders.setup.orderArray = [];
+            orders.setup.option = 'yes';
             for(var i =0; i < orders.selected.length; i++) {
                 if (orders.selected[i].checked == true) {
                     orders.setup.orderArray.push({id: orders.selected[i].id});
@@ -177,6 +178,28 @@ groovepacks_services.factory('orders',['$http','$window','notification',function
                 }
             }).error(notification.server_error);
         }
+    };
+
+    var update_list_by_option = function(option,orders) {
+        orders.setup.orderArray = [];
+        orders.setup.option = option;
+        for(var i =0; i < orders.selected.length; i++) {
+            if (orders.selected[i].checked == true) {
+                orders.setup.orderArray.push({id: orders.selected[i].id});
+            }
+        }
+
+        return $http.post('/orders/changeorderstatus.json',orders.setup).success(function(data) {
+            orders.selected = [];
+            if(data.status) {
+                orders.setup.select_all =  false;
+                orders.setup.inverted = false;
+                notification.notify(success_messages[action],1);
+                notification.notify(data.notice_messages,2);
+            } else {
+                notification.notify(data.error_messages,0);
+            }
+        }).error(notification.server_error);
     };
 
     var select_list = function(orders,from,to,state) {
@@ -389,7 +412,8 @@ groovepacks_services.factory('orders',['$http','$window','notification',function
             total_items:total_items_list,
             update_node: update_list_node,
             generate: generate_list,
-            cancel_pdf_gen: cancel_pdf_gen
+            cancel_pdf_gen: cancel_pdf_gen,
+            update_with_option: update_list_by_option
         },
         single: {
             get: get_single,

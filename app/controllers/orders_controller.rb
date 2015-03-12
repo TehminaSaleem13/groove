@@ -339,6 +339,7 @@ class OrdersController < ApplicationController
       unless @orders.nil?
         @orders.each do|order|
           @order = Order.find(order['id'])
+          @order.update_inventory_level &= false
           if @order.status =='scanned' && params[:status] =='awaiting'
             @order.reset_scanned_status
             @result['notice_messages'].push('Items in scanned orders have already been removed from inventory so no further inventory adjustments will be made during packing.')
@@ -347,6 +348,8 @@ class OrdersController < ApplicationController
           unless @order.save
             @result['status'] = false
             @result['error_messages'] = @order.errors.full_messages
+          else
+            @order.update_inventory_levels_for_items
           end
         end
       end
@@ -354,12 +357,43 @@ class OrdersController < ApplicationController
       @result['status'] = false
       @result['error_messages'].push("You do not have enough permissions to delete order")
     end
-
+    @order.update_inventory_level = true
     respond_to do |format|
       format.html # show.html.erb
       format.json { render json: @result }
     end
   end
+
+  # def change_orderstatus_and_updateinventory
+  #   @result = Hash.new
+  #   @result['status'] = true
+  #   @result['error_messages'] = []
+  #   @result['notice_messages'] = []
+
+  #   @orders = list_selected_orders
+  #   if current_user.can? 'change_order_status'
+  #     unless @orders.nil?
+  #       puts "params[:option]: " + params[:option]
+  #       unless params[:option] == 'cancel order status change'
+  #         @orders.each do|order|
+  #           @order = Order.find(order['id'])
+  #           @order.status = params[:status]
+  #           unless @order.save
+  #             @result['status'] = false
+  #             @result['error_messages'] = @order.errors.full_messages
+  #           else
+  #             @order.update_inventory_levels(params[:option])
+  #           end
+  #         end
+  #       end
+  #     end
+  #   end
+
+  #   respond_to do |format|
+  #     format.html # show.html.erb
+  #     format.json { render json: @result }
+  #   end
+  # end
 
   def getdetails
     @result = Hash.new

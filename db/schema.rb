@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150311120912) do
+ActiveRecord::Schema.define(:version => 20150312152659) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0, :null => false
@@ -373,6 +373,7 @@ ActiveRecord::Schema.define(:version => 20150311120912) do
     t.string   "non_hyphen_increment_id"
     t.boolean  "note_confirmation",                                     :default => false
     t.string   "store_order_id"
+    t.boolean  "update_inventory_level",                                :default => true
   end
 
   create_table "product_barcodes", :force => true do |t|

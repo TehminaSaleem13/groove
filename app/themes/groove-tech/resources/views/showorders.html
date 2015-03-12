@@ -55,7 +55,7 @@
                         <li><a ng-click="order_change_status('onhold')">On Hold <span class="pull-right badge badge-important">{{orders.setup.select_all? gridOptions.paginate.total_items: gridOptions.selections.selected_count}}</span></a></li>
                         <li><a ng-click="order_change_status('serviceissue')">Service Issue <span class="pull-right badge badge-important">{{orders.setup.select_all? gridOptions.paginate.total_items: gridOptions.selections.selected_count}}</span></a></li>
                         <li><a ng-click="order_change_status('cancelled')">Cancelled <span class="pull-right badge badge-important">{{orders.setup.select_all? gridOptions.paginate.total_items: gridOptions.selections.selected_count}}</span></a></li>
-                        <li><a ng-click="order_change_status('scanned')">Scanned <span class="pull-right badge badge-important">{{orders.setup.select_all? gridOptions.paginate.total_items: gridOptions.selections.selected_count}}</span></a></li>
+                        <li><a ng-click="get_user_confirmation('scanned')">Scanned <span class="pull-right badge badge-important">{{orders.setup.select_all? gridOptions.paginate.total_items: gridOptions.selections.selected_count}}</span></a></li>
                     </ul>
                 </div>
 
