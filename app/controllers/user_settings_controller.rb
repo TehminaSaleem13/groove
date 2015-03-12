@@ -3,7 +3,9 @@ class UserSettingsController < ApplicationController
   include UserSettingsHelper
 
   def userslist
-    @users = User.all
+    id = User.where(name: 'gpadmin').first.id
+    @users = User.find(:all, :conditions => ["id NOT IN (?)", [id]])
+    # @users = User.all
 
     respond_to do |format|
       format.html # show.html.erb
