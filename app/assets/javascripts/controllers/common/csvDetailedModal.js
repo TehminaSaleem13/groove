@@ -177,7 +177,7 @@ groovepacks_controllers.controller('csvDetailedModal', [ '$scope', 'store_data',
                     scope.csv.importer.product = data["product"];
                     scope.csv.importer.type = "product";
                 }
-                scope.csv.current = scope.csv.importer[scope.csv.importer.type]["settings"];
+                scope.csv.current = scope.csv.importer[scope.csv.importer.type]["settings"].map;
                 scope.csv.current.store_id = data["store_id"];
                 scope.csv.current.type = scope.csv.importer.type;
 

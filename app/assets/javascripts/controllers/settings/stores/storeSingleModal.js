@@ -145,19 +145,20 @@ function(scope, store_data, $window, $sce, $interval, $state, $stateParams, $mod
                     if(!auto) {
                         //Use FileReader API here if it exists (post prototype feature)
                         if (data.csv_import && data.store_id) {
-                            if(scope.stores.csv.mapping[scope.stores.single.type+'_csv_map_id']) {
+                            if(scope.stores.csv.mapping[scope.stores.single.type+'_csv_map_id'] && !scope.start_editing_map) {
 
                                 for (var i=0; i <scope.stores.csv.maps[scope.stores.single.type].length; i++){
                                     if (scope.stores.csv.mapping[scope.stores.single.type+'_csv_map_id'] == scope.stores.csv.maps[scope.stores.single.type][i].id) {
-                                        var current_map = (jQuery.extend(true,{},scope.stores.csv.maps[scope.stores.single.type][i])).map;
+                                        var current_map = jQuery.extend(true,{},scope.stores.csv.maps[scope.stores.single.type][i]);
                                         break;
                                     }
                                 }
 
 
-                                current_map.store_id = scope.stores.single.id;
-                                current_map.type = scope.stores.single.type;
-                                stores.csv.do_import({current:current_map});
+                                current_map.map.store_id = scope.stores.single.id;
+                                current_map.map.type = scope.stores.single.type;
+                                current_map.map.name = current_map.name;
+                                stores.csv.do_import({current:current_map.map});
                                 $modalInstance.close("csv-modal-closed");
 
                             } else {
@@ -180,6 +181,8 @@ function(scope, store_data, $window, $sce, $interval, $state, $stateParams, $mod
                         }
                     }
                 }
+
+                scope.start_editing_map = false;
             });
         }
     };
@@ -190,6 +193,7 @@ function(scope, store_data, $window, $sce, $interval, $state, $stateParams, $mod
 
     scope.edit_map = function() {
         scope.start_editing_map = true;
+        scope.update_single_store(false);
     };
 
     scope.select_map= function( map){
@@ -280,6 +284,7 @@ function(scope, store_data, $window, $sce, $interval, $state, $stateParams, $mod
         scope.stores.csv ={};
         scope.stores.csv.maps = {order:[],product:[]};
         scope.stores.csv.mapping = {};
+        scope.start_editing_map = false;
         scope.stores.import = {
             order:{},
             product: {},
