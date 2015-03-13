@@ -565,8 +565,10 @@ class Order < ActiveRecord::Base
   end
   def get_items_count
     count = 0
-    self.order_items.each do |item|
-      count = count + item.qty
+    unless self.order_items.empty?
+      self.order_items.each do |item|
+        count = count + item.qty unless item.qty.nil?
+      end
     end
     count
   end

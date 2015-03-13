@@ -126,7 +126,7 @@ describe('Orders:',function() {
                     edit.button = element.all(by.buttonText('Edit')).first().click();
                     edit.parent = edit.button.element(by.xpath(".."));
                     edit.ul = edit.parent.element(by.tagName("ul"));
-                    edit.li = edit.ul.all(by.tagName("li")).get(1).click();
+                    edit.li = edit.ul.all(by.tagName("li")).get(2).click();
 
                     table.tbody = element.all(by.tagName("tbody")).first();
                     table.row = table.tbody.all(by.tagName("tr")).first();
@@ -319,7 +319,22 @@ describe('Orders:',function() {
                         var modal_scope = modal_header.element(by.xpath('..'));
                         var modal_body = modal_scope.element(by.className('modal-body'));
                         var modal_rows = modal_body.all(by.className('row'));
-                        modal_rows.get(3).all(by.tagName('tbody')).first().all(by.tagName('tr')).first().click();
+                        var status = false;
+                        modal_rows.get(3).all(by.tagName('tbody')).first().all(by.tagName('tr')).getText().then(function(trs) {
+                            for(i=0 ; i<trs.length ; i++) {
+                                status =  function () {
+                                    if(modal_rows.get(3).all(by.tagName('tbody')).first().all(by.tagName('tr')).get(i).all(by.tagName('td')).getText().get(2) == 'active') {
+                                        status = true;
+                                    }
+                                    return status;
+                                };
+                                if(status) {
+                                    modal_rows.get(3).all(by.tagName('tbody')).first().all(by.tagName('tr')).get(i).click();
+                                    break;
+                                }
+                            }
+                        });
+
                         modal_rows.get(2).element(by.cssContainingText('button','Save & Close')).click();
                         var row = element(by.className('tab-content'));
                         var table_pane = row.all(by.cssContainingText('.ng-isolate-scope .binder', 'Primary Image')).first().all(by.tagName('div')).get(1);
@@ -332,7 +347,7 @@ describe('Orders:',function() {
                     });
                 });
                 it('\'Remove Selected Items\', removes items from the existing items list',function() {
-                    element(by.cssContainingText('.panel-collapse.in .panel-body li','On Hold')).click();
+                    // element(by.cssContainingText('.panel-collapse.in .panel-body li','On Hold')).click();
                     table.list_table = element.all(by.tagName('table')).first();
                     table.thead = table.list_table.element(by.tagName('thead'));
                     table.thead.all(by.repeater('field in theads')).getText().then (function(text) {

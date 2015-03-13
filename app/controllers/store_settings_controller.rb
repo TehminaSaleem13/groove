@@ -486,10 +486,10 @@ class StoreSettingsController < ApplicationController
       #store mapping for later
       csv_map = CsvMapping.find_by_store_id(@store.id)
       if params[:type] =='product'
+        if params[:name].blank?
+          params[:name] = csv_map.store.name+' - Default Product Map'
+        end
         if csv_map.product_csv_map_id.nil?
-          if params[:name] == ''
-            params[:name] = csv_map.store.name+' - Default Product Map'
-          end
           map_data = CsvMap.create(:kind=>'product',:name=>params[:name], :map=>{})
           csv_map.product_csv_map_id = map_data.id
           csv_map.save
@@ -498,10 +498,10 @@ class StoreSettingsController < ApplicationController
         end
 
       else
+        if params[:name].blank?
+          params[:name] = csv_map.store.name+' - Default Order Map'
+        end
         if csv_map.order_csv_map_id.nil?
-          if params[:name] == ''
-            params[:name] = csv_map.store.name+' - Default Order Map'
-          end
           map_data = CsvMap.create(:kind=>'order',:name=>params[:name], :map=>{})
           csv_map.order_csv_map_id = map_data.id
           csv_map.save
@@ -509,6 +509,8 @@ class StoreSettingsController < ApplicationController
           map_data = csv_map.order_csv_map
         end
       end
+
+      map_data.name = params[:name]
 
       map_data.map = {
           :rows => params[:rows],

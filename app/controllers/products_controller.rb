@@ -871,7 +871,7 @@ class ProductsController < ApplicationController
   end
   def updateproduct
     @result = Hash.new
-    @product = Product.find(params[:basicinfo][:id])
+    @product = Product.find(params[:basicinfo][:id]) unless params.nil? && params[:basicinfo].nil?
     @result['status'] = true
     @result['messages'] = []
     @result['params'] = params
