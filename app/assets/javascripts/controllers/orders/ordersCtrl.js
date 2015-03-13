@@ -47,9 +47,15 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
             controller: 'ordersModal',
             templateUrl: '/assets/views/modals/order/confirmation.html',
             resolve: {
-                order_data: function(){return $scope.orders},
-                status: function(){return status}
+                order_data: function(){return $scope.orders;},
+                status: function(){return status;}
             }
+        });
+        myscope.order_obj.result.then(function (data) {
+            console.log(data);
+            console.log("reloading the page");
+            $scope.orders.setup.status = "";
+            myscope.init();
         });
     };
 

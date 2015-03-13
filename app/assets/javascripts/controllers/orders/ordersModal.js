@@ -13,14 +13,12 @@ groovepacks_controllers.
             scope.change_order_status_yes = function() {
                 order_data.setup.status = status;
                 orders.list.update_with_option('yes',order_data).then(function(data) {
-                    order_data.setup.status = "";
                     scope.ok();
                 });
             };
             scope.change_order_status_no = function() {
                 order_data.setup.status = status;
                 orders.list.update_with_option('no',order_data).then(function(data) {
-                    order_data.setup.status = "";
                     scope.ok();
                 });
             };

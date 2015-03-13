@@ -194,7 +194,7 @@ groovepacks_services.factory('orders',['$http','$window','notification',function
             if(data.status) {
                 orders.setup.select_all =  false;
                 orders.setup.inverted = false;
-                notification.notify(success_messages[action],1);
+                notification.notify("order status updated successfully",1);
                 notification.notify(data.notice_messages,2);
             } else {
                 notification.notify(data.error_messages,0);

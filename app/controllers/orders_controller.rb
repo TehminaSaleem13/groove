@@ -345,11 +345,10 @@ class OrdersController < ApplicationController
             @result['notice_messages'].push('Items in scanned orders have already been removed from inventory so no further inventory adjustments will be made during packing.')
           end
           @order.status = params[:status]
+          @order.update_inventory_levels(params[:option])
           unless @order.save
             @result['status'] = false
             @result['error_messages'] = @order.errors.full_messages
-          else
-            @order.update_inventory_levels_for_items
           end
         end
       end
