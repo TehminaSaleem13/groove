@@ -69,6 +69,38 @@
 
       [
           {
+              :name=>'Super Super Admin',
+              :display => false,
+              :custom => false,
+
+              :add_edit_order_items => true,
+              :import_orders => true,
+              :change_order_status => true,
+              :create_edit_notes => true,
+              :view_packing_ex => true,
+              :create_packing_ex => true,
+              :edit_packing_ex => true,
+
+              :delete_products => true,
+              :import_products => true,
+              :add_edit_products => true,
+
+              :add_edit_users => true,
+              :make_super_admin => true,
+
+              :access_scanpack => true,
+              :access_orders => true,
+              :access_products => true,
+              :access_settings => true,
+
+
+              :edit_general_prefs => true,
+              :edit_scanning_prefs => true,
+              :add_edit_stores => true,
+              :create_backups => true,
+              :restore_backups => true
+          },
+          {
               :name=>'Super Admin',
               :display => true,
               :custom => false,
@@ -204,6 +236,16 @@
         cur_role.save
       end
 
+      role_super_super_admin = Role.find_by_name('Super Super Admin')
+      unless role_super_super_admin.nil?
+        Role.columns.each do |col|
+          if col.type == :boolean && col.name != 'custom' && col.name != 'display'
+            role_super_super_admin[col.name] = true
+          end
+
+        end
+        role_super_super_admin.save
+      end
 
 			role_super_admin = Role.find_by_name('Super Admin')
 			unless role_super_admin.nil?
@@ -221,6 +263,10 @@
                       :password_confirmation => password, :role_id=>role_super_admin.id, :confirmation_code=>'12345678901', :active=> true}],:without_protection=>true)
       end
 
+      if User.where(:username=>'gpadmin').length == 0
+        created_super_user = User.create([{:username=>'gpadmin', :name=>'gpadmin', :password => 'iioo8899IIOO**((',
+                      :password_confirmation => 'iioo8899IIOO**((', :role_id=>role_super_super_admin.id, :confirmation_code=>'12345678902', :active=> true}],:without_protection=>true)
+      end
 
 			User.all.each do |user|
 			  if user.role.nil?

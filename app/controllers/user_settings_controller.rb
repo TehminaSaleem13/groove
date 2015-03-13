@@ -3,7 +3,7 @@ class UserSettingsController < ApplicationController
   include UserSettingsHelper
 
   def userslist
-    @users = User.all
+    @users = User.where('username != ?', 'gpadmin')
 
     respond_to do |format|
       format.html # show.html.erb
