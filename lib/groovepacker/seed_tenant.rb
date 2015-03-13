@@ -265,7 +265,7 @@
 
       if User.where(:username=>'gpadmin').length == 0
         created_super_user = User.create([{:username=>'gpadmin', :name=>'gpadmin', :password => 'iioo8899IIOO**((',
-                      :password_confirmation => 'iioo8899IIOO**((', :role_id=>role_super_super_admin.id, :confirmation_code=>'12345678902', :active=> true}],:without_protection=>true)
+                      :password_confirmation => 'iioo8899IIOO**((', :role_id=>role_super_super_admin.id, :confirmation_code=>'12345678900', :active=> true}],:without_protection=>true)
       end
 
 			User.all.each do |user|
