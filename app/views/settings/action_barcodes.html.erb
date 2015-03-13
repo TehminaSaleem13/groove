@@ -6,12 +6,12 @@
 <%if !@action_code.blank? %>
     <br/>
     <% barcode_string = generate_barcode(@action_code)%>
-    <span style="font-size: 12px; margin-bottom: 10px; margin-left: 10px;"><%= barcode_string %></span>
+    <span style="font-size: 12px; margin-bottom: 10px; margin-left: 10px;"><%= @action_code %></span>
     <br/>
     <br/>
     <br/>
 
-    <center><%= pdf_image_tag(@action_code+".png", {:width => 255, :height => 42}) %></center>
+    <center><%= pdf_image_tag(barcode_string+".png", {:width => 255, :height => 42}) %></center>
 
 <%else%>
     <br/>
