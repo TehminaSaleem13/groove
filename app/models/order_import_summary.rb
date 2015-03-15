@@ -1,8 +1,9 @@
 class OrderImportSummary < ActiveRecord::Base
 	belongs_to :store
 	has_many :import_items
-	attr_accessible :user_id, :status
+	attr_accessible :user_id, :status, :user
   after_save :emit_data_to_user
+  belongs_to :user
 
   def self.top_summary
     summary = nil
@@ -15,7 +16,7 @@ class OrderImportSummary < ActiveRecord::Base
 
   def emit_data_to_user
     result = Hash.new
-    result['import_info'] = self
+    result['import_info'] = self.reload
     result['import_items'] = []
     import_items = ImportItem.where('order_import_summary_id = '+self.id.to_s+' OR order_import_summary_id is null')
     import_items.all.each do |import_item|

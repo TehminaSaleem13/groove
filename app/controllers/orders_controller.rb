@@ -1201,6 +1201,36 @@ class OrdersController < ApplicationController
     render json: result
   end
 
+  # params[:store_id] params[:import_type]
+  def import
+    result = {
+      status: true,
+      success_messages: [],
+      error_messages: []
+    }
+
+    order_summary = OrderImportSummary.where(
+      status: 'in_progress')
+
+    if order_summary.empty?
+      store = Store.find(params[:store_id])
+      tenant = Apartment::Tenant.current_tenant
+      Delayed::Job.where(queue: "importing_orders_#{tenant}").destroy_all
+      import_orders_obj = ImportOrders.new
+      import_orders_obj.import_order_by_store(
+        tenant, 
+        store, 
+        params[:import_type], 
+        current_user
+      )
+    else
+      result.status = false
+      result.error_messages << "Import is in progress"
+    end
+
+    render json: result
+  end
+
   def confirmation
 
   end

@@ -8,6 +8,17 @@ groovepacks_services.factory("importOrders", ['$http','notification',function($h
                         notification.notify(data.error_messages);
                     }
                 }).error(notification.server_error);
+            },
+
+            issue_import: function(store_id, import_type) {
+                $http.get('/orders/import.json?store_id=' + store_id + "&import_type=" + import_type, 
+                    {ignoreLoadingBar: true}).success(function(data) {
+                    if(data.status) {
+                        notification.notify(data.success_messages,1);
+                    } else {
+                        notification.notify(data.error_messages);
+                    }
+                }).error(notification.server_error); 
             }
             // do_import: function(scope) {
 
