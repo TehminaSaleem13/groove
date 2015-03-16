@@ -168,6 +168,145 @@ describe OrdersController do
       result = JSON.parse(response.body)
       expect(result['status']).to eq(true)
     end
+    it "Changing order status from awaiting/service_issue to scanned and clicking on 'yes' option should update inventory counts from allocated to sold" do
+      request.accept = "application/json"
+      inv_wh = FactoryGirl.create(:inventory_warehouse)
+      store = FactoryGirl.create(:store, :inventory_warehouse_id => inv_wh.id)
+      @user_role.change_order_status = true
+      @user_role.save
+      order1 = FactoryGirl.create(:order, :status=>'awaiting', :increment_id=>'1234567890', :store => store)
+      order2 = FactoryGirl.create(:order, :status=>'awaiting', :increment_id=>'1234567891', :store => store)
+      product1 = FactoryGirl.create(:product)
+      product2 = FactoryGirl.create(:product)
+      order_item1 = FactoryGirl.create(:order_item, :product_id=>product1.id,
+                    :qty=>1, :price=>"10", :row_total=>"10", :order=>order1, :name=>product1.name)
+      order_item2 = FactoryGirl.create(:order_item, :product_id=>product2.id,
+                    :qty=>1, :price=>"10", :row_total=>"10", :order=>order2, :name=>product2.name)
+      product_inv_wh1 = FactoryGirl.create(
+        :product_inventory_warehouse, :product=> product1,
+        :inventory_warehouse_id =>inv_wh.id, 
+        :available_inv => 25, :allocated_inv => 5)
+      product_inv_wh2 = FactoryGirl.create(
+        :product_inventory_warehouse, :product=> product2,
+        :inventory_warehouse_id =>inv_wh.id, 
+        :available_inv => 25, :allocated_inv => 5)
+      put :changeorderstatus, {:order_ids=>[order1.id, order2.id],:status=>'scanned',:option=>'yes'}
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['status']).to eq(true)
+      product_inv_wh1.reload
+      product_inv_wh2.reload
+      expect(product_inv_wh1.allocated_inv).to eq(4)
+      expect(product_inv_wh2.allocated_inv).to eq(4)
+      expect(product_inv_wh1.sold_inventory_warehouses.first.sold_qty).to eq(1)
+      expect(product_inv_wh2.sold_inventory_warehouses.first.sold_qty).to eq(1)
+    end
+
+    it "Changing order status from awaiting/service_issue to scanned and clicking on 'no' option should update inventory counts from allocated to available" do
+      request.accept = "application/json"
+      inv_wh = FactoryGirl.create(:inventory_warehouse)
+      store = FactoryGirl.create(:store, :inventory_warehouse_id => inv_wh.id)
+      @user_role.change_order_status = true
+      @user_role.save
+      order1 = FactoryGirl.create(:order, :status=>'awaiting', :increment_id=>'1234567890', :store => store)
+      order2 = FactoryGirl.create(:order, :status=>'awaiting', :increment_id=>'1234567891', :store => store)
+      product1 = FactoryGirl.create(:product)
+      product2 = FactoryGirl.create(:product)
+      order_item1 = FactoryGirl.create(:order_item, :product_id=>product1.id,
+                    :qty=>1, :price=>"10", :row_total=>"10", :order=>order1, :name=>product1.name)
+      order_item2 = FactoryGirl.create(:order_item, :product_id=>product2.id,
+                    :qty=>1, :price=>"10", :row_total=>"10", :order=>order2, :name=>product2.name)
+      product_inv_wh1 = FactoryGirl.create(
+        :product_inventory_warehouse, :product=> product1,
+        :inventory_warehouse_id =>inv_wh.id, 
+        :available_inv => 25, :allocated_inv => 5)
+      product_inv_wh2 = FactoryGirl.create(
+        :product_inventory_warehouse, :product=> product2,
+        :inventory_warehouse_id =>inv_wh.id, 
+        :available_inv => 25, :allocated_inv => 5)
+      put :changeorderstatus, {:order_ids=>[order1.id, order2.id],:status=>'scanned',:option=>'no'}
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['status']).to eq(true)
+      product_inv_wh1.reload
+      product_inv_wh2.reload
+      expect(product_inv_wh1.allocated_inv).to eq(4)
+      expect(product_inv_wh2.allocated_inv).to eq(4)
+      expect(product_inv_wh1.available_inv).to eq(26)
+      expect(product_inv_wh2.available_inv).to eq(26)
+    end
+
+    it "Changing order status from cancelled to scanned and clicking on 'yes' option should update inventory counts from available to sold" do
+      request.accept = "application/json"
+      inv_wh = FactoryGirl.create(:inventory_warehouse)
+      store = FactoryGirl.create(:store, :inventory_warehouse_id => inv_wh.id)
+      @user_role.change_order_status = true
+      @user_role.save
+      order1 = FactoryGirl.create(:order, :status=>'cancelled', :increment_id=>'1234567890', :store => store)
+      order2 = FactoryGirl.create(:order, :status=>'cancelled', :increment_id=>'1234567891', :store => store)
+      product1 = FactoryGirl.create(:product)
+      product2 = FactoryGirl.create(:product)
+      order_item1 = FactoryGirl.create(:order_item, :product_id=>product1.id,
+                    :qty=>1, :price=>"10", :row_total=>"10", :order=>order1, :name=>product1.name)
+      order_item2 = FactoryGirl.create(:order_item, :product_id=>product2.id,
+                    :qty=>1, :price=>"10", :row_total=>"10", :order=>order2, :name=>product2.name)
+      product_inv_wh1 = FactoryGirl.create(
+        :product_inventory_warehouse, :product=> product1,
+        :inventory_warehouse_id =>inv_wh.id, 
+        :available_inv => 25, :allocated_inv => 5)
+      product_inv_wh2 = FactoryGirl.create(
+        :product_inventory_warehouse, :product=> product2,
+        :inventory_warehouse_id =>inv_wh.id, 
+        :available_inv => 25, :allocated_inv => 5)
+      put :changeorderstatus, {:order_ids=>[order1.id, order2.id],:status=>'scanned',:option=>'yes'}
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['status']).to eq(true)
+      product_inv_wh1.reload
+      product_inv_wh2.reload
+      expect(product_inv_wh1.available_inv).to eq(24)
+      expect(product_inv_wh2.available_inv).to eq(24)
+      expect(product_inv_wh1.sold_inventory_warehouses.first.sold_qty).to eq(1)
+      expect(product_inv_wh2.sold_inventory_warehouses.first.sold_qty).to eq(1)
+    end
+
+    it "Changing order status from cancelled to scanned and clicking on 'no' option should not update inventory" do
+      request.accept = "application/json"
+      inv_wh = FactoryGirl.create(:inventory_warehouse)
+      store = FactoryGirl.create(:store, :inventory_warehouse_id => inv_wh.id)
+      @user_role.change_order_status = true
+      @user_role.save
+      order1 = FactoryGirl.create(:order, :status=>'cancelled', :increment_id=>'1234567890', :store => store)
+      order2 = FactoryGirl.create(:order, :status=>'cancelled', :increment_id=>'1234567891', :store => store)
+      product1 = FactoryGirl.create(:product)
+      product2 = FactoryGirl.create(:product)
+      order_item1 = FactoryGirl.create(:order_item, :product_id=>product1.id,
+                    :qty=>1, :price=>"10", :row_total=>"10", :order=>order1, :name=>product1.name)
+      order_item2 = FactoryGirl.create(:order_item, :product_id=>product2.id,
+                    :qty=>1, :price=>"10", :row_total=>"10", :order=>order2, :name=>product2.name)
+      product_inv_wh1 = FactoryGirl.create(
+        :product_inventory_warehouse, :product=> product1,
+        :inventory_warehouse_id =>inv_wh.id, 
+        :available_inv => 25, :allocated_inv => 5)
+      product_inv_wh2 = FactoryGirl.create(
+        :product_inventory_warehouse, :product=> product2,
+        :inventory_warehouse_id =>inv_wh.id, 
+        :available_inv => 25, :allocated_inv => 5)
+      put :changeorderstatus, {:order_ids=>[order1.id, order2.id],:status=>'scanned',:option=>'no'}
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['status']).to eq(true)
+      product_inv_wh1.reload
+      product_inv_wh2.reload
+      order1.reload
+      order2.reload
+      expect(product_inv_wh1.available_inv).to eq(25)
+      expect(product_inv_wh2.available_inv).to eq(25)
+      expect(product_inv_wh1.allocated_inv).to eq(5)
+      expect(product_inv_wh2.allocated_inv).to eq(5)
+      expect(order1.status).to eq('scanned')
+      expect(order1.status).to eq('scanned')
+    end
   end
 
   # describe "GET order pick list" do

@@ -339,11 +339,13 @@ class OrdersController < ApplicationController
       unless @orders.nil?
         @orders.each do|order|
           @order = Order.find(order['id'])
+          @order.update_inventory_level &= false
           if @order.status =='scanned' && params[:status] =='awaiting'
             @order.reset_scanned_status
             @result['notice_messages'].push('Items in scanned orders have already been removed from inventory so no further inventory adjustments will be made during packing.')
           end
           @order.status = params[:status]
+          @order.update_inventory_levels(params[:option])
           unless @order.save
             @result['status'] = false
             @result['error_messages'] = @order.errors.full_messages
@@ -354,7 +356,7 @@ class OrdersController < ApplicationController
       @result['status'] = false
       @result['error_messages'].push("You do not have enough permissions to delete order")
     end
-
+    @order.update_inventory_level = true
     respond_to do |format|
       format.html # show.html.erb
       format.json { render json: @result }

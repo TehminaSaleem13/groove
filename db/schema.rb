@@ -374,6 +374,7 @@ ActiveRecord::Schema.define(:version => 20150315093005) do
     t.string   "non_hyphen_increment_id"
     t.boolean  "note_confirmation",                                     :default => false
     t.string   "store_order_id"
+    t.boolean  "update_inventory_level",                                :default => true
   end
 
   create_table "product_barcodes", :force => true do |t|

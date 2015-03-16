@@ -1,0 +1,26 @@
+<div>
+  <div class="modal-header">
+    <button type="button" class="close-btn" ng-click="ok()"><i class="glyphicon glyphicon-remove"></i></button>
+    <div class="modal-title">
+      <span>Confirm Status Change</span>
+    </div>
+   </div>
+    <div class="modal-body" >
+      <div class="container-fluid" >
+        <div class="col-sm-1"></div>
+          <div class="form-group col-sm-11 pull-left">
+            <h4 class="control-label" style="margin-left:-40px;">Should inventory be adjusted as if these orders had shipped?</h4>
+            <br>
+            <div class="btn-group">
+              <button class="modal-save-button btn-sm" style="height:37px; width:130px; margin-right:5px;" ng-click="change_order_status_yes()">Yes</button>
+              <button class="modal-remove-button btn-sm" style="height:37px; width:130px; margin-right:5px;" ng-click="change_order_status_no()">No</button>
+              <button class="modal-cancel-button" style="height:37px; width:130px;" ng-click="cancel_change_order_status()">Cancel status change</button>
+            </div>
+        </div>
+      </div>
+      </div>
+    <div class="modal-footer">
+      <button ng-click="cancel()" class="modal-cancel-button" translate>modal.cancel</button>
+    </div>
+  </form>
+</div>
