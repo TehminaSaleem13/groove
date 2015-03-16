@@ -14,12 +14,13 @@ module Groovepacker
             statuses = []
             statuses.push('awaiting_shipment') if credential.shall_import_awaiting_shipment?
             statuses.push('shipped') if credential.shall_import_shipped?
-            if import_item.import_type == 'regular'
-              import_from = 
-                credential.last_imported_at.nil? ? Date.today - 2.weeks : credential.last_imported_at - 3.days
-            elsif import_item.import_type == 'deep'
+
+            if import_item.import_type == 'deep'
               import_from = 
                 credential.last_imported_at.nil? ? Date.today - 2.weeks : credential.last_imported_at - 7.days
+            else
+              import_from = 
+                credential.last_imported_at.nil? ? Date.today - 2.weeks : credential.last_imported_at - 3.days
             end
 
             unless statuses.empty?
