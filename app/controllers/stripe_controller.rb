@@ -18,20 +18,23 @@
 		  	logger.info("in event type invoice.created")
 		  elsif event.type == 'charge.succeeded'
 		  	logger.info("in event type charge.succeeded")
-		    @invoice = get_invoice(event)
+		  elsif event.type == 'charge.failed'
+		  	logger.info("in event type charge.failed")
+		  elsif event.type == 'invoice.payment_succeeded'
+		  	logger.info("in event type invoice.payment_succeeded")
+		  	@invoice = get_invoice(event)
 		  	if @invoice.save
 		  		logger.info("saved the invoice for event invoice.created")
 		  		StripeInvoiceEmail.send_success_invoice(@invoice).deliver
 		  	end
-		  elsif event.type == 'charge.failed'
-		  	logger.info("in event type charge.failed")
-		    @invoice = get_invoice(event)
+		  	ApplyAccessRestrictions.apply_access_restrictions(@invoice)
+		  elsif event.type == 'invoice.payment_failed'
+		  	logger.info("in event type invoice.payment_failed")
+		  	@invoice = get_invoice(event)
 		  	if @invoice.save
 		  		logger.info("saved the invoice for event invoice.created")
 		  		StripeInvoiceEmail.send_failure_invoice(@invoice).deliver
 		  	end
-		  elsif event.type == 'invoice.payment_succeeded'
-		  	logger.info("in event type invoice.payment_succeeded")
 		  elsif event.type == 'customer.created'
 		  	logger.info("in event type customer.created")
 			elsif event.type == 'customer.subscription.trial_will_end'
