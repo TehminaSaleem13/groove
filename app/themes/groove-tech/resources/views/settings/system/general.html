@@ -221,7 +221,7 @@
                         <label class="control-label col-sm-3">{{translations.labels.packing_slip_message_to_customer}}</label>
                         <div class="controls col-sm-7">
                             <div ng-controller="generalSettingsCtrl">
-                                <div text-angular ng-model="general_settings.single.packing_slip_message_to_customer"></div>
+                                <div text-angular ng-model="general_settings.single.packing_slip_message_to_customer" ng-blur="update_settings()"></div>
                             </div>
                         </div>
                         <div class="info col-sm-2">
