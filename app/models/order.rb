@@ -574,7 +574,6 @@ class Order < ActiveRecord::Base
   end
 
   def update_inventory_levels_for_items(override = true)
-    puts "update_inventory_levels_for_items called..."
     changed_hash = self.changes
 
     logger.debug(changed_hash)
