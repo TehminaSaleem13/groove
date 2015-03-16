@@ -363,37 +363,6 @@ class OrdersController < ApplicationController
     end
   end
 
-  # def change_orderstatus_and_updateinventory
-  #   @result = Hash.new
-  #   @result['status'] = true
-  #   @result['error_messages'] = []
-  #   @result['notice_messages'] = []
-
-  #   @orders = list_selected_orders
-  #   if current_user.can? 'change_order_status'
-  #     unless @orders.nil?
-  #       puts "params[:option]: " + params[:option]
-  #       unless params[:option] == 'cancel order status change'
-  #         @orders.each do|order|
-  #           @order = Order.find(order['id'])
-  #           @order.status = params[:status]
-  #           unless @order.save
-  #             @result['status'] = false
-  #             @result['error_messages'] = @order.errors.full_messages
-  #           else
-  #             @order.update_inventory_levels(params[:option])
-  #           end
-  #         end
-  #       end
-  #     end
-  #   end
-
-  #   respond_to do |format|
-  #     format.html # show.html.erb
-  #     format.json { render json: @result }
-  #   end
-  # end
-
   def getdetails
     @result = Hash.new
     @order = Order.find_by_id(params[:id])

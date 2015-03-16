@@ -617,7 +617,7 @@ class Order < ActiveRecord::Base
     end
   end
 
-  def update_inventory_levels(option)
+  def update_inventory_levels_for_status_change(option)
     changed_hash = self.changes
     unless changed_hash['status'].nil?
       if option == 'yes'
