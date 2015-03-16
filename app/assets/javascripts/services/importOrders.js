@@ -19,6 +19,17 @@ groovepacks_services.factory("importOrders", ['$http','notification',function($h
                         notification.notify(data.error_messages);
                     }
                 }).error(notification.server_error); 
+            },
+
+            cancel_import: function() {
+                $http.put('/orders/cancel_import.json', 
+                    null ).success(function(data) {
+                    if(data.status) {
+                        notification.notify(data.success_messages,1);
+                    } else {
+                        notification.notify(data.error_messages);
+                    }
+                }).error(notification.server_error);      
             }
             // do_import: function(scope) {
 
