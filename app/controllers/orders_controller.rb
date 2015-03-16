@@ -1201,6 +1201,59 @@ class OrdersController < ApplicationController
     render json: result
   end
 
+  # params[:store_id] params[:import_type]
+  def import
+    result = {
+      status: true,
+      success_messages: [],
+      error_messages: []
+    }
+
+    order_summary = OrderImportSummary.where(
+      status: 'in_progress')
+
+    if order_summary.empty?
+      store = Store.find(params[:store_id])
+      tenant = Apartment::Tenant.current_tenant
+      Delayed::Job.where(queue: "importing_orders_#{tenant}").destroy_all
+      import_orders_obj = ImportOrders.new
+      import_params = {tenant: tenant, store: store, import_type: params[:import_type], user: current_user}
+      import_orders_obj.import_order_by_store import_params
+    else
+      result[:status] = false
+      result[:error_messages] << "Import is in progress"
+    end
+
+    render json: result
+  end
+
+  def cancel_import
+    result = {
+      status: true,
+      success_messages: [],
+      error_messages: []
+    }
+
+    order_summary = OrderImportSummary.where(
+      status: 'in_progress')
+
+    if order_summary.empty?
+      result[:status] = false
+      result[:error_messages] << "No imports are in progress"
+    else
+      order_summary = order_summary.first
+      order_summary.status = 'cancelled'
+      order_summary.save
+
+      order_summary.import_items.each do |import_item|
+        import_item.status = 'cancelled'
+        import_item.save
+      end
+    end
+
+    render json: result
+  end
+
   def confirmation
 
   end

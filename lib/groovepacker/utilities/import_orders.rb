@@ -32,6 +32,7 @@
 					end
 				end
 				OrderImportSummary.where(status: 'completed').delete_all
+				OrderImportSummary.where(status: 'cancelled').delete_all
 				if !@order_import_summary.nil? && !@order_import_summary.id.nil?
 					import_items = @order_import_summary.import_items
 					import_items.each do |import_item|
@@ -122,6 +123,43 @@
 			end	
 			result
 		end
+		# params should have hash of tenant, store, import_type = 'regular', user
+		def import_order_by_store(params)
+			result = {
+				status: true,
+				messages: []
+			}
+			tenant = params[:tenant]
+			store = params[:store]
+			import_type = params[:import_type]
+			user = params[:user]
+			Apartment::Tenant.switch(tenant)
+			if OrderImportSummary.where(status: 'in_progress').empty?
+				#delete existing order import summary
+				OrderImportSummary.where(status: 'completed').delete_all
+				OrderImportSummary.where(status: 'cancelled').delete_all
+				#add a new import summary
+				import_summary = OrderImportSummary.create(
+					user: user,
+					status: 'not_started'
+				)
+
+				#add import item for the store
+				import_summary.import_items.create(
+					store: store,
+					import_type: import_type
+				)
+
+				#start importing using delayed job
+				Delayed::Job.enqueue ImportJob.new(tenant, import_summary.id), :queue => 'importing_orders_#{tenant}'
+			else
+				#import is already running. back off from importing
+				result[:status] = false
+				result[:messages] << "An import is already running."
+			end
+			result
+		end
+
 		def reschedule_job(type,tenant)
 			Apartment::Tenant.switch(tenant)
 			date = DateTime.now
@@ -145,5 +183,106 @@
 					date = date + 1.day
 				end
 			end	
+		end
+
+		def import_orders_with_import_item(import_item)
+			begin
+				store_type = import_item.store.store_type
+				store = import_item.store
+				if store_type == 'Amazon'
+					import_item.status = 'in_progress'
+					import_item.save
+					context = Groovepacker::Store::Context.new(
+						Groovepacker::Store::Handlers::AmazonHandler.new(store, import_item))
+					result = context.import_orders
+					import_item.previous_imported = result[:previous_imported]
+					import_item.success_imported = result[:success_imported]
+					if !result[:status]
+						import_item.status = 'failed'
+					else
+						import_item.status = 'completed'
+					end 	
+					import_item.save
+				elsif store_type == 'Ebay'
+					import_item.status = 'in_progress'
+					import_item.save
+					context = Groovepacker::Store::Context.new(
+						Groovepacker::Store::Handlers::EbayHandler.new(store,import_item))
+					result = context.import_orders
+					import_item.previous_imported = result[:previous_imported]
+					import_item.success_imported = result[:success_imported]
+					if !result[:status]
+						import_item.status = 'failed'
+					else
+						import_item.status = 'completed'
+					end
+					import_item.save
+				elsif store_type == 'Magento'
+					import_item.status = 'in_progress'
+					import_item.save
+					context = Groovepacker::Store::Context.new(
+						Groovepacker::Store::Handlers::MagentoHandler.new(store,import_item))
+					result = context.import_orders
+					import_item.previous_imported = result[:previous_imported]
+					import_item.success_imported = result[:success_imported]
+					if !result[:status]
+						import_item.status = 'failed'
+					else
+						import_item.status = 'completed'
+					end
+					import_item.save
+				elsif store_type == 'Shipstation'
+					import_item.status = 'in_progress'
+					import_item.save
+					context = Groovepacker::Store::Context.new(
+						Groovepacker::Store::Handlers::ShipstationHandler.new(store,import_item))
+					result = context.import_orders
+					import_item.previous_imported = result[:previous_imported]
+					import_item.success_imported = result[:success_imported]
+					if !result[:status]
+						import_item.status = 'failed'
+					else
+						import_item.status = 'completed'
+					end
+					import_item.save
+				elsif store_type == 'Shipstation API 2'
+					import_item.status = 'in_progress'
+					import_item.save
+					context = Groovepacker::Store::Context.new(
+						Groovepacker::Store::Handlers::ShipstationRestHandler.new(store,import_item))
+					result = context.import_orders
+					import_item.previous_imported = result[:previous_imported]
+					import_item.success_imported = result[:success_imported]
+					if !result[:status]
+						import_item.status = 'failed'
+					else
+						import_item.status = 'completed'
+					end
+					import_item.save
+	      end
+      rescue Exception => e
+        import_item.message = "Import failed: " + e.message
+        import_item.status = 'failed'
+        import_item.save
+      end
+      import_item.order_import_summary.status = 'completed'
+			import_item.order_import_summary.save
+		end
+
+		ImportJob = Struct.new(:tenant, :order_import_summary_id) do
+			def perform
+				Apartment::Tenant.switch(tenant)
+
+				order_import_summary = OrderImportSummary.find(order_import_summary_id)
+				order_import_summary.status = 'in_progress'
+				order_import_summary.save
+		
+				order_import_summary.import_items.each do |import_item|
+					ImportOrders.new.import_orders_with_import_item(import_item)
+				end
+		
+				order_import_summary.status = 'completed'
+				order_import_summary.save
+			end
 		end
 	end
