@@ -16,61 +16,27 @@
 		  # Do something with event
 		  if event.type == 'invoice.created'
 		  	logger.info("in event type invoice.created")
-		  	@invoice = Invoice.new
-		  	@invoice.date = Time.at(event.data.object.date).utc
-		  	@invoice.invoice_id = event.data.object.id
-		  	@invoice.subscription_id = event.data.object.subscription
-		  	@invoice.customer_id = event.data.object.customer
-		  	@invoice.charge_id = event.data.object.charge
-		  	@invoice.attempted = event.data.object.attempted
-		  	@invoice.closed = event.data.object.closed
-		  	@invoice.forgiven = event.data.object.forgiven
-		  	@invoice.paid = event.data.object.paid
-		  	unless event.data.object.lines.data.first.nil?
-		  		@invoice.plan_id = event.data.object.lines.data.first.plan.id unless event.data.object.lines.data.first.plan.id.nil?
-		  		@invoice.period_start = Time.at(event.data.object.lines.data.first.period.start).utc
-		  		@invoice.period_end = Time.at(event.data.object.lines.data.first.period.end).utc
-		  		@invoice.amount = event.data.object.lines.data.first.amount.to_f/100
-		  		@invoice.quantity = event.data.object.lines.data.first.quantity
-		  	end
-		  	if @invoice.save
-		  		logger.info("saved the invoice for event invoice.created")
-		  		StripeInvoiceEmail.send_invoice(@invoice).deliver
-		  	end
 		  elsif event.type == 'charge.succeeded'
 		  	logger.info("in event type charge.succeeded")
-		    # amount has been deducted from account
-		    # customer_id = event_json.data.object.customer
-		    # transaction_id = event_json.data.object.balance_transaction
-		    # amount = event_json.data.object.amount
 		  elsif event.type == 'charge.failed'
 		  	logger.info("in event type charge.failed")
-		    # the charge couldnot be completed due to some error.
-		    # customer_id = event_json.data.object.customer
-		    # transaction_id = event_json.data.object.balance_transaction
-		    # amount = event_json.data.object.amount
-		    # error = event_json.data.object.failure_message
 		  elsif event.type == 'invoice.payment_succeeded'
 		  	logger.info("in event type invoice.payment_succeeded")
-		    # customer_id = event_json.object.customer
-		    # subscription_id = event_json.object.line.data.first.id
-		    # subscription_upto = event_json.object.line.data.first.period.end
-		    # plan = event_json.object.line.data.first.plan.id
-		    # amount = event_json.object.line.data.first.plan.amount
-		    # subscription = Subscription.where(customer_subscription_id: subscription_id).first
-		    # subscription.is_active = true
-		    # subscription.save
+		  	@invoice = get_invoice(event)
+		  	if @invoice.save
+		  		logger.info("saved the invoice for event invoice.created")
+		  		StripeInvoiceEmail.send_success_invoice(@invoice).deliver
+		  	end
+		  	ApplyAccessRestrictions.apply_access_restrictions(@invoice)
+		  elsif event.type == 'invoice.payment_failed'
+		  	logger.info("in event type invoice.payment_failed")
+		  	@invoice = get_invoice(event)
+		  	if @invoice.save
+		  		logger.info("saved the invoice for event invoice.created")
+		  		StripeInvoiceEmail.send_failure_invoice(@invoice).deliver
+		  	end
 		  elsif event.type == 'customer.created'
 		  	logger.info("in event type customer.created")
-		  	# customer_id = event_json.data.object.id
-		  	# if !event_json.data.object.subscription.data.first.nil?
-			  # 	subscription_id = event_json.data.object.subscription.data.first.id
-			  # 	plan_name = event_json.data.object.subscription.data.first.plan.name
-			  # 	plan_interval = event_json.data.object.subscription.data.first.plan.interval
-			  # 	amount = event_json.data.object.subscription.data.first.plan.amount
-			  # 	trial_period_days = event_json.data.object.subscription.data.first.plan.trial_period_days
-			  # 	trial_end = event_json.data.object.subscription.data.first.trial_end
-			  # end
 			elsif event.type == 'customer.subscription.trial_will_end'
 		  	#occurs three days before the trial period of a subscription is scheduled to end.
 
@@ -78,13 +44,27 @@
 		    #customer updates the subscription
 		  elsif event.type == 'customer.subscription.created'
 		  	logger.info("in event type customer.subscription.created")
-		    # customer_id = event_json.object.customer
-		    # subscription_id = event_json.object.id
-		    # plan = event_json.object.plan.id
-		    # amount = event_json.object.plan.amount
-		    # trial_days = event_json.object.plan.trial_period_days
-		    # trial_upto = event_json.object.trial_end
 		  end
 		  render :status => 200, :nothing => true
+		end
+		def get_invoice(event)
+			invoice = Invoice.new
+	  	invoice.date = Time.at(event.data.object.date).utc
+	  	invoice.invoice_id = event.data.object.id
+	  	invoice.subscription_id = event.data.object.subscription
+	  	invoice.customer_id = event.data.object.customer
+	  	invoice.charge_id = event.data.object.charge
+	  	invoice.attempted = event.data.object.attempted
+	  	invoice.closed = event.data.object.closed
+	  	invoice.forgiven = event.data.object.forgiven
+	  	invoice.paid = event.data.object.paid
+	  	unless event.data.object.lines.data.first.nil?
+	  		invoice.plan_id = event.data.object.lines.data.first.plan.id unless event.data.object.lines.data.first.plan.id.nil?
+	  		invoice.period_start = Time.at(event.data.object.lines.data.first.period.start).utc
+	  		invoice.period_end = Time.at(event.data.object.lines.data.first.period.end).utc
+	  		invoice.amount = event.data.object.lines.data.first.amount.to_f/100
+	  		invoice.quantity = event.data.object.lines.data.first.quantity
+	  	end
+	  	invoice
 		end
 	end
