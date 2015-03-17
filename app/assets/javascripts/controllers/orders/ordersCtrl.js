@@ -55,7 +55,7 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
             console.log(data);
             console.log("reloading the page");
             $scope.orders.setup.status = "";
-            myscope.init();
+            myscope.get_orders();
         });
     };
 
