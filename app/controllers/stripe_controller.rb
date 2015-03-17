@@ -27,7 +27,7 @@
 		  		logger.info("saved the invoice for event invoice.created")
 		  		StripeInvoiceEmail.send_success_invoice(@invoice).deliver
 		  	end
-		  	ApplyAccessRestrictions.apply_access_restrictions(@invoice)
+		  	ApplyAccessRestrictions.apply_access_restrictions(@invoice) unless @invoice.plan_id.nil?
 		  elsif event.type == 'invoice.payment_failed'
 		  	logger.info("in event type invoice.payment_failed")
 		  	@invoice = get_invoice(event)
@@ -59,11 +59,11 @@
 	  	invoice.forgiven = event.data.object.forgiven
 	  	invoice.paid = event.data.object.paid
 	  	unless event.data.object.lines.data.first.nil?
-	  		invoice.plan_id = event.data.object.lines.data.first.plan.id unless event.data.object.lines.data.first.plan.id.nil?
+	  		invoice.plan_id = event.data.object.lines.data.first.plan.id unless event.data.object.lines.data.first.plan.id.nil? || event.data.object.lines.data.first.plan.nil?
 	  		invoice.period_start = Time.at(event.data.object.lines.data.first.period.start).utc
 	  		invoice.period_end = Time.at(event.data.object.lines.data.first.period.end).utc
 	  		invoice.amount = event.data.object.lines.data.first.amount.to_f/100
-	  		invoice.quantity = event.data.object.lines.data.first.quantity
+	  		invoice.quantity = event.data.object.lines.data.first.quantity unless event.data.object.lines.data.first.quantity.nil?
 	  	end
 	  	invoice
 		end
