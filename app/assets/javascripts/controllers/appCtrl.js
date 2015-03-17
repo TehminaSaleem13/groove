@@ -122,11 +122,11 @@ groovepacks_controllers.
                             '<img ng-src="{{store.logo.src}}" width="60px" alt="{{store.logo.alt}}"/>' +
                         '</td>' +
                         '<td style="white-space: nowrap;">{{store.name}}</td>' +
-                        '<td style="width:75%;padding:3px;">' +
+                        '<td style="width:70%;padding:3px;">' +
                             '<progressbar type="{{store.progress.type}}" value="store.progress.value"> {{store.progress.message}}</progressbar>' +
                             '<progressbar ng-show="store.progress_product.show" type="{{store.progress_product.type}}" value="store.progress_product.value">{{store.progress_product.message}}</progressbar>' +
                         '</td>' +
-                        '<td style="text-align:right;width:25%;padding:3px;" ng-show="store.store_type==\'Shipstation API 2\'">' +
+                        '<td style="text-align:right;width:30%;padding:3px;" ng-show="store.store_type==\'Shipstation API 2\'">' +
                             '<div class="btn-group">' + 
                             '<a class="btn" ng-hide="import_summary.import_info.status==\'in_progress\'" title="Regular Import" ng-click="issue_import(store.id, \'regular\')"><img class="icons" src="/assets/images/reg_import.png"></img></a>' +
                             '<a class="btn" ng-hide="import_summary.import_info.status==\'in_progress\'" title="Deep Import" ng-click="issue_import(store.id, \'deep\')"><img class="icons" src="/assets/images/deep_import.png"></img></a>' + 
