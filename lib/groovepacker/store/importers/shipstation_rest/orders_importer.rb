@@ -26,7 +26,18 @@ module Groovepacker
             unless statuses.empty?
               response = client.get_orders(statuses.join(","), import_from)
               importing_time = Date.today - 1.day
+              
+              gp_ready_tag_id = client.get_tag_id('GP Ready')
+              gp_imported_tag_id = client.get_tag_id('GP Imported')
 
+              unless gp_ready_tag_id == -1 or gp_imported_tag_id == -1
+                tagged_response = client.get_orders_by_tag('GP Ready')
+
+                #perform union of orders
+                response["orders"] = response["orders"].nil?? tagged_response["orders"] :
+                  response["orders"] | tagged_response["orders"]
+              end
+              
               unless response["orders"].nil?   
                 result[:total_imported] = response["orders"].length          
                 import_item.current_increment_id = ''
@@ -107,6 +118,11 @@ module Groovepacker
                       result[:success_imported] = result[:success_imported] + 1
                       import_item.success_imported = result[:success_imported]
                       import_item.save
+                      if gp_ready_tag_id != -1 && gp_imported_tag_id != -1 && !order["tagIds"].nil? &&
+                        order["tagIds"].include?(gp_ready_tag_id)
+                        client.remove_tag_from_order(order["orderId"], gp_ready_tag_id)
+                        client.add_tag_to_order(order["orderId"], gp_imported_tag_id)
+                      end
                     end
                   else
                     import_item.previous_imported = import_item.previous_imported + 1
