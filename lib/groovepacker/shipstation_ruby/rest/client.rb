@@ -2,11 +2,12 @@ module Groovepacker
   module ShipstationRuby
     module Rest
       class Client
-        attr_accessor :auth, :client
+        attr_accessor :auth, :client, :endpoint
 
         def initialize(api_key, api_secret)
           raise ArgumentError unless api_key && api_secret
           @auth = {:api_key => api_key, :api_secret => api_secret}
+          @endpoint = "https://ssapi.shipstation.com"
         end
 
         def get_orders(status, order_placed_after)
@@ -92,11 +93,79 @@ module Groovepacker
           response
         end
 
+        def get_tag_id(tag)
+          response = HTTParty.get(@endpoint + '/accounts/listtags',
+            headers: {
+              "Authorization" => authorization_token
+          })
+          handle_exceptions(response)
+          tags = response.parsed_response
+          index = tags.empty?? nil : tags.index{|x| x["name"] == tag }
+          index.nil?? -1 : tags[index]["tagId"]
+        end
+
+        def get_orders_by_tag(tag)
+          tag_id = get_tag_id(tag)
+          page_index = 1
+          response = {}
+          response["orders"] = []
+          unless tag_id == -1
+            ["awaiting_payment", "awaiting_shipment", "shipped", 
+              "on_hold", "cancelled"].each do |status|
+              orders = find_orders_by_tag_and_status(tag_id, status)
+              response["orders"] = response["orders"] + orders unless orders.nil?
+            end
+          end
+          response
+        end
+
+        def find_orders_by_tag_and_status (tag_id, status)
+          page_index = 1
+          total_pages = 0
+
+          begin
+            response = HTTParty.get(@endpoint + '/orders/listbytag?orderStatus=' + 
+              status + '&tagId=' + tag_id.to_s + '&page=' + page_index.to_s + '&pageSize=100',
+                headers: {
+                  "Authorization" => authorization_token
+                }
+              )
+            total_pages = response.parsed_response["pages"]
+            page_index = page_index + 1
+          end while (page_index <= total_pages)
+          handle_exceptions(response)
+          response["orders"]
+        end
+
+        def remove_tag_from_order(order_id, tag_id)
+          response = HTTParty.post(@endpoint + '/orders/removetag', {
+            body: {orderId: order_id, tagId: tag_id},
+            headers: {
+              "Authorization" => authorization_token
+            }
+          })
+          handle_exceptions(response)
+        end
+
+        def add_tag_to_order(order_id, tag_id)
+          response = HTTParty.post(@endpoint + '/orders/addtag', {
+            body: {orderId: order_id, tagId: tag_id},
+            headers: {
+              "Authorization" => authorization_token
+            }
+          })
+          handle_exceptions(response)
+        end
+
         def inspect
           "#<ShipStationRuby::Client:#{object_id}>"
         end
 
         private
+
+        def authorization_token
+          "Basic "+ Base64.encode64(@auth[:api_key] + ":" + @auth[:api_secret]).gsub(/\n/, '')
+        end
 
         def handle_exceptions(response)
           raise Exception, "Authorization with Shipstation store failed. Please check your API credentials" if response.code == 401
