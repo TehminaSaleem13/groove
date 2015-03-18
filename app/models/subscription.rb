@@ -21,49 +21,48 @@ class Subscription < ActiveRecord::Base
           :account_balance => one_time_payment
         )
         end
-        
         #whenever you do .first, make sure null check is done
-        self.stripe_customer_id = customer.id
+        unless customer.nil?
+          self.stripe_customer_id = customer.id
         
-        unless customer.subscriptions.data.first.nil?
-          self.customer_subscription_id = customer.subscriptions.data.first.id
-          # Stripe::Charge.create(
-          #   # :amount => self.amount*100,
-          #   :currency => "usd",
-          #   :customer => customer.id,
-          #   :description => self.email
-          # )
-          CreateTenant.create_tenant self
-          Apartment::Tenant.switch()
-          transactions = Stripe::BalanceTransaction.all(:limit => 1)
-          unless transactions.first.nil?
-            self.stripe_transaction_identifier = transactions.first.id
-            # CreateTenant.delay(:run_at => 1.seconds.from_now).create_tenant self
-            unless customer.cards.data.first.nil?
-              card_type = customer.cards.data.first.brand
-              exp_month_of_card = customer.cards.data.first.exp_month
-              exp_year_of_card = customer.cards.data.first.exp_year
-              transaction = Transaction.create(
-                transaction_id: transactions.first.id,
-                amount: self.amount,
-                card_type: card_type,
-                exp_month_of_card: exp_month_of_card,
-                exp_year_of_card: exp_year_of_card,
-                date_of_payment: Date.today(),
-                subscription_id: self.id)
+          unless customer.subscriptions.data.first.nil?
+            self.customer_subscription_id = customer.subscriptions.data.first.id
+            # Stripe::Charge.create(
+            #   # :amount => self.amount*100,
+            #   :currency => "usd",
+            #   :customer => customer.id,
+            #   :description => self.email
+            # )
+            CreateTenant.create_tenant self
+            Apartment::Tenant.switch()
+            transactions = Stripe::BalanceTransaction.all(:limit => 1)
+            unless transactions.first.nil?
+              self.stripe_transaction_identifier = transactions.first.id
+              CreateTenant.delay(:run_at => 1.seconds.from_now).create_tenant self
+              unless customer.cards.data.first.nil?
+                card_type = customer.cards.data.first.brand
+                exp_month_of_card = customer.cards.data.first.exp_month
+                exp_year_of_card = customer.cards.data.first.exp_year
+                transaction = Transaction.create(
+                  transaction_id: transactions.first.id,
+                  amount: self.amount,
+                  card_type: card_type,
+                  exp_month_of_card: exp_month_of_card,
+                  exp_year_of_card: exp_year_of_card,
+                  date_of_payment: Date.today(),
+                  subscription_id: self.id)
+              end
             end
           end
         end
-
+        self.status = 'completed'
+        self.is_active = true
+        self.save
       rescue Stripe::CardError => e
         self.status = 'failed'
-        self.save
         self.transaction_errors = e.message
+        self.save
       end
-      self.status = 'completed'
-      self.is_active = true
-      self.save
-  		save!
   	end
   rescue Stripe::InvalidRequestError => e
     self.status = 'failed'
@@ -73,5 +72,4 @@ class Subscription < ActiveRecord::Base
   	errors.add :base, "There was a problem with your credit card."
   	false
   end
-
 end
