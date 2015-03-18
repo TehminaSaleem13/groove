@@ -621,7 +621,7 @@ class Order < ActiveRecord::Base
     changed_hash = self.changes
     unless changed_hash['status'].nil?
       if option == 'yes'
-        if (changed_hash['status'][0] == 'service issue' or
+        if (changed_hash['status'][0] == 'serviceissue' or
             changed_hash['status'][0] == 'awaiting') and
             changed_hash['status'][1] == 'scanned'
           result = true
@@ -641,7 +641,7 @@ class Order < ActiveRecord::Base
           end
         end
       else
-        if (changed_hash['status'][0] == 'service issue' or
+        if (changed_hash['status'][0] == 'serviceissue' or
             changed_hash['status'][0] == 'awaiting') and
           changed_hash['status'][1] == 'scanned'
           result = true
