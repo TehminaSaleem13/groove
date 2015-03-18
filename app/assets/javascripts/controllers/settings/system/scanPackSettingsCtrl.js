@@ -1,6 +1,6 @@
 groovepacks_controllers.
-controller('scanPackSettingsCtrl', [ '$scope', '$http', '$timeout', '$location', '$state', '$cookies', 'scanPack', 'groov_translator',
-function( $scope, $http, $timeout, $location, $state, $cookies, scanPack,groov_translator) {
+controller('scanPackSettingsCtrl', [ '$scope', '$http', '$timeout', '$location', '$state', '$cookies', 'scanPack', 'groov_translator','$modal',
+function( $scope, $http, $timeout, $location, $state, $cookies, scanPack,groov_translator,$modal) {
 
     var myscope = {};
 
@@ -29,7 +29,8 @@ function( $scope, $http, $timeout, $location, $state, $cookies, scanPack,groov_t
                 "skip_code":"",
                 "note_from_packer_code":"",
                 "service_issue_code":"",
-                "restart_code":""
+                "restart_code":"",
+                "type_scan_code":""
             },
             "tooltips" :{
                 "enable_click_sku":"",
@@ -38,12 +39,39 @@ function( $scope, $http, $timeout, $location, $state, $cookies, scanPack,groov_t
                 "skip_code":"",
                 "note_from_packer_code":"",
                 "service_issue_code":"",
-                "restart_code":""
+                "restart_code":"",
+                "type_scan_code":""
             }
         };
         groov_translator.translate('settings.system.scan_pack',$scope.translations);
         $scope.scan_pack = scanPack.settings.model();
         scanPack.settings.get($scope.scan_pack);
+    };
+
+
+    $scope.per_product_setting = function(key) {
+        $modal.open({
+            templateUrl: '/assets/views/modals/settings/system/product_list.html',
+            controller: 'productListModal',
+            size: 'lg',
+            resolve: {
+                context_data: function () {
+                    var enabled = false;
+                    var type = '';
+                    if(key == 'enable_click_sku') {
+                        enabled = $scope.scan_pack.settings.enable_click_sku;
+                        type = 'click_scan_enabled';
+                    } else if(key == 'type_scan_code') {
+                        enabled = $scope.scan_pack.settings.type_scan_code_enabled;
+                        type = 'type_scan_enabled';
+                    }
+                    return {
+                        type: type,
+                        enabled: enabled
+                    }
+                }
+            }
+        });
     };
 
     $scope.update_settings = function() {

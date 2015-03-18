@@ -353,6 +353,7 @@ ActiveRecord::Schema.define(:version => 20150315093005) do
     t.string   "method"
     t.datetime "created_at",                                                               :null => false
     t.datetime "updated_at",                                                               :null => false
+    t.string   "store_order_id"
     t.string   "notes_internal"
     t.string   "notes_toPacker"
     t.string   "notes_fromPacker"
@@ -373,7 +374,6 @@ ActiveRecord::Schema.define(:version => 20150315093005) do
     t.integer  "weight_oz"
     t.string   "non_hyphen_increment_id"
     t.boolean  "note_confirmation",                                     :default => false
-    t.string   "store_order_id"
     t.boolean  "update_inventory_level",                                :default => true
   end
 
@@ -482,6 +482,8 @@ ActiveRecord::Schema.define(:version => 20150315093005) do
     t.decimal  "weight",                          :precision => 8, :scale => 2, :default => 0.0,       :null => false
     t.decimal  "shipping_weight",                 :precision => 8, :scale => 2, :default => 0.0
     t.boolean  "record_serial",                                                 :default => false
+    t.string   "type_scan_enabled",                                             :default => "on"
+    t.string   "click_scan_enabled",                                            :default => "on"
   end
 
   add_index "products", ["store_id"], :name => "index_products_on_store_id"
@@ -544,6 +546,8 @@ ActiveRecord::Schema.define(:version => 20150315093005) do
     t.boolean  "play_order_complete_sound",     :default => true
     t.string   "order_complete_sound_url",      :default => "/assets/sounds/scan_order_complete.mp3"
     t.float    "order_complete_sound_vol",      :default => 0.75
+    t.boolean  "type_scan_code_enabled",        :default => true
+    t.string   "type_scan_code",                :default => "*"
   end
 
   create_table "shipstation_credentials", :force => true do |t|

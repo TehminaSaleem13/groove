@@ -20,6 +20,7 @@ groovepacks_controllers.controller('csvDetailedModal', [ '$scope', 'store_data',
         scope.cancel = function () {
             $modalInstance.dismiss("cancel-button-click");
         };
+
         scope.parse = function() {
             if (scope.csv.importer[scope.csv.importer.type] != null) {
                 $timeout(myscope.doparse);

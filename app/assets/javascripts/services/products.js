@@ -5,7 +5,8 @@ groovepacks_services.factory('products',['$http','notification','editable','$win
         delete: "Deleted Successfully",
         duplicate: "Duplicated Successfully",
         barcode: "Barcodes generated Successfully",
-        receiving_label: "Labels generated Successfully"
+        receiving_label: "Labels generated Successfully",
+        update_per_product: "Updated Successfully"
     };
 
     //default object
@@ -26,6 +27,8 @@ groovepacks_services.factory('products',['$http','notification','editable','$win
                 is_kit: 0,
                 limit: 20,
                 offset: 0,
+                //for per product setting only
+                setting:'',
                 //used for updating only
                 status:'',
                 productArray:[]
@@ -117,7 +120,7 @@ groovepacks_services.factory('products',['$http','notification','editable','$win
     };
 
     var update_list = function(action,products) {
-        if(["update_status","delete","duplicate","barcode","receiving_label"].indexOf(action) != -1) {
+        if(['update_status','delete','duplicate','barcode','receiving_label','update_per_product'].indexOf(action) != -1) {
             products.setup.productArray = [];
             for(var i =0; i < products.selected.length; i++) {
                 if (products.selected[i].checked == true) {
@@ -135,6 +138,8 @@ groovepacks_services.factory('products',['$http','notification','editable','$win
                 url = '/products/generatebarcode.json';
             } else if(action == "receiving_label") {
                 url = '/products/print_receiving_label.json';
+            } else if(action == 'update_per_product') {
+                url = '/products/scan_per_product.json';
             }
 
             return $http.post(url,products.setup).success(function(data) {

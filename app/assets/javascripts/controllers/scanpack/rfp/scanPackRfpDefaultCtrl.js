@@ -1,6 +1,6 @@
 groovepacks_controllers.
-    controller('scanPackRfpDefaultCtrl', [ '$scope', '$http', '$timeout', '$stateParams', '$location', '$state', '$cookies', '$modal','products', 'orders', 'scanPack',
-        function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies, $modal, products, orders, scanPack) {
+    controller('scanPackRfpDefaultCtrl', [ '$scope', '$http', '$timeout', '$stateParams', '$location', '$state', '$cookies', '$modal','products', 'orders', 'scanPack','notification',
+        function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies, $modal, products, orders, scanPack,notification) {
             var myscope = {};
 
             $scope.reset_order = function () {
@@ -21,9 +21,54 @@ groovepacks_controllers.
 
             $scope.autoscan_barcode = function() {
                 if($scope.scan_pack.settings.enable_click_sku) {
-                    scanPack.click_scan($scope.data.order.next_item.barcodes[0].barcode,$scope.data.order.id).success($scope.handle_scan_return);
+                    if($scope.data.order.next_item.click_scan_enabled =="on_with_confirmation") {
+                        myscope.show_click_scan_confirm();
+                    } else if($scope.data.order.next_item.click_scan_enabled =="on") {
+                        myscope.do_autoscan();
+                    } else if($scope.data.order.next_item.click_scan_enabled =="off") {
+                        notification.notify('Click Scan is disabled for this product');
+                    }
+
+                } else {
+                    notification.notify('Click Scan is disabled');
                 }
             };
+
+            myscope.type_scan = function() {
+                if($scope.scan_pack.settings.type_scan_code_enabled) {
+                    if($scope.data.order.next_item.type_scan_enabled =="on_with_confirmation") {
+                        myscope.show_type_scan_confirm();
+                    } else if($scope.data.order.next_item.type_scan_enabled =="on") {
+                        myscope.launch_type_scan();
+                    } else if($scope.data.order.next_item.type_scan_enabled =="off") {
+                        notification.notify('Type-In Scan Count is disabled for this product');
+                    }
+
+                } else {
+                    notification.notify('Type-In Scan Count is disabled');
+                }
+            };
+
+            myscope.launch_type_scan = function() {
+                myscope.type_scan_obj = $modal.open({
+                    templateUrl: '/assets/views/modals/scanpack/typescan.html',
+                    controller: 'scanPackRfpTypeScan',
+                    size:'lg',
+                    resolve: {
+                        order_data: function() {return $scope.data.order;},
+                        confirm:function(){ return $scope.handle_scan_return;}
+                    }
+                });
+                myscope.type_scan_obj.result.finally(function() {
+                    $scope.set('input','');
+                    $timeout($scope.focus_search,500);
+                });
+            };
+
+            myscope.do_autoscan = function(){
+                scanPack.click_scan($scope.data.order.next_item.barcodes[0].barcode,$scope.data.order.id).success($scope.handle_scan_return);
+            };
+
 
             $scope.product_details = function(id) {
                 if($scope.current_user.can('add_edit_products')) {
@@ -42,6 +87,46 @@ groovepacks_controllers.
                         }
                     });
                     item_modal.result.finally(myscope.check_reload_compute);
+                }
+            };
+
+            myscope.show_type_scan_confirm = function () {
+                if(myscope.type_scan_confirmed_id != $scope.data.order.next_item.product_id) {
+                    myscope.type_scan_confirm_obj = $modal.open({
+                        templateUrl: '/assets/views/modals/scanpack/codeconfirm.html',
+                        controller: 'scanPackRfpCodeConfirm',
+                        size:'lg',
+                        resolve: {
+                            order_data: function() {return $scope.data.order;},
+                            confirm:function(){return function(){myscope.type_scan_confirmed_id = $scope.data.order.next_item.product_id; myscope.launch_type_scan();}}
+                        }
+                    });
+                    myscope.type_scan_confirm_obj.result.finally(function() {
+                        $timeout($scope.focus_search,500);
+                        $timeout(myscope.show_type_scan_confirm,100);
+                    });
+                } else {
+                    myscope.type_scan_confirmed_id = 0;
+                }
+            };
+
+            myscope.show_click_scan_confirm = function () {
+                if(myscope.click_scan_confirmed_id != $scope.data.order.next_item.product_id) {
+                    myscope.click_scan_confirm_obj = $modal.open({
+                        templateUrl: '/assets/views/modals/scanpack/codeconfirm.html',
+                        controller: 'scanPackRfpCodeConfirm',
+                        size:'lg',
+                        resolve: {
+                            order_data: function() {return $scope.data.order;},
+                            confirm:function(){return function(){myscope.click_scan_confirmed_id = $scope.data.order.next_item.product_id; myscope.do_autoscan();}}
+                        }
+                    });
+                    myscope.click_scan_confirm_obj.result.finally(function() {
+                        $timeout($scope.focus_search,500);
+                        $timeout(myscope.show_click_scan_confirm,100);
+                    });
+                } else {
+                    myscope.click_scan_confirmed_id = 0;
                 }
             };
 
@@ -138,12 +223,15 @@ groovepacks_controllers.
                     return false;
                 } else if($scope.scan_pack.settings.service_issue_code_enabled && $scope.data.input == $scope.scan_pack.settings.service_issue_code && !myscope.service_issue_message_saved) {
                     $scope.add_note();
-                    $scope.notify("Please add a message with the service issue",2);
+                    notification.notify("Please add a message with the service issue",2);
                     myscope.note_obj.result.finally(function() {
                         $scope.set('input',$scope.scan_pack.settings.service_issue_code);
                         myscope.service_issue_message_saved = true;
                         $scope.input_enter({which:13});
                     });
+                    return false;
+                } else if($scope.scan_pack.settings.type_scan_code_enabled && $scope.data.input == $scope.scan_pack.settings.type_scan_code) {
+                    myscope.type_scan();
                     return false;
                 } else if($scope.scan_pack.settings.restart_code_enabled && $scope.data.input == $scope.scan_pack.settings.restart_code) {
                     $scope.reset_order();
@@ -174,6 +262,10 @@ groovepacks_controllers.
                 myscope.order_instruction_obj = null;
                 myscope.product_instruction_obj = null;
                 myscope.product_instruction_confirmed_id = 0;
+                myscope.click_scan_confirm_obj = null;
+                myscope.click_scan_confirmed_id =0;
+                myscope.type_scan_confirm_obj = null;
+                myscope.type_scan_confirmed_id =0;
                 $scope.confirmation_code = "";
                 myscope.service_issue_message_saved = false;
                 myscope.check_reload_compute();

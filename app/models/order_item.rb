@@ -43,6 +43,8 @@ class OrderItem < ActiveRecord::Base
     result['product_id'] = item.id
     result['skippable'] = item.is_skippable
     result['record_serial'] = item.record_serial
+    result['click_scan_enabled'] = item.click_scan_enabled
+    result['type_scan_enabled'] = item.type_scan_enabled
     result['order_item_id'] = self.id
 
     result

@@ -627,6 +627,8 @@ class SettingsController < ApplicationController
         scan_pack_setting.service_issue_code = params[:service_issue_code]
         scan_pack_setting.restart_code_enabled = params[:restart_code_enabled]
         scan_pack_setting.restart_code = params[:restart_code]
+        scan_pack_setting.type_scan_code_enabled = params[:type_scan_code_enabled]
+        scan_pack_setting.type_scan_code = params[:type_scan_code]
 
         if scan_pack_setting.save
           @result['success_messages'].push('Settings updated successfully.')

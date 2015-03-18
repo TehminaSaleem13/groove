@@ -1,6 +1,6 @@
 groovepacks_controllers.
-    controller('productsSingleModal', [ '$scope','auth', 'product_data', 'load_page', 'product_id', 'hotkeys', '$state', '$stateParams', '$modalInstance', '$timeout','$modal','$q','groov_translator','products','warehouses','generalsettings',
-    function(scope,auth,product_data,load_page, product_id, hotkeys, $state,$stateParams,$modalInstance,$timeout,$modal,$q,groov_translator,products,warehouses,generalsettings) {
+    controller('productsSingleModal', [ '$scope','auth', 'product_data', 'load_page', 'product_id', 'hotkeys', '$state', '$stateParams', '$modalInstance', '$timeout','$modal','$q','groov_translator','products','warehouses','generalsettings','scanPack',
+    function(scope,auth,product_data,load_page, product_id, hotkeys, $state,$stateParams,$modalInstance,$timeout,$modal,$q,groov_translator,products,warehouses,generalsettings,scanPack) {
         var myscope = {};
 
 
@@ -251,8 +251,12 @@ groovepacks_controllers.
             products.single.activity.acknowledge(activity_id).then(function(response){
                 myscope.product_single_details(scope.products.single.basicinfo.id);
             })
-        }
+        };
 
+        scope.change_setting = function(key,value) {
+            scope.products.single.basicinfo[key] = value;
+            scope.update_single_product();
+        };
 
 
         myscope.load_item = function(id) {
@@ -300,6 +304,8 @@ groovepacks_controllers.
                      "</ul>"+
                      "</div><div class=\"well-main\">&nbsp;</div>";
             }
+            scope.scan_pack_settings = scanPack.settings.model();
+            scanPack.settings.get(scope.scan_pack_settings);
 
             scope.custom_identifier = Math.floor(Math.random()*1000);
             scope.products = product_data;
