@@ -21,9 +21,9 @@ groovepacks_services.factory("importOrders", ['$http','notification',function($h
                 }).error(notification.server_error); 
             },
 
-            cancel_import: function() {
+            cancel_import: function(store_id) {
                 $http.put('/orders/cancel_import.json', 
-                    null ).success(function(data) {
+                    {store_id: store_id} ).success(function(data) {
                     if(data.status) {
                         notification.notify(data.success_messages,1);
                     } else {

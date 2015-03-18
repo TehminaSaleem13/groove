@@ -1242,12 +1242,10 @@ class OrdersController < ApplicationController
       result[:error_messages] << "No imports are in progress"
     else
       order_summary = order_summary.first
-      order_summary.status = 'cancelled'
-      order_summary.save
 
       order_summary.import_items.each do |import_item|
-        import_item.status = 'cancelled'
-        import_item.save
+        import_item.update_attributes(
+          status: 'cancelled') if import_item.store_id == params[:store_id]
       end
     end
 

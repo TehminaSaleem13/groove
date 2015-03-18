@@ -47,13 +47,17 @@ module Groovepacker
       end
 
       class MockImportItem
-        attr_accessor :to_import, :import_type, :current_increment_id, :current_order_items, :current_order_imported_item, :message, :success_imported, :previous_imported
+        attr_accessor :to_import, :import_type, :current_increment_id, :current_order_items, :current_order_imported_item, :message, 
+        :success_imported, :previous_imported, :status
         def initialize
 
         end
 
         def save
 
+        end
+
+        def reload
         end
       end
     end

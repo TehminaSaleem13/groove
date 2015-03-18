@@ -69,7 +69,7 @@ groovepacks_controllers.
                         single_data.progress_product.type = 'in_progress';
 
 
-                        if(import_item.import_info.status=='completed') {
+                        if(import_item.import_info.status=='completed' || import_item.import_info.status=='cancelled') {
                             single_data.progress.value = 100;
                             if(import_item.store_info.store_type == 'Shipworks' ||import_item.store_info.store_type == 'CSV') {
                                 single_data.progress.message += 'Last Imported Order #'+import_item.import_info.current_increment_id+' at '+$filter('date')(import_item.import_info.updated_at,'dd MMM hh:mm a');
@@ -77,6 +77,9 @@ groovepacks_controllers.
                                 single_data.progress.message +=' No new orders found.';
                             } else {
                                 single_data.progress.message += import_item.import_info.success_imported+' New Orders Imported.';
+                            }
+                            if (import_item.import_info.status=='cancelled') {
+                                single_data.progress.message += ' The import was cancelled.';
                             }
                         } else if(import_item.import_info.status=='not_started') {
                             single_data.progress.message += 'Import not started.';
@@ -111,6 +114,8 @@ groovepacks_controllers.
                             if(import_item.import_info.message != '') {
                                 single_data.progress.message = import_item.import_info.message;
                             }
+                        } else if (import_item.import_info.status=='cancelled') {
+                            single_data.progress.value = 100;
                         }
                         $scope.import_groov_popover.data.push(single_data);
                     }
@@ -123,13 +128,14 @@ groovepacks_controllers.
                         '</td>' +
                         '<td style="white-space: nowrap;">{{store.name}}</td>' +
                         '<td style="width:70%;padding:3px;">' +
-                            '<progressbar type="{{store.progress.type}}" value="store.progress.value"> {{store.progress.message}}</progressbar>' +
-                            '<progressbar ng-show="store.progress_product.show" type="{{store.progress_product.type}}" value="store.progress_product.value">{{store.progress_product.message}}</progressbar>' +
+                            '<progressbar type="{{store.progress.type}}" value="store.progress.value"> {{store.progress.message| limitTo: 50}}</progressbar>' +
+                            '<progressbar ng-show="store.progress_product.show" type="{{store.progress_product.type}}" value="store.progress_product.value">{{store.progress_product.message | limitTo: 50}}</progressbar>' +
                         '</td>' +
                         '<td style="text-align:right;width:30%;padding:3px;" ng-show="store.store_type==\'Shipstation API 2\'">' +
                             '<div class="btn-group">' + 
                             '<a class="btn" ng-hide="import_summary.import_info.status==\'in_progress\'" title="Regular Import" ng-click="issue_import(store.id, \'regular\')"><img class="icons" src="/assets/images/reg_import.png"></img></a>' +
                             '<a class="btn" ng-hide="import_summary.import_info.status==\'in_progress\'" title="Deep Import" ng-click="issue_import(store.id, \'deep\')"><img class="icons" src="/assets/images/deep_import.png"></img></a>' + 
+                            '<a class="btn" ng-show="import_summary.import_info.status==\'in_progress\'" title="Cancel Import" ng-click="cancel_import(store.id)"><img class="icons" src="/assets/images/cancel_import.png"></img></a>' + 
                             '</div>'
                         '</td>'+
                     '</tr>' +
@@ -143,9 +149,9 @@ groovepacks_controllers.
             importOrders.issue_import(store_id, import_type)
         }
 
-        $scope.cancel_import = function() {
+        $scope.cancel_import = function(store_id) {
             //alert("cancel import" + store_id)
-            importOrders.cancel_import()
+            importOrders.cancel_import(store_id);
         }
 
         $scope.show_logout_box = false;
