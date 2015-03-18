@@ -64,8 +64,8 @@ class User < ActiveRecord::Base
   end
 
   def self.can_create_new?
-    unless AccessRestriction.first.nil?
-      self.all.count < AccessRestriction.first.num_users + 1
+    unless AccessRestriction.order("created_at").last.nil?
+      self.all.count < AccessRestriction.order("created_at").last.num_users + 1
     end
   end
 
