@@ -25,7 +25,7 @@ module Groovepacker
               status + '&page=' + page_index.to_s + '&pageSize=100' + orderDateStart,
               headers: {
                 "Authorization" => "Basic "+ Base64.encode64(@auth[:api_key] + ":" + @auth[:api_secret]).gsub(/\n/, ''),
-                "X-Mashape-Key" => "E6cSux0BVQmshJh0VacUkqXP1sJgp1I1APKjsntC26JSOTy0pP"
+                "X-Mashape-Key" => "E6cSux0BVQmshJh0VacUkqXP1sJgp1I1APKjsntC26JSOTy0pP",
               })
             handle_exceptions(response)
             combined_response["orders"] = 
@@ -70,10 +70,12 @@ module Groovepacker
         def update_order(orderId, order)
           Rails.logger.info "Updating order with orderId: " + orderId.to_s
           response = HTTParty.post('https://ssapi.shipstation.com/Orders/CreateOrder',{
-            body: order,
+            body: JSON.dump(order),
             headers: {
               "Authorization" => "Basic "+ Base64.encode64(@auth[:api_key] + ":" + @auth[:api_secret]).gsub(/\n/, ''),
-              "X-Mashape-Key" => "E6cSux0BVQmshJh0VacUkqXP1sJgp1I1APKjsntC26JSOTy0pP"
+              "X-Mashape-Key" => "E6cSux0BVQmshJh0VacUkqXP1sJgp1I1APKjsntC26JSOTy0pP",
+              "Content-Type" => "application/json",
+              "Accept" => "application/json"
             }, :debug_output => $stdout})
           handle_exceptions(response)
           puts response.inspect

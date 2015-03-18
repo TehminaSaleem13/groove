@@ -58,7 +58,6 @@ class ProductInventoryWarehouses < ActiveRecord::Base
     unless changed_hash['location_primary'].nil?
       #update product store
       store = self.product.store
-
       if store.store_type == 'Shipstation API 2'
         context = Groovepacker::Store::Context.new(
           Groovepacker::Store::Handlers::ShipstationRestHandler.new(store))

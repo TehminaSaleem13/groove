@@ -98,7 +98,7 @@ groovepacks_controllers.
                                 if(single_data.progress_product.value == 0 ) {
                                     if(import_item.import_info.current_order_items <= 0 ) {
                                         single_data.progress_product.type = 'not_started';
-                                        single_data.progress_product.message = 'Import not started';
+                                        single_data.progress_product.message = 'waiting on source...';
                                     }
                                 } else if(single_data.progress_product.value == 100) {
                                     single_data.progress_product.type = 'completed';

@@ -190,8 +190,8 @@ module Groovepacker
             end
             
             unless item["warehouseLocation"].nil?
-              product.primary_warehouse.update_attributes(
-                location_primary: item["warehouseLocation"]
+              product.primary_warehouse.update_column(
+                'location_primary', item["warehouseLocation"]
               )
             end
 
