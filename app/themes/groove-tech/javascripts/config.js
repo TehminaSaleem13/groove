@@ -37,6 +37,10 @@ function($stateProvider, $urlRouterProvider,hotkeysProvider,cfpLoadingBarProvide
                        controller:'scanPackRecordingCtrl'})
         .state('scanpack.rfp.verifying', {url: '/verifying', templateUrl:'/assets/views/scanpack/multi.html',
                        controller:'scanPackVerifyingCtrl'})
+        .state('scanpack.rfp.verifying.no_tracking_info', {url: '/verifying', templateUrl:'/assets/views/scanpack/multi.html',
+                       controller:'scanPackVerifyingCtrl'})
+        .state('scanpack.rfp.verifying.no_match', {url: '/verifying', templateUrl:'/assets/views/scanpack/multi.html',
+                       controller:'scanPackVerifyingCtrl'})
         .state('scanpack.rfp.product_edit', {url: '/product_edit', templateUrl:'/assets/views/scanpack/productedit.html',
                        controller:'scanPackProductEditCtrl'})
         .state('scanpack.rfp.product_edit.single', {url: '/{product_id:[0-9]+}', template:'', controller:'productsSingleCtrl'})

@@ -114,7 +114,11 @@ module ScanPackHelper
             if !single_order.has_unscanned_items
               if scanpack_settings.post_scanning_option != "None"
                 if scanpack_settings.post_scanning_option == "Verify"
-                  single_order_result['next_state'] = 'scanpack.rfp.verifying'
+                  if single_order.tracking_num.nil?
+                    single_order_result['next_state'] = 'scanpack.rfp.verifying.no_tracking_info'
+                  else
+                    single_order_result['next_state'] = 'scanpack.rfp.verifying'
+                  end
                 else
                   single_order_result['next_state'] = 'scanpack.rfp.recording'
                 end
@@ -288,9 +292,9 @@ module ScanPackHelper
             if !single_order.has_unscanned_items
               if scanpack_settings.post_scanning_option != "None"
                 if scanpack_settings.post_scanning_option == "Verify"
-                  single_order_result['next_state'] = 'scanpack.rfp.verifying'
+                  result['data']['next_state'] = 'scanpack.rfp.verifying'
                 else
-                  single_order_result['next_state'] = 'scanpack.rfp.recording'
+                  result['data']['next_state'] = 'scanpack.rfp.recording'
                 end
               else
                 single_order.set_order_to_scanned_state(current_user.username)
@@ -376,16 +380,17 @@ module ScanPackHelper
       result['error_messages'].push("Could not find order with id: "+id)
     else
       if order.status == 'awaiting'
-        if input.nil?
-          result['status'] &= false
-          result['error_messages'].push("No tracking number is provided")
-        else
-          #allow tracking id to be saved without special permissions
-          order.tracking_num = input
-          order.set_order_to_scanned_state(current_user.username)
-          result['data']['next_state'] = 'scanpack.rfo'
-          #update inventory when inventory warehouses is implemented.
-          order.save
+        puts "input: " + input.inspect
+        unless input.nil?
+          if order.tracking_num == input
+            order.set_order_to_scanned_state(current_user.username)
+            result['data']['next_state'] = 'scanpack.rfo'
+            order.save
+          else
+            result['status'] &= false
+            result['error_messages'].push("Tracking number does not match.")
+            result['data']['next_state'] = 'scanpack.rfp.verifying.no_match'
+          end
         end
       else
         result['status'] &= false
