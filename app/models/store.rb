@@ -52,6 +52,8 @@ class Store < ActiveRecord::Base
       @credentials = ShipstationRestCredential.where(:store_id => self.id)
       if !@credentials.nil? && @credentials.length > 0
         @result['shipstation_rest_credentials'] = @credentials.first
+        @result['shipstation_rest_credentials']['gp_ready_tag_name'] = @credentials.first.gp_ready_tag_name
+        @result['shipstation_rest_credentials']['gp_imported_tag_name'] = @credentials.first.gp_imported_tag_name
         @result['status'] =true
       end
     end

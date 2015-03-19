@@ -165,6 +165,9 @@ groovepacks_services.factory('stores',['$http','notification','$filter',function
                         stores.single.api_secret = data.credentials.shipstation_rest_credentials.api_secret;
                         stores.single.shall_import_awaiting_shipment = data.credentials.shipstation_rest_credentials.shall_import_awaiting_shipment;
                         stores.single.shall_import_shipped = data.credentials.shipstation_rest_credentials.shall_import_shipped;
+                        stores.single.warehouse_location_update = data.credentials.shipstation_rest_credentials.warehouse_location_update;
+                        stores.single.gp_ready_tag_name = data.credentials.shipstation_rest_credentials.gp_ready_tag_name;
+                        stores.single.gp_imported_tag_name = data.credentials.shipstation_rest_credentials.gp_imported_tag_name;
                     } else if(data.store.store_type == 'Shipworks') {
                         stores.single.auth_token = data.credentials.shipworks_credentials.auth_token;
                         stores.single.import_store_order_number = data.credentials.shipworks_credentials.import_store_order_number
@@ -446,6 +449,13 @@ groovepacks_services.factory('stores',['$http','notification','$filter',function
         }).error(notification.server_error);
     };
 
+    var verify_tags = function(store_id) {
+        return $http.get('/store_settings/verify_tags/' + store_id + '.json').success(
+            function(data){
+            console.log(store_id);
+        }).error(notification.server_error);
+    }
+
 
     //Public facing API
     return {
@@ -497,6 +507,9 @@ groovepacks_services.factory('stores',['$http','notification','$filter',function
         },
         update: {
             products: update_products
+        },
+        shipstation: {
+            verify_tags: verify_tags
         }
     };
 }]);

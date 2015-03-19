@@ -32,6 +32,11 @@ module Groovepacker
           Groovepacker::Store::Updaters::ShipstationRest::ProductsUpdater.new(
             self.build_handle).update_single(hash)
         end
+
+        def verify_tags(tags)
+          Groovepacker::Store::Utilities::ShipstationRest::Utilities.new(
+            self.build_handle).verify_tags(tags)
+        end
       end
     end
   end

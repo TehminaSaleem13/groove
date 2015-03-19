@@ -23,6 +23,7 @@
         <label class="control-label col-md-4">Awaiting Shipment</label>
         <div class="controls col-md-8">
           <div toggle-switch ng-model="stores.single.shall_import_awaiting_shipment" groov-click="update_single_store()"></div>
+          <i class="pull-right icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" popover="Orders with statuses enabled here will be imported."></i>
         </div>
       </div>
 
@@ -34,6 +35,41 @@
       </div>
     </div>
   </div>
+  <div class="row">
+    <div class="col-md-6">
+      <legend>Import specific orders using a tag</legend>
+      <div class="form-group">
+        <label class="control-label col-md-4">{{stores.single.gp_ready_tag_name}}</label>
+        <div class="controls col-md-8">
+          <button class="btn btn-success" clip-copy="stores.single.gp_ready_tag_name">Copy to clipboard</button> <i class="pull-right icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" popover="The GP Ready Tag can be used to import or reimport"></i>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="control-label col-md-4">{{stores.single.gp_imported_tag_name}}</label>
+        <div class="controls col-md-8">
+          <button class="btn btn-success" clip-copy="stores.single.gp_imported_tag_name" clip-click="alert('clicked')">Copy to clipboard</button>
+
+          <button class="btn btn-success pull-right" ng-click="shipstation_verify_tags(stores.single.id)">Test tags</button>
+          <div class="alert" ng-class="{'alert-success':verification_tags.verification_result, 'alert-danger': verification_tags.verification_result == false}" style="margin-top: 10px; margin-bottom: 0px;">
+            <p>{{verification_tags.message}}</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-6">
+      <legend>Settings</legend>
+      <div class="form-group">
+        <label class="control-label col-md-4">Update Warehouse Location in ShipStation</label>
+        <div class="controls col-md-8">
+          <div toggle-switch ng-model="stores.single.warehouse_location_update" groov-click="update_single_store()"></div> <i class="pull-right icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" popover="When enabled, the ShipStation Warehouse Location will be updated when changes are made to the GroovePacker Primary Location. The change is not made to the default product record in Shipstation, but rather to products in existing orders. This allows pick lists to be printed with updated warehouse locations."></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="row" ng-hide="true">
     <div class="col-md-6">
       <legend>Import Orders</legend>

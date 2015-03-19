@@ -229,6 +229,7 @@ class StoreSettingsController < ApplicationController
             @shipstation.api_secret = params[:api_secret]
             @shipstation.shall_import_awaiting_shipment = params[:shall_import_awaiting_shipment]
             @shipstation.shall_import_shipped = params[:shall_import_shipped]
+            @shipstation.warehouse_location_update = params[:warehouse_location_update]
             @store.shipstation_rest_credential = @shipstation
 
             begin
@@ -919,6 +920,25 @@ class StoreSettingsController < ApplicationController
     }
   end
 
+  def verify_tags
+    #store_id
+    store = Store.find(params[:id])
+    result = {
+      status: true,
+      messages: [],
+      data: {
+        verification_result: false,
+        message: ""
+      }
+    }
+    if store.store_type == 'Shipstation API 2'
+      result[:data] = store.shipstation_rest_credential.verify_tags
+    else
+      result[:status] = false
+      result[:messages] << "Cannot verify tags for this store"
+    end
+    render json: result
+  end
 end
 
 

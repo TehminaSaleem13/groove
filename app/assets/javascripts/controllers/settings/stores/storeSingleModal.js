@@ -204,6 +204,13 @@ function(scope, store_data, $window, $sce, $interval, $state, $stateParams, $mod
         stores.csv.map.delete(scope.stores,kind);
     };
 
+    scope.shipstation_verify_tags = function(store_id) {
+        stores.shipstation.verify_tags(store_id).then(function(response) {
+            console.log(response);
+            scope.verification_tags = response.data.data;
+        });
+    }
+
     scope.launch_ebay_popup= function() {
 
         //TODO: Move this into a service/directive after some testing is done
@@ -324,10 +331,6 @@ function(scope, store_data, $window, $sce, $interval, $state, $stateParams, $mod
             CSV: {
                 name: "CSV",
                 file: "/assets/views/modals/settings/stores/csv.html"
-            },
-            Shipstation: {
-                name: "Shipstation",
-                file: "/assets/views/modals/settings/stores/shipstation.html"
             },
             "Shipstation API 2": {
                 name: "Shipstation API 2",

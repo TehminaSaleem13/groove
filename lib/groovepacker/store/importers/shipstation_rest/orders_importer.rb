@@ -23,14 +23,18 @@ module Groovepacker
                 credential.last_imported_at.nil? ? Date.today - 2.weeks : credential.last_imported_at - 3.days
             end
 
-            unless statuses.empty?
-              response = client.get_orders(statuses.join(","), import_from)
-              importing_time = Date.today - 1.day
-              gp_ready_tag_id = client.get_tag_id('GP Ready')
-              gp_imported_tag_id = client.get_tag_id('GP Imported')
+            gp_ready_tag_id = client.get_tag_id(credential.gp_ready_tag_name)
+            gp_imported_tag_id = client.get_tag_id(credential.gp_imported_tag_name)
 
-              unless gp_ready_tag_id == -1 or gp_imported_tag_id == -1
-                tagged_response = client.get_orders_by_tag('GP Ready')
+            unless statuses.empty? && gp_ready_tag_id == -1
+              response = {}
+              response["orders"] = nil
+              response = client.get_orders(statuses.join(","), import_from) unless statuses.empty?
+       
+              importing_time = Date.today - 1.day
+
+              unless gp_ready_tag_id == -1
+                tagged_response = client.get_orders_by_tag(credential.gp_ready_tag_name)
 
                 #perform union of orders
                 response["orders"] = response["orders"].nil?? tagged_response["orders"] :
@@ -119,10 +123,10 @@ module Groovepacker
                         result[:success_imported] = result[:success_imported] + 1
                         import_item.success_imported = result[:success_imported]
                         import_item.save
-                        if gp_ready_tag_id != -1 && gp_imported_tag_id != -1 && !order["tagIds"].nil? &&
+                        if gp_ready_tag_id != -1 && !order["tagIds"].nil? &&
                           order["tagIds"].include?(gp_ready_tag_id)
                           client.remove_tag_from_order(order["orderId"], gp_ready_tag_id)
-                          client.add_tag_to_order(order["orderId"], gp_imported_tag_id)
+                          client.add_tag_to_order(order["orderId"], gp_imported_tag_id)  if gp_imported_tag_id != -1
                         end
                       end
                     else
@@ -136,8 +140,8 @@ module Groovepacker
             else
               result[:status] = false
               result[:messages].push(
-                'All import statuses disabled. Import skipped.')
-              import_item.message = 'All import statuses disabled. Import skipped.'
+                'All import statuses disabled and no GP Ready tags found. Import skipped.')
+              import_item.message = 'All import statuses disabled and no GP Ready tags found. Import skipped.'
               import_item.save
             end
             if result[:status]

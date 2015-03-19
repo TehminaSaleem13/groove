@@ -25,6 +25,10 @@ module Groovepacker
         self.handler.update_product(hash)
       end
 
+      def verify_tags(tags)
+        self.handler.verify_tags(tags)
+      end
+
       attr_accessor :handler
     end
   end

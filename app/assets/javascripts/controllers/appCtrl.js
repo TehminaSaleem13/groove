@@ -128,8 +128,8 @@ groovepacks_controllers.
                         '</td>' +
                         '<td style="white-space: nowrap;">{{store.name}}</td>' +
                         '<td style="width:70%;padding:3px;">' +
-                            '<progressbar type="{{store.progress.type}}" value="store.progress.value"> {{store.progress.message| limitTo: 50}}</progressbar>' +
-                            '<progressbar ng-show="store.progress_product.show" type="{{store.progress_product.type}}" value="store.progress_product.value">{{store.progress_product.message | limitTo: 50}}</progressbar>' +
+                            '<progressbar type="{{store.progress.type}}" value="store.progress.value"> {{store.progress.message| limitTo: 55}}</progressbar>' +
+                            '<progressbar ng-show="store.progress_product.show" type="{{store.progress_product.type}}" value="store.progress_product.value">{{store.progress_product.message | limitTo: 56}}</progressbar>' +
                         '</td>' +
                         '<td style="text-align:right;width:30%;padding:3px;" ng-show="store.store_type==\'Shipstation API 2\'">' +
                             '<div class="btn-group">' + 

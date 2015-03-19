@@ -4,5 +4,19 @@ class ShipstationRestCredential < ActiveRecord::Base
 
   belongs_to :store
 
+  def verify_tags
+    context = Groovepacker::Store::Context.new(
+      Groovepacker::Store::Handlers::ShipstationRestHandler.new(store))
+    context.verify_tags([gp_ready_tag_name, gp_imported_tag_name])
+  end
+
+  def gp_ready_tag_name
+    "GP Ready"
+  end
+
+  def gp_imported_tag_name
+    "GP Imported"
+  end
+
 end
 
