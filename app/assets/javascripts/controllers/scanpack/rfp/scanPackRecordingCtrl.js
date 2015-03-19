@@ -1,5 +1,5 @@
 groovepacks_controllers.
-    controller('scanPackTrackingCtrl', [ '$scope', '$http', '$timeout', '$stateParams', '$location', '$state', '$cookies','orders','scanPack',
+    controller('scanPackRecordingCtrl', [ '$scope', '$http', '$timeout', '$stateParams', '$location', '$state', '$cookies','orders','scanPack',
         function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies, orders, scanPack) {
             var myscope = {};
             myscope.init = function() {

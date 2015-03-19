@@ -1,7 +1,8 @@
 <div class="row bottom-well">
     <div class="pack_image">
         <img ng-show="current_state == 'scanpack.rfo'" src="/assets/images/RFO_background.png" alt="RFO background" />
-        <h3 ng-show="current_state == 'scanpack.rfp.tracking'">Please create the shipping label, adhere it to the package, and scan the tracking number to continue.</h3>
+        <h3 ng-show="current_state == 'scanpack.rfp.recording'">Please create the shipping label, adhere it to the package, and scan the tracking number to continue.</h3>
+        <h3 ng-show="current_state == 'scanpack.rfp.verifying'"></h3>
         <h3 ng-show="current_state == 'scanpack.rfp.confirmation.order_edit'">Scan Confirmation Code with 'Order edit' permission</h3>
         <h3 ng-show="current_state == 'scanpack.rfp.confirmation.product_edit'">Scan Confirmation Code with 'Product edit' permission</h3>
         <h3 ng-show="current_state == 'scanpack.rfp.confirmation.cos'">Scan Confirmation Code with 'Order edit' permission</h3>

@@ -112,8 +112,12 @@ module ScanPackHelper
           #if order has status of Awaiting Scanning
           if single_order.status == 'awaiting'
             if !single_order.has_unscanned_items
-              if scanpack_settings.ask_tracking_number?
-                single_order_result['next_state'] = 'scanpack.rfp.tracking'
+              if scanpack_settings.post_scanning_option != "None"
+                if scanpack_settings.post_scanning_option == "Verify"
+                  single_order_result['next_state'] = 'scanpack.rfp.verifying'
+                else
+                  single_order_result['next_state'] = 'scanpack.rfp.recording'
+                end
               else
                 single_order.set_order_to_scanned_state(current_user.username)
                 single_order_result['next_state'] = 'scanpack.rfo'
@@ -214,7 +218,8 @@ module ScanPackHelper
 
           unscanned_items = single_order.get_unscanned_items
           barcode_found = false
-          #puts unscanned_items.to_s
+          puts "................"
+          puts unscanned_items.to_s
           #search if barcode exists
           unscanned_items.each do |item|
             if item['product_type'] == 'individual'
@@ -281,9 +286,12 @@ module ScanPackHelper
           #puts "Barcode "+input+" found: "+barcode_found.to_s
           if barcode_found
             if !single_order.has_unscanned_items
-              if scanpack_settings.ask_tracking_number?
-                result['data']['order_complete'] = true
-                result['data']['next_state'] = 'scanpack.rfp.tracking'
+              if scanpack_settings.post_scanning_option != "None"
+                if scanpack_settings.post_scanning_option == "Verify"
+                  single_order_result['next_state'] = 'scanpack.rfp.verifying'
+                else
+                  single_order_result['next_state'] = 'scanpack.rfp.recording'
+                end
               else
                 single_order.set_order_to_scanned_state(current_user.username)
                 result['data']['order_complete'] = true
@@ -315,7 +323,7 @@ module ScanPackHelper
     return result
   end
 
-  def scan_tracking(input,state,id)
+  def scan_recording(input,state,id)
     result = Hash.new
     result['status'] = true
     result['matched'] = true
@@ -323,7 +331,43 @@ module ScanPackHelper
     result['success_messages'] = []
     result['notice_messages'] = []
     result['data'] = Hash.new
-    result['data']['next_state'] = 'scanpack.rfp.tracking'
+    result['data']['next_state'] = 'scanpack.rfp.recording'
+
+    order = Order.find(id)
+
+    if order.nil?
+      result['status'] &= false
+      result['error_messages'].push("Could not find order with id: "+id)
+    else
+      if order.status == 'awaiting'
+        if input.nil?
+          result['status'] &= false
+          result['error_messages'].push("No tracking number is provided")
+        else
+          #allow tracking id to be saved without special permissions
+          order.tracking_num = input
+          order.set_order_to_scanned_state(current_user.username)
+          result['data']['next_state'] = 'scanpack.rfo'
+          #update inventory when inventory warehouses is implemented.
+          order.save
+        end
+      else
+        result['status'] &= false
+        result['error_messages'].push("The order is not in awaiting state. Cannot scan the tracking number")
+      end
+    end
+    return result
+  end
+
+  def scan_verifying(input,state,id)
+    result = Hash.new
+    result['status'] = true
+    result['matched'] = true
+    result['error_messages'] = []
+    result['success_messages'] = []
+    result['notice_messages'] = []
+    result['data'] = Hash.new
+    result['data']['next_state'] = 'scanpack.rfp.verifying'
 
     order = Order.find(id)
 
@@ -512,6 +556,7 @@ module ScanPackHelper
     data = single_order.attributes
     data['unscanned_items'] = single_order.get_unscanned_items
     data['scanned_items'] = single_order.get_scanned_items
+    puts "data['scanned_items']: " + data['scanned_items'].inspect
     unless data['unscanned_items'].length == 0
       unless session[:most_recent_scanned_products].nil?
         session[:most_recent_scanned_products].reverse!.each do |scanned_product_id|

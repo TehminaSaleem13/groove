@@ -33,8 +33,10 @@ function($stateProvider, $urlRouterProvider,hotkeysProvider,cfpLoadingBarProvide
                        abstract:true })
         .state('scanpack.rfp.default', {url: '', controller:'scanPackRfpDefaultCtrl',
                        templateUrl:'/assets/views/scanpack/rfpdefault.html'})
-        .state('scanpack.rfp.tracking', {url: '/tracking', templateUrl:'/assets/views/scanpack/multi.html',
-                       controller:'scanPackTrackingCtrl'})
+        .state('scanpack.rfp.recording', {url: '/recording', templateUrl:'/assets/views/scanpack/multi.html',
+                       controller:'scanPackRecordingCtrl'})
+        .state('scanpack.rfp.verifying', {url: '/verifying', templateUrl:'/assets/views/scanpack/multi.html',
+                       controller:'scanPackVerifyingCtrl'})
         .state('scanpack.rfp.product_edit', {url: '/product_edit', templateUrl:'/assets/views/scanpack/productedit.html',
                        controller:'scanPackProductEditCtrl'})
         .state('scanpack.rfp.product_edit.single', {url: '/{product_id:[0-9]+}', template:'', controller:'productsSingleCtrl'})
