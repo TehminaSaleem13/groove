@@ -357,6 +357,7 @@ module ScanPackHelper
           #allow tracking id to be saved without special permissions
           order.tracking_num = input
           order.set_order_to_scanned_state(current_user.username)
+          result['data']['order_complete'] = true
           result['data']['next_state'] = 'scanpack.rfo'
           #update inventory when inventory warehouses is implemented.
           order.save
@@ -391,11 +392,13 @@ module ScanPackHelper
         unless input.nil?
           if order.tracking_num == input
             order.set_order_to_scanned_state(current_user.username)
+            result['data']['order_complete'] = true
             result['data']['next_state'] = 'scanpack.rfo'
             order.save
           elsif input == current_user.confirmation_code
             result['matched'] = false
             order.set_order_to_scanned_state(current_user.username)
+            result['data']['order_complete'] = true
             result['data']['next_state'] = 'scanpack.rfo'
             order.save
           else
@@ -432,6 +435,7 @@ module ScanPackHelper
         result['status'] = true
         result['matched'] = false
         order.set_order_to_scanned_state(current_user.username)
+        result['data']['order_complete'] = true
         result['data']['next_state'] = 'scanpack.rfo'
         order.save
       end
@@ -456,12 +460,14 @@ module ScanPackHelper
           result['status'] = true
           result['matched'] = false
           order.set_order_to_scanned_state(current_user.username)
+          result['data']['order_complete'] = true
           result['data']['next_state'] = 'scanpack.rfo'
           order.save
         elsif state == "scanpack.rfp.no_match" && input == order.tracking_num
           result['status'] = true
           result['matched'] = true
           order.set_order_to_scanned_state(current_user.username)
+          result['data']['order_complete'] = true
           result['data']['next_state'] = 'scanpack.rfo'
           order.save
         else
