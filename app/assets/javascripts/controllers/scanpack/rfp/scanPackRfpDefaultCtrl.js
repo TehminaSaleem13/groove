@@ -50,6 +50,7 @@ groovepacks_controllers.
             };
 
             myscope.launch_type_scan = function() {
+                console.log("launch_type_scan");
                 myscope.type_scan_obj = $modal.open({
                     templateUrl: '/assets/views/modals/scanpack/typescan.html',
                     controller: 'scanPackRfpTypeScan',
@@ -66,6 +67,8 @@ groovepacks_controllers.
             };
 
             myscope.do_autoscan = function(){
+                console.log("do_autoscan");
+                console.log($scope.data);
                 scanPack.click_scan($scope.data.order.next_item.barcodes[0].barcode,$scope.data.order.id).success($scope.handle_scan_return);
             };
 

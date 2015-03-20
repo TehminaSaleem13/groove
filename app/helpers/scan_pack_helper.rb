@@ -116,7 +116,7 @@ module ScanPackHelper
               if scanpack_settings.post_scanning_option != "None"
                 if scanpack_settings.post_scanning_option == "Verify"
                   if single_order.tracking_num.nil?
-                    single_order_result['next_state'] = 'scanpack.rfp.verifying.no_tracking_info'
+                    single_order_result['next_state'] = 'scanpack.rfp.no_tracking_info'
                   else
                     puts "single_order.tracking_num :" + single_order.tracking_num
                     single_order_result['next_state'] = 'scanpack.rfp.verifying'
@@ -295,7 +295,7 @@ module ScanPackHelper
               if scanpack_settings.post_scanning_option != "None"
                 if scanpack_settings.post_scanning_option == "Verify"
                   if single_order.tracking_num.nil?
-                    result['data']['next_state'] = 'scanpack.rfp.verifying.no_tracking_info'
+                    result['data']['next_state'] = 'scanpack.rfp.no_tracking_info'
                   else
                     result['data']['next_state'] = 'scanpack.rfp.verifying'
                   end
@@ -401,7 +401,7 @@ module ScanPackHelper
           else
             result['status'] &= false
             result['error_messages'].push("Tracking number does not match.")
-            result['data']['next_state'] = 'scanpack.rfp.verifying.no_match'
+            result['data']['next_state'] = 'scanpack.rfp.no_match'
           end
         end
       else
@@ -421,14 +421,14 @@ module ScanPackHelper
     result['success_messages'] = []
     result['notice_messages'] = []
     result['data'] = Hash.new
-    result['data']['next_state'] = 'scanpack.rfp.verifying.no_tracking_info'
+    result['data']['next_state'] = 'scanpack.rfp.no_tracking_info'
     unless id.nil?
       order = Order.find(id)
-      if state == "scanpack.rfp.verifying.no_tracking_info" && input == ""
+      if state == "scanpack.rfp.no_tracking_info" && input == ""
         result['status'] = false
         result['matched'] = false
         result['data']['next_state'] = 'scanpack.rfo'
-      elsif state == "scanpack.rfp.verifying.no_tracking_info" && input == current_user.confirmation_code
+      elsif state == "scanpack.rfp.no_tracking_info" && input == current_user.confirmation_code
         result['status'] = true
         result['matched'] = false
         order.set_order_to_scanned_state(current_user.username)
@@ -448,13 +448,19 @@ module ScanPackHelper
     result['success_messages'] = []
     result['notice_messages'] = []
     result['data'] = Hash.new
-    result['data']['next_state'] = 'scanpack.rfp.verifying.no_match'
+    result['data']['next_state'] = 'scanpack.rfp.no_match'
     unless id.nil?
       order = Order.find(id)
       unless order.nil?
-        if state == "scanpack.rfp.verifying.no_match" && input == current_user.confirmation_code
+        if state == "scanpack.rfp.no_match" && input == current_user.confirmation_code
           result['status'] = true
           result['matched'] = false
+          order.set_order_to_scanned_state(current_user.username)
+          result['data']['next_state'] = 'scanpack.rfo'
+          order.save
+        elsif state == "scanpack.rfp.no_match" && input == order.tracking_num
+          result['status'] = true
+          result['matched'] = true
           order.set_order_to_scanned_state(current_user.username)
           result['data']['next_state'] = 'scanpack.rfo'
           order.save
