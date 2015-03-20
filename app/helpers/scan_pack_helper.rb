@@ -112,13 +112,11 @@ module ScanPackHelper
           #if order has status of Awaiting Scanning
           if single_order.status == 'awaiting'
             if !single_order.has_unscanned_items
-              puts "single_order :" + single_order.inspect
               if scanpack_settings.post_scanning_option != "None"
                 if scanpack_settings.post_scanning_option == "Verify"
                   if single_order.tracking_num.nil?
                     single_order_result['next_state'] = 'scanpack.rfp.no_tracking_info'
                   else
-                    puts "single_order.tracking_num :" + single_order.tracking_num
                     single_order_result['next_state'] = 'scanpack.rfp.verifying'
                   end
                 else
@@ -213,6 +211,11 @@ module ScanPackHelper
           result['error_messages'].push('Order with id: '+id+' is already in scanned state')
         end
       else
+        escape_string = ''
+        if scanpack_settings.escape_string_enabled
+          escape_string = scanpack_settings.escape_string
+        end
+
         result['data']['serial']['clicked'] = clicked
         result['data']['serial']['barcode'] = input
         result['data']['serial']['order_id'] = id
@@ -220,21 +223,18 @@ module ScanPackHelper
         result['data']['order_num'] = single_order.increment_id
 
         if single_order.has_unscanned_items
-          single_order.should_the_kit_be_split(input) if single_order.contains_kit && single_order.contains_splittable_kit
+          single_order.should_the_kit_be_split(input,escape_string) if single_order.contains_kit && single_order.contains_splittable_kit
 
           unscanned_items = single_order.get_unscanned_items
           barcode_found = false
-          puts "................"
-          puts unscanned_items.to_s
           #search if barcode exists
           unscanned_items.each do |item|
             if item['product_type'] == 'individual'
               if item['child_items'].length > 0
                 item['child_items'].each do |child_item|
-                  #puts child_item.to_s
                   if !child_item['barcodes'].nil?
                     child_item['barcodes'].each do |barcode|
-                      if barcode.barcode == input || (scanpack_settings.skip_code_enabled? && input == scanpack_settings.skip_code && child_item['skippable'])
+                      if barcode_matches(barcode.barcode, input,escape_string) || (scanpack_settings.skip_code_enabled? && input == scanpack_settings.skip_code && child_item['skippable'])
                         barcode_found = true
                         #process product barcode scan
                         order_item_kit_product =
@@ -264,7 +264,7 @@ module ScanPackHelper
               end
             elsif item['product_type'] == 'single'
               item['barcodes'].each do |barcode|
-                if barcode.barcode == input || (scanpack_settings.skip_code_enabled? && input == scanpack_settings.skip_code && item['skippable'])
+                if barcode_matches(barcode.barcode,input,escape_string) || (scanpack_settings.skip_code_enabled? && input == scanpack_settings.skip_code && item['skippable'])
                   barcode_found = true
                   #process product barcode scan
                   order_item = OrderItem.find(item['order_item_id'])
@@ -289,7 +289,7 @@ module ScanPackHelper
             end
             break if barcode_found
           end
-          #puts "Barcode "+input+" found: "+barcode_found.to_s
+
           if barcode_found
             if !single_order.has_unscanned_items
               if scanpack_settings.post_scanning_option != "None"
@@ -308,8 +308,6 @@ module ScanPackHelper
                 result['data']['next_state'] = 'scanpack.rfo'
               end
             end
-            #puts "Length of unscanned items:" + result['data']['unscanned_items'].length.to_s
-            #puts result['data']['unscanned_items'].to_s
           else
             result['status'] &= false
             result['error_messages'].push("Barcode '"+input+"' doesn't match any item on this order")
@@ -371,7 +369,6 @@ module ScanPackHelper
   end
 
   def scan_verifying(input,state,id)
-    puts "params in scan_verifying: " + params.inspect
     result = Hash.new
     result['status'] = true
     result['matched'] = true
@@ -388,7 +385,6 @@ module ScanPackHelper
       result['error_messages'].push("Could not find order with id: "+id)
     else
       if order.status == 'awaiting'
-        puts "input: " + input.inspect
         unless input.nil?
           if order.tracking_num == input
             order.set_order_to_scanned_state(current_user.username)
@@ -416,7 +412,6 @@ module ScanPackHelper
   end
 
   def render_order_scan(input,state,id)
-    puts ".......in render_order_scan........."
     result = Hash.new
     result['status'] = true
     result['matched'] = true
@@ -444,7 +439,6 @@ module ScanPackHelper
   end
 
   def scan_again_or_render_order_scan(input,state,id)
-    puts "params: " + params.inspect
     result = Hash.new
     result['status'] = true
     result['matched'] = true
@@ -641,7 +635,6 @@ module ScanPackHelper
     data = single_order.attributes
     data['unscanned_items'] = single_order.get_unscanned_items
     data['scanned_items'] = single_order.get_scanned_items
-    puts "data['scanned_items']: " + data['scanned_items'].inspect
     unless data['unscanned_items'].length == 0
       unless session[:most_recent_scanned_products].nil?
         session[:most_recent_scanned_products].reverse!.each do |scanned_product_id|
@@ -687,6 +680,14 @@ module ScanPackHelper
     end
     barcode_data = ProductBarcode.find_by_barcode(barcode)
     return !barcode_data.nil?
+  end
+
+  def barcode_matches(barcode = '',input = '',escape_string='')
+    if escape_string == '' || barcode == input
+      return barcode == input
+    else
+      return barcode.starts_with? input+escape_string
+    end
   end
 
 end

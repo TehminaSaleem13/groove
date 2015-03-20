@@ -1,5 +1,7 @@
-groovepacks.config(['$stateProvider', '$urlRouterProvider','hotkeysProvider','cfpLoadingBarProvider','$translateProvider','$urlMatcherFactoryProvider',
-function($stateProvider, $urlRouterProvider,hotkeysProvider,cfpLoadingBarProvider,$translateProvider,$urlMatcherFactoryProvider) {
+groovepacks.config(['$stateProvider', '$urlRouterProvider','hotkeysProvider','cfpLoadingBarProvider','$translateProvider','$urlMatcherFactoryProvider', 'ngClipProvider',
+function($stateProvider, $urlRouterProvider,hotkeysProvider,cfpLoadingBarProvider,$translateProvider,$urlMatcherFactoryProvider, ngClipProvider) {
+
+    ngClipProvider.setPath("/swf/ZeroClipboard.swf");
 
     $urlRouterProvider.otherwise("/home");
     $urlRouterProvider.when('/scanandpack/rfp', '/scanandpack');

@@ -50,7 +50,6 @@ groovepacks_controllers.
             };
 
             myscope.launch_type_scan = function() {
-                console.log("launch_type_scan");
                 myscope.type_scan_obj = $modal.open({
                     templateUrl: '/assets/views/modals/scanpack/typescan.html',
                     controller: 'scanPackRfpTypeScan',
@@ -67,8 +66,6 @@ groovepacks_controllers.
             };
 
             myscope.do_autoscan = function(){
-                console.log("do_autoscan");
-                console.log($scope.data);
                 scanPack.click_scan($scope.data.order.next_item.barcodes[0].barcode,$scope.data.order.id).success($scope.handle_scan_return);
             };
 
@@ -221,7 +218,6 @@ groovepacks_controllers.
                     $scope.add_note();
                     myscope.note_obj.result.finally(function() {
                         $scope.set('input','');
-                        console.log("inputed");
                     });
                     return false;
                 } else if($scope.scan_pack.settings.service_issue_code_enabled && $scope.data.input == $scope.scan_pack.settings.service_issue_code && !myscope.service_issue_message_saved) {

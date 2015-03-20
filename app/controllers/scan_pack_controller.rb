@@ -31,7 +31,6 @@ class ScanPackController < ApplicationController
 
       @matcher[params[:state]].each do |state_func|
         output = send(state_func,params[:input],params[:state],params[:id])
-        puts "....output......" + output.inspect
         @result['error_messages'] = @result['error_messages'] + output['error_messages']
         @result['success_messages'] = @result['success_messages'] + output['success_messages']
         @result['notice_messages'] = @result['notice_messages'] + output['notice_messages']

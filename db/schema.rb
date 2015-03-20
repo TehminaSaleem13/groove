@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150319110149) do
+ActiveRecord::Schema.define(:version => 20150320063524) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0, :null => false
@@ -549,6 +549,8 @@ ActiveRecord::Schema.define(:version => 20150319110149) do
     t.boolean  "type_scan_code_enabled",        :default => true
     t.string   "type_scan_code",                :default => "*"
     t.string   "post_scanning_option",          :default => "None"
+    t.string   "escape_string",                 :default => " - "
+    t.boolean  "escape_string_enabled",         :default => false
   end
 
   create_table "shipstation_credentials", :force => true do |t|
@@ -569,6 +571,7 @@ ActiveRecord::Schema.define(:version => 20150319110149) do
     t.datetime "updated_at",                                        :null => false
     t.boolean  "shall_import_awaiting_shipment", :default => true
     t.boolean  "shall_import_shipped",           :default => false
+    t.boolean  "warehouse_location_update",      :default => false
   end
 
   create_table "shipworks_credentials", :force => true do |t|

@@ -128,8 +128,8 @@ groovepacks_controllers.
                         '</td>' +
                         '<td style="white-space: nowrap;">{{store.name}}</td>' +
                         '<td style="width:70%;padding:3px;">' +
-                            '<progressbar type="{{store.progress.type}}" value="store.progress.value"> {{store.progress.message| limitTo: 50}}</progressbar>' +
-                            '<progressbar ng-show="store.progress_product.show" type="{{store.progress_product.type}}" value="store.progress_product.value">{{store.progress_product.message | limitTo: 50}}</progressbar>' +
+                            '<progressbar type="{{store.progress.type}}" value="store.progress.value"> {{store.progress.message| limitTo: 55}}</progressbar>' +
+                            '<progressbar ng-show="store.progress_product.show" type="{{store.progress_product.type}}" value="store.progress_product.value">{{store.progress_product.message | limitTo: 56}}</progressbar>' +
                         '</td>' +
                         '<td style="text-align:right;width:30%;padding:3px;" ng-show="store.store_type==\'Shipstation API 2\'">' +
                             '<div class="btn-group">' + 
@@ -201,6 +201,7 @@ groovepacks_controllers.
             importOrders.do_import($scope);
         };
         $rootScope.focus_search = function(event) {
+            var elem;
             if (typeof event != 'undefined') {
                 event.preventDefault();
             }
@@ -210,10 +211,12 @@ groovepacks_controllers.
             }
             // If in modal
             if($document.find('body').hasClass('modal-open')) {
-                $document.find('.modal-dialog:last .modal-body .search-box').focus();
+                elem = $document.find('.modal-dialog:last .modal-body .search-box');
             } else {
-                $document.find('.search-box').focus();
+                elem = $document.find('.search-box');
             }
+            elem.focus();
+            return elem;
         };
         hotkeys.bindTo($scope).add({
             combo: ['return'],
