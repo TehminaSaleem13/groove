@@ -114,7 +114,8 @@
                    "note_from_packer_code":"Create a 'note from packer' for the current order",
                    "service_issue_code":"Give current order service issue status",
                    "restart_code":"Restart current Order",
-                   "type_scan_code":"Type-In Counts"
+                   "type_scan_code":"Type-In Counts",
+                   "escape_string":"Escape String"
                },
                "tooltips": {
                    "enable_click_sku": "When this option is enabled the packer can click the SKU of the item currently suggested for packing to add the item to the order. This prevents the packer from having to type in damaged or unreadable barcodes.",
@@ -124,7 +125,8 @@
                    "note_from_packer_code":"This will open the text area so the packer can begin typing.",
                    "service_issue_code":"If a packer realizes during the packing of an order that packing can not be completed due to damaged items or an inventory issue, they can scan this code to save the current order as a service issue and leave a note from packer explaining the issue.",
                    "restart_code":"Rather than clicking the Restart Order button on the Scan & Pack interface you can scan this barcode. All items already scanned for the current order will be removed and GroovePacker will be ready for you to rescan the same order or another order.",
-                   "type_scan_code":"Type-In Counts allow the scanner to enter a number of items rather than scanning a large number of the same item, just like they do at a the grocery store. To enter a Type-In Count for an item:<br/> Scan the item <br/>Scan your Type-In counts barcode<br/>Type in the count and press enter"
+                   "type_scan_code":"Type-In Counts allow the scanner to enter a number of items rather than scanning a large number of the same item, just like they do at a the grocery store. To enter a Type-In Count for an item:<br/> Scan the item <br/>Scan your Type-In counts barcode<br/>Type in the count and press enter",
+                   "escape_string":"If your barcode has lot number or some extra characters added at the end of your barcode, you can specify an escape string here. Anything after the escape string will be ignored.<br/> Eg: If your barcode is <strong>>XXX-YYY - ZZZ</strong><br/><strong>ZZZ</strong> being the lot number, you can specify \" - \" as your escape string to ignore it and the lot number.<br> Your barcode will be accepted as <strong>XXX-YYY</strong> during scan packing"
                }
             }
         },

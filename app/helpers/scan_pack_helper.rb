@@ -203,6 +203,11 @@ module ScanPackHelper
           result['error_messages'].push('Order with id: '+id+' is already in scanned state')
         end
       else
+        escape_string = ''
+        if scanpack_settings.escape_string_enabled
+          escape_string = scanpack_settings.escape_string
+        end
+
         result['data']['serial']['clicked'] = clicked
         result['data']['serial']['barcode'] = input
         result['data']['serial']['order_id'] = id
@@ -210,7 +215,7 @@ module ScanPackHelper
         result['data']['order_num'] = single_order.increment_id
 
         if single_order.has_unscanned_items
-          single_order.should_the_kit_be_split(input) if single_order.contains_kit && single_order.contains_splittable_kit
+          single_order.should_the_kit_be_split(input,escape_string) if single_order.contains_kit && single_order.contains_splittable_kit
 
           unscanned_items = single_order.get_unscanned_items
           barcode_found = false
@@ -223,7 +228,7 @@ module ScanPackHelper
                   #puts child_item.to_s
                   if !child_item['barcodes'].nil?
                     child_item['barcodes'].each do |barcode|
-                      if barcode.barcode == input || (scanpack_settings.skip_code_enabled? && input == scanpack_settings.skip_code && child_item['skippable'])
+                      if barcode_matches(barcode.barcode, input,escape_string) || (scanpack_settings.skip_code_enabled? && input == scanpack_settings.skip_code && child_item['skippable'])
                         barcode_found = true
                         #process product barcode scan
                         order_item_kit_product =
@@ -253,7 +258,7 @@ module ScanPackHelper
               end
             elsif item['product_type'] == 'single'
               item['barcodes'].each do |barcode|
-                if barcode.barcode == input || (scanpack_settings.skip_code_enabled? && input == scanpack_settings.skip_code && item['skippable'])
+                if barcode_matches(barcode.barcode,input,escape_string) || (scanpack_settings.skip_code_enabled? && input == scanpack_settings.skip_code && item['skippable'])
                   barcode_found = true
                   #process product barcode scan
                   order_item = OrderItem.find(item['order_item_id'])
@@ -557,6 +562,14 @@ module ScanPackHelper
     end
     barcode_data = ProductBarcode.find_by_barcode(barcode)
     return !barcode_data.nil?
+  end
+
+  def barcode_matches(barcode = '',input = '',escape_string='')
+    if escape_string == ''
+      return barcode == input
+    else
+      return barcode.starts_with? input+escape_string
+    end
   end
 
 end

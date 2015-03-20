@@ -40,6 +40,21 @@
                         <i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" groov-popover="{{translations.tooltips.type_scan_code}}"></i>
                     </div>
                 </div>
+                <div class="form-group">
+                    <label class="control-label col-sm-3">{{translations.labels.escape_string}}</label>
+                    <div class="controls col-sm-2 form-inline">
+                        <div toggle-switch ng-model="scan_pack.settings.escape_string_enabled" groov-click="update_settings()"></div>
+                    </div>
+                    <div class="col-sm-4" ng-show="scan_pack.settings.escape_string_enabled">
+                        <label class="control-label col-sm-3 col-md-2">{{translations.labels.scan}}</label>
+                        <div class="col-sm-9 col-md-10">
+                            <input class="form-control input-style" type="text" ng-blur="update_settings()" ng-model="scan_pack.settings.escape_string"/>
+                        </div>
+                    </div>
+                    <div class="info col-sm-2">
+                        <i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" groov-popover="{{translations.tooltips.escape_string}}"></i>
+                    </div>
+                </div>
 
             </fieldset>
         </div>

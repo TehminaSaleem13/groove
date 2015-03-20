@@ -241,13 +241,17 @@ class Order < ActiveRecord::Base
     result
   end
 
-  def should_the_kit_be_split(barcode)
+  def should_the_kit_be_split(barcode,escape_string ='')
     result = false
     product_inside_splittable_kit = false
     product_available_as_single_item = false
     matched_product_id = 0
     matched_order_item_id = 0
-    product_barcode = ProductBarcode.where(:barcode=>barcode)
+    if escape_string == ''
+      product_barcode = ProductBarcode.where(:barcode=>barcode)
+    else
+      product_barcode = ProductBarcode.all(:conditions => ['barcode Like ?',barcode+escape_string+'%'])
+    end
 
     if product_barcode.length > 0
       product_barcode = product_barcode.first

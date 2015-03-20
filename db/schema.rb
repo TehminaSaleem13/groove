@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150318132731) do
+ActiveRecord::Schema.define(:version => 20150320063524) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0, :null => false
@@ -548,6 +548,8 @@ ActiveRecord::Schema.define(:version => 20150318132731) do
     t.float    "order_complete_sound_vol",      :default => 0.75
     t.boolean  "type_scan_code_enabled",        :default => true
     t.string   "type_scan_code",                :default => "*"
+    t.string   "escape_string",                 :default => " - "
+    t.boolean  "escape_string_enabled",         :default => false
   end
 
   create_table "shipstation_credentials", :force => true do |t|

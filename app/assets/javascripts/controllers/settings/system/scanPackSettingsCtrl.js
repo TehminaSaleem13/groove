@@ -30,7 +30,8 @@ function( $scope, $http, $timeout, $location, $state, $cookies, scanPack,groov_t
                 "note_from_packer_code":"",
                 "service_issue_code":"",
                 "restart_code":"",
-                "type_scan_code":""
+                "type_scan_code":"",
+                "escape_string":""
             },
             "tooltips" :{
                 "enable_click_sku":"",
@@ -40,7 +41,8 @@ function( $scope, $http, $timeout, $location, $state, $cookies, scanPack,groov_t
                 "note_from_packer_code":"",
                 "service_issue_code":"",
                 "restart_code":"",
-                "type_scan_code":""
+                "type_scan_code":"",
+                "escape_string":""
             }
         };
         groov_translator.translate('settings.system.scan_pack',$scope.translations);
