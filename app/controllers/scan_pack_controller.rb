@@ -15,6 +15,8 @@ class ScanPackController < ApplicationController
         'scanpack.rfp.default' => ['product_scan'],
         'scanpack.rfp.recording' => ['scan_recording'],
         'scanpack.rfp.verifying' => ['scan_verifying'],
+        'scanpack.rfp.verifying.no_tracking_info' => ['render_order_scan'],
+        'scanpack.rfp.verifying.no_match' => ['scan_again_or_render_order_scan'],
         'scanpack.rfp.product_edit' => ['order_scan'],
         'scanpack.rfp.product_edit.single' => ['order_scan'],
         'scanpack.rfp.confirmation.product_edit' => ['product_edit_conf','order_scan'],
@@ -29,6 +31,7 @@ class ScanPackController < ApplicationController
 
       @matcher[params[:state]].each do |state_func|
         output = send(state_func,params[:input],params[:state],params[:id])
+        puts "....output......" + output.inspect
         @result['error_messages'] = @result['error_messages'] + output['error_messages']
         @result['success_messages'] = @result['success_messages'] + output['success_messages']
         @result['notice_messages'] = @result['notice_messages'] + output['notice_messages']
