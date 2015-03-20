@@ -247,9 +247,8 @@ class Order < ActiveRecord::Base
     product_available_as_single_item = false
     matched_product_id = 0
     matched_order_item_id = 0
-    if escape_string == ''
-      product_barcode = ProductBarcode.where(:barcode=>barcode)
-    else
+    product_barcode = ProductBarcode.where(:barcode=>barcode)
+    if product_barcode.length == 0 && escape_string != ''
       product_barcode = ProductBarcode.all(:conditions => ['barcode Like ?',barcode+escape_string+'%'])
     end
 

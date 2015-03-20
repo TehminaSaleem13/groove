@@ -565,7 +565,7 @@ module ScanPackHelper
   end
 
   def barcode_matches(barcode = '',input = '',escape_string='')
-    if escape_string == ''
+    if escape_string == '' || barcode == input
       return barcode == input
     else
       return barcode.starts_with? input+escape_string
