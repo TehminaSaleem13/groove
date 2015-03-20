@@ -99,7 +99,7 @@
                     "scan_actions_sub_head": "Scanning these special action barcodes during order processing will perform the listed actions."
                },
                "labels": {
-                   "enable_click_sku":"Click SKU to Scan",
+                   "enable_click_sku":"Click Scanning",
                    "ask_tracking_number":"Ask for Tracking Number",
                    "show_success_image":"Display Success Image",
                    "show_fail_image":"Display Fail Image",
