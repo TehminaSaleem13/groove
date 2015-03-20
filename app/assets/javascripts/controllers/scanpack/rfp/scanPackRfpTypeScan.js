@@ -4,7 +4,7 @@ function($scope, $modalInstance, $timeout, order_data, confirm, scanPack, notifi
 
     myscope.init = function() {
         $scope.order = order_data;
-        $timeout($scope.focus_search,200);
+        $timeout(function(){$scope.focus_search().select();},200);
         $scope.code = {};
         $scope.code.count = 0;
     };
