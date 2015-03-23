@@ -42,6 +42,7 @@ function( $scope, $http, $timeout, $location, $state, $cookies, scanPack,groov_t
                 "service_issue_code":"",
                 "restart_code":"",
                 "type_scan_code":"",
+                "type_in_counts":"",
                 "escape_string":""
             }
         };
@@ -74,6 +75,11 @@ function( $scope, $http, $timeout, $location, $state, $cookies, scanPack,groov_t
                 }
             }
         });
+    };
+
+    $scope.change_post_scanning_opt = function(value) {
+        $scope.scan_pack.settings.post_scanning_option = value;
+        $scope.update_settings();
     };
 
     $scope.update_settings = function() {

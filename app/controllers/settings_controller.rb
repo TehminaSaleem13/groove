@@ -629,6 +629,7 @@ class SettingsController < ApplicationController
         scan_pack_setting.restart_code = params[:restart_code]
         scan_pack_setting.type_scan_code_enabled = params[:type_scan_code_enabled]
         scan_pack_setting.type_scan_code = params[:type_scan_code]
+        scan_pack_setting.post_scanning_option = params[:post_scanning_option]
         scan_pack_setting.escape_string_enabled = params[:escape_string_enabled]
         scan_pack_setting.escape_string = params[:escape_string]
 

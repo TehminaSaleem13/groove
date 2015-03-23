@@ -30,9 +30,6 @@ groovepacks_services.factory('scanPack',['$http','notification','$state',functio
             notification.notify(data.notice_messages,2);
             notification.notify(data.success_messages,1);
             notification.notify(data.error_messages,0);
-            //console.log("input scan response");
-            //console.log(data);
-
         }).error(notification.server_error);
     };
 

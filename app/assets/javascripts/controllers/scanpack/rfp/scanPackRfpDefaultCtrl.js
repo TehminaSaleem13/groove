@@ -218,7 +218,6 @@ groovepacks_controllers.
                     $scope.add_note();
                     myscope.note_obj.result.finally(function() {
                         $scope.set('input','');
-                        console.log("inputed");
                     });
                     return false;
                 } else if($scope.scan_pack.settings.service_issue_code_enabled && $scope.data.input == $scope.scan_pack.settings.service_issue_code && !myscope.service_issue_message_saved) {

@@ -13,7 +13,10 @@ class ScanPackController < ApplicationController
     @matcher = {
         'scanpack.rfo' => ['order_scan'],
         'scanpack.rfp.default' => ['product_scan'],
-        'scanpack.rfp.tracking' => ['scan_tracking'],
+        'scanpack.rfp.recording' => ['scan_recording'],
+        'scanpack.rfp.verifying' => ['scan_verifying'],
+        'scanpack.rfp.no_tracking_info' => ['render_order_scan'],
+        'scanpack.rfp.no_match' => ['scan_again_or_render_order_scan'],
         'scanpack.rfp.product_edit' => ['order_scan'],
         'scanpack.rfp.product_edit.single' => ['order_scan'],
         'scanpack.rfp.confirmation.product_edit' => ['product_edit_conf','order_scan'],
