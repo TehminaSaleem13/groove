@@ -103,6 +103,11 @@ module ProductsHelper
           product_location.name = value
         elsif var == 'qty'
           product_location.available_inv = value
+          product_location.save
+          order_item = product_location.product.order_items.first unless product_location.product.order_items.empty?
+          if order_item.qty <= product_location.available_inv
+            order_item.update_inventory_levels_for_packing(true)
+          end
         end
       product_location.save
     end

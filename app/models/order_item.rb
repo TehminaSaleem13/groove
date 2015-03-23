@@ -220,15 +220,18 @@ class OrderItem < ActiveRecord::Base
   end
 
   def update_inventory_levels_for_packing(override = false)
+    puts "in update_inventory_levels_for_packing"
     result = true
     self.order.reload
     if !self.order.nil? && 
       (self.order.status == 'awaiting' or override)
       if !self.product.nil? && !self.order.store.nil? &&
         !self.order.store.inventory_warehouse_id.nil?
+        qty = (self.qty - self.product.product_inventory_warehousess.first.allocated_inv).to_s
+        puts "qty=" + qty
         result &= self.product.
           update_available_product_inventory_level(self.order.store.inventory_warehouse_id,
-            self.qty, 'purchase')
+            qty.to_i, 'purchase')
         
         if !GeneralSetting.all.first.nil? && 
               (GeneralSetting.all.first.inventory_tracking ||
