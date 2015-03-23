@@ -6,7 +6,7 @@ RSpec.describe ScanPackController, :type => :controller do
   before(:each) do
     SeedTenant.new.seed
     scanpacksetting = ScanPackSetting.first
-    scanpacksetting.ask_tracking_number = true
+    scanpacksetting.post_scanning_option = "recording"
     scanpacksetting.save
 
     #@user_role =FactoryGirl.create(:role, :name=>'scan_pack', :import_orders=>true)
@@ -202,7 +202,7 @@ RSpec.describe ScanPackController, :type => :controller do
       result = JSON.parse(response.body)
       expect(result["status"]).to eq(true)
       expect(result["data"]['order']["status"]).to eq("awaiting")
-      expect(result["data"]["next_state"]).to eq("scanpack.rfp.tracking")
+      expect(result["data"]["next_state"]).to eq("scanpack.rfp.recording")
     end
 
     it "should process order scan for orders having a status of Awaiting Scanning with some unscanned items" do
@@ -578,7 +578,6 @@ RSpec.describe ScanPackController, :type => :controller do
   it "should scan product by barcode and order status should still be in scanned status when there are no unscanned items"+
      " of the same product" do
       request.accept = "application/json"
-
       order = FactoryGirl.create(:order, :status=>'awaiting')
 
       product = FactoryGirl.create(:product)
@@ -711,7 +710,7 @@ RSpec.describe ScanPackController, :type => :controller do
       result = JSON.parse(response.body)
       expect(result["status"]).to eq(true)
       expect(result['data']['order']['unscanned_items'].length).to eq(0)
-      expect(result['data']['next_state']).to eq('scanpack.rfp.tracking')
+      expect(result['data']['next_state']).to eq('scanpack.rfp.recording')
 
       order_item_kit.reload
       #expect(order_item_kit.scanned_qty).to eq(1)
@@ -814,7 +813,7 @@ RSpec.describe ScanPackController, :type => :controller do
       expect(result['data']['order']['unscanned_items'].length).to eq(0)
       expect(result['data']['order']['scanned_items'].length).to eq(4)
       # expect(result['data']['order']['scanned_items'].last['child_items'].length).to eq(2)
-      expect(result['data']['next_state']).to eq('scanpack.rfp.tracking')
+      expect(result['data']['next_state']).to eq('scanpack.rfp.recording')
 
 
       order_item.reload
@@ -957,7 +956,7 @@ RSpec.describe ScanPackController, :type => :controller do
       result = JSON.parse(response.body)
       expect(result["status"]).to eq(true)
       expect(result['data']['order']['unscanned_items'].length).to eq(0)
-      expect(result['data']['next_state']).to eq('scanpack.rfp.tracking')
+      expect(result['data']['next_state']).to eq('scanpack.rfp.recording')
 
       order.reload
       expect(order.status).to eq("awaiting")
@@ -1078,7 +1077,7 @@ RSpec.describe ScanPackController, :type => :controller do
       request.accept = "application/json"
       order = FactoryGirl.create(:order, :status=>'awaiting')
 
-      put :scan_barcode, {:state => 'scanpack.rfp.tracking', :id => order.id, :input=>'1234567890' }
+      put :scan_barcode, {:state => 'scanpack.rfp.recording', :id => order.id, :input=>'1234567890' }
 
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
