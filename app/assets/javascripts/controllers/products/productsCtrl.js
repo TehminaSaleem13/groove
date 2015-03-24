@@ -25,7 +25,7 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
         }
     };
 
-    $scope.update_product_list = function(product,prop) {
+    $scope.update_product_list = function(product, prop) {
         products.list.update_node({
             id: product.id,
             var: prop,
