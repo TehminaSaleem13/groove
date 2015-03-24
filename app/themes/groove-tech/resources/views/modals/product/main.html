@@ -291,7 +291,6 @@
                     <div class="form-group">
                         <div class="controls col-sm-8"
                             ng-repeat="activity in products.single.unacknowledged_kit_activities">
-                            {{activity}}
                             <h5>{{ activity.created_at | date:'EEEE MM/dd/yyyy hh:mm:ss a'}}</h5>
                             {{ activity.activity_message}} - by: {{ activity.username }}
                         </div>
