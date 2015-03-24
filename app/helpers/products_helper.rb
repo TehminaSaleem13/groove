@@ -104,14 +104,21 @@ module ProductsHelper
         elsif var == 'qty'
           product_location.available_inv = value
           product_location.save
-          order_item = product_location.product.order_items.first unless product_location.product.order_items.empty?
-          if order_item.qty <= product_location.available_inv
-            order_item.update_inventory_levels_for_packing(true)
+          @order_items = product_location.product.order_items unless product_location.product.order_items.empty?
+          @order_items.each do |order_item|
+            order_item.order.update_inventory_level = false
+            puts "order_item inv_status :" + order_item.inv_status
+            if order_item.qty <= product_location.available_inv && order_item.inv_status != 'allocated'
+              order_item.update_inventory_levels_for_packing(true)
+            end
           end
         end
       product_location.save
     end
     product.update_product_status
+    @order_items.each do |order|
+      order.update_inventory_level = true
+    end
     rescue Exception => e
       puts e.inspect
     end

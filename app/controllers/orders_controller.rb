@@ -285,6 +285,9 @@ class OrdersController < ApplicationController
       unless @orders.nil?
         @orders.each do|order|
           @order = Order.find(order["id"])
+          # in order to adjust inventory on deletion of order assign order status as 'cancelled'
+          @order.status = 'cancelled'
+          @order.save
           if @order.destroy
             @result['status'] &= true
           else
@@ -345,7 +348,7 @@ class OrdersController < ApplicationController
             @result['notice_messages'].push('Items in scanned orders have already been removed from inventory so no further inventory adjustments will be made during packing.')
           end
           @order.status = params[:status]
-          @order.update_inventory_levels_for_status_change(params[:option])
+          @order.update_inventory_levels_for_status_change(params[:option]) unless params[:option].nil?
           unless @order.save
             @result['status'] = false
             @result['error_messages'] = @order.errors.full_messages

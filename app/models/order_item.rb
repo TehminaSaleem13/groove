@@ -227,11 +227,12 @@ class OrderItem < ActiveRecord::Base
       (self.order.status == 'awaiting' or override)
       if !self.product.nil? && !self.order.store.nil? &&
         !self.order.store.inventory_warehouse_id.nil?
-        qty = (self.qty - self.product.product_inventory_warehousess.first.allocated_inv).to_s
-        puts "qty=" + qty
+        # qty = (self.qty - self.product.product_inventory_warehousess.first.allocated_inv).to_s
+        # puts "qty=" + qty
+        puts "quantity : " + self.qty.to_s
         result &= self.product.
           update_available_product_inventory_level(self.order.store.inventory_warehouse_id,
-            qty.to_i, 'purchase')
+            self.qty, 'purchase')
         
         if !GeneralSetting.all.first.nil? && 
               (GeneralSetting.all.first.inventory_tracking ||
@@ -254,8 +255,9 @@ class OrderItem < ActiveRecord::Base
 
   def update_inventory_levels_for_return (override = false)
     result = true
+    puts "in update_inventory_levels_for_return"
     if !self.order.nil? && 
-        (self.order.status == 'awaiting' or override)
+        (self.order.status == 'awaiting' or self.order.status == 'cancelled' or override)
       if !self.product.nil? && !self.order.store.nil? &&
         !self.order.store.inventory_warehouse_id.nil?
         logger.info('available product inventory level')

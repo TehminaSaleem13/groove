@@ -574,8 +574,10 @@ class Order < ActiveRecord::Base
   end
 
   def update_inventory_levels_for_items(override = true)
+    puts "in update_inventory_levels_for_items"
     changed_hash = self.changes
-
+    puts "changed_hash: "
+    puts changed_hash.inspect
     logger.debug(changed_hash)
     if self.update_inventory_level
 
@@ -589,6 +591,8 @@ class Order < ActiveRecord::Base
           (changed_hash['status'][1] == 'onhold' or
           changed_hash['status'][1] == 'cancelled')
           #update_inventory_levels_for_return
+          reason = 'return'
+        elsif changed_hash['status'][0] == 'onhold' and changed_hash['status'][1] == 'cancelled'
           reason = 'return'
         end
         self.order_items.each do |order_item|
