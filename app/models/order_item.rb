@@ -220,16 +220,12 @@ class OrderItem < ActiveRecord::Base
   end
 
   def update_inventory_levels_for_packing(override = false)
-    puts "in update_inventory_levels_for_packing"
     result = true
     self.order.reload
     if !self.order.nil? && self.inv_status != 'allocated'
       (self.order.status == 'awaiting' or override)
       if !self.product.nil? && !self.order.store.nil? &&
         !self.order.store.inventory_warehouse_id.nil?
-        # qty = (self.qty - self.product.product_inventory_warehousess.first.allocated_inv).to_s
-        # puts "qty=" + qty
-        puts "quantity : " + self.qty.to_s
         result &= self.product.
           update_available_product_inventory_level(self.order.store.inventory_warehouse_id,
             self.qty, 'purchase')
@@ -255,8 +251,6 @@ class OrderItem < ActiveRecord::Base
 
   def update_inventory_levels_for_return (override = false)
     result = true
-    puts "in update_inventory_levels_for_return"
-    puts self.inv_status
     if !self.order.nil? && self.inv_status != 'unallocated'
         (self.order.status == 'awaiting' or override)
       if !self.product.nil? && !self.order.store.nil? &&

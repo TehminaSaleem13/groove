@@ -51,7 +51,6 @@ class OrdersController < ApplicationController
       rescue Exception => e
         @result['status'] = false
         @result['messages'].push(e.message)
-        puts e.backtrace
       end
     else
       @result['status'] = false
@@ -890,7 +889,6 @@ class OrdersController < ApplicationController
       end
 
     end
-    puts @depends_pick_list
 
     respond_to do |format|
       format.html

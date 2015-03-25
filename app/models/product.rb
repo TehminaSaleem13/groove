@@ -165,7 +165,6 @@ class Product < ActiveRecord::Base
 
   def update_available_product_inventory_level(inventory_warehouse_id, purchase_qty, reason)
   	result = true
-    puts "in update_available_product_inventory_level"
   	if self.is_kit != 1 or
   		(self.is_kit == 1 and (self.kit_parsing == 'single' or self.kit_parsing == 'depends'))
 	     result &= self.update_warehouses_inventory_level(inventory_warehouse_id, self.id,
@@ -216,7 +215,6 @@ class Product < ActiveRecord::Base
 
   def update_warehouses_inventory_level(inv_wh_id, product_id, purchase_qty, reason)
 	  result = true
-    puts "update_warehouses_inventory_level"
   	prod_warehouses = ProductInventoryWarehouses.where(:inventory_warehouse_id =>
   		inv_wh_id).where(:product_id => product_id)
 

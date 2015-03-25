@@ -294,6 +294,9 @@ module ScanPackHelper
 
           #puts "Barcode "+clean_input+" found: "+barcode_found.to_s
           if barcode_found
+            puts "single_order.inspect: "
+            puts single_order.inspect
+            puts single_order.has_unscanned_items
             if !single_order.has_unscanned_items
               if scanpack_settings.post_scanning_option != "None"
                 if scanpack_settings.post_scanning_option == "Verify"
@@ -306,6 +309,7 @@ module ScanPackHelper
                   result['data']['next_state'] = 'scanpack.rfp.recording'
                 end
               else
+                puts "no unscanned_items..."
                 single_order.set_order_to_scanned_state(current_user.username)
                 result['data']['order_complete'] = true
                 result['data']['next_state'] = 'scanpack.rfo'

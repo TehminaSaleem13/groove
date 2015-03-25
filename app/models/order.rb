@@ -574,13 +574,9 @@ class Order < ActiveRecord::Base
   end
 
   def update_inventory_levels_for_items(override = true)
-    puts "in update_inventory_levels_for_items"
     changed_hash = self.changes
-    puts "changed_hash: "
-    puts changed_hash.inspect
     logger.debug(changed_hash)
     if self.update_inventory_level
-
       unless changed_hash['status'].nil?
         if (changed_hash['status'][0] == 'onhold' or
             changed_hash['status'][0] == 'cancelled' or override) and
