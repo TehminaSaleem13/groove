@@ -223,7 +223,7 @@ class OrderItem < ActiveRecord::Base
     puts "in update_inventory_levels_for_packing"
     result = true
     self.order.reload
-    if !self.order.nil? && 
+    if !self.order.nil? && self.inv_status != 'allocated'
       (self.order.status == 'awaiting' or override)
       if !self.product.nil? && !self.order.store.nil? &&
         !self.order.store.inventory_warehouse_id.nil?
@@ -256,7 +256,7 @@ class OrderItem < ActiveRecord::Base
   def update_inventory_levels_for_return (override = false)
     result = true
     puts "in update_inventory_levels_for_return"
-    if !self.order.nil? && 
+    if !self.order.nil? && self.inv_status != 'unallocated'
         (self.order.status == 'awaiting' or self.order.status == 'cancelled' or override)
       if !self.product.nil? && !self.order.store.nil? &&
         !self.order.store.inventory_warehouse_id.nil?

@@ -107,6 +107,7 @@ module ProductsHelper
           @order_items = product_location.product.order_items unless product_location.product.order_items.empty?
           @order_items.each do |order_item|
             order_item.order.update_inventory_level = false
+            order_item.order.save
             puts "order_item inv_status :" + order_item.inv_status
             if order_item.qty <= product_location.available_inv && order_item.inv_status != 'allocated'
               order_item.update_inventory_levels_for_packing(true)
@@ -116,8 +117,9 @@ module ProductsHelper
       product_location.save
     end
     product.update_product_status
-    @order_items.each do |order|
-      order.update_inventory_level = true
+    @order_items.each do |order_item|
+      order_item.order.update_inventory_level = true
+      order_item.order.save
     end
     rescue Exception => e
       puts e.inspect
