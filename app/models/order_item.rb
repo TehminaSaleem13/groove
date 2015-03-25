@@ -256,8 +256,9 @@ class OrderItem < ActiveRecord::Base
   def update_inventory_levels_for_return (override = false)
     result = true
     puts "in update_inventory_levels_for_return"
+    puts self.inv_status
     if !self.order.nil? && self.inv_status != 'unallocated'
-        (self.order.status == 'awaiting' or self.order.status == 'cancelled' or override)
+        (self.order.status == 'awaiting' or override)
       if !self.product.nil? && !self.order.store.nil? &&
         !self.order.store.inventory_warehouse_id.nil?
         logger.info('available product inventory level')
