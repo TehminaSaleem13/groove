@@ -151,7 +151,6 @@ groovepacks_services.factory('orders',['$http','$window','notification',function
     var update_list = function(action,orders) {
         if(["update_status","delete","duplicate"].indexOf(action) != -1) {
             orders.setup.orderArray = [];
-            orders.setup.option = 'yes';
             for(var i =0; i < orders.selected.length; i++) {
                 if (orders.selected[i].checked == true) {
                     orders.setup.orderArray.push({id: orders.selected[i].id});
