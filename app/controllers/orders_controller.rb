@@ -348,10 +348,9 @@ class OrdersController < ApplicationController
           end
           @order.status = params[:status]
 
-          unless params[:option].nil?
+          if params[:status] == 'scanned'
             @order.update_inventory_level = false
-            @order.save
-            @order.update_inventory_levels_for_status_change(params[:option])
+            @order.update_inventory_levels_for_status_change
           end 
           unless @order.save
             @result['status'] = false
