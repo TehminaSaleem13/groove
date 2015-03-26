@@ -196,7 +196,7 @@ describe('Orders:',function() {
                     table.thead = table.list_table.element(by.tagName('thead'));
                     table.thead.all(by.repeater('field in theads')).getText().then (function(text) {
                         new openOrderModal(text);
-                        order.first_field_set = element.all(by.tagName('fieldset')).get(1);
+                        order.first_field_set = element.all(by.tagName('fieldset')).get(0);
 
                         order.first_name_label = order.first_field_set.element(by.cssContainingText('.row .container-fluid .form-group label', 'First Name'));
                         order.first_name_div = order.first_name_label.element(by.xpath('..'));
@@ -258,7 +258,7 @@ describe('Orders:',function() {
                         order.country_value = order.country_div.element(by.tagName('input')).getAttribute('value');
                         expect(order.country_value).toEqual(element(by.model('orders.single.basicinfo.country')).getAttribute('value'));
 
-                        order.last_field_set = element.all(by.tagName('fieldset')).get(2);
+                        order.last_field_set = element.all(by.tagName('fieldset')).get(1);
                         order.scanned_on_label = order.last_field_set.element(by.cssContainingText('.row .form-group label', 'Scanned on'));
                         order.scanned_on_div = order.scanned_on_label.element(by.xpath('..'));
                         order.scanned_on_value = order.scanned_on_div.element(by.tagName('input')).getAttribute('value');
