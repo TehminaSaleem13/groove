@@ -75,7 +75,7 @@
 				)
 
 				#start importing using delayed job
-				Delayed::Job.enqueue ImportJob.new(tenant, import_summary.id), :queue => 'importing_orders_#{tenant}'
+				Delayed::Job.enqueue ImportJob.new(tenant, import_summary.id), :queue => 'importing_orders_'+ tenant
 			else
 				#import is already running. back off from importing
 				result[:status] = false
