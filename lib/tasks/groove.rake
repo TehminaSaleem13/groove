@@ -39,17 +39,6 @@ namespace :groove do
       Apartment::Tenant.process(tenant.name) do
         puts 'Upgrading Tenant: '+Apartment::Tenant.current.to_s
         #Add upgrade code to run for every tenant after this line
-        general_setting = GeneralSetting.all.first
-        if general_setting.default_low_inventory_alert_limit.blank? || general_setting.default_low_inventory_alert_limit < 1
-          general_setting.default_low_inventory_alert_limit = 1
-        end
-        general_setting.save
-
-        CsvMapping.find_each do |map|
-          if map.store.nil?
-            map.destroy
-          end
-        end
         #Add upgrade code to run for every tenant before this line
       end
       rescue Exception => e
