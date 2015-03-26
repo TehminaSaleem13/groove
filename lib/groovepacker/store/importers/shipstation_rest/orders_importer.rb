@@ -57,8 +57,15 @@ module Groovepacker
                     import_item.current_order_items = -1
                     import_item.current_order_imported_item = -1
                     import_item.save
+                    shipstation_order = nil
+
                     if Order.where(increment_id: order["orderNumber"]).length == 0
                       shipstation_order = Order.new
+                    elsif !order["tagIds"].nil? && order["tagIds"].include?(gp_ready_tag_id)
+                      shipstation_order = Order.where(increment_id: order["orderNumber"]).first
+                    end
+
+                    unless shipstation_order.nil?
                       ship_to = order["shipTo"]["name"].split(" ")
                       import_order(shipstation_order, order)
                       shipstation_order.tracking_num = client.get_tracking_number(order["orderNumber"])
@@ -66,8 +73,10 @@ module Groovepacker
                         import_item.current_order_items = order["items"].length
                         import_item.current_order_imported_item = 0
                         import_item.save
+                        order_items_for_activity_recording = []
                         order["items"].each do |item|
-                          order_item = OrderItem.new
+                          order_item = create_order_item(shipstation_order, item["sku"])
+
                           import_order_item(order_item, item)
 
                           Rails.logger.info("SKU Product Id: " + item.to_s) 
@@ -104,15 +113,17 @@ module Groovepacker
                             order_item_product.save
                             order_item.product = order_item_product
                           end
-        
-                          shipstation_order.order_items << order_item
+                          unless shipstation_order.order_items.include?(order_item)
+                            shipstation_order.order_items << order_item 
+                            order_items_for_activity_recording << order_item
+                          end
                           import_item.current_order_imported_item = import_item.current_order_imported_item + 1
                           import_item.save
                         end
                       end
                       if shipstation_order.save
                         shipstation_order.addactivity("Order Import", credential.store.name+" Import")
-                        shipstation_order.order_items.each do |item|
+                        order_items_for_activity_recording.each do |item|
                           unless item.product.nil? || item.product.primary_sku.nil?
                             shipstation_order.addactivity("Item with SKU: "+item.product.primary_sku+" Added", credential.store.name+" Import")
                           end
@@ -149,6 +160,20 @@ module Groovepacker
               credential.save
             end
             result
+          end
+
+          def create_order_item(order, sku)
+            found = false
+            order_item = nil
+            order.order_items.each do |item|
+              if !sku.nil? && 
+                item.product.product_skus.include?(ProductSku.where(sku: sku).first)
+                found = true
+                order_item = item
+              end
+            end
+            order_item = OrderItem.new unless found
+            order_item
           end
 
           def import_order(shipstation_order, order)
