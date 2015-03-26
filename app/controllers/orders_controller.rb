@@ -1217,7 +1217,7 @@ class OrdersController < ApplicationController
     if order_summary.empty?
       store = Store.find(params[:store_id])
       tenant = Apartment::Tenant.current_tenant
-      Delayed::Job.where(queue: "importing_orders_#{tenant}").destroy_all
+      Delayed::Job.where(queue: "importing_orders_"+tenant).destroy_all
       import_orders_obj = ImportOrders.new
       import_params = {tenant: tenant, store: store, import_type: params[:import_type], user: current_user}
       import_orders_obj.import_order_by_store import_params

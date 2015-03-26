@@ -18,5 +18,10 @@ class ShipstationRestCredential < ActiveRecord::Base
     "GP Imported"
   end
 
+  def update_all_locations
+    context = Groovepacker::Store::Context.new(
+      Groovepacker::Store::Handlers::ShipstationRestHandler.new(store))
+    context.update_all_products
+  end
 end
 

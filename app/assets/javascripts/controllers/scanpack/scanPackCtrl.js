@@ -39,6 +39,10 @@ groovepacks_controllers.
                 }
             };
 
+            $scope.get_last_scanned = function() {
+                return myscope.last_scanned_barcode;
+            };
+
             $scope.reg_callback = function(func) {
                 if (typeof func == 'function') {
                     myscope.callback = func;
@@ -74,6 +78,11 @@ groovepacks_controllers.
                 if(typeof $scope.data.order.id !== "undefined") {
                     id = $scope.data.order.id;
                 }
+                if($scope.current_state =='scanpack.rfp.default') {
+                    myscope.last_scanned_barcode = $scope.data.input;
+                } else {
+                    myscope.last_scanned_barcode = '';
+                }
                 scanPack.input($scope.data.input,$scope.current_state,id).success($scope.handle_scan_return);
             };
 
@@ -85,6 +94,7 @@ groovepacks_controllers.
             myscope.init = function() {
                 $scope.scan_pack = scanPack.settings.model();
                 $scope.general_settings = generalsettings.model.get();
+                myscope.last_scanned_barcode = '';
                 generalsettings.single.get($scope.general_settings).success(function() {
                     myscope.gen_setting_loaded = (new Date).getTime();
                 });

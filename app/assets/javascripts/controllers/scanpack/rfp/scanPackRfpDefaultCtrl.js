@@ -36,17 +36,29 @@ groovepacks_controllers.
 
             myscope.type_scan = function() {
                 if($scope.scan_pack.settings.type_scan_code_enabled) {
-                    if($scope.data.order.next_item.type_scan_enabled =="on_with_confirmation") {
-                        myscope.show_type_scan_confirm();
-                    } else if($scope.data.order.next_item.type_scan_enabled =="on") {
-                        myscope.launch_type_scan();
-                    } else if($scope.data.order.next_item.type_scan_enabled =="off") {
-                        notification.notify('Type-In Scan Count is disabled for this product');
+                    var barcode_found = false;
+                    if($scope.data.order.next_item.barcodes.length) {
+                        for (var i=0; i< $scope.data.order.next_item.barcodes.length; i++) {
+                            if($scope.get_last_scanned() == $scope.data.order.next_item.barcodes[i].barcode) {
+                                barcode_found = true;
+                            }
+                        }
                     }
-
+                    if (barcode_found) {
+                        if($scope.data.order.next_item.type_scan_enabled =="on_with_confirmation") {
+                            myscope.show_type_scan_confirm();
+                        } else if($scope.data.order.next_item.type_scan_enabled =="on") {
+                            myscope.launch_type_scan();
+                        } else if($scope.data.order.next_item.type_scan_enabled =="off") {
+                            notification.notify('Type-In Scan Count is disabled for this product');
+                        }
+                    } else {
+                        notification.notify('To use Type-In Counts please scan the first item, then scan or enter: '+$scope.scan_pack.settings.type_scan_code+' You can then enter the quantity of the item.');
+                    }
                 } else {
                     notification.notify('Type-In Scan Count is disabled');
                 }
+                $scope.set('input','');
             };
 
             myscope.launch_type_scan = function() {

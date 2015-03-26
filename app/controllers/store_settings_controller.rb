@@ -939,6 +939,36 @@ class StoreSettingsController < ApplicationController
     end
     render json: result
   end
+
+  def update_all_locations
+    #store_id
+    store = Store.find(params[:id])
+    result = {
+      status: true,
+      messages: [],
+      data: {
+        update_status: false,
+        message: ""
+      }
+    }
+    if current_user.can? 'add_edit_stores'
+      if store.store_type == 'Shipstation API 2'
+        if store.shipstation_rest_credential.warehouse_location_update
+          result[:data] = store.shipstation_rest_credential.update_all_locations
+        else
+          result[:status] = false
+          result[:messages] << "Cannot update locations as the location update is turned off."
+        end
+      else
+        result[:status] = false
+        result[:messages] << "Cannot update locations for products of this store."
+      end
+    else
+      result[:status] = false
+      result[:messages] << "User does not have permission to add or edit stores"
+    end
+    render json: result
+  end
 end
 
 

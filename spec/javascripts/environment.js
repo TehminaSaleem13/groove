@@ -10,7 +10,7 @@ module.exports = {
     },
 
     baseUrl:
-        'http://' + (process.env.HTTP_HOST || 'flysurfer.barcodepacker.com') +
+        'http://' + (process.env.HTTP_HOST || 'miracle.barcodepacker.com') +
         (process.env.HTTP_PORT ? ':'+ process.env.HTTP_PORT : '')
 
 };
