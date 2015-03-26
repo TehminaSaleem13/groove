@@ -456,6 +456,12 @@ groovepacks_services.factory('stores',['$http','notification','$filter',function
         }).error(notification.server_error);
     }
 
+    var update_all_locations = function(store_id) {
+        return $http.put('/store_settings/update_all_locations/' + store_id + '.json', null).success(
+            function(data){
+            console.log(store_id);
+        }).error(notification.server_error); 
+    }
 
     //Public facing API
     return {
@@ -509,7 +515,8 @@ groovepacks_services.factory('stores',['$http','notification','$filter',function
             products: update_products
         },
         shipstation: {
-            verify_tags: verify_tags
+            verify_tags: verify_tags,
+            update_all_locations: update_all_locations
         }
     };
 }]);

@@ -206,8 +206,14 @@ function(scope, store_data, $window, $sce, $interval, $state, $stateParams, $mod
 
     scope.shipstation_verify_tags = function(store_id) {
         stores.shipstation.verify_tags(store_id).then(function(response) {
-            console.log(response);
             scope.verification_tags = response.data.data;
+        });
+    }
+
+    scope.shipstation_update_all_locations = function(store_id) {
+        scope.shipstation_loc_update_response = {}
+        stores.shipstation.update_all_locations(store_id).then(function(response){
+            scope.shipstation_loc_update_response = response.data;
         });
     }
 
@@ -250,7 +256,9 @@ function(scope, store_data, $window, $sce, $interval, $state, $stateParams, $mod
     myscope.rollback = function() {
         scope.stores.single = {};
         angular.copy(myscope.single,scope.stores.single);
-        scope.update_single_store();
+        if (typeof scope.stores.single.id != 'undefined') {
+            scope.update_single_store();
+        }
     };
 
     myscope.up_key = function(event) {

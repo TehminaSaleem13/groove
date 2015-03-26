@@ -6,7 +6,7 @@ module Groovepacker
           self.handler = handler
         end
 
-        def update
+        def update_all
           {}
         end
 
