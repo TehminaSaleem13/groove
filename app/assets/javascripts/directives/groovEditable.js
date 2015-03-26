@@ -89,7 +89,7 @@ groovepacks_directives.directive('groovEditable', ['$timeout','editable','$rootS
                 scope.tag_class = "tag-bubble false-tag-bubble tag-bubble-input span3 input-text";
             };
             scope.handle_key_event =  function(event) {
-                if(event.which == 13 || event.which == 188 || event.which == 9) {
+                if(event.which == 13 || event.which == 9) {
                     event.preventDefault();
                     scope.save_node();
                 }
