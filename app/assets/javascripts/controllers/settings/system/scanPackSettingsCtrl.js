@@ -43,7 +43,8 @@ function( $scope, $http, $timeout, $location, $state, $cookies, scanPack,groov_t
                 "restart_code":"",
                 "type_scan_code":"",
                 "type_in_counts":"",
-                "escape_string":""
+                "escape_string":"",
+                "ask_post_scanning_functions":""
             }
         };
         groov_translator.translate('settings.system.scan_pack',$scope.translations);
