@@ -37,7 +37,6 @@ class StripeInvoiceEmail < ActionMailer::Base
     unless subscription.stripe_customer_id.nil?
       customer = Stripe::Customer.retrieve(subscription.stripe_customer_id) 
       return customer.email
-      end
     end
   end
 end
