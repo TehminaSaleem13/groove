@@ -400,10 +400,6 @@ module ScanPackHelper
             result['data']['order_complete'] = true
             result['data']['next_state'] = 'scanpack.rfo'
             order.save
-          elsif input == "" && GeneralSetting.all.first.strict_cc == false
-            result['status'] = false
-            result['matched'] = false
-            result['data']['next_state'] = 'scanpack.rfo'
           else
             result['status'] &= false
             result['error_messages'].push("Tracking number does not match.")
@@ -471,14 +467,14 @@ module ScanPackHelper
           result['data']['order_complete'] = true
           result['data']['next_state'] = 'scanpack.rfo'
           order.save
-        elsif input == "" && GeneralSetting.all.first.strict_cc == false
+        elsif state == "scanpack.rfp.no_match" && input == "" && GeneralSetting.all.first.strict_cc == false
           result['status'] = false
           result['matched'] = false
           result['data']['next_state'] = 'scanpack.rfo'
         else
           result['status'] = false
           result['matched'] = false
-          result['data']['next_state'] = 'scanpack.rfp.verifying'
+          result['data']['next_state'] = 'scanpack.rfp.no_match'
         end
       end
     end
