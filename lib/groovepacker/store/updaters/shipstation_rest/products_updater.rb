@@ -17,22 +17,27 @@ module Groovepacker
             client = handler[:store_handle]
             errors = []
 
-            shipstation_orders = client.get_orders(
-              "on_hold", 
-              nil
-            )
+            statuses = ["awaiting_shipment", "on_hold"]
+            if credential.warehouse_location_update
+              statuses.each do |status|
+                shipstation_orders = client.get_orders(
+                  status, 
+                  nil
+                )
 
-            shipstation_orders = shipstation_orders["orders"]
-            puts shipstation_orders.inspect
-            shipstation_orders.each do |order|
-              order["items"].each do |order_item|
-                unless ProductSku.where(sku: order_item["sku"]).empty?
-                  product = ProductSku.where(sku: order_item["sku"]).first.product
-                  unless product.nil?
-                    update_response = update_product(product, client, credential, order)
-                    result[:update_status] &= update_response[:update_status]
-                    order_count = order_count + update_response[:order_count]
-                    errors << update_response[:message] unless update_response[:update_status]
+                shipstation_orders = shipstation_orders["orders"]
+                puts shipstation_orders.inspect
+                shipstation_orders.each do |order|
+                  order["items"].each do |order_item|
+                    unless ProductSku.where(sku: order_item["sku"]).empty?
+                      product = ProductSku.where(sku: order_item["sku"]).first.product
+                      unless product.nil?
+                        update_response = update_product(product, client, credential, order)
+                        result[:update_status] &= update_response[:update_status]
+                        order_count = order_count + update_response[:order_count]
+                        errors << update_response[:message] unless update_response[:update_status]
+                      end
+                    end
                   end
                 end
               end
