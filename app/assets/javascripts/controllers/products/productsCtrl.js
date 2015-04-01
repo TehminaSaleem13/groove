@@ -30,7 +30,7 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
             id: product.id,
             var: prop,
             value: product[prop]
-        }).then(myscope.get_products)
+        }).then(function(){myscope.get_products()});
     };
 
     $scope.create_product = function () {
@@ -357,6 +357,9 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
             $scope._can_load_products = false;
             return products.list.get($scope.products,page).success(function(response) {
                 $scope.gridOptions.paginate.total_items = products.list.total_items($scope.products);
+                if($scope.gridOptions.paginate.current_page != page) {
+                    $scope.gridOptions.paginate.current_page = page;
+                }
                 myscope.update_selected_count();
                 $scope._can_load_products = true;
             }).error(function(){

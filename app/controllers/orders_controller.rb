@@ -51,7 +51,6 @@ class OrdersController < ApplicationController
       rescue Exception => e
         @result['status'] = false
         @result['messages'].push(e.message)
-        puts e.backtrace
       end
     else
       @result['status'] = false
@@ -285,6 +284,9 @@ class OrdersController < ApplicationController
       unless @orders.nil?
         @orders.each do|order|
           @order = Order.find(order["id"])
+          # in order to adjust inventory on deletion of order assign order status as 'cancelled'
+          @order.status = 'cancelled'
+          @order.save
           if @order.destroy
             @result['status'] &= true
           else
@@ -339,11 +341,17 @@ class OrdersController < ApplicationController
       unless @orders.nil?
         @orders.each do|order|
           @order = Order.find(order['id'])
+          
           if @order.status =='scanned' && params[:status] =='awaiting'
             @order.reset_scanned_status
             @result['notice_messages'].push('Items in scanned orders have already been removed from inventory so no further inventory adjustments will be made during packing.')
           end
           @order.status = params[:status]
+
+          if params[:status] == 'scanned'
+            @order.update_inventory_level = false
+            @order.update_inventory_levels_for_status_change
+          end 
           unless @order.save
             @result['status'] = false
             @result['error_messages'] = @order.errors.full_messages
@@ -354,7 +362,7 @@ class OrdersController < ApplicationController
       @result['status'] = false
       @result['error_messages'].push("You do not have enough permissions to delete order")
     end
-
+    @order.update_inventory_level = true
     respond_to do |format|
       format.html # show.html.erb
       format.json { render json: @result }
@@ -880,7 +888,6 @@ class OrdersController < ApplicationController
       end
 
     end
-    puts @depends_pick_list
 
     respond_to do |format|
       format.html

@@ -43,6 +43,8 @@ class OrderItem < ActiveRecord::Base
     result['product_id'] = item.id
     result['skippable'] = item.is_skippable
     result['record_serial'] = item.record_serial
+    result['click_scan_enabled'] = item.click_scan_enabled
+    result['type_scan_enabled'] = item.type_scan_enabled
     result['order_item_id'] = self.id
 
     result
@@ -220,7 +222,7 @@ class OrderItem < ActiveRecord::Base
   def update_inventory_levels_for_packing(override = false)
     result = true
     self.order.reload
-    if !self.order.nil? && 
+    if !self.order.nil? && self.inv_status != 'allocated' &&
       (self.order.status == 'awaiting' or override)
       if !self.product.nil? && !self.order.store.nil? &&
         !self.order.store.inventory_warehouse_id.nil?
@@ -249,7 +251,7 @@ class OrderItem < ActiveRecord::Base
 
   def update_inventory_levels_for_return (override = false)
     result = true
-    if !self.order.nil? && 
+    if !self.order.nil? && self.inv_status != 'unallocated'
         (self.order.status == 'awaiting' or override)
       if !self.product.nil? && !self.order.store.nil? &&
         !self.order.store.inventory_warehouse_id.nil?

@@ -5,18 +5,20 @@
 <body style="line-height: 8px; margin-left: 3px; margin-top: 2px; margin-right: 2px; margin-bottom: 1px">
     <%if !@product.product_barcodes.first.nil? && !@product.product_barcodes.first.barcode.nil? %>
       <%unless @product.primary_sku.nil?%>
-        <span style="font-size: 13px; margin-left: 10px;"><%= @product.primary_sku %></span> <br/>
+        <div style="font-size: 13px; margin-left: 10px; margin-top: 5px; margin-bottom: -5px;"><%= @product.primary_sku %></div> <br/>
       <%end%>
-      <span style="font-size: 12px; margin-bottom: 10px; margin-left: 10px;"><%= truncate(@product.name, length: 80)%></span>
-      <br/>
-      <br/>
-      <% barcode_string = generate_barcode(@product.primary_barcode)%>
-      <center><%= pdf_image_tag(barcode_string+".png", {:width => 255, :height => 42}) %></center>
+      <div style="font-size: 12px; margin-left: 10px; margin-top:-2px; margin-bottom: 5px;"><%= truncate(@product.name, length: 80)%></div>
 
-      <p style="text-align:center; font-size:8px; line-height: 0px;">*<%=@product.primary_barcode%>*</p>
+      <% barcode_string = generate_barcode(@product.primary_barcode)%>
+      <div  style="margin-top:3px;">
+        <center><%= pdf_image_tag(barcode_string+".png", {:width => 255, :height => 48}) %></center>
+      </div>
+      <div style="line-height: 8px; font-size:8px;">
+        <center>*<%=@product.primary_barcode%>*</center>
+      </div>
     <%else%>
       <br/>
-      <span style="font-size: 20px; margin-bottom: 10px; margin-left: 45px;">Barcode not available</span>
+      <div style="font-size: 20px; margin-bottom: 10px; margin-left: 45px;">Barcode not available</div>
     <%end%>
 </body>
 </html>

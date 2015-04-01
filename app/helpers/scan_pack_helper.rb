@@ -112,8 +112,17 @@ module ScanPackHelper
           #if order has status of Awaiting Scanning
           if single_order.status == 'awaiting'
             if !single_order.has_unscanned_items
-              if scanpack_settings.ask_tracking_number?
-                single_order_result['next_state'] = 'scanpack.rfp.tracking'
+              if scanpack_settings.post_scanning_option != "None"
+                if scanpack_settings.post_scanning_option == "Verify"
+                  if single_order.tracking_num.nil?
+                    single_order_result['next_state'] = 'scanpack.rfp.no_tracking_info'
+                    single_order.addactivity("Tracking information was not imported with this order so the shipping label could not be verified ", current_user.username)
+                  else
+                    single_order_result['next_state'] = 'scanpack.rfp.verifying'
+                  end
+                else
+                  single_order_result['next_state'] = 'scanpack.rfp.recording'
+                end
               else
                 single_order.set_order_to_scanned_state(current_user.username)
                 single_order_result['next_state'] = 'scanpack.rfo'
@@ -146,8 +155,8 @@ module ScanPackHelper
 
   def can_order_be_scanned
     #result = false
-    #max_shipments = AccessRestriction.first.num_shipments
-    #total_shipments = AccessRestriction.first.total_scanned_shipments
+    #max_shipments = AccessRestriction.order("created_at").last.num_shipments
+    #total_shipments = AccessRestriction.order("created_at").last.total_scanned_shipments
     #if total_shipments < max_shipments
     #  result = true
     #else
@@ -203,27 +212,32 @@ module ScanPackHelper
           result['error_messages'].push('Order with id: '+id+' is already in scanned state')
         end
       else
+        escape_string = ''
+        if scanpack_settings.escape_string_enabled && !input.index(scanpack_settings.escape_string).nil?
+          clean_input = input.slice(0..(input.index(scanpack_settings.escape_string)-1))
+        else
+          clean_input = input
+        end
+
         result['data']['serial']['clicked'] = clicked
-        result['data']['serial']['barcode'] = input
+        result['data']['serial']['barcode'] = clean_input
         result['data']['serial']['order_id'] = id
 
         result['data']['order_num'] = single_order.increment_id
 
         if single_order.has_unscanned_items
-          single_order.should_the_kit_be_split(input) if single_order.contains_kit && single_order.contains_splittable_kit
+          single_order.should_the_kit_be_split(clean_input) if single_order.contains_kit && single_order.contains_splittable_kit
 
           unscanned_items = single_order.get_unscanned_items
           barcode_found = false
-          #puts unscanned_items.to_s
           #search if barcode exists
           unscanned_items.each do |item|
             if item['product_type'] == 'individual'
               if item['child_items'].length > 0
                 item['child_items'].each do |child_item|
-                  #puts child_item.to_s
                   if !child_item['barcodes'].nil?
                     child_item['barcodes'].each do |barcode|
-                      if barcode.barcode == input || (scanpack_settings.skip_code_enabled? && input == scanpack_settings.skip_code && child_item['skippable'])
+                      if barcode.barcode == clean_input || (scanpack_settings.skip_code_enabled? && clean_input == scanpack_settings.skip_code && child_item['skippable'])
                         barcode_found = true
                         #process product barcode scan
                         order_item_kit_product =
@@ -253,7 +267,7 @@ module ScanPackHelper
               end
             elsif item['product_type'] == 'single'
               item['barcodes'].each do |barcode|
-                if barcode.barcode == input || (scanpack_settings.skip_code_enabled? && input == scanpack_settings.skip_code && item['skippable'])
+                if barcode.barcode == clean_input || (scanpack_settings.skip_code_enabled? && clean_input == scanpack_settings.skip_code && item['skippable'])
                   barcode_found = true
                   #process product barcode scan
                   order_item = OrderItem.find(item['order_item_id'])
@@ -278,23 +292,30 @@ module ScanPackHelper
             end
             break if barcode_found
           end
-          #puts "Barcode "+input+" found: "+barcode_found.to_s
+
+          #puts "Barcode "+clean_input+" found: "+barcode_found.to_s
           if barcode_found
             if !single_order.has_unscanned_items
-              if scanpack_settings.ask_tracking_number?
-                result['data']['order_complete'] = true
-                result['data']['next_state'] = 'scanpack.rfp.tracking'
+              if scanpack_settings.post_scanning_option != "None"
+                if scanpack_settings.post_scanning_option == "Verify"
+                  if single_order.tracking_num.nil?
+                    result['data']['next_state'] = 'scanpack.rfp.no_tracking_info'
+                    single_order.addactivity("Tracking information was not imported with this order so the shipping label could not be verified ", current_user.username)
+                  else
+                    result['data']['next_state'] = 'scanpack.rfp.verifying'
+                  end
+                else
+                  result['data']['next_state'] = 'scanpack.rfp.recording'
+                end
               else
                 single_order.set_order_to_scanned_state(current_user.username)
                 result['data']['order_complete'] = true
                 result['data']['next_state'] = 'scanpack.rfo'
               end
             end
-            #puts "Length of unscanned items:" + result['data']['unscanned_items'].length.to_s
-            #puts result['data']['unscanned_items'].to_s
           else
             result['status'] &= false
-            result['error_messages'].push("Barcode '"+input+"' doesn't match any item on this order")
+            result['error_messages'].push("Barcode '"+clean_input+"' doesn't match any item on this order")
           end
         else
           result['status'] &= false
@@ -315,7 +336,7 @@ module ScanPackHelper
     return result
   end
 
-  def scan_tracking(input,state,id)
+  def scan_recording(input,state,id)
     result = Hash.new
     result['status'] = true
     result['matched'] = true
@@ -323,7 +344,7 @@ module ScanPackHelper
     result['success_messages'] = []
     result['notice_messages'] = []
     result['data'] = Hash.new
-    result['data']['next_state'] = 'scanpack.rfp.tracking'
+    result['data']['next_state'] = 'scanpack.rfp.recording'
 
     order = Order.find(id)
 
@@ -339,6 +360,7 @@ module ScanPackHelper
           #allow tracking id to be saved without special permissions
           order.tracking_num = input
           order.set_order_to_scanned_state(current_user.username)
+          result['data']['order_complete'] = true
           result['data']['next_state'] = 'scanpack.rfo'
           #update inventory when inventory warehouses is implemented.
           order.save
@@ -349,6 +371,120 @@ module ScanPackHelper
       end
     end
     return result
+  end
+
+  def scan_verifying(input,state,id)
+    result = Hash.new
+    result['status'] = true
+    result['matched'] = true
+    result['error_messages'] = []
+    result['success_messages'] = []
+    result['notice_messages'] = []
+    result['data'] = Hash.new
+    result['data']['next_state'] = 'scanpack.rfp.verifying'
+
+    order = Order.find(id)
+
+    if order.nil?
+      result['status'] &= false
+      result['error_messages'].push("Could not find order with id: "+id)
+    else
+      if order.status == 'awaiting'
+        unless input.nil?
+          if order.tracking_num == input
+            order.set_order_to_scanned_state(current_user.username)
+            result['data']['order_complete'] = true
+            result['data']['next_state'] = 'scanpack.rfo'
+            order.addactivity("Shipping Label Verified: #{input}", current_user.username)
+            order.save
+          elsif input == current_user.confirmation_code
+            result['matched'] = false
+            order.set_order_to_scanned_state(current_user.username)
+            result['data']['order_complete'] = true
+            result['data']['next_state'] = 'scanpack.rfo'
+            order.save
+          else
+            result['status'] &= false
+            result['error_messages'].push("Tracking number does not match.")
+            result['data']['next_state'] = 'scanpack.rfp.no_match'
+          end
+        end
+      else
+        result['status'] &= false
+        result['error_messages'].push("The order is not in awaiting state. Cannot scan the tracking number")
+      end
+    end
+    return result
+  end
+
+  def render_order_scan(input,state,id)
+    result = Hash.new
+    result['status'] = true
+    result['matched'] = true
+    result['error_messages'] = []
+    result['success_messages'] = []
+    result['notice_messages'] = []
+    result['data'] = Hash.new
+    result['data']['next_state'] = 'scanpack.rfp.no_tracking_info'
+    unless id.nil?
+      order = Order.find(id)
+      if state == "scanpack.rfp.no_tracking_info" && (input == current_user.confirmation_code || input == "")
+        result['status'] = true
+        result['matched'] = false
+        order.set_order_to_scanned_state(current_user.username)
+        result['data']['order_complete'] = true
+        result['data']['next_state'] = 'scanpack.rfo'
+        order.save
+      else
+        result['status'] = false
+        result['matched'] = false
+        result['data']['next_state'] = 'scanpack.rfp.no_tracking_info'
+      end
+    end
+    result
+  end
+
+  def scan_again_or_render_order_scan(input,state,id)
+    result = Hash.new
+    result['status'] = true
+    result['matched'] = true
+    result['error_messages'] = []
+    result['success_messages'] = []
+    result['notice_messages'] = []
+    result['data'] = Hash.new
+    result['data']['next_state'] = 'scanpack.rfp.no_match'
+    unless id.nil?
+      order = Order.find(id)
+      unless order.nil?
+        if state == "scanpack.rfp.no_match" && input == current_user.confirmation_code
+          result['status'] = true
+          result['matched'] = false
+          order.set_order_to_scanned_state(current_user.username)
+          result['data']['order_complete'] = true
+          order.addactivity("The correct shipping label was not verified at the time of packing. Confirmation code for user #{current_user.username} was scanned", current_user.username)
+          result['data']['next_state'] = 'scanpack.rfo'
+          order.save
+        elsif state == "scanpack.rfp.no_match" && input == order.tracking_num
+          result['status'] = true
+          result['matched'] = true
+          order.set_order_to_scanned_state(current_user.username)
+          result['data']['order_complete'] = true
+          result['data']['next_state'] = 'scanpack.rfo'
+          order.save
+        elsif state == "scanpack.rfp.no_match" && input == "" && GeneralSetting.all.first.strict_cc == false
+          result['status'] = true
+          result['matched'] = false
+          order.set_order_to_scanned_state(current_user.username)
+          result['data']['order_complete'] = true
+          result['data']['next_state'] = 'scanpack.rfo'
+        else
+          result['status'] = false
+          result['matched'] = false
+          result['data']['next_state'] = 'scanpack.rfp.no_match'
+        end
+      end
+    end
+    result
   end
 
   def order_edit_conf(input,state,id)

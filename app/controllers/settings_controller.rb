@@ -493,6 +493,7 @@ class SettingsController < ApplicationController
         general_setting.low_inventory_alert_email = params[:low_inventory_alert_email]
         general_setting.low_inventory_email_address = params[:low_inventory_email_address]
         general_setting.send_email_for_packer_notes = params[:send_email_for_packer_notes]
+        general_setting.inventory_auto_allocation = params[:inventory_auto_allocation]
         if params[:default_low_inventory_alert_limit].to_i < 1
           params[:default_low_inventory_alert_limit] = 1
         end
@@ -627,6 +628,11 @@ class SettingsController < ApplicationController
         scan_pack_setting.service_issue_code = params[:service_issue_code]
         scan_pack_setting.restart_code_enabled = params[:restart_code_enabled]
         scan_pack_setting.restart_code = params[:restart_code]
+        scan_pack_setting.type_scan_code_enabled = params[:type_scan_code_enabled]
+        scan_pack_setting.type_scan_code = params[:type_scan_code]
+        scan_pack_setting.post_scanning_option = params[:post_scanning_option]
+        scan_pack_setting.escape_string_enabled = params[:escape_string_enabled]
+        scan_pack_setting.escape_string = params[:escape_string]
 
         if scan_pack_setting.save
           @result['success_messages'].push('Settings updated successfully.')

@@ -42,6 +42,23 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
 
     };
 
+    // $scope.get_user_confirmation = function(status) {
+    //     myscope.order_obj= $modal.open({
+    //         controller: 'ordersModal',
+    //         templateUrl: '/assets/views/modals/order/confirmation.html',
+    //         resolve: {
+    //             order_data: function(){return $scope.orders;},
+    //             status: function(){return status;}
+    //         }
+    //     });
+    //     myscope.order_obj.result.then(function (data) {
+    //         console.log(data);
+    //         console.log("reloading the page");
+    //         $scope.orders.setup.status = "";
+    //         myscope.get_orders();
+    //     });
+    // };
+
     $scope.order_change_status = function(status) {
         $scope.orders.setup.status = status;
         orders.list.update('update_status',$scope.orders).then(function(data) {

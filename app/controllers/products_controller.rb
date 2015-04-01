@@ -622,6 +622,40 @@ class ProductsController < ApplicationController
     end
   end
 
+  def scan_per_product
+    @result = Hash.new
+    @result['status'] = true
+    @result['messages'] = []
+
+    if current_user.can?('add_edit_products')
+      if !params[:setting].blank? && ['type_scan_enabled','click_scan_enabled'].include?(params[:setting])
+        @products = list_selected_products
+        unless @products.nil?
+          @products.each do|product|
+            @product = Product.find(product['id'])
+            @product[params[:setting]] = params[:status]
+            unless @product.save
+              @result['status'] &= false
+              @result['messages'].push('There was a problem updating '+@product.name)
+            end
+          end
+        end
+      else
+        @result['status'] = false
+        @result['messages'].push('No action specified for updating')
+      end
+
+    else
+      @result['status'] = false
+      @result['messages'].push('You do not have enough permissions to edit this product')
+    end
+
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json: @result }
+    end
+  end
+
   def changeproductstatus
     @result = Hash.new
     @result['status'] = true
@@ -688,6 +722,7 @@ class ProductsController < ApplicationController
         @store = stores.first
       end
       general_setting = GeneralSetting.all.first
+      scan_pack_setting = ScanPackSetting.all.first
       amazon_products = AmazonCredentials.where(:store_id=>store_id)
       if !amazon_products.nil?
         @amazon_product = amazon_products.first
@@ -696,7 +731,7 @@ class ProductsController < ApplicationController
       @result['product'] = Hash.new
       @result['product']['amazon_product'] = @amazon_product
       @result['product']['store'] = @store
-      @result['product']['basicinfo'] = @product
+      @result['product']['basicinfo'] = @product.attributes
       @result['product']['product_weight_format'] = GeneralSetting.get_product_weight_format
       @result['product']['weight'] = @product.get_weight
       @result['product']['shipping_weight'] = @product.get_shipping_weight
@@ -895,6 +930,8 @@ class ProductsController < ApplicationController
         @product.status = params[:basicinfo][:status]
         @product.store_id = params[:basicinfo][:store_id]
         @product.store_product_id = params[:basicinfo][:store_product_id]
+        @product.type_scan_enabled = params[:basicinfo][:type_scan_enabled]
+        @product.click_scan_enabled = params[:basicinfo][:click_scan_enabled]
 
         @product.weight = get_product_weight(params[:weight])
         @product.shipping_weight = get_product_weight(params[:shipping_weight])
@@ -945,14 +982,11 @@ class ProductsController < ApplicationController
                 product_inv_wh = ProductInventoryWarehouses.find(wh["info"]["id"])
 
                 if general_setting.low_inventory_alert_email
-                  if !product_inv_wh.product_inv_alert && product_inv_wh.product_inv_alert_level != wh["info"]["product_inv_alert_level"] && product_inv_wh.available_inv == wh["info"]["available_inv"] && product_inv_wh.location_primary == wh["info"]["location_primary"] && product_inv_wh.location_secondary == wh["info"]["location_secondary"] && product_inv_wh.location_tertiary == wh["info"]["location_tertiary"]
-                      product_inv_wh.product_inv_alert = true
-                  else
-                    product_inv_wh.product_inv_alert = wh["info"]["product_inv_alert"]
-                  end
+                  product_inv_wh.product_inv_alert = wh["info"]["product_inv_alert"]
                   product_inv_wh.product_inv_alert_level = wh["info"]["product_inv_alert_level"]
                 end
-                product_inv_wh.available_inv = wh["info"]["available_inv"]
+                updatelist(product_inv_wh.product,'qty',wh["info"]["available_inv"]) unless wh["info"]["available_inv"].nil?
+                # product_inv_wh.available_inv = wh["info"]["available_inv"]
                 product_inv_wh.location_primary = wh["info"]["location_primary"]
                 product_inv_wh.location_secondary = wh["info"]["location_secondary"]
                 product_inv_wh.location_tertiary = wh["info"]["location_tertiary"]
@@ -1485,7 +1519,7 @@ class ProductsController < ApplicationController
       query_add = ' LIMIT '+limit.to_s+' OFFSET '+offset.to_s
     end
 
-    base_query = 'SELECT products.id as id, products.name as name, products.status as status, products.updated_at as updated_at, product_skus.sku as sku, product_barcodes.barcode as barcode, product_cats.category as cat, product_inventory_warehouses.location_primary, product_inventory_warehouses.location_secondary, product_inventory_warehouses.location_tertiary, product_inventory_warehouses.available_inv as qty, inventory_warehouses.name as location_name, stores.name as store_type, products.store_id as store_id
+    base_query = 'SELECT products.id as id, products.name as name, products.type_scan_enabled as type_scan_enabled, products.click_scan_enabled as click_scan_enabled, products.status as status, products.updated_at as updated_at, product_skus.sku as sku, product_barcodes.barcode as barcode, product_cats.category as cat, product_inventory_warehouses.location_primary, product_inventory_warehouses.location_secondary, product_inventory_warehouses.location_tertiary, product_inventory_warehouses.available_inv as qty, inventory_warehouses.name as location_name, stores.name as store_type, products.store_id as store_id
       FROM products
         LEFT JOIN product_skus ON (products.id = product_skus.product_id)
         LEFT JOIN product_barcodes ON (product_barcodes.product_id = products.id)
@@ -1656,6 +1690,8 @@ class ProductsController < ApplicationController
       @product_hash['location_secondary'] = ''
       @product_hash['location_tertiary'] = ''
       @product_hash['location_name'] = 'not_available'
+      @product_hash['type_scan_enabled'] = product.type_scan_enabled
+      @product_hash['click_scan_enabled'] = product.click_scan_enabled
       @product_hash['qty'] = 0
       @product_hash['barcode'] = ''
       @product_hash['sku'] = ''

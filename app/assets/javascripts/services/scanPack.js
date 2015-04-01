@@ -30,9 +30,6 @@ groovepacks_services.factory('scanPack',['$http','notification','$state',functio
             notification.notify(data.notice_messages,2);
             notification.notify(data.success_messages,1);
             notification.notify(data.error_messages,0);
-            //console.log("input scan response");
-            //console.log(data);
-
         }).error(notification.server_error);
     };
 
@@ -86,7 +83,20 @@ groovepacks_services.factory('scanPack',['$http','notification','$state',functio
     };
 
     var order_instruction = function(id,code) {
-        return $http.post('/scan_pack/order_instruction.json',{id: id,code: code}).success(function(data) {
+        return $http.post('/scan_pack/confirmation_code.json',{id: id,code: code}).success(function(data) {
+            notification.notify(data.notice_messages,2);
+            notification.notify(data.success_messages,1);
+            notification.notify(data.error_messages,0);
+        }).error(notification.server_error);
+    };
+
+    var code_confirm = function(code) {
+        return $http.post('/scan_pack/confirmation_code.json',{code: code}).success(function(data) {
+        }).error(notification.server_error);
+    };
+
+    var type_scan = function(id,next_item,count) {
+        return $http.post('/scan_pack/type_scan.json',{id: id, next_item: next_item, count: count}).success(function(data) {
             notification.notify(data.notice_messages,2);
             notification.notify(data.success_messages,1);
             notification.notify(data.error_messages,0);
@@ -131,6 +141,8 @@ groovepacks_services.factory('scanPack',['$http','notification','$state',functio
             model:get_state
         },
         click_scan:click_scan,
+        type_scan: type_scan,
+        code_confirm: code_confirm,
         order_instruction: order_instruction,
         product_instruction: product_instruction,
         product_serial:serial_scan

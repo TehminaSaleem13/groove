@@ -13,7 +13,10 @@ class ScanPackController < ApplicationController
     @matcher = {
         'scanpack.rfo' => ['order_scan'],
         'scanpack.rfp.default' => ['product_scan'],
-        'scanpack.rfp.tracking' => ['scan_tracking'],
+        'scanpack.rfp.recording' => ['scan_recording'],
+        'scanpack.rfp.verifying' => ['scan_verifying'],
+        'scanpack.rfp.no_tracking_info' => ['render_order_scan'],
+        'scanpack.rfp.no_match' => ['scan_again_or_render_order_scan'],
         'scanpack.rfp.product_edit' => ['order_scan'],
         'scanpack.rfp.product_edit.single' => ['order_scan'],
         'scanpack.rfp.confirmation.product_edit' => ['product_edit_conf','order_scan'],
@@ -201,6 +204,66 @@ class ScanPackController < ApplicationController
     respond_to do |format|
       format.html # show.html.erb
       format.json { render json: product_scan(params[:barcode],'scanpack.rfp.default',params[:id],true) }
+    end
+  end
+
+  def confirmation_code
+    general_setting = GeneralSetting.all.first
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json {render json: {confirmed: (!general_setting.strict_cc || current_user.confirmation_code == params[:code])}}
+    end
+  end
+
+  def type_scan
+    @result = Hash.new
+    @result['status'] = true
+    @result['error_messages'] = []
+    @result['success_messages'] = []
+    @result['notice_messages'] = []
+    @result['data'] = Hash.new
+    if params[:id].nil? || params[:count].nil? || params[:next_item].nil?
+      @result['status'] &= false
+      @result['error_messages'].push('Order id, Item id and Type-in count are required')
+    else
+      @order = Order.find(params[:id])
+      if @order.nil?
+        @result['status'] &= false
+        @result['error_messages'].push('Could not find order with id: '+params[:id].to_s)
+      else
+        @order_item = OrderItem.find(params[:next_item]['order_item_id'])
+        unless params[:next_item]['kit_product_id'].nil?
+          @order_kit_product = OrderItemKitProduct.find(params[:next_item]['kit_product_id'])
+        end
+        if @order_item.nil?
+          @result['status'] &= false
+          @result['error_messages'].push('Couldnt find order item')
+        elsif !params[:next_item]['kit_product_id'].nil? && (@order_kit_product.nil?  ||
+            @order_kit_product.order_item_id != @order_item.id)
+          @result['status'] &= false
+          @result['error_messages'].push('Couldnt find child item')
+        elsif @order_item.order_id != @order.id
+          @result['status'] &= false
+          @result['error_messages'].push('Item doesnt belong to current order')
+        else
+          if params[:count] == params[:next_item][:qty]
+            unless params[:next_item][:barcodes].blank? || params[:next_item][:barcodes][0].blank? || params[:next_item][:barcodes][0][:barcode].blank?
+              (1..params[:next_item][:qty_remaining]).each do
+                @result['data'] = product_scan(params[:next_item][:barcodes][0][:barcode],'scanpack.rfp.default',params[:id],false)
+              end
+              @order.addactivity('Type-In count Scanned for product'+params[:next_item][:sku],current_user.username)
+            end
+          else
+            @result['status'] &= false
+            @result['error_messages'].push('Wrong count has been entered. Please try again')
+          end
+        end
+      end
+
+    end
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json: @result }
     end
   end
 

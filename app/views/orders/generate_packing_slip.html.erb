@@ -6326,14 +6326,15 @@ body {
       </div>
 
           <%if !@order.store.nil?%>
+            <%if !GeneralSetting.get_packing_slip_message_to_customer.nil? %>
+                <div style="page-break-inside: avoid;">
+                  <p><%=GeneralSetting.get_packing_slip_message_to_customer.html_safe%></p>
+                </div>
+            <% end %>
             <%if !@order.store.thank_you_message_to_customer.nil? %>
               <div style="page-break-inside: avoid;">
                 <p><%=@order.store.thank_you_message_to_customer.html_safe%></p>
               </div>
-            <%elsif !GeneralSetting.get_packing_slip_message_to_customer.nil? %>
-                <div style="page-break-inside: avoid;">
-                  <p><%=GeneralSetting.get_packing_slip_message_to_customer.html_safe%></p>
-                </div>
             <% end %>
           <%end%>
 

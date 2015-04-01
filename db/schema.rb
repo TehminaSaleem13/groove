@@ -145,6 +145,7 @@ ActiveRecord::Schema.define(:version => 20150401214924) do
     t.string   "conf_code_product_instruction",     :default => "optional"
     t.string   "admin_email"
     t.string   "export_items",                      :default => "disabled"
+    t.boolean  "inventory_auto_allocation",         :default => false
   end
 
   create_table "generate_barcodes", :force => true do |t|
@@ -375,6 +376,7 @@ ActiveRecord::Schema.define(:version => 20150401214924) do
     t.string   "non_hyphen_increment_id"
     t.boolean  "note_confirmation",                                     :default => false
     t.string   "store_order_id"
+    t.boolean  "update_inventory_level",                                :default => true
   end
 
   create_table "product_barcodes", :force => true do |t|
@@ -482,6 +484,8 @@ ActiveRecord::Schema.define(:version => 20150401214924) do
     t.decimal  "weight",                          :precision => 8, :scale => 2, :default => 0.0,       :null => false
     t.decimal  "shipping_weight",                 :precision => 8, :scale => 2, :default => 0.0
     t.boolean  "record_serial",                                                 :default => false
+    t.string   "type_scan_enabled",                                             :default => "on"
+    t.string   "click_scan_enabled",                                            :default => "on"
   end
 
   add_index "products", ["store_id"], :name => "index_products_on_store_id"
@@ -544,6 +548,11 @@ ActiveRecord::Schema.define(:version => 20150401214924) do
     t.boolean  "play_order_complete_sound",     :default => true
     t.string   "order_complete_sound_url",      :default => "/assets/sounds/scan_order_complete.mp3"
     t.float    "order_complete_sound_vol",      :default => 0.75
+    t.boolean  "type_scan_code_enabled",        :default => true
+    t.string   "type_scan_code",                :default => "*"
+    t.string   "post_scanning_option",          :default => "None"
+    t.string   "escape_string",                 :default => " - "
+    t.boolean  "escape_string_enabled",         :default => false
   end
 
   create_table "shipstation_credentials", :force => true do |t|

@@ -36,7 +36,8 @@ function( $scope, $http, $timeout, $location, $state, $cookies, generalsettings,
                 "packing_slip_orientation": "",
                 "portrait": "",
                 "landscape": "",
-                "packing_slip_message_to_customer": ""
+                "packing_slip_message_to_customer": "",
+                "inventory_auto_allocation": ""
             },
             "tooltips": {
                 "inventory_tracking": "",

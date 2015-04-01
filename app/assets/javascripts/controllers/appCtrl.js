@@ -233,6 +233,7 @@ groovepacks_controllers.
             importOrders.do_import($scope);
         };
         $rootScope.focus_search = function(event) {
+            var elem;
             if (typeof event != 'undefined') {
                 event.preventDefault();
             }
@@ -242,10 +243,12 @@ groovepacks_controllers.
             }
             // If in modal
             if($document.find('body').hasClass('modal-open')) {
-                $document.find('.modal-dialog:last .modal-body .search-box').focus();
+                elem = $document.find('.modal-dialog:last .modal-body .search-box');
             } else {
-                $document.find('.search-box').focus();
+                elem = $document.find('.search-box');
             }
+            elem.focus();
+            return elem;
         };
         hotkeys.bindTo($scope).add({
             combo: ['return'],

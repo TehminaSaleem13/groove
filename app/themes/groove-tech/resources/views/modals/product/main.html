@@ -16,7 +16,7 @@
                   <span ng-repeat="activity in products.single.unacknowledged_kit_activities" >
                       <div class="alert alert-acknowledge" ng-show="activity.activity_type=='deleted_item'">
                           <div class="pull-right">
-                              <button class="btn btn-info btn-xs" 
+                              <button class="btn btn-info btn-xs"
                                 ng-click="acknowledge_activity(activity.id)">Acknowledge</button>
                           </div>
                           <h5>{{ activity.activitytime | date:'EEEE MM/dd/yyyy hh:mm:ss a'}}</h5>
@@ -127,24 +127,7 @@
                 </div>
             </div>
 
-            <div class="form-group">
-                <label class="control-label col-sm-2">Special instructions for Packer</label>
 
-                <div class="controls col-sm-4">
-                    <textarea class="form-control input-style" ng-model="products.single.basicinfo.spl_instructions_4_packer" ng-blur="update_single_product()" class="col-sm-8" rows="4"></textarea>
-                </div>
-                <label class="control-label col-sm-2">Packer Confirmation</label>
-                <div class="controls col-sm-2 col-lg-1" ng-show="general_settings.single.conf_code_product_instruction =='optional'">
-                    <div toggle-switch ng-model="products.single.basicinfo.spl_instructions_4_confirmation" groov-click="update_single_product()"></div>
-                </div>
-                <div class="control-label col-sm-2 col-lg-1" ng-show="general_settings.single.conf_code_product_instruction !='optional'">
-                    <div class="label col-xs-12 label-default" ng-class="{'label-success':general_settings.single.conf_code_product_instruction=='always'}">
-                        <span ng-show="general_settings.single.conf_code_product_instruction=='always'" translate>common.always</span>
-                        <span ng-show="general_settings.single.conf_code_product_instruction=='never'" translate>common.never</span>
-                    </div>
-                </div>
-                <div class="info col-sm-2" ><i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" groov-popover="{{translations.tooltips.confirmation}} <br/> {{confirmation_setting_text}}"></i></div>
-            </div>
             <div class="form-group" ng-show="products.single.store.store_type!='Amazon' || (products.single.store.store_type=='Amazon' && products.single.amazon_product.show_shipping_weight_only==false)">
                 <label class="control-label col-sm-2">Product Weight</label>
 
@@ -201,7 +184,7 @@
 
                 </div>
             </div>
-
+            <h4>Packing options</h4>
             <div class="form-group">
                 <label class="control-label col-sm-2">Packing placement</label>
 
@@ -222,6 +205,24 @@
             -->
 
             <div class="form-group">
+                <label class="control-label col-sm-2">Special instructions for Packer</label>
+
+                <div class="controls col-sm-4">
+                    <textarea class="form-control input-style" ng-model="products.single.basicinfo.spl_instructions_4_packer" ng-blur="update_single_product()" class="col-sm-8" rows="4"></textarea>
+                </div>
+                <label class="control-label col-sm-2">Packer Confirmation</label>
+                <div class="controls col-sm-2 col-lg-1" ng-show="general_settings.single.conf_code_product_instruction =='optional'">
+                    <div toggle-switch ng-model="products.single.basicinfo.spl_instructions_4_confirmation" groov-click="update_single_product()"></div>
+                </div>
+                <div class="control-label col-sm-2 col-lg-1" ng-show="general_settings.single.conf_code_product_instruction !='optional'">
+                    <div class="label col-xs-12 label-default" ng-class="{'label-success':general_settings.single.conf_code_product_instruction=='always'}">
+                        <span ng-show="general_settings.single.conf_code_product_instruction=='always'" translate>common.always</span>
+                        <span ng-show="general_settings.single.conf_code_product_instruction=='never'" translate>common.never</span>
+                    </div>
+                </div>
+                <div class="info col-sm-2" ><i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" groov-popover="{{translations.tooltips.confirmation}} <br/> {{confirmation_setting_text}}"></i></div>
+            </div>
+            <div class="form-group">
                 <label class="control-label col-sm-2">Product can be skipped</label>
 
                 <div class="controls col-sm-2 col-lg-1">
@@ -231,7 +232,7 @@
 
             </div>
             <div class="form-group">
-                <label class="control-label col-sm-2">Record a Serial Number for this item during packing?</label>
+                <label class="control-label col-sm-2">Record Serial Number?</label>
 
                 <div class="controls col-sm-2 col-lg-1">
                     <div toggle-switch ng-model="products.single.basicinfo.record_serial" groov-click="update_single_product()"></div>
@@ -239,7 +240,47 @@
                 <div class="info col-sm-2" ><i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" popover="{{translations.tooltips.record_serial}}"></i></div>
 
             </div>
-            <h4>Inventory <a href="" ng-click="print_receive_label($event)"><i class="icon-large glyphicon glyphicon-print"></i></a></h4>
+            <div class="form-group">
+                <label class="control-label col-sm-2">Type-In Scan Setting</label>
+                <div class="col-sm-2 col-lg-1 " dropdown ng-show="scan_pack_settings.settings.type_scan_code_enabled">
+                    <button class="dropdown-toggle groove-button label label-default" ng-class="{'label-success':products.single.basicinfo.type_scan_enabled=='on',
+                            'label-warning':products.single.basicinfo.type_scan_enabled=='on_with_confirmation'}">
+                        <span ng-show="products.single.basicinfo.type_scan_enabled=='on'" >On</span>
+                        <span ng-show="products.single.basicinfo.type_scan_enabled=='off'" >Off</span>
+                        <span ng-show="products.single.basicinfo.type_scan_enabled=='on_with_confirmation'"> On with Confirmation</span>
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu" role="menu">
+                        <li><a class="dropdown-toggle" ng-click="change_setting('type_scan_enabled','on')" >On</a></li>
+                        <li><a class="dropdown-toggle" ng-click="change_setting('type_scan_enabled','off')" >Off</a></li>
+                        <li><a class="dropdown-toggle" ng-click="change_setting('type_scan_enabled','on_with_confirmation')" >On with confirmation</a></li>
+                    </ul>
+                </div>
+                <div class="col-sm-2" ng-hide="scan_pack_settings.settings.type_scan_code_enabled">
+                    <button class="groove-button label label-default">Disabled</button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-sm-2">Click Scanning Setting</label>
+                <div class="col-sm-2 col-lg-1 " dropdown ng-show="scan_pack_settings.settings.enable_click_sku">
+                    <button class="dropdown-toggle groove-button label label-default" ng-class="{'label-success':products.single.basicinfo.click_scan_enabled=='on',
+                            'label-warning':products.single.basicinfo.click_scan_enabled=='on_with_confirmation'}">
+                        <span ng-show="products.single.basicinfo.click_scan_enabled=='on'" >On</span>
+                        <span ng-show="products.single.basicinfo.click_scan_enabled=='off'" >Off</span>
+                        <span ng-show="products.single.basicinfo.click_scan_enabled=='on_with_confirmation'"> On with Confirmation</span>
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu" role="menu">
+                        <li><a class="dropdown-toggle" ng-click="change_setting('click_scan_enabled','on')" >On</a></li>
+                        <li><a class="dropdown-toggle" ng-click="change_setting('click_scan_enabled','off')" >Off</a></li>
+                        <li><a class="dropdown-toggle" ng-click="change_setting('click_scan_enabled','on_with_confirmation')" >On with confirmation</a></li>
+                    </ul>
+                </div>
+                <div class="col-sm-2" ng-hide="scan_pack_settings.settings.enable_click_sku">
+                    <button class="groove-button label label-default">Disabled</button>
+                </div>
+            </div>
+            <h4 class="text-right">Print Inventory Receiving Label&nbsp;<a href="" ng-click="print_receive_label($event)" style="padding:10px;"><i class="icon-large glyphicon glyphicon-print"></i></a></h4>
             <div class="form-group">
                 <div class="controls col-xs-12">
                     <div groov-data-grid="warehouseGridOptions" groov-list="products.single.inventory_warehouses"></div>
@@ -257,7 +298,7 @@
 
             <fieldset ng-show="products.single.basicinfo.is_kit==1">
                 <legend>Kit Options</legend>
-                
+
                 <table class="table table-hover table-bordered table-striped table-condensed">
                     <thead>
                     <tr>
