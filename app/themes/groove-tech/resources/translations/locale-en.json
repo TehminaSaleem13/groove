@@ -72,6 +72,7 @@
                     "conf_code_product_instruction": "Should confirmation be required on \"Special Instructions to Packer\"?",
                     "default_low_inventory_alert_limit":"Set Default low inventory alert limit",
                     "hold_orders_due_to_inventory": "Hold Order due to Inventory",
+                    "inventory_auto_allocation": "Inventory Auto-Allocation",
                     "conf_req_on_notes_to_packer": "Should confirmation be required on \"Notes to Packer\"?",
                     "send_email_for_packer_notes": "Should an email be sent when \"Notes from Packer\" are added?",
                     "email_address": "Email Address",

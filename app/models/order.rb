@@ -575,20 +575,22 @@ class Order < ActiveRecord::Base
 
   def update_inventory_levels_for_items(override = true)
     changed_hash = self.changes
-
     logger.debug(changed_hash)
     if self.update_inventory_level
-
       unless changed_hash['status'].nil?
         if (changed_hash['status'][0] == 'onhold' or
             changed_hash['status'][0] == 'cancelled' or override) and
-          changed_hash['status'][1] == 'awaiting'
+           (changed_hash['status'][1] == 'awaiting' or
+            changed_hash['status'][1] == 'serviceissue')
           #update_inventory_levels_for_purchase
           reason = 'packing'
-        elsif changed_hash['status'][0] == 'awaiting' and
+        elsif (changed_hash['status'][0] == 'awaiting' or
+          changed_hash['status'][0] == 'serviceissue') and
           (changed_hash['status'][1] == 'onhold' or
           changed_hash['status'][1] == 'cancelled')
           #update_inventory_levels_for_return
+          reason = 'return'
+        elsif changed_hash['status'][0] == 'onhold' and changed_hash['status'][1] == 'cancelled'
           reason = 'return'
         end
         self.order_items.each do |order_item|
@@ -617,11 +619,11 @@ class Order < ActiveRecord::Base
     end
   end
 
-  def update_inventory_levels_for_status_change(option)
+  def update_inventory_levels_for_status_change(override = true)
     changed_hash = self.changes
     unless changed_hash['status'].nil?
-      if option == 'yes'
-        if (changed_hash['status'][0] == 'serviceissue' or
+      if GeneralSetting.first.inventory_auto_allocation
+        if (changed_hash['status'][0] == 'service issue' or
             changed_hash['status'][0] == 'awaiting') and
             changed_hash['status'][1] == 'scanned'
           result = true
@@ -640,18 +642,18 @@ class Order < ActiveRecord::Base
             end
           end
         end
-      else
-        if (changed_hash['status'][0] == 'serviceissue' or
-            changed_hash['status'][0] == 'awaiting') and
-          changed_hash['status'][1] == 'scanned'
-          result = true
-          self.order_items.each do |order_item|
-            result &= order_item.update_inventory_levels_for_return(true)
-          end
-        elsif changed_hash['status'][0] == 'cancelled' and
-          (changed_hash['status'][1] == 'scanned')
-          result = true
-        end
+      # else
+      #   if (changed_hash['status'][0] == 'service issue' or
+      #       changed_hash['status'][0] == 'awaiting') and
+      #     changed_hash['status'][1] == 'scanned'
+      #     result = true
+      #     self.order_items.each do |order_item|
+      #       result &= order_item.update_inventory_levels_for_return(true)
+      #     end
+      #   elsif changed_hash['status'][0] == 'cancelled' and
+      #     (changed_hash['status'][1] == 'scanned')
+      #     result = true
+      #   end
       end
     end
     logger.info('error updating inventory level') if !result

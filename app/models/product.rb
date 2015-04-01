@@ -165,7 +165,6 @@ class Product < ActiveRecord::Base
 
   def update_available_product_inventory_level(inventory_warehouse_id, purchase_qty, reason)
   	result = true
-
   	if self.is_kit != 1 or
   		(self.is_kit == 1 and (self.kit_parsing == 'single' or self.kit_parsing == 'depends'))
 	     result &= self.update_warehouses_inventory_level(inventory_warehouse_id, self.id,
@@ -215,7 +214,7 @@ class Product < ActiveRecord::Base
   end
 
   def update_warehouses_inventory_level(inv_wh_id, product_id, purchase_qty, reason)
-	result = true
+	  result = true
   	prod_warehouses = ProductInventoryWarehouses.where(:inventory_warehouse_id =>
   		inv_wh_id).where(:product_id => product_id)
 
@@ -225,11 +224,11 @@ class Product < ActiveRecord::Base
 
   	unless !result
   		prod_warehouses.each do |wh|
-  			wh.update_available_inventory_level(purchase_qty, reason)
-		end
-	end
+  			result = wh.update_available_inventory_level(purchase_qty, reason)
+  		end
+  	end
 
-	result
+	  result
   end
 
   def update_warehouses_sold_level(inv_wh_id, product_id, allocated_qty)

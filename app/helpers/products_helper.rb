@@ -15,8 +15,7 @@ module ProductsHelper
 
 			if @amazon_credentials.length > 0
 				@credential = @amazon_credentials.first
-        puts "connecting to mws"
-        puts product_sku.to_s
+
 				mws = Mws.connect(
 					  merchant: @credential.merchant_id,
 					  access: ENV['AMAZON_MWS_ACCESS_KEY_ID'],
@@ -32,20 +31,15 @@ module ProductsHelper
 				product = Product.find(product_id)
 
 				product.name = product_hash['GetMatchingProductForIdResult']['Products']['Product']['AttributeSets']['ItemAttributes']['Title']
-        puts "product.name:"
-        puts product.name
+
         if !product_hash['GetMatchingProductForIdResult']['Products']['Product']['AttributeSets']['ItemAttributes']['ItemDimensions'].nil? &&
           !product_hash['GetMatchingProductForIdResult']['Products']['Product']['AttributeSets']['ItemAttributes']['ItemDimensions']['Weight'].nil? 
           product.weight = product_hash['GetMatchingProductForIdResult']['Products']['Product']['AttributeSets']['ItemAttributes']['ItemDimensions']['Weight'].to_f * 16
-          puts "product.weight:"
-          puts product.weight
         end
 
         if !product_hash['GetMatchingProductForIdResult']['Products']['Product']['AttributeSets']['ItemAttributes']['PackageDimensions'].nil? &&
           !product_hash['GetMatchingProductForIdResult']['Products']['Product']['AttributeSets']['ItemAttributes']['PackageDimensions']['Weight'].nil? 
           product.shipping_weight = product_hash['GetMatchingProductForIdResult']['Products']['Product']['AttributeSets']['ItemAttributes']['PackageDimensions']['Weight'].to_f * 16
-          puts "product.shipping_weight:"
-          puts product.shipping_weight
         end
 
 				product.store_product_id = product_hash['GetMatchingProductForIdResult']['Products']['Product']['Identifiers']['MarketplaceASIN']['ASIN']
@@ -103,10 +97,25 @@ module ProductsHelper
           product_location.name = value
         elsif var == 'qty'
           product_location.available_inv = value
+          if GeneralSetting.first.inventory_auto_allocation == true
+            product_location.save
+            @order_items = product_location.product.order_items unless product_location.product.order_items.empty?
+            @order_items.each do |order_item|
+              order_item.order.update_inventory_level = false
+              order_item.order.save
+              if order_item.qty <= product_location.available_inv && order_item.inv_status != 'allocated'
+                order_item.update_inventory_levels_for_packing(true)
+              end
+            end
+          end
         end
       product_location.save
     end
     product.update_product_status
+    @order_items.each do |order_item|
+      order_item.order.update_inventory_level = true
+      order_item.order.save
+    end
     rescue Exception => e
       puts e.inspect
     end
