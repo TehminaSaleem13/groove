@@ -985,7 +985,8 @@ class ProductsController < ApplicationController
                   product_inv_wh.product_inv_alert = wh["info"]["product_inv_alert"]
                   product_inv_wh.product_inv_alert_level = wh["info"]["product_inv_alert_level"]
                 end
-                product_inv_wh.available_inv = wh["info"]["available_inv"]
+                updatelist(product_inv_wh.product,'qty',wh["info"]["available_inv"]) unless wh["info"]["available_inv"].nil?
+                # product_inv_wh.available_inv = wh["info"]["available_inv"]
                 product_inv_wh.location_primary = wh["info"]["location_primary"]
                 product_inv_wh.location_secondary = wh["info"]["location_secondary"]
                 product_inv_wh.location_tertiary = wh["info"]["location_tertiary"]
