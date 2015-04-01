@@ -116,6 +116,7 @@ module ScanPackHelper
                 if scanpack_settings.post_scanning_option == "Verify"
                   if single_order.tracking_num.nil?
                     single_order_result['next_state'] = 'scanpack.rfp.no_tracking_info'
+                    single_order.addactivity("Tracking information was not imported with this order so the shipping label could not be verified ", current_user.username)
                   else
                     single_order_result['next_state'] = 'scanpack.rfp.verifying'
                   end
@@ -299,6 +300,7 @@ module ScanPackHelper
                 if scanpack_settings.post_scanning_option == "Verify"
                   if single_order.tracking_num.nil?
                     result['data']['next_state'] = 'scanpack.rfp.no_tracking_info'
+                    single_order.addactivity("Tracking information was not imported with this order so the shipping label could not be verified ", current_user.username)
                   else
                     result['data']['next_state'] = 'scanpack.rfp.verifying'
                   end
@@ -393,6 +395,7 @@ module ScanPackHelper
             order.set_order_to_scanned_state(current_user.username)
             result['data']['order_complete'] = true
             result['data']['next_state'] = 'scanpack.rfo'
+            order.addactivity("Shipping Label Verified: #{input}", current_user.username)
             order.save
           elsif input == current_user.confirmation_code
             result['matched'] = false
@@ -425,17 +428,17 @@ module ScanPackHelper
     result['data']['next_state'] = 'scanpack.rfp.no_tracking_info'
     unless id.nil?
       order = Order.find(id)
-      if state == "scanpack.rfp.no_tracking_info" && input == ""
-        result['status'] = false
-        result['matched'] = false
-        result['data']['next_state'] = 'scanpack.rfo'
-      elsif state == "scanpack.rfp.no_tracking_info" && input == current_user.confirmation_code
+      if state == "scanpack.rfp.no_tracking_info" && (input == current_user.confirmation_code || input == "")
         result['status'] = true
         result['matched'] = false
         order.set_order_to_scanned_state(current_user.username)
         result['data']['order_complete'] = true
         result['data']['next_state'] = 'scanpack.rfo'
         order.save
+      else
+        result['status'] = false
+        result['matched'] = false
+        result['data']['next_state'] = 'scanpack.rfp.no_tracking_info'
       end
     end
     result
@@ -458,6 +461,7 @@ module ScanPackHelper
           result['matched'] = false
           order.set_order_to_scanned_state(current_user.username)
           result['data']['order_complete'] = true
+          order.addactivity("The correct shipping label was not verified at the time of packing. Confirmation code for user #{current_user.username} was scanned", current_user.username)
           result['data']['next_state'] = 'scanpack.rfo'
           order.save
         elsif state == "scanpack.rfp.no_match" && input == order.tracking_num
@@ -468,8 +472,10 @@ module ScanPackHelper
           result['data']['next_state'] = 'scanpack.rfo'
           order.save
         elsif state == "scanpack.rfp.no_match" && input == "" && GeneralSetting.all.first.strict_cc == false
-          result['status'] = false
+          result['status'] = true
           result['matched'] = false
+          order.set_order_to_scanned_state(current_user.username)
+          result['data']['order_complete'] = true
           result['data']['next_state'] = 'scanpack.rfo'
         else
           result['status'] = false
