@@ -23,9 +23,22 @@ class OrderImportSummary < ActiveRecord::Base
       if import_item.store.nil?
         import_item.destroy
       else
-        result['import_items'].push({store_info: import_item.store, import_info: import_item})
+        result['import_items'].push({store_info: import_item.store, import_info: import_item, 
+          show_update: show_update(import_item.store)})
       end
     end
     GroovRealtime::emit('import_status_update',result,:tenant)
+  end
+
+  private
+
+  def show_update(store)
+    if store.store_type == 'Shipstation API 2' && 
+      !store.shipstation_rest_credential.nil? && 
+      store.shipstation_rest_credential.warehouse_location_update
+      true
+    else
+      false
+    end
   end
 end
