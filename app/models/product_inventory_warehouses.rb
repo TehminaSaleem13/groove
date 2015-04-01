@@ -5,7 +5,6 @@ class ProductInventoryWarehouses < ActiveRecord::Base
   belongs_to :inventory_warehouse
   has_many :sold_inventory_warehouses
 
-  after_update :update_store
 
   def update_available_inventory_level(purchase_qty, reason)
   	result = true
@@ -50,25 +49,6 @@ class ProductInventoryWarehouses < ActiveRecord::Base
       result &= false
     end
     result
-  end
-
-  def update_store
-    changed_hash = self.changes
-    unless changed_hash['location_primary'].nil?
-      self.product.order_items.each do |order_item|
-        order_store = order_item.order.store
-        if !order_store.nil? && 
-          order_store.store_type == 'Shipstation API 2' &&
-          order_store.shipstation_rest_credential.warehouse_location_update
-          context = Groovepacker::Store::Context.new(
-            Groovepacker::Store::Handlers::ShipstationRestHandler.new(order_store))
-          context.update_product({ 
-            product: self.product, 
-            store_order_id: order_item.order.store_order_id 
-          })
-        end
-      end
-    end
   end
 
 end

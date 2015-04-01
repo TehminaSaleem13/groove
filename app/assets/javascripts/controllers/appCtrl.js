@@ -1,6 +1,6 @@
 groovepacks_controllers.
-    controller('appCtrl', [ '$rootScope', '$scope', '$timeout','$modalStack', '$state', '$filter','$document','$window','hotkeys', 'auth','notification','importOrders','groovIO','editable',
-    function( $rootScope, $scope, $timeout, $modalStack, $state, $filter, $document, $window, hotkeys, auth,notification,importOrders,groovIO,editable) {
+    controller('appCtrl', [ '$rootScope', '$scope', '$timeout','$modalStack', '$state', '$filter','$document','$window','hotkeys', 'auth','notification','importOrders','groovIO','editable', 'stores', 
+    function( $rootScope, $scope, $timeout, $modalStack, $state, $filter, $document, $window, hotkeys, auth,notification,importOrders,groovIO,editable, stores) {
 
         $scope.$on("user-data-reloaded", function() {
             $scope.current_user = auth;
@@ -12,15 +12,33 @@ groovepacks_controllers.
                 //console.log("socket",message);
                 $scope.import_summary = angular.copy(message);
                 $scope.import_groov_popover = {title:'',content:'',data:[]};
-                if($scope.import_summary.import_info.status =='completed') {
-                    $scope.import_groov_popover.title = 'Last import: '+$filter('date')($scope.import_summary.import_info.updated_at,'EEE MM/dd/yy hh:mm a');
-                } else if($scope.import_summary.import_info.status == 'in_progress') {
-                    $scope.import_groov_popover.title = 'Import in Progress';
-                } else if($scope.import_summary.import_info.status == 'not_started') {
-                    $scope.import_groov_popover.title = 'Import not started';
-                } else if($scope.import_summary.import_info.status == 'cancelled') {
-                    $scope.import_groov_popover.title = 'Import cancelled';
+                var get_import_type = function() {
+                    if ($scope.import_summary.import_info.import_summary_type == 'update_locations'){
+                        return ("Update");
+                    } else {
+                        return ("Import");
+                    }                
                 }
+
+                var get_import_type_past = function() {
+                    if ($scope.import_summary.import_info.import_summary_type == 'update_locations'){
+                        return ("Updated");
+                    } else {
+                        return ("Imported");
+                    }                 
+                }
+                if($scope.import_summary.import_info.status =='completed') {
+                    $scope.import_groov_popover.title = 'Last '+ get_import_type() + ': ' +
+                        $filter('date')($scope.import_summary.import_info.updated_at,
+                            'EEE MM/dd/yy hh:mm a');
+                } else if($scope.import_summary.import_info.status == 'in_progress') {
+                    $scope.import_groov_popover.title = get_import_type() + ' in Progress';
+                } else if($scope.import_summary.import_info.status == 'not_started') {
+                    $scope.import_groov_popover.title = get_import_type() + ' not started';
+                } else if($scope.import_summary.import_info.status == 'cancelled') {
+                    $scope.import_groov_popover.title = get_import_type() + ' cancelled';
+                }
+
                 var logos = {
                     Ebay: {
                           alt:"Ebay",
@@ -68,33 +86,42 @@ groovepacks_controllers.
                         single_data.progress_product.message = '';
                         single_data.progress_product.type = 'in_progress';
 
-
                         if(import_item.import_info.status=='completed' || import_item.import_info.status=='cancelled') {
                             single_data.progress.value = 100;
                             if(import_item.store_info.store_type == 'Shipworks' ||import_item.store_info.store_type == 'CSV') {
-                                single_data.progress.message += 'Last Imported Order #'+import_item.import_info.current_increment_id+' at '+$filter('date')(import_item.import_info.updated_at,'dd MMM hh:mm a');
+                                single_data.progress.message += 'Last '+ get_import_type_past() + ' Order #'+import_item.import_info.current_increment_id+' at '+$filter('date')(import_item.import_info.updated_at,'dd MMM hh:mm a');
                             } else if (import_item.import_info.success_imported <= 0) {
-                                single_data.progress.message +=' No new orders found.';
+                                if ($scope.import_summary.import_info.import_summary_type == 'update_locations') {
+                                    single_data.progress.message +=' No updates made. Locations are upto date.';
+                                } else {
+                                    single_data.progress.message +=' No new orders found.';
+                                }
                             } else {
-                                single_data.progress.message += import_item.import_info.success_imported+' New Orders Imported.';
+                                if ($scope.import_summary.import_info.import_summary_type == 'update_locations') {
+                                    single_data.progress.message += import_item.import_info.success_imported + ' Orders were updated.'
+                                } else {
+                                    single_data.progress.message += import_item.import_info.success_imported+' New Orders Imported.';
+                                }
                             }
                             if (import_item.import_info.status=='cancelled') {
                                 single_data.progress.message += ' The import was cancelled.';
                             }
                         } else if(import_item.import_info.status=='not_started') {
-                            single_data.progress.message += 'Import not started.';
+                            single_data.progress.message += get_import_type() + ' not started.';
                         } else if(import_item.import_info.status == 'in_progress') {
                             $scope.import_summary.import_info.status = 'in_progress';
                             if(import_item.import_info.to_import > 0) {
                                 single_data.progress.value =(((import_item.import_info.success_imported + import_item.import_info.previous_imported)/import_item.import_info.to_import)*100);
-                                single_data.progress.message += 'Imported '+(import_item.import_info.success_imported+import_item.import_info.previous_imported)+'/'+import_item.import_info.to_import+' Orders ';
+                                single_data.progress.message += get_import_type_past() + ' ' + 
+                                (import_item.import_info.success_imported+import_item.import_info.previous_imported)+'/'+import_item.import_info.to_import+' Orders ';
                                 if(import_item.import_info.current_increment_id !='') {
                                     single_data.progress.message += 'Current #'+import_item.import_info.current_increment_id+' ';
                                 }
                                 single_data.progress_product.show = true;
                                 if(import_item.import_info.current_order_items > 0 ) {
                                     single_data.progress_product.value = (import_item.import_info.current_order_imported_item/import_item.import_info.current_order_items) *100;
-                                    single_data.progress_product.message += 'Imported '+import_item.import_info.current_order_imported_item+'/'+import_item.import_info.current_order_items+' Products';
+                                    single_data.progress_product.message += get_import_type_past() + ' ' + 
+                                    import_item.import_info.current_order_imported_item+'/'+import_item.import_info.current_order_items+' Products';
                                 } else {
                                     single_data.progress_product.value = 0;
                                 }
@@ -107,7 +134,7 @@ groovepacks_controllers.
                                     single_data.progress_product.type = 'completed';
                                 }
                             } else {
-                                single_data.progress.message += 'Import in progress.';
+                                single_data.progress.message += get_import_type() + ' in progress.';
                             }
                         } else if(import_item.import_info.status=='failed') {
                             single_data.progress.value = 100;
@@ -135,7 +162,8 @@ groovepacks_controllers.
                             '<div class="btn-group">' + 
                             '<a class="btn" ng-hide="import_summary.import_info.status==\'in_progress\'" title="Regular Import" ng-click="issue_import(store.id, \'regular\')"><img class="icons" src="/assets/images/reg_import.png"></img></a>' +
                             '<a class="btn" ng-hide="import_summary.import_info.status==\'in_progress\'" title="Deep Import" ng-click="issue_import(store.id, \'deep\')"><img class="icons" src="/assets/images/deep_import.png"></img></a>' + 
-                            '<a class="btn" ng-show="import_summary.import_info.status==\'in_progress\'" title="Cancel Import" ng-click="cancel_import(store.id)"><img class="icons" src="/assets/images/cancel_import.png"></img></a>' + 
+                            '<a class="btn" ng-hide="import_summary.import_info.status==\'in_progress\'" title="Update Locations" ng-click="issue_update(store.id)"><img class="icons" src="/assets/images/download_cloud_update.png"></img></a>' + 
+                            '<a class="btn" ng-show="import_summary.import_info.status==\'in_progress\' && import_summary.import_info.import_summary_type != \'update_locations\'" title="Cancel Import" ng-click="cancel_import(store.id)"><img class="icons" src="/assets/images/cancel_import.png"></img></a>' + 
                             '</div>'
                         '</td>'+
                     '</tr>' +
@@ -153,6 +181,10 @@ groovepacks_controllers.
             //alert("cancel import" + store_id)
             importOrders.cancel_import(store_id);
         }
+        
+        $scope.issue_update = function(store_id) {
+            stores.shipstation.update_all_locations(store_id);
+        };
 
         $scope.show_logout_box = false;
         groovIO.on('ask_logout',function(msg) {

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150318132731) do
+ActiveRecord::Schema.define(:version => 20150401214924) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0, :null => false
@@ -250,8 +250,9 @@ ActiveRecord::Schema.define(:version => 20150318132731) do
   create_table "order_import_summaries", :force => true do |t|
     t.integer  "user_id"
     t.string   "status"
-    t.datetime "created_at", :null => false
-    t.datetime "updated_at", :null => false
+    t.datetime "created_at",                                       :null => false
+    t.datetime "updated_at",                                       :null => false
+    t.string   "import_summary_type", :default => "import_orders"
   end
 
   create_table "order_item_kit_products", :force => true do |t|

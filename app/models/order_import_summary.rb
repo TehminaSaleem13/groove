@@ -1,7 +1,7 @@
 class OrderImportSummary < ActiveRecord::Base
 	belongs_to :store
 	has_many :import_items
-	attr_accessible :user_id, :status, :user
+	attr_accessible :user_id, :status, :user, :import_summary_type
   after_save :emit_data_to_user
   belongs_to :user
 

@@ -16,40 +16,70 @@ module Groovepacker
             credential = handler[:credential]
             client = handler[:store_handle]
             errors = []
+            import_item = handler[:import_item]
+
+            import_item.status = 'in_progress'
+            import_item.current_increment_id = ''
+            import_item.success_imported = 0
+            import_item.previous_imported = 0
+            import_item.current_order_items = -1
+            import_item.current_order_imported_item = -1
+            import_item.to_import = 0
+            import_item.save
 
             statuses = ["awaiting_shipment", "on_hold"]
             if credential.warehouse_location_update
+              shipstation_orders = []
               statuses.each do |status|
-                shipstation_orders = client.get_orders(
+                response = client.get_orders(
                   status, 
                   nil
                 )
+                shipstation_orders = shipstation_orders + response["orders"] unless response["orders"].nil?
+              end
+                
+              
+              puts shipstation_orders.inspect
+              import_item.to_import = shipstation_orders.length unless shipstation_orders.nil?
+              import_item.save
+              shipstation_orders.each do |order|
+                import_item.current_increment_id = order['orderNumber']
+                import_item.current_order_items = order["items"].length
+                import_item.current_order_imported_item = 0
+                import_item.save
+                order_item_update_count = 0
+                order["items"].each_with_index do |order_item, index|
+                  import_item.current_order_imported_item = index + 1
+                  import_item.save
 
-                shipstation_orders = shipstation_orders["orders"]
-                puts shipstation_orders.inspect
-                shipstation_orders.each do |order|
-                  order["items"].each do |order_item|
-                    unless ProductSku.where(sku: order_item["sku"]).empty?
-                      product = ProductSku.where(sku: order_item["sku"]).first.product
-                      unless product.nil?
-                        update_response = update_product(product, client, credential, order)
-                        result[:update_status] &= update_response[:update_status]
-                        order_count = order_count + update_response[:order_count]
-                        errors << update_response[:message] unless update_response[:update_status]
-                      end
+                  unless ProductSku.where(sku: order_item["sku"]).empty?
+                    product = ProductSku.where(sku: order_item["sku"]).first.product
+                    unless product.nil?
+                      update_response = update_product(product, client, credential, order)
+                      result[:update_status] &= update_response[:update_status]
+                      order_item_update_count = order_item_update_count + update_response[:order_count]
+                      errors << update_response[:message] unless update_response[:update_status]
                     end
                   end
                 end
+
+                if order_item_update_count > 0
+                  import_item.success_imported = import_item.success_imported + 1
+                else
+                  import_item.previous_imported = import_item.previous_imported + 1
+                end
+                import_item.save
               end
             end
 
             if result[:update_status]
-              result[:message] = 
-                "#{order_count.to_s} order item(s) have been updated."
+              import_item.status = 'completed'
             else
+              import_item.status = 'failed'
+              import_item.message = errors.join(", ")
               result[:message] = errors.join(", ")
             end
-
+            import_item.save
             result
           end
 
