@@ -951,22 +951,19 @@ class StoreSettingsController < ApplicationController
         message: ""
       }
     }
-    if current_user.can? 'add_edit_stores'
-      if store.store_type == 'Shipstation API 2'
-        if store.shipstation_rest_credential.warehouse_location_update
-          result[:data] = store.shipstation_rest_credential.update_all_locations
-        else
-          result[:status] = false
-          result[:messages] << "Cannot update locations as the location update is turned off."
-        end
-      else
-        result[:status] = false
-        result[:messages] << "Cannot update locations for products of this store."
-      end
+
+    order_summary = OrderImportSummary.where(
+      status: 'in_progress')
+
+    if order_summary.empty? && store.store_type == 'Shipstation API 2'
+      tenant = Apartment::Tenant.current_tenant
+      Delayed::Job.where(queue: "importing_orders_"+tenant).destroy_all
+      store.shipstation_rest_credential.update_all_locations(tenant, current_user)
     else
       result[:status] = false
-      result[:messages] << "User does not have permission to add or edit stores"
+      result[:error_messages] << "Import/Update is in progress"
     end
+
     render json: result
   end
 end
