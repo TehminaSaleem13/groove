@@ -16,15 +16,30 @@ module Groovepacker
             credential = handler[:credential]
             client = handler[:store_handle]
             errors = []
-            credential.store.products.each do |product|
-              unless product.primary_warehouse.nil? ||
-               product.primary_warehouse.location_primary.nil? ||
-               product.primary_warehouse.location_primary == ''
-               #update all orders of shipstation here which contain this product
-               update_response = update_product(product, client, credential)
-               result[:update_status] &= update_response[:update_status]
-               order_count = order_count + update_response[:order_count]
-               errors << update_response[:message] unless update_response[:status]
+
+            statuses = ["awaiting_shipment", "on_hold"]
+            if credential.warehouse_location_update
+              statuses.each do |status|
+                shipstation_orders = client.get_orders(
+                  status, 
+                  nil
+                )
+
+                shipstation_orders = shipstation_orders["orders"]
+                puts shipstation_orders.inspect
+                shipstation_orders.each do |order|
+                  order["items"].each do |order_item|
+                    unless ProductSku.where(sku: order_item["sku"]).empty?
+                      product = ProductSku.where(sku: order_item["sku"]).first.product
+                      unless product.nil?
+                        update_response = update_product(product, client, credential, order)
+                        result[:update_status] &= update_response[:update_status]
+                        order_count = order_count + update_response[:order_count]
+                        errors << update_response[:message] unless update_response[:update_status]
+                      end
+                    end
+                  end
+                end
               end
             end
 
@@ -38,67 +53,49 @@ module Groovepacker
             result
           end
 
-          def update_single(product)
+          def update_single(product, order_id)
             puts "Updating product"
             handler = self.get_handler
             credential = handler[:credential]
             client = handler[:store_handle]
             result = self.build_result
+            puts "sku matched"
 
             #update inventory warehouse's primary location
-            warehouse = product.primary_warehouse
-            unless warehouse.nil? && warehouse.location_primary.nil?
-              puts product.order_items.inspect
-              product.order_items.each do |order_item|
-                puts "order item:"
-                unless order_item.order.store_order_id.nil?
-                  shipstation_order = client.get_order(order_item.order.store_order_id)
-                  #update warehouse location of an SKU.
-                  shipstation_order["items"].each_with_index do |item, index|
-                    if item["sku"] == product.primary_sku
-                      puts "sku matched"
-                      item["warehouseLocation"] = warehouse.location_primary
-                      shipstation_order["items"][index] = item
-                      client.update_order(shipstation_order["orderId"], shipstation_order)
-                      client.get_order(order_item.order.store_order_id)
-                    end
-                  end
-                end
-              end
-            end
+            shipstation_order = client.get_order(order_id)
+            update_product(product, client, credential, shipstation_order)
           end
 
           private
 
-          def update_product(product, client, credential)
+          def update_product(product, client, credential, shipstation_order)
             result = {
               update_status: true,
               order_count: 0,
               message: ''
             }
 
-            product.order_items.each do |order_item|
-              unless order_item.order.store_order_id.nil?
-                begin
-                  shipstation_order = client.get_order(order_item.order.store_order_id)
-                  #update warehouse location of an SKU.
-                  if shipstation_order["orderStatus"] == 'awaiting_shipment' ||
-                    shipstation_order["orderStatus"] == 'on_hold'
-                    shipstation_order["items"].each_with_index do |item, index|
-                      if item["sku"] == product.primary_sku && 
-                        item["warehouseLocation"] != product.primary_warehouse.location_primary
-                        item["warehouseLocation"] = product.primary_warehouse.location_primary
-                        shipstation_order["items"][index] = item
-                        client.update_order(shipstation_order["orderId"], shipstation_order)
-                        result[:order_count] = result[:order_count] + 1
-                      end
-                    end
+            begin
+              #update warehouse location of an SKU.
+              if shipstation_order["orderStatus"] == 'awaiting_shipment' ||
+                shipstation_order["orderStatus"] == 'on_hold'
+                shipstation_order["items"].each_with_index do |item, index|
+                  if item["sku"] == product.primary_sku && 
+                    !product.primary_warehouse.nil? && 
+                    product.primary_warehouse.location_primary != nil &&
+                    product.primary_warehouse.location_primary != '' &&
+                    item["warehouseLocation"] != product.primary_warehouse.location_primary
+                    #update location only if the above conditions are satisfied
+                    item["warehouseLocation"] = product.primary_warehouse.location_primary
+                    shipstation_order["items"][index] = item
+                    client.update_order(shipstation_order["orderId"], shipstation_order)
+                    result[:order_count] = result[:order_count] + 1
                   end
-                rescue Exception => ex
-                  result[:update_status] = false
-                  result[:message] = ex.message
                 end
               end
+            rescue Exception => ex
+              result[:update_status] = false
+              result[:message] = ex.message
             end
 
             result         

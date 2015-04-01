@@ -30,7 +30,7 @@ module Groovepacker
 
         def update_product(hash)
           Groovepacker::Store::Updaters::ShipstationRest::ProductsUpdater.new(
-            self.build_handle).update_single(hash)
+            self.build_handle).update_single(hash[:product], hash[:store_order_id])
         end
 
         def update_all_products
