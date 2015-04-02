@@ -144,6 +144,28 @@ class Product < ActiveRecord::Base
 	result
   end
 
+  def update_due_to_inactive_product
+    if self.status == 'inactive'
+      kit_products  = ProductKitSkus.where(:option_product_id => self.id)
+      unless kit_products.empty?
+        kit_products.each do |kit_product|
+          if kit_product.product.status != 'inactive'
+            kit_product.product.status = 'new'
+            kit_product.product.save
+            order_items = OrderItem.where(:product_id=>kit_product.product.id)
+            order_items.each do |item|
+              item.order.update_order_status
+            end
+          end
+        end
+      end
+      @order_items = OrderItem.where(:product_id=>self.id)
+      @order_items.each do |item|
+        item.order.update_order_status
+      end
+    end
+  end
+
   def set_product_status
   	result = true
 

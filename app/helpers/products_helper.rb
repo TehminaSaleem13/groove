@@ -74,6 +74,13 @@ module ProductsHelper
     if ['name','status','is_skippable','type_scan_enabled','click_scan_enabled'].include?(var)
       product[var] = value
       product.save
+      if var == 'status'
+        if value == 'inactive'
+          product.update_product_status
+        else
+          product.update_due_to_inactive_product
+        end
+      end
     elsif var ==  'sku'
       product.primary_sku = value
     elsif var ==  'cat'

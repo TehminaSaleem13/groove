@@ -685,6 +685,8 @@ class ProductsController < ApplicationController
                 @product.status = current_status
                 @product.save
               end
+            else
+              @product.update_due_to_inactive_product
             end
           else
             @result['status'] &= false
@@ -927,7 +929,7 @@ class ProductsController < ApplicationController
         @product.product_type = params[:basicinfo][:product_type]
         @product.spl_instructions_4_confirmation = params[:basicinfo][:spl_instructions_4_confirmation]
         @product.spl_instructions_4_packer = params[:basicinfo][:spl_instructions_4_packer]
-        @product.status = params[:basicinfo][:status]
+        # @product.status = params[:basicinfo][:status]
         @product.store_id = params[:basicinfo][:store_id]
         @product.store_product_id = params[:basicinfo][:store_product_id]
         @product.type_scan_enabled = params[:basicinfo][:type_scan_enabled]
@@ -939,6 +941,9 @@ class ProductsController < ApplicationController
         if !@product.save
           @result['status'] &= false
         end
+
+        #Update product status and also update the containing kit and orders
+        updatelist(@product,'status',params[:basicinfo][:status]) unless params[:basicinfo][:status].nil?
 
         #Update product inventory warehouses
         #check if a product inventory warehouse is defined.
