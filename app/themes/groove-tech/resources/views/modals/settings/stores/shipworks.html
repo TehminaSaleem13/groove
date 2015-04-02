@@ -54,29 +54,33 @@
 
   <div class="row">
     <div class="col-md-12">
+        <iframe width="853" height="480" src="https://www.youtube.com/embed/1WJeGw_GbbI?rel=0" frameborder="0" allowfullscreen></iframe>
+    </div>
+    <div class="col-md-12">
       <legend>Instructions to setup Shipworks to import orders in Groovepacker</legend>
       <ol class="list-group">
           <li class="list-group-item">
-              <h4 class="list-group-item-heading">1. Create an action in Shipworks</h4>
-              <p class="list-group-item-text">Open ShipWorks & click on Manage > Actions > New Action (name the new action).</p>
-          </li>
-          <li class="list-group-item active">
-              <h4 class="list-group-item-heading">2. Setup the action</h4>
-              <p class="list-group-item-text">Under Actions, Select "A filter's content changes"</p>
-              <p class="list-group-item-text">Under Quick Filter, click on Create, Filter Name: Sync with Groovepacker, click on the All link and change it to Any</p>
-              <p class="list-group-item-text"> Click on Order Total and Select Order > Local Status From the status dropdown select In Process.</p>
-              <p class="list-group-item-text">Similarly create conditions for In Process and Not Shipped</p>
-              <p class="list-group-item-text">From the Add Task dropdown Select External > Send web request</p>
-               <p class="list-group-item-text">For template: Select "XML Source"</p>
+              <p class="list-group-item-text">1. Use the switches above to control which local order statuses ShipWorks will send to GroovePacker.
+                  You can enable all statuses if you'll be using a custom button in ShipWorks to import all selected orders.</p>
           </li>
           <li class="list-group-item">
-              <h4 class="list-group-item-heading">3. Integrate with Groovepacker</h4>
-              <p class="list-group-item-text">Copy (ctrl-C) and Paste (ctrl-V) your Request URL to the ShipWorks Request URL blank. Here is your Request URL:</p>
-              <p class="list-group-item-text"><strong>{{stores.single.request_url}}{{stores.single.auth_token}}</strong></p>
+              <p class="list-group-item-text">2. Request URL: <strong>{{stores.single.request_url}}{{stores.single.auth_token}}</strong></p>
+              <p class="list-group-item-text"><button class="groove-button" ng-class="copy_text.class" clip-copy="stores.single.request_url+stores.single.auth_token" clip-click="copy_acknowledgement()">{{copy_text.text}}</button></p>
+              <p class="list-group-item-text">You'll paste it into ShipWorks in step #6 below.</p>
           </li>
           <li class="list-group-item">
-              <h4 class="list-group-item-heading">Setup is complete!</h4>
-              <p class="list-group-item-text">Now, when orders are downloaded into ShipWorks they will be automatically imported into GroovePacker. Setting the ShipWorks store to Inactive in GroovePacker will disable the import.</p>
+              <p class="list-group-item-text">3. In ShipWorks click on the Manage tab at the top and then on Actions. In the window click "New Action".</p>
+          </li>
+          <li class="list-group-item">
+              <p class="list-group-item-text">4. Give the action a name and use the first dropdown to select how you would like the action to be triggered. Creating a custom button gives you control over when orders are sent. </p>
+              <p class="list-group-item-text">If the "Require" dropdown is set to "An order to be selected" only selected orders will be sent to GroovePacker when you click the button.</p>
+              <p class="list-group-item-text">If you choose not to rely on a selection you'll need to adjust the setting below for "Send the request using". Otherwise you can leave it set to "Selected Orders".</p>
+          </li>
+          <li class="list-group-item">
+              <p class="list-group-item-text">5. After setting your trigger click the Add Task dropdown and select External > Send Web Request. On the "Send the request" dropdown choose "Using the results of processing a template". In the Template Dropdown scroll all the way down and choose the last option: XML Source.</p>
+          </li>
+          <li class="list-group-item">
+              <p class="list-group-item-text">6. The last step is to paste (ctrl-v) your Request URL into the blank and click ok to save your action. Now when the button is clicked (or the trigger you defined is activated) you should see all orders with a local status enabled in step #1, imported into GroovePacker.</p>
           </li>
       </ol>
     </div>

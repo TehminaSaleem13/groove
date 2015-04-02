@@ -39,6 +39,15 @@ function(scope, store_data, $window, $sce, $interval, $state, $stateParams, $mod
 
     };
 
+    scope.copy_acknowledgement = function() {
+        scope.copy_text.text='Copied to clipboard';
+        scope.copy_text.class='label label-success';
+        $timeout(function() {
+            scope.copy_text.text='Click Here to copy to clipboard';
+            scope.copy_text.class='';
+        },2000);
+    };
+
     scope.import_images = function(report_id) {
         console.log("in import_images");
         scope.stores.import.image.status = "Import in progress";
@@ -208,14 +217,14 @@ function(scope, store_data, $window, $sce, $interval, $state, $stateParams, $mod
         stores.shipstation.verify_tags(store_id).then(function(response) {
             scope.verification_tags = response.data.data;
         });
-    }
+    };
 
     scope.shipstation_update_all_locations = function(store_id) {
         scope.shipstation_loc_update_response = {}
         stores.shipstation.update_all_locations(store_id).then(function(response){
             scope.shipstation_loc_update_response = response.data;
         });
-    }
+    };
 
     scope.launch_ebay_popup= function() {
 
@@ -305,6 +314,12 @@ function(scope, store_data, $window, $sce, $interval, $state, $stateParams, $mod
             product: {},
             image: {}
         };
+
+        scope.copy_text = {
+            text:'Click Here to copy to clipboard',
+            class:''
+        };
+
         scope.stores.types = {};
         scope.warehouses = warehouses.model.get();
         warehouses.list.get(scope.warehouses).then(function() {
