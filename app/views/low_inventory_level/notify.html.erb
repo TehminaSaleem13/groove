@@ -79,8 +79,7 @@
                wh_hash['secondary_location'] = 'Not Available'
              end
 
-             if ((wh.available_inv <= GeneralSetting.all.first.default_low_inventory_alert_limit) && !wh.product_inv_alert) ||
-                     (wh.product_inv_alert && wh.product_inv_alert_level > 0)
+             if (wh.product_inv_alert && wh.product_inv_alert_level > 0)
                wh_hash['threshold'] = wh.product_inv_alert_level
              else
                wh_hash['threshold'] = GeneralSetting.all.first.default_low_inventory_alert_limit
