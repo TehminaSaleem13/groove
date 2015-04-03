@@ -231,11 +231,12 @@ class OrderItem < ActiveRecord::Base
             self.qty, 'purchase')
         
         if !GeneralSetting.all.first.nil? && 
-              (GeneralSetting.all.first.inventory_tracking ||
-                GeneralSetting.all.first.hold_orders_due_to_inventory)
+              (GeneralSetting.all.first.inventory_tracking)
           unless result
-              self.order.status = 'onhold'
-              self.order.status_reason = 'on_hold_due_to_inventory'
+              if GeneralSetting.all.first.hold_orders_due_to_inventory
+                self.order.status = 'onhold'
+                self.order.status_reason = 'on_hold_due_to_inventory'
+              end
               self.inv_status = 'unallocated'
               self.inv_status_reason = 'on_hold_due_to_inventory'
           else
@@ -261,11 +262,12 @@ class OrderItem < ActiveRecord::Base
             self.qty, 'return')
 
         if !GeneralSetting.all.first.nil? && 
-              (GeneralSetting.all.first.inventory_tracking ||
-                GeneralSetting.all.first.hold_orders_due_to_inventory)
+              (GeneralSetting.all.first.inventory_tracking)
           unless result
-            self.order.status = 'onhold'
-            self.order.status_reason = 'on_hold_due_to_inventory'
+            if GeneralSetting.all.first.hold_orders_due_to_inventory
+              self.order.status = 'onhold'
+              self.order.status_reason = 'on_hold_due_to_inventory'
+            end
             self.inv_status = 'allocated'
             self.inv_status_reason = 'allocated_due_to_low_available_inventory'
           else
