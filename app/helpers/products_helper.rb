@@ -76,9 +76,9 @@ module ProductsHelper
       product.save
       if var == 'status'
         if value == 'inactive'
-          product.update_product_status
-        else
           product.update_due_to_inactive_product
+        else
+          product.update_product_status
         end
       end
     elsif var ==  'sku'
