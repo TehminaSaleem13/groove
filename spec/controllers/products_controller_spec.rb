@@ -193,4 +193,72 @@ RSpec.describe ProductsController, :type => :controller do
     end
   end
 
+  describe "Order status" do
+    it "shows order status as onHold when all its items are not allocated" do
+      request.accept = "application/json"
+      general_setting = FactoryGirl.create(:general_setting, :inventory_tracking=>true, :hold_orders_due_to_inventory=>true, :inventory_auto_allocation=>true)
+      inv_wh = FactoryGirl.create(:inventory_warehouse,:is_default => true)
+      store = FactoryGirl.create(:store, :inventory_warehouse_id => inv_wh.id)
+      @user.role.update_attribute(:add_edit_products, true)
+      product1 = FactoryGirl.create(:product)
+      product1_sku = FactoryGirl.create(:product_sku, :product=> product1)
+      product1_barcode = FactoryGirl.create(:product_barcode, :product=> product1)
+
+      product2 = FactoryGirl.create(:product, :name=>"Apple iPhone5C")
+      product2_sku = FactoryGirl.create(:product_sku, :product=> product2, :sku=>'iPhone5C')
+      product2_barcode = FactoryGirl.create(:product_barcode, :product=> product2, :barcode=>"2456789")
+
+      order = FactoryGirl.create(:order, :status=>'onhold', :store=>store)
+      order_item1 = FactoryGirl.create(:order_item, :product_id=>product1.id,
+                    :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>product1.name, :inv_status=>'unallocated')
+      order_item2 = FactoryGirl.create(:order_item, :product_id=>product2.id,
+                    :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>product2.name, :inv_status=>'unallocated')
+
+      put :updateproductlist, { :id => product1.id, var: "qty", value: "5"  }
+
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      order.reload
+      order_item1.reload
+      expect(order_item1.product.product_inventory_warehousess.first.available_inv).to eq(4)
+      expect(order_item1.inv_status).to eq("allocated")
+      expect(order_item2.inv_status).to eq("unallocated")
+      expect(order.status).to eq ("onhold")
+    end
+
+    it "shows order status as awaiting when all its items are allocated" do
+      request.accept = "application/json"
+      general_setting = FactoryGirl.create(:general_setting, :inventory_tracking=>true, :hold_orders_due_to_inventory=>true, :inventory_auto_allocation=>true)
+      inv_wh = FactoryGirl.create(:inventory_warehouse,:is_default => true)
+      store = FactoryGirl.create(:store, :inventory_warehouse_id => inv_wh.id)
+      @user.role.update_attribute(:add_edit_products, true)
+      product1 = FactoryGirl.create(:product)
+      product1_sku = FactoryGirl.create(:product_sku, :product=> product1)
+      product1_barcode = FactoryGirl.create(:product_barcode, :product=> product1)
+
+      product2 = FactoryGirl.create(:product, :name=>"Apple iPhone5C")
+      product2_sku = FactoryGirl.create(:product_sku, :product=> product2, :sku=>'iPhone5C')
+      product2_barcode = FactoryGirl.create(:product_barcode, :product=> product2, :barcode=>"2456789")
+
+      order = FactoryGirl.create(:order, :status=>'onhold', :store=>store)
+      order_item1 = FactoryGirl.create(:order_item, :product_id=>product1.id,
+                    :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>product1.name, :inv_status=>'unallocated')
+      order_item2 = FactoryGirl.create(:order_item, :product_id=>product2.id,
+                    :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>product2.name, :inv_status=>'unallocated')
+
+      put :updateproductlist, { :id => product1.id, var: "qty", value: "5"  }
+      put :updateproductlist, { :id => product2.id, var: "qty", value: "5"  }
+
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      order.reload
+      order_item1.reload
+      order_item2.reload
+      expect(order_item1.product.product_inventory_warehousess.first.available_inv).to eq(4)
+      expect(order_item2.product.product_inventory_warehousess.first.available_inv).to eq(4)
+      expect(order_item1.inv_status).to eq("allocated")
+      expect(order_item2.inv_status).to eq("allocated")
+      expect(order.status).to eq ("awaiting")
+    end
+  end
 end
