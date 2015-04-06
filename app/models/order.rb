@@ -119,7 +119,7 @@ class Order < ActiveRecord::Base
       self.order_items.each do |order_item|
         product = Product.find_by_id(order_item.product_id)
         unless product.nil?
-          if product.status == "new" or product.status == "inactive"
+          if product.status == "new" or product.status == "inactive" or order_item.inv_status == 'unallocated'
               result &= false
           end
         end
