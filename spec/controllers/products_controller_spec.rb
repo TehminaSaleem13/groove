@@ -260,5 +260,60 @@ RSpec.describe ProductsController, :type => :controller do
       expect(order_item2.inv_status).to eq("allocated")
       expect(order.status).to eq ("awaiting")
     end
+    it "auto allocates inventory for awaiting, onhold and serveice issue orders" do
+      request.accept = "application/json"
+      inv_wh = FactoryGirl.create(:inventory_warehouse,:is_default => true)
+      store = FactoryGirl.create(:store, :inventory_warehouse_id => inv_wh.id)
+      general_setting = FactoryGirl.create(:general_setting, :inventory_tracking=>true, :hold_orders_due_to_inventory=>true, :inventory_auto_allocation=>true)
+      order1 = FactoryGirl.create(:order, :status=>'awaiting', :increment_id=>'1234567890', :store => store)
+      order2 = FactoryGirl.create(:order, :status=>'onhold', :increment_id=>'1234567891', :store => store)
+      order3 = FactoryGirl.create(:order, :status=>'serviceissue', :increment_id=>'1234567892', :store => store)
+      product1 = FactoryGirl.create(:product)
+      product2 = FactoryGirl.create(:product)
+      product3 = FactoryGirl.create(:product)
+
+      order_item1 = FactoryGirl.create(:order_item, :product_id=>product1.id,
+                    :qty=>1, :price=>"10", :row_total=>"10", :order=>order1, :name=>product1.name)
+      order_item2 = FactoryGirl.create(:order_item, :product_id=>product2.id,
+                    :qty=>1, :price=>"10", :row_total=>"10", :order=>order2, :name=>product2.name)
+      order_item3 = FactoryGirl.create(:order_item, :product_id=>product3.id,
+                    :qty=>1, :price=>"10", :row_total=>"10", :order=>order3, :name=>product3.name)
+      put :updateproductlist, {:id=>product1.id, :var=> 'qty', :value=>'10'}
+      put :updateproductlist, {:id=>product2.id, :var=> 'qty', :value=>'10'}
+      put :updateproductlist, {:id=>product3.id, :var=> 'qty', :value=>'10'}
+      product1.reload
+      product2.reload
+      product3.reload
+      expect(product1.product_inventory_warehousess.first.allocated_inv).to eq(1)
+      expect(product2.product_inventory_warehousess.first.allocated_inv).to eq(1)
+      expect(product3.product_inventory_warehousess.first.allocated_inv).to eq(1)
+      expect(product1.product_inventory_warehousess.first.available_inv).to eq(9)
+      expect(product2.product_inventory_warehousess.first.available_inv).to eq(9)
+      expect(product3.product_inventory_warehousess.first.available_inv).to eq(9)
+    end
+
+    it "does not auto allocates inventory for scanned and cancelled orders" do
+      request.accept = "application/json"
+      inv_wh = FactoryGirl.create(:inventory_warehouse,:is_default => true)
+      store = FactoryGirl.create(:store, :inventory_warehouse_id => inv_wh.id)
+      general_setting = FactoryGirl.create(:general_setting, :inventory_tracking=>true, :hold_orders_due_to_inventory=>true, :inventory_auto_allocation=>true)
+      order1 = FactoryGirl.create(:order, :status=>'scanned', :increment_id=>'1234567890', :store => store)
+      order2 = FactoryGirl.create(:order, :status=>'cancelled', :increment_id=>'1234567891', :store => store)
+      product1 = FactoryGirl.create(:product)
+      product2 = FactoryGirl.create(:product)
+
+      order_item1 = FactoryGirl.create(:order_item, :product_id=>product1.id,
+                    :qty=>1, :price=>"10", :row_total=>"10", :order=>order1, :name=>product1.name)
+      order_item2 = FactoryGirl.create(:order_item, :product_id=>product2.id,
+                    :qty=>1, :price=>"10", :row_total=>"10", :order=>order2, :name=>product2.name)
+      put :updateproductlist, {:id=>product1.id, :var=> 'qty', :value=>'10'}
+      put :updateproductlist, {:id=>product2.id, :var=> 'qty', :value=>'10'}
+      product1.reload
+      product2.reload
+      expect(product1.product_inventory_warehousess.first.allocated_inv).to eq(0)
+      expect(product2.product_inventory_warehousess.first.allocated_inv).to eq(0)
+      expect(product1.product_inventory_warehousess.first.available_inv).to eq(10)
+      expect(product2.product_inventory_warehousess.first.available_inv).to eq(10)
+    end
   end
 end

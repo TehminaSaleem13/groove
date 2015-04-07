@@ -222,7 +222,7 @@ class OrderItem < ActiveRecord::Base
   def update_inventory_levels_for_packing(override = false)
     result = true
     self.order.reload
-    if !self.order.nil? && self.inv_status != 'allocated' && self.order.status != 'cancelled' && 
+    if !self.order.nil? && self.inv_status != 'allocated' && self.order.status != 'cancelled' && self.order.status != 'scanned' && 
       (self.order.status == 'awaiting' or override)
       if !self.product.nil? && !self.order.store.nil? &&
         !self.order.store.inventory_warehouse_id.nil?
