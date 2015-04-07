@@ -371,6 +371,9 @@ GEM
       nokogiri (>= 1.4.0)
       nori (~> 2.1.0)
       wasabi (~> 3.1.0)
+    shopify_api (3.2.1)
+      activeresource (>= 3.0.0)
+      thor (>= 0.14.4)
     simple_form (2.1.0)
       actionpack (~> 3.0)
       activemodel (~> 3.0)
@@ -478,6 +481,7 @@ DEPENDENCIES
   rubyzip
   sass-rails (~> 3.2.3)
   savon
+  shopify_api
   simple_form (>= 2.0.4)
   soap2r!
   spring-commands-rspec

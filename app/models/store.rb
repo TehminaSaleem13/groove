@@ -8,6 +8,8 @@ class Store < ActiveRecord::Base
   has_one :shipstation_credential
   has_one :shipstation_rest_credential
   has_one :shipworks_credential
+  has_one :shopify_credential
+
   belongs_to :inventory_warehouse
 
   validates_presence_of :name
@@ -60,6 +62,10 @@ class Store < ActiveRecord::Base
     if self.store_type == 'Shipworks'
       @result['shipworks_credentials'] = shipworks_credential
       @result['shipworks_hook_url'] = "https://"+Apartment::Database.current_tenant+"."+ENV['HOST_NAME']+"/orders/import_shipworks?auth_token="
+      @result['status'] =true
+    end
+    if self.store_type == 'Shopify'
+      @result['shopify_credentials'] = shopify_credential
       @result['status'] =true
     end
   	@result

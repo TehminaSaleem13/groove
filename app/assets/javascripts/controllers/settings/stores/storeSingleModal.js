@@ -362,6 +362,10 @@ function(scope, store_data, $window, $sce, $interval, $state, $stateParams, $mod
             Shipworks: {
                 name: "Shipworks",
                 file: "/assets/views/modals/settings/stores/shipworks.html"
+            },
+            Shopify: {
+                name: "Shopify",
+                file: "/assets/views/modals/settings/stores/shopify.html"
             }
         };
 

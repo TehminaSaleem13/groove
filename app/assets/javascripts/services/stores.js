@@ -177,8 +177,10 @@ groovepacks_services.factory('stores',['$http','notification','$filter',function
                         stores.single.shall_import_shipped = data.credentials.shipworks_credentials.shall_import_shipped;
                         stores.single.shall_import_no_status = data.credentials.shipworks_credentials.shall_import_no_status;
                         stores.single.request_url = data.credentials.shipworks_hook_url;
+                    } else if (data.store.store_type == 'Shopify') {
+                        stores.single.shop_name = data.credentials.shopify_credentials.shop_name;
+                        stores.single.access_token = data.credentials.shopify_credentials.access_token;
                     }
-
                 }
             }
         }).error(notification.server_error);
@@ -211,6 +213,9 @@ groovepacks_services.factory('stores',['$http','notification','$filter',function
                     break;
                 case 'Amazon':
                     return (stores.single.merchant_id && stores.single.marketplace_id);
+                    break;
+                case 'Shopify':
+                    return (stores.single.shop_name);
                     break;
                 //for any other store types (ebay and csv) just return true
                 case 'Shipworks':
