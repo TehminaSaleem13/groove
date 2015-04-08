@@ -403,13 +403,13 @@ groovepacks_controllers.
                         name: "Override Global Inv Alert Lvl",
                         model:'row.info',
                         editable:false,
-                        transclude: '<div> <span ng-hide="{{options.setup.enable_inv_alert()}}">Disabled</span><div ng-show="{{options.setup.enable_inv_alert()}}" toggle-switch ng-model="row.info.product_inv_alert" groov-click="options.editable.update()"></div></div>'
+                        transclude: '<div> <span groov-popover=\'If you would like to enable the Low Inventory Alerts you can do so in the <a ui-sref="settings.system.general" target="_blank">General Settings</a>\' ng-hide="{{options.setup.enable_inv_alert()}}">Off</span><div ng-show="{{options.setup.enable_inv_alert()}}" toggle-switch ng-model="row.info.product_inv_alert" groov-click="options.editable.update()"></div></div>'
                     },
                     product_inv_alert_level: {
                         name:"Inv Alert Level",
                         model:'row.info',
                         editable:false,
-                        transclude: '<div><span ng-hide="{{options.setup.enable_inv_alert()}}">Disabled</span><div ng-show="{{options.setup.enable_inv_alert()}}"><div ng-show="{{row.info.product_inv_alert}}"><div groov-editable="options.editable" prop="{{field}}" ng-model="row.info" identifier="warehousesgrid_list-product_inv_alert_level-{{$index}}">{{row.info.product_inv_alert_level}}</div></div><div ng-hide="{{row.info.product_inv_alert}}">Disabled</div></div></div>'
+                        transclude: '<div><span groov-popover=\'This product is currently using the global alert threshold.<br /> If you would like to enable the Low Inventory Alerts you can do so in the <a ui-sref="settings.system.general" target="_blank">General Settings</a>\' ng-hide="{{options.setup.enable_inv_alert()}}">{{row.info.product_inv_alert_level}}</span><div ng-show="{{options.setup.enable_inv_alert()}}"><div ng-show="{{row.info.product_inv_alert}}"><div groov-editable="options.editable" prop="{{field}}" ng-model="row.info" identifier="warehousesgrid_list-product_inv_alert_level-{{$index}}">{{row.info.product_inv_alert_level}}</div></div><div ng-hide="{{row.info.product_inv_alert}}" groov-popover=\'This product is currently using the alert threshold set in the <a ui-sref="settings.system.general" target="_blank">General Settings</a>. <br/>If you would like to set an alternate alert level for this product, please turn on the override switch.\'>{{row.info.product_inv_alert_level}}</div></div></div>'
                     }
                 }
             };
