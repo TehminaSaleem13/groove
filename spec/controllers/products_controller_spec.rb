@@ -284,12 +284,18 @@ RSpec.describe ProductsController, :type => :controller do
       product1.reload
       product2.reload
       product3.reload
+      order_item1.reload
+      order_item2.reload
+      order_item3.reload
       expect(product1.product_inventory_warehousess.first.allocated_inv).to eq(1)
       expect(product2.product_inventory_warehousess.first.allocated_inv).to eq(1)
       expect(product3.product_inventory_warehousess.first.allocated_inv).to eq(1)
       expect(product1.product_inventory_warehousess.first.available_inv).to eq(9)
       expect(product2.product_inventory_warehousess.first.available_inv).to eq(9)
       expect(product3.product_inventory_warehousess.first.available_inv).to eq(9)
+      expect(order_item1.inv_status).to eq('allocated')
+      expect(order_item2.inv_status).to eq('allocated')
+      expect(order_item3.inv_status).to eq('allocated')
     end
 
     it "does not auto allocates inventory for scanned and cancelled orders" do
@@ -306,6 +312,7 @@ RSpec.describe ProductsController, :type => :controller do
                     :qty=>1, :price=>"10", :row_total=>"10", :order=>order1, :name=>product1.name)
       order_item2 = FactoryGirl.create(:order_item, :product_id=>product2.id,
                     :qty=>1, :price=>"10", :row_total=>"10", :order=>order2, :name=>product2.name)
+
       put :updateproductlist, {:id=>product1.id, :var=> 'qty', :value=>'10'}
       put :updateproductlist, {:id=>product2.id, :var=> 'qty', :value=>'10'}
       product1.reload
@@ -334,6 +341,7 @@ RSpec.describe ProductsController, :type => :controller do
                     :qty=>1, :price=>"10", :row_total=>"10", :order=>order2, :name=>product2.name)
       order_item3 = FactoryGirl.create(:order_item, :product_id=>product3.id,
                     :qty=>1, :price=>"10", :row_total=>"10", :order=>order3, :name=>product3.name)
+
       put :updateproductlist, {:id=>product1.id, :var=> 'qty', :value=>'10'}
       put :updateproductlist, {:id=>product2.id, :var=> 'qty', :value=>'10'}
       put :updateproductlist, {:id=>product3.id, :var=> 'qty', :value=>'10'}

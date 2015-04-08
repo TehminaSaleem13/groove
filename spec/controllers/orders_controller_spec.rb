@@ -207,6 +207,7 @@ describe OrdersController do
       store = FactoryGirl.create(:store, :inventory_warehouse_id => inv_wh.id)
       @user_role.add_edit_order_items = true
       @user_role.save
+      general_setting = FactoryGirl.create(:general_setting, :inventory_tracking=>true, :hold_orders_due_to_inventory=>true, :inventory_auto_allocation=>true)
       order = FactoryGirl.create(:order, :status=>'awaiting', :increment_id=>'1234567890', :store => store)
       product1 = FactoryGirl.create(:product)
       product2 = FactoryGirl.create(:product)
@@ -227,6 +228,10 @@ describe OrdersController do
       result = JSON.parse(response.body)
       product_inv_wh1.reload
       product_inv_wh2.reload
+      order_item1.reload
+      order_item2.reload
+      expect(order_item1.inv_status).to eq('unallocated')
+      expect(order_item2.inv_status).to eq('unallocated')
       expect(product_inv_wh1.allocated_inv).to eq(4)
       expect(product_inv_wh2.allocated_inv).to eq(4)
       expect(product_inv_wh1.available_inv).to eq(26)
@@ -239,6 +244,7 @@ describe OrdersController do
       store = FactoryGirl.create(:store, :inventory_warehouse_id => inv_wh.id)
       @user_role.add_edit_order_items = true
       @user_role.save
+      general_setting = FactoryGirl.create(:general_setting, :inventory_tracking=>true, :hold_orders_due_to_inventory=>true, :inventory_auto_allocation=>true)
       order = FactoryGirl.create(:order, :status=>'serviceissue', :increment_id=>'12345678911', :store => store)
       product1 = FactoryGirl.create(:product)
       product2 = FactoryGirl.create(:product)
@@ -259,10 +265,14 @@ describe OrdersController do
       result = JSON.parse(response.body)
       product_inv_wh1.reload
       product_inv_wh2.reload
+      order_item1.reload
+      order_item2.reload
       expect(product_inv_wh1.allocated_inv).to eq(4)
       expect(product_inv_wh2.allocated_inv).to eq(4)
       expect(product_inv_wh1.available_inv).to eq(26)
       expect(product_inv_wh2.available_inv).to eq(26)
+      expect(order_item1.inv_status).to eq('unallocated')
+      expect(order_item2.inv_status).to eq('unallocated')
     end
 
     it "inventory gets adjusted when order is moved from cancelled to awaiting" do
@@ -271,6 +281,7 @@ describe OrdersController do
       store = FactoryGirl.create(:store, :inventory_warehouse_id => inv_wh.id)
       @user_role.add_edit_order_items = true
       @user_role.save
+      general_setting = FactoryGirl.create(:general_setting, :inventory_tracking=>true, :hold_orders_due_to_inventory=>true, :inventory_auto_allocation=>true)
       order = FactoryGirl.create(:order, :status=>'cancelled', :increment_id=>'12345678911', :store => store)
       product1 = FactoryGirl.create(:product)
       product2 = FactoryGirl.create(:product)
@@ -293,10 +304,14 @@ describe OrdersController do
       result = JSON.parse(response.body)
       product_inv_wh1.reload
       product_inv_wh2.reload
+      order_item1.reload
+      order_item2.reload
       expect(product_inv_wh1.allocated_inv).to eq(6)
       expect(product_inv_wh2.allocated_inv).to eq(6)
       expect(product_inv_wh1.available_inv).to eq(24)
       expect(product_inv_wh2.available_inv).to eq(24)
+      expect(order_item1.inv_status).to eq('allocated')
+      expect(order_item2.inv_status).to eq('allocated')
     end
 
     it "inventory gets adjusted when order is moved from cancelled to serviceissue" do
@@ -305,6 +320,7 @@ describe OrdersController do
       store = FactoryGirl.create(:store, :inventory_warehouse_id => inv_wh.id)
       @user_role.add_edit_order_items = true
       @user_role.save
+      general_setting = FactoryGirl.create(:general_setting, :inventory_tracking=>true, :hold_orders_due_to_inventory=>true, :inventory_auto_allocation=>true)
       order = FactoryGirl.create(:order, :status=>'cancelled', :increment_id=>'12345678912', :store => store)
       product1 = FactoryGirl.create(:product)
       product2 = FactoryGirl.create(:product)
@@ -327,10 +343,14 @@ describe OrdersController do
       result = JSON.parse(response.body)
       product_inv_wh1.reload
       product_inv_wh2.reload
+      order_item1.reload
+      order_item2.reload
       expect(product_inv_wh1.allocated_inv).to eq(6)
       expect(product_inv_wh2.allocated_inv).to eq(6)
       expect(product_inv_wh1.available_inv).to eq(24)
       expect(product_inv_wh2.available_inv).to eq(24)
+      expect(order_item1.inv_status).to eq('allocated')
+      expect(order_item2.inv_status).to eq('allocated')
     end
 
     it "inventory gets adjusted from available to allocated when item is added to an order" do
@@ -358,10 +378,12 @@ describe OrdersController do
 
       product_inv_wh1.reload
       product_inv_wh2.reload
+      order.reload
       expect(product_inv_wh1.allocated_inv).to eq(6)
       expect(product_inv_wh2.allocated_inv).to eq(5)
       expect(product_inv_wh1.available_inv).to eq(24)
       expect(product_inv_wh2.available_inv).to eq(25)
+      expect(order.order_items.size).to eq(1)
 
       put :additemtoorder, {:id=>order.id, :productids=>[product2.id], :qty=>'1', :price=>"10"}
       expect(response.status).to eq(200)
@@ -373,6 +395,7 @@ describe OrdersController do
       expect(product_inv_wh2.allocated_inv).to eq(6)
       expect(product_inv_wh1.available_inv).to eq(24)
       expect(product_inv_wh2.available_inv).to eq(24)
+      expect(order.order_items.size).to eq(2)
     end
 
     it "inventory gets adjusted from allocated to available when item is removed from an order" do
@@ -402,10 +425,12 @@ describe OrdersController do
 
       product_inv_wh1.reload
       product_inv_wh2.reload
+      order.reload
       expect(product_inv_wh1.allocated_inv).to eq(6)
       expect(product_inv_wh2.allocated_inv).to eq(6)
       expect(product_inv_wh1.available_inv).to eq(24)
       expect(product_inv_wh2.available_inv).to eq(24)
+      expect(order.order_items.size).to eq(2)
 
       put :removeitemfromorder, {:orderitem=>[order_item1.id]}
       expect(response.status).to eq(200)
@@ -413,10 +438,12 @@ describe OrdersController do
       
       product_inv_wh1.reload
       product_inv_wh2.reload
+      order.reload
       expect(product_inv_wh1.allocated_inv).to eq(5)
       expect(product_inv_wh2.allocated_inv).to eq(6)
       expect(product_inv_wh1.available_inv).to eq(25)
       expect(product_inv_wh2.available_inv).to eq(24)
+      expect(order.order_items.size).to eq(1)
     end
 
     it "inventory remains unchanged when order is moved from awaiting to serviceissue" do
@@ -517,10 +544,14 @@ describe OrdersController do
       result = JSON.parse(response.body)
       product_inv_wh1.reload
       product_inv_wh2.reload
+      order_item1.reload
+      order_item2.reload
       expect(product_inv_wh1.allocated_inv).to eq(7)
       expect(product_inv_wh2.allocated_inv).to eq(6)
       expect(product_inv_wh1.available_inv).to eq(23)
       expect(product_inv_wh2.available_inv).to eq(24)
+      expect(order_item1.inv_status).to eq('allocated')
+      expect(order_item2.inv_status).to eq('allocated')
     end
 
     it "inventory does not adjust when order item quantity in order is changed, if auto-allocation is off" do
