@@ -267,6 +267,7 @@ class UserSettingsController < ApplicationController
 
           @newuser.password = @user.password
           @newuser.password_confirmation = @user.password_confirmation
+          @newuser.confirmation_code = @user.confirmation_code+'1'
           @newuser.last_sign_in_at = ''
 
           if !@newuser.save(:validate => false)
