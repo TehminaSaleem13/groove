@@ -201,7 +201,7 @@ describe OrdersController do
       expect(product_inv_wh2.available_inv).to eq(26)
     end
 
-    it "inventory gets adjusted when order is cancelled" do
+    it "inventory gets adjusted when order is moved from awaiting to cancelled" do
       request.accept = "application/json"
       inv_wh = FactoryGirl.create(:inventory_warehouse)
       store = FactoryGirl.create(:store, :inventory_warehouse_id => inv_wh.id)
@@ -231,6 +231,257 @@ describe OrdersController do
       expect(product_inv_wh2.allocated_inv).to eq(4)
       expect(product_inv_wh1.available_inv).to eq(26)
       expect(product_inv_wh2.available_inv).to eq(26)
+    end
+
+    it "inventory gets adjusted when order is moved from serviceissue to cancelled" do
+      request.accept = "application/json"
+      inv_wh = FactoryGirl.create(:inventory_warehouse)
+      store = FactoryGirl.create(:store, :inventory_warehouse_id => inv_wh.id)
+      @user_role.add_edit_order_items = true
+      @user_role.save
+      order = FactoryGirl.create(:order, :status=>'serviceissue', :increment_id=>'12345678911', :store => store)
+      product1 = FactoryGirl.create(:product)
+      product2 = FactoryGirl.create(:product)
+      order_item1 = FactoryGirl.create(:order_item, :product_id=>product1.id,
+                    :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>product1.name, :inv_status=>'allocated')
+      order_item2 = FactoryGirl.create(:order_item, :product_id=>product2.id,
+                    :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>product2.name, :inv_status=>'allocated')
+      product_inv_wh1 = FactoryGirl.create(
+        :product_inventory_warehouse, :product=> product1,
+        :inventory_warehouse_id =>inv_wh.id, 
+        :available_inv => 25, :allocated_inv => 5)
+      product_inv_wh2 = FactoryGirl.create(
+        :product_inventory_warehouse, :product=> product2,
+        :inventory_warehouse_id =>inv_wh.id, 
+        :available_inv => 25, :allocated_inv => 5)
+      put :changeorderstatus, {:order_ids=>[order.id], :status=>'cancelled'}
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      product_inv_wh1.reload
+      product_inv_wh2.reload
+      expect(product_inv_wh1.allocated_inv).to eq(4)
+      expect(product_inv_wh2.allocated_inv).to eq(4)
+      expect(product_inv_wh1.available_inv).to eq(26)
+      expect(product_inv_wh2.available_inv).to eq(26)
+    end
+
+    it "inventory gets adjusted when order is moved from cancelled to awaiting" do
+      request.accept = "application/json"
+      inv_wh = FactoryGirl.create(:inventory_warehouse)
+      store = FactoryGirl.create(:store, :inventory_warehouse_id => inv_wh.id)
+      @user_role.add_edit_order_items = true
+      @user_role.save
+      order = FactoryGirl.create(:order, :status=>'cancelled', :increment_id=>'12345678911', :store => store)
+      product1 = FactoryGirl.create(:product)
+      product2 = FactoryGirl.create(:product)
+      order_item1 = FactoryGirl.create(:order_item, :product_id=>product1.id,
+                    :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>product1.name)
+      order_item2 = FactoryGirl.create(:order_item, :product_id=>product2.id,
+                    :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>product2.name)
+      product_inv_wh1 = FactoryGirl.create(
+        :product_inventory_warehouse, :product=> product1,
+        :inventory_warehouse_id =>inv_wh.id, 
+        :available_inv => 25, :allocated_inv => 5)
+      product_inv_wh2 = FactoryGirl.create(
+        :product_inventory_warehouse, :product=> product2,
+        :inventory_warehouse_id =>inv_wh.id, 
+        :available_inv => 25, :allocated_inv => 5)
+      product_inv_wh1.reload
+      product_inv_wh2.reload
+      put :changeorderstatus, {:order_ids=>[order.id], :status=>'awaiting'}
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      product_inv_wh1.reload
+      product_inv_wh2.reload
+      expect(product_inv_wh1.allocated_inv).to eq(6)
+      expect(product_inv_wh2.allocated_inv).to eq(6)
+      expect(product_inv_wh1.available_inv).to eq(24)
+      expect(product_inv_wh2.available_inv).to eq(24)
+    end
+
+    it "inventory gets adjusted when order is moved from cancelled to serviceissue" do
+      request.accept = "application/json"
+      inv_wh = FactoryGirl.create(:inventory_warehouse)
+      store = FactoryGirl.create(:store, :inventory_warehouse_id => inv_wh.id)
+      @user_role.add_edit_order_items = true
+      @user_role.save
+      order = FactoryGirl.create(:order, :status=>'cancelled', :increment_id=>'12345678912', :store => store)
+      product1 = FactoryGirl.create(:product)
+      product2 = FactoryGirl.create(:product)
+      order_item1 = FactoryGirl.create(:order_item, :product_id=>product1.id,
+                    :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>product1.name)
+      order_item2 = FactoryGirl.create(:order_item, :product_id=>product2.id,
+                    :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>product2.name)
+      product_inv_wh1 = FactoryGirl.create(
+        :product_inventory_warehouse, :product=> product1,
+        :inventory_warehouse_id =>inv_wh.id, 
+        :available_inv => 25, :allocated_inv => 5)
+      product_inv_wh2 = FactoryGirl.create(
+        :product_inventory_warehouse, :product=> product2,
+        :inventory_warehouse_id =>inv_wh.id, 
+        :available_inv => 25, :allocated_inv => 5)
+      product_inv_wh1.reload
+      product_inv_wh2.reload
+      put :changeorderstatus, {:order_ids=>[order.id], :status=>'serviceissue'}
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      product_inv_wh1.reload
+      product_inv_wh2.reload
+      expect(product_inv_wh1.allocated_inv).to eq(6)
+      expect(product_inv_wh2.allocated_inv).to eq(6)
+      expect(product_inv_wh1.available_inv).to eq(24)
+      expect(product_inv_wh2.available_inv).to eq(24)
+    end
+
+    it "inventory gets adjusted from available to allocated when item is added to an order" do
+      request.accept = "application/json"
+      inv_wh = FactoryGirl.create(:inventory_warehouse)
+      store = FactoryGirl.create(:store, :inventory_warehouse_id => inv_wh.id)
+      @user_role.add_edit_order_items = true
+      @user_role.save
+      general_setting = FactoryGirl.create(:general_setting, :inventory_tracking=>true, :hold_orders_due_to_inventory=>true, :inventory_auto_allocation=>true)
+      order = FactoryGirl.create(:order, :status=>'awaiting', :increment_id=>'12345678912', :store => store)
+      product1 = FactoryGirl.create(:product)
+      product2 = FactoryGirl.create(:product)
+      
+      product_inv_wh1 = FactoryGirl.create(
+        :product_inventory_warehouse, :product=> product1,
+        :inventory_warehouse_id =>inv_wh.id, 
+        :available_inv => 25, :allocated_inv => 5)
+      product_inv_wh2 = FactoryGirl.create(
+        :product_inventory_warehouse, :product=> product2,
+        :inventory_warehouse_id =>inv_wh.id, 
+        :available_inv => 25, :allocated_inv => 5)
+
+      order_item1 = FactoryGirl.create(:order_item, :product_id=>product1.id,
+                    :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>product1.name)
+
+      product_inv_wh1.reload
+      product_inv_wh2.reload
+      expect(product_inv_wh1.allocated_inv).to eq(6)
+      expect(product_inv_wh2.allocated_inv).to eq(5)
+      expect(product_inv_wh1.available_inv).to eq(24)
+      expect(product_inv_wh2.available_inv).to eq(25)
+
+      put :additemtoorder, {:id=>order.id, :productids=>[product2.id], :qty=>'1', :price=>"10"}
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+
+      product_inv_wh1.reload
+      product_inv_wh2.reload
+      expect(product_inv_wh1.allocated_inv).to eq(6)
+      expect(product_inv_wh2.allocated_inv).to eq(6)
+      expect(product_inv_wh1.available_inv).to eq(24)
+      expect(product_inv_wh2.available_inv).to eq(24)
+    end
+
+    it "inventory gets adjusted from allocated to available when item is removed from an order" do
+      request.accept = "application/json"
+      inv_wh = FactoryGirl.create(:inventory_warehouse)
+      store = FactoryGirl.create(:store, :inventory_warehouse_id => inv_wh.id)
+      @user_role.add_edit_order_items = true
+      @user_role.save
+      general_setting = FactoryGirl.create(:general_setting, :inventory_tracking=>true, :hold_orders_due_to_inventory=>true, :inventory_auto_allocation=>true)
+      order = FactoryGirl.create(:order, :status=>'awaiting', :increment_id=>'12345678912', :store => store)
+      product1 = FactoryGirl.create(:product)
+      product2 = FactoryGirl.create(:product)
+      
+      product_inv_wh1 = FactoryGirl.create(
+        :product_inventory_warehouse, :product=> product1,
+        :inventory_warehouse_id =>inv_wh.id, 
+        :available_inv => 25, :allocated_inv => 5)
+      product_inv_wh2 = FactoryGirl.create(
+        :product_inventory_warehouse, :product=> product2,
+        :inventory_warehouse_id =>inv_wh.id, 
+        :available_inv => 25, :allocated_inv => 5)
+
+      order_item1 = FactoryGirl.create(:order_item, :product_id=>product1.id,
+                    :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>product1.name)
+      order_item2 = FactoryGirl.create(:order_item, :product_id=>product2.id,
+                    :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>product2.name)
+
+      product_inv_wh1.reload
+      product_inv_wh2.reload
+      expect(product_inv_wh1.allocated_inv).to eq(6)
+      expect(product_inv_wh2.allocated_inv).to eq(6)
+      expect(product_inv_wh1.available_inv).to eq(24)
+      expect(product_inv_wh2.available_inv).to eq(24)
+
+      put :removeitemfromorder, {:orderitem=>[order_item1.id]}
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      
+      product_inv_wh1.reload
+      product_inv_wh2.reload
+      expect(product_inv_wh1.allocated_inv).to eq(5)
+      expect(product_inv_wh2.allocated_inv).to eq(6)
+      expect(product_inv_wh1.available_inv).to eq(25)
+      expect(product_inv_wh2.available_inv).to eq(24)
+    end
+
+    it "inventory remains unchanged when order is moved from awaiting to serviceissue" do
+      request.accept = "application/json"
+      inv_wh = FactoryGirl.create(:inventory_warehouse)
+      store = FactoryGirl.create(:store, :inventory_warehouse_id => inv_wh.id)
+      @user_role.add_edit_order_items = true
+      @user_role.save
+      general_setting = FactoryGirl.create(:general_setting, :inventory_tracking=>true, :hold_orders_due_to_inventory=>true, :inventory_auto_allocation=>true)
+      order = FactoryGirl.create(:order, :status=>'awaiting', :increment_id=>'12345678912', :store => store)
+      product = FactoryGirl.create(:product)
+      
+      product_inv_wh = FactoryGirl.create(
+        :product_inventory_warehouse, :product=> product,
+        :inventory_warehouse_id =>inv_wh.id, 
+        :available_inv => 25, :allocated_inv => 5)
+
+      order_item = FactoryGirl.create(:order_item, :product_id=>product.id,
+                    :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>product.name, :inv_status=>'allocated')
+      
+      product_inv_wh.reload
+      expect(product_inv_wh.allocated_inv).to eq(5)
+      expect(product_inv_wh.available_inv).to eq(25)
+      
+      put :changeorderstatus, {:order_ids=>[order.id], :status=>'serviceissue'}
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      
+      product_inv_wh.reload
+      expect(product_inv_wh.allocated_inv).to eq(5)
+      expect(product_inv_wh.available_inv).to eq(25)
+      expect(order_item.inv_status).to eq('allocated')
+    end
+
+    it "inventory remains unchanged when order is moved from serviceissue to awaiting" do
+      request.accept = "application/json"
+      inv_wh = FactoryGirl.create(:inventory_warehouse)
+      store = FactoryGirl.create(:store, :inventory_warehouse_id => inv_wh.id)
+      @user_role.add_edit_order_items = true
+      @user_role.save
+      general_setting = FactoryGirl.create(:general_setting, :inventory_tracking=>true, :hold_orders_due_to_inventory=>true, :inventory_auto_allocation=>true)
+      order = FactoryGirl.create(:order, :status=>'serviceissue', :increment_id=>'12345678912', :store => store)
+      product = FactoryGirl.create(:product)
+      
+      product_inv_wh = FactoryGirl.create(
+        :product_inventory_warehouse, :product=> product,
+        :inventory_warehouse_id =>inv_wh.id, 
+        :available_inv => 25, :allocated_inv => 5)
+
+      order_item = FactoryGirl.create(:order_item, :product_id=>product.id,
+                    :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>product.name, :inv_status=>'allocated')
+      
+      product_inv_wh.reload
+      expect(product_inv_wh.allocated_inv).to eq(5)
+      expect(product_inv_wh.available_inv).to eq(25)
+      
+      put :changeorderstatus, {:order_ids=>[order.id], :status=>'awaiting'}
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      
+      product_inv_wh.reload
+      order_item.reload
+      expect(product_inv_wh.allocated_inv).to eq(5)
+      expect(product_inv_wh.available_inv).to eq(25)
+      expect(order_item.inv_status).to eq('allocated')
     end
 
     it "inventory gets adjusted when order item quantity in order is changed" do
