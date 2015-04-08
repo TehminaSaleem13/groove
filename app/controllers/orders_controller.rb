@@ -594,12 +594,19 @@ class OrdersController < ApplicationController
         @result['status'] &= false
         @result['messages'].push("Could not find order item")
       else
-        @orderitem.qty = params[:qty]
+        if GeneralSetting.first.inventory_auto_allocation
+          @orderitem.update_inventory_levels_for_return(true)
+          @orderitem.qty = params[:qty]
+          @orderitem.update_inventory_levels_for_packing(true)
+        else
+          @orderitem.qty = params[:qty]
+        end
 
         unless @orderitem.save
           @result['status'] &= false
           @result['messages'].push("Could not update order item")
         end
+        @orderitem.order.update_order_status
       end
     else
       @result['status'] = false
