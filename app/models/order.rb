@@ -122,7 +122,6 @@ class Order < ActiveRecord::Base
           if product.status == "new" or product.status == "inactive" or 
             (GeneralSetting.first.hold_orders_due_to_inventory and (order_item.inv_status == 'unallocated' or order_item.inv_status == 'unprocessed'))
               result &= false
-              puts "result: " + result.inspect
           end
         end
       end
