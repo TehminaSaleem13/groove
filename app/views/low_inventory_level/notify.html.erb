@@ -1,47 +1,44 @@
-<div style="background-color: #B4D3CA; padding: 20px; border-color: #D6E0DE; border-width: 3px; border-radius: 6px; border-style: dotted;">
-  <%= image_tag attachments['logo.png'].url %>
-  <hr style="border-color:#999999;"/>
-  <div style="text-align:center; padding-left:40px; padding-right: 40px;">
-    <div style="width: 500px; margin-left: 100px;">
-      <div style="border: 1px solid #F5D099; background-color: yellow;height: auto; border-radius: 4px; border-style: dotted; border-width: 2px; padding-top:5px; margin-bottom:-20px;">
-        <p style="text-align:center"><%= image_tag attachments['caution_alert.png'].url %></p>
+<%          tenant_name = Apartment::Tenant.current_tenant %>
+<div style="background:#232222;  -webkit-border-radius: 24px / 23px; border-radius: 24px / 23px; ">
+<div style="-webkit-box-sizing: content-box; -moz-box-sizing: content-box; box-sizing: content-box; position: relative; margin: auto; padding: 10px 50px 100px 50px; border: 4px solid rgba(128, 128, 128, 1); -webkit-border-radius: 24px / 23px; border-radius: 24px / 23px; color: rgba(0,0,0,0.9); -o-text-overflow: clip; text-overflow: clip; background: url('https://admin.groovepacker.com/assets/images/email_background_image.png') no-repeat; background-position: 50% 50%; -webkit-background-origin: padding-box; background-origin: padding-box; -webkit-background-clip: border-box; background-clip: border-box; -webkit-background-size: cover; background-size: cover; -webkit-box-shadow: 5px 5px 8px 2px rgba(0,0,0,0.4); box-shadow: 5px 5px 8px 2px rgba(0,0,0,0.4);">
+  <a href="http://www.groovepacker.com/"><img style="margin: auto; display: block;" src="http://www.groovepacker.com/site/images/GroovePacker_Bc_logo_400x73.png" alt=""></a>
 
-        <p style="text-align: center; color:red;font-size: 18px; font-weight: bold;">Low Inventory Alert</p>
+  <h1 style="text-align: center; font-family: 'Play', sans-serif; font-weight: 700; color: #95D329; font-size: 25px; text-shadow: #232222 0 0 20px;">
+    Low Inventory Alert
+  </h1>
+
+<div style="width: 96%; margin-left:auto; margin-right:auto; background: #C1C2C1; border-color: #aca3a3; border-width: 4px; border-radius: 20px; font-family: 'Lato', sans-serif; padding: 15px; border-style: double; -webkit-box-shadow: 5px 5px 8px 2px rgba(0,0,0,0.4); box-shadow: 5px 5px 8px 2px rgba(0,0,0,0.8);">
+    <div style="text-align:center;">
+      <img style="margin: 0 auto; margin-top:12px; display:block;" src="https://admin.groovepacker.com/assets/images/caution_icon.png" alt="Caution" />
+      <h1 style="text-align: center; font-family: 'Play', sans-serif; font-weight: 700; color: #2B4410; font-size: 16px; text-shadow: #232222 0 0 10px;">
+        This email was sent to let you know that the following items are currently at or below their low inventory threshold.
+      </h1>
+      <div style="color:black; font-size: 14px;margin-top:10px;">
+        You can control Low Inventory Alert emails in GroovePacker's <a href="https://<%=tenant_name%>.groovepacker.com/#/settings/system/general" style="font-weight:bold; color:#498815;">General Settings</a> Area
       </div>
     </div>
-    <div style="width: 500px; margin-left: 100px;">
-      <div style="color: black; border-bottom:1px solid #999999;">
-        <b>This email was sent to let you know that the following items are currently at or below their low inventory
-          threshold.</b>
-      </div>
-      <div style="color:black; font-size: 12px;">
-        You can control Low Inventory Alert emails in GroovePacker's
-        General Settings Area
-      </div>
-    </div>
-    <table style="margin-top: 40px; border-spacing: 0px; background-color:white;">
+    <table style="margin:0 auto;margin-top: 20px; border-spacing: 0; background-color:#e8e7e7;border-radius:15px;">
       <thead>
-      <th style="border: 1px solid rgb(117, 116, 116); border-left: 0px; margin-left: 0px; margin-right: 0px; background-color: #AFCAAF; width: 150px; border-radius: 4px; border-bottom-width: 3px; border-top-width: 2px; border-top-color: #E6EBE6;">Image</th>
-      <th style="border: 1px solid rgb(117, 116, 116); border-left: 0px; margin-left: 0px; margin-right: 0px; background-color: #AFCAAF; width: 150px; border-radius: 4px; border-bottom-width: 3px; border-top-width: 2px; border-top-color: #E6EBE6;">SKU</th>
-      <th style="border: 1px solid rgb(117, 116, 116); border-left: 0px; margin-left: 0px; margin-right: 0px; background-color: #AFCAAF; width: 150px; border-radius: 4px; border-bottom-width: 3px; border-top-width: 2px; border-top-color: #E6EBE6;">Product
+      <th style="border-top-left-radius:15px;-webkit-border-top-left-radius:15px;width:150px;text-align: center;line-height: 0.9;vertical-align: middle;position: relative;font-size: 14px;font-family: 'Play', sans-serif;color: #ffffff;border-bottom: 2px solid #8AC007;background-color: #2D2D2C;padding: 14px 10px;border-right: 2px solid #8AC007;">Image</th>
+      <th style="width:150px;text-align: center;line-height: 0.9;vertical-align: middle;position: relative;font-size: 14px;font-family: 'Play', sans-serif;color: #ffffff;border-bottom: 2px solid #8AC007;background-color: #2D2D2C;padding: 14px 10px;border-right: 2px solid #8AC007;">SKU</th>
+      <th style="width:150px;text-align: center;line-height: 0.9;vertical-align: middle;position: relative;font-size: 14px;font-family: 'Play', sans-serif;color: #ffffff;border-bottom: 2px solid #8AC007;background-color: #2D2D2C;padding: 14px 10px;border-right: 2px solid #8AC007;">Product
         Name
       </th>
-      <th style="border: 1px solid rgb(117, 116, 116); border-left: 0px; margin-left: 0px; margin-right: 0px; background-color: #AFCAAF; width: 150px; border-radius: 4px; border-bottom-width: 3px; border-top-width: 2px; border-top-color: #E6EBE6;">Warehouse
+      <th style="width:150px;text-align: center;line-height: 0.9;vertical-align: middle;position: relative;font-size: 14px;font-family: 'Play', sans-serif;color: #ffffff;border-bottom: 2px solid #8AC007;background-color: #2D2D2C;padding: 14px 10px;border-right: 2px solid #8AC007;">Warehouse
         name
       </th>
-      <th style="border: 1px solid rgb(117, 116, 116); border-left: 0px; margin-left: 0px; margin-right: 0px; background-color: #AFCAAF; width: 150px; border-radius: 4px; border-bottom-width: 3px; border-top-width: 2px; border-top-color: #E6EBE6;">available/threshold</th>
-      <th style="border: 1px solid rgb(117, 116, 116); border-left: 0px; margin-left: 0px; margin-right: 0px; background-color: #AFCAAF; width: 150px; border-radius: 4px; border-bottom-width: 3px; border-top-width: 2px; border-top-color: #E6EBE6;">Primary
+      <th style="width:150px;text-align: center;line-height: 0.9;vertical-align: middle;position: relative;font-size: 14px;font-family: 'Play', sans-serif;color: #ffffff;border-bottom: 2px solid #8AC007;background-color: #2D2D2C;padding: 14px 10px;border-right: 2px solid #8AC007;">Available/Threshold</th>
+      <th style="width:150px;text-align: center;line-height: 0.9;vertical-align: middle;position: relative;font-size: 14px;font-family: 'Play', sans-serif;color: #ffffff;border-bottom: 2px solid #8AC007;background-color: #2D2D2C;padding: 14px 10px;border-right: 2px solid #8AC007;">Primary
         Location
       </th>
-      <th style="border: 1px solid rgb(117, 116, 116); border-left: 0px; margin-left: 0px; margin-right: 0px; background-color: #AFCAAF; width: 150px; border-radius: 4px; border-bottom-width: 3px; border-top-width: 2px; border-top-color: #E6EBE6;">Secondary
+      <th style="border-top-right-radius:15px;-webkit-border-top-right-radius:15px;width:150px;text-align: center;line-height: 0.9;vertical-align: middle;position: relative;font-size: 14px;font-family: 'Play', sans-serif;color: #ffffff;border-bottom: 2px solid #8AC007;background-color: #2D2D2C;padding: 14px 10px;">Secondary
         Location
       </th>
       </thead>
       <tbody>
       <%
-         tenant_name = Apartment::Tenant.current_tenant
          @products = []
-         @products_list = Product.all
+         @general_setting = GeneralSetting.all.first
          @products_list.each do |product|
            product_hash = Hash.new
            product_hash['id'] = product.id
@@ -82,13 +79,13 @@
              if (wh.product_inv_alert && wh.product_inv_alert_level > 0)
                wh_hash['threshold'] = wh.product_inv_alert_level
              else
-               wh_hash['threshold'] = GeneralSetting.all.first.default_low_inventory_alert_limit
+               wh_hash['threshold'] = @general_setting.default_low_inventory_alert_limit
              end
 
 
-             if ((wh.available_inv <= GeneralSetting.all.first.default_low_inventory_alert_limit) && !wh.product_inv_alert) ||
+             if ((wh.available_inv <= @general_setting.default_low_inventory_alert_limit) && !wh.product_inv_alert) ||
                 (wh.product_inv_alert && wh.product_inv_alert_level > 0 && wh.available_inv <= wh.product_inv_alert_level)
-               wh_hash['style'] = 'color:red;'
+               wh_hash['style'] = 'color:#D21C1C;'
                low_inv_found = true
              else
                wh_hash['style'] = 'color:black;'
@@ -104,19 +101,24 @@
       <%= @my_name %>
       <% if !@products.nil? %>
       <%  unless @products.length <=1
-            @products =  @products.sort_by{|hsh| hsh['warehouse'][0]['threshold']}.reverse!
+            @products =  @products.sort_by{|hsh| hsh['warehouses'][0]['threshold']}.reverse!
           end %>
-          <% @products.each do |product| %>
+          <% @products.each_with_index do |product,index| %>
 
-              <tr>
-                <td>
-                  <img width="" height="45px" src="<%= product['image'] %>"/>
+              <tr style="text-align:center;<%= ((index % 2) == 0 )? 'background:#dcdcdc;':''%>">
+                <td style="padding:8px;">
+                  <% if product['image'] == '-' %>
+                      <%= product['image'] %>
+                      <% else %>
+                        <img width="" style="margin:0 auto;" height="45px" src="<%= product['image'] %>"/>
+                  <% end %>
+
                 </td>
-                <td>
+                <td style="padding:8px;">
                   <%= product['sku'] %>
                 </td>
-                <td>
-                  <a href="https://<%=tenant_name%>.groovepacker.com/#/products/product/all/1/<%= product['id']%>"><%= product['name'] %></a>
+                <td style="padding:8px;">
+                  <a href="https://<%=tenant_name%>.groovepacker.com/#/products/product/all/1/<%= product['id']%>" style="font-weight:bold; color:#498815;"><%= product['name'] %></a>
                 </td>
                 <td style="padding-left: 25px; padding-right: 25px;">
 								<span>
@@ -137,8 +139,7 @@
                                   <% product['warehouses'].each do |pro_wh| %>
                                       <tr style="text-align:center;">
                                         <td style="<%= pro_wh['style'] %>">
-                                          <span style="text-align:center;"><%= pro_wh['available_inv'] %>
-                                            /<%= pro_wh['threshold'] %> </span>
+                                          <span style="text-align:center;"><%= pro_wh['available_inv'] %>/<%= pro_wh['threshold'] %> </span>
                                         </td>
                                       </tr>
                                   <% end %>
@@ -177,5 +178,11 @@
       </tbody>
     </table>
   </div>
+  <br />
 
+  <div style="float: right; font-family: 'Lato', sans-serif; font-size: small; line-height: .9;background: #c1c2c1;padding: 4px;border-radius: 6px;">
+    <a href="http://www.groovepacker.com/support"><img src="http://www.groovepacker.com/site/images/apple-touch-icon.png" alt="" style="width: 50px;height: 50px;margin-left: auto;margin-right: auto;display: block;"></a>
+    <br><a style="text-decoration:none;color: #777;" href="http://www.groovepacker.com/support">Need Help?</a></div>
+
+</div>
 </div>
