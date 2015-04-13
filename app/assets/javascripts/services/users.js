@@ -127,13 +127,13 @@ groovepacks_services.factory('users',['$http','notification','$filter',function(
         if (typeof auto !== 'boolean') auto = true;
         if(!auto) return true;
         var valid = true;
-        console.log(users.single);
+        //console.log(users.single);
         if (typeof users.single.username == 'undefined' ||
             users.single.username == null || users.single.username == '') {
             valid &= false;
         }
         if (edit_status) {
-                    console.log(users.single.confirmation_code);
+            //console.log(users.single.confirmation_code);
             if (typeof users.single.confirmation_code == 'undefined' ||
             users.single.confirmation_code == null ||
             users.single.confirmation_code == '') {

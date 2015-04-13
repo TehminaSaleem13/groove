@@ -51,8 +51,11 @@ groovepacks_controllers.
 
             scope.update_single_user = function(auto) {
                 if(users.single.validate(scope.users,auto,scope.edit_status)) {
-                    return users.single.update(scope.users,auto).then(myscope.load_roles).then(function(){
-                        scope.show_password = false;
+                    return users.single.update(scope.users,auto).then(function(data) {
+                        myscope.load_roles();
+                        if(data.data.status) {
+                            scope.show_password = false;
+                        }
                     });
                 }
             };
@@ -161,7 +164,7 @@ groovepacks_controllers.
             };
 
             myscope.load_item = function(id) {
-                console.log(id);
+                //console.log(id);
                 var newStateParams = angular.copy($stateParams);
                 newStateParams.user_id = ""+scope.users.list[id].id;
                 scope.user_single_details(scope.users.list[id].id, true);
