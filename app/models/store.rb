@@ -89,7 +89,9 @@ class Store < ActiveRecord::Base
     if self.store_type == 'Shipstation'
       @credentials = ShipstationCredential.where(:store_id => self.id)
     end
-
+    if self.store_type == 'Shopify'
+      @credentials = ShopifyCredential.where(:store_id => self.id)
+    end
     if !@credentials.nil? && @credentials.length > 0
       if !(@credentials.first.destroy)
         @result= false
