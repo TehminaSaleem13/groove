@@ -88,7 +88,8 @@ Groovepacks::Application.routes.draw do
 
   resources :shopify do
     member do
-      put 'auth'
+      get 'auth'
+      put 'disconnect'
     end
   end
   

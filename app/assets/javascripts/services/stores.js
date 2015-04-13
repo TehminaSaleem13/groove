@@ -180,6 +180,7 @@ groovepacks_services.factory('stores',['$http','notification','$filter',function
                     } else if (data.store.store_type == 'Shopify') {
                         stores.single.shop_name = data.credentials.shopify_credentials.shop_name;
                         stores.single.access_token = data.credentials.shopify_credentials.access_token;
+                        stores.single.shopify_permission_url = data.credentials.shopify_permission_url;
                     }
                 }
             }
@@ -468,6 +469,12 @@ groovepacks_services.factory('stores',['$http','notification','$filter',function
         }).error(notification.server_error); 
     }
 
+    var shopfiy_disconnect = function(store_id) {
+        return $http.put('/shopify/'+ store_id + '/disconnect.json', null).error(
+            notification.server_error
+        );   
+    }
+
     //Public facing API
     return {
         model: {
@@ -522,6 +529,9 @@ groovepacks_services.factory('stores',['$http','notification','$filter',function
         shipstation: {
             verify_tags: verify_tags,
             update_all_locations: update_all_locations
+        },
+        shopify: {
+            disconnect: shopfiy_disconnect
         }
     };
 }]);
