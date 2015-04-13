@@ -289,9 +289,7 @@ class StoreSettingsController < ApplicationController
                   shop_name: params[:shop_name])
                 new_record = true
               else
-                @shopify.update_attributes(
-                  shop_name: params[:shop_name],
-                  access_token: params[:access_token])
+                @shopify.update_attributes(shop_name: params[:shop_name])
               end
               @store.save
             rescue ActiveRecord::RecordInvalid => e
