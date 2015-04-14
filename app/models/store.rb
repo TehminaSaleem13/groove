@@ -68,7 +68,7 @@ class Store < ActiveRecord::Base
       @result['shopify_credentials'] = shopify_credential
       if shopify_credential.access_token.nil?
         shopify_handle = Groovepacker::ShopifyRuby::Utilities.new(shopify_credential)
-        @result['shopify_permission_url'] = shopify_handle.permission_url
+        @result['shopify_permission_url'] = shopify_handle.permission_url(Apartment::Database.current_tenant)
       end
       @result['status'] =true
     end
