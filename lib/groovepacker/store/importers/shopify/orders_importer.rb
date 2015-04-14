@@ -49,19 +49,19 @@ module Groovepacker
                       # if sku is nil or empty
                       if Product.find_by_name(item["name"]).nil?
                         # if item is not found by name then create the item
-                        order_item.product = create_new_product_from_order(item, credential.store, ProductSku.get_temp_sku)
+                        order_item.product = create_new_product_from_order(item, credential.store, ProductSku.get_temp_sku, client)
                       else
                         # product exists add temp sku if it does not exist
                         products = Product.where(name: item["name"])
                         unless contains_temp_skus(products)
-                          order_item.product = create_new_product_from_order(item, credential.store, ProductSku.get_temp_sku)
+                          order_item.product = create_new_product_from_order(item, credential.store, ProductSku.get_temp_sku, client)
                         else
                           order_item.product = get_product_with_temp_skus(products)
                         end
                       end
                     elsif ProductSku.where(sku: item["sku"]).length == 0
                       # if non-nil sku is not found
-                      product = create_new_product_from_order(item, credential.store, item["sku"])
+                      product = create_new_product_from_order(item, credential.store, item["sku"], client)
                       order_item.product = product
                     else
                       order_item_product = ProductSku.where(sku: item["sku"]).
@@ -130,7 +130,6 @@ module Groovepacker
 
             shopify_order.weight_oz = (order["total_weight"].to_i * 0.035274) unless order["total_weight"].nil?
             shopify_order.order_total = order["total_price"].to_f unless order["total_price"].nil?
-            shopify_order.save
           end
 
           def import_order_item(order_item, line_item)
@@ -141,25 +140,64 @@ module Groovepacker
             order_item
           end
 
-          def create_new_product_from_order(item, store, sku)
+          def create_new_product_from_order(item, store, sku, client)
             #create and import product
             product = Product.create(name: item["name"], store: store,
               store_product_id: item["product_id"])
             product.product_skus.create(sku: sku)
 
             #get from products api
+            response = client.product(item["product_id"])
 
-            # #Build Image
-            # unless item["imageUrl"].nil? || product.product_images.length > 0
-            #   product.product_images.create(image: item["imageUrl"])
-            # end
-            
-            # unless item["warehouseLocation"].nil?
-            #   product.primary_warehouse.update_column(
-            #     'location_primary', item["warehouseLocation"]
-            #   )
-            # end
+            shopify_product = response["product"]
+            unless shopify_product.nil?
+              # get product categories
+              unless shopify_product["tags"].nil? || 
+                shopify_product["tags"] == ""
+                tags = shopify_product["tags"].split(", ")
+                tags.each do |tag|
+                  product.product_cats.create(category: tag)
+                end
+              end
 
+              unless shopify_product["variants"].empty?
+                # get variant id based on the sku
+                variant_id = nil
+                shopify_product["variants"].each do |variant|
+                  if variant["sku"] == sku
+                    # create barcode
+                    product.product_barcodes.create(barcode: variant["barcode"])
+                    # get image based on the variant id
+                    shopify_product["images"].each do |image|
+                      if image["variant_ids"].include?(variant["if"])
+                        product.product_images.create(image: image["src"])
+                      end
+                    end
+
+                    # get weight
+                    if variant["weight_unit"] == 'lb'
+                      product.weight = variant["weight"] * 16
+                    elsif variant["weight_unit"] == 'kg'
+                      product.weight = variant["weight"] * 35.274
+                    elsif variant["weight_unit"] == 'g'
+                      product.weight = variant["weight"] * 0.035274
+                    elsif variant["weight_unit"] == 'oz'
+                      product.weight = variant["weight"]
+                    end
+                  end
+                end
+              end
+
+              # if product images are empty then import product image
+              if product.product_images.empty? && 
+                !shopify_product["image"].nil? &&
+                shopify_product["image"] != ''
+                product.product_images.create(image: shopify_product["image"]["src"])
+              end
+
+            end
+            product.save
+            product.update_product_status
             product
           end
         end

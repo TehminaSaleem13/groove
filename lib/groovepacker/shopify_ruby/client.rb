@@ -17,6 +17,18 @@ module Groovepacker
         combined_response["orders"] =  response["orders"]
         combined_response
       end
+
+      def product(product_id)
+        response = HTTParty.get('https://'+ shopify_credential.shop_name + 
+          '.myshopify.com/admin/products/' + product_id.to_s,
+          headers: {
+            "X-Shopify-Access-Token" => shopify_credential.access_token,
+            "Content-Type" => "application/json",
+            "Accept" => "application/json"
+          })
+        puts response.inspect
+        response
+      end
     end
   end
 end
