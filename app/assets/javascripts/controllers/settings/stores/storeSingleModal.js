@@ -30,6 +30,12 @@ function(scope, store_data, $window, $sce, $interval, $state, $stateParams, $mod
         });
     };
 
+    scope.disconnect_shopify = function() {
+        stores.shopify.disconnect(scope.stores.single.id).then(function() {
+            myscope.store_single_details(scope.stores.single.id,true);
+        });
+    }
+
     scope.import_orders = function(report_id) {
         scope.stores.import.order.status = "Import in progress";
         scope.stores.import.order.status_show = true;
@@ -226,14 +232,7 @@ function(scope, store_data, $window, $sce, $interval, $state, $stateParams, $mod
         });
     };
 
-    scope.launch_ebay_popup= function() {
-
-        //TODO: Move this into a service/directive after some testing is done
-        var ebay_url = $sce.trustAsResourceUrl(scope.stores.ebay.signin_url+'&ruparams=redirect%3Dtrue%26editstatus%3D'+scope.edit_status+'%26name%3D'+
-                                scope.stores.single.name+'%26status%3D'+scope.stores.single.status+'%26storetype%3D'+
-                                scope.stores.single.store_type+'%26storeid%3D'+scope.stores.single.id+'%26inventorywarehouseid%3D'+scope.stores.single.inventory_warehouse_id+'%26importimages%3D'+scope.stores.single.import_images+
-                                '%26importproducts%3D'+scope.stores.single.import_products+'%26messagetocustomer%3D'+scope.stores.single.thank_you_message_to_customer+'%26tenantname%3D'+scope.stores.ebay.current_tenant);
-
+    myscope.open_popup = function(url) {
         var w = 1000;
         var h = 400;
         var left_adjust = angular.isDefined($window.screenLeft) ? $window.screenLeft : $window.screen.left;
@@ -244,7 +243,7 @@ function(scope, store_data, $window, $sce, $interval, $state, $stateParams, $mod
         var left = ((width / 2) - (w / 2)) + left_adjust;
         var top = ((height / 2) - (h / 2)) + top_adjust;
 
-        var popup = $window.open(ebay_url, '', "top=" + top + ", left=" + left + ", width="+w+", height="+h);
+        var popup = $window.open(url, '', "top=" + top + ", left=" + left + ", width="+w+", height="+h);
         var interval = 1000;
 
         var i = $interval(function() {
@@ -260,6 +259,20 @@ function(scope, store_data, $window, $sce, $interval, $state, $stateParams, $mod
                 console.error(e);
             }
         },interval);
+    }
+    scope.launch_ebay_popup= function() {
+        //TODO: Move this into a service/directive after some testing is done
+        var ebay_url = $sce.trustAsResourceUrl(scope.stores.ebay.signin_url+'&ruparams=redirect%3Dtrue%26editstatus%3D'+scope.edit_status+'%26name%3D'+
+                                scope.stores.single.name+'%26status%3D'+scope.stores.single.status+'%26storetype%3D'+
+                                scope.stores.single.store_type+'%26storeid%3D'+scope.stores.single.id+'%26inventorywarehouseid%3D'+scope.stores.single.inventory_warehouse_id+'%26importimages%3D'+scope.stores.single.import_images+
+                                '%26importproducts%3D'+scope.stores.single.import_products+'%26messagetocustomer%3D'+scope.stores.single.thank_you_message_to_customer+'%26tenantname%3D'+scope.stores.ebay.current_tenant);
+
+        myscope.open_popup(ebay_url);
+    };
+
+    scope.launch_shopify_popup= function() {
+        var shopify_url = $sce.trustAsResourceUrl(scope.stores.single.shopify_permission_url);
+        myscope.open_popup(shopify_url)
     };
 
     myscope.rollback = function() {
@@ -362,6 +375,10 @@ function(scope, store_data, $window, $sce, $interval, $state, $stateParams, $mod
             Shipworks: {
                 name: "Shipworks",
                 file: "/assets/views/modals/settings/stores/shipworks.html"
+            },
+            Shopify: {
+                name: "Shopify",
+                file: "/assets/views/modals/settings/stores/shopify.html"
             }
         };
 

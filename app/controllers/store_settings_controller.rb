@@ -279,6 +279,29 @@ class StoreSettingsController < ApplicationController
               @result['messages'] = [e.message]
             end
           end
+
+          if @store.store_type == 'Shopify'
+            @shopify = ShopifyCredential.find_by_store_id(@store.id)
+            puts @shopify.inspect
+            begin
+              if @shopify.nil?
+                @store.shopify_credential = ShopifyCredential.new(
+                  shop_name: params[:shop_name])
+                new_record = true
+              else
+                @shopify.update_attributes(shop_name: params[:shop_name])
+              end
+              @store.save
+            rescue ActiveRecord::RecordInvalid => e
+              @result['status'] = false
+              @result['messages'] = [@store.errors.full_messages, 
+                @store.shopify_credential.errors.full_messages]
+
+            rescue ActiveRecord::StatementInvalid => e
+              @result['status'] = false
+              @result['messages'] = [e.message]
+            end
+          end
         else
           @result['status'] = false
           @result['messages'].push("Current user does not have permission to create or edit a store")

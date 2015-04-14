@@ -85,6 +85,13 @@ Groovepacks::Application.routes.draw do
       put 'acknowledge'
     end
   end
+
+  resources :shopify do
+    member do
+      get 'auth'
+      put 'disconnect'
+    end
+  end
   
   # Sample resource route with options:
   #   resources :products do

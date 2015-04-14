@@ -110,6 +110,10 @@ Groovepacks::Application.configure do
   ENV['SHIPSTATION_USERNAME'] = "dreadhead"
   ENV['SHIPSTATION_PASSWORD'] = "g8J$v5KLoP"
 
+  ENV['SHOPIFY_API_KEY'] = "1177da0ae0ee723ad479792561c4c480"
+  ENV['SHOPIFY_SHARED_SECRET'] = "8f48a567ba58e3ac057253cdde377fc2"
+  ENV["SHOPIFY_REDIRECT_HOST"] = "localpacker.com"
+  
   # Stripe test keys
   ENV['STRIPE_API_KEY'] = "sk_test_4QS2OJ8BkMWcuzCWrHrKGlz9"
   ENV['STRIPE_PUBLIC_KEY'] = "pk_test_4QS2UN3famIPlHtp2Q7ykpDf"

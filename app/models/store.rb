@@ -8,6 +8,8 @@ class Store < ActiveRecord::Base
   has_one :shipstation_credential
   has_one :shipstation_rest_credential
   has_one :shipworks_credential
+  has_one :shopify_credential
+
   belongs_to :inventory_warehouse
 
   validates_presence_of :name
@@ -62,6 +64,14 @@ class Store < ActiveRecord::Base
       @result['shipworks_hook_url'] = "https://"+Apartment::Database.current_tenant+"."+ENV['HOST_NAME']+"/orders/import_shipworks?auth_token="
       @result['status'] =true
     end
+    if self.store_type == 'Shopify'
+      @result['shopify_credentials'] = shopify_credential
+      if shopify_credential.access_token.nil?
+        shopify_handle = Groovepacker::ShopifyRuby::Utilities.new(shopify_credential)
+        @result['shopify_permission_url'] = shopify_handle.permission_url(Apartment::Database.current_tenant)
+      end
+      @result['status'] =true
+    end
   	@result
   end
 
@@ -79,7 +89,9 @@ class Store < ActiveRecord::Base
     if self.store_type == 'Shipstation'
       @credentials = ShipstationCredential.where(:store_id => self.id)
     end
-
+    if self.store_type == 'Shopify'
+      @credentials = ShopifyCredential.where(:store_id => self.id)
+    end
     if !@credentials.nil? && @credentials.length > 0
       if !(@credentials.first.destroy)
         @result= false

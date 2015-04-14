@@ -47,8 +47,13 @@ class OrdersController < ApplicationController
           context = Groovepacker::Store::Context.new(
             Groovepacker::Store::Handlers::ShipstationRestHandler.new(store))
           import_result = context.import_orders
+        elsif store.store_type == 'Shopify'
+          context = Groovepacker::Store::Context.new(
+            Groovepacker::Store::Handlers::ShopifyHandler.new(store))
+          import_result = context.import_orders  
         end
       rescue Exception => e
+        puts e.backtrace.join(", ")
         @result['status'] = false
         @result['messages'].push(e.message)
       end
