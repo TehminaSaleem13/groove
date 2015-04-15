@@ -51,11 +51,13 @@
       </div>
     </div>
   </div>
-
   <div class="row">
-    <div class="col-md-12 text-center">
-        <iframe width="768" height="432" src="https://www.youtube.com/embed/1WJeGw_GbbI?rel=0" frameborder="0" allowfullscreen></iframe>
-    </div>
+      <div class="col-md-12 text-center">
+          <iframe width="768" height="432" src="https://www.youtube.com/embed/1WJeGw_GbbI?rel=0" frameborder="0" allowfullscreen></iframe>
+      </div>
+  </div>
+  <div class="row">
+
     <div class="col-md-12">
       <legend>ShipWorks Integration Setup</legend>
       <ol class="list-group">
@@ -64,9 +66,9 @@
                   You can enable all statuses if you'll be using a custom button in ShipWorks to import all selected orders.</p>
           </li>
           <li class="list-group-item">
-              <p class="list-group-item-text">2. Request URL: <strong>{{stores.single.request_url}}{{stores.single.auth_token}}</strong></p>
-              <p class="list-group-item-text"><button class="groove-button" ng-class="copy_text.class" clip-copy="stores.single.request_url+stores.single.auth_token" clip-click="copy_acknowledgement()">{{copy_text.text}}</button></p>
-              <p class="list-group-item-text">You'll paste it into ShipWorks in step #6 below.</p>
+              <p class="list-group-item-text">2. Request URL: <span class="password-label" ng-hide="edit_status"> Please provide a name for your ShipWorks store above to generate Request Url</span><strong ng-show="edit_status">{{stores.single.request_url}}{{stores.single.auth_token}}</strong></p>
+              <p class="list-group-item-text" ng-show="edit_status"><button class="groove-button" ng-class="copy_text.class" clip-copy="stores.single.request_url+stores.single.auth_token" clip-click="copy_acknowledgement()">{{copy_text.text}}</button></p>
+              <p class="list-group-item-text" ng-show="edit_status">You'll paste it into ShipWorks in step #6 below.</p>
           </li>
           <li class="list-group-item">
               <p class="list-group-item-text">3. In ShipWorks click on the Manage tab at the top and then on Actions. In the window click "New Action".</p>
