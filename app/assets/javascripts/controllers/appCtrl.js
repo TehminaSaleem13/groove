@@ -67,6 +67,10 @@ groovepacks_controllers.
                     CSV: {
                          alt:"CSV",
                         src: "/assets/images/csv_logo.png"
+                    },
+                    Shopify: {
+                         alt:"CSV",
+                        src: "/assets/images/shopify_import.png"
                     }
 
                 };
