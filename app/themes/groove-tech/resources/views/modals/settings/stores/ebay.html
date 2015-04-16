@@ -16,7 +16,7 @@
 
   <div class="row">
     <div class="col-md-4">
-    <legend>Import Orders</legend>
+    <legend>Access Token</legend>
       <!-- for api import with a valid state -->
       <div ng-show="stores.import.order.type=='apiimport'">
 
@@ -27,7 +27,7 @@
          </div>
       </div>
       <div ng-hide="stores.ebay.show_url">
-          <p class="alert alert-success">Auth Token is successfully retrieved and hidden for security reasons.</p>
+          <p class="alert alert-success">Auth Token is successfully retrieved and hidden for security reasons. You can import orders by clicking on Import Orders button on the top navigation menu.</p>
           <div>
             <a href="" ng-click="disconnect_ebay_seller()">Disconnect from seller account</a>
           </div>
