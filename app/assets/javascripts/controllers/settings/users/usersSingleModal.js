@@ -54,6 +54,7 @@ groovepacks_controllers.
                     return users.single.update(scope.users,auto).then(function(data) {
                         myscope.load_roles();
                         if(data.data.status) {
+                            scope.edit_status =true;
                             scope.show_password = false;
                         }
                     });
@@ -75,9 +76,9 @@ groovepacks_controllers.
                 scope.roles_data.showSelectBaseRole = false;
                 if(scope.roles_data.selectedRole != null) {
                     if(confirm("Are you sure?")) {
-                        scope.users.single.role = scope.roles_data.selectedRole;
-                        scope.update_single_user().then(function(){
-
+                        $timeout(function() {
+                            scope.users.single.role = scope.roles_data.selectedRole;
+                            scope.update_single_user();
                         });
                     }
                 } else {
