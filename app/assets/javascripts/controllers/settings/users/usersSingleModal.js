@@ -103,9 +103,15 @@ groovepacks_controllers.
             };
 
             myscope.rollback = function() {
-                scope.users.single = {};
-                angular.copy(myscope.single,scope.users.single);
-                scope.update_single_user();
+                if(typeof myscope.single =='undefined' || typeof myscope.single['id'] == "undefined") {
+                    if (typeof scope.users.single['id'] != "undefined") {
+                        users.list.update('delete',{setup:{status:''},list:[{id:scope.users.single.id, checked:true }]});
+                    }
+                } else {
+                    scope.users.single = {};
+                    angular.copy(myscope.single,scope.users.single);
+                    scope.update_single_user();
+                }
             };
             /**
              * private properties

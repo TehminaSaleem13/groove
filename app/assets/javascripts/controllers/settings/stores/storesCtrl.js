@@ -89,7 +89,7 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies, st
         }
 
         $scope.$watch('stores.setup.search',myscope.get_stores);
-        $scope.store_modal_closed_callback = myscope.get_stores;
+        $scope.store_modal_closed_callback = function(){$timeout(myscope.get_stores,100);};
     };
 
     myscope.init();

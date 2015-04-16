@@ -155,7 +155,7 @@ function(scope, store_data, $window, $sce, $interval, $state, $stateParams, $mod
             return stores.single.update(scope.stores,auto).success(function(data){
                 if(data.status && data.store_id) {
                     if(typeof scope.stores.single['id'] == "undefined") {
-                        myscope.store_single_details(data.store_id,true);
+                        myscope.store_single_details(data.store_id);
                     }
                     if(!auto) {
                         //Use FileReader API here if it exists (post prototype feature)
@@ -259,7 +259,7 @@ function(scope, store_data, $window, $sce, $interval, $state, $stateParams, $mod
                 console.error(e);
             }
         },interval);
-    }
+    };
     scope.launch_ebay_popup= function() {
         //TODO: Move this into a service/directive after some testing is done
         var ebay_url = $sce.trustAsResourceUrl(scope.stores.ebay.signin_url+'&ruparams=redirect%3Dtrue%26editstatus%3D'+scope.edit_status+'%26name%3D'+
@@ -276,9 +276,13 @@ function(scope, store_data, $window, $sce, $interval, $state, $stateParams, $mod
     };
 
     myscope.rollback = function() {
-        scope.stores.single = {};
-        angular.copy(myscope.single,scope.stores.single);
-        if (typeof scope.stores.single.id != 'undefined') {
+        if (typeof myscope.single == "undefined" || typeof myscope.single.id == "undefined") {
+            if(typeof scope.stores.single['id'] != "undefined") {
+                stores.list.update('delete',{setup:{status:''},list:[{id:scope.stores.single.id, checked:true}]});
+            }
+        } else {
+            scope.stores.single = {};
+            angular.copy(myscope.single,scope.stores.single);
             scope.update_single_store();
         }
     };
