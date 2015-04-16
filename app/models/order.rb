@@ -661,7 +661,7 @@ class Order < ActiveRecord::Base
   end
 
   def update_non_hyphen_increment_id
-    self.non_hyphen_increment_id = non_hyphenated_string(self.increment_id)
+    self.non_hyphen_increment_id = non_hyphenated_string(self.increment_id.to_s)
   end
 
   def scanned_items_count
