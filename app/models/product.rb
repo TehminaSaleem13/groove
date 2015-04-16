@@ -132,13 +132,13 @@ class Product < ActiveRecord::Base
 	  	#update order items status from onhold to awaiting
 	  	@order_items = OrderItem.where(:product_id=>self.id)
 	  	@order_items.each do |item|
-	  		item.order.update_order_status
+	  		item.order.update_order_status unless item.order.nil?
 	  	end
 	else
 	  	#update order items status from onhold to awaiting
 	  	@order_items = OrderItem.where(:product_id=>self.id)
 	  	@order_items.each do |item|
-	  		item.order.update_order_status
+	  		item.order.update_order_status unless item.order.nil?
 	  	end
 	end
 	result
@@ -154,14 +154,14 @@ class Product < ActiveRecord::Base
             kit_product.product.save
             order_items = OrderItem.where(:product_id=>kit_product.product.id)
             order_items.each do |item|
-              item.order.update_order_status
+              item.order.update_order_status unless item.order.nil?
             end
           end
         end
       end
       @order_items = OrderItem.where(:product_id=>self.id)
       @order_items.each do |item|
-        item.order.update_order_status
+        item.order.update_order_status unless item.order.nil?
       end
     end
   end
