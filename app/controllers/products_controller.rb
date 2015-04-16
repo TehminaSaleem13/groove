@@ -487,13 +487,15 @@ class ProductsController < ApplicationController
         @products.each do|product|
           @product = Product.find(product["id"])
           @product.order_items.each do |order_item|
-            order_item.order.status = "onhold"
-            order_item.order.save
-            order_item.order.addactivity("An item with Name #{@product.name} and " +
+            unless order_item.order.nil?
+             order_item.order.status = "onhold"
+             order_item.order.save
+             order_item.order.addactivity("An item with Name #{@product.name} and " +
               "SKU #{@product.primary_sku} has been deleted",
               current_user.username,
               "deleted_item"
-            )
+             )
+            end
             order_item.destroy
           end
 
