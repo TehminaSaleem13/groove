@@ -14,7 +14,7 @@
     </div>
   </div>
 
-  <div class="row" ng-hide="true">
+  <div class="row">
     <div class="col-md-4">
     <legend>Import Orders</legend>
       <!-- for api import with a valid state -->
@@ -31,20 +31,6 @@
           <div>
             <a href="" ng-click="disconnect_ebay_seller()">Disconnect from seller account</a>
           </div>
-
-
-          <div>
-            <div class="form-group">
-              <div class="controls col-md-8">
-                <button ng-click="import_orders()" class="modal-save-button">Import Orders</button>
-              </div>
-            </div>
-            <div class="form-group">
-                <div class="col-xs-12">
-                    <label class="alert alert-info" ng-show="stores.import.order.status_show">{{stores.import.order.status}}</label>
-                </div>
-            </div>
-          </div>
       </div>
 
       <div ng-show="stores.import.order.type=='csvimport'">
@@ -58,7 +44,7 @@
     </div>
   </div>
 </div>
-<div class="row" ng-hide="true">
+<div class="row" ng-hide="stores.ebay.show_url">
     <div class="col-md-6">
         <legend>Import Products</legend>
 
