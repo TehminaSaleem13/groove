@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150407100222) do
+ActiveRecord::Schema.define(:version => 20150421151540) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0, :null => false
@@ -486,6 +486,7 @@ ActiveRecord::Schema.define(:version => 20150407100222) do
     t.boolean  "record_serial",                                                 :default => false
     t.string   "type_scan_enabled",                                             :default => "on"
     t.string   "click_scan_enabled",                                            :default => "on"
+    t.string   "weight_format"
   end
 
   add_index "products", ["store_id"], :name => "index_products_on_store_id"

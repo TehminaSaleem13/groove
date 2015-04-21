@@ -909,6 +909,7 @@ class ProductsController < ApplicationController
     end
   end
   def updateproduct
+    puts "params :::" + params.inspect 
     @result = Hash.new
     @product = Product.find(params[:basicinfo][:id]) unless params.nil? && params[:basicinfo].nil?
     @result['status'] = true
@@ -936,14 +937,16 @@ class ProductsController < ApplicationController
         @product.store_product_id = params[:basicinfo][:store_product_id]
         @product.type_scan_enabled = params[:basicinfo][:type_scan_enabled]
         @product.click_scan_enabled = params[:basicinfo][:click_scan_enabled]
+        @product.weight_format = params[:basicinfo][:weight_format]
 
-        @product.weight = get_product_weight(params[:weight])
-        @product.shipping_weight = get_product_weight(params[:shipping_weight])
+        @product.weight = @product.get_product_weight(params[:weight])
+        puts "@product.weight: " + @product.weight.inspect
+        @product.shipping_weight = @product.get_product_weight(params[:shipping_weight])
 
         if !@product.save
           @result['status'] &= false
         end
-
+        puts "product saved.............."
         #Update product status and also update the containing kit and orders
         updatelist(@product,'status',params[:basicinfo][:status]) unless params[:basicinfo][:status].nil?
 
@@ -1481,14 +1484,18 @@ class ProductsController < ApplicationController
   private
 
   def get_product_weight(weight)
-    if GeneralSetting.get_product_weight_format=='English'
-      @lbs =  16 * weight[:lbs].to_i
+    puts "weight: " + weight.inspect
+    if GeneralSetting.get_product_weight_format=='lb'
+      @lbs =  16 * weight[:lbs].to_f
+    elsif GeneralSetting.get_product_weight_format=='oz'
       @oz = weight[:oz].to_f
-      @lbs + @oz
+      puts "@oz: " + @oz.inspect
+    elsif GeneralSetting.get_product_weight_format=='kg'
+      @kgs = 1000 * weight[:kgs].to_f
+      @kgs * 0.035274
     else
-      @kgs = 1000 * weight[:kgs].to_i
       @gms = weight[:gms].to_f
-      (@kgs + @gms) * 0.035274
+      @gms * 0.035274
     end
   end
 

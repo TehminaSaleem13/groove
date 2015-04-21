@@ -409,4 +409,34 @@ class Product < ActiveRecord::Base
       where('activity_type in (:types)', types: 'deleted_item').
       where(acknowledged: false)
   end
+
+  def get_product_weight(weight)
+    puts "weight: " + weight.inspect
+    unless self.weight_format.nil?
+      if self.weight_format=='lb'
+        @lbs =  16 * weight[:lbs].to_f
+      elsif self.weight_format=='oz'
+        @oz = weight[:oz].to_f
+        puts "@oz: " + @oz.inspect
+      elsif self.weight_format=='kg'
+        @kgs = 1000 * weight[:kgs].to_f
+        @kgs * 0.035274
+      else
+        @gms = weight[:gms].to_f
+        @gms * 0.035274
+      end
+    else
+      if GeneralSetting.get_product_weight_format=='lb'
+        @lbs =  16 * weight[:lbs].to_f
+      elsif GeneralSetting.get_product_weight_format=='oz'
+        @oz = weight[:oz].to_f
+      elsif GeneralSetting.get_product_weight_format=='kg'
+        @kgs = 1000 * weight[:kgs].to_f
+        @kgs * 0.035274
+      else
+        @gms = weight[:gms].to_f
+        @gms * 0.035274
+      end
+    end
+  end
 end
