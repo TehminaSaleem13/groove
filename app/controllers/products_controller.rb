@@ -732,6 +732,7 @@ class ProductsController < ApplicationController
       @result['product']['amazon_product'] = @amazon_product
       @result['product']['store'] = @store
       @result['product']['basicinfo'] = @product.attributes
+      @result['product']['basicinfo']['weight_format'] = @product.get_show_weight_format
       @result['product']['product_weight_format'] = GeneralSetting.get_product_weight_format
       @result['product']['weight'] = @product.get_weight
       @result['product']['shipping_weight'] = @product.get_shipping_weight
@@ -740,6 +741,7 @@ class ProductsController < ApplicationController
       @result['product']['images'] = @product.product_images.order("product_images.order ASC")
       @result['product']['barcodes'] = @product.product_barcodes.order("product_barcodes.order ASC")
       @result['product']['inventory_warehouses'] = []
+
       @product.product_inventory_warehousess.each do |inv_wh|
         if UserInventoryPermission.where(
             :user_id => current_user.id,
@@ -932,7 +934,8 @@ class ProductsController < ApplicationController
         @product.store_product_id = params[:basicinfo][:store_product_id]
         @product.type_scan_enabled = params[:basicinfo][:type_scan_enabled]
         @product.click_scan_enabled = params[:basicinfo][:click_scan_enabled]
-        @product.weight_format = params[:basicinfo][:weight_format]
+        # @product.weight_format = params[:basicinfo][:weight_format]
+        @product.weight_format = get_weight_format(params[:basicinfo][:weight_format])
 
         @product.weight = @product.get_product_weight(params[:weight])
         @product.shipping_weight = @product.get_product_weight(params[:shipping_weight])
@@ -1475,6 +1478,14 @@ class ProductsController < ApplicationController
   end
 
   private
+
+  def get_weight_format(weight_format)
+    unless weight_format.nil?
+      return weight_format
+    else
+      return GeneralSetting.get_product_weight_format
+    end
+  end
 
   def do_search(results_only = true)
     limit = 10

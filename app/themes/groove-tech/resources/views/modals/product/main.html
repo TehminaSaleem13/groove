@@ -130,20 +130,14 @@
 
             <div class="form-group" ng-show="products.single.store.store_type!='Amazon' || (products.single.store.store_type=='Amazon' && products.single.amazon_product.show_shipping_weight_only==false)">
                 <label class="control-label col-sm-2">Product Weight</label>
-
                 <div class="col-sm-8 controls">
-                    <div class="input-group col-sm-12 controls">
-                        <input class="form-control input-style" aria-describedby="basic-addon2" ng-show="products.single.basicinfo.weight_format=='lb'"  ng-model="products.single.weight.lbs" ng-blur="update_single_product()">
-                        <input class="form-control input-style" aria-describedby="basic-addon2" ng-show="products.single.basicinfo.weight_format=='oz'"  ng-model="products.single.weight.oz" ng-blur="update_single_product()">
-                        <input class="form-control input-style" aria-describedby="basic-addon2" ng-show="products.single.basicinfo.weight_format=='kg'"  ng-model="products.single.weight.kgs" ng-blur="update_single_product()">
-                        <input class="form-control input-style" aria-describedby="basic-addon2" ng-show="products.single.basicinfo.weight_format=='g'"  ng-model="products.single.weight.gms" ng-blur="update_single_product()">
-                        <input class="form-control input-style" aria-describedby="basic-addon2" ng-show="products.single.product_weight_format=='lb' && products.single.basicinfo.weight_format==null"  ng-model="products.single.weight.lbs" ng-blur="update_single_product()">
-                        <input class="form-control input-style" aria-describedby="basic-addon2" ng-show="products.single.product_weight_format=='oz' && products.single.basicinfo.weight_format==null"  ng-model="products.single.weight.oz" ng-blur="update_single_product()">
-                        <input class="form-control input-style" aria-describedby="basic-addon2" ng-show="products.single.product_weight_format=='kg' && products.single.basicinfo.weight_format==null"  ng-model="products.single.weight.kgs" ng-blur="update_single_product()">
-                        <input class="form-control input-style" aria-describedby="basic-addon2" ng-show="products.single.product_weight_format=='g' && products.single.basicinfo.weight_format==null"  ng-model="products.single.weight.gms" ng-blur="update_single_product()">
+                    <div class="input-group col-sm-12">
+                        <input class="form-control input-style" ng-show="products.single.basicinfo.weight_format=='lb'" ng-model="products.single.weight.lbs" ng-blur="update_single_product()">
+                        <input class="form-control input-style" ng-show="products.single.basicinfo.weight_format=='oz'"  ng-model="products.single.weight.oz" ng-blur="update_single_product()">
+                        <input class="form-control input-style" ng-show="products.single.basicinfo.weight_format=='kg'"  ng-model="products.single.weight.kgs" ng-blur="update_single_product()">
+                        <input class="form-control input-style" ng-show="products.single.basicinfo.weight_format=='g'"  ng-model="products.single.weight.gms" ng-blur="update_single_product()">
                         <div class="input-group-btn dropdown">
-                            <button class="btn btn-default dropdown-toggle input-style" type="button" data-toggle="dropdown" aria-expanded="false" ng-show="products.single.basicinfo.weight_format==null"><span>{{products.single.product_weight_format}}</span> <span class="caret"></span></button>
-                            <button class="btn btn-default dropdown-toggle input-style" type="button" data-toggle="dropdown" aria-expanded="false" ng-hide="products.single.basicinfo.weight_format==null"><span>{{products.single.basicinfo.weight_format}}</span> <span class="caret"></span></button>
+                            <button class="btn btn-default dropdown-toggle input-style" type="button" data-toggle="dropdown" aria-expanded="false"><span>{{products.single.basicinfo.weight_format}}</span> <span class="caret"></span></button>
                             <ul class="dropdown-menu" role="menu">
                                 <li><a class="dropdown-toggle" ng-click="change_setting('weight_format','lb')" >lb</a></li>
                                 <li><a class="dropdown-toggle" ng-click="change_setting('weight_format','oz')" >oz</a></li>
@@ -162,13 +156,8 @@
                         <input class="form-control input-style" aria-describedby="basic-addon2" ng-show="products.single.basicinfo.weight_format=='oz'"  ng-model="products.single.shipping_weight.oz" ng-blur="update_single_product()">
                         <input class="form-control input-style" aria-describedby="basic-addon2" ng-show="products.single.basicinfo.weight_format=='kg'"  ng-model="products.single.shipping_weight.kgs" ng-blur="update_single_product()">
                         <input class="form-control input-style" aria-describedby="basic-addon2" ng-show="products.single.basicinfo.weight_format=='g'"  ng-model="products.single.shipping_weight.gms" ng-blur="update_single_product()">
-                        <input class="form-control input-style" aria-describedby="basic-addon2" ng-show="products.single.product_weight_format=='lb' && products.single.basicinfo.weight_format==null"  ng-model="products.single.shipping_weight.lbs" ng-blur="update_single_product()">
-                        <input class="form-control input-style" aria-describedby="basic-addon2" ng-show="products.single.product_weight_format=='oz' && products.single.basicinfo.weight_format==null"  ng-model="products.single.shipping_weight.oz" ng-blur="update_single_product()">
-                        <input class="form-control input-style" aria-describedby="basic-addon2" ng-show="products.single.product_weight_format=='kg' && products.single.basicinfo.weight_format==null"  ng-model="products.single.shipping_weight.kgs" ng-blur="update_single_product()">
-                        <input class="form-control input-style" aria-describedby="basic-addon2" ng-show="products.single.product_weight_format=='g' && products.single.basicinfo.weight_format==null"  ng-model="products.single.shipping_weight.gms" ng-blur="update_single_product()">
                         <div class="input-group-btn dropdown">
-                            <button class="btn btn-default dropdown-toggle input-style" type="button" data-toggle="dropdown" aria-expanded="false" ng-show="products.single.basicinfo.weight_format==null"><span>{{products.single.product_weight_format}}</span> <span class="caret"></span></button>
-                            <button class="btn btn-default dropdown-toggle input-style" type="button" data-toggle="dropdown" aria-expanded="false" ng-hide="products.single.basicinfo.weight_format==null"><span>{{products.single.basicinfo.weight_format}}</span> <span class="caret"></span></button>
+                            <button class="btn btn-default dropdown-toggle input-style" type="button" data-toggle="dropdown" aria-expanded="false"><span>{{products.single.basicinfo.weight_format}}</span> <span class="caret"></span></button>
                             <ul class="dropdown-menu" role="menu">
                                 <li><a class="dropdown-toggle" ng-click="change_setting('weight_format','lb')" >lb</a></li>
                                 <li><a class="dropdown-toggle" ng-click="change_setting('weight_format','oz')" >oz</a></li>

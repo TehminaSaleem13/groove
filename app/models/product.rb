@@ -420,4 +420,12 @@ class Product < ActiveRecord::Base
       end
     end
   end
+
+  def get_show_weight_format
+    unless self.weight_format.nil?
+      return self.weight_format
+    else
+      return GeneralSetting.get_product_weight_format
+    end
+  end
 end
