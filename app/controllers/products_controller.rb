@@ -172,14 +172,11 @@ class ProductsController < ApplicationController
     @result['previous_imported'] = 0
 
     import_result = nil
-    puts current_user.inspect
     if current_user.can?('import_products')
       begin
         if @store.store_type == 'Shipstation'
-          puts "in importimages"
           context = Groovepacker::Store::Context.new(
             Groovepacker::Store::Handlers::ShipstationHandler.new(@store))
-          puts "returned from images_importer"
           import_result = context.import_images
         end
       rescue Exception => e
@@ -190,7 +187,6 @@ class ProductsController < ApplicationController
       @result['status'] = false
       @result['messages'].push('You can not import images')
     end
-    # puts @result.inspect
     if !import_result.nil?
       import_result[:messages].each do |message|
         @result['messages'].push(message)
@@ -909,7 +905,6 @@ class ProductsController < ApplicationController
     end
   end
   def updateproduct
-    puts "params :::" + params.inspect 
     @result = Hash.new
     @product = Product.find(params[:basicinfo][:id]) unless params.nil? && params[:basicinfo].nil?
     @result['status'] = true
@@ -940,13 +935,11 @@ class ProductsController < ApplicationController
         @product.weight_format = params[:basicinfo][:weight_format]
 
         @product.weight = @product.get_product_weight(params[:weight])
-        puts "@product.weight: " + @product.weight.inspect
         @product.shipping_weight = @product.get_product_weight(params[:shipping_weight])
 
         if !@product.save
           @result['status'] &= false
         end
-        puts "product saved.............."
         #Update product status and also update the containing kit and orders
         updatelist(@product,'status',params[:basicinfo][:status]) unless params[:basicinfo][:status].nil?
 
@@ -1482,22 +1475,6 @@ class ProductsController < ApplicationController
   end
 
   private
-
-  def get_product_weight(weight)
-    puts "weight: " + weight.inspect
-    if GeneralSetting.get_product_weight_format=='lb'
-      @lbs =  16 * weight[:lbs].to_f
-    elsif GeneralSetting.get_product_weight_format=='oz'
-      @oz = weight[:oz].to_f
-      puts "@oz: " + @oz.inspect
-    elsif GeneralSetting.get_product_weight_format=='kg'
-      @kgs = 1000 * weight[:kgs].to_f
-      @kgs * 0.035274
-    else
-      @gms = weight[:gms].to_f
-      @gms * 0.035274
-    end
-  end
 
   def do_search(results_only = true)
     limit = 10

@@ -296,19 +296,10 @@ class Product < ActiveRecord::Base
     #converting oz to gms
     weight_gms = self.weight * 28.349523125
 
-    if self.weight < 16
-      result['lbs'] = 0
-    else
-      result['lbs'] = (self.weight / 16).floor
-    end
-    result['oz'] = (self.weight % 16).floor
-
-    if weight_gms < 1000
-      result['kgs'] = 0
-    else
-      result['kgs'] = (weight_gms / 1000).floor
-    end
-      result['gms'] = (weight_gms % 1000).floor
+    result['lbs'] = (self.weight / 16).round(2)
+    result['oz'] = self.weight
+    result['kgs'] = (weight_gms / 1000).round(3)
+    result['gms'] = weight_gms.round
 
     result
   end
@@ -316,19 +307,11 @@ class Product < ActiveRecord::Base
   def get_shipping_weight
     result = Hash.new
     weight_gms = self.shipping_weight * 28.349523125
-    if self.shipping_weight < 16
-      result['lbs'] = 0
-    else
-      result['lbs'] = (self.shipping_weight / 16).floor
-    end
-    result['oz'] = (self.shipping_weight % 16)
-
-    if weight_gms < 1000
-      result['kgs'] = 0
-    else
-      result['kgs'] = (weight_gms / 1000).floor
-    end
-      result['gms'] = (weight_gms % 1000).floor
+  
+    result['lbs'] = (self.shipping_weight / 16).round(2)
+    result['oz'] = self.shipping_weight
+    result['kgs'] = (weight_gms / 1000).round(3)
+    result['gms'] = weight_gms.round
 
     result
   end
@@ -411,13 +394,11 @@ class Product < ActiveRecord::Base
   end
 
   def get_product_weight(weight)
-    puts "weight: " + weight.inspect
     unless self.weight_format.nil?
       if self.weight_format=='lb'
         @lbs =  16 * weight[:lbs].to_f
       elsif self.weight_format=='oz'
         @oz = weight[:oz].to_f
-        puts "@oz: " + @oz.inspect
       elsif self.weight_format=='kg'
         @kgs = 1000 * weight[:kgs].to_f
         @kgs * 0.035274
