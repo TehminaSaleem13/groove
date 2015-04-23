@@ -934,11 +934,9 @@ class ProductsController < ApplicationController
         @product.store_product_id = params[:basicinfo][:store_product_id]
         @product.type_scan_enabled = params[:basicinfo][:type_scan_enabled]
         @product.click_scan_enabled = params[:basicinfo][:click_scan_enabled]
-        # @product.weight_format = params[:basicinfo][:weight_format]
-        @product.weight_format = get_weight_format(params[:basicinfo][:weight_format])
-
         @product.weight = @product.get_product_weight(params[:weight])
         @product.shipping_weight = @product.get_product_weight(params[:shipping_weight])
+        @product.weight_format = get_weight_format(params[:basicinfo][:weight_format])
 
         if !@product.save
           @result['status'] &= false
