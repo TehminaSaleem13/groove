@@ -172,14 +172,11 @@ class ProductsController < ApplicationController
     @result['previous_imported'] = 0
 
     import_result = nil
-    puts current_user.inspect
     if current_user.can?('import_products')
       begin
         if @store.store_type == 'Shipstation'
-          puts "in importimages"
           context = Groovepacker::Store::Context.new(
             Groovepacker::Store::Handlers::ShipstationHandler.new(@store))
-          puts "returned from images_importer"
           import_result = context.import_images
         end
       rescue Exception => e
@@ -190,7 +187,6 @@ class ProductsController < ApplicationController
       @result['status'] = false
       @result['messages'].push('You can not import images')
     end
-    # puts @result.inspect
     if !import_result.nil?
       import_result[:messages].each do |message|
         @result['messages'].push(message)
@@ -736,6 +732,7 @@ class ProductsController < ApplicationController
       @result['product']['amazon_product'] = @amazon_product
       @result['product']['store'] = @store
       @result['product']['basicinfo'] = @product.attributes
+      @result['product']['basicinfo']['weight_format'] = @product.get_show_weight_format
       @result['product']['product_weight_format'] = GeneralSetting.get_product_weight_format
       @result['product']['weight'] = @product.get_weight
       @result['product']['shipping_weight'] = @product.get_shipping_weight
@@ -744,6 +741,7 @@ class ProductsController < ApplicationController
       @result['product']['images'] = @product.product_images.order("product_images.order ASC")
       @result['product']['barcodes'] = @product.product_barcodes.order("product_barcodes.order ASC")
       @result['product']['inventory_warehouses'] = []
+
       @product.product_inventory_warehousess.each do |inv_wh|
         if UserInventoryPermission.where(
             :user_id => current_user.id,
@@ -936,14 +934,13 @@ class ProductsController < ApplicationController
         @product.store_product_id = params[:basicinfo][:store_product_id]
         @product.type_scan_enabled = params[:basicinfo][:type_scan_enabled]
         @product.click_scan_enabled = params[:basicinfo][:click_scan_enabled]
-
-        @product.weight = get_product_weight(params[:weight])
-        @product.shipping_weight = get_product_weight(params[:shipping_weight])
+        @product.weight = @product.get_product_weight(params[:weight])
+        @product.shipping_weight = @product.get_product_weight(params[:shipping_weight])
+        @product.weight_format = get_weight_format(params[:basicinfo][:weight_format])
 
         if !@product.save
           @result['status'] &= false
         end
-
         #Update product status and also update the containing kit and orders
         updatelist(@product,'status',params[:basicinfo][:status]) unless params[:basicinfo][:status].nil?
 
@@ -1480,15 +1477,11 @@ class ProductsController < ApplicationController
 
   private
 
-  def get_product_weight(weight)
-    if GeneralSetting.get_product_weight_format=='English'
-      @lbs =  16 * weight[:lbs].to_i
-      @oz = weight[:oz].to_f
-      @lbs + @oz
+  def get_weight_format(weight_format)
+    unless weight_format.nil?
+      return weight_format
     else
-      @kgs = 1000 * weight[:kgs].to_i
-      @gms = weight[:gms].to_f
-      (@kgs + @gms) * 0.035274
+      return GeneralSetting.get_product_weight_format
     end
   end
 

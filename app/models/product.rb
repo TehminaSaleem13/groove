@@ -291,46 +291,31 @@ class Product < ActiveRecord::Base
   end
 
   def get_weight
-    result = Hash.new
-
-    #converting oz to gms
+    format = get_show_weight_format
     weight_gms = self.weight * 28.349523125
-
-    if self.weight < 16
-      result['lbs'] = 0
+    if format == 'lb'
+      return (self.weight / 16).round(2)
+    elsif format == 'oz'
+      return self.weight
+    elsif format == 'kg'
+      return (weight_gms / 1000).round(3)
     else
-      result['lbs'] = (self.weight / 16).floor
-    end
-    result['oz'] = (self.weight % 16).floor
-
-    if weight_gms < 1000
-      result['kgs'] = 0
-    else
-      result['kgs'] = (weight_gms / 1000).floor
-    end
-      result['gms'] = (weight_gms % 1000).floor
-
-    result
+      return weight_gms.round
+    end     
   end
 
   def get_shipping_weight
-    result = Hash.new
+    format = get_show_weight_format
     weight_gms = self.shipping_weight * 28.349523125
-    if self.shipping_weight < 16
-      result['lbs'] = 0
+    if format == 'lb'
+      return (self.shipping_weight / 16).round(2)
+    elsif format == 'oz'
+      return self.shipping_weight
+    elsif format == 'kg'
+      return (weight_gms / 1000).round(3)
     else
-      result['lbs'] = (self.shipping_weight / 16).floor
+      return weight_gms.round
     end
-    result['oz'] = (self.shipping_weight % 16)
-
-    if weight_gms < 1000
-      result['kgs'] = 0
-    else
-      result['kgs'] = (weight_gms / 1000).floor
-    end
-      result['gms'] = (weight_gms % 1000).floor
-
-    result
   end
 
   def get_inventory_warehouse_info(inventory_warehouse_id)
@@ -408,5 +393,41 @@ class Product < ActiveRecord::Base
     product_kit_activities.
       where('activity_type in (:types)', types: 'deleted_item').
       where(acknowledged: false)
+  end
+
+  def get_product_weight(weight)
+    unless self.weight_format.nil?
+      if self.weight_format=='lb'
+        @lbs =  16 * weight.to_f
+      elsif self.weight_format=='oz'
+        @oz = weight.to_f
+      elsif self.weight_format=='kg'
+        @kgs = 1000 * weight.to_f
+        @kgs * 0.035274
+      else
+        @gms = weight.to_f
+        @gms * 0.035274
+      end
+    else
+      if GeneralSetting.get_product_weight_format=='lb'
+        @lbs =  16 * weight.to_f
+      elsif GeneralSetting.get_product_weight_format=='oz'
+        @oz = weight.to_f
+      elsif GeneralSetting.get_product_weight_format=='kg'
+        @kgs = 1000 * weight.to_f
+        @kgs * 0.035274
+      else
+        @gms = weight.to_f
+        @gms * 0.035274
+      end
+    end
+  end
+
+  def get_show_weight_format
+    unless self.weight_format.nil?
+      return self.weight_format
+    else
+      return GeneralSetting.get_product_weight_format
+    end
   end
 end
