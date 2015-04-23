@@ -132,7 +132,7 @@
                 <label class="control-label col-sm-2">Product Weight</label>
                 <div class="col-sm-8 controls">
                     <div class="input-group col-sm-12">
-                        <input class="form-control input-style" ng-model="products.single.weight" ng-blur="update_single_product()">
+                        <input class="form-control input-style" ng-model="products.single.weight" ng-blur="update_single_product()" onclick="select()">
                         <div class="input-group-btn dropdown">
                             <button class="btn btn-default dropdown-toggle input-style" type="button" data-toggle="dropdown" aria-expanded="false"><span>{{products.single.basicinfo.weight_format}}</span> <span class="caret"></span></button>
                             <ul class="dropdown-menu" role="menu">
@@ -149,7 +149,7 @@
                 <label class="control-label col-sm-2">Shipping Weight</label>
                 <div class="col-sm-8 controls">
                     <div class="input-group col-sm-12 controls">
-                        <input class="form-control input-style" aria-describedby="basic-addon2"  ng-model="products.single.shipping_weight" ng-blur="update_single_product()">
+                        <input class="form-control input-style" aria-describedby="basic-addon2"  ng-model="products.single.shipping_weight" ng-blur="update_single_product()" onclick="select()">
                         <div class="input-group-btn dropdown">
                             <button class="btn btn-default dropdown-toggle input-style" type="button" data-toggle="dropdown" aria-expanded="false"><span>{{products.single.basicinfo.weight_format}}</span> <span class="caret"></span></button>
                             <ul class="dropdown-menu" role="menu">
