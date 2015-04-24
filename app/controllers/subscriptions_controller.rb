@@ -62,6 +62,10 @@
       flash[:notice] = params[:notice]
     end
 
+    def complete
+      
+    end
+    
     def planInfo
       getPlanInfo(params[:plan_id])
       render json: @result
