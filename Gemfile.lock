@@ -203,6 +203,8 @@ GEM
     httpi (2.0.2)
       rack
     i18n (0.6.1)
+    intercom-rails (0.2.28)
+      activesupport (> 3.0)
     journey (1.0.4)
     jquery-fileupload-rails (0.4.1)
       actionpack (>= 3.1)
@@ -452,6 +454,7 @@ DEPENDENCIES
   fingerprintjs-rails
   fog (~> 1.15.0)
   gelf
+  intercom-rails
   jquery-fileupload-rails
   jquery-rails
   jquery-ui-rails
