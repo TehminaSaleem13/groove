@@ -35,6 +35,7 @@
     end
 
     def valid_tenant_name
+      puts "valid_tenant_name..."
       result = {}
       result['valid'] = true
       result['message'] = ''
@@ -73,6 +74,18 @@
 
     def check_tenant_name
       Apartment::Tenant.current_tenant==""?true:(render status: 401)
+    end
+
+    def check_coupon_id
+      puts "in check_coupon_id..."
+      check_coupon_validation(params[:coupon_id])
+      render json: @result
+    end
+
+    def validate_coupon_id
+      puts "in validate_coupon_id..."
+      is_coupon_valid(params[:coupon_id])
+      render json: @result
     end
 
   end

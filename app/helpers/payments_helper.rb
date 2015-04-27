@@ -126,7 +126,7 @@ module PaymentsHelper
       end
     rescue Stripe::InvalidRequestError => e
       @result['status'] = false
-      @result['messages'].push(e.message);
+      @result['messages'].push(e.message)
     end
   end
 
@@ -139,6 +139,38 @@ module PaymentsHelper
     rescue Stripe::InvalidRequestError => e
       @result['status'] = false
       @result['messages'].push(e.message);
+    end
+  end
+
+  def check_coupon_validation(coupon_id)
+    puts "in check_coupon_validation"
+    create_result_hash
+    coupons = Stripe::Coupon.all(limit: 30)
+    valid = false
+    coupons.each do |coupon|
+      if coupon.include? coupon_id
+        valid = true
+      end
+    end
+    unless valid
+      @result['status'] = false
+      @result['messages'].push('coupon id does not match any valid coupon')
+    end
+  end
+
+  def is_coupon_valid(coupon_id)
+    puts "in is_coupon_valid"
+    create_result_hash
+    coupons = Stripe::Coupon.all(limit: 30)
+    valid = false
+    coupons.each do |coupon|
+      if coupon == coupon_id
+        valid = true
+      end
+    end
+    unless valid
+      @result['status'] = false
+      @result['messages'].push('coupon id does not match any valid coupon')
     end
   end
 end
