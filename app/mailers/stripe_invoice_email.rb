@@ -8,11 +8,13 @@ class StripeInvoiceEmail < ActionMailer::Base
       unless subscription.tenant.nil? || subscription.tenant.name.nil?
         tenant = subscription.tenant.name
         @email = get_customer_email_from_stripe(subscription)
-        Apartment::Tenant.switch(tenant)
-        @tenant_name = tenant
-        @invoice = invoice
-        mail to: @email, 
-          subject: "GroovePacker Invoice Email"
+        unless @email.nil?
+          Apartment::Tenant.switch(tenant)
+          @tenant_name = tenant
+          @invoice = invoice
+          mail to: @email, 
+            subject: "GroovePacker Invoice Email"
+        end
       end
     end
   end
@@ -24,19 +26,25 @@ class StripeInvoiceEmail < ActionMailer::Base
       unless subscription.tenant.nil? || subscription.tenant.name.nil?
         tenant = subscription.tenant.name
         @email = get_customer_email_from_stripe(subscription)
-        Apartment::Tenant.switch(tenant)
-        @tenant_name = tenant
-        @invoice = invoice
-        mail to: @email, 
-          subject: "Attention Required: Account Billing Failure for "+tenant+".groovepacker.com"
+        unless @email.nil?
+          Apartment::Tenant.switch(tenant)
+          @tenant_name = tenant
+          @invoice = invoice
+          mail to: @email, 
+            subject: "Attention Required: Account Billing Failure for "+tenant+".groovepacker.com"
+        end
       end
     end
   end
 
   def get_customer_email_from_stripe(subscription)
     unless subscription.stripe_customer_id.nil?
-      customer = Stripe::Customer.retrieve(subscription.stripe_customer_id) 
-      return customer.email
+      begin
+        customer = Stripe::Customer.retrieve(subscription.stripe_customer_id) 
+        return customer.email
+      rescue Stripe::InvalidRequestError => er
+        return nil
+      end
     end
   end
 end
