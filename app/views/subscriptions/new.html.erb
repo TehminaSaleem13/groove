@@ -69,8 +69,27 @@
                    value="<%= ENV['ONE_TIME_PAYMENT'] %>"/>
           </div>
         </div>
-        <div class="form-group">
 
+        <hr>
+
+        <div class="form-group">
+          <label for="coupon_id" class="control-label">Coupon ID</label>
+          (Enter a promotional code)
+          <div class="input-group">
+            <input type="text" id="coupon_id" class="form-control" value="<%= params[:coupon_id] %>"/>
+            <span class="input-group-btn">
+              <button id="apply" class="btn btn-primary">Apply</button>
+            </span>
+          </div>
+          <div class="form-group error" style="color: green;">
+            <div id="success-coupon-block" class="help-inline"></div>
+          </div>
+          <div class="form-group error" style="color: red;">
+            <div id="error-coupon-block" class="help-inline"></div>
+          </div>
+        </div>
+
+        <div class="form-group">
           <div class="checkbox control-label" style="font-weight:bold;"><input type="checkbox" id="tos_checkbox"/>
             I agree with the <a href="" id="tos_link">Terms of Service</a> and
             <a href="" id="privacy_link">Privacy Policy</a></div>
@@ -95,25 +114,18 @@
           <div>
             <label class="radio" style="margin-left: -5px;"><input type="radio" id="radio_subscription1" name="radio_subscription" value="monthly" checked/>Monthly:($<%=@monthly_amount/100%>.00)</label>
             <div style ="padding-left:23px;width: 97%;font-size: 14px; margin-top: -10px;">
-              <label>The first monthly billing will be charged after 30 days. A one time initialization charge of $500 is paid today on deployment.</label>
+              <label id="monthly_billing_label">The first monthly billing will be charged after 30 days. A one time initialization charge of $500 is paid today on deployment.</label>
+              <label id="monthly_discount_label"></label>
             </div>
           </div>
           <div style="padding-top: 5px;">
             <label class="radio" style="margin-left: -5px;"><input type="radio" id="radio_subscription2" name="radio_subscription" value="annually" style="-webkit-appearance:block; background:green;"/>Annually:(<strike>$<%=@monthly_amount*12/100%>.00</strike>)($<%=@annually_amount/100%>.00) Save 10%</label>
             <div style ="padding-left:23px;width: 85%;font-size: 14px; margin-top: -10px;">
-              <label>The first annual billing will be charged after 30 days at a 10% discount. A one time initialization charge of $500 is paid today on deployment.</label>
+              <label id="annual_billing_label">The first annual billing will be charged after 30 days at a 10% discount. A one time initialization charge of $500 is paid today on deployment.</label>
             </div>
           </div>
         </div>
-        <div class="form-group">
-          <label for="coupon_id" class="control-label">Coupon ID</label>
-          (Enter a valid coupon code if you have.)
-          <input type="text" id="coupon_id" class="form-control"/>
-
-          <div class="form-group error" style="color: red;">
-            <div id="error-coupon-block" class="help-inline"></div>
-          </div>
-        </div>
+        
 
         <script src="https://checkout.stripe.com/checkout.js"></script>
         <div class="">
@@ -141,6 +153,7 @@
           var amount=0;
           var plan_id = null;
           var coupon_id = null;
+          var one_time_payment = $('#one_time_payment').val()
 
           $('html').click(function () {
               $('#tos_iframe').hide();
@@ -175,7 +188,8 @@
                           plan_id: plan_id,
                           user_name: $('#user_name').val(),
                           password: $('#password').val(),
-                          radio_subscription: radio_button_value
+                          radio_subscription: radio_button_value,
+                          coupon_id: coupon_id
                       }),
                       dataType: "json"
 
@@ -235,30 +249,45 @@
               }
           });
 
-          $('#coupon_id').keyup(function() {
-            console.log('change...');
-            var coupon = document.forms["myForm"]["coupon_id"].value;
-            $.ajax({
-              type: "GET",
-              contentType: "application/json; charset=utf-8",
-              url: "/subscriptions/check_coupon_id",
-              data: {coupon_id: coupon},
-              dataType: "json"
-            }).error(function (response) {
+          // $('#coupon_id').keyup(function() {
+          //   console.log('change...');
+          //   var coupon = document.forms["myForm"]["coupon_id"].value;
+          //   $.ajax({
+          //     type: "GET",
+          //     contentType: "application/json; charset=utf-8",
+          //     url: "/subscriptions/check_coupon_id",
+          //     data: {coupon_id: coupon},
+          //     dataType: "json"
+          //   }).error(function (response) {
 
-            }).success(function(response) {
-              console.log(response);
-              if (response.status == false) {
-                coupon_id = null;
-                $('#error-coupon-block').html(response.messages);
-              }
-              else {
-                coupon_id = $('#coupon_id').val()
-              }
-            });
-          });
+          //   }).success(function(response) {
+          //     console.log(response);
+          //     if (response.status == false) {
+          //       coupon_id = null;
+          //       $('#error-coupon-block').show();
+          //       $('#error-coupon-block').html(response.messages);
+          //     }
+          //     else {
+          //       coupon_id = $('#coupon_id').val()
+          //       $('#error-coupon-block').hide();
+          //     }
+          //   });
+          // });
+        //   $(document).on('ready page:load', function() {
+        //     $('#apply').on('click', function(e) {
+        //       if ($('#coupon_code').val() != null && 
+        //         typeof($('#coupon_code').val()) != 'undefined' &&
+        //         $('#coupon_code').val() != '') {
+        //         var plan_id = "<%#= @checkout.plan.id %>";
+        //         url = window.location.origin + window.location.pathname + 
+        //           "?plan_id=" + plan_id + "&coupon_code=" + $('#coupon_code').val();
+        //         window.location = url;
+        //       }
+        //     });
+        //   });
 
-          $('#coupon_id').blur(function() {
+          document.getElementById('apply').addEventListener('click',function(a) {
+            a.preventDefault();
             console.log('blur......');
             var coupon = document.forms["myForm"]["coupon_id"].value;
             $.ajax({
@@ -272,10 +301,19 @@
             }).success(function(response) {
               if (response.status == false) {
                 coupon_id = null;
+                one_time_payment = $('#one_time_payment').val();
+                console.log(one_time_payment);
+                $('#error-coupon-block').show();
+                $('#success-coupon-block').hide();
                 $('#error-coupon-block').html(response.messages);
               }
               else {
                 coupon_id = $('#coupon_id').val()
+                one_time_payment = $('#one_time_payment').val() - (($('#one_time_payment').val() * response.percent_off) / 100)
+
+                $('#error-coupon-block').hide();
+                $('#success-coupon-block').show();
+                $('#success-coupon-block').html(response.messages);
               }
             });
           });
@@ -411,8 +449,8 @@
                           // Open Checkout with further options
                           handler.open({
                               name: 'Groovepacker',
-                              description: 'initialization fee ($' + Number($('#one_time_payment').val()/100).toFixed(2) + ')',
-                              amount: $('#one_time_payment').val(),
+                              description: 'initialization fee ($' + Number(one_time_payment/100).toFixed(2) + ')',
+                              amount: one_time_payment,
                               email: $('#email').val(),
                               allowRememberMe: false
                           });

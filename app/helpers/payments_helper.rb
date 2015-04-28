@@ -148,29 +148,36 @@ module PaymentsHelper
     coupons = Stripe::Coupon.all(limit: 30)
     valid = false
     coupons.each do |coupon|
-      if coupon.include? coupon_id
+      puts "coupon: " + coupon.inspect
+      if coupon.id.include? coupon_id
         valid = true
       end
     end
     unless valid
       @result['status'] = false
-      @result['messages'].push('coupon id does not match any valid coupon')
+      @result['messages'].push('Oops! coupon id is not valid. You can still proceed with submitting the form.')
+    else
+      @result['messages'].push('Congrats! Your coupon id is valid.')
     end
   end
 
   def is_coupon_valid(coupon_id)
     puts "in is_coupon_valid"
     create_result_hash
+    @result['percent_off'] = 0
     coupons = Stripe::Coupon.all(limit: 30)
     valid = false
     coupons.each do |coupon|
-      if coupon == coupon_id
+      if coupon.id == coupon_id
         valid = true
+        @result['percent_off'] = coupon.percent_off
       end
     end
     unless valid
       @result['status'] = false
-      @result['messages'].push('coupon id does not match any valid coupon')
+      @result['messages'].push('Oops! coupon id is not valid. You can still proceed with submitting the form.')
+    else
+      @result['messages'].push('Congrats! Your coupon id is valid.')
     end
   end
 end

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150427154459) do
+ActiveRecord::Schema.define(:version => 20150428152535) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0, :null => false
@@ -45,6 +45,19 @@ ActiveRecord::Schema.define(:version => 20150427154459) do
   end
 
   add_index "column_preferences", ["user_id"], :name => "index_column_preferences_on_user_id"
+
+  create_table "coupons", :force => true do |t|
+    t.string   "coupon_id",                                      :null => false
+    t.integer  "percent_off"
+    t.decimal  "amount_off",      :precision => 10, :scale => 0
+    t.string   "duration"
+    t.date     "redeem_by"
+    t.integer  "max_redemptions"
+    t.integer  "times_redeemed"
+    t.boolean  "is_valid",                                       :null => false
+    t.datetime "created_at",                                     :null => false
+    t.datetime "updated_at",                                     :null => false
+  end
 
   create_table "csv_mappings", :force => true do |t|
     t.integer  "store_id"

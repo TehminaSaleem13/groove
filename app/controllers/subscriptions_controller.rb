@@ -20,7 +20,8 @@
           email: params[:email],
           user_name: params[:user_name],
           password: params[:password],
-          status: "started") 
+          status: "started",
+          coupon_id: params[:coupon_id]) 
       if @subscription
         @subscription.save_with_payment(ENV['ONE_TIME_PAYMENT'])
         if @subscription.status == 'completed'
