@@ -8,7 +8,7 @@ class Subscription < ActiveRecord::Base
   	if valid?
       begin
         unless self.coupon_id.nil?
-          coupon = Stripe::Coupon.retrieve(self.coupon_id)
+          coupon_data = Stripe::Coupon.retrieve(self.coupon_id)
           Apartment::Tenant.switch()
           # if coupon.valid
           #   unless coupon.max_redemptions.nil? || coupon.times_redeemed >= coupon.max_redemptions
@@ -19,7 +19,7 @@ class Subscription < ActiveRecord::Base
           #     puts coupon.inspect
           #   end
           # end
-          coupon_data = Stripe::Coupon.retrieve(self.coupon_id)
+          # coupon_data = Stripe::Coupon.retrieve(self.coupon_id)
           coupon = Coupon.where(:coupon_id=>coupon_data.id).first unless Coupon.where(:coupon_id=>coupon_data.id).empty?
           unless coupon.nil? || coupon.max_redemptions == coupon.times_redeemed || coupon.is_valid == false
             coupon.times_redeemed += 1
