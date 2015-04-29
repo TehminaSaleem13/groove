@@ -70,25 +70,6 @@
           </div>
         </div>
 
-        <hr>
-
-        <div class="form-group">
-          <label for="coupon_id" class="control-label">Coupon ID</label>
-          (Enter a promotional code)
-          <div class="input-group">
-            <input type="text" id="coupon_id" class="form-control" value="<%= params[:coupon_id] %>"/>
-            <span class="input-group-btn">
-              <button id="apply" class="btn btn-primary">Apply</button>
-            </span>
-          </div>
-          <div class="form-group error" style="color: green;">
-            <div id="success-coupon-block" class="help-inline"></div>
-          </div>
-          <div class="form-group error" style="color: red;">
-            <div id="error-coupon-block" class="help-inline"></div>
-          </div>
-        </div>
-
         <div class="form-group">
           <div class="checkbox control-label" style="font-weight:bold;"><input type="checkbox" id="tos_checkbox"/>
             I agree with the <a href="" id="tos_link">Terms of Service</a> and
@@ -122,10 +103,24 @@
             <label class="radio" style="margin-left: -5px;"><input type="radio" id="radio_subscription2" name="radio_subscription" value="annually" style="-webkit-appearance:block; background:green;"/>Annually:(<strike>$<%=@monthly_amount*12/100%>.00</strike>)($<%=@annually_amount/100%>.00) Save 10%</label>
             <div style ="padding-left:23px;width: 85%;font-size: 14px; margin-top: -10px;">
               <label id="annual_billing_label">The first annual billing will be charged after 30 days at a 10% discount. A one time initialization charge of $500 is paid today on deployment.</label>
+              <label id="annual_discount_label"></label>
             </div>
           </div>
         </div>
-        
+
+        <div class="form-group">
+          <label for="coupon_id" class="control-label">Promotional Code</label>
+          <div class="input-group">
+            <input type="text" id="coupon_id" class="form-control" value="<%= params[:coupon_id] %>"/>
+            <span class="input-group-btn">
+              <button id="apply" class="btn btn-primary">Apply</button>
+            </span>
+          </div>
+          <div class="form-group error">
+            <div id="success-coupon-block" class="help-inline" style="color: green;"></div>
+            <div id="error-coupon-block" class="help-inline" style="color: red;"></div>
+          </div>
+        </div>
 
         <script src="https://checkout.stripe.com/checkout.js"></script>
         <div class="">
@@ -153,7 +148,8 @@
           var amount=0;
           var plan_id = null;
           var coupon_id = null;
-          var one_time_payment = $('#one_time_payment').val()
+          var one_time_payment = $('#one_time_payment').val();
+          var show_coupon_block = false;
 
           $('html').click(function () {
               $('#tos_iframe').hide();
@@ -249,74 +245,63 @@
               }
           });
 
-          // $('#coupon_id').keyup(function() {
-          //   console.log('change...');
-          //   var coupon = document.forms["myForm"]["coupon_id"].value;
-          //   $.ajax({
-          //     type: "GET",
-          //     contentType: "application/json; charset=utf-8",
-          //     url: "/subscriptions/check_coupon_id",
-          //     data: {coupon_id: coupon},
-          //     dataType: "json"
-          //   }).error(function (response) {
-
-          //   }).success(function(response) {
-          //     console.log(response);
-          //     if (response.status == false) {
-          //       coupon_id = null;
-          //       $('#error-coupon-block').show();
-          //       $('#error-coupon-block').html(response.messages);
-          //     }
-          //     else {
-          //       coupon_id = $('#coupon_id').val()
-          //       $('#error-coupon-block').hide();
-          //     }
-          //   });
-          // });
-        //   $(document).on('ready page:load', function() {
-        //     $('#apply').on('click', function(e) {
-        //       if ($('#coupon_code').val() != null && 
-        //         typeof($('#coupon_code').val()) != 'undefined' &&
-        //         $('#coupon_code').val() != '') {
-        //         var plan_id = "<%#= @checkout.plan.id %>";
-        //         url = window.location.origin + window.location.pathname + 
-        //           "?plan_id=" + plan_id + "&coupon_code=" + $('#coupon_code').val();
-        //         window.location = url;
-        //       }
-        //     });
-        //   });
-
+          $(document).ready(function() {
+            console.log("ready");
+            show_coupon_block = false;
+            checkOneTimePayment();
+          });
+          
           document.getElementById('apply').addEventListener('click',function(a) {
             a.preventDefault();
             console.log('blur......');
-            var coupon = document.forms["myForm"]["coupon_id"].value;
-            $.ajax({
-              type: "GET",
-              contentType: "application/json; charset=utf-8",
-              url: "/subscriptions/validate_coupon_id",
-              data: {coupon_id: $('#coupon_id').val()},
-              dataType: "json"
-            }).error(function (response) {
-
-            }).success(function(response) {
-              if (response.status == false) {
-                coupon_id = null;
-                one_time_payment = $('#one_time_payment').val();
-                console.log(one_time_payment);
-                $('#error-coupon-block').show();
-                $('#success-coupon-block').hide();
-                $('#error-coupon-block').html(response.messages);
-              }
-              else {
-                coupon_id = $('#coupon_id').val()
-                one_time_payment = $('#one_time_payment').val() - (($('#one_time_payment').val() * response.percent_off) / 100)
-
-                $('#error-coupon-block').hide();
-                $('#success-coupon-block').show();
-                $('#success-coupon-block').html(response.messages);
-              }
-            });
+            show_coupon_block = true;
+            checkOneTimePayment();
           });
+          
+          var checkOneTimePayment = function() {
+            var coupon = document.forms["myForm"]["coupon_id"].value;
+            if (coupon != '') {
+              $.ajax({
+                type: "GET",
+                contentType: "application/json; charset=utf-8",
+                url: "/subscriptions/validate_coupon_id",
+                data: {coupon_id: $('#coupon_id').val()},
+                dataType: "json"
+              }).error(function (response) {
+
+              }).success(function(response) {
+                if (response.status == false) {
+                  coupon_id = null;
+                  one_time_payment = $('#one_time_payment').val();
+                  console.log(one_time_payment);
+                  if (show_coupon_block) {
+                    $('#error-coupon-block').show();
+                    $('#success-coupon-block').hide();
+                  };
+                  $('#error-coupon-block').html(response.messages);
+                  $('#monthly_discount_label').hide();
+                  $('#annual_discount_label').hide();
+                  $('#monthly_billing_label').show();
+                  $('#annual_billing_label').show();
+                }
+                else {
+                  coupon_id = $('#coupon_id').val();
+                  one_time_payment = $('#one_time_payment').val() - (($('#one_time_payment').val() * response.percent_off) / 100);
+                  if (show_coupon_block) {
+                    $('#error-coupon-block').hide();
+                    $('#success-coupon-block').show();
+                    $('#success-coupon-block').html(response.messages);
+                  };
+                  $('#monthly_billing_label').hide();
+                  $('#monthly_discount_label').show();
+                  $('#monthly_discount_label').html('The first monthly billing will be charged after 30 days. A one time initialization charge of <strike>$500</strike> $' + one_time_payment/100 + '(' + response.percent_off + '% off) is paid today on deployment.');
+                  $('#annual_billing_label').hide();
+                  $('#annual_discount_label').show();
+                  $('#annual_discount_label').html('The first annual billing will be charged after 30 days at a 10% discount. A one time initialization charge of <strike>$500</strike> $' + one_time_payment/100 + '(' + response.percent_off + '% off) is paid today on deployment.');
+                }
+              });
+            };
+          };
 
           $('#email').blur(function () {
               var email = document.forms["myForm"]["email"].value;
