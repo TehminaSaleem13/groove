@@ -126,7 +126,7 @@ module PaymentsHelper
       end
     rescue Stripe::InvalidRequestError => e
       @result['status'] = false
-      @result['messages'].push(e.message);
+      @result['messages'].push(e.message)
     end
   end
 
@@ -139,6 +139,26 @@ module PaymentsHelper
     rescue Stripe::InvalidRequestError => e
       @result['status'] = false
       @result['messages'].push(e.message);
+    end
+  end
+
+  def is_coupon_valid(coupon_id)
+    puts "in is_coupon_valid"
+    create_result_hash
+    @result['percent_off'] = 0
+    coupons = Stripe::Coupon.all(limit: 30)
+    valid = false
+    coupons.each do |coupon|
+      if coupon.id == coupon_id
+        valid = true
+        @result['percent_off'] = coupon.percent_off
+      end
+    end
+    unless valid
+      @result['status'] = false
+      @result['messages'].push('Oops! promotional code is not valid. You can still proceed with submitting the form.')
+    else
+      @result['messages'].push('Congrats! Your promotional code is valid.')
     end
   end
 end

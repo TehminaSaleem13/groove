@@ -20,12 +20,13 @@
           email: params[:email],
           user_name: params[:user_name],
           password: params[:password],
-          status: "started") 
+          status: "started",
+          coupon_id: params[:coupon_id]) 
       if @subscription
         @subscription.save_with_payment(ENV['ONE_TIME_PAYMENT'])
         if @subscription.status == 'completed'
           @result = getNextPaymentDate(@subscription)
-          render json: {valid: true, redirect_url: "subscriptions/show?transaction_id=#{@subscription.stripe_transaction_identifier}&notice=Congratulations! Your GroovePacker is being deployed!&email=#{@subscription.email}&next_date=#{@result['next_date']}"}
+          render json: {valid: true, redirect_url: "./show?transaction_id=#{@subscription.stripe_transaction_identifier}&notice=Congratulations! Your GroovePacker is being deployed!&email=#{@subscription.email}&next_date=#{@result['next_date']}"}
         else
           render json: {valid: false}
         end
@@ -35,6 +36,7 @@
     end
 
     def valid_tenant_name
+      puts "valid_tenant_name..."
       result = {}
       result['valid'] = true
       result['message'] = ''
@@ -73,6 +75,12 @@
 
     def check_tenant_name
       Apartment::Tenant.current_tenant==""?true:(render status: 401)
+    end
+
+    def validate_coupon_id
+      puts "in validate_coupon_id..."
+      is_coupon_valid(params[:coupon_id])
+      render json: @result
     end
 
   end
