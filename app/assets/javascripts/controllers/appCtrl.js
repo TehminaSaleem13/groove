@@ -156,7 +156,7 @@ groovepacks_controllers.
                 '<table style="font-size: 12px;width:100%;">' +
                     '<tr ng-repeat="store in import_groov_popover.data">' +
                         '<td width="60px;" style="white-space: nowrap;">' +
-                            '<img ng-src="{{store.logo.src}}" width="60px" alt="{{store.logo.alt}}"/>' +
+                            '<a class="btn" href="#/settings/stores/{{store.id}}"><img ng-src="{{store.logo.src}}" width="60px" alt="{{store.logo.alt}}"/></a>' +
                         '</td>' +
                         '<td style="white-space: nowrap;">{{store.name}}</td>' +
                         '<td style="width:70%;padding:3px;">' +
