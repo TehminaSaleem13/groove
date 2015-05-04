@@ -1,0 +1,49 @@
+<div class="row">
+  <div class="box-outer">
+    <div class="box"></div>
+    <div class="col-sm-offset-3 col-sm-6">
+      <img src="/assets/images/logo.png" class="col-xs-12" alt="GroovePacker"/>
+    </div>
+  </div>
+</div>
+<div class="row bottom-well col-sm-offset-3 col-md-offset-3 col-lg-offset-3 col-md-6 col-sm-6 col-lg-6">
+  <legend class="text-center">Existing Account</legend>
+  <div>
+    <form action="" method="POST" class="form-vertical">
+      <fieldset>
+        <div class="form-group">
+          <input type="hidden" id="plan_id" value="<%= params[:plan_id] %>"/>
+          <label class="control-label">Enter your site address*</label>
+
+          <div class="input-group">
+            <div class="input-group-addon">https://</div>
+            <input type="text" id="tenant_name" class="form-control" autofocus value="<%= params[:shopify]%>"/>
+            <div class="input-group-addon">.groovepacker.com</div>
+          </div>
+          <div class="form-group error" style="color: red;">
+            <div id="error-tenant-block" class="help-inline"></div>
+          </div>
+        </div>
+
+        <button id="login_button" class="btn btn-primary" 
+        style="margin-bottom: 15px;">
+          Continue to Login
+        </button>
+      </fieldset>
+    </form>
+
+    <script type="text/javascript">
+      $(document).on('ready page:load', function() {
+        $('#login_button').on('click', function(e) {
+          if ($('#tenant_name').val() != null && 
+            typeof($('#tenant_name').val()) != 'undefined' &&
+            $('#tenant_name').val() != '') {
+            e.preventDefault();
+            url = 'https://' + $('#tenant_name').val() + ".groovepacker.com";
+            window.location.href = url;
+          }
+        });
+      });
+    </script>
+  </div>
+</div>

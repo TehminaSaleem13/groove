@@ -21,7 +21,8 @@
             </div>
             <div>
               <label>
-                Already have an account? <a href="http://wwww.google.com">Login here</a>
+                Already have an account? 
+                <%= link_to 'Login here', subscriptions_login_path(shopify: params[:shopify])%>
               </label>
             </div>
           </div>
@@ -34,7 +35,6 @@
           <div class="input-group">
             <div class="input-group-addon">https://</div>
             <input type="text" id="tenant_name" class="form-control" autofocus value="<%= params[:shopify]%>"/>
-
             <div class="input-group-addon">.groovepacker.com</div>
           </div>
           <div class="form-group error" style="color: red;">

@@ -83,4 +83,7 @@
       render json: @result
     end
 
+    def login
+      
+    end
   end

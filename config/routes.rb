@@ -2,6 +2,7 @@ Groovepacks::Application.routes.draw do
 
 
   match 'subscriptions', :to => 'subscriptions#new', :as => 'subscriptions'
+  match 'subscriptions_login', :to => 'subscriptions#login', :as => 'subscriptions/login'
   # match 'subscriptions/new', :to => 'subscriptions#new'
   # match 'subscriptions/show', :to => 'subscriptions#show'
   # get "subscriptions/show"
@@ -96,6 +97,8 @@ Groovepacks::Application.routes.draw do
       get 'callback'
     end
   end
+
+
   
   # Sample resource route with options:
   #   resources :products do
