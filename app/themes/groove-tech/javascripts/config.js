@@ -84,7 +84,7 @@ function($stateProvider, $urlRouterProvider,hotkeysProvider,cfpLoadingBarProvide
         .state('settings.backup',{url:'/backup', template:'<div ui-view></div>', abstract:true})
         .state('settings.backup.backup_restore',{url:'/backup_restore', templateUrl:'/assets/views/settings/backup/backup.html', controller: 'showBackupCtrl'})
         .state('settings.backup.order_exception',{url:'/order_exception', templateUrl:'/assets/views/settings/backup/order_exceptions.html', controller: 'exportOrderExceptionCtrl'})
-        .state('settings.backup.order_export',{url:'/order_export', templateUrl:'/assets/views/settings/backup/backup.html', controller: 'exportOrderExceptionCtrl'})
+        .state('settings.backup.order_export',{url:'/order_export', templateUrl:'/assets/views/settings/backup/order_export.html', controller: 'orderExportCtrl'})
         .state('settings.backup.serial_export',{url:'/serial_export', templateUrl:'/assets/views/settings/backup/order_serials.html', controller: 'exportOrderExceptionCtrl'});
 
     hotkeysProvider.cheatSheetHotkey =['mod+f1','g','G'];

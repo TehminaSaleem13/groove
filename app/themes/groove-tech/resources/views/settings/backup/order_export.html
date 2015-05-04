@@ -1,0 +1,76 @@
+<div class="col-lg-10 col-sm-10 general-settings">
+    <div class="row">
+        <div class="col-xs-12">
+            <h3>Order Export Options</h3>
+            <div class="form-horizontal general-settings-form">
+                <fieldset>
+                    <div class="form-group">
+                        <label class="control-label col-sm-3">Auto Email Export</label>
+                        <div class="controls col-sm-2 form-inline">
+                            <div toggle-switch ng-model="" groov-click=""></div>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+            <div ng-show="general_settings.single.inventory_tracking">                        
+                        <div class="form-group" ng-show="">
+                            <label class="control-label col-sm-3"></label>
+                            <div class="controls col-sm-7">
+                                <timepicker ng-model="" ng-change="show_button=true" show-meridian="false"></timepicker>
+                            </div>
+
+                        </div>
+                        <div class="row" ng-show="show_button">
+                            <div class="col-sm-4 col-sm-offset-3" >
+                                <button class="modal-save-button" ng-click="">Update</button>
+                            </div>
+                        </div>
+                        <div class="form-group" ng-show="general_settings.single.low_inventory_alert_email== '1'">
+                            <label class="control-label col-sm-3">Send Email On</label>
+                            <div class="controls col-sm-9 form-inline">
+                                <label class="checkbox col-sm-2">
+                                    <input type="checkbox" ng-model="" ng-change="">mon
+                                </label>
+                                <label class="checkbox col-sm-2">
+                                    <input type="checkbox" ng-model="" ng-change="">tue
+                                </label>
+                                <label class="checkbox">
+                                    <input type="checkbox" ng-model="" ng-change="">wed
+                                </label>
+                            </div>
+                            <div class="controls col-sm-9 col-sm-offset-3 form-inline">
+                                <label class="checkbox col-sm-2">
+                                    <input type="checkbox" ng-model="" ng-change="">thu
+                                </label>
+                                <label class="checkbox col-sm-2">
+                                    <input type="checkbox" ng-model="" ng-change="">fri
+                                </label>
+                                <label class="checkbox col-sm-2">
+                                    <input type="checkbox" ng-model="" ng-change="">sat
+                                </label>
+                                <label class="checkbox">
+                                    <input type="checkbox" ng-model="" ng-change="">sun
+                                </label>
+                            </div>
+                        </div>                        
+                    </div>
+                    <div class="form-group" ng-show="general_settings.single.low_inventory_alert_email== '1'">
+                        <label class="control-label col-sm-3">The email will include all orders scanned: </label>
+                        <div class="controls col-sm-3 well-main " dropdown>
+                            <button class="dropdown-toggle groove-button label label-default" ng-class="">
+                                <span ng-show="" >common.always</span>
+                                <span ng-show="">common.optional</span>
+                                <span ng-show="">common.never</span>
+                            </button>
+                            <ul class="dropdown-menu" role="menu">
+                                <li><a class="dropdown-toggle" ng-click="">common.always</a></li>
+                                <li><a class="dropdown-toggle" ng-click="">common.optional</a></li>
+                                <li><a class="dropdown-toggle" ng-click="">common.never</a></li>
+                            </ul>
+                        </div>
+                    </div>
+        </div>
+    </div>    
+</div>
+
+
