@@ -72,15 +72,20 @@ function($stateProvider, $urlRouterProvider,hotkeysProvider,cfpLoadingBarProvide
                 controller:'generalSettingsCtrl'})
         .state('settings.system.scan_pack', {url:'/scan_pack',templateUrl:'/assets/views/settings/system/scan_pack.html',
                 controller:'scanPackSettingsCtrl'})
-        .state('settings.system.backup', {url:'/backup', templateUrl:'/assets/views/settings/system/backup.html',
-                       controller:'showBackupCtrl'})
-        .state('settings.system.order_exception', {url:'/order_exception', templateUrl:'/assets/views/settings/system/order_exception.html',
-                       controller:'exportOrderExceptionCtrl'})
+        // .state('settings.system.backup', {url:'/backup', templateUrl:'/assets/views/settings/system/backup.html',
+                       // controller:'showBackupCtrl'})
+        // .state('settings.system.order_exception', {url:'/order_exception', templateUrl:'/assets/views/settings/system/order_exception.html',
+                       // controller:'exportOrderExceptionCtrl'})
         .state('settings.system.warehouses', {url:'/warehouses',templateUrl:'/assets/views/settings/system/warehouses.html',
             controller:'warehousesCtrl'})
         .state('settings.accounts',{url:'/accounts', template:'<div ui-view></div>', abstract:true})
         .state('settings.accounts.card_details', {url:'/card_details', templateUrl:'/assets/views/settings/accounts/payment_details.html',
-            controller:'paymentsCtrl'});
+            controller:'paymentsCtrl'})
+        .state('settings.backup',{url:'/backup', template:'<div ui-view></div>', abstract:true})
+        .state('settings.backup.backup_restore',{url:'/backup_restore', templateUrl:'/assets/views/settings/backup/backup.html', controller: 'showBackupCtrl'})
+        .state('settings.backup.order_exception',{url:'/order_exception', templateUrl:'/assets/views/settings/backup/order_exceptions.html', controller: 'exportOrderExceptionCtrl'})
+        .state('settings.backup.order_export',{url:'/order_export', templateUrl:'/assets/views/settings/backup/backup.html', controller: 'exportOrderExceptionCtrl'})
+        .state('settings.backup.serial_export',{url:'/serial_export', templateUrl:'/assets/views/settings/backup/order_serials.html', controller: 'exportOrderExceptionCtrl'});
 
     hotkeysProvider.cheatSheetHotkey =['mod+f1','g','G'];
     hotkeysProvider.cheatSheetDescription = '(or \'g\') Show / hide this help menu';

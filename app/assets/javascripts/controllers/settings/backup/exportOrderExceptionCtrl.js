@@ -16,8 +16,7 @@ groovepacks_controllers.controller('exportOrderExceptionCtrl', [ '$scope','$wind
     myscope.init = function() {
         $scope.exception = myscope.defaults();
         $scope.serial = myscope.defaults();
-
-        $scope.setup_page('system','order_exception');
+        $scope.setup_page('exception_export');
     };
 
     $scope.open_picker = function(event,object) {
