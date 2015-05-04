@@ -34,7 +34,7 @@
 
           <div class="input-group">
             <div class="input-group-addon">https://</div>
-            <input type="text" id="tenant_name" class="form-control" autofocus value="<%= params[:shopify]%>"/>
+            <input type="text" id="tenant_name" class="form-control" autofocus value="<%= non_hyphenated_string(params[:shopify])%>"/>
             <div class="input-group-addon">.groovepacker.com</div>
           </div>
           <div class="form-group error" style="color: red;">
@@ -449,7 +449,7 @@
                           // Open Checkout with further options
                           handler.open({
                               name: 'Groovepacker',
-                              description: 'initialization fee ($' + Number(one_time_payment/100).toFixed(2) + ')',
+                              description: 'Initialization fee ($' + Number(one_time_payment/100).toFixed(2) + ')',
                               amount: one_time_payment,
                               email: $('#email').val(),
                               allowRememberMe: false
