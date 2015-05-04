@@ -91,6 +91,10 @@ Groovepacks::Application.routes.draw do
       get 'auth'
       put 'disconnect'
     end
+
+    collection do
+      get 'callback'
+    end
   end
   
   # Sample resource route with options:

@@ -12,13 +12,28 @@
   <div>
     <form action="" method="POST" class="form-vertical" name="myForm" id="my_form">
       <fieldset>
+        <% unless params[:shopify].nil? %>
+          <div class="form-group">
+            <div class="checkbox">
+              <label>
+                <input type="checkbox" id="new_account" checked> New Account?
+              </label>
+            </div>
+            <div>
+              <label>
+                Already have an account? <a href="http://wwww.google.com">Login here</a>
+              </label>
+            </div>
+          </div>
+        <% end %>
+
         <div class="form-group">
           <input type="hidden" id="plan_id" value="<%= params[:plan_id] %>"/>
           <label class="control-label">Choose your site address*</label>
 
           <div class="input-group">
             <div class="input-group-addon">https://</div>
-            <input type="text" id="tenant_name" class="form-control" autofocus/>
+            <input type="text" id="tenant_name" class="form-control" autofocus value="<%= params[:shopify]%>"/>
 
             <div class="input-group-addon">.groovepacker.com</div>
           </div>
