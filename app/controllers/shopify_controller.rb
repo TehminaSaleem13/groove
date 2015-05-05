@@ -1,5 +1,5 @@
 class ShopifyController < ApplicationController
-  before_filter :authenticate_user!, :except => [:auth, :callback]
+  before_filter :authenticate_user!, :except => [:auth, :callback, :preferences, :help]
 
   # {
   #  "code"=>"58a883f4bb36e4e953431549abff383c", 
@@ -46,6 +46,14 @@ class ShopifyController < ApplicationController
     else
       render status: 304, json:'not disconnected'
     end
+  end
+
+  def preferences
+
+  end
+
+  def help
+
   end
 
   private

@@ -95,6 +95,8 @@ Groovepacks::Application.routes.draw do
 
     collection do
       get 'callback'
+      get 'preferences'
+      get 'help'
     end
   end
 
