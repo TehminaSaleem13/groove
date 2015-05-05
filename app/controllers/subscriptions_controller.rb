@@ -43,7 +43,7 @@
       if Tenant.where(name: params[:tenant_name]).length == 0
         if (params[:tenant_name] =~ /^[a-z0-9][a-z0-9_]*[a-z0-9]$/).nil?
           result['valid'] = false
-          result['message'] = 'Site name can only have lower case alphabets, numbers and underscores. They cannot start or end with an underscore'
+          result['message'] = 'Site name can only have lower case alphabets, numbers and dashes. They cannot start or end with an underscore'
         end
       else
         result['valid'] = false
@@ -83,4 +83,7 @@
       render json: @result
     end
 
+    def login
+
+    end
   end
