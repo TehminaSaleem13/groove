@@ -63,8 +63,8 @@
 			  general_setting.save
 			end
 
-      if BackupSetting.all.length == 0
-        backup_setting = BackupSetting.create(:auto_email_export=>1,
+      if ExportSetting.all.length == 0
+         ExportSetting.create(:auto_email_export=>1,
           :export_orders_option=>'on_same_day',
           :order_export_type=>'include_all')
       end

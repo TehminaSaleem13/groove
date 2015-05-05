@@ -1,4 +1,4 @@
-groovepacks_services.factory('backupsettings',['$http','notification',function($http, notification) {
+groovepacks_services.factory('exportsettings',['$http','notification',function($http, notification) {
 
 
     //default object
@@ -8,8 +8,8 @@ groovepacks_services.factory('backupsettings',['$http','notification',function($
         };
     };
 
-    var get_backup_settings = function(settings) {
-        var url = '/backupsettings/get_backup_settings.json';
+    var get_export_settings = function(settings) {
+        var url = '/exportsettings/get_export_settings.json';
 
         return $http.get(url).success(
             function(data) {
@@ -38,13 +38,13 @@ groovepacks_services.factory('backupsettings',['$http','notification',function($
 
     // };
 
-    var update_backup_settings = function(settings) {
-        var url = '/backupsettings/update_backup_settings.json';
+    var update_export_settings = function(settings) {
+        var url = '/exportsettings/update_export_settings.json';
 
         return $http.put(url, settings.single).success(
             function(data) {
                 if(data.status) {
-                    get_backup_settings(settings);
+                    get_export_settings(settings);
                     notification.notify(data.success_messages,1);
                 } else {
                     notification.notify(data.error_messages,0);
@@ -59,8 +59,8 @@ groovepacks_services.factory('backupsettings',['$http','notification',function($
             get:get_default
         },
         single: {
-            update: update_backup_settings,
-            get: get_backup_settings
+            update: update_export_settings,
+            get: get_export_settings
         }
     };
 

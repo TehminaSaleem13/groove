@@ -35,12 +35,12 @@
                     </accordion-group>
                     <accordion-group is-open="tabs[3].open">
                         <accordion-heading>
-                            <a ui-sref="settings.backup.backup_restore" >Backup & Export</a>
+                            <a ui-sref="settings.export.backup_restore" >Backup & Export</a>
                         </accordion-heading>
-                        <li ng-class="{active:current_page =='backup'}" ui-sref="settings.backup.backup_restore">Backup and Restore</li>
-                        <li ng-class="{active:current_page =='exception_export'}" ng-show="current_user.can('view_packing_ex')" ui-sref="settings.backup.order_exception">Exceptions Export</li>
-                        <li ng-class="{active:current_page =='order_export'}" ui-sref="settings.backup.order_export">Order Export</li>
-                        <li ng-class="{active:current_page =='serial_export'}" ng-show="current_user.can('view_packing_ex')" ui-sref="settings.backup.serial_export">Serial Export</li>
+                        <li ng-class="{active:current_page =='backup'}" ui-sref="settings.export.backup_restore">Backup and Restore</li>
+                        <li ng-class="{active:current_page =='exception_export'}" ng-show="current_user.can('view_packing_ex')" ui-sref="settings.export.order_exception">Exceptions Export</li>
+                        <li ng-class="{active:current_page =='order_export'}" ui-sref="settings.export.order_export">Order Export</li>
+                        <li ng-class="{active:current_page =='serial_export'}" ng-show="current_user.can('view_packing_ex')" ui-sref="settings.export.serial_export">Serial Export</li>
                     </accordion-group>
                     <accordion-group is-open="tabs[4].open">
                         <accordion-heading>

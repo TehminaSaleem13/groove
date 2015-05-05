@@ -1,6 +1,6 @@
-class CreateBackupSettings < ActiveRecord::Migration
+class CreateExportSettings < ActiveRecord::Migration
   def change
-    create_table :backup_settings do |t|
+    create_table :export_settings do |t|
     	t.boolean :auto_email_export, :default=>true
     	t.datetime    :time_to_send_export_email
     	t.boolean :send_export_email_on_mon, :default=>false
@@ -14,7 +14,7 @@ class CreateBackupSettings < ActiveRecord::Migration
     	t.string  :export_orders_option, :default=>'on_same_day'
     	t.string  :order_export_type,    :default=>'include_all'
     	t.string  :order_export_email
-
+    	
       t.timestamps
     end
   end
