@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150428152535) do
+ActiveRecord::Schema.define(:version => 20150505061003) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0, :null => false
@@ -34,6 +34,24 @@ ActiveRecord::Schema.define(:version => 20150428152535) do
     t.string   "productgenerated_report_id"
     t.datetime "productgenerated_report_date"
     t.boolean  "show_shipping_weight_only",    :default => false
+  end
+
+  create_table "backup_settings", :force => true do |t|
+    t.boolean  "auto_email_export",         :default => true
+    t.datetime "time_to_send_export_email"
+    t.boolean  "send_export_email_on_mon",  :default => false
+    t.boolean  "send_export_email_on_tue",  :default => false
+    t.boolean  "send_export_email_on_wed",  :default => false
+    t.boolean  "send_export_email_on_thu",  :default => false
+    t.boolean  "send_export_email_on_fri",  :default => false
+    t.boolean  "send_export_email_on_sat",  :default => false
+    t.boolean  "send_export_email_on_sun",  :default => false
+    t.datetime "last_exported"
+    t.string   "export_orders_option",      :default => "on_same_day"
+    t.string   "order_export_type",         :default => "include_all"
+    t.string   "order_export_email"
+    t.datetime "created_at",                                           :null => false
+    t.datetime "updated_at",                                           :null => false
   end
 
   create_table "column_preferences", :force => true do |t|

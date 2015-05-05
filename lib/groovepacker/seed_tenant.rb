@@ -63,6 +63,12 @@
 			  general_setting.save
 			end
 
+      if BackupSetting.all.length == 0
+        backup_setting = BackupSetting.create(:auto_email_export=>1,
+          :export_orders_option=>'on_same_day',
+          :order_export_type=>'include_all')
+      end
+
       if ScanPackSetting.all.length == 0
         ScanPackSetting.create(:enable_click_sku => true, :ask_tracking_number=>false)
       end
