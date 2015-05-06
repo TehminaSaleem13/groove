@@ -3,26 +3,18 @@ class ExportOrder < ActionMailer::Base
   
   def export(tenant)
     Apartment::Tenant.switch(tenant)
-    # @products_list = get_entire_list
     export_settings = ExportSetting.all.first
-    # @data = export_settings.export_data
-    # puts "@data: " + @data.inspect
-    @counts = get_order_counts
-    # send_data @data,
-    #   :type => 'text/csv; charset=iso-8859-1; header=present',
-    #   :disposition => "attachment; filename=users.csv"
+    if export_settings.export_orders_option == 'on_same_day'
+      @counts = get_order_counts
+    else
+      @counts = nil
+    end
     filename = export_settings.export_data
+    @csv_data = CSV.read("#{Rails.root}/public/csv/#{filename}")
+
     attachments["#{filename}"] = File.read("#{Rails.root}/public/csv/#{filename}")
-    # encoded_content = SpecialEncode(File.read(export_settings.export_data))
-    # attachments['filename.jpg'] = {
-    #   mime_type: 'text/csv',
-    #   encoding: 'SpecialEncoding',
-    #   content: encoded_content
-    # }
   	mail to: export_settings.order_export_email,
   		subject: "GroovePacker Order Export Report"
-
-    # reschedule(tenant)
     import_orders_obj = ImportOrders.new
     import_orders_obj.reschedule_job('export_order',tenant)
     File.delete("#{Rails.root}/public/csv/#{filename}")

@@ -3,13 +3,43 @@
     Order Export Report<br />
   </h1>
   <div style="width: 96%; margin-left:auto; margin-right:auto; background: #C1C2C1; border-color: #aca3a3; border-width: 4px; border-radius: 20px; font-family: 'Lato', sans-serif; padding: 15px; border-style: double; -webkit-box-shadow: 5px 5px 8px 2px rgba(0,0,0,0.4); box-shadow: 5px 5px 8px 2px rgba(0,0,0,0.8);">
-    <div>
-      <%=@data%>
-    </div>
+    <table style="margin:0 auto;margin-top: 20px; border-spacing: 0; background-color:#e8e7e7;border-radius:15px;">
+      <thead>
+        <% @csv_data.first.each_with_index do |th, index| %>
+          <% if index == 0 %>
+            <th style="border-top-left-radius:15px;-webkit-border-top-left-radius:15px;width:150px;text-align: center;line-height: 0.9;vertical-align: middle;position: relative;font-size: 14px;font-family: 'Play', sans-serif;color: #ffffff;border-bottom: 2px solid #8AC007;background-color: #2D2D2C;padding: 14px 10px;border-right: 2px solid #8AC007;">
+              <%=th%>
+            </th>
+          <%elsif index == (@csv_data.first.size - 1) %>
+              <th style="border-top-right-radius:15px;-webkit-border-top-right-radius:15px;width:150px;text-align: center;line-height: 0.9;vertical-align: middle;position: relative;font-size: 14px;font-family: 'Play', sans-serif;color: #ffffff;border-bottom: 2px solid #8AC007;background-color: #2D2D2C;padding: 14px 10px;">
+                <%=th%>
+              </th>
+          <% else %>
+            <th style="width:150px;text-align: center;line-height: 0.9;vertical-align: middle;position: relative;font-size: 14px;font-family: 'Play', sans-serif;color: #ffffff;border-bottom: 2px solid #8AC007;background-color: #2D2D2C;padding: 14px 10px;border-right: 2px solid #8AC007;">
+            <%=th%>
+            </th>
+          <% end %>
+        <% end %>
+      </thead>
+      <tbody>
+        <% for i in 1..(@csv_data.size - 1) do %>
+          <tr style="text-align:center;<%= ((i % 2) == 0 )? 'background:#dcdcdc;':''%>">
+            <% if @csv_data[i] %>
+              <% @csv_data[i].each do |td| %>
+                <td><%=td%></td>
+              <% end %>
+            <% end %>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+    
+    <%if @counts %>
     <p>Order imported today: <%=@counts['imported']%></p>
     <p>Order scanned today: <%=@counts['scanned']%></p>
     <p>Today's Order Remaining Awaiting: <%=@counts['awaiting']%></p>
     <p>Today's Order Remaining On Hold: <%=@counts['onhold']%></p>
     <p>Today's Order Remaining Cancelled: <%=@counts['cancelled']%></p>
+    <% end %>
   </div>
 </div>
