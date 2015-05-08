@@ -21,6 +21,6 @@ module ApplicationHelper
   end
 
   def non_hyphenated_string(string)
-    string.tr('-', '')
+    string.nil? ? nil : string.tr('-', '')
   end
 end
