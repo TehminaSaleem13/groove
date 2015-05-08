@@ -116,7 +116,7 @@ class ExportSetting < ActiveRecord::Base
                   unless order_item.product.primary_barcode.nil?
                     product = order_item.product
                     serials = OrderSerial.where(:product_id=>product.id)
-                    unless serials.nil?
+                    unless serials.empty?
                       serials.each do |serial|
                         single_row = row_map.dup
                         single_row[:serial_number] = serial.serial
@@ -142,28 +142,31 @@ class ExportSetting < ActiveRecord::Base
                         csv << single_row.values
                       end
                     else
-                      single_row = row_map.dup
-                      single_row[:serial_number] = serial.serial
-                      single_row[:order_number] = order_item.order.increment_id
-                      single_row[:order_date] = order_item.order.order_placed_time
-                      single_row[:scanned_date] = order_item.order.scanned_on
-                      packing_user = nil
-                      packing_user = User.find(order_item.order.packing_user_id) unless order_item.order.packing_user_id.blank?
-                      unless packing_user.nil?
-                        single_row[:packing_user] = packing_user.name + ' ('+packing_user.username+')'
-                        single_row[:warehouse_name] =  order_item.product.primary_warehouse.inventory_warehouse.name unless order_item.product.primary_warehouse.nil? || order_item.product.primary_warehouse.inventory_warehouse.nil?
-                      end
-                      single_row[:barcode_with_lot] = order_item.product.primary_barcode
                       unless scanpack_settings.escape_string.nil?
                         barcode = order_item.product.primary_barcode
-                        single_row[:barcode] = barcode.slice(0..(barcode.index(scanpack_settings.escape_string)-1)) unless barcode.index(scanpack_settings.escape_string).nil?
-                        single_row[:lot_number] = barcode.slice(barcode.index(scanpack_settings.escape_string)..(barcode.length-1)) unless barcode.index(scanpack_settings.escape_string).nil?
-                      end
-                      single_row[:product_name] = order_item.product.name
-                      single_row[:primary_sku] =  order_item.product.primary_sku
-                      single_row[:order_item_count] = order_item.order.get_items_count
+                        lot_number = barcode.slice(barcode.index(scanpack_settings.escape_string)..(barcode.length-1)) unless barcode.index(scanpack_settings.escape_string).nil?
+                        unless lot_number.nil?
+                          single_row = row_map.dup
+                          single_row[:order_number] = order_item.order.increment_id
+                          single_row[:order_date] = order_item.order.order_placed_time
+                          single_row[:scanned_date] = order_item.order.scanned_on
+                          packing_user = nil
+                          packing_user = User.find(order_item.order.packing_user_id) unless order_item.order.packing_user_id.blank?
+                          unless packing_user.nil?
+                            single_row[:packing_user] = packing_user.name + ' ('+packing_user.username+')'
+                            single_row[:warehouse_name] =  order_item.product.primary_warehouse.inventory_warehouse.name unless order_item.product.primary_warehouse.nil? || order_item.product.primary_warehouse.inventory_warehouse.nil?
+                          end
+                          single_row[:barcode_with_lot] = order_item.product.primary_barcode
+                          
+                          single_row[:barcode] = barcode.slice(0..(barcode.index(scanpack_settings.escape_string)-1)) unless barcode.index(scanpack_settings.escape_string).nil?
+                          single_row[:lot_number] = lot_number
+                          single_row[:product_name] = order_item.product.name
+                          single_row[:primary_sku] =  order_item.product.primary_sku
+                          single_row[:order_item_count] = order_item.order.get_items_count
 
-                      csv << single_row.values
+                          csv << single_row.values
+                        end
+                      end
                     end
                   else
                     next
@@ -171,12 +174,8 @@ class ExportSetting < ActiveRecord::Base
                 else
                   product = order_item.product
                   serials = OrderSerial.where(:product_id=>product.id)
-                  puts "in else."
-                  puts "orderSerials: " + serials.inspect
                   unless serials.empty?
-                    puts "in unless"
                     serials.each do |serial|
-                      puts "serial"
                       single_row = row_map.dup
                       single_row[:serial_number] = serial.serial
                       single_row[:order_number] = order_item.order.increment_id
@@ -214,7 +213,6 @@ class ExportSetting < ActiveRecord::Base
                       csv << single_row.values
                     end
                   else
-                    puts "in else"
                     single_row = row_map.dup
                     single_row[:order_number] = order_item.order.increment_id
                     single_row[:order_date] = order_item.order.order_placed_time

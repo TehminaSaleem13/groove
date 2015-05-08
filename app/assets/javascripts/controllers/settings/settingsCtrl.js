@@ -23,7 +23,7 @@ groovepacks_controllers.
                         open:false
                     },
                     {
-                        page:'backup',
+                        page:'backup_restore',
                         open:false
                     },
                     {
