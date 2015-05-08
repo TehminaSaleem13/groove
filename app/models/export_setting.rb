@@ -132,12 +132,16 @@ class ExportSetting < ActiveRecord::Base
                         single_row[:barcode_with_lot] = order_item.product.primary_barcode
                         unless scanpack_settings.escape_string.nil?
                           barcode = order_item.product.primary_barcode
-                          single_row[:barcode] = barcode.slice(0..(barcode.index(scanpack_settings.escape_string)-1)) unless barcode.index(scanpack_settings.escape_string).nil?
+                          unless barcode.index(scanpack_settings.escape_string).nil?
+                            single_row[:barcode] = barcode.slice(0..(barcode.index(scanpack_settings.escape_string)-1))
+                          else
+                            single_row[:barcode] = barcode
+                          end
                           single_row[:lot_number] = barcode.slice(barcode.index(scanpack_settings.escape_string)..(barcode.length-1)) unless barcode.index(scanpack_settings.escape_string).nil?
                         end
                         single_row[:product_name] = order_item.product.name
                         single_row[:primary_sku] =  order_item.product.primary_sku
-                        single_row[:order_item_count] = order_item.order.get_items_count
+                        single_row[:order_item_count] = order_item.qty
 
                         csv << single_row.values
                       end
@@ -158,11 +162,15 @@ class ExportSetting < ActiveRecord::Base
                           end
                           single_row[:barcode_with_lot] = order_item.product.primary_barcode
                           
-                          single_row[:barcode] = barcode.slice(0..(barcode.index(scanpack_settings.escape_string)-1)) unless barcode.index(scanpack_settings.escape_string).nil?
+                          unless barcode.index(scanpack_settings.escape_string).nil?
+                            single_row[:barcode] = barcode.slice(0..(barcode.index(scanpack_settings.escape_string)-1))
+                          else
+                            single_row[:barcode] = barcode
+                          end
                           single_row[:lot_number] = lot_number
                           single_row[:product_name] = order_item.product.name
                           single_row[:primary_sku] =  order_item.product.primary_sku
-                          single_row[:order_item_count] = order_item.order.get_items_count
+                          single_row[:order_item_count] = order_item.qty
 
                           csv << single_row.values
                         end
@@ -190,15 +198,18 @@ class ExportSetting < ActiveRecord::Base
                       single_row[:barcode_with_lot] = order_item.product.primary_barcode
                       unless scanpack_settings.escape_string.nil?
                         barcode = order_item.product.primary_barcode
-                        single_row[:barcode] = barcode.slice(0..(barcode.index(scanpack_settings.escape_string)-1)) unless barcode.index(scanpack_settings.escape_string).nil?
+                        unless barcode.index(scanpack_settings.escape_string).nil?
+                          single_row[:barcode] = barcode.slice(0..(barcode.index(scanpack_settings.escape_string)-1))
+                        else
+                          single_row[:barcode] = barcode
+                        end
                         single_row[:lot_number] = barcode.slice(barcode.index(scanpack_settings.escape_string)..(barcode.length-1)) unless barcode.index(scanpack_settings.escape_string).nil?
                       end
                       single_row[:product_name] = order_item.product.name
                       single_row[:primary_sku] =  order_item.product.primary_sku
-                      single_row[:order_item_count] = order_item.order.get_items_count
+                      single_row[:order_item_count] = order_item.qty
 
-                      if (single_row[:serial_number] == previous_row[:serial_number] && 
-                        single_row[:order_number] == previous_row[:order_number] &&
+                      if (single_row[:order_number] == previous_row[:order_number] &&
                         single_row[:scanned_date] == previous_row[:scanned_date] &&
                         single_row[:packing_user] == previous_row[:packing_user] &&
                         single_row[:warehouse_name] == previous_row[:warehouse_name] &&
@@ -226,12 +237,16 @@ class ExportSetting < ActiveRecord::Base
                     single_row[:barcode_with_lot] = order_item.product.primary_barcode
                     unless scanpack_settings.escape_string.nil?
                       barcode = order_item.product.primary_barcode
-                      single_row[:barcode] = barcode.slice(0..(barcode.index(scanpack_settings.escape_string)-1)) unless barcode.index(scanpack_settings.escape_string).nil?
+                      unless barcode.index(scanpack_settings.escape_string).nil?
+                        single_row[:barcode] = barcode.slice(0..(barcode.index(scanpack_settings.escape_string)-1))
+                      else
+                        single_row[:barcode] = barcode
+                      end
                       single_row[:lot_number] = barcode.slice(barcode.index(scanpack_settings.escape_string)..(barcode.length-1)) unless barcode.index(scanpack_settings.escape_string).nil?
                     end
                     single_row[:product_name] = order_item.product.name
                     single_row[:primary_sku] =  order_item.product.primary_sku
-                    single_row[:order_item_count] = order_item.order.get_items_count
+                    single_row[:order_item_count] = order_item.qty
 
                     if (single_row[:order_number] == previous_row[:order_number] &&
                       single_row[:scanned_date] == previous_row[:scanned_date] &&
@@ -243,7 +258,6 @@ class ExportSetting < ActiveRecord::Base
                       single_row[:product_name] == previous_row[:product_name] &&
                       single_row[:primary_sku] == previous_row[:primary_sku])
                       single_row[:order_item_count] = single_row[:order_item_count].to_i + previous_row[:order_item_count].to_i
-                      # previous_row = single_row
                     end
                     previous_row = single_row
                     csv << single_row.values
