@@ -1,7 +1,7 @@
 class ExportsettingsController < ApplicationController
   before_filter :authenticate_user!
   def get_export_settings
-  	@result = Hash.new
+    @result = Hash.new
     @result['status'] = true
     @result['error_messages'] = []
     @result['success_messages'] = []
@@ -9,8 +9,9 @@ class ExportsettingsController < ApplicationController
     @result['data'] = Hash.new
 
     export_setting = ExportSetting.all.first
-
-    if !export_setting.nil?
+    export_setting.order_export_email = GeneralSetting.all.first.admin_email if export_setting.order_export_email.nil?
+    export_setting.save
+    unless export_setting.nil?
       @result['data']['settings'] = export_setting
     else
       @result['status'] &= false
@@ -24,7 +25,7 @@ class ExportsettingsController < ApplicationController
   end
 
   def update_export_settings
-  	@result = Hash.new
+    @result = Hash.new
     @result['status'] = true
     @result['error_messages'] = []
     @result['success_messages'] = []

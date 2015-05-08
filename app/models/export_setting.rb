@@ -73,7 +73,7 @@ class ExportSetting < ActiveRecord::Base
     start_time = nil
     end_time = nil
     if self.export_orders_option == 'on_same_day'
-      start_time = Time.zone.now.beginning_of_day
+      start_time = Time.now.beginning_of_day
     else
       unless self.last_exported.nil?
         start_time = self.last_exported
@@ -119,61 +119,18 @@ class ExportSetting < ActiveRecord::Base
                     unless serials.empty?
                       serials.each do |serial|
                         single_row = row_map.dup
+                        single_row = calculate_row_data(single_row, order_item)
                         single_row[:serial_number] = serial.serial
-                        single_row[:order_number] = order_item.order.increment_id
-                        single_row[:order_date] = order_item.order.order_placed_time
-                        single_row[:scanned_date] = order_item.order.scanned_on
-                        packing_user = nil
-                        packing_user = User.find(order_item.order.packing_user_id) unless order_item.order.packing_user_id.blank?
-                        unless packing_user.nil?
-                          single_row[:packing_user] = packing_user.name + ' ('+packing_user.username+')'
-                          single_row[:warehouse_name] =  order_item.product.primary_warehouse.inventory_warehouse.name unless order_item.product.primary_warehouse.nil? || order_item.product.primary_warehouse.inventory_warehouse.nil?
-                        end
-                        single_row[:barcode_with_lot] = order_item.product.primary_barcode
-                        unless scanpack_settings.escape_string.nil?
-                          barcode = order_item.product.primary_barcode
-                          unless barcode.index(scanpack_settings.escape_string).nil?
-                            single_row[:barcode] = barcode.slice(0..(barcode.index(scanpack_settings.escape_string)-1))
-                          else
-                            single_row[:barcode] = barcode
-                          end
-                          single_row[:lot_number] = barcode.slice(barcode.index(scanpack_settings.escape_string)..(barcode.length-1)) unless barcode.index(scanpack_settings.escape_string).nil?
-                        end
-                        single_row[:product_name] = order_item.product.name
-                        single_row[:primary_sku] =  order_item.product.primary_sku
-                        single_row[:order_item_count] = order_item.qty
-
+                        
                         csv << single_row.values
                       end
                     else
-                      unless scanpack_settings.escape_string.nil?
-                        barcode = order_item.product.primary_barcode
-                        lot_number = barcode.slice(barcode.index(scanpack_settings.escape_string)..(barcode.length-1)) unless barcode.index(scanpack_settings.escape_string).nil?
-                        unless lot_number.nil?
-                          single_row = row_map.dup
-                          single_row[:order_number] = order_item.order.increment_id
-                          single_row[:order_date] = order_item.order.order_placed_time
-                          single_row[:scanned_date] = order_item.order.scanned_on
-                          packing_user = nil
-                          packing_user = User.find(order_item.order.packing_user_id) unless order_item.order.packing_user_id.blank?
-                          unless packing_user.nil?
-                            single_row[:packing_user] = packing_user.name + ' ('+packing_user.username+')'
-                            single_row[:warehouse_name] =  order_item.product.primary_warehouse.inventory_warehouse.name unless order_item.product.primary_warehouse.nil? || order_item.product.primary_warehouse.inventory_warehouse.nil?
-                          end
-                          single_row[:barcode_with_lot] = order_item.product.primary_barcode
-                          
-                          unless barcode.index(scanpack_settings.escape_string).nil?
-                            single_row[:barcode] = barcode.slice(0..(barcode.index(scanpack_settings.escape_string)-1))
-                          else
-                            single_row[:barcode] = barcode
-                          end
-                          single_row[:lot_number] = lot_number
-                          single_row[:product_name] = order_item.product.name
-                          single_row[:primary_sku] =  order_item.product.primary_sku
-                          single_row[:order_item_count] = order_item.qty
+                      lot_number = order_item.get_lot_number(order_item.product.primary_barcode)
+                      unless lot_number.nil?
+                        single_row = row_map.dup
+                        single_row = calculate_row_data(single_row, order_item)
 
-                          csv << single_row.values
-                        end
+                        csv << single_row.values
                       end
                     end
                   else
@@ -185,30 +142,9 @@ class ExportSetting < ActiveRecord::Base
                   unless serials.empty?
                     serials.each do |serial|
                       single_row = row_map.dup
+                      single_row = calculate_row_data(single_row, order_item)
                       single_row[:serial_number] = serial.serial
-                      single_row[:order_number] = order_item.order.increment_id
-                      single_row[:order_date] = order_item.order.order_placed_time
-                      single_row[:scanned_date] = order_item.order.scanned_on
-                      packing_user = nil
-                      packing_user = User.find(order_item.order.packing_user_id) unless order_item.order.packing_user_id.blank?
-                      unless packing_user.nil?
-                        single_row[:packing_user] = packing_user.name + ' ('+packing_user.username+')'
-                        single_row[:warehouse_name] =  order_item.product.primary_warehouse.inventory_warehouse.name unless order_item.product.primary_warehouse.nil? || order_item.product.primary_warehouse.inventory_warehouse.nil?
-                      end
-                      single_row[:barcode_with_lot] = order_item.product.primary_barcode
-                      unless scanpack_settings.escape_string.nil?
-                        barcode = order_item.product.primary_barcode
-                        unless barcode.index(scanpack_settings.escape_string).nil?
-                          single_row[:barcode] = barcode.slice(0..(barcode.index(scanpack_settings.escape_string)-1))
-                        else
-                          single_row[:barcode] = barcode
-                        end
-                        single_row[:lot_number] = barcode.slice(barcode.index(scanpack_settings.escape_string)..(barcode.length-1)) unless barcode.index(scanpack_settings.escape_string).nil?
-                      end
-                      single_row[:product_name] = order_item.product.name
-                      single_row[:primary_sku] =  order_item.product.primary_sku
-                      single_row[:order_item_count] = order_item.qty
-
+                      
                       if (single_row[:order_number] == previous_row[:order_number] &&
                         single_row[:scanned_date] == previous_row[:scanned_date] &&
                         single_row[:packing_user] == previous_row[:packing_user] &&
@@ -225,29 +161,8 @@ class ExportSetting < ActiveRecord::Base
                     end
                   else
                     single_row = row_map.dup
-                    single_row[:order_number] = order_item.order.increment_id
-                    single_row[:order_date] = order_item.order.order_placed_time
-                    single_row[:scanned_date] = order_item.order.scanned_on
-                    packing_user = nil
-                    packing_user = User.find(order_item.order.packing_user_id) unless order_item.order.packing_user_id.blank?
-                    unless packing_user.nil?
-                      single_row[:packing_user] = packing_user.name + ' ('+packing_user.username+')'
-                      single_row[:warehouse_name] =  order_item.product.primary_warehouse.inventory_warehouse.name unless order_item.product.primary_warehouse.nil? || order_item.product.primary_warehouse.inventory_warehouse.nil?
-                    end
-                    single_row[:barcode_with_lot] = order_item.product.primary_barcode
-                    unless scanpack_settings.escape_string.nil?
-                      barcode = order_item.product.primary_barcode
-                      unless barcode.index(scanpack_settings.escape_string).nil?
-                        single_row[:barcode] = barcode.slice(0..(barcode.index(scanpack_settings.escape_string)-1))
-                      else
-                        single_row[:barcode] = barcode
-                      end
-                      single_row[:lot_number] = barcode.slice(barcode.index(scanpack_settings.escape_string)..(barcode.length-1)) unless barcode.index(scanpack_settings.escape_string).nil?
-                    end
-                    single_row[:product_name] = order_item.product.name
-                    single_row[:primary_sku] =  order_item.product.primary_sku
-                    single_row[:order_item_count] = order_item.qty
-
+                    single_row = calculate_row_data(single_row, order_item)
+                    
                     if (single_row[:order_number] == previous_row[:order_number] &&
                       single_row[:scanned_date] == previous_row[:scanned_date] &&
                       single_row[:packing_user] == previous_row[:packing_user] &&
@@ -299,5 +214,25 @@ class ExportSetting < ActiveRecord::Base
       filename = 'error.csv'
     end
     filename
+  end
+
+  def calculate_row_data(single_row, order_item)
+    single_row[:order_number] = order_item.order.increment_id
+    single_row[:order_date] = order_item.order.order_placed_time
+    single_row[:scanned_date] = order_item.order.scanned_on
+    packing_user = nil
+    packing_user = User.find(order_item.order.packing_user_id) unless order_item.order.packing_user_id.blank?
+    unless packing_user.nil?
+      single_row[:packing_user] = packing_user.name + ' ('+packing_user.username+')'
+      single_row[:warehouse_name] =  order_item.product.primary_warehouse.inventory_warehouse.name unless order_item.product.primary_warehouse.nil? || order_item.product.primary_warehouse.inventory_warehouse.nil?
+    end
+    single_row[:barcode_with_lot] = order_item.product.primary_barcode
+    single_row[:barcode] = order_item.get_barcode_without_lotnumber(order_item.product.primary_barcode)
+    single_row[:lot_number] = order_item.get_lot_number(order_item.product.primary_barcode)
+    single_row[:product_name] = order_item.product.name
+    single_row[:primary_sku] =  order_item.product.primary_sku
+    single_row[:order_item_count] = order_item.qty
+
+    single_row
   end
 end

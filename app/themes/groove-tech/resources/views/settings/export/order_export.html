@@ -12,10 +12,7 @@
                     </div>
                     <div ng-show="export_settings.single.auto_email_export=='1'">
                         <div class="form-group">
-                            <div class="controls col-sm-offset-3 col-sm-5" ng-show="export_settings.single.order_export_email==null">
-                                <input type="text" class="form-control input-style" ng-model="general_settings.single.admin_email" placeholder="Email address" ng-blur="change_option('order_export_email',general_settings.single.admin_email)"/>
-                            </div>
-                            <div class="controls col-sm-offset-3 col-sm-5" ng-hide="export_settings.single.order_export_email==null">
+                            <div class="controls col-sm-offset-3 col-sm-5">
                                 <input type="text" class="form-control input-style" ng-model="export_settings.single.order_export_email" placeholder="Email address" ng-blur="update_export_settings()"/>
                             </div>
                         </div>                       

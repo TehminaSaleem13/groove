@@ -20,31 +20,13 @@ class ExportOrder < ActionMailer::Base
     File.delete("#{Rails.root}/public/csv/#{filename}")
   end
 
-  def reschedule(tenant)
-    date = DateTime.now
-    date = date + 1.day
-    job_scheduled = false
-    export_settings = ExportSetting.all.first
-    while !job_scheduled do
-      should_schedule_job = export_settings.should_export_orders(date)
-      time = export_settings.time_to_send_export_email
-
-      if should_schedule_job
-        job_scheduled = export_settings.schedule_job(date,
-          time)
-      else
-        date = date + 1.day
-      end
-    end
-  end
-
   def get_order_counts
     result = Hash.new
-    result['imported'] = Order.where("created_at >= ?", Time.zone.now.beginning_of_day).size
-    result['scanned'] = Order.where("created_at >= ? and status = ?", Time.zone.now.beginning_of_day,'scanned').size
-    result['awaiting'] = Order.where("created_at >= ? and status = ?", Time.zone.now.beginning_of_day,'awaiting').size
-    result['onhold'] = Order.where("created_at >= ? and status = ?", Time.zone.now.beginning_of_day,'onhold').size
-    result['cancelled'] = Order.where("created_at >= ? and status = ?", Time.zone.now.beginning_of_day,'cancelled').size
+    result['imported'] = Order.where("created_at >= ?", Time.now.beginning_of_day).size
+    result['scanned'] = Order.where("created_at >= ? and status = ?", Time.now.beginning_of_day,'scanned').size
+    result['awaiting'] = Order.where("created_at >= ? and status = ?", Time.now.beginning_of_day,'awaiting').size
+    result['onhold'] = Order.where("created_at >= ? and status = ?", Time.now.beginning_of_day,'onhold').size
+    result['cancelled'] = Order.where("created_at >= ? and status = ?", Time.now.beginning_of_day,'cancelled').size
     result
   end
 end

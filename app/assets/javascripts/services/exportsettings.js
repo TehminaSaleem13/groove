@@ -23,21 +23,6 @@ groovepacks_services.factory('exportsettings',['$http','notification',function($
         ).error(notification.server_error);
     };
 
-    // var fix_times =function (settings) {
-    //     var today = null;
-    //     var all = ['time_to_import_orders','time_to_send_email'];
-    //     var config_date = null;
-    //     for(var i=0; i< all.length; i++) {
-    //         config_date = new Date(settings.single[all[i]]);
-    //         today = new Date();
-    //         today.setHours(config_date.getHours());
-    //         today.setMinutes(config_date.getMinutes());
-    //         today.setSeconds(0);
-    //         settings.single[all[i]] = today;
-    //     }
-
-    // };
-
     var update_export_settings = function(settings) {
         var url = '/exportsettings/update_export_settings.json';
 
