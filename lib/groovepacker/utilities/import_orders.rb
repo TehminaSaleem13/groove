@@ -90,6 +90,7 @@
 			date = date + 1.day
 			job_scheduled = false
 			general_settings = GeneralSetting.all.first
+			export_settings = ExportSetting.all.first
 			while !job_scheduled do
 				should_schedule_job = false
 				if type=='import_orders'
@@ -98,6 +99,9 @@
 				elsif type=='low_inventory_email'
 					should_schedule_job = general_settings.should_send_email(date)
 					time = general_settings.time_to_send_email
+				elsif type == 'export_order'
+					should_schedule_job = export_settings.should_export_orders(date)
+      				time = export_settings.time_to_send_export_email
 				end
 
 				if should_schedule_job

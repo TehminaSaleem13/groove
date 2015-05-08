@@ -4,7 +4,7 @@ function( $scope,backup) {
     var myscope = {};
 
     myscope.init = function() {
-        $scope.setup_page('system','backup');
+        $scope.setup_page('backup_restore','backup');
         $scope.backup_restore = backup.model.get();
 
 

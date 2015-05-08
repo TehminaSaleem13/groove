@@ -1,4 +1,4 @@
-groovepacks_controllers.controller('exportOrderExceptionCtrl', [ '$scope','$window',function($scope,$window) {
+groovepacks_controllers.controller('exportOrderExceptionCtrl', [ '$state','$scope','$window',function($state,$scope,$window) {
     var myscope = {};
     myscope.defaults = function() {
         return {
@@ -16,8 +16,7 @@ groovepacks_controllers.controller('exportOrderExceptionCtrl', [ '$scope','$wind
     myscope.init = function() {
         $scope.exception = myscope.defaults();
         $scope.serial = myscope.defaults();
-
-        $scope.setup_page('system','order_exception');
+        $scope.setup_page('backup_restore',$state.current.url.substring(1));
     };
 
     $scope.open_picker = function(event,object) {

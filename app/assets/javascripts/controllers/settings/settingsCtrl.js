@@ -23,6 +23,10 @@ groovepacks_controllers.
                         open:false
                     },
                     {
+                        page:'backup_restore',
+                        open:false
+                    },
+                    {
                         page: 'show_card_details',
                         open:false
                     }

@@ -116,6 +116,11 @@ class GeneralSetting < ActiveRecord::Base
         Delayed::Job.where(queue: "import_orders_scheduled_#{tenant}").destroy_all
         self.delay(:run_at => time_diff.seconds.from_now,:queue => "import_orders_scheduled_#{tenant}").import_orders_helper tenant
         job_scheduled = true
+      elsif job_type == 'export_order'
+        Delayed::Job.where(queue: "order_export_email_scheduled_#{tenant}").destroy_all
+        ExportOrder.delay(:run_at => time_diff.seconds.from_now,:queue => "order_export_email_scheduled_#{tenant}").export(tenant)
+        # ExportOrder.export(tenant).deliver
+        job_scheduled = true
       end
     end
     job_scheduled

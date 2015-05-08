@@ -10,25 +10,25 @@ class OrderItem < ActiveRecord::Base
   after_save :update_inventory_levels_for_kit_parsing_depends
 
   def has_unscanned_kit_items
-  	result = false
-  	self.order_item_kit_products.each do |kit_product|
-		if kit_product.scanned_status != 'scanned'
-			result = true
-			break
-		end
-  	end
-  	result
+    result = false
+    self.order_item_kit_products.each do |kit_product|
+    if kit_product.scanned_status != 'scanned'
+      result = true
+      break
+    end
+    end
+    result
   end
 
   def has_atleast_one_item_scanned
-  	result = false
-  	self.order_item_kit_products.each do |kit_product|
-		if kit_product.scanned_status != 'unscanned'
-			result = true
-			break
-		end
-  	end
-  	result
+    result = false
+    self.order_item_kit_products.each do |kit_product|
+    if kit_product.scanned_status != 'unscanned'
+      result = true
+      break
+    end
+    end
+    result
   end
 
   def build_basic_item(item)
@@ -340,6 +340,20 @@ class OrderItem < ActiveRecord::Base
     end
 
     result
+  end
+
+  def get_lot_number(barcode)
+    scanpack_settings = ScanPackSetting.all.first
+    return barcode.slice(barcode.index(scanpack_settings.escape_string)..(barcode.length-1)) unless barcode.index(scanpack_settings.escape_string).nil? || scanpack_settings.escape_string.nil?
+  end
+
+  def get_barcode_without_lotnumber(barcode)
+    scanpack_settings = ScanPackSetting.all.first
+    unless scanpack_settings.escape_string.nil? || barcode.index(scanpack_settings.escape_string).nil?
+      return barcode.slice(0..(barcode.index(scanpack_settings.escape_string)-1))
+    else
+      return barcode
+    end
   end
 
   private
