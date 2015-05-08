@@ -10,7 +10,7 @@
 
   <div style="width: 96%; margin-left:auto; margin-right:auto; background: #C1C2C1; border-color: #aca3a3; border-width: 4px; border-radius: 20px; font-family: 'Lato', sans-serif; padding: 15px; border-style: double; -webkit-box-shadow: 5px 5px 8px 2px rgba(0,0,0,0.4); box-shadow: 5px 5px 8px 2px rgba(0,0,0,0.8);">
 <span style="color:#000;">The following note was created at: <strong><%=DateTime.now.strftime('%a %d %b, %Y at %H:%M')%></strong> <BR>
-This note was added by <strong><%=@mail_data['sender'] %></strong> to order number: <a href="https://<%=@mail_data['tenant_name'] %>.groovepacker.com/#/orders/awaiting/1/<%=@mail_data['order_id'] %>"><%=@mail_data['order_number'] %></a>
+This note was added by <strong><%=@mail_data['sender'] %></strong> to order number: <a href="https://<%=@mail_data['tenant_name'] %>.groovepacker.com/#/orders/awaiting/1/<%=@mail_data['order_id'] %>" style="color:#66A909;"><%=@mail_data['order_number'] %></a>
 </span><br>
     <HR>
     <p>
@@ -38,13 +38,13 @@ This note was added by <strong><%=@mail_data['sender'] %></strong> to order numb
     <p>
       You can View or Edit the related order in GroovePacker by following this link:
       <strong>
-        <a href="https://<%=@mail_data['tenant_name'] %>.groovepacker.com/#/orders/awaiting/1/<%=@mail_data['order_id'] %>"><%=@mail_data['order_number'] %></a>
+        <a href="https://<%=@mail_data['tenant_name'] %>.groovepacker.com/#/orders/awaiting/1/<%=@mail_data['order_id'] %>" style="color:#66A909;"><%=@mail_data['order_number'] %></a>
       </strong></p>
 
 
 
     <p>&nbsp;</p>
-    <p style="font-size:small;color:#000;"> If you would like to have packing notes disabled or sent to another address you can do so on the  <a href="https://<%=@mail_data['tenant_name'] %>.groovepacker.com/#/settings/system/general">General Settings page</a>.   </p>
+    <p style="font-size:small;color:#000;"> If you would like to have packing notes disabled or sent to another address you can do so on the  <a href="https://<%=@mail_data['tenant_name'] %>.groovepacker.com/#/settings/system/general" style="color:#66A909;">General Settings page</a>.   </p>
 
 
     <div style="text-align:center;font-family:'Lato',sans-serif;color:#777777;"><BR>

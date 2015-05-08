@@ -62,7 +62,11 @@
 	  		invoice.plan_id = event.data.object.lines.data.first.plan.id unless event.data.object.lines.data.first.plan.id.nil? || event.data.object.lines.data.first.plan.nil?
 	  		invoice.period_start = Time.at(event.data.object.lines.data.first.period.start).utc
 	  		invoice.period_end = Time.at(event.data.object.lines.data.first.period.end).utc
-	  		invoice.amount = event.data.object.lines.data.first.amount.to_f/100
+	  		if event.data.object.starting_balance == 0
+	  			invoice.amount = event.data.object.lines.data.first.amount.to_f/100
+	  		else
+	  			invoice.amount = event.data.object.starting_balance.to_f/100
+	  		end
 	  		invoice.quantity = event.data.object.lines.data.first.quantity unless event.data.object.lines.data.first.quantity.nil?
 	  	end
 	  	invoice
