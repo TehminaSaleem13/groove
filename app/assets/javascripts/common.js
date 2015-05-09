@@ -3,3 +3,4 @@
 //= require services
 //= require directives
 //= require controllers
+//= require subscriptions

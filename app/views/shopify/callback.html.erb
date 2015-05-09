@@ -1,0 +1,91 @@
+<div class="row">
+  <div class="box-outer">
+    <div class="box">
+      <%= render 'shared/existing_customer', shopify: @shop_name %>
+    </div>
+    <div class="col-sm-offset-3 col-sm-6">
+      <img src="/assets/images/logo.png" class="col-xs-12" alt="GroovePacker"/>
+    </div>
+  </div>
+</div>
+<div class="row bottom-well col-sm-offset-3 col-md-offset-3 col-lg-offset-3 col-md-6 col-sm-6 col-lg-6">
+
+  <div class="well">
+    <h4 class="text-center">Setup Groovepacker with</h4>
+    <h4 class="text-center">
+      <%= params[:shop] %>
+    </h4>
+  </div>
+  <div>
+    <form action="" method="POST" class="form-vertical">
+      <fieldset>
+        <div class="form-group">
+          <label for="email" class="control-label">Enter your email</label>
+          <input type="email" id="tenant_email" autofocus class="form-control"/>
+
+          <div class="form-group error" style="color: red;">
+            <div id="error-email-block" class="help-inline"></div>
+          </div>
+        </div>
+
+        <button id="continue_button" class="btn btn-primary btn-disabled" 
+        style="margin-bottom: 15px;">
+          Continue
+        </button>
+      </fieldset>
+    </form>
+
+    <script type="text/javascript">
+      $(document).on('ready page:load', function() {
+        var valid = { };
+
+        $('#continue_button').on('click', function(e) {
+          e.preventDefault();
+          validate_email();
+          if (valid.email) {
+            url = 'http://admin.'+ '<%=ENV["HOST_NAME"]%>'+ '/subscriptions/select_plan?email=' + 
+              $('#tenant_email').val() + '&shopify=<%=@shop_name%>';
+            window.location.href = url;
+          } 
+        });
+
+        var validate_email = function() {
+          var email = $('#tenant_email').val();
+          var atpos = email.indexOf("@");
+          var dotpos = email.lastIndexOf(".");
+          if (email == null || email == "") {
+            valid.email = false;
+            $('#error-email-block').html("email must be filled out");
+          }
+          else if (atpos < 1 || dotpos < atpos + 2 || dotpos + 2 >= email.length) {
+            valid.email = false;
+            $('#error-email-block').html("email is not valid");
+          } else {
+            $.ajax({
+                type: "GET",
+                contentType: "application/json; charset=utf-8",
+                url: "/subscriptions/valid_email",
+                data: { email: email },
+                dataType: "json",
+                async: false
+            }).error(function (response) {
+
+            }).success(function (response) {
+              if (!response.valid) {
+                $('#error-email-block').html(email + " email already exists");
+                valid.email = false;
+              } else {
+                $('#error-email-block').html("");
+                valid.email = true;
+              }
+            });
+          }
+        }
+
+        $('#tenant_email').blur(function () {
+          validate_email();
+        });
+      });
+    </script>
+  </div>
+</div>

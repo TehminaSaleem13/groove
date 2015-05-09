@@ -31,8 +31,8 @@ class ShopifyController < ApplicationController
   def callback
     # redirect to admin page with the shopify and with groove-solo plan
     # get shop name
-    shop_name = get_shop_name(params[:shop])
-    redirect_to subscriptions_path(plan_id: 'groove-solo', shopify: shop_name )
+    @shop_name = get_shop_name(params[:shop])
+    #redirect_to subscriptions_path(plan_id: 'groove-solo', shopify: shop_name )
   end
 
   def disconnect
