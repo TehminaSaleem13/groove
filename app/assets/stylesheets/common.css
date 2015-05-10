@@ -37,3 +37,11 @@
 .col-md-2.price-column {
   width: 20%;
 }
+
+.well-header p{
+  background-color: #ADACAC;
+  color: white;
+  padding: 10px;
+  font-size: 18px;
+  border-radius: 18px;
+}
