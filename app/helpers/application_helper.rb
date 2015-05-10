@@ -23,4 +23,8 @@ module ApplicationHelper
   def non_hyphenated_string(string)
     string.nil? ? nil : string.tr('-', '')
   end
+
+  def is_base_tenant(request)
+    request.original_url =~ /admin./
+  end
 end

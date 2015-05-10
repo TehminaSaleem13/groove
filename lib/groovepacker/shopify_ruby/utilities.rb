@@ -21,6 +21,7 @@ module Groovepacker
           "http://"+ subdomain + "." + ENV["SHOPIFY_REDIRECT_HOST"] + 
           auth_shopify_path(shopify_credential.store, {tenant_name: tenant_name})
         )
+        puts permission_url
         permission_url
       end
     end

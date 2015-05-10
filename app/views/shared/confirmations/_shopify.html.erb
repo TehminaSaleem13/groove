@@ -1,0 +1,22 @@
+<% if result %>
+  <div class="row">
+    <div class="col-sm-12">
+      <h3>Nice Work! Your shopify connection is complete! </h3> 
+      <p>
+        When your server deployment is complete, an email will be sent to <i><%= email%> </i>providing you the login details for your account.
+      </p>
+    </div>
+  </div>
+<% else %>
+  <div class="row">
+    <div class="col-sm-12">
+      <h3>Nice Work! Your account setup is complete. </h3> 
+      <p>
+        When your server deployment is complete, an email will be sent to <i><%= email%> </i>providing you the login details for your account.
+      </p>
+      <p class="alert alert-danger">
+        There was an error authenticating with your Shopify account. Please login with the details in the email to resolve the connection issue.
+      </p>
+    </div>
+  </div>
+<% end %>
