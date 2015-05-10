@@ -64,6 +64,7 @@ class Subscription < ActiveRecord::Base
             # )
             CreateTenant.create_tenant self
             Apartment::Tenant.switch()
+
             transactions = Stripe::BalanceTransaction.all(:limit => 1)
             unless transactions.first.nil?
               self.stripe_transaction_identifier = transactions.first.id

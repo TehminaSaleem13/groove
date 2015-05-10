@@ -195,19 +195,22 @@
                       user_name: $('#user_name').val(),
                       password: $('#password').val(),
                       radio_subscription: radio_button_value,
-                      coupon_id: coupon_id
+                      coupon_id: coupon_id,
+                      shopify_shop_name: "<%= params[:shopify] %>"
                   }),
                   dataType: "json"
 
               }).error(function (response) {
                   $('#processing_alert_success').hide();
                   $('#customButton').show();
+                  $('#shopifyButton').show();
                   $('#processing_alert_error').show();
               }).success(function (response) {
                   if (!response.valid) {
 
                       $('#processing_alert_success').hide();
                       $('#customButton').show();
+                      $('#shopifyButton').show();
                       $('#processing_alert_error').show();
                   }
                   else {
@@ -216,6 +219,7 @@
                   }
               });
               $('#customButton').hide();
+              $('#shopifyButton').hide();
               $('#processing_alert_success').show();
               $('#processing_alert_error').hide();
             }
@@ -335,8 +339,6 @@
                     email: $('#email').val(),
                     allowRememberMe: false
                   });
-                } else {
-                  alert("invalid")
                 }
               }, 400);
             });

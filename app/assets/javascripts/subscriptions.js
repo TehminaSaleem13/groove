@@ -142,7 +142,6 @@ Subscription = {
 
   validate_tos : function() {
     var tos = $('#tos_checkbox').is(':checked');
-    alert(tos);
     var valid = false;
     if (tos == null || tos == "" || tos == false) {
         valid = false;
