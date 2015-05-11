@@ -1,6 +1,6 @@
 class DeleteFiles
 
-	def self.delete_pdfs
+	def self.delete_files
   	@files = []
   	Dir.chdir('public')
     Dir.chdir('pdfs')
