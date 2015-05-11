@@ -180,8 +180,14 @@ groovepacks_controllers.controller('csvDetailedModal', [ '$scope', 'store_data',
                 }
                 scope.csv.current = scope.csv.importer[scope.csv.importer.type]["settings"].map;
                 scope.csv.current.store_id = data["store_id"];
+                scope.csv.current.name = scope.csv.importer[scope.csv.importer.type]["settings"].name;
                 scope.csv.current.type = scope.csv.importer.type;
-
+                if (typeof scope.csv.current['import_action'] == "undefined") {
+                    scope.csv.current['import_action'] = 'create_new';
+                }
+                angular.forEach(scope.csv.importer[scope.csv.importer.type]["map_options"],function(opt) {
+                    opt.disabled = false;
+                });
                 scope.parse();
             });
         };

@@ -1,0 +1,57 @@
+class GroovS3
+  class << self
+    require 's3'
+    @bucket = nil
+
+    def create(tenant, file, content_type =  'application/octet-stream',  privacy = :public_read)
+      object = self.bucket.objects.build(tenant+'/'+file)
+      object.acl = privacy
+      object.content_type = content_type
+      object
+    end
+
+    def save(object, data)
+      object.content = data
+      save = object.save
+      save
+    end
+
+    #TODO: refactor csv, pdf, image into their own classes later
+
+    def create_csv(tenant, type, store_id, data)
+      object = self.create(tenant, "csv/#{type}.#{store_id}.csv", 'text/csv', :private)
+      self.save(object, data)
+    end
+
+    def find_csv(tenant, type, store_id)
+      begin
+        object = self.bucket.objects.find(tenant+"/csv/#{type}.#{store_id}.csv")
+        return object
+      rescue S3::Error::NoSuchKey => e
+        return nil
+      end
+    end
+
+    def create_pdf(tenant, file_name, data)
+      object = self.create(tenant, "pdf/#{file_name}", 'application/pdf', :public_read)
+      self.save(object, data)
+    end
+
+    def create_image(tenant, file_name, data, content_type)
+      object = self.create(tenant, "image/#{file_name}", content_type, :public_read)
+      self.save(object,data)
+    end
+
+
+    def bucket
+      if @bucket.nil?
+        service = S3::Service.new(
+            :access_key_id => ENV['S3_ACCESS_KEY_ID'],
+            :secret_access_key => ENV['S3_ACCESS_KEY_SECRET']
+        )
+        @bucket = service.buckets.find(ENV['S3_BUCKET_NAME'])
+      end
+      @bucket
+    end
+  end
+end

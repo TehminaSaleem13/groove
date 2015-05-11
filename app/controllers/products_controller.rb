@@ -1380,11 +1380,13 @@ class ProductsController < ApplicationController
       if !@product.nil? && !params[:product_image].nil?
         @image = ProductImage.new
 
-          csv_directory = "public/images"
-          file_name = Time.now.to_s+params[:product_image].original_filename
-          path = File.join(csv_directory, file_name )
-          File.open(path, "wb") { |f| f.write(params[:product_image].read) }
-          @image.image = "/images/"+file_name
+          #image_directory = "public/images"
+          current_tenant = Apartment::Tenant.current_tenant
+          file_name = Time.now.strftime('%d_%b_%Y_%I:%M_%p')+@product.id+params[:product_image].original_filename
+          GroovS3.create_image(current_tenant,file_name,params[:product_image].read,params[:product_image].content_type)
+          #path = File.join(image_directory, file_name )
+          #File.open(path, "wb") { |f| f.write(params[:product_image].read) }
+          @image.image = ENV['S3_BASE_URL']+'/'+current_tenant+'/image/'+file_name
         @image.caption = params[:caption] if !params[:caption].nil?
         @product.product_images << @image
         if !@product.save

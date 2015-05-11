@@ -44,7 +44,11 @@ class GeneratePackingSlipPdf
 
         #merge the packing-slips
         packing_slip_obj.merge(result,orientation,size,file_name)
-        generate_barcode.url = result['data']['merged_packing_slip_url']
+        base_file_name = File.basename(result['data']['destination'])
+        pdf_file = File.open(result['data']['destination'],'rb')
+        GroovS3.create_pdf(tenant_name,base_file_name,pdf_file.read)
+        pdf_file.close
+        generate_barcode.url = ENV['S3_BASE_URL']+'/'+tenant_name+'/pdf/'+base_file_name
         generate_barcode.status = 'completed'
         generate_barcode.save
       end

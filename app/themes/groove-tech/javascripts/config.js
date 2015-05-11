@@ -54,8 +54,8 @@ function($stateProvider, $urlRouterProvider,hotkeysProvider,cfpLoadingBarProvide
 
         .state('settings',{url: '/settings', templateUrl:'/assets/views/settings/base.html', controller:'settingsCtrl', abstract:true })
 
-        .state('settings.detailed_import', {url:'/detailed_import',templateUrl:'/assets/views/settings/csv_detailed.html',
-            controller:'csvDetailed'})
+        //.state('settings.detailed_import', {url:'/detailed_import',templateUrl:'/assets/views/settings/csv_detailed.html',
+        //    controller:'csvDetailed'})
 
         .state('settings.users',{url: '/users', templateUrl: '/assets/views/settings/users.html', controller: 'usersCtrl'})
         .state('settings.users.create',{url: '/create', controller: 'usersSingleCtrl'})

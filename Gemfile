@@ -90,4 +90,6 @@ gem 'ruby_odata'
 gem 'newrelic_rpm'
 gem 'activerecord-import', '= 0.3.1'
 gem 'shopify_api'
-gem "intercom-rails"
+gem 'intercom-rails'
+gem 's3'
+

@@ -116,11 +116,12 @@ class Order < ActiveRecord::Base
   def update_order_status
     result = true
     if true
+      hold_orders_due_to_inventory = GeneralSetting.first.hold_orders_due_to_inventory
       self.order_items.each do |order_item|
         product = Product.find_by_id(order_item.product_id)
         unless product.nil?
           if product.status == "new" or product.status == "inactive" or 
-            (GeneralSetting.first.hold_orders_due_to_inventory and (order_item.inv_status == 'unallocated' or order_item.inv_status == 'unprocessed'))
+            (hold_orders_due_to_inventory and (order_item.inv_status == 'unallocated' or order_item.inv_status == 'unprocessed'))
               result &= false
           end
         end
@@ -140,7 +141,8 @@ class Order < ActiveRecord::Base
 
       self.save
 
-      self.apply_and_update_predefined_tags
+      #isn't being used, shouldn't get called
+      #self.apply_and_update_predefined_tags
     end
   end
 

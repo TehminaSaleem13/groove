@@ -121,4 +121,10 @@ Groovepacks::Application.configure do
   ENV['HOST_NAME'] = 'localpacker.com'
 
   ENV['ONE_TIME_PAYMENT'] = '50000'
+
+  #S3 access details
+  ENV['S3_ACCESS_KEY_ID'] = 'AKIAI3A7VXS372GV6EQQ'
+  ENV['S3_ACCESS_KEY_SECRET'] = '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'
+  ENV['S3_BUCKET_NAME'] = 'groove-dev'
+  ENV['S3_BASE_URL'] = 'https://s3-ap-southeast-1.amazonaws.com/groove-dev'
 end

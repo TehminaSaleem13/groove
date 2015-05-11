@@ -3,7 +3,7 @@ module Groovepacker
     module Importers
       module CSV
         class ProductsImporter
-          def import(params,final_record,mapping)
+          def import(params,final_record,mapping, import_action)
             result = Hash.new
             result['status'] = true
             result['messages'] = []
@@ -13,8 +13,15 @@ module Groovepacker
             duplicate_file = 0
             duplicate_db = 0
             duplicate_action = 'skip'
-            if !mapping['sku'].nil? && !mapping['sku'][:action].nil?
-              duplicate_action = mapping['sku'][:action]
+            new_action = 'skip'
+            unless import_action.nil?
+              if ['update_existing', 'create_update'].include?(import_action)
+                duplicate_action = 'overwrite'
+              end
+
+              if ['create_new', 'create_update'].include?(import_action)
+                new_action = 'create'
+              end
             end
             product_import = CsvProductImport.find_by_store_id(params[:store_id])
             if product_import.nil?
@@ -46,6 +53,16 @@ module Groovepacker
                     sec_skus.each do |sec_single_sku|
                       unless single_row_skus.include? sec_single_sku
                         single_row_skus << sec_single_sku
+                      end
+                    end
+                  end
+                end
+                if !mapping['tertiary_sku'].nil? && mapping['tertiary_sku'][:position] >= 0
+                  unless single_row[mapping['tertiary_sku'][:position]].nil?
+                    tert_skus = single_row[mapping['tertiary_sku'][:position]].split(',')
+                    tert_skus.each do |tert_single_sku|
+                      unless single_row_skus.include? tert_single_sku
+                        single_row_skus << tert_single_sku
                       end
                     end
                   end
@@ -82,6 +99,26 @@ module Groovepacker
                       barcodes.each do |single_barcode|
                         all_barcodes << single_barcode
                         usable_record[:barcodes] << single_barcode
+                      end
+                    end
+                  end
+
+                  if !mapping['secondary_barcode'].nil? && mapping['secondary_barcode'][:position] >= 0
+                    unless single_row[mapping['secondary_barcode'][:position]].nil?
+                      secondary_barcodes = single_row[mapping['secondary_barcode'][:position]].split(',')
+                      secondary_barcodes.each do |single_secondary_barcode|
+                        all_barcodes << single_secondary_barcode
+                        usable_record[:barcodes] << single_secondary_barcode
+                      end
+                    end
+                  end
+
+                  if !mapping['tertiary_barcode'].nil? && mapping['tertiary_barcode'][:position] >= 0
+                    unless single_row[mapping['tertiary_barcode'][:position]].nil?
+                      tertiary_barcodes = single_row[mapping['tertiary_barcode'][:position]].split(',')
+                      tertiary_barcodes.each do |single_tertiary_barcode|
+                        all_barcodes << single_tertiary_barcode
+                        usable_record[:barcodes] << single_tertiary_barcode
                       end
                     end
                   end
@@ -189,7 +226,7 @@ module Groovepacker
                 end
               end
 
-              if duplicate_found === false
+              if duplicate_found === false && new_action == 'create'
                 single_import = Product.new(:name=> record[:name],:product_type => record[:product_type])
                 single_import.store_id = params[:store_id]
                 single_import.store_product_id = record[:store_product_id]
@@ -209,27 +246,32 @@ module Groovepacker
                 single_product_duplicate_sku = ProductSku.find_by_sku(duplicate_found)
                 duplicate_product = Product.find_by_id(single_product_duplicate_sku.product_id)
                 duplicate_product.store_id = params[:store_id]
-                if !mapping['product_name'].nil? && mapping['product_name'][:action] == 'overwrite'
+                if !mapping['product_name'].nil? #&& mapping['product_name'][:action] == 'overwrite'
                   duplicate_product.name = record[:name]
                 end
-                if !mapping['product_type'].nil? && mapping['product_type'][:action] == 'overwrite'
+                if !mapping['product_type'].nil? #&& mapping['product_type'][:action] == 'overwrite'
                   duplicate_product.product_type = record[:product_type]
+                end
+                if record[:skus].length > 0 && record[:barcodes].length > 0
+                  duplicate_product.status = 'active'
+                else
+                  duplicate_product.status = 'new'
                 end
                 duplicate_product.save
 
                 if (!mapping['inv_wh1'].nil? || !mapping['location_primary'].nil? || !mapping['location_secondary'].nil? || !mapping['location_tertiary'].nil?)
                   default_inventory = ProductInventoryWarehouses.find_or_create_by_inventory_warehouse_id_and_product_id(default_inventory_warehouse_id,duplicate_product.id)
                   updatable_record = record[:inventory].first
-                  if !mapping['inv_wh1'].nil? && mapping['inv_wh1'][:action] =='overwrite'
+                  if !mapping['inv_wh1'].nil? #&& mapping['inv_wh1'][:action] =='overwrite'
                     default_inventory.available_inv = updatable_record[:available_inv]
                   end
-                  if !mapping['location_primary'].nil? && mapping['location_primary'][:action] =='overwrite'
+                  if !mapping['location_primary'].nil? #&& mapping['location_primary'][:action] =='overwrite'
                     default_inventory.location_primary = updatable_record[:location_primary]
                   end
-                  if !mapping['location_secondary'].nil? && mapping['location_secondary'][:action] =='overwrite'
+                  if !mapping['location_secondary'].nil? #&& mapping['location_secondary'][:action] =='overwrite'
                     default_inventory.location_secondary = updatable_record[:location_secondary]
                   end
-                  if !mapping['location_tertiary'].nil? && mapping['location_tertiary'][:action] =='overwrite'
+                  if !mapping['location_tertiary'].nil? #&& mapping['location_tertiary'][:action] =='overwrite'
                     default_inventory.location_tertiary = updatable_record[:location_tertiary]
                   end
                   default_inventory.save
@@ -237,11 +279,11 @@ module Groovepacker
 
 
                 if !mapping['category_name'].nil? && record[:cats].length > 0
-                  if mapping['category_name'][:action] == 'overwrite'
-                    ProductCat.where(product_id: duplicate_product.id).delete_all
-                  end
+                  #if mapping['category_name'][:action] == 'overwrite'
+                  #  ProductCat.where(product_id: duplicate_product.id).delete_all
+                  #end
 
-                  if mapping['category_name'][:action] == 'add' || mapping['category_name'][:action] == 'overwrite'
+                  #if mapping['category_name'][:action] == 'add' || mapping['category_name'][:action] == 'overwrite'
                     all_found_cats = ProductCat.where(product_id: duplicate_product.id)
                     to_not_add_cats = []
                     all_found_cats.each do |single_found_dup_cat|
@@ -257,13 +299,13 @@ module Groovepacker
                         import_product_cats << to_add_cat
                       end
                     end
-                  end
+                  #end
                 end
                 if !mapping['barcode'].nil? && record[:barcodes].length > 0
-                  if mapping['barcode'][:action] == 'overwrite'
-                    ProductBarcode.where(product_id: duplicate_product.id).delete_all
-                  end
-                  if mapping['barcode'][:action] == 'add' || mapping['barcode'][:action] == 'overwrite'
+                  #if mapping['barcode'][:action] == 'overwrite'
+                  #  ProductBarcode.where(product_id: duplicate_product.id).delete_all
+                  #end
+                  #if mapping['barcode'][:action] == 'add' || mapping['barcode'][:action] == 'overwrite'
                     all_found_barcodes = ProductBarcode.where(product_id: duplicate_product.id)
                     to_not_add_barcodes = []
                     all_found_barcodes.each do |single_found_dup_barcode|
@@ -280,14 +322,14 @@ module Groovepacker
                         import_product_barcodes << to_add_barcode
                       end
                     end
-                  end
+                  #end
                 end
 
                 if !mapping['sku'].nil? && record[:skus].length > 0
-                  if mapping['sku'][:action] == 'overwrite'
-                    ProductSku.where(product_id: duplicate_product.id).delete_all
-                  end
-                  if mapping['sku'][:action] == 'add' || mapping['sku'][:action] == 'overwrite'
+                  #if mapping['sku'][:action] == 'overwrite'
+                  #  ProductSku.where(product_id: duplicate_product.id).delete_all
+                  #end
+                  #if mapping['sku'][:action] == 'add' || mapping['sku'][:action] == 'overwrite'
                     all_found_skus = ProductSku.where(product_id: duplicate_product.id)
                     to_not_add_skus = []
                     all_found_skus.each do |single_found_dup_sku|
@@ -304,14 +346,14 @@ module Groovepacker
                         import_product_skus << to_add_sku
                       end
                     end
-                  end
+                  #end
                 end
 
                 if !mapping['product_images'].nil? && record[:images].length > 0
-                  if mapping['product_images'][:action] == 'overwrite'
-                    ProductImage.where(product_id: duplicate_product.id).delete_all
-                  end
-                  if mapping['product_images'][:action] == 'add' || mapping['product_images'][:action] == 'overwrite'
+                  #if mapping['product_images'][:action] == 'overwrite'
+                  #  ProductImage.where(product_id: duplicate_product.id).delete_all
+                  #end
+                  #if mapping['product_images'][:action] == 'add' || mapping['product_images'][:action] == 'overwrite'
                     all_found_images = ProductImage.where(product_id: duplicate_product.id)
                     to_not_add_images = []
                     all_found_images.each do |single_found_dup_image|
@@ -328,7 +370,7 @@ module Groovepacker
                         import_product_images << to_add_image
                       end
                     end
-                  end
+                  #end
                 end
 
               end

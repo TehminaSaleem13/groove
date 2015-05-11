@@ -87,6 +87,7 @@ class Product < ActiveRecord::Base
 
   def update_product_status (force_from_inactive_state = false)
   	#puts "Updating product status"
+    original_status = self.status
   	if self.status != 'inactive' || force_from_inactive_state
 	  	result = true
 
@@ -117,28 +118,30 @@ class Product < ActiveRecord::Base
 	  		self.save
 	  	end
 
-	  	# for non kit products, update all kits product statuses where the
-	  	# current product is an item of the kit
-	  	if self.is_kit == 0
-	  		@kit_products  = ProductKitSkus.where(:option_product_id => self.id)
-	  		result_kit = true
-	  		@kit_products.each do |kit_product|
-	  			if kit_product.product.status != 'inactive'
-		  			kit_product.product.update_product_status
-	  			end
-	  		end
-	  	end
+      unless self.status == original_status
+        # for non kit products, update all kits product statuses where the
+        # current product is an item of the kit
+        if self.is_kit == 0
+          @kit_products  = ProductKitSkus.where(:option_product_id => self.id)
+          result_kit = true
+          @kit_products.each do |kit_product|
+            if kit_product.product.status != 'inactive'
+              kit_product.product.update_product_status
+            end
+          end
+        end
 
-	  	#update order items status from onhold to awaiting
-	  	@order_items = OrderItem.where(:product_id=>self.id)
-	  	@order_items.each do |item|
-	  		item.order.update_order_status unless item.order.nil?
-	  	end
+        #update order items status from onhold to awaiting
+        @order_items = OrderItem.where(:product_id=>self.id)
+        @order_items.each do |item|
+          item.order.update_order_status unless item.order.nil? or !['awaiting','onhold'].include?(item.order.status)
+        end
+      end
 	else
 	  	#update order items status from onhold to awaiting
 	  	@order_items = OrderItem.where(:product_id=>self.id)
 	  	@order_items.each do |item|
-	  		item.order.update_order_status unless item.order.nil?
+	  		item.order.update_order_status unless item.order.nil? or !['awaiting','onhold'].include?(item.order.status)
 	  	end
 	end
 	result

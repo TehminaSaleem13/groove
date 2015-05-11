@@ -4,18 +4,22 @@ class ImportCsv
     result['messages'] = []
     begin
       Apartment::Tenant.switch(tenant)
-      csv_directory = 'uploads/csv'
-      file_path = File.join(csv_directory, "#{tenant}.#{params[:store_id]}.#{params[:type]}.csv")
-      if File.exists? file_path
+      #download CSV and save
+      csv_file = GroovS3.find_csv(tenant,params[:type],params[:store_id])
+      if csv_file.nil?
+        result['messages'].push("No file present to import #{params[:type]}")
+      else
+        #csv_directory = 'uploads/csv'
+        #file_path = File.join(csv_directory, "#{tenant}.#{params[:store_id]}.#{params[:type]}.csv")
         final_record = []
         if params[:fix_width] == 1
-          initial_split = IO.readlines(file_path)
+          initial_split = csv_file.content.split(/\n/).reject(&:empty?)
           initial_split.each do |single|
             final_record.push(single.scan(/.{1,#{params[:fixed_width]}}/m))
           end
         else
           require 'csv'
-          CSV.foreach(file_path,:col_sep => params[:sep], :quote_char => params[:delimiter] ,:encoding => 'windows-1251:utf-8') do |single|
+          CSV.parse(csv_file.content,:col_sep => params[:sep], :quote_char => params[:delimiter] ,:encoding => 'windows-1251:utf-8') do |single|
             final_record.push(single)
           end
         end
@@ -35,17 +39,15 @@ class ImportCsv
           end
         end
 
-
         if params[:type] == 'order'
           result = Groovepacker::Store::Importers::CSV::OrdersImporter.new.import_old(params,final_record,mapping)
           #result = Groovepacker::Store::Importers::CSV::OrdersImporter.new.import(params,final_record,mapping)
         else
           #result = Groovepacker::Store::Importers::CSV::ProductsImporter.new.import_old(params,final_record,mapping)
-          result = Groovepacker::Store::Importers::CSV::ProductsImporter.new.import(params,final_record,mapping)
+          result = Groovepacker::Store::Importers::CSV::ProductsImporter.new.import(params,final_record,mapping, params[:import_action])
         end
-        File.delete(file_path)
-      else
-        result['messages'].push("No file present to import #{params[:type]}")
+        #File.delete(file_path)
+
       end
     rescue Exception => e
       raise e

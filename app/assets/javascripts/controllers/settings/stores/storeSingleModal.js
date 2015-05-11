@@ -177,16 +177,28 @@ function(scope, store_data, $window, $sce, $interval, $state, $stateParams, $mod
                                 $modalInstance.close("csv-modal-closed");
 
                             } else {
-                                var csv_modal = $modal.open({
-                                    templateUrl: '/assets/views/modals/settings/stores/csv_import.html',
-                                    controller: 'csvSingleModal',
-                                    size: 'lg',
-                                    resolve: {
-                                        store_data: function () {
-                                            return scope.stores;
+                                var csv_modal;
+                                if(scope.stores.single.type == 'order') {
+                                    csv_modal = $modal.open({
+                                        templateUrl: '/assets/views/modals/settings/stores/csv_import.html',
+                                        controller: 'csvSingleModal',
+                                        size: 'lg',
+                                        resolve: {
+                                            store_data: function () {
+                                                return scope.stores;
+                                            }
                                         }
-                                    }
-                                });
+                                    });
+                                } else {
+                                    csv_modal = $modal.open({
+                                        templateUrl: '/assets/views/modals/settings/stores/csv_import_detailed.html',
+                                        controller: 'csvDetailedModal',
+                                        size:'lg',
+                                        resolve: {
+                                            store_data: function(){return scope.stores;}
+                                        }
+                                    });
+                                }
                                 csv_modal.result.finally(function () {
                                     $modalInstance.close("csv-modal-closed");
                                 });

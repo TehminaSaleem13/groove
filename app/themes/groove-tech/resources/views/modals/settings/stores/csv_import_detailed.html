@@ -63,6 +63,26 @@
                             Text delimiter <input type="text" class="form-control input-style" ng-model="csv.current.delimiter" ng-change="parse()" />
                         </div>
                     </div>
+                    <legend ng-show="csv.importer.type == 'product'">Product Import options</legend>
+                    <div class="form-group" ng-if="csv.importer.type == 'product'">
+                        <div class="controls col-md-8">
+                            <label class="radio inline">
+                                <input type="radio" ng-model="csv.current.import_action" value="create_new" /> Create New Product Records <span class="icon-large glyphicon glyphicon-info-sign"></span>
+                            </label>
+                            <label class="radio inline">
+                                <input type="radio" ng-model="csv.current.import_action" value="update_existing" /> Add or Update Existing Product Records <span class="icon-large glyphicon glyphicon-info-sign"></span>
+                            </label>
+                            <label class="radio inline">
+                                <input type="radio" ng-model="csv.current.import_action" value="create_update" /> Create and Update Product Records <span class="icon-large glyphicon glyphicon-info-sign"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <legend >Csv Map Name</legend>
+                    <div class="form-group" >
+                        <div class="controls col-md-8">
+                            Name <input type="text" class="form-control input-style" ng-model="csv.current.name" />
+                        </div>
+                    </div>
                     </div>
                 </div>
             <div class="row">
@@ -85,26 +105,12 @@
                                         </button>
 
 
-                                        <ul class="dropdown-menu" role="menu">
+                                        <ul class="dropdown-menu" role="menu" ng-show="csv.current.map[column].value!= 'sku'">
                                             <li ng-repeat="opt in csv.importer[csv.importer.type]['map_options']" ng-class="{disabled:opt.disabled}">
                                                 <a dropdown-toggle ng-click="column_map(column,opt)">{{opt.name}}</a>
                                             </li>
                                         </ul>
 
-                                    </div>
-                                    <br/>
-                                    <div class="btn-group btn-group-sm" dropdown>
-                                        <button class="groove-button dropdown-toggle">
-                                            {{csv.current.map[column].action}}
-                                            <span class="caret"></span>
-                                        </button>
-
-
-                                        <ul class="dropdown-menu" role="menu">
-                                            <li><a dropdown-toggle ng-click="column_action(column,'skip')">Skip</a></li>
-                                            <li ng-if="csv.current.map[column].value!=csv.importer.default_map.value"><a dropdown-toggle ng-click="column_action(column,'overwrite')">Overwrite</a></li>
-                                            <li ng-if="csv.current.map[column].value=='barcode' || csv.current.map[column].value=='category_name' || csv.current.map[column].value=='product_images' "><a dropdown-toggle ng-click="column_action(column,'add')">Add New</a></li>
-                                        </ul>
                                     </div>
                                 </th>
                             </tr>

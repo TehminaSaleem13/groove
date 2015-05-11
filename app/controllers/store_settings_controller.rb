@@ -178,12 +178,18 @@ class StoreSettingsController < ApplicationController
               current_tenant = Apartment::Tenant.current_tenant
               unless params[:orderfile].nil?
                 path = File.join(csv_directory, "#{current_tenant}.#{@store.id}.order.csv")
-                File.open(path, "wb") { |f| f.write(params[:orderfile].read) }
+                order_file_data = params[:orderfile].read
+                File.open(path, "wb") { |f| f.write(order_file_data) }
+
+                GroovS3.create_csv(current_tenant, 'order', @store.id, order_file_data)
                 @result['csv_import'] = true
               end
               unless params[:productfile].nil?
                 path = File.join(csv_directory, "#{current_tenant}.#{@store.id}.product.csv")
-                File.open(path, "wb") { |f| f.write(params[:productfile].read) }
+                product_file_data = params[:productfile].read
+                File.open(path, "wb") { |f| f.write(product_file_data) }
+
+                GroovS3.create_csv(current_tenant, 'product', @store.id, product_file_data)
                 @result['csv_import'] = true
               end
             end
@@ -433,13 +439,15 @@ class StoreSettingsController < ApplicationController
               # read 4 kb data
               order_file_data = IO.read(order_file_path,40960)
               @result['order']['data'] = order_file_data
+              File.delete(order_file_path)
             end
           end
           if ['both','product'].include?(params[:type])
             @result['product'] = Hash.new
             @result['product']['map_options'] = [
                 { value:'sku' , name:'SKU'},
-                {value:'secondary_sku', name:'Secondary Sku'},
+                { value:'secondary_sku', name:'Secondary Sku'},
+                { value:'tertiary_sku', name:'Tertiary Sku'},
                 { value: 'product_name', name: 'Product Name'},
                 { value: 'category_name', name: 'Category Name'},
                 { value: 'inv_wh1', name: 'Inventory Count'},
@@ -449,6 +457,7 @@ class StoreSettingsController < ApplicationController
                 { value: 'location_tertiary', name: 'Location Tertiary'},
                 { value: 'barcode', name: 'UPC/Barcode'},
                 { value: 'secondary_barcode', name: 'Secondary Barcode'},
+                { value: 'tertiary_barcode', name: 'Tertiary Barcode'},
                 { value: 'product_weight', name: 'Product Weight'}
             ]
             if csv_map.product_csv_map.nil?
@@ -461,6 +470,7 @@ class StoreSettingsController < ApplicationController
             if File.exists? product_file_path
               product_file_data = IO.read(product_file_path,40960)
               @result["product"]["data"] = product_file_data
+              File.delete(product_file_path)
             end
           end
         else
@@ -543,6 +553,7 @@ class StoreSettingsController < ApplicationController
           :delimiter=> params[:delimiter],
           :fix_width => params[:fix_width],
           :fixed_width => params[:fixed_width],
+          :import_action => params[:import_action],
           :map => params[:map]
       }
       map_data.save
@@ -567,6 +578,7 @@ class StoreSettingsController < ApplicationController
       data[:rows] = params[:rows]
       data[:map] = params[:map]
       data[:store_id] = params[:store_id]
+      data[:import_action] = params[:import_action]
 
       import_csv = ImportCsv.new
       delayed_job = import_csv.delay(:run_at =>1.seconds.from_now).import Apartment::Tenant.current_tenant, data

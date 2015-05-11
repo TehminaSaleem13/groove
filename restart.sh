@@ -48,11 +48,12 @@ if [ ${ENV} == 'staging' ]; then
     NUM_JOBS=1
 fi
 
+#RAILS_ENV=${ENV} script/delayed_job stop
+
 sudo su groovepacker <<EOF
 source /usr/local/rvm/scripts/rvm
 
 cd ~/groove
-RAILS_ENV=${ENV} script/delayed_job stop
 
 git remote set-url origin git@bitbucket.org:jonnyclean/groovepacker.git
 
@@ -67,9 +68,9 @@ RAILS_ENV=${ENV} rake groove:upgrade
 RAILS_ENV=${ENV} rake assets:clean
 RAILS_ENV=${ENV} rake assets:precompile
 RAILS_ENV=${ENV} rake fs:delete_pdfs
-RAILS_ENV=${ENV} script/delayed_job -n ${NUM_JOBS} start
 
 exit
 EOF
+#RAILS_ENV=${ENV} script/delayed_job -n ${NUM_JOBS} start
 
 sudo service nginx start
