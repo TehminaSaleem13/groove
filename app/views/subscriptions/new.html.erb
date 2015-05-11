@@ -12,22 +12,6 @@
   <div>
     <form action="" method="POST" class="form-vertical" name="myForm" id="my_form">
       <fieldset>
-        <% unless params[:shopify].nil? %>
-          <div class="form-group">
-            <div class="checkbox">
-              <label>
-                <input type="checkbox" id="new_account" checked> New Account?
-              </label>
-            </div>
-            <div>
-              <label>
-                Already have an account? 
-                <%= link_to 'Login here', subscriptions_login_path(shopify: params[:shopify])%>
-              </label>
-            </div>
-          </div>
-        <% end %>
-
         <div class="form-group">
           <input type="hidden" id="plan_id" value="<%= params[:plan_id] %>"/>
           <label class="control-label">Choose your site address*</label>
@@ -44,7 +28,8 @@
 
         <div class="form-group">
           <label for="email" class="control-label">Email*</label>
-          <input type="email" id="email" class="form-control"/>
+          <input type="email" id="email" class="form-control" 
+            value="<%= params[:email]%>"/>
 
           <div class="form-group error" style="color: red;">
             <div id="error-email-block" class="help-inline"></div>
@@ -100,54 +85,58 @@
           <iframe src="/assets/views/termsofservicetos.html" width="100%" height="200px"></iframe>
         </div>
         <hr width="95%">
-        <div><h4><center>Risk Free 30-day Evaluation</center></h4></div>
-        <div style ="padding-left:12px;font-size: 14px;">
-          <label>If you are not completely satisfied, please let us know at any time during the evaluation period and all charges will be credited in full.</label>
-        </div>
+        <% if params[:shopify].nil? %>
+          <div><h4><center>Risk Free 30-day Evaluation</center></h4></div>
+          <div style ="padding-left:12px;font-size: 14px;">
+            <label>If you are not completely satisfied, please let us know at any time during the evaluation period and all charges will be credited in full.</label>
+          </div>
 
-        <div style ="padding-left:23px;"><h4>Please choose how you would like to be billed:</h4></div>
-        <div class="form-group" style="padding-top: 2px;margin-top: -5px;">
-          <div>
-            <label class="radio" style="margin-left: -5px;"><input type="radio" id="radio_subscription1" name="radio_subscription" value="monthly" checked/>Monthly:($<%=@monthly_amount/100%>.00)</label>
-            <div style ="padding-left:23px;width: 97%;font-size: 14px; margin-top: -10px;">
-              <label id="monthly_billing_label">The first monthly billing will be charged after 30 days. A one time initialization charge of $500 is paid today on deployment.</label>
-              <label id="monthly_discount_label"></label>
+          <div style ="padding-left:23px;"><h4>Please choose how you would like to be billed:</h4></div>
+          <div class="form-group" style="padding-top: 2px;margin-top: -5px;">
+            <div>
+              <label class="radio" style="margin-left: -5px;"><input type="radio" id="radio_subscription1" name="radio_subscription" value="monthly" checked/>Monthly:($<%=@monthly_amount/100%>.00)</label>
+              <div style ="padding-left:23px;width: 97%;font-size: 14px; margin-top: -10px;">
+                <label id="monthly_billing_label">The first monthly billing will be charged after 30 days. A one time initialization charge of $500 is paid today on deployment.</label>
+                <label id="monthly_discount_label"></label>
+              </div>
+            </div>
+            <div style="padding-top: 5px;">
+              <label class="radio" style="margin-left: -5px;"><input type="radio" id="radio_subscription2" name="radio_subscription" value="annually" style="-webkit-appearance:block; background:green;"/>Annually:(<strike>$<%=@monthly_amount*12/100%>.00</strike>)($<%=@annually_amount/100%>.00) Save 10%</label>
+              <div style ="padding-left:23px;width: 85%;font-size: 14px; margin-top: -10px;">
+                <label id="annual_billing_label">The first annual billing will be charged after 30 days at a 10% discount. A one time initialization charge of $500 is paid today on deployment.</label>
+                <label id="annual_discount_label"></label>
+              </div>
             </div>
           </div>
-          <div style="padding-top: 5px;">
-            <label class="radio" style="margin-left: -5px;"><input type="radio" id="radio_subscription2" name="radio_subscription" value="annually" style="-webkit-appearance:block; background:green;"/>Annually:(<strike>$<%=@monthly_amount*12/100%>.00</strike>)($<%=@annually_amount/100%>.00) Save 10%</label>
-            <div style ="padding-left:23px;width: 85%;font-size: 14px; margin-top: -10px;">
-              <label id="annual_billing_label">The first annual billing will be charged after 30 days at a 10% discount. A one time initialization charge of $500 is paid today on deployment.</label>
-              <label id="annual_discount_label"></label>
+
+          <div class="form-group">
+            <label for="coupon_id" class="control-label">Promotional Code</label>
+            <div class="input-group">
+              <input type="text" id="coupon_id" class="form-control" value="<%= params[:coupon_id] %>"/>
+              <span class="input-group-btn">
+                <button id="apply" class="btn btn-primary">Apply</button>
+              </span>
+            </div>
+            <div class="form-group error">
+              <div id="success-coupon-block" class="help-inline" style="color: green;"></div>
+              <div id="error-coupon-block" class="help-inline" style="color: red;"></div>
             </div>
           </div>
-        </div>
 
-        <div class="form-group">
-          <label for="coupon_id" class="control-label">Promotional Code</label>
-          <div class="input-group">
-            <input type="text" id="coupon_id" class="form-control" value="<%= params[:coupon_id] %>"/>
-            <span class="input-group-btn">
-              <button id="apply" class="btn btn-primary">Apply</button>
-            </span>
-          </div>
-          <div class="form-group error">
-            <div id="success-coupon-block" class="help-inline" style="color: green;"></div>
-            <div id="error-coupon-block" class="help-inline" style="color: red;"></div>
-          </div>
-        </div>
+          <script src="https://checkout.stripe.com/checkout.js"></script>
+          <div class="">
+            <button id="customButton" class="btn btn-primary" style="margin-bottom: 15px;">Purchase</button>
 
-        <script src="https://checkout.stripe.com/checkout.js"></script>
-        <div class="">
-          <button id="customButton" class="btn btn-primary" style="margin-bottom: 15px;">Purchase</button>
-
-          <div class="alert alert-success" id="processing_alert_success" style="display:none;">
-            <div><i class="glyphicon glyphicon-refresh spin" style="font-size: 12px;"></i> Your subscription is being processed.</div>
+            <div class="alert alert-success" id="processing_alert_success" style="display:none;">
+              <div><i class="glyphicon glyphicon-refresh spin" style="font-size: 12px;"></i> Your subscription is being processed.</div>
+            </div>
+            <div class="alert alert-error" id="processing_alert_error" style="display:none;">
+              <p>Your subscription could not be processed. Please try again.</p>
+            </div>
           </div>
-          <div class="alert alert-error" id="processing_alert_error" style="display:none;">
-            <p>Your subscription could not be processed. Please try again.</p>
-          </div>
-        </div>
+        <% else %>
+          <%= render 'shopify_payment_form' %>
+        <% end %>
       </fieldset>
     </form>
       <script>
@@ -159,122 +148,96 @@
               password_conf: false,
               tos: false
           };
-          var radio_button_value=null;
-          var amount=0;
+
+          var radio_button_value = null;
+          var amount = 0;
           var plan_id = null;
           var coupon_id = null;
           var one_time_payment = $('#one_time_payment').val();
           var show_coupon_block = false;
 
           $('html').click(function () {
-              $('#tos_iframe').hide();
-              $('#privacy_iframe').hide();
+            $('#tos_iframe').hide();
+            $('#privacy_iframe').hide();
           });
           $('#tos_link').click(function (event) {
-              event.preventDefault();
-              event.stopPropagation();
-              $('#privacy_iframe').hide();
-              $('#tos_iframe').show();
+            event.preventDefault();
+            event.stopPropagation();
+            $('#privacy_iframe').hide();
+            $('#tos_iframe').show();
           });
           $('#privacy_link').click(function (event) {
-              event.preventDefault();
-              event.stopPropagation();
-              $('#tos_iframe').hide();
-              $('#privacy_iframe').show();
+            event.preventDefault();
+            event.stopPropagation();
+            $('#tos_iframe').hide();
+            $('#privacy_iframe').show();
           });
+          $('#shopifyButton').on('click', function(event) {
+              event.preventDefault();
+              plan_id = $('#plan_id').val();
+              open_handler(plan_id, "shopify");
+          })
 
           var handler = StripeCheckout.configure({
-              key: $('#stripe_public_key').val(),
-              image: '/assets/images/apple-touch-icon.png',
-              token: function (token) {
-                  $.ajax({
-                      type: "POST",
-                      contentType: "application/json; charset=utf-8",
-                      url: "/subscriptions/confirm_payment",
-                      data: JSON.stringify({
-                          tenant_name: $('#tenant_name').val(),
-                          stripe_user_token: token.id,
-                          email: $('#email').val(),
-                          amount: amount,
-                          plan_id: plan_id,
-                          user_name: $('#user_name').val(),
-                          password: $('#password').val(),
-                          radio_subscription: radio_button_value,
-                          coupon_id: coupon_id
-                      }),
-                      dataType: "json"
+            key: $('#stripe_public_key').val(),
+            image: '/assets/images/apple-touch-icon.png',
+            token: function (token) {
+              $.ajax({
+                  type: "POST",
+                  contentType: "application/json; charset=utf-8",
+                  url: "/subscriptions/confirm_payment",
+                  data: JSON.stringify({
+                      tenant_name: $('#tenant_name').val(),
+                      stripe_user_token: token.id,
+                      email: $('#email').val(),
+                      amount: amount,
+                      plan_id: plan_id,
+                      user_name: $('#user_name').val(),
+                      password: $('#password').val(),
+                      radio_subscription: radio_button_value,
+                      coupon_id: coupon_id,
+                      shopify_shop_name: "<%= params[:shopify] %>"
+                  }),
+                  dataType: "json"
 
-                  }).error(function (response) {
+              }).error(function (response) {
+                  $('#processing_alert_success').hide();
+                  $('#customButton').show();
+                  $('#shopifyButton').show();
+                  $('#processing_alert_error').show();
+              }).success(function (response) {
+                  if (!response.valid) {
+
                       $('#processing_alert_success').hide();
                       $('#customButton').show();
+                      $('#shopifyButton').show();
                       $('#processing_alert_error').show();
-                  }).success(function (response) {
-                      if (!response.valid) {
-
-                          $('#processing_alert_success').hide();
-                          $('#customButton').show();
-                          $('#processing_alert_error').show();
-                      }
-                      else {
-                          window.location.href =
-                                  response.redirect_url
-                      }
-                  });
-                  $('#customButton').hide();
-                  $('#processing_alert_success').show();
-                  $('#processing_alert_error').hide();
-              }
-          });
-
-          $('#tenant_name').blur(function () {
-              var tenant_name = document.forms["myForm"]["tenant_name"].value;
-              tenant_name = tenant_name.toLowerCase();
-              document.forms["myForm"]["tenant_name"].value = tenant_name;
-              if (tenant_name == null || tenant_name == "" || tenant_name.length < 4) {
-                  valid.tenant_name = false;
-                  $('#error-tenant-block').html("Site name must be at least 4 characters long");
-                  //this.focus();
-              }
-              else {
-                  $.ajax({
-                      type: "GET",
-                      contentType: "application/json; charset=utf-8",
-                      url: "/subscriptions/valid_tenant_name",
-                      data: {tenant_name: $('#tenant_name').val()},
-                      dataType: "json"
-
-                  }).error(function (response) {
-
-                  }).success(function (response) {
-                      if (!response.valid) {
-                          $('#error-tenant-block').html(response.message);
-                          valid.tenant_name = false;
-                          //$('#tenant_name').focus();
-                      }
-                      else {
-                          $('#error-tenant-block').html("");
-                          valid.tenant_name = true;
-                          //email.focus();
-                      }
-                  });
-              }
+                  }
+                  else {
+                      window.location.href =
+                              response.redirect_url
+                  }
+              });
+              $('#customButton').hide();
+              $('#shopifyButton').hide();
+              $('#processing_alert_success').show();
+              $('#processing_alert_error').hide();
+            }
           });
 
           $(document).ready(function() {
-            console.log("ready");
             show_coupon_block = false;
             checkOneTimePayment();
           });
           
-          document.getElementById('apply').addEventListener('click',function(a) {
+          $('#apply').on('click',function(a) {
             a.preventDefault();
-            console.log('blur......');
             show_coupon_block = true;
             checkOneTimePayment();
           });
           
           var checkOneTimePayment = function() {
-            var coupon = document.forms["myForm"]["coupon_id"].value;
+            var coupon = $('#coupon_id').val();
             if (coupon != '') {
               $.ajax({
                 type: "GET",
@@ -318,110 +281,69 @@
             };
           };
 
+          $('#tenant_name').blur(function () {
+            Subscription.validate_tenant_name();
+          });
+
           $('#email').blur(function () {
-              var email = document.forms["myForm"]["email"].value;
-              var atpos = email.indexOf("@");
-              var dotpos = email.lastIndexOf(".");
-              if (email == null || email == "") {
-                  valid.email = false;
-                  if (valid.tenant_name) {
-                      $('#error-email-block').html("email must be filled out");
-                      //this.focus();
-                  }
-
-              }
-              else if (atpos < 1 || dotpos < atpos + 2 || dotpos + 2 >= email.length) {
-                  valid.email = false;
-                  $('#error-email-block').html("email is not valid");
-              } else {
-                  $.ajax({
-                      type: "GET",
-                      contentType: "application/json; charset=utf-8",
-                      url: "/subscriptions/valid_email",
-                      data: {email: $('#email').val()},
-                      dataType: "json"
-
-                  }).error(function (response) {
-
-                  }).success(function (response) {
-                      if (!response.valid) {
-                          $('#error-email-block').html($('#email').val() + " email already exists");
-                          valid.email = false;
-                          //$('#email').focus();
-                      }
-                      else {
-                          $('#error-email-block').html("");
-                          valid.email = true;
-                          //user_name.focus();
-                      }
-                  });
-              }
+            Subscription.validate_email();
           });
 
           $('#user_name').blur(function () {
-              var user_name = document.forms["myForm"]["user_name"].value;
-              if (user_name == null || user_name == "") {
-                  valid.user_name = false;
-                  if (valid.email) {
-                      $('#error-username-block').html("username must be filled out");
-                      //this.focus();
-                  }
-              } else {
-                  $('#error-username-block').html("");
-                  valid.user_name = true;
-                  //password.focus();
-              }
+            Subscription.validate_username();
           });
-          $('#password').blur(function () {
-              var password = document.forms["myForm"]["password"].value;
-              if (password == null || password == "") {
 
-                  valid.password = false;
-                  if (valid.user_name) {
-                      $('#error-password-block').html("password must be filled out");
-                      $('#error-password-conf-block').html("");
-                      //this.focus();
-                  }
-              } else if (password.length < 6) {
-                  valid.password = false;
-                  if (valid.user_name) {
-                      $('#error-password-block').html("Password should be at least 6 characters");
-                      $('#error-password-conf-block').html("");
-                      //this.focus();
-                  }
-              } else {
-                  valid.password = true;
-                  $('#error-password-block').html("");
-                  $('#error-password-conf-block, #error-password-block').html("");
-                  //password_conf.focus();
-              }
+          $('#password').blur(function () {
+            Subscription.validate_password();
           });
+
           $('#password_conf').blur(function () {
-              var password_conf = document.forms["myForm"]["password_conf"].value;
-              if (password_conf == null || password_conf == "" || password_conf != password.value) {
-                  valid.password_conf = false;
-                  $('#error-password-conf-block, #error-password-block').html("password and password confirmation must match");
-                  //password.value = "";
-                  //this.value = "";
-                  //password.focus();
-              }
-              else {
-                  valid.password_conf = true;
-                  $('#error-password-conf-block, #error-password-block').html("");
-                  //customButton.focus();
-              }
+            Subscription.validate_password_confirmation();
           });
+          
           $('#tos_checkbox').click(function () {
-              var tos = document.forms["myForm"]["tos_checkbox"].checked;
-              if (tos == null || tos == "" || tos == false) {
-                  valid.tos = false;
-                  $('#error-tos-block').html("Please click I agree for TOS and Privacy Policy");
-              } else {
-                  valid.tos = true;
-                  $('#error-tos-block').html("");
-              }
+            Subscription.validate_tos();
           });
-          document.getElementById('customButton').addEventListener('click', function (e) {
+
+          var open_handler = function(plan_id, channel) {
+            $.ajax({
+              type: "GET",
+              contentType: "application/json; charset=utf-8",
+              url: "/subscriptions/planInfo",
+              data: {plan_id: plan_id},
+              dataType: "json"
+            }).error(function (response) {
+
+            }).success(function(response) {
+              if(response.status == true) {
+                amount = response.plan_info.amount;
+              }
+              setTimeout(function () {
+                if (Subscription.validate()) {
+                    // Open Checkout with further options
+                  var description = null;
+                  var amount = 0;
+                  if(channel == 'shopify') {
+                    amount = 0;
+                    description = 'Add a card to your account';
+                  } else {
+                    amount = one_time_payment;
+                    description = 'Initialization fee ($' + 
+                      Number(one_time_payment/100).toFixed(2) + ')';
+                  }
+
+                  handler.open({
+                    name: 'Groovepacker',
+                    description: description,
+                    amount: amount,
+                    email: $('#email').val(),
+                    allowRememberMe: false
+                  });
+                }
+              }, 400);
+            });
+          }
+          $('#customButton').on('click', function (e) {
               e.preventDefault();
               if ($("input[name='radio_subscription']:checked").length > 0){
                 radio_button_value = $('input:radio[name=radio_subscription]:checked').val();
@@ -431,33 +353,7 @@
                 else {
                   plan_id = $('#plan_id').val();
                 }
-                $.ajax({
-                      type: "GET",
-                      contentType: "application/json; charset=utf-8",
-                      url: "/subscriptions/planInfo",
-                      data: {plan_id: plan_id},
-                      dataType: "json"
-
-                  }).error(function (response) {
-
-                  }).success(function(response) {
-                    if(response.status == true) {
-                      amount = response.plan_info.amount;
-                    }
-                    setTimeout(function () {
-                      if (valid.tenant_name && valid.email && valid.tos) {
-                          // Open Checkout with further options
-                          handler.open({
-                              name: 'Groovepacker',
-                              description: 'Initialization fee ($' + Number(one_time_payment/100).toFixed(2) + ')',
-                              amount: one_time_payment,
-                              email: $('#email').val(),
-                              allowRememberMe: false
-                          });
-                      }
-                      ;
-                  }, 400);
-                  });
+                open_handler(plan_id, "regular");
               }
           });
       </script>

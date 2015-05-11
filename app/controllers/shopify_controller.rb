@@ -10,6 +10,8 @@ class ShopifyController < ApplicationController
   #  "id"=>"1" 
   # }
   def auth
+    #puts params[:is_admin]
+    Apartment::Tenant.switch(params[:tenant_name])
     store = Store.find(params[:id])
     @shopify_credential = store.shopify_credential
     session = ShopifyAPI::Session.new(@shopify_credential.shop_name + ".myshopify.com")
@@ -24,15 +26,15 @@ class ShopifyController < ApplicationController
     end
   end
 
-  #hmac=d43d3f1d1ef5453bcdc62909e8db267ca95dc524dd3c61871c051abd338606a1&
-  #shop=groovepacker-dev-shop.myshopify.com&
-  #signature=9496a95477ede166870e8f08da1b4526&
-  #timestamp=1430733874
+  # hmac=d43d3f1d1ef5453bcdc62909e8db267ca95dc524dd3c61871c051abd338606a1&
+  # shop=groovepacker-dev-shop.myshopify.com&
+  # signature=9496a95477ede166870e8f08da1b4526&
+  # timestamp=1430733874
   def callback
     # redirect to admin page with the shopify and with groove-solo plan
     # get shop name
-    shop_name = get_shop_name(params[:shop])
-    redirect_to subscriptions_path(plan_id: 'groove-solo', shopify: shop_name )
+    @shop_name = get_shop_name(params[:shop])
+    #redirect_to subscriptions_path(plan_id: 'groove-solo', shopify: shop_name )
   end
 
   def disconnect

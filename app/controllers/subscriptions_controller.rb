@@ -1,5 +1,6 @@
   class SubscriptionsController < ApplicationController
     include PaymentsHelper
+    include StoreSettingsHelper
     # before_filter :check_tenant_name
 
     def new
@@ -25,8 +26,31 @@
       if @subscription
         @subscription.save_with_payment(ENV['ONE_TIME_PAYMENT'])
         if @subscription.status == 'completed'
-          @result = getNextPaymentDate(@subscription)
-          render json: {valid: true, redirect_url: "subscriptions/show?transaction_id=#{@subscription.stripe_transaction_identifier}&notice=Congratulations! Your GroovePacker is being deployed!&email=#{@subscription.email}&next_date=#{@result['next_date']}"}
+          #for shopify create the store and send for authentication
+          if params[:shopify_shop_name]
+            #switch tenant
+            Apartment::Tenant.switch(@subscription.tenant_name)
+            store = Store.create(
+              name: params[:shopify_shop_name], 
+              store_type: 'Shopify',
+              status: '1',
+              inventory_warehouse_id: get_default_warehouse_id 
+            )
+            shopify_credential = ShopifyCredential.create(
+              shop_name: params[:shopify_shop_name],
+              store_id: store.id
+            )
+            render json: { 
+              valid: true, 
+              redirect_url: 
+                Groovepacker::ShopifyRuby::Utilities.new(
+                  shopify_credential
+                ).permission_url(params[:tenant_name], true)
+            }
+          else
+            @result = getNextPaymentDate(@subscription)
+            render json: {valid: true, redirect_url: "subscriptions/show?transaction_id=#{@subscription.stripe_transaction_identifier}&notice=Congratulations! Your GroovePacker is being deployed!&email=#{@subscription.email}&next_date=#{@result['next_date']}"}
+          end
         else
           render json: {valid: false}
         end

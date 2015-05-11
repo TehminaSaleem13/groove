@@ -1,59 +1,99 @@
 <div class="row">
   <div class="box-outer">
-    <div class="box"></div>
+    <div class="box">
+      <%= render 'shared/existing_customer', shopify: @shop_name %>
+    </div>
     <div class="col-sm-offset-3 col-sm-6">
       <img src="/assets/images/logo.png" class="col-xs-12" alt="GroovePacker"/>
     </div>
   </div>
 </div>
-<div class="row bottom-well col-sm-offset-1 col-sm-10">
-  <div class="col-sm-12">
-    <div class="col-sm-4 text-center">
-      <div class="well">
-        <h2>SOLO</h2>
-        <h1>$30.00</h1>
-        <p>You will be allowed access for 1 store</p>
-        <%= link_to 'Select', {action: 'new', controller: 'subscriptions', plan_id: 'groove-solo'}, class: "btn btn-primary" %>
-      </div>
-
+<div class="row bottom-well col-md-offset-1 col-md-10">
+  <div class="row">
+    <div class="col-md-offset-3 col-md-6 well-header text-center">
+      <p>Choose Your Free Trial Account Type</p>
     </div>
-    <div class="col-sm-4 text-center">
-      <div class="well">
-      <h2>DUO</h2>
-      <h1>$60.00</h1>
-      <p>You will be allowed access for 2 stores</p>
-      <%= link_to 'Select', {action: 'new', controller: 'subscriptions', plan_id: 'groove-duo'}, class: "btn btn-primary" %>
-      </div>
+  </div>
+  <div class="col-md-2 price-column">
+    <div class="col-box-primary">     
+      Solo<br>$30<br> /Month
     </div>
-    <div class="col-sm-4 text-center">
-      <div class="well">
-        <h2>TRIO</h2>
-        <h1>$80.00</h1>
-        <p>You will be allowed access for 3 stores</p>
-        <%= link_to 'Select', {action: 'new', controller: 'subscriptions', plan_id: 'groove-trio'}, class: "btn btn-primary" %>
-      </div>
-
+    <div class="col-box">     
+      500 Shipments<br/> <i class="fa fa-dropbox" style="font-size: 26px;"></i>
+    </div>
+    <div class="col-box">     
+      1 User<br/> <i class="fa fa-user" style="font-size: 32px; margin-top: 5px;"></i>
+    </div>
+    <br/>
+    <div class="text-center">
+      <%= link_to 'Get Started', {action: 'new', controller: 'subscriptions', plan_id: 'groove-solo', shopify: params[:shopify], email: params[:email]}, class: "btn btn-success" %>
     </div>
   </div>
 
-  <div class="col-sm-12">
-    <div class="col-sm-offset-2 col-sm-4  text-center">
-      <div class="well">
-      <h2>QUINTET</h2>
-      <h1>$100.00</h1>
-      <p>You will be allowed access for 5 stores</p>
-      <%= link_to 'Select', {action: 'new', controller: 'subscriptions', plan_id: 'groove-quintet'}, class: "btn btn-primary" %>
-      </div>
+  <div class="col-md-2 price-column">
+    <div class="col-box-primary">     
+      Duo<br>$60<br> /Month
     </div>
-    <div class="col-sm-4 text-center">
-      <div class="well">
-      <h2>SYMPHONY</h2>
-      <h1>$200.00</h1>
-      <p>You will be allowed access for 8 stores</p>
-      <%= link_to 'Select', {action: 'new', controller: 'subscriptions', plan_id: 'groove-symphony'}, class: "btn btn-primary" %>
-      </div>
+    <div class="col-box">     
+      2,000 Shipments<br/> <i class="fa fa-dropbox" style="font-size: 26px;"></i>
+    </div>
+    <div class="col-box">     
+      2 Users<br/> <i class="fa fa-user" style="font-size: 32px; margin-top: 5px;"></i>
+    </div>
+    <br/>
+    <div class="text-center">
+      <%= link_to 'Get Started', {action: 'new', controller: 'subscriptions', plan_id: 'groove-duo', shopify: params[:shopify], email: params[:email]}, class: "btn btn-success" %>
     </div>
   </div>
 
+  <div class="col-md-2 price-column">
+    <div class="col-box-primary">     
+      Trio<br>$80<br> /Month
+    </div>
+    <div class="col-box">     
+      6,000 Shipments<br/> <i class="fa fa-dropbox" style="font-size: 26px;"></i>
+    </div>
+    <div class="col-box">     
+      3 Users<br/> <i class="fa fa-user" style="font-size: 32px; margin-top: 5px;"></i>
+    </div>
+    <br/>
+    <div class="text-center">
+      <%= link_to 'Get Started', {action: 'new', controller: 'subscriptions', plan_id: 'groove-trio', shopify: params[:shopify], email: params[:email]}, class: "btn btn-success" %>
+    </div>
+  </div>
+
+
+  <div class="col-md-2 price-column">
+    <div class="col-box-primary">     
+      Quintet<br>$100<br> /Month
+    </div>
+    <div class="col-box">     
+      12,000 Shipments<br/> <i class="fa fa-dropbox" style="font-size: 26px;"></i>
+    </div>
+    <div class="col-box">     
+      5 Users<br/> <i class="fa fa-user" style="font-size: 32px; margin-top: 5px;"></i>
+    </div>
+    <br/>
+    <div class="text-center">
+      <%= link_to 'Get Started', {action: 'new', controller: 'subscriptions', plan_id: 'groove-quintet', shopify: params[:shopify], email: params[:email]}, class: "btn btn-success" %>
+    </div>
+  </div>
+
+
+  <div class="col-md-2 price-column">
+    <div class="col-box-primary">     
+      Symphony<br>$200<br> /Month
+    </div>
+    <div class="col-box">     
+      50,000 Shipments<br/> <i class="fa fa-dropbox" style="font-size: 26px;"></i>
+    </div>
+    <div class="col-box">     
+      12 Users<br/> <i class="fa fa-user" style="font-size: 32px; margin-top: 5px;"></i>
+    </div>
+    <br/>
+    <div class="text-center">
+      <%= link_to 'Get Started', {action: 'new', controller: 'subscriptions', plan_id: 'groove-symphony', shopify: params[:shopify], email: params[:email]}, class: "btn btn-success" %>
+    </div>
+  </div>
 </div>
 
