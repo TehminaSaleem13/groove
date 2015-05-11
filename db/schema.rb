@@ -389,6 +389,7 @@ ActiveRecord::Schema.define(:version => 20150511104930) do
     t.string   "method"
     t.datetime "created_at",                                                               :null => false
     t.datetime "updated_at",                                                               :null => false
+    t.string   "store_order_id"
     t.string   "notes_internal"
     t.string   "notes_toPacker"
     t.string   "notes_fromPacker"
@@ -409,7 +410,6 @@ ActiveRecord::Schema.define(:version => 20150511104930) do
     t.integer  "weight_oz"
     t.string   "non_hyphen_increment_id"
     t.boolean  "note_confirmation",                                     :default => false
-    t.string   "store_order_id"
     t.boolean  "update_inventory_level",                                :default => true
   end
 
@@ -585,9 +585,9 @@ ActiveRecord::Schema.define(:version => 20150511104930) do
     t.float    "order_complete_sound_vol",      :default => 0.75
     t.boolean  "type_scan_code_enabled",        :default => true
     t.string   "type_scan_code",                :default => "*"
-    t.string   "post_scanning_option",          :default => "None"
     t.string   "escape_string",                 :default => " - "
     t.boolean  "escape_string_enabled",         :default => false
+    t.string   "post_scanning_option",          :default => "None"
   end
 
   create_table "shipstation_credentials", :force => true do |t|
