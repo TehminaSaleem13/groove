@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150505132745) do
+ActiveRecord::Schema.define(:version => 20150511104930) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0, :null => false
@@ -136,6 +136,9 @@ ActiveRecord::Schema.define(:version => 20150505132745) do
     t.string   "order_export_email"
     t.datetime "created_at",                                           :null => false
     t.datetime "updated_at",                                           :null => false
+    t.datetime "start_time"
+    t.datetime "end_time"
+    t.boolean  "manual_export",             :default => false
   end
 
   create_table "general_settings", :force => true do |t|

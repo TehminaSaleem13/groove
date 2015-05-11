@@ -69,4 +69,33 @@ class ExportsettingsController < ApplicationController
       format.json { render json: @result }
     end
   end
+
+  def order_exports
+    require 'csv'
+    result = Hash.new
+    result['status'] = true
+    result['messages'] = []
+    if current_user.can? 'view_packing_ex'
+      if params[:start].nil? || params[:end].nil?
+        result['status'] = false
+        result['messages'].push('We need a start and an end time')
+      else
+        export_setting = ExportSetting.all.first
+        export_setting.start_time = Time.parse(params[:start])
+        export_setting.end_time = Time.parse(params[:end])
+        export_setting.manual_export = true
+        export_setting.save
+        filename = "#{Rails.root}/public/csv/"+export_setting.export_data
+        export_setting.manual_export = false
+        export_setting.save
+      end
+    end
+    unless result['status']
+      data = CSV.generate do |csv|
+        csv << result['messages']
+      end
+      filename = 'error.csv'
+    end
+    send_file filename, :type => 'text/csv'
+  end
 end

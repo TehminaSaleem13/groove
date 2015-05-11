@@ -2,7 +2,8 @@ class ExportSetting < ActiveRecord::Base
   attr_accessible :auto_email_export, :time_to_send_export_email, :send_export_email_on_mon,
    :send_export_email_on_tue, :send_export_email_on_wed, :send_export_email_on_thu,
    :send_export_email_on_fri, :send_export_email_on_sat, :send_export_email_on_sun, 
-   :last_exported, :export_orders_option, :order_export_type, :order_export_email 
+   :last_exported, :export_orders_option, :order_export_type, :order_export_email,
+   :start_time, :end_time, :manual_export 
 
   after_save :scheduled_export
 
@@ -72,20 +73,29 @@ class ExportSetting < ActiveRecord::Base
     result['messages'] = []
     start_time = nil
     end_time = nil
-    if self.export_orders_option == 'on_same_day'
-      start_time = Time.now.beginning_of_day
-    else
-      unless self.last_exported.nil?
-        start_time = self.last_exported
+    unless self.manual_export
+      if self.export_orders_option == 'on_same_day'
+        start_time = Time.now.beginning_of_day
+        end_time = Time.now
       else
-        start_time = '2000-01-01 00:00:00'
+        unless self.last_exported.nil?
+          start_time = self.last_exported
+          end_time = Time.now
+        else
+          start_time = '2000-01-01 00:00:00'
+          end_time = Time.now
+        end
       end
+    else
+      start_time = self.start_time
+      end_time = self.end_time
     end
+    
     if start_time.nil?
       result['status'] = false
       result['messages'].push('We need a start and an end time')
     else
-      orders = Order.where(scanned_on: start_time..Time.now)
+      orders = Order.where(scanned_on: start_time..end_time)
       scanpack_settings = ScanPackSetting.all.first
       self.last_exported = Time.now
       self.save

@@ -70,23 +70,66 @@
                                 </ul>
                             </div>
                         </div>
-                        <div class="form-group">
-                            <label class="control-label col-sm-3">Order export type </label>
-                            <div class="controls col-sm-3 form-inline" dropdown>
-                                <button class="dropdown-toggle groove-button label label-default" ng-class="{
-                                    'label-warning':export_settings.single.order_export_type=='order_with_serial_lot',
-                                    'label-success':export_settings.single.order_export_type=='include_all'}">
-                                    <span ng-show="export_settings.single.order_export_type=='do_not_include'" >Do not include order items</span>
-                                    <span ng-show="export_settings.single.order_export_type=='order_with_serial_lot'">Only include order items with Serial/Lot numbers</span>
-                                    <span ng-show="export_settings.single.order_export_type=='include_all'">Include all order items</span>
-                                </button>
-                                <ul class="dropdown-menu" role="menu">
-                                    <li><a class="dropdown-toggle" ng-click="change_option('order_export_type','do_not_include')">Do not include order items</a></li>
-                                    <li><a class="dropdown-toggle" ng-click="change_option('order_export_type','order_with_serial_lot')">Only include order items with Serial/Lot numbers</a></li>
-                                    <li><a class="dropdown-toggle" ng-click="change_option('order_export_type','include_all')">Include all order items</a></li>
-                                </ul>
-                            </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-3">Order export type </label>
+                        <div class="controls col-sm-3 form-inline" dropdown>
+                            <button class="dropdown-toggle groove-button label label-default" ng-class="{
+                                'label-warning':export_settings.single.order_export_type=='order_with_serial_lot',
+                                'label-success':export_settings.single.order_export_type=='include_all'}">
+                                <span ng-show="export_settings.single.order_export_type=='do_not_include'" >Do not include order items</span>
+                                <span ng-show="export_settings.single.order_export_type=='order_with_serial_lot'">Only include order items with Serial/Lot numbers</span>
+                                <span ng-show="export_settings.single.order_export_type=='include_all'">Include all order items</span>
+                            </button>
+                            <ul class="dropdown-menu" role="menu">
+                                <li><a class="dropdown-toggle" ng-click="change_option('order_export_type','do_not_include')">Do not include order items</a></li>
+                                <li><a class="dropdown-toggle" ng-click="change_option('order_export_type','order_with_serial_lot')">Only include order items with Serial/Lot numbers</a></li>
+                                <li><a class="dropdown-toggle" ng-click="change_option('order_export_type','include_all')">Include all order items</a></li>
+                            </ul>
                         </div>
+                    </div>
+                    <div class="form-group col-sm-6">
+                        <label class="control-label">Start Date</label>
+                        <div class="container-fluid form-horizontal">
+                            <div class="row">
+                                <div class="control-label timepicker-label col-md-8">
+                                    <p class=" input-group">
+                                        <input type="text" class="form-control" datepicker-popup="dd-MMMM-yyyy" ng-model="exports.start.time" is-open="exports.start.open"  ng-required="true" close-text="Close" />
+                                            <span class="input-group-btn">
+                                                <button type="button" class="btn btn-default" ng-click="open_picker($event,exports.start)"><i class="glyphicon glyphicon-calendar"></i></button>
+                                            </span>
+                                    </p>
+                                </div>
+
+                                <div class="controls col-md-4">
+                                    <timepicker  ng-model="exports.start.time" show-meridian="false"></timepicker>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="form-group col-sm-6">
+                        <label class="control-label">End Date</label>
+                        <div class="container-fluid form-horizontal">
+                            <div class="row">
+                                <div class="control-label timepicker-label col-md-8">
+                                    <p class=" input-group">
+                                        <input type="text" class="form-control" datepicker-popup="dd-MMMM-yyyy" ng-model="exports.end.time" is-open="exports.end.open" ng-required="true" close-text="Close" />
+                                            <span class="input-group-btn">
+                                                <button type="button" class="btn btn-default" ng-click="open_picker($event,exports.end)"><i class="glyphicon glyphicon-calendar"></i></button>
+                                            </span>
+                                    </p>
+                                </div>
+
+                                <div class="controls col-md-4">
+                                    <timepicker  ng-model="exports.end.time" show-meridian="false"></timepicker>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="col-sm-2 text-center col-sm-offset-4">
+                        <button ng_click="download_csv('exports')" class="modal-save-button">Export Now</button>
                     </div>
                 </fieldset>
             </div>
