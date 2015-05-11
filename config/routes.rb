@@ -91,6 +91,7 @@ Groovepacks::Application.routes.draw do
     member do
       get 'auth'
       put 'disconnect'
+      get 'complete'
     end
 
     collection do
