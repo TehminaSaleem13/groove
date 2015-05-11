@@ -1,5 +1,5 @@
 class ShopifyController < ApplicationController
-  before_filter :authenticate_user!, :except => [:auth, :callback, :preferences, :help]
+  before_filter :authenticate_user!, :except => [:auth, :callback, :preferences, :help, :complete]
 
   # {
   #  "code"=>"58a883f4bb36e4e953431549abff383c", 
@@ -55,6 +55,10 @@ class ShopifyController < ApplicationController
   end
 
   def help
+
+  end
+
+  def complete
 
   end
 
