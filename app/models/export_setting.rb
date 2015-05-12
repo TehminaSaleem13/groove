@@ -156,13 +156,6 @@ class ExportSetting < ActiveRecord::Base
                       single_row[:serial_number] = serial.serial
                       
                       if (single_row[:order_number] == previous_row[:order_number] &&
-                        single_row[:scanned_date] == previous_row[:scanned_date] &&
-                        single_row[:packing_user] == previous_row[:packing_user] &&
-                        single_row[:warehouse_name] == previous_row[:warehouse_name] &&
-                        single_row[:barcode_with_lot] == previous_row[:barcode_with_lot] &&
-                        single_row[:barcode] == previous_row[:barcode] &&
-                        single_row[:lot_number] == previous_row[:lot_number] &&
-                        single_row[:product_name] == previous_row[:product_name] &&
                         single_row[:primary_sku] == previous_row[:primary_sku])
                         single_row[:order_item_count] = single_row[:order_item_count].to_i + previous_row[:order_item_count].to_i
                       end
@@ -174,13 +167,6 @@ class ExportSetting < ActiveRecord::Base
                     single_row = calculate_row_data(single_row, order_item)
                     
                     if (single_row[:order_number] == previous_row[:order_number] &&
-                      single_row[:scanned_date] == previous_row[:scanned_date] &&
-                      single_row[:packing_user] == previous_row[:packing_user] &&
-                      single_row[:warehouse_name] == previous_row[:warehouse_name] &&
-                      single_row[:barcode_with_lot] == previous_row[:barcode_with_lot] &&
-                      single_row[:barcode] == previous_row[:barcode] &&
-                      single_row[:lot_number] == previous_row[:lot_number] &&
-                      single_row[:product_name] == previous_row[:product_name] &&
                       single_row[:primary_sku] == previous_row[:primary_sku])
                       single_row[:order_item_count] = single_row[:order_item_count].to_i + previous_row[:order_item_count].to_i
                     end
@@ -196,6 +182,7 @@ class ExportSetting < ActiveRecord::Base
         row_map = {
           :order_date =>'',
           :order_number => '',
+          :scanned_qty => '',
           :packing_user =>'',
           :scanned_date =>''
         }
@@ -204,6 +191,7 @@ class ExportSetting < ActiveRecord::Base
           orders.each do |order|
             single_row = row_map.dup
             single_row[:order_number] = order.increment_id
+            single_row[:scanned_qty] = order.scanned_items_count
             single_row[:order_date] = order.order_placed_time
             single_row[:scanned_date] = order.scanned_on
             packing_user = nil
