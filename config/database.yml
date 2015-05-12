@@ -51,7 +51,7 @@ staging:
   reconnect: false
   database: groovepacks_production
   pool: 5
-  host: localhost
+  host: groov-staging-db
   username: root
   password: password
   #port: 3306
