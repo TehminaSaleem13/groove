@@ -955,7 +955,7 @@ class OrdersController < ApplicationController
     end
     @header = ''
 
-    @file_name = Apartment::Tenant.current_tenant+Time.now.strftime('%d_%b_%Y_%I:%M_%p')
+    @file_name = Apartment::Tenant.current_tenant+Time.now.strftime('%d_%b_%Y_%I__%M_%p')
     @orders = []
     orders = list_selected_orders
     orders.each do |order|
