@@ -67,7 +67,7 @@ RAILS_ENV=${ENV} rake db:seed
 RAILS_ENV=${ENV} rake groove:upgrade
 RAILS_ENV=${ENV} rake assets:clean
 RAILS_ENV=${ENV} rake assets:precompile
-RAILS_ENV=${ENV} rake fs:delete_pdfs
+RAILS_ENV=${ENV} rake fs:delete_files
 
 exit
 EOF
