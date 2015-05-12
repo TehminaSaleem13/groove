@@ -54,5 +54,5 @@ staging:
   host: groov-staging-db
   username: root
   password: password
-  #port: 3306
-  socket: /var/run/mysqld/mysqld.sock
+  port: 3306
+  #socket: /var/run/mysqld/mysqld.sock
