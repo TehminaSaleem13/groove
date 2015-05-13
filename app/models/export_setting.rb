@@ -87,7 +87,7 @@ class ExportSetting < ActiveRecord::Base
         end
       end
     else
-      start_time = self.start_time
+      start_time = self.start_time.beginning_of_day
       end_time = self.end_time
     end
     
@@ -122,10 +122,10 @@ class ExportSetting < ActiveRecord::Base
             unless order_items.empty?
               previous_row = row_map.dup
               order_items.each do |order_item|
+                serials = OrderSerial.where(:product_id=>order_item.product.id, :order_id=>order_item.order.id)
                 if self.order_export_type == 'order_with_serial_lot'
-                  unless order_item.product.primary_barcode.nil?
-                    product = order_item.product
-                    serials = OrderSerial.where(:product_id=>product.id)
+                  lot_number = order_item.get_lot_number(order_item.product.primary_barcode)
+                  unless serials.empty? && lot_number.nil?
                     unless serials.empty?
                       serials.each do |serial|
                         single_row = row_map.dup
@@ -135,7 +135,6 @@ class ExportSetting < ActiveRecord::Base
                         csv << single_row.values
                       end
                     else
-                      lot_number = order_item.get_lot_number(order_item.product.primary_barcode)
                       unless lot_number.nil?
                         single_row = row_map.dup
                         single_row = calculate_row_data(single_row, order_item)
@@ -147,36 +146,61 @@ class ExportSetting < ActiveRecord::Base
                     next
                   end
                 else
-                  product = order_item.product
-                  serials = OrderSerial.where(:product_id=>product.id)
                   unless serials.empty?
                     serials.each do |serial|
                       single_row = row_map.dup
                       single_row = calculate_row_data(single_row, order_item)
                       single_row[:serial_number] = serial.serial
                       
-                      if (single_row[:order_number] == previous_row[:order_number] &&
-                        single_row[:primary_sku] == previous_row[:primary_sku])
-                        single_row[:order_item_count] = single_row[:order_item_count].to_i + previous_row[:order_item_count].to_i
-                      end
-                      previous_row = single_row
                       csv << single_row.values
                     end
                   else
                     single_row = row_map.dup
                     single_row = calculate_row_data(single_row, order_item)
                     
-                    if (single_row[:order_number] == previous_row[:order_number] &&
-                      single_row[:primary_sku] == previous_row[:primary_sku])
-                      single_row[:order_item_count] = single_row[:order_item_count].to_i + previous_row[:order_item_count].to_i
-                    end
-                    previous_row = single_row
                     csv << single_row.values
                   end
                 end
               end
             end
           end
+        end
+        if self.order_export_type == 'include_all'
+          order_hash = []
+          CSV.foreach("#{Rails.root}/public/csv/#{filename}") do |row|
+            orders = order_hash.select {|order| order[:order_number] == row[1] && order[:primary_sku] == row[5]}
+            unless orders.empty?
+              order = orders.first
+              order[:order_item_count] = order[:order_item_count].to_i + row[9].to_i
+            else
+              order = {:order_date=>row[0], :order_number=>row[1],
+               :barcode_with_lot=>row[2], :barcode=>row[3],
+               :lot_number=>row[4], :primary_sku=>row[5],
+               :serial_number=>row[6], :product_name=>row[7],
+               :packing_user=>row[8], :order_item_count=>row[9],
+               :scanned_date=>row[10], :warehouse_name=>row[11]}
+              order_hash.push(order)
+            end
+          end
+          CSV.open("#{Rails.root}/public/csv/temp.csv","w") do |csv|
+            order_hash.each do |order|
+              single_row = row_map.dup
+              single_row[:order_number] = order[:order_number]
+              single_row[:order_date] = order[:order_date]
+              single_row[:scanned_date] = order[:scanned_date]
+              single_row[:packing_user] = order[:packing_user]
+              single_row[:warehouse_name] =  order[:warehouse_name]
+              single_row[:barcode_with_lot] = order[:barcode_with_lot]
+              single_row[:barcode] = order[:barcode]
+              single_row[:lot_number] = order[:lot_number]
+              single_row[:product_name] = order[:product_name]
+              single_row[:primary_sku] =  order[:primary_sku]
+              single_row[:order_item_count] = order[:order_item_count]
+              csv << single_row.values
+            end
+          end
+          File.delete("#{Rails.root}/public/csv/#{filename}")
+          File.rename("#{Rails.root}/public/csv/temp.csv","#{Rails.root}/public/csv/#{filename}")
         end
       else
         row_map = {
@@ -202,7 +226,7 @@ class ExportSetting < ActiveRecord::Base
             csv << single_row.values
           end
         end
-      end  
+      end
     end
 
     unless result['status']
