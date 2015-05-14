@@ -11,18 +11,18 @@ describe OrdersController do
     @access_restriction.inspect
   end
 
-  it "imports orders for amazon store" do
-    @inv_wh = FactoryGirl.create(:inventory_warehouse, :name=>'amazon_inventory_warehouse')
-    @store = FactoryGirl.create(:store, :name=>'amazon_store', :inventory_warehouse=>@inv_wh, :store_type=> 'Amazon')
-    @amazon_credentials = FactoryGirl.create(:amazon_credential, :store_id=>@store.id)
-    request.accept = "application/json"
-    post :importorders, {:id => @store.id}
-    expect(response.status).to eq(200)
-    result = JSON.parse(response.body)
-    puts result.inspect
-    expect(result['status']).to eq(true)
-    expect(result['messages']).to eq([])
-  end
+  # it "imports orders for amazon store" do
+  #   @inv_wh = FactoryGirl.create(:inventory_warehouse, :name=>'amazon_inventory_warehouse')
+  #   @store = FactoryGirl.create(:store, :name=>'amazon_store', :inventory_warehouse=>@inv_wh, :store_type=> 'Amazon')
+  #   @amazon_credentials = FactoryGirl.create(:amazon_credential, :store_id=>@store.id)
+  #   request.accept = "application/json"
+  #   post :importorders, {:id => @store.id}
+  #   expect(response.status).to eq(200)
+  #   result = JSON.parse(response.body)
+  #   puts result.inspect
+  #   expect(result['status']).to eq(true)
+  #   expect(result['messages']).to eq([])
+  # end
   # it "imports orders for ebay store" do
   #   @inv_wh = FactoryGirl.create(:inventory_warehouse, :name=>'ebay_inventory_warehouse')
   #   @store = FactoryGirl.create(:store, :name=>'ebay_store', :inventory_warehouse=>@inv_wh, :store_type=> 'Ebay')
@@ -59,18 +59,18 @@ describe OrdersController do
   #   expect(result['status']).to eq(true)
   #   expect(result['messages']).to eq([])
   # end
-  it "imports orders for shipstation API 2 store" do
-    @inv_wh = FactoryGirl.create(:inventory_warehouse, :name=>'shipstation_inventory_warehouse')
-    @store = FactoryGirl.create(:store, :name=>'shipstation_store', :inventory_warehouse=>@inv_wh, :store_type=> 'Shipstation API 2')
-    @shipstation_rest_credentials = FactoryGirl.create(:shipstation_rest_credential, :store_id=>@store.id)
-    request.accept = "application/json"
-    post :importorders, {:id => @store.id}
-    expect(response.status).to eq(200)
-    result = JSON.parse(response.body)
-    expect(result['status']).to eq(true)
-    expect(result['messages']).to eq([])
-    puts result.inspect
-  end
+  # it "imports orders for shipstation API 2 store" do
+  #   @inv_wh = FactoryGirl.create(:inventory_warehouse, :name=>'shipstation_inventory_warehouse')
+  #   @store = FactoryGirl.create(:store, :name=>'shipstation_store', :inventory_warehouse=>@inv_wh, :store_type=> 'Shipstation API 2')
+  #   @shipstation_rest_credentials = FactoryGirl.create(:shipstation_rest_credential, :store_id=>@store.id)
+  #   request.accept = "application/json"
+  #   post :importorders, {:id => @store.id}
+  #   expect(response.status).to eq(200)
+  #   result = JSON.parse(response.body)
+  #   expect(result['status']).to eq(true)
+  #   expect(result['messages']).to eq([])
+  #   puts result.inspect
+  # end
   # it "imports orders for shipworks store" do
   #   @inv_wh = FactoryGirl.create(:inventory_warehouse, :name=>'shipworks_inventory_warehouse')
   #   @store = FactoryGirl.create(:store, :name=>'shipworks_store', :inventory_warehouse=>@inv_wh, :status => true)
