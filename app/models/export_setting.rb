@@ -119,7 +119,7 @@ class ExportSetting < ActiveRecord::Base
         order_hash = {:order_date=>"order_date", :order_number=>"order_number",
              :barcode_with_lot=>"barcode_with_lot", :barcode=>"barcode",
              :lot_number=>"lot_number", :primary_sku=>"primary_sku",
-             :serial_number=>"serial_number", :product_name=>r"product_name",
+             :serial_number=>"serial_number", :product_name=>"product_name",
              :packing_user=>"packing_user", :order_item_count=>"order_item_count",
              :scanned_date=>"scanned_date", :warehouse_name=>"warehouse_name"}
         order_hash_array.push(order_hash)
@@ -207,20 +207,84 @@ class ExportSetting < ActiveRecord::Base
         end
         
         CSV.open("#{Rails.root}/public/csv/#{filename}","w") do |csv|
+          show_lot_number = false
+          show_serial_number = false
+          for i in 1..order_hash_array.size-1
+            puts "lot_number : " + order_hash_array[i][:lot_number].inspect
+            unless order_hash_array[i][:lot_number].nil?
+              show_lot_number = true
+              break
+            end
+          end
+
+          for i in 1..order_hash_array.size-1
+            unless order_hash_array[i][:serial_number].nil?
+              show_serial_number = true
+              break
+            end
+          end
+
+          if show_serial_number==false && show_lot_number==false
+            csv_row_map = {
+              :order_date =>'',
+              :order_number => '',
+              :barcode =>'',
+              :primary_sku =>'',
+              :product_name=>'',
+              :packing_user =>'',
+              :order_item_count => '',
+              :scanned_date =>'',
+              :warehouse_name =>''
+            }
+          elsif show_serial_number==false
+            csv_row_map = {
+              :order_date =>'',
+              :order_number => '',
+              :barcode_with_lot => '',
+              :barcode =>'',
+              :lot_number =>'',
+              :primary_sku =>'',
+              :product_name=>'',
+              :packing_user =>'',
+              :order_item_count => '',
+              :scanned_date =>'',
+              :warehouse_name =>''
+            }
+          elsif show_lot_number == false
+            csv_row_map = {
+              :order_date =>'',
+              :order_number => '',
+              :barcode =>'',
+              :primary_sku =>'',
+              :serial_number =>'',
+              :product_name=>'',
+              :packing_user =>'',
+              :order_item_count => '',
+              :scanned_date =>'',
+              :warehouse_name =>''
+            }
+          else
+            csv_row_map = {
+              :order_date =>'',
+              :order_number => '',
+              :barcode_with_lot => '',
+              :barcode =>'',
+              :lot_number =>'',
+              :primary_sku =>'',
+              :serial_number =>'',
+              :product_name=>'',
+              :packing_user =>'',
+              :order_item_count => '',
+              :scanned_date =>'',
+              :warehouse_name =>''
+            }
+          end
+
           order_hash_array.each do |order_hash|
-            single_row = row_map.dup
-            single_row[:order_number] = order_hash[:order_number]
-            single_row[:order_date] = order_hash[:order_date]
-            single_row[:scanned_date] = order_hash[:scanned_date]
-            single_row[:packing_user] = order_hash[:packing_user]
-            single_row[:warehouse_name] =  order_hash[:warehouse_name]
-            single_row[:barcode_with_lot] = order_hash[:barcode_with_lot]
-            single_row[:barcode] = order_hash[:barcode]
-            single_row[:lot_number] = order_hash[:lot_number]
-            single_row[:product_name] = order_hash[:product_name]
-            single_row[:primary_sku] =  order_hash[:primary_sku]
-            single_row[:order_item_count] = order_hash[:order_item_count]
-            single_row[:serial_number] = order_hash[:serial_number]
+            single_row = csv_row_map.dup
+            for i in 0..single_row.size
+              single_row[csv_row_map.keys[i]] = order_hash[csv_row_map.keys[i]]
+            end
             csv << single_row.values
           end
         end
