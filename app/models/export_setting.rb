@@ -115,92 +115,114 @@ class ExportSetting < ActiveRecord::Base
           :scanned_date =>'',
           :warehouse_name =>''
         }
-        CSV.open("#{Rails.root}/public/csv/#{filename}","w") do |csv|
-          csv << row_map.keys
-          orders.each do |order|
-            order_items = order.order_items
-            unless order_items.empty?
-              previous_row = row_map.dup
-              order_items.each do |order_item|
-                serials = OrderSerial.where(:product_id=>order_item.product.id, :order_id=>order_item.order.id)
-                if self.order_export_type == 'order_with_serial_lot'
-                  lot_number = order_item.get_lot_number(order_item.product.primary_barcode)
-                  unless serials.empty? && lot_number.nil?
-                    unless serials.empty?
-                      serials.each do |serial|
-                        single_row = row_map.dup
-                        single_row = calculate_row_data(single_row, order_item)
-                        single_row[:serial_number] = serial.serial
-                        
-                        csv << single_row.values
-                      end
-                    else
-                      unless lot_number.nil?
-                        single_row = row_map.dup
-                        single_row = calculate_row_data(single_row, order_item)
-
-                        csv << single_row.values
-                      end
-                    end
-                  else
-                    next
-                  end
-                else
+        order_hash_array = []
+        order_hash = {:order_date=>"order_date", :order_number=>"order_number",
+             :barcode_with_lot=>"barcode_with_lot", :barcode=>"barcode",
+             :lot_number=>"lot_number", :primary_sku=>"primary_sku",
+             :serial_number=>"serial_number", :product_name=>r"product_name",
+             :packing_user=>"packing_user", :order_item_count=>"order_item_count",
+             :scanned_date=>"scanned_date", :warehouse_name=>"warehouse_name"}
+        order_hash_array.push(order_hash)
+        orders.each do |order|
+          order_items = order.order_items
+          unless order_items.empty?
+            order_items.each do |order_item|
+              serials = OrderSerial.where(:product_id=>order_item.product.id, :order_id=>order_item.order.id)
+              if self.order_export_type == 'order_with_serial_lot'
+                lot_number = order_item.get_lot_number(order_item.product.primary_barcode)
+                unless serials.empty? && lot_number.nil?
                   unless serials.empty?
                     serials.each do |serial|
                       single_row = row_map.dup
                       single_row = calculate_row_data(single_row, order_item)
                       single_row[:serial_number] = serial.serial
                       
-                      csv << single_row.values
+                      order_hash = {:order_date=>single_row[:order_date], :order_number=>single_row[:order_number],
+                       :barcode_with_lot=>single_row[:barcode_with_lot], :barcode=>single_row[:barcode],
+                       :lot_number=>single_row[:lot_number], :primary_sku=>single_row[:primary_sku],
+                       :serial_number=>single_row[:serial_number], :product_name=>single_row[:product_name],
+                       :packing_user=>single_row[:packing_user], :order_item_count=>single_row[:order_item_count],
+                       :scanned_date=>single_row[:scanned_date], :warehouse_name=>single_row[:warehouse_name]}
+                      order_hash_array.push(order_hash)
                     end
                   else
+                    unless lot_number.nil?
+                      single_row = row_map.dup
+                      single_row = calculate_row_data(single_row, order_item)
+
+                      order_hash = {:order_date=>single_row[:order_date], :order_number=>single_row[:order_number],
+                       :barcode_with_lot=>single_row[:barcode_with_lot], :barcode=>single_row[:barcode],
+                       :lot_number=>single_row[:lot_number], :primary_sku=>single_row[:primary_sku],
+                       :serial_number=>single_row[:serial_number], :product_name=>single_row[:product_name],
+                       :packing_user=>single_row[:packing_user], :order_item_count=>single_row[:order_item_count],
+                       :scanned_date=>single_row[:scanned_date], :warehouse_name=>single_row[:warehouse_name]}
+                      order_hash_array.push(order_hash)
+                    end
+                  end
+                else
+                  next
+                end
+              else
+                unless serials.empty?
+                  serials.each do |serial|
                     single_row = row_map.dup
                     single_row = calculate_row_data(single_row, order_item)
+                    single_row[:serial_number] = serial.serial
                     
-                    csv << single_row.values
+                    duplicate_orders = order_hash_array.select {|duplicate_order| duplicate_order[:order_number] == single_row[:order_number] && duplicate_order[:primary_sku] == single_row[:primary_sku]}                      
+                    unless duplicate_orders.empty?
+                      duplicate_order = duplicate_orders.first
+                      duplicate_order[:order_item_count] = duplicate_order[:order_item_count].to_i + single_row[:order_item_count].to_i
+                    else
+                      order_hash = {:order_date=>single_row[:order_date], :order_number=>single_row[:order_number],
+                       :barcode_with_lot=>single_row[:barcode_with_lot], :barcode=>single_row[:barcode],
+                       :lot_number=>single_row[:lot_number], :primary_sku=>single_row[:primary_sku],
+                       :serial_number=>single_row[:serial_number], :product_name=>single_row[:product_name],
+                       :packing_user=>single_row[:packing_user], :order_item_count=>single_row[:order_item_count],
+                       :scanned_date=>single_row[:scanned_date], :warehouse_name=>single_row[:warehouse_name]}
+                      order_hash_array.push(order_hash)
+                    end
+                  end
+                else
+                  single_row = row_map.dup
+                  single_row = calculate_row_data(single_row, order_item)
+                  
+                  duplicate_orders = order_hash_array.select {|duplicate_order| duplicate_order[:order_number] == single_row[:order_number] && duplicate_order[:primary_sku] == single_row[:primary_sku]}                      
+                  unless duplicate_orders.empty?
+                    duplicate_order = duplicate_orders.first
+                    duplicate_order[:order_item_count] = duplicate_order[:order_item_count].to_i + single_row[:order_item_count].to_i
+                  else
+                    order_hash = {:order_date=>single_row[:order_date], :order_number=>single_row[:order_number],
+                     :barcode_with_lot=>single_row[:barcode_with_lot], :barcode=>single_row[:barcode],
+                     :lot_number=>single_row[:lot_number], :primary_sku=>single_row[:primary_sku],
+                     :serial_number=>single_row[:serial_number], :product_name=>single_row[:product_name],
+                     :packing_user=>single_row[:packing_user], :order_item_count=>single_row[:order_item_count],
+                     :scanned_date=>single_row[:scanned_date], :warehouse_name=>single_row[:warehouse_name]}
+                    order_hash_array.push(order_hash)
                   end
                 end
               end
             end
           end
         end
-        if self.order_export_type == 'include_all'
-          order_hash = []
-          CSV.foreach("#{Rails.root}/public/csv/#{filename}") do |row|
-            orders = order_hash.select {|order| order[:order_number] == row[1] && order[:primary_sku] == row[5]}
-            unless orders.empty?
-              order = orders.first
-              order[:order_item_count] = order[:order_item_count].to_i + row[9].to_i
-            else
-              order = {:order_date=>row[0], :order_number=>row[1],
-               :barcode_with_lot=>row[2], :barcode=>row[3],
-               :lot_number=>row[4], :primary_sku=>row[5],
-               :serial_number=>row[6], :product_name=>row[7],
-               :packing_user=>row[8], :order_item_count=>row[9],
-               :scanned_date=>row[10], :warehouse_name=>row[11]}
-              order_hash.push(order)
-            end
+        
+        CSV.open("#{Rails.root}/public/csv/#{filename}","w") do |csv|
+          order_hash_array.each do |order_hash|
+            single_row = row_map.dup
+            single_row[:order_number] = order_hash[:order_number]
+            single_row[:order_date] = order_hash[:order_date]
+            single_row[:scanned_date] = order_hash[:scanned_date]
+            single_row[:packing_user] = order_hash[:packing_user]
+            single_row[:warehouse_name] =  order_hash[:warehouse_name]
+            single_row[:barcode_with_lot] = order_hash[:barcode_with_lot]
+            single_row[:barcode] = order_hash[:barcode]
+            single_row[:lot_number] = order_hash[:lot_number]
+            single_row[:product_name] = order_hash[:product_name]
+            single_row[:primary_sku] =  order_hash[:primary_sku]
+            single_row[:order_item_count] = order_hash[:order_item_count]
+            single_row[:serial_number] = order_hash[:serial_number]
+            csv << single_row.values
           end
-          CSV.open("#{Rails.root}/public/csv/temp.csv","w") do |csv|
-            order_hash.each do |order|
-              single_row = row_map.dup
-              single_row[:order_number] = order[:order_number]
-              single_row[:order_date] = order[:order_date]
-              single_row[:scanned_date] = order[:scanned_date]
-              single_row[:packing_user] = order[:packing_user]
-              single_row[:warehouse_name] =  order[:warehouse_name]
-              single_row[:barcode_with_lot] = order[:barcode_with_lot]
-              single_row[:barcode] = order[:barcode]
-              single_row[:lot_number] = order[:lot_number]
-              single_row[:product_name] = order[:product_name]
-              single_row[:primary_sku] =  order[:primary_sku]
-              single_row[:order_item_count] = order[:order_item_count]
-              csv << single_row.values
-            end
-          end
-          File.delete("#{Rails.root}/public/csv/#{filename}")
-          File.rename("#{Rails.root}/public/csv/temp.csv","#{Rails.root}/public/csv/#{filename}")
         end
       else
         row_map = {
