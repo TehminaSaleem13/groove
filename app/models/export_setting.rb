@@ -88,7 +88,7 @@ class ExportSetting < ActiveRecord::Base
       end
     else
       start_time = self.start_time.beginning_of_day
-      end_time = self.end_time
+      end_time = self.end_time.end_of_day
     end
     
     if start_time.nil?
@@ -210,15 +210,14 @@ class ExportSetting < ActiveRecord::Base
           show_lot_number = false
           show_serial_number = false
           for i in 1..order_hash_array.size-1
-            puts "lot_number : " + order_hash_array[i][:lot_number].inspect
-            unless order_hash_array[i][:lot_number].nil?
+            unless order_hash_array[i][:lot_number].nil? || order_hash_array[i][:lot_number]==""
               show_lot_number = true
               break
             end
           end
 
           for i in 1..order_hash_array.size-1
-            unless order_hash_array[i][:serial_number].nil?
+            unless order_hash_array[i][:serial_number].nil? || order_hash_array[i][:serial_number]==""
               show_serial_number = true
               break
             end
@@ -236,7 +235,7 @@ class ExportSetting < ActiveRecord::Base
               :scanned_date =>'',
               :warehouse_name =>''
             }
-          elsif show_serial_number==false
+          elsif show_serial_number==false && show_lot_number==true
             csv_row_map = {
               :order_date =>'',
               :order_number => '',
@@ -250,7 +249,7 @@ class ExportSetting < ActiveRecord::Base
               :scanned_date =>'',
               :warehouse_name =>''
             }
-          elsif show_lot_number == false
+          elsif show_serial_number==true && show_lot_number==false
             csv_row_map = {
               :order_date =>'',
               :order_number => '',

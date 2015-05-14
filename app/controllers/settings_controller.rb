@@ -633,6 +633,7 @@ class SettingsController < ApplicationController
         scan_pack_setting.post_scanning_option = params[:post_scanning_option]
         scan_pack_setting.escape_string_enabled = params[:escape_string_enabled]
         scan_pack_setting.escape_string = params[:escape_string]
+        scan_pack_setting.record_lot_number = params[:record_lot_number]
 
         if scan_pack_setting.save
           @result['success_messages'].push('Settings updated successfully.')
