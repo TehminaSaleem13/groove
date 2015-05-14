@@ -301,7 +301,7 @@
   <%= render 'shared/header' %>
   <div class="row bottom-well col-sm-offset-1 col-sm-10">
     <% if direct %>
-      <%= render 'shared/confirmations/direct', result: result %>
+      <%= render 'shared/confirmations/direct'%>
     <% else %>
       <%= render 'shared/confirmations/shopify', result: result, email: email %>
     <% end %>
