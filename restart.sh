@@ -58,7 +58,8 @@ cd ~/groove
 git remote set-url origin git@bitbucket.org:jonnyclean/groovepacker.git
 
 git stash
-git pull origin master
+git checkout ${ENV}
+git pull origin ${ENV}
 
 
 RAILS_ENV=${ENV} bundle install --deployment
