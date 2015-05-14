@@ -31,7 +31,8 @@ function( $scope, $http, $timeout, $location, $state, $cookies, scanPack,groov_t
                 "service_issue_code":"",
                 "restart_code":"",
                 "type_scan_code":"",
-                "escape_string":""
+                "escape_string":"",
+                "lot_number":""
             },
             "tooltips" :{
                 "enable_click_sku":"",

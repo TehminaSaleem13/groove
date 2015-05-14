@@ -87,8 +87,8 @@ class ExportSetting < ActiveRecord::Base
         end
       end
     else
-      start_time = self.start_time
-      end_time = self.end_time
+      start_time = self.start_time.beginning_of_day
+      end_time = self.end_time.end_of_day
     end
     
     if start_time.nil?
@@ -115,87 +115,183 @@ class ExportSetting < ActiveRecord::Base
           :scanned_date =>'',
           :warehouse_name =>''
         }
-        CSV.open("#{Rails.root}/public/csv/#{filename}","w") do |csv|
-          csv << row_map.keys
-          orders.each do |order|
-            order_items = order.order_items
-            unless order_items.empty?
-              previous_row = row_map.dup
-              order_items.each do |order_item|
-                if self.order_export_type == 'order_with_serial_lot'
-                  unless order_item.product.primary_barcode.nil?
-                    product = order_item.product
-                    serials = OrderSerial.where(:product_id=>product.id)
-                    unless serials.empty?
-                      serials.each do |serial|
-                        single_row = row_map.dup
-                        single_row = calculate_row_data(single_row, order_item)
-                        single_row[:serial_number] = serial.serial
-                        
-                        csv << single_row.values
-                      end
-                    else
-                      lot_number = order_item.get_lot_number(order_item.product.primary_barcode)
-                      unless lot_number.nil?
-                        single_row = row_map.dup
-                        single_row = calculate_row_data(single_row, order_item)
-
-                        csv << single_row.values
-                      end
-                    end
-                  else
-                    next
-                  end
-                else
-                  product = order_item.product
-                  serials = OrderSerial.where(:product_id=>product.id)
+        order_hash_array = []
+        order_hash = {:order_date=>"order_date", :order_number=>"order_number",
+             :barcode_with_lot=>"barcode_with_lot", :barcode=>"barcode",
+             :lot_number=>"lot_number", :primary_sku=>"primary_sku",
+             :serial_number=>"serial_number", :product_name=>"product_name",
+             :packing_user=>"packing_user", :order_item_count=>"order_item_count",
+             :scanned_date=>"scanned_date", :warehouse_name=>"warehouse_name"}
+        order_hash_array.push(order_hash)
+        orders.each do |order|
+          order_items = order.order_items
+          unless order_items.empty?
+            order_items.each do |order_item|
+              serials = OrderSerial.where(:product_id=>order_item.product.id, :order_id=>order_item.order.id)
+              if self.order_export_type == 'order_with_serial_lot'
+                lot_number = order_item.get_lot_number(order_item.product.primary_barcode)
+                unless serials.empty? && lot_number.nil?
                   unless serials.empty?
                     serials.each do |serial|
                       single_row = row_map.dup
                       single_row = calculate_row_data(single_row, order_item)
                       single_row[:serial_number] = serial.serial
                       
-                      if (single_row[:order_number] == previous_row[:order_number] &&
-                        single_row[:scanned_date] == previous_row[:scanned_date] &&
-                        single_row[:packing_user] == previous_row[:packing_user] &&
-                        single_row[:warehouse_name] == previous_row[:warehouse_name] &&
-                        single_row[:barcode_with_lot] == previous_row[:barcode_with_lot] &&
-                        single_row[:barcode] == previous_row[:barcode] &&
-                        single_row[:lot_number] == previous_row[:lot_number] &&
-                        single_row[:product_name] == previous_row[:product_name] &&
-                        single_row[:primary_sku] == previous_row[:primary_sku])
-                        single_row[:order_item_count] = single_row[:order_item_count].to_i + previous_row[:order_item_count].to_i
-                      end
-                      previous_row = single_row
-                      csv << single_row.values
+                      order_hash = {:order_date=>single_row[:order_date], :order_number=>single_row[:order_number],
+                       :barcode_with_lot=>single_row[:barcode_with_lot], :barcode=>single_row[:barcode],
+                       :lot_number=>single_row[:lot_number], :primary_sku=>single_row[:primary_sku],
+                       :serial_number=>single_row[:serial_number], :product_name=>single_row[:product_name],
+                       :packing_user=>single_row[:packing_user], :order_item_count=>single_row[:order_item_count],
+                       :scanned_date=>single_row[:scanned_date], :warehouse_name=>single_row[:warehouse_name]}
+                      order_hash_array.push(order_hash)
                     end
                   else
+                    unless lot_number.nil?
+                      single_row = row_map.dup
+                      single_row = calculate_row_data(single_row, order_item)
+
+                      order_hash = {:order_date=>single_row[:order_date], :order_number=>single_row[:order_number],
+                       :barcode_with_lot=>single_row[:barcode_with_lot], :barcode=>single_row[:barcode],
+                       :lot_number=>single_row[:lot_number], :primary_sku=>single_row[:primary_sku],
+                       :serial_number=>single_row[:serial_number], :product_name=>single_row[:product_name],
+                       :packing_user=>single_row[:packing_user], :order_item_count=>single_row[:order_item_count],
+                       :scanned_date=>single_row[:scanned_date], :warehouse_name=>single_row[:warehouse_name]}
+                      order_hash_array.push(order_hash)
+                    end
+                  end
+                else
+                  next
+                end
+              else
+                unless serials.empty?
+                  serials.each do |serial|
                     single_row = row_map.dup
                     single_row = calculate_row_data(single_row, order_item)
+                    single_row[:serial_number] = serial.serial
                     
-                    if (single_row[:order_number] == previous_row[:order_number] &&
-                      single_row[:scanned_date] == previous_row[:scanned_date] &&
-                      single_row[:packing_user] == previous_row[:packing_user] &&
-                      single_row[:warehouse_name] == previous_row[:warehouse_name] &&
-                      single_row[:barcode_with_lot] == previous_row[:barcode_with_lot] &&
-                      single_row[:barcode] == previous_row[:barcode] &&
-                      single_row[:lot_number] == previous_row[:lot_number] &&
-                      single_row[:product_name] == previous_row[:product_name] &&
-                      single_row[:primary_sku] == previous_row[:primary_sku])
-                      single_row[:order_item_count] = single_row[:order_item_count].to_i + previous_row[:order_item_count].to_i
+                    duplicate_orders = order_hash_array.select {|duplicate_order| duplicate_order[:order_number] == single_row[:order_number] && duplicate_order[:primary_sku] == single_row[:primary_sku]}                      
+                    unless duplicate_orders.empty?
+                      duplicate_order = duplicate_orders.first
+                      duplicate_order[:order_item_count] = duplicate_order[:order_item_count].to_i + single_row[:order_item_count].to_i
+                    else
+                      order_hash = {:order_date=>single_row[:order_date], :order_number=>single_row[:order_number],
+                       :barcode_with_lot=>single_row[:barcode_with_lot], :barcode=>single_row[:barcode],
+                       :lot_number=>single_row[:lot_number], :primary_sku=>single_row[:primary_sku],
+                       :serial_number=>single_row[:serial_number], :product_name=>single_row[:product_name],
+                       :packing_user=>single_row[:packing_user], :order_item_count=>single_row[:order_item_count],
+                       :scanned_date=>single_row[:scanned_date], :warehouse_name=>single_row[:warehouse_name]}
+                      order_hash_array.push(order_hash)
                     end
-                    previous_row = single_row
-                    csv << single_row.values
+                  end
+                else
+                  single_row = row_map.dup
+                  single_row = calculate_row_data(single_row, order_item)
+                  
+                  duplicate_orders = order_hash_array.select {|duplicate_order| duplicate_order[:order_number] == single_row[:order_number] && duplicate_order[:primary_sku] == single_row[:primary_sku]}                      
+                  unless duplicate_orders.empty?
+                    duplicate_order = duplicate_orders.first
+                    duplicate_order[:order_item_count] = duplicate_order[:order_item_count].to_i + single_row[:order_item_count].to_i
+                  else
+                    order_hash = {:order_date=>single_row[:order_date], :order_number=>single_row[:order_number],
+                     :barcode_with_lot=>single_row[:barcode_with_lot], :barcode=>single_row[:barcode],
+                     :lot_number=>single_row[:lot_number], :primary_sku=>single_row[:primary_sku],
+                     :serial_number=>single_row[:serial_number], :product_name=>single_row[:product_name],
+                     :packing_user=>single_row[:packing_user], :order_item_count=>single_row[:order_item_count],
+                     :scanned_date=>single_row[:scanned_date], :warehouse_name=>single_row[:warehouse_name]}
+                    order_hash_array.push(order_hash)
                   end
                 end
               end
             end
           end
         end
+        
+        CSV.open("#{Rails.root}/public/csv/#{filename}","w") do |csv|
+          show_lot_number = false
+          show_serial_number = false
+          for i in 1..order_hash_array.size-1
+            unless order_hash_array[i][:lot_number].nil? || order_hash_array[i][:lot_number]==""
+              show_lot_number = true
+              break
+            end
+          end
+
+          for i in 1..order_hash_array.size-1
+            unless order_hash_array[i][:serial_number].nil? || order_hash_array[i][:serial_number]==""
+              show_serial_number = true
+              break
+            end
+          end
+
+          if show_serial_number==false && show_lot_number==false
+            csv_row_map = {
+              :order_date =>'',
+              :order_number => '',
+              :barcode =>'',
+              :primary_sku =>'',
+              :product_name=>'',
+              :packing_user =>'',
+              :order_item_count => '',
+              :scanned_date =>'',
+              :warehouse_name =>''
+            }
+          elsif show_serial_number==false && show_lot_number==true
+            csv_row_map = {
+              :order_date =>'',
+              :order_number => '',
+              :barcode_with_lot => '',
+              :barcode =>'',
+              :lot_number =>'',
+              :primary_sku =>'',
+              :product_name=>'',
+              :packing_user =>'',
+              :order_item_count => '',
+              :scanned_date =>'',
+              :warehouse_name =>''
+            }
+          elsif show_serial_number==true && show_lot_number==false
+            csv_row_map = {
+              :order_date =>'',
+              :order_number => '',
+              :barcode =>'',
+              :primary_sku =>'',
+              :serial_number =>'',
+              :product_name=>'',
+              :packing_user =>'',
+              :order_item_count => '',
+              :scanned_date =>'',
+              :warehouse_name =>''
+            }
+          else
+            csv_row_map = {
+              :order_date =>'',
+              :order_number => '',
+              :barcode_with_lot => '',
+              :barcode =>'',
+              :lot_number =>'',
+              :primary_sku =>'',
+              :serial_number =>'',
+              :product_name=>'',
+              :packing_user =>'',
+              :order_item_count => '',
+              :scanned_date =>'',
+              :warehouse_name =>''
+            }
+          end
+
+          order_hash_array.each do |order_hash|
+            single_row = csv_row_map.dup
+            for i in 0..single_row.size
+              single_row[csv_row_map.keys[i]] = order_hash[csv_row_map.keys[i]]
+            end
+            csv << single_row.values
+          end
+        end
       else
         row_map = {
           :order_date =>'',
           :order_number => '',
+          :scanned_qty => '',
           :packing_user =>'',
           :scanned_date =>''
         }
@@ -204,6 +300,7 @@ class ExportSetting < ActiveRecord::Base
           orders.each do |order|
             single_row = row_map.dup
             single_row[:order_number] = order.increment_id
+            single_row[:scanned_qty] = order.scanned_items_count
             single_row[:order_date] = order.order_placed_time
             single_row[:scanned_date] = order.scanned_on
             packing_user = nil
@@ -214,7 +311,7 @@ class ExportSetting < ActiveRecord::Base
             csv << single_row.values
           end
         end
-      end  
+      end
     end
 
     unless result['status']
@@ -236,9 +333,9 @@ class ExportSetting < ActiveRecord::Base
       single_row[:packing_user] = packing_user.name + ' ('+packing_user.username+')'
       single_row[:warehouse_name] =  order_item.product.primary_warehouse.inventory_warehouse.name unless order_item.product.primary_warehouse.nil? || order_item.product.primary_warehouse.inventory_warehouse.nil?
     end
-    single_row[:barcode_with_lot] = order_item.product.primary_barcode
-    single_row[:barcode] = order_item.get_barcode_without_lotnumber(order_item.product.primary_barcode)
     single_row[:lot_number] = order_item.get_lot_number(order_item.product.primary_barcode)
+    single_row[:barcode_with_lot] = order_item.get_barcode_with_lotnumber(order_item.product.primary_barcode,single_row[:lot_number]) unless single_row[:lot_number].nil?
+    single_row[:barcode] = order_item.product.primary_barcode
     single_row[:product_name] = order_item.product.name
     single_row[:primary_sku] =  order_item.product.primary_sku
     single_row[:order_item_count] = order_item.qty

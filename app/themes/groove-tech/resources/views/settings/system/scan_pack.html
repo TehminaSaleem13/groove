@@ -67,6 +67,12 @@
                     </div>
                 </div>
 
+                <div class="form-group" ng-show="scan_pack.settings.escape_string_enabled">
+                    <label class="control-label col-sm-3">{{translations.labels.lot_number}}</label>
+                    <div class="controls col-sm-2 form-inline">
+                        <div toggle-switch ng-model="scan_pack.settings.record_lot_number" groov-click="update_settings()"></div>
+                    </div>
+                </div>
             </fieldset>
         </div>
     </div>

@@ -242,6 +242,11 @@ module ScanPackHelper
                         #process product barcode scan
                         order_item_kit_product =
                             OrderItemKitProduct.find(child_item['kit_product_id'])
+                        if scanpack_settings.record_lot_number
+                          product_barcode = order_item_kit_product.order_item.product.product_barcodes.where(barcode: barcode.barcode).first
+                          product_barcode.lot_number = calculate_lot_number(scanpack_settings, input)
+                          product_barcode.save
+                        end
 
                         unless order_item_kit_product.nil?
                           if child_item['record_serial']
@@ -271,7 +276,12 @@ module ScanPackHelper
                   barcode_found = true
                   #process product barcode scan
                   order_item = OrderItem.find(item['order_item_id'])
-
+                  if scanpack_settings.record_lot_number
+                    product_barcode = order_item.product.product_barcodes.where(barcode: barcode.barcode).first
+                    product_barcode.lot_number = calculate_lot_number(scanpack_settings, input)
+                    product_barcode.save
+                  end
+                  
                   unless order_item.nil?
                     if item['record_serial']
                       if serial_added
@@ -334,6 +344,10 @@ module ScanPackHelper
     end
 
     return result
+  end
+
+  def calculate_lot_number(scanpack_settings, input)
+    return input.slice((input.index(scanpack_settings.escape_string)+scanpack_settings.escape_string.length)..(input.length-1))
   end
 
   def scan_recording(input,state,id)
