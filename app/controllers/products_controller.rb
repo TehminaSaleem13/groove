@@ -1382,7 +1382,7 @@ class ProductsController < ApplicationController
 
           #image_directory = "public/images"
           current_tenant = Apartment::Tenant.current_tenant
-          file_name = Time.now.strftime('%d_%b_%Y_%I__%M_%p')+@product.id+params[:product_image].original_filename
+          file_name = Time.now.strftime('%d_%b_%Y_%I__%M_%p')+@product.id.to_s+params[:product_image].original_filename
           GroovS3.create_image(current_tenant,file_name,params[:product_image].read,params[:product_image].content_type)
           #path = File.join(image_directory, file_name )
           #File.open(path, "wb") { |f| f.write(params[:product_image].read) }
