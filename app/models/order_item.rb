@@ -343,16 +343,16 @@ class OrderItem < ActiveRecord::Base
   end
 
   def get_lot_number(barcode)
-    scanpack_settings = ScanPackSetting.all.first
-    return barcode.slice(barcode.index(scanpack_settings.escape_string)..(barcode.length-1)) unless barcode.index(scanpack_settings.escape_string).nil? || scanpack_settings.escape_string.nil?
+    product_barcodes = self.product.product_barcodes.where(barcode: barcode) unless self.product.product_barcodes.empty?
+    unless product_barcodes.empty?
+      return product_barcodes.first.lot_number
+    end
   end
 
-  def get_barcode_without_lotnumber(barcode)
+  def get_barcode_with_lotnumber(barcode,lot_number)
     scanpack_settings = ScanPackSetting.all.first
-    unless scanpack_settings.escape_string.nil? || barcode.index(scanpack_settings.escape_string).nil?
-      return barcode.slice(0..(barcode.index(scanpack_settings.escape_string)-1))
-    else
-      return barcode
+    unless scanpack_settings.escape_string.nil?
+      return barcode + scanpack_settings.escape_string + lot_number
     end
   end
 

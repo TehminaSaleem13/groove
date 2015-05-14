@@ -215,6 +215,7 @@ module ScanPackHelper
         escape_string = ''
         if scanpack_settings.escape_string_enabled && !input.index(scanpack_settings.escape_string).nil?
           clean_input = input.slice(0..(input.index(scanpack_settings.escape_string)-1))
+          lot_number = input.slice((input.index(scanpack_settings.escape_string)+scanpack_settings.escape_string.length)..(input.length-1))
         else
           clean_input = input
         end
@@ -242,6 +243,9 @@ module ScanPackHelper
                         #process product barcode scan
                         order_item_kit_product =
                             OrderItemKitProduct.find(child_item['kit_product_id'])
+                        product_barcode = order_item_kit_product.order_item.product.product_barcodes.where(barcode: barcode.barcode).first
+                        product_barcode.lot_number = lot_number
+                        product_barcode.save
 
                         unless order_item_kit_product.nil?
                           if child_item['record_serial']
@@ -271,7 +275,9 @@ module ScanPackHelper
                   barcode_found = true
                   #process product barcode scan
                   order_item = OrderItem.find(item['order_item_id'])
-
+                  product_barcode = order_item.product.product_barcodes.where(barcode: barcode.barcode).first
+                  product_barcode.lot_number = lot_number
+                  product_barcode.save
                   unless order_item.nil?
                     if item['record_serial']
                       if serial_added

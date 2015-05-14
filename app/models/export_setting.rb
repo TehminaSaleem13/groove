@@ -334,9 +334,9 @@ class ExportSetting < ActiveRecord::Base
       single_row[:packing_user] = packing_user.name + ' ('+packing_user.username+')'
       single_row[:warehouse_name] =  order_item.product.primary_warehouse.inventory_warehouse.name unless order_item.product.primary_warehouse.nil? || order_item.product.primary_warehouse.inventory_warehouse.nil?
     end
-    single_row[:barcode_with_lot] = order_item.product.primary_barcode
-    single_row[:barcode] = order_item.get_barcode_without_lotnumber(order_item.product.primary_barcode)
     single_row[:lot_number] = order_item.get_lot_number(order_item.product.primary_barcode)
+    single_row[:barcode_with_lot] = order_item.get_barcode_with_lotnumber(order_item.product.primary_barcode,single_row[:lot_number]) unless single_row[:lot_number].nil?
+    single_row[:barcode] = order_item.product.primary_barcode
     single_row[:product_name] = order_item.product.name
     single_row[:primary_sku] =  order_item.product.primary_sku
     single_row[:order_item_count] = order_item.qty
