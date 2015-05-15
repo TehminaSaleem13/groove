@@ -24,10 +24,17 @@
           status: "started",
           coupon_id: params[:coupon_id]) 
       if @subscription
-        @subscription.save_with_payment(ENV['ONE_TIME_PAYMENT'])
+        if !params[:shopify_shop_name].nil? &&
+            params[:shopify_shop_name] != ''
+          one_time_payment = 0
+        else
+          one_time_payment = ENV['ONE_TIME_PAYMENT']
+        end
+        @subscription.save_with_payment(one_time_payment)
         if @subscription.status == 'completed'
           #for shopify create the store and send for authentication
-          if params[:shopify_shop_name]
+          if !params[:shopify_shop_name].nil? &&
+            params[:shopify_shop_name] != ''
             #switch tenant
             Apartment::Tenant.switch(@subscription.tenant_name)
             store = Store.create(
