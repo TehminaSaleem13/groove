@@ -281,7 +281,7 @@ class ExportSetting < ActiveRecord::Base
 
           order_hash_array.each do |order_hash|
             single_row = csv_row_map.dup
-            for i in 0..single_row.size
+            for i in 0..single_row.size-1
               single_row[csv_row_map.keys[i]] = order_hash[csv_row_map.keys[i]]
             end
             csv << single_row.values
