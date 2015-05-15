@@ -347,7 +347,9 @@ module ScanPackHelper
   end
 
   def calculate_lot_number(scanpack_settings, input)
-    return input.slice((input.index(scanpack_settings.escape_string)+scanpack_settings.escape_string.length)..(input.length-1))
+    if scanpack_settings.escape_string_enabled && !input.index(scanpack_settings.escape_string).nil?
+      return input.slice((input.index(scanpack_settings.escape_string)+scanpack_settings.escape_string.length)..(input.length-1))
+    end
   end
 
   def scan_recording(input,state,id)
