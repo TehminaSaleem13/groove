@@ -163,7 +163,7 @@ module Groovepacker
             result
           end
 
-          def import_order(shipstation_order, order)
+          def import_order(shipstation_order, order, credential)
             shipstation_order.increment_id = order["orderNumber"]
             shipstation_order.store_order_id = order["orderId"]
             shipstation_order.order_placed_time = order["orderDate"]
