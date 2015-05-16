@@ -236,6 +236,8 @@ class StoreSettingsController < ApplicationController
             @shipstation.shall_import_awaiting_shipment = params[:shall_import_awaiting_shipment]
             @shipstation.shall_import_shipped = params[:shall_import_shipped]
             @shipstation.warehouse_location_update = params[:warehouse_location_update]
+            @shipstation.shall_import_customer_notes = params[:shall_import_customer_notes]
+            @shipstation.shall_import_internal_notes = params[:shall_import_internal_notes]
             @store.shipstation_rest_credential = @shipstation
 
             begin

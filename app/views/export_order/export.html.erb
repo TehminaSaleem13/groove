@@ -25,8 +25,18 @@
         <% for i in 1..(@csv_data.size - 1) do %>
           <tr style="text-align:center;<%= ((i % 2) == 0 )? 'background:#dcdcdc;':''%>">
             <% if @csv_data[i] %>
-              <% @csv_data[i].each do |td| %>
-                <td><%=td%></td>
+              <% @csv_data[i].each_with_index do |td, td_index| %>
+                <% if i == (@csv_data.size - 1) %>
+                  <% if td_index == 0 %>
+                    <td style="border-bottom-left-radius:15px;-webkit-border-bottom-left-radius:15px;"><%=td%></td>
+                  <% elsif td_index == (@csv_data[i].size-1) %>
+                    <td style="border-bottom-right-radius:15px;-webkit-border-bottom-right-radius:15px;"><%=td%></td>
+                  <% else %>
+                    <td><%=td%></td>
+                  <% end %>
+                <% else %>
+                  <td><%=td%></td>
+                <% end %>
               <% end %>
             <% end %>
           </tr>
