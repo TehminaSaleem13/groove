@@ -165,9 +165,14 @@ groovepacks_services.factory('stores',['$http','notification','$filter',function
                         stores.single.api_secret = data.credentials.shipstation_rest_credentials.api_secret;
                         stores.single.shall_import_awaiting_shipment = data.credentials.shipstation_rest_credentials.shall_import_awaiting_shipment;
                         stores.single.shall_import_shipped = data.credentials.shipstation_rest_credentials.shall_import_shipped;
+                        stores.single.shall_import_customer_notes = 
+                            data.credentials.shipstation_rest_credentials.shall_import_customer_notes;
+                        stores.single.shall_import_internal_notes = 
+                            data.credentials.shipstation_rest_credentials.shall_import_internal_notes;
                         stores.single.warehouse_location_update = data.credentials.shipstation_rest_credentials.warehouse_location_update;
                         stores.single.gp_ready_tag_name = data.credentials.shipstation_rest_credentials.gp_ready_tag_name;
                         stores.single.gp_imported_tag_name = data.credentials.shipstation_rest_credentials.gp_imported_tag_name;
+                        //shall_import_customer_notes
                     } else if(data.store.store_type == 'Shipworks') {
                         stores.single.auth_token = data.credentials.shipworks_credentials.auth_token;
                         stores.single.import_store_order_number = data.credentials.shipworks_credentials.import_store_order_number

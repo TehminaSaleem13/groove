@@ -80,3 +80,24 @@
       </div>
     </div>
   </div>
+  <div class="row">
+    <div class="col-md-6">
+      <legend>Import Notes</legend>
+      <div class="form-group">
+        <label class="control-label col-md-4">Import Internal Notes</label>
+        <div class="controls col-md-8">
+          <div toggle-switch ng-model="stores.single.shall_import_internal_notes" groov-click="update_single_store()"></div>
+          <i class="pull-right icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" popover="Notes enabled here will be imported along with the orders.&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+          &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+          You should also turn on the show internal notes and show customer notes in the Scan Pack settings to view the notes while scanning and packing"></i>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="control-label col-md-4">Import Customer Notes</label>
+        <div class="controls col-md-8">
+          <div toggle-switch ng-model="stores.single.shall_import_customer_notes" groov-click="update_single_store()"></div>
+        </div>
+      </div>
+    </div>
+  </div>

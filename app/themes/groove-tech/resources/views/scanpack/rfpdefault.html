@@ -26,8 +26,13 @@
                 <div class="well-heading">
                     <span>{{ unscanned_count }} Items Left</span>
                 </div>
-                <div class="well-main alert alert-info" ng-show="data.order.notes_toPacker.length">
+                <div class="well-main alert alert-acknowledge" 
+                    ng-show="data.scan_pack_settings.show_internal_notes &&data.order.notes_toPacker.length">
                     <h4>{{data.order.notes_toPacker}}</h4>
+                </div>
+                <div class="well-main alert alert-acknowledge" 
+                    ng-show="data.scan_pack_settings.show_customer_notes && data.order.customer_comments.length">
+                    <h4>{{data.order.customer_comments}}</h4>
                 </div>
                 <div class="row" ng-repeat="unscanned_item in data.order.unscanned_items">
                     <div class="media">

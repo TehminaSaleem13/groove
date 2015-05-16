@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150514150313) do
+ActiveRecord::Schema.define(:version => 20150516115811) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0, :null => false
@@ -590,6 +590,8 @@ ActiveRecord::Schema.define(:version => 20150514150313) do
     t.string   "escape_string",                 :default => " - "
     t.boolean  "escape_string_enabled",         :default => false
     t.boolean  "record_lot_number",             :default => false
+    t.boolean  "show_customer_notes",           :default => false
+    t.boolean  "show_internal_notes",           :default => false
   end
 
   create_table "shipstation_credentials", :force => true do |t|
@@ -611,6 +613,8 @@ ActiveRecord::Schema.define(:version => 20150514150313) do
     t.boolean  "shall_import_awaiting_shipment", :default => true
     t.boolean  "shall_import_shipped",           :default => false
     t.boolean  "warehouse_location_update",      :default => false
+    t.boolean  "shall_import_customer_notes",    :default => false
+    t.boolean  "shall_import_internal_notes",    :default => false
   end
 
   create_table "shipworks_credentials", :force => true do |t|

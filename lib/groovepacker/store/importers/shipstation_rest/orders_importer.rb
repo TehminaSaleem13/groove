@@ -72,7 +72,7 @@ module Groovepacker
 
                     unless shipstation_order.nil?
                       ship_to = order["shipTo"]["name"].split(" ")
-                      import_order(shipstation_order, order)
+                      import_order(shipstation_order, order, credential)
                       shipstation_order.tracking_num = client.get_tracking_number(order["orderNumber"])
                       unless order["items"].nil?
                         import_item.current_order_items = order["items"].length
@@ -163,7 +163,7 @@ module Groovepacker
             result
           end
 
-          def import_order(shipstation_order, order)
+          def import_order(shipstation_order, order, credential)
             shipstation_order.increment_id = order["orderNumber"]
             shipstation_order.store_order_id = order["orderId"]
             shipstation_order.order_placed_time = order["orderDate"]
@@ -175,18 +175,41 @@ module Groovepacker
                 shipstation_order.firstname = split_name.join(' ')
               end
 
-              shipstation_order.address_1 = order["shipTo"]["street1"] unless order["shipTo"]["street1"].nil?
-              shipstation_order.address_2 = order["shipTo"]["street2"] unless order["shipTo"]["street2"].nil?
-              shipstation_order.city = order["shipTo"]["city"] unless order["shipTo"]["city"].nil?
-              shipstation_order.state = order["shipTo"]["state"] unless order["shipTo"]["state"].nil?
-              shipstation_order.postcode = order["shipTo"]["postalCode"] unless order["shipTo"]["postalCode"].nil?
-              shipstation_order.country = order["shipTo"]["country"] unless order["shipTo"]["country"].nil?
+              shipstation_order.address_1 = 
+                order["shipTo"]["street1"] unless order["shipTo"]["street1"].nil?
+              
+              shipstation_order.address_2 = 
+                order["shipTo"]["street2"] unless order["shipTo"]["street2"].nil?
+              
+              shipstation_order.city = 
+                order["shipTo"]["city"] unless order["shipTo"]["city"].nil?
+              
+              shipstation_order.state = 
+                order["shipTo"]["state"] unless order["shipTo"]["state"].nil?
+              
+              shipstation_order.postcode = 
+                order["shipTo"]["postalCode"] unless order["shipTo"]["postalCode"].nil?
+              
+              shipstation_order.country = 
+                order["shipTo"]["country"] unless order["shipTo"]["country"].nil?
             end
 
-            shipstation_order.shipping_amount = order["shippingAmount"] unless order["shippingAmount"].nil?
-            shipstation_order.order_total = order["amountPaid"] unless order["amountPaid"].nil?
-            shipstation_order.notes_from_buyer = order["customerNotes"] unless order["customerNotes"].nil?
-            shipstation_order.weight_oz = order["weight"]["value"] unless order["weight"].nil? || order["weight"]["value"].nil?
+            shipstation_order.shipping_amount = 
+              order["shippingAmount"] unless order["shippingAmount"].nil?
+            
+            shipstation_order.order_total = 
+              order["amountPaid"] unless order["amountPaid"].nil?
+            
+            shipstation_order.notes_internal = 
+              order["internalNotes"] if credential.shall_import_internal_notes && 
+                !order["internalNotes"].nil?
+            
+            shipstation_order.customer_comments = 
+              order["customerNotes"] if credential.shall_import_customer_notes && 
+                !order["customerNotes"].nil?
+            
+            shipstation_order.weight_oz = 
+              order["weight"]["value"] unless order["weight"].nil? || order["weight"]["value"].nil?
           end
 
           def import_order_item(order_item, item)
