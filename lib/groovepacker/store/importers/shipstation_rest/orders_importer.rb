@@ -204,7 +204,7 @@ module Groovepacker
               order["internalNotes"] if credential.shall_import_internal_notes && 
                 !order["internalNotes"].nil?
             
-            shipstation_order.notes_from_buyer = 
+            shipstation_order.customer_comments = 
               order["customerNotes"] if credential.shall_import_customer_notes && 
                 !order["customerNotes"].nil?
             

@@ -30,6 +30,7 @@ groovepacks_controllers.
                                 $state.go(data.data.data['next_state'],{order_num: $stateParams.order_num});
                             }
                             $scope.set('order', data.data.data.order);
+                            $scope.set('scan_pack_settings', data.data.data.scan_pack_settings);
                         }
                     }).then(result.resolve);
                 }

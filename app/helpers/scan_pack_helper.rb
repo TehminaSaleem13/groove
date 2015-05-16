@@ -145,6 +145,7 @@ module ScanPackHelper
           single_order_result['next_state'] = 'scanpack.rfo'
         end
         result['data'] = single_order_result
+        result['data']['scan_pack_settings'] = scanpack_settings
       end
     else
       result['status'] &= false
@@ -341,6 +342,7 @@ module ScanPackHelper
         result['error_messages'].push('Could not save order with id: '+single_order.id)
       end
       result['data']['order'] = order_details_and_next_item(single_order)
+      result['data']['scan_pack_settings'] = scanpack_settings
     end
 
     return result
