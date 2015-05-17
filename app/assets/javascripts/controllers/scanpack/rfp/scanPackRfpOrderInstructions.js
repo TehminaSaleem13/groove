@@ -19,7 +19,7 @@ function($scope,$modalInstance,$timeout,order_data,confirm,scanPack){
             scanPack.order_instruction($scope.order.id,$scope.code.confirmation).then(function(data) {
                 $scope.code.confirmation = "";
                 $timeout($scope.focus_search,200);
-                if(data.data.status) {
+                if(data.data.confirmed) {
                     $modalInstance.close("finished");
                     confirm();
                 }

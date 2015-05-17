@@ -82,17 +82,13 @@ groovepacks_services.factory('scanPack',['$http','notification','$state',functio
         }).error(notification.server_error);
     };
 
-    var order_instruction = function(id,code) {
-        return $http.post('/scan_pack/confirmation_code.json',{id: id,code: code}).success(function(data) {
-            notification.notify(data.notice_messages,2);
-            notification.notify(data.success_messages,1);
-            notification.notify(data.error_messages,0);
-        }).error(notification.server_error);
-    };
-
     var code_confirm = function(code) {
         return $http.post('/scan_pack/confirmation_code.json',{code: code}).success(function(data) {
         }).error(notification.server_error);
+    };
+
+    var order_instruction = function(id,code) {
+        return code_confirm(code);
     };
 
     var type_scan = function(id,next_item,count) {
