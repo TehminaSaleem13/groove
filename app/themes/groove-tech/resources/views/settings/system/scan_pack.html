@@ -73,6 +73,21 @@
                         <div toggle-switch ng-model="scan_pack.settings.record_lot_number" groov-click="update_settings()"></div>
                     </div>
                 </div>
+
+                <div class="form-group">
+                    <label class="control-label col-sm-3">{{translations.labels.show_customer_notes}}</label>
+                    <div class="controls col-sm-3 col-md-2 form-inline">
+                        <div toggle-switch ng-model="scan_pack.settings.show_customer_notes" groov-click="update_settings()"></div>
+                        <i class="info icon-large glyphicon glyphicon-info-sign" style="padding-left:5px;" popover-trigger="mouseenter" groov-popover="{{translations.tooltips.show_customer_notes}}"></i>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-sm-3">{{translations.labels.show_internal_notes}}</label>
+                    <div class="controls col-sm-3 col-md-2 form-inline">
+                        <div toggle-switch ng-model="scan_pack.settings.show_internal_notes" groov-click="update_settings()"></div>
+                        <i class="info icon-large glyphicon glyphicon-info-sign" style="padding-left:5px;" popover-trigger="mouseenter" groov-popover="{{translations.tooltips.show_internal_notes}}"></i>
+                    </div>
+                </div>
             </fieldset>
         </div>
     </div>
@@ -146,18 +161,6 @@
                     <div class="info col-sm-2">
                         <a href="/settings/print_action_barcode/restart_code.pdf" target="_blank"><i class="icon-large glyphicon glyphicon-print"></i></a>&nbsp;
                         <i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" popover="{{translations.tooltips.restart_code}}"></i>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="control-label col-sm-3">Show Customer Notes</label>
-                    <div class="controls col-sm-2 col-md-1 form-inline">
-                        <div toggle-switch ng-model="scan_pack.settings.show_customer_notes" groov-click="update_settings()"></div>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="control-label col-sm-3">Show Internal Notes</label>
-                    <div class="controls col-sm-2 col-md-1 form-inline">
-                        <div toggle-switch ng-model="scan_pack.settings.show_internal_notes" groov-click="update_settings()"></div>
                     </div>
                 </div>
             </fieldset>

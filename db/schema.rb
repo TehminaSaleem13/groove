@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150516115811) do
+ActiveRecord::Schema.define(:version => 20150518082130) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0, :null => false
@@ -389,9 +389,9 @@ ActiveRecord::Schema.define(:version => 20150516115811) do
     t.string   "method"
     t.datetime "created_at",                                                               :null => false
     t.datetime "updated_at",                                                               :null => false
-    t.string   "notes_internal"
-    t.string   "notes_toPacker"
-    t.string   "notes_fromPacker"
+    t.text     "notes_internal"
+    t.text     "notes_toPacker"
+    t.text     "notes_fromPacker"
     t.boolean  "tracking_processed"
     t.string   "status"
     t.date     "scanned_on"
