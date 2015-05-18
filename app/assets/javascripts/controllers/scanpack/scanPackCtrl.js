@@ -53,6 +53,7 @@ groovepacks_controllers.
                 if(typeof data.data != "undefined") {
                     if(typeof data.data.order != "undefined") {
                         $scope.set('order',data.data.order);
+                        $scope.set('scan_pack_settings',data.data.scan_pack_settings);
                     }
                     if(typeof data.data.next_state != "undefined") {
                         if($state.current.name == data.data.next_state) {
