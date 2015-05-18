@@ -93,7 +93,7 @@ Groovepacks::Application.configure do
     :password => 'ckWnOifHhLOJRiqZQ-ZRKA',
     :openssl_verify_mode  => 'none'
   }
-  $redis = Redis.new(:host => 'localhost', :port=> 6379)
+  $redis = Redis.new(:host => 'groove-prod-1', :port=> 6379)
   # Log the query plan for queries taking more than this (works
   # with SQLite, MySQL, and PostgreSQL)
   ENV['AMAZON_MWS_ACCESS_KEY_ID'] = "AKIAJ4VZ2GY7HZUL277Q"
