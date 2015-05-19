@@ -75,15 +75,15 @@ class ExportSetting < ActiveRecord::Base
     end_time = nil
     unless self.manual_export
       if self.export_orders_option == 'on_same_day'
-        start_time = Time.now.beginning_of_day
-        end_time = Time.now
+        start_time = Time.zone.now.beginning_of_day
+        end_time = Time.zone.now
       else
         unless self.last_exported.nil?
           start_time = self.last_exported
-          end_time = Time.now
+          end_time = Time.zone.now
         else
           start_time = '2000-01-01 00:00:00'
-          end_time = Time.now
+          end_time = Time.zone.now
         end
       end
     else
