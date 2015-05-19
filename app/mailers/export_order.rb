@@ -10,7 +10,13 @@ class ExportOrder < ActionMailer::Base
       @counts = nil
     end
     filename = export_settings.export_data
+    @tenant_name = tenant
     @csv_data = CSV.read("#{Rails.root}/public/csv/#{filename}")
+    @csv_data.first.each_with_index do |value, index|
+      if value == 'order_number'
+        @order_number = index
+      end
+    end
 
     attachments["#{filename}"] = File.read("#{Rails.root}/public/csv/#{filename}")
     mail to: export_settings.order_export_email,
