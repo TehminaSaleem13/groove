@@ -26,16 +26,23 @@
           <tr style="text-align:center;<%= ((i % 2) == 0 )? 'background:#dcdcdc;':''%>">
             <% if @csv_data[i] %>
               <% @csv_data[i].each_with_index do |td, td_index| %>
-                <% if i == (@csv_data.size - 1) %>
-                  <% if td_index == 0 %>
-                    <td style="border-bottom-left-radius:15px;-webkit-border-bottom-left-radius:15px;"><%=td%></td>
-                  <% elsif td_index == (@csv_data[i].size-1) %>
-                    <td style="border-bottom-right-radius:15px;-webkit-border-bottom-right-radius:15px;"><%=td%></td>
+                <% if td_index == @order_number %>
+                  <% order=Order.where(increment_id: td).first %>
+                  <td>
+                    <a href="https://<%=@tenant_name%>.groovepacker.com/#/orders/scanned/1/<%= order.id%>" style="font-weight:bold; color:#66A909;"><%= td %></a>
+                  </td>
+                <% else %>
+                  <% if i == (@csv_data.size - 1) %>
+                    <% if td_index == 0 %>
+                      <td style="border-bottom-left-radius:15px;-webkit-border-bottom-left-radius:15px;"><%=td%></td>
+                    <% elsif td_index == (@csv_data[i].size-1) %>
+                      <td style="border-bottom-right-radius:15px;-webkit-border-bottom-right-radius:15px;"><%=td%></td>
+                    <% else %>
+                      <td><%=td%></td>
+                    <% end %>
                   <% else %>
                     <td><%=td%></td>
                   <% end %>
-                <% else %>
-                  <td><%=td%></td>
                 <% end %>
               <% end %>
             <% end %>

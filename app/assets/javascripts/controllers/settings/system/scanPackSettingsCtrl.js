@@ -32,7 +32,9 @@ function( $scope, $http, $timeout, $location, $state, $cookies, scanPack,groov_t
                 "restart_code":"",
                 "type_scan_code":"",
                 "escape_string":"",
-                "lot_number":""
+                "lot_number":"",
+                "show_customer_notes":"",
+                "show_internal_notes":""
             },
             "tooltips" :{
                 "enable_click_sku":"",
@@ -45,7 +47,9 @@ function( $scope, $http, $timeout, $location, $state, $cookies, scanPack,groov_t
                 "type_scan_code":"",
                 "type_in_counts":"",
                 "escape_string":"",
-                "ask_post_scanning_functions":""
+                "ask_post_scanning_functions":"",
+                "show_internal_notes":"",
+                "show_customer_notes":""
             }
         };
         groov_translator.translate('settings.system.scan_pack',$scope.translations);
