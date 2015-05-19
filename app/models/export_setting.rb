@@ -297,7 +297,8 @@ class ExportSetting < ActiveRecord::Base
           :order_number => '',
           :scanned_qty => '',
           :packing_user =>'',
-          :scanned_date =>''
+          :scanned_date =>'',
+          :click_scanned_qty =>''
         }
         CSV.open("#{Rails.root}/public/csv/#{filename}","w") do |csv|
           csv << row_map.keys
@@ -311,6 +312,13 @@ class ExportSetting < ActiveRecord::Base
             packing_user = User.find(order.packing_user_id) unless order.packing_user_id.blank?
             unless packing_user.nil?
               single_row[:packing_user] = packing_user.name + ' ('+packing_user.username+')'
+            end
+            order_items = order.order_items
+            unless order_items.empty?
+              single_row[:click_scanned_qty] = 0
+              order_items.each do |order_item|
+                single_row[:click_scanned_qty] += order_item.clicked_qty
+              end
             end
             csv << single_row.values
           end
