@@ -6,6 +6,7 @@
     <p>This invoice is to let you know that billing for your GroovePacker, at <i><%=@tenant_name%>.groovepacker.com</i> was successful and your account is all paid up,</p>
     <p>No further action is required at this time.</p>
     <p>Your current GroovePacker Plan is <b><%=@invoice.plan_id%></b> </p>
+    <p>Your account email is: <b><%=@email%></b></p>
     <p>The amount of the invoice is: <b><%=@invoice.amount%></b></p>
     <p>This invoice is for the following billing period:</p>
     <p><b><%=@invoice.period_start.strftime('%B %d, %Y')%></b> to <b><%=@invoice.period_end.strftime('%B %d, %Y')%></b></p>
