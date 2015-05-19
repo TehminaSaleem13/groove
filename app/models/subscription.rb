@@ -38,6 +38,7 @@ class Subscription < ActiveRecord::Base
         end
         if one_time_payment == 0
           customer = Stripe::Customer.create(
+          :card => self.stripe_user_token,
           :email => self.email,
           :plan => self.subscription_plan_id,
           :account_balance => one_time_payment
