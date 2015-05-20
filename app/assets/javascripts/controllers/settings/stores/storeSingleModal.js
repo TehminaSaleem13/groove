@@ -331,7 +331,6 @@ function(scope, store_data, $window, $sce, $interval, $state, $stateParams, $mod
     };
 
     scope.export_active_products = function() {
-        console.log('export_active_products');
         $window.open('/store_settings/export_active_products.csv');
     };
 

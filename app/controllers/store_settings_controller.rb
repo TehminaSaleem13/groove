@@ -1005,7 +1005,84 @@ class StoreSettingsController < ApplicationController
   end
 
   def export_active_products
-    puts "in export_active_products!!!"
+    require 'csv'
+    result = Hash.new
+    result['status'] = true
+    result['messages'] = []
+    
+    products = Store.where(store_type: 'ShipStation API 2').first.products.where(status: 'active') unless Store.where(store_type: 'ShipStation API 2').first.nil?
+    unless products.empty?
+      filename = 'groove-products-'+Time.now.to_s+'.csv'
+      row_map = {
+          :SKU => '',
+          :Name => '',
+          :WarehouseLocation =>'',
+          :WeightOz =>'',
+          :Category =>'',
+          :Tag1 =>'',
+          :Tag2 =>'',
+          :Tag3 =>'',
+          :Tag4 =>'',
+          :Tag5 =>'',
+          :CustomsDescription =>'',
+          :CustomsValue =>'',
+          :CustomsTariffNo =>'',
+          :CustomsCountry =>'',
+          :ThumbnailUrl =>'',
+          :UPC =>'',
+          :FillSKU =>'',
+          :Length =>'',
+          :Width =>'',
+          :Height =>'',
+          :UseProductName =>'',
+          :Active =>''
+      }
+      data = CSV.generate do |csv|
+        csv << row_map.keys
+
+        products.each do |product|
+          single_row = row_map.dup
+          single_row[:SKU] = product.primary_sku
+          single_row[:Name] = product.name
+          single_row[:WarehouseLocation] = product.primary_warehouse.location
+          single_row[:WeightOz] = product.weight.to_s
+          single_row[:Category] = product.primary_category
+          single_row[:Tag1] = ''
+          single_row[:Tag2] = ''
+          single_row[:Tag3] = ''
+          single_row[:Tag4] = ''
+          single_row[:Tag5] = ''
+          single_row[:CustomsDescription] = ''
+          single_row[:CustomsValue] = ''
+          single_row[:CustomsTariffNo] = ''
+          single_row[:CustomsCountry] = product.order_items.first.order.country unless product.order_items.first.order.nil? || product.order_items.empty?
+          single_row[:ThumbnailUrl] = product.primary_image
+          single_row[:UPC] = product.primary_barcode
+          single_row[:FillSKU] = ''
+          single_row[:Length] = ''
+          single_row[:Width] = ''
+          single_row[:Height] = ''
+          single_row[:UseProductName] = ''
+          single_row[:Active] = product.is_active
+
+          csv << single_row.values
+        end
+      end
+    else
+
+    end
+
+    unless result['status']
+      data = CSV.generate do |csv|
+        csv << result['messages']
+      end
+      filename = 'error.csv'
+    end
+
+    respond_to do |format|
+      format.html # show.html.erb
+      format.csv { send_data  data, :type => 'text/csv', :filename => filename }
+    end
   end
 end
 
