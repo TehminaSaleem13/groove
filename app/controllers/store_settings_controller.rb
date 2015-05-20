@@ -1010,7 +1010,7 @@ class StoreSettingsController < ApplicationController
     result['status'] = true
     result['messages'] = []
     
-    products = Store.where(store_type: 'ShipStation API 2').first.products.where(status: 'active') unless Store.where(store_type: 'ShipStation API 2').first.nil?
+    products = Product.where(status: 'active')
     unless products.empty?
       filename = 'groove-products-'+Time.now.to_s+'.csv'
       row_map = {
@@ -1044,8 +1044,8 @@ class StoreSettingsController < ApplicationController
           single_row = row_map.dup
           single_row[:SKU] = product.primary_sku
           single_row[:Name] = product.name
-          single_row[:WarehouseLocation] = product.primary_warehouse.location
-          single_row[:WeightOz] = product.weight.to_s
+          single_row[:WarehouseLocation] = product.primary_warehouse.location_primary
+          single_row[:WeightOz] = product.get_weight.round.to_s
           single_row[:Category] = product.primary_category
           single_row[:Tag1] = ''
           single_row[:Tag2] = ''
