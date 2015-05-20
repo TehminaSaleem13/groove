@@ -52,11 +52,13 @@
     </table>
     
     <%if @counts %>
-    <p>Order imported today: <%=@counts['imported']%></p>
-    <p>Order scanned today: <%=@counts['scanned']%></p>
-    <p>Today's Order Remaining Awaiting: <%=@counts['awaiting']%></p>
-    <p>Today's Order Remaining On Hold: <%=@counts['onhold']%></p>
-    <p>Today's Order Remaining Cancelled: <%=@counts['cancelled']%></p>
+      <p>Order imported today: <%=@counts['imported']%></p>
+      <p>Order scanned today: <%=@counts['scanned']%></p>
+      <% if @counts['imported'] > 0 %>
+        <p>Today's Order Remaining Awaiting: <%=@counts['awaiting']%></p>
+        <p>Today's Order Remaining On Hold: <%=@counts['onhold']%></p>
+        <p>Today's Order Remaining Cancelled: <%=@counts['cancelled']%></p>
+      <% end %>
     <% end %>
   </div>
 </div>
