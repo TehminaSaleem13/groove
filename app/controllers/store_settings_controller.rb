@@ -1055,7 +1055,7 @@ class StoreSettingsController < ApplicationController
           single_row[:CustomsDescription] = ''
           single_row[:CustomsValue] = ''
           single_row[:CustomsTariffNo] = ''
-          single_row[:CustomsCountry] = product.order_items.first.order.country unless product.order_items.first.order.nil? || product.order_items.empty?
+          single_row[:CustomsCountry] = product.order_items.first.order.country unless product.order_items.empty? || product.order_items.first.order.nil?
           single_row[:ThumbnailUrl] = product.primary_image
           single_row[:UPC] = product.primary_barcode
           single_row[:FillSKU] = ''
