@@ -330,6 +330,11 @@ function(scope, store_data, $window, $sce, $interval, $state, $stateParams, $mod
         $state.go($state.current.name, newStateParams);
     };
 
+    scope.export_active_products = function() {
+        console.log('export_active_products');
+        $window.open('/store_settings/export_active_products.csv');
+    };
+
     myscope.init = function() {
         scope.stores = store_data;
         scope.stores.single = {};

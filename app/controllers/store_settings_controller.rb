@@ -1003,6 +1003,10 @@ class StoreSettingsController < ApplicationController
 
     render json: result
   end
+
+  def export_active_products
+    puts "in export_active_products!!!"
+  end
 end
 
 
