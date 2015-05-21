@@ -11,7 +11,8 @@ class ShopifyController < ApplicationController
   # }
   def auth
     #puts params[:is_admin]
-    Apartment::Tenant.switch(params[:tenant_name])
+    @tenant_name, @is_admin = params[:tenant_name].split('&')
+    Apartment::Tenant.switch(@tenant_name)
     store = Store.find(params[:id])
     @shopify_credential = store.shopify_credential
     session = ShopifyAPI::Session.new(@shopify_credential.shop_name + ".myshopify.com")
