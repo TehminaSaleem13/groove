@@ -44,6 +44,12 @@
                         </accordion-heading>
                         <li ng-class="{active:current_page =='show_card_details'}" ui-sref="settings.accounts.card_details">Payment Method</li>
                     </accordion-group>
+                    <accordion-group is-open="tabs[4].open" ng-show="current_user.get().current_tenant=='groovepackeradmin'">
+                        <accordion-heading>
+                            <a ui-sref="settings.tools.admin_tools" >Tools</a>
+                        </accordion-heading>
+                        <li ng-class="{active:current_page =='show_admin_tools'}" ui-sref="settings.tools.admin_tools">Admin Tools</li>
+                    </accordion-group>
                 </accordion>
             </div>
         </div>

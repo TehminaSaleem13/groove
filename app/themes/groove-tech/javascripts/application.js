@@ -7,8 +7,11 @@
 //= require angular-ui-bootstrap-tpls
 //= require fingerprint
 //= require jquery.ui.sortable
-//= require lib
+//= require groovepacks/lib
+//= require groovepacks_admin/lib
 //= require angular-animate
 //= require groovepacks
-//= require common
+//= require groovepacks/common
+//= require groovepacks_admin
+//= require groovepacks_admin/common
 //= require_tree .

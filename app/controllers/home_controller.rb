@@ -2,8 +2,11 @@ class HomeController < ApplicationController
   layout 'angular'
   def index
   	#if current user is not signed in, show login page
+    puts "in index........................."
   	if !user_signed_in?
   		redirect_to new_user_session_path
+    else
+      @groovepacks_admin = (Apartment::Tenant.current_tenant == 'groovepackeradmin')
   	end
 
   end
