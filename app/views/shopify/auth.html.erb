@@ -1,9 +1,9 @@
-<% if is_base_tenant(request) %>
+<% if @is_admin == 'true' %>
   <% Apartment::Tenant.switch()
-    unless Subscription.where(tenant_name: params[:tenant_name]).empty?
-      @email = Subscription.where(tenant_name: params[:tenant_name]).first.email
+    unless Subscription.where(tenant_name: @tenant_name).empty?
+      @email = Subscription.where(tenant_name: @tenant_name).first.email
     end
-    Apartment::Tenant.switch(params[:tenant_name]) %>
+    Apartment::Tenant.switch(@tenant_name) %>
   <%= render 'shared/registration_confirmation', 
     direct: false, result: @result, email: @email %>
 <% else %>

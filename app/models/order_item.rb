@@ -252,30 +252,33 @@ class OrderItem < ActiveRecord::Base
 
   def update_inventory_levels_for_return (override = false)
     result = true
-    if !self.order.nil? && self.inv_status != 'unallocated' &&
-        (self.order.status == 'awaiting' or override)
-      if !self.product.nil? && !self.order.store.nil? &&
-        !self.order.store.inventory_warehouse_id.nil?
-        logger.info('available product inventory level')
-        result &= self.product.
-          update_available_product_inventory_level(self.order.store.inventory_warehouse_id,
-            self.qty, 'return')
+    general_setting = GeneralSetting.all.first
+    if general_setting.inventory_tracking
+      if !self.order.nil? && self.inv_status != 'unallocated' &&
+          (self.order.status == 'awaiting' or override)
+        if !self.product.nil? && !self.order.store.nil? &&
+            !self.order.store.inventory_warehouse_id.nil?
+          logger.info('available product inventory level')
+          result &= self.product.
+              update_available_product_inventory_level(self.order.store.inventory_warehouse_id,
+                                                       self.qty, 'return')
 
-        if !GeneralSetting.all.first.nil? && 
-              (GeneralSetting.all.first.inventory_tracking)
-          unless result
-            if GeneralSetting.all.first.hold_orders_due_to_inventory
-              self.order.status = 'onhold'
-              self.order.status_reason = 'on_hold_due_to_inventory'
+          if !general_setting.nil? &&
+              (general_setting.inventory_tracking)
+            unless result
+              if general_setting.hold_orders_due_to_inventory
+                self.order.status = 'onhold'
+                self.order.status_reason = 'on_hold_due_to_inventory'
+              end
+              self.inv_status = 'allocated'
+              self.inv_status_reason = 'allocated_due_to_low_available_inventory'
+            else
+              self.inv_status = 'unallocated'
             end
-            self.inv_status = 'allocated'
-            self.inv_status_reason = 'allocated_due_to_low_available_inventory'
-          else
-            self.inv_status = 'unallocated'
           end
+          self.save
+          self.order.save
         end
-        self.save
-        self.order.save
       end
     end
     result

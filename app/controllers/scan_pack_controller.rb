@@ -41,7 +41,7 @@ class ScanPackController < ApplicationController
     end
 
     if params[:state] == "scanpack.rfp.default" && @result['status'] == true
-      Order.find(params[:id]).addactivity("Product with barcode: " + params[:input] + " scanned", current_user.name)
+      Order.find(params[:id]).addactivity("Product with barcode: " + params[:input].to_s + " scanned", current_user.name)
     end
 
     respond_to do |format|
@@ -67,11 +67,11 @@ class ScanPackController < ApplicationController
         @result['data']['next_state'] = 'scanpack.rfo'
       else
         @result['status'] &= false
-        @result['error_messages'].push("Order with id: "+params[:order_id]+" is already in scanned state")
+        @result['error_messages'].push("Order with id: "+params[:order_id].to_s+" is already in scanned state")
       end
     else
       @result['status'] &= false
-      @result['error_messages'].push("Could not find order with id: "+params[:order_id])
+      @result['error_messages'].push("Could not find order with id: "+params[:order_id].to_s)
     end
 
     respond_to do |format|
@@ -113,7 +113,7 @@ class ScanPackController < ApplicationController
           order_serial.serial = params[:serial].to_s
           order_serial.save
           @result = product_scan(params[:barcode],'scanpack.rfp.default',params[:order_id],params[:clicked],true)
-          order.addactivity('Product: "'+product.name.to_s+'" Serial scanned: "'+params[:serial]+'"',current_user.name)
+          order.addactivity('Product: "'+product.name.to_s+'" Serial scanned: "'+params[:serial].to_s+'"',current_user.name)
         end
       end
     end
@@ -251,7 +251,7 @@ class ScanPackController < ApplicationController
               (1..params[:next_item][:qty_remaining]).each do
                 @result['data'] = product_scan(params[:next_item][:barcodes][0][:barcode],'scanpack.rfp.default',params[:id],false)
               end
-              @order.addactivity('Type-In count Scanned for product'+params[:next_item][:sku],current_user.username)
+              @order.addactivity('Type-In count Scanned for product'+params[:next_item][:sku].to_s,current_user.username)
             end
           else
             @result['status'] &= false
