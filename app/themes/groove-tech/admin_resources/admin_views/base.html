@@ -1,0 +1,17 @@
+<div class="container-fluid">
+    <div class="row bottom-well">
+        <div class="col-lg-2 col-md-2">
+            <div class="row">
+                <accordion>
+                    <accordion-group is-open="true">
+                        <accordion-heading>
+                            <a ui-sref="tools.admin_tools" >Tools</a>
+                        </accordion-heading>
+                        <li ng-class="{active:current_page =='show_admin_tools'}" ui-sref="tools.admin_tools">Admin Tools</li>
+                    </accordion-group>
+                </accordion>
+            </div>
+        </div>
+    <div ui-view></div>
+    </div>
+</div>

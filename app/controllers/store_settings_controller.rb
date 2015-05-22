@@ -1045,8 +1045,8 @@ class StoreSettingsController < ApplicationController
           single_row[:SKU] = product.primary_sku
           single_row[:Name] = product.name
           single_row[:WarehouseLocation] = product.primary_warehouse.location_primary
-          unless product.get_weight.round == 0
-            single_row[:WeightOz] = product.get_weight.round.to_s
+          unless product.weight.round == 0
+            single_row[:WeightOz] = product.weight.round.to_s
           else
             single_row[:WeightOz] = ''
           end

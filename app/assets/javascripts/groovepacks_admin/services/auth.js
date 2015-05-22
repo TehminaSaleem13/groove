@@ -20,8 +20,8 @@ groovepacks_admin_services.factory("auth", ['$http','$rootScope','groovIO',funct
 
     var home = function () {
         //check if access to orders
-        if(has_access('orders')) {
-            return 'orders';
+        if(has_access('tools')) {
+            return 'tools';
         }
         return 'scanpack.rfo';
     };
