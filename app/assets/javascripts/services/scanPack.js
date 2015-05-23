@@ -81,7 +81,7 @@ groovepacks_services.factory('scanPack',['$http','notification','$state',functio
             }
         }).error(notification.server_error);
     };
-
+    
     var code_confirm = function(code) {
         return $http.post('/scan_pack/confirmation_code.json',{code: code}).success(function(data) {
         }).error(notification.server_error);
