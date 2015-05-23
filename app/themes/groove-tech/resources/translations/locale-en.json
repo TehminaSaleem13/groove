@@ -32,7 +32,7 @@
     "orders": {
         "modal": {
             "tooltips": {
-               "confirmation": "Text here will be displayed when this order is being scanned. Unless packer confirmations are disabled, confirmations will be required when the Packer Confirmation is \"On\" or \"Always\"."
+               "confirmation": "The confirmation setting applies to all notes which are set <br/> to display to the packer. If confirmation is required,<br/> the packer will be asked to enter or scan their confirmation code <br/>before packing the order."
             }
         }
     },
@@ -73,7 +73,7 @@
                     "default_low_inventory_alert_limit":"Set Default low inventory alert limit",
                     "hold_orders_due_to_inventory": "Hold Order due to Inventory",
                     "inventory_auto_allocation": "Inventory Auto-Allocation",
-                    "conf_req_on_notes_to_packer": "Should confirmation be required on \"Notes to Packer\"?",
+                    "conf_req_on_notes_to_packer": "Should confirmation be required when order notes are shown to the packer?",
                     "send_email_for_packer_notes": "Should an email be sent when \"Notes from Packer\" are added?",
                     "email_address": "Email Address",
                     "packing_slip_size": "Packing Slip Size:",
@@ -87,7 +87,7 @@
                     "low_inventory_alert_email": "Low Inventory Alerts limits can be set on the product edit page. If you're not using alerts they can be disabled for all products here. To disable alerts for individual products set their alert level to 0 on their page",
                     "default_low_inventory_alert_limit": "The Alert level set here will be assigned to all products that do not have a value set.",
                     "hold_orders_due_to_inventory": "If an order contains a product with an inventory level less than zero, it is automatically placed On Hold when this option is turned on. Turning this off will prevent inventory levels from changing the orders status.",
-                    "conf_req_on_notes_to_packer": "Notes to Packer can be added for any order from the notes tab of the Order detail window. If a confirmation is required the Packer will be prompted to scan their unique confirmation code to proceed when the note is shown. If you want to ensure that confirmations are always required or never required for this type of notification you can do that here. Leaving it optional allows the user creating the Note to choose if confirmation is required.",
+                    "conf_req_on_notes_to_packer": "Notes to Packer can be added for any order from the notes tab of the Order detail window. If a confirmation is required the Packer will be prompted to scan their unique confirmation code to proceed when the note is shown. If you want to ensure that confirmations are always required or never required for this type of notification you can do that here. Leaving it optional allows the user creating the Note to choose if confirmation is required. It's also possible to display the internal notes and customer comments to the packer. This can be enabled in the Scan & Pack settings. The confirmation setting chosen here will apply to all notes shown to the packer.",
                     "send_email_for_packer_notes": "Notes from Packer can be added by a packer during the scanning of an order. They are often used to make a supervisor aware of a stock situation or exception but the feature can be used in any way that fits your workflow. If you want to ensure that these notes are always emailed to a supervisor you can do that with this setting.",
                     "strict_cc": "When Strict Confirmation Codes are disabled a user can just use the enter key to acknowledge that they've seen a packing or order notification. When enabled a user must scan or enter their own confirmation code to proceed. About Packing notifications: There are two types of packing notifications. The first, \"Notes to Packer\" may be added to an order. It will appear when the order is packed. The second, \"Special Instructions to Packer\" can be added to a product. This notification will appear each time that product is packed. The user's Confirmation Code can be requested for either of these notifications. The strict confirmation code setting controls how the user is required to confirm.",
                     "conf_code_product_instruction": "Special instructions to Packer can be added for any product from the product detail window. If a confirmation is required the Packer will be prompted to scan their unique confirmation code to proceed when the instructions are shown. If you want to ensure that confirmations are always required or never required for this type of notification you can do that here. Leaving it optional allows this setting to be controlled on a per product basis.",
