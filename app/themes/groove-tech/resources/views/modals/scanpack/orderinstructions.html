@@ -7,8 +7,8 @@
         <div class="container-fluid form-horizontal">
             <div class="row" >
                 <div class="col-xs-12">
-                    <h4>{{order.notes_toPacker}}</h4>
                     <h4 ng-show="scan_pack_settings.show_internal_notes && order.notes_internal.length">{{order.notes_internal}}</h4>
+                    <h4>{{order.notes_toPacker}}</h4>
                     <h4 ng-show="scan_pack_settings.show_customer_notes && order.customer_comments.length">{{order.customer_comments}}</h4>
                     <legend>Please acknowledge with your confirmation code to continue</legend>
                     <div class="form-group ">
