@@ -12,7 +12,7 @@ class StripeInvoiceEmail < ActionMailer::Base
           Apartment::Tenant.switch(tenant)
           @tenant_name = tenant
           @invoice = invoice
-          mail to: @email, 
+          mail to: [@email,'groovepacker@gmail.com'], 
             subject: "GroovePacker Invoice Email"
         end
       end
@@ -30,7 +30,7 @@ class StripeInvoiceEmail < ActionMailer::Base
           Apartment::Tenant.switch(tenant)
           @tenant_name = tenant
           @invoice = invoice
-          mail to: @email, 
+          mail to: [@email,'groovepacker@gmail.com'], 
             subject: "Attention Required: Account Billing Failure for "+tenant+".groovepacker.com"
         end
       end

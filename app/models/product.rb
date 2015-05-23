@@ -399,6 +399,10 @@ class Product < ActiveRecord::Base
       where(acknowledged: false)
   end
 
+  def is_active
+    self.status == 'active' ? 'TRUE' : 'FALSE'
+  end
+
   def get_product_weight(weight)
     unless self.weight_format.nil?
       if self.weight_format=='lb'

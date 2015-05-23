@@ -75,15 +75,15 @@ class ExportSetting < ActiveRecord::Base
     end_time = nil
     unless self.manual_export
       if self.export_orders_option == 'on_same_day'
-        start_time = Time.now.beginning_of_day
-        end_time = Time.now
+        start_time = Time.zone.now.beginning_of_day
+        end_time = Time.zone.now
       else
         unless self.last_exported.nil?
           start_time = self.last_exported
-          end_time = Time.now
+          end_time = Time.zone.now
         else
           start_time = '2000-01-01 00:00:00'
-          end_time = Time.now
+          end_time = Time.zone.now
         end
       end
     else
@@ -136,6 +136,7 @@ class ExportSetting < ActiveRecord::Base
                       single_row = row_map.dup
                       single_row = calculate_row_data(single_row, order_item)
                       single_row[:serial_number] = serial.serial
+                      single_row[:order_item_count] = 1
                       
                       order_hash = {:order_date=>single_row[:order_date], :order_number=>single_row[:order_number],
                        :barcode_with_lot=>single_row[:barcode_with_lot], :barcode=>single_row[:barcode],
@@ -149,6 +150,7 @@ class ExportSetting < ActiveRecord::Base
                     unless lot_number.nil?
                       single_row = row_map.dup
                       single_row = calculate_row_data(single_row, order_item)
+                      single_row[:order_item_count] = order_item.qty
 
                       order_hash = {:order_date=>single_row[:order_date], :order_number=>single_row[:order_number],
                        :barcode_with_lot=>single_row[:barcode_with_lot], :barcode=>single_row[:barcode],
@@ -168,8 +170,9 @@ class ExportSetting < ActiveRecord::Base
                     single_row = row_map.dup
                     single_row = calculate_row_data(single_row, order_item)
                     single_row[:serial_number] = serial.serial
+                    single_row[:order_item_count] = 1
                     
-                    duplicate_orders = order_hash_array.select {|duplicate_order| duplicate_order[:order_number] == single_row[:order_number] && duplicate_order[:primary_sku] == single_row[:primary_sku]}                      
+                    duplicate_orders = order_hash_array.select {|duplicate_order| duplicate_order[:order_number] == single_row[:order_number] && duplicate_order[:primary_sku] == single_row[:primary_sku] && duplicate_order[:serial_number] == single_row[:serial_number]}                      
                     unless duplicate_orders.empty?
                       duplicate_order = duplicate_orders.first
                       duplicate_order[:order_item_count] = duplicate_order[:order_item_count].to_i + single_row[:order_item_count].to_i
@@ -186,6 +189,7 @@ class ExportSetting < ActiveRecord::Base
                 else
                   single_row = row_map.dup
                   single_row = calculate_row_data(single_row, order_item)
+                  single_row[:order_item_count] = order_item.qty
                   
                   duplicate_orders = order_hash_array.select {|duplicate_order| duplicate_order[:order_number] == single_row[:order_number] && duplicate_order[:primary_sku] == single_row[:primary_sku]}                      
                   unless duplicate_orders.empty?
@@ -293,7 +297,8 @@ class ExportSetting < ActiveRecord::Base
           :order_number => '',
           :scanned_qty => '',
           :packing_user =>'',
-          :scanned_date =>''
+          :scanned_date =>'',
+          :click_scanned_qty =>''
         }
         CSV.open("#{Rails.root}/public/csv/#{filename}","w") do |csv|
           csv << row_map.keys
@@ -307,6 +312,13 @@ class ExportSetting < ActiveRecord::Base
             packing_user = User.find(order.packing_user_id) unless order.packing_user_id.blank?
             unless packing_user.nil?
               single_row[:packing_user] = packing_user.name + ' ('+packing_user.username+')'
+            end
+            order_items = order.order_items
+            unless order_items.empty?
+              single_row[:click_scanned_qty] = 0
+              order_items.each do |order_item|
+                single_row[:click_scanned_qty] += order_item.clicked_qty
+              end
             end
             csv << single_row.values
           end
@@ -338,7 +350,7 @@ class ExportSetting < ActiveRecord::Base
     single_row[:barcode] = order_item.product.primary_barcode
     single_row[:product_name] = order_item.product.name
     single_row[:primary_sku] =  order_item.product.primary_sku
-    single_row[:order_item_count] = order_item.qty
+    # single_row[:order_item_count] = order_item.qty
 
     single_row
   end

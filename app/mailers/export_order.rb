@@ -10,7 +10,13 @@ class ExportOrder < ActionMailer::Base
       @counts = nil
     end
     filename = export_settings.export_data
+    @tenant_name = tenant
     @csv_data = CSV.read("#{Rails.root}/public/csv/#{filename}")
+    @csv_data.first.each_with_index do |value, index|
+      if value == 'order_number'
+        @order_number = index
+      end
+    end
 
     attachments["#{filename}"] = File.read("#{Rails.root}/public/csv/#{filename}")
     mail to: export_settings.order_export_email,
@@ -23,7 +29,7 @@ class ExportOrder < ActionMailer::Base
   def get_order_counts
     result = Hash.new
     result['imported'] = Order.where("created_at >= ?", Time.now.beginning_of_day).size
-    result['scanned'] = Order.where("created_at >= ? and status = ?", Time.now.beginning_of_day,'scanned').size
+    result['scanned'] = Order.where(scanned_on: Date.today).size
     result['awaiting'] = Order.where("created_at >= ? and status = ?", Time.now.beginning_of_day,'awaiting').size
     result['onhold'] = Order.where("created_at >= ? and status = ?", Time.now.beginning_of_day,'onhold').size
     result['cancelled'] = Order.where("created_at >= ? and status = ?", Time.now.beginning_of_day,'cancelled').size
