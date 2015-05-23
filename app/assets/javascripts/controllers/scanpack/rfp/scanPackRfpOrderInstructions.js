@@ -1,9 +1,12 @@
-groovepacks_controllers.controller('scanPackRfpOrderInstructions', [ '$scope', '$modalInstance', '$timeout', 'order_data','confirm', 'scanPack',
-function($scope,$modalInstance,$timeout,order_data,confirm,scanPack){
+groovepacks_controllers.controller('scanPackRfpOrderInstructions', [ '$scope', '$modalInstance', '$timeout', 
+    'order_data','confirm', 'scan_pack_settings', 'scanPack',
+function($scope,$modalInstance,$timeout,order_data,confirm,
+    scan_pack_settings, scanPack){
     var myscope = {};
 
     myscope.init = function() {
         $scope.order = order_data;
+        $scope.scan_pack_settings = scan_pack_settings;
         $timeout($scope.focus_search,200);
         $scope.code = {};
         $scope.code.confirmation = '';

@@ -150,6 +150,7 @@ groovepacks_controllers.
                         size:'lg',
                         resolve: {
                             order_data: function(){return $scope.data.order;},
+                            scan_pack_settings: function(){return $scope.scan_pack.settings;},
                             confirm:function(){return function(){myscope.order_instruction_confirmed = true;}}
                         }
                     });

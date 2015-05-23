@@ -32,7 +32,7 @@
     "orders": {
         "modal": {
             "tooltips": {
-               "confirmation": "Text here will be displayed when this order is being scanned. Unless packer confirmations are disabled, confirmations will be required when the Packer Confirmation is \"On\" or \"Always\"."
+               "confirmation": "The confirmation setting applies to all notes which are set <br/> to display to the packer. If confirmation is required,<br/> the packer will be asked to enter or scan their confirmation code <br/>before packing the order."
             }
         }
     },
@@ -72,7 +72,7 @@
                     "conf_code_product_instruction": "Should confirmation be required on \"Special Instructions to Packer\"?",
                     "default_low_inventory_alert_limit":"Set Default low inventory alert limit",
                     "inventory_auto_allocation": "Inventory Auto-Allocation",
-                    "conf_req_on_notes_to_packer": "Should confirmation be required on \"Notes to Packer\"?",
+                    "conf_req_on_notes_to_packer": "Should confirmation be required when order notes are shown to the packer?",
                     "send_email_for_packer_notes": "Should an email be sent when \"Notes from Packer\" are added?",
                     "email_address": "Email Address",
                     "packing_slip_size": "Packing Slip Size:",

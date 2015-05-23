@@ -19,23 +19,23 @@
         </div>
     </div>
     <div class="col-lg-offset-3 col-md-offset-3">
-        <div class="row">
-            <div class="col-lg-4 col-md-4  alert alert-note" 
-                ng-show="data.order.notes_toPacker.length && !show_packer_notes">
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close" ng-click="show_packer_notes=true"><span aria-hidden="true">&times;</span></button>
-                <h4>{{data.order.notes_toPacker}}</h4>
-            </div>
-            <div class="col-lg-4 col-md-4 alert alert-note" 
-                ng-show="data.scan_pack_settings.show_internal_notes && data.order.notes_internal.length && !show_internal_notes">
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close" ng-click="show_internal_notes=true"><span aria-hidden="true">&times;</span></button>
-                <h4>{{data.order.notes_internal}}</h4>
-            </div>
-            <div class="col-lg-3 col-md-3 alert alert-note" 
-                ng-show="data.scan_pack_settings.show_customer_notes && data.order.customer_comments.length && !show_customer_notes">
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close" ng-click="show_customer_notes=true"><span aria-hidden="true">&times;</span></button>
-                <h4>{{data.order.customer_comments}}</h4>
-            </div>
-        </div>
+    </div>
+</div>
+<div class="confirmation-notes">
+    <div class="row alert alert-note" 
+        ng-show="data.scan_pack_settings.show_internal_notes && data.order.notes_internal.length && !show_internal_notes">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close" ng-click="show_internal_notes=true"><span aria-hidden="true">&times;</span></button>
+        <h4>{{data.order.notes_internal}}</h4>
+    </div>
+    <div class="row alert alert-note" 
+        ng-show="data.order.notes_toPacker.length && !show_packer_notes">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close" ng-click="show_packer_notes=true"><span aria-hidden="true">&times;</span></button>
+        <h4>{{data.order.notes_toPacker}}</h4>
+    </div> 
+    <div class="row alert alert-note" 
+        ng-show="data.scan_pack_settings.show_customer_notes && data.order.customer_comments.length && !show_customer_notes">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close" ng-click="show_customer_notes=true"><span aria-hidden="true">&times;</span></button>
+        <h4>{{data.order.customer_comments}}</h4>
     </div>
 </div>
 <div class="row bottom-well">
