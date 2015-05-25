@@ -129,7 +129,7 @@ class ExportSetting < ActiveRecord::Base
             order_items.each do |order_item|
               serials = OrderSerial.where(:product_id=>order_item.product.id, :order_id=>order_item.order.id)
               if self.order_export_type == 'order_with_serial_lot'
-                lot_number = order_item.get_lot_number(order_item.product.primary_barcode)
+                lot_number = order_item.get_lot_number()
                 unless serials.empty? && lot_number.nil?
                   unless serials.empty?
                     serials.each do |serial|
@@ -150,7 +150,7 @@ class ExportSetting < ActiveRecord::Base
                     unless lot_number.nil?
                       single_row = row_map.dup
                       single_row = calculate_row_data(single_row, order_item)
-                      single_row[:order_item_count] = order_item.qty
+                      single_row[:order_item_count] = 1
 
                       order_hash = {:order_date=>single_row[:order_date], :order_number=>single_row[:order_number],
                        :barcode_with_lot=>single_row[:barcode_with_lot], :barcode=>single_row[:barcode],
@@ -172,7 +172,7 @@ class ExportSetting < ActiveRecord::Base
                     single_row[:serial_number] = serial.serial
                     single_row[:order_item_count] = 1
                     
-                    duplicate_orders = order_hash_array.select {|duplicate_order| duplicate_order[:order_number] == single_row[:order_number] && duplicate_order[:primary_sku] == single_row[:primary_sku] && duplicate_order[:serial_number] == single_row[:serial_number]}                      
+                    duplicate_orders = order_hash_array.select {|duplicate_order| duplicate_order[:order_number] == single_row[:order_number] && duplicate_order[:primary_sku] == single_row[:primary_sku] && duplicate_order[:serial_number] == single_row[:serial_number] && duplicate_order[:lot_number] == single_row[:lot_number]}                      
                     unless duplicate_orders.empty?
                       duplicate_order = duplicate_orders.first
                       duplicate_order[:order_item_count] = duplicate_order[:order_item_count].to_i + single_row[:order_item_count].to_i
@@ -191,7 +191,7 @@ class ExportSetting < ActiveRecord::Base
                   single_row = calculate_row_data(single_row, order_item)
                   single_row[:order_item_count] = order_item.qty
                   
-                  duplicate_orders = order_hash_array.select {|duplicate_order| duplicate_order[:order_number] == single_row[:order_number] && duplicate_order[:primary_sku] == single_row[:primary_sku]}                      
+                  duplicate_orders = order_hash_array.select {|duplicate_order| duplicate_order[:order_number] == single_row[:order_number] && duplicate_order[:primary_sku] == single_row[:primary_sku] && duplicate_order[:lot_number] == single_row[:lot_number]}                      
                   unless duplicate_orders.empty?
                     duplicate_order = duplicate_orders.first
                     duplicate_order[:order_item_count] = duplicate_order[:order_item_count].to_i + single_row[:order_item_count].to_i
@@ -345,7 +345,7 @@ class ExportSetting < ActiveRecord::Base
       single_row[:packing_user] = packing_user.name + ' ('+packing_user.username+')'
       single_row[:warehouse_name] =  order_item.product.primary_warehouse.inventory_warehouse.name unless order_item.product.primary_warehouse.nil? || order_item.product.primary_warehouse.inventory_warehouse.nil?
     end
-    single_row[:lot_number] = order_item.get_lot_number(order_item.product.primary_barcode)
+    single_row[:lot_number] = order_item.get_lot_number()
     single_row[:barcode_with_lot] = order_item.get_barcode_with_lotnumber(order_item.product.primary_barcode,single_row[:lot_number]) unless single_row[:lot_number].nil?
     single_row[:barcode] = order_item.product.primary_barcode
     single_row[:product_name] = order_item.product.name

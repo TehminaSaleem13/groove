@@ -25,6 +25,7 @@ class Product < ActiveRecord::Base
   has_many :order_serial
   has_many :order_items
   has_many :product_kit_activities, dependent: :destroy
+  has_many :product_lots
 
   after_save :check_inventory_warehouses
 

@@ -3,6 +3,7 @@ class OrderItem < ActiveRecord::Base
   belongs_to :product
 
   has_many :order_item_kit_products
+  belongs_to :product_lot
   attr_accessible :price, :qty, :row_total, :sku, :product, :product_is_deleted
 
   after_create :update_inventory_levels_for_packing, :add_kit_products
@@ -345,10 +346,9 @@ class OrderItem < ActiveRecord::Base
     result
   end
 
-  def get_lot_number(barcode)
-    product_barcodes = self.product.product_barcodes.where(barcode: barcode) unless self.product.product_barcodes.empty?
-    unless product_barcodes.empty?
-      return product_barcodes.first.lot_number
+  def get_lot_number()
+    unless self.product_lot.nil?
+      return self.product_lot.lot_number
     end
   end
 

@@ -244,10 +244,12 @@ module ScanPackHelper
                         order_item_kit_product =
                             OrderItemKitProduct.find(child_item['kit_product_id'])
                         if scanpack_settings.record_lot_number
-                          product_barcode = order_item_kit_product.order_item.product.product_barcodes.where(barcode: barcode.barcode).first
                           lot_number = calculate_lot_number(scanpack_settings, input)
-                          product_barcode.lot_number = lot_number unless lot_number.nil?
-                          product_barcode.save
+                          product = order_item_kit_product.order_item.product
+                          if ProductLot.where(product_id: product.id, lot_number: lot_number).empty?
+                            ProductLot.create(product_id: product.id, lot_number: lot_number)
+                            ProductLot.where(product_id: product.id, lot_number: lot_number).first.order_item = order_item
+                          end
                         end
 
                         unless order_item_kit_product.nil?
@@ -279,10 +281,12 @@ module ScanPackHelper
                   #process product barcode scan
                   order_item = OrderItem.find(item['order_item_id'])
                   if scanpack_settings.record_lot_number
-                    product_barcode = order_item.product.product_barcodes.where(barcode: barcode.barcode).first
                     lot_number = calculate_lot_number(scanpack_settings, input)
-                    product_barcode.lot_number = lot_number unless lot_number.nil?
-                    product_barcode.save
+                    product = order_item.product
+                    if ProductLot.where(product_id: product.id, lot_number: lot_number).empty?
+                      ProductLot.create(product_id: product.id, lot_number: lot_number)
+                      ProductLot.where(product_id: product.id, lot_number: lot_number).first.order_item = order_item
+                    end
                   end
                   
                   unless order_item.nil?
