@@ -245,7 +245,8 @@ module ScanPackHelper
                             OrderItemKitProduct.find(child_item['kit_product_id'])
                         if scanpack_settings.record_lot_number
                           product_barcode = order_item_kit_product.order_item.product.product_barcodes.where(barcode: barcode.barcode).first
-                          product_barcode.lot_number = calculate_lot_number(scanpack_settings, input)
+                          lot_number = calculate_lot_number(scanpack_settings, input)
+                          product_barcode.lot_number = lot_number unless lot_number.nil?
                           product_barcode.save
                         end
 
@@ -279,7 +280,8 @@ module ScanPackHelper
                   order_item = OrderItem.find(item['order_item_id'])
                   if scanpack_settings.record_lot_number
                     product_barcode = order_item.product.product_barcodes.where(barcode: barcode.barcode).first
-                    product_barcode.lot_number = calculate_lot_number(scanpack_settings, input)
+                    lot_number = calculate_lot_number(scanpack_settings, input)
+                    product_barcode.lot_number = lot_number unless lot_number.nil?
                     product_barcode.save
                   end
                   

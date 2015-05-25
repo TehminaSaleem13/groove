@@ -97,7 +97,7 @@ class ExportSetting < ActiveRecord::Base
     else
       orders = Order.where(scanned_on: start_time..end_time)
       scanpack_settings = ScanPackSetting.all.first
-      self.last_exported = Time.now
+      self.last_exported = Time.zone.now
       self.save
       filename = 'groove-order-export-'+Time.now.to_s+'.csv'
       unless self.order_export_type == 'do_not_include'
