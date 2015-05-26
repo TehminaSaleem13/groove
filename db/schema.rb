@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150525150849) do
+ActiveRecord::Schema.define(:version => 20150526064005) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0, :null => false
@@ -322,10 +322,14 @@ ActiveRecord::Schema.define(:version => 20150525150849) do
     t.string   "inv_status",                                           :default => "unprocessed"
     t.string   "inv_status_reason",                                    :default => ""
     t.integer  "clicked_qty",                                          :default => 0
-    t.integer  "product_lot_id"
   end
 
   add_index "order_items", ["order_id"], :name => "index_order_items_on_order_id"
+
+  create_table "order_items_product_lots", :id => false, :force => true do |t|
+    t.integer "order_item_id"
+    t.integer "product_lot_id"
+  end
 
   create_table "order_serials", :force => true do |t|
     t.integer  "order_id"
@@ -490,11 +494,14 @@ ActiveRecord::Schema.define(:version => 20150525150849) do
 
   create_table "product_lots", :force => true do |t|
     t.integer  "product_id"
+    t.integer  "order_item_id"
     t.string   "lot_number"
-    t.datetime "created_at", :null => false
-    t.datetime "updated_at", :null => false
+    t.datetime "created_at",                   :null => false
+    t.datetime "updated_at",                   :null => false
+    t.integer  "qty",           :default => 0
   end
 
+  add_index "product_lots", ["order_item_id"], :name => "index_product_lots_on_order_item_id"
   add_index "product_lots", ["product_id"], :name => "index_product_lots_on_product_id"
 
   create_table "product_skus", :force => true do |t|

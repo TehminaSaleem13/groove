@@ -246,9 +246,13 @@ module ScanPackHelper
                         if scanpack_settings.record_lot_number
                           lot_number = calculate_lot_number(scanpack_settings, input)
                           product = order_item_kit_product.order_item.product
-                          if ProductLot.where(product_id: product.id, lot_number: lot_number).empty?
-                            ProductLot.create(product_id: product.id, lot_number: lot_number)
-                            ProductLot.where(product_id: product.id, lot_number: lot_number).first.order_item = order_item
+                          if ProductLot.where(product_id: product.id, order_item_id: order_item.id, lot_number: lot_number).empty?
+                            ProductLot.create(product_id: product.id, order_item_id: order_item.id, lot_number: lot_number, qty: 1)
+                            ProductLot.where(product_id: product.id, order_item_id: order_item.id, lot_number: lot_number).first.order_items << order_item
+                          else
+                            product_lot = ProductLot.where(product_id: product.id, order_item_id: order_item.id, lot_number: lot_number).first
+                            product_lot.qty += 1
+                            product_lot.save
                           end
                         end
 
@@ -283,9 +287,13 @@ module ScanPackHelper
                   if scanpack_settings.record_lot_number
                     lot_number = calculate_lot_number(scanpack_settings, input)
                     product = order_item.product
-                    if ProductLot.where(product_id: product.id, lot_number: lot_number).empty?
-                      ProductLot.create(product_id: product.id, lot_number: lot_number)
-                      ProductLot.where(product_id: product.id, lot_number: lot_number).first.order_item = order_item
+                    if ProductLot.where(product_id: product.id, lot_number: lot_number, order_item_id: order_item.id).empty?
+                      ProductLot.create(product_id: product.id, lot_number: lot_number, order_item_id: order_item.id, qty: 1)
+                      ProductLot.where(product_id: product.id, order_item_id: order_item.id, lot_number: lot_number).first.order_items << order_item
+                    else
+                      product_lot = ProductLot.where(product_id: product.id, order_item_id: order_item.id, lot_number: lot_number).first
+                      product_lot.qty += 1
+                      product_lot.save
                     end
                   end
                   

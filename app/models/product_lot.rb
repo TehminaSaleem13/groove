@@ -1,5 +1,5 @@
 class ProductLot < ActiveRecord::Base
-  attr_accessible :lot_number, :product_id
-  has_one :order_item
+  attr_accessible :lot_number, :product_id, :qty, :order_item_id
+  has_and_belongs_to_many :order_items
   belongs_to :product
 end

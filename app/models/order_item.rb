@@ -3,7 +3,7 @@ class OrderItem < ActiveRecord::Base
   belongs_to :product
 
   has_many :order_item_kit_products
-  belongs_to :product_lot
+  has_and_belongs_to_many :product_lots
   attr_accessible :price, :qty, :row_total, :sku, :product, :product_is_deleted
 
   after_create :update_inventory_levels_for_packing, :add_kit_products
@@ -347,8 +347,12 @@ class OrderItem < ActiveRecord::Base
   end
 
   def get_lot_number()
-    unless self.product_lot.nil?
-      return self.product_lot.lot_number
+    puts "self.product_lots: " + self.product_lots.inspect
+    unless self.product_lots.empty?
+      puts "product_lots: " + self.product_lots.inspect
+      return self.product_lots
+    else
+      return []
     end
   end
 
