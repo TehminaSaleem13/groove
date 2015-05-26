@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150526064005) do
+ActiveRecord::Schema.define(:version => 20150526132715) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0, :null => false
@@ -302,6 +302,14 @@ ActiveRecord::Schema.define(:version => 20150526064005) do
 
   add_index "order_item_kit_products", ["order_item_id"], :name => "index_order_item_kit_products_on_order_item_id"
   add_index "order_item_kit_products", ["product_kit_skus_id"], :name => "index_order_item_kit_products_on_product_kit_skus_id"
+
+  create_table "order_item_order_serial_product_lots", :force => true do |t|
+    t.integer  "order_item_id"
+    t.integer  "product_lot_id"
+    t.integer  "order_serial_id"
+    t.datetime "created_at",      :null => false
+    t.datetime "updated_at",      :null => false
+  end
 
   create_table "order_items", :force => true do |t|
     t.string   "sku"

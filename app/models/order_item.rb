@@ -347,9 +347,7 @@ class OrderItem < ActiveRecord::Base
   end
 
   def get_lot_number()
-    puts "self.product_lots: " + self.product_lots.inspect
     unless self.product_lots.empty?
-      puts "product_lots: " + self.product_lots.inspect
       return self.product_lots
     else
       return []

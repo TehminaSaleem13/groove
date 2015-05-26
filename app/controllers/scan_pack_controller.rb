@@ -43,7 +43,6 @@ class ScanPackController < ApplicationController
     if params[:state] == "scanpack.rfp.default" && @result['status'] == true
       Order.find(params[:id]).addactivity("Product with barcode: " + params[:input].to_s + " scanned", current_user.name)
     end
-
     respond_to do |format|
       format.html # show.html.erb
       format.json { render json: @result }
@@ -112,6 +111,14 @@ class ScanPackController < ApplicationController
           order_serial.product_id = product.id
           order_serial.serial = params[:serial].to_s
           order_serial.save
+
+          order_item_serial_lot = OrderItemOrderSerialProductLot.where(order_item_id: params[:order_item_id], product_lot_id: params[:product_lot_id])
+          unless order_item_serial_lot.empty?
+            if order_item_serial_lot.first.order_serial_id.nil?
+              order_item_serial_lot.first.order_serial_id = order_serial.id
+              order_item_serial_lot.first.save
+            end
+          end
           @result = product_scan(params[:barcode],'scanpack.rfp.default',params[:order_id],params[:clicked],true)
           order.addactivity('Product: "'+product.name.to_s+'" Serial scanned: "'+params[:serial].to_s+'"',current_user.name)
         end
