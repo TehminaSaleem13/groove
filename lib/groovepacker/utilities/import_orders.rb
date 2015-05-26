@@ -97,8 +97,10 @@
 					should_schedule_job = general_settings.should_import_orders(date)
 					time = general_settings.time_to_import_orders
 				elsif type=='low_inventory_email'
-					should_schedule_job = general_settings.should_send_email(date)
-					time = general_settings.time_to_send_email
+					if general_settings.low_inventory_alert_email? && !general_settings.low_inventory_email_address.blank?
+						should_schedule_job = general_settings.should_send_email(date)
+						time = general_settings.time_to_send_email
+					end
 				elsif type == 'export_order'
 					should_schedule_job = export_settings.should_export_orders(date)
       				time = export_settings.time_to_send_export_email
