@@ -334,11 +334,6 @@ ActiveRecord::Schema.define(:version => 20150526132715) do
 
   add_index "order_items", ["order_id"], :name => "index_order_items_on_order_id"
 
-  create_table "order_items_product_lots", :id => false, :force => true do |t|
-    t.integer "order_item_id"
-    t.integer "product_lot_id"
-  end
-
   create_table "order_serials", :force => true do |t|
     t.integer  "order_id"
     t.integer  "product_id"
@@ -504,9 +499,8 @@ ActiveRecord::Schema.define(:version => 20150526132715) do
     t.integer  "product_id"
     t.integer  "order_item_id"
     t.string   "lot_number"
-    t.datetime "created_at",                   :null => false
-    t.datetime "updated_at",                   :null => false
-    t.integer  "qty",           :default => 0
+    t.datetime "created_at",    :null => false
+    t.datetime "updated_at",    :null => false
   end
 
   add_index "product_lots", ["order_item_id"], :name => "index_product_lots_on_order_item_id"
