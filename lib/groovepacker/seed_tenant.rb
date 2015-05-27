@@ -1,6 +1,6 @@
-	class SeedTenant
+  class SeedTenant
     include InventoryWarehouseHelper
-		def seed(create = false, username='admin', email='abc@gmail.com', password='12345678')
+    def seed(create = false, username='admin', email='abc@gmail.com', password='12345678')
 
       case Rails.env
         when "development"
@@ -14,54 +14,49 @@
           end
       end
 
-			if OrderTag.where(:name=>'Contains New').length == 0
-				contains_new_tag = OrderTag.create(:name=>'Contains New', :color=>'#FF0000', :predefined => true)
-			end
+      if OrderTag.where(:name=>'Contains New').length == 0
+        contains_new_tag = OrderTag.create(:name=>'Contains New', :color=>'#FF0000', :predefined => true)
+      end
 
-			if OrderTag.where(:name=>'Contains Inactive').length == 0
-				contains_inactive_tag = OrderTag.create(:name=>'Contains Inactive', :color=>'#00FF00', :predefined => true)
-			end
+      if OrderTag.where(:name=>'Contains Inactive').length == 0
+        contains_inactive_tag = OrderTag.create(:name=>'Contains Inactive', :color=>'#00FF00', :predefined => true)
+      end
 
-			if OrderTag.where(:name=>'Manual Hold').length == 0
-				manual_hold_tag = OrderTag.create(:name=>'Manual Hold', :color=>'#0000FF', :predefined => true)
-			end
+      if OrderTag.where(:name=>'Manual Hold').length == 0
+        manual_hold_tag = OrderTag.create(:name=>'Manual Hold', :color=>'#0000FF', :predefined => true)
+      end
 
-			if InventoryWarehouse.where(:is_default => 1).length == 0
-			  default_location = InventoryWarehouse.create(:name=>'Default Warehouse', :location=> 'Default Warehouse', :status => 'active', :is_default => 1)
-			end
+      if InventoryWarehouse.where(:is_default => 1).length == 0
+        default_location = InventoryWarehouse.create(:name=>'Default Warehouse', :location=> 'Default Warehouse', :status => 'active', :is_default => 1)
+      end
 
-			if Store.where(:store_type=>'system').length == 0
-			  system_store = Store.create(:name=>'GroovePacker', :store_type=>'system',
+      if Store.where(:store_type=>'system').length == 0
+        system_store = Store.create(:name=>'GroovePacker', :store_type=>'system',
           :status=>true, inventory_warehouse: InventoryWarehouse.first)
-			end
+      end
 
-			if GeneralSetting.all.length == 0
-			  general_setting = GeneralSetting.create(:inventory_tracking=>1,
-			  		:low_inventory_alert_email => 1,
-			  		:low_inventory_email_address => '',
+      if GeneralSetting.all.length == 0
+        general_setting = GeneralSetting.create(:inventory_tracking=>1,
+            :low_inventory_alert_email => 1,
+            :low_inventory_email_address => '',
             :hold_orders_due_to_inventory=> 0,
-			  		:conf_req_on_notes_to_packer => 'optional',
-			  		:send_email_for_packer_notes => 'always',
-			  		:email_address_for_packer_notes => '')
-			end
-
-			if GeneralSetting.all.length == 1
-			  general_setting = GeneralSetting.all.first
-			  general_setting.product_weight_format = 'lb'
-			  general_setting.packing_slip_size = '4 x 6'
-			  general_setting.packing_slip_orientation = 'portrait'
-			  general_setting.time_to_import_orders = '2001-01-01 00:00:00'
-			  general_setting.time_to_send_email = '2001-01-01 00:00:00'
-			  general_setting.scheduled_order_import = true
-			  general_setting.import_orders_on_mon = false
-			  general_setting.import_orders_on_tue = false
-			  general_setting.import_orders_on_wed = false
-			  general_setting.import_orders_on_thurs = false
-			  general_setting.import_orders_on_fri = false
-			  general_setting.import_orders_on_sat = false
-			  general_setting.import_orders_on_sun = false
-			  general_setting.save
-			end
+            :conf_req_on_notes_to_packer => 'optional',
+            :send_email_for_packer_notes => 'always',
+            :email_address_for_packer_notes => '',
+            :product_weight_format => 'oz',
+            :packing_slip_size => '4 x 6',
+            :packing_slip_orientation => 'portrait',
+            :time_to_import_orders => '2001-01-01 00:00:00',
+            :time_to_send_email => '2001-01-01 00:00:00',
+            :scheduled_order_import => true,
+            :import_orders_on_mon => false,
+            :import_orders_on_tue => false,
+            :import_orders_on_wed => false,
+            :import_orders_on_thurs => false,
+            :import_orders_on_fri => false,
+            :import_orders_on_sat => false,
+            :import_orders_on_sun => false)
+      end
 
       if ExportSetting.all.length == 0
          ExportSetting.create(:auto_email_export=>1,
@@ -253,16 +248,16 @@
         role_super_super_admin.save
       end
 
-			role_super_admin = Role.find_by_name('Super Admin')
-			unless role_super_admin.nil?
-			  Role.columns.each do |col|
-			    if col.type == :boolean && col.name != 'custom'
-			      role_super_admin[col.name] = true
-			    end
+      role_super_admin = Role.find_by_name('Super Admin')
+      unless role_super_admin.nil?
+        Role.columns.each do |col|
+          if col.type == :boolean && col.name != 'custom'
+            role_super_admin[col.name] = true
+          end
 
-			  end
-			  role_super_admin.save
-			end
+        end
+        role_super_admin.save
+      end
 
       if User.all.length == 0 || (User.where(:username=>username).length == 0 && create)
         created_user = User.create([{:username=>username, :name=>username, :password => password,
@@ -274,10 +269,10 @@
                       :password_confirmation => 'iioo8899IIOO**((', :role_id=>role_super_super_admin.id, :confirmation_code=>'12345678900', :active=> true}],:without_protection=>true)
       end
 
-			User.all.each do |user|
-			  if user.role.nil?
-  	      user.role = Role.find_by_name('Scan & Pack User')
-			    user.save
+      User.all.each do |user|
+        if user.role.nil?
+          user.role = Role.find_by_name('Scan & Pack User')
+          user.save
         end
         if user.inventory_warehouse_id.nil?
           user.inventory_warehouse_id = InventoryWarehouse.where(:is_default => 1).first.id
@@ -287,5 +282,5 @@
           fix_user_inventory_permissions(user,inv_wh)
         end
       end
-		end
-	end
+    end
+  end
