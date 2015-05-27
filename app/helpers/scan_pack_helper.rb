@@ -243,10 +243,32 @@ module ScanPackHelper
                         #process product barcode scan
                         order_item_kit_product =
                             OrderItemKitProduct.find(child_item['kit_product_id'])
+                        lot_number = calculate_lot_number(scanpack_settings, input)
                         if scanpack_settings.record_lot_number
-                          product_barcode = order_item_kit_product.order_item.product.product_barcodes.where(barcode: barcode.barcode).first
-                          product_barcode.lot_number = calculate_lot_number(scanpack_settings, input)
-                          product_barcode.save
+                          product = order_item_kit_product.order_item.product
+                          order_item = order_item_kit_product.order_item
+                          result['data']['serial']['order_item_id'] = order_item.id
+                          unless lot_number.nil?
+                            if ProductLot.where(product_id: product.id, order_item_id: order_item.id, lot_number: lot_number).empty?
+                              ProductLot.create(product_id: product.id, order_item_id: order_item.id, lot_number: lot_number)
+                              product_lot = ProductLot.where(product_id: product.id, order_item_id: order_item.id, lot_number: lot_number).first
+                              result['data']['serial']['product_lot_id'] = product_lot.id
+                            else
+                              product_lot = ProductLot.where(product_id: product.id, order_item_id: order_item.id, lot_number: lot_number).first
+                              result['data']['serial']['product_lot_id'] = product_lot.id
+                            end
+                          else
+                            result['data']['serial']['product_lot_id'] = nil
+                          end
+                        end
+                        unless serial_added
+                          product_lots = []
+                          product_lots = ProductLot.where(product_id: product.id, order_item_id: order_item.id, lot_number: lot_number)
+                          unless product_lots.empty?
+                            OrderItemOrderSerialProductLot.create(order_item_id: order_item.id, product_lot_id: product_lots.first.id)
+                          else
+                            OrderItemOrderSerialProductLot.create(order_item_id: order_item.id, product_lot_id: nil)
+                          end
                         end
 
                         unless order_item_kit_product.nil?
@@ -277,12 +299,33 @@ module ScanPackHelper
                   barcode_found = true
                   #process product barcode scan
                   order_item = OrderItem.find(item['order_item_id'])
-                  if scanpack_settings.record_lot_number
-                    product_barcode = order_item.product.product_barcodes.where(barcode: barcode.barcode).first
-                    product_barcode.lot_number = calculate_lot_number(scanpack_settings, input)
-                    product_barcode.save
+                  lot_number = calculate_lot_number(scanpack_settings, input)
+                  if scanpack_settings.record_lot_number                    
+                    product = order_item.product
+                    result['data']['serial']['order_item_id'] = order_item.id
+                    unless lot_number.nil?
+                      if ProductLot.where(product_id: product.id, lot_number: lot_number, order_item_id: order_item.id).empty?
+                        ProductLot.create(product_id: product.id, lot_number: lot_number, order_item_id: order_item.id)
+                        product_lot = ProductLot.where(product_id: product.id, order_item_id: order_item.id, lot_number: lot_number).first
+                        result['data']['serial']['product_lot_id'] = product_lot.id
+                      else
+                        product_lot = ProductLot.where(product_id: product.id, order_item_id: order_item.id, lot_number: lot_number).first
+                        result['data']['serial']['product_lot_id'] = product_lot.id
+                      end
+                    else
+                      result['data']['serial']['product_lot_id'] = nil
+                    end
                   end
-                  
+                  unless serial_added
+                    product_lots = []
+                    product_lots = ProductLot.where(product_id: product.id, order_item_id: order_item.id, lot_number: lot_number)
+                    unless product_lots.empty?
+                      OrderItemOrderSerialProductLot.create(order_item_id: order_item.id, product_lot_id: product_lots.first.id)
+                    else
+                      OrderItemOrderSerialProductLot.create(order_item_id: order_item.id, product_lot_id: nil)
+                    end
+                  end
+
                   unless order_item.nil?
                     if item['record_serial']
                       if serial_added
