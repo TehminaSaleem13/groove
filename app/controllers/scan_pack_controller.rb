@@ -111,16 +111,8 @@ class ScanPackController < ApplicationController
           order_serial.product_id = product.id
           order_serial.serial = params[:serial].to_s
           order_serial.save
-
-          order_item_serial_lot = OrderItemOrderSerialProductLot.where(order_item_id: params[:order_item_id], product_lot_id: params[:product_lot_id])
-          puts "order_item_serial_lot: " + order_item_serial_lot.inspect
-          unless order_item_serial_lot.empty?
-            new_record = order_item_serial_lot.where(order_serial_id: nil).first
-            new_record.order_serial_id = order_serial.id
-            new_record.save
-          end
           @result = product_scan(params[:barcode],'scanpack.rfp.default',params[:order_id],params[:clicked],true)
-          order.addactivity('Product: "'+product.name.to_s+'" Serial scanned: "'+params[:serial].to_s+'"',current_user.name)
+          order.addactivity('Product: "'+product.name.to_s+'" Serial scanned: "'+params[:serial]+'"',current_user.name)
         end
       end
     end
