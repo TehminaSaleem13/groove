@@ -7,7 +7,7 @@
       <%unless @product.primary_sku.nil?%>
         <div style="line-height: 10px; font-size: 13px; margin-left: 10px; margin-top: 0px; margin-bottom: 0px;"><%= @product.primary_sku %></div> <br/>
       <%end%>
-      <div style="font-size: 12px; margin-left: 10px; margin-top:0px; margin-bottom: 5px;"><%= truncate(@product.name, length: 43)%></div>
+      <div style="font-size: 12px; margin-left: 10px; margin-top:0px; margin-bottom: 5px;"><%= truncate(@product.name, length: 36)%></div>
 
       <% barcode_string = generate_barcode(@product.primary_barcode)%>
       <div  style="margin-top:3px;">
