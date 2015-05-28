@@ -133,9 +133,9 @@ class ExportSetting < ActiveRecord::Base
                 order_item_serial_lots = OrderItemOrderSerialProductLot.where(order_item_id: order_item.id)
                 unless order_item_serial_lots.empty?
                   order_item_serial_lots.each do |order_item_serial_lot|
-                    unless order_item_serial_lot.order_serial_id.nil? && order_item_serial_lot.product_lot_id.nil?
-                      product_lot = ProductLot.find(order_item_serial_lot.product_lot_id) unless order_item_serial_lot.product_lot_id.nil?
-                      order_serial = OrderSerial.find(order_item_serial_lot.order_serial_id) unless order_item_serial_lot.order_serial_id.nil?
+                    unless order_item_serial_lot.order_serial.nil? && order_item_serial_lot.product_lot.nil?
+                      product_lot = order_item_serial_lot.product_lot unless order_item_serial_lot.product_lot.nil?
+                      order_serial = order_item_serial_lot.order_serial unless order_item_serial_lot.order_serial.nil?
                       single_row = row_map.dup
                       single_row = calculate_row_data(single_row, order_item)
                       single_row[:order_item_count] = 1
@@ -168,8 +168,8 @@ class ExportSetting < ActiveRecord::Base
                 order_item_serial_lots = OrderItemOrderSerialProductLot.where(order_item_id: order_item.id)
                 unless order_item_serial_lots.empty?
                   order_item_serial_lots.each do |order_item_serial_lot|
-                    product_lot = ProductLot.find(order_item_serial_lot.product_lot_id) unless order_item_serial_lot.product_lot_id.nil?
-                    order_serial = OrderSerial.find(order_item_serial_lot.order_serial_id) unless order_item_serial_lot.order_serial_id.nil?
+                    product_lot = order_item_serial_lot.product_lot unless order_item_serial_lot.product_lot.nil?
+                    order_serial = order_item_serial_lot.order_serial unless order_item_serial_lot.order_serial.nil?
                     single_row = row_map.dup
                     single_row = calculate_row_data(single_row, order_item)
                     single_row[:order_item_count] = 1
