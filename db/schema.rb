@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150518082130) do
+ActiveRecord::Schema.define(:version => 20150526132715) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0, :null => false
@@ -303,6 +303,14 @@ ActiveRecord::Schema.define(:version => 20150518082130) do
   add_index "order_item_kit_products", ["order_item_id"], :name => "index_order_item_kit_products_on_order_item_id"
   add_index "order_item_kit_products", ["product_kit_skus_id"], :name => "index_order_item_kit_products_on_product_kit_skus_id"
 
+  create_table "order_item_order_serial_product_lots", :force => true do |t|
+    t.integer  "order_item_id"
+    t.integer  "product_lot_id"
+    t.integer  "order_serial_id"
+    t.datetime "created_at",      :null => false
+    t.datetime "updated_at",      :null => false
+  end
+
   create_table "order_items", :force => true do |t|
     t.string   "sku"
     t.integer  "qty"
@@ -394,7 +402,7 @@ ActiveRecord::Schema.define(:version => 20150518082130) do
     t.text     "notes_fromPacker"
     t.boolean  "tracking_processed"
     t.string   "status"
-    t.date     "scanned_on"
+    t.datetime "scanned_on"
     t.string   "tracking_num"
     t.string   "company"
     t.integer  "packing_user_id"
@@ -486,6 +494,17 @@ ActiveRecord::Schema.define(:version => 20150518082130) do
   end
 
   add_index "product_kit_skus", ["product_id"], :name => "index_product_kit_skus_on_product_id"
+
+  create_table "product_lots", :force => true do |t|
+    t.integer  "product_id"
+    t.integer  "order_item_id"
+    t.string   "lot_number"
+    t.datetime "created_at",    :null => false
+    t.datetime "updated_at",    :null => false
+  end
+
+  add_index "product_lots", ["order_item_id"], :name => "index_product_lots_on_order_item_id"
+  add_index "product_lots", ["product_id"], :name => "index_product_lots_on_product_id"
 
   create_table "product_skus", :force => true do |t|
     t.string   "sku"

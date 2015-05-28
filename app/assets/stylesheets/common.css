@@ -59,3 +59,9 @@
   font-size: 18px;
   border-radius: 18px;
 }
+
+.well.well-notes {
+  border: 1px solid #B6B2B2;
+  border-radius: 15px;
+  margin-top: 10px;
+}
