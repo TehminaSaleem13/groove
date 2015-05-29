@@ -248,13 +248,13 @@ module ScanPackHelper
                           unless serial_added
                             lot_number = calculate_lot_number(scanpack_settings, input)
                             order_item = order_item_kit_product.order_item unless order_item_kit_product.order_item.nil?
-                            product = oorder_item.product unless order_item.nil? || order_item.product.nil?
+                            product = order_item.product unless order_item.nil? || order_item.product.nil?
                             result['data']['serial']['order_item_id'] = order_item.id
                             unless lot_number.nil?
                               if product.product_lots.where(lot_number: lot_number).empty?
                                 product.product_lots.create(product_id: product.id, lot_number: lot_number)
                               end
-                              product_lot = product.product_lots.where(order_item_id: order_item.id, lot_number: lot_number).first
+                              product_lot = product.product_lots.where(lot_number: lot_number).first
                               OrderItemOrderSerialProductLot.create(order_item_id: order_item.id, product_lot_id: product_lot.id, qty: 1)
                               result['data']['serial']['product_lot_id'] = product_lot.id
                             else

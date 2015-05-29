@@ -140,8 +140,6 @@ class ScanPackController < ApplicationController
                 existing_serial.qty  += 1
                 existing_serial.save
               end
-            else
-              OrderItemOrderSerialProductLot.create(order_item_id: params[:order_item_id], product_lot_id: params[:product_lot_id], order_serial_id: order_serial.id, qty: 1)
             end
           end
           @result = product_scan(params[:barcode],'scanpack.rfp.default',params[:order_id],params[:clicked],true)
