@@ -30,16 +30,16 @@
         </fieldset>
         <hr/>
         <fieldset>
-            <p style="font-size: 21px; margin-bottom:0px;">Notes from Packer</p>
-            <textarea ng-model="orders.single.basicinfo.notes_fromPacker"
+            <p style="font-size: 21px; margin-bottom:0px;">Customer Comments</p>
+            <textarea ng-model="orders.single.basicinfo.customer_comments"
                       ng-blur="update_single_order()" class="form-control input-style" rows="4"></textarea>
         </fieldset>
     </div>
     <hr/>
-    <fieldset>
-        <p style="font-size: 21px; margin-bottom:0px;">Customer Comments</p>
-        <textarea ng-model="orders.single.basicinfo.customer_comments"
-                  ng-blur="update_single_order()" class="form-control input-style" rows="4"></textarea>
-    </fieldset>
+        <fieldset>
+            <p style="font-size: 21px; margin-bottom:0px;">Notes from Packer</p>
+            <textarea ng-model="orders.single.basicinfo.notes_fromPacker"
+                      ng-blur="update_single_order()" class="form-control input-style" rows="4"></textarea>
+        </fieldset>
     <hr/>
 </div>
