@@ -106,19 +106,43 @@ class ScanPackController < ApplicationController
           @result['status'] &= false
           @result['error_messages'].push('Product Serial number: "'+params[:serial].to_s+'" can not be the same as a confirmation code, one of the action codes or any product barcode')
         else
-          order_serial = OrderSerial.new
-          order_serial.order = order
-          order_serial.product_id = product.id
-          order_serial.serial = params[:serial].to_s
-          order_serial.save
-
-          order_item_serial_lot = OrderItemOrderSerialProductLot.where(order_item_id: params[:order_item_id], product_lot_id: params[:product_lot_id])
-          unless order_item_serial_lot.empty?
-            new_record = order_item_serial_lot.where(order_serial_id: nil).first
-            new_record.order_serial_id = order_serial.id
-            new_record.save
+          order_serials = OrderSerial.where(order_id: order.id, product_id: product.id, serial: params[:serial])
+          unless order_serials.empty?
+            order_serial = order_serials.first
           else
-            OrderItemOrderSerialProductLot.create(order_item_id: params[:order_item_id], order_serial_id: order_serial.id)
+            order_serial = OrderSerial.new
+            order_serial.order = order
+            order_serial.product = product
+            order_serial.serial = params[:serial]
+            order_serial.save
+          end
+
+          if params[:product_lot_id].nil?
+            order_item_serial_lots = OrderItemOrderSerialProductLot.where(order_item_id: params[:order_item_id], product_lot_id: params[:product_lot_id], order_serial_id: order_serial.id)
+            if order_item_serial_lots.empty?
+              OrderItemOrderSerialProductLot.create(order_item_id: params[:order_item_id], product_lot_id: params[:product_lot_id], order_serial_id: order_serial.id, qty: 1)
+            else
+              existing_serial = order_item_serial_lots.first
+              existing_serial.qty  += 1
+              existing_serial.save
+            end
+          else
+            order_item_serial_lots = OrderItemOrderSerialProductLot.where(order_item_id: params[:order_item_id], product_lot_id: params[:product_lot_id])
+            unless order_item_serial_lots.empty?
+              existing_serials = order_item_serial_lots.where(order_serial_id: order_serial.id)
+              if existing_serials.empty?
+                new_serial = order_item_serial_lots.where(order_serial_id: nil).first
+                new_serial.order_serial = order_serial
+                new_serial.save
+              else
+                order_item_serial_lots.where(order_serial_id: nil).first.destroy
+                existing_serial = existing_serials.first
+                existing_serial.qty  += 1
+                existing_serial.save
+              end
+            else
+              OrderItemOrderSerialProductLot.create(order_item_id: params[:order_item_id], product_lot_id: params[:product_lot_id], order_serial_id: order_serial.id, qty: 1)
+            end
           end
           @result = product_scan(params[:barcode],'scanpack.rfp.default',params[:order_id],params[:clicked],true)
           order.addactivity('Product: "'+product.name.to_s+'" Serial scanned: "'+params[:serial].to_s+'"',current_user.name)

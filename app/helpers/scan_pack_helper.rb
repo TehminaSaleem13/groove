@@ -244,21 +244,22 @@ module ScanPackHelper
                         order_item_kit_product =
                             OrderItemKitProduct.find(child_item['kit_product_id'])
 
-                        if scanpack_settings.record_lot_number && !serial_added
-                          lot_number = calculate_lot_number(scanpack_settings, input)
-                          order_item = order_item_kit_product.order_item unless order_item_kit_product.order_item.nil?
-                          product = oorder_item.product unless order_item.nil? || order_item.product.nil?
-                          result['data']['serial']['order_item_id'] = order_item.id
-                          unless lot_number.nil?
-                            if product.product_lots.where(lot_number: lot_number, order_item_id: order_item.id).empty?
-                              ProductLot.create(product_id: product.id, lot_number: lot_number, order_item_id: order_item.id)
+                        if scanpack_settings.record_lot_number
+                          unless serial_added
+                            lot_number = calculate_lot_number(scanpack_settings, input)
+                            order_item = order_item_kit_product.order_item unless order_item_kit_product.order_item.nil?
+                            product = oorder_item.product unless order_item.nil? || order_item.product.nil?
+                            result['data']['serial']['order_item_id'] = order_item.id
+                            unless lot_number.nil?
+                              if product.product_lots.where(lot_number: lot_number).empty?
+                                product.product_lots.create(product_id: product.id, lot_number: lot_number)
+                              end
+                              product_lot = product.product_lots.where(order_item_id: order_item.id, lot_number: lot_number).first
+                              OrderItemOrderSerialProductLot.create(order_item_id: order_item.id, product_lot_id: product_lot.id, qty: 1)
+                              result['data']['serial']['product_lot_id'] = product_lot.id
+                            else
+                              result['data']['serial']['product_lot_id'] = nil
                             end
-                            product_lot = product.product_lots.where(order_item_id: order_item.id, lot_number: lot_number).first
-                            OrderItemOrderSerialProductLot.create(order_item_id: order_item.id, product_lot_id: product_lot.id)
-                            result['data']['serial']['product_lot_id'] = product_lot.id
-                          # else
-                          #   OrderItemOrderSerialProductLot.create(order_item: order_item, product_lot_id: nil)
-                          #   result['data']['serial']['product_lot_id'] = nil
                           end
                         end
 
@@ -297,15 +298,14 @@ module ScanPackHelper
                       product = order_item.product unless order_item.product.nil?
                       result['data']['serial']['order_item_id'] = order_item.id
                       unless lot_number.nil?
-                        if product.product_lots.where(lot_number: lot_number, order_item_id: order_item.id).empty?
-                          ProductLot.create(product_id: product.id, lot_number: lot_number, order_item_id: order_item.id)
+                        if product.product_lots.where(lot_number: lot_number).empty?
+                          product.product_lots.create(lot_number: lot_number)
                         end
-                        product_lot = product.product_lots.where(order_item_id: order_item.id, lot_number: lot_number).first
-                        OrderItemOrderSerialProductLot.create(order_item_id: order_item.id, product_lot_id: product_lot.id)
+                        product_lot = product.product_lots.where(lot_number: lot_number).first
+                        OrderItemOrderSerialProductLot.create(order_item_id: order_item.id, product_lot_id: product_lot.id, qty: 1)
                         result['data']['serial']['product_lot_id'] = product_lot.id
-                      # else
-                      #   OrderItemOrderSerialProductLot.create(order_item_id: order_item.id, product_lot_id: nil)
-                      #   result['data']['serial']['product_lot_id'] = nil
+                      else
+                        result['data']['serial']['product_lot_id'] = nil
                       end
                     end
                   end
