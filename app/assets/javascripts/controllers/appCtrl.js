@@ -80,7 +80,6 @@ groovepacks_controllers.
                         var single_data = {progress:{},progress_product:{},name:''};
                         single_data.logo = logos[import_item.store_info.store_type];
                         single_data.name = import_item.store_info.name;
-                        single_data.show_update = import_item.show_update
                         single_data.id = import_item.store_info.id;
                         single_data.store_type = import_item.store_info.store_type;
                         single_data.progress.type = import_item.import_info.status;
@@ -166,7 +165,7 @@ groovepacks_controllers.
                         '<td style="text-align:right;width:30%;padding:3px;" ng-show="store.store_type==\'Shipstation API 2\'">' +
                             '<div class="btn-group">' + 
                             '<a class="btn" ng-hide="import_summary.import_info.status==\'in_progress\'" title="Regular Import" ng-click="issue_import(store.id, \'regular\')"><img class="icons" src="/assets/images/reg_import.png"></img></a>' +
-                            '<a class="btn" ng-hide="import_summary.import_info.status==\'in_progress\'" title="Deep Import" ng-click="issue_import(store.id, \'deep\')"><img class="icons" src="/assets/images/deep_import.png"></img></a>' + 
+                            '<a class="btn" ng-hide="import_summary.import_info.status==\'in_progress\'" title="Deep Import" ng-click="issue_import(store.id, \'deep\')"><img class="icons" src="/assets/images/deep_import.png"></img></a>' +  
                             '<a class="btn" ng-show="import_summary.import_info.status==\'in_progress\' && import_summary.import_info.import_summary_type != \'update_locations\'" title="Cancel Import" ng-click="cancel_import(store.id)"><img class="icons" src="/assets/images/cancel_import.png"></img></a>' + 
                             '</div>'
                         '</td>'+
