@@ -167,7 +167,6 @@ groovepacks_controllers.
                             '<div class="btn-group">' + 
                             '<a class="btn" ng-hide="import_summary.import_info.status==\'in_progress\'" title="Regular Import" ng-click="issue_import(store.id, \'regular\')"><img class="icons" src="/assets/images/reg_import.png"></img></a>' +
                             '<a class="btn" ng-hide="import_summary.import_info.status==\'in_progress\'" title="Deep Import" ng-click="issue_import(store.id, \'deep\')"><img class="icons" src="/assets/images/deep_import.png"></img></a>' + 
-                            '<a class="btn" ng-show="import_summary.import_info.status!=\'in_progress\' && store.show_update" title="Update Locations" ng-click="issue_update(store.id)"><img class="icons" src="/assets/images/download_cloud_update.png"></img></a>' + 
                             '<a class="btn" ng-show="import_summary.import_info.status==\'in_progress\' && import_summary.import_info.import_summary_type != \'update_locations\'" title="Cancel Import" ng-click="cancel_import(store.id)"><img class="icons" src="/assets/images/cancel_import.png"></img></a>' + 
                             '</div>'
                         '</td>'+

@@ -68,20 +68,6 @@
   </div>
   <div class="row">
     <div class="col-md-6">
-      <legend>Update Warehouse Location in ShipStation</legend>
-      <div class="form-group">
-        <label class="control-label col-md-4">Warehouse Location Updating</label>
-        <div class="controls col-md-8">
-          <div toggle-switch ng-model="stores.single.warehouse_location_update" groov-click="update_single_store()"></div> <i class="pull-right icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" popover="When enabled, the Primary Bin Location in GroovePacker can be sent back to ShipStation so it can be used when printing pick lists or packing slips. ShipStaiton does not permit the location of the default product to be changed, instead the location of each product is updated within orders that are Awaiting Shipment and On Hold in ShipStation. This means you will not see the updated location when opening the order and going to Order Items > Product Details > Shipping and Customs. Instead you'll need to select the order containing the item and print the pick list to see the location change for the items in that order. Enabling the feature will add a button beside the regular and deep import buttons in the Import Summary Window (hover over the Import Orders button in the main navigation to see the summary window)"></i>
-          <div class="alert" ng-class="{'alert-success':shipstation_loc_update_response.status==true && shipstation_loc_update_response.data.update_status==true, 'alert-danger': shipstation_loc_update_response.status==false || shipstation_loc_update_response.data.update_status==false}" style="margin-top: 10px; margin-bottom: 0px;">
-            <p>{{shipstation_loc_update_response.data.message}}</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="row">
-    <div class="col-md-6">
       <legend>Import Notes</legend>
       <div class="form-group">
         <label class="control-label col-md-4">Import Internal Notes</label>
