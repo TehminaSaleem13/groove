@@ -1611,10 +1611,15 @@ div.input-style {
   position:fixed;
   z-index:8000;
   width:100%;
-  top:0px;
   height:0%;
   cursor:pointer;
   background: transparent;
+}
+.persist-notifications-background-bottom {
+  bottom: 0px;
+}
+.persist-notifications-background-top {
+  top: 0px;
 }
 .pnotif-open {
   .persist-notifications {
@@ -1626,11 +1631,26 @@ div.input-style {
     height: 100%;
   }
 }
+.pdash-open {
+  .persist-notifications {
+    .details {
+      height:450px;
+    }
+  }
+  .persist-notifications-background {
+    height: 100%;
+  }
+}
+.persist-notifications-bottom {
+  bottom: 0px;
+}
+.persist-notifications-top {
+  top: 0px;
+}
 .persist-notifications {
   position:fixed;
   z-index:8000;
   width:100%;
-  top:0px;
   background: rgba(0, 0, 10,  0.7);
   .glow {
     -webkit-animation: bar_glow 2s infinite alternate;
