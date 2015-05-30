@@ -6,9 +6,10 @@ groovepacks_directives.directive('groovDashboard',['$window','$document','$sce',
       templateUrl:"/assets/views/directives/dashboard.html",
       scope: {},
       link: function(scope,el,attrs) {
-        scope.toggle_detail = function() {
+        scope.dashbord_detail_open = false;
+        scope.toggle_dashboard_detail = function() {
           $('#dashboard').toggleClass('pdash-open');
-          scope.detail_open = !scope.detail_open;
+          scope.dashbord_detail_open = !scope.dashbord_detail_open;
         }
       }
     }
