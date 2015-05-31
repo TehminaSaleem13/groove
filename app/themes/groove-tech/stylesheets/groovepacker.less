@@ -869,6 +869,93 @@ li{
     background-color: rgba(220, 219, 219, 0.9);
     border: 1px solid rgb(165, 165, 165);
     border-radius: 4px;
+    height: 450px;
+
+    .dash-home-container {
+      background-color: white;
+      border-radius: 4px;
+    }
+
+    .tab-col {
+      padding-left: 0px;
+      padding-right: 5px;
+
+      .tab-pill {
+        height: 150px;
+        border-radius: 8px;
+        margin-bottom: 5px;
+        color: white;
+
+        &.tab-red {
+          background-color: red;
+        }
+
+        &.tab-green {
+          background-color: green;
+        }
+
+        &.tab-violet {
+          background-color: #0573CF;
+        }
+
+        .fa-dash {
+          font-size: 80px;
+        }
+
+        .fa-red {
+          color:red;
+        }
+
+        .fa-green {
+          color: green;
+        }
+
+        .fa-violet {
+          color: #0573CF;
+        }
+
+        .pill-col {
+          padding-left: 0px;
+          padding-right: 10px;
+          .well {
+            height: 105px;
+            margin-top: 45px;
+            margin-bottom: 0px;
+            border-radius: 0px;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            color: black;
+            padding-top: 2px;
+            padding-bottom: 0px;
+            .fa-pill-col {
+              font-size: 35px;
+            }
+          }
+        }
+
+        .pill-col-last {
+          padding-left: 0px;
+          padding-right: 0px;
+          margin-left: -4px;
+          .well {
+            padding-left: 0px;
+            padding-right: 0px;
+            padding-top: 0px;
+            text-align: center;
+            height: 135px;
+            margin-top: 15px;
+            margin-bottom: 0px;
+            border-radius: 0px;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            color: black;
+            .fa-pill-col {
+              font-size: 40px;
+            }
+          }
+        }
+      }
+    }
   }
   
   .nav:after {
@@ -879,9 +966,7 @@ li{
 
 
   .nav-tabs {
-    width: auto;
     margin-left: 20px;
-    margin-right: 20px;
     >li {
       padding-right: 10px;
       >a {
@@ -1686,7 +1771,7 @@ div.input-style {
 .pdash-open {
   .persist-notifications {
     .details {
-      height: 450px;
+      height: 550px;
       padding-top: 20px;
     }
   }
@@ -1778,7 +1863,7 @@ div.input-style {
       color: rgba(255, 250, 250, 0.90);
     }
     .glyphicon-top {
-      top: -450px;
+      top: -550px;
     }
     .glow {
       -webkit-animation: bar_glow 1s infinite alternate;

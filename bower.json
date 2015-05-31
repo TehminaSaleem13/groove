@@ -1,0 +1,26 @@
+{
+  "name": "Groovepacker",
+  "version": "0.1",
+  "homepage": "https://www.groovepacker.com",
+  "authors": [
+    "Shyam Visamsetty <svisamsetty@navaratan.com>"
+  ],
+  "description": "Scan and Pack system",
+  "keywords": [
+    "scanning",
+    "packing"
+  ],
+  "license": "Proprietary Copyright reserved",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ], 
+  "dependencies": {
+    "highcharts-release": "latest",
+    "highcharts-ng": "latest"
+  }
+}
