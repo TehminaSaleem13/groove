@@ -2,7 +2,10 @@ class GeneralSetting < ActiveRecord::Base
   include SettingsHelper
   attr_accessible :conf_req_on_notes_to_packer, :email_address_for_packer_notes, :hold_orders_due_to_inventory,
    :inventory_tracking, :low_inventory_alert_email, :low_inventory_email_address, :send_email_for_packer_notes,
-   :scheduled_order_import, :tracking_error_order_not_found, :tracking_error_info_not_found
+   :scheduled_order_import, :tracking_error_order_not_found, :tracking_error_info_not_found, :product_weight_format,
+   :packing_slip_size, :packing_slip_orientation, :time_to_import_orders, :time_to_send_email, :import_orders_on_mon,
+   :import_orders_on_tue, :import_orders_on_wed, :import_orders_on_thurs, :import_orders_on_fri, :import_orders_on_sat,
+   :import_orders_on_sun
 
   after_save :send_low_inventory_alert_email
   after_save :scheduled_import

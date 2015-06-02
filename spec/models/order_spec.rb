@@ -192,6 +192,7 @@ describe Order do
 
     it "should create order then delete order and update allocated inventory count" do      
       inv_wh = FactoryGirl.create(:inventory_warehouse)
+      general_setting = FactoryGirl.create(:general_setting, :inventory_tracking=>true)
 
       store = FactoryGirl.create(:store, :inventory_warehouse_id => inv_wh.id)
 
@@ -215,6 +216,7 @@ describe Order do
 
     it "should create order with status awaiting change it to onhold and update allocated inventory count" do      
       inv_wh = FactoryGirl.create(:inventory_warehouse)
+      general_setting = FactoryGirl.create(:general_setting, :inventory_tracking=>true)
 
       store = FactoryGirl.create(:store, :inventory_warehouse_id => inv_wh.id)
 
@@ -242,6 +244,7 @@ describe Order do
 
     it "should create order which has a kit with single with status awaiting change it to onhold and update allocated inventory count" do      
       inv_wh = FactoryGirl.create(:inventory_warehouse)
+      general_setting = FactoryGirl.create(:general_setting, :inventory_tracking=>true)
 
       store = FactoryGirl.create(:store, :inventory_warehouse_id => inv_wh.id)
 
@@ -275,6 +278,7 @@ describe Order do
 
     it "should create order which has a kit with individual status awaiting change it to onhold and update allocated inventory count" do      
       inv_wh = FactoryGirl.create(:inventory_warehouse)
+      general_setting = FactoryGirl.create(:general_setting, :inventory_tracking=>true)
 
       store = FactoryGirl.create(:store, :inventory_warehouse_id => inv_wh.id)
 
