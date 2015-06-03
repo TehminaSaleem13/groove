@@ -220,9 +220,9 @@ groovepacks_services.factory('stores',['$http','notification','$filter',function
                 case 'Amazon':
                     return (stores.single.merchant_id && stores.single.marketplace_id);
                     break;
-                case 'Shopify':
-                    return (stores.single.shop_name);
-                    break;
+                // case 'Shopify':
+                //     return (stores.single.shop_name);
+                //     break;
                 //for any other store types (ebay and csv) just return true
                 case 'Shipworks':
                 default:
@@ -463,14 +463,12 @@ groovepacks_services.factory('stores',['$http','notification','$filter',function
     var verify_tags = function(store_id) {
         return $http.get('/store_settings/verify_tags/' + store_id + '.json').success(
             function(data){
-            console.log(store_id);
         }).error(notification.server_error);
     }
 
     var update_all_locations = function(store_id) {
         return $http.put('/store_settings/update_all_locations/' + store_id + '.json', null).success(
             function(data){
-            console.log(store_id);
         }).error(notification.server_error); 
     }
 
