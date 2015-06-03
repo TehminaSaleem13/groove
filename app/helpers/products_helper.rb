@@ -119,9 +119,11 @@ module ProductsHelper
       product_location.save
     end
     product.update_product_status
-    @order_items.each do |order_item|
-      order_item.order.update_inventory_level = true
-      order_item.order.save
+    unless @order_items.nil?
+      @order_items.each do |order_item|
+        order_item.order.update_inventory_level = true
+        order_item.order.save
+      end
     end
     rescue Exception => e
       puts e.inspect

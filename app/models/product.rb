@@ -134,7 +134,6 @@ class Product < ActiveRecord::Base
 
         #update order items status from onhold to awaiting
         @order_items = OrderItem.where(:product_id=>self.id)
-        puts "@order_items: " + @order_items.inspect
         @order_items.each do |item|
           item.order.update_order_status unless item.order.nil? or !['awaiting','onhold'].include?(item.order.status)
         end
