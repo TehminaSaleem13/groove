@@ -717,4 +717,16 @@ class Order < ActiveRecord::Base
       where('activity_type in (:types)', types: 'deleted_item').
       where(acknowledged: false)
   end
+
+  def add_item_to_order(product)
+    order_item = OrderItem.new
+    order_item.product = product
+    order_item.name = product.name
+    unless product.product_skus.empty?
+      order_item.sku = product.product_skus.first.sku
+    end
+    order_item.qty = 1
+    order_item.order = self
+    order_item.save
+  end
 end
