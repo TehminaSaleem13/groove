@@ -362,6 +362,7 @@ module ScanPackHelper
                       end
                     end
                   end
+                  break
                 end
               end
             end
