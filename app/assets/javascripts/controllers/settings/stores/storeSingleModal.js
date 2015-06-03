@@ -286,11 +286,10 @@ function(scope, store_data, $window, $sce, $interval, $state, $stateParams, $mod
     scope.launch_shopify_popup= function() {
         var shopify_url = $sce.trustAsResourceUrl(scope.stores.single.shopify_permission_url);
         if (shopify_url == null) {
-            if (typeof scope.stores.single.id == 'undefined') {
+            console.log(scope.stores);
+            if (typeof scope.stores.single.shop_name == 'undefined') {
                 notification.notify("Please enter your store name first. Currently you could type in the name, and then click, \"Save & Close\" without Authorizing.");
-            } else {
-                notification.notify("Please enter shop name for authorization");
-            } 
+            }
         } else {
             myscope.open_popup(shopify_url);
         }

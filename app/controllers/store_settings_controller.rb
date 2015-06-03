@@ -47,9 +47,7 @@ class StoreSettingsController < ApplicationController
           @result['status'] = false
           @result['messages'].push('Please select a store type to create a store')
         else
-          if params[:name]=='undefined'
-            params[:name]=nil
-          end
+          params[:name]=nil if params[:name]=='undefined'
           @store.name = params[:name] || get_default_warehouse_name
           @store.store_type = params[:store_type]
           @store.status = params[:status]
@@ -294,9 +292,7 @@ class StoreSettingsController < ApplicationController
           if @store.store_type == 'Shopify'
             @shopify = ShopifyCredential.find_by_store_id(@store.id)
             begin
-              if params[:shop_name] == 'null'
-                params[:shop_name] = nil
-              end
+              params[:shop_name] = nil if params[:shop_name] == 'null'
               if @shopify.nil?
                 @store.shopify_credential = ShopifyCredential.new(
                   shop_name: params[:shop_name])
