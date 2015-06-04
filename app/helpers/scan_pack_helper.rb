@@ -325,51 +325,51 @@ module ScanPackHelper
                     end
                   end
                   break
-                else
-                  product_barcodes = ProductBarcode.where(barcode: clean_input)
-                  unless product_barcodes.empty?
-                    product_barcode = product_barcodes.first
-                    product = product_barcode.product unless product_barcode.product.nil?
-                    unless product.nil?
-                      if product.add_to_any_order
-                        barcode_found = true
-                        # check if the item is part of the order item list or not
-                        #IF the item is already in the items list, then just increment the qty for the item
-                        # if the item is not in the items list, then add the item to the list.Add activities
-                        item_in_order = false
-                        single_order.order_items.each do |item|
-                          if item.product == product
-                            item.qty += 1
-                            item.save
-                            single_order.addactivity("Item with SKU: #{item.sku} Added", current_user.username)
-                            item_in_order = true
-                            item.process_item(clicked, current_user.username)
-                            (session[:most_recent_scanned_products] ||= []) << item.product_id
-                            break
-                          end
-                        end
-                        unless item_in_order
-                          single_order.add_item_to_order(product)
-                          order_items = single_order.order_items.where(product_id: product.id)
-                          order_item = order_items.first unless order_items.empty?
-                          # product_skus = product.product_skus
-                          unless order_item.nil?
-                            single_order.addactivity("Item with SKU: #{order_item.sku} Added", current_user.username)
-                            order_item.process_item(clicked, current_user.username)
-                            (session[:most_recent_scanned_products] ||= []) << order_item.product_id
-                          end
-                        end
-                      end
-                    end
-                  end
-                  break
                 end
               end
             end
             break if barcode_found
           end
 
-          #puts "Barcode "+clean_input+" found: "+barcode_found.to_s
+          unless barcode_found
+            product_barcodes = ProductBarcode.where(barcode: clean_input)
+            unless product_barcodes.empty?
+              product_barcode = product_barcodes.first
+              product = product_barcode.product unless product_barcode.product.nil?
+              unless product.nil?
+                if product.add_to_any_order
+                  barcode_found = true
+                  # check if the item is part of the order item list or not
+                  #IF the item is already in the items list, then just increment the qty for the item
+                  # if the item is not in the items list, then add the item to the list.Add activities
+                  item_in_order = false
+                  single_order.order_items.each do |item|
+                    if item.product == product
+                      store_lot_number(scanpack_settings, input, item, serial_added, result)
+                      item.qty += 1
+                      item.scanned_status = 'partially_scanned'
+                      item.save
+                      single_order.addactivity("Item with SKU: #{item.sku} Added", current_user.username)
+                      item_in_order = true
+                      process_scan(clicked, item, serial_added, result)
+                      break
+                    end
+                  end
+                  unless item_in_order
+                    single_order.add_item_to_order(product)
+                    order_items = single_order.order_items.where(product_id: product.id)
+                    order_item = order_items.first unless order_items.empty?
+                    unless order_item.nil?
+                      store_lot_number(scanpack_settings, input, order_item, serial_added, result)
+                      single_order.addactivity("Item with SKU: #{order_item.sku} Added", current_user.username)
+                      process_scan(clicked, order_item, serial_added, result)
+                    end
+                  end
+                end
+              end
+            end
+          end
+
           if barcode_found
             if !single_order.has_unscanned_items
               if scanpack_settings.post_scanning_option != "None"
@@ -411,6 +411,45 @@ module ScanPackHelper
     end
 
     return result
+  end
+
+  def store_lot_number(scanpack_settings, input, order_item, serial_added,result)
+    if scanpack_settings.record_lot_number
+      unless serial_added
+        product = order_item.product
+        lot_number = calculate_lot_number(scanpack_settings, input)
+        result['data']['serial']['order_item_id'] = order_item.id
+        unless lot_number.nil?
+          if product.product_lots.where(lot_number: lot_number).empty?
+            product.product_lots.create(lot_number: lot_number)
+          end
+          product_lot = product.product_lots.where(lot_number: lot_number).first
+          OrderItemOrderSerialProductLot.create(order_item_id: order_item.id, product_lot_id: product_lot.id, qty: 1)
+          result['data']['serial']['product_lot_id'] = product_lot.id
+        else
+          result['data']['serial']['product_lot_id'] = nil
+        end
+      end
+    end
+    result
+  end
+
+  def process_scan(clicked, order_item, serial_added, result)
+    unless order_item.nil?
+      if order_item.product.record_serial
+        if serial_added
+          order_item.process_item(clicked, current_user.username)
+          (session[:most_recent_scanned_products] ||= []) << order_item.product_id
+        else
+          result['data']['serial']['ask'] = true
+          result['data']['serial']['product_id'] = order_item.product_id
+        end
+      else
+        order_item.process_item(clicked, current_user.username)
+        (session[:most_recent_scanned_products] ||= []) << order_item.product_id
+      end
+    end
+    result
   end
 
   def calculate_lot_number(scanpack_settings, input)
