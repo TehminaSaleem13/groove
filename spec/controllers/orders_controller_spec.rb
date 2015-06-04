@@ -172,6 +172,7 @@ describe OrdersController do
     it "inventory gets adjusted when order is deleted" do
       request.accept = "application/json"
       inv_wh = FactoryGirl.create(:inventory_warehouse)
+      general_setting = FactoryGirl.create(:general_setting, :inventory_tracking=>true)
       store = FactoryGirl.create(:store, :inventory_warehouse_id => inv_wh.id)
       @user_role.add_edit_order_items = true
       @user_role.save
