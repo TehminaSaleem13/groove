@@ -309,7 +309,7 @@ module ScanPackHelper
                       end
                     end
                   end
-
+                  
                   unless order_item.nil?
                     if item['record_serial']
                       if serial_added
@@ -346,7 +346,9 @@ module ScanPackHelper
                   single_order.order_items.each do |item|
                     if item.product == product
                       store_lot_number(scanpack_settings, input, item, serial_added, result)
+                      item.update_inventory_levels_for_return(true)
                       item.qty += 1
+                      item.update_inventory_levels_for_packing(true)
                       item.scanned_status = 'partially_scanned'
                       item.save
                       single_order.addactivity("Item with SKU: #{item.sku} Added", current_user.username)
@@ -796,7 +798,8 @@ module ScanPackHelper
         if data['unscanned_items'].first['product_type'] == 'single'
           data['next_item'] = data['unscanned_items'].first.clone
         elsif data['unscanned_items'].first['product_type'] == 'individual'
-          data['next_item'] = data['unscanned_items'].first['child_items'].first.clone
+          puts "data['unscanned_items']: " + data['unscanned_items'].inspect
+          data['next_item'] = data['unscanned_items'].first['child_items'].first.clone unless data['unscanned_items'].first['child_items'].empty?
         end
       end
       data['next_item']['qty'] = data['next_item']['scanned_qty'] + data['next_item']['qty_remaining']

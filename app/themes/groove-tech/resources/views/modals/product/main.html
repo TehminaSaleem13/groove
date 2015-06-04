@@ -208,13 +208,15 @@
                 </div>
                 <div class="info col-sm-1" ><i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" popover="{{translations.tooltips.skippable}}"></i></div>
 
-                <label class="control-label col-sm-2">Add to any order</label>
+                <div ng-hide="products.single.basicinfo.is_kit=1">
+                    <label class="control-label col-sm-2">Add to any order</label>
 
-                <div class="controls col-sm-2 col-lg-1">
-                    <div toggle-switch ng-model="products.single.basicinfo.add_to_any_order" groov-click="update_single_product()"></div>
+                    <div class="controls col-sm-2 col-lg-1">
+                        <div toggle-switch ng-model="products.single.basicinfo.add_to_any_order" groov-click="update_single_product()"></div>
+                    </div>
+                    <div class="info col-sm-2" ><i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" popover=""></i></div>
                 </div>
-                <div class="info col-sm-2" ><i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" popover=""></i></div>
-
+                
             </div>
             <div class="form-group">
                 <label class="control-label col-sm-2">Record Serial Number?</label>

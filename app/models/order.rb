@@ -728,5 +728,6 @@ class Order < ActiveRecord::Base
     order_item.qty = 1
     order_item.order = self
     order_item.save
+    self.update_order_status
   end
 end
