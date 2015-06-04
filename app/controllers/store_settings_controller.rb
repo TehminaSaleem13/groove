@@ -47,6 +47,7 @@ class StoreSettingsController < ApplicationController
           @result['status'] = false
           @result['messages'].push('Please select a store type to create a store')
         else
+          params[:name]=nil if params[:name]=='undefined'
           @store.name = params[:name] || get_default_warehouse_name
           @store.store_type = params[:store_type]
           @store.status = params[:status]
@@ -290,8 +291,8 @@ class StoreSettingsController < ApplicationController
 
           if @store.store_type == 'Shopify'
             @shopify = ShopifyCredential.find_by_store_id(@store.id)
-            puts @shopify.inspect
             begin
+              params[:shop_name] = nil if params[:shop_name] == 'null'
               if @shopify.nil?
                 @store.shopify_credential = ShopifyCredential.new(
                   shop_name: params[:shop_name])
@@ -834,7 +835,6 @@ class StoreSettingsController < ApplicationController
     end
     ebaytoken_resp = MultiXml.parse(res.body)
     @result['response'] = ebaytoken_resp
-    puts "fetch token response:" + ebaytoken_resp.inspect
     if ebaytoken_resp['FetchTokenResponse']['Ack'] == 'Success'
       session[:ebay_auth_token] = ebaytoken_resp['FetchTokenResponse']['eBayAuthToken']
       session[:ebay_auth_expiration] = ebaytoken_resp['FetchTokenResponse']['HardExpirationTime']

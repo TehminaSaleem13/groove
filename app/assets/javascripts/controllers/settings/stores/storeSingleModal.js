@@ -55,7 +55,6 @@ function(scope, store_data, $window, $sce, $interval, $state, $stateParams, $mod
     };
 
     scope.import_images = function(report_id) {
-        console.log("in import_images");
         scope.stores.import.image.status = "Import in progress";
         scope.stores.import.image.status_show = true;
         scope.update_single_store(false).then(function() {
@@ -65,7 +64,6 @@ function(scope, store_data, $window, $sce, $interval, $state, $stateParams, $mod
     };
 
     scope.update_products = function() {
-        console.log("in update products");
         scope.stores.update.products.status = "Update in progress";
         scope.stores.update.products.status_show = true;
         stores.update.products($stateParams.storeid).then(function(){
@@ -154,6 +152,9 @@ function(scope, store_data, $window, $sce, $interval, $state, $stateParams, $mod
         if(scope.edit_status || stores.single.validate_create(scope.stores)) {
             return stores.single.update(scope.stores,auto).success(function(data){
                 if(data.status && data.store_id) {
+                    if(scope.stores.single['id'] != 0) {
+                        myscope.store_single_details(data.store_id);
+                    }
                     if(typeof scope.stores.single['id'] == "undefined") {
                         myscope.store_single_details(data.store_id);
                     }
@@ -284,7 +285,14 @@ function(scope, store_data, $window, $sce, $interval, $state, $stateParams, $mod
 
     scope.launch_shopify_popup= function() {
         var shopify_url = $sce.trustAsResourceUrl(scope.stores.single.shopify_permission_url);
-        myscope.open_popup(shopify_url)
+        if (shopify_url == null) {
+            console.log(scope.stores);
+            if (typeof scope.stores.single.shop_name == 'undefined') {
+                notification.notify("Please enter your store name first. Currently you could type in the name, and then click, \"Save & Close\" without Authorizing.");
+            }
+        } else {
+            myscope.open_popup(shopify_url);
+        }
     };
 
     myscope.rollback = function() {
