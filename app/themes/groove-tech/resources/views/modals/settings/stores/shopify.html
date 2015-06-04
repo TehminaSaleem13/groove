@@ -11,30 +11,27 @@
         </div>
       </div>
     </div>
-    <div ng-show="stores.single.id">
-      <div class="form-group" ng-show="stores.single.access_token=='null' || 
-      stores.single.access_token == null">
-        <label class="control-label col-md-4"></label>
+    <div class="form-group">
+      <label class="control-label col-md-4"></label>
+      <div class="controls col-md-8">
+        <button class="btn btn-success" ng-click="launch_shopify_popup()">
+          Authorize access
+        </button>
+      </div>
+    </div>
+    <div ng-hide="stores.single.access_token == null || stores.single.access_token == 'null'">
+      <div class="form-group">
+        <label class="control-label col-md-4">Access token</label>
         <div class="controls col-md-8">
-          <button class="btn btn-success" ng-click="launch_shopify_popup()">
-            Authorize access
-          </button>
+          <p class="form-control-static">Available</p>
         </div>
       </div>
-      <div ng-hide="stores.single.access_token == null || stores.single.access_token == 'null'">
-        <div class="form-group">
-          <label class="control-label col-md-4">Access token</label>
-          <div class="controls col-md-8">
-            <p class="form-control-static">Available</p>
-          </div>
-        </div>
-        <div class="form-group">
-          <label class="control-label col-md-4"></label>
-          <div class="controls col-md-8">
-            <button class="btn btn-success" ng-click="disconnect_shopify()">
-              Disconnect access
-            </button>
-          </div>
+      <div class="form-group">
+        <label class="control-label col-md-4"></label>
+        <div class="controls col-md-8">
+          <button class="btn btn-success" ng-click="disconnect_shopify()">
+            Disconnect access
+          </button>
         </div>
       </div>
     </div>
