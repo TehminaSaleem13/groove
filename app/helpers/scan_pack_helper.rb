@@ -785,7 +785,6 @@ module ScanPackHelper
         if data['unscanned_items'].first['product_type'] == 'single'
           data['next_item'] = data['unscanned_items'].first.clone
         elsif data['unscanned_items'].first['product_type'] == 'individual'
-          puts "data['unscanned_items']: " + data['unscanned_items'].inspect
           data['next_item'] = data['unscanned_items'].first['child_items'].first.clone unless data['unscanned_items'].first['child_items'].empty?
         end
       end
