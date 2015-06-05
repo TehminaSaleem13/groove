@@ -137,6 +137,40 @@ describe ScanPackController do
 	    expect(order_item_serial_lots[1].qty).to eq(1)
 	    expect(order_item_serial_lots.last.qty).to eq(1)
 		end
+
+		it "scanning an add_to_any_order enabled item during an order scan adds the item to the order item list of the order" do
+			request.accept = "application/json"
+			inv_wh = FactoryGirl.create(:inventory_warehouse)
+
+      store = FactoryGirl.create(:store, :inventory_warehouse_id => inv_wh.id)
+	    order = FactoryGirl.create(:order, :status=>'awaiting', :store=>store)
+
+	    product1 = FactoryGirl.create(:product, :record_serial=>true)
+	    product_sku1 = FactoryGirl.create(:product_sku, :product=> product1)
+	    product_barcode1 = FactoryGirl.create(:product_barcode, :product=> product1, :barcode=>'1236547890')
+	    order_item1 = FactoryGirl.create(:order_item, :product_id=>product1.id,
+	                  :qty=>4, :order=>order, :name=>product1.name)
+
+	    product2 = FactoryGirl.create(:product, :record_serial=>true)
+	    product_sku2 = FactoryGirl.create(:product_sku, :product=> product2)
+	    product_barcode2 = FactoryGirl.create(:product_barcode, :product=> product2, :barcode=>'2236547890')
+	    order_item2 = FactoryGirl.create(:order_item, :product_id=>product2.id,
+	                  :qty=>4, :order=>order, :name=>product2.name)
+
+	    product3 = FactoryGirl.create(:product, :record_serial=>true, :add_to_any_order=>true)
+	    product_sku3 = FactoryGirl.create(:product_sku, :product=> product3)
+	    product_barcode3 = FactoryGirl.create(:product_barcode, :product=> product3, :barcode=>'3236547890')
+
+	    get :scan_barcode, {:state=>'scanpack.rfp.default', :input => '1236547890', :id => order.id }
+	    expect(response.status).to eq(200)	    
+	    get :scan_barcode, {:state=>'scanpack.rfp.default', :input => '2236547890', :id => order.id }
+	    expect(response.status).to eq(200)
+	    get :scan_barcode, {:state=>'scanpack.rfp.default', :input => '3236547890', :id => order.id }
+	    expect(response.status).to eq(200)
+	    order.reload()
+	    expect(order.order_items).to include(product3.order_items)
+		end
+
 		def extract_response(response)
 			result = JSON.parse(response.body)
 			data = Hash.new
