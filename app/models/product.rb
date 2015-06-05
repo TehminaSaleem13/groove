@@ -14,7 +14,8 @@ class Product < ActiveRecord::Base
     :kit_parsing,
     :disable_conf_req,
     :store,
-    :weight
+    :weight,
+    :add_to_any_order
 
   has_many :product_skus, :dependent => :destroy
   has_many :product_cats, :dependent => :destroy
