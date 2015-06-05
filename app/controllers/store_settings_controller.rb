@@ -1060,11 +1060,7 @@ class StoreSettingsController < ApplicationController
           single_row[:CustomsValue] = ''
           single_row[:CustomsTariffNo] = ''
           single_row[:CustomsCountry] = product.order_items.first.order.country unless product.order_items.empty? || product.order_items.first.order.nil?
-          if product.store.store_type == 'Shipstation API 2'
-            single_row[:ThumbnailUrl] = ''
-          else
-            single_row[:ThumbnailUrl] = product.primary_image
-          end
+          single_row[:ThumbnailUrl] = ''
           single_row[:UPC] = product.primary_barcode
           single_row[:FillSKU] = ''
           single_row[:Length] = ''
