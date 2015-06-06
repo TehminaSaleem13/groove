@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150603143807) do
+ActiveRecord::Schema.define(:version => 20150606093107) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0, :null => false
@@ -634,6 +634,7 @@ ActiveRecord::Schema.define(:version => 20150603143807) do
     t.boolean  "warehouse_location_update",      :default => false
     t.boolean  "shall_import_customer_notes",    :default => false
     t.boolean  "shall_import_internal_notes",    :default => false
+    t.integer  "regular_import_range",           :default => 3
   end
 
   create_table "shipworks_credentials", :force => true do |t|

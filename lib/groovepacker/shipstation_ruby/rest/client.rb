@@ -21,8 +21,9 @@ module Groovepacker
           combined_response = {}
           combined_response["orders"] = []
           begin
+            Rails.logger.info "Retrieving for page " + page_index.to_s + " at " + DateTime.now.to_s
             response = HTTParty.get('https://ssapi.shipstation.com/Orders/List?orderStatus=' + 
-              status + '&page=' + page_index.to_s + '&pageSize=100' + orderDateStart,
+              status + '&page=' + page_index.to_s + '&pageSize=500' + orderDateStart,
               headers: {
                 "Authorization" => "Basic "+ Base64.encode64(@auth[:api_key] + ":" + @auth[:api_secret]).gsub(/\n/, ''),
                 "X-Mashape-Key" => "E6cSux0BVQmshJh0VacUkqXP1sJgp1I1APKjsntC26JSOTy0pP",

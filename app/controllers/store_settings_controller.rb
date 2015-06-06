@@ -239,6 +239,7 @@ class StoreSettingsController < ApplicationController
             @shipstation.warehouse_location_update = params[:warehouse_location_update]
             @shipstation.shall_import_customer_notes = params[:shall_import_customer_notes]
             @shipstation.shall_import_internal_notes = params[:shall_import_internal_notes]
+            @shipstation.regular_import_range = params[:regular_import_range] unless params[:regular_import_range].nil?
             @store.shipstation_rest_credential = @shipstation
 
             begin
