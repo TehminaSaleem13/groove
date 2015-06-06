@@ -45,11 +45,11 @@ groovepacks_services.factory("notification", ['$timeout','$rootScope','$window',
     return {
         notify: notify,
         server_error: function(data) {
-            if(typeof data == 'object' && typeof data['error'] != "undefined" && data['error'] == "You need to sign in or sign up before continuing.") {
-                $window.location.href ='/users/sign_in';
+            if (typeof data == 'object' && typeof data['error'] != "undefined" && data['error'] == "You need to sign in or sign up before continuing.") {
+                $window.location.href = '/users/sign_in';
             }
             console.log(data);
-            notify("Error contacting server",0);
+            notify("Error contacting server", 0);
         }
     };
 

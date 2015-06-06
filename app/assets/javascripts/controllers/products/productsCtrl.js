@@ -1,6 +1,6 @@
 groovepacks_controllers.
-controller('productsCtrl', [ '$scope', '$http', '$timeout', '$stateParams', '$location', '$state', '$cookies','$q','$modal','products',
-function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,$modal,products) {
+controller('productsCtrl', [ '$scope', '$http', '$timeout', '$stateParams', '$location', '$state', '$cookies','$q','$modal','products','$rootScope',
+function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,$modal,products, $rootScope) {
     //Definitions
 
     var myscope= {};
@@ -344,6 +344,7 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
 
         $scope.product_modal_closed_callback = myscope.get_products;
         $scope.$watch('products.selected', myscope.update_selected_count,true);
+        $rootScope.$on('bulk_action_finished',function(){myscope.get_products();});
         //$("#product-search-query").focus();
     };
 

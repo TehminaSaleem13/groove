@@ -1,9 +1,9 @@
 groovepacks_services.factory('products',['$http','notification','editable','$window', function($http,notification,editable,$window) {
 
     var success_messages = {
-        update_status: "Status updated Successfully",
-        delete: "Deleted Successfully",
-        duplicate: "Duplicated Successfully",
+        update_status: "Status Update Queued Successfully",
+        delete: "Delete Queued Successfully",
+        duplicate: "Duplicate Queued Successfully",
         barcode: "Barcodes generated Successfully",
         receiving_label: "Labels generated Successfully",
         update_per_product: "Updated Successfully"

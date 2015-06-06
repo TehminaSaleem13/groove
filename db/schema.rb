@@ -198,6 +198,19 @@ ActiveRecord::Schema.define(:version => 20150606093107) do
 
   add_index "generate_barcodes", ["user_id"], :name => "index_generate_barcodes_on_user_id"
 
+  create_table "groove_bulk_actions", :force => true do |t|
+    t.string   "identifier",                          :null => false
+    t.string   "activity",                            :null => false
+    t.integer  "total",      :default => 0
+    t.integer  "completed",  :default => 0
+    t.string   "status",     :default => "scheduled"
+    t.string   "current"
+    t.string   "messages"
+    t.boolean  "cancel",     :default => false
+    t.datetime "created_at",                          :null => false
+    t.datetime "updated_at",                          :null => false
+  end
+
   create_table "import_items", :force => true do |t|
     t.string   "status"
     t.integer  "store_id"
@@ -398,6 +411,7 @@ ActiveRecord::Schema.define(:version => 20150606093107) do
     t.string   "method"
     t.datetime "created_at",                                                               :null => false
     t.datetime "updated_at",                                                               :null => false
+    t.string   "store_order_id"
     t.text     "notes_internal"
     t.text     "notes_toPacker"
     t.text     "notes_fromPacker"
@@ -418,7 +432,6 @@ ActiveRecord::Schema.define(:version => 20150606093107) do
     t.integer  "weight_oz"
     t.string   "non_hyphen_increment_id"
     t.boolean  "note_confirmation",                                     :default => false
-    t.string   "store_order_id"
     t.boolean  "update_inventory_level",                                :default => true
   end
 
@@ -605,9 +618,9 @@ ActiveRecord::Schema.define(:version => 20150606093107) do
     t.float    "order_complete_sound_vol",      :default => 0.75
     t.boolean  "type_scan_code_enabled",        :default => true
     t.string   "type_scan_code",                :default => "*"
-    t.string   "post_scanning_option",          :default => "None"
     t.string   "escape_string",                 :default => " - "
     t.boolean  "escape_string_enabled",         :default => false
+    t.string   "post_scanning_option",          :default => "None"
     t.boolean  "record_lot_number",             :default => false
     t.boolean  "show_customer_notes",           :default => false
     t.boolean  "show_internal_notes",           :default => false
