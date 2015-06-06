@@ -20,7 +20,7 @@ module Groovepacker
                 credential.last_imported_at.nil? ? Date.today - 2.weeks : credential.last_imported_at - 7.days
             else
               import_from = 
-                credential.last_imported_at.nil? ? Date.today - 2.weeks : credential.last_imported_at - 3.days
+                credential.last_imported_at.nil? ? Date.today - 2.weeks : credential.last_imported_at - credential.regular_import_range.days
             end
 
             gp_ready_tag_id = client.get_tag_id(credential.gp_ready_tag_name)

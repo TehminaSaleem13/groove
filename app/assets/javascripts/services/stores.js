@@ -169,6 +169,9 @@ groovepacks_services.factory('stores',['$http','notification','$filter',function
                             data.credentials.shipstation_rest_credentials.shall_import_customer_notes;
                         stores.single.shall_import_internal_notes = 
                             data.credentials.shipstation_rest_credentials.shall_import_internal_notes;
+                        stores.single.regular_import_range = 
+                            data.credentials.shipstation_rest_credentials.regular_import_range;
+                        stores.single.import_days = ["1", "2", "3", "4", "5","6" ];
                         stores.single.warehouse_location_update = data.credentials.shipstation_rest_credentials.warehouse_location_update;
                         stores.single.gp_ready_tag_name = data.credentials.shipstation_rest_credentials.gp_ready_tag_name;
                         stores.single.gp_imported_tag_name = data.credentials.shipstation_rest_credentials.gp_imported_tag_name;
@@ -463,14 +466,12 @@ groovepacks_services.factory('stores',['$http','notification','$filter',function
     var verify_tags = function(store_id) {
         return $http.get('/store_settings/verify_tags/' + store_id + '.json').success(
             function(data){
-            console.log(store_id);
         }).error(notification.server_error);
     }
 
     var update_all_locations = function(store_id) {
         return $http.put('/store_settings/update_all_locations/' + store_id + '.json', null).success(
             function(data){
-            console.log(store_id);
         }).error(notification.server_error); 
     }
 

@@ -53,7 +53,8 @@ class OrdersController < ApplicationController
           import_result = context.import_orders  
         end
       rescue Exception => e
-        puts e.backtrace.join(", ")
+        puts e.message
+        puts e.backtrace.join('\n')
         @result['status'] = false
         @result['messages'].push(e.message)
       end

@@ -937,6 +937,7 @@ class ProductsController < ApplicationController
         @product.weight = @product.get_product_weight(params[:weight])
         @product.shipping_weight = @product.get_product_weight(params[:shipping_weight])
         @product.weight_format = get_weight_format(params[:basicinfo][:weight_format])
+        @product.add_to_any_order = params[:basicinfo][:add_to_any_order]
 
         if !@product.save
           @result['status'] &= false
