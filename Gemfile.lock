@@ -256,6 +256,7 @@ GEM
       net-ssh (>= 2.6.5)
     netrc (0.7.7)
     newrelic_rpm (3.7.2.195)
+    ng-rails-csrf (0.1.0)
     nokogiri (1.6.3.1)
       mini_portile (= 0.6.0)
     nori (2.1.0)
@@ -471,6 +472,7 @@ DEPENDENCIES
   mws-connect (~> 0.0.7)!
   mysql2
   newrelic_rpm
+  ng-rails-csrf
   open4
   pdf-reader
   pdftk

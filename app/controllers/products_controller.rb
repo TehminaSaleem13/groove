@@ -333,7 +333,7 @@ class ProductsController < ApplicationController
   def getproducts
     @result = Hash.new
     @result[:status] = true
-    @products = do_getproducts
+    @products = do_getproducts(params)
     @result['products'] = make_products_list(@products)
     @result['products_count'] = get_products_count()
     respond_to do |format|
@@ -368,169 +368,11 @@ class ProductsController < ApplicationController
     end
   end
 
-  def duplicateproduct
-
-    @result = Hash.new
-    @result['status'] = true
-    @result['messages'] = []
-
-    if current_user.can?('add_edit_products')
-      @products = list_selected_products
-      unless @products.nil?
-        @products.each do|product|
-          #copy product
-          @product = Product.find(product["id"])
-
-          @newproduct = @product.dup
-          index = 0
-          @newproduct.name = @product.name+" "+index.to_s
-          @productslist = Product.where(:name=>@newproduct.name)
-          begin
-            index = index + 1
-            #todo: duplicate sku, images, categories associated with product too.
-            @newproduct.name = @product.name+" "+index.to_s
-            @productslist = Product.where(:name=>@newproduct.name)
-          end while(!@productslist.nil? && @productslist.length > 0)
-
-          #copy barcodes
-          @product.product_barcodes.each do |barcode|
-            index = 0
-            newbarcode = barcode.barcode+" "+index.to_s
-            barcodeslist = ProductBarcode.where(:barcode=>newbarcode)
-            begin
-              index = index + 1
-              #todo: duplicate sku, images, categories associated with product too.
-              newbarcode = barcode.barcode+" "+index.to_s
-              barcodeslist = ProductBarcode.where(:barcode=>newbarcode)
-            end while(!barcodeslist.nil? && barcodeslist.length > 0)
-
-            newbarcode_item = ProductBarcode.new
-            newbarcode_item.barcode = newbarcode
-            @newproduct.product_barcodes << newbarcode_item
-          end
-
-          #copy skus
-          @product.product_skus.each do |sku|
-            index = 0
-            newsku = sku.sku+" "+index.to_s
-            skuslist = ProductSku.where(:sku=>newsku)
-            begin
-              index = index + 1
-              #todo: duplicate sku, images, categories associated with product too.
-              newsku = sku.sku+" "+index.to_s
-              skuslist = ProductSku.where(:sku=>newsku)
-            end while(!skuslist.nil? && skuslist.length > 0)
-
-            newsku_item = ProductSku.new
-            newsku_item.sku = newsku
-            newsku_item.purpose = sku.purpose
-            @newproduct.product_skus << newsku_item
-          end
-
-          #copy images
-          @product.product_images.each do |image|
-            newimage = ProductImage.new
-            newimage = image.dup
-            @newproduct.product_images << newimage
-          end
-
-          #copy categories
-          @product.product_cats.each do |category|
-            newcategory = ProductCat.new
-            newcategory = category.dup
-            @newproduct.product_cats << newcategory
-          end
-
-          #copy product kit items
-          @product.product_kit_skuss.each do |sku|
-            new_kit_sku = ProductKitSkus.new
-            new_kit_sku = sku.dup
-            @newproduct.product_kit_skuss << new_kit_sku
-          end
-
-          #copy product inventory warehouses
-          @product.product_inventory_warehousess.each do |warehouse|
-            new_warehouse = ProductInventoryWarehouses.new
-            new_warehouse = warehouse.dup
-            @newproduct.product_inventory_warehousess << new_warehouse
-          end
-
-
-          if !@newproduct.save(:validate => false)
-            @result['status'] = false
-            @result['messages'] = @newproduct.errors.full_messages
-          end
-        end
-      end
-    else
-      @result['status'] = false
-      @result['messages'].push('You do not have enough permissions to duplicate products')
-    end
-    respond_to do |format|
-        format.html # show.html.erb
-        format.json { render json: @result }
-    end
-  end
-
-  def deleteproduct
-    @result = Hash.new
-    @result['status'] = true
-    @result['messages'] = []
-
-    if current_user.can?('delete_products')
-      @products = list_selected_products
-      unless @products.nil?
-        @products.each do|product|
-          @product = Product.find(product["id"])
-          @product.order_items.each do |order_item|
-            unless order_item.order.nil?
-             order_item.order.status = "onhold"
-             order_item.order.save
-             order_item.order.addactivity("An item with Name #{@product.name} and " +
-              "SKU #{@product.primary_sku} has been deleted",
-              current_user.username,
-              "deleted_item"
-             )
-            end
-            order_item.destroy
-          end
-
-          ProductKitSkus.where(option_product_id: @product.id).each do |product_kit_sku|
-            product_kit_sku.product.status = "new"
-            product_kit_sku.product.save
-            product_kit_sku.product.product_kit_activities.create(
-              activity_message: "An item with Name #{@product.name} and " +
-              "SKU #{@product.primary_sku} has been deleted",
-              username: current_user.username,
-              activity_type: "deleted_item"
-            )
-            product_kit_sku.destroy
-          end
-
-          if @product.destroy
-            @result['status'] &= true
-          else
-            @result['status'] &= false
-            @result['messages'] = @product.errors.full_messages
-          end
-        end
-      end
-    else
-      @result['status'] = false
-      @result['messages'].push('You do not have enough permissions to delete products')
-    end
-
-    respond_to do |format|
-        format.html # show.html.erb
-        format.json { render json: @result }
-    end
-  end
-
   def print_receiving_label
     result = Hash.new
     result['status'] = true
     result['messages'] = []
-    products = list_selected_products
+    products = list_selected_products(params)
     @products = []
     unless products.nil?
       products.each do |product|
@@ -568,7 +410,7 @@ class ProductsController < ApplicationController
     @result['status'] = true
     @result['messages'] = []
     if current_user.can?('add_edit_products')
-      @products = list_selected_products
+      @products = list_selected_products(params)
       unless @products.nil?
         @products.each do|product|
           @product = Product.find(product["id"])
@@ -604,7 +446,7 @@ class ProductsController < ApplicationController
     @result['status'] = true
   if !params[:search].nil? && params[:search] != ''
 
-    @products = do_search(false)
+    @products = do_search(params, false)
     @result['products'] = make_products_list(@products['products'])
     @result['products_count'] = get_products_count
     @result['products_count']['search'] = @products['count']
@@ -627,7 +469,7 @@ class ProductsController < ApplicationController
 
     if current_user.can?('add_edit_products')
       if !params[:setting].blank? && ['type_scan_enabled','click_scan_enabled'].include?(params[:setting])
-        @products = list_selected_products
+        @products = list_selected_products(params)
         unless @products.nil?
           @products.each do|product|
             @product = Product.find(product['id'])
@@ -660,43 +502,66 @@ class ProductsController < ApplicationController
     @result['messages'] = []
 
     if current_user.can?('add_edit_products')
-      @products = list_selected_products
-      unless @products.nil?
-        @products.each do|product|
-          @product = Product.find(product["id"])
-          current_status = @product.status
-          @product.status = params[:status]
-          if @product.save
-             @product.reload
-            if @product.status !='inactive'
-              if !@product.update_product_status && params[:status] == 'active'
-                @result['status'] &= false
-                if @product.is_kit == 1
-                  @result['messages'].push('There was a problem changing kit status for '+
-                   @product.name + '. Reason: In order for a Kit to be Active it needs to '+
-                   'have at least one item and every item in the Kit must be Active.')
-                else
-                  @result['messages'].push('There was a problem changing product status for '+
-                   @product.name + '. Reason: In order for a product to be Active it needs to '+
-                   'have at least one SKU and one barcode.')
-                end
-                @product.status = current_status
-                @product.save
-              end
-            else
-              @product.update_due_to_inactive_product
-            end
-          else
-            @result['status'] &= false
-            @result['messages'].push('There was a problem changing products status for '+@product.name)
-          end
-        end
-      end
+      bulk_actions = Groovepacker::Products::BulkActions.new
+      groove_bulk_actions = GrooveBulkActions.new
+      groove_bulk_actions.identifier = 'product'
+      groove_bulk_actions.activity = 'status_update'
+      groove_bulk_actions.save
+
+      bulk_actions.delay(:run_at =>1.seconds.from_now).status_update(Apartment::Tenant.current_tenant, params, groove_bulk_actions.id)
+
     else
       @result['status'] = false
       @result['messages'].push('You do not have enough permissions to edit product status')
     end
 
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json: @result }
+    end
+  end
+
+  def deleteproduct
+    @result = Hash.new
+    @result['status'] = true
+    @result['messages'] = []
+
+    if current_user.can?('delete_products')
+      bulk_actions = Groovepacker::Products::BulkActions.new
+      groove_bulk_actions = GrooveBulkActions.new
+      groove_bulk_actions.identifier = 'product'
+      groove_bulk_actions.activity = 'delete'
+      groove_bulk_actions.save
+
+      bulk_actions.delay(:run_at =>1.seconds.from_now).delete(Apartment::Tenant.current_tenant, params, groove_bulk_actions.id)
+    else
+      @result['status'] = false
+      @result['messages'].push('You do not have enough permissions to delete products')
+    end
+
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json: @result }
+    end
+  end
+
+  def duplicateproduct
+
+    @result = Hash.new
+    @result['status'] = true
+    @result['messages'] = []
+
+    if current_user.can?('add_edit_products')
+      bulk_actions = Groovepacker::Products::BulkActions.new
+      groove_bulk_actions = GrooveBulkActions.new
+      groove_bulk_actions.identifier = 'product'
+      groove_bulk_actions.activity = 'duplicate'
+      groove_bulk_actions.save
+      bulk_actions.delay(:run_at =>1.seconds.from_now).duplicate(Apartment::Tenant.current_tenant, params, groove_bulk_actions.id)
+    else
+      @result['status'] = false
+      @result['messages'].push('You do not have enough permissions to duplicate products')
+    end
     respond_to do |format|
       format.html # show.html.erb
       format.json { render json: @result }
@@ -937,6 +802,7 @@ class ProductsController < ApplicationController
         @product.weight = @product.get_product_weight(params[:weight])
         @product.shipping_weight = @product.get_product_weight(params[:shipping_weight])
         @product.weight_format = get_weight_format(params[:basicinfo][:weight_format])
+        @product.add_to_any_order = params[:basicinfo][:add_to_any_order]
 
         if !@product.save
           @result['status'] &= false
@@ -1487,200 +1353,6 @@ class ProductsController < ApplicationController
     end
   end
 
-  def do_search(results_only = true)
-    limit = 10
-    offset = 0
-    sort_key = 'updated_at'
-    sort_order = 'DESC'
-    supported_sort_keys = ['updated_at', 'name', 'sku',
-                           'status', 'barcode', 'location_primary','location_secondary','location_tertiary','location_name','cat','qty', 'store_type' ]
-    supported_order_keys = ['ASC', 'DESC' ] #Caps letters only
-
-    sort_key = params[:sort] if !params[:sort].nil? &&
-        supported_sort_keys.include?(params[:sort].to_s)
-
-    sort_order = params[:order] if !params[:order].nil? &&
-        supported_order_keys.include?(params[:order].to_s)
-
-    # Get passed in parameter variables if they are valid.
-    limit = params[:limit].to_i if !params[:limit].nil? && params[:limit].to_i > 0
-
-    offset = params[:offset].to_i if !params[:offset].nil? && params[:offset].to_i >= 0
-    search = ActiveRecord::Base::sanitize('%'+params[:search]+'%')
-    is_kit = 0
-    supported_kit_params = ['0', '1', '-1']
-    kit_query = ''
-    query_add = ''
-
-    is_kit = params[:is_kit].to_i if !params[:is_kit].nil?  &&
-        supported_kit_params.include?(params[:is_kit])
-    unless is_kit == -1
-      kit_query = 'AND products.is_kit='+is_kit.to_s+' '
-    end
-    unless params[:select_all] || params[:inverted]
-      query_add = ' LIMIT '+limit.to_s+' OFFSET '+offset.to_s
-    end
-
-    base_query = 'SELECT products.id as id, products.name as name, products.type_scan_enabled as type_scan_enabled, products.click_scan_enabled as click_scan_enabled, products.status as status, products.updated_at as updated_at, product_skus.sku as sku, product_barcodes.barcode as barcode, product_cats.category as cat, product_inventory_warehouses.location_primary, product_inventory_warehouses.location_secondary, product_inventory_warehouses.location_tertiary, product_inventory_warehouses.available_inv as qty, inventory_warehouses.name as location_name, stores.name as store_type, products.store_id as store_id
-      FROM products
-        LEFT JOIN product_skus ON (products.id = product_skus.product_id)
-        LEFT JOIN product_barcodes ON (product_barcodes.product_id = products.id)
-            LEFT JOIN product_cats ON (products.id = product_cats.product_id)
-            LEFT JOIN product_inventory_warehouses ON (product_inventory_warehouses.product_id = products.id)
-            LEFT JOIN inventory_warehouses ON (product_inventory_warehouses.inventory_warehouse_id =  inventory_warehouses.id)
-            LEFT JOIN stores ON (products.store_id = stores.id)
-        WHERE
-          (
-            products.name like '+search+' OR product_barcodes.barcode like '+search+'
-            OR product_skus.sku like '+search+' OR product_cats.category like '+search+'
-            OR (
-              product_inventory_warehouses.location_primary like '+search+'
-              OR product_inventory_warehouses.location_secondary like '+search+'
-              OR product_inventory_warehouses.location_tertiary like '+search+'
-            )
-          )
-          '+kit_query+'
-        GROUP BY products.id ORDER BY '+sort_key+' '+sort_order
-
-    result_rows = Product.find_by_sql(base_query+query_add)
-
-
-    if results_only
-      result = result_rows
-    else
-      result = Hash.new
-      result['products'] = result_rows
-      if params[:select_all] || params[:inverted]
-        result['count'] = result_rows.length
-      else
-        result['count'] = Product.count_by_sql('SELECT count(*) as count from('+base_query+') as tmp')
-      end
-    end
-
-
-    return result
-  end
-
-  def do_getproducts
-    sort_key = 'updated_at'
-    sort_order = 'DESC'
-    status_filter = 'active'
-    limit = 10
-    offset = 0
-    query_add = ""
-    kit_query = ""
-    status_filter_text = ""
-    is_kit = 0
-    supported_sort_keys = ['updated_at', 'name', 'sku',
-                           'status', 'barcode', 'location_primary','location_secondary','location_tertiary','location_name','cat','qty', 'store_type' ]
-    supported_order_keys = ['ASC', 'DESC' ] #Caps letters only
-    supported_status_filters = ['all', 'active', 'inactive', 'new']
-    supported_kit_params = ['0', '1', '-1']
-
-    # Get passed in parameter variables if they are valid.
-    limit = params[:limit].to_i if !params[:limit].nil? && params[:limit].to_i > 0
-
-    offset = params[:offset].to_i if !params[:offset].nil? && params[:offset].to_i >= 0
-
-    sort_key = params[:sort] if !params[:sort].nil? &&
-        supported_sort_keys.include?(params[:sort].to_s)
-
-    sort_order = params[:order] if !params[:order].nil? &&
-        supported_order_keys.include?(params[:order].to_s)
-
-    status_filter = params[:filter] if !params[:filter].nil? &&
-        supported_status_filters.include?(params[:filter].to_s)
-
-    is_kit = params[:is_kit].to_i if !params[:is_kit].nil?  &&
-        supported_kit_params.include?(params[:is_kit].to_s)
-
-    unless is_kit == -1
-      kit_query = " WHERE products.is_kit="+is_kit.to_s
-    end
-
-    unless params[:select_all] || params[:inverted]
-      query_add += " LIMIT "+limit.to_s+" OFFSET "+offset.to_s
-    end
-
-    #hack to bypass for now and enable client development
-    # sort_key = 'name' if sort_key == 'sku'
-
-    #todo status filters to be implemented
-
-    unless status_filter == 'all'
-      if is_kit == '-1'
-        status_filter_text = " WHERE "
-      else
-        status_filter_text = " AND "
-      end
-      status_filter_text += " products.status='"+status_filter+"'"
-    end
-
-    if sort_key == 'sku'
-      products = Product.find_by_sql("SELECT products.* FROM products LEFT JOIN product_skus ON ("+
-                                         "products.id = product_skus.product_id ) "+kit_query+
-                                         status_filter_text+" ORDER BY product_skus.sku "+sort_order+query_add)
-    elsif sort_key == 'store_type'
-      products = Product.find_by_sql("SELECT products.* FROM products LEFT JOIN stores ON ("+
-                                         "products.store_id = stores.id ) "+kit_query+
-                                         status_filter_text+" ORDER BY stores.name "+sort_order+query_add)
-    elsif sort_key == 'barcode'
-      products = Product.find_by_sql("SELECT products.* FROM products LEFT JOIN product_barcodes ON ("+
-                                         "products.id = product_barcodes.product_id ) "+kit_query+
-                                         status_filter_text+" ORDER BY product_barcodes.barcode "+sort_order+query_add)
-    elsif sort_key == 'location_primary'
-      products = Product.find_by_sql("SELECT products.* FROM products LEFT JOIN product_inventory_warehouses ON ( "+
-                                            "products.id = product_inventory_warehouses.product_id ) "+ kit_query+
-                                            status_filter_text+" ORDER BY product_inventory_warehouses.location_primary "+sort_order+query_add)
-    elsif sort_key == 'location_secondary'
-      products = Product.find_by_sql("SELECT products.* FROM products LEFT JOIN product_inventory_warehouses ON ( "+
-                                            "products.id = product_inventory_warehouses.product_id ) "+kit_query+
-                                            status_filter_text+" ORDER BY product_inventory_warehouses.location_secondary "+sort_order+query_add)
-    elsif sort_key == 'location_tertiary'
-      products = Product.find_by_sql("SELECT products.* FROM products LEFT JOIN product_inventory_warehouses ON ( "+
-                                         "products.id = product_inventory_warehouses.product_id ) "+kit_query+
-                                         status_filter_text+" ORDER BY product_inventory_warehouses.location_tertiary "+sort_order+query_add)
-    elsif sort_key == 'location_name'
-      products = Product.find_by_sql("SELECT products.* FROM products LEFT JOIN product_inventory_warehouses ON ( "+
-                                            "products.id = product_inventory_warehouses.product_id )  LEFT JOIN inventory_warehouses ON("+
-                                            "product_inventory_warehouses.inventory_warehouse_id = inventory_warehouses.id ) "+kit_query+
-                                            status_filter_text+" ORDER BY inventory_warehouses.name "+sort_order+query_add)
-    elsif sort_key == 'qty'
-      products = Product.find_by_sql("SELECT products.* FROM products LEFT JOIN product_inventory_warehouses ON ( "+
-                                            "products.id = product_inventory_warehouses.product_id ) "+kit_query+
-                                            status_filter_text+" ORDER BY product_inventory_warehouses.available_inv "+sort_order+query_add)
-    elsif sort_key == 'cat'
-      products = Product.find_by_sql("SELECT products.* FROM products LEFT JOIN product_cats ON ( "+
-                                            "products.id = product_cats.product_id ) "+kit_query+
-                                            status_filter_text+" ORDER BY product_cats.category "+sort_order+query_add)
-    else
-      products = Product.order(sort_key+" "+sort_order)
-      unless is_kit == -1
-        products = products.where(:is_kit=> is_kit.to_s)
-      end
-      unless status_filter == 'all'
-          products = products.where(:status=>status_filter)
-      end
-      unless params[:select_all] || params[:inverted]
-        products =  products.limit(limit).offset(offset)
-      end
-    end
-
-    if products.length == 0
-      products = Product.where(1)
-      unless is_kit == -1
-        products = products.where(:is_kit=> is_kit.to_s)
-      end
-      unless status_filter == 'all'
-        products = products.where(:status=>status_filter)
-      end
-      unless params[:select_all] || params[:inverted]
-        products =  products.limit(limit).offset(offset)
-      end
-    end
-    return products
-  end
-
   def make_products_list(products)
     @products_result = []
     products.each do |product|
@@ -1731,34 +1403,7 @@ class ProductsController < ApplicationController
     return @products_result
   end
 
-  def list_selected_products
-    if params[:select_all] || params[:inverted]
-      if !params[:search].nil? && params[:search] != ''
-        result = do_search
-      else
-        result = do_getproducts
-      end
-    else
-      result = params[:productArray]
-    end
 
-    result_rows = []
-    if params[:inverted] && !params[:productArray].blank?
-      not_in = []
-      params[:productArray].each do |product|
-        not_in.push(product['id'])
-      end
-      result.each do |single_product|
-        unless not_in.include? single_product['id']
-          result_rows.push(single_product)
-        end
-      end
-    else
-      result_rows = result
-    end
-
-    return result_rows
-  end
 
   def get_products_count
     count = Hash.new

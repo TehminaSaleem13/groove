@@ -14,7 +14,8 @@ class Product < ActiveRecord::Base
     :kit_parsing,
     :disable_conf_req,
     :store,
-    :weight
+    :weight,
+    :add_to_any_order
 
   has_many :product_skus, :dependent => :destroy
   has_many :product_cats, :dependent => :destroy
@@ -134,7 +135,6 @@ class Product < ActiveRecord::Base
 
         #update order items status from onhold to awaiting
         @order_items = OrderItem.where(:product_id=>self.id)
-        puts "@order_items: " + @order_items.inspect
         @order_items.each do |item|
           item.order.update_order_status unless item.order.nil? or !['awaiting','onhold'].include?(item.order.status)
         end

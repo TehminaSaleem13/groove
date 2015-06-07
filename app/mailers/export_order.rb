@@ -29,7 +29,7 @@ class ExportOrder < ActionMailer::Base
   def get_order_counts
     result = Hash.new
     result['imported'] = Order.where("created_at >= ?", Time.now.beginning_of_day).size
-    result['scanned'] = Order.where(scanned_on: Date.today).size
+    result['scanned'] = Order.where("scanned_on >= ?", Time.now.beginning_of_day).size
     result['awaiting'] = Order.where("created_at >= ? and status = ?", Time.now.beginning_of_day,'awaiting').size
     result['onhold'] = Order.where("created_at >= ? and status = ?", Time.now.beginning_of_day,'onhold').size
     result['cancelled'] = Order.where("created_at >= ? and status = ?", Time.now.beginning_of_day,'cancelled').size

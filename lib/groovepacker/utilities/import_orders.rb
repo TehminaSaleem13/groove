@@ -102,8 +102,10 @@
 						time = general_settings.time_to_send_email
 					end
 				elsif type == 'export_order'
-					should_schedule_job = export_settings.should_export_orders(date)
-      				time = export_settings.time_to_send_export_email
+					if export_settings.auto_email_export? && !export_settings.order_export_email.blank?
+						should_schedule_job = export_settings.should_export_orders(date)
+						time = export_settings.time_to_send_export_email
+					end
 				end
 
 				if should_schedule_job
