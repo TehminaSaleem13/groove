@@ -44,31 +44,102 @@ class Product < ActiveRecord::Base
     }
     tables.each do |ident,model|
       CSV.open("#{folder}/#{ident}.csv",'w',options) do |csv|
-        headers= model.column_names.dup
+        headers= []
         if ident == :products
-          headers.push('primary_sku','primary_barcode','primary_category','primary_image','default_wh_avbl','default_wh_loc_primary','default_wh_loc_secondary')
+          # headers.push('primary_sku','primary_barcode','primary_category','primary_image','default_wh_avbl','default_wh_loc_primary','default_wh_loc_secondary')
+          headers.push('ID','Name','SKU 1','Barcode 1','BinLocation 1','Quantity Avbl','Primary Image','Weight','Primary Category',
+            'SKU 2','SKU 3','Barcode 2','Barcode 3','BinLocation 2','BinLocation 3')
+          model.column_names.each do |name|
+            unless headers.any?{|s| s.casecmp(name)==0}
+              headers.push(name)
+            end
+          end
+        else
+          headers= model.column_names.dup
         end
 
 
         csv << headers
-        model.all.each do |item|
-          data = []
-          data = item.attributes.values_at(*model.column_names).dup
-          if ident == :products
-            data.push(item.primary_sku)
-            data.push(item.primary_barcode)
-            data.push(item.primary_category)
-            data.push(item.primary_image)
-            inventory_wh = ProductInventoryWarehouses.where(:product_id=>item.id,:inventory_warehouse_id => InventoryWarehouse.where(:is_default => true).first.id).first
-            if inventory_wh.nil?
-              data.push('','','')
-            else
-              data.push(inventory_wh.available_inv,inventory_wh.location_primary,inventory_wh.location_secondary)
-            end
-          end
 
-          logger.info data
-          csv << data
+        if ident == :products
+          model.all.each do |item|
+            data = []
+            inventory_wh = ProductInventoryWarehouses.where(:product_id=>item.id,:inventory_warehouse_id => InventoryWarehouse.where(:is_default => true).first.id).first
+            headers.each do |title|
+              if title == 'ID'
+                data.push(item.id)
+              elsif title == 'Name'
+                data.push(item.name)
+              elsif title == 'SKU 1'
+                data.push(item.primary_sku)
+              elsif title == 'Barcode 1'
+                data.push(item.primary_barcode)
+              elsif title == 'BinLocation 1'
+                data.push(inventory_wh.location_primary)
+              elsif title == 'Quantity Avbl'
+                data.push(inventory_wh.available_inv)
+              elsif title == 'Primary Image'
+                data.push(item.primary_image)
+              elsif title == 'Weight'
+                data.push(item.get_weight)
+              elsif title == 'Primary Category'
+                data.push(item.primary_category)
+              elsif title == 'SKU 2'
+                if item.product_skus.length >1
+                  data.push(item.product_skus[1].sku)
+                else
+                  data.push('')
+                end
+              elsif title == 'SKU 3'
+                if item.product_skus.length >2
+                  data.push(item.product_skus[2].sku)
+                else
+                  data.push('')
+                end
+              elsif title == 'Barcode 2'
+                if item.product_barcodes.length >1
+                  data.push(item.product_barcodes[1].barcode)
+                else
+                  data.push('')
+                end
+              elsif title == 'Barcode 3'
+                if item.product_barcodes.length >2
+                  data.push(item.product_barcodes[2].barcode)
+                else
+                  data.push('')
+                end
+              elsif title == 'BinLocation 2'
+                data.push(inventory_wh.location_secondary)
+              elsif title == 'BinLocation 3'
+                data.push('')
+              else
+                data.push(item.attributes.values_at(title).first) unless item.attributes.values_at(title).empty?
+              end
+            end
+
+            logger.info data
+            csv << data
+          end
+        else
+          model.all.each do |item|
+            data = []
+            data = item.attributes.values_at(*model.column_names).dup
+            # if ident == :products
+            #   data.push(item.primary_sku)
+            #   data.push(item.primary_barcode)
+            #   data.push(item.primary_category)
+            #   data.push(item.primary_image)
+            #   inventory_wh = ProductInventoryWarehouses.where(:product_id=>item.id,:inventory_warehouse_id => InventoryWarehouse.where(:is_default => true).first.id).first
+            #   if inventory_wh.nil?
+            #     data.push('','','')
+            #   else
+            #     data.push(inventory_wh.available_inv,inventory_wh.location_primary,inventory_wh.location_secondary)
+            #   end
+            # end
+
+            logger.info data
+            csv << data
+          end
         end
         response[ident] = "#{folder}/#{ident}.csv"
       end
