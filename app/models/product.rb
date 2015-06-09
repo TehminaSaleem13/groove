@@ -77,7 +77,6 @@ class Product < ActiveRecord::Base
     end
     csv << headers
     products.each do |item|
-      puts "item: " + item.inspect
       data = []
       inventory_wh = ProductInventoryWarehouses.where(:product_id=>item.id,:inventory_warehouse_id => InventoryWarehouse.where(:is_default => true).first.id).first
       headers.each do |title|
