@@ -125,7 +125,7 @@ module Groovepacker
         def find_orders_by_tag_and_status (tag_id, status)
           page_index = 1
           total_pages = 0
-
+          orders = []
           begin
             response = HTTParty.get(@endpoint + '/orders/listbytag?orderStatus=' + 
               status + '&tagId=' + tag_id.to_s + '&page=' + page_index.to_s + '&pageSize=100',
@@ -133,11 +133,12 @@ module Groovepacker
                   "Authorization" => authorization_token
                 }
               )
+            orders = orders + response["orders"] unless response["orders"].nil?
             total_pages = response.parsed_response["pages"]
             page_index = page_index + 1
           end while (page_index <= total_pages)
           handle_exceptions(response)
-          response["orders"]
+          orders
         end
 
         def remove_tag_from_order(order_id, tag_id)
