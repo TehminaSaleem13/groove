@@ -1343,6 +1343,38 @@ class ProductsController < ApplicationController
     end
   end
 
+  def generate_products_csv
+    require 'csv'
+    result = Hash.new
+    result['status'] = true
+    result['messages'] = []
+    if current_user.can? 'create_backups'
+      products_list = list_selected_products(params)
+      products = []
+      products_list.each do |product|
+        products.push(Product.find(product['id']))
+      end
+      result['filename'] = 'products-'+Time.now.to_s+'.csv'
+      CSV.open("#{Rails.root}/public/csv/#{result['filename']}","w") do |csv|
+        Product.products_csv(products,csv)
+      end
+    else
+      result['status'] = false
+      result['messages'].push('You do not have enough permissions to create backup csv')
+    end
+    unless result['status']
+      result['filename'] = 'error.csv'
+      CSV.open("#{Rails.root}/public/csv/#{result['filename']}","w") do |csv|
+        csv << result['messages']
+      end
+    end
+
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json: result }
+    end
+  end
+
   private
 
   def get_weight_format(weight_format)

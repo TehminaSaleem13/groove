@@ -91,6 +91,12 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
         });
     };
 
+    $scope.backup_product_csv = function() {
+        products.list.generate($scope.products).then(function(data) {
+            myscope.get_products();
+        });
+    };
+
     $scope.setup_child = function(childStateParams) {
         if(typeof childStateParams['type'] == 'undefined') {
             childStateParams['type'] = 'product';
