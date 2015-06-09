@@ -1356,7 +1356,7 @@ class ProductsController < ApplicationController
       end
       result['filename'] = 'products-'+Time.now.to_s+'.csv'
       CSV.open("#{Rails.root}/public/csv/#{result['filename']}","w") do |csv|
-        Product.products_csv(products,csv)
+        ProductsHelper.products_csv(products,csv)
       end
     else
       result['status'] = false
