@@ -395,12 +395,12 @@ groovepacks_controllers.
                           name:"Primary Barcode"
                         },
                         qty: {
-                            name:"Qty ordered",
+                            name:"Qty Ordered",
                             model:"row.iteminfo",
                             transclude: '<span>{{row.iteminfo.qty}}</span>'
                         },
                         location_primary: {
-                            name:"Primary location"
+                            name:"Primary Location"
                         },
                         qty_on_hand: {
                             name:"Available Inv",
@@ -412,6 +412,16 @@ groovepacks_controllers.
                             model:"row.productinfo",
                             transclude: '<div toggle-switch ng-model="row.productinfo.is_skippable" groov-click="options.editable.update(row.productinfo,\'is_skippable\')"></div>',
                             hidden:true
+                        },
+                        print_barcode: {
+                            name: "Print Barcode",
+                            editable:false,
+                            model: "row.iteminfo",
+                            transclude: "<a class='label label-default' ng-class=\"{" +
+                                        "'label-success': row.iteminfo.is_barcode_printed == false, " +
+                                        "'label-default': row.iteminfo.is_barcode_printed == true }\" " +
+                                        " href=\"/products/generate_barcode_slip/{{row.productinfo.id}}.pdf\"  target=\"_blank\">" +
+                                        "&nbsp;&nbsp;<i class=\"glyphicon glyphicon-print icon-large\"></i>&nbsp;&nbsp;</a>"
                         }
                     }
                 };

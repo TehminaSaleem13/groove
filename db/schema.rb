@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150606093107) do
+ActiveRecord::Schema.define(:version => 20150610141651) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0, :null => false
@@ -344,6 +344,10 @@ ActiveRecord::Schema.define(:version => 20150606093107) do
     t.string   "inv_status",                                           :default => "unprocessed"
     t.string   "inv_status_reason",                                    :default => ""
     t.integer  "clicked_qty",                                          :default => 0
+    t.boolean  "is_barcode_printed",                                   :default => false
+    t.boolean  "is_incremental_item",                                  :default => false
+    t.integer  "product_sku_id"
+    t.integer  "product_barcode_id"
   end
 
   add_index "order_items", ["order_id"], :name => "index_order_items_on_order_id"
@@ -411,7 +415,6 @@ ActiveRecord::Schema.define(:version => 20150606093107) do
     t.string   "method"
     t.datetime "created_at",                                                               :null => false
     t.datetime "updated_at",                                                               :null => false
-    t.string   "store_order_id"
     t.text     "notes_internal"
     t.text     "notes_toPacker"
     t.text     "notes_fromPacker"
@@ -432,6 +435,7 @@ ActiveRecord::Schema.define(:version => 20150606093107) do
     t.integer  "weight_oz"
     t.string   "non_hyphen_increment_id"
     t.boolean  "note_confirmation",                                     :default => false
+    t.string   "store_order_id"
     t.boolean  "update_inventory_level",                                :default => true
   end
 
@@ -618,9 +622,9 @@ ActiveRecord::Schema.define(:version => 20150606093107) do
     t.float    "order_complete_sound_vol",      :default => 0.75
     t.boolean  "type_scan_code_enabled",        :default => true
     t.string   "type_scan_code",                :default => "*"
+    t.string   "post_scanning_option",          :default => "None"
     t.string   "escape_string",                 :default => " - "
     t.boolean  "escape_string_enabled",         :default => false
-    t.string   "post_scanning_option",          :default => "None"
     t.boolean  "record_lot_number",             :default => false
     t.boolean  "show_customer_notes",           :default => false
     t.boolean  "show_internal_notes",           :default => false
