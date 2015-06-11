@@ -600,12 +600,16 @@ class OrdersController < ApplicationController
         @result['status'] &= false
         @result['messages'].push("Could not find order item")
       else
-        if GeneralSetting.first.inventory_auto_allocation
-          @orderitem.update_inventory_levels_for_return(true)
-          @orderitem.qty = params[:qty]
-          @orderitem.update_inventory_levels_for_packing(true)
+        if params.keys.include? ('qty')
+          if GeneralSetting.first.inventory_auto_allocation
+            @orderitem.update_inventory_levels_for_return(true)
+            @orderitem.qty = params[:qty]
+            @orderitem.update_inventory_levels_for_packing(true)
+          else
+            @orderitem.qty = params[:qty]
+          end
         else
-          @orderitem.qty = params[:qty]
+          @orderitem.is_barcode_printed = true
         end
 
         unless @orderitem.save
