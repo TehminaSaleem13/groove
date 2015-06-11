@@ -36,4 +36,19 @@
         render json: {valid: false}
       end
     end
+
+    def getinfo
+      @result = Hash.new
+      @result['status'] = true
+      @result['messages'] = []
+      @tenants = Tenant.all
+      if @tenants.empty?
+        @result['status'] = false
+      else
+        @result['tenants'] = @tenants
+      end
+      respond_to do |format|
+        format.json { render json: @result}
+      end
+    end
   end
