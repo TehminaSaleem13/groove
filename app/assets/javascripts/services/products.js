@@ -158,6 +158,25 @@ groovepacks_services.factory('products',['$http','notification','editable','$win
         }
     };
 
+    var generate_csv = function(products) {
+        products.setup.productArray = [];
+        for(var i =0; i < products.selected.length; i++) {
+            if (products.selected[i].checked == true) {
+                products.setup.productArray.push({id: products.selected[i].id});
+            }
+        }
+        return $http.post('/products/generate_products_csv',products.setup).success(function(data) {
+            if (data.status) {
+                products.setup.select_all =  false;
+                products.setup.inverted = false;
+                products.selected = [];
+                $window.open('/csv/'+ data.filename);
+            } else {
+                notification.notify(data.messages,0);
+            };
+        });
+    };
+
     var select_list = function(products,from,to,state) {
         var url = '';
         var setup = products.setup;
@@ -374,7 +393,8 @@ groovepacks_services.factory('products',['$http','notification','editable','$win
             total_items:total_items_list,
             update: update_list,
             select: select_list,
-            update_node: update_list_node
+            update_node: update_list_node,
+            generate: generate_csv
         },
         single: {
             get: get_single,
