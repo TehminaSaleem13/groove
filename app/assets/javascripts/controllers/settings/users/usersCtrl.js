@@ -1,6 +1,6 @@
 groovepacks_controllers.
-controller('usersCtrl', [ '$scope', '$http', '$timeout', '$stateParams', '$location', '$state', '$cookies', 'auth', 'users',
-    function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies, auth, users) {
+controller('usersCtrl', [ '$scope', '$http', '$timeout', '$stateParams', '$location', '$state', '$cookies', 'auth', 'users', 'notification',
+    function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies, auth, users, notification) {
 
         var myscope = {};
 
@@ -20,9 +20,19 @@ controller('usersCtrl', [ '$scope', '$http', '$timeout', '$stateParams', '$locat
         };
 
         $scope.user_delete = function() {
-            return users.list.update('delete',$scope.users).then(function(data) {
-                myscope.get_users();
-            });
+            $scope.users.selected = 0;
+            for (var i =0; i < $scope.users.list.length;i++) {
+                if($scope.users.list[i].checked) {
+                    $scope.users.selected += 1;
+                }
+            }
+            if ($scope.users.selected == 0) {
+                notification.notify('select a user to delete');
+            } else if (confirm("Are you sure you want to delete the user" + (($scope.users.selected == 1) ? "?" : "s?"))) {
+                return users.list.update('delete',$scope.users).then(function(data) {
+                    myscope.get_users();
+                });
+            };
         };
 
         $scope.user_duplicate = function() {
