@@ -356,6 +356,14 @@ class Product < ActiveRecord::Base
     self.product_barcodes.order('product_barcodes.order ASC').first.barcode unless self.product_barcodes.order('product_barcodes.order ASC').first.nil?
   end
 
+  def base_product
+    unless self.base_sku.nil?
+      return Product.where(sku: self.base_sku).first
+    else
+      return self
+    end
+  end
+
   def primary_barcode=(value)
     primary = self.product_barcodes.order('product_barcodes.order ASC').first
     if primary.nil?

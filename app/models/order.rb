@@ -612,7 +612,7 @@ class Order < ActiveRecord::Base
             result = true
             #move items from allocated to sold for each order items
             self.order_items.each do |order_item|
-              result &= order_item.product.update_allocated_product_sold_level(self.store.inventory_warehouse_id,
+              result &= order_item.product.base_product.update_allocated_product_sold_level(self.store.inventory_warehouse_id,
               order_item.qty, order_item)
             end
 
@@ -631,7 +631,7 @@ class Order < ActiveRecord::Base
             changed_hash['status'][1] == 'scanned'
           result = true
           self.order_items.each do |order_item|
-            result &= order_item.product.update_allocated_product_sold_level(self.store.inventory_warehouse_id,
+            result &= order_item.product.base_product.update_allocated_product_sold_level(self.store.inventory_warehouse_id,
             order_item.qty, order_item)
           end
         elsif changed_hash['status'][0] == 'cancelled' and 
