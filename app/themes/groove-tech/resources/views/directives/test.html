@@ -68,7 +68,25 @@
   </div>
 
   <div class="col-md-12 col-lg-12 dash-home-container">
-    <highchart id="chart1" config="chartConfig"></highchart>
+    <div class="dc-chart"
+      dc-chart="lineChart"
+      dc-render-area="true"
+      dc-width="990"
+      dc-height="200"
+      dc-transition-duration="1000"
+      dc-margins="{top: 30, right: 50, bottom: 25, left: 40}"
+      dc-dimension="moveMonths"
+      dc-mouse-zoomable="true"
+      dc-range-chart="volumeChart"
+      dc-x="d3.time.scale().domain([Date(1985, 0, 1), Date(2012, 11, 31)])"
+      dc-round="d3.time.month.round"
+      dc-x-units="d3.time.months"
+      dc-elastic-y="true"
+      dc-render-horizontal-grid-lines="true"
+      dc-legend="dc.legend().x(800).y(10).itemHeight(13).gap(5)"
+      dc-brush-on="false"
+      dc-options="moveChartOptions"
+      dc-post-setup-chart="moveChartPostSetupChart"/>
   </div>
 </div>
 

@@ -21,6 +21,7 @@
   ], 
   "dependencies": {
     "highcharts-release": "latest",
-    "highcharts-ng": "latest"
+    "highcharts-ng": "latest",
+    "angular-dc": "latest"
   }
 }
