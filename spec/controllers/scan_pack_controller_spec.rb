@@ -12,12 +12,10 @@ RSpec.describe ScanPackController, :type => :controller do
     #@user_role =FactoryGirl.create(:role, :name=>'scan_pack', :import_orders=>true)
     @user = FactoryGirl.create(:user, :username=>"scan_pack_spec_user", :name=>'Scan Pack user', 
       :role => Role.find_by_name('Scan & Pack User'))
-    # puts "Signing in **************"
     # sign_in @user
     request.env["devise.mapping"] = Devise.mappings[:user]
     sign_in :user, @user 
 
-    #puts current_user.inspect
     #@request.env["devise.mapping"] = Devise.mappings[:user]
 
     @child_item_l = lambda do |name, images, sku, qty_remaining,
@@ -838,7 +836,6 @@ RSpec.describe ScanPackController, :type => :controller do
 
       order.reload
       expect(order.status).to eq("awaiting")
-      #puts result['data']['order']['unscanned_items'].to_s
       expect(result['data']['order']['unscanned_items'].length).to eq(0)
       expect(result['data']['order']['scanned_items'].length).to eq(4)
       # order_item.reload
@@ -3000,7 +2997,6 @@ RSpec.describe ScanPackController, :type => :controller do
       order.reload
       order.status = 'scanned'
       order.save
-      # puts order
       product_kit_inv_wh.reload
       expect(product_kit_inv_wh.available_inv).to eq(24)
       expect(product_kit_inv_wh.allocated_inv).to eq(0)

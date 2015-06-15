@@ -53,8 +53,6 @@ class OrdersController < ApplicationController
           import_result = context.import_orders  
         end
       rescue Exception => e
-        puts e.message
-        puts e.backtrace.join('\n')
         @result['status'] = false
         @result['messages'].push(e.message)
       end
@@ -81,7 +79,6 @@ class OrdersController < ApplicationController
   def import_shipworks
     #find store by using the auth_token
     auth_token = params[:auth_token]
-    logger.info(auth_token)
     unless auth_token.nil? || request.headers["HTTP_USER_AGENT"] != 'shipworks'
       begin
         credential = ShipworksCredential.find_by_auth_token(auth_token)
@@ -108,8 +105,6 @@ class OrdersController < ApplicationController
           render status: 401, nothing: true
         end
       rescue Exception => e
-        logger.info(e.message)
-        logger.info(e.backtrace.inspect)
         import_item.status = 'failed'
         import_item.message = e.message
         import_item.save

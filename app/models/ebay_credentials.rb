@@ -40,7 +40,6 @@ class EbayCredentials < ActiveRecord::Base
 				 :startTimeTo =>(Date.today + 1.day).to_datetime)
 
 			@result['total_imported']  = seller_list.itemArray.length
-			puts "Total imported is: " + seller_list.itemArray.length.to_s
 			total_pages = (@result['total_imported'] / 10) +1
 			page_num = 1
 			begin

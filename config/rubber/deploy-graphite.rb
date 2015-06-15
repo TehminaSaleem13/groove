@@ -52,7 +52,6 @@ namespace :rubber do
       cleaning_instances = stored_instances - active_instances
 
       if cleaning_instances.size > 0
-        logger.info "Cleaning dead instances from graphite storage: #{cleaning_instances.join(',')}"
 
         do_clean = true
         if (cleaning_instances.size.to_f / stored_instances.size) > 0.01

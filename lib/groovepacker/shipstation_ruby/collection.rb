@@ -35,23 +35,18 @@ module Groovepacker
         final_string_array = []
         filters.each do |attribute, value|
           shipstation_style_attribute = attribute.to_s.classify.gsub(/Id/, 'ID')
-          puts shipstation_style_attribute
-          puts value
           if value.is_a?(Integer) || value == true || value == false
             filter_string = "#{shipstation_style_attribute} eq #{value}"
           elsif value.is_a?(Time)
-            puts "Date Time field"
             value = value.to_datetime
             filter_string = "#{shipstation_style_attribute} gt datetime'#{value}'"
           else
-            puts "string"
             filter_string = "#{shipstation_style_attribute} eq '#{value}'"
           end
 
           final_string_array << filter_string
         end
         final_string = final_string_array.join(' and ')
-        puts final_string
         @client.send("#{@resource}").filter("#{final_string}")
         results = @client.execute
         formatted_results = []
@@ -68,18 +63,14 @@ module Groovepacker
         sku_string = "SKU eq '#{sku}'"
         final_string_array << sku_string
         final_string = final_string_array.join(' and ')
-        puts final_string_array
         @client.send("#{@resource}").filter("#{final_string}")
         result = @client.execute
         result = result.first
-        puts result.inspect
         unless location.nil? || location == ''
           result.WarehouseLocation = location 
           @client.update_object(result)
-          puts @client.save_changes
+          @client.save_changes
         end
-        #puts "Updating location:"
-        #puts location
       end
 
     end
