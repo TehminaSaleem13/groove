@@ -70,7 +70,7 @@ module Groovepacker
         end
       end
 
-      def delete(tenant,params,bulk_actions_id)
+      def delete(tenant,params,bulk_actions_id, username)
         Apartment::Tenant.switch(tenant)
         result = Hash.new
         result['messages'] =[]
@@ -100,7 +100,7 @@ module Groovepacker
                   order_item.order.save
                   order_item.order.addactivity("An item with Name #{product.name} and " +
                                                    "SKU #{product.primary_sku} has been deleted",
-                                               current_user.username,
+                                               username,
                                                'deleted_item'
                   )
                 end
@@ -113,7 +113,7 @@ module Groovepacker
                 product_kit_sku.product.product_kit_activities.create(
                     activity_message: "An item with Name #{product.name} and " +
                         "SKU #{product.primary_sku} has been deleted",
-                    username: current_user.username,
+                    username: username,
                     activity_type: 'deleted_item'
                 )
                 product_kit_sku.destroy
