@@ -288,7 +288,7 @@ function(scope, store_data, $window, $sce, $interval, $state, $stateParams, $mod
         if (shopify_url == null) {
             console.log(scope.stores);
             if (typeof scope.stores.single.shop_name == 'undefined') {
-                notification.notify("Please enter your store name first. Currently you could type in the name, and then click, \"Save & Close\" without Authorizing.");
+                notification.notify("Please enter your store name first.");
             }
         } else {
             myscope.open_popup(shopify_url);

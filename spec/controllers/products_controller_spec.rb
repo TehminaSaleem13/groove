@@ -356,4 +356,25 @@ RSpec.describe ProductsController, :type => :controller do
       expect(product3.product_inventory_warehousess.first.available_inv).to eq(10)
     end
   end
+  describe "Products CSV" do
+    it "generates a csv file in public/csv when product csv is generated for selected products" do
+      request.accept = "application/json"
+      inv_wh = FactoryGirl.create(:inventory_warehouse,:is_default => true)
+      store = FactoryGirl.create(:store, :inventory_warehouse_id => inv_wh.id)
+      product1 = FactoryGirl.create(:product)
+      product1_sku = FactoryGirl.create(:product_sku, :product=> product1)
+      product1_barcode = FactoryGirl.create(:product_barcode, :product=> product1)
+
+      product2 = FactoryGirl.create(:product, :name=>'Apple iPhone 5C')
+      product2_sku = FactoryGirl.create(:product_sku, :product=> product2, :sku=>'IPHONE5C')
+      product2_barcode = FactoryGirl.create(:product_barcode, :product=> product2, :barcode=>'1234567891')
+
+      post :generate_products_csv, {:select_all=>false, :inverted=>false, :search=>'', :productArray=>[{'id' => product1.id},{'id' => product2.id}]}
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["status"]).to eq(true)      
+      File.exist?(File.dirname(__FILE__) + '/../../public/csv/'+result['filename']).should == true
+      File.delete(File.dirname(__FILE__) + '/../../public/csv/'+result['filename'])
+    end
+  end
 end

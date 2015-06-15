@@ -51,18 +51,23 @@ module Groovepacker
         def get_tracking_number(orderNumber)
           tracking_number = nil
           unless orderNumber.nil?
-            orderNumber = '&orderNumber=' + orderNumber.to_s
+            orderNumberParam = '&orderNumber=' + orderNumber.to_s
             Rails.logger.info "Getting shipment with order number: " + orderNumber
             response = HTTParty.get('https://ssapi.shipstation.com/Shipments/List?' + 
-                'page=1&pageSize=100' + URI.encode(orderNumber),
+                'page=1&pageSize=100' + URI.encode(orderNumberParam),
                 headers: {
                   "Authorization" => "Basic "+ Base64.encode64(@auth[:api_key] + ":" + @auth[:api_secret]).gsub(/\n/, ''),
                   "X-Mashape-Key" => "E6cSux0BVQmshJh0VacUkqXP1sJgp1I1APKjsntC26JSOTy0pP"
                 })
+
             handle_exceptions(response)
             unless response.parsed_response["shipments"].nil? ||
              response.parsed_response["shipments"].empty?
-              tracking_number = response.parsed_response["shipments"].first["trackingNumber"]
+              response.parsed_response["shipments"].each do |shipment|
+                if !shipment["trackingNumber"].nil? && shipment["orderNumber"] == orderNumber
+                  tracking_number = shipment["trackingNumber"]
+                end 
+              end
             end
           end
           tracking_number
@@ -125,7 +130,7 @@ module Groovepacker
         def find_orders_by_tag_and_status (tag_id, status)
           page_index = 1
           total_pages = 0
-
+          orders = []
           begin
             response = HTTParty.get(@endpoint + '/orders/listbytag?orderStatus=' + 
               status + '&tagId=' + tag_id.to_s + '&page=' + page_index.to_s + '&pageSize=100',
@@ -133,11 +138,12 @@ module Groovepacker
                   "Authorization" => authorization_token
                 }
               )
+            orders = orders + response["orders"] unless response["orders"].nil?
             total_pages = response.parsed_response["pages"]
             page_index = page_index + 1
           end while (page_index <= total_pages)
           handle_exceptions(response)
-          response["orders"]
+          orders
         end
 
         def remove_tag_from_order(order_id, tag_id)
