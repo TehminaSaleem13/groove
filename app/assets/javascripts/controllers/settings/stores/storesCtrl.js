@@ -1,6 +1,6 @@
 groovepacks_controllers.
-controller('storesCtrl', [ '$scope', '$http', '$timeout', '$stateParams', '$location', '$state', '$cookies','stores', 'warehouses', 'notification',
-function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies, stores, warehouses, notification) {
+controller('storesCtrl', [ '$scope', '$http', '$timeout', '$stateParams', '$location', '$state', '$cookies','stores', 'warehouses', 'notification','$q',
+function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies, stores, warehouses, notification, $q) {
 
     var myscope = {};
 
@@ -22,6 +22,7 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies, st
 
     $scope.store_delete = function() {
         $scope.stores.selected = 0;
+        var result = $q.defer();
         for (var i =0; i < $scope.stores.list.length;i++) {
             if($scope.stores.list[i].checked) {
                 $scope.stores.selected += 1;
@@ -29,11 +30,15 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies, st
         }
         if ($scope.stores.selected == 0) {
             notification.notify('select a store to delete');
+            result.resolve();
         } else if (confirm("Are you sure you want to delete the store" + (($scope.stores.selected == 1) ? "?" : "s?"))) {
-            return stores.list.update('delete',$scope.stores).then(function(data) {
+            stores.list.update('delete',$scope.stores).then(function(data) {
                 myscope.get_stores();
-            });
-        };
+            }).then(result.resolve);
+        } else {
+            result.resolve();
+        }
+        return result.promise;
     };
 
     $scope.store_duplicate = function() {
