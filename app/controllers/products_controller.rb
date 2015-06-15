@@ -533,7 +533,7 @@ class ProductsController < ApplicationController
       groove_bulk_actions.activity = 'delete'
       groove_bulk_actions.save
 
-      bulk_actions.delay(:run_at =>1.seconds.from_now).delete(Apartment::Tenant.current_tenant, params, groove_bulk_actions.id)
+      bulk_actions.delay(:run_at =>1.seconds.from_now).delete(Apartment::Tenant.current_tenant, params, groove_bulk_actions.id, current_user.username)
     else
       @result['status'] = false
       @result['messages'].push('You do not have enough permissions to delete products')
