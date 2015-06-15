@@ -90,7 +90,6 @@ module Groovepacker
             import_item.to_import = final_record.length
             import_item.save
 
-
             final_record.each_with_index do |single_row,index|
               if !mapping['increment_id'].nil? && mapping['increment_id'][:position] >= 0 && !single_row[mapping['increment_id'][:position]].blank?
                 import_item.current_increment_id = single_row[mapping['increment_id'][:position]]
@@ -130,6 +129,7 @@ module Groovepacker
                           product.product_skus << sku
                           product.store_product_id = 0
                           product.store_id = params[:store_id]
+                          product.base_sku = single_row[mapping['base_sku'][:position]]
                           product.save
 
                           order_item  = OrderItem.new

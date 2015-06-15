@@ -430,9 +430,7 @@ class StoreSettingsController < ApplicationController
                 { value: 'postcode', name: 'Postal Code'},
                 { value: 'country', name: 'Country'},
                 { value: 'method', name: 'Shipping Method'},
-                { value: 'customer_comments', name: 'Customer Comments'},
-                { value: 'base_sku', name: 'Base SKU'},
-                { value: 'weight', name: 'Weight'}
+                { value: 'customer_comments', name: 'Customer Comments'}
             ]
             if csv_map.order_csv_map.nil?
               @result['order']['settings'] = default_csv_map
@@ -464,7 +462,8 @@ class StoreSettingsController < ApplicationController
                 { value: 'barcode', name: 'UPC/Barcode'},
                 { value: 'secondary_barcode', name: 'Secondary Barcode'},
                 { value: 'tertiary_barcode', name: 'Tertiary Barcode'},
-                { value: 'product_weight', name: 'Product Weight'}
+                { value: 'product_weight', name: 'Product Weight'},
+                { value: 'base_sku', name: 'Base SKU'}
             ]
             if csv_map.product_csv_map.nil?
               @result["product"]["settings"] = default_csv_map
@@ -587,7 +586,8 @@ class StoreSettingsController < ApplicationController
       data[:import_action] = params[:import_action]
 
       import_csv = ImportCsv.new
-      delayed_job = import_csv.delay(:run_at =>1.seconds.from_now).import Apartment::Tenant.current_tenant, data
+      # delayed_job = import_csv.delay(:run_at =>1.seconds.from_now).import Apartment::Tenant.current_tenant, data
+      delayed_job = import_csv.import(Apartment::Tenant.current_tenant, data)
 
       if params[:type] == 'order'
         import_item = ImportItem.find_by_store_id(@store.id)
