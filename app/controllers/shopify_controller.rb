@@ -10,7 +10,6 @@ class ShopifyController < ApplicationController
   #  "id"=>"1" 
   # }
   def auth
-    #puts params[:is_admin]
     @tenant_name, @is_admin = params[:tenant_name].split('&')
     Apartment::Tenant.switch(@tenant_name)
     store = Store.find(params[:id])

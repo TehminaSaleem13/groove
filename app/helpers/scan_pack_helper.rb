@@ -17,7 +17,6 @@ module ScanPackHelper
     session[:most_recent_scanned_products] = []
     if !input.nil? && input != ""
       orders = Order.where(['increment_id = ? or non_hyphen_increment_id =?', input, input])
-      logger.info orders
       single_order = nil
       single_order_result = Hash.new
       single_order_result['matched_orders'] = []

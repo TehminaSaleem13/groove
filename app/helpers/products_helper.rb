@@ -9,8 +9,6 @@ module ProductsHelper
 	def import_amazon_product_details(store_id, product_sku, product_id)
 		begin
 			@store = Store.find(store_id)
-      #puts "@store:"
-      #puts @store.inspect
 			@amazon_credentials = AmazonCredentials.where(:store_id => store_id)
 
 			if @amazon_credentials.length > 0

@@ -13,7 +13,6 @@ module Groovepacker
             begin
               seller_list = ebay.GetMyeBaySelling(:soldList=> 
                 {:orderStatusFilter=>'AwaitingShipment'})
-              #puts seller_list.inspect
 
               if (seller_list.soldList != nil &&
                   seller_list.soldList.orderTransactionArray != nil)

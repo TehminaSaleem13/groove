@@ -84,7 +84,6 @@ class GeneralSetting < ActiveRecord::Base
 
   def send_low_inventory_alert_email
   	changed_hash = self.changes
-    logger.info changed_hash
     if (self.inventory_tracking ||
         self.low_inventory_alert_email) &&
         !changed_hash['time_to_send_email'].nil?
@@ -106,14 +105,12 @@ class GeneralSetting < ActiveRecord::Base
     run_at_date = run_at_date.change({:hour => time.hour, 
       :min => time.min, :sec => time.sec})
     time_diff = ((run_at_date - DateTime.now.getutc) * 24 * 60 * 60).to_i
-    logger.info time_diff
     if time_diff > 0
       tenant = Apartment::Tenant.current_tenant
       if job_type == 'low_inventory_email'
         if self.low_inventory_alert_email? && !self.low_inventory_email_address.blank?
           Delayed::Job.where(queue: "low_inventory_email_scheduled_#{tenant}").destroy_all
           #LowInventoryLevel.notify(self,tenant).deliver
-          logger.info 'inserting delayed job'
           LowInventoryLevel.delay(:run_at => time_diff.seconds.from_now,:queue => "low_inventory_email_scheduled_#{tenant}").notify(self, tenant)
           job_scheduled = true
         end

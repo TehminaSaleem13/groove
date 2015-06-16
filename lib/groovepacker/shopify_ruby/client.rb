@@ -2,7 +2,6 @@ module Groovepacker
   module ShopifyRuby
     class Client < Base
       def orders
-        # Rails.logger.info "Getting orders with status: " + status
         page_index = 1
         combined_response = {}
         combined_response["orders"] = []
@@ -26,7 +25,6 @@ module Groovepacker
             "Content-Type" => "application/json",
             "Accept" => "application/json"
           })
-        puts response.inspect
         response
       end
     end
