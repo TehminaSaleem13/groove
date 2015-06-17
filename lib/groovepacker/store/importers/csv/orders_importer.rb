@@ -96,7 +96,7 @@ module Groovepacker
                 import_item.current_order_items = -1
                 import_item.current_order_imported_item = -1
                 import_item.save
-                if imported_orders.has_key?(single_row[mapping['increment_id'][:position]]) || Order.where(:increment_id => single_row[mapping['increment_id'][:position]]).length == 0
+                if imported_orders.has_key?(single_row[mapping['increment_id'][:position]]) || Order.where(:increment_id => single_row[mapping['increment_id'][:position]]).length == 0 && !single_row[mapping['sku'][:position]].include? (single_row[mapping['increment_id'][:position]])
                   order = Order.find_or_create_by_increment_id(single_row[mapping['increment_id'][:position]])
                   order.store_id = params[:store_id]
                   #order_placed_time,price,qty
@@ -129,7 +129,7 @@ module Groovepacker
                           product.product_skus << sku
                           product.store_product_id = 0
                           product.store_id = params[:store_id]
-                          product.base_sku = single_row[mapping['base_sku'][:position]]
+                          product.base_sku = single_row[mapping['base_sku'][:position]] unless single_row[mapping['base_sku']].nil?
                           product.save
 
                           order_item  = OrderItem.new

@@ -430,7 +430,8 @@ class StoreSettingsController < ApplicationController
                 { value: 'postcode', name: 'Postal Code'},
                 { value: 'country', name: 'Country'},
                 { value: 'method', name: 'Shipping Method'},
-                { value: 'customer_comments', name: 'Customer Comments'}
+                { value: 'customer_comments', name: 'Customer Comments'},
+                { value: 'base_sku', name: 'Base SKU'}
             ]
             if csv_map.order_csv_map.nil?
               @result['order']['settings'] = default_csv_map
@@ -494,6 +495,7 @@ class StoreSettingsController < ApplicationController
   end
 
   def csvDoImport
+    puts "params: " + params.inspect
     @result = Hash.new
     @result["status"] = true
     @result["last_row"] = 0
