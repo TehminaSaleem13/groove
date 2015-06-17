@@ -8,7 +8,6 @@ class SettingsController < ApplicationController
     if current_user.can? 'restore_backups'
         # Every entry on mapping[current_mapping][:map] should be in the format
       # csv_header => db_table_header
-      puts "params: " + params.inspect
       if params[:method] == 'del_import_old'
         product_map = {
                   'id' => 'id',
@@ -162,7 +161,6 @@ class SettingsController < ApplicationController
         require 'csv'
         # Clear tables if delete method is invoked
         mapping.each do |single_map|
-          puts "single_map: " + single_map.inspect
           single_map[1][:model].delete_all
         end
 
@@ -176,7 +174,6 @@ class SettingsController < ApplicationController
             if mapping.key?(current_mapping)
               # Parse the file by it's data
               CSV.parse(zipfile.read(file.name),:headers=> true) do |csv_row|
-                puts "csv_row: " + csv_row.inspect
                 single_row = nil
                 create_new = false
                 # Create new row if deleted all else find and select by id for updating
@@ -215,8 +212,6 @@ class SettingsController < ApplicationController
                 unless single_row.nil?
                   # Now loop through all our defined mappings to check and update values
                   mapping[current_mapping][:map].each do |column|
-                    puts "column: " + column.inspect
-                    puts "csv_row[column[0]]:" + csv_row[column[0]].inspect
                     if current_mapping=='product_skus' && column[1] =='id' && !create_new
                       break;
                     end
@@ -259,9 +254,6 @@ class SettingsController < ApplicationController
                     unless csv_row['is_kit'].blank?
                       products_to_check_later << single_row
                     end
-                    single_row.save
-                    puts "update_product_status....................."
-                    single_row.update_product_status
                   end
                 end
               end
