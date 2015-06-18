@@ -114,6 +114,7 @@
 				else
 					date = date + 1.day
 				end
+				break if job_scheduled
 			end	
 		end
 
