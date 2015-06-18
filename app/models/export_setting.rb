@@ -10,16 +10,15 @@ class ExportSetting < ActiveRecord::Base
   def scheduled_export
     result = Hash.new
     changed_hash = self.changes
-    if self.auto_email_export && !changed_hash[:time_to_send_export_email].nil?
-      if self.should_export_orders_today
-        job_scheduled = false
-        date = DateTime.now
-        general_settings = GeneralSetting.all.first
-        while !job_scheduled do
-          job_scheduled = general_settings.schedule_job(date, 
-            self.time_to_send_export_email,'export_order')
-          date = DateTime.now + 1.day
-        end
+    if self.auto_email_export && !changed_hash[:time_to_send_export_email].nil? && !self.order_export_email.blank?
+      job_scheduled = false
+      date = DateTime.now
+      general_settings = GeneralSetting.all.first
+      for i in 0..6
+        job_scheduled = general_settings.schedule_job(date, 
+          self.time_to_send_export_email,'export_order')
+        date = date + 1.day
+        break if job_scheduled
       end
     end
   end
