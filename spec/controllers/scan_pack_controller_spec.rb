@@ -5,9 +5,9 @@ RSpec.describe ScanPackController, :type => :controller do
 
   before(:each) do
     SeedTenant.new.seed
-    scanpacksetting = ScanPackSetting.first
-    scanpacksetting.post_scanning_option = "recording"
-    scanpacksetting.save
+    @scanpacksetting = ScanPackSetting.first
+    @scanpacksetting.post_scanning_option = "Record"
+    @scanpacksetting.save
 
     #@user_role =FactoryGirl.create(:role, :name=>'scan_pack', :import_orders=>true)
     @user = FactoryGirl.create(:user, :username=>"scan_pack_spec_user", :name=>'Scan Pack user', 
@@ -580,7 +580,10 @@ RSpec.describe ScanPackController, :type => :controller do
   it "should scan product by barcode and order status should still be in scanned status when there are no unscanned items"+
      " of the same product" do
       request.accept = "application/json"
-      order = FactoryGirl.create(:order, :status=>'awaiting')
+      inv_wh = FactoryGirl.create(:inventory_warehouse)
+
+      store = FactoryGirl.create(:store, :inventory_warehouse_id => inv_wh.id)
+      order = FactoryGirl.create(:order, :status=>'awaiting', store: store)
 
       product = FactoryGirl.create(:product)
       product_sku = FactoryGirl.create(:product_sku, :product=> product)
@@ -678,8 +681,10 @@ RSpec.describe ScanPackController, :type => :controller do
   describe "Product Kit Scan" do
     it "should scan single kits" do
       request.accept = "application/json"
+      inv_wh = FactoryGirl.create(:inventory_warehouse)
 
-      order = FactoryGirl.create(:order, :status=>'awaiting')
+      store = FactoryGirl.create(:store, :inventory_warehouse_id => inv_wh.id)
+      order = FactoryGirl.create(:order, :status=>'awaiting', :store=>store)
 
       product = FactoryGirl.create(:product, :packing_placement=>'35')
       product_sku = FactoryGirl.create(:product_sku, :product=> product)
@@ -726,8 +731,10 @@ RSpec.describe ScanPackController, :type => :controller do
 
     it "should scan individual kits" do
       request.accept = "application/json"
+      inv_wh = FactoryGirl.create(:inventory_warehouse)
 
-      order = FactoryGirl.create(:order, :status=>'awaiting')
+      store = FactoryGirl.create(:store, :inventory_warehouse_id => inv_wh.id)
+      order = FactoryGirl.create(:order, :status=>'awaiting', :store=>store)
 
       product = FactoryGirl.create(:product, :name=>'PRODUCT1', :packing_placement=>40)
       product_sku = FactoryGirl.create(:product_sku, :product=> product)
@@ -845,8 +852,10 @@ RSpec.describe ScanPackController, :type => :controller do
 
     it "should split and scan kits" do
       request.accept = "application/json"
+      inv_wh = FactoryGirl.create(:inventory_warehouse)
 
-      order = FactoryGirl.create(:order, :status=>'awaiting')
+      store = FactoryGirl.create(:store, :inventory_warehouse_id => inv_wh.id)
+      order = FactoryGirl.create(:order, :status=>'awaiting', :store=>store)
 
       product = FactoryGirl.create(:product, :name=>'iPhone 5S', :packing_placement=>20)
       product_sku = FactoryGirl.create(:product_sku, :product=> product)
