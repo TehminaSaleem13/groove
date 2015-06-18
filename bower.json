@@ -20,8 +20,6 @@
     "tests"
   ], 
   "dependencies": {
-    "highcharts-release": "latest",
-    "highcharts-ng": "latest",
-    "angular-dc": "latest"
+    "angularjs-nvd3-directives": "latest"
   }
 }

@@ -68,7 +68,18 @@
   </div>
 
   <div class="col-md-12 col-lg-12 dash-home-container">
-    <div class="dc-chart"
+    <nvd3-line-chart
+      data="exampleData"
+      id="interactiveGuideLineExample"
+      width="550"
+      height="350"
+      xAxisTickFormat="xAxisTickFormatFunction()"
+      showXAxis="true"
+      showYAxis="true"
+      useInteractiveGuideLine="true">
+        <svg></svg>
+    </nvd3-line-chart>
+<!--     <div class="dc-chart"
       dc-chart="lineChart"
       dc-render-area="true"
       dc-width="990"
@@ -86,7 +97,7 @@
       dc-legend="dc.legend().x(800).y(10).itemHeight(13).gap(5)"
       dc-brush-on="false"
       dc-options="moveChartOptions"
-      dc-post-setup-chart="moveChartPostSetupChart"/>
+      dc-post-setup-chart="moveChartPostSetupChart"/> -->
   </div>
 </div>
 
