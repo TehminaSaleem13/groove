@@ -33,17 +33,40 @@ groovepacks_directives.directive('groovDashboard',['$window','$document','$sce',
           $('#dashboard').toggleClass('pdash-open');
           scope.dashbord_detail_open = !scope.dashbord_detail_open;
         }
-        scope.packing_stats = dashboard.model.get();
 
-        dashboard.stats.packing_stats('30', scope.packing_stats).then(function(response){
-          console.log(response)
-          scope.packing_stats = response.data;
-          console.log(scope.packing_stats);
-        });
+        scope.init = function() {
+          scope.charts.type = 'packing_stats';
+          scope.dashboard = dashboard.model.get();
+          scope.charts.retrieve.packing_stats('30');
+        }
+
+        scope.charts = {
+          type: 'packing_stats',
+          change_days_filter: function(days) {
+            if(scope.charts.type == 'packing_stats') {
+              this.retrieve.packing_stats(days)
+            } else if (scope.charts.type == 'packing_item_stats') {
+
+            }
+          },
+          retrieve: {
+            packing_stats: function(days) {
+              dashboard.stats.packing_stats(days).then(
+                function(response){
+                  console.log("packing_stats")
+                  console.log(scope.dashboard.packing_stats);
+                  scope.dashboard.packing_stats = response.data;
+              });
+            }
+          },
+          set_type: function(chart_mode) {
+            scope.charts.type = chart_mode;
+          }
+        }
 
         scope.xAxisTickFormatFunction = function() {
           return function(d){
-            return d3.time.format('%H:%M')(moment.unix(d).toDate());
+            return d3.time.format('%a, %b %e, %Y')(moment.unix(d).toDate());
           }
         }
 
@@ -64,6 +87,9 @@ groovepacks_directives.directive('groovDashboard',['$window','$document','$sce',
                     '<p>' +  y + ' at ' + x + '</p>'
           }
         }
+
+        scope.init();
+
       }
     }
   }]);

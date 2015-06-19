@@ -1,67 +1,82 @@
 <div class="col-md-offset-1 col-md-10 col-lg-offset-1 col-lg-10">
-  <div class="col-md-12 col-lg-12 pull-right">
-    <button class="btn btn-default">30 days</button>
+  <div  class="row">
+    <div class="col-md-12 col-lg-12">
+      <br/>
+      <button class="btn btn-default pull-right" 
+        ng-click="charts.change_days_filter('7')">7 days</button>
+      <button class="btn btn-default pull-right" 
+        ng-click="charts.change_days_filter('30')">30 days</button>
+      <button class="btn btn-default pull-right" 
+        ng-click="charts.change_days_filter('90')">90 days</button>
+      <button class="btn btn-default pull-right" 
+        ng-click="charts.change_days_filter('180')">180 days</button>
+      <button class="btn btn-default pull-right"
+        ng-click="charts.change_days_filter('-1')">All Time</button>
+    </div>
   </div>
-  <div class="col-md-4 tab-col">
-    <div class="tab-pill tab-red">
-      <div class="col-md-6 col-lg-6">
-        <span class="fa fa-dot-circle-o fa-dash"></span>
-        <h3>PACKING ACCURACY</h3>
-      </div>
-      <div class="col-md-4 col-lg-4 pill-col">
-        <div class="well">
-          <h4>98.07%</h4>
-          <span class="fa fa-calendar fa-pill-col"></span>
-          <span>Current Period</span>
+  <div class="row">
+    <div class="col-md-4 tab-col">
+      <div class="tab-pill tab-red">
+        <div class="col-md-6 col-lg-6">
+          <span class="fa fa-dot-circle-o fa-dash"></span>
+          <h3>PACKING ACCURACY</h3>
         </div>
-      </div>
-      <div class="col-md-2 col-lg-2 pill-col-last">
-        <div class="well">
-          <span class="fa fa-arrow-circle-up fa-pill-col fa-red"></span>
-          <p>+.04 % From Prev 30 Days</p>
+        <div class="col-md-4 col-lg-4 pill-col">
+          <div class="well">
+            <h4>98.07%</h4>
+            <span class="fa fa-calendar fa-pill-col"></span>
+            <span>Current Period</span>
+          </div>
+        </div>
+        <div class="col-md-2 col-lg-2 pill-col-last">
+          <div class="well">
+            <span class="fa fa-arrow-circle-up fa-pill-col fa-red"></span>
+            <p>+.04 % From Prev 30 Days</p>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-  <div class="col-md-4 tab-col">
-    <div class=" tab-pill tab-green">
-      <div class="col-md-6 col-lg-6">
-        <span class="fa fa-tachometer fa-dash"></span>
-        <h3>PACKING SPEED</h3>
-      </div>
-      <div class="col-md-4 col-lg-4 pill-col">
-        <div class="well">
-          <h4>98:01</h4>
-          <span class="fa fa-calendar fa-pill-col"></span>
-          <span>Current Period</span>
-        </div>
-      </div>
-      <div class="col-md-2 col-lg-2 pill-col-last">
-        <div class="well">
-          <span class="fa fa-arrow-circle-down fa-pill-col fa-green"></span>
-          <p>- 00:56 From Prev 30 Days</p>
-        </div>
-      </div>
-    </div>
-  </div>
 
-  <div class="col-md-4 tab-col">
-    <div class="tab-pill tab-violet">
-      <div class="col-md-6 col-lg-6">
-        <span class="fa fa-flag-checkered fa-dash"></span>
-        <h3>ITEMS PACKED</h3>
-      </div>
-      <div class="col-md-4 col-lg-4 pill-col">
-        <div class="well">
-          <h4>3250</h4>
-          <span class="fa fa-calendar fa-pill-col"></span>
-          <span>Current Period</span>
+    <div class="col-md-4 tab-col">
+      <div class=" tab-pill tab-green">
+        <div class="col-md-6 col-lg-6">
+          <span class="fa fa-tachometer fa-dash"></span>
+          <h3>PACKING SPEED</h3>
+        </div>
+        <div class="col-md-4 col-lg-4 pill-col">
+          <div class="well">
+            <h4>98:01</h4>
+            <span class="fa fa-calendar fa-pill-col"></span>
+            <span>Current Period</span>
+          </div>
+        </div>
+        <div class="col-md-2 col-lg-2 pill-col-last">
+          <div class="well">
+            <span class="fa fa-arrow-circle-down fa-pill-col fa-green"></span>
+            <p>- 00:56 From Prev 30 Days</p>
+          </div>
         </div>
       </div>
-      <div class="col-md-2 col-lg-2 pill-col-last">
-        <div class="well">
-          <span class="fa fa-arrow-circle-down fa-pill-col fa-violet"></span>
-          <p>-212 From Prev 30 Days</p>
+    </div>
+
+    <div class="col-md-4 tab-col">
+      <div class="tab-pill tab-violet">
+        <div class="col-md-6 col-lg-6">
+          <span class="fa fa-flag-checkered fa-dash"></span>
+          <h3>ITEMS PACKED</h3>
+        </div>
+        <div class="col-md-4 col-lg-4 pill-col">
+          <div class="well">
+            <h4>3250</h4>
+            <span class="fa fa-calendar fa-pill-col"></span>
+            <span>Current Period</span>
+          </div>
+        </div>
+        <div class="col-md-2 col-lg-2 pill-col-last">
+          <div class="well">
+            <span class="fa fa-arrow-circle-down fa-pill-col fa-violet"></span>
+            <p>-212 From Prev 30 Days</p>
+          </div>
         </div>
       </div>
     </div>
@@ -69,9 +84,8 @@
 
   <div class="col-md-12 col-lg-12 dash-home-container">
     <nvd3-line-chart
-      data="packing_stats"
-      id="interactiveGuideLineExample"
-      width="850"
+      data="dashboard.packing_stats"
+      width="900"
       height="350"
       xAxisTickFormat="xAxisTickFormatFunction()"
       yAxisTickFormat="yAxisTickFormatFunction()"
@@ -83,29 +97,9 @@
       showLegend="true"
       color = "legendColorFunction()"
       legendRightAlign="false"
-      legendColor="legendColorFunction()">
+      legendColor="legendColorFunction()" ng-show="charts.type=='packing_stats'">
         <svg></svg>
     </nvd3-line-chart>
-
-<!--     <div class="dc-chart"
-      dc-chart="lineChart"
-      dc-render-area="true"
-      dc-width="990"
-      dc-height="200"
-      dc-transition-duration="1000"
-      dc-margins="{top: 30, right: 50, bottom: 25, left: 40}"
-      dc-dimension="moveMonths"
-      dc-mouse-zoomable="true"
-      dc-range-chart="volumeChart"
-      dc-x="d3.time.scale().domain([Date(1985, 0, 1), Date(2012, 11, 31)])"
-      dc-round="d3.time.month.round"
-      dc-x-units="d3.time.months"
-      dc-elastic-y="true"
-      dc-render-horizontal-grid-lines="true"
-      dc-legend="dc.legend().x(800).y(10).itemHeight(13).gap(5)"
-      dc-brush-on="false"
-      dc-options="moveChartOptions"
-      dc-post-setup-chart="moveChartPostSetupChart"/> -->
   </div>
 </div>
 

@@ -1,16 +1,15 @@
 groovepacks_services.factory('dashboard',['$http','notification',function($http, notification) {
   var get_default = function() {
-    return [];
+    return {
+      packing_stats: []
+    };
   };
 
 
 
-  var packing_stats = function(duration, packing_stats) {
+  var packing_stats = function(duration) {
     return(
-      $http.get('/dashboard/packing_stats?duration='+ duration).success(function(response) {
-        console.log(response)
-        packing_stats = response;
-      }).error(function(event){
+      $http.get('/dashboard/packing_stats?duration='+ duration).error(function(response){
         notification.notify("Failed to load packing statistics",0);
       })
     );

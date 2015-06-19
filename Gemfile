@@ -92,4 +92,4 @@ gem 'activerecord-import', '= 0.3.1'
 gem 'shopify_api'
 gem 'intercom-rails'
 gem 's3'
-
+gem 'paleta'

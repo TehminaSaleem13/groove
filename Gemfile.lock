@@ -261,6 +261,7 @@ GEM
     nori (2.1.0)
     open4 (1.3.0)
     orm_adapter (0.5.0)
+    paleta (0.2.2)
     pdf-core (0.2.5)
     pdf-reader (1.3.3)
       Ascii85 (~> 1.0.0)
@@ -472,6 +473,7 @@ DEPENDENCIES
   mysql2
   newrelic_rpm
   open4
+  paleta
   pdf-reader
   pdftk
   prawn
