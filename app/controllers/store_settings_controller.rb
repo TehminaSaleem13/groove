@@ -364,6 +364,7 @@ class StoreSettingsController < ApplicationController
     result = Hash.new
     result['status'] = true
     result['messages'] = []
+    puts "params : " + params.inspect
     if params[:map].nil? || params[:store_id].nil?
       result['status'] = false
       result['messages'].push('You need map and store id to update csv map')
@@ -406,7 +407,7 @@ class StoreSettingsController < ApplicationController
 
           #check if previous mapping exists
           #else fill in defaults
-          default_csv_map ={ 'name' =>'', 'map' =>{'rows' => 2, 'sep' => ',' , 'other_sep' => 0, 'delimiter'=> '"', 'fix_width' => 0, 'fixed_width' => 4, 'map' => {} }}
+          default_csv_map ={ 'name' =>'', 'map' =>{'rows' => 2, 'sep' => ',' , 'other_sep' => 0, 'delimiter'=> '"', 'fix_width' => 0, 'fixed_width' => 4, 'contains_unique_order_items' => false, 'map' => {} }}
           csv_map = CsvMapping.find_or_create_by_store_id(@store.id)
           # end check for mapping
 

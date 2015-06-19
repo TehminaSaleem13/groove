@@ -12,6 +12,7 @@
     <div class="modal-body" >
 
         <div class="container-fluid form-horizontal">
+        {{csv}}
             <div class="row">
                 <div class="col-md-8">
                     <legend>Import Options</legend>
@@ -63,19 +64,35 @@
                         <div class="controls col-md-8">
                             Text delimiter <input type="text" class="form-control input-style" ng-model="csv.current.delimiter" ng-change="parse()" />
                         </div>
+                        <div></div>
                     </div>
-                    <legend >Csv Map Name</legend>
+                </div>
+                <div class="col-md-4"></div>
+
+                <div class="col-md-8">
+                    <legend>Csv Map Name</legend>
                     <div class="form-group" >
                         <div class="controls col-md-8">
                             Name <input type="text" class="form-control input-style" ng-model="csv.current.name" />
                         </div>
                     </div>
+                </div>                
+                
+                <div class="col-md-4">
+                    <br>
+                    <br>
+                    <br>
+                    <div class="form-group">
+                        <label class="control-label col-sm-8 col-md-8">Unique Ordernum/SKU Barcodes</label>
+                        <div class="controls col-sm-4 col-md-4 form-inline pull-left">
+                            <div toggle-switch ng-model="csv.current.contains_unique_order_items" groov-click="update_map()"></div>
+                        </div>
+                    </div>
                 </div>
-
             </div>
-                </div>
             <div class="row">
-                <div class="pull-right col-xs-4 col-sm-3 col-md-2">
+                <div class="col-xs-8 col-sm-9 col-md-10"></div>
+                <div class="col-xs-4 col-sm-3 col-md-2 pull-right">
                     <button ng-click="ok()" class="modal-save-button">Import</button>
                     <button ng-click="cancel()" class="modal-cancel-button">Cancel</button>
                 </div>

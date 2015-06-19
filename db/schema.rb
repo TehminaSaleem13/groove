@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150612101535) do
+ActiveRecord::Schema.define(:version => 20150619143159) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0, :null => false
@@ -72,10 +72,11 @@ ActiveRecord::Schema.define(:version => 20150612101535) do
   create_table "csv_maps", :force => true do |t|
     t.string   "kind"
     t.string   "name"
-    t.boolean  "custom",     :default => true
+    t.boolean  "custom",                      :default => true
     t.text     "map"
-    t.datetime "created_at",                   :null => false
-    t.datetime "updated_at",                   :null => false
+    t.datetime "created_at",                                     :null => false
+    t.datetime "updated_at",                                     :null => false
+    t.boolean  "contains_unique_order_items", :default => false
   end
 
   create_table "csv_product_imports", :force => true do |t|
@@ -122,7 +123,7 @@ ActiveRecord::Schema.define(:version => 20150612101535) do
 
   create_table "export_settings", :force => true do |t|
     t.boolean  "auto_email_export",         :default => true
-    t.datetime "time_to_send_export_email"
+    t.datetime "time_to_send_export_email", :default => '2000-01-01 00:00:00'
     t.boolean  "send_export_email_on_mon",  :default => false
     t.boolean  "send_export_email_on_tue",  :default => false
     t.boolean  "send_export_email_on_wed",  :default => false
@@ -134,8 +135,8 @@ ActiveRecord::Schema.define(:version => 20150612101535) do
     t.string   "export_orders_option",      :default => "on_same_day"
     t.string   "order_export_type",         :default => "include_all"
     t.string   "order_export_email"
-    t.datetime "created_at",                                           :null => false
-    t.datetime "updated_at",                                           :null => false
+    t.datetime "created_at",                                                   :null => false
+    t.datetime "updated_at",                                                   :null => false
     t.datetime "start_time"
     t.datetime "end_time"
     t.boolean  "manual_export",             :default => false

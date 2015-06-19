@@ -21,9 +21,22 @@ function(scope, store_data, $state, $stateParams, $modal, $modalInstance, $timeo
         $modalInstance.dismiss("cancel-button-click");
     };
     scope.parse = function() {
+        console.log("in parse...");
         if (scope.csv.importer[scope.csv.importer.type] != null) {
+            console.log("importer_type: "+ scope.csv.importer[scope.csv.importer.type]);
             $timeout(myscope.doparse);
         }
+    };
+
+    scope.update_map = function() {
+        console.log(scope.csv);
+        stores.csv.map.update(scope.stores,scope.csv.current).success(function(data) {
+            console.log("success");
+        });
+        // if (scope.csv.map.update[scope.csv.map.type] != null) {
+        //     console.log("importer_type: "+ scope.csv.importer[scope.csv.importer.type]);
+        //     $timeout(myscope.doparse);
+        // }
     };
 
     scope.column_map = function(col,option) {
