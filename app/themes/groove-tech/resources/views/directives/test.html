@@ -69,7 +69,7 @@
 
   <div class="col-md-12 col-lg-12 dash-home-container">
     <nvd3-line-chart
-      data="exampleData"
+      data="packing_stats"
       id="interactiveGuideLineExample"
       width="850"
       height="350"
@@ -81,9 +81,12 @@
       tooltips="true"
       tooltipcontent="toolTipContentFunction()"
       showLegend="true"
+      color = "legendColorFunction()"
+      legendRightAlign="false"
       legendColor="legendColorFunction()">
         <svg></svg>
     </nvd3-line-chart>
+
 <!--     <div class="dc-chart"
       dc-chart="lineChart"
       dc-render-area="true"
