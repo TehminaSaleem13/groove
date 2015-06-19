@@ -71,12 +71,17 @@
     <nvd3-line-chart
       data="exampleData"
       id="interactiveGuideLineExample"
-      width="550"
+      width="850"
       height="350"
       xAxisTickFormat="xAxisTickFormatFunction()"
+      yAxisTickFormat="yAxisTickFormatFunction()"
       showXAxis="true"
       showYAxis="true"
-      useInteractiveGuideLine="true">
+      interactive="true"
+      tooltips="true"
+      tooltipcontent="toolTipContentFunction()"
+      showLegend="true"
+      legendColor="legendColorFunction()">
         <svg></svg>
     </nvd3-line-chart>
 <!--     <div class="dc-chart"
