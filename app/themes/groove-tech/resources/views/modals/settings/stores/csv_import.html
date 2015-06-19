@@ -18,7 +18,7 @@
                     <div class="form-group">
                         <label class="control-label col-md-4">From Row</label>
                         <div class="controls col-md-2">
-                            <input type="number" class="form-control input-style" min="1" ng-change="parse()"  ng-model="csv.current.rows" />
+                            <input type="number" class="form-control input-style" min="2" ng-change="parse()"  ng-model="csv.current.rows" />
                         </div>
                     </div>
                     <legend>Separator Options</legend>
@@ -81,6 +81,10 @@
                 </div>
                 <div class="col-xs-12">
                     <legend>Preview</legend>
+                    <div class="csv-preview-top">
+                        <div class="csv-preview-top-div" style="width: 3000px; height: 10px;"></div>
+                    </div>
+                    <div><center><div class="glyphicon glyphicon-plus-sign"></div></center></div>
                     <div class="csv-preview">
                         <table class="table table-hover table-bordered table-striped table-condensed">
                             <thead>
@@ -121,3 +125,19 @@
         <button ng-click="cancel()" class="modal-cancel-button">Cancel</button>
     </div>
 </div>
+<script>
+    $(function(){
+      $(".csv-preview").scroll(function(){
+        $(".csv-preview-top").scrollLeft($(".csv-preview").scrollLeft());
+      });
+      $(".csv-preview-top").scroll(function(){
+        $(".csv-preview").scrollLeft($(".csv-preview-top").scrollLeft());
+      });
+    });
+
+    // $( document ).ready(function() {
+    //     console.log("table_width:");
+    //     console.log($('table').outerWidth());
+    //     $('.csv-preview-top-div').css('width', $('table').outerWidth() );
+    // });
+</script>

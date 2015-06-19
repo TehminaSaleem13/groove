@@ -406,7 +406,7 @@ class StoreSettingsController < ApplicationController
 
           #check if previous mapping exists
           #else fill in defaults
-          default_csv_map ={ 'name' =>'', 'map' =>{'rows' => 1, 'sep' => ',' , 'other_sep' => 0, 'delimiter'=> '"', 'fix_width' => 0, 'fixed_width' => 4, 'map' => {} }}
+          default_csv_map ={ 'name' =>'', 'map' =>{'rows' => 2, 'sep' => ',' , 'other_sep' => 0, 'delimiter'=> '"', 'fix_width' => 0, 'fixed_width' => 4, 'map' => {} }}
           csv_map = CsvMapping.find_or_create_by_store_id(@store.id)
           # end check for mapping
 
