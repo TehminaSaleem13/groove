@@ -10,24 +10,24 @@ groovepacks_directives.directive('groovDashboard',['$window','$document','$sce',
         scope.dash_tabs = [
           {
             "heading": "Home",
-            "templateUrl": "/assets/views/directives/test.html"
-          },
-          {
-            "heading": "Most Recent Exceptions",
-            "templateUrl": "/assets/views/directives/test.html"
-          },
-          {
-            "heading": "Exceptions by Frequency",
-            "templateUrl": "/assets/views/directives/test.html"
-          },
-          {
-            "heading": "Items by Exception rate",
-            "templateUrl": "/assets/views/directives/test.html"
-          },
-          {
-            "heading": "Leader Board",
-            "templateUrl": "/assets/views/directives/test.html"
+            "templateUrl": "/assets/views/directives/dashboard/home.html"
           }
+          // {
+          //   "heading": "Most Recent Exceptions",
+          //   "templateUrl": "/assets/views/directives/test.html"
+          // },
+          // {
+          //   "heading": "Exceptions by Frequency",
+          //   "templateUrl": "/assets/views/directives/test.html"
+          // },
+          // {
+          //   "heading": "Items by Exception rate",
+          //   "templateUrl": "/assets/views/directives/test.html"
+          // },
+          // {
+          //   "heading": "Leader Board",
+          //   "templateUrl": "/assets/views/directives/test.html"
+          // }
         ]
         scope.toggle_dashboard_detail = function() {
           $('#dashboard').toggleClass('pdash-open');
