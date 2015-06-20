@@ -42,25 +42,49 @@ groovepacks_directives.directive('groovDashboard',['$window','$document','$sce',
 
         scope.charts = {
           type: 'packing_stats',
-          change_days_filter: function(days) {
+          current_filter_idx: 1,
+          days_filters:[
+            { id: 1, name: '7 days', days: '7'},
+            { id: 2, name: '30 days', days: '30'},
+            { id: 3, name: '90 days', days: '90'},
+            { id: 4, name: '180 days', days: '180'},
+            { id: 5, name: 'All time', days: '-1'}
+          ],
+          change_days_filter: function(index) {
             if(scope.charts.type == 'packing_stats') {
-              this.retrieve.packing_stats(days)
-            } else if (scope.charts.type == 'packing_item_stats') {
-
+              this.current_filter_idx = index;
+              this.retrieve.packing_stats(this.days_filters[index].days)
+            } else if (scope.charts.type == 'packed_item_stats') {
+              this.current_filter_idx = index;
+              this.retrieve.packed_item_stats(this.days_filters[index].days)
+            }
+          },
+          init: function(){
+            if(this.type == 'packed_item_stats') {
+              this.retrieve.packed_item_stats(
+                this.days_filters[this.current_filter_idx].days);
+            } else if (this.type == 'packing_stats') {
+              this.retrieve.packing_stats(
+                this.days_filters[this.current_filter_idx].days)
             }
           },
           retrieve: {
             packing_stats: function(days) {
               dashboard.stats.packing_stats(days).then(
                 function(response){
-                  console.log("packing_stats")
-                  console.log(scope.dashboard.packing_stats);
                   scope.dashboard.packing_stats = response.data;
+              });
+            },
+            packed_item_stats: function(days) {
+              dashboard.stats.packed_item_stats(days).then(
+                function(response){
+                  scope.dashboard.packed_item_stats = response.data;
               });
             }
           },
           set_type: function(chart_mode) {
             scope.charts.type = chart_mode;
+            this.init();
           }
         }
 
@@ -82,9 +106,9 @@ groovepacks_directives.directive('groovDashboard',['$window','$document','$sce',
         };
         scope.toolTipContentFunction = function(){
           return function(key, x, y, e, graph) {
-              return  'Super New Tooltip' +
-                  '<h1>' + key + '</h1>' +
-                    '<p>' +  y + ' at ' + x + '</p>'
+              return ('<div><h4 style="text-transform: capitalize; color:'+e.series.color+
+                      '">' + key + '</h4>' +
+                      '<span>' +  y + ' order scans on ' + x + '</span></div>')
           }
         }
 
