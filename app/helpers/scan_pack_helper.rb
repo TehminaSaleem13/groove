@@ -138,6 +138,7 @@ module ScanPackHelper
               end
             else
               single_order_result['next_state'] = 'scanpack.rfp.default'
+              single_order.scan_start_time = DateTime.now if single_order.scan_start_time.nil?
             end
           end
           unless single_order.nil?
@@ -400,6 +401,7 @@ module ScanPackHelper
               end
             end
           else
+            single_order.inaccurate_scan_count = single_order.inaccurate_scan_count + 1
             result['status'] &= false
             result['error_messages'].push("Barcode '"+clean_input+"' doesn't match any item on this order")
           end

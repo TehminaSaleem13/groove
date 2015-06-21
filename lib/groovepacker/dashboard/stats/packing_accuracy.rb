@@ -1,0 +1,93 @@
+module Groovepacker
+  module Dashboard
+    module Stats
+      class PackingAccuracy < Groovepacker::Dashboard::Stats::Base
+
+        def summary
+          # current_month_packed_items = 0
+          # previous_month_packed_items = 0
+          # result = {}
+          # #current month packed items
+          # if @duration.to_i == -1
+          #   start_time = nil 
+          # else
+          #   start_time = (DateTime.now - @duration.to_i.days).beginning_of_day 
+          # end
+          # end_time = DateTime.now.end_of_day
+          # current_month_packed_items = 
+          #   get_overall_packed_item_stats(start_time, end_time)
+
+
+          # if @duration.to_i != -1    
+          #   #previous month packed items
+          #   start_time = (DateTime.now - (2*(@duration.to_i)).days).beginning_of_day 
+          #   end_time = (DateTime.now - (@duration.to_i - 1).days).end_of_day
+          #   previous_month_packed_items = 
+          #     get_overall_packed_item_stats(start_time, end_time)
+
+          #   result = {
+          #     current_period: current_month_packed_items,
+          #     previous_period: previous_month_packed_items,
+          #     delta: current_month_packed_items - previous_month_packed_items
+          #   }
+          # else
+          #   result = {
+          #     current_period: current_month_packed_items,
+          #     previous_period: previous_month_packed_items,
+          #     delta: '-'
+          #   }
+          # end
+          # result        
+        end
+
+        def detail
+          results = []
+          @users = User.all
+
+          pallete = Groovepacker::Dashboard::Color::Pallete.new(
+            @users.count, "006699")
+          
+          # if @duration == -1
+          #   start_time = nil
+          # else
+          #   start_time = (DateTime.now - @duration.to_i.days).beginning_of_day 
+          # end
+          # end_time = DateTime.now.end_of_day
+
+          @users.each_with_index do |user, index|
+            stat = {}
+            stat[:key] = user.username
+            stat[:color] = "#" + pallete.get(index)
+            stat[:values] = get_packing_stats(user)
+            results.push(stat)
+          end
+          results
+        end
+        
+
+        private
+
+          def get_packing_stats(user)
+            stats_result = []
+            start_time = (DateTime.now - @duration.days).beginning_of_day
+            end_time = DateTime.now.end_of_day
+            if @duration == -1
+              orders = Order.where('scanned_on < ?', end_time).where(packing_user_id: 13).order(
+                scanned_on: :ASC).group('date(scanned_on)').count
+            else
+              orders = Order.where(scanned_on: start_time..end_time).where(
+                packing_user_id: user.id).order(
+                scanned_on: :ASC).group('date(scanned_on)').count
+            end
+
+            orders.each do |order|
+              order[0] = order[0].to_time.to_i
+              stats_result.push(order)
+            end
+
+            stats_result
+          end
+      end
+    end
+  end
+end
