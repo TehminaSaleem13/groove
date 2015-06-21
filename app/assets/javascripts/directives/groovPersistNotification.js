@@ -1,4 +1,4 @@
-groovepacks_directives.directive('groovPersistNotification',['$window','$document','$sce','$timeout','$interval','groovIO','orders','stores','notification',function ($window,$document,$sce,$timeout,$interval,groovIO,orders,stores,notification) {
+groovepacks_directives.directive('groovPersistNotification',['$window','$document','$sce','$timeout','$interval','groovIO','orders','stores','notification', '$rootScope', 'settings', function ($window,$document,$sce,$timeout,$interval,groovIO,orders,stores,notification,$rootScope, settings) {
     return {
         restrict:"A",
         templateUrl:"/assets/views/directives/persistnotification.html",
@@ -124,6 +124,55 @@ groovepacks_directives.directive('groovPersistNotification',['$window','$documen
                     $event.preventDefault();
                     $event.stopPropagation();
                     orders.list.cancel_pdf_gen(message.id).then(function() {
+                        myscope.repurpose_selected();
+                    });
+                };
+            };
+
+            myscope.groove_bulk_actions = function(message, hash) {
+                scope.notifications[hash].percent = (message['completed']/message['total'])*100;
+                var notif_message = '';
+                var notif_details = '';
+                if(message['identifier'] == 'product') {
+                    if(message['activity'] == 'status_update') {
+                        notif_message = '<b>Product Status Update:</b> ';
+                    } else if(message['activity'] == 'delete') {
+                        notif_message = '<b>Product Delete:</b> ';
+                    }  else if(message['activity'] == 'duplicate') {
+                        notif_message = '<b>Product Duplicate:</b> ';
+                    }
+
+                }
+                myscope.repurpose_selected();
+                scope.notifications[hash].type = message['status'];
+                if(message['status'] == "scheduled") {
+                    notif_message += 'Queued';
+                } else if(message['status'] == "in_progress") {
+                    notif_message += message['completed']+'/'+message['total']+'&nbsp;';
+                    notif_details = '<b>Current Product:<b> '+message['current']+ notif_details;
+                } else if(message['status'] == "completed" || message['status'] == "cancelled" || message['status'] == 'failed') {
+                    $rootScope.$emit('bulk_action_finished',message);
+                    notif_details = '';
+                    $timeout(function() {
+                        delete scope.notifications[hash];
+                        myscope.repurpose_selected();
+                    },5000);
+                    groovIO.emit('delete_tenant_pnotif',hash);
+                    if(message['status'] == "completed" ) {
+                        notif_message += "Complete!";
+                    } else if(message['status'] == "cancelled") {
+                        notif_message += "Cancelled";
+                    } else if(message['status'] == 'failed') {
+                        notif_message += 'Failed';
+                        notification.notify(message['messages']);
+                    }
+                }
+                scope.notifications[hash].message = $sce.trustAsHtml(notif_message);
+                scope.notifications[hash].details = $sce.trustAsHtml(notif_details);
+                scope.notifications[hash].cancel = function($event) {
+                    $event.preventDefault();
+                    $event.stopPropagation();
+                    settings.cancel_bulk_action(message.id).then(function() {
                         myscope.repurpose_selected();
                     });
                 };

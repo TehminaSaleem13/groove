@@ -39,7 +39,6 @@ module Groovepacker
               end
                 
               
-              puts shipstation_orders.inspect
               import_item.to_import = shipstation_orders.length unless shipstation_orders.nil?
               import_item.save
               shipstation_orders.each do |order|
@@ -84,12 +83,10 @@ module Groovepacker
           end
 
           def update_single(product, order_id)
-            puts "Updating product"
             handler = self.get_handler
             credential = handler[:credential]
             client = handler[:store_handle]
             result = self.build_result
-            puts "sku matched"
 
             #update inventory warehouse's primary location
             shipstation_order = client.get_order(order_id)

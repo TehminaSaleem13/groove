@@ -1,4 +1,5 @@
 class Product < ActiveRecord::Base
+  include ProductsHelper
   belongs_to :store
 
   attr_accessible :name,
@@ -14,7 +15,8 @@ class Product < ActiveRecord::Base
     :kit_parsing,
     :disable_conf_req,
     :store,
-    :weight
+    :weight,
+    :add_to_any_order
 
   has_many :product_skus, :dependent => :destroy
   has_many :product_cats, :dependent => :destroy
@@ -43,31 +45,20 @@ class Product < ActiveRecord::Base
     }
     tables.each do |ident,model|
       CSV.open("#{folder}/#{ident}.csv",'w',options) do |csv|
-        headers= model.column_names.dup
+        headers= []
         if ident == :products
-          headers.push('primary_sku','primary_barcode','primary_category','primary_image','default_wh_avbl','default_wh_loc_primary','default_wh_loc_secondary')
-        end
+          ProductsHelper.products_csv(model.all,csv)          
+        else
+          headers= model.column_names.dup
 
+          csv << headers
 
-        csv << headers
-        model.all.each do |item|
-          data = []
-          data = item.attributes.values_at(*model.column_names).dup
-          if ident == :products
-            data.push(item.primary_sku)
-            data.push(item.primary_barcode)
-            data.push(item.primary_category)
-            data.push(item.primary_image)
-            inventory_wh = ProductInventoryWarehouses.where(:product_id=>item.id,:inventory_warehouse_id => InventoryWarehouse.where(:is_default => true).first.id).first
-            if inventory_wh.nil?
-              data.push('','','')
-            else
-              data.push(inventory_wh.available_inv,inventory_wh.location_primary,inventory_wh.location_secondary)
-            end
+          model.all.each do |item|
+            data = []
+            data = item.attributes.values_at(*model.column_names).dup
+
+            csv << data
           end
-
-          logger.info data
-          csv << data
         end
         response[ident] = "#{folder}/#{ident}.csv"
       end
@@ -87,37 +78,36 @@ class Product < ActiveRecord::Base
   end
 
   def update_product_status (force_from_inactive_state = false)
-  	#puts "Updating product status"
     # original_status = self.status
-  	if self.status != 'inactive' || force_from_inactive_state
-	  	result = true
+    if self.status != 'inactive' || force_from_inactive_state
+      result = true
 
       result &= false if (self.name.nil? or self.name == '')
 
-	  	result &= false if self.product_skus.length == 0
+      result &= false if self.product_skus.length == 0
 
-	  	result &= false if self.product_barcodes.length == 0
+      result &= false if self.product_barcodes.length == 0
 
-	  	#if kit it should contain kit products as well
-	  	if self.is_kit == 1
-	  	  result &= false if self.product_kit_skuss.length == 0
-	  	  self.product_kit_skuss.each do |kit_product|
-	  	  	option_product = Product.find(kit_product.option_product_id)
-	  	  	if !option_product.nil? &&
-	  	  			option_product.status != 'active'
-	  	  		result &= false
-	  	  	end
-	  	  end
+      #if kit it should contain kit products as well
+      if self.is_kit == 1
+        result &= false if self.product_kit_skuss.length == 0
+        self.product_kit_skuss.each do |kit_product|
+          option_product = Product.find(kit_product.option_product_id)
+          if !option_product.nil? &&
+              option_product.status != 'active'
+            result &= false
+          end
+        end
         result &= false if unacknowledged_kit_activities.length > 0
-	  	end
+      end
 
-	  	if result
-	  		self.status = 'active'
-	  		self.save
-	  	else
-	  		self.status = 'new'
-	  		self.save
-	  	end
+      if result
+        self.status = 'active'
+        self.save
+      else
+        self.status = 'new'
+        self.save
+      end
 
       # unless self.status == original_status
         # for non kit products, update all kits product statuses where the
@@ -134,19 +124,18 @@ class Product < ActiveRecord::Base
 
         #update order items status from onhold to awaiting
         @order_items = OrderItem.where(:product_id=>self.id)
-        puts "@order_items: " + @order_items.inspect
         @order_items.each do |item|
           item.order.update_order_status unless item.order.nil? or !['awaiting','onhold'].include?(item.order.status)
         end
       # end
-	else
-	  	#update order items status from onhold to awaiting
-	  	@order_items = OrderItem.where(:product_id=>self.id)
-	  	@order_items.each do |item|
-	  		item.order.update_order_status unless item.order.nil? or !['awaiting','onhold'].include?(item.order.status)
-	  	end
-	end
-	result
+  else
+      #update order items status from onhold to awaiting
+      @order_items = OrderItem.where(:product_id=>self.id)
+      @order_items.each do |item|
+        item.order.update_order_status unless item.order.nil? or !['awaiting','onhold'].include?(item.order.status)
+      end
+  end
+  result
   end
 
   def update_due_to_inactive_product
@@ -172,61 +161,59 @@ class Product < ActiveRecord::Base
   end
 
   def set_product_status
-  	result = true
+    result = true
 
-	  @skus = ProductSku.where(:product_id=>self.id)
-  	result &= false if @skus.length == 0
+    @skus = ProductSku.where(:product_id=>self.id)
+    result &= false if @skus.length == 0
 
-  	@barcodes = ProductBarcode.where(:product_id=>self.id)
-  	result &= false if @barcodes.length == 0
+    @barcodes = ProductBarcode.where(:product_id=>self.id)
+    result &= false if @barcodes.length == 0
 
     result &= false if unacknowledged_kit_activities.length > 0
 
-  	if result
-  		self.status = 'active'
-  	else
-  		self.status = 'new'
-  	end
-  	self.save
+    if result
+      self.status = 'active'
+    else
+      self.status = 'new'
+    end
+    self.save
   end
 
   def update_available_product_inventory_level(inventory_warehouse_id, purchase_qty, reason)
-  	result = true
-  	if self.is_kit != 1 or
-  		(self.is_kit == 1 and (self.kit_parsing == 'single' or self.kit_parsing == 'depends'))
-	     result &= self.update_warehouses_inventory_level(inventory_warehouse_id, self.id,
-	 		purchase_qty, reason)
+    result = true
+    if self.is_kit != 1 or
+      (self.is_kit == 1 and (self.kit_parsing == 'single' or self.kit_parsing == 'depends'))
+       result &= self.update_warehouses_inventory_level(inventory_warehouse_id, self.id,
+      purchase_qty, reason)
     else
-    	if self.kit_parsing == 'individual'
-    		#update all kits products inventory warehouses
-    		self.product_kit_skuss.each do |kit_item|
-	    		result &= self.update_warehouses_inventory_level(inventory_warehouse_id, kit_item.option_product_id,
-	  				purchase_qty * kit_item.qty, reason)
-    		end
-    	end
+      if self.kit_parsing == 'individual'
+        #update all kits products inventory warehouses
+        self.product_kit_skuss.each do |kit_item|
+          result &= self.update_warehouses_inventory_level(inventory_warehouse_id, kit_item.option_product_id,
+            purchase_qty * kit_item.qty, reason)
+        end
+      end
     end
 
-	result
+  result
   end
 
   def update_allocated_product_sold_level(inventory_warehouse_id, allocated_qty,
     order_item =nil)
-   	result = true
+    result = true
 
-  	if self.is_kit != 1 or
-  		(self.is_kit == 1 and self.kit_parsing == 'single')
-	     result &= self.update_warehouses_sold_level(inventory_warehouse_id, self.id,
-	 		allocated_qty)
+    if self.is_kit != 1 or
+      (self.is_kit == 1 and self.kit_parsing == 'single')
+       result &= self.update_warehouses_sold_level(inventory_warehouse_id, self.id,
+      allocated_qty)
     else
-    	if self.kit_parsing == 'individual'
-    		#update all kits products inventory warehouses
-    		self.product_kit_skuss.each do |kit_item|
-	    		result &= self.update_warehouses_sold_level(inventory_warehouse_id, kit_item.option_product_id,
-	  				allocated_qty * kit_item.qty)
-    		end
+      if self.kit_parsing == 'individual'
+        #update all kits products inventory warehouses
+        self.product_kit_skuss.each do |kit_item|
+          result &= self.update_warehouses_sold_level(inventory_warehouse_id, kit_item.option_product_id,
+            allocated_qty * kit_item.qty)
+        end
       elsif self.kit_parsing == 'depends'
-        logger.info "saving order to scanned"
-        logger.info order_item.inspect
         self.product_kit_skuss.each do |kit_sku|
           result &= self.update_warehouses_sold_level(inventory_warehouse_id,
             kit_sku.option_product_id,
@@ -234,54 +221,53 @@ class Product < ActiveRecord::Base
         end
         result &= self.update_warehouses_sold_level(inventory_warehouse_id, self.id,
         order_item.single_scanned_qty)
-    	end
+      end
     end
 
-	result
+  result
   end
 
   def update_warehouses_inventory_level(inv_wh_id, product_id, purchase_qty, reason)
-	  result = true
-  	prod_warehouses = ProductInventoryWarehouses.where(:inventory_warehouse_id =>
-  		inv_wh_id).where(:product_id => product_id)
+    result = true
+    prod_warehouses = ProductInventoryWarehouses.where(:inventory_warehouse_id =>
+      inv_wh_id).where(:product_id => product_id)
 
-  	unless prod_warehouses.length == 1
-  		result &= false
-  	end
+    unless prod_warehouses.length == 1
+      result &= false
+    end
 
-  	unless !result
-  		prod_warehouses.each do |wh|
-  			result = wh.update_available_inventory_level(purchase_qty, reason)
-  		end
-  	end
+    unless !result
+      prod_warehouses.each do |wh|
+        result = wh.update_available_inventory_level(purchase_qty, reason)
+      end
+    end
 
-	  result
+    result
   end
 
   def update_warehouses_sold_level(inv_wh_id, product_id, allocated_qty)
- 	result = true
-  	prod_warehouses = ProductInventoryWarehouses.where(:inventory_warehouse_id =>
-  		inv_wh_id).where(:product_id => product_id)
+  result = true
+    prod_warehouses = ProductInventoryWarehouses.where(:inventory_warehouse_id =>
+      inv_wh_id).where(:product_id => product_id)
 
-  	unless prod_warehouses.length == 1
-  		result &= false
-  	end
-    logger.info('Allocated Qty which has been sold:'+allocated_qty.to_s)
-  	unless !result
-  		prod_warehouses.each do |wh|
-  			wh.update_sold_inventory_level(allocated_qty)
-		  end
-	 end
+    unless prod_warehouses.length == 1
+      result &= false
+    end
+    unless !result
+      prod_warehouses.each do |wh|
+        wh.update_sold_inventory_level(allocated_qty)
+      end
+   end
 
-	result
+  result
   end
 
   def get_total_avail_loc
-  	total_avail_loc = 0
-  	self.product_inventory_warehousess.each do |inv_wh|
-  		total_avail_loc = total_avail_loc + inv_wh.available_inv
-  	end
-  	total_avail_loc
+    total_avail_loc = 0
+    self.product_inventory_warehousess.each do |inv_wh|
+      total_avail_loc = total_avail_loc + inv_wh.available_inv
+    end
+    total_avail_loc
   end
 
 

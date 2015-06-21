@@ -546,6 +546,33 @@ class SettingsController < ApplicationController
     end
   end
 
+  def cancel_bulk_action
+    result = Hash.new
+    result['status'] = true
+    result['success_messages'] = []
+    result['notice_messages'] = []
+    result['error_messages'] = []
+
+    if params[:id].nil?
+      result['status'] = false
+      result['error_messages'].push('No id given. Can not cancel generating')
+    else
+      bulk_action = GrooveBulkActions.find_by_id(params[:id])
+      unless bulk_action.nil?
+        bulk_action.cancel = true
+        if bulk_action.save
+          result['notice_messages'].push('Bulk action marked for cancellation. Please wait for acknowledgement.')
+        end
+      else
+        result['error_messages'].push('No bulk action found with the id.')
+      end
+    end
+
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json: result }
+    end
+  end
 
   def get_scan_pack_settings
     @result = Hash.new

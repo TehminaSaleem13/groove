@@ -229,10 +229,8 @@ class InventoryWarehouseController < ApplicationController
         result['status'] &= false
         result['error_messages'].push('There is no user with id:'+params[:user]['user_info']['id'])
       else
-        logger.info(params[:user])
         if params[:user]['checked']
           user.inventory_warehouse_id  = inv_wh.id
-          logger.info inv_wh
           if user.save
             result['success_messages'].push('User is successfully added to the warehouse')
           else

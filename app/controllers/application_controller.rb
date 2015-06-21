@@ -1,5 +1,6 @@
 class ApplicationController < ActionController::Base
   before_filter :set_current_user_id
+  protect_from_forgery with: :null_session
 
   def set_current_user_id
     if current_user

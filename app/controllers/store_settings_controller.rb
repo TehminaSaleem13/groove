@@ -47,6 +47,7 @@ class StoreSettingsController < ApplicationController
           @result['status'] = false
           @result['messages'].push('Please select a store type to create a store')
         else
+          params[:name]=nil if params[:name]=='undefined'
           @store.name = params[:name] || get_default_warehouse_name
           @store.store_type = params[:store_type]
           @store.status = params[:status]
@@ -238,6 +239,7 @@ class StoreSettingsController < ApplicationController
             @shipstation.warehouse_location_update = params[:warehouse_location_update]
             @shipstation.shall_import_customer_notes = params[:shall_import_customer_notes]
             @shipstation.shall_import_internal_notes = params[:shall_import_internal_notes]
+            @shipstation.regular_import_range = params[:regular_import_range] unless params[:regular_import_range].nil?
             @store.shipstation_rest_credential = @shipstation
 
             begin
@@ -290,8 +292,8 @@ class StoreSettingsController < ApplicationController
 
           if @store.store_type == 'Shopify'
             @shopify = ShopifyCredential.find_by_store_id(@store.id)
-            puts @shopify.inspect
             begin
+              params[:shop_name] = nil if params[:shop_name] == 'null'
               if @shopify.nil?
                 @store.shopify_credential = ShopifyCredential.new(
                   shop_name: params[:shop_name])
@@ -569,7 +571,6 @@ class StoreSettingsController < ApplicationController
         @result['messages'].push(e.message)
       end
     end
-    logger.info "CSV Map stored."
     if @result['status']
       data = {}
       data[:type] = params[:type]
@@ -834,7 +835,6 @@ class StoreSettingsController < ApplicationController
     end
     ebaytoken_resp = MultiXml.parse(res.body)
     @result['response'] = ebaytoken_resp
-    puts "fetch token response:" + ebaytoken_resp.inspect
     if ebaytoken_resp['FetchTokenResponse']['Ack'] == 'Success'
       session[:ebay_auth_token] = ebaytoken_resp['FetchTokenResponse']['eBayAuthToken']
       session[:ebay_auth_expiration] = ebaytoken_resp['FetchTokenResponse']['HardExpirationTime']
@@ -1060,11 +1060,7 @@ class StoreSettingsController < ApplicationController
           single_row[:CustomsValue] = ''
           single_row[:CustomsTariffNo] = ''
           single_row[:CustomsCountry] = product.order_items.first.order.country unless product.order_items.empty? || product.order_items.first.order.nil?
-          if product.store.store_type == 'Shipstation API 2'
-            single_row[:ThumbnailUrl] = ''
-          else
-            single_row[:ThumbnailUrl] = product.primary_image
-          end
+          single_row[:ThumbnailUrl] = ''
           single_row[:UPC] = product.primary_barcode
           single_row[:FillSKU] = ''
           single_row[:Length] = ''
