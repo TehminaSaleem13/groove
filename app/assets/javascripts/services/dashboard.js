@@ -2,7 +2,8 @@ groovepacks_services.factory('dashboard',['$http','notification',function($http,
   var get_default = function() {
     return {
       packing_stats: [],
-      packed_item_stats: []
+      packed_item_stats: [],
+      main_summary: {}
     };
   };
 
@@ -24,13 +25,22 @@ groovepacks_services.factory('dashboard',['$http','notification',function($http,
     );
   }
 
+  var main_summary = function(duration) {
+    return(
+      $http.get('/dashboard/main_summary?duration='+ duration).error(function(response){
+        notification.notify("Failed to load main summary statistics",0);
+      })
+    ); 
+  }
+
   return {
     model: {
         get:get_default
     },
     stats: {
       packing_stats: packing_stats,
-      packed_item_stats: packed_item_stats
+      packed_item_stats: packed_item_stats,
+      main_summary: main_summary
     }
   };
 }]);

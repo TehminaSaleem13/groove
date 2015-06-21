@@ -37,7 +37,7 @@ groovepacks_directives.directive('groovDashboard',['$window','$document','$sce',
         scope.init = function() {
           scope.charts.type = 'packing_stats';
           scope.dashboard = dashboard.model.get();
-          scope.charts.retrieve.packing_stats('30');
+          scope.charts.init();
         }
 
         scope.charts = {
@@ -51,13 +51,8 @@ groovepacks_directives.directive('groovDashboard',['$window','$document','$sce',
             { id: 5, name: 'All time', days: '-1'}
           ],
           change_days_filter: function(index) {
-            if(scope.charts.type == 'packing_stats') {
-              this.current_filter_idx = index;
-              this.retrieve.packing_stats(this.days_filters[index].days)
-            } else if (scope.charts.type == 'packed_item_stats') {
-              this.current_filter_idx = index;
-              this.retrieve.packed_item_stats(this.days_filters[index].days)
-            }
+            this.current_filter_idx = index;
+            this.init();
           },
           init: function(){
             if(this.type == 'packed_item_stats') {
@@ -67,8 +62,15 @@ groovepacks_directives.directive('groovDashboard',['$window','$document','$sce',
               this.retrieve.packing_stats(
                 this.days_filters[this.current_filter_idx].days)
             }
+            this.retrieve.main_summary(
+              this.days_filters[this.current_filter_idx].days);
           },
           retrieve: {
+            main_summary: function(days){
+              dashboard.stats.main_summary(days).then(function(response){
+                scope.dashboard.main_summary = response.data;
+              });
+            },
             packing_stats: function(days) {
               dashboard.stats.packing_stats(days).then(
                 function(response){

@@ -66,7 +66,7 @@
         </div>
         <div class="col-md-4 col-lg-4 pill-col">
           <div class="well">
-            <h4>3250</h4>
+            <h4>{{dashboard.main_summary.packed_items_summary.current_period}}</h4>
             <span class="fa fa-calendar fa-pill-col"></span>
             <span>Current Period</span>
           </div>
@@ -74,7 +74,10 @@
         <div class="col-md-2 col-lg-2 pill-col-last">
           <div class="well">
             <span class="fa fa-arrow-circle-down fa-pill-col fa-violet"></span>
-            <p>-212 From Prev 30 Days</p>
+            <p style="line-height: 19px;">
+              {{dashboard.main_summary.packed_items_summary.delta}} 
+              From Prev {{charts.days_filters[charts.current_filter_idx].name}}
+            </p>
           </div>
         </div>
       </div>

@@ -105,6 +105,7 @@ Groovepacks::Application.routes.draw do
     collection do
       get 'packing_stats'
       get 'packed_item_stats'
+      get 'main_summary'
     end
   end
 
