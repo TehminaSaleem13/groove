@@ -7,7 +7,7 @@ module Groovepacker
         def initialize(size, base_color)
           color = Paleta::Color.new(:hex, base_color)
           @palettes = Paleta::Palette.generate(
-            :type => :tetrad, :from => :color, :size => size, :color => color)
+            :type => :monochromatic, :from => :color, :size => size, :color => color)
         end
 
         def get(index)
