@@ -186,6 +186,17 @@ module Groovepacker
                         product.product_skus << sku
                         product.store_product_id = 0
                         product.store_id = params[:store_id]
+                        base_product = ProductSku.where(:sku=>single_row[mapping['base_sku'][:position]]).first unless ProductSku.where(:sku=>single_row[mapping['base_sku'][:position]]).empty?
+                        if base_product.nil?
+                          base_product = Product.new()
+                          base_product.name = "Base Product " + single_row[mapping['base_sku'][:position]]
+                          base_product.store_product_id = 0
+                          base_product.store_id = params[:store_id]
+                          basesku = ProductSku.new
+                          basesku.sku = single_row[mapping['base_sku'][:position]]
+                          base_product.product_skus << basesku
+                          base_product.save
+                        end
                         product.base_sku = single_row[mapping['base_sku'][:position]] unless single_row[mapping['base_sku'][:position]].nil?
                         product.save
 

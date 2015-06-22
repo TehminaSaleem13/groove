@@ -358,7 +358,8 @@ class Product < ActiveRecord::Base
 
   def base_product
     unless self.base_sku.nil?
-      return Product.where(sku: self.base_sku).first
+      base_product_sku = ProductSku.where(:sku=>self.base_sku).first unless ProductSku.where(:sku=>self.base_sku).empty?
+      return base_product_sku.product unless base_product_sku.nil?
     else
       return self
     end
