@@ -90,6 +90,12 @@ class Product < ActiveRecord::Base
 
       result &= false if self.product_barcodes.length == 0
 
+      unless self.base_sku.nil?
+        if base_product(self).status == 'inactive' || base_product(self).status == 'new'
+          result &= false
+        end
+      end
+
       #if kit it should contain kit products as well
       if self.is_kit == 1
         result &= false if self.product_kit_skuss.length == 0
