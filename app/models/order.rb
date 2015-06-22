@@ -257,15 +257,12 @@ class Order < ActiveRecord::Base
     else
       product_barcode = nil
     end
-    #puts "Product Barcode:" +product_barcode.barcode
     #check if barcode is present in a kit which has kitparsing of depends
     if !product_barcode.nil?
       self.order_items.each do |order_item|
         if order_item.product.is_kit == 1 && order_item.product.kit_parsing == 'depends' &&
           order_item.scanned_status != 'scanned'
           order_item.product.product_kit_skuss.each do |kit_product|
-            #puts "Product Id:" + kit_product.option_product_id.to_s
-            #puts "Product Barcode Id:" + product_barcode.product_id.to_s
             if kit_product.option_product_id == product_barcode.product_id
               product_inside_splittable_kit = true
               matched_product_id = kit_product.option_product_id
@@ -278,16 +275,11 @@ class Order < ActiveRecord::Base
         break if product_inside_splittable_kit
       end
     end
-    #puts "Product inside splittable kit:"+product_inside_splittable_kit.to_s
     #if barcode is present and the matched product is also present in other non-kit
     #and unscanned order items, then the kit need not be split.
     if product_inside_splittable_kit
       self.order_items.each do |order_item|
-        #puts "Order Kit Status:"+order_item.product.is_kit.to_s
-        #puts "Order Item Status:"+order_item.scanned_status
         if order_item.product.is_kit == 0 && order_item.scanned_status != 'scanned'
-            #puts "Order Product Id:" + order_item.product_id.to_s
-            #puts "Product Barcode Id:" + matched_product_id.to_s
           if order_item.product_id == matched_product_id
             product_available_as_single_item = true
             result = false
@@ -305,7 +297,6 @@ class Order < ActiveRecord::Base
         #if current item does not belong to any of the unscanned items in the already split kits
         if order_item.should_kit_split_qty_be_increased(matched_product_id)
           if order_item.kit_split_qty <= order_item.qty
-            logger.info 'Kit is already split, incrementing quantity'
             order_item.kit_split_qty = order_item.kit_split_qty + 1
             order_item.order_item_kit_products.each do |kit_product|
               kit_product.scanned_status = 'partially_scanned'
@@ -318,11 +309,8 @@ class Order < ActiveRecord::Base
         order_item.kit_split_qty = 1
       end
       order_item.save
-      #puts "Order Item"+order_item.id.to_s
       order_item.reload
-      #puts "Kit Split"+order_item.kit_split.to_s+"Id: "+order_item.id.to_s
     end
-    #puts "Product available as single item:"+product_available_as_single_item.to_s
     result
   end
 
@@ -332,10 +320,7 @@ class Order < ActiveRecord::Base
     self.reload
     self.order_items.each do |order_item|
       if order_item.scanned_status != 'scanned'
-        #puts "Kit Status:"+order_item.product.is_kit.to_s
         if order_item.product.is_kit == 1
-          #puts "Kit Parsing:" + order_item.product.kit_parsing
-          #puts "Before:"+unscanned_list.to_s
           if order_item.product.kit_parsing == 'single'
             #if single, then add order item to unscanned list
             unscanned_list.push(order_item.build_unscanned_single_item)
@@ -343,7 +328,6 @@ class Order < ActiveRecord::Base
             #else if individual then add all order items as children to unscanned list
             unscanned_list.push(order_item.build_unscanned_individual_kit)
           elsif order_item.product.kit_parsing == 'depends'
-            #puts "Kit Split"+order_item.kit_split.to_s+"Id: "+order_item.id.to_s
             if order_item.kit_split
               if order_item.kit_split_qty > order_item.kit_split_scanned_qty
                 unscanned_list.push(order_item.build_unscanned_individual_kit(true))
@@ -368,8 +352,6 @@ class Order < ActiveRecord::Base
               #       end
               #     end
 
-              #     logger.info 'Individual Kit Count'+individual_kit_count.to_s
-              #     logger.info 'Kit Split Quantity'+order_item.kit_split_qty.to_s
 
               #     #unscanned list building kits
               #     if individual_kit_count < order_item.kit_split_qty
@@ -387,7 +369,6 @@ class Order < ActiveRecord::Base
               end
             end
           end
-          #puts "After:"+unscanned_list.to_s
         else
           # add order item to unscanned list
           unscanned_item = order_item.build_unscanned_single_item
@@ -397,7 +378,6 @@ class Order < ActiveRecord::Base
         end
       end
     end
-    logger.info unscanned_list.to_s
     unscanned_list.sort_by { |hsh| hsh['packing_placement'] }
   end
 

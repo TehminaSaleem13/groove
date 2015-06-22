@@ -91,7 +91,7 @@
 			job_scheduled = false
 			general_settings = GeneralSetting.all.first
 			export_settings = ExportSetting.all.first
-			while !job_scheduled do
+			for i in 0..6
 				should_schedule_job = false
 				if type=='import_orders'
 					should_schedule_job = general_settings.should_import_orders(date)
@@ -114,6 +114,7 @@
 				else
 					date = date + 1.day
 				end
+				break if job_scheduled
 			end	
 		end
 

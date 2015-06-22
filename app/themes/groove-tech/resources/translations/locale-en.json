@@ -8,7 +8,9 @@
         "never": "Never",
         "none": "None",
         "verify": "Shipping Label Verification",
-        "record": "Record Tracking Number"
+        "record": "Record Tracking Number",
+        "packing_slip": "Print Packing Slip",
+        "order_barcode": "Print Order Barcode"
     },
     "modal": {
         "save_close": "Save & Close",

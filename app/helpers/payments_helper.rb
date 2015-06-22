@@ -143,7 +143,6 @@ module PaymentsHelper
   end
 
   def is_coupon_valid(coupon_id)
-    puts "in is_coupon_valid"
     create_result_hash
     @result['percent_off'] = 0
     coupons = Stripe::Coupon.all(limit: 30)

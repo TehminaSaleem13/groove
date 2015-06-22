@@ -125,7 +125,6 @@ module Groovepacker
               end
 
               #add inventory warehouse
-              puts credential.store.inventory_warehouse_id.to_s
               unless credential.store.nil? && credential.store.inventory_warehouse_id.nil?
                 inv_wh = ProductInventoryWarehouses.new
                 inv_wh.inventory_warehouse_id = credential.store.inventory_warehouse_id

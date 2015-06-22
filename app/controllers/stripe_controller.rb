@@ -1,15 +1,11 @@
 	class StripeController < ApplicationController
 	 	protect_from_forgery :except => :webhook
 	 	def webhook
-	 		logger.info("in webhook")
 	 		event_json = JSON.parse(request.body.read)
 		  # Webhook.create(event: event_json) 
 		  # Verify the event by fetching it from Stripe
 		  event = Stripe::Event.retrieve(event_json["id"])
-		  logger.info('event:')
-		  logger.info(event.inspect)
 		  Apartment::Tenant.switch()
-		  logger.info(Apartment::Tenant.current_tenant)
 		  if Webhook.create(event: event)
 		  	logger.info("event saved as blob") 
 		  end

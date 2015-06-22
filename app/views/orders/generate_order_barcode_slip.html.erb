@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body style="line-height: 100%; margin-left: 3px; margin-top: 3px; margin-right: 2px; margin-bottom: 1px">
+    <%unless @order.increment_id.nil? %>
+      <%unless @order.get_items_count.nil?%>
+        <div style="line-height: 140%; font-size: 13px; margin-left: 10px; margin-top: 0px; margin-bottom: 5px; max-width: 255px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;"><span style="font-size: 25px; font-weight: bold;"><%= @order.get_items_count %></span>&nbsp;<%= @order.firstname%>&nbsp;<%= @order.lastname%></div>
+      <%end%>
+      
+      <% barcode_string = generate_barcode(@order.increment_id)%>
+      <div  style="margin-top:3px;">
+        <center><%= pdf_image_tag(barcode_string+".png", {:width => 255, :height => 48}) %></center>
+      </div>
+      <div style="line-height: 8px; font-size:8px;">
+        <center>*<%=@order.increment_id%>*</center>
+      </div>
+    <%else%>
+      <br/>
+      <div style="font-size: 20px; margin-bottom: 10px; margin-left: 45px;">Barcode not available</div>
+    <%end%>
+</body>
+</html>

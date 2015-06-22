@@ -41,8 +41,6 @@ module Groovepacker
             rescue Exception => e
               result[:status] &= false
               result[:messages].push(e.message)
-              puts "Exception"
-              puts e.message.inspect
             end
             result
           end 
