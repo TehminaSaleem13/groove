@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150619143159) do
+ActiveRecord::Schema.define(:version => 20150612101535) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0, :null => false
@@ -72,11 +72,10 @@ ActiveRecord::Schema.define(:version => 20150619143159) do
   create_table "csv_maps", :force => true do |t|
     t.string   "kind"
     t.string   "name"
-    t.boolean  "custom",                      :default => true
+    t.boolean  "custom",     :default => true
     t.text     "map"
-    t.datetime "created_at",                                     :null => false
-    t.datetime "updated_at",                                     :null => false
-    t.boolean  "contains_unique_order_items", :default => false
+    t.datetime "created_at",                   :null => false
+    t.datetime "updated_at",                   :null => false
   end
 
   create_table "csv_product_imports", :force => true do |t|

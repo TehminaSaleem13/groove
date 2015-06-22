@@ -12,7 +12,6 @@
     <div class="modal-body" >
 
         <div class="container-fluid form-horizontal">
-        {{csv}}
             <div class="row">
                 <div class="col-md-8">
                     <legend>Import Options</legend>
@@ -85,7 +84,7 @@
                     <div class="form-group">
                         <label class="control-label col-sm-8 col-md-8">Unique Ordernum/SKU Barcodes</label>
                         <div class="controls col-sm-4 col-md-4 form-inline pull-left">
-                            <div toggle-switch ng-model="csv.current.contains_unique_order_items" groov-click="update_map()"></div>
+                            <div toggle-switch ng-model="csv.current.contains_unique_order_items"></div>
                         </div>
                     </div>
                 </div>

@@ -364,7 +364,6 @@ class StoreSettingsController < ApplicationController
     result = Hash.new
     result['status'] = true
     result['messages'] = []
-    puts "params : " + params.inspect
     if params[:map].nil? || params[:store_id].nil?
       result['status'] = false
       result['messages'].push('You need map and store id to update csv map')
@@ -432,7 +431,8 @@ class StoreSettingsController < ApplicationController
                 { value: 'country', name: 'Country'},
                 { value: 'method', name: 'Shipping Method'},
                 { value: 'customer_comments', name: 'Customer Comments'},
-                { value: 'base_sku', name: 'Base SKU'}
+                { value: 'base_sku', name: 'Base SKU'},
+                { value: 'product_name', name: 'Product Name'}
             ]
             if csv_map.order_csv_map.nil?
               @result['order']['settings'] = default_csv_map
@@ -496,7 +496,6 @@ class StoreSettingsController < ApplicationController
   end
 
   def csvDoImport
-    puts "params: " + params.inspect
     @result = Hash.new
     @result["status"] = true
     @result["last_row"] = 0
@@ -562,6 +561,7 @@ class StoreSettingsController < ApplicationController
           :fix_width => params[:fix_width],
           :fixed_width => params[:fixed_width],
           :import_action => params[:import_action],
+          :contains_unique_order_items => params[:contains_unique_order_items],
           :map => params[:map]
       }
       map_data.save
@@ -587,6 +587,7 @@ class StoreSettingsController < ApplicationController
       data[:map] = params[:map]
       data[:store_id] = params[:store_id]
       data[:import_action] = params[:import_action]
+      data[:contains_unique_order_items] = params[:contains_unique_order_items]
 
       import_csv = ImportCsv.new
       # delayed_job = import_csv.delay(:run_at =>1.seconds.from_now).import Apartment::Tenant.current_tenant, data
