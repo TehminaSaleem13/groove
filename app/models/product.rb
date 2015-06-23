@@ -91,7 +91,7 @@ class Product < ActiveRecord::Base
       result &= false if self.product_barcodes.length == 0
 
       unless self.base_sku.nil?
-        if base_product(self).status == 'inactive' || base_product(self).status == 'new'
+        if base_product.status == 'inactive' || base_product.status == 'new'
           result &= false
         end
       end
@@ -126,6 +126,15 @@ class Product < ActiveRecord::Base
           @kit_products.each do |kit_product|
             if kit_product.product.status != 'inactive'
               kit_product.product.update_product_status
+            end
+          end
+        end
+
+        if result && self.base_sku.nil?
+          products = Product.where(:base_sku => self.primary_sku)
+          unless products.empty?
+            products.each do |child_product|
+              child_product.update_product_status
             end
           end
         end
