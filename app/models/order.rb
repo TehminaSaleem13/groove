@@ -649,7 +649,7 @@ class Order < ActiveRecord::Base
   def scanned_items_count
     count = 0
       self.order_items.each do |item|
-        if item.product.is_kit
+        if item.product.is_kit == 1
           if item.product.kit_parsing == 'depends'
             count = count + item.single_scanned_qty
             item.order_item_kit_products.each do |kit_product|
@@ -672,7 +672,7 @@ class Order < ActiveRecord::Base
   def clicked_items_count
     count = 0
       self.order_items.each do |item|
-        if item.product.is_kit
+        if item.product.is_kit == 1
           if item.product.kit_parsing == 'depends'
             count = count + item.clicked_qty
             item.order_item_kit_products.each do |kit_product|
