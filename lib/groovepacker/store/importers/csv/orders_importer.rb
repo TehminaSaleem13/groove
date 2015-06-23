@@ -56,6 +56,7 @@ module Groovepacker
           end
 
           def import_old(params,final_record,mapping)
+            puts "parms:::::: " + params.inspect
             result = Hash.new
             result['status'] = true
             result['messages'] = []
@@ -175,12 +176,22 @@ module Groovepacker
                         end
 
                         product = Product.new
-                        unless single_row[mapping['product_name'][:position]].nil?
-                          product.name = single_row[mapping['product_name'][:position]]
+                        if params[:use_sku_as_product_name] == true
+                          product.name = order_increment_sku
                         else
-                          product.name = 'Product created from order import'
+                          unless single_row[mapping['product_name'][:position]].nil?
+                            product.name = single_row[mapping['product_name'][:position]]
+                          else
+                            product.name = 'Product created from order import'
+                          end
                         end
-                        
+
+                        if params[:generate_barcode_from_sku] == true
+                          product_barcode = ProductBarcode.new
+                          product_barcode.barcode = order_increment_sku
+                          product.product_barcodes << product_barcode
+                        end
+                                      
                         sku = ProductSku.new
                         sku.sku = order_increment_sku
                         product.product_skus << sku
