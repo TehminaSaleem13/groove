@@ -254,12 +254,12 @@ module ScanPackHelper
                         order_item_kit_product =
                             OrderItemKitProduct.find(child_item['kit_product_id'])
 
-                        if scanpack_settings.record_lot_number
-                          unless serial_added
+                        unless serial_added
+                          order_item = order_item_kit_product.order_item unless order_item_kit_product.order_item.nil?
+                          result['data']['serial']['order_item_id'] = order_item.id
+                          if scanpack_settings.record_lot_number
                             lot_number = calculate_lot_number(scanpack_settings, input)
-                            order_item = order_item_kit_product.order_item unless order_item_kit_product.order_item.nil?
                             product = order_item.product unless order_item.nil? || order_item.product.nil?
-                            result['data']['serial']['order_item_id'] = order_item.id
                             unless lot_number.nil?
                               if product.product_lots.where(lot_number: lot_number).empty?
                                 product.product_lots.create(product_id: product.id, lot_number: lot_number)
@@ -270,6 +270,8 @@ module ScanPackHelper
                             else
                               result['data']['serial']['product_lot_id'] = nil
                             end
+                          else
+                            result['data']['serial']['product_lot_id'] = nil
                           end
                         end
 
@@ -302,11 +304,11 @@ module ScanPackHelper
                   #process product barcode scan
                   order_item = OrderItem.find(item['order_item_id'])
 
-                  if scanpack_settings.record_lot_number
-                    unless serial_added
+                  unless serial_added
+                    result['data']['serial']['order_item_id'] = order_item.id
+                    if scanpack_settings.record_lot_number
                       lot_number = calculate_lot_number(scanpack_settings, input)
                       product = order_item.product unless order_item.product.nil?
-                      result['data']['serial']['order_item_id'] = order_item.id
                       unless lot_number.nil?
                         if product.product_lots.where(lot_number: lot_number).empty?
                           product.product_lots.create(lot_number: lot_number)
@@ -317,6 +319,8 @@ module ScanPackHelper
                       else
                         result['data']['serial']['product_lot_id'] = nil
                       end
+                    else
+                      result['data']['serial']['product_lot_id'] = nil
                     end
                   end
                   
