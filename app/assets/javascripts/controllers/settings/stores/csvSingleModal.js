@@ -8,6 +8,25 @@ function(scope, store_data, $state, $stateParams, $modal, $modalInstance, $timeo
       */
 
     scope.ok = function() {
+        for(var i = 0; i < scope.csv.importer[scope.csv.importer.type]['map_options'].length; i++) {
+            if (scope.csv.importer[scope.csv.importer.type]['map_options'][i].name == "Order Date/Time") {
+                if (scope.csv.importer[scope.csv.importer.type]['map_options'][i].disabled) {
+                    scope.csv.current.order_placed_at = null;
+                    myscope.ok_import();
+                    break;
+                } else {
+                    if (confirm("An Order Date/Time has not been mapped. Would you like to continue using the current Date/Time for each imported order?")) {
+                        scope.csv.current.order_placed_at = new Date();
+                        myscope.ok_import();
+                        break;
+                    };
+                };
+            } else {continue;};
+        }
+        
+    };
+
+    myscope.ok_import = function() {
         stores.csv.do_import(scope.csv).success(function(data) {
             if(data.status) {
                 $modalInstance.close("ok-button-click");
@@ -21,9 +40,7 @@ function(scope, store_data, $state, $stateParams, $modal, $modalInstance, $timeo
         $modalInstance.dismiss("cancel-button-click");
     };
     scope.parse = function() {
-        console.log("in parse...");
         if (scope.csv.importer[scope.csv.importer.type] != null) {
-            console.log("importer_type: "+ scope.csv.importer[scope.csv.importer.type]);
             $timeout(myscope.doparse);
         }
     };

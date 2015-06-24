@@ -174,8 +174,26 @@ function(scope, store_data, $window, $sce, $interval, $state, $stateParams, $mod
                                 current_map.map.store_id = scope.stores.single.id;
                                 current_map.map.type = scope.stores.single.type;
                                 current_map.map.name = current_map.name;
-                                stores.csv.do_import({current:current_map.map});
-                                $modalInstance.close("csv-modal-closed");
+                                var not_found = true
+                                for(var i = 0; i < current_map.map.map.length; i++) {
+                                    if (current_map.map.map[i].name == "Order Date/Time") {
+                                        not_found &= false
+                                        break;
+                                    } else {continue;};
+                                }
+                                if (not_found) {
+                                    if (confirm("An Order Date/Time has not been mapped. Would you like to continue using the current Date/Time for each imported order?")) {
+                                        current_map.map.order_placed_at = new Date();
+                                        stores.csv.do_import({current:current_map.map});
+                                        $modalInstance.close("csv-modal-closed");
+                                    };
+                                } else {
+                                    current_map.map.order_placed_at = null;
+                                    stores.csv.do_import({current:current_map.map});
+                                    $modalInstance.close("csv-modal-closed");
+                                };
+                                // stores.csv.do_import({current:current_map.map});
+                                // $modalInstance.close("csv-modal-closed");
 
                             } else {
                                 var csv_modal;

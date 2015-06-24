@@ -126,14 +126,22 @@ module Groovepacker
                           end
                         else # no sku is found
                           product = Product.new
-                          product.name = 'Product created from order import'
+                          if params[:use_sku_as_product_name] == true
+                            product.name = single_row[mapping['sku'][:position]]
+                          else
+                            product.name = 'Product created from order import'
+                          end
 
                           sku = ProductSku.new
                           sku.sku = single_row[mapping['sku'][:position]]
                           product.product_skus << sku
+                          if params[:generate_barcode_from_sku] == true
+                            product_barcode = ProductBarcode.new
+                            product_barcode.barcode = single_row[mapping['sku'][:position]]
+                            product.product_barcodes << product_barcode
+                          end
                           product.store_product_id = 0
                           product.store_id = params[:store_id]
-                          product.base_sku = single_row[mapping['base_sku'][:position]] unless single_row[mapping['base_sku']].nil?
                           product.save
 
                           order_item  = OrderItem.new
@@ -248,6 +256,10 @@ module Groovepacker
                         #result["status"] = true
                         result['messages'].push("Order Placed has bad parameter - #{single_row[mapping['order_placed_time'][:position]]}")
                       end
+                    elsif !params[:order_placed_at].nil?
+                      require 'time'
+                      time = Time.parse(params[:order_placed_at])
+                      order['order_placed_time'] = time
                     else
                       result['status'] = false
                       result['messages'].push('Order Placed is missing.')
