@@ -13,7 +13,7 @@ class OrderItemKitProduct < ActiveRecord::Base
 		total_qty = self.order_item.qty
   	end
 
-  	#puts "Processng Kit product"+self.scanned_qty.to_s
+
   	if self.scanned_qty < total_qty * self.product_kit_skus.qty
   		self.scanned_qty = self.scanned_qty + 1
       if clicked
@@ -27,7 +27,7 @@ class OrderItemKitProduct < ActiveRecord::Base
   			self.scanned_status = 'partially_scanned'
   		end
   		self.save
-  		#puts "Status:"+self.scanned_status
+
 
 	  	#need to update order item quantity,
 	  	# for this calculate minimum of order items

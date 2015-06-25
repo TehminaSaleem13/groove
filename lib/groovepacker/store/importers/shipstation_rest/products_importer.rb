@@ -10,7 +10,6 @@ module Groovepacker
             client = handler[:store_handle]
             result = self.build_result
             product_result = client.get_products
-            puts product_result.inspect
             unless product_result["products"].nil?
               result[:total_imported] = product_result["products"].length.to_s
 

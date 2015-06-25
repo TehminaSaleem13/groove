@@ -205,7 +205,6 @@ class OrderItem < ActiveRecord::Base
           end
         end
     end
-    logger.info "result:"+result.to_s
 
     result
   end
@@ -261,7 +260,7 @@ class OrderItem < ActiveRecord::Base
           (self.order.status == 'awaiting' or override)
         if !self.product.nil? && !self.order.store.nil? &&
             !self.order.store.inventory_warehouse_id.nil?
-          logger.info('available product inventory level')
+
           result &= self.product.base_product.
               update_available_product_inventory_level(self.order.store.inventory_warehouse_id,
                                                        self.qty, 'return')

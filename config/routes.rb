@@ -101,6 +101,13 @@ Groovepacks::Application.routes.draw do
     end
   end
 
+  resources :dashboard do
+    collection do
+      get 'packing_stats'
+      get 'packed_item_stats'
+      get 'main_summary'
+    end
+  end
 
   
   # Sample resource route with options:

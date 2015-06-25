@@ -14,7 +14,6 @@ module Groovepacker
             if credential.can_import_an_order?
               if allowed_status_to_import?(credential, order["Status"]) &&
                 Order.find_by_increment_id(order_number).nil?
-                puts "Importing Order"
 
                 import_item.current_increment_id =order_number
                 import_item.save
@@ -173,8 +172,6 @@ end
 
  # # temporary method for importing shipworks
  #  def import_shipworks
- #    puts "********* IMPORT SHIPWORKS *********"
- #    puts params.inspect
  #    shipworks = params["ShipWorks"]
  #    order = Order.new
 

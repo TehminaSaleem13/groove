@@ -309,7 +309,7 @@ function(scope, store_data, $window, $sce, $interval, $state, $stateParams, $mod
         if (shopify_url == null) {
             console.log(scope.stores);
             if (typeof scope.stores.single.shop_name == 'undefined') {
-                notification.notify("Please enter your store name first. Currently you could type in the name, and then click, \"Save & Close\" without Authorizing.");
+                notification.notify("Please enter your store name first.");
             }
         } else {
             myscope.open_popup(shopify_url);
@@ -485,7 +485,7 @@ function(scope, store_data, $window, $sce, $interval, $state, $stateParams, $mod
                     scope.stores.single.status = 1;
                 }
             } else {
-                myscope.store_single_details($stateParams.storeid,false);
+                myscope.store_single_details($stateParams.storeid, true);
             }
 
         }

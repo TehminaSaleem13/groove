@@ -8,9 +8,11 @@ class ExportsettingsController < ApplicationController
     @result['notice_messages'] = []
     @result['data'] = Hash.new
 
-    export_setting = ExportSetting.all.first
-    export_setting.order_export_email = GeneralSetting.all.first.admin_email if export_setting.order_export_email.nil?
-    export_setting.save
+    export_setting = ExportSetting.all.first unless ExportSetting.all.empty?
+    if export_setting.order_export_email.nil?
+      export_setting.order_export_email = GeneralSetting.all.first.admin_email
+      export_setting.save
+    end
     unless export_setting.nil?
       @result['data']['settings'] = export_setting
     else

@@ -145,7 +145,6 @@ class ProductsController < ApplicationController
       @result['status'] = false
       @result['messages'].push('You can not import products')
     end
-    # puts @result.inspect
     if !import_result.nil?
       import_result[:messages].each do |message|
         @result['messages'].push(message)
@@ -222,7 +221,6 @@ class ProductsController < ApplicationController
         require 'active_support/core_ext/hash/conversions'
         product_hash = Hash.from_xml(products_api.to_s)
         # product_hash = from_xml(products_api)
-        # puts product_hash['GetMatchingProductForIdResult']['Products']['Product']['AttributeSets']['ItemAttributes']['SmallImage']['URL']
         raise
         # response = mws.orders.get_matching_product_for_id :id_type=>'SellerSKU', :seller_sku => ["12345678"],
         #   :marketplace_id => @credential.marketplace_id
@@ -533,7 +531,7 @@ class ProductsController < ApplicationController
       groove_bulk_actions.activity = 'delete'
       groove_bulk_actions.save
 
-      bulk_actions.delay(:run_at =>1.seconds.from_now).delete(Apartment::Tenant.current_tenant, params, groove_bulk_actions.id)
+      bulk_actions.delay(:run_at =>1.seconds.from_now).delete(Apartment::Tenant.current_tenant, params, groove_bulk_actions.id, current_user.username)
     else
       @result['status'] = false
       @result['messages'].push('You do not have enough permissions to delete products')
@@ -1167,7 +1165,6 @@ class ProductsController < ApplicationController
       @product_orig = Product.find(params[:product_orig_id])
       skus_len = @product_orig.product_skus.all.length
       barcodes_len = @product_orig.product_barcodes.all.length
-      logger.info
       @product_aliases = Product.find_all_by_id(params[:product_alias_ids])
       if @product_aliases.length > 0
         @product_aliases.each do |product_alias|

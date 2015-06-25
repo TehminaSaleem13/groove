@@ -14,14 +14,13 @@ class GeneralSetting < ActiveRecord::Base
     result = Hash.new
     changed_hash = self.changes
     if self.scheduled_order_import && !changed_hash[:time_to_import_orders].nil?
-      if self.should_import_orders_today
-        job_scheduled = false
-        date = DateTime.now
-        while !job_scheduled do
-          job_scheduled = self.schedule_job(date, 
-            self.time_to_import_orders, 'import_orders')
-          date = DateTime.now + 1.day
-        end
+      job_scheduled = false
+      date = DateTime.now
+      for i in 0..6
+        job_scheduled = self.schedule_job(date, 
+          self.time_to_import_orders, 'import_orders')
+        date = date + 1.day
+        break if job_scheduled
       end
     end
   end
@@ -84,18 +83,17 @@ class GeneralSetting < ActiveRecord::Base
 
   def send_low_inventory_alert_email
   	changed_hash = self.changes
-    logger.info changed_hash
     if (self.inventory_tracking ||
         self.low_inventory_alert_email) &&
-        !changed_hash['time_to_send_email'].nil?
-      if self.should_send_email_today
-        job_scheduled = false
-        date = DateTime.now
-        while !job_scheduled do
-          job_scheduled = self.schedule_job(date, 
-            self.time_to_send_email, 'low_inventory_email')
-          date = DateTime.now + 1.day
-        end
+        !changed_hash['time_to_send_email'].nil? &&
+        !self.low_inventory_email_address.blank?
+      job_scheduled = false
+      date = DateTime.now
+      for i in 0..6
+        job_scheduled = self.schedule_job(date, 
+          self.time_to_send_email, 'low_inventory_email')
+        date = date + 1.day
+        break if job_scheduled
       end
     end
   end
@@ -106,26 +104,29 @@ class GeneralSetting < ActiveRecord::Base
     run_at_date = run_at_date.change({:hour => time.hour, 
       :min => time.min, :sec => time.sec})
     time_diff = ((run_at_date - DateTime.now.getutc) * 24 * 60 * 60).to_i
-    logger.info time_diff
     if time_diff > 0
       tenant = Apartment::Tenant.current_tenant
       if job_type == 'low_inventory_email'
-        if self.low_inventory_alert_email? && !self.low_inventory_email_address.blank?
+                if self.low_inventory_alert_email? && !self.low_inventory_email_address.blank? && self.should_send_email(date)
           Delayed::Job.where(queue: "low_inventory_email_scheduled_#{tenant}").destroy_all
           #LowInventoryLevel.notify(self,tenant).deliver
-          logger.info 'inserting delayed job'
           LowInventoryLevel.delay(:run_at => time_diff.seconds.from_now,:queue => "low_inventory_email_scheduled_#{tenant}").notify(self, tenant)
           job_scheduled = true
         end
       elsif job_type == 'import_orders'
-        Delayed::Job.where(queue: "import_orders_scheduled_#{tenant}").destroy_all
-        self.delay(:run_at => time_diff.seconds.from_now,:queue => "import_orders_scheduled_#{tenant}").import_orders_helper tenant
-        job_scheduled = true
+        if self.should_import_orders(date)
+          Delayed::Job.where(queue: "import_orders_scheduled_#{tenant}").destroy_all
+          self.delay(:run_at => time_diff.seconds.from_now,:queue => "import_orders_scheduled_#{tenant}").import_orders_helper tenant
+          job_scheduled = true
+        end
       elsif job_type == 'export_order'
-        Delayed::Job.where(queue: "order_export_email_scheduled_#{tenant}").destroy_all
-        ExportOrder.delay(:run_at => time_diff.seconds.from_now,:queue => "order_export_email_scheduled_#{tenant}").export(tenant)
-        # ExportOrder.export(tenant).deliver
-        job_scheduled = true
+        export_setting = ExportSetting.all.first
+        if export_setting.should_export_orders(date)
+          Delayed::Job.where(queue: "order_export_email_scheduled_#{tenant}").destroy_all
+          ExportOrder.delay(:run_at => time_diff.seconds.from_now,:queue => "order_export_email_scheduled_#{tenant}").export(tenant)
+          # ExportOrder.export(tenant).deliver
+          job_scheduled = true
+        end
       end
     end
     job_scheduled

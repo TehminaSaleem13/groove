@@ -577,7 +577,6 @@ class StoreSettingsController < ApplicationController
         @result['messages'].push(e.message)
       end
     end
-    logger.info "CSV Map stored."
     if @result['status']
       data = {}
       data[:type] = params[:type]

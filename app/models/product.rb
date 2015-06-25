@@ -57,7 +57,6 @@ class Product < ActiveRecord::Base
             data = []
             data = item.attributes.values_at(*model.column_names).dup
 
-            logger.info data
             csv << data
           end
         end
@@ -79,7 +78,6 @@ class Product < ActiveRecord::Base
   end
 
   def update_product_status (force_from_inactive_state = false)
-    #puts "Updating product status"
     # original_status = self.status
     if self.status != 'inactive' || force_from_inactive_state
       result = true
@@ -231,8 +229,6 @@ class Product < ActiveRecord::Base
             allocated_qty * kit_item.qty)
         end
       elsif self.kit_parsing == 'depends'
-        logger.info "saving order to scanned"
-        logger.info order_item.inspect
         self.product_kit_skuss.each do |kit_sku|
           result &= self.update_warehouses_sold_level(inventory_warehouse_id,
             kit_sku.option_product_id,
@@ -272,7 +268,6 @@ class Product < ActiveRecord::Base
     unless prod_warehouses.length == 1
       result &= false
     end
-    logger.info('Allocated Qty which has been sold:'+allocated_qty.to_s)
     unless !result
       prod_warehouses.each do |wh|
         wh.update_sold_inventory_level(allocated_qty)

@@ -279,7 +279,7 @@ groovepacks_directives.directive('groovPersistNotification',['$window','$documen
             };
 
             scope.toggle_detail = function() {
-                $document.find('body').eq(0).toggleClass('pnotif-open');
+                $('#notification').toggleClass('pnotif-open');
                 scope.detail_open = !scope.detail_open;
                 if(scope.detail_open) {
                     if(scope.selected == '') {

@@ -4,8 +4,6 @@ module StoreSettingsHelper
 		if !inventory_warehouses.nil?
 			inventory_warehouse = inventory_warehouses.first
 			default_warehouse_id = inventory_warehouse.id
-			# puts "default_warehouse_id"
-			# puts default_warehouse_id
 			default_warehouse_id
 		end
 	end
@@ -14,8 +12,6 @@ module StoreSettingsHelper
 		if !inventory_warehouses.nil?
 			inventory_warehouse = inventory_warehouses.first
 			default_warehouse_name = inventory_warehouse.name
-			# puts "default_warehouse_name"
-			# puts default_warehouse_name
 			default_warehouse_name
 		end
 	end

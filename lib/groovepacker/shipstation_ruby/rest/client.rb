@@ -84,12 +84,10 @@ module Groovepacker
               "Accept" => "application/json"
             }, :debug_output => $stdout})
           handle_exceptions(response)
-          puts response.inspect
           response
         end
 
         def get_order(orderId)
-          puts "retrieving order"
           Rails.logger.info "Getting orders with orderId: " + orderId
           response = HTTParty.get('https://ssapi.shipstation.com/Orders/' + orderId,
             headers: {
@@ -97,7 +95,6 @@ module Groovepacker
               "X-Mashape-Key" => "E6cSux0BVQmshJh0VacUkqXP1sJgp1I1APKjsntC26JSOTy0pP"
             })
           handle_exceptions(response)
-          puts response.inspect
           response
         end
 

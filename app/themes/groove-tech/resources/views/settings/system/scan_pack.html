@@ -9,16 +9,22 @@
                     <label class="control-label col-sm-3">{{translations.labels.ask_tracking_number}}</label>
                     <div class="controls col-sm-4 form-inline " dropdown>
                         <button class="dropdown-toggle groove-button label label-default" ng-class="{'label-success':scan_pack.settings.post_scanning_option=='Verify',
-                        'label-warning':scan_pack.settings.post_scanning_option=='Record'}">
+                        'label-warning':scan_pack.settings.post_scanning_option=='Record',
+                        'label-info':scan_pack.settings.post_scanning_option=='PackingSlip',
+                        'label-danger':scan_pack.settings.post_scanning_option=='Barcode'}">
                             <span ng-show="scan_pack.settings.post_scanning_option=='None'" translate>common.none</span>
                             <span ng-show="scan_pack.settings.post_scanning_option=='Verify'" translate>common.verify</span>
                             <span ng-show="scan_pack.settings.post_scanning_option=='Record'" translate>common.record</span>
+                            <span ng-show="scan_pack.settings.post_scanning_option=='PackingSlip'" translate>common.packing_slip</span>
+                            <span ng-show="scan_pack.settings.post_scanning_option=='Barcode'" translate>common.order_barcode</span>
                             <span class="caret"></span>
                         </button>
                         <ul class="dropdown-menu" role="menu">
                             <li><a class="dropdown-toggle" ng-click="change_post_scanning_opt('None')" translate>common.none</a></li>
                             <li><a class="dropdown-toggle" ng-click="change_post_scanning_opt('Verify')" translate>common.verify</a></li>
                             <li><a class="dropdown-toggle" ng-click="change_post_scanning_opt('Record')" translate>common.record</a></li>
+                            <li><a class="dropdown-toggle" ng-click="change_post_scanning_opt('PackingSlip')" translate>common.packing_slip</a></li>
+                            <li><a class="dropdown-toggle" ng-click="change_post_scanning_opt('Barcode')" translate>common.order_barcode</a></li>
                         </ul>
                     </div>
                     <div class="info col-sm-2">

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150612101535) do
+ActiveRecord::Schema.define(:version => 20150621153125) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0, :null => false
@@ -434,6 +434,8 @@ ActiveRecord::Schema.define(:version => 20150612101535) do
     t.boolean  "note_confirmation",                                     :default => false
     t.string   "store_order_id"
     t.boolean  "update_inventory_level",                                :default => true
+    t.integer  "inaccurate_scan_count",                                 :default => 0
+    t.datetime "scan_start_time"
   end
 
   create_table "product_barcodes", :force => true do |t|

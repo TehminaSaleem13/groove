@@ -17,7 +17,6 @@ module ScanPackHelper
     session[:most_recent_scanned_products] = []
     if !input.nil? && input != ""
       orders = Order.where(['increment_id = ? or non_hyphen_increment_id =?', input, input])
-      logger.info orders
       single_order = nil
       single_order_result = Hash.new
       single_order_result['matched_orders'] = []
@@ -120,8 +119,18 @@ module ScanPackHelper
                   else
                     single_order_result['next_state'] = 'scanpack.rfp.verifying'
                   end
-                else
+                elsif scanpack_settings.post_scanning_option == "Record"
                   single_order_result['next_state'] = 'scanpack.rfp.recording'
+                elsif scanpack_settings.post_scanning_option == "PackingSlip"
+                  #generate packingslip for the order
+                  single_order.set_order_to_scanned_state(current_user.username)
+                  single_order_result['next_state'] = 'scanpack.rfo'
+                  generate_packing_slip(single_order)
+                else
+                  #generate barcode for the order
+                  single_order.set_order_to_scanned_state(current_user.username)
+                  single_order_result['next_state'] = 'scanpack.rfo'
+                  generate_order_barcode_slip(single_order)
                 end
               else
                 single_order.set_order_to_scanned_state(current_user.username)
@@ -129,6 +138,7 @@ module ScanPackHelper
               end
             else
               single_order_result['next_state'] = 'scanpack.rfp.default'
+              single_order.scan_start_time = DateTime.now if single_order.scan_start_time.nil?
             end
           end
           unless single_order.nil?
@@ -244,12 +254,12 @@ module ScanPackHelper
                         order_item_kit_product =
                             OrderItemKitProduct.find(child_item['kit_product_id'])
 
-                        if scanpack_settings.record_lot_number
-                          unless serial_added
+                        unless serial_added
+                          order_item = order_item_kit_product.order_item unless order_item_kit_product.order_item.nil?
+                          result['data']['serial']['order_item_id'] = order_item.id
+                          if scanpack_settings.record_lot_number
                             lot_number = calculate_lot_number(scanpack_settings, input)
-                            order_item = order_item_kit_product.order_item unless order_item_kit_product.order_item.nil?
                             product = order_item.product unless order_item.nil? || order_item.product.nil?
-                            result['data']['serial']['order_item_id'] = order_item.id
                             unless lot_number.nil?
                               if product.product_lots.where(lot_number: lot_number).empty?
                                 product.product_lots.create(product_id: product.id, lot_number: lot_number)
@@ -260,6 +270,8 @@ module ScanPackHelper
                             else
                               result['data']['serial']['product_lot_id'] = nil
                             end
+                          else
+                            result['data']['serial']['product_lot_id'] = nil
                           end
                         end
 
@@ -292,11 +304,11 @@ module ScanPackHelper
                   #process product barcode scan
                   order_item = OrderItem.find(item['order_item_id'])
 
-                  if scanpack_settings.record_lot_number
-                    unless serial_added
+                  unless serial_added
+                    result['data']['serial']['order_item_id'] = order_item.id
+                    if scanpack_settings.record_lot_number
                       lot_number = calculate_lot_number(scanpack_settings, input)
                       product = order_item.product unless order_item.product.nil?
-                      result['data']['serial']['order_item_id'] = order_item.id
                       unless lot_number.nil?
                         if product.product_lots.where(lot_number: lot_number).empty?
                           product.product_lots.create(lot_number: lot_number)
@@ -307,6 +319,8 @@ module ScanPackHelper
                       else
                         result['data']['serial']['product_lot_id'] = nil
                       end
+                    else
+                      result['data']['serial']['product_lot_id'] = nil
                     end
                   end
                   
@@ -369,8 +383,20 @@ module ScanPackHelper
                   else
                     result['data']['next_state'] = 'scanpack.rfp.verifying'
                   end
-                else
+                elsif scanpack_settings.post_scanning_option == "Record"
                   result['data']['next_state'] = 'scanpack.rfp.recording'
+                elsif scanpack_settings.post_scanning_option == "PackingSlip"
+                  #generate packing slip for the order
+                  single_order.set_order_to_scanned_state(current_user.username)
+                  result['data']['order_complete'] = true
+                  result['data']['next_state'] = 'scanpack.rfo'
+                  generate_packing_slip(single_order)
+                else
+                  #generate barcode for the order
+                  single_order.set_order_to_scanned_state(current_user.username)
+                  result['data']['order_complete'] = true
+                  result['data']['next_state'] = 'scanpack.rfo'
+                  generate_order_barcode_slip(single_order)
                 end
               else
                 single_order.set_order_to_scanned_state(current_user.username)
@@ -379,6 +405,7 @@ module ScanPackHelper
               end
             end
           else
+            single_order.inaccurate_scan_count = single_order.inaccurate_scan_count + 1
             result['status'] &= false
             result['error_messages'].push("Barcode '"+clean_input+"' doesn't match any item on this order")
           end
@@ -806,4 +833,99 @@ module ScanPackHelper
     return !barcode_data.nil?
   end
 
+  def generate_packing_slip(order)
+    result = Hash.new
+    result['status'] = false
+    if GeneralSetting.get_packing_slip_size == '4 x 6'
+      @page_height = '6'
+      @page_width = '4'
+    else
+      @page_height = '11'
+      @page_width = '8.5'
+    end
+    @size = GeneralSetting.get_packing_slip_size
+    @orientation = GeneralSetting.get_packing_slip_orientation
+    @result = Hash.new
+    @result['data'] = Hash.new
+    @result['data']['packing_slip_file_paths'] = []
+
+    if @orientation == 'landscape'
+      @page_height = @page_height.to_f/2
+      @page_height = @page_height.to_s
+    end
+    @header = ''
+
+    @file_name = Apartment::Tenant.current_tenant+Time.now.strftime('%d_%b_%Y_%I__%M_%p')
+    @orders = []
+
+    single_order = Order.find(order.id)
+    unless single_order.nil?
+      @orders.push({id:single_order.id, increment_id:single_order.increment_id})
+    end
+    unless @orders.empty?
+      GenerateBarcode.where('updated_at < ?',24.hours.ago).delete_all
+      @generate_barcode = GenerateBarcode.new
+      @generate_barcode.user_id = current_user.id
+      @generate_barcode.current_order_position = 0
+      @generate_barcode.total_orders = @orders.length
+      @generate_barcode.next_order_increment_id = @orders.first[:increment_id] unless @orders.first.nil?
+      @generate_barcode.status = 'scheduled'
+
+      @generate_barcode.save
+      delayed_job = GeneratePackingSlipPdf.delay(:run_at => 1.seconds.from_now).generate_packing_slip_pdf(@orders, Apartment::Tenant.current_tenant, @result, @page_height,@page_width,@orientation,@file_name, @size, @header,@generate_barcode.id)
+      @generate_barcode.delayed_job_id = delayed_job.id
+      @generate_barcode.save
+      result['status'] = true
+    end
+  end
+
+  def generate_order_barcode_slip(order)
+    require 'wicked_pdf'
+    GenerateBarcode.where('updated_at < ?',24.hours.ago).delete_all
+    @generate_barcode = GenerateBarcode.new
+    @generate_barcode.user_id = current_user.id
+    @generate_barcode.current_order_position = 0
+    @generate_barcode.total_orders = 1
+    @generate_barcode.current_increment_id = order.increment_id
+    @generate_barcode.next_order_increment_id = nil
+    @generate_barcode.status = 'in_progress'
+
+    @generate_barcode.save
+    file_name_order = Digest::MD5.hexdigest(order.increment_id)
+    reader_file_path = Rails.root.join('public', 'pdfs', "#{Apartment::Tenant.current_tenant}.#{file_name_order}.pdf")
+    ActionView::Base.send(:define_method, :protect_against_forgery?) { false }
+    av = ActionView::Base.new()
+    av.view_paths = ActionController::Base.view_paths
+    av.class_eval do
+      include Rails.application.routes.url_helpers
+      include ApplicationHelper
+      include ProductsHelper
+    end
+    @order = order
+    tenant_name = Apartment::Tenant.current_tenant
+    file_name = tenant_name + Time.now.strftime('%d_%b_%Y_%I__%M_%p')
+    pdf_path = Rails.root.join('public', 'pdfs', "#{file_name}_order_number.pdf")
+    pdf_html = av.render :template => 'orders/generate_order_barcode_slip.html.erb', :layout => nil, :locals => {:@order => @order}
+    doc_pdf = WickedPdf.new.pdf_from_string(
+      pdf_html,
+      :inline => true,
+      :save_only => false,
+      :page_height => '1in',
+      :page_width => '3in',
+      :margin => {:top => '0',
+                  :bottom => '0',
+                  :left => '0',
+                  :right => '0'}
+    )
+    File.open(reader_file_path, 'wb') do |file|
+      file << doc_pdf
+    end
+    base_file_name = File.basename(pdf_path)
+    pdf_file = File.open(reader_file_path)
+    GroovS3.create_pdf(tenant_name,base_file_name,pdf_file.read)
+    pdf_file.close
+    @generate_barcode.url = ENV['S3_BASE_URL']+'/'+tenant_name+'/pdf/'+base_file_name
+    @generate_barcode.status = 'completed'
+    @generate_barcode.save
+  end
 end

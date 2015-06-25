@@ -27,7 +27,7 @@
         <button class="groove-button label label-info" ng-click="stop_editing()">Exit Edit Mode</button>
     </div>
 </div>
-<div groov-persist-notification></div>
+<div id="notification" groov-persist-notification></div>
 <div class="container main-body">
     <div class="gradient-well">
         <div class="container-fluid gradient-well-inner">
@@ -36,6 +36,9 @@
     </div>
 </div>
 <div groov-notification></div>
+<% if ENV['DASHBOARD_ENABLE'] == 'YES' %>
+<div id="dashboard" groov-dashboard></div>
+<% end %>
 <script>
     // Include the UserVoice JavaScript SDK (only needed once on a page)
     UserVoice=window.UserVoice||[];(function(){var uv=document.createElement('script');uv.type='text/javascript';uv.async=true;uv.src='//widget.uservoice.com/3ZTbdvkPQEdrJEP5n2nndA.js';var s=document.getElementsByTagName('script')[0];s.parentNode.insertBefore(uv,s)})();
