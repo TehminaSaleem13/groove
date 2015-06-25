@@ -2,7 +2,7 @@ groovepacks_services.factory('backup',['$http','notification',function($http, no
     var get_default = function() {
         return {
             data: {
-                method: 'del_import',
+                method: 'del_import_new',
                 file:   null
             }
         };
