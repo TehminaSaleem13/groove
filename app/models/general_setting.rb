@@ -22,6 +22,9 @@ class GeneralSetting < ActiveRecord::Base
         date = date + 1.day
         break if job_scheduled
       end
+    else
+      tenant = Apartment::Tenant.current_tenant
+      Delayed::Job.where(queue: "import_orders_scheduled_#{tenant}").destroy_all
     end
   end
 
@@ -95,6 +98,9 @@ class GeneralSetting < ActiveRecord::Base
         date = date + 1.day
         break if job_scheduled
       end
+    else
+      tenant = Apartment::Tenant.current_tenant
+      Delayed::Job.where(queue: "low_inventory_email_scheduled_#{tenant}").destroy_all
     end
   end
 

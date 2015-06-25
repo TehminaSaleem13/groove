@@ -20,6 +20,9 @@ class ExportSetting < ActiveRecord::Base
         date = date + 1.day
         break if job_scheduled
       end
+    else
+      tenant = Apartment::Tenant.current_tenant
+      Delayed::Job.where(queue: "order_export_email_scheduled_#{tenant}").destroy_all
     end
   end
 
