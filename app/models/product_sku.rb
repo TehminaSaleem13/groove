@@ -1,5 +1,6 @@
 class ProductSku < ActiveRecord::Base
   belongs_to :product
+  belongs_to :order_item
   attr_accessible :purpose, :sku
   validates_uniqueness_of :sku
 

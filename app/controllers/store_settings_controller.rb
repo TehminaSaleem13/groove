@@ -406,7 +406,7 @@ class StoreSettingsController < ApplicationController
 
           #check if previous mapping exists
           #else fill in defaults
-          default_csv_map ={ 'name' =>'', 'map' =>{'rows' => 1, 'sep' => ',' , 'other_sep' => 0, 'delimiter'=> '"', 'fix_width' => 0, 'fixed_width' => 4, 'map' => {} }}
+          default_csv_map ={ 'name' =>'', 'map' =>{'rows' => 2, 'sep' => ',' , 'other_sep' => 0, 'delimiter'=> '"', 'fix_width' => 0, 'fixed_width' => 4, 'contains_unique_order_items' => false, 'generate_barcode_from_sku' => false, 'use_sku_as_product_name' => false, 'order_placed_at' => nil, 'map' => {} }}
           csv_map = CsvMapping.find_or_create_by_store_id(@store.id)
           # end check for mapping
 
@@ -430,7 +430,9 @@ class StoreSettingsController < ApplicationController
                 { value: 'postcode', name: 'Postal Code'},
                 { value: 'country', name: 'Country'},
                 { value: 'method', name: 'Shipping Method'},
-                { value: 'customer_comments', name: 'Customer Comments'}
+                { value: 'customer_comments', name: 'Customer Comments'},
+                { value: 'base_sku', name: 'Base SKU'},
+                { value: 'product_name', name: 'Product Name'}
             ]
             if csv_map.order_csv_map.nil?
               @result['order']['settings'] = default_csv_map
@@ -462,7 +464,8 @@ class StoreSettingsController < ApplicationController
                 { value: 'barcode', name: 'UPC/Barcode'},
                 { value: 'secondary_barcode', name: 'Secondary Barcode'},
                 { value: 'tertiary_barcode', name: 'Tertiary Barcode'},
-                { value: 'product_weight', name: 'Product Weight'}
+                { value: 'product_weight', name: 'Product Weight'},
+                { value: 'base_sku', name: 'Base SKU'}
             ]
             if csv_map.product_csv_map.nil?
               @result["product"]["settings"] = default_csv_map
@@ -558,6 +561,9 @@ class StoreSettingsController < ApplicationController
           :fix_width => params[:fix_width],
           :fixed_width => params[:fixed_width],
           :import_action => params[:import_action],
+          :contains_unique_order_items => params[:contains_unique_order_items],
+          :generate_barcode_from_sku => params[:generate_barcode_from_sku],
+          :use_sku_as_product_name => params[:use_sku_as_product_name],
           :map => params[:map]
       }
       map_data.save
@@ -582,9 +588,14 @@ class StoreSettingsController < ApplicationController
       data[:map] = params[:map]
       data[:store_id] = params[:store_id]
       data[:import_action] = params[:import_action]
+      data[:contains_unique_order_items] = params[:contains_unique_order_items]
+      data[:generate_barcode_from_sku] = params[:generate_barcode_from_sku]
+      data[:use_sku_as_product_name] = params[:use_sku_as_product_name]
+      data[:order_placed_at] = params[:order_placed_at]
 
       import_csv = ImportCsv.new
-      delayed_job = import_csv.delay(:run_at =>1.seconds.from_now).import Apartment::Tenant.current_tenant, data
+      # delayed_job = import_csv.delay(:run_at =>1.seconds.from_now).import Apartment::Tenant.current_tenant, data
+      delayed_job = import_csv.import(Apartment::Tenant.current_tenant, data)
 
       if params[:type] == 'order'
         import_item = ImportItem.find_by_store_id(@store.id)

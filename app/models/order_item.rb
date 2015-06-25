@@ -3,7 +3,9 @@ class OrderItem < ActiveRecord::Base
   belongs_to :product
 
   has_many :order_item_kit_products
-  has_many :order_item_order_serial_product_lots  
+  has_many :order_item_order_serial_product_lots
+  has_one :product_barcode
+  has_one :product_sku
   attr_accessible :price, :qty, :row_total, :sku, :product, :product_is_deleted
 
   after_create :update_inventory_levels_for_packing, :add_kit_products
@@ -226,7 +228,7 @@ class OrderItem < ActiveRecord::Base
       (self.order.status == 'awaiting' or override)
       if !self.product.nil? && !self.order.store.nil? &&
         !self.order.store.inventory_warehouse_id.nil?
-        result &= self.product.
+        result &= self.product.base_product.
           update_available_product_inventory_level(self.order.store.inventory_warehouse_id,
             self.qty, 'purchase')
         
@@ -258,7 +260,8 @@ class OrderItem < ActiveRecord::Base
           (self.order.status == 'awaiting' or override)
         if !self.product.nil? && !self.order.store.nil? &&
             !self.order.store.inventory_warehouse_id.nil?
-          result &= self.product.
+
+          result &= self.product.base_product.
               update_available_product_inventory_level(self.order.store.inventory_warehouse_id,
                                                        self.qty, 'return')
 
@@ -314,7 +317,7 @@ class OrderItem < ActiveRecord::Base
             if !self.product.nil? && !self.order.store.nil? &&
               !self.order.store.inventory_warehouse_id.nil?
               #return the single kit product
-              result &= self.product.
+              result &= self.product.base_product.
                 update_available_product_inventory_level(self.order.store.inventory_warehouse_id,
                   1, 'return')
 
@@ -334,7 +337,7 @@ class OrderItem < ActiveRecord::Base
               changed_hash['kit_split_qty'][0] * kit_sku.qty, 'return')
           end
 
-          result &= self.product.
+          result &= self.product.base_product.
             update_available_product_inventory_level(self.order.store.inventory_warehouse_id,
               changed_hash['kit_split_qty'][0], 'purchase')
         end
@@ -343,6 +346,14 @@ class OrderItem < ActiveRecord::Base
 
     result
   end
+
+  # def get_base_product
+  #   if self.is_incremental_item
+  #     return self.product.base_product
+  #   else
+  #     return self.product
+  #   end
+  # end
 
   def get_lot_number()
     unless self.product_lots.empty?

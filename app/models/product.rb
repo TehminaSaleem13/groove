@@ -88,6 +88,12 @@ class Product < ActiveRecord::Base
 
       result &= false if self.product_barcodes.length == 0
 
+      unless self.base_sku.nil?
+        if base_product.status == 'inactive' || base_product.status == 'new'
+          result &= false
+        end
+      end
+
       #if kit it should contain kit products as well
       if self.is_kit == 1
         result &= false if self.product_kit_skuss.length == 0
@@ -118,6 +124,15 @@ class Product < ActiveRecord::Base
           @kit_products.each do |kit_product|
             if kit_product.product.status != 'inactive'
               kit_product.product.update_product_status
+            end
+          end
+        end
+
+        if result && self.base_sku.nil?
+          products = Product.where(:base_sku => self.primary_sku)
+          unless products.empty?
+            products.each do |child_product|
+              child_product.update_product_status
             end
           end
         end
@@ -349,6 +364,15 @@ class Product < ActiveRecord::Base
   # provides primary barcode if exists
   def primary_barcode
     self.product_barcodes.order('product_barcodes.order ASC').first.barcode unless self.product_barcodes.order('product_barcodes.order ASC').first.nil?
+  end
+
+  def base_product
+    unless self.base_sku.nil?
+      base_product_sku = ProductSku.where(:sku=>self.base_sku).first unless ProductSku.where(:sku=>self.base_sku).empty?
+      return base_product_sku.product unless base_product_sku.nil?
+    else
+      return self
+    end
   end
 
   def primary_barcode=(value)

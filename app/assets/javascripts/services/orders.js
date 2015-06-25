@@ -386,6 +386,22 @@ groovepacks_services.factory('orders',['$http','$window','notification',function
         }).error(notification.server_error);
     };
 
+    var single_update_print_status = function(item) {
+        return $http.post('/orders/updateiteminorder.json',{orderitem: item.id}).success(function(data) {
+            if(data.status) {
+                if (data.messages.length > 0) {
+                    notification.notify(data.messages,0);
+                };
+            } else {
+                notification.notify(data.messages,0);
+            }
+        }).error(notification.server_error);
+    };
+
+    var single_print_barcode = function(item) {
+        $window.open('/products/generate_barcode_slip.pdf?id='+item.id);
+    };
+
     var acknowledge_activity = function(activity_id) {
         return $http.post('/order_activities/acknowledge/'+activity_id, null).success(function(data) {
             if(data.status) {
@@ -422,7 +438,9 @@ groovepacks_services.factory('orders',['$http','$window','notification',function
             item: {
                 add: single_add_item,
                 remove: single_remove_item,
-                update:  single_update_item_qty
+                update:  single_update_item_qty,
+                print_status: single_update_print_status,
+                print_barcode: single_print_barcode
             },
             exception: {
                 record: single_record_exception,

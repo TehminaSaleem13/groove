@@ -126,6 +126,13 @@ groovepacks_controllers.
                 }
             };
 
+            scope.update_print_status = function(item,product) {
+                orders.single.item.print_status({id: item.id});
+                myscope.init();
+                scope.modal_tabs[1].active = true;
+                orders.single.item.print_barcode({id: product.id});
+            }
+
             scope.acknowledge_activity = function(activity_id) {
                 orders.single.activity.acknowledge(activity_id).then(function(response){
                     myscope.order_single_details(scope.orders.single.basicinfo.id);
@@ -344,6 +351,7 @@ groovepacks_controllers.
                     selectable:true,
                     editable: {
                         update: scope.save_item,
+                        print_status:scope.update_print_status,
                         elements: {
                             qty: {type:'number',min:0},
                             qty_on_hand: {type:'number',min:0},
@@ -395,12 +403,12 @@ groovepacks_controllers.
                           name:"Primary Barcode"
                         },
                         qty: {
-                            name:"Qty ordered",
+                            name:"Qty Ordered",
                             model:"row.iteminfo",
                             transclude: '<span>{{row.iteminfo.qty}}</span>'
                         },
                         location_primary: {
-                            name:"Primary location"
+                            name:"Primary Location"
                         },
                         qty_on_hand: {
                             name:"Available Inv",
@@ -412,6 +420,16 @@ groovepacks_controllers.
                             model:"row.productinfo",
                             transclude: '<div toggle-switch ng-model="row.productinfo.is_skippable" groov-click="options.editable.update(row.productinfo,\'is_skippable\')"></div>',
                             hidden:true
+                        },
+                        print_barcode: {
+                            name: "Print Barcode",
+                            editable:false,
+                            model: "row.iteminfo",
+                            transclude: "<a class='label label-default' ng-class=\"{" +
+                                        "'label-success': row.iteminfo.is_barcode_printed == false, " +
+                                        "'label-default': row.iteminfo.is_barcode_printed == true }\" " +
+                                        " groov-click=\"options.editable.print_status(row.iteminfo,row.productinfo)\" href=\"\">" +
+                                        "&nbsp;&nbsp;<i class=\"glyphicon glyphicon-print icon-large\"></i>&nbsp;&nbsp;</a>"
                         }
                     }
                 };

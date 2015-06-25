@@ -101,15 +101,28 @@ module ProductsHelper
         elsif var == 'location_name'
           product_location.name = value
         elsif var == 'qty'
-          product_location.available_inv = value
-          if GeneralSetting.first.inventory_auto_allocation == true
-            product_location.save
-            @order_items = product_location.product.order_items unless product_location.product.order_items.empty?
-            @order_items.each do |order_item|
-              order_item.order.update_inventory_level = false
-              order_item.order.save
-              if order_item.qty <= product_location.available_inv && order_item.inv_status != 'allocated'
-                order_item.update_inventory_levels_for_packing(true)
+          if product.base_sku.nil?
+            product_location.available_inv = value
+            if GeneralSetting.first.inventory_auto_allocation == true
+              product_location.save
+              @order_items = []
+              @order_items = product_location.product.order_items unless product_location.product.order_items.empty?
+              products = Product.where(:base_sku => product_location.product.primary_sku)
+              unless products.empty?
+                products.each do |child_product|
+                  unless child_product.order_items.empty?
+                    child_product.order_items.each do |order_item|
+                      @order_items << order_item
+                    end
+                  end
+                end
+              end
+              @order_items.each do |order_item|
+                order_item.order.update_inventory_level = false
+                order_item.order.save
+                if order_item.qty <= product_location.available_inv && order_item.inv_status != 'allocated'
+                  order_item.update_inventory_levels_for_packing(true)
+                end
               end
             end
           end

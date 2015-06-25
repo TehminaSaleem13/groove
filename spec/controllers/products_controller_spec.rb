@@ -268,9 +268,13 @@ RSpec.describe ProductsController, :type => :controller do
       order1 = FactoryGirl.create(:order, :status=>'awaiting', :increment_id=>'1234567890', :store => store)
       order2 = FactoryGirl.create(:order, :status=>'onhold', :increment_id=>'1234567891', :store => store)
       order3 = FactoryGirl.create(:order, :status=>'serviceissue', :increment_id=>'1234567892', :store => store)
-      product1 = FactoryGirl.create(:product)
-      product2 = FactoryGirl.create(:product)
-      product3 = FactoryGirl.create(:product)
+      product1 = FactoryGirl.create(:product, :name=>"Apple iPhone 5S")
+      product2 = FactoryGirl.create(:product, :name=>"Apple iPhone 5T")
+      product3 = FactoryGirl.create(:product, :name=>"Apple iPhone 5Z")
+
+      product_sku1 = FactoryGirl.create(:product_sku, :product=> product1, :sku=>"E-VEGAN-EPIC1")
+      product_sku2 = FactoryGirl.create(:product_sku, :product=> product2, :sku=>"E-VEGAN-EPIC2")
+      product_sku3 = FactoryGirl.create(:product_sku, :product=> product3, :sku=>"E-VEGAN-EPIC3")
 
       order_item1 = FactoryGirl.create(:order_item, :product_id=>product1.id,
                     :qty=>1, :price=>"10", :row_total=>"10", :order=>order1, :name=>product1.name)
@@ -279,8 +283,11 @@ RSpec.describe ProductsController, :type => :controller do
       order_item3 = FactoryGirl.create(:order_item, :product_id=>product3.id,
                     :qty=>1, :price=>"10", :row_total=>"10", :order=>order3, :name=>product3.name)
       put :updateproductlist, {:id=>product1.id, :var=> 'qty', :value=>'10'}
+      expect(response.status).to eq(200)
       put :updateproductlist, {:id=>product2.id, :var=> 'qty', :value=>'10'}
+      expect(response.status).to eq(200)
       put :updateproductlist, {:id=>product3.id, :var=> 'qty', :value=>'10'}
+      expect(response.status).to eq(200)
       product1.reload
       product2.reload
       product3.reload

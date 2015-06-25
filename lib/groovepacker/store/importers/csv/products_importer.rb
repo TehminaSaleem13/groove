@@ -81,6 +81,7 @@ module Groovepacker
                   usable_record[:images] = []
                   usable_record[:inventory] = []
                   usable_record[:product_type] = ''
+                  usable_record[:base_sku] = ''
 
                   all_skus = all_skus + single_row_skus
                   usable_record[:skus] = single_row_skus
@@ -157,6 +158,12 @@ module Groovepacker
                   if !mapping['product_images'].nil? && mapping['product_images'][:position] >= 0
                     unless single_row[mapping['product_images'][:position]].nil?
                       usable_record[:images] =  single_row[mapping['product_images'][:position]].split(',')
+                    end
+                  end
+
+                  if !mapping['base_sku'].nil? && mapping['base_sku'][:position] >= 0
+                    unless single_row[mapping['base_sku'][:position]].nil?
+                      usable_record[:base_sku] = single_row[mapping['base_sku'][:position]].split(',')
                     end
                   end
 
