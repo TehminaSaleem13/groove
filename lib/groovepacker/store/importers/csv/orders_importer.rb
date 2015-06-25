@@ -216,6 +216,7 @@ module Groovepacker
                           base_product.product_skus << basesku
                           base_product.save
                         end
+                        product.spl_instructions_4_packer = single_row[mapping['customer_comments'][:position]] unless single_row[mapping['customer_comments'][:position]].nil?
                         product.base_sku = single_row[mapping['base_sku'][:position]] unless single_row[mapping['base_sku'][:position]].nil?
                         product.save
 

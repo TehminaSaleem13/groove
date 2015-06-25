@@ -1,6 +1,6 @@
 groovepacks_controllers.controller('storeSingleModal', [ '$scope', 'store_data', '$window', '$sce', '$interval', '$state', '$stateParams','$modal',
-                             '$modalInstance', '$timeout', 'hotkeys', 'stores','warehouses', 'notification',
-function(scope, store_data, $window, $sce, $interval, $state, $stateParams, $modal, $modalInstance, $timeout, hotkeys, stores, warehouses, notification) {
+                             '$modalInstance', '$timeout', 'hotkeys', 'stores','warehouses', 'notification', '$q',
+function(scope, store_data, $window, $sce, $interval, $state, $stateParams, $modal, $modalInstance, $timeout, hotkeys, stores, warehouses, notification, $q) {
     var myscope = {};
 
     /**
@@ -163,6 +163,7 @@ function(scope, store_data, $window, $sce, $interval, $state, $stateParams, $mod
                         if (data.csv_import && data.store_id) {
                             if(scope.stores.csv.mapping[scope.stores.single.type+'_csv_map_id'] && !scope.start_editing_map) {
 
+                                var result = $q.defer();
                                 for (var i=0; i <scope.stores.csv.maps[scope.stores.single.type].length; i++){
                                     if (scope.stores.csv.mapping[scope.stores.single.type+'_csv_map_id'] == scope.stores.csv.maps[scope.stores.single.type][i].id) {
                                         var current_map = jQuery.extend(true,{},scope.stores.csv.maps[scope.stores.single.type][i]);
@@ -186,15 +187,17 @@ function(scope, store_data, $window, $sce, $interval, $state, $stateParams, $mod
                                         current_map.map.order_placed_at = new Date();
                                         stores.csv.do_import({current:current_map.map});
                                         $modalInstance.close("csv-modal-closed");
+                                        result.resolve();
                                     };
                                 } else {
                                     current_map.map.order_placed_at = null;
                                     stores.csv.do_import({current:current_map.map});
                                     $modalInstance.close("csv-modal-closed");
+                                    result.resolve();
                                 };
                                 // stores.csv.do_import({current:current_map.map});
                                 // $modalInstance.close("csv-modal-closed");
-
+                                return result.promise;
                             } else {
                                 var csv_modal;
                                 if(scope.stores.single.type == 'order') {

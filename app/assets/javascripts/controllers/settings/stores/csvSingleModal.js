@@ -1,6 +1,6 @@
 groovepacks_controllers.controller('csvSingleModal', [ '$scope', 'store_data', '$state', '$stateParams','$modal',
-         '$modalInstance', '$timeout', 'hotkeys', 'stores','warehouses','notification',
-function(scope, store_data, $state, $stateParams, $modal, $modalInstance, $timeout, hotkeys, stores, warehouses, notification) {
+         '$modalInstance', '$timeout', 'hotkeys', 'stores','warehouses','notification','$q',
+function(scope, store_data, $state, $stateParams, $modal, $modalInstance, $timeout, hotkeys, stores, warehouses, notification, $q) {
      var myscope = {};
 
      /**
@@ -8,6 +8,7 @@ function(scope, store_data, $state, $stateParams, $modal, $modalInstance, $timeo
       */
 
     scope.ok = function() {
+        var result = $q.defer();
         for(var i = 0; i < scope.csv.importer[scope.csv.importer.type]['map_options'].length; i++) {
             if (scope.csv.importer[scope.csv.importer.type]['map_options'][i].name == "Order Date/Time") {
                 if (scope.csv.importer[scope.csv.importer.type]['map_options'][i].disabled) {
@@ -18,12 +19,13 @@ function(scope, store_data, $state, $stateParams, $modal, $modalInstance, $timeo
                     if (confirm("An Order Date/Time has not been mapped. Would you like to continue using the current Date/Time for each imported order?")) {
                         scope.csv.current.order_placed_at = new Date();
                         myscope.ok_import();
+                        result.resolve();
                         break;
-                    };
+                    } else {result.resolve();};
                 };
             } else {continue;};
         }
-        
+        return result.promise;
     };
 
     myscope.ok_import = function() {
