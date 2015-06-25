@@ -389,7 +389,9 @@ groovepacks_services.factory('orders',['$http','$window','notification',function
     var single_update_print_status = function(item) {
         return $http.post('/orders/updateiteminorder.json',{orderitem: item.id}).success(function(data) {
             if(data.status) {
-                notification.notify("Item updated",1);
+                if (data.messages.length > 0) {
+                    notification.notify(data.messages,0);
+                };
             } else {
                 notification.notify(data.messages,0);
             }

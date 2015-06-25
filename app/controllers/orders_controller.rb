@@ -586,6 +586,7 @@ class OrdersController < ApplicationController
   end
 
   def updateiteminorder
+    puts "params: " + params.inspect
     @result = Hash.new
     @result['status'] = true
     @result['messages'] = []
@@ -603,15 +604,31 @@ class OrdersController < ApplicationController
           else
             @orderitem.qty = params[:qty]
           end
+          unless @orderitem.save
+            @result['status'] &= false
+            @result['messages'].push("Could not update order item")
+          end
+          @orderitem.order.update_order_status
         else
-          @orderitem.is_barcode_printed = true
+          unless @orderitem.product.base_sku.nil?
+            @orderitem.is_barcode_printed = true
+            unless @orderitem.save
+              @result['status'] &= false
+              @result['messages'].push("Could not update order item")
+            else
+              all_printed = true
+              @orderitem.order.order_items.each do |item|
+                unless item.is_barcode_printed
+                  all_printed &= false
+                  break
+                end
+              end
+              if all_printed
+                @result['messages'].push('Barcode for all order items of the order have been printed')
+              end
+            end
+          end
         end
-
-        unless @orderitem.save
-          @result['status'] &= false
-          @result['messages'].push("Could not update order item")
-        end
-        @orderitem.order.update_order_status
       end
     else
       @result['status'] = false
