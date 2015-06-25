@@ -86,7 +86,27 @@ groovepacks_controllers.
                 if($scope.current_user.can('add_edit_products')) {
                     var item_modal = $modal.open({
                         templateUrl: '/assets/views/modals/product/main.html',
-                        controller: 'productsSingleModal',
+                        controller: 'productSingleModal',
+                        size:'lg',
+                        resolve: {
+                            product_data: function(){return orders.model.get()},
+                            load_page: function(){return function() {
+                                var req = $q.defer();
+                                req.reject();
+                                return req.promise;
+                            }},
+                            product_id: function(){return id;}
+                        }
+                    });
+                    item_modal.result.finally(myscope.check_reload_compute);
+                }
+            };
+
+            $scope.order_details = function(id) {
+                if($scope.current_user.can('add_edit_orders')) {
+                    var item_modal = $modal.open({
+                        templateUrl: '/assets/views/modals/order/main.html',
+                        controller: 'orderssSingleModal',
                         size:'lg',
                         resolve: {
                             product_data: function(){return products.model.get()},
