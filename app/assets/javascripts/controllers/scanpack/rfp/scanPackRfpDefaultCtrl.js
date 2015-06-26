@@ -86,10 +86,10 @@ groovepacks_controllers.
                 if($scope.current_user.can('add_edit_products')) {
                     var item_modal = $modal.open({
                         templateUrl: '/assets/views/modals/product/main.html',
-                        controller: 'productSingleModal',
+                        controller: 'productsSingleModal',
                         size:'lg',
                         resolve: {
-                            product_data: function(){return orders.model.get()},
+                            product_data: function(){return products.model.get()},
                             load_page: function(){return function() {
                                 var req = $q.defer();
                                 req.reject();
@@ -103,19 +103,20 @@ groovepacks_controllers.
             };
 
             $scope.order_details = function(id) {
+                console.log("id:" + id);
                 if($scope.current_user.can('add_edit_orders')) {
                     var item_modal = $modal.open({
                         templateUrl: '/assets/views/modals/order/main.html',
-                        controller: 'orderssSingleModal',
+                        controller: 'ordersSingleModal',
                         size:'lg',
                         resolve: {
-                            product_data: function(){return products.model.get()},
+                            order_data: function(){return orders.model.get()},
                             load_page: function(){return function() {
                                 var req = $q.defer();
                                 req.reject();
                                 return req.promise;
                             }},
-                            product_id: function(){return id;}
+                            order_id: function(){return id;}
                         }
                     });
                     item_modal.result.finally(myscope.check_reload_compute);

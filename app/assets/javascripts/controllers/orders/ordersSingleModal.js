@@ -1,6 +1,6 @@
 groovepacks_controllers.
-    controller('ordersSingleModal', [ '$scope', 'order_data', 'load_page', '$state', '$stateParams','$modal', '$modalInstance', '$timeout','$q', 'hotkeys', 'orders','products','generalsettings','auth','groov_translator',
-        function(scope,order_data,load_page,$state,$stateParams,$modal, $modalInstance,$timeout,$q,hotkeys,orders,products,generalsettings,auth,groov_translator) {
+    controller('ordersSingleModal', [ '$scope', 'order_data', 'order_id','load_page', '$state', '$stateParams','$modal', '$modalInstance', '$timeout','$q', 'hotkeys', 'orders','products','generalsettings','auth','groov_translator',
+        function(scope,order_data,order_id,load_page,$state,$stateParams,$modal, $modalInstance,$timeout,$q,hotkeys,orders,products,generalsettings,auth,groov_translator) {
 
             var myscope = {};
 
@@ -434,7 +434,11 @@ groovepacks_controllers.
                     }
                 };
                 myscope.add_hotkeys();
-                myscope.order_single_details($stateParams.order_id,true);
+                if(order_id) {
+                    myscope.order_single_details(order_id,true);
+                } else {
+                    myscope.order_single_details($stateParams.order_id,true);
+                };
             };
             myscope.init();
             //$('.icon-question-sign').popover({trigger: 'hover focus'});
