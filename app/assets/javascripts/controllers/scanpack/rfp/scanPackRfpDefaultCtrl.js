@@ -102,6 +102,27 @@ groovepacks_controllers.
                 }
             };
 
+            $scope.order_details = function(id) {
+                console.log("id:" + id);
+                if($scope.current_user.can('add_edit_orders')) {
+                    var item_modal = $modal.open({
+                        templateUrl: '/assets/views/modals/order/main.html',
+                        controller: 'ordersSingleModal',
+                        size:'lg',
+                        resolve: {
+                            order_data: function(){return orders.model.get()},
+                            load_page: function(){return function() {
+                                var req = $q.defer();
+                                req.reject();
+                                return req.promise;
+                            }},
+                            order_id: function(){return id;}
+                        }
+                    });
+                    item_modal.result.finally(myscope.check_reload_compute);
+                }
+            };
+
             myscope.show_type_scan_confirm = function () {
                 if(myscope.type_scan_confirmed_id != $scope.data.order.next_item.product_id) {
                     myscope.type_scan_confirm_obj = $modal.open({
