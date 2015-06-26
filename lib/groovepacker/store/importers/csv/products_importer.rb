@@ -81,7 +81,8 @@ module Groovepacker
                   usable_record[:images] = []
                   usable_record[:inventory] = []
                   usable_record[:product_type] = ''
-                  usable_record[:base_sku] = ''
+                  usable_record[:base_sku] = nil
+                  usable_record[:spl_instructions_4_packer] = ''
 
                   all_skus = all_skus + single_row_skus
                   usable_record[:skus] = single_row_skus
@@ -167,6 +168,12 @@ module Groovepacker
                     end
                   end
 
+                  if !mapping['customer_comments'].nil? && mapping['customer_comments'][:position] >= 0
+                    unless single_row[mapping['customer_comments'][:position]].nil?
+                      usable_record[:spl_instructions_4_packer] = single_row[mapping['customer_comments'][:position]].split(',')
+                    end
+                  end
+
                   usable_records << usable_record
 
                   success = success + 1
@@ -234,7 +241,7 @@ module Groovepacker
               end
 
               if duplicate_found === false && new_action == 'create'
-                single_import = Product.new(:name=> record[:name],:product_type => record[:product_type])
+                single_import = Product.new(:name=> record[:name],:product_type => record[:product_type],:spl_instructions_4_packer => record[:spl_instructions_4_packer][0])
                 single_import.store_id = params[:store_id]
                 single_import.store_product_id = record[:store_product_id]
                 if record[:skus].length > 0 && record[:barcodes].length > 0
@@ -258,6 +265,12 @@ module Groovepacker
                 end
                 if !mapping['product_type'].nil? #&& mapping['product_type'][:action] == 'overwrite'
                   duplicate_product.product_type = record[:product_type]
+                end
+                if !mapping['customer_comments'].nil? #&& mapping['customer_comments'][:action] == 'overwrite'
+                  duplicate_product.spl_instructions_4_packer = record[:spl_instructions_4_packer]
+                end
+                if !mapping['base_sku'].nil? #&& mapping['base_sku'][:action] == 'overwrite'
+                  duplicate_product.base_sku = record[:base_sku]
                 end
                 if record[:skus].length > 0 && record[:barcodes].length > 0
                   duplicate_product.status = 'active'

@@ -465,6 +465,7 @@ class StoreSettingsController < ApplicationController
                 { value: 'secondary_barcode', name: 'Secondary Barcode'},
                 { value: 'tertiary_barcode', name: 'Tertiary Barcode'},
                 { value: 'product_weight', name: 'Product Weight'},
+                { value: 'customer_comments', name: 'Customer Comments'},
                 { value: 'base_sku', name: 'Base SKU'}
             ]
             if csv_map.product_csv_map.nil?
