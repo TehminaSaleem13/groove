@@ -67,8 +67,6 @@ module Groovepacks
     config.middleware.use 'Apartment::Elevators::Subdomain'
     config.assets.paths << Rails.root.join("app", "assets", "fonts")
     config.assets.paths << Rails.root.join("vendor", "assets", "components")
-    puts "asset path"
-    puts config.assets.precompile.inspect
     config.assets.precompile += %w(*.png *.jpg *.jpeg *.gif *.woff *.ttf *.svg)
   end
 end
