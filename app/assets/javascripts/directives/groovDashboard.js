@@ -61,6 +61,9 @@ groovepacks_directives.directive('groovDashboard',['$window','$document','$sce',
             } else if (this.type == 'packing_stats') {
               this.retrieve.packing_stats(
                 this.days_filters[this.current_filter_idx].days)
+            } else if (this.type == 'packing_speed_stats') {
+              this.retrieve.packing_speed_stats(
+                this.days_filters[this.current_filter_idx].days)
             }
             this.retrieve.main_summary(
               this.days_filters[this.current_filter_idx].days);
@@ -81,6 +84,12 @@ groovepacks_directives.directive('groovDashboard',['$window','$document','$sce',
               dashboard.stats.packed_item_stats(days).then(
                 function(response){
                   scope.dashboard.packed_item_stats = response.data;
+              });
+            },
+            packing_speed_stats: function(days) {
+              dashboard.stats.packing_speed_stats(days).then(
+                function(response){
+                  scope.dashboard.packing_speed_stats = response.data;
               });
             }
           },
@@ -108,9 +117,17 @@ groovepacks_directives.directive('groovDashboard',['$window','$document','$sce',
         };
         scope.toolTipContentFunction = function(){
           return function(key, x, y, e, graph) {
+              var tooltipText = '';
+              if (scope.charts.type == 'packing_stats'){
+                tooltipText = y + ' order scans on ' + x
+              } else if (scope.charts.type == 'packing_speed_stats') {
+                tooltipText = y + ' seconds per scan on '+ x
+              } else if (scope.charts.type == 'packed_item_stats') {
+                tooltipText = y + ' items packed on '+ x
+              }
               return ('<div><h4 style="text-transform: capitalize; color:'+e.series.color+
                       '">' + key + '</h4>' +
-                      '<span>' +  y + ' order scans on ' + x + '</span></div>')
+                      '<span>' +  tooltipText + '</span></div>')
           }
         }
 
