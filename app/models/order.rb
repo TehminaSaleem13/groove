@@ -469,6 +469,7 @@ class Order < ActiveRecord::Base
 
     self.order_serials.destroy_all
     self.set_order_status
+    self.scan_start_time = nil
     self.update_inventory_levels_for_items(true)
     self.save
   end

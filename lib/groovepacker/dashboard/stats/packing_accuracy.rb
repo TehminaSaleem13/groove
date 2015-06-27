@@ -4,40 +4,40 @@ module Groovepacker
       class PackingAccuracy < Groovepacker::Dashboard::Stats::Base
 
         def summary
-          # current_month_packed_items = 0
-          # previous_month_packed_items = 0
-          # result = {}
-          # #current month packed items
-          # if @duration.to_i == -1
-          #   start_time = nil 
-          # else
-          #   start_time = (DateTime.now - @duration.to_i.days).beginning_of_day 
-          # end
-          # end_time = DateTime.now.end_of_day
-          # current_month_packed_items = 
-          #   get_overall_packed_item_stats(start_time, end_time)
+          current_month_packing_accuracy = 0
+          previous_month_packing_accuracy = 0
+          result = {}
+          #current month packing accuracy
+          if @duration.to_i == -1
+            start_time = nil 
+          else
+            start_time = (DateTime.now - @duration.to_i.days).beginning_of_day 
+          end
+          end_time = DateTime.now.end_of_day
+          current_month_packing_accuracy = 
+            get_overall_packing_accuracy_stats(start_time, end_time)
 
 
-          # if @duration.to_i != -1    
-          #   #previous month packed items
-          #   start_time = (DateTime.now - (2*(@duration.to_i)).days).beginning_of_day 
-          #   end_time = (DateTime.now - (@duration.to_i - 1).days).end_of_day
-          #   previous_month_packed_items = 
-          #     get_overall_packed_item_stats(start_time, end_time)
+          if @duration.to_i != -1    
+            #previous month packed items
+            start_time = (DateTime.now - (2*(@duration.to_i)).days).beginning_of_day 
+            end_time = (DateTime.now - (@duration.to_i - 1).days).end_of_day
+            previous_month_packing_accuracy = 
+              get_overall_packing_accuracy_stats(start_time, end_time)
 
-          #   result = {
-          #     current_period: current_month_packed_items,
-          #     previous_period: previous_month_packed_items,
-          #     delta: current_month_packed_items - previous_month_packed_items
-          #   }
-          # else
-          #   result = {
-          #     current_period: current_month_packed_items,
-          #     previous_period: previous_month_packed_items,
-          #     delta: '-'
-          #   }
-          # end
-          # result        
+            result = {
+              current_period: current_month_packing_accuracy,
+              previous_period: previous_month_packing_accuracy,
+              delta: current_month_packing_accuracy - previous_month_packing_accuracy
+            }
+          else
+            result = {
+              current_period: current_month_packing_accuracy,
+              previous_period: previous_month_packing_accuracy,
+              delta: '-'
+            }
+          end
+          result        
         end
 
         def detail
@@ -86,6 +86,22 @@ module Groovepacker
             end
 
             stats_result
+          end
+
+          def get_overall_packing_accuracy_stats(start_time, end_time)
+            if start_time.nil?
+              orders = Order.where(status: 'scanned').where('scanned_on < ?', end_time)
+            else
+              orders = Order.where(status: 'scanned').where(scanned_on: start_time..end_time)
+            end
+            total_items_count = 0
+            total_incorrect = 0
+            orders.each do |order|
+              total_items_count = total_items_count + order.order_items.count
+              total_incorrect = total_incorrect + order.inaccurate_scan_count
+            end
+            total_incorrect == 0 ? 100 : 
+              ((total_items_count - total_incorrect).to_f/ total_items_count) * 100
           end
       end
     end

@@ -21,15 +21,19 @@
         </div>
         <div class="col-md-4 col-lg-4 pill-col">
           <div class="well">
-            <h4>98.07%</h4>
+            <h4>{{dashboard.main_summary.packing_accuracy_summary.current_period}}%</h4>
             <span class="fa fa-calendar fa-pill-col"></span>
             <span>Current Period</span>
           </div>
         </div>
         <div class="col-md-2 col-lg-2 pill-col-last">
           <div class="well">
-            <span class="fa fa-arrow-circle-up fa-pill-col fa-red"></span>
-            <p>+.04 % From Prev 30 Days</p>
+            <span class="fa fa-arrow-circle-up fa-pill-col fa-red" 
+            ng-show="dashboard.main_summary.packing_accuracy_summary.delta > 0"></span>
+            <span class="fa fa-arrow-circle-down fa-pill-col fa-red" 
+            ng-show="dashboard.main_summary.packing_accuracy_summary.delta < 0"></span>
+            <span class="fa fa-minus-circle fa-pill-col fa-red" ng-show="dashboard.main_summary.packing_accuracy_summary.delta == '-' || dashboard.main_summary.packing_accuracy_summary.delta == 0"></span>
+            <p>{{dashboard.main_summary.packing_accuracy_summary.delta}}% From Prev {{charts.days_filters[charts.current_filter_idx].name}}</p>
           </div>
         </div>
       </div>
@@ -43,15 +47,19 @@
         </div>
         <div class="col-md-4 col-lg-4 pill-col">
           <div class="well">
-            <h4>98:01</h4>
+            <h4>{{dashboard.main_summary.packing_speed_summary.current_period}}</h4>
             <span class="fa fa-calendar fa-pill-col"></span>
             <span>Current Period</span>
           </div>
         </div>
         <div class="col-md-2 col-lg-2 pill-col-last">
           <div class="well">
-            <span class="fa fa-arrow-circle-down fa-pill-col fa-green"></span>
-            <p>- 00:56 From Prev 30 Days</p>
+            <span class="fa fa-arrow-circle-up fa-pill-col fa-green" 
+            ng-show="dashboard.main_summary.packing_speed_summary.delta > 0"></span>
+            <span class="fa fa-arrow-circle-down fa-pill-col fa-green" 
+            ng-show="dashboard.main_summary.packing_speed_summary.delta < 0"></span>
+            <span class="fa fa-minus-circle fa-pill-col fa-green" ng-show="dashboard.main_summary.packing_speed_summary.delta == '-' || dashboard.main_summary.packing_speed_summary.delta == 0"></span>
+            <p>{{dashboard.main_summary.packing_speed_summary.delta}} From Prev {{charts.days_filters[charts.current_filter_idx].name}}</p>
           </div>
         </div>
       </div>
@@ -73,7 +81,9 @@
         </div>
         <div class="col-md-2 col-lg-2 pill-col-last">
           <div class="well">
-            <span class="fa fa-arrow-circle-down fa-pill-col fa-violet"></span>
+            <span class="fa fa-arrow-circle-up fa-pill-col fa-violet" ng-show="dashboard.main_summary.packed_items_summary.delta>0"></span>
+            <span class="fa fa-minus-circle fa-pill-col fa-violet" ng-show="dashboard.main_summary.packed_items_summary.delta == '-' || dashboard.main_summary.packed_items_summary.delta == 0"></span>
+            <span class="fa fa-arrow-circle-down fa-pill-col fa-violet" ng-show="dashboard.main_summary.packed_items_summary.delta<0"></span>
             <p style="line-height: 19px;">
               {{dashboard.main_summary.packed_items_summary.delta}} 
               From Prev {{charts.days_filters[charts.current_filter_idx].name}}
