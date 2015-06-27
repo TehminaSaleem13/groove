@@ -3,6 +3,7 @@ groovepacks_services.factory('dashboard',['$http','notification',function($http,
     return {
       packing_stats: [],
       packed_item_stats: [],
+      packing_speed_stats:[],
       main_summary: {}
     };
   };
@@ -13,6 +14,14 @@ groovepacks_services.factory('dashboard',['$http','notification',function($http,
     return(
       $http.get('/dashboard/packing_stats?duration='+ duration).error(function(response){
         notification.notify("Failed to load packing statistics",0);
+      })
+    );
+  }
+
+  var packing_speed_stats = function(duration) {
+    return(
+      $http.get('/dashboard/packing_speed?duration='+ duration).error(function(response){
+        notification.notify("Failed to load packing speed statistics",0);
       })
     );
   }
@@ -40,6 +49,7 @@ groovepacks_services.factory('dashboard',['$http','notification',function($http,
     stats: {
       packing_stats: packing_stats,
       packed_item_stats: packed_item_stats,
+      packing_speed_stats: packing_speed_stats,
       main_summary: main_summary
     }
   };

@@ -26,14 +26,14 @@ module Groovepacker
               get_overall_packing_accuracy_stats(start_time, end_time)
 
             result = {
-              current_period: current_month_packing_accuracy,
-              previous_period: previous_month_packing_accuracy,
-              delta: current_month_packing_accuracy - previous_month_packing_accuracy
+              current_period: current_month_packing_accuracy.round(2),
+              previous_period: previous_month_packing_accuracy.round(2),
+              delta: (current_month_packing_accuracy - previous_month_packing_accuracy).round(2)
             }
           else
             result = {
-              current_period: current_month_packing_accuracy,
-              previous_period: previous_month_packing_accuracy,
+              current_period: current_month_packing_accuracy.round(2),
+              previous_period: previous_month_packing_accuracy.round(2),
               delta: '-'
             }
           end
@@ -72,7 +72,7 @@ module Groovepacker
             start_time = (DateTime.now - @duration.days).beginning_of_day
             end_time = DateTime.now.end_of_day
             if @duration == -1
-              orders = Order.where('scanned_on < ?', end_time).where(packing_user_id: 13).order(
+              orders = Order.where('scanned_on < ?', end_time).where(packing_user_id: user.id).order(
                 scanned_on: :ASC).group('date(scanned_on)').count
             else
               orders = Order.where(scanned_on: start_time..end_time).where(

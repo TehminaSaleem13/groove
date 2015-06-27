@@ -91,12 +91,10 @@ module Groovepacker
             start_time = (DateTime.now - @duration.days).beginning_of_day
             end_time = DateTime.now.end_of_day
             if @duration == -1
-              orders = Order.where('scanned_on < ?', end_time).where(packing_user_id: 13).order(
+              orders = Order.where('scanned_on < ?', end_time).where(packing_user_id: user.id).order(
                 scanned_on: :ASC).group('date(scanned_on)').count
             else
-              orders = Order.where(scanned_on: start_time..end_time).where(
-                packing_user_id: user.id).order(
-                scanned_on: :ASC).group('date(scanned_on)').count
+              orders = Order.where(scanned_on: start_time..end_time).where(packing_user_id: user.id).order(scanned_on: :ASC).group('date(scanned_on)').average('timediff(scanned_on, scan_start_time)')
             end
 
             orders.each do |order|

@@ -14,7 +14,7 @@
   </div>
   <div class="row">
     <div class="col-md-4 tab-col" ng-click="charts.set_type('packing_stats')">
-      <div class="tab-pill tab-red" ng-class="{'tab-pill-active': charts.type=='packing_stats'}">
+      <div class="tab-pill tab-red tab-pill-active" ng-class="{'tab-pill-active': charts.type=='packing_stats'}">
         <div class="col-md-6 col-lg-6">
           <span class="fa fa-dot-circle-o fa-dash"></span>
           <h3>PACKING ACCURACY</h3>
@@ -39,8 +39,8 @@
       </div>
     </div>
 
-    <div class="col-md-4 tab-col">
-      <div class=" tab-pill tab-green">
+    <div class="col-md-4 tab-col" ng-click="charts.set_type('packing_speed_stats')">
+      <div class=" tab-pill tab-green" ng-class="{'tab-pill-active': charts.type=='packing_speed_stats'}">
         <div class="col-md-6 col-lg-6">
           <span class="fa fa-tachometer fa-dash"></span>
           <h3>PACKING SPEED</h3>
@@ -110,6 +110,23 @@
         color = "legendColorFunction()"
         legendRightAlign="false"
         legendColor="legendColorFunction()" ng-show="charts.type=='packing_stats'">
+          <svg></svg>
+      </nvd3-line-chart>
+      <nvd3-line-chart
+        data="dashboard.packing_speed_stats"
+        width="900"
+        height="310"
+        xAxisTickFormat="xAxisTickFormatFunction()"
+        yAxisTickFormat="yAxisTickFormatFunction()"
+        showXAxis="true"
+        showYAxis="true"
+        interactive="true"
+        tooltips="true"
+        tooltipcontent="toolTipContentFunction()"
+        showLegend="true"
+        color = "legendColorFunction()"
+        legendRightAlign="false"
+        legendColor="legendColorFunction()" ng-show="charts.type=='packing_speed_stats'">
           <svg></svg>
       </nvd3-line-chart>
       <nvd3-line-chart
