@@ -133,7 +133,9 @@
                                 </th>
                             </tr>
                             </thead>
-
+                            <tr>
+                                <td ng-repeat="column_number in empty_cols"> <div class="csv-preview-fix-height"> {{csv.current.head[0][column_number]}}</div> </td>
+                            </tr>
                             <tr ng-repeat="(row_number, preview_row) in csv.current.data">
                                 <td ng-repeat="column_number in empty_cols"> <div class="csv-preview-fix-height"> {{csv.current.data[row_number][column_number]}}</div> </td>
                             </tr>

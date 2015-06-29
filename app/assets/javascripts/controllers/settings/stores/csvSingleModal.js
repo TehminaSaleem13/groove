@@ -86,6 +86,7 @@ function(scope, store_data, $state, $stateParams, $modal, $modalInstance, $timeo
 
     myscope.doparse = function() {
         scope.csv.current.data = [];
+        scope.csv.current.head = [];
         scope.empty_cols = [];
         var in_entry = false;
         var secondary_split = [];
@@ -155,7 +156,7 @@ function(scope, store_data, $state, $stateParams, $modal, $modalInstance, $timeo
                 scope.csv.current.map[i] = scope.csv.importer.default_map;
             }
         }
-
+        scope.csv.current.head = final_record.slice(0,1)
         scope.csv.current.data = final_record.slice(scope.csv.current.rows-1);
 
         scope.csv.current.data.pop(1);
