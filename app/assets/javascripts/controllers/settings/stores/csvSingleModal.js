@@ -162,6 +162,10 @@ function(scope, store_data, $state, $stateParams, $modal, $modalInstance, $timeo
         scope.csv.current.data.pop(1);
         final_record = [];
         row_array = [];
+        $timeout(function(){
+        $('#csv_table_top_scroll').css("width",$('#map_table').width());
+        }, 1000);
+        
     };
 
      myscope.init = function() {

@@ -167,6 +167,10 @@ groovepacks_controllers.controller('csvDetailedModal', [ '$scope', 'store_data',
             scope.csv.current.data.pop(1);
             final_record = [];
             row_array = [];
+
+            $timeout(function(){
+            $('#csv_table_top_scroll').css("width",$('#map_table').width());
+            }, 1000);
         };
 
         myscope.init = function() {
