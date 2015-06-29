@@ -122,7 +122,7 @@ ActiveRecord::Schema.define(:version => 20150621153125) do
 
   create_table "export_settings", :force => true do |t|
     t.boolean  "auto_email_export",         :default => true
-    t.datetime "time_to_send_export_email", :default => '2000-01-01 00:00:00'
+    t.datetime "time_to_send_export_email"
     t.boolean  "send_export_email_on_mon",  :default => false
     t.boolean  "send_export_email_on_tue",  :default => false
     t.boolean  "send_export_email_on_wed",  :default => false
@@ -134,8 +134,8 @@ ActiveRecord::Schema.define(:version => 20150621153125) do
     t.string   "export_orders_option",      :default => "on_same_day"
     t.string   "order_export_type",         :default => "include_all"
     t.string   "order_export_email"
-    t.datetime "created_at",                                                   :null => false
-    t.datetime "updated_at",                                                   :null => false
+    t.datetime "created_at",                                           :null => false
+    t.datetime "updated_at",                                           :null => false
     t.datetime "start_time"
     t.datetime "end_time"
     t.boolean  "manual_export",             :default => false
@@ -412,6 +412,7 @@ ActiveRecord::Schema.define(:version => 20150621153125) do
     t.string   "method"
     t.datetime "created_at",                                                               :null => false
     t.datetime "updated_at",                                                               :null => false
+    t.string   "store_order_id"
     t.text     "notes_internal"
     t.text     "notes_toPacker"
     t.text     "notes_fromPacker"
@@ -432,7 +433,6 @@ ActiveRecord::Schema.define(:version => 20150621153125) do
     t.integer  "weight_oz"
     t.string   "non_hyphen_increment_id"
     t.boolean  "note_confirmation",                                     :default => false
-    t.string   "store_order_id"
     t.boolean  "update_inventory_level",                                :default => true
     t.integer  "inaccurate_scan_count",                                 :default => 0
     t.datetime "scan_start_time"
@@ -622,9 +622,9 @@ ActiveRecord::Schema.define(:version => 20150621153125) do
     t.float    "order_complete_sound_vol",      :default => 0.75
     t.boolean  "type_scan_code_enabled",        :default => true
     t.string   "type_scan_code",                :default => "*"
-    t.string   "post_scanning_option",          :default => "None"
     t.string   "escape_string",                 :default => " - "
     t.boolean  "escape_string_enabled",         :default => false
+    t.string   "post_scanning_option",          :default => "None"
     t.boolean  "record_lot_number",             :default => false
     t.boolean  "show_customer_notes",           :default => false
     t.boolean  "show_internal_notes",           :default => false
