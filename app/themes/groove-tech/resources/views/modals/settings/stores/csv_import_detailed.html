@@ -108,10 +108,11 @@
                 <div class="col-xs-12">
                     <legend>Preview</legend>
                     <div class="csv-preview-top">
-                        <div class="csv-preview-top-div" style="width: 3000px; height: 10px;"></div>
+                        <div id="csv_table_top_scroll" style="height: 10px;"></div>
                     </div>
                     <div class="csv-preview">
-                        <table class="table table-hover table-bordered table-striped table-condensed">
+                        <table class="table table-hover table-bordered table-striped table-condensed" id=
+                        "map_table">
                             <thead>
                             <tr>
                                 <th ng-repeat="column in empty_cols">
@@ -133,7 +134,9 @@
                                 </th>
                             </tr>
                             </thead>
-
+                            <tr>
+                                <td ng-repeat="column_number in empty_cols"> <div class="csv-preview-fix-height"> {{csv.current.head[0][column_number]}}</div> </td>
+                            </tr>
                             <tr ng-repeat="(row_number, preview_row) in csv.current.data">
                                 <td ng-repeat="column_number in empty_cols"> <div class="csv-preview-fix-height"> {{csv.current.data[row_number][column_number]}}</div> </td>
                             </tr>

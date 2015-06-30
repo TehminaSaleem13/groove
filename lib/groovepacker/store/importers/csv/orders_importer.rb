@@ -56,7 +56,6 @@ module Groovepacker
           end
 
           def import_old(params,final_record,mapping)
-            puts "parms:::::: " + params.inspect
             result = Hash.new
             result['status'] = true
             result['messages'] = []
@@ -107,7 +106,7 @@ module Groovepacker
                   order_map.each do |single_map|
                     if !mapping[single_map].nil? && mapping[single_map][:position] >= 0
                       #if sku, create order item with product id, qty
-                      if single_map == 'sku'
+                      if single_map == 'sku' && !params[:contains_unique_order_items] == true
                         import_item.current_order_items = 1
                         import_item.current_order_imported_item = 0
                         import_item.save
@@ -142,6 +141,7 @@ module Groovepacker
                           end
                           product.store_product_id = 0
                           product.store_id = params[:store_id]
+                          product.spl_instructions_4_packer = single_row[mapping['product_instructions']][:position]
                           product.save
 
                           order_item  = OrderItem.new
@@ -171,7 +171,7 @@ module Groovepacker
                         import_item.current_order_imported_item = 0
                         import_item.save
                         
-                        order_increment_sku = single_row[mapping['increment_id'][:position]]+'-'+single_row[mapping['base_sku'][:position]]
+                        order_increment_sku = single_row[mapping['increment_id'][:position]]+'-'+single_row[mapping['sku'][:position]]
                         
                         product_skus = ProductSku.where(['sku like (?)', order_increment_sku+'%'])
                         if product_skus.length > 0
@@ -205,19 +205,19 @@ module Groovepacker
                         product.product_skus << sku
                         product.store_product_id = 0
                         product.store_id = params[:store_id]
-                        base_product = ProductSku.where(:sku=>single_row[mapping['base_sku'][:position]]).first unless ProductSku.where(:sku=>single_row[mapping['base_sku'][:position]]).empty?
+                        base_product = ProductSku.where(:sku=>single_row[mapping['sku'][:position]]).first unless ProductSku.where(:sku=>single_row[mapping['sku'][:position]]).empty?
                         if base_product.nil?
                           base_product = Product.new()
-                          base_product.name = "Base Product " + single_row[mapping['base_sku'][:position]]
+                          base_product.name = "Base Product " + single_row[mapping['sku'][:position]]
                           base_product.store_product_id = 0
                           base_product.store_id = params[:store_id]
                           basesku = ProductSku.new
-                          basesku.sku = single_row[mapping['base_sku'][:position]]
+                          basesku.sku = single_row[mapping['sku'][:position]]
                           base_product.product_skus << basesku
                           base_product.save
                         end
-                        product.spl_instructions_4_packer = single_row[mapping['customer_comments'][:position]] unless single_row[mapping['customer_comments'][:position]].nil?
-                        product.base_sku = single_row[mapping['base_sku'][:position]] unless single_row[mapping['base_sku'][:position]].nil?
+                        product.spl_instructions_4_packer = single_row[mapping['product_instructions'][:position]] unless single_row[mapping['product_instructions'][:position]].nil?
+                        product.base_sku = single_row[mapping['sku'][:position]] unless single_row[mapping['sku'][:position]].nil?
                         product.save
 
                         order_item  = OrderItem.new

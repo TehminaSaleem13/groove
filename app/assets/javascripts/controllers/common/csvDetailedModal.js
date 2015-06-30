@@ -91,6 +91,7 @@ groovepacks_controllers.controller('csvDetailedModal', [ '$scope', 'store_data',
 
         myscope.doparse = function() {
             scope.csv.current.data = [];
+            scope.csv.current.head = [];
             scope.empty_cols = [];
             var in_entry = false;
             var secondary_split = [];
@@ -160,12 +161,16 @@ groovepacks_controllers.controller('csvDetailedModal', [ '$scope', 'store_data',
                     scope.csv.current.map[i] = scope.csv.importer.default_map;
                 }
             }
-
+            scope.csv.current.head = final_record.slice(0,1)
             scope.csv.current.data = final_record.slice(scope.csv.current.rows-1);
 
             scope.csv.current.data.pop(1);
             final_record = [];
             row_array = [];
+
+            $timeout(function(){
+            $('#csv_table_top_scroll').css("width",$('#map_table').width());
+            }, 1000);
         };
 
         myscope.init = function() {
