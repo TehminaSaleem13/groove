@@ -1,6 +1,6 @@
 groovepacks_controllers.controller('csvSingleModal', [ '$scope', 'store_data', '$state', '$stateParams','$modal',
-         '$modalInstance', '$timeout', 'hotkeys', 'stores','warehouses','notification','$q',
-function(scope, store_data, $state, $stateParams, $modal, $modalInstance, $timeout, hotkeys, stores, warehouses, notification, $q) {
+         '$modalInstance', '$timeout', 'hotkeys', 'stores','warehouses','notification','$q','groov_translator',
+function(scope, store_data, $state, $stateParams, $modal, $modalInstance, $timeout, hotkeys, stores, warehouses, notification, $q, groov_translator) {
      var myscope = {};
 
      /**
@@ -171,6 +171,14 @@ function(scope, store_data, $state, $stateParams, $modal, $modalInstance, $timeo
      myscope.init = function() {
          scope.csv = {};
          scope.stores = store_data;
+         scope.translations = {
+            "tooltips": {
+                "unique_order_items": "",
+                "generate_barcode_from_sku": "",
+                "use_sku_as_product_name": ""
+            }
+        };
+        groov_translator.translate('settings.backup_restore',scope.translations);
          stores.csv.import(scope.stores, scope.stores.single.id).success(function(data) {
              scope.csv.importer = {};
              scope.csv.importer.default_map = {value:'none', name:"Unmapped"};
