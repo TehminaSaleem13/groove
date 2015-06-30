@@ -74,7 +74,8 @@ module Groovepacker
                 "sku",
                 "state",
                 "price",
-                "qty"
+                "qty",
+                "tracking_num"
             ]
             imported_orders = {}
             import_item = ImportItem.find_by_store_id(params[:store_id])
