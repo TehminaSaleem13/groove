@@ -264,7 +264,10 @@ groovepacks_services.factory('stores',['$http','notification','$filter',function
         }).success(function(data) {
             if(data.status && data.store_id) {
                 if(!auto) {
-                    notification.notify("Successfully Updated",1);
+                    console.log(data);
+                    if (data.csv_import) {
+                        notification.notify("Successfully Updated",1);
+                    };
                 }
             } else {
                 notification.notify(data.messages,0);
