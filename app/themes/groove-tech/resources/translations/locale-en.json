@@ -141,6 +141,13 @@
                }
             }
         },
+        "backup_restore": {
+            "tooltips": {
+                "unique_order_items": "This setting is only enabled when orders are comprised of unique or custom items which each require their own SKU and barcode.",
+                "generate_barcode_from_sku": "In some cases you may want to use your SKU as both a SKU and in internal barcode. To do so, enable this setting.",
+                "use_sku_as_product_name": "In some cases you may want to use your SKU as both a SKU and product name. To do so, enable this setting."
+            }
+        },
         "accounts": {
             "headings": {
                 "credit_cards": "Card Details"
