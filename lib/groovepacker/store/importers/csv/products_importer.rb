@@ -89,6 +89,9 @@ module Groovepacker
                   if !mapping['product_name'].nil? && mapping['product_name'][:position] >= 0 && !single_row[mapping['product_name'][:position]].blank?
                     usable_record[:name] = single_row[mapping['product_name'][:position]]
                   end
+                  if params[:use_sku_as_product_name]
+                    usable_record[:name] = single_row[mapping['sku'][:position]]
+                  end
                   if usable_record[:name].blank?
                     usable_record[:name] = 'Product from CSV Import'
                   end
@@ -101,6 +104,12 @@ module Groovepacker
                         all_barcodes << single_barcode
                         usable_record[:barcodes] << single_barcode
                       end
+                    end
+                  elsif params[:generate_barcode_from_sku]
+                    barcodes = single_row[mapping['sku'][:position]].split(',')
+                    barcodes.each do |single_barcode|
+                      all_barcodes << single_barcode
+                      usable_record[:barcodes] << single_barcode
                     end
                   end
 
