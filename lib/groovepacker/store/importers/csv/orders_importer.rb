@@ -142,8 +142,9 @@ module Groovepacker
                           end
                           product.store_product_id = 0
                           product.store_id = params[:store_id]
-                          product.spl_instructions_4_packer = single_row[mapping['product_instructions']][:position]
+                          product.spl_instructions_4_packer = single_row[mapping['product_instructions'][:position]]
                           product.save
+                          product.update_product_status
 
                           order_item  = OrderItem.new
                           order_item.product = product
@@ -220,6 +221,7 @@ module Groovepacker
                         product.spl_instructions_4_packer = single_row[mapping['product_instructions'][:position]] unless single_row[mapping['product_instructions'][:position]].nil?
                         product.base_sku = single_row[mapping['sku'][:position]] unless single_row[mapping['sku'][:position]].nil?
                         product.save
+                        product.update_product_status
 
                         order_item  = OrderItem.new
                         order_item.product = product
