@@ -401,6 +401,7 @@ class OrdersController < ApplicationController
           end
           @orderitem['sku'] = product.primary_sku
           @orderitem['barcode'] = product.primary_barcode
+          @orderitem['category'] = product.primary_category
           @orderitem['image'] = product.primary_image
 
         end
