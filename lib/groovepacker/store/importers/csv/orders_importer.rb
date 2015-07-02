@@ -218,10 +218,13 @@ module Groovepacker
                           base_product.product_skus << basesku
                           base_product.save
                         end
-                        cat = ProductCat.new
-                        cat.category = single_row[mapping['category'][:position]]
-                        product.product_cats << cat
 
+                        unless mapping['category'].nil?
+                          cat = ProductCat.new
+                          cat.category = single_row[mapping['category'][:position]] unless single_row[mapping['category'][:position]].nil?
+                          product.product_cats << cat
+                        end
+                        
                         product.spl_instructions_4_packer = single_row[mapping['product_instructions'][:position]] unless single_row[mapping['product_instructions'][:position]].nil?
                         product.base_sku = single_row[mapping['sku'][:position]] unless single_row[mapping['sku'][:position]].nil?
                         product.save
