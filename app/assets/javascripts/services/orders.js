@@ -48,6 +48,35 @@ groovepacks_services.factory('orders',['$http','$window','notification',function
         return setup;
     };
 
+    var update_items_setup = function (items,type,value) {
+        var ascending = true;
+        var i = 0, length = items.length;
+        while (i < items.length-1) {
+            if (items[i].category.toLowerCase() > items[++i].category.toLowerCase()) {
+                ascending &= false;
+                break;
+            };
+        };
+        if (!ascending) {
+            items.sort(sort_by_category_ascend);
+        } else{
+            items.sort(sort_by_category_descend);
+        };
+        return items;
+    };
+
+    var sort_by_category_ascend = function (a, b){
+      var aName = a.category.toLowerCase();
+      var bName = b.category.toLowerCase();
+      return ((aName < bName) ? -1 : ((aName > bName) ? 1 : 0));
+    };
+
+    var sort_by_category_descend = function (a, b){
+      var aName = a.category.toLowerCase();
+      var bName = b.category.toLowerCase();
+      return ((aName < bName) ? 1 : ((aName > bName) ? -1 : 0));
+    };
+
     //list related functions
     var get_list = function(object,page) {
         var url = '';
@@ -417,8 +446,8 @@ groovepacks_services.factory('orders',['$http','$window','notification',function
             get:get_default
         },
         setup: {
-            update:update_setup
-
+            update:update_setup,
+            update_items: update_items_setup
         },
         list: {
             get: get_list,
