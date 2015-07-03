@@ -366,6 +366,7 @@ describe('Products:',function() {
 
                             table.exit_button = element(by.className("top-message"));
                             table.exit_button.element(by.buttonText('Exit Edit Mode')).click();
+                            browser.sleep(1000);
                             table.available_inv = table.row.all(by.tagName('td')).get(table.titles_available_inv_count).getText();
                             element(by.className("close-btn")).click();
                             table.list_table = element.all(by.tagName('table')).first();
