@@ -107,6 +107,7 @@ Groovepacks::Application.routes.draw do
       get 'packed_item_stats'
       get 'packing_speed'
       get 'main_summary'
+      get 'exceptions'
     end
   end
 

@@ -73,4 +73,22 @@ class DashboardController < ApplicationController
     render json: results
   end
 
+  def exceptions 
+    results = []
+
+    params[:exception_type] = params[:exception_type] || 'most_recent'
+
+    params[:user_id] = nil if params[:user_id] == '-1'
+
+    exception_stats = Groovepacker::Dashboard::Stats::Exception.new(params[:user_id])
+
+    if params[:exception_type] == 'most_recent'
+      results = exception_stats.most_recent
+    elsif params[:exception_type] == 'by_frequency'
+      results = exception_stats.by_frequency
+    end
+
+    render json: results
+  end
+
 end

@@ -39,10 +39,10 @@ groovepacks_directives.directive('groovDashboard',['$window','$document','$sce',
 
         scope.switch_tab = function(tab) {
           if(tab.heading == "Most Recent Exceptions") {
-            scope.exceptions.type = "most_recent_exceptions";
+            scope.exceptions.type = "most_recent";
             scope.exceptions.retrieve.most_recent_exceptions();
           } else if (tab.heading == "Exceptions by Frequency") {
-            scope.exceptions.type = "exceptions_by_frequency";
+            scope.exceptions.type = "by_frequency";
             scope.exceptions.retrieve.exceptions_by_frequency();
           } else if (tab.heading == "Leader Board") {
             scope.leader_board.retrieve.leader_board();
@@ -164,7 +164,8 @@ groovepacks_directives.directive('groovDashboard',['$window','$document','$sce',
         }
 
         scope.exceptions = {
-          type: 'most_recent_exceptions',
+          type: 'most_recent',
+          user_id: '-1',
           init_all: function() {
             this.init.most_recent_exceptions();
             this.init.exception_by_frequency();
@@ -206,13 +207,13 @@ groovepacks_directives.directive('groovDashboard',['$window','$document','$sce',
               scope.most_recent_exceptions = {
                 list: [],
                 options: {
-                  // paginate:{
-                  //     show:true,
-                  //     //send a large number to prevent resetting page number
-                  //     total_items:2,
-                  //     current_page:1,
-                  //     items_per_page:1
-                  // },
+                  paginate:{
+                      show:true,
+                      //send a large number to prevent resetting page number
+                      total_items: 50000,
+                      current_page:1,
+                      items_per_page:10
+                  },
                   all_fields: {
                     created_at: {
                       name:"Date Recorded",
@@ -236,17 +237,19 @@ groovepacks_directives.directive('groovDashboard',['$window','$document','$sce',
             }
           },
           retrieve: {
-            most_recent_exceptions: function(){
-              scope.most_recent_exceptions.list = [
-                  {created_at: "1", description: "hello", increment_id: "12345678", frequency:"10%"}, 
-                  {created_at: "2", description: "hello1", increment_id: "1234567890", frequency: "100%"}
-              ]
+            most_recent_exceptions: function() {
+              dashboard.stats.exceptions(scope.exceptions.user_id, scope.exceptions.type).then(
+                function(response){
+                  console.log(response.data);
+                  scope.most_recent_exceptions.list = response.data;
+              });
             },
             exceptions_by_frequency: function() {
-              scope.exceptions_by_frequency.list = [
-                {created_at: "3", description: "hello", increment_id: "12345678", frequency:"10%"}, 
-                {created_at: "4", description: "hello1", increment_id: "1234567890", frequency: "100%"}
-              ]
+              dashboard.stats.exceptions(scope.exceptions.user_id, scope.exceptions.type).then(
+                function(response){
+                  console.log(response.data);
+                  scope.exceptions_by_frequency.list = response.data;
+              });
             }
           }
         }
