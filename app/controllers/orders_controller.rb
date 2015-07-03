@@ -416,9 +416,9 @@ class OrdersController < ApplicationController
 
       #Retrieve Unacknowledged activities
       @result['order']['unacknowledged_activities'] = @order.unacknowledged_activities
-      @result['order']['exception'] = @order.order_exceptions if current_user.can?('view_packing_ex')
+      @result['order']['exception'] = @order.order_exception if current_user.can?('view_packing_ex')
       @result['order']['exception']['assoc'] =
-        User.find(@order.order_exceptions.user_id) if current_user.can?('view_packing_ex') && !@order.order_exceptions.nil? && @order.order_exceptions.user_id !=0
+        User.find(@order.order_exception.user_id) if current_user.can?('view_packing_ex') && !@order.order_exception.nil? && @order.order_exception.user_id !=0
 
       @result['order']['users'] = User.all
 
@@ -462,13 +462,13 @@ class OrdersController < ApplicationController
     @order = Order.find(params[:id])
 
     if !params[:reason].nil?
-      if (current_user.can?('create_packing_ex') &&  @order.order_exceptions.nil?) ||
-          (current_user.can?('edit_packing_ex') &&  !@order.order_exceptions.nil?)
-        if @order.order_exceptions.nil?
-          @exception = OrderExceptions.new
+      if (current_user.can?('create_packing_ex') &&  @order.order_exception.nil?) ||
+          (current_user.can?('edit_packing_ex') &&  !@order.order_exception.nil?)
+        if @order.order_exception.nil?
+          @exception = OrderException.new
           @exception.order_id = @order.id
         else
-          @exception = @order.order_exceptions
+          @exception = @order.order_exception
         end
 
         @exception.reason = params[:reason]
@@ -506,12 +506,12 @@ class OrdersController < ApplicationController
     @result['messages'] = []
 
     @order = Order.find(params[:id])
-    if @order.order_exceptions.nil?
+    if @order.order_exception.nil?
       @result['status'] &= false
       @result['messages'].push('Order does not have exception to clear')
     else
       if current_user.can? 'edit_packing_ex'
-        if @order.order_exceptions.destroy
+        if @order.order_exception.destroy
           @order.addactivity("Order Exception Cleared", current_user.name)
         else
           @result['status'] &= false
@@ -757,11 +757,11 @@ class OrdersController < ApplicationController
         if current_user.can? 'edit_packing_ex'
           #exception
           if params[:single]['exception'].nil?
-            unless order.order_exceptions.nil?
-              order.order_exceptions.destroy
+            unless order.order_exception.nil?
+              order.order_exception.destroy
             end
           else
-            exception = OrderExceptions.find_or_create_by_order_id(order.id)
+            exception = OrderException.find_or_create_by_order_id(order.id)
             params[:single]['exception'].each do |value|
               unless ["id","created_at","updated_at","order_id","assoc"].include?(value[0])
                 exception[value[0]] = value[1]
