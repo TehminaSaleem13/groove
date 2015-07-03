@@ -625,7 +625,7 @@ class OrdersController < ApplicationController
                 end
               end
               if all_printed
-                @result['messages'].push('Barcode for all order items of the order have been printed')
+                @result['messages'].push('All item barcodes have now been printed. This order should now be ready to ship.')
               end
             end
           end

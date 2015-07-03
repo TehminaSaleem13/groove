@@ -108,15 +108,51 @@ module Groovepacker
                     if !mapping[single_map].nil? && mapping[single_map][:position] >= 0
                       #if sku, create order item with product id, qty
                       if single_map == 'sku' && !params[:contains_unique_order_items] == true
-                        import_item.current_order_items = 1
-                        import_item.current_order_imported_item = 0
-                        import_item.save
+                        unless mapping['sku'].nil?
+                          import_item.current_order_items = 1
+                          import_item.current_order_imported_item = 0
+                          import_item.save
 
-                        product_skus = ProductSku.where(:sku => single_row[mapping[single_map][:position]])
-                        if product_skus.length > 0
-                          if OrderItem.where(:product_id => product_skus.first.product.id, :order_id => order.id).length == 0
+                          product_skus = ProductSku.where(:sku => single_row[mapping[single_map][:position]])
+                          if product_skus.length > 0
+                            if OrderItem.where(:product_id => product_skus.first.product.id, :order_id => order.id).length == 0
+                              order_item  = OrderItem.new
+                              order_item.product = product_skus.first.product
+                              order_item.sku = single_row[mapping['sku'][:position]]
+                              if !mapping['qty'].nil? && mapping['qty'][:position] >= 0
+                                order_item.qty = single_row[mapping['qty'][:position]]
+                                order_required.delete('qty')
+                              end
+                              order.order_items << order_item
+                            end
+                          else # no sku is found
+                            product = Product.new
+                            if params[:use_sku_as_product_name] == true
+                              product.name = single_row[mapping['sku'][:position]]
+                            elsif !mapping['product_name'].nil?
+                              product.name = single_row[mapping['product_name'][:position]]
+                            else
+                              product.name = 'Product created from order import'
+                            end
+
+                            sku = ProductSku.new
+                            sku.sku = single_row[mapping['sku'][:position]]
+                            product.product_skus << sku
+                            if params[:generate_barcode_from_sku] == true
+                              product_barcode = ProductBarcode.new
+                              product_barcode.barcode = single_row[mapping['sku'][:position]]
+                              product.product_barcodes << product_barcode
+                            end
+                            product.store_product_id = 0
+                            product.store_id = params[:store_id]
+                            unless mapping['product_instructions'].nil?
+                              product.spl_instructions_4_packer = single_row[mapping['product_instructions'][:position]]
+                            end
+                            product.save
+                            product.update_product_status
+
                             order_item  = OrderItem.new
-                            order_item.product = product_skus.first.product
+                            order_item.product = product
                             order_item.sku = single_row[mapping['sku'][:position]]
                             if !mapping['qty'].nil? && mapping['qty'][:position] >= 0
                               order_item.qty = single_row[mapping['qty'][:position]]
@@ -124,39 +160,10 @@ module Groovepacker
                             end
                             order.order_items << order_item
                           end
-                        else # no sku is found
-                          product = Product.new
-                          if params[:use_sku_as_product_name] == true
-                            product.name = single_row[mapping['sku'][:position]]
-                          else
-                            product.name = 'Product created from order import'
-                          end
-
-                          sku = ProductSku.new
-                          sku.sku = single_row[mapping['sku'][:position]]
-                          product.product_skus << sku
-                          if params[:generate_barcode_from_sku] == true
-                            product_barcode = ProductBarcode.new
-                            product_barcode.barcode = single_row[mapping['sku'][:position]]
-                            product.product_barcodes << product_barcode
-                          end
-                          product.store_product_id = 0
-                          product.store_id = params[:store_id]
-                          product.spl_instructions_4_packer = single_row[mapping['product_instructions'][:position]]
-                          product.save
-                          product.update_product_status
-
-                          order_item  = OrderItem.new
-                          order_item.product = product
-                          order_item.sku = single_row[mapping['sku'][:position]]
-                          if !mapping['qty'].nil? && mapping['qty'][:position] >= 0
-                            order_item.qty = single_row[mapping['qty'][:position]]
-                            order_required.delete('qty')
-                          end
-                          order.order_items << order_item
+                          import_item.current_order_imported_item = 1
+                          import_item.save
                         end
-                        import_item.current_order_imported_item = 1
-                        import_item.save
+                        
                       elsif single_map == 'firstname'
                         if mapping['lastname'].nil? || mapping['lastname'][:position] == 0
                           arr = single_row[mapping[single_map][:position]].blank? ? [] : single_row[mapping[single_map][:position]].split(' ')
@@ -165,7 +172,7 @@ module Groovepacker
                         else
                           order.firstname = single_row[mapping[single_map][:position]]
                         end
-                      elsif single_map == 'increment_id' && params[:contains_unique_order_items] == true
+                      elsif single_map == 'increment_id' && params[:contains_unique_order_items] == true && !mapping['increment_id'].nil? && !mapping['sku'].nil?
                         order[single_map] = single_row[mapping[single_map][:position]]
                         order_required.delete('increment_id')
 
@@ -189,7 +196,7 @@ module Groovepacker
                         if params[:use_sku_as_product_name] == true
                           product.name = order_increment_sku
                         else
-                          unless single_row[mapping['product_name'][:position]].nil?
+                          unless mapping['product_name'].nil? || single_row[mapping['product_name'][:position]].nil?
                             product.name = single_row[mapping['product_name'][:position]]
                           else
                             product.name = 'Product created from order import'
@@ -225,7 +232,9 @@ module Groovepacker
                           product.product_cats << cat
                         end
                         
-                        product.spl_instructions_4_packer = single_row[mapping['product_instructions'][:position]] unless single_row[mapping['product_instructions'][:position]].nil?
+                        unless mapping['product_instructions'].nil?
+                          product.spl_instructions_4_packer = single_row[mapping['product_instructions'][:position]] unless single_row[mapping['product_instructions'][:position]].nil?
+                        end
                         product.base_sku = single_row[mapping['sku'][:position]] unless single_row[mapping['sku'][:position]].nil?
                         product.save
                         product.update_product_status
@@ -243,7 +252,9 @@ module Groovepacker
                         import_item.current_order_imported_item = 1
                         import_item.save
                       else
-                        order[single_map] = single_row[mapping[single_map][:position]]
+                        unless mapping[single_map].nil?
+                          order[single_map] = single_row[mapping[single_map][:position]]
+                        end
                       end
 
                       if order_required.include? single_map

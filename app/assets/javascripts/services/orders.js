@@ -1,4 +1,4 @@
-groovepacks_services.factory('orders',['$http','$window','notification',function($http,$window,notification) {
+groovepacks_services.factory('orders',['$http','$window','notification','$q',function($http,$window,notification,$q) {
 
     var success_messages = {
         update_status: "Status updated Successfully",
@@ -416,15 +416,18 @@ groovepacks_services.factory('orders',['$http','$window','notification',function
     };
 
     var single_update_print_status = function(item) {
+        var result = $q.defer();
         return $http.post('/orders/updateiteminorder.json',{orderitem: item.id}).success(function(data) {
             if(data.status) {
                 if (data.messages.length > 0) {
-                    notification.notify(data.messages,0);
+                    alert(data.messages[0]);
+                    result.resolve();
                 };
             } else {
                 notification.notify(data.messages,0);
             }
         }).error(notification.server_error);
+        return result.promise;
     };
 
     var single_print_barcode = function(item) {
