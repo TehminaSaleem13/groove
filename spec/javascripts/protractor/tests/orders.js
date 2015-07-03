@@ -279,14 +279,14 @@ describe('Orders:',function() {
                         var titles_items_count = text.indexOf('Items');
                         new openOrderModal(text);
                         element(by.cssContainingText('.modal-body .tabbable .nav.nav-tabs.modal-nav.ng-isolate-scope .nav.nav-tabs li','Items')).all(by.tagName('a')).first().click();
-
+                        browser.sleep(1000);
                         var row = element(by.className('tab-content'));
                         var table_pane = row.all(by.cssContainingText('.ng-isolate-scope .binder', 'Primary Image')).first().all(by.tagName('div')).get(1);
 
                         table_pane.all(by.repeater('field in theads')).getText().then (function(items_title) {
                             var total_qty_ordered = 0;
                             var total_qty;
-                            var title_qty_ordered_count = items_title.indexOf('Qty ordered');
+                            var title_qty_ordered_count = items_title.indexOf('Qty Ordered');
                             var table_body = table_pane.all(by.tagName('tbody')).first();
                             table_body.all(by.tagName('tr')).then(function(trs) {
                                 for(var i = 0; i<trs.length;i++) {
