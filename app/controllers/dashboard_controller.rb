@@ -91,4 +91,14 @@ class DashboardController < ApplicationController
     render json: results
   end
 
+  def leader_board 
+    results = []
+
+    leader_board_stats = Groovepacker::Dashboard::Stats::LeaderBoard.new
+
+    results = leader_board_stats.list
+
+    render json: results
+  end
+
 end

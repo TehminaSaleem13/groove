@@ -212,7 +212,7 @@ groovepacks_directives.directive('groovDashboard',['$window','$document','$sce',
                       //send a large number to prevent resetting page number
                       total_items: 50000,
                       current_page:1,
-                      items_per_page:10
+                      items_per_page:10 
                   },
                   all_fields: {
                     created_at: {
