@@ -30,12 +30,12 @@ groovepacks_directives.directive('groovDashboard',['$window','$document','$sce',
         scope.toggle_dashboard_detail = function() {
           $('#dashboard').toggleClass('pdash-open');
           scope.dashbord_detail_open = !scope.dashbord_detail_open;
+          scope.charts.init();
         }
 
         scope.init = function() {
           scope.charts.type = 'packing_stats';
           scope.dashboard = dashboard.model.get();
-          scope.charts.init();
           scope.exceptions.init_all();
         }
 
@@ -248,7 +248,7 @@ groovepacks_directives.directive('groovDashboard',['$window','$document','$sce',
 
         scope.xAxisTickFormatFunction = function() {
           return function(d){
-            return d3.time.format('%a, %b %e, %Y')(moment.unix(d).toDate());
+            return d3.time.format('%b %e, %Y')(moment.unix(d).toDate());
           }
         }
 
