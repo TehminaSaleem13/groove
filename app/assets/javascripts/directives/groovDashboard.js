@@ -248,7 +248,7 @@ groovepacks_directives.directive('groovDashboard',['$window','$document','$sce',
 
         scope.xAxisTickFormatFunction = function() {
           return function(d){
-            return d3.time.format('%a, %b %e, %Y')(moment.unix(d).toDate());
+            return d3.time.format('%b %e, %Y')(moment.unix(d).toDate());
           }
         }
 
