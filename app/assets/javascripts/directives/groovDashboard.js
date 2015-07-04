@@ -30,7 +30,9 @@ groovepacks_directives.directive('groovDashboard',['$window','$document','$sce',
         scope.toggle_dashboard_detail = function() {
           $('#dashboard').toggleClass('pdash-open');
           scope.dashbord_detail_open = !scope.dashbord_detail_open;
-          scope.charts.init();
+          if (scope.dashbord_detail_open) {
+            scope.charts.init();
+          }
         }
 
         scope.init = function() {
