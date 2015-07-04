@@ -94,9 +94,7 @@ class DashboardController < ApplicationController
   def leader_board 
     results = []
 
-    leader_board_stats = Groovepacker::Dashboard::Stats::LeaderBoardStats.new
-    Groovepacker::Dashboard::Stats::LeaderBoardStats.new.compute_leader_board
-    results = leader_board_stats.list
+    results = Groovepacker::Dashboard::Stats::LeaderBoardStats.new.list
 
     render json: results
   end

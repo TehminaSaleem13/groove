@@ -44,9 +44,11 @@ groovepacks_services.factory('users',['$http','notification','$filter',function(
         var result = [];
         return $http.get('/user_settings/userslist.json').success(
             function(data) {
-                result = $filter('filter')(data,object.setup.search);
-                result = $filter('orderBy')(result,object.setup.sort,(object.setup.order=='DESC'));
-                object.list = result;
+                if (object != null) {
+                    result = $filter('filter')(data,object.setup.search);
+                    result = $filter('orderBy')(result,object.setup.sort,(object.setup.order=='DESC'));
+                    object.list = result;
+                }
             }
         ).error(notification.server_error);
     };

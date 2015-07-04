@@ -1,6 +1,8 @@
 groovepacks_directives.directive('groovDashboard',['$window','$document','$sce',
-  '$timeout','$interval','groovIO','orders','stores','notification', 'dashboard', function (
-    $window,$document,$sce,$timeout,$interval,groovIO,orders,stores,notification, dashboard) {
+  '$timeout','$interval','groovIO','orders','stores','notification', 'dashboard', 'users',
+   function (
+    $window,$document,$sce,$timeout,$interval,groovIO,orders,stores,
+    notification, dashboard, users) {
     return {
       restrict:"A",
       templateUrl:"/assets/views/directives/dashboard.html",
@@ -147,27 +149,29 @@ groovepacks_directives.directive('groovDashboard',['$window','$document','$sce',
 
         scope.exceptions = {
           type: 'most_recent',
-          user_id: '-1',
+          current_user_idx: '0',
+          users:[],
           init_all: function() {
             this.init.most_recent_exceptions();
             this.init.exception_by_frequency();
+            this.init.users();
           },
           init: {
+            users: function() {
+              users.list.get(null).then(function(response){
+                scope.exceptions.users = response.data;
+                console.log(scope.exceptions.users);
+              })
+            },
             exception_by_frequency: function() {
               scope.exceptions_by_frequency = {
                 list: [],
                 options: {
-                  // paginate:{
-                  //     show:true,
-                  //     //send a large number to prevent resetting page number
-                  //     total_items:2,
-                  //     current_page:1,
-                  //     items_per_page:1
-                  // },
                   all_fields: {
                     created_at: {
                       name:"Date Recorded",
-                      editable: false
+                      editable: false,
+                      transclude:"<span>{{row[field] | date:'EEEE MM/dd/yyyy'}}</span>"
                     },
                     description:{
                       name:"Exception Description",
@@ -189,17 +193,11 @@ groovepacks_directives.directive('groovDashboard',['$window','$document','$sce',
               scope.most_recent_exceptions = {
                 list: [],
                 options: {
-                  paginate:{
-                      show:true,
-                      //send a large number to prevent resetting page number
-                      total_items: 50000,
-                      current_page:1,
-                      items_per_page:10 
-                  },
                   all_fields: {
                     created_at: {
                       name:"Date Recorded",
-                      editable: false
+                      editable: false,
+                      transclude:"<span>{{row[field] | date:'EEEE MM/dd/yyyy'}}</span>"
                     },
                     description:{
                       name:"Exception Description",
@@ -218,16 +216,28 @@ groovepacks_directives.directive('groovDashboard',['$window','$document','$sce',
               }
             }
           },
+          change_user: function(user_idx) {
+            this.current_user_idx = user_idx
+            if(scope.exceptions.type == "most_recent") {
+              scope.exceptions.retrieve.most_recent_exceptions();
+            } else if (scope.exceptions.type == "by_frequency") {
+              scope.exceptions.retrieve.exceptions_by_frequency();
+            }
+          },
           retrieve: {
             most_recent_exceptions: function() {
-              dashboard.stats.exceptions(scope.exceptions.user_id, scope.exceptions.type).then(
+              dashboard.stats.exceptions(
+                scope.exceptions.users[scope.exceptions.current_user_idx].id, 
+                scope.exceptions.type).then(
                 function(response){
                   console.log(response.data);
                   scope.most_recent_exceptions.list = response.data;
               });
             },
             exceptions_by_frequency: function() {
-              dashboard.stats.exceptions(scope.exceptions.user_id, scope.exceptions.type).then(
+              dashboard.stats.exceptions(
+                scope.exceptions.users[scope.exceptions.current_user_idx].id, 
+                scope.exceptions.type).then(
                 function(response){
                   console.log(response.data);
                   scope.exceptions_by_frequency.list = response.data;
