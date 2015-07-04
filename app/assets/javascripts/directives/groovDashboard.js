@@ -111,25 +111,19 @@ groovepacks_directives.directive('groovDashboard',['$window','$document','$sce',
         scope.leader_board = {
           list:[],
           options: {
-            // paginate:{
-            //     show:true,
-            //     //send a large number to prevent resetting page number
-            //     total_items:2,
-            //     current_page:1,
-            //     items_per_page:1
-            // },
             all_fields: {
-              order_items: {
+              order_items_count: {
                 name:"Order Items",
                 editable: false
               },
-              name:{
+              user_name:{
                 name:"Name",
                 editable: false
               },
               record_date: {
                 name: "Record Date",
-                editable: false
+                editable: false,
+                transclude:"<span>{{row[field] | date:'EEEE MM/dd/yyyy'}}</span>"
               },
               increment_id: {
                 name: "Order Number",
@@ -143,22 +137,10 @@ groovepacks_directives.directive('groovDashboard',['$window','$document','$sce',
           },
           retrieve: {
             leader_board: function() {
-              scope.leader_board.list = [
-                {
-                  order_items: "10",
-                  name: "John Sculley",
-                  record_date: "10/11/2015",
-                  increment_id: "12345678",
-                  packing_time: "22:13"
-                },
-                {
-                  order_items: "11",
-                  name: "John Sculley",
-                  record_date: "10/11/2014",
-                  increment_id: "12345689",
-                  packing_time: "22:11"
-                }
-              ]
+              dashboard.stats.leader_board().then(
+                function(response){
+                  scope.leader_board.list = response.data;
+              });
             }
           }
         }

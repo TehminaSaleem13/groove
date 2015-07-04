@@ -50,6 +50,14 @@ groovepacks_services.factory('dashboard',['$http','notification',function($http,
     ); 
   }
 
+  var leader_board = function() {
+    return(
+      $http.get('/dashboard/leader_board').error(function(response){
+        notification.notify("Failed to load leader board",0);
+      })
+    );   
+  }
+
   return {
     model: {
         get:get_default
@@ -59,7 +67,8 @@ groovepacks_services.factory('dashboard',['$http','notification',function($http,
       packed_item_stats: packed_item_stats,
       packing_speed_stats: packing_speed_stats,
       main_summary: main_summary,
-      exceptions: exceptions
+      exceptions: exceptions,
+      leader_board: leader_board
     }
   };
 }]);
