@@ -42,6 +42,22 @@ groovepacks_services.factory('dashboard',['$http','notification',function($http,
     ); 
   }
 
+  var exceptions = function(user_id, type) {
+    return(
+      $http.get('/dashboard/exceptions?user_id='+ user_id + '&exception_type='+type).error(function(response){
+        notification.notify("Failed to load exception statistics",0);
+      })
+    ); 
+  }
+
+  var leader_board = function() {
+    return(
+      $http.get('/dashboard/leader_board').error(function(response){
+        notification.notify("Failed to load leader board",0);
+      })
+    );   
+  }
+
   return {
     model: {
         get:get_default
@@ -50,7 +66,9 @@ groovepacks_services.factory('dashboard',['$http','notification',function($http,
       packing_stats: packing_stats,
       packed_item_stats: packed_item_stats,
       packing_speed_stats: packing_speed_stats,
-      main_summary: main_summary
+      main_summary: main_summary,
+      exceptions: exceptions,
+      leader_board: leader_board
     }
   };
 }]);

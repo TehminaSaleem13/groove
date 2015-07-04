@@ -307,7 +307,7 @@ class SettingsController < ApplicationController
         result['status'] = false
         result['messages'].push('We need a start and an end time')
       else
-        exceptions = OrderExceptions.where(updated_at: Time.parse(params[:start])..Time.parse(params[:end]))
+        exceptions = OrderException.where(updated_at: Time.parse(params[:start])..Time.parse(params[:end]))
         filename = 'groove-order-exceptions-'+Time.now.to_s+'.csv'
         row_map = {
             :order_number => '',

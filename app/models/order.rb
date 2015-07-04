@@ -9,7 +9,7 @@ class Order < ActiveRecord::Base
 
   has_many :order_items, :dependent => :destroy
   has_one :order_shipping, :dependent => :destroy
-  has_one :order_exceptions, :dependent => :destroy
+  has_one :order_exception, :dependent => :destroy
   has_many :order_activities, :dependent => :destroy
   has_many :order_serials, :dependent => :destroy
   has_and_belongs_to_many :order_tags

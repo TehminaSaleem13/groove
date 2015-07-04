@@ -98,7 +98,10 @@ module Groovepacker
             total_incorrect = 0
             orders.each do |order|
               total_items_count = total_items_count + order.order_items.count
-              total_incorrect = total_incorrect + order.inaccurate_scan_count
+              if !order.order_exception.nil? && 
+                ["missing_item", "incorrect_item", "qty_related"].include?(order.order_exception.reason)
+                total_incorrect = total_incorrect + 1
+              end
             end
             total_incorrect == 0 ? 100 : 
               ((total_items_count - total_incorrect).to_f/ total_items_count) * 100

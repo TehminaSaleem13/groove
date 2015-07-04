@@ -1,6 +1,8 @@
 groovepacks_directives.directive('groovDashboard',['$window','$document','$sce',
-  '$timeout','$interval','groovIO','orders','stores','notification', 'dashboard', function (
-    $window,$document,$sce,$timeout,$interval,groovIO,orders,stores,notification, dashboard) {
+  '$timeout','$interval','groovIO','orders','stores','notification', 'dashboard', 'users',
+   function (
+    $window,$document,$sce,$timeout,$interval,groovIO,orders,stores,
+    notification, dashboard, users) {
     return {
       restrict:"A",
       templateUrl:"/assets/views/directives/dashboard.html",
@@ -11,23 +13,19 @@ groovepacks_directives.directive('groovDashboard',['$window','$document','$sce',
           {
             "heading": "Home",
             "templateUrl": "/assets/views/directives/dashboard/home.html"
+          },
+          {
+            "heading": "Most Recent Exceptions",
+            "templateUrl": "/assets/views/directives/dashboard/most_recent_exceptions.html"
+          },
+          {
+            "heading": "Exceptions by Frequency",
+            "templateUrl": "/assets/views/directives/dashboard/most_recent_exceptions.html"
+          },
+          {
+            "heading": "Leader Board",
+            "templateUrl": "/assets/views/directives/dashboard/leader_board.html"
           }
-          // {
-          //   "heading": "Most Recent Exceptions",
-          //   "templateUrl": "/assets/views/directives/test.html"
-          // },
-          // {
-          //   "heading": "Exceptions by Frequency",
-          //   "templateUrl": "/assets/views/directives/test.html"
-          // },
-          // {
-          //   "heading": "Items by Exception rate",
-          //   "templateUrl": "/assets/views/directives/test.html"
-          // },
-          // {
-          //   "heading": "Leader Board",
-          //   "templateUrl": "/assets/views/directives/test.html"
-          // }
         ]
         scope.toggle_dashboard_detail = function() {
           $('#dashboard').toggleClass('pdash-open');
@@ -38,6 +36,19 @@ groovepacks_directives.directive('groovDashboard',['$window','$document','$sce',
           scope.charts.type = 'packing_stats';
           scope.dashboard = dashboard.model.get();
           scope.charts.init();
+          scope.exceptions.init_all();
+        }
+
+        scope.switch_tab = function(tab) {
+          if(tab.heading == "Most Recent Exceptions") {
+            scope.exceptions.type = "most_recent";
+            scope.exceptions.retrieve.most_recent_exceptions();
+          } else if (tab.heading == "Exceptions by Frequency") {
+            scope.exceptions.type = "by_frequency";
+            scope.exceptions.retrieve.exceptions_by_frequency();
+          } else if (tab.heading == "Leader Board") {
+            scope.leader_board.retrieve.leader_board();
+          }
         }
 
         scope.charts = {
@@ -96,6 +107,142 @@ groovepacks_directives.directive('groovDashboard',['$window','$document','$sce',
           set_type: function(chart_mode) {
             scope.charts.type = chart_mode;
             this.init();
+          }
+        }
+
+        scope.leader_board = {
+          list:[],
+          options: {
+            all_fields: {
+              order_items_count: {
+                name:"Order Items",
+                editable: false
+              },
+              user_name:{
+                name:"Name",
+                editable: false
+              },
+              record_date: {
+                name: "Record Date",
+                editable: false,
+                transclude:"<span>{{row[field] | date:'EEEE MM/dd/yyyy'}}</span>"
+              },
+              increment_id: {
+                name: "Order Number",
+                editable: false
+              },
+              packing_time: {
+                name: "Packing Time",
+                editable: false
+              }
+            }
+          },
+          retrieve: {
+            leader_board: function() {
+              dashboard.stats.leader_board().then(
+                function(response){
+                  scope.leader_board.list = response.data;
+              });
+            }
+          }
+        }
+
+        scope.exceptions = {
+          type: 'most_recent',
+          current_user_idx: '0',
+          users:[],
+          init_all: function() {
+            this.init.most_recent_exceptions();
+            this.init.exception_by_frequency();
+            this.init.users();
+          },
+          init: {
+            users: function() {
+              users.list.get(null).then(function(response){
+                scope.exceptions.users = response.data;
+                console.log(scope.exceptions.users);
+              })
+            },
+            exception_by_frequency: function() {
+              scope.exceptions_by_frequency = {
+                list: [],
+                options: {
+                  all_fields: {
+                    created_at: {
+                      name:"Date Recorded",
+                      editable: false,
+                      transclude:"<span>{{row[field] | date:'EEEE MM/dd/yyyy'}}</span>"
+                    },
+                    description:{
+                      name:"Exception Description",
+                      editable: false
+                    },
+                    increment_id: {
+                      name: "Order Number",
+                      editable: false
+                    },
+                    frequency: {
+                      name: "Frequency",
+                      editable: false
+                    }
+                  }
+                }
+              }
+            },
+            most_recent_exceptions: function(){
+              scope.most_recent_exceptions = {
+                list: [],
+                options: {
+                  all_fields: {
+                    created_at: {
+                      name:"Date Recorded",
+                      editable: false,
+                      transclude:"<span>{{row[field] | date:'EEEE MM/dd/yyyy'}}</span>"
+                    },
+                    description:{
+                      name:"Exception Description",
+                      editable: false
+                    },
+                    increment_id: {
+                      name: "Order Number",
+                      editable: false
+                    },
+                    frequency: {
+                      name: "Frequency",
+                      editable: false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          change_user: function(user_idx) {
+            this.current_user_idx = user_idx
+            if(scope.exceptions.type == "most_recent") {
+              scope.exceptions.retrieve.most_recent_exceptions();
+            } else if (scope.exceptions.type == "by_frequency") {
+              scope.exceptions.retrieve.exceptions_by_frequency();
+            }
+          },
+          retrieve: {
+            most_recent_exceptions: function() {
+              dashboard.stats.exceptions(
+                scope.exceptions.users[scope.exceptions.current_user_idx].id, 
+                scope.exceptions.type).then(
+                function(response){
+                  console.log(response.data);
+                  scope.most_recent_exceptions.list = response.data;
+              });
+            },
+            exceptions_by_frequency: function() {
+              dashboard.stats.exceptions(
+                scope.exceptions.users[scope.exceptions.current_user_idx].id, 
+                scope.exceptions.type).then(
+                function(response){
+                  console.log(response.data);
+                  scope.exceptions_by_frequency.list = response.data;
+              });
+            }
           }
         }
 

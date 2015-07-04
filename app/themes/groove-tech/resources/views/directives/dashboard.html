@@ -4,7 +4,7 @@
     <h3>Dashboard</h3>
     <div class="tabbable col-md-offset-1 col-md-10 col-lg-offset-1 col-lg-10">
       <tabset class="nav nav-tabs dashboard-nav">
-          <tab ng-repeat="tab in dash_tabs" heading="{{tab.heading}}" active="tab.active">
+          <tab ng-repeat="tab in dash_tabs" heading="{{tab.heading}}" active="tab.active" ng-click="switch_tab(tab)">
               <div groov-include="{{tab.templateUrl}}"></div>
           </tab>
       </tabset>
