@@ -36,7 +36,7 @@
     </div>
 </div>
 <div groov-notification></div>
-<% if ENV['DASHBOARD_ENABLE'] == 'YES' %>
+<% if !current_user.nil? && current_user.username == 'gpadmin' %>
 <div id="dashboard" groov-dashboard></div>
 <% end %>
 <script>
