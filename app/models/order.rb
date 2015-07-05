@@ -81,6 +81,9 @@ class Order < ActiveRecord::Base
       restriction.total_scanned_shipments += 1
       restriction.save
     end
+    Groovepacker::Dashboard::Stats::LeaderBoardStats.new.
+      compute_leader_board_for_order_item_count(
+        self.order_items.count)
   end
 
   def has_inactive_or_new_products

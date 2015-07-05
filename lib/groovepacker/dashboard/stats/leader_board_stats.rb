@@ -17,7 +17,7 @@ module Groovepacker
               "order_items ON orders.id = order_items.order_id AND " +
               "orders.scan_start_time != 'NULL' GROUP BY order_items.order_id " +
               "HAVING COUNT(*) = '"+ (order_item_count).to_s+"'))")
-              leader_board = LeaderBoard.where(order_item_count: order_item_count)
+          leader_board = LeaderBoard.where(order_item_count: order_item_count)
           if leader_board.empty?
             if order.first.nil?
               LeaderBoard.create(order_item_count: (order_item_count), 
@@ -31,8 +31,11 @@ module Groovepacker
             leader_board = leader_board.first
             if !order.first.nil?
               order= order.first
+              puts "scan time is more" 
+              puts leader_board.scan_time.inspect
+              puts (order.scanned_on - order.scan_start_time).inspect
               if leader_board.scan_time > (order.scanned_on - order.scan_start_time)
-                leader_board.order = order.id
+                leader_board.order_id = order.id
                 leader_board.scan_time = order.scanned_on - order.scan_start_time
                 leader_board.order_item_count = order_item_count
                 leader_board.save
