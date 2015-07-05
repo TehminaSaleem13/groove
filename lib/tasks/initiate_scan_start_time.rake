@@ -46,7 +46,7 @@ namespace :scan_pack do
     Tenant.all.each do |tenant|
       begin
       Apartment::Tenant.process(tenant.name) do
-        Groovepacker::Dashboard::Stats::LeaderBoard.new.compute_leader_board
+        Groovepacker::Dashboard::Stats::LeaderBoardStats.new.compute_leader_board
       end
       rescue Exception => e
         puts e.message
