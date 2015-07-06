@@ -282,7 +282,7 @@ describe('Orders:',function() {
                         browser.sleep(2000);
                         element.all(by.className('tab-content')).then(function(row) {
                             console.log(row.length);
-                            var table_pane = row[1].all(by.cssContainingText('.tab-pane.ng-scope.active .ng-scope .container-fluid.ng-scope .ng-isolate-scope .binder', 'Primary Image')).first().all(by.tagName('div')).get(1);
+                            var table_pane = row[row.length-1].all(by.cssContainingText('.tab-pane.ng-scope.active .ng-scope .container-fluid.ng-scope .ng-isolate-scope .binder', 'Primary Image')).first().all(by.tagName('div')).get(1);
                             table_pane.all(by.repeater('field in theads')).getText().then (function(items_title) {
                                 var total_qty_ordered = 0;
                                 var total_qty;
@@ -310,12 +310,12 @@ describe('Orders:',function() {
                         element(by.cssContainingText('.modal-body .tabbable .nav.nav-tabs.modal-nav.ng-isolate-scope .nav.nav-tabs li','Items')).all(by.tagName('a')).first().click();
                         element.all(by.className('tab-content')).then (function(row) {
                             console.log(row.length);
-                            var table_pane = row[1].all(by.cssContainingText('.ng-isolate-scope .binder', 'Primary Image')).first().all(by.tagName('div')).get(1);
+                            var table_pane = row[row.length-1].all(by.cssContainingText('.ng-isolate-scope .binder', 'Primary Image')).first().all(by.tagName('div')).get(1);
                             var table_body = table_pane.all(by.tagName('tbody')).first();
                             table_body.all(by.tagName('tr')).then(function(trs) {
                                 table.row_count = trs.length;
                             });
-                            row[1].all(by.cssContainingText('.btn-group.pull-right', 'Add Item')).first().all(by.tagName('button')).first().click();
+                            row[row.length-1].all(by.cssContainingText('.btn-group.pull-right', 'Add Item')).first().all(by.tagName('button')).first().click();
                             var header = element.all(by.cssContainingText('.modal-dialog.modal-lg .modal-content .modal-header div','Select Product to ')).first();
                             var modal_header = header.element(by.xpath('..'));
                             var modal_scope = modal_header.element(by.xpath('..'));
@@ -338,7 +338,7 @@ describe('Orders:',function() {
                                 modal_rows.get(2).element(by.cssContainingText('button','Save & Close')).click();
                                 element.all(by.className('tab-content')).then(function(row1) {
                                     console.log(row1.length);
-                                    var table_pane = row1[1].all(by.cssContainingText('.ng-isolate-scope .binder', 'Primary Image')).first().all(by.tagName('div')).get(1);
+                                    var table_pane = row1[row1.length-1].all(by.cssContainingText('.ng-isolate-scope .binder', 'Primary Image')).first().all(by.tagName('div')).get(1);
                                     var table_body = table_pane.all(by.tagName('tbody')).first();
                                     table_body.all(by.tagName('tr')).then(function(trs) {
                                         table.row_count1 = trs.length;
@@ -362,17 +362,17 @@ describe('Orders:',function() {
                         element(by.cssContainingText('.modal-body .tabbable .nav.nav-tabs.modal-nav.ng-isolate-scope .nav.nav-tabs li','Items')).all(by.tagName('a')).first().click();
                         element.all(by.className('tab-content')).then (function(row) {
                             console.log(row.length);
-                            var table_pane = row[1].all(by.cssContainingText('.ng-isolate-scope .binder', 'Primary Image')).first().all(by.tagName('div')).get(1);
+                            var table_pane = row[row.length-1].all(by.cssContainingText('.ng-isolate-scope .binder', 'Primary Image')).first().all(by.tagName('div')).get(1);
                             var table_body = table_pane.all(by.tagName('tbody')).first();
                             table_body.all(by.tagName('tr')).then(function(trs) {
                                 table.row_count = trs.length;
                             });
                             table_body.all(by.tagName('tr')).first().click();
-                            row[1].all(by.cssContainingText('.btn-group.pull-right', 'Remove selected Items')).first().all(by.tagName('button')).last().click();
+                            row[row.length-1].all(by.cssContainingText('.btn-group.pull-right', 'Remove selected Items')).first().all(by.tagName('button')).last().click();
                             browser.sleep(1000);
                             element.all(by.className('tab-content')).then(function(row1) {
                                 console.log(row1.length);
-                                var table_pane = row1[1].all(by.cssContainingText('.ng-isolate-scope .binder', 'Primary Image')).first().all(by.tagName('div')).get(1);
+                                var table_pane = row1[row1.length-1].all(by.cssContainingText('.ng-isolate-scope .binder', 'Primary Image')).first().all(by.tagName('div')).get(1);
                                 var table_body = table_pane.all(by.tagName('tbody')).first();
                                 table_body.all(by.tagName('tr')).then(function(trs) {
                                     table.row_count1 = trs.length;
