@@ -601,6 +601,7 @@ class ProductsController < ApplicationController
       @result['product']['shipping_weight'] = @product.get_shipping_weight
       @result['product']['skus'] = @product.product_skus.order("product_skus.order ASC")
       @result['product']['cats'] = @product.product_cats
+      @result['product']['spl_instructions_4_packer'] = @product.spl_instructions_4_packer
       @result['product']['images'] = @product.product_images.order("product_images.order ASC")
       @result['product']['barcodes'] = @product.product_barcodes.order("product_barcodes.order ASC")
       @result['product']['inventory_warehouses'] = []
@@ -1395,6 +1396,7 @@ class ProductsController < ApplicationController
       @product_hash['location_name'] = 'not_available'
       @product_hash['type_scan_enabled'] = product.type_scan_enabled
       @product_hash['click_scan_enabled'] = product.click_scan_enabled
+      @product_hash['spl_instructions_4_packer'] = product.spl_instructions_4_packer
       @product_hash['qty'] = 0
       @product_hash['barcode'] = ''
       @product_hash['sku'] = ''
