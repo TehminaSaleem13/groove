@@ -433,6 +433,7 @@ groovepacks_controllers.
                         print_barcode: {
                             name: "Print Barcode",
                             editable:false,
+                            hidden: true,
                             model: "row.iteminfo",
                             transclude: "<a class='label label-default' ng-class=\"{" +
                                         "'label-success': row.iteminfo.is_barcode_printed == false, " +
@@ -441,8 +442,13 @@ groovepacks_controllers.
                                         "&nbsp;&nbsp;<i class=\"glyphicon glyphicon-print icon-large\"></i>&nbsp;&nbsp;</a>"
                         },
                         category: {
-                            name: "Categoty",
-                            sortable:true
+                            name: "Category",
+                            sortable:true,
+                            hidden: true
+                        },
+                        spl_instructions_4_packer: {
+                            name: "Product Instructions",
+                            hidden: true
                         }
                     }
                 };

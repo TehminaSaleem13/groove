@@ -69,7 +69,7 @@ module ProductsHelper
 
   def updatelist(product,var,value)
     begin
-    if ['name','status','is_skippable','type_scan_enabled','click_scan_enabled'].include?(var)
+    if ['name','status','is_skippable','type_scan_enabled','click_scan_enabled','spl_instructions_4_packer'].include?(var)
       product[var] = value
       product.save
       if var == 'status'
