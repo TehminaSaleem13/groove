@@ -185,7 +185,8 @@ groovepacks_directives.directive('groovPersistNotification',['$window','$documen
                     importing_barcodes:'Barcode Import in Progress',
                     importing_cats: 'Categories Import in Progress',
                     importing_images: 'Images import in Progress',
-                    importing_inventory: 'Inventory Data import in Progress'
+                    importing_inventory: 'Inventory Data import in Progress',
+                    processing_status: 'Updating Product Status'
                 };
                 scope.notifications[hash].percent = (message['success']/message['total'])*100;
                 myscope.repurpose_selected();
@@ -194,7 +195,7 @@ groovepacks_directives.directive('groovPersistNotification',['$window','$documen
                 if(message['status'] == 'scheduled') {
                     scope.notifications[hash].type = 'scheduled';
                     notif_message += 'Queued';
-                } else if(['processing_csv','processing_products','importing_products','processing_rest','importing_skus','importing_barcodes','importing_cats','importing_images','importing_inventory'].indexOf(message['status']) >= 0) {
+                } else if(['processing_csv','processing_products','importing_products','processing_rest','importing_skus','importing_barcodes','importing_cats','importing_images','importing_inventory','processing_status'].indexOf(message['status']) >= 0) {
                     scope.notifications[hash].type = message.status.split('_').shift();
                     if(message['status'] == 'processing_csv') {
                         notif_message += 'Processing CSV file ';
@@ -208,7 +209,7 @@ groovepacks_directives.directive('groovPersistNotification',['$window','$documen
                         notif_message += 'Preparing to import Skus, Barcodes, Categories, Images and Inventory Data.';
                     }
 
-                    if (['importing_products','importing_skus','importing_barcodes','importing_cats','importing_images','importing_inventory'].indexOf(message['status']) >= 0) {
+                    if (['importing_products','importing_skus','importing_barcodes','importing_cats','importing_images','importing_inventory','processing_status'].indexOf(message['status']) >= 0) {
                         notif_message += import_stock_messages[message['status']];
                         if (notif_message == '') {
                             notif_message += 'Import in Progress.';
@@ -257,7 +258,7 @@ groovepacks_directives.directive('groovPersistNotification',['$window','$documen
                     },5000);
                     groovIO.emit('delete_tenant_pnotif',hash);
                     if(message['status'] == "completed" ) {
-                        notif_message += "Complete! Imported "+message["success_imported"]+" Products";
+                        notif_message += "Complete! Imported "+message["success_imported"]+" New Products. Updated "+message["success_updated"]+" Products.";
                         if(message["duplicate_file"] > 0 ) {
                             notification.notify(message["duplicate_file"]+' items appeared in the import file more than once and were skipped.',2);
                         }
