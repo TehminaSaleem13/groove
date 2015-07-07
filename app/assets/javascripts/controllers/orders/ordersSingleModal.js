@@ -435,11 +435,11 @@ groovepacks_controllers.
                             editable:false,
                             hidden: true,
                             model: "row.iteminfo",
-                            transclude: "<a class='label label-default' ng-class=\"{" +
+                            transclude: "<a class='groove-button label label-default' ng-class=\"{" +
                                         "'label-success': row.iteminfo.is_barcode_printed == false, " +
                                         "'label-default': row.iteminfo.is_barcode_printed == true }\" " +
                                         " groov-click=\"options.editable.print_status(row.iteminfo,row.productinfo)\" href=\"\">" +
-                                        "&nbsp;&nbsp;<i class=\"glyphicon glyphicon-print icon-large\"></i>&nbsp;&nbsp;</a>"
+                                        "&nbsp;&nbsp;<i class=\"glyphicon glyphicon-print icon-large white\"></i>&nbsp;&nbsp;</a>"
                         },
                         category: {
                             name: "Category",

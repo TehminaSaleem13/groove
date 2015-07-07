@@ -91,6 +91,22 @@ module Groovepacker
             import_item.current_order_imported_item = -1
             import_item.to_import = final_record.length
             import_item.save
+            if params[:contains_unique_order_items] == true
+              existing_order_numbers = []
+              filtered_final_record = []
+              existing_orders =  Order.all
+              existing_orders.each do |order|
+                existing_order_numbers << order.increment_id
+              end 
+              final_record.each_with_index do |single_row,index|
+                if !mapping['increment_id'].nil? && mapping['increment_id'][:position] >= 0 && !single_row[mapping['increment_id'][:position]].blank?
+                  unless existing_order_numbers.include? (single_row[mapping['increment_id'][:position]])
+                    filtered_final_record << single_row
+                  end
+                end
+              end
+              final_record = filtered_final_record
+            end
 
             final_record.each_with_index do |single_row,index|
               if !mapping['increment_id'].nil? && mapping['increment_id'][:position] >= 0 && !single_row[mapping['increment_id'][:position]].blank?
