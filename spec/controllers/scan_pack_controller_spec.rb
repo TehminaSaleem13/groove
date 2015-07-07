@@ -189,6 +189,49 @@ RSpec.describe ScanPackController, :type => :controller do
       expect(result["error_messages"][0]).to eq("Please specify a barcode to scan the order")
     end
 
+    it "should not process order tracking number if cue_orders_by settings as 'order_number'" do
+      request.accept = "application/json"
+
+      @order = FactoryGirl.create(:order, :tracking_num=>'11223344556677889900')
+
+      get :scan_barcode, { :state => "scanpack.rfo", :input => '11223344556677889900' }
+
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["status"]).to eq(true)
+      expect(result["notice_messages"][0]).to eq("Order with number " + @order.tracking_num + " cannot be found. It may not have been imported yet")
+    end
+
+    it "should not process order number if cue_orders_by settings as 'tracking_number'" do
+      request.accept = "application/json"
+
+      @scanpacksetting.cue_orders_by = 'tracking_number'
+      @scanpacksetting.save
+      @order = FactoryGirl.create(:order)
+
+      get :scan_barcode, { :state => "scanpack.rfo", :input => 12345678 }
+
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["status"]).to eq(true)
+      expect(result["notice_messages"][0]).to eq("Order with tracking number " + @order.increment_id + " cannot be found. It may not have been imported yet")
+    end
+
+    it "should process order scan for cue_orders_by settings as 'tracking_number'" do
+      request.accept = "application/json"
+
+      @scanpacksetting.cue_orders_by = 'tracking_number'
+      @scanpacksetting.save
+      @order = FactoryGirl.create(:order, :tracking_num=>'11223344556677889900')
+
+      get :scan_barcode, { :state => "scanpack.rfo", :input => '11223344556677889900' }
+
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["status"]).to eq(true)
+      
+    end
+
    	it "should process order scan for orders having a status of Awaiting Scanning" do
       request.accept = "application/json"
 
