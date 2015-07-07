@@ -16,7 +16,11 @@ module ScanPackHelper
 
     session[:most_recent_scanned_products] = []
     if !input.nil? && input != ""
-      orders = Order.where(['increment_id = ? or non_hyphen_increment_id =?', input, input])
+      if scanpack_settings.cue_orders_by == 'order_number'
+        orders = Order.where(['increment_id = ? or non_hyphen_increment_id =?', input, input])
+      else
+        orders = Order.where(['tracking_num = ?', input])
+      end
       single_order = nil
       single_order_result = Hash.new
       single_order_result['matched_orders'] = []
@@ -44,8 +48,13 @@ module ScanPackHelper
       end
 
       if single_order.nil?
-        result['notice_messages'].push('Order with number '+
-          input +' cannot be found. It may not have been imported yet')
+        if scanpack_settings.cue_orders_by == 'order_number'
+          result['notice_messages'].push('Order with number '+
+            input +' cannot be found. It may not have been imported yet')
+        else
+          result['notice_messages'].push('Order with tracking number '+
+            input +' cannot be found. It may not have been imported yet')
+        end
       else
         single_order_result['status'] = single_order.status
         single_order_result['order_num'] = single_order.increment_id
