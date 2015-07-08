@@ -1396,7 +1396,6 @@ class ProductsController < ApplicationController
       @product_hash['location_name'] = 'not_available'
       @product_hash['type_scan_enabled'] = product.type_scan_enabled
       @product_hash['click_scan_enabled'] = product.click_scan_enabled
-      @product_hash['spl_instructions_4_packer'] = product.spl_instructions_4_packer
       @product_hash['qty'] = 0
       @product_hash['barcode'] = ''
       @product_hash['sku'] = ''
