@@ -588,7 +588,6 @@ class OrdersController < ApplicationController
   end
 
   def updateiteminorder
-    puts "params: " + params.inspect
     @result = Hash.new
     @result['status'] = true
     @result['messages'] = []
