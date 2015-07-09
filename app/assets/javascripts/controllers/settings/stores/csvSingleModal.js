@@ -9,22 +9,26 @@ function(scope, store_data, $state, $stateParams, $modal, $modalInstance, $timeo
 
     scope.ok = function() {
         var result = $q.defer();
-        for(var i = 0; i < scope.csv.importer[scope.csv.importer.type]['map_options'].length; i++) {
-            if (scope.csv.importer[scope.csv.importer.type]['map_options'][i].name == "Order Date/Time") {
-                if (scope.csv.importer[scope.csv.importer.type]['map_options'][i].disabled) {
-                    scope.csv.current.order_placed_at = null;
-                    myscope.ok_import();
-                    break;
-                } else {
-                    if (confirm("An Order Date/Time has not been mapped. Would you like to continue using the current Date/Time for each imported order?")) {
-                        scope.csv.current.order_placed_at = new Date();
+        if (scope.csv.current.order_date_time_format == 'None' || scope.csv.current.order_date_time_format == null) {
+            alert("Select an Order Date/Time foramt to start import");
+        } else {
+            for(var i = 0; i < scope.csv.importer[scope.csv.importer.type]['map_options'].length; i++) {
+                if (scope.csv.importer[scope.csv.importer.type]['map_options'][i].name == "Order Date/Time") {
+                    if (scope.csv.importer[scope.csv.importer.type]['map_options'][i].disabled) {
+                        scope.csv.current.order_placed_at = null;
                         myscope.ok_import();
-                        result.resolve();
                         break;
-                    } else {result.resolve();};
-                };
-            } else {continue;};
-        }
+                    } else {
+                        if (confirm("An Order Date/Time has not been mapped. Would you like to continue using the current Date/Time for each imported order?")) {
+                            scope.csv.current.order_placed_at = new Date();
+                            myscope.ok_import();
+                            result.resolve();
+                            break;
+                        } else {result.resolve();};
+                    };
+                } else {continue;};
+            }
+        };
         return result.promise;
     };
 
@@ -180,7 +184,8 @@ function(scope, store_data, $state, $stateParams, $modal, $modalInstance, $timeo
             "tooltips": {
                 "unique_order_items": "",
                 "generate_barcode_from_sku": "",
-                "use_sku_as_product_name": ""
+                "use_sku_as_product_name": "",
+                "order_date_time_format": ""
             }
         };
         groov_translator.translate('settings.backup_restore',scope.translations);
