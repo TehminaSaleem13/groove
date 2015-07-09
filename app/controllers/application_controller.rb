@@ -1,15 +1,22 @@
 class ApplicationController < ActionController::Base
   before_filter :set_current_user_id
-  protect_from_forgery with: :null_session
+  protect_from_forgery with: :csrf_protection
   
   respond_to :html, :json
 
   def groovepacker_authorize!
-    if request.headers["Oauth"].nil?
+    puts "Authorizing"
+    #puts request.headers["Authorization"].inspect
+    auth_header = request.headers["Authorization"]
+    puts auth_header.inspect
+    if auth_header.nil?
       authenticate_user!
-    else
+    elsif auth_header.include?("Bearer")
+      puts "Authorizing doorkeeper"
       doorkeeper_authorize!
-      skip_before_action :verify_authenticity_token if doorkeeper_authorize!
+      #skip_before_action :verify_authenticity_token if doorkeeper_authorize!
+    else
+      render status: 401
     end
   end
   
