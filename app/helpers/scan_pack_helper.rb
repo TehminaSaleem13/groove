@@ -61,6 +61,10 @@ module ScanPackHelper
 
         #can order be scanned?
         if can_order_be_scanned
+          unless single_order.status == 'scanned'
+            single_order.packing_user_id = current_user.id
+            single_order.save
+          end
           #search in orders that have status of Scanned
           if single_order.status == 'scanned'
             single_order_result['scanned_on'] = single_order.scanned_on
@@ -151,7 +155,6 @@ module ScanPackHelper
             end
           end
           unless single_order.nil?
-            single_order.packing_user_id = current_user.id
             unless single_order.save
               result['status'] &= false
               result['error_messages'].push("Could not save order with id: "+single_order.id)
