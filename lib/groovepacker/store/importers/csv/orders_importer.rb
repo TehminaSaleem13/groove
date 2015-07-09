@@ -293,11 +293,29 @@ module Groovepacker
                     end
                   end
                   if result['status']
-                    if !mapping['order_placed_time'].nil? && mapping['order_placed_time'][:position] >= 0
+                    if !mapping['order_placed_time'].nil? && mapping['order_placed_time'][:position] >= 0 && !params[:order_date_time_format].nil?
                       begin
                         require 'time'
-                        # time = single_row[mapping['order_placed_time'][:position]]
-                        order['order_placed_time'] = DateTime.strptime(single_row[mapping['order_placed_time'][:position]],"%d/%m/%y %H:%M")
+                        imported_order_time = single_row[mapping['order_placed_time'][:position]]
+                        if params[:order_date_time_format] == 'YYYY/MM/DD TIME'
+                          if imported_order_time.split("/").first.length == 4
+                            order['order_placed_time'] = DateTime.strptime(imported_order_time,"%Y/%m/%d %H:%M")
+                          else
+                            order['order_placed_time'] = DateTime.strptime(imported_order_time,"%y/%m/%d %H:%M")
+                          end
+                        elsif params[:order_date_time_format] == 'MM/DD/YYYY TIME'
+                          if imported_order_time.split(" ").first.split("/").last.length == 4
+                            order['order_placed_time'] = DateTime.strptime(imported_order_time,"%m/%d/%Y %H:%M")
+                          else
+                            order['order_placed_time'] = DateTime.strptime(imported_order_time,"%m/%d/%y %H:%M")
+                          end
+                        elsif params[:order_date_time_format] == 'DD/MM/YYYY TIME'
+                          if imported_order_time.split(" ").first.split("/").last.length == 4
+                            order['order_placed_time'] = DateTime.strptime(imported_order_time,"%d/%m/%Y %H:%M")
+                          else
+                            order['order_placed_time'] = DateTime.strptime(imported_order_time,"%d/%m/%y %H:%M")
+                          end
+                        end
                       rescue ArgumentError => e
                         #result["status"] = true
                         result['messages'].push("Order Placed has bad parameter - #{single_row[mapping['order_placed_time'][:position]]}")

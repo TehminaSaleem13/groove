@@ -176,26 +176,32 @@ function(scope, store_data, $window, $sce, $interval, $state, $stateParams, $mod
                                 current_map.map.type = scope.stores.single.type;
                                 current_map.map.name = current_map.name;
                                 if (current_map.map.type == 'order') {
-                                    var not_found = true
-                                    for(var i = 0; i < Object.keys(current_map.map.map).length; i++) {
-                                        if (current_map.map.map[i].name == "Order Date/Time") {
-                                            not_found &= false
-                                            break;
-                                        } else {continue;};
-                                    }
-                                    if (not_found) {
-                                        if (confirm("An Order Date/Time has not been mapped. Would you like to continue using the current Date/Time for each imported order?")) {
-                                            current_map.map.order_placed_at = new Date();
+                                    if (current_map.map.order_date_time_format == null || current_map.map.order_date_time_format == 'None') {
+                                        alert("Order Date/Time foramt has not been set. Edit map to select one.");
+                                        result.resolve();
+                                    } else{
+                                        var not_found = true
+                                        for(var i = 0; i < Object.keys(current_map.map.map).length; i++) {
+                                            if (current_map.map.map[i].name == "Order Date/Time") {
+                                                not_found &= false
+                                                break;
+                                            } else {continue;};
+                                        }
+                                        if (not_found) {
+                                            if (confirm("An Order Date/Time has not been mapped. Would you like to continue using the current Date/Time for each imported order?")) {
+                                                current_map.map.order_placed_at = new Date();
+                                                stores.csv.do_import({current:current_map.map});
+                                                $modalInstance.close("csv-modal-closed");
+                                                result.resolve();
+                                            };
+                                        } else {
+                                            current_map.map.order_placed_at = null;
                                             stores.csv.do_import({current:current_map.map});
                                             $modalInstance.close("csv-modal-closed");
                                             result.resolve();
                                         };
-                                    } else {
-                                        current_map.map.order_placed_at = null;
-                                        stores.csv.do_import({current:current_map.map});
-                                        $modalInstance.close("csv-modal-closed");
-                                        result.resolve();
                                     };
+                                    
                                 } else{
                                     stores.csv.do_import({current:current_map.map});
                                     $modalInstance.close("csv-modal-closed");
