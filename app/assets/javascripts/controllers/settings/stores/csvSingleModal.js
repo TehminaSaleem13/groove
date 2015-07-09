@@ -38,6 +38,11 @@ function(scope, store_data, $state, $stateParams, $modal, $modalInstance, $timeo
         });
     };
 
+    scope.change_order_date_time_format = function (format) {
+        console.log(format);
+        scope.csv.current.order_date_time_format = format;
+    };
+
     scope.cancel = function () {
         $modalInstance.dismiss("cancel-button-click");
     };

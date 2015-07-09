@@ -21,6 +21,35 @@
                             <input type="number" class="form-control input-style" min="2" ng-change="parse()"  ng-model="csv.current.rows" />
                         </div>
                     </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-4">Order Date/Time Format</label>
+                        <div class="controls col-sm-5 form-inline" dropdown>
+                            <button class="dropdown-toggle groove-button label label-default col-sm-9" ng-class="{
+                            'label-success':csv.current.order_date_time_format=='YYYY/MM/DD TIME',
+                            'label-warning':csv.current.order_date_time_format=='YYYY/MM/DD TIME AM/PM',
+                            'label-info':csv.current.order_date_time_format=='MM/DD/YYYY TIME',
+                            'label-danger':csv.current.order_date_time_format=='MM/DD/YYYY TIME AM/PM'}">
+                                <span ng-show="csv.current.order_date_time_format=='None'">None</span>
+                                <span ng-show="csv.current.order_date_time_format=='YYYY/MM/DD TIME'">YYYY/MM/DD TIME</span>
+                                <span ng-show="csv.current.order_date_time_format=='YYYY/MM/DD TIME AM/PM'">YYYY/MM/DD TIME AM/PM</span>
+                                <span ng-show="csv.current.order_date_time_format=='MM/DD/YYYY TIME'">MM/DD/YYYY TIME</span>
+                                <span ng-show="csv.current.order_date_time_format=='MM/DD/YYYY TIME AM/PM'">MM/DD/YYYY TIME AM/PM</span>
+                                <span ng-show="csv.current.order_date_time_format=='DD/MM/YYYY TIME'">DD/MM/YYYY TIME</span>
+                                <span ng-show="csv.current.order_date_time_format=='DD/MM/YYYY TIME AM/PM'">DD/MM/YYYY TIME AM/PM</span>
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu" role="menu">
+                                <li><a class="dropdown-toggle" ng-click="change_order_date_time_format('None')">None</a></li>
+                                <li><a class="dropdown-toggle" ng-click="change_order_date_time_format('YYYY/MM/DD TIME')">YYYY/MM/DD TIME</a></li>
+                                <li><a class="dropdown-toggle" ng-click="change_order_date_time_format('YYYY/MM/DD TIME AM/PM')">YYYY/MM/DD TIME AM/PM</a></li>
+                                <li><a class="dropdown-toggle" ng-click="change_order_date_time_format('MM/DD/YYYY TIME')">MM/DD/YYYY TIME</a></li>
+                                <li><a class="dropdown-toggle" ng-click="change_order_date_time_format('MM/DD/YYYY TIME AM/PM')">MM/DD/YYYY TIME AM/PM</a></li>
+                                <li><a class="dropdown-toggle" ng-click="change_order_date_time_format('DD/MM/YYYY TIME')">DD/MM/YYYY TIME</a></li>
+                                <li><a class="dropdown-toggle" ng-click="change_order_date_time_format('DD/MM/YYYY TIME AM/PM')">DD/MM/YYYY TIME AM/PM</a></li>
+                            </ul>
+                            <i class="info col-sm-2 icon-large glyphicon glyphicon-info-sign pull-right" popover-trigger="mouseenter" popover-placement="bottom" groov-popover=""></i>
+                        </div>
+                    </div>
                     <legend>Separator Options</legend>
                     <div class="container-fluid">
                         <label class="radio col-sm-2">
