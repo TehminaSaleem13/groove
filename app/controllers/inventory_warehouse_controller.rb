@@ -1,5 +1,5 @@
 class InventoryWarehouseController < ApplicationController
-  before_filter :authenticate_user!
+  before_filter :groovepacker_authorize!
   # this action creates a warehouse with a name
   include InventoryWarehouseHelper
   def create

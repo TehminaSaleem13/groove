@@ -1,5 +1,5 @@
 class DashboardController < ApplicationController
-  before_filter :authenticate_user!
+  before_filter :groovepacker_authorize!
   # perform authorization too
 
   def main_summary    

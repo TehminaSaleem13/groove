@@ -1,8 +1,17 @@
 class ApplicationController < ActionController::Base
   before_filter :set_current_user_id
-  #protect_from_forgery with: :null_session
+  protect_from_forgery with: :null_session
   
   respond_to :html, :json
+
+  def groovepacker_authorize!
+    if request.headers["Oauth"].nil?
+      authenticate_user!
+    else
+      doorkeeper_authorize!
+      skip_before_action :verify_authenticity_token if doorkeeper_authorize!
+    end
+  end
   
   def set_current_user_id
     if current_user
@@ -32,5 +41,11 @@ class ApplicationController < ActionController::Base
       $redis.hdel('groovehacks:session', cookies['_validation_token_key'])
     end
     super(resource_or_scope)
+  end
+
+  private
+
+  def csrf_protection
+    puts "handle csrf protection"
   end
 end
