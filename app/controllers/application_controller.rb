@@ -32,9 +32,12 @@ class ApplicationController < ActionController::Base
       # store session data or any authentication data you want here, generate to JSON data
       stored_session = JSON.generate({'tenant'=>Apartment::Tenant.current_tenant, 'user_id'=> current_user.id, 'username'=>current_user.username})
       $redis.hset('groovehacks:session',cookies['_validation_token_key'],stored_session)
-      super(resource_or_scope)
+      if session[:redirect_uri]
+        session[:redirect_uri]
+      else
+        super(resource_or_scope)
+      end
     end
-
   end
 
   def after_sign_out_path_for(resource_or_scope)
@@ -42,6 +45,7 @@ class ApplicationController < ActionController::Base
     if cookies['_validation_token_key'].present?
       $redis.hdel('groovehacks:session', cookies['_validation_token_key'])
     end
+    session[:redirect_uri] = nil
     super(resource_or_scope)
   end
 
