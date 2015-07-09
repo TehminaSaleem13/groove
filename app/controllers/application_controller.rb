@@ -1,20 +1,16 @@
 class ApplicationController < ActionController::Base
   before_filter :set_current_user_id
-  protect_from_forgery with: :csrf_protection
+  protect_from_forgery with: :null_session
   
   respond_to :html, :json
 
   def groovepacker_authorize!
-    puts "Authorizing"
-    #puts request.headers["Authorization"].inspect
     auth_header = request.headers["Authorization"]
-    puts auth_header.inspect
     if auth_header.nil?
       authenticate_user!
     elsif auth_header.include?("Bearer")
-      puts "Authorizing doorkeeper"
       doorkeeper_authorize!
-      #skip_before_action :verify_authenticity_token if doorkeeper_authorize!
+      @current_user = User.find(doorkeeper_token.resource_owner_id) if doorkeeper_token
     else
       render status: 401
     end
@@ -26,7 +22,6 @@ class ApplicationController < ActionController::Base
     else
       GroovRealtime.current_user_id = 0
     end
-
   end
 
   def after_sign_in_path_for(resource_or_scope)
@@ -50,9 +45,4 @@ class ApplicationController < ActionController::Base
     super(resource_or_scope)
   end
 
-  private
-
-  def csrf_protection
-    puts "handle csrf protection"
-  end
 end
