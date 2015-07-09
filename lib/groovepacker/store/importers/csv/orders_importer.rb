@@ -296,8 +296,8 @@ module Groovepacker
                     if !mapping['order_placed_time'].nil? && mapping['order_placed_time'][:position] >= 0
                       begin
                         require 'time'
-                        time = Time.parse(single_row[mapping['order_placed_time'][:position]])
-                        order['order_placed_time'] = time
+                        # time = single_row[mapping['order_placed_time'][:position]]
+                        order['order_placed_time'] = DateTime.strptime(single_row[mapping['order_placed_time'][:position]],"%d/%m/%y %H:%M")
                       rescue ArgumentError => e
                         #result["status"] = true
                         result['messages'].push("Order Placed has bad parameter - #{single_row[mapping['order_placed_time'][:position]]}")
