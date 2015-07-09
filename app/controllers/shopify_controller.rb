@@ -1,5 +1,5 @@
 class ShopifyController < ApplicationController
-  before_filter :authenticate_user!, :except => [:auth, :callback, :preferences, :help, :complete]
+  before_filter :groovepacker_authorize!, :except => [:auth, :callback, :preferences, :help, :complete]
 
   # {
   #  "code"=>"58a883f4bb36e4e953431549abff383c", 

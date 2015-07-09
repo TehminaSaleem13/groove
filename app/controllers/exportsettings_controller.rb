@@ -1,5 +1,5 @@
 class ExportsettingsController < ApplicationController
-  before_filter :authenticate_user!
+  before_filter :groovepacker_authorize!
   def get_export_settings
     @result = Hash.new
     @result['status'] = true

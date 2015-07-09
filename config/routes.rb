@@ -1,6 +1,8 @@
 Groovepacks::Application.routes.draw do
 
 
+  use_doorkeeper
+
   match 'subscriptions', :to => 'subscriptions#new', :as => 'subscriptions'
   match 'subscriptions_login', :to => 'subscriptions#login', :as => 'subscriptions/login'
   # match 'subscriptions/new', :to => 'subscriptions#new'

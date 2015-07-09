@@ -1,5 +1,5 @@
 class OrderActivitiesController < ApplicationController
-  before_filter :authenticate_user!
+  before_filter :groovepacker_authorize!
 
   def acknowledge
     result = Hash.new

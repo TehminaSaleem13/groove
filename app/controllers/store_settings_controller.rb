@@ -1,5 +1,5 @@
 class StoreSettingsController < ApplicationController
-  before_filter :authenticate_user!, :except => [:handle_ebay_redirect]
+  before_filter :groovepacker_authorize!, :except => [:handle_ebay_redirect]
 
   include StoreSettingsHelper
   def storeslist

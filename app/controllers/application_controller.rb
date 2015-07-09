@@ -3,6 +3,18 @@ class ApplicationController < ActionController::Base
   protect_from_forgery with: :null_session
   
   respond_to :html, :json
+
+  def groovepacker_authorize!
+    auth_header = request.headers["Authorization"]
+    if auth_header.nil?
+      authenticate_user!
+    elsif auth_header.include?("Bearer")
+      doorkeeper_authorize!
+      @current_user = User.find(doorkeeper_token.resource_owner_id) if doorkeeper_token
+    else
+      render status: 401
+    end
+  end
   
   def set_current_user_id
     if current_user
@@ -10,7 +22,6 @@ class ApplicationController < ActionController::Base
     else
       GroovRealtime.current_user_id = 0
     end
-
   end
 
   def after_sign_in_path_for(resource_or_scope)
@@ -21,9 +32,12 @@ class ApplicationController < ActionController::Base
       # store session data or any authentication data you want here, generate to JSON data
       stored_session = JSON.generate({'tenant'=>Apartment::Tenant.current_tenant, 'user_id'=> current_user.id, 'username'=>current_user.username})
       $redis.hset('groovehacks:session',cookies['_validation_token_key'],stored_session)
-      super(resource_or_scope)
+      if session[:redirect_uri]
+        session[:redirect_uri]
+      else
+        super(resource_or_scope)
+      end
     end
-
   end
 
   def after_sign_out_path_for(resource_or_scope)
@@ -31,6 +45,8 @@ class ApplicationController < ActionController::Base
     if cookies['_validation_token_key'].present?
       $redis.hdel('groovehacks:session', cookies['_validation_token_key'])
     end
+    session[:redirect_uri] = nil
     super(resource_or_scope)
   end
+
 end

@@ -1,5 +1,5 @@
 class OrdersController < ApplicationController
-  before_filter :authenticate_user!, except: [:import_shipworks]
+  before_filter :groovepacker_authorize!, except: [:import_shipworks]
   include OrdersHelper
   include ProductsHelper
   include SettingsHelper

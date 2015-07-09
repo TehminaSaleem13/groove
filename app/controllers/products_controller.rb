@@ -1,5 +1,5 @@
 class ProductsController < ApplicationController
-  before_filter :authenticate_user!
+  before_filter :groovepacker_authorize!
   include ProductsHelper
   def importproducts
     @store = Store.find(params[:id])
