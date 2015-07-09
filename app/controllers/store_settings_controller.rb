@@ -406,7 +406,7 @@ class StoreSettingsController < ApplicationController
 
           #check if previous mapping exists
           #else fill in defaults
-          default_csv_map ={ 'name' =>'', 'map' =>{'rows' => 2, 'sep' => ',' , 'other_sep' => 0, 'delimiter'=> '"', 'fix_width' => 0, 'fixed_width' => 4, 'contains_unique_order_items' => false, 'generate_barcode_from_sku' => false, 'use_sku_as_product_name' => false, 'order_placed_at' => nil, 'map' => {} }}
+          default_csv_map ={ 'name' =>'', 'map' =>{'rows' => 2, 'sep' => ',' , 'other_sep' => 0, 'delimiter'=> '"', 'fix_width' => 0, 'fixed_width' => 4, 'contains_unique_order_items' => false, 'generate_barcode_from_sku' => false, 'use_sku_as_product_name' => false, 'order_placed_at' => nil, 'order_date_time_format' => 'None', 'map' => {} }}
           csv_map = CsvMapping.find_or_create_by_store_id(@store.id)
           # end check for mapping
 
@@ -567,6 +567,7 @@ class StoreSettingsController < ApplicationController
           :contains_unique_order_items => params[:contains_unique_order_items],
           :generate_barcode_from_sku => params[:generate_barcode_from_sku],
           :use_sku_as_product_name => params[:use_sku_as_product_name],
+          :order_date_time_format => params[:order_date_time_format],
           :map => params[:map]
       }
       map_data.save
@@ -595,6 +596,7 @@ class StoreSettingsController < ApplicationController
       data[:generate_barcode_from_sku] = params[:generate_barcode_from_sku]
       data[:use_sku_as_product_name] = params[:use_sku_as_product_name]
       data[:order_placed_at] = params[:order_placed_at]
+      data[:order_date_time_format] = params[:order_date_time_format]
 
       import_csv = ImportCsv.new
       delayed_job = import_csv.delay(:run_at =>1.seconds.from_now).import Apartment::Tenant.current_tenant, data
