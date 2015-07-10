@@ -103,7 +103,6 @@ groovepacks_controllers.
             };
 
             $scope.order_details = function(id) {
-                console.log("id:" + id);
                 if($scope.current_user.can('add_edit_orders')) {
                     var item_modal = $modal.open({
                         templateUrl: '/assets/views/modals/order/main.html',

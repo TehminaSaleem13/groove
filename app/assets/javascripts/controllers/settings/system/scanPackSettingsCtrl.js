@@ -90,11 +90,6 @@ function( $scope, $http, $timeout, $location, $state, $cookies, scanPack,groov_t
         $scope.update_settings();
     };
 
-    $scope.change_cue_order_opt = function(value) {
-        $scope.scan_pack.settings.cue_orders_by = value;
-        $scope.update_settings();
-    }
-
     $scope.update_settings = function() {
         scanPack.settings.update($scope.scan_pack);
     };
