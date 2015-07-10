@@ -125,7 +125,7 @@
                    "lot_number":"Record Lot Number",
                    "show_customer_notes":"Show Customer Notes",
                    "show_internal_notes":"Show Internal Notes",
-                   "cue_orders_for_scanpack":"Cue Orders For Scan & Pack By"
+                   "cue_orders_for_scanpack":"Cue Orders For Scan & Pack By Tracking Number"
                },
                "tooltips": {
                    "enable_click_sku": "When this option is enabled the packer will be prompted to scan a tracking number after the last item of an order has been packed.",

@@ -2,8 +2,7 @@ module ScanPackHelper
 
   include OrdersHelper
 
-  def order_scan(input,state,id,over_ride)
-    puts "over_ride: " + over_ride.to_s
+  def order_scan(input,state,id)
     result = Hash.new
     result['status'] = true
     result['matched'] = true
@@ -17,9 +16,8 @@ module ScanPackHelper
 
     session[:most_recent_scanned_products] = []
     if !input.nil? && input != ""
-      if scanpack_settings.cue_orders_by == 'order_number' || over_ride
-        orders = Order.where(['increment_id = ? or non_hyphen_increment_id =?', input, input])
-      else
+      orders = Order.where(['increment_id = ? or non_hyphen_increment_id =?', input, input])
+      if orders.length==0 && scanpack_settings.scan_by_tracking_number
         orders = Order.where(['tracking_num = ?', input])
       end
       single_order = nil
@@ -49,11 +47,11 @@ module ScanPackHelper
       end
 
       if single_order.nil?
-        if scanpack_settings.cue_orders_by == 'order_number'
-          result['notice_messages'].push('Order with number '+
+        if scanpack_settings.scan_by_tracking_number
+          result['notice_messages'].push('Order with tracking number '+
             input +' cannot be found. It may not have been imported yet')
         else
-          result['notice_messages'].push('Order with tracking number '+
+          result['notice_messages'].push('Order with number '+
             input +' cannot be found. It may not have been imported yet')
         end
       else
@@ -487,7 +485,7 @@ module ScanPackHelper
     end
   end
 
-  def scan_recording(input,state,id,over_ride)
+  def scan_recording(input,state,id)
     result = Hash.new
     result['status'] = true
     result['matched'] = true
@@ -524,7 +522,7 @@ module ScanPackHelper
     return result
   end
 
-  def scan_verifying(input,state,id,over_ride)
+  def scan_verifying(input,state,id)
     result = Hash.new
     result['status'] = true
     result['matched'] = true
@@ -568,7 +566,7 @@ module ScanPackHelper
     return result
   end
 
-  def render_order_scan(input,state,id,over_ride)
+  def render_order_scan(input,state,id)
     result = Hash.new
     result['status'] = true
     result['matched'] = true
@@ -595,7 +593,7 @@ module ScanPackHelper
     result
   end
 
-  def scan_again_or_render_order_scan(input,state,id,over_ride)
+  def scan_again_or_render_order_scan(input,state,id)
     result = Hash.new
     result['status'] = true
     result['matched'] = true
@@ -638,7 +636,7 @@ module ScanPackHelper
     result
   end
 
-  def order_edit_conf(input,state,id,over_ride)
+  def order_edit_conf(input,state,id)
     result = Hash.new
     result['status'] = true
     result['matched'] = false
@@ -685,7 +683,7 @@ module ScanPackHelper
     return result
   end
 
-  def cos_conf(input,state,id,over_ride)
+  def cos_conf(input,state,id)
     result = Hash.new
     result['status'] = true
     result['matched'] = false
@@ -740,7 +738,7 @@ module ScanPackHelper
     return result
   end
 
-  def product_edit_conf(input,state,id,over_ride)
+  def product_edit_conf(input,state,id)
     result = Hash.new
     result['status'] = true
     result['matched'] = false

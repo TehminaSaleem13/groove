@@ -687,7 +687,7 @@ class SettingsController < ApplicationController
         scan_pack_setting.record_lot_number = params[:record_lot_number]
         scan_pack_setting.show_customer_notes = params[:show_customer_notes]
         scan_pack_setting.show_internal_notes = params[:show_internal_notes]
-        scan_pack_setting.cue_orders_by = params[:cue_orders_by]
+        scan_pack_setting.scan_by_tracking_number = params[:scan_by_tracking_number]
 
         if scan_pack_setting.save
           @result['success_messages'].push('Settings updated successfully.')
