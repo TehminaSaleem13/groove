@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150710113320) do
+ActiveRecord::Schema.define(:version => 20150710141455) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0, :null => false
@@ -123,7 +123,7 @@ ActiveRecord::Schema.define(:version => 20150710113320) do
 
   create_table "export_settings", :force => true do |t|
     t.boolean  "auto_email_export",         :default => true
-    t.datetime "time_to_send_export_email"
+    t.datetime "time_to_send_export_email", :default => '2000-01-01 00:00:00'
     t.boolean  "send_export_email_on_mon",  :default => false
     t.boolean  "send_export_email_on_tue",  :default => false
     t.boolean  "send_export_email_on_wed",  :default => false
@@ -135,8 +135,8 @@ ActiveRecord::Schema.define(:version => 20150710113320) do
     t.string   "export_orders_option",      :default => "on_same_day"
     t.string   "order_export_type",         :default => "include_all"
     t.string   "order_export_email"
-    t.datetime "created_at",                                           :null => false
-    t.datetime "updated_at",                                           :null => false
+    t.datetime "created_at",                                                   :null => false
+    t.datetime "updated_at",                                                   :null => false
     t.datetime "start_time"
     t.datetime "end_time"
     t.boolean  "manual_export",             :default => false
@@ -607,6 +607,7 @@ ActiveRecord::Schema.define(:version => 20150710113320) do
     t.string   "weight_format"
     t.boolean  "add_to_any_order",                                              :default => false
     t.string   "base_sku"
+    t.boolean  "is_intangible",                                                 :default => false
   end
 
   add_index "products", ["store_id"], :name => "index_products_on_store_id"
@@ -671,13 +672,15 @@ ActiveRecord::Schema.define(:version => 20150710113320) do
     t.float    "order_complete_sound_vol",      :default => 0.75
     t.boolean  "type_scan_code_enabled",        :default => true
     t.string   "type_scan_code",                :default => "*"
+    t.string   "post_scanning_option",          :default => "None"
     t.string   "escape_string",                 :default => " - "
     t.boolean  "escape_string_enabled",         :default => false
-    t.string   "post_scanning_option",          :default => "None"
     t.boolean  "record_lot_number",             :default => false
     t.boolean  "show_customer_notes",           :default => false
     t.boolean  "show_internal_notes",           :default => false
     t.boolean  "scan_by_tracking_number",       :default => false
+    t.boolean  "intangible_setting_enabled",    :default => false
+    t.string   "intangible_string",             :default => ""
   end
 
   create_table "shipstation_credentials", :force => true do |t|

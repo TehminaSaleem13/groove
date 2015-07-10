@@ -1373,6 +1373,26 @@ class ProductsController < ApplicationController
     end
   end
 
+  def update_intagibleness
+    scan_pack_setting = ScanPackSetting.all.first
+    if params[:intangible_setting_enabled]
+      if params[:intangible_string] != scan_pack_setting.intangible_string
+        products = Product.where(:is_intangible=>true)
+        products.each do |product|
+          product.is_intangible = false
+          product.save
+        end
+        products = Product.where("name like ?", "#{params[:intangible_string]}%")
+      end
+    else
+      products = Product.where(:is_intangible=>true)
+      products.each do |product|
+        product.is_intangible = false
+        product.save
+      end
+    end
+  end
+
   private
 
   def get_weight_format(weight_format)
