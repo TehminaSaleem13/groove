@@ -23,7 +23,7 @@ groovepacks_controllers.
                 if(typeof $scope.data.order != 'undefined' && typeof $scope.data.order.status != 'undefined') {
                     result.resolve();
                 } else {
-                    return scanPack.input($stateParams.order_num,'scanpack.rfo',null).then(function(data) {
+                    return scanPack.input($stateParams.order_num,'scanpack.rfo',null,true).then(function(data) {
                         $scope.set('raw',data.data);
                         if(typeof data.data != 'undefined' && typeof data.data.data != 'undefined') {
                             if(typeof data.data.data['next_state'] != 'undefined' &&  data.data.data['next_state'] != $state.current.name) {

@@ -2,7 +2,8 @@ module ScanPackHelper
 
   include OrdersHelper
 
-  def order_scan(input,state,id)
+  def order_scan(input,state,id,over_ride)
+    puts "over_ride: " + over_ride.to_s
     result = Hash.new
     result['status'] = true
     result['matched'] = true
@@ -16,7 +17,7 @@ module ScanPackHelper
 
     session[:most_recent_scanned_products] = []
     if !input.nil? && input != ""
-      if scanpack_settings.cue_orders_by == 'order_number'
+      if scanpack_settings.cue_orders_by == 'order_number' || over_ride
         orders = Order.where(['increment_id = ? or non_hyphen_increment_id =?', input, input])
       else
         orders = Order.where(['tracking_num = ?', input])
@@ -486,7 +487,7 @@ module ScanPackHelper
     end
   end
 
-  def scan_recording(input,state,id)
+  def scan_recording(input,state,id,over_ride)
     result = Hash.new
     result['status'] = true
     result['matched'] = true
@@ -523,7 +524,7 @@ module ScanPackHelper
     return result
   end
 
-  def scan_verifying(input,state,id)
+  def scan_verifying(input,state,id,over_ride)
     result = Hash.new
     result['status'] = true
     result['matched'] = true
@@ -567,7 +568,7 @@ module ScanPackHelper
     return result
   end
 
-  def render_order_scan(input,state,id)
+  def render_order_scan(input,state,id,over_ride)
     result = Hash.new
     result['status'] = true
     result['matched'] = true
@@ -594,7 +595,7 @@ module ScanPackHelper
     result
   end
 
-  def scan_again_or_render_order_scan(input,state,id)
+  def scan_again_or_render_order_scan(input,state,id,over_ride)
     result = Hash.new
     result['status'] = true
     result['matched'] = true
@@ -637,7 +638,7 @@ module ScanPackHelper
     result
   end
 
-  def order_edit_conf(input,state,id)
+  def order_edit_conf(input,state,id,over_ride)
     result = Hash.new
     result['status'] = true
     result['matched'] = false
@@ -684,7 +685,7 @@ module ScanPackHelper
     return result
   end
 
-  def cos_conf(input,state,id)
+  def cos_conf(input,state,id,over_ride)
     result = Hash.new
     result['status'] = true
     result['matched'] = false
@@ -739,7 +740,7 @@ module ScanPackHelper
     return result
   end
 
-  def product_edit_conf(input,state,id)
+  def product_edit_conf(input,state,id,over_ride)
     result = Hash.new
     result['status'] = true
     result['matched'] = false

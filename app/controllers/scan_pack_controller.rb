@@ -30,7 +30,7 @@ class ScanPackController < ApplicationController
     else
 
       @matcher[params[:state]].each do |state_func|
-        output = send(state_func,params[:input],params[:state],params[:id])
+        output = send(state_func,params[:input],params[:state],params[:id],params[:over_ride])
         @result['error_messages'] = @result['error_messages'] + output['error_messages']
         @result['success_messages'] = @result['success_messages'] + output['success_messages']
         @result['notice_messages'] = @result['notice_messages'] + output['notice_messages']
