@@ -98,8 +98,10 @@ class OrdersController < ApplicationController
           import_item.save
           Groovepacker::Store::Context.new(
             Groovepacker::Store::Handlers::ShipworksHandler.new(credential.store,import_item)).import_order(params["ShipWorks"]["Customer"]["Order"])
-          import_item.status = 'completed'
-          import_item.save
+          if import_item.status != 'failed'
+            import_item.status = 'completed'
+            import_item.save
+          end
           render nothing: true
         else
           render status: 401, nothing: true
