@@ -66,7 +66,7 @@ module Groovepacker
               end
             else
               import_item.status = 'failed'
-              import_item.message = 'All import statuses disabled. Import skipped.'
+              import_item.message = 'No incoming orders with the currently enabled statuses.'
               import_item.save
             end
           end
