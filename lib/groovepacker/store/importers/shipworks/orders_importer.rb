@@ -115,7 +115,7 @@ module Groovepacker
               end
               internal_notes = notes.join(" || ")
             else
-              internal_notes = note ["Text"] if note["Visibility"] == "Internal"
+              internal_notes = order["Note"]["Text"] if order["Note"]["Visibility"] == "Internal"
             end
             internal_notes
           end
