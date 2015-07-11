@@ -20,7 +20,7 @@ module Groovepacker
                 ship_address = get_ship_address(order)
                 tracking_num = nil
                 tracking_num = order["Shipment"]["TrackingNumber"] unless order["Shipment"].nil?
-                notes_internal = get_internal_notes(order)
+                notes_internal = get_internal_notes(order) unless order["Note"].nil?
 
                 order_m = Order.create(
                   increment_id: order_number,
@@ -113,7 +113,7 @@ module Groovepacker
                   notes << note["Text"]
                 end
               end
-              internal_notes = notes.join("\n---------------------------\n")
+              internal_notes = notes.join(" || ")
             else
               internal_notes = note ["Text"] if note["Visibility"] == "Internal"
             end
