@@ -4,6 +4,9 @@ module Groovepacker
 			class << self
 				include Groovepacker::Inventory::Helper
 				def sell(order)
+					unless inventory_tracking_enabled?
+						return false
+					end
 					result = true
 					order.order_items.each do |order_item|
 						result &= process_sell_item(order_item)
@@ -12,6 +15,9 @@ module Groovepacker
 				end
 
 				def unsell(order)
+					unless inventory_tracking_enabled?
+						return false
+					end
 					result = true
 					order.order_items.each do |order_item|
 						result &= process_sell_item(order_item, -1)
@@ -20,6 +26,9 @@ module Groovepacker
 				end
 
 				def allocate(order)
+					unless inventory_tracking_enabled?
+						return false
+					end
 					result = true
 					order.order_items.each do |order_item|
 						result &= allocate_item(order_item, true)
@@ -28,6 +37,9 @@ module Groovepacker
 				end
 
 				def deallocate(order)
+					unless inventory_tracking_enabled?
+						return false
+					end
 					result = true
 					order.order_items.each do |order_item|
 						result &= deallocate_item(order_item, true)
@@ -35,8 +47,17 @@ module Groovepacker
 				end
 
 				def item_update(order_item, initial_count, final_count)
+					unless inventory_tracking_enabled?
+						return false
+					end
 					result = true
 					if order_item.is_inventory_allocated?
+						if initial_count.nil?
+							initial_count = 0
+						end
+						if final_count.nil?
+							final_count = 0
+						end
 						difference = final_count - initial_count
 						result &= do_allocate_item(order_item, difference)
 					elsif order_item.is_inventory_unprocessed?
@@ -48,6 +69,9 @@ module Groovepacker
 				end
 
 				def allocate_item(order_item, status_match = false)
+					unless inventory_tracking_enabled?
+						return false
+					end
 					if order_item.is_inventory_allocated? || order_item.is_inventory_sold?
 						return false
 					end
@@ -55,6 +79,9 @@ module Groovepacker
 				end
 
 				def deallocate_item(order_item, status_match = false)
+					unless inventory_tracking_enabled?
+						return false
+					end
 					unless order_item.is_inventory_allocated?
 						return false
 					end

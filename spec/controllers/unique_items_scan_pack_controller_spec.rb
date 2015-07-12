@@ -5,7 +5,7 @@ describe ScanPackController do
     @user = FactoryGirl.create(:user,:name=>'Admin Tester', :username=>"admin", :password=>'12345678')
     sign_in @user
     @inv_wh = FactoryGirl.create(:inventory_warehouse, :name=>'test_inventory_warehouse', :is_default=>true, :status=>"active")
-    @general_settings = FactoryGirl.create(:general_setting, :inventory_tracking=>true, :hold_orders_due_to_inventory=>true, :inventory_auto_allocation=>true)
+    @general_settings = FactoryGirl.create(:general_setting, :inventory_tracking=>true, :hold_orders_due_to_inventory=>true)
     @store = FactoryGirl.create(:store, :name=>'csv_store', :inventory_warehouse=>@inv_wh, :store_type=> 'CSV')
     @scan_pack_settings = ScanPackSetting.new
     @scan_pack_settings.save!

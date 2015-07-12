@@ -31,8 +31,8 @@ describe OrdersController do
   it "synchronizes available inventory and allocated inventory for kit items for kit_parsing as single" do
   	@product = FactoryGirl.create(:product, :name=>'KIT_PRODUCT', :total_avail_ext=>50, :is_kit=>true, :store=>@store, :kit_parsing=>'single')
 
-    create_order_info
     create_kit_item_info
+    create_order_info
 
     request.accept = "application/json"
     @order.update_order_status
@@ -51,8 +51,8 @@ describe OrdersController do
   	@product = FactoryGirl.create(:product, :name=>'KIT_PRODUCT', :total_avail_ext=>50, 
       :is_kit=>true, :store=>@store, :kit_parsing=>'individual')
 
-    create_order_info
     create_kit_item_info
+    create_order_info
 
     request.accept = "application/json"
     @order.update_order_status
@@ -71,8 +71,8 @@ describe OrdersController do
   it "synchronizes available inventory and allocated inventory for kit items for kit_parsing as depends" do
   	@product = FactoryGirl.create(:product, :name=>'KIT_PRODUCT', :total_avail_ext=>50, :is_kit=>true, :store=>@store, :kit_parsing=>'depends')
 
-	  create_order_info
     create_kit_item_info
+    create_order_info
 
     request.accept = "application/json"
     @order.update_order_status

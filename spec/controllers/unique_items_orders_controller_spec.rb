@@ -265,41 +265,42 @@ RSpec.describe OrdersController, :type => :controller do
       expect(order_item2.inv_status).to eq('allocated')
     end
 
-    it "inventory does not update if inventory_tracking is off when order is moved from awaiting to cancelled " do
-      request.accept = "application/json"
-      inv_wh = FactoryGirl.create(:inventory_warehouse)
-      general_setting = FactoryGirl.create(:general_setting, :inventory_tracking=>false)
-      store = FactoryGirl.create(:store, :inventory_warehouse_id => inv_wh.id)
-      @user_role.add_edit_order_items = true
-      @user_role.save
-      order = FactoryGirl.create(:order, :status=>'awaiting', :increment_id=>'1234567890', :store => store)
-      base_product = FactoryGirl.create(:product, :name=>"base product", :status=>'active')
-      base_product_sku = FactoryGirl.create(:product_sku, :product=> base_product)
-
-      child_product1 = FactoryGirl.create(:product, :name=>"child product1", :base_sku=>base_product.primary_sku)
-      child_product_sku1 = FactoryGirl.create(:product_sku, :sku=>'SKU1', :product=> child_product1)
-      child_product2 = FactoryGirl.create(:product, :name=>"child product2", :base_sku=>base_product.primary_sku)
-      child_product_sku2 = FactoryGirl.create(:product_sku, :sku=>'SKU2', :product=> child_product2)
-
-      order_item1 = FactoryGirl.create(:order_item, :product_id=>child_product1.id,
-                    :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>child_product1.name, :inv_status=>'allocated')
-      order_item2 = FactoryGirl.create(:order_item, :product_id=>child_product2.id,
-                    :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>child_product2.name, :inv_status=>'allocated')
-
-      product_inv_wh = FactoryGirl.create(
-        :product_inventory_warehouse, :product=> base_product,
-        :inventory_warehouse_id =>inv_wh.id, 
-        :available_inv => 25, :allocated_inv => 5)
-      
-      put :changeorderstatus, {:order_ids=>[order.id], :status=>'cancelled'}
-      expect(response.status).to eq(200)
-      product_inv_wh.reload
-      order_item1.reload
-      order_item2.reload
-      expect(product_inv_wh.allocated_inv).to eq(5)
-      expect(product_inv_wh.available_inv).to eq(25)
-      expect(order_item1.inv_status).to eq('allocated')
-      expect(order_item2.inv_status).to eq('allocated')
-    end
+		#turning inventory on and off will be handled by a batch process
+    # it "inventory does not update if inventory_tracking is off when order is moved from awaiting to cancelled " do
+    #   request.accept = "application/json"
+    #   inv_wh = FactoryGirl.create(:inventory_warehouse)
+    #   general_setting = FactoryGirl.create(:general_setting, :inventory_tracking=>false)
+    #   store = FactoryGirl.create(:store, :inventory_warehouse_id => inv_wh.id)
+    #   @user_role.add_edit_order_items = true
+    #   @user_role.save
+    #   order = FactoryGirl.create(:order, :status=>'awaiting', :increment_id=>'1234567890', :store => store)
+    #   base_product = FactoryGirl.create(:product, :name=>"base product", :status=>'active')
+    #   base_product_sku = FactoryGirl.create(:product_sku, :product=> base_product)
+		#
+    #   child_product1 = FactoryGirl.create(:product, :name=>"child product1", :base_sku=>base_product.primary_sku)
+    #   child_product_sku1 = FactoryGirl.create(:product_sku, :sku=>'SKU1', :product=> child_product1)
+    #   child_product2 = FactoryGirl.create(:product, :name=>"child product2", :base_sku=>base_product.primary_sku)
+    #   child_product_sku2 = FactoryGirl.create(:product_sku, :sku=>'SKU2', :product=> child_product2)
+		#
+    #   order_item1 = FactoryGirl.create(:order_item, :product_id=>child_product1.id,
+    #                 :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>child_product1.name, :inv_status=>'allocated')
+    #   order_item2 = FactoryGirl.create(:order_item, :product_id=>child_product2.id,
+    #                 :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>child_product2.name, :inv_status=>'allocated')
+		#
+    #   product_inv_wh = FactoryGirl.create(
+    #     :product_inventory_warehouse, :product=> base_product,
+    #     :inventory_warehouse_id =>inv_wh.id,
+    #     :available_inv => 25, :allocated_inv => 5)
+    #
+    #   put :changeorderstatus, {:order_ids=>[order.id], :status=>'cancelled'}
+    #   expect(response.status).to eq(200)
+    #   product_inv_wh.reload
+    #   order_item1.reload
+    #   order_item2.reload
+    #   expect(product_inv_wh.allocated_inv).to eq(5)
+    #   expect(product_inv_wh.available_inv).to eq(25)
+    #   expect(order_item1.inv_status).to eq('allocated')
+    #   expect(order_item2.inv_status).to eq('allocated')
+    # end
   end
 end

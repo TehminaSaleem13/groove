@@ -11,7 +11,8 @@ class OrderItem < ActiveRecord::Base
 
   after_create :add_kit_products
   before_destroy :delete_inventory
-  after_save :update_inventory_levels
+  after_create :create_inventory
+  after_update :update_inventory_levels
 
   # Move to enum when possible
   # :inv_status
@@ -274,6 +275,11 @@ class OrderItem < ActiveRecord::Base
   def delete_inventory
     Groovepacker::Inventory::Orders::deallocate_item(self)
     #send true regardless to avoid ghost data.
+    true
+  end
+
+  def create_inventory
+    Groovepacker::Inventory::Orders::allocate_item(self)
     true
   end
 
