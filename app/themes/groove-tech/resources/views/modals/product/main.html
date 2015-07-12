@@ -302,7 +302,7 @@
                         <td><a href="" ng-click="load_kit(kit_sku,$event)">{{kit_sku.name}}</a></td>
                         <td>{{kit_sku.sku}}</td>
                         <td groov-editable="kitEditableOptions" ng-model="kit_sku" prop="qty" identifier="kit_sku-qty-{{$index}}"></td>
-                        <td>{{kit_sku.qty_on_hand}}</td>
+                        <td>{{kit_sku.available_inv}}</td>
                         <td groov-editable="kitEditableOptions" ng-model="kit_sku" prop="packing_order" identifier="kit_sku-packing_order-{{$index}}"></td>
                     </tr>
                     </tbody>

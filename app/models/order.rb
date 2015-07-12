@@ -21,6 +21,14 @@ class Order < ActiveRecord::Base
   include OrdersHelper
   include ApplicationHelper
 
+  ALLOCATE_STATUSES = ['awaiting', 'onhold', 'serviceissue']
+  UNALLOCATE_STATUSES = ['cancelled']
+  SOLD_STATUSES = ['scanned']
+
+  def has_store_and_warehouse?
+    !self.store.nil? && self.store.ensure_warehouse?
+  end
+
   def addactivity(order_activity_message, username='', activity_type ='regular')
   	@activity = OrderActivity.new
   	@activity.order_id = self.id
@@ -166,13 +174,12 @@ class Order < ActiveRecord::Base
     result &= false if self.unacknowledged_activities.length > 0
     
     if result
-      self.status = "awaiting"
+      self.update_column(:status,'awaiting')
     else
-      self.status = "onhold"
+      self.update_column(:status,'scanned')
     end
 
-    self.save
-    self.apply_and_update_predefined_tags
+    #self.apply_and_update_predefined_tags
   end
 
   def has_unscanned_items
@@ -452,29 +459,12 @@ class Order < ActiveRecord::Base
 
   def reset_scanned_status
     self.order_items.each do |order_item|
-      #if item is a kit then make all order item product skus as also unscanned
-      if order_item.product.is_kit == 1
-        order_item.order_item_kit_products.each do |kit_product|
-          kit_product.scanned_status = 'unscanned'
-          kit_product.scanned_qty = 0
-          kit_product.save
-        end
-      end
-
-      order_item.scanned_status = 'unscanned'
-      order_item.scanned_qty = 0
-      order_item.kit_split = false
-      order_item.kit_split_qty = 0
-      order_item.kit_split_scanned_qty = 0
-      order_item.single_scanned_qty = 0
-      order_item.save
+      order_item.reset_scanned
     end
 
     self.order_serials.destroy_all
     self.set_order_status
-    self.scan_start_time = nil
-    self.update_inventory_levels_for_items(true)
-    self.save
+    self.update_column(:scan_start_time, nil)
   end
 
   def addtag(tag_id)
@@ -559,90 +549,36 @@ class Order < ActiveRecord::Base
     count
   end
 
-  def update_inventory_levels_for_items(override = true)
+  def update_inventory_levels_for_items
     changed_hash = self.changes
     logger.debug(changed_hash)
-    if self.update_inventory_level
-      unless changed_hash['status'].nil?
-        if (changed_hash['status'][0] == 'onhold' or
-            changed_hash['status'][0] == 'cancelled' or override) and
-           (changed_hash['status'][1] == 'awaiting' or
-            changed_hash['status'][1] == 'serviceissue')
-          #update_inventory_levels_for_purchase
-          reason = 'packing'
-        elsif (changed_hash['status'][0] == 'awaiting' or
-          changed_hash['status'][0] == 'serviceissue') and
-          (changed_hash['status'][1] == 'onhold' or
-          changed_hash['status'][1] == 'cancelled')
-          #update_inventory_levels_for_return
-          reason = 'return'
-        elsif changed_hash['status'][0] == 'onhold' and changed_hash['status'][1] == 'cancelled'
-          reason = 'return'
-        end
-        self.order_items.each do |order_item|
-          if reason == 'packing'
-            order_item.update_inventory_levels_for_packing(true)
-          elsif reason == 'return'
-            order_item.update_inventory_levels_for_return(true)
-          end
-        end
+    if changed_hash['status'].nil?
+      return true
+    end
+
+    initial_status = changed_hash['status'][0]
+    final_status = changed_hash['status'][1]
+    if ALLOCATE_STATUSES.include?(initial_status)
+      if UNALLOCATE_STATUSES.include?(final_status)
+        # Allocate -> unallocate = deallocate inv
+        Groovepacker::Inventory::Orders.deallocate(self)
+      elsif SOLD_STATUSES.include?(final_status)
+        # Allocate -> sold = sell inventory
+        Groovepacker::Inventory::Orders.sell(self)
       end
-
-      unless changed_hash['status'].nil?
-        #if changing for awaiting to scanned
-          if changed_hash['status'][0] == 'awaiting' and
-            changed_hash['status'][1] == 'scanned'
-            result = true
-            #move items from allocated to sold for each order items
-            self.order_items.each do |order_item|
-              result &= order_item.product.base_product.update_allocated_product_sold_level(self.store.inventory_warehouse_id,
-              order_item.qty, order_item)
-            end
-
-            logger.info('error updating sold inventory level') if !result
-          end
+    elsif UNALLOCATE_STATUSES.include?(initial_status)
+      if ALLOCATE_STATUSES.include?(final_status)
+        # Unallocate -> allocate = Allocate inventory
+        Groovepacker::Inventory::Orders.allocate(self)
+      end
+    elsif SOLD_STATUSES.include?(initial_status)
+      if ALLOCATE_STATUSES.include?(final_status)
+        Groovepacker::Inventory::Orders.unsell(self)
+        self.reset_scanned_status
       end
     end
-  end
-
-  def update_inventory_levels_for_status_change(override = true)
-    changed_hash = self.changes
-    unless changed_hash['status'].nil?
-      if GeneralSetting.first.inventory_auto_allocation
-        if (changed_hash['status'][0] == 'serviceissue' or
-            changed_hash['status'][0] == 'awaiting') and
-            changed_hash['status'][1] == 'scanned'
-          result = true
-          self.order_items.each do |order_item|
-            result &= order_item.product.base_product.update_allocated_product_sold_level(self.store.inventory_warehouse_id,
-            order_item.qty, order_item)
-          end
-        elsif changed_hash['status'][0] == 'cancelled' and 
-          changed_hash['status'][1] == 'scanned'
-          result =true
-          self.order_items.each do |order_item|
-            result &= order_item.update_inventory_levels_for_packing(true)
-            if result
-              result &= order_item.product.update_allocated_product_sold_level(self.store.inventory_warehouse_id,
-               order_item.qty, order_item)
-            end
-          end
-        end
-      # else
-      #   if (changed_hash['status'][0] == 'service issue' or
-      #       changed_hash['status'][0] == 'awaiting') and
-      #     changed_hash['status'][1] == 'scanned'
-      #     result = true
-      #     self.order_items.each do |order_item|
-      #       result &= order_item.update_inventory_levels_for_return(true)
-      #     end
-      #   elsif changed_hash['status'][0] == 'cancelled' and
-      #     (changed_hash['status'][1] == 'scanned')
-      #     result = true
-      #   end
-      end
-    end
-    logger.info('error updating inventory level') if !result
+    self.update_column(:reallocate_inventory, false)
+    true
   end
 
   def update_non_hyphen_increment_id

@@ -370,13 +370,20 @@ groovepacks_controllers.
                     available_inv: {
                         name: 'Available Inv',
                         model:'row.info',
+                        editable: false,
                         transclude: '<span>{{row.info.available_inv}}</span>'
                     },
+
                     allocated_inv: {
                         name: 'Allocated Inv',
                         model:'row.info',
                         editable:false,
                         transclude: '<span>{{row.info.allocated_inv}}</span>'
+                    },
+                    quantity_on_hand: {
+                        name: 'QoH',
+                        model:'row.info',
+                        transclude: '<span>{{row.info.quantity_on_hand}}</span>'
                     },
                     sold_inv: {
                         name: 'Sold Inv',
@@ -418,7 +425,6 @@ groovepacks_controllers.
                 update: scope.update_single_product,
                 elements: {
                     qty: {type:'number',min:0},
-                    qty_on_hand: {type:'number',min:0},
                     packing_order: {type:'number', min:0}
                 },
                 functions: {

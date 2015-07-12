@@ -24,6 +24,7 @@ groovepacks_services.factory('orders',['$http','$window','notification','$q',fun
                 offset: 0,
                 //used for updating only
                 status:'',
+                reallocate_inventory: false,
                 orderArray:[]
             },
             orders_count: {

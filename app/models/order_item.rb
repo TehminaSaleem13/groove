@@ -2,20 +2,32 @@ class OrderItem < ActiveRecord::Base
   belongs_to :order
   belongs_to :product
 
-  has_many :order_item_kit_products
+  has_many :order_item_kit_products, :dependent => :destroy
   has_many :order_item_order_serial_product_lots
+  has_many :sold_inventory_warehouses, :dependent => :destroy
   has_one :product_barcode
   has_one :product_sku
   attr_accessible :price, :qty, :row_total, :sku, :product, :product_is_deleted
 
-  after_create :update_inventory_levels_for_packing, :add_kit_products
-  before_destroy :update_inventory_levels_for_return
-  after_save :update_inventory_levels_for_kit_parsing_depends
+  after_create :add_kit_products
+  before_destroy :delete_inventory
+  after_save :update_inventory_levels
 
+  # Move to enum when possible
+  # :inv_status
+  DEFAULT_INV_STATUS = 'unprocessed'
+  ALLOCATED_INV_STATUS = 'allocated'
+  UNALLOCATED_INV_STATUS = 'unallocated'
+  SOLD_INV_STATUS = 'sold'
+
+  #:scanned_status
+  SCANNED_STATUS = 'scanned'
+  UNSCANNED_STATUS = 'unscanned'
+  PARTIALLY_SCANNED_STATUS = 'partially_scanned'
   def has_unscanned_kit_items
     result = false
     self.order_item_kit_products.each do |kit_product|
-    if kit_product.scanned_status != 'scanned'
+    if kit_product.scanned_status != SCANNED_STATUS
       result = true
       break
     end
@@ -23,13 +35,34 @@ class OrderItem < ActiveRecord::Base
     result
   end
 
+  def is_not_ghost?
+    !self.order.nil? && !self.product.nil? && self.order.has_store_and_warehouse?
+  end
+
+  def is_inventory_allocated?
+    self.inv_status == ALLOCATED_INV_STATUS
+  end
+
+  def is_inventory_unallocated?
+    self.inv_status == UNALLOCATED_INV_STATUS
+  end
+
+  def is_inventory_unprocessed?
+    self.inv_status == DEFAULT_INV_STATUS
+  end
+
+  def is_inventory_sold?
+    self.inv_status == SOLD_INV_STATUS
+  end
+
+
   def has_atleast_one_item_scanned
     result = false
     self.order_item_kit_products.each do |kit_product|
-    if kit_product.scanned_status != 'unscanned'
-      result = true
-      break
-    end
+      if kit_product.scanned_status != UNSCANNED_STATUS
+        result = true
+        break
+      end
     end
     result
   end
@@ -104,7 +137,7 @@ class OrderItem < ActiveRecord::Base
 
   def build_unscanned_single_item(depends_kit = false)
     result = Hash.new
-    if !self.product.nil?
+    unless self.product.nil?
       result = self.build_single_item(depends_kit)
       result['scanned_qty'] = self.scanned_qty
     end
@@ -113,7 +146,7 @@ class OrderItem < ActiveRecord::Base
 
   def build_unscanned_individual_kit (depends_kit = false)
     result = Hash.new
-    if !self.product.nil?
+    unless self.product.nil?
       result = self.build_individual_kit(depends_kit)
       self.order_item_kit_products.each do |kit_product|
         if !kit_product.product_kit_skus.nil? &&
@@ -131,7 +164,7 @@ class OrderItem < ActiveRecord::Base
 
   def build_scanned_single_item(depends_kit = false)
     result = Hash.new
-    if !self.product.nil?
+    unless self.product.nil?
       result = self.build_single_item(depends_kit)
       if depends_kit
         result['scanned_qty'] = self.single_scanned_qty
@@ -152,8 +185,8 @@ class OrderItem < ActiveRecord::Base
       self.order_item_kit_products.each do |kit_product|
         if !kit_product.product_kit_skus.nil? &&
             !kit_product.product_kit_skus.product.nil? &&
-            (kit_product.scanned_status == 'scanned' or
-                kit_product.scanned_status == 'partially_scanned')
+            (kit_product.scanned_status == SCANNED_STATUS or
+                kit_product.scanned_status == PARTIALLY_SCANNED_STATUS)
           child_item = self.build_single_child_item(kit_product,depends_kit)
           result['child_items'].push(child_item) if child_item['scanned_qty'] != 0
         end
@@ -179,9 +212,9 @@ class OrderItem < ActiveRecord::Base
         total_qty = self.qty - self.kit_split_qty
       end
       if self.scanned_qty == self.qty
-        self.scanned_status = 'scanned'
+        self.scanned_status = SCANNED_STATUS
       else
-        self.scanned_status = 'partially_scanned'
+        self.scanned_status = PARTIALLY_SCANNED_STATUS
       end
       self.save
     end
@@ -221,67 +254,34 @@ class OrderItem < ActiveRecord::Base
     result
   end
 
-  def update_inventory_levels_for_packing(override = false)
-    result = true
-    self.order.reload
-    if !self.order.nil? && self.inv_status != 'allocated' && self.order.status != 'cancelled' && self.order.status != 'scanned' && 
-      (self.order.status == 'awaiting' or override)
-      if !self.product.nil? && !self.order.store.nil? &&
-        !self.order.store.inventory_warehouse_id.nil?
-        result &= self.product.base_product.
-          update_available_product_inventory_level(self.order.store.inventory_warehouse_id,
-            self.qty, 'purchase')
-        
-        if !GeneralSetting.all.first.nil? && 
-              (GeneralSetting.all.first.inventory_tracking)
-          unless result
-              if GeneralSetting.all.first.hold_orders_due_to_inventory
-                self.order.status = 'onhold'
-                self.order.status_reason = 'on_hold_due_to_inventory'
-              end
-              self.inv_status = 'unallocated'
-              self.inv_status_reason = 'on_hold_due_to_inventory'
-          else
-            self.inv_status = 'allocated'
-          end
-        end
-        self.save
-        self.order.save
+  def reset_scanned
+    #if item is a kit then make all order item product skus as also unscanned
+    if self.product.is_kit == 1
+      self.order_item_kit_products.each do |kit_product|
+        kit_product.reset_scanned
       end
     end
-    result
+
+    self.scanned_status = UNSCANNED_STATUS
+    self.scanned_qty = 0
+    self.kit_split = false
+    self.kit_split_qty = 0
+    self.kit_split_scanned_qty = 0
+    self.single_scanned_qty = 0
+    self.save
   end
 
-  def update_inventory_levels_for_return (override = false)
+  def delete_inventory
+    Groovepacker::Inventory::Orders::deallocate_item(self)
+    #send true regardless to avoid ghost data.
+    true
+  end
+
+  def update_inventory_levels
     result = true
-    general_setting = GeneralSetting.all.first
-    if general_setting.inventory_tracking
-      if !self.order.nil? && self.inv_status != 'unallocated' &&
-          (self.order.status == 'awaiting' or override)
-        if !self.product.nil? && !self.order.store.nil? &&
-            !self.order.store.inventory_warehouse_id.nil?
-
-          result &= self.product.base_product.
-              update_available_product_inventory_level(self.order.store.inventory_warehouse_id,
-                                                       self.qty, 'return')
-
-          if !general_setting.nil? &&
-              (general_setting.inventory_tracking)
-            unless result
-              if general_setting.hold_orders_due_to_inventory
-                self.order.status = 'onhold'
-                self.order.status_reason = 'on_hold_due_to_inventory'
-              end
-              self.inv_status = 'allocated'
-              self.inv_status_reason = 'allocated_due_to_low_available_inventory'
-            else
-              self.inv_status = 'unallocated'
-            end
-          end
-          self.save
-          self.order.save
-        end
-      end
+    changed_hash = self.changes
+    if !changed_hash.nil? and (!changed_hash['qty'].nil?)
+      result &= Groovepacker::Inventory::Orders.item_update(self,changed_hash['qty'][0],changed_hash['qty'][1])
     end
     result
   end
@@ -301,52 +301,6 @@ class OrderItem < ActiveRecord::Base
 
   end
 
-
-  def update_inventory_levels_for_kit_parsing_depends()
-    result = true
-    if !self.product.nil? && self.product.kit_parsing == 'depends'
-      changed_hash = self.changes
-
-      # this condition gaurantees a new depends kit has been split dynamically
-      if !changed_hash.nil? and (!changed_hash['kit_split_qty'].nil?)
-
-
-        if (changed_hash['kit_split_qty'][0] < changed_hash['kit_split_qty'][1])
-          if !self.order.nil? &&
-            (self.order.status == 'awaiting')
-            if !self.product.nil? && !self.order.store.nil? &&
-              !self.order.store.inventory_warehouse_id.nil?
-              #return the single kit product
-              result &= self.product.base_product.
-                update_available_product_inventory_level(self.order.store.inventory_warehouse_id,
-                  1, 'return')
-
-              #foreach product skus, update the available inventory levels
-              self.product.product_kit_skuss.each do |kit_sku|
-                result &= kit_sku.option_product.update_available_product_inventory_level(
-                  self.order.store.inventory_warehouse_id,
-                  kit_sku.qty, 'purchase')
-              end
-            end
-          end
-        elsif (!changed_hash['kit_split_qty'][1].nil? && changed_hash['kit_split_qty'][0] != changed_hash['kit_split_qty'][1])
-          #reverse the procedure above. this is most likely used when order is reset
-          self.product.product_kit_skuss.each do |kit_sku|
-            result &= kit_sku.option_product.update_available_product_inventory_level(
-              self.order.store.inventory_warehouse_id,
-              changed_hash['kit_split_qty'][0] * kit_sku.qty, 'return')
-          end
-
-          result &= self.product.base_product.
-            update_available_product_inventory_level(self.order.store.inventory_warehouse_id,
-              changed_hash['kit_split_qty'][0], 'purchase')
-        end
-      end
-    end
-
-    result
-  end
-
   # def get_base_product
   #   if self.is_incremental_item
   #     return self.product.base_product
@@ -355,7 +309,7 @@ class OrderItem < ActiveRecord::Base
   #   end
   # end
 
-  def get_lot_number()
+  def get_lot_number
     unless self.product_lots.empty?
       return self.product_lots
     else

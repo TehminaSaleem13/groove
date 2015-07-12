@@ -31,6 +31,15 @@ class Product < ActiveRecord::Base
 
   after_save :check_inventory_warehouses
 
+  SINGLE_KIT_PARSING = 'single'
+  DEPENDS_KIT_PARSING = 'depends'
+  INDIVIDUAL_KIT_PARSING = 'individual'
+
+  SINGLE_SCAN_STATUSES = [SINGLE_KIT_PARSING, DEPENDS_KIT_PARSING]
+  INDIVIDUAL_SCAN_STATUSES = [INDIVIDUAL_KIT_PARSING]
+
+
+
   def self.to_csv(folder,options= {})
     require 'csv'
     response = {}
@@ -69,12 +78,12 @@ class Product < ActiveRecord::Base
   def check_inventory_warehouses
     if self.product_inventory_warehousess.length == 0
       inventory = ProductInventoryWarehouses.new
-      inventory.product = self
+      inventory.product_id = self.id
       inventory.inventory_warehouse = InventoryWarehouse.where(:is_default => true).first
       inventory.save
-      self.product_inventory_warehousess << inventory
-      self.save
     end
+
+    true
   end
 
   def update_product_status (force_from_inactive_state = false)
@@ -194,87 +203,18 @@ class Product < ActiveRecord::Base
     self.save
   end
 
-  def update_available_product_inventory_level(inventory_warehouse_id, purchase_qty, reason)
-    result = true
-    if self.is_kit != 1 or
-      (self.is_kit == 1 and (self.kit_parsing == 'single' or self.kit_parsing == 'depends'))
-       result &= self.update_warehouses_inventory_level(inventory_warehouse_id, self.id,
-      purchase_qty, reason)
-    else
-      if self.kit_parsing == 'individual'
-        #update all kits products inventory warehouses
-        self.product_kit_skuss.each do |kit_item|
-          result &= self.update_warehouses_inventory_level(inventory_warehouse_id, kit_item.option_product_id,
-            purchase_qty * kit_item.qty, reason)
-        end
-      end
+  def should_scan_as_single_product?
+    if self.is_kit == 1
+      return SINGLE_SCAN_STATUSES.include? self.kit_parsing
     end
-
-  result
+    true
   end
 
-  def update_allocated_product_sold_level(inventory_warehouse_id, allocated_qty,
-    order_item =nil)
-    result = true
-
-    if self.is_kit != 1 or
-      (self.is_kit == 1 and self.kit_parsing == 'single')
-       result &= self.update_warehouses_sold_level(inventory_warehouse_id, self.id,
-      allocated_qty)
-    else
-      if self.kit_parsing == 'individual'
-        #update all kits products inventory warehouses
-        self.product_kit_skuss.each do |kit_item|
-          result &= self.update_warehouses_sold_level(inventory_warehouse_id, kit_item.option_product_id,
-            allocated_qty * kit_item.qty)
-        end
-      elsif self.kit_parsing == 'depends'
-        self.product_kit_skuss.each do |kit_sku|
-          result &= self.update_warehouses_sold_level(inventory_warehouse_id,
-            kit_sku.option_product_id,
-          order_item.kit_split_scanned_qty)
-        end
-        result &= self.update_warehouses_sold_level(inventory_warehouse_id, self.id,
-        order_item.single_scanned_qty)
-      end
+  def should_scan_as_individual_items?
+    if self.is_kit == 1
+      return INDIVIDUAL_SCAN_STATUSES.include? self.kit_parsing
     end
-
-  result
-  end
-
-  def update_warehouses_inventory_level(inv_wh_id, product_id, purchase_qty, reason)
-    result = true
-    prod_warehouses = ProductInventoryWarehouses.where(:inventory_warehouse_id =>
-      inv_wh_id).where(:product_id => product_id)
-
-    unless prod_warehouses.length == 1
-      result &= false
-    end
-
-    unless !result
-      prod_warehouses.each do |wh|
-        result = wh.update_available_inventory_level(purchase_qty, reason)
-      end
-    end
-
-    result
-  end
-
-  def update_warehouses_sold_level(inv_wh_id, product_id, allocated_qty)
-  result = true
-    prod_warehouses = ProductInventoryWarehouses.where(:inventory_warehouse_id =>
-      inv_wh_id).where(:product_id => product_id)
-
-    unless prod_warehouses.length == 1
-      result &= false
-    end
-    unless !result
-      prod_warehouses.each do |wh|
-        wh.update_sold_inventory_level(allocated_qty)
-      end
-   end
-
-  result
+    false
   end
 
   def get_total_avail_loc

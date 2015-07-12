@@ -358,9 +358,7 @@ module ScanPackHelper
                   single_order.order_items.each do |item|
                     if item.product == product
                       store_lot_number(scanpack_settings, input, item, serial_added, result)
-                      item.update_inventory_levels_for_return(true)
                       item.qty += 1
-                      item.update_inventory_levels_for_packing(true)
                       item.scanned_status = 'partially_scanned'
                       item.save
                       single_order.addactivity("Item with SKU: #{item.sku} Added", current_user.username)

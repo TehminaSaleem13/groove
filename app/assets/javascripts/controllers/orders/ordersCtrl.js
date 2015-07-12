@@ -60,12 +60,18 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
     // };
 
     $scope.order_change_status = function(status) {
+        if($state.params.filter == "scanned") {
+            $scope.orders.setup.reallocate_inventory = confirm("Should inventory deduct from available for allocation?");
+        }
         $scope.orders.setup.status = status;
-        orders.list.update('update_status',$scope.orders).then(function(data) {
+        orders.list.update('update_status', $scope.orders).then(function(data) {
             $scope.orders.setup.status = "";
             myscope.get_orders();
         });
     };
+
+
+
     $scope.order_delete = function() {
         orders.list.update('delete',$scope.orders).then(function(data) {
             myscope.get_orders();
@@ -130,6 +136,11 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
             $scope.select_all_toggle(false);
             $state.go(toState,toParams);
         }
+    };
+
+    myscope.reset_change_status = function() {
+        $scope.allow_status_changes.cancelled = $state.params.filter != "scanned";
+        $scope.allow_status_changes.scanned = $state.params.filter != "cancelled"
     };
 
     myscope.update_selected_count = function() {
@@ -219,6 +230,7 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
         if(typeof page == 'undefined') {
             page = $state.params.page;
         }
+        myscope.reset_change_status();
         if($scope._can_load_orders) {
             $scope._can_load_orders = false;
             return orders.list.get($scope.orders,page).success(function(data) {
@@ -255,6 +267,10 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
         $scope.orders = orders.model.get();
         $scope.firstOpen = true;
         $scope.general_settings = generalsettings.model.get();
+        $scope.allow_status_changes = {
+            scanned: true,
+            cancelled:true
+        };
         generalsettings.single.get($scope.general_settings);
 
         //Private properties
