@@ -551,17 +551,18 @@ class Order < ActiveRecord::Base
 
   def update_inventory_levels_for_items
     changed_hash = self.changes
-    logger.debug(changed_hash)
+    #TODO: remove this from here as soon as possible.
+    # Very slow way to ensure inventory always gets allocated
+    Groovepacker::Inventory::Orders.allocate(self)
     if changed_hash['status'].nil?
       return true
     end
-
     initial_status = changed_hash['status'][0]
     final_status = changed_hash['status'][1]
     if ALLOCATE_STATUSES.include?(initial_status)
       if UNALLOCATE_STATUSES.include?(final_status)
         # Allocate -> unallocate = deallocate inv
-        Groovepacker::Inventory::Orders.deallocate(self)
+        Groovepacker::Inventory::Orders.deallocate(self, true)
       elsif SOLD_STATUSES.include?(final_status)
         # Allocate -> sold = sell inventory
         Groovepacker::Inventory::Orders.sell(self)
@@ -569,7 +570,7 @@ class Order < ActiveRecord::Base
     elsif UNALLOCATE_STATUSES.include?(initial_status)
       if ALLOCATE_STATUSES.include?(final_status)
         # Unallocate -> allocate = Allocate inventory
-        Groovepacker::Inventory::Orders.allocate(self)
+        Groovepacker::Inventory::Orders.allocate(self, true)
       end
     elsif SOLD_STATUSES.include?(initial_status)
       if ALLOCATE_STATUSES.include?(final_status)
