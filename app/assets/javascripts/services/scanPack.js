@@ -81,6 +81,16 @@ groovepacks_services.factory('scanPack',['$http','notification','$state',functio
             }
         }).error(notification.server_error);
     };
+
+    var update_intagibleness = function(model) {
+        return $http.post('/products/update_intangibleness.json', model.settings).success(function(data) {
+            if(data.status) {
+                notification.notify("updating products queued successfully");
+            } else {
+                notification.notify(data.messages,0);
+            }
+        }).error(notification.server_error);
+    };
     
     var code_confirm = function(code) {
         return $http.post('/scan_pack/confirmation_code.json',{code: code}).success(function(data) {
@@ -141,6 +151,7 @@ groovepacks_services.factory('scanPack',['$http','notification','$state',functio
         code_confirm: code_confirm,
         order_instruction: order_instruction,
         product_instruction: product_instruction,
-        product_serial:serial_scan
+        product_serial:serial_scan,
+        update_products: update_intagibleness
     };
 }]);

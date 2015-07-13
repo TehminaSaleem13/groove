@@ -387,7 +387,12 @@ groovepacks_controllers.
                         image: {
                             name:"Primary Image",
                             editable:false,
-                            transclude:'<div ng-click="options.editable.functions.name(row,$event)" class="pointer single-image"><img class="img-responsive" ng-src="{{row.image}}" /></div>'
+                            transclude:"<div ng-show=\"row.productinfo.is_intangible == false\" " + 
+                                       "ng-click=\"options.editable.functions.name(row,$event)\"" +
+                                       " class=\"pointer single-image\"><img class=\"img-responsive\" ng-src=\"{{row.image}}\" /></div>" + 
+                                       "<div ng-show=\"row.productinfo.is_intangible\" " + 
+                                       "ng-click=\"options.editable.functions.name(row,$event)\" " +
+                                       "class=\"pointer single-image\"><img class=\"img-responsive img-reduced-transparency\" ng-src=\"{{row.image}}\" /></div>"
                         },
                         name: {
                             name:"Product",

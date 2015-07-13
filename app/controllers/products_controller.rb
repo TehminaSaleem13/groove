@@ -1374,6 +1374,28 @@ class ProductsController < ApplicationController
     end
   end
 
+  def update_intangibleness
+    result = Hash.new
+    result['status'] = true
+    if current_user.can?('add_edit_products')
+      action_intangible = Groovepacker::Products::ActionIntangible.new
+
+      scan_pack_setting = ScanPackSetting.all.first
+      intangible_setting_enabled = scan_pack_setting.intangible_setting_enabled
+      intangible_string = scan_pack_setting.intangible_string
+
+      action_intangible.delay(:run_at =>1.seconds.from_now).update_intangibleness(Apartment::Tenant.current_tenant, params, intangible_setting_enabled, intangible_string)
+      # action_intangible.update_intangibleness(Apartment::Tenant.current_tenant, params, scan_pack_setting)
+    else
+      result['status'] = false
+      result['messages'].push('You do not have enough permissions to edit product status')
+    end
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json: result }
+    end
+  end
+
   private
 
   def get_weight_format(weight_format)

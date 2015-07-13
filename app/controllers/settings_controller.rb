@@ -687,6 +687,8 @@ class SettingsController < ApplicationController
         scan_pack_setting.show_customer_notes = params[:show_customer_notes]
         scan_pack_setting.show_internal_notes = params[:show_internal_notes]
         scan_pack_setting.scan_by_tracking_number = params[:scan_by_tracking_number]
+        scan_pack_setting.intangible_setting_enabled = params[:intangible_setting_enabled]
+        scan_pack_setting.intangible_string = params[:intangible_string]
 
         if scan_pack_setting.save
           @result['success_messages'].push('Settings updated successfully.')
