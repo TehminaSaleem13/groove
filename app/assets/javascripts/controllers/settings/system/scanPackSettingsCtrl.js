@@ -94,8 +94,9 @@ function( $scope, $http, $timeout, $location, $state, $cookies, scanPack,groov_t
     };
 
     $scope.update_product_intangibleness = function() {
-        scanPack.update_products($scope.scan_pack);
-        $scope.update_settings();
+        scanPack.update_products($scope.scan_pack).then(function(data){
+            $scope.update_settings();
+        });
     };
 
     $scope.update_settings = function() {

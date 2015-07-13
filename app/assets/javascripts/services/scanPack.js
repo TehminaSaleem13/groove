@@ -83,7 +83,7 @@ groovepacks_services.factory('scanPack',['$http','notification','$state',functio
     };
 
     var update_intagibleness = function(model) {
-        return $http.post('/products/update_intagibleness.json', model.settings).success(function(data) {
+        return $http.post('/products/update_intangibleness.json', model.settings).success(function(data) {
             if(data.status) {
                 notification.notify(data.success_messages,1);
             } else {
