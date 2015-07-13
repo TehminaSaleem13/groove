@@ -145,12 +145,12 @@ module Groovepacker
 									#add inventory warehouses
 									product_inventory = {}
 									product_inventory[:inventory_warehouse_id] = default_inventory_warehouse_id
-									product_inventory[:available_inv] = 0
+									product_inventory[:quantity_on_hand] = 0
 									product_inventory[:location_primary] = ''
 									product_inventory[:location_secondary] = ''
 									product_inventory[:location_tertiary] = ''
 									if !mapping['inv_wh1'].nil? && mapping['inv_wh1'][:position] >= 0
-										product_inventory[:available_inv] = single_row[mapping['inv_wh1'][:position]]
+										product_inventory[:quantity_on_hand] = single_row[mapping['inv_wh1'][:position]]
 									end
 									if !mapping['location_primary'].nil? && mapping['location_primary'][:position] >= 0
 										product_inventory[:location_primary] = single_row[mapping['location_primary'][:position]]
@@ -284,7 +284,7 @@ module Groovepacker
 									default_inventory = ProductInventoryWarehouses.find_or_create_by_inventory_warehouse_id_and_product_id(default_inventory_warehouse_id, duplicate_product.id)
 									updatable_record = record[:inventory].first
 									if !mapping['inv_wh1'].nil? #&& mapping['inv_wh1'][:action] =='overwrite'
-										default_inventory.available_inv = updatable_record[:available_inv]
+										default_inventory.quantity_on_hand = updatable_record[:quantity_on_hand]
 									end
 									if !mapping['location_primary'].nil? #&& mapping['location_primary'][:action] =='overwrite'
 										default_inventory.location_primary = updatable_record[:location_primary]
@@ -485,7 +485,7 @@ module Groovepacker
 										product_inv_wh.location_primary = warehouse[:location_primary]
 										product_inv_wh.location_secondary = warehouse[:location_secondary]
 										product_inv_wh.location_tertiary = warehouse[:location_tertiary]
-										product_inv_wh.available_inv = warehouse[:available_inv]
+										product_inv_wh.quantity_on_hand = warehouse[:quantity_on_hand]
 										product_inv_wh.product_id = product_id
 										import_product_inventory_warehouses << product_inv_wh
 									end

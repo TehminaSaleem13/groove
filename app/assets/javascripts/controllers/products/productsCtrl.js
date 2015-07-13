@@ -271,7 +271,7 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
                             {name: "New", value: 'new'}
                         ]
                     },
-                    qty:{
+                    qty_on_hand:{
                         type: 'number',
                         min: 0
                     }
@@ -313,8 +313,12 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
                     name: "Store",
                     editable: false
                 },
-                qty: {
-                    name: "Avbl Inv"
+                qty_on_hand:{
+                    name: "QoH"
+                },
+                available_inv: {
+                    name: "Avbl Inv",
+                    editable: false
                 },
                 cat:{
                     name: "Category",

@@ -363,7 +363,6 @@ groovepacks_controllers.
                         print_status:scope.update_print_status,
                         elements: {
                             qty: {type:'number',min:0},
-                            qty_on_hand: {type:'number',min:0},
                             is_skippable: {
                                 type:'select',
                                 options:[
@@ -424,7 +423,7 @@ groovepacks_controllers.
                         location_primary: {
                             name:"Primary Location"
                         },
-                        qty_on_hand: {
+                        available_inv: {
                             name:"Available Inv",
                             editable:false,
                             hidden:true

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150710141455) do
+ActiveRecord::Schema.define(:version => 20150711221826) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0, :null => false
@@ -180,7 +180,6 @@ ActiveRecord::Schema.define(:version => 20150710141455) do
     t.string   "conf_code_product_instruction",     :default => "optional"
     t.string   "admin_email"
     t.string   "export_items",                      :default => "disabled"
-    t.boolean  "inventory_auto_allocation",         :default => false
   end
 
   create_table "generate_barcodes", :force => true do |t|
@@ -461,6 +460,7 @@ ActiveRecord::Schema.define(:version => 20150710141455) do
     t.string   "method"
     t.datetime "created_at",                                                               :null => false
     t.datetime "updated_at",                                                               :null => false
+    t.string   "store_order_id"
     t.text     "notes_internal"
     t.text     "notes_toPacker"
     t.text     "notes_fromPacker"
@@ -481,10 +481,9 @@ ActiveRecord::Schema.define(:version => 20150710141455) do
     t.integer  "weight_oz"
     t.string   "non_hyphen_increment_id"
     t.boolean  "note_confirmation",                                     :default => false
-    t.string   "store_order_id"
-    t.boolean  "update_inventory_level",                                :default => true
     t.integer  "inaccurate_scan_count",                                 :default => 0
     t.datetime "scan_start_time"
+    t.boolean  "reallocate_inventory",                                  :default => false
   end
 
   create_table "product_barcodes", :force => true do |t|
@@ -734,7 +733,10 @@ ActiveRecord::Schema.define(:version => 20150710141455) do
     t.datetime "sold_date"
     t.datetime "created_at",                      :null => false
     t.datetime "updated_at",                      :null => false
+    t.integer  "order_item_id"
   end
+
+  add_index "sold_inventory_warehouses", ["order_item_id"], :name => "index_sold_inventory_warehouses_on_order_item_id"
 
   create_table "stores", :force => true do |t|
     t.string   "name",                                             :null => false

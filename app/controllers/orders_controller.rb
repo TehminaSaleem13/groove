@@ -98,8 +98,10 @@ class OrdersController < ApplicationController
           import_item.save
           Groovepacker::Store::Context.new(
             Groovepacker::Store::Handlers::ShipworksHandler.new(credential.store,import_item)).import_order(params["ShipWorks"]["Customer"]["Order"])
-          import_item.status = 'completed'
-          import_item.save
+          if import_item.status != 'failed'
+            import_item.status = 'completed'
+            import_item.save
+          end
           render nothing: true
         else
           render status: 401, nothing: true
@@ -255,8 +257,13 @@ class OrdersController < ApplicationController
             #add activity
             @order_items = @order.order_items
             @order_items.each do |order_item|
-              neworder_item = order_item.dup
+              neworder_item = OrderItem.new
               neworder_item.order_id = @neworder.id
+              neworder_item.product_id = order_item.product_id
+              neworder_item.qty = order_item.qty
+              neworder_item.name = order_item.name
+              neworder_item.price = order_item.price
+              neworder_item.row_total = order_item.row_total
               neworder_item.save
             end
             username = current_user.name
@@ -285,9 +292,6 @@ class OrdersController < ApplicationController
       unless @orders.nil?
         @orders.each do|order|
           @order = Order.find(order["id"])
-          # in order to adjust inventory on deletion of order assign order status as 'cancelled'
-          @order.status = 'cancelled'
-          @order.save
           if @order.destroy
             @result['status'] &= true
           else
@@ -343,27 +347,24 @@ class OrdersController < ApplicationController
         @orders.each do|order|
           @order = Order.find(order['id'])
           
-          if @order.status =='scanned' && params[:status] =='awaiting'
-            @order.reset_scanned_status
-            @result['notice_messages'].push('Items in scanned orders have already been removed from inventory so no further inventory adjustments will be made during packing.')
-          end
-          @order.status = params[:status]
+          if (Order::SOLD_STATUSES.include?(@order.status) && Order::UNALLOCATE_STATUSES.include?(params[:status])) ||
+              (Order::UNALLOCATE_STATUSES.include?(@order.status) && Order::SOLD_STATUSES.include?(params[:status]))
 
-          if params[:status] == 'scanned'
-            @order.update_inventory_level = false
-            @order.update_inventory_levels_for_status_change
-          end 
-          unless @order.save
-            @result['status'] = false
-            @result['error_messages'] = @order.errors.full_messages
+            @result['error_messages'].push('This status change is not permitted.')
+          else
+            @order.status = params[:status]
+            @order.reallocate_inventory = params[:reallocate_inventory]
+            unless @order.save
+              @result['status'] = false
+              @result['error_messages'] = @order.errors.full_messages
+            end
           end
         end
       end
     else
       @result['status'] = false
-      @result['error_messages'].push("You do not have enough permissions to delete order")
+      @result['error_messages'].push("You do not have enough permissions to change order status")
     end
-    @order.update_inventory_level = true
     respond_to do |format|
       format.html # show.html.erb
       format.json { render json: @result }
@@ -390,9 +391,9 @@ class OrdersController < ApplicationController
           @orderitem['productimages'] = nil
         else
           @orderitem['productinfo'] = product
-          @orderitem['qty_on_hand'] = 0
+          @orderitem['available_inv'] = 0
           product.product_inventory_warehousess.each do |inventory|
-            @orderitem['qty_on_hand'] +=  inventory.available_inv.to_i
+            @orderitem['available_inv'] +=  inventory.available_inv.to_i
           end
           if product.product_inventory_warehousess.length > 0
             @orderitem['location_primary'] =
@@ -598,13 +599,7 @@ class OrdersController < ApplicationController
         @result['messages'].push("Could not find order item")
       else
         if params.keys.include? ('qty')
-          if GeneralSetting.first.inventory_auto_allocation
-            @orderitem.update_inventory_levels_for_return(true)
-            @orderitem.qty = params[:qty]
-            @orderitem.update_inventory_levels_for_packing(true)
-          else
-            @orderitem.qty = params[:qty]
-          end
+          @orderitem.qty = params[:qty]
           unless @orderitem.save
             @result['status'] &= false
             @result['messages'].push("Could not update order item")
@@ -726,7 +721,6 @@ class OrdersController < ApplicationController
                 current_product = Product.find(current_item['iteminfo']['product_id'])
                 updatelist(current_product,'name',current_item['productinfo']['name'])
                 updatelist(current_product,'is_skippable',current_item['productinfo']['is_skippable'])
-                updatelist(current_product,'qty',current_item['qty_on_hand'])
                 updatelist(current_product,'location_name',current_item['location'])
                 updatelist(current_product,'sku',current_item['sku'])
               rescue Exception => e

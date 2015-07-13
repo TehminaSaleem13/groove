@@ -42,7 +42,7 @@ module Groovepacker
               end
 
               unless response["orders"].nil? 
-                result[:total_imported] = response["orders"].length          
+                result[:total_imported] = response["orders"].length
                 import_item.current_increment_id = ''
                 import_item.success_imported = 0
                 import_item.previous_imported = 0

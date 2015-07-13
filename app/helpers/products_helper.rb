@@ -85,7 +85,7 @@ module ProductsHelper
       product.primary_category = value
     elsif var ==  'barcode'
       product.primary_barcode = value
-    elsif ['location_primary' ,'location_secondary', 'location_tertiary','location_name','qty'].include?(var)
+    elsif ['location_primary' ,'location_secondary', 'location_tertiary','location_name','qty_on_hand'].include?(var)
       product_location = product.primary_warehouse
       if product_location.nil?
         product_location = ProductInventoryWarehouses.new
@@ -100,42 +100,12 @@ module ProductsHelper
           product_location.location_tertiary = value
         elsif var == 'location_name'
           product_location.name = value
-        elsif var == 'qty'
-          if product.base_sku.nil?
-            product_location.available_inv = value
-            if GeneralSetting.first.inventory_auto_allocation == true
-              product_location.save
-              @order_items = []
-              @order_items = product_location.product.order_items unless product_location.product.order_items.empty?
-              products = Product.where(:base_sku => product_location.product.primary_sku)
-              unless products.empty?
-                products.each do |child_product|
-                  unless child_product.order_items.empty?
-                    child_product.order_items.each do |order_item|
-                      @order_items << order_item
-                    end
-                  end
-                end
-              end
-              @order_items.each do |order_item|
-                order_item.order.update_inventory_level = false
-                order_item.order.save
-                if order_item.qty <= product_location.available_inv && order_item.inv_status != 'allocated'
-                  order_item.update_inventory_levels_for_packing(true)
-                end
-              end
-            end
-          end
+        elsif var == 'qty_on_hand'
+          product_location.quantity_on_hand= value
         end
       product_location.save
     end
     product.update_product_status
-    unless @order_items.nil?
-      @order_items.each do |order_item|
-        order_item.order.update_inventory_level = true
-        order_item.order.save
-      end
-    end
     rescue Exception => e
       puts e.inspect
     end

@@ -15,6 +15,7 @@ module ScanPackHelper
     scanpack_settings = ScanPackSetting.all.first
 
     session[:most_recent_scanned_products] = []
+    session[:parent_order_item] = false
     if !input.nil? && input != ""
       orders = Order.where(['increment_id = ? or non_hyphen_increment_id =?', input, input])
       if orders.length==0 && scanpack_settings.scan_by_tracking_number
@@ -291,6 +292,7 @@ module ScanPackHelper
                             if serial_added
                               order_item_kit_product.process_item(clicked, current_user.username)
                               (session[:most_recent_scanned_products] ||= []) << child_item['product_id']
+                              session[:parent_order_item] = item['order_item_id']
                             else
                               result['data']['serial']['ask'] = true
                               result['data']['serial']['product_id'] = child_item['product_id']
@@ -298,6 +300,8 @@ module ScanPackHelper
                           else
                             order_item_kit_product.process_item(clicked, current_user.username)
                             (session[:most_recent_scanned_products] ||= []) << child_item['product_id']
+                            session[:parent_order_item] = item['order_item_id']
+
                           end
                         end
 
@@ -358,9 +362,7 @@ module ScanPackHelper
                   single_order.order_items.each do |item|
                     if item.product == product
                       store_lot_number(scanpack_settings, input, item, serial_added, result)
-                      item.update_inventory_levels_for_return(true)
                       item.qty += 1
-                      item.update_inventory_levels_for_packing(true)
                       item.scanned_status = 'partially_scanned'
                       item.save
                       single_order.addactivity("Item with SKU: #{item.sku} Added", current_user.username)
@@ -467,6 +469,10 @@ module ScanPackHelper
         if serial_added
           order_item.process_item(clicked, current_user.username)
           (session[:most_recent_scanned_products] ||= []) << order_item.product_id
+          session[:parent_order_item] = false
+          if order_item.product.is_kit == 1
+            session[:parent_order_item] = order_item.id
+          end
         else
           result['data']['serial']['ask'] = true
           result['data']['serial']['product_id'] = order_item.product_id
@@ -474,6 +480,10 @@ module ScanPackHelper
       else
         order_item.process_item(clicked, current_user.username)
         (session[:most_recent_scanned_products] ||= []) << order_item.product_id
+        session[:parent_order_item] = false
+        if order_item.product.is_kit == 1
+          session[:parent_order_item] = order_item.id
+        end
       end
     end
     result
@@ -801,7 +811,13 @@ module ScanPackHelper
       unless session[:most_recent_scanned_products].nil?
         session[:most_recent_scanned_products].reverse!.each do |scanned_product_id|
           data['unscanned_items'].each do |unscanned_item|
-            if unscanned_item['product_type'] == 'single' &&
+            if session[:parent_order_item] && session[:parent_order_item] == unscanned_item['order_item_id']
+              session[:parent_order_item] = false
+              if unscanned_item['product_type'] == 'individual' && !unscanned_item['child_items'].empty?
+                data['next_item'] = unscanned_item['child_items'].first.clone
+                break
+              end
+            elsif unscanned_item['product_type'] == 'single' &&
                 scanned_product_id == unscanned_item['product_id'] &&
                 unscanned_item['scanned_qty'] + unscanned_item['qty_remaining'] > 0
               data['next_item'] = unscanned_item.clone

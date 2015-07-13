@@ -26,8 +26,10 @@ describe ScanPackController do
   end
   it "synchronizes available inventory, allocated inventory and sold_qty for kit items with kit_parsing as single" do
     @product = FactoryGirl.create(:product, :name=>'KIT_PRODUCT', :total_avail_ext=>50, :is_kit=>true, :store=>@store, :kit_parsing=>'single')
-    create_order_info
+
     create_kit_item_info
+    create_order_info
+
 
     request.accept = "application/json"
     @order.set_order_status
@@ -49,8 +51,10 @@ describe ScanPackController do
   end
   it "synchronizes available inventory, allocated inventory and sold_qty for kit items with kit_parsing as individual" do
     @product = FactoryGirl.create(:product, :name=>'KIT_PRODUCT', :total_avail_ext=>50, :is_kit=>true, :store=>@store, :kit_parsing=>'individual')
-    create_order_info
+
     create_kit_item_info
+    create_order_info
+
 
     request.accept = "application/json"
     @order.set_order_status
@@ -74,9 +78,11 @@ describe ScanPackController do
   end
   it "synchronizes available inventory, allocated inventory and sold_qty for kit items with kit_parsing as depends scan as single" do
     @product = FactoryGirl.create(:product, :name=>'KIT_PRODUCT', :total_avail_ext=>50, :is_kit=>true, :store=>@store, :kit_parsing=>'depends')
-    create_order_info
-    
+
+
     create_kit_item_info
+    create_order_info
+
 
     request.accept = "application/json"
     @order.set_order_status
@@ -112,9 +118,9 @@ describe ScanPackController do
   end
   it "synchronizes available inventory, allocated inventory and sold_qty for kit items with kit_parsing as depends scan as individual" do
     @product = FactoryGirl.create(:product, :name=>'KIT_PRODUCT', :total_avail_ext=>50, :is_kit=>true, :store=>@store, :kit_parsing=>'depends')
-    create_order_info
-    
+
     create_kit_item_info
+		create_order_info
 
     request.accept = "application/json"
     @order.set_order_status

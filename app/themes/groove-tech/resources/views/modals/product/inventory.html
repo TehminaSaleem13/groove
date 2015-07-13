@@ -66,7 +66,7 @@
                         <td>{{products_inv_manager.single.skus[0].sku}}</td>
                         <td><span ng-repeat="warehouse in products_inv_manager.single.inventory_warehouses"
                                   ng-show="warehouse.warehouse_info.id == inventory_manager.single.inv_wh_id">
-                    {{warehouse.info.available_inv}}</span></td>
+                    {{warehouse.info.quantity_on_hand}}</span></td>
                         <td><span ng-repeat="warehouse in products_inv_manager.single.inventory_warehouses"
                                   ng-show="warehouse.warehouse_info.id == inventory_manager.single.inv_wh_id">
                     {{warehouse.warehouse_info.name}}</span></td>

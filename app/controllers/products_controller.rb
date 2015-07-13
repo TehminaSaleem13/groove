@@ -614,6 +614,7 @@ class ProductsController < ApplicationController
         ).length > 0
           inv_wh_result = Hash.new
           inv_wh_result['info'] = inv_wh.attributes
+          inv_wh_result['info']['quantity_on_hand'] = inv_wh.quantity_on_hand
           inv_wh_result['info']['sold_inv'] = SoldInventoryWarehouse.sum(
               :sold_qty,
               :conditions => {:product_inventory_warehouses_id => inv_wh.id}
@@ -643,9 +644,9 @@ class ProductsController < ApplicationController
             kit_sku['sku'] = option_product.primary_sku
           end
           kit_sku['qty'] = kit.qty
-          kit_sku['qty_on_hand'] = 0
+          kit_sku['available_inv'] = 0
           option_product.product_inventory_warehousess.each do |inventory|
-            kit_sku['qty_on_hand'] +=  inventory.available_inv.to_i
+            kit_sku['available_inv'] +=  inventory.available_inv.to_i
           end
           kit_sku['packing_order'] = kit.packing_order
           kit_sku['option_product_id'] = option_product.id
@@ -854,7 +855,7 @@ class ProductsController < ApplicationController
                   product_inv_wh.product_inv_alert = wh["info"]["product_inv_alert"]
                   product_inv_wh.product_inv_alert_level = wh["info"]["product_inv_alert_level"]
                 end
-                updatelist(product_inv_wh.product,'qty',wh["info"]["available_inv"]) unless wh["info"]["available_inv"].nil?
+                product_inv_wh.quantity_on_hand= wh["info"]["quantity_on_hand"]
                 # product_inv_wh.available_inv = wh["info"]["available_inv"]
                 product_inv_wh.location_primary = wh["info"]["location_primary"]
                 product_inv_wh.location_secondary = wh["info"]["location_secondary"]
@@ -1304,7 +1305,7 @@ class ProductsController < ApplicationController
 
         unless params[:inventory_count].blank?
           if params[:method] == 'recount'
-            product_inv_whs.first.available_inv = params[:inventory_count]
+            product_inv_whs.first.quantity_on_hand = params[:inventory_count]
           elsif params[:method] == 'receive'
             product_inv_whs.first.available_inv =
                 product_inv_whs.first.available_inv + (params[:inventory_count].to_i)
@@ -1429,7 +1430,8 @@ class ProductsController < ApplicationController
         @product_hash['location_primary'] = @product_location.location_primary
         @product_hash['location_secondary'] = @product_location.location_secondary
         @product_hash['location_tertiary'] = @product_location.location_tertiary
-        @product_hash['qty'] = @product_location.available_inv
+        @product_hash['available_inv'] = @product_location.available_inv
+        @product_hash['qty_on_hand'] = @product_location.quantity_on_hand
         if !@product_location.inventory_warehouse.nil?
           @product_hash['location_name'] = @product_location.inventory_warehouse.name
         end

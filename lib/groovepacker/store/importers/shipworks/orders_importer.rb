@@ -18,6 +18,10 @@ module Groovepacker
                 import_item.current_increment_id =order_number
                 import_item.save
                 ship_address = get_ship_address(order)
+                tracking_num = nil
+                tracking_num = order["Shipment"]["TrackingNumber"] unless order["Shipment"].nil?
+                notes_internal = get_internal_notes(order) unless order["Note"].nil?
+
                 order_m = Order.create(
                   increment_id: order_number,
                   order_placed_time: order["Date"],
@@ -31,7 +35,9 @@ module Groovepacker
                   state: ship_address["StateName"],
                   postcode: ship_address["PostalCode"],
                   country: ship_address["CountryCode"],
-                  order_total: order["Total"])
+                  order_total: order["Total"],
+                  tracking_num: tracking_num,
+                  notes_internal: notes_internal)
 
                 import_item.current_order_items = order["Item"].length
                 import_item.current_order_imported_item = 0
@@ -60,7 +66,7 @@ module Groovepacker
               end
             else
               import_item.status = 'failed'
-              import_item.message = 'All import statuses disabled. Import skipped.'
+              import_item.message = 'No incoming orders with the currently enabled statuses.'
               import_item.save
             end
           end
@@ -95,6 +101,23 @@ module Groovepacker
             end
 
             result
+          end
+
+          def get_internal_notes(order)
+            internal_notes = nil
+            # if order["Note"] is array or hash
+            if order["Note"].is_a?(Array)
+              notes = []
+              order["Note"].each do |note|
+                if note["Visibility"] == "Internal"
+                  notes << note["Text"]
+                end
+              end
+              internal_notes = notes.join(" || ")
+            else
+              internal_notes = order["Note"]["Text"] if order["Note"]["Visibility"] == "Internal"
+            end
+            internal_notes
           end
 
           def import_order_item(item, import_item, order, store)
