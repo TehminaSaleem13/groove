@@ -1380,11 +1380,14 @@ class ProductsController < ApplicationController
       action_intangible = Groovepacker::Products::ActionIntangible.new
 
       scan_pack_setting = ScanPackSetting.all.first
-      action_intangible.delay(:run_at =>1.seconds.from_now).update_intangibleness(Apartment::Tenant.current_tenant, params, scan_pack_setting)
+      intangible_setting_enabled = scan_pack_setting.intangible_setting_enabled
+      intangible_string = scan_pack_setting.intangible_string
+
+      action_intangible.delay(:run_at =>1.seconds.from_now).update_intangibleness(Apartment::Tenant.current_tenant, params, intangible_setting_enabled, intangible_string)
       # action_intangible.update_intangibleness(Apartment::Tenant.current_tenant, params, scan_pack_setting)
     else
-      @result['status'] = false
-      @result['messages'].push('You do not have enough permissions to edit product status')
+      result['status'] = false
+      result['messages'].push('You do not have enough permissions to edit product status')
     end
     respond_to do |format|
       format.html # show.html.erb

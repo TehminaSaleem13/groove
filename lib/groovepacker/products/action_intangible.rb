@@ -1,11 +1,11 @@
 module Groovepacker
   module Products
     class ActionIntangible
-      def update_intangibleness(tenant,params,scan_pack_setting)
+      def update_intangibleness(tenant,params,intangible_setting_enabled, intangible_string)
         Apartment::Tenant.switch(tenant)
 
         if params[:intangible_setting_enabled]
-          if params[:intangible_string] != scan_pack_setting.intangible_string || scan_pack_setting.intangible_setting_enabled == false
+          if params[:intangible_string] != intangible_string || intangible_setting_enabled == false
             products = Product.where(:is_intangible=>true)
             products.each do |product|
               product.is_intangible = false
