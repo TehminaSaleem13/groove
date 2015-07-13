@@ -31,7 +31,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="control-label col-sm-3">{{translations.labels.cue_orders_for_scanpack}}</label>
+                    <label class="control-label col-sm-3" style="padding-top: 0px;">{{translations.labels.cue_orders_for_scanpack}}</label>
                     <div class="controls col-sm-3 col-md-2 form-inline">
                         <div toggle-switch ng-model="scan_pack.settings.scan_by_tracking_number" groov-click="update_settings()"></div>
                         <i class="info icon-large glyphicon glyphicon-info-sign" style="padding-left:5px;" popover-trigger="mouseenter" groov-popover="{{translations.tooltips.cue_orders_optons}}"></i>
@@ -70,8 +70,8 @@
                         <i class="info icon-large glyphicon glyphicon-info-sign" style="padding-left:5px;" ng-hide="scan_pack.settings.escape_string_enabled" popover-trigger="mouseenter" groov-popover="{{translations.tooltips.escape_string}}"></i>
                     </div>
                     <div class="col-sm-4" ng-show="scan_pack.settings.escape_string_enabled">
-                        <label class="control-label col-sm-3 col-md-2">{{translations.labels.scan}}</label>
-                        <div class="col-sm-9 col-md-10">
+                        <label class="control-label col-sm-5 col-md-4">{{translations.labels.scan}}</label>
+                        <div class="col-sm-7 col-md-8">
                             <input class="form-control input-style" type="text" ng-blur="update_settings()" ng-model="scan_pack.settings.escape_string" ng-trim="false"/>
                         </div>
                     </div>
@@ -102,14 +102,14 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="control-label col-sm-3">{{translations.labels.intangible_setting}}</label>
+                    <label class="control-label col-sm-3" style="padding-top: 0px;">{{translations.labels.intangible_setting}}</label>
                     <div class="controls col-sm-2 form-inline">
                         <div toggle-switch ng-model="scan_pack.settings.intangible_setting_enabled" groov-click="update_product_intangibleness()"></div>
                         <i class="info icon-large glyphicon glyphicon-info-sign" style="padding-left:5px;" ng-hide="scan_pack.settings.intangible_setting_enabled" popover-trigger="mouseenter" groov-popover="{{translations.tooltips.intanginle_setting}}"></i>
                     </div>
                     <div class="col-sm-4" ng-show="scan_pack.settings.intangible_setting_enabled">
-                        <label class="control-label col-sm-3 col-md-2">{{translations.labels.intangible_string}}</label>
-                        <div class="col-sm-9 col-md-10">
+                        <label class="control-label col-sm-5 col-md-4" style="padding-top: 0px;">{{translations.labels.intangible_string}}</label>
+                        <div class="col-sm-7 col-md-8">
                             <input class="form-control input-style" type="text" ng-blur="update_product_intangibleness()" ng-model="scan_pack.settings.intangible_string" ng-trim="false"/>
                         </div>
                     </div>

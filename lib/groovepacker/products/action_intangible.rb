@@ -3,9 +3,10 @@ module Groovepacker
     class ActionIntangible
       def update_intangibleness(tenant,params,intangible_setting_enabled, intangible_string)
         Apartment::Tenant.switch(tenant)
-
+        intangible_strings = intangible_string.split(",")
+        intangible_param_strings = params[:intangible_string].split(",")
         if params[:intangible_setting_enabled]
-          if params[:intangible_string] != intangible_string || intangible_setting_enabled == false
+          if intangible_param_strings != intangible_strings || intangible_setting_enabled == false
             products = Product.where(:is_intangible=>true)
             products.each do |product|
               product.is_intangible = false
@@ -13,9 +14,11 @@ module Groovepacker
             end
             products = Product.all
             products.each do |product|
-              if product.name.start_with? (params[:intangible_string]) || sku_starts_with_intangible_string(product,params[:intangible_string])
-                product.is_intangible = true
-                product.save
+              intangible_param_strings.each do |param_string|
+                if product.name.start_with? (param_string) || sku_starts_with_intangible_string(product,param_string)
+                  product.is_intangible = true
+                  product.save
+                end
               end
             end
           end
