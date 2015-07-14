@@ -271,14 +271,25 @@ groovepacks_directives.directive('groovDashboard',['$window','$document','$sce',
               var tooltipText = '';
               if (scope.charts.type == 'packing_stats'){
                 tooltipText = y + ' order scans on ' + x
-              } else if (scope.charts.type == 'packing_speed_stats') {
-                tooltipText = y + ' seconds per scan on '+ x
-              } else if (scope.charts.type == 'packed_item_stats') {
-                tooltipText = y + ' items packed on '+ x
-              }
-              return ('<div><h4 style="text-transform: capitalize; color:'+e.series.color+
+                return ('<div><h4 style="text-transform: capitalize; color:'+e.series.color+
                       '">' + key + '</h4>' +
                       '<span>' +  tooltipText + '</span></div>')
+              } else if (scope.charts.type == 'packing_speed_stats') {
+                tooltipText = y
+                return ('<div><h4 style="text-transform: capitalize; color:'+e.series.color+
+                      '">' + key + '</h4>' +
+                      '<span><strong>Period Speed Score:</strong>' +  tooltipText + '%</span><br/>'+
+                      '<span><strong>Date: </strong>' + x + '</span><br/>' + 
+                      '<span><strong>Daily Speed Score: </strong>'+ y+ '</span><br/>' +
+                      '<span><strong>Avg. Time/Item: </strong>'+ y+ '</span>' +
+                      '</div>')
+              } else if (scope.charts.type == 'packed_item_stats') {
+                tooltipText = y + ' items packed on '+ x
+                return ('<div><h4 style="text-transform: capitalize; color:'+e.series.color+
+                      '">' + key + '</h4>' +
+                      '<span>' +  tooltipText + '</span></div>')
+              }
+
           }
         }
 
