@@ -200,6 +200,25 @@
                 </div>
                 <div class="info col-sm-2" ><i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" groov-popover="{{translations.tooltips.confirmation}} <br/> {{confirmation_setting_text}}"></i></div>
             </div>
+
+            <div class="form-group">
+                <label class="control-label col-sm-2">Product Receiving Instructions</label>
+
+                <div class="controls col-sm-4">
+                    <textarea class="form-control input-style" ng-model="products.single.basicinfo.product_receiving_instructions" ng-blur="update_single_product()" class="col-sm-8" rows="4"></textarea>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-sm-2"></label>
+                <div class="controls col-sm-10" ng-model="products.single.images">
+                    <div class="img-thumbnail" ng-hide="image.added_to_receiving_instructions==0" ng-repeat="image in products.single.images">
+                        <img ng-src="{{ image.image }}" class="img-polaroid img-thumb img-responsive" style="border: 1px solid grey;"/>
+                        <i class="glyphicon glyphicon-remove" ng-click="remove_instruction_image(image)"></i>
+                    </div>
+                    <button class="modal-save-button" ng-click="add_image_for_receiving_instructions()">Add Image</button>
+                </div>
+            </div>
+
             <div class="form-group">
                 <label class="control-label col-sm-2">Product can be skipped</label>
 

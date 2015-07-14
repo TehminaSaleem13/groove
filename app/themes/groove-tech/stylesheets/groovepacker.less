@@ -2087,6 +2087,29 @@ div.input-style {
   opacity: 0.2;
 }
 
+.img-thumbnail {
+  position:relative;
+  float:left;
+  margin:0 5px;
+  width:65px;
+  img {
+    margin:0 auto;
+    max-height:65px;
+  }
+  .glyphicon-remove {
+    position: absolute;
+    top:1px;
+    right:1px;
+    border-radius: 5px;
+    padding:2px;
+    cursor:pointer;
+    background:rgba(180,180, 180, 0.7);
+    &:hover {
+      background:rgba(255,255, 255, 0.9);
+    }
+  }
+}
+
 .single-image {
   position:relative;
   float:left;

@@ -803,6 +803,7 @@ class ProductsController < ApplicationController
         @product.shipping_weight = @product.get_product_weight(params[:shipping_weight])
         @product.weight_format = get_weight_format(params[:basicinfo][:weight_format])
         @product.add_to_any_order = params[:basicinfo][:add_to_any_order]
+        @product.product_receiving_instructions = params[:basicinfo][:product_receiving_instructions]
 
         if !@product.save
           @result['status'] &= false
@@ -1389,6 +1390,22 @@ class ProductsController < ApplicationController
     else
       result['status'] = false
       result['messages'].push('You do not have enough permissions to edit product status')
+    end
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json: result }
+    end
+  end
+
+  def update_image
+    result = Hash.new
+    result['status'] = true
+    begin
+     image = ProductImage.find(params[:id])
+     image.added_to_receiving_instructions = params[:added_to_receiving_instructions]
+     image.save
+    rescue
+      result['status'] = false
     end
     respond_to do |format|
       format.html # show.html.erb
