@@ -185,7 +185,8 @@ groovepacks_directives.directive('groovDashboard',['$window','$document','$sce',
                     },
                     frequency: {
                       name: "Frequency",
-                      editable: false
+                      editable: false,
+                      transclude:"<span>{{row[field]}} %</span>"
                     }
                   }
                 }
@@ -211,7 +212,8 @@ groovepacks_directives.directive('groovDashboard',['$window','$document','$sce',
                     },
                     frequency: {
                       name: "Frequency",
-                      editable: false
+                      editable: false,
+                      transclude:"<span>{{row[field]}} %</span>"
                     }
                   }
                 }
