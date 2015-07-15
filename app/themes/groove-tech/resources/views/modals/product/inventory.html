@@ -56,8 +56,9 @@
                     </div>
                     <div class="col-sm-12 form-group">
                         <div class="controls col-sm-12">
-                            <div class="img-thumbnail" ng-model="products_inv_manager.single.images" ng-repeat="image in products_inv_manager.single.images" ng-hide="image.added_to_receiving_instructions==0">
+                            <div class="single-image" ng-model="products_inv_manager.single.images" ng-repeat="image in products_inv_manager.single.images" ng-hide="image.added_to_receiving_instructions==0">
                                 <img ng-src="{{ image.image }}" class="img-polaroid img-thumb img-responsive" style="border: 1px solid grey;"/>
+                                <div class="img-note"><p>{{image.image_note}}</p></div>
                             </div>
                         </div>
                     </div>
