@@ -9,13 +9,18 @@ groovepacks_controllers.
          */
 
         scope.ok = function() {
-            products.single.update_image(scope.products.single.selected_image,true).then(function () {
+            scope.products.single.selected_image.added_to_receiving_instructions = true;
+            products.single.update_image(scope.products.single.selected_image).then(function () {
                 $modalInstance.close("ok-button-click");
             });
         };
         scope.cancel = function () {
             $modalInstance.dismiss("cancel-button-click");
         };
+
+        scope.update_image_note = function (index) {
+            products.single.update_image(scope.products.single.images[index]);
+        }
 
         scope.select_unselect = function (image) {
             for (var i = 0; i < scope.products.single.images.length; i++) {

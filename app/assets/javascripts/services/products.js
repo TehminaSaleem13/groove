@@ -321,8 +321,8 @@ groovepacks_services.factory('products',['$http','notification','editable','$win
         }).error(notification.server_error);
     };
 
-    var update_image_data = function(image,added_to_receiving_instructions) {
-        return $http.post("products/update_image.json",{id: image.id, added_to_receiving_instructions: added_to_receiving_instructions}).success(
+    var update_image_data = function(image) {
+        return $http.post("products/update_image.json",{image: image}).success(
             function(data) {
                 if (data.status) {
                     notification.notify("Successfully Updated",1);

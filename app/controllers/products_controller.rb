@@ -1401,8 +1401,9 @@ class ProductsController < ApplicationController
     result = Hash.new
     result['status'] = true
     begin
-     image = ProductImage.find(params[:id])
-     image.added_to_receiving_instructions = params[:added_to_receiving_instructions]
+     image = ProductImage.find(params[:image][:id])
+     image.added_to_receiving_instructions = params[:image][:added_to_receiving_instructions]
+     image.image_note = params[:image][:image_note]
      image.save
     rescue
       result['status'] = false

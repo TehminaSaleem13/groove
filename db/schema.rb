@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150714143215) do
+ActiveRecord::Schema.define(:version => 20150715063719) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0, :null => false
@@ -515,6 +515,7 @@ ActiveRecord::Schema.define(:version => 20150714143215) do
     t.string   "caption"
     t.integer  "order",                           :default => 0
     t.boolean  "added_to_receiving_instructions", :default => false
+    t.string   "image_note"
   end
 
   add_index "product_images", ["product_id"], :name => "index_product_images_on_product_id"
