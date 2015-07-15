@@ -51,7 +51,7 @@
                 <div class="col-sm-12" ng-hide="products_inv_manager.single.basicinfo.product_receiving_instructions==null || products_inv_manager.single.basicinfo.product_receiving_instructions=='' || inventory_manager.single.method=='recount'">
                     <div class="form-group">
                         <div class="controls col-sm-12">
-                            {{products_inv_manager.single.basicinfo.product_receiving_instructions}}
+                            <div ng-bind-html="products_inv_manager.single.basicinfo.product_receiving_instructions"></div>
                         </div>
                     </div>
                     <div class="col-sm-12 form-group">
