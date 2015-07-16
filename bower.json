@@ -18,8 +18,9 @@
     "bower_components",
     "test",
     "tests"
-  ], 
+  ],
   "dependencies": {
-    "angularjs-nvd3-directives": "latest"
+    "angularjs-nvd3-directives": "latest",
+    "angular-bootstrap-lightbox": "~0.6.1"
   }
 }

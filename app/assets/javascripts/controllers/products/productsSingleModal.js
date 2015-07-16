@@ -113,6 +113,7 @@ groovepacks_controllers.
             var receiving_image_modal = $modal.open({
                 templateUrl: '/assets/views/modals/product/receiving_images.html',
                 controller: 'productReceivingImageModal',
+                size: 'md',
                 resolve: {
                     product_data: function(){return scope.products;},
                     product_id: function(){return $stateParams.product_id;}
@@ -297,7 +298,8 @@ groovepacks_controllers.
                     "time_adjust": "",
                     "skippable": "",
                     "record_serial":"",
-                    "master_alias":""
+                    "master_alias":"",
+                    "product_receiving_instructions":""
                 }
             };
             groov_translator.translate('products.modal',scope.translations);

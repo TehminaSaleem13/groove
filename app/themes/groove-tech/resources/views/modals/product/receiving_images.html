@@ -1,5 +1,5 @@
 <!-- show order modal -->
-<div>
+<div style="padding-top: 100px;">
 
     <div class="modal-header">
         <button type="button" class="close-btn" ng-click="cancel()"><i class="glyphicon glyphicon-remove"></i></button>
@@ -9,11 +9,11 @@
         <div class="container-fluid form-horizontal">
             <div class="form-group">
                 <div class="col-sm-12">
-                    <div class="single-image" ng-model="products.single.images" ng-class="{'primary-image': $index==0}" ng-repeat="image in products.single.images">
+                    <div class="single-image-clickable" ng-model="products.single.images" ng-class="{'primary-image': $index==0}" ng-repeat="image in products.single.images">
                         <div ng-hide="image.added_to_receiving_instructions">
                             <div>
-                                <img ng-src="{{ image.image }}" style="border: 1px solid grey;" class="img-polaroid img-thumb img-responsive" ng-click="select_unselect(image)" ng-show="image.checked == false"/>
-                                <img ng-src="{{ image.image }}" style="border: 2px solid #8CF20D;" class="img-polaroid img-thumb img-responsive img-selected" ng-click="select_unselect(image)" ng-show="image.checked"/>
+                                <img ng-src="{{image.image}}" style="border: 1px solid grey;" class="img-polaroid img-thumb img-responsive" ng-click="select_unselect(image)" ng-show="image.checked == false"/>
+                                <img ng-src="{{image.image}}" style="border: 2px solid #8CF20D;" class="img-polaroid img-thumb img-responsive img-selected" ng-click="select_unselect(image)" ng-show="image.checked"/>
                             </div>
                         </div>
                     </div>

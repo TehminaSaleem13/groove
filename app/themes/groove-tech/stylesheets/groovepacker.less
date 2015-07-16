@@ -2133,6 +2133,18 @@ div.input-style {
   }
 }
 
+.single-image-clickable {
+  position:relative;
+  float:left;
+  margin:0 10px;
+  width:130px;
+  img {
+    margin:0 auto;
+    max-height:130px;
+  };
+  cursor: pointer;
+}
+
 .img-note {
   position: absolute;
   width: 130px;
@@ -2152,7 +2164,7 @@ div.input-style {
   opacity: 0;
 }
 
-.single-image:hover .img-note {
+.single-image-clickable:hover .img-note {
   visibility: visible;
   opacity: 1;
 }
