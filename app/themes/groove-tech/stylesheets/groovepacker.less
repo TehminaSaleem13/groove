@@ -2087,6 +2087,29 @@ div.input-style {
   opacity: 0.2;
 }
 
+.img-thumbnail {
+  position:relative;
+  float:left;
+  margin:0 5px;
+  width:65px;
+  img {
+    margin:0 auto;
+    max-height:65px;
+  }
+  .glyphicon-remove {
+    position: absolute;
+    top:1px;
+    right:1px;
+    border-radius: 5px;
+    padding:2px;
+    cursor:pointer;
+    background:rgba(180,180, 180, 0.7);
+    &:hover {
+      background:rgba(255,255, 255, 0.9);
+    }
+  }
+}
+
 .single-image {
   position:relative;
   float:left;
@@ -2108,6 +2131,42 @@ div.input-style {
       background:rgba(255,255, 255, 0.9);
     }
   }
+}
+
+.single-image-clickable {
+  position:relative;
+  float:left;
+  margin:0 10px;
+  width:130px;
+  img {
+    margin:0 auto;
+    max-height:130px;
+  };
+  cursor: pointer;
+}
+
+.img-note {
+  position: absolute;
+  width: 130px;
+  height: 130px;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding-top: 3px;
+  padding-left: 5px;
+  padding-bottom: 3px;
+  padding-right: 5px;
+  border-radius: 15px;
+  background: rgba(180,180, 180, 0.9);
+  color: #fff;
+  visibility: hidden;
+  opacity: 0;
+}
+
+.single-image-clickable:hover .img-note {
+  visibility: visible;
+  opacity: 1;
 }
 
 .csv-preview {

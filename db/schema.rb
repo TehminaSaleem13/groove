@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150711221826) do
+ActiveRecord::Schema.define(:version => 20150715063719) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0, :null => false
@@ -460,7 +460,6 @@ ActiveRecord::Schema.define(:version => 20150711221826) do
     t.string   "method"
     t.datetime "created_at",                                                               :null => false
     t.datetime "updated_at",                                                               :null => false
-    t.string   "store_order_id"
     t.text     "notes_internal"
     t.text     "notes_toPacker"
     t.text     "notes_fromPacker"
@@ -481,6 +480,7 @@ ActiveRecord::Schema.define(:version => 20150711221826) do
     t.integer  "weight_oz"
     t.string   "non_hyphen_increment_id"
     t.boolean  "note_confirmation",                                     :default => false
+    t.string   "store_order_id"
     t.integer  "inaccurate_scan_count",                                 :default => 0
     t.datetime "scan_start_time"
     t.boolean  "reallocate_inventory",                                  :default => false
@@ -510,10 +510,12 @@ ActiveRecord::Schema.define(:version => 20150711221826) do
   create_table "product_images", :force => true do |t|
     t.integer  "product_id"
     t.string   "image"
-    t.datetime "created_at",                :null => false
-    t.datetime "updated_at",                :null => false
+    t.datetime "created_at",                                         :null => false
+    t.datetime "updated_at",                                         :null => false
     t.string   "caption"
-    t.integer  "order",      :default => 0
+    t.integer  "order",                           :default => 0
+    t.boolean  "added_to_receiving_instructions", :default => false
+    t.string   "image_note"
   end
 
   add_index "product_images", ["product_id"], :name => "index_product_images_on_product_id"
@@ -607,6 +609,7 @@ ActiveRecord::Schema.define(:version => 20150711221826) do
     t.boolean  "add_to_any_order",                                              :default => false
     t.string   "base_sku"
     t.boolean  "is_intangible",                                                 :default => false
+    t.string   "product_receiving_instructions"
   end
 
   add_index "products", ["store_id"], :name => "index_products_on_store_id"

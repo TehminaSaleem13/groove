@@ -109,12 +109,32 @@ groovepacks_controllers.
                 myscope.add_alias_product(type,data);
             });
         };
+        scope.add_image_for_receiving_instructions = function () {
+            var receiving_image_modal = $modal.open({
+                templateUrl: '/assets/views/modals/product/receiving_images.html',
+                controller: 'productReceivingImageModal',
+                size: 'md',
+                resolve: {
+                    product_data: function(){return scope.products;},
+                    product_id: function(){return $stateParams.product_id;}
+                }
+            });
+            receiving_image_modal.result.then(function(data) {
+                myscope.init();
+            });
+        };
         scope.add_image = function () {
             $("#product_image"+scope.custom_identifier).click();
         };
         scope.remove_image = function(index) {
             scope.products.single.images.splice(index,1);
             scope.update_single_product();
+        };
+        scope.remove_instruction_image = function(index) {
+            scope.products.single.images[index].added_to_receiving_instructions = false;
+            products.single.update_image(scope.products.single.images[index]).then(function() {
+                myscope.init();
+            })
         };
         scope.$on("fileSelected", function (event, args) {
             $("input[type='file']").val('');
@@ -124,7 +144,7 @@ groovepacks_controllers.
                           myscope.product_single_details(scope.products.single.basicinfo.id);
                     });
                 });
-            }
+            };
         });
 
         myscope.add_alias_product = function(type,args) {
@@ -278,7 +298,8 @@ groovepacks_controllers.
                     "time_adjust": "",
                     "skippable": "",
                     "record_serial":"",
-                    "master_alias":""
+                    "master_alias":"",
+                    "product_receiving_instructions":""
                 }
             };
             groov_translator.translate('products.modal',scope.translations);
