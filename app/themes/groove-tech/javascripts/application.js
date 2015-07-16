@@ -5,6 +5,7 @@
 //= require angular-touch
 //= require angular-cookies
 //= require angular-ui-bootstrap-tpls
+//= require angular-bootstrap-lightbox/dist/angular-bootstrap-lightbox
 //= require ng-rails-csrf
 //= require fingerprint
 //= require jquery.ui.sortable

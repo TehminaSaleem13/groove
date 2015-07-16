@@ -9,44 +9,66 @@
 
     <div class="modal-body">
         <div class="container-fluid form-horizontal" >
-            <div class="form-group">
-                <label class="control-label col-sm-2">Inventory Warehouse</label>
+            <div class="col-sm-5">
+                <div class="form-group">
+                    <label class="control-label col-sm-5">Inventory Warehouse</label>
 
-                <div class="controls col-sm-8" dropdown>
-                    <button class="dropdown-toggle groove-button">
-                        <span ng-repeat="inv_wh in warehouses.list" ng-show="inventory_manager.single.inv_wh_id==inv_wh.info.id" >{{inv_wh.info.name}}</span>
-                        <span class="caret"></span>
-                    </button>
-                    <ul class="dropdown-menu" role="menu">
-                        <li ng-repeat="inv_wh in warehouses.list"><a class="dropdown-toggle" ng-click="handle_change_event(inv_wh.info.id)">{{inv_wh.info.name}}</a></li>
-                    </ul>
+                    <div class="controls col-sm-7" dropdown>
+                        <button class="dropdown-toggle groove-button">
+                            <span ng-repeat="inv_wh in warehouses.list" ng-show="inventory_manager.single.inv_wh_id==inv_wh.info.id" >{{inv_wh.info.name}}</span>
+                            <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu" role="menu">
+                            <li ng-repeat="inv_wh in warehouses.list"><a class="dropdown-toggle" ng-click="handle_change_event(inv_wh.info.id)">{{inv_wh.info.name}}</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="control-label col-sm-5">Receive or Recount Inventory</label>
+
+                    <div class="controls col-sm-7">
+                        <label class="radio inline">
+                            <input type="radio"
+                                   ng-model="inventory_manager.single.method" value="receive" ng-change='handle_change_event()'/> Receive Inventory
+                        </label>
+                        <label class="radio inline">
+                            <input type="radio"
+                                   ng-model="inventory_manager.single.method" value="recount" ng-change='handle_change_event()'/> Recount Inventory
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="control-label col-sm-5">Scan Product Barcode</label>
+
+                    <div class="controls col-sm-5">
+                        <input id="inventorymanagerbarcode" type="text" ng-model="inventory_manager.single.product_barcode" ng-keypress="_handle_inv_manager_key_event($event)" class="form-control input-style"/>
+                    </div>
+                </div>  
+            </div>
+            <div class="col-sm-7">
+                <div class="col-sm-12" ng-hide="products_inv_manager.single.basicinfo.product_receiving_instructions==null || products_inv_manager.single.basicinfo.product_receiving_instructions=='' || inventory_manager.single.method=='recount'">
+                    <div class="form-group">
+                        <div class="controls col-sm-12">
+                            <div ng-bind-html="products_inv_manager.single.basicinfo.product_receiving_instructions"></div>
+                        </div>
+                    </div>
+                    <div class="col-sm-12 form-group">
+                        <div class="controls col-sm-12">
+                            <div class="single-image-clickable" ng-model="products_inv_manager.single.images" ng-class="{'primary-image': $index==0}" ng-repeat="image in products_inv_manager.single.images" ng-hide="image.added_to_receiving_instructions==0">
+                                <a ng-click="openLightboxModal($index)">
+                                  <img ng-src="{{image.image}}" class="img-polaroid img-thumb img-responsive" alt="">
+                                  <div class="img-note"><p>{{image.image_note}}</p></div>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
+            
 
-            <div class="form-group">
-                <label class="control-label col-sm-2">Receive or Recount Inventory</label>
-
-                <div class="controls col-sm-8">
-                    <label class="radio inline">
-                        <input type="radio"
-                               ng-model="inventory_manager.single.method" value="receive" ng-change='handle_change_event()'/> Receive Inventory
-                    </label>
-                    <label class="radio inline">
-                        <input type="radio"
-                               ng-model="inventory_manager.single.method" value="recount" ng-change='handle_change_event()'/> Recount Inventory
-                    </label>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label class="control-label col-sm-2">Scan Product Barcode</label>
-
-                <div class="controls col-sm-2">
-                    <input id="inventorymanagerbarcode" type="text" ng-model="inventory_manager.single.product_barcode" ng-keypress="_handle_inv_manager_key_event($event)" class="form-control input-style"/>
-                </div>
-            </div>
-
-            <div ng-show="products_inv_manager.single.basicinfo.id > 0">
+            <div class="col-sm-12" ng-show="products_inv_manager.single.basicinfo.id > 0">
                 <h3>Product Information</h3>
                 <table class="well table-well table table-striped table-hover table-alt">
                     <thead>
