@@ -94,7 +94,7 @@ module Groovepacker
               orders = Order.where('scanned_on < ?', end_time).where(packing_user_id: user.id).order(
                 scanned_on: :ASC).group('date(scanned_on)').count
             else
-              orders = Order.where(scanned_on: start_time..end_time).where(packing_user_id: user.id).order(scanned_on: :ASC).group('date(scanned_on)').average('timediff(scanned_on, scan_start_time)')
+              orders = Order.where(scanned_on: start_time..end_time).where(packing_user_id: user.id).order(scanned_on: :ASC).group('date(scanned_on)').average('packing_score')
             end
 
             orders.each do |order|

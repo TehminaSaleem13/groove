@@ -79,10 +79,15 @@ class Order < ActiveRecord::Base
     result
   end
 
+  def compute_packing_score
+    100 - (self.total_scan_time.to_f / self.total_scan_count)
+  end
+
   def set_order_to_scanned_state(username)
     self.status = 'scanned'
     self.scanned_on = current_time_from_proper_timezone
     self.addactivity('Order Scanning Complete', username)
+    self.packing_score = self.compute_packing_score
     self.save
     restriction = AccessRestriction.order("created_at").last
     unless restriction.nil?

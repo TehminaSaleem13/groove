@@ -5,6 +5,7 @@ class OrderItem < ActiveRecord::Base
   has_many :order_item_kit_products, :dependent => :destroy
   has_many :order_item_order_serial_product_lots
   has_many :sold_inventory_warehouses, :dependent => :destroy
+  has_many :order_item_scan_times, :dependent => :destroy
   has_one :product_barcode
   has_one :product_sku
   attr_accessible :price, :qty, :row_total, :sku, :product, :product_is_deleted
@@ -212,6 +213,13 @@ class OrderItem < ActiveRecord::Base
         set_clicked_quantity(clicked, self.product.primary_sku, username)
         total_qty = self.qty - self.kit_split_qty
       end
+      scan_time = self.order_item_scan_times.create(
+        scan_start: self.order.last_suggested_at,
+        scan_end: DateTime.now)
+      self.order.total_scan_time = self.order.total_scan_time + 
+        (scan_time.scan_end - scan_time.scan_start).to_i
+      self.order.total_scan_count = self.order.total_scan_count + 1
+      self.order.save
       if self.scanned_qty == self.qty
         self.scanned_status = SCANNED_STATUS
       else
