@@ -76,13 +76,12 @@ module Groovepacker
             total_time = 0.0
             total_count = 0
             orders.each do |order|
-              unless order.scan_start_time.nil? || order.scanned_on.nil?
-                total_count = total_count + 1
-                total_time = total_time + 
-                  (order.scanned_on - order.scan_start_time).to_i
+              unless order.total_scan_time == 0 || order.total_scan_count == 0
+                total_count = total_count + order.total_scan_count
+                total_time = total_time + order.total_scan_time
               end
             end
-            total_count == 0 ? 0 : (total_time / total_count).round(2)
+            total_count == 0 ? 0 : 100 - ((total_time / total_count).round(2))
           end
 
 
