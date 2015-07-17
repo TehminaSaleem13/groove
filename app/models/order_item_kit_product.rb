@@ -1,6 +1,7 @@
 class OrderItemKitProduct < ActiveRecord::Base
   belongs_to :order_item
   belongs_to :product_kit_skus
+  has_many :order_item_kit_product_scan_times
   attr_accessible :scanned_qty, :scanned_status
 
 	SCANNED_STATUS = 'scanned'
@@ -17,7 +18,6 @@ class OrderItemKitProduct < ActiveRecord::Base
 		total_qty = self.order_item.qty
   	end
 
-
   	if self.scanned_qty < total_qty * self.product_kit_skus.qty
   		self.scanned_qty = self.scanned_qty + 1
       if clicked
@@ -25,6 +25,7 @@ class OrderItemKitProduct < ActiveRecord::Base
         self.order_item.order.addactivity("Item with SKU: " + 
           self.product_kit_skus.option_product.primary_sku + " has been click scanned", username)
       end
+
   		if self.scanned_qty ==  total_qty * self.product_kit_skus.qty
   			self.scanned_status = SCANNED_STATUS
   		else
@@ -32,6 +33,14 @@ class OrderItemKitProduct < ActiveRecord::Base
   		end
   		self.save
 
+      scan_time = self.order_item_kit_product_scan_times.create(
+        scan_start: self.order_item.order.last_suggested_at, 
+        scan_end: DateTime.now)
+
+      self.order_item.order.total_scan_time = self.order_item.order.total_scan_time + 
+        (scan_time.scan_end - scan_time.scan_start).to_i
+      self.order_item.order.total_scan_count = self.order_item.order.total_scan_count + 1
+      self.order_item.order.save
 
 	  	#need to update order item quantity,
 	  	# for this calculate minimum of order items

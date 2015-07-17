@@ -151,6 +151,7 @@ module ScanPackHelper
               end
             else
               single_order_result['next_state'] = 'scanpack.rfp.default'
+              single_order.last_suggested_at = DateTime.now
               single_order.scan_start_time = DateTime.now if single_order.scan_start_time.nil?
             end
           end
@@ -417,6 +418,7 @@ module ScanPackHelper
                 result['data']['next_state'] = 'scanpack.rfo'
               end
             end
+            single_order.last_suggested_at = DateTime.now
           else
             single_order.inaccurate_scan_count = single_order.inaccurate_scan_count + 1
             result['status'] &= false

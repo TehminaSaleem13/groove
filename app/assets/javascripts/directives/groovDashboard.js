@@ -102,7 +102,8 @@ groovepacks_directives.directive('groovDashboard',['$window','$document','$sce',
             packing_speed_stats: function(days) {
               dashboard.stats.packing_speed_stats(days).then(
                 function(response){
-                  scope.dashboard.packing_speed_stats = response.data;
+                  scope.dashboard.packing_speed_stats = response.data.daily_stats;
+                  scope.dashboard.avg_packing_speed_stats = response.data.avg_stats;
               });
             }
           },
@@ -185,7 +186,8 @@ groovepacks_directives.directive('groovDashboard',['$window','$document','$sce',
                     },
                     frequency: {
                       name: "Frequency",
-                      editable: false
+                      editable: false,
+                      transclude:"<span>{{row[field]}} %</span>"
                     }
                   }
                 }
@@ -211,7 +213,8 @@ groovepacks_directives.directive('groovDashboard',['$window','$document','$sce',
                     },
                     frequency: {
                       name: "Frequency",
-                      editable: false
+                      editable: false,
+                      transclude:"<span>{{row[field]}} %</span>"
                     }
                   }
                 }
@@ -269,14 +272,33 @@ groovepacks_directives.directive('groovDashboard',['$window','$document','$sce',
               var tooltipText = '';
               if (scope.charts.type == 'packing_stats'){
                 tooltipText = y + ' order scans on ' + x
-              } else if (scope.charts.type == 'packing_speed_stats') {
-                tooltipText = y + ' seconds per scan on '+ x
-              } else if (scope.charts.type == 'packed_item_stats') {
-                tooltipText = y + ' items packed on '+ x
-              }
-              return ('<div><h4 style="text-transform: capitalize; color:'+e.series.color+
+                return ('<div><h4 style="text-transform: capitalize; color:'+e.series.color+
                       '">' + key + '</h4>' +
                       '<span>' +  tooltipText + '</span></div>')
+              } else if (scope.charts.type == 'packing_speed_stats') {
+                avg_period_score = "-"
+                for (idx = 0; idx < scope.dashboard.avg_packing_speed_stats.length;
+                  idx++) {
+                  if (scope.dashboard.avg_packing_speed_stats[idx].key == key){
+                    avg_period_score = scope.dashboard.avg_packing_speed_stats[idx].
+                      avg_period_score;
+                    break;
+                  }
+                }
+                return ('<div><h4 style="text-transform: capitalize; color:'+e.series.color+
+                      '">' + key + '</h4>' +
+                      '<span><strong>Period Speed Score: </strong>' +  avg_period_score + '% </span><br/>'+
+                      '<span><strong>Date: </strong>' + x + '</span><br/>' + 
+                      '<span><strong>Daily Speed Score: </strong>'+ y+ '% </span><br/>' +
+                      '<span><strong>Avg. Time/Item: </strong>'+ (100 - y) + '</span>' +
+                      '</div>')
+              } else if (scope.charts.type == 'packed_item_stats') {
+                tooltipText = y + ' items packed on '+ x
+                return ('<div><h4 style="text-transform: capitalize; color:'+e.series.color+
+                      '">' + key + '</h4>' +
+                      '<span>' +  tooltipText + '</span></div>')
+              }
+
           }
         }
 
