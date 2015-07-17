@@ -249,10 +249,10 @@
                     <label class="control-label col-sm-2">Intangible Item</label>
     
                     <div class="controls col-sm-2 col-lg-1">
-                        <div ng-show="products.single.basicinfo.contains_intangible_string && products.single.basicinfo.is_intangible"> 1
+                        <div ng-show="products.single.basicinfo.contains_intangible_string && products.single.basicinfo.is_intangible">
                             <div toggle-switch ng-model="products.single.basicinfo.is_intangible" disabled="disabled" style="opacity: 0.5;"></div>
                         </div>
-                        <div ng-hide="products.single.basicinfo.contains_intangible_string && products.single.basicinfo.is_intangible"> 2
+                        <div ng-hide="products.single.basicinfo.contains_intangible_string && products.single.basicinfo.is_intangible">
                             <div toggle-switch ng-model="products.single.basicinfo.is_intangible" groov-click="update_single_product()"></div>
                         </div>
                     </div>
