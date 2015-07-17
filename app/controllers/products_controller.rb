@@ -804,6 +804,7 @@ class ProductsController < ApplicationController
         @product.weight_format = get_weight_format(params[:basicinfo][:weight_format])
         @product.add_to_any_order = params[:basicinfo][:add_to_any_order]
         @product.product_receiving_instructions = params[:basicinfo][:product_receiving_instructions]
+        @product.is_intangible = params[:basicinfo][:is_intangible]
 
         if !@product.save
           @result['status'] &= false

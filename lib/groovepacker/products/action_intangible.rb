@@ -7,10 +7,14 @@ module Groovepacker
         intangible_param_strings = params[:intangible_string].split(",")
         if params[:intangible_setting_enabled]
           if intangible_param_strings != intangible_strings || intangible_setting_enabled == false
-            products = Product.where(:is_intangible=>true)
+            products = Product.all
             products.each do |product|
-              product.is_intangible = false
-              product.save
+              intangible_strings.each do |string|
+                if product.name.start_with? (string) || sku_starts_with_intangible_string(product,string)
+                  product.is_intangible = false
+                  product.save
+                end
+              end
             end
             products = Product.all
             products.each do |product|
@@ -23,10 +27,14 @@ module Groovepacker
             end
           end
         else
-          products = Product.where(:is_intangible=>true)
+          products = Product.all
           products.each do |product|
-            product.is_intangible = false
-            product.save
+            intangible_param_strings.each do |string|
+              if product.name.start_with? (string) || sku_starts_with_intangible_string(product,string)
+                product.is_intangible = false
+                product.save
+              end
+            end
           end
         end
       end
