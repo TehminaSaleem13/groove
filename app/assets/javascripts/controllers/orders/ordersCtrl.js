@@ -186,11 +186,12 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
                             },
                             status: {
                                 name:"Status",
-                                transclude:"<span class='label label-default' ng-class=\"{" +
+                                transclude:"<span class='label label-default' ng-hide=\"row[field] == 'onhold'\" ng-class=\"{" +
                                            "'label-success': row[field] == 'awaiting', " +
-                                           "'label-warning': row[field] == 'onhold', " +
                                            "'label-danger': row[field] == 'serviceissue' }\">" +
-                                           "{{row[field]}}</span>"
+                                           "{{row[field]}}</span>" +
+                                           "<span class='label label-default label-warning' ng-show=\"row[field] == 'onhold'\">" +
+                                           "Action Required</span>"
                             }
                         }
                     };}

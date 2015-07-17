@@ -1215,6 +1215,29 @@ class ProductsController < ApplicationController
             end
           end
 
+          #Ensure all inventory data is copied over
+          product_alias.product_inventory_warehousess.each do |aliased_inventory|
+            orig_product_inv_whs = ProductInventoryWarehouses.where(@product_orig.id, aliased_inventory.inventory_warehouse_id)
+            if orig_product_inv_whs.length == 0
+              orig_product_inv_wh = ProductInventoryWarehouses.new
+              orig_product_inv_wh.inventory_warehouse_id = aliased_inventory.inventory_warehouse_id
+              orig_product_inv_wh.product_id = @product_orig.id
+              orig_product_inv_wh.quantity_on_hand = aliased_inventory.quantity_on_hand
+              orig_product_inv_wh.save
+            else
+              orig_product_inv_wh = orig_product_inv_whs.first
+            end
+            #copy over the qoh of original as QOH of original should not change in aliasing
+            orig_product_qoh = orig_product_inv_wh.quantity_on_hand
+            orig_product_inv_wh.allocated_inv = orig_product_inv_wh.allocated_inv + aliased_inventory.allocated_inv
+            orig_product_inv_wh.quantity_on_hand = orig_product_qoh
+            orig_product_inv_wh.save
+
+            # Move all sold inventory warehouse of aliased to original
+            SoldInventoryWarehouse.where(:product_inventory_warehouses_id => aliased_inventory.id).update_all(product_inventory_warehouses_id: orig_product_inv_wh.id)
+            aliased_inventory.reload
+          end
+
           #destroy the aliased object
           if !product_alias.destroy
             result['status'] &= false

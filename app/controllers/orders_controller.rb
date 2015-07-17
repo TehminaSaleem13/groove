@@ -599,7 +599,12 @@ class OrdersController < ApplicationController
         @result['messages'].push("Could not find order item")
       else
         if params.keys.include? ('qty')
-          @orderitem.qty = params[:qty]
+          if Order::SOLD_STATUSES.include? @orderitem.order.status
+            @result['status'] &= false
+            @result['messages'].push("Scanned Orders item quantities can't be changed")
+          else
+            @orderitem.qty = params[:qty]
+          end
           unless @orderitem.save
             @result['status'] &= false
             @result['messages'].push("Could not update order item")

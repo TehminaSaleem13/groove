@@ -1,6 +1,6 @@
 groovepacks_controllers. 
-controller('generalSettingsCtrl', [ '$scope', '$http', '$timeout', '$location', '$state', '$cookies', 'generalsettings', 'groov_translator',
-function( $scope, $http, $timeout, $location, $state, $cookies, generalsettings, groov_translator) {
+controller('generalSettingsCtrl', [ '$scope', '$http', '$timeout', '$location', '$state', '$cookies', 'generalsettings', 'groov_translator','$rootScope',
+function( $scope, $http, $timeout, $location, $state, $cookies, generalsettings, groov_translator, $rootScope) {
 
     var myscope = {};
 
@@ -54,7 +54,30 @@ function( $scope, $http, $timeout, $location, $state, $cookies, generalsettings,
 
         $scope.show_button = false;
         $scope.general_settings = generalsettings.model.get();
-        generalsettings.single.get($scope.general_settings);
+        $scope.confirmation_hash = {};
+        myscope.reload_settings();
+
+        $rootScope.$on('bulk_action_finished',myscope.reload_settings);
+    };
+
+    myscope.reload_settings = function () {
+        generalsettings.single.get($scope.general_settings).then(function() {
+            $scope.confirmation_hash.inventory_tracking = $scope.general_settings.single.inventory_tracking;
+        });
+    };
+
+
+    $scope.confirm_and_update = function (key) {
+        if(key == 'inventory_tracking' && $scope.confirmation_hash[key] == false) {
+            if(confirm("Are you sure? Turning inventory off will remove all inventory warehouse related data, including Quantity On Hand (QOH).")) {
+                $scope.general_settings.single[key] = $scope.confirmation_hash[key];
+            } else {
+                $scope.confirmation_hash[key] = $scope.general_settings.single[key];
+            }
+        } else {
+            $scope.general_settings.single[key] = $scope.confirmation_hash[key];
+        }
+        $scope.update_settings();
     };
 
     $scope.change_opt = function(key,value) {
@@ -64,7 +87,7 @@ function( $scope, $http, $timeout, $location, $state, $cookies, generalsettings,
 
     $scope.update_settings = function() {
         $scope.show_button = false;
-        generalsettings.single.update($scope.general_settings);
+        generalsettings.single.update($scope.general_settings).then(myscope.reload_settings);
     };
 
 	myscope.init();
