@@ -114,7 +114,7 @@ module Groovepacker
               where(scanned_on_predicate).
               where(packing_user_id: user.id).
               where('packing_score > 0').
-              order(scanned_on: :ASC).
+              order('scanned_on ASC').
               group('date(scanned_on)').
               sum('total_scan_count * total_scan_time')
 
@@ -123,7 +123,7 @@ module Groovepacker
               where(scanned_on: start_time..end_time).
               where(packing_user_id: user.id).
               where('packing_score > 0').
-              order(scanned_on: :ASC).
+              order('scanned_on ASC').
               group('date(scanned_on)').
               sum('total_scan_count')
 
