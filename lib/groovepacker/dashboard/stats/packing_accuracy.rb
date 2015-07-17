@@ -73,11 +73,11 @@ module Groovepacker
             end_time = DateTime.now.end_of_day
             if @duration == -1
               orders = Order.where('scanned_on < ?', end_time).where(packing_user_id: user.id).order(
-                scanned_on: :ASC).group('date(scanned_on)').count
+                'scanned_on ASC').group('date(scanned_on)').count
             else
               orders = Order.where(scanned_on: start_time..end_time).where(
                 packing_user_id: user.id).order(
-                scanned_on: :ASC).group('date(scanned_on)').count
+                'scanned_on ASC').group('date(scanned_on)').count
             end
 
             orders.each do |order|
