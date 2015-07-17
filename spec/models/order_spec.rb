@@ -4,8 +4,7 @@ describe Order do
   before(:each) do
     SeedTenant.new.seed
     @generalsetting = GeneralSetting.all.first
-    @generalsetting.inventory_tracking = true
-    @generalsetting.save
+    @generalsetting.update_column(:inventory_tracking,true)
   end
    	it "should not split kits" do
       order = FactoryGirl.create(:order, :status=>'awaiting')

@@ -9,8 +9,7 @@ RSpec.describe ScanPackController, :type => :controller do
     @scanpacksetting.post_scanning_option = "Record"
     @scanpacksetting.save
     @generalsetting = GeneralSetting.all.first
-    @generalsetting.inventory_tracking = true
-    @generalsetting.save
+    @generalsetting.update_column(:inventory_tracking, true)
 
     #@user_role =FactoryGirl.create(:role, :name=>'scan_pack', :import_orders=>true)
     @user = FactoryGirl.create(:user, :username=>"scan_pack_spec_user", :name=>'Scan Pack user', 
