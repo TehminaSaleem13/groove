@@ -86,23 +86,24 @@ module Groovepacker
             if start_time == nil
               orders = Order.where('scanned_on < ?', end_time).where(
                 packing_user_id: user.id).order(
-                scanned_on: :ASC).group('date(scanned_on)')
+                'scanned_on ASC').group('date(scanned_on)')
               scanned_dates = Order.where('scanned_on < ?', end_time).where(
                 packing_user_id: user.id).order(
-                scanned_on: :ASC).group('date(scanned_on)').pluck(:scanned_on)
+                'scanned_on ASC').group('date(scanned_on)').pluck(:scanned_on)
             else
               orders = Order.where(scanned_on: start_time..end_time).where(
                 packing_user_id: user.id).order(
-                scanned_on: :ASC).group('date(scanned_on)')
+                'scanned_on ASC').group('date(scanned_on)')
               scanned_dates = Order.where(scanned_on: start_time..end_time).where(
                 packing_user_id: user.id).order(
-                scanned_on: :ASC).group('date(scanned_on)').pluck(:scanned_on)
+                'scanned_on ASC').group('date(scanned_on)').pluck(:scanned_on)
             end
 
             scanned_dates.each_with_index do |scanned_date, index|
-              scanned_orders = Order.where(scanned_on: scanned_date.beginning_of_day..scanned_date.end_of_day).where(packing_user_id: user.id)
+              scanned_orders = Order.where(scanned_on: 
+                scanned_date.beginning_of_day.utc..scanned_date.end_of_day.utc).where(
+                packing_user_id: user.id)
               count = 0
-              puts scanned_orders.inspect
               scanned_orders.each do |scanned_order|
                 count = count + scanned_order.order_items.count
               end
