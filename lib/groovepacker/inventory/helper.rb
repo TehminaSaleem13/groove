@@ -13,8 +13,12 @@ module Groovepacker
 				# 	end
 				# end
 				# Thread.current[:inventory_tracking_enabled]
-
-				GeneralSetting.all.first.inventory_tracking?
+				result = false
+				general_setting = GeneralSetting.all.first
+				unless general_setting.nil?
+					result = general_setting.inventory_tracking?
+				end
+				result
 			end
 
 			def hold_orders_due_to_inventory?

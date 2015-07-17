@@ -1,6 +1,12 @@
 require 'spec_helper'
 
 describe Order do
+  before(:each) do
+    SeedTenant.new.seed
+    @generalsetting = GeneralSetting.all.first
+    @generalsetting.inventory_tracking = true
+    @generalsetting.save
+  end
    	it "should not split kits" do
       order = FactoryGirl.create(:order, :status=>'awaiting')
       
@@ -186,8 +192,8 @@ describe Order do
 
       product_inv_wh.reload
 
-      expect(product_inv_wh.available_inv).to equal(23)
-      expect(product_inv_wh.allocated_inv).to equal(2)
+      expect(product_inv_wh.available_inv).to eq(23)
+      expect(product_inv_wh.allocated_inv).to eq(2)
     end
 
     it "should create order then delete order and update allocated inventory count" do      
@@ -210,8 +216,8 @@ describe Order do
 
       product_inv_wh.reload
 
-      expect(product_inv_wh.available_inv).to equal(25)
-      expect(product_inv_wh.allocated_inv).to equal(0)
+      expect(product_inv_wh.available_inv).to eq(25)
+      expect(product_inv_wh.allocated_inv).to eq(0)
     end
 
     it "should create order with status awaiting change it to onhold should not change data" do

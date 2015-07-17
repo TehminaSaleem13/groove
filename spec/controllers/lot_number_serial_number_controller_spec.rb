@@ -10,6 +10,9 @@ describe ScanPackController do
     scanpacksetting.escape_string_enabled = true
     scanpacksetting.escape_string = ' - '
     scanpacksetting.save
+    general_setting = GeneralSetting.all.first
+    general_setting.inventory_tracking = true
+    general_setting.save
 
     @user = FactoryGirl.create(:user, :username=>"scan_pack_spec_user", :name=>'Scan Pack user', 
       :role => Role.find_by_name('Scan & Pack User'))

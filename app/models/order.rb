@@ -132,12 +132,11 @@ class Order < ActiveRecord::Base
   def update_order_status
     result = true
     if true
-      hold_orders_due_to_inventory = GeneralSetting.first.hold_orders_due_to_inventory
+      #Implement hold orders from Groovepacker::Inventory
       self.order_items.each do |order_item|
         product = Product.find_by_id(order_item.product_id)
         unless product.nil?
-          if product.status == "new" or product.status == "inactive" or 
-            (hold_orders_due_to_inventory and (order_item.inv_status == 'unallocated' or order_item.inv_status == 'unprocessed'))
+          if product.status == "new" or product.status == "inactive"
               result &= false
           end
         end
