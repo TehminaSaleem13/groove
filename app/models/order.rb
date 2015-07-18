@@ -180,7 +180,7 @@ class Order < ActiveRecord::Base
     if result
       self.update_column(:status,'awaiting')
     else
-      self.update_column(:status,'scanned')
+      self.update_column(:status,'onhold')
     end
 
     #self.apply_and_update_predefined_tags
