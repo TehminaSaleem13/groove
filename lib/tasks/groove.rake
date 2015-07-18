@@ -65,10 +65,9 @@ namespace :groove do
           #Add upgrade code to run for every tenant after this line
           general_setting = GeneralSetting.all.first
           bulk_action = Groovepacker::Inventory::BulkActions.new
-
+          inventory_data = []
           if general_setting.inventory_tracking?
             product_inventory_warehouses = ProductInventoryWarehouses.all
-            inventory_data = []
             product_inventory_warehouses.each do |single_warehouse|
               inventory_data << { id: single_warehouse.id, quantity_on_hand: single_warehouse.available_inv}
             end

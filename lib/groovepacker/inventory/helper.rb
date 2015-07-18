@@ -14,7 +14,7 @@ module Groovepacker
 				# end
 				# Thread.current[:inventory_tracking_enabled]
 				result = false
-				general_setting = GeneralSetting.all.first
+				general_setting = GeneralSetting.setting
 				unless general_setting.nil?
 					result = general_setting.inventory_tracking?
 				end

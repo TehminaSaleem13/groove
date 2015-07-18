@@ -10,9 +10,29 @@ class GeneralSetting < ActiveRecord::Base
   after_save :send_low_inventory_alert_email
   after_save :scheduled_import
   after_update :inventory_state_change_check
+  @@all_tenants_settings = {}
+
+  def self.setting
+    if @@all_tenants_settings.nil?
+      @@all_tenants_settings = {}
+    end
+    if @@all_tenants_settings[Apartment::Tenant.current_tenant].nil?
+      @@all_tenants_settings[Apartment::Tenant.current_tenant] = self.all.first
+    end
+    @@all_tenants_settings[Apartment::Tenant.current_tenant]
+  end
+
+  def self.unset_setting
+    if @@all_tenants_settings.nil?
+      @@all_tenants_settings = {}
+    end
+    @@all_tenants_settings[Apartment::Tenant.current_tenant] = nil
+    true
+  end
 
   def inventory_state_change_check
     changes = self.changes
+    self.unset_setting
     if changes.nil? || changes['inventory_tracking'].nil?
       return true
     end

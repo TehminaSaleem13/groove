@@ -13,6 +13,7 @@ module Groovepacker
           do_unprocess_all
           general_setting = GeneralSetting.all.first
           general_setting.update_column(:inventory_tracking, false)
+          GeneralSetting.unset_setting
           return true
         end
         begin
@@ -35,6 +36,7 @@ module Groovepacker
                   do_unprocess_all
                   general_setting = GeneralSetting.all.first
                   general_setting.update_column(:inventory_tracking, false)
+                  GeneralSetting.unset_setting
                   return true
                 end
                 bulk_action.completed = index + 1
@@ -43,6 +45,11 @@ module Groovepacker
             end
             bulk_action.status = 'completed'
             bulk_action.save
+          else
+            do_unprocess_all
+            general_setting = GeneralSetting.all.first
+            general_setting.update_column(:inventory_tracking, false)
+            GeneralSetting.unset_setting
           end
         rescue Exception => e
           bulk_action.status = 'failed'
@@ -60,6 +67,7 @@ module Groovepacker
           bulk_action.save
           general_setting = GeneralSetting.all.first
           general_setting.update_column(:inventory_tracking, true)
+          GeneralSetting.unset_setting
           return true
         end
         begin
