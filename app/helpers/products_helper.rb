@@ -237,7 +237,7 @@ module ProductsHelper
     status_filter_text = ""
     is_kit = 0
     supported_sort_keys = ['updated_at', 'name', 'sku',
-                           'status', 'barcode', 'location_primary','location_secondary','location_tertiary','location_name','cat','qty', 'store_type' ]
+                           'status', 'barcode', 'location_primary','location_secondary','location_tertiary','location_name','cat','available_inv', 'store_type' ]
     supported_order_keys = ['ASC', 'DESC' ] #Caps letters only
     supported_status_filters = ['all', 'active', 'inactive', 'new']
     supported_kit_params = ['0', '1', '-1']
@@ -310,7 +310,7 @@ module ProductsHelper
                                          "products.id = product_inventory_warehouses.product_id )  LEFT JOIN inventory_warehouses ON("+
                                          "product_inventory_warehouses.inventory_warehouse_id = inventory_warehouses.id ) "+kit_query+
                                          status_filter_text+" ORDER BY inventory_warehouses.name "+sort_order+query_add)
-    elsif sort_key == 'qty'
+    elsif sort_key == 'available_inv'
       products = Product.find_by_sql("SELECT products.* FROM products LEFT JOIN product_inventory_warehouses ON ( "+
                                          "products.id = product_inventory_warehouses.product_id ) "+kit_query+
                                          status_filter_text+" ORDER BY product_inventory_warehouses.available_inv "+sort_order+query_add)
