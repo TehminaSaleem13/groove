@@ -310,7 +310,7 @@ class Order < ActiveRecord::Base
 
         #if current item does not belong to any of the unscanned items in the already split kits
         if order_item.should_kit_split_qty_be_increased(matched_product_id)
-          if order_item.kit_split_qty <= order_item.qty
+          if order_item.kit_split_qty + order_item.single_scanned_qty < order_item.qty
             order_item.kit_split_qty = order_item.kit_split_qty + 1
             order_item.order_item_kit_products.each do |kit_product|
               kit_product.scanned_status = 'partially_scanned'
