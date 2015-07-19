@@ -32,7 +32,7 @@ class GeneralSetting < ActiveRecord::Base
 
   def inventory_state_change_check
     changes = self.changes
-    self.unset_setting
+    GeneralSetting.unset_setting
     if changes.nil? || changes['inventory_tracking'].nil?
       return true
     end
