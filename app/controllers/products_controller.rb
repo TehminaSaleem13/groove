@@ -596,6 +596,7 @@ class ProductsController < ApplicationController
       @result['product']['store'] = @store
       @result['product']['basicinfo'] = @product.attributes
       @result['product']['basicinfo']['weight_format'] = @product.get_show_weight_format
+      @result['product']['basicinfo']['contains_intangible_string'] = @product.contains_intangible_string
       @result['product']['product_weight_format'] = GeneralSetting.get_product_weight_format
       @result['product']['weight'] = @product.get_weight
       @result['product']['shipping_weight'] = @product.get_shipping_weight
@@ -1410,7 +1411,7 @@ class ProductsController < ApplicationController
       intangible_string = scan_pack_setting.intangible_string
 
       action_intangible.delay(:run_at =>1.seconds.from_now).update_intangibleness(Apartment::Tenant.current_tenant, params, intangible_setting_enabled, intangible_string)
-      # action_intangible.update_intangibleness(Apartment::Tenant.current_tenant, params, scan_pack_setting)
+      # action_intangible.update_intangibleness(Apartment::Tenant.current_tenant, params, intangible_setting_enabled, intangible_string)
     else
       result['status'] = false
       result['messages'].push('You do not have enough permissions to edit product status')

@@ -10,7 +10,7 @@ module Groovepacker
             products = Product.all
             products.each do |product|
               intangible_strings.each do |string|
-                if product.name.start_with? (string) || sku_starts_with_intangible_string(product,string)
+                if (product.name.start_with? (string)) || sku_starts_with_intangible_string(product,string)
                   product.is_intangible = false
                   product.save
                 end
@@ -19,7 +19,7 @@ module Groovepacker
             products = Product.all
             products.each do |product|
               intangible_param_strings.each do |param_string|
-                if product.name.start_with? (param_string) || sku_starts_with_intangible_string(product,param_string)
+                if (product.name.start_with? (param_string)) || sku_starts_with_intangible_string(product,param_string)
                   product.is_intangible = true
                   product.save
                 end
@@ -30,7 +30,8 @@ module Groovepacker
           products = Product.all
           products.each do |product|
             intangible_param_strings.each do |string|
-              if product.name.start_with? (string) || sku_starts_with_intangible_string(product,string)
+              # sku_starts_with_intangible_string(product,string)
+              if (product.name.start_with? (string)) || sku_starts_with_intangible_string(product,string)
                 product.is_intangible = false
                 product.save
               end
@@ -38,6 +39,8 @@ module Groovepacker
           end
         end
       end
+
+      private
 
       def sku_starts_with_intangible_string(product,intangible_string)
         product_skus = product.product_skus

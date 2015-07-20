@@ -382,6 +382,30 @@ class Product < ActiveRecord::Base
     end
   end
 
+  def contains_intangible_string
+    scan_pack_settings = ScanPackSetting.all.first
+    unless scan_pack_settings.intangible_string.nil? && (scan_pack_settings.intangible_string.strip.equal? (''))
+      intangible_string = scan_pack_settings.intangible_string
+      intangible_strings = intangible_string.split(",")
+      intangible_strings.each do |string|
+        if (self.name.include? (string)) || sku_contains_string(string)
+          return true
+        end
+      end
+      return false
+    end
+  end
+
+  def sku_contains_string(string)
+    product_skus = self.product_skus
+    product_skus.each do |product_sku|
+      if product_sku.sku.include? (string)
+        return true
+      end
+    end
+    return false
+  end
+
   def get_show_weight_format
     unless self.weight_format.nil?
       return self.weight_format

@@ -52,20 +52,6 @@ groovepacks_controllers.
                     myscope.single = {};
                     angular.copy(scope.products.single, myscope.single);
                 }
-                for (var i = 0; i < 5; i++) {
-                    if (scope.scan_pack_settings.settings.intangible_string != undefined) {
-                        var intangible_string = scope.scan_pack_settings.settings.intangible_string;
-                        var intangible_strings = intangible_string.split(",");
-                        for (var i = 0; i < intangible_strings.length; i++) {
-                            if (scope.products.single.basicinfo.name.includes(intangible_strings[i]) || scope.products.single.skus[0].sku.includes(intangible_strings[i])) {
-                                scope.products.single.basicinfo.contains_intangible_string = true;
-                            } else{
-                                scope.products.single.basicinfo.contains_intangible_string = false;
-                            };
-                        };
-                        break;
-                    } else {next;};         
-                };
             });
         };
 
