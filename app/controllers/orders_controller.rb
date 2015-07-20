@@ -865,22 +865,24 @@ class OrdersController < ApplicationController
           Groovepacker::PickList::DependsPickListBuilder.new
         order.order_items.each do |order_item|
           if !order_item.product.nil?
-            # for single products which are not kit
-            if order_item.product.is_kit == 0
-              @pick_list = single_pick_list_obj.build(
-                order_item.qty, order_item.product, @pick_list, inventory_warehouse_id)
-            else # for products which are kits
-              if order_item.product.kit_parsing == 'single'
+            unless order_item.product.is_intangible
+              # for single products which are not kit
+              if order_item.product.is_kit == 0
                 @pick_list = single_pick_list_obj.build(
                   order_item.qty, order_item.product, @pick_list, inventory_warehouse_id)
-              else #for individual kits
-                if order_item.product.kit_parsing == 'individual'
-                  @pick_list = individual_pick_list_obj.build(
-                  order_item.qty, order_item.product, @pick_list, inventory_warehouse_id)
-                else #for automatic depends kits
-                  if order_item.product.kit_parsing == 'depends'
-                    @depends_pick_list = depends_pick_list_obj.build(
-                    order_item.qty, order_item.product, @depends_pick_list, inventory_warehouse_id)
+              else # for products which are kits
+                if order_item.product.kit_parsing == 'single'
+                  @pick_list = single_pick_list_obj.build(
+                    order_item.qty, order_item.product, @pick_list, inventory_warehouse_id)
+                else #for individual kits
+                  if order_item.product.kit_parsing == 'individual'
+                    @pick_list = individual_pick_list_obj.build(
+                    order_item.qty, order_item.product, @pick_list, inventory_warehouse_id)
+                  else #for automatic depends kits
+                    if order_item.product.kit_parsing == 'depends'
+                      @depends_pick_list = depends_pick_list_obj.build(
+                      order_item.qty, order_item.product, @depends_pick_list, inventory_warehouse_id)
+                    end
                   end
                 end
               end
@@ -993,6 +995,7 @@ class OrdersController < ApplicationController
 
       @generate_barcode.save
       delayed_job = GeneratePackingSlipPdf.delay(:run_at => 1.seconds.from_now).generate_packing_slip_pdf(@orders, Apartment::Tenant.current_tenant, @result, @page_height,@page_width,@orientation,@file_name, @size, @header,@generate_barcode.id)
+      # delayed_job = GeneratePackingSlipPdf.generate_packing_slip_pdf(@orders, Apartment::Tenant.current_tenant, @result, @page_height,@page_width,@orientation,@file_name, @size, @header,@generate_barcode.id)
       @generate_barcode.delayed_job_id = delayed_job.id
       @generate_barcode.save
       result['status'] = true

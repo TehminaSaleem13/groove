@@ -190,9 +190,11 @@ class Order < ActiveRecord::Base
     result = false
     self.reload
     self.order_items.each do |order_item|
-      if order_item.scanned_status != 'scanned'
-        result |= true
-        break
+      unless order_item.product.is_intangible
+        if order_item.scanned_status != 'scanned'
+          result |= true
+          break
+        end
       end
     end
 
@@ -384,10 +386,12 @@ class Order < ActiveRecord::Base
             end
           end
         else
-          # add order item to unscanned list
-          unscanned_item = order_item.build_unscanned_single_item
-          if unscanned_item['qty_remaining'] > 0
-            unscanned_list.push(unscanned_item)
+          unless order_item.product.is_intangible
+            # add order item to unscanned list
+            unscanned_item = order_item.build_unscanned_single_item
+            if unscanned_item['qty_remaining'] > 0
+              unscanned_list.push(unscanned_item)
+            end
           end
         end
       end

@@ -384,16 +384,18 @@ class Product < ActiveRecord::Base
 
   def contains_intangible_string
     scan_pack_settings = ScanPackSetting.all.first
-    unless scan_pack_settings.intangible_string.nil? && (scan_pack_settings.intangible_string.strip.equal? (''))
-      intangible_string = scan_pack_settings.intangible_string
-      intangible_strings = intangible_string.split(",")
-      intangible_strings.each do |string|
-        if (self.name.include? (string)) || sku_contains_string(string)
-          return true
+    if scan_pack_settings.intangible_setting_enabled
+      unless scan_pack_settings.intangible_string.nil? && (scan_pack_settings.intangible_string.strip.equal? (''))
+        intangible_string = scan_pack_settings.intangible_string
+        intangible_strings = intangible_string.split(",")
+        intangible_strings.each do |string|
+          if (self.name.include? (string)) || sku_contains_string(string)
+            return true
+          end
         end
       end
-      return false
     end
+    return false
   end
 
   def sku_contains_string(string)
