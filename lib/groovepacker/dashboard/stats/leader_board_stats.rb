@@ -32,7 +32,7 @@ module Groovepacker
               leader_board = leader_board.first
               if !order.first.nil?
                 order= order.first
-                if leader_board.scan_time > (order.scanned_on - order.scan_start_time)
+                if leader_board.scan_time.nil? || (leader_board.scan_time > (order.scanned_on - order.scan_start_time))
                   leader_board.order_id = order.id
                   leader_board.scan_time = order.scanned_on - order.scan_start_time
                   leader_board.order_item_count = order_item_count
