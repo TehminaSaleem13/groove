@@ -1,5 +1,6 @@
 class ApplyAccessRestrictions
-  def self.apply_access_restrictions(invoice)
+  def self.apply_access_restrictions(invoice_id)
+    invoice = Invoice.find(invoice_id)
     Apartment::Tenant.switch()
     unless Subscription.where(stripe_customer_id: invoice.customer_id).empty?
       subscription = Subscription.where(stripe_customer_id: invoice.customer_id).first
