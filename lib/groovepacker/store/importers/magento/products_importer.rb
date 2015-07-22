@@ -131,6 +131,20 @@ module Groovepacker
                 @productdb.product_inventory_warehousess << inv_wh
               end
 
+              scan_pack_settings = ScanPackSetting.all.first
+              @productdb.is_intangible = false
+              if scan_pack_settings.intangible_setting_enabled
+                unless scan_pack_settings.intangible_string.nil? && (scan_pack_settings.intangible_string.strip.equal? (''))
+                  intangible_strings = scan_pack_settings.intangible_string.strip.split(",")
+                  intangible_strings.each do |string|
+                    if (@productdb.name.include? (string)) || (@productdbsku.sku.include? (string))
+                      @productdb.is_intangible = true
+                      break
+                    end
+                  end
+                end
+              end
+
               @productdb.save
               @productdb.set_product_status
               result_product_id = @productdb.id

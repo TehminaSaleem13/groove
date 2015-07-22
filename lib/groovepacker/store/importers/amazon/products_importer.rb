@@ -71,6 +71,21 @@ module Groovepacker
                   inv_wh = ProductInventoryWarehouses.new
                   inv_wh.inventory_warehouse_id = credential.store.inventory_warehouse_id
                   product.product_inventory_warehousess << inv_wh
+
+                  scan_pack_settings = ScanPackSetting.all.first
+                  product.is_intangible = false
+                  if scan_pack_settings.intangible_setting_enabled
+                    unless scan_pack_settings.intangible_string.nil? && (scan_pack_settings.intangible_string.strip.equal? (''))
+                      intangible_strings = scan_pack_settings.intangible_string.strip.split(",")
+                      intangible_strings.each do |string|
+                        if (product.name.include? (string)) || (import_hash[:product_sku].include? (string))
+                          product.is_intangible = true
+                          break
+                        end
+                      end
+                    end
+                  end
+
                   product.save
                   product.update_product_status
                 else

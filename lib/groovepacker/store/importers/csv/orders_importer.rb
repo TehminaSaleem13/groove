@@ -78,6 +78,7 @@ module Groovepacker
                 "tracking_num"
             ]
             imported_orders = {}
+            scan_pack_settings = ScanPackSetting.all.first
             import_item = ImportItem.find_by_store_id(params[:store_id])
             if import_item.nil?
               import_item = ImportItem.new
@@ -168,6 +169,20 @@ module Groovepacker
                             unless mapping['product_instructions'].nil?
                               product.spl_instructions_4_packer = single_row[mapping['product_instructions'][:position]]
                             end
+
+                            product.is_intangible = false
+                            if scan_pack_settings.intangible_setting_enabled
+                              unless scan_pack_settings.intangible_string.nil? && (scan_pack_settings.intangible_string.strip.equal? (''))
+                                intangible_strings = scan_pack_settings.intangible_string.strip.split(",")
+                                intangible_strings.each do |string|
+                                  if (product.name.include? (string)) || (single_row[mapping['sku'][:position]].include? (string))
+                                    product.is_intangible = true
+                                    break
+                                  end
+                                end
+                              end
+                            end
+
                             product.save
                             product.update_product_status
 
@@ -247,6 +262,18 @@ module Groovepacker
                           basesku = ProductSku.new
                           basesku.sku = single_row[mapping['sku'][:position]]
                           base_product.product_skus << basesku
+                          base_product.is_intangible = false
+                          if scan_pack_settings.intangible_setting_enabled
+                            unless scan_pack_settings.intangible_string.nil? && (scan_pack_settings.intangible_string.strip.equal? (''))
+                              intangible_strings = scan_pack_settings.intangible_string.strip.split(",")
+                              intangible_strings.each do |string|
+                                if (base_product.name.include? (string)) || (basesku.sku.include? (string))
+                                  base_product.is_intangible = true
+                                  break
+                                end
+                              end
+                            end
+                          end
                           base_product.save
                         end
 

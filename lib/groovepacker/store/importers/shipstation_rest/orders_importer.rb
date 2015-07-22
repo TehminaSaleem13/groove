@@ -117,6 +117,26 @@ module Groovepacker
                             order_item_product.save
                             order_item.product = order_item_product
                           end
+                          scan_pack_settings = ScanPackSetting.all.first
+                          order_item.product.is_intangible = false
+                          if scan_pack_settings.intangible_setting_enabled
+                            unless scan_pack_settings.intangible_string.nil? && (scan_pack_settings.intangible_string.strip.equal? (''))
+                              intangible_strings = scan_pack_settings.intangible_string.strip.split(",")
+                              intangible_strings.each do |string|
+                                if item["sku"].nil? or item["sku"] == ''
+                                  if (order_item.product.name.include? (string)) || (ProductSku.get_temp_sku.include? (string))
+                                    product.is_intangible = true
+                                    break
+                                  end
+                                else
+                                  if (order_item.product.name.include? (string)) || (item["sku"].include? (string))
+                                    product.is_intangible = true
+                                    break
+                                  end
+                                end
+                              end
+                            end
+                          end
                           shipstation_order.order_items << order_item
                           import_item.current_order_imported_item = import_item.current_order_imported_item + 1
                           import_item.save

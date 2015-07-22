@@ -65,7 +65,7 @@ module Groovepacker
               unless products.nil?
                 product = products.first
                 @product = Product.find(id)
-                set_product_fields(@product,product,credential)
+                set_product_fields(@product,product,credential,sku)
               end 
             rescue Exception => e
               result &= false
@@ -80,10 +80,10 @@ module Groovepacker
             product = Product.create(store: credential.store, store_product_id: 0,
               name: item["name"])
             product.product_skus.create(sku: sku)
-            set_product_fields(product, item, credential)
+            set_product_fields(product, item, credential,sku)
           end
 
-          def set_product_fields(product, ssproduct, credential)
+          def set_product_fields(product, ssproduct, credential,sku)
             result = false 
             product.name = ssproduct["name"]
 
@@ -105,6 +105,20 @@ module Groovepacker
               product.weight = ssproduct["weightOz"]
             else
               product.weight = 0
+            end
+
+            scan_pack_settings = ScanPackSetting.all.first
+            product.is_intangible = false
+            if scan_pack_settings.intangible_setting_enabled
+              unless scan_pack_settings.intangible_string.nil? && (scan_pack_settings.intangible_string.strip.equal? (''))
+                intangible_strings = scan_pack_settings.intangible_string.strip.split(",")
+                intangible_strings.each do |string|
+                  if (product.name.include? (string)) || (sku.include? (string))
+                    product.is_intangible = true
+                    break
+                  end
+                end
+              end
             end
 
             if product.save
