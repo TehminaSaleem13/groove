@@ -144,6 +144,7 @@ module Groovepacker
             )
             import_item.current_order_imported_item = import_item.current_order_imported_item + 1
             import_item.save
+            make_product_intangible(product)
           end
 
           def import_product(item, store)

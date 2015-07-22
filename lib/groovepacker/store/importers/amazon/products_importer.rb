@@ -3,6 +3,7 @@ module Groovepacker
     module Importers
       module Amazon
         class ProductsImporter < Groovepacker::Store::Importers::Importer
+          include ProductsHelper
           require 'mws-connect'
 
           def import
@@ -71,7 +72,9 @@ module Groovepacker
                   inv_wh = ProductInventoryWarehouses.new
                   inv_wh.inventory_warehouse_id = credential.store.inventory_warehouse_id
                   product.product_inventory_warehousess << inv_wh
+
                   product.save
+                  make_product_intangible(product)
                   product.update_product_status
                 else
                   Rails.logger.info('No attributes and/or identifiers for SKU: ' + 

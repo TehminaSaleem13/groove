@@ -4,6 +4,7 @@ module Groovepacker
       module ShipstationRest
         include ProductsHelper
         class OrdersImporter < Groovepacker::Store::Importers::Importer
+          include ProductsHelper
           def import
             handler = self.get_handler
             credential = handler[:credential]
@@ -117,6 +118,7 @@ module Groovepacker
                             order_item_product.save
                             order_item.product = order_item_product
                           end
+                          make_product_intangible(order_item.product)
                           shipstation_order.order_items << order_item
                           import_item.current_order_imported_item = import_item.current_order_imported_item + 1
                           import_item.save

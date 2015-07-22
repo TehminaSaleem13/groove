@@ -490,4 +490,20 @@ module ProductsHelper
     csv
   end
 
+  def make_product_intangible(product)
+    puts product.inspect
+    scan_pack_settings = ScanPackSetting.all.first
+    if scan_pack_settings.intangible_setting_enabled
+      unless scan_pack_settings.intangible_string.nil? || (scan_pack_settings.intangible_string.strip.equal? (''))
+        intangible_strings = scan_pack_settings.intangible_string.strip.split(",")
+        intangible_strings.each do |string|
+          if (product.name.include? (string)) || (product.primary_sku.include? (string))
+            product.is_intangible = true
+            product.save
+            break
+          end
+        end
+      end
+    end
+  end
 end
