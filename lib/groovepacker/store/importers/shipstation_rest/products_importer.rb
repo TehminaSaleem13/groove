@@ -65,7 +65,7 @@ module Groovepacker
               unless products.nil?
                 product = products.first
                 @product = Product.find(id)
-                set_product_fields(@product,product,credential,sku)
+                set_product_fields(@product,product,credential)
               end 
             rescue Exception => e
               result &= false
@@ -80,10 +80,10 @@ module Groovepacker
             product = Product.create(store: credential.store, store_product_id: 0,
               name: item["name"])
             product.product_skus.create(sku: sku)
-            set_product_fields(product, item, credential,sku)
+            set_product_fields(product, item, credential)
           end
 
-          def set_product_fields(product, ssproduct, credential,sku)
+          def set_product_fields(product, ssproduct, credential)
             result = false 
             product.name = ssproduct["name"]
 
