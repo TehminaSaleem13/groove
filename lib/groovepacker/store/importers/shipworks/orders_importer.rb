@@ -136,20 +136,6 @@ module Groovepacker
               product = import_product(item, store)
             end
 
-            scan_pack_settings = ScanPackSetting.all.first
-            product.is_intangible = false
-            if scan_pack_settings.intangible_setting_enabled
-              unless scan_pack_settings.intangible_string.nil? && (scan_pack_settings.intangible_string.strip.equal? (''))
-                intangible_strings = scan_pack_settings.intangible_string.strip.split(",")
-                intangible_strings.each do |string|
-                  if (product.name.include? (string)) || (sku.include? (string))
-                    product.is_intangible = true
-                    break
-                  end
-                end
-              end
-            end
-
             order.order_items.create(
               product: product,
               price: item["UnitPrice"],
@@ -158,6 +144,7 @@ module Groovepacker
             )
             import_item.current_order_imported_item = import_item.current_order_imported_item + 1
             import_item.save
+            make_product_intangible(product)
           end
 
           def import_product(item, store)

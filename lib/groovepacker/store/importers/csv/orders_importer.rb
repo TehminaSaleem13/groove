@@ -3,6 +3,8 @@ module Groovepacker
     module Importers
       module CSV
         class OrdersImporter
+          include ProductsHelper
+
           def import(params,final_record,mapping)
             result = Hash.new
             result['status'] = true
@@ -170,20 +172,8 @@ module Groovepacker
                               product.spl_instructions_4_packer = single_row[mapping['product_instructions'][:position]]
                             end
 
-                            product.is_intangible = false
-                            if scan_pack_settings.intangible_setting_enabled
-                              unless scan_pack_settings.intangible_string.nil? && (scan_pack_settings.intangible_string.strip.equal? (''))
-                                intangible_strings = scan_pack_settings.intangible_string.strip.split(",")
-                                intangible_strings.each do |string|
-                                  if (product.name.include? (string)) || (single_row[mapping['sku'][:position]].include? (string))
-                                    product.is_intangible = true
-                                    break
-                                  end
-                                end
-                              end
-                            end
-
                             product.save
+                            make_product_intangible(product)
                             product.update_product_status
 
                             order_item  = OrderItem.new
@@ -263,18 +253,9 @@ module Groovepacker
                           basesku.sku = single_row[mapping['sku'][:position]]
                           base_product.product_skus << basesku
                           base_product.is_intangible = false
-                          if scan_pack_settings.intangible_setting_enabled
-                            unless scan_pack_settings.intangible_string.nil? && (scan_pack_settings.intangible_string.strip.equal? (''))
-                              intangible_strings = scan_pack_settings.intangible_string.strip.split(",")
-                              intangible_strings.each do |string|
-                                if (base_product.name.include? (string)) || (basesku.sku.include? (string))
-                                  base_product.is_intangible = true
-                                  break
-                                end
-                              end
-                            end
-                          end
+                          
                           base_product.save
+                          make_product_intangible(base_product)
                         end
 
                         unless mapping['category'].nil?

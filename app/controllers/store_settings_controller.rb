@@ -599,8 +599,8 @@ class StoreSettingsController < ApplicationController
       data[:order_date_time_format] = params[:order_date_time_format]
 
       import_csv = ImportCsv.new
-      delayed_job = import_csv.delay(:run_at =>1.seconds.from_now).import Apartment::Tenant.current_tenant, data
-      # delayed_job = import_csv.import Apartment::Tenant.current_tenant, data
+      # delayed_job = import_csv.delay(:run_at =>1.seconds.from_now).import Apartment::Tenant.current_tenant, data
+      delayed_job = import_csv.import Apartment::Tenant.current_tenant, data
 
       if params[:type] == 'order'
         import_item = ImportItem.find_by_store_id(@store.id)
@@ -616,7 +616,7 @@ class StoreSettingsController < ApplicationController
           product_import = CsvProductImport.new
           product_import.store_id = @store.id
         end
-        product_import.delayed_job_id = delayed_job.id
+        # product_import.delayed_job_id = delayed_job.id
         product_import.total = 0
         product_import.success = 0
         product_import.cancel = false

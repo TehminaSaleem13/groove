@@ -200,20 +200,8 @@ module Groovepacker
               end
 
             end
-            scan_pack_settings = ScanPackSetting.all.first
-            product.is_intangible = false
-            if scan_pack_settings.intangible_setting_enabled
-              unless scan_pack_settings.intangible_string.nil? && (scan_pack_settings.intangible_string.strip.equal? (''))
-                intangible_strings = scan_pack_settings.intangible_string.strip.split(",")
-                intangible_strings.each do |string|
-                  if (product.name.include? (string)) || (sku.include? (string))
-                    product.is_intangible = true
-                    break
-                  end
-                end
-              end
-            end
             product.save
+            make_product_intangible(product)
             product.update_product_status
             product
           end
