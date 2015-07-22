@@ -163,62 +163,66 @@
                 </div>
             </div>
             <h4>Packing options</h4>
-            <div class="form-group">
-                <label class="control-label col-sm-2">Packing placement</label>
+            <div class="col-sm-6" style="padding-left: 0px; padding-right: 0px;">
+                <div class="form-group">
+                    <label class="control-label col-sm-4">Packing placement</label>
 
-                <div class="controls col-sm-1">
-                    <input type="number" min="1" max="100" ng-blur="update_single_product()" class="form-control input-style" ng-model="products.single.basicinfo.packing_placement"/>
+                    <div class="controls col-sm-2">
+                        <input type="number" min="1" max="100" ng-blur="update_single_product()" class="form-control input-style" ng-model="products.single.basicinfo.packing_placement"/>
+                    </div>
+                    <div class="info col-sm-4" ><i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" popover="{{translations.tooltips.placement}}"></i></div>
                 </div>
-                <div class="info col-sm-2" ><i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" popover="{{translations.tooltips.placement}}"></i></div>
-            </div>
-            <!--
-            <div class="form-group">
-                <label class="control-label col-sm-2">Packing time adjustment</label>
+                <!--
+                <div class="form-group">
+                    <label class="control-label col-sm-2">Packing time adjustment</label>
 
-                <div class="controls col-sm-1">
-                    <input type="number" class="form-control input-style" ng-blur="update_single_product()" ng-model="products.single.basicinfo.pack_time_adj"/>
+                    <div class="controls col-sm-1">
+                        <input type="number" class="form-control input-style" ng-blur="update_single_product()" ng-model="products.single.basicinfo.pack_time_adj"/>
+                    </div>
+                    <div class="info col-sm-2" ><i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" popover="{{translations.tooltips.time_adjust}}"></i></div>
                 </div>
-                <div class="info col-sm-2" ><i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" popover="{{translations.tooltips.time_adjust}}"></i></div>
-            </div>
-            -->
+                -->
 
-            <div class="form-group">
-                <label class="control-label col-sm-2">Special instructions for Packer</label>
+                <div class="form-group">
+                    <label class="control-label col-sm-4">Special instructions for Packer</label>
 
-                <div class="controls col-sm-4">
-                    <textarea class="form-control input-style" ng-model="products.single.basicinfo.spl_instructions_4_packer" ng-blur="update_single_product()" class="col-sm-8" rows="4"></textarea>
-                </div>
-                <label class="control-label col-sm-2">Packer Confirmation</label>
-                <div class="controls col-sm-2 col-lg-1" ng-show="general_settings.single.conf_code_product_instruction =='optional'">
-                    <div toggle-switch ng-model="products.single.basicinfo.spl_instructions_4_confirmation" groov-click="update_single_product()"></div>
-                </div>
-                <div class="control-label col-sm-2 col-lg-1" ng-show="general_settings.single.conf_code_product_instruction !='optional'">
-                    <div class="label col-xs-12 label-default" ng-class="{'label-success':general_settings.single.conf_code_product_instruction=='always'}">
-                        <span ng-show="general_settings.single.conf_code_product_instruction=='always'" translate>common.always</span>
-                        <span ng-show="general_settings.single.conf_code_product_instruction=='never'" translate>common.never</span>
+                    <div class="controls col-sm-8">
+                        <textarea class="form-control input-style" ng-model="products.single.basicinfo.spl_instructions_4_packer" ng-blur="update_single_product()" class="col-sm-8" rows="4"></textarea>
                     </div>
                 </div>
-                <div class="info col-sm-2" ><i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" groov-popover="{{translations.tooltips.confirmation}} <br/> {{confirmation_setting_text}}"></i></div>
+                <div class="form-group">
+                    <label class="control-label col-sm-4">Packer Confirmation</label>
+                    <div class="controls col-sm-4 col-lg-2" ng-show="general_settings.single.conf_code_product_instruction =='optional'">
+                        <div toggle-switch ng-model="products.single.basicinfo.spl_instructions_4_confirmation" groov-click="update_single_product()"></div>
+                    </div>
+                    <div class="control-label col-sm-4 col-lg-2" ng-show="general_settings.single.conf_code_product_instruction !='optional'">
+                        <div class="label col-xs-12 label-default" ng-class="{'label-success':general_settings.single.conf_code_product_instruction=='always'}">
+                            <span ng-show="general_settings.single.conf_code_product_instruction=='always'" translate>common.always</span>
+                            <span ng-show="general_settings.single.conf_code_product_instruction=='never'" translate>common.never</span>
+                        </div>
+                    </div>
+                    <div class="info col-sm-1" ><i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" groov-popover="{{translations.tooltips.confirmation}} <br/> {{confirmation_setting_text}}"></i></div>
+                </div>
             </div>
-
-            <div class="form-group">
-                <label class="control-label col-sm-2">Product Receiving Instructions</label>
-                <div class="controls col-sm-4">
+            <div class="col-sm-6" style="padding-left: 0px; margin-left: -15px;">
+                <label class="control-label col-sm-4" style="padding-left: 0px;"><br/><br/>Product Receiving Instructions</label>
+                <div class="controls col-sm-8" style="padding-right: 0px; padding-left: 0px;">
+                    <i class="info icon-large glyphicon glyphicon-info-sign pull-right" popover-trigger="mouseenter" popover="{{translations.tooltips.product_receiving_instructions}}"></i>
                     <div text-angular ng-model="products.single.basicinfo.product_receiving_instructions" ng-blur="update_single_product()"></div>
                 </div>
-                <div class="info col-sm-2" ><i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" popover="{{translations.tooltips.product_receiving_instructions}}"></i></div>
-            </div>
-            <div class="form-group">
-                <label class="control-label col-sm-2"></label>
-                <div class="controls col-sm-10"  ng-class="{'primary-image': $index==0}" ng-model="products.single.images">
-                    <div class="img-thumbnail" ng-hide="image.added_to_receiving_instructions==0" ng-repeat="image in products.single.images">
-                        <img ng-src="{{ image.image }}" class="img-polaroid img-thumb img-responsive" style="border: 1px solid grey;"/>
-                        <i class="glyphicon glyphicon-remove" ng-click="remove_instruction_image($index)"></i>
+                <div class="form-group">
+                    <label class="control-label col-sm-4"></label>
+                    <div class="controls col-sm-8"  ng-class="{'primary-image': $index==0}" ng-model="products.single.images">
+                        <div class="img-thumbnail" ng-hide="image.added_to_receiving_instructions==0" ng-repeat="image in products.single.images">
+                            <img ng-src="{{ image.image }}" class="img-polaroid img-thumb img-responsive" style="border: 1px solid grey;"/>
+                            <i class="glyphicon glyphicon-remove" ng-click="remove_instruction_image($index)"></i>
+                        </div>
+                        <button class="modal-save-button" ng-click="add_image_for_receiving_instructions()">Add Image</button>
                     </div>
-                    <button class="modal-save-button" ng-click="add_image_for_receiving_instructions()">Add Image</button>
                 </div>
             </div>
 
+            <h4>Scanning Options</h4>
             <div class="form-group">
                 <label class="control-label col-sm-2">Product can be skipped</label>
 
@@ -228,41 +232,15 @@
                 <div class="info col-sm-1" ><i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" popover="{{translations.tooltips.skippable}}"></i></div>
 
                 <div ng-hide="products.single.basicinfo.is_kit==1">
-                    <label class="control-label col-sm-2">Add to any order</label>
+                    <label class="control-label col-sm-2" style="margin-left: -60px;">Add to any order</label>
 
                     <div class="controls col-sm-2 col-lg-1">
                         <div toggle-switch ng-model="products.single.basicinfo.add_to_any_order" groov-click="update_single_product()"></div>
                     </div>
-                    <div class="info col-sm-2" ><i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" groov-popover="{{translations.tooltips.add_to_any_order}}"></i></div>
+                    <div class="info col-sm-1" ><i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" groov-popover="{{translations.tooltips.add_to_any_order}}"></i></div>
                 </div>
-                
-            </div>
-            <div class="form-group">
-                <label class="control-label col-sm-2">Record Serial Number?</label>
-
-                <div class="controls col-sm-2 col-lg-1">
-                    <div toggle-switch ng-model="products.single.basicinfo.record_serial" groov-click="update_single_product()"></div>
-                </div>
-                <div class="info col-sm-1" ><i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" popover="{{translations.tooltips.record_serial}}"></i></div>
-
-                <div ng-hide="products.single.basicinfo.is_kit==1">
-                    <label class="control-label col-sm-2">Intangible Item</label>
-    
-                    <div class="controls col-sm-2 col-lg-1">
-                        <div ng-show="products.single.basicinfo.contains_intangible_string && products.single.basicinfo.is_intangible">
-                            <div toggle-switch ng-model="products.single.basicinfo.is_intangible" disabled="disabled" style="opacity: 0.5;"></div>
-                        </div>
-                        <div ng-hide="products.single.basicinfo.contains_intangible_string && products.single.basicinfo.is_intangible">
-                            <div toggle-switch ng-model="products.single.basicinfo.is_intangible" groov-click="update_single_product()"></div>
-                        </div>
-                    </div>
-                    
-                    <div class="info col-sm-2" ><i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" groov-popover="{{translations.tooltips.intangible_item}}"></i></div>
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="control-label col-sm-2">Type-In Scan Setting</label>
-                <div class="col-sm-2 col-lg-1 " dropdown ng-show="scan_pack_settings.settings.type_scan_code_enabled">
+                <label class="control-label col-sm-2" style="margin-left: -20px;">Type-In Scan Setting</label>
+                <div class="col-sm-2 col-lg-2" dropdown ng-show="scan_pack_settings.settings.type_scan_code_enabled">
                     <button class="dropdown-toggle groove-button label label-default" ng-class="{'label-success':products.single.basicinfo.type_scan_enabled=='on',
                             'label-warning':products.single.basicinfo.type_scan_enabled=='on_with_confirmation'}">
                         <span ng-show="products.single.basicinfo.type_scan_enabled=='on'" >On</span>
@@ -274,15 +252,38 @@
                         <li><a class="dropdown-toggle" ng-click="change_setting('type_scan_enabled','on')" >On</a></li>
                         <li><a class="dropdown-toggle" ng-click="change_setting('type_scan_enabled','off')" >Off</a></li>
                         <li><a class="dropdown-toggle" ng-click="change_setting('type_scan_enabled','on_with_confirmation')" >On with confirmation</a></li>
-                    </ul>
+                    </ul>&nbsp;
+                    <i class="info icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" groov-popover="{{translations.tooltips.type_in_scan_setting}}"></i>
                 </div>
                 <div class="col-sm-2" ng-hide="scan_pack_settings.settings.type_scan_code_enabled">
                     <button class="groove-button label label-default">Disabled</button>
                 </div>
             </div>
             <div class="form-group">
-                <label class="control-label col-sm-2">Click Scanning Setting</label>
-                <div class="col-sm-2 col-lg-1 " dropdown ng-show="scan_pack_settings.settings.enable_click_sku">
+                <label class="control-label col-sm-2">Record Serial Number?</label>
+
+                <div class="controls col-sm-1 col-lg-1">
+                    <div toggle-switch ng-model="products.single.basicinfo.record_serial" groov-click="update_single_product()"></div>
+                </div>
+                <div class="info col-sm-1" ><i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" popover="{{translations.tooltips.record_serial}}"></i></div>
+
+                <div ng-hide="products.single.basicinfo.is_kit==1">
+                    <label class="control-label col-sm-2" style="margin-left: -60px;">Intangible Item</label>
+    
+                    <div class="controls col-sm-1 col-lg-1">
+                        <div ng-show="products.single.basicinfo.contains_intangible_string && products.single.basicinfo.is_intangible">
+                            <div toggle-switch ng-model="products.single.basicinfo.is_intangible" disabled="disabled" style="opacity: 0.5;"></div>
+                        </div>
+                        <div ng-hide="products.single.basicinfo.contains_intangible_string && products.single.basicinfo.is_intangible">
+                            <div toggle-switch ng-model="products.single.basicinfo.is_intangible" groov-click="update_single_product()"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="info col-sm-1" ><i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" groov-popover="{{translations.tooltips.intangible_item}}"></i></div>
+                </div>
+
+                <label class="control-label col-sm-2" style="margin-left: -20px;">Click Scanning Setting</label>
+                <div class="col-sm-2 col-lg-2" dropdown ng-show="scan_pack_settings.settings.enable_click_sku">
                     <button class="dropdown-toggle groove-button label label-default" ng-class="{'label-success':products.single.basicinfo.click_scan_enabled=='on',
                             'label-warning':products.single.basicinfo.click_scan_enabled=='on_with_confirmation'}">
                         <span ng-show="products.single.basicinfo.click_scan_enabled=='on'" >On</span>
@@ -294,12 +295,14 @@
                         <li><a class="dropdown-toggle" ng-click="change_setting('click_scan_enabled','on')" >On</a></li>
                         <li><a class="dropdown-toggle" ng-click="change_setting('click_scan_enabled','off')" >Off</a></li>
                         <li><a class="dropdown-toggle" ng-click="change_setting('click_scan_enabled','on_with_confirmation')" >On with confirmation</a></li>
-                    </ul>
+                    </ul>&nbsp;
+                    <i class="info icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" groov-popover="{{translations.tooltips.click_scanning_setting}}"></i>
                 </div>
                 <div class="col-sm-2" ng-hide="scan_pack_settings.settings.enable_click_sku">
                     <button class="groove-button label label-default">Disabled</button>
                 </div>
             </div>
+            
             <h4 class="text-right">Print Inventory Receiving Label&nbsp;<a href="" ng-click="print_receive_label($event)" style="padding:10px;"><i class="icon-large glyphicon glyphicon-print"></i></a></h4>
             <div class="form-group">
                 <div class="controls col-xs-12">
