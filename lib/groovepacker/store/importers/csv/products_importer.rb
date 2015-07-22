@@ -3,6 +3,8 @@ module Groovepacker
 		module Importers
 			module CSV
 				class ProductsImporter
+					include ProductsHelper
+
 					def import(params, final_record, mapping, import_action)
 						result = Hash.new
 						result['status'] = true
@@ -101,7 +103,7 @@ module Groovepacker
 
 		                            scan_pack_settings = ScanPackSetting.all.first
 		                            if scan_pack_settings.intangible_setting_enabled
-		                              unless scan_pack_settings.intangible_string.nil? && (scan_pack_settings.intangible_string.strip.equal? (''))
+		                              unless scan_pack_settings.intangible_string.nil? || (scan_pack_settings.intangible_string.strip.equal? (''))
 		                                intangible_strings = scan_pack_settings.intangible_string.strip.split(",")
 		                                sku_found = false
 		                                intangible_strings.each do |string|
