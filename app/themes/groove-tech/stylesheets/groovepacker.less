@@ -2157,11 +2157,19 @@ div.input-style {
   padding-left: 5px;
   padding-bottom: 3px;
   padding-right: 5px;
+  font-size: 22px;
+  text-align: center;
+  display: table;
   border-radius: 15px;
   background: rgba(180,180, 180, 0.9);
   color: #fff;
   visibility: hidden;
   opacity: 0;
+}
+
+.image-span {
+  display: table-cell;
+  vertical-align: middle;
 }
 
 .single-image-clickable:hover .img-note {
@@ -2302,6 +2310,27 @@ div.input-style {
 
 .white, .white a {
   color: #fff;
+}
+
+.remove_padding {
+  padding-left: 0px;
+  padding-right: 0px;
+}
+
+.remove_padding_left {
+  padding-left: 0px;
+}
+
+.subtract_margin_left15 {
+  margin-left: -15px;
+}
+
+.subtract_margin_left20 {
+  margin-left: -20px;
+}
+
+.subtract_margin_left60 {
+  margin-left: -60px;
 }
 
 @-moz-keyframes spin {
