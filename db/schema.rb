@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150723115525) do
+ActiveRecord::Schema.define(:version => 20150723194806) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0, :null => false
@@ -123,7 +123,7 @@ ActiveRecord::Schema.define(:version => 20150723115525) do
 
   create_table "export_settings", :force => true do |t|
     t.boolean  "auto_email_export",         :default => true
-    t.datetime "time_to_send_export_email", :default => '2000-01-01 00:00:00'
+    t.datetime "time_to_send_export_email"
     t.boolean  "send_export_email_on_mon",  :default => false
     t.boolean  "send_export_email_on_tue",  :default => false
     t.boolean  "send_export_email_on_wed",  :default => false
@@ -135,8 +135,8 @@ ActiveRecord::Schema.define(:version => 20150723115525) do
     t.string   "export_orders_option",      :default => "on_same_day"
     t.string   "order_export_type",         :default => "include_all"
     t.string   "order_export_email"
-    t.datetime "created_at",                                                   :null => false
-    t.datetime "updated_at",                                                   :null => false
+    t.datetime "created_at",                                           :null => false
+    t.datetime "updated_at",                                           :null => false
     t.datetime "start_time"
     t.datetime "end_time"
     t.boolean  "manual_export",             :default => false
@@ -556,6 +556,7 @@ ActiveRecord::Schema.define(:version => 20150723115525) do
     t.string   "location_tertiary",       :limit => 50
     t.integer  "product_inv_alert_level",               :default => 0
     t.boolean  "product_inv_alert",                     :default => false
+    t.integer  "sold_inv",                              :default => 0
   end
 
   add_index "product_inventory_warehouses", ["inventory_warehouse_id"], :name => "index_product_inventory_warehouses_on_inventory_warehouse_id"
@@ -749,17 +750,6 @@ ActiveRecord::Schema.define(:version => 20150723115525) do
     t.datetime "created_at",   :null => false
     t.datetime "updated_at",   :null => false
   end
-
-  create_table "sold_inventory_warehouses", :force => true do |t|
-    t.integer  "product_inventory_warehouses_id"
-    t.integer  "sold_qty"
-    t.datetime "sold_date"
-    t.datetime "created_at",                      :null => false
-    t.datetime "updated_at",                      :null => false
-    t.integer  "order_item_id"
-  end
-
-  add_index "sold_inventory_warehouses", ["order_item_id"], :name => "index_sold_inventory_warehouses_on_order_item_id"
 
   create_table "stores", :force => true do |t|
     t.string   "name",                                             :null => false

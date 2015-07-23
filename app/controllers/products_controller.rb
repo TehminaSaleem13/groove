@@ -616,10 +616,6 @@ class ProductsController < ApplicationController
           inv_wh_result = Hash.new
           inv_wh_result['info'] = inv_wh.attributes
           inv_wh_result['info']['quantity_on_hand'] = inv_wh.quantity_on_hand
-          inv_wh_result['info']['sold_inv'] = SoldInventoryWarehouse.sum(
-              :sold_qty,
-              :conditions => {:product_inventory_warehouses_id => inv_wh.id}
-          )
           unless general_setting.low_inventory_alert_email
             inv_wh_result['info']['product_inv_alert'] = false
           end
@@ -1231,11 +1227,11 @@ class ProductsController < ApplicationController
             #copy over the qoh of original as QOH of original should not change in aliasing
             orig_product_qoh = orig_product_inv_wh.quantity_on_hand
             orig_product_inv_wh.allocated_inv = orig_product_inv_wh.allocated_inv + aliased_inventory.allocated_inv
+            orig_product_inv_wh.sold_inv = orig_product_inv_wh.sold_inv + aliased_inventory.sold_inv
+
             orig_product_inv_wh.quantity_on_hand = orig_product_qoh
             orig_product_inv_wh.save
 
-            # Move all sold inventory warehouse of aliased to original
-            SoldInventoryWarehouse.where(:product_inventory_warehouses_id => aliased_inventory.id).update_all(product_inventory_warehouses_id: orig_product_inv_wh.id)
             aliased_inventory.reload
           end
 

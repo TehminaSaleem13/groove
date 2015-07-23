@@ -228,10 +228,8 @@ class Product < ActiveRecord::Base
 
   def get_total_sold_qty
     total_sold_qty = 0
-    self.product_inventory_warehousess.each do |inv_wh|
-      inv_wh.sold_inventory_warehouses.each do |sold_wh|
-        total_sold_qty += sold_wh.sold_qty
-      end
+    self.product_inventory_warehousess.all.each do |inv_wh|
+      total_sold_qty += inv_wh.sold_inv
     end
     total_sold_qty
   end

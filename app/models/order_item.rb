@@ -4,7 +4,6 @@ class OrderItem < ActiveRecord::Base
 
   has_many :order_item_kit_products, :dependent => :destroy
   has_many :order_item_order_serial_product_lots
-  has_many :sold_inventory_warehouses, :dependent => :destroy
   has_many :order_item_scan_times, :dependent => :destroy
   has_one :product_barcode
   has_one :product_sku

@@ -342,9 +342,7 @@ describe Order do
       product_inv_wh.reload
       expect(product_inv_wh.available_inv).to eq(23)
       expect(product_inv_wh.allocated_inv).to eq(0)
-      sold_inv_wh = SoldInventoryWarehouse.where(:product_inventory_warehouses_id => product_inv_wh.id)
-      expect(sold_inv_wh.count).to eq(1)
-      expect(sold_inv_wh.first.sold_qty).to eq(2)
+      expect(product_inv_wh.sold_inv).to eq(2)
     end
 
 end

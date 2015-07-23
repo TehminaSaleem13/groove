@@ -56,10 +56,6 @@ describe ScanPackController do
     expect(order.status).to eq('scanned')
     expect(prod_inv_wh.available_inv).to eq(48)
     expect(prod_inv_wh.allocated_inv).to eq(0)
-    sold_qty = 0
-    for i in 1..prod_inv_wh.sold_inventory_warehouses.length
-      sold_qty += prod_inv_wh.sold_inventory_warehouses[i-1].sold_qty
-    end
-    expect(sold_qty).to eq(2)
+    expect(prod_inv_wh.sold_inv).to eq(2)
   end
 end

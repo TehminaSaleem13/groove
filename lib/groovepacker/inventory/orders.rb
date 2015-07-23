@@ -143,28 +143,11 @@ module Groovepacker
 						return false
 					end
 
-					if qty > 0
-						sold_inventory = SoldInventoryWarehouse.new
-						sold_inventory.sold_qty = qty
-						sold_inventory.product_inventory_warehouses = product_warehouse
-						sold_inventory.order_item = order_item
-						sold_inventory.sold_date = order_item.order.scanned_on
-						sold_inventory.save
-					else
-						sold_inventories = SoldInventoryWarehouse.where(:order_item_id => order_item.id, :product_inventory_warehouses_id => product_warehouse.id)
-						if sold_inventories.length > 0
-							#destroy all sold inventories for the current order item
-							# Not the ideal solution but this condition is only reached when
-							# an order is moved from scanned to other states, all sold information would be removed anyway
-							sold_inventories.each do |sold_inventory|
-								sold_inventory.destroy
-							end
-						end
-						if order_item.order.reallocate_inventory?
-							product_warehouse.available_inv = product_warehouse.available_inv + qty
-						end
-					end
 
+          if order_item.order.reallocate_inventory?
+            product_warehouse.available_inv = product_warehouse.available_inv + qty
+          end
+          product_warehouse.sold_inv = product_warehouse.sold_inv + qty
 					product_warehouse.allocated_inv = product_warehouse.allocated_inv - qty
 					product_warehouse.save
 					true

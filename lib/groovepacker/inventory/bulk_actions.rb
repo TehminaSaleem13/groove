@@ -107,8 +107,7 @@ module Groovepacker
       end
 
       def do_unprocess_all
-        SoldInventoryWarehouse.delete_all
-        ProductInventoryWarehouses.update_all(available_inv: 0, allocated_inv: 0)
+        ProductInventoryWarehouses.update_all(available_inv: 0, allocated_inv: 0, sold_inv: 0)
         OrderItem.update_all(inv_status: OrderItem::DEFAULT_INV_STATUS)
         true
       end
