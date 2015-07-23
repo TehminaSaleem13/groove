@@ -3,6 +3,8 @@ module Groovepacker
     module Importers
       module CSV
         class OrdersImporter
+          include ProductsHelper
+
           def import(params,final_record,mapping)
             result = Hash.new
             result['status'] = true
@@ -78,6 +80,7 @@ module Groovepacker
                 "tracking_num"
             ]
             imported_orders = {}
+            scan_pack_settings = ScanPackSetting.all.first
             import_item = ImportItem.find_by_store_id(params[:store_id])
             if import_item.nil?
               import_item = ImportItem.new
@@ -168,7 +171,9 @@ module Groovepacker
                             unless mapping['product_instructions'].nil?
                               product.spl_instructions_4_packer = single_row[mapping['product_instructions'][:position]]
                             end
+
                             product.save
+                            make_product_intangible(product)
                             product.update_product_status
 
                             order_item  = OrderItem.new
@@ -247,7 +252,10 @@ module Groovepacker
                           basesku = ProductSku.new
                           basesku.sku = single_row[mapping['sku'][:position]]
                           base_product.product_skus << basesku
+                          base_product.is_intangible = false
+                          
                           base_product.save
+                          make_product_intangible(base_product)
                         end
 
                         unless mapping['category'].nil?

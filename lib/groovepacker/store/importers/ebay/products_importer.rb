@@ -3,6 +3,7 @@ module Groovepacker
     module Importers
       module Ebay
         class ProductsImporter < Groovepacker::Store::Importers::Importer
+          import productsHelper
           def import
             #do ebay connect.
             handler = self.get_handler
@@ -129,6 +130,7 @@ module Groovepacker
               @productdb.product_inventory_warehousess << inv_wh
               
               @productdb.save
+              make_product_intangible(@productdb)
               @productdb.set_product_status
               product_id = @productdb.id
             else
