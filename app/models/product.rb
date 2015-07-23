@@ -76,7 +76,7 @@ class Product < ActiveRecord::Base
   end
 
   def check_inventory_warehouses
-    if self.product_inventory_warehousess.length == 0
+    if self.product_inventory_warehousess.all.length == 0
       inventory = ProductInventoryWarehouses.new
       inventory.product_id = self.id
       inventory.inventory_warehouse = InventoryWarehouse.where(:is_default => true).first

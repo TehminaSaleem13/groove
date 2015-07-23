@@ -395,7 +395,7 @@ class OrdersController < ApplicationController
           product.product_inventory_warehousess.each do |inventory|
             @orderitem['available_inv'] +=  inventory.available_inv.to_i
           end
-          if product.product_inventory_warehousess.length > 0
+          if product.product_inventory_warehousess.all.length > 0
             @orderitem['location_primary'] =
             product.primary_warehouse.nil? ? "" : product.primary_warehouse.location_primary
                 #ProductInventoryWarehouses.where(product_id:product.id,inventory_warehouse_id: current_user.inventory_warehouse_id).first.location_primary
