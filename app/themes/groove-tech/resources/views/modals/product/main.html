@@ -55,12 +55,18 @@
                     </td>
                     <td>
                         <h5>Status </h5>
-                        <label class="radio"><input type="radio" ng-change="update_single_product()"
+                        <div class="radio">
+                            <label class="control-label"><input type="radio" ng-change="update_single_product()"
                                                     ng-model="products.single.basicinfo.status" value="active"> Active </label>
-                        <label class="radio"><input type="radio" ng-change="update_single_product()"
+                        </div>
+                        <div class="radio">
+                            <label class="control-label"><input type="radio" ng-change="update_single_product()"
                                                     ng-model="products.single.basicinfo.status" value="inactive"> Inactive </label>
-                        <label class="radio"><input type="radio" ng-change="update_single_product()"
+                        </div>
+                        <div class="radio">
+                            <label class="control-label"><input type="radio" ng-change="update_single_product()"
                                                     ng-model="products.single.basicinfo.status" value="new"> New </label>
+                        </div>
                     </td>
                 </tr>
             </table>
@@ -365,18 +371,24 @@
 
                 <div class="form-group">
                     <div class="controls col-sm-8">
-                        <label class="radio">
-                            <input type="radio" ng-change="update_single_product()" ng-model="products.single.basicinfo.kit_parsing"
-                                   value="single"/> Always be scanned as single SKU
-                        </label>
-                        <label class="radio">
-                            <input type="radio" ng-change="update_single_product()" ng-model="products.single.basicinfo.kit_parsing"
-                                   value="individual"/> Always be scanned as individual part SKUs
-                        </label>
-                        <label class="radio">
-                            <input type="radio" ng-change="update_single_product()" ng-model="products.single.basicinfo.kit_parsing"
-                                   value="depends"/> Automatically switch as needed when part SKUs are scanned
-                        </label>
+                        <div class="radio">
+                            <label class="control-label">
+                                <input type="radio" ng-change="update_single_product()" ng-model="products.single.basicinfo.kit_parsing"
+                                       value="single"/> Always be scanned as single SKU
+                            </label>
+                        </div>
+                        <div class="radio">
+                            <label class="control-label">
+                                <input type="radio" ng-change="update_single_product()" ng-model="products.single.basicinfo.kit_parsing"
+                                       value="individual"/> Always be scanned as individual part SKUs
+                            </label>
+                        </div>
+                        <div class="radio">
+                            <label class="control-label">
+                                <input type="radio" ng-change="update_single_product()" ng-model="products.single.basicinfo.kit_parsing"
+                                       value="depends"/> Automatically switch as needed when part SKUs are scanned
+                            </label>
+                        </div>
                     </div>
                 </div>
             </fieldset>

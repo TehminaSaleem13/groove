@@ -10,7 +10,7 @@ function(scope, store_data, $state, $stateParams, $modal, $modalInstance, $timeo
     scope.ok = function() {
         var result = $q.defer();
         if (scope.csv.current.order_date_time_format == 'None' || scope.csv.current.order_date_time_format == null) {
-            alert("Select an Order Date/Time foramt to start import");
+            alert("Select an Order Date/Time format to start import");
         } else {
             for(var i = 0; i < scope.csv.importer[scope.csv.importer.type]['map_options'].length; i++) {
                 if (scope.csv.importer[scope.csv.importer.type]['map_options'][i].name == "Order Date/Time") {
