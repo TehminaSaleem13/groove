@@ -212,6 +212,12 @@ module Groovepacker
                           product_sku = product_skus.where(:sku=>order_increment_sku).first
                           unless product_sku.nil?
                             product_sku.sku = order_increment_sku + '-1'
+                            if params[:generate_barcode_from_sku] == true
+                              product_sku.product.product_barcodes.last.delete
+                              product_barcode = ProductBarcode.new
+                              product_barcode.barcode = product_sku.sku
+                              product_sku.product.product_barcodes << product_barcode
+                            end
                             product_sku.save
                           end
                           order_increment_sku = order_increment_sku + '-' + (product_skus.length+1).to_s 
