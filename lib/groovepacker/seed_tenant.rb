@@ -36,26 +36,8 @@
       end
 
       if GeneralSetting.all.length == 0
-        general_setting = GeneralSetting.create(:inventory_tracking=>1,
-            :low_inventory_alert_email => false,
-            :low_inventory_email_address => '',
-            :hold_orders_due_to_inventory=> 0,
-            :conf_req_on_notes_to_packer => 'optional',
-            :send_email_for_packer_notes => 'always',
-            :email_address_for_packer_notes => '',
-            :product_weight_format => 'oz',
-            :packing_slip_size => '4 x 6',
-            :packing_slip_orientation => 'portrait',
-            :time_to_import_orders => '2001-01-01 00:00:00',
-            :time_to_send_email => '2001-01-01 00:00:00',
-            :scheduled_order_import => false,
-            :import_orders_on_mon => false,
-            :import_orders_on_tue => false,
-            :import_orders_on_wed => false,
-            :import_orders_on_thurs => false,
-            :import_orders_on_fri => false,
-            :import_orders_on_sat => false,
-            :import_orders_on_sun => false)
+        general_setting = GeneralSetting.new
+        general_setting.save
       end
 
       if ExportSetting.all.length == 0

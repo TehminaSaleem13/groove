@@ -9,6 +9,51 @@ class GeneralSetting < ActiveRecord::Base
 
   after_save :send_low_inventory_alert_email
   after_save :scheduled_import
+  after_update :inventory_state_change_check
+  @@all_tenants_settings = {}
+
+  def self.setting
+    if @@all_tenants_settings.nil?
+      @@all_tenants_settings = {}
+    end
+    if @@all_tenants_settings[Apartment::Tenant.current_tenant].nil?
+      @@all_tenants_settings[Apartment::Tenant.current_tenant] = self.all.first
+    end
+    @@all_tenants_settings[Apartment::Tenant.current_tenant]
+  end
+
+  def self.unset_setting
+    if @@all_tenants_settings.nil?
+      @@all_tenants_settings = {}
+    end
+    @@all_tenants_settings[Apartment::Tenant.current_tenant] = nil
+    true
+  end
+
+  def inventory_state_change_check
+    changes = self.changes
+    GeneralSetting.unset_setting
+    if changes.nil? || changes['inventory_tracking'].nil?
+      return true
+    end
+
+    bulk_actions = Groovepacker::Inventory::BulkActions.new
+    groove_bulk_actions = GrooveBulkActions.new
+    groove_bulk_actions.identifier = 'inventory'
+    if changes['inventory_tracking'][1]
+
+      groove_bulk_actions.activity = 'enable'
+      groove_bulk_actions.save
+
+      bulk_actions.delay(:run_at =>1.minutes.from_now).process_all(Apartment::Tenant.current_tenant, groove_bulk_actions.id)
+    else
+      groove_bulk_actions.activity = 'disable'
+      groove_bulk_actions.save
+
+      bulk_actions.delay(:run_at =>1.minutes.from_now).unprocess_all(Apartment::Tenant.current_tenant, groove_bulk_actions.id)
+    end
+    true
+  end
 
   def scheduled_import
     result = Hash.new
@@ -26,6 +71,7 @@ class GeneralSetting < ActiveRecord::Base
       tenant = Apartment::Tenant.current_tenant
       Delayed::Job.where(queue: "import_orders_scheduled_#{tenant}").destroy_all
     end
+    true
   end
 
   def should_import_orders_today
@@ -102,6 +148,7 @@ class GeneralSetting < ActiveRecord::Base
       tenant = Apartment::Tenant.current_tenant
       Delayed::Job.where(queue: "low_inventory_email_scheduled_#{tenant}").destroy_all
     end
+    true
   end
 
   def schedule_job (date, time, job_type)

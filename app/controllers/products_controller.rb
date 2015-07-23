@@ -596,6 +596,7 @@ class ProductsController < ApplicationController
       @result['product']['store'] = @store
       @result['product']['basicinfo'] = @product.attributes
       @result['product']['basicinfo']['weight_format'] = @product.get_show_weight_format
+      @result['product']['basicinfo']['contains_intangible_string'] = @product.contains_intangible_string
       @result['product']['product_weight_format'] = GeneralSetting.get_product_weight_format
       @result['product']['weight'] = @product.get_weight
       @result['product']['shipping_weight'] = @product.get_shipping_weight
@@ -804,6 +805,7 @@ class ProductsController < ApplicationController
         @product.weight_format = get_weight_format(params[:basicinfo][:weight_format])
         @product.add_to_any_order = params[:basicinfo][:add_to_any_order]
         @product.product_receiving_instructions = params[:basicinfo][:product_receiving_instructions]
+        @product.is_intangible = params[:basicinfo][:is_intangible]
 
         if !@product.save
           @result['status'] &= false
@@ -1214,6 +1216,29 @@ class ProductsController < ApplicationController
             end
           end
 
+          #Ensure all inventory data is copied over
+          product_alias.product_inventory_warehousess.each do |aliased_inventory|
+            orig_product_inv_whs = ProductInventoryWarehouses.where(@product_orig.id, aliased_inventory.inventory_warehouse_id)
+            if orig_product_inv_whs.length == 0
+              orig_product_inv_wh = ProductInventoryWarehouses.new
+              orig_product_inv_wh.inventory_warehouse_id = aliased_inventory.inventory_warehouse_id
+              orig_product_inv_wh.product_id = @product_orig.id
+              orig_product_inv_wh.quantity_on_hand = aliased_inventory.quantity_on_hand
+              orig_product_inv_wh.save
+            else
+              orig_product_inv_wh = orig_product_inv_whs.first
+            end
+            #copy over the qoh of original as QOH of original should not change in aliasing
+            orig_product_qoh = orig_product_inv_wh.quantity_on_hand
+            orig_product_inv_wh.allocated_inv = orig_product_inv_wh.allocated_inv + aliased_inventory.allocated_inv
+            orig_product_inv_wh.quantity_on_hand = orig_product_qoh
+            orig_product_inv_wh.save
+
+            # Move all sold inventory warehouse of aliased to original
+            SoldInventoryWarehouse.where(:product_inventory_warehouses_id => aliased_inventory.id).update_all(product_inventory_warehouses_id: orig_product_inv_wh.id)
+            aliased_inventory.reload
+          end
+
           #destroy the aliased object
           if !product_alias.destroy
             result['status'] &= false
@@ -1386,7 +1411,7 @@ class ProductsController < ApplicationController
       intangible_string = scan_pack_setting.intangible_string
 
       action_intangible.delay(:run_at =>1.seconds.from_now).update_intangibleness(Apartment::Tenant.current_tenant, params, intangible_setting_enabled, intangible_string)
-      # action_intangible.update_intangibleness(Apartment::Tenant.current_tenant, params, scan_pack_setting)
+      # action_intangible.update_intangibleness(Apartment::Tenant.current_tenant, params, intangible_setting_enabled, intangible_string)
     else
       result['status'] = false
       result['messages'].push('You do not have enough permissions to edit product status')

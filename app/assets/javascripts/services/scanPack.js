@@ -85,7 +85,7 @@ groovepacks_services.factory('scanPack',['$http','notification','$state',functio
     var update_intagibleness = function(model) {
         return $http.post('/products/update_intangibleness.json', model.settings).success(function(data) {
             if(data.status) {
-                notification.notify("updating products queued successfully");
+                notification.notify("updating products queued successfully",1);
             } else {
                 notification.notify(data.messages,0);
             }

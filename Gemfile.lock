@@ -504,6 +504,3 @@ DEPENDENCIES
   wicked_pdf (>= 0.11)
   wkhtmltopdf-binary
   xmlparser
-
-BUNDLED WITH
-   1.10.5

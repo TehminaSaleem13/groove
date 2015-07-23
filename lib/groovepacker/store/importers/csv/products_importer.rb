@@ -3,6 +3,8 @@ module Groovepacker
 		module Importers
 			module CSV
 				class ProductsImporter
+					include ProductsHelper
+
 					def import(params, final_record, mapping, import_action)
 						result = Hash.new
 						result['status'] = true
@@ -84,6 +86,7 @@ module Groovepacker
 									usable_record[:inventory] = []
 									usable_record[:product_type] = ''
 									usable_record[:spl_instructions_4_packer] = ''
+									usable_record[:is_intangible] = false
 
 									all_skus = all_skus + single_row_skus
 									usable_record[:skus] = single_row_skus
@@ -97,6 +100,30 @@ module Groovepacker
 									if usable_record[:name].blank?
 										usable_record[:name] = 'Product from CSV Import'
 									end
+
+		                            scan_pack_settings = ScanPackSetting.all.first
+		                            if scan_pack_settings.intangible_setting_enabled
+		                              unless scan_pack_settings.intangible_string.nil? || (scan_pack_settings.intangible_string.strip.equal? (''))
+		                                intangible_strings = scan_pack_settings.intangible_string.strip.split(",")
+		                                sku_found = false
+		                                intangible_strings.each do |string|
+		                                	if (usable_record[:name].include? (string))
+			                                    usable_record[:is_intangible] = true
+			                                    break
+			                                end
+		                                	usable_record[:skus].each do |sku|
+				                                if (sku.include? (string))
+				                                	sku_found = true
+				                                    usable_record[:is_intangible] = true
+				                                    break
+				                                end
+				                            end
+				                            if sku_found
+				                            	break
+				                            end
+		                                end
+		                              end
+		                            end
 
 									if !mapping['product_instructions'].nil? && mapping['product_instructions'][:position] >= 0 && !single_row[mapping['product_instructions'][:position]].blank?
 										usable_record[:spl_instructions_4_packer] = single_row[mapping['product_instructions'][:position]]
@@ -244,7 +271,7 @@ module Groovepacker
 							end
 
 							if duplicate_found === false && new_action == 'create'
-								single_import = Product.new(:name => record[:name], :product_type => record[:product_type], :spl_instructions_4_packer => record[:spl_instructions_4_packer])
+								single_import = Product.new(:name => record[:name], :product_type => record[:product_type], :spl_instructions_4_packer => record[:spl_instructions_4_packer], :is_intangible => record[:is_intangible])
 								single_import.store_id = params[:store_id]
 								single_import.store_product_id = record[:store_product_id]
 								if record[:skus].length > 0 && record[:barcodes].length > 0
@@ -266,6 +293,7 @@ module Groovepacker
 								if !mapping['product_name'].nil? #&& mapping['product_name'][:action] == 'overwrite'
 									duplicate_product.name = record[:name]
 								end
+								duplicate_product.is_intangible = record[:is_intangible]
 								if !mapping['product_type'].nil? #&& mapping['product_type'][:action] == 'overwrite'
 									duplicate_product.product_type = record[:product_type]
 								end

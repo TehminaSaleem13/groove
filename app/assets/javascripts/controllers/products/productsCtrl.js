@@ -314,7 +314,8 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
                     editable: false
                 },
                 qty_on_hand:{
-                    name: "QoH"
+                    name: "QoH",
+                    sortable:false
                 },
                 available_inv: {
                     name: "Avbl Inv",

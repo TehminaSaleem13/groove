@@ -299,7 +299,9 @@ groovepacks_controllers.
                     "skippable": "",
                     "record_serial":"",
                     "master_alias":"",
-                    "product_receiving_instructions":""
+                    "product_receiving_instructions":"",
+                    "intangible_item":"",
+                    "add_to_any_order":""
                 }
             };
             groov_translator.translate('products.modal',scope.translations);

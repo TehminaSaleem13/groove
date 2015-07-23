@@ -132,12 +132,11 @@ class Order < ActiveRecord::Base
   def update_order_status
     result = true
     if true
-      hold_orders_due_to_inventory = GeneralSetting.first.hold_orders_due_to_inventory
+      #Implement hold orders from Groovepacker::Inventory
       self.order_items.each do |order_item|
         product = Product.find_by_id(order_item.product_id)
         unless product.nil?
-          if product.status == "new" or product.status == "inactive" or 
-            (hold_orders_due_to_inventory and (order_item.inv_status == 'unallocated' or order_item.inv_status == 'unprocessed'))
+          if product.status == "new" or product.status == "inactive"
               result &= false
           end
         end
@@ -181,7 +180,7 @@ class Order < ActiveRecord::Base
     if result
       self.update_column(:status,'awaiting')
     else
-      self.update_column(:status,'scanned')
+      self.update_column(:status,'onhold')
     end
 
     #self.apply_and_update_predefined_tags
@@ -191,9 +190,11 @@ class Order < ActiveRecord::Base
     result = false
     self.reload
     self.order_items.each do |order_item|
-      if order_item.scanned_status != 'scanned'
-        result |= true
-        break
+      unless order_item.product.is_intangible
+        if order_item.scanned_status != 'scanned'
+          result |= true
+          break
+        end
       end
     end
 
@@ -311,7 +312,7 @@ class Order < ActiveRecord::Base
 
         #if current item does not belong to any of the unscanned items in the already split kits
         if order_item.should_kit_split_qty_be_increased(matched_product_id)
-          if order_item.kit_split_qty <= order_item.qty
+          if order_item.kit_split_qty + order_item.single_scanned_qty < order_item.qty
             order_item.kit_split_qty = order_item.kit_split_qty + 1
             order_item.order_item_kit_products.each do |kit_product|
               kit_product.scanned_status = 'partially_scanned'
@@ -385,10 +386,12 @@ class Order < ActiveRecord::Base
             end
           end
         else
-          # add order item to unscanned list
-          unscanned_item = order_item.build_unscanned_single_item
-          if unscanned_item['qty_remaining'] > 0
-            unscanned_list.push(unscanned_item)
+          unless order_item.product.is_intangible
+            # add order item to unscanned list
+            unscanned_item = order_item.build_unscanned_single_item
+            if unscanned_item['qty_remaining'] > 0
+              unscanned_list.push(unscanned_item)
+            end
           end
         end
       end

@@ -252,6 +252,10 @@ module ScanPackHelper
         if single_order.has_unscanned_items
           single_order.should_the_kit_be_split(clean_input) if single_order.contains_kit && single_order.contains_splittable_kit
 
+          if single_order.last_suggested_at.nil?
+            single_order.last_suggested_at = DateTime.now
+            single_order.save
+          end
           unscanned_items = single_order.get_unscanned_items
           barcode_found = false
           #search if barcode exists

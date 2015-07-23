@@ -201,6 +201,7 @@ module Groovepacker
 
             end
             product.save
+            make_product_intangible(product)
             product.update_product_status
             product
           end

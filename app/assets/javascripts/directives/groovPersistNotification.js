@@ -142,6 +142,12 @@ groovepacks_directives.directive('groovPersistNotification',['$window','$documen
                         notif_message = '<b>Product Duplicate:</b> ';
                     }
 
+                } else if(message['identifier'] == 'inventory') {
+                    if(message['activity'] == 'enable') {
+                        notif_message = '<b>Enabling Inventory Tracking:</b> ';
+                    } else if(message['activity'] == 'disable') {
+                        notif_message = '<b>Disabling Inventory Tracking:</b> ';
+                    }
                 }
                 myscope.repurpose_selected();
                 scope.notifications[hash].type = message['status'];
@@ -149,7 +155,7 @@ groovepacks_directives.directive('groovPersistNotification',['$window','$documen
                     notif_message += 'Queued';
                 } else if(message['status'] == "in_progress") {
                     notif_message += message['completed']+'/'+message['total']+'&nbsp;';
-                    notif_details = '<b>Current Product:<b> '+message['current']+ notif_details;
+                    notif_details = '<b>Currently processing:<b> '+message['current']+ notif_details;
                 } else if(message['status'] == "completed" || message['status'] == "cancelled" || message['status'] == 'failed') {
                     $rootScope.$emit('bulk_action_finished',message);
                     notif_details = '';

@@ -91,6 +91,19 @@ function($scope, hotkeys, $state,$stateParams,$modalInstance,$timeout,warehouses
         $timeout(function() {$scope._inventory_warehouse_inputObj.focus()},20);
     };
 
+    $scope.print_receive_label = function(event) {
+        event.preventDefault();
+        inventory_manager.single.update($scope.inventory_manager).then(function(){
+            var prods = products.model.get();
+            prods.selected.push({id: $scope.products_inv_manager.single.basicinfo.id,checked:true});
+            products.list.update('receiving_label',prods).then(function() {
+                var e = jQuery.Event( "click" );
+                e.which = 13;
+                $scope._handle_inv_manager_key_event(e);
+            });
+        });
+    };
+
     myscope.init = function() {
         //alert('Recounting or receiving inventory');
         $scope.warehouses = warehouses.model.get();

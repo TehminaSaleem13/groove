@@ -117,11 +117,20 @@ module Groovepacker
 
 				def process_sell_item(order_item, integer = 1)
 					result = true
+					multiplier = (integer*integer)/integer
+					if (multiplier == 1 && !order_item.is_inventory_allocated?) || (multiplier == -1 && !order_item.is_inventory_sold?)
+						return false
+					end
 					if is_depends_kit?(order_item) && order_item.kit_split
-						split_depends_kit(order_item, integer*order_item.kit_split_qty)
-						result &= sell_depends_kit(order_item, integer*order_item.kit_split_scanned_qty, integer*order_item.single_scanned_qty)
+						split_depends_kit(order_item, multiplier*order_item.kit_split_qty)
+						result &= sell_depends_kit(order_item, multiplier*order_item.kit_split_scanned_qty, multiplier*order_item.single_scanned_qty)
 					else
-						result &= sell_item(order_item, integer*order_item.qty, order_item.order.store.inventory_warehouse_id)
+						result &= sell_item(order_item, multiplier*order_item.qty, order_item.order.store.inventory_warehouse_id)
+					end
+					if multiplier == 1
+						order_item.update_column(:inv_status, OrderItem::SOLD_INV_STATUS)
+					else
+						order_item.update_column(:inv_status, OrderItem::ALLOCATED_INV_STATUS)
 					end
 					result
 				end
@@ -139,7 +148,7 @@ module Groovepacker
 						sold_inventory.sold_qty = qty
 						sold_inventory.product_inventory_warehouses = product_warehouse
 						sold_inventory.order_item = order_item
-						sold_inventory.sold_date = DateTime.now
+						sold_inventory.sold_date = order_item.order.scanned_on
 						sold_inventory.save
 					else
 						sold_inventories = SoldInventoryWarehouse.where(:order_item_id => order_item.id, :product_inventory_warehouses_id => product_warehouse.id)
@@ -151,13 +160,11 @@ module Groovepacker
 								sold_inventory.destroy
 							end
 						end
+						if order_item.order.reallocate_inventory?
+							product_warehouse.available_inv = product_warehouse.available_inv + qty
+						end
 					end
 
-
-
-					if order_item.order.reallocate_inventory?
-						product_warehouse.available_inv = product_warehouse.available_inv + qty
-					end
 					product_warehouse.allocated_inv = product_warehouse.allocated_inv - qty
 					product_warehouse.save
 					true
