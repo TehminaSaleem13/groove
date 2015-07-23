@@ -42,7 +42,7 @@
                     <label class="control-label col-sm-3">{{translations.labels.enable_click_sku}}</label>
                     <div class="controls col-sm-2 form-inline pull-left">
                             <div toggle-switch ng-model="scan_pack.settings.enable_click_sku" groov-click="update_settings()"></div>
-                            <i class="info icon-large glyphicon glyphicon-info-sign" style="padding-left:5px;" popover-trigger="mouseenter" popover="{{translations.tooltips.enable_click_sku}}"></i>
+                            <i class="info icon-large glyphicon glyphicon-info-sign" style="padding-left:5px;" popover-trigger="mouseenter" groov-popover="{{translations.tooltips.enable_click_sku}}"></i>
                     </div>
                     <div class="col-sm-4 col-md-3 col-lg-3 col-lg-offset-0 col-md-offset-1 text-center" ng-show="scan_pack.settings.enable_click_sku"><button ng-click="per_product_setting('enable_click_sku')" class="groove-button label label-default label-success">Per Product Setting</button></div>
                     

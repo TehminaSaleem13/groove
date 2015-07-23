@@ -49,7 +49,7 @@
             </div>
             <div class="col-sm-7">
                 <div class="col-sm-12" ng-hide="products_inv_manager.single.basicinfo.product_receiving_instructions==null || products_inv_manager.single.basicinfo.product_receiving_instructions=='' || inventory_manager.single.method=='recount'">
-                    <div class="form-group">
+                    <div class="row bottom-well" style="background-color: #fff;">
                         <div class="controls col-sm-12">
                             <div ng-bind-html="products_inv_manager.single.basicinfo.product_receiving_instructions"></div>
                         </div>
@@ -59,7 +59,7 @@
                             <div class="single-image-clickable" ng-model="products_inv_manager.single.images" ng-class="{'primary-image': $index==0}" ng-repeat="image in products_inv_manager.single.images" ng-hide="image.added_to_receiving_instructions==0">
                                 <a ng-click="openLightboxModal($index)">
                                   <img ng-src="{{image.image}}" class="img-polaroid img-thumb img-responsive" alt="">
-                                  <div class="img-note"><p>{{image.image_note}}</p></div>
+                                  <div class="img-note mini-popover" popover-trigger="mouseenter" groov-popover="{{image.image_note}}"><div class="image-span">GREAT IMAGE</div></div>
                                 </a>
                             </div>
                         </div>

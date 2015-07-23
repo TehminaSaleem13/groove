@@ -301,7 +301,9 @@ groovepacks_controllers.
                     "master_alias":"",
                     "product_receiving_instructions":"",
                     "intangible_item":"",
-                    "add_to_any_order":""
+                    "add_to_any_order":"",
+                    "type_in_scan_setting":"",
+                    "click_scanning_setting":""
                 }
             };
             groov_translator.translate('products.modal',scope.translations);
