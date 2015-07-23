@@ -1,4 +1,4 @@
-require 'debugger'
+#require 'debugger'
 require "#{Rails.root}/app/helpers/products_helper"
 include ProductsHelper
 

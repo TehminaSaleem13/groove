@@ -26,8 +26,8 @@
         manual_hold_tag = OrderTag.create(:name=>'Manual Hold', :color=>'#0000FF', :predefined => true)
       end
 
-      if InventoryWarehouse.where(:is_default => 1).length == 0
-        default_location = InventoryWarehouse.create(:name=>'Default Warehouse', :location=> 'Default Warehouse', :status => 'active', :is_default => 1)
+      if InventoryWarehouse.where(:is_default => true).length == 0
+        default_location = InventoryWarehouse.create(:name=>'Default Warehouse', :location=> 'Default Warehouse', :status => 'active', :is_default => true)
       end
 
       if Store.where(:store_type=>'system').length == 0
@@ -257,7 +257,7 @@
           user.save
         end
         if user.inventory_warehouse_id.nil?
-          user.inventory_warehouse_id = InventoryWarehouse.where(:is_default => 1).first.id
+          user.inventory_warehouse_id = InventoryWarehouse.where(:is_default => true).first.id
           user.save
         end
         InventoryWarehouse.all.each do |inv_wh|
