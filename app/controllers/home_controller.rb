@@ -15,7 +15,7 @@ class HomeController < ApplicationController
       user['name'] = current_user.name
       user['id'] = current_user.id
       user['role'] = current_user.role
-      user['current_tenant'] = Apartment::Tenant.current_tenant
+      user['current_tenant'] = Apartment::Tenant.current
     end
 
     respond_to do |format|

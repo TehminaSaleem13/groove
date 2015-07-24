@@ -89,6 +89,26 @@ module Groovepacker
 					do_allocate_item(order_item, -order_item.qty, OrderItem::UNALLOCATED_INV_STATUS, status_match)
 				end
 
+				def process_sell_item(order_item, integer = 1)
+					result = true
+					multiplier = (integer*integer)/integer
+					if (multiplier == 1 && !order_item.is_inventory_allocated?) || (multiplier == -1 && !order_item.is_inventory_sold?)
+						return false
+					end
+					if is_depends_kit?(order_item) && order_item.kit_split
+						split_depends_kit(order_item, multiplier*order_item.kit_split_qty)
+						result &= sell_depends_kit(order_item, multiplier*order_item.kit_split_scanned_qty, multiplier*order_item.single_scanned_qty)
+					else
+						result &= sell_item(order_item, multiplier*order_item.qty, order_item.order.store.inventory_warehouse_id)
+					end
+					if multiplier == 1
+						order_item.update_column(:inv_status, OrderItem::SOLD_INV_STATUS)
+					else
+						order_item.update_column(:inv_status, OrderItem::ALLOCATED_INV_STATUS)
+					end
+					result
+				end
+
 				private
 
 				def individual_sell(order_item, qty, warehouse_id = nil)
@@ -115,25 +135,7 @@ module Groovepacker
 					result
 				end
 
-				def process_sell_item(order_item, integer = 1)
-					result = true
-					multiplier = (integer*integer)/integer
-					if (multiplier == 1 && !order_item.is_inventory_allocated?) || (multiplier == -1 && !order_item.is_inventory_sold?)
-						return false
-					end
-					if is_depends_kit?(order_item) && order_item.kit_split
-						split_depends_kit(order_item, multiplier*order_item.kit_split_qty)
-						result &= sell_depends_kit(order_item, multiplier*order_item.kit_split_scanned_qty, multiplier*order_item.single_scanned_qty)
-					else
-						result &= sell_item(order_item, multiplier*order_item.qty, order_item.order.store.inventory_warehouse_id)
-					end
-					if multiplier == 1
-						order_item.update_column(:inv_status, OrderItem::SOLD_INV_STATUS)
-					else
-						order_item.update_column(:inv_status, OrderItem::ALLOCATED_INV_STATUS)
-					end
-					result
-				end
+
 
 				def update_sold_inventory(order_item, product_warehouse, qty)
 					unless inventory_tracking_enabled?

@@ -15,6 +15,7 @@ class Order < ActiveRecord::Base
   has_and_belongs_to_many :order_tags
   after_update :update_inventory_levels_for_items
   before_save :update_non_hyphen_increment_id
+  after_save :process_unprocessed_orders
   validates_uniqueness_of :increment_id
 
   include ProductsHelper
@@ -41,6 +42,12 @@ class Order < ActiveRecord::Base
   	else
   		false
   	end
+  end
+
+  def process_unprocessed_orders
+    bulkaction = Groovepacker::Inventory::BulkActions.new
+    bulkaction.process_unprocessed
+    true
   end
 
   def addnewitems
