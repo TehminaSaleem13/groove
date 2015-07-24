@@ -5,19 +5,19 @@ RSpec.describe ScanPackController, :type => :controller do
 
   before(:each) do
     SeedTenant.new.seed
-    scanpacksetting = ScanPackSetting.first
-    scanpacksetting.post_scanning_option = "recording"
-    scanpacksetting.save
+    @scanpacksetting = ScanPackSetting.first
+    @scanpacksetting.post_scanning_option = "Record"
+    @scanpacksetting.save
+    @generalsetting = GeneralSetting.all.first
+    @generalsetting.update_column(:inventory_tracking, true)
 
     #@user_role =FactoryGirl.create(:role, :name=>'scan_pack', :import_orders=>true)
     @user = FactoryGirl.create(:user, :username=>"scan_pack_spec_user", :name=>'Scan Pack user', 
       :role => Role.find_by_name('Scan & Pack User'))
-    # puts "Signing in **************"
     # sign_in @user
     request.env["devise.mapping"] = Devise.mappings[:user]
     sign_in :user, @user 
 
-    #puts current_user.inspect
     #@request.env["devise.mapping"] = Devise.mappings[:user]
 
     @child_item_l = lambda do |name, images, sku, qty_remaining,
@@ -189,6 +189,25 @@ RSpec.describe ScanPackController, :type => :controller do
       result = JSON.parse(response.body)
       expect(result["status"]).to eq(false)
       expect(result["error_messages"][0]).to eq("Please specify a barcode to scan the order")
+    end
+
+    it "should process order scan by both tracking number and order number if scan_by_tracking_number is enabled" do
+      request.accept = "application/json"
+
+      @scanpacksetting.scan_by_tracking_number = true
+      @scanpacksetting.save
+      order1 = FactoryGirl.create(:order, :tracking_num=>'11223344556677889900')
+      order2 = FactoryGirl.create(:order, :increment_id=>'1234567890123')
+
+      get :scan_barcode, { :state => "scanpack.rfo", :input => '11223344556677889900' }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["status"]).to eq(true)
+
+      get :scan_barcode, { :state => "scanpack.rfo", :input => 1234567890123 }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["status"]).to eq(true)
     end
 
    	it "should process order scan for orders having a status of Awaiting Scanning" do
@@ -582,7 +601,10 @@ RSpec.describe ScanPackController, :type => :controller do
   it "should scan product by barcode and order status should still be in scanned status when there are no unscanned items"+
      " of the same product" do
       request.accept = "application/json"
-      order = FactoryGirl.create(:order, :status=>'awaiting')
+      inv_wh = FactoryGirl.create(:inventory_warehouse)
+
+      store = FactoryGirl.create(:store, :inventory_warehouse_id => inv_wh.id)
+      order = FactoryGirl.create(:order, :status=>'awaiting', store: store)
 
       product = FactoryGirl.create(:product)
       product_sku = FactoryGirl.create(:product_sku, :product=> product)
@@ -680,8 +702,10 @@ RSpec.describe ScanPackController, :type => :controller do
   describe "Product Kit Scan" do
     it "should scan single kits" do
       request.accept = "application/json"
+      inv_wh = FactoryGirl.create(:inventory_warehouse)
 
-      order = FactoryGirl.create(:order, :status=>'awaiting')
+      store = FactoryGirl.create(:store, :inventory_warehouse_id => inv_wh.id)
+      order = FactoryGirl.create(:order, :status=>'awaiting', :store=>store)
 
       product = FactoryGirl.create(:product, :packing_placement=>'35')
       product_sku = FactoryGirl.create(:product_sku, :product=> product)
@@ -728,8 +752,10 @@ RSpec.describe ScanPackController, :type => :controller do
 
     it "should scan individual kits" do
       request.accept = "application/json"
+      inv_wh = FactoryGirl.create(:inventory_warehouse)
 
-      order = FactoryGirl.create(:order, :status=>'awaiting')
+      store = FactoryGirl.create(:store, :inventory_warehouse_id => inv_wh.id)
+      order = FactoryGirl.create(:order, :status=>'awaiting', :store=>store)
 
       product = FactoryGirl.create(:product, :name=>'PRODUCT1', :packing_placement=>40)
       product_sku = FactoryGirl.create(:product_sku, :product=> product)
@@ -838,7 +864,6 @@ RSpec.describe ScanPackController, :type => :controller do
 
       order.reload
       expect(order.status).to eq("awaiting")
-      #puts result['data']['order']['unscanned_items'].to_s
       expect(result['data']['order']['unscanned_items'].length).to eq(0)
       expect(result['data']['order']['scanned_items'].length).to eq(4)
       # order_item.reload
@@ -848,8 +873,10 @@ RSpec.describe ScanPackController, :type => :controller do
 
     it "should split and scan kits" do
       request.accept = "application/json"
+      inv_wh = FactoryGirl.create(:inventory_warehouse)
 
-      order = FactoryGirl.create(:order, :status=>'awaiting')
+      store = FactoryGirl.create(:store, :inventory_warehouse_id => inv_wh.id)
+      order = FactoryGirl.create(:order, :status=>'awaiting', :store=>store)
 
       product = FactoryGirl.create(:product, :name=>'iPhone 5S', :packing_placement=>20)
       product_sku = FactoryGirl.create(:product_sku, :product=> product)
@@ -2810,60 +2837,60 @@ RSpec.describe ScanPackController, :type => :controller do
       get :scan_barcode, {:state => 'scanpack.rfp.default', :input => 'KITITEM1', :id => order.id }
 
       product_kit_inv_wh.reload
-      expect(product_kit_inv_wh.available_inv).to eq(24)
-      expect(product_kit_inv_wh.allocated_inv).to eq(1)
+      expect(product_kit_inv_wh.available_inv).to eq(23)
+      expect(product_kit_inv_wh.allocated_inv).to eq(2)
 
       kit_product_inv_wh.reload
-      expect(kit_product_inv_wh.available_inv).to eq(24)
-      expect(kit_product_inv_wh.allocated_inv).to eq(1)
+      expect(kit_product_inv_wh.available_inv).to eq(25)
+      expect(kit_product_inv_wh.allocated_inv).to eq(0)
 
       kit_product2_inv_wh.reload
-      expect(kit_product2_inv_wh.available_inv).to eq(24)
-      expect(kit_product2_inv_wh.allocated_inv).to eq(1)
+      expect(kit_product2_inv_wh.available_inv).to eq(25)
+      expect(kit_product2_inv_wh.allocated_inv).to eq(0)
 
       get :scan_barcode, {:state => 'scanpack.rfp.default', :input => 'KITITEM2', :id => order.id }
 
       product_kit_inv_wh.reload
-      expect(product_kit_inv_wh.available_inv).to eq(24)
-      expect(product_kit_inv_wh.allocated_inv).to eq(1)
+      expect(product_kit_inv_wh.available_inv).to eq(23)
+      expect(product_kit_inv_wh.allocated_inv).to eq(2)
 
       kit_product_inv_wh.reload
-      expect(kit_product_inv_wh.available_inv).to eq(24)
-      expect(kit_product_inv_wh.allocated_inv).to eq(1)
+      expect(kit_product_inv_wh.available_inv).to eq(25)
+      expect(kit_product_inv_wh.allocated_inv).to eq(0)
 
       kit_product2_inv_wh.reload
-      expect(kit_product2_inv_wh.available_inv).to eq(24)
-      expect(kit_product2_inv_wh.allocated_inv).to eq(1)
+      expect(kit_product2_inv_wh.available_inv).to eq(25)
+      expect(kit_product2_inv_wh.allocated_inv).to eq(0)
 
 
       get :scan_barcode, {:state => 'scanpack.rfp.default', :input => 'KITITEM1', :id => order.id }
 
       product_kit_inv_wh.reload
-      expect(product_kit_inv_wh.available_inv).to eq(25)
-      expect(product_kit_inv_wh.allocated_inv).to eq(0)
+      expect(product_kit_inv_wh.available_inv).to eq(23)
+      expect(product_kit_inv_wh.allocated_inv).to eq(2)
 
       kit_product_inv_wh.reload
-      expect(kit_product_inv_wh.available_inv).to eq(23)
-      expect(kit_product_inv_wh.allocated_inv).to eq(2)
+      expect(kit_product_inv_wh.available_inv).to eq(25)
+      expect(kit_product_inv_wh.allocated_inv).to eq(0)
 
       kit_product2_inv_wh.reload
-      expect(kit_product2_inv_wh.available_inv).to eq(23)
-      expect(kit_product2_inv_wh.allocated_inv).to eq(2)
+      expect(kit_product2_inv_wh.available_inv).to eq(25)
+      expect(kit_product2_inv_wh.allocated_inv).to eq(0)
 
 
       get :scan_barcode, {:state => 'scanpack.rfp.default', :input => 'KITITEM2', :id => order.id }
 
       product_kit_inv_wh.reload
-      expect(product_kit_inv_wh.available_inv).to eq(25)
-      expect(product_kit_inv_wh.allocated_inv).to eq(0)
+      expect(product_kit_inv_wh.available_inv).to eq(23)
+      expect(product_kit_inv_wh.allocated_inv).to eq(2)
 
       kit_product_inv_wh.reload
-      expect(kit_product_inv_wh.available_inv).to eq(23)
-      expect(kit_product_inv_wh.allocated_inv).to eq(2)
+      expect(kit_product_inv_wh.available_inv).to eq(25)
+      expect(kit_product_inv_wh.allocated_inv).to eq(0)
 
       kit_product2_inv_wh.reload
-      expect(kit_product2_inv_wh.available_inv).to eq(23)
-      expect(kit_product2_inv_wh.allocated_inv).to eq(2)
+      expect(kit_product2_inv_wh.available_inv).to eq(25)
+      expect(kit_product2_inv_wh.allocated_inv).to eq(0)
 
       order.reload
       order.status = 'scanned'
@@ -2872,16 +2899,12 @@ RSpec.describe ScanPackController, :type => :controller do
       kit_product_inv_wh.reload
       expect(kit_product_inv_wh.available_inv).to eq(23)
       expect(kit_product_inv_wh.allocated_inv).to eq(0)
-      sold_inv_wh = SoldInventoryWarehouse.where(:product_inventory_warehouses_id => kit_product_inv_wh.id)
-      expect(sold_inv_wh.count).to eq(1)
-      expect(sold_inv_wh.first.sold_qty).to eq(2)
+      expect(kit_product_inv_wh.sold_inv).to eq(2)
 
       kit_product2_inv_wh.reload
       expect(kit_product2_inv_wh.available_inv).to eq(23)
       expect(kit_product2_inv_wh.allocated_inv).to eq(0)
-      sold_inv_wh = SoldInventoryWarehouse.where(:product_inventory_warehouses_id => kit_product2_inv_wh.id)
-      expect(sold_inv_wh.count).to eq(1)
-      expect(sold_inv_wh.first.sold_qty).to eq(2)
+      expect(kit_product2_inv_wh.sold_inv).to eq(2)
     end
 
     it "should scan orders with multiple kit products and adjust inventory accordingly when some kits are not split1" do
@@ -2954,73 +2977,66 @@ RSpec.describe ScanPackController, :type => :controller do
         :input => 'KITITEM1', :id => order.id }
 
       product_kit_inv_wh.reload
-      expect(product_kit_inv_wh.available_inv).to eq(24)
-      expect(product_kit_inv_wh.allocated_inv).to eq(1)
+      expect(product_kit_inv_wh.available_inv).to eq(23)
+      expect(product_kit_inv_wh.allocated_inv).to eq(2)
 
       kit_product_inv_wh.reload
-      expect(kit_product_inv_wh.available_inv).to eq(24)
-      expect(kit_product_inv_wh.allocated_inv).to eq(1)
+      expect(kit_product_inv_wh.available_inv).to eq(25)
+      expect(kit_product_inv_wh.allocated_inv).to eq(0)
 
       kit_product2_inv_wh.reload
-      expect(kit_product2_inv_wh.available_inv).to eq(24)
-      expect(kit_product2_inv_wh.allocated_inv).to eq(1)
+      expect(kit_product2_inv_wh.available_inv).to eq(25)
+      expect(kit_product2_inv_wh.allocated_inv).to eq(0)
 
       get :scan_barcode, {:state => 'scanpack.rfp.default', 
         :input => 'KITITEM2', :id => order.id }
 
       product_kit_inv_wh.reload
-      expect(product_kit_inv_wh.available_inv).to eq(24)
-      expect(product_kit_inv_wh.allocated_inv).to eq(1)
+      expect(product_kit_inv_wh.available_inv).to eq(23)
+      expect(product_kit_inv_wh.allocated_inv).to eq(2)
 
       kit_product_inv_wh.reload
-      expect(kit_product_inv_wh.available_inv).to eq(24)
-      expect(kit_product_inv_wh.allocated_inv).to eq(1)
+      expect(kit_product_inv_wh.available_inv).to eq(25)
+      expect(kit_product_inv_wh.allocated_inv).to eq(0)
 
       kit_product2_inv_wh.reload
-      expect(kit_product2_inv_wh.available_inv).to eq(24)
-      expect(kit_product2_inv_wh.allocated_inv).to eq(1)
+      expect(kit_product2_inv_wh.available_inv).to eq(25)
+      expect(kit_product2_inv_wh.allocated_inv).to eq(0)
 
 
       get :scan_barcode, {:state => 'scanpack.rfp.default', 
         :input => 'IPROTOBAR', :id => order.id }
 
       product_kit_inv_wh.reload
-      expect(product_kit_inv_wh.available_inv).to eq(24)
-      expect(product_kit_inv_wh.allocated_inv).to eq(1)
+      expect(product_kit_inv_wh.available_inv).to eq(23)
+      expect(product_kit_inv_wh.allocated_inv).to eq(2)
 
       kit_product_inv_wh.reload
-      expect(kit_product_inv_wh.available_inv).to eq(24)
-      expect(kit_product_inv_wh.allocated_inv).to eq(1)
+      expect(kit_product_inv_wh.available_inv).to eq(25)
+      expect(kit_product_inv_wh.allocated_inv).to eq(0)
 
       kit_product2_inv_wh.reload
-      expect(kit_product2_inv_wh.available_inv).to eq(24)
-      expect(kit_product2_inv_wh.allocated_inv).to eq(1)
+      expect(kit_product2_inv_wh.available_inv).to eq(25)
+      expect(kit_product2_inv_wh.allocated_inv).to eq(0)
 
 
       order.reload
       order.status = 'scanned'
       order.save
-      # puts order
       product_kit_inv_wh.reload
       expect(product_kit_inv_wh.available_inv).to eq(24)
       expect(product_kit_inv_wh.allocated_inv).to eq(0)
-      sold_inv_wh = SoldInventoryWarehouse.where(:product_inventory_warehouses_id => product_kit_inv_wh.id)
-      expect(sold_inv_wh.count).to eq(1)
-      expect(sold_inv_wh.first.sold_qty).to eq(1)
+      expect(product_kit_inv_wh.sold_inv).to eq(1)
 
       kit_product_inv_wh.reload
       expect(kit_product_inv_wh.available_inv).to eq(24)
       expect(kit_product_inv_wh.allocated_inv).to eq(0)
-      sold_inv_wh = SoldInventoryWarehouse.where(:product_inventory_warehouses_id => kit_product_inv_wh.id)
-      expect(sold_inv_wh.count).to eq(1)
-      expect(sold_inv_wh.first.sold_qty).to eq(1)
+      expect(kit_product_inv_wh.sold_inv).to eq(1)
 
       kit_product2_inv_wh.reload
       expect(kit_product2_inv_wh.available_inv).to eq(24)
       expect(kit_product2_inv_wh.allocated_inv).to eq(0)
-      sold_inv_wh = SoldInventoryWarehouse.where(:product_inventory_warehouses_id => kit_product2_inv_wh.id)
-      expect(sold_inv_wh.count).to eq(1)
-      expect(sold_inv_wh.first.sold_qty).to eq(1)
+      expect(kit_product2_inv_wh.sold_inv).to eq(1)
     end
 
     it "should scan orders with multiple kit products and adjust inventory accordingly when some kits are not split also should reset order scan and adjust inventory accordingly" do
@@ -3091,45 +3107,45 @@ RSpec.describe ScanPackController, :type => :controller do
       get :scan_barcode, {:state=>'scanpack.rfp.default', :input => 'KITITEM1', :id => order.id }
 
       product_kit_inv_wh.reload
-      expect(product_kit_inv_wh.available_inv).to eq(24)
-      expect(product_kit_inv_wh.allocated_inv).to eq(1)
+      expect(product_kit_inv_wh.available_inv).to eq(23)
+      expect(product_kit_inv_wh.allocated_inv).to eq(2)
 
       kit_product_inv_wh.reload
-      expect(kit_product_inv_wh.available_inv).to eq(24)
-      expect(kit_product_inv_wh.allocated_inv).to eq(1)
+      expect(kit_product_inv_wh.available_inv).to eq(25)
+      expect(kit_product_inv_wh.allocated_inv).to eq(0)
 
       kit_product2_inv_wh.reload
-      expect(kit_product2_inv_wh.available_inv).to eq(24)
-      expect(kit_product2_inv_wh.allocated_inv).to eq(1)
+      expect(kit_product2_inv_wh.available_inv).to eq(25)
+      expect(kit_product2_inv_wh.allocated_inv).to eq(0)
 
       get :scan_barcode, {:state=>'scanpack.rfp.default', :input => 'KITITEM2', :id => order.id }
 
       product_kit_inv_wh.reload
-      expect(product_kit_inv_wh.available_inv).to eq(24)
-      expect(product_kit_inv_wh.allocated_inv).to eq(1)
+      expect(product_kit_inv_wh.available_inv).to eq(23)
+      expect(product_kit_inv_wh.allocated_inv).to eq(2)
 
       kit_product_inv_wh.reload
-      expect(kit_product_inv_wh.available_inv).to eq(24)
-      expect(kit_product_inv_wh.allocated_inv).to eq(1)
+      expect(kit_product_inv_wh.available_inv).to eq(25)
+      expect(kit_product_inv_wh.allocated_inv).to eq(0)
 
       kit_product2_inv_wh.reload
-      expect(kit_product2_inv_wh.available_inv).to eq(24)
-      expect(kit_product2_inv_wh.allocated_inv).to eq(1)
+      expect(kit_product2_inv_wh.available_inv).to eq(25)
+      expect(kit_product2_inv_wh.allocated_inv).to eq(0)
 
 
       get :scan_barcode, {:state=>'scanpack.rfp.default', :input => 'IPROTOBAR', :id => order.id }
 
       product_kit_inv_wh.reload
-      expect(product_kit_inv_wh.available_inv).to eq(24)
-      expect(product_kit_inv_wh.allocated_inv).to eq(1)
+      expect(product_kit_inv_wh.available_inv).to eq(23)
+      expect(product_kit_inv_wh.allocated_inv).to eq(2)
 
       kit_product_inv_wh.reload
-      expect(kit_product_inv_wh.available_inv).to eq(24)
-      expect(kit_product_inv_wh.allocated_inv).to eq(1)
+      expect(kit_product_inv_wh.available_inv).to eq(25)
+      expect(kit_product_inv_wh.allocated_inv).to eq(0)
 
       kit_product2_inv_wh.reload
-      expect(kit_product2_inv_wh.available_inv).to eq(24)
-      expect(kit_product2_inv_wh.allocated_inv).to eq(1)
+      expect(kit_product2_inv_wh.available_inv).to eq(25)
+      expect(kit_product2_inv_wh.allocated_inv).to eq(0)
 
       order.reload
       put :reset_order_scan, {:order_id => order.id}
@@ -3249,21 +3265,17 @@ RSpec.describe ScanPackController, :type => :controller do
       product_kit_inv_wh.reload
       expect(product_kit_inv_wh.available_inv).to eq(23)
       expect(product_kit_inv_wh.allocated_inv).to eq(0)
-      sold_inv_wh = SoldInventoryWarehouse.where(:product_inventory_warehouses_id => product_kit_inv_wh.id)
-      expect(sold_inv_wh.count).to eq(1)
-      expect(sold_inv_wh.first.sold_qty).to eq(2)
+      expect(product_kit_inv_wh.sold_inv).to eq(2)
 
       kit_product_inv_wh.reload
       expect(kit_product_inv_wh.available_inv).to eq(25)
       expect(kit_product_inv_wh.allocated_inv).to eq(0)
-      sold_inv_wh = SoldInventoryWarehouse.where(:product_inventory_warehouses_id => kit_product_inv_wh.id)
-      expect(sold_inv_wh.count).to eq(0)
+      expect(kit_product_inv_wh.sold_inv).to eq(0)
 
       kit_product2_inv_wh.reload
       expect(kit_product2_inv_wh.available_inv).to eq(25)
       expect(kit_product2_inv_wh.allocated_inv).to eq(0)
-      sold_inv_wh = SoldInventoryWarehouse.where(:product_inventory_warehouses_id => kit_product2_inv_wh.id)
-      expect(sold_inv_wh.count).to eq(0)
+      expect(kit_product2_inv_wh.sold_inv).to eq(0)
 
     end
 

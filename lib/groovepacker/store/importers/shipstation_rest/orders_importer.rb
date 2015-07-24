@@ -4,6 +4,7 @@ module Groovepacker
       module ShipstationRest
         include ProductsHelper
         class OrdersImporter < Groovepacker::Store::Importers::Importer
+          include ProductsHelper
           def import
             handler = self.get_handler
             credential = handler[:credential]
@@ -20,7 +21,7 @@ module Groovepacker
                 credential.last_imported_at.nil? ? Date.today - 2.weeks : credential.last_imported_at - 7.days
             else
               import_from = 
-                credential.last_imported_at.nil? ? Date.today - 2.weeks : credential.last_imported_at - 3.days
+                credential.last_imported_at.nil? ? Date.today - 2.weeks : credential.last_imported_at - credential.regular_import_range.days
             end
 
             gp_ready_tag_id = client.get_tag_id(credential.gp_ready_tag_name)
@@ -42,7 +43,7 @@ module Groovepacker
               end
 
               unless response["orders"].nil? 
-                result[:total_imported] = response["orders"].length          
+                result[:total_imported] = response["orders"].length
                 import_item.current_increment_id = ''
                 import_item.success_imported = 0
                 import_item.previous_imported = 0
@@ -117,6 +118,7 @@ module Groovepacker
                             order_item_product.save
                             order_item.product = order_item_product
                           end
+                          make_product_intangible(order_item.product)
                           shipstation_order.order_items << order_item
                           import_item.current_order_imported_item = import_item.current_order_imported_item + 1
                           import_item.save

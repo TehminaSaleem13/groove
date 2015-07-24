@@ -1,5 +1,5 @@
 class ShopifyController < ApplicationController
-  before_filter :authenticate_user!, :except => [:auth, :callback, :preferences, :help, :complete]
+  before_filter :groovepacker_authorize!, :except => [:auth, :callback, :preferences, :help, :complete]
 
   # {
   #  "code"=>"58a883f4bb36e4e953431549abff383c", 
@@ -10,8 +10,8 @@ class ShopifyController < ApplicationController
   #  "id"=>"1" 
   # }
   def auth
-    #puts params[:is_admin]
-    Apartment::Tenant.switch(params[:tenant_name])
+    @tenant_name, @is_admin = params[:tenant_name].split('&')
+    Apartment::Tenant.switch(@tenant_name)
     store = Store.find(params[:id])
     @shopify_credential = store.shopify_credential
     session = ShopifyAPI::Session.new(@shopify_credential.shop_name + ".myshopify.com")

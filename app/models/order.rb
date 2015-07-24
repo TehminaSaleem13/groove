@@ -9,7 +9,7 @@ class Order < ActiveRecord::Base
 
   has_many :order_items, :dependent => :destroy
   has_one :order_shipping, :dependent => :destroy
-  has_one :order_exceptions, :dependent => :destroy
+  has_one :order_exception, :dependent => :destroy
   has_many :order_activities, :dependent => :destroy
   has_many :order_serials, :dependent => :destroy
   has_and_belongs_to_many :order_tags
@@ -20,6 +20,14 @@ class Order < ActiveRecord::Base
   include ProductsHelper
   include OrdersHelper
   include ApplicationHelper
+
+  ALLOCATE_STATUSES = ['awaiting', 'onhold', 'serviceissue']
+  UNALLOCATE_STATUSES = ['cancelled']
+  SOLD_STATUSES = ['scanned']
+
+  def has_store_and_warehouse?
+    !self.store.nil? && self.store.ensure_warehouse?
+  end
 
   def addactivity(order_activity_message, username='', activity_type ='regular')
   	@activity = OrderActivity.new
@@ -71,16 +79,24 @@ class Order < ActiveRecord::Base
     result
   end
 
+  def compute_packing_score
+    100 - (self.total_scan_time.to_f / self.total_scan_count)
+  end
+
   def set_order_to_scanned_state(username)
     self.status = 'scanned'
     self.scanned_on = current_time_from_proper_timezone
     self.addactivity('Order Scanning Complete', username)
+    self.packing_score = self.compute_packing_score
     self.save
     restriction = AccessRestriction.order("created_at").last
     unless restriction.nil?
       restriction.total_scanned_shipments += 1
       restriction.save
     end
+    Groovepacker::Dashboard::Stats::LeaderBoardStats.new.
+      compute_leader_board_for_order_item_count(
+        self.order_items.count)
   end
 
   def has_inactive_or_new_products
@@ -116,12 +132,11 @@ class Order < ActiveRecord::Base
   def update_order_status
     result = true
     if true
-      hold_orders_due_to_inventory = GeneralSetting.first.hold_orders_due_to_inventory
+      #Implement hold orders from Groovepacker::Inventory
       self.order_items.each do |order_item|
         product = Product.find_by_id(order_item.product_id)
         unless product.nil?
-          if product.status == "new" or product.status == "inactive" or 
-            (hold_orders_due_to_inventory and (order_item.inv_status == 'unallocated' or order_item.inv_status == 'unprocessed'))
+          if product.status == "new" or product.status == "inactive"
               result &= false
           end
         end
@@ -163,22 +178,23 @@ class Order < ActiveRecord::Base
     result &= false if self.unacknowledged_activities.length > 0
     
     if result
-      self.status = "awaiting"
+      self.update_column(:status,'awaiting')
     else
-      self.status = "onhold"
+      self.update_column(:status,'onhold')
     end
 
-    self.save
-    self.apply_and_update_predefined_tags
+    #self.apply_and_update_predefined_tags
   end
 
   def has_unscanned_items
     result = false
     self.reload
     self.order_items.each do |order_item|
-      if order_item.scanned_status != 'scanned'
-        result |= true
-        break
+      unless order_item.product.is_intangible
+        if order_item.scanned_status != 'scanned'
+          result |= true
+          break
+        end
       end
     end
 
@@ -257,15 +273,12 @@ class Order < ActiveRecord::Base
     else
       product_barcode = nil
     end
-    #puts "Product Barcode:" +product_barcode.barcode
     #check if barcode is present in a kit which has kitparsing of depends
     if !product_barcode.nil?
       self.order_items.each do |order_item|
         if order_item.product.is_kit == 1 && order_item.product.kit_parsing == 'depends' &&
           order_item.scanned_status != 'scanned'
           order_item.product.product_kit_skuss.each do |kit_product|
-            #puts "Product Id:" + kit_product.option_product_id.to_s
-            #puts "Product Barcode Id:" + product_barcode.product_id.to_s
             if kit_product.option_product_id == product_barcode.product_id
               product_inside_splittable_kit = true
               matched_product_id = kit_product.option_product_id
@@ -278,16 +291,11 @@ class Order < ActiveRecord::Base
         break if product_inside_splittable_kit
       end
     end
-    #puts "Product inside splittable kit:"+product_inside_splittable_kit.to_s
     #if barcode is present and the matched product is also present in other non-kit
     #and unscanned order items, then the kit need not be split.
     if product_inside_splittable_kit
       self.order_items.each do |order_item|
-        #puts "Order Kit Status:"+order_item.product.is_kit.to_s
-        #puts "Order Item Status:"+order_item.scanned_status
         if order_item.product.is_kit == 0 && order_item.scanned_status != 'scanned'
-            #puts "Order Product Id:" + order_item.product_id.to_s
-            #puts "Product Barcode Id:" + matched_product_id.to_s
           if order_item.product_id == matched_product_id
             product_available_as_single_item = true
             result = false
@@ -304,8 +312,7 @@ class Order < ActiveRecord::Base
 
         #if current item does not belong to any of the unscanned items in the already split kits
         if order_item.should_kit_split_qty_be_increased(matched_product_id)
-          if order_item.kit_split_qty <= order_item.qty
-            logger.info 'Kit is already split, incrementing quantity'
+          if order_item.kit_split_qty + order_item.single_scanned_qty < order_item.qty
             order_item.kit_split_qty = order_item.kit_split_qty + 1
             order_item.order_item_kit_products.each do |kit_product|
               kit_product.scanned_status = 'partially_scanned'
@@ -318,11 +325,8 @@ class Order < ActiveRecord::Base
         order_item.kit_split_qty = 1
       end
       order_item.save
-      #puts "Order Item"+order_item.id.to_s
       order_item.reload
-      #puts "Kit Split"+order_item.kit_split.to_s+"Id: "+order_item.id.to_s
     end
-    #puts "Product available as single item:"+product_available_as_single_item.to_s
     result
   end
 
@@ -332,10 +336,7 @@ class Order < ActiveRecord::Base
     self.reload
     self.order_items.each do |order_item|
       if order_item.scanned_status != 'scanned'
-        #puts "Kit Status:"+order_item.product.is_kit.to_s
         if order_item.product.is_kit == 1
-          #puts "Kit Parsing:" + order_item.product.kit_parsing
-          #puts "Before:"+unscanned_list.to_s
           if order_item.product.kit_parsing == 'single'
             #if single, then add order item to unscanned list
             unscanned_list.push(order_item.build_unscanned_single_item)
@@ -343,7 +344,6 @@ class Order < ActiveRecord::Base
             #else if individual then add all order items as children to unscanned list
             unscanned_list.push(order_item.build_unscanned_individual_kit)
           elsif order_item.product.kit_parsing == 'depends'
-            #puts "Kit Split"+order_item.kit_split.to_s+"Id: "+order_item.id.to_s
             if order_item.kit_split
               if order_item.kit_split_qty > order_item.kit_split_scanned_qty
                 unscanned_list.push(order_item.build_unscanned_individual_kit(true))
@@ -368,8 +368,6 @@ class Order < ActiveRecord::Base
               #       end
               #     end
 
-              #     logger.info 'Individual Kit Count'+individual_kit_count.to_s
-              #     logger.info 'Kit Split Quantity'+order_item.kit_split_qty.to_s
 
               #     #unscanned list building kits
               #     if individual_kit_count < order_item.kit_split_qty
@@ -387,17 +385,17 @@ class Order < ActiveRecord::Base
               end
             end
           end
-          #puts "After:"+unscanned_list.to_s
         else
-          # add order item to unscanned list
-          unscanned_item = order_item.build_unscanned_single_item
-          if unscanned_item['qty_remaining'] > 0
-            unscanned_list.push(unscanned_item)
+          unless order_item.product.is_intangible
+            # add order item to unscanned list
+            unscanned_item = order_item.build_unscanned_single_item
+            if unscanned_item['qty_remaining'] > 0
+              unscanned_list.push(unscanned_item)
+            end
           end
         end
       end
     end
-    logger.info unscanned_list.to_s
     unscanned_list.sort_by { |hsh| hsh['packing_placement'] }
   end
 
@@ -469,29 +467,12 @@ class Order < ActiveRecord::Base
 
   def reset_scanned_status
     self.order_items.each do |order_item|
-      #if item is a kit then make all order item product skus as also unscanned
-      if order_item.product.is_kit == 1
-        order_item.order_item_kit_products.each do |kit_product|
-          kit_product.scanned_status = 'unscanned'
-          kit_product.scanned_qty = 0
-          kit_product.save
-        end
-      end
-
-      order_item.scanned_status = 'unscanned'
-      order_item.scanned_qty = 0
-      order_item.kit_split = false
-      order_item.kit_split_qty = 0
-      order_item.kit_split_scanned_qty = 0
-      order_item.single_scanned_qty = 0
-      order_item.save
+      order_item.reset_scanned
     end
 
     self.order_serials.destroy_all
     self.set_order_status
-    self.tracking_num = ''
-    self.update_inventory_levels_for_items(true)
-    self.save
+    self.update_column(:scan_start_time, nil)
   end
 
   def addtag(tag_id)
@@ -576,90 +557,37 @@ class Order < ActiveRecord::Base
     count
   end
 
-  def update_inventory_levels_for_items(override = true)
+  def update_inventory_levels_for_items
     changed_hash = self.changes
-    logger.debug(changed_hash)
-    if self.update_inventory_level
-      unless changed_hash['status'].nil?
-        if (changed_hash['status'][0] == 'onhold' or
-            changed_hash['status'][0] == 'cancelled' or override) and
-           (changed_hash['status'][1] == 'awaiting' or
-            changed_hash['status'][1] == 'serviceissue')
-          #update_inventory_levels_for_purchase
-          reason = 'packing'
-        elsif (changed_hash['status'][0] == 'awaiting' or
-          changed_hash['status'][0] == 'serviceissue') and
-          (changed_hash['status'][1] == 'onhold' or
-          changed_hash['status'][1] == 'cancelled')
-          #update_inventory_levels_for_return
-          reason = 'return'
-        elsif changed_hash['status'][0] == 'onhold' and changed_hash['status'][1] == 'cancelled'
-          reason = 'return'
-        end
-        self.order_items.each do |order_item|
-          if reason == 'packing'
-            order_item.update_inventory_levels_for_packing(true)
-          elsif reason == 'return'
-            order_item.update_inventory_levels_for_return(true)
-          end
-        end
+    #TODO: remove this from here as soon as possible.
+    # Very slow way to ensure inventory always gets allocated
+    Groovepacker::Inventory::Orders.allocate(self)
+    if changed_hash['status'].nil?
+      return true
+    end
+    initial_status = changed_hash['status'][0]
+    final_status = changed_hash['status'][1]
+    if ALLOCATE_STATUSES.include?(initial_status)
+      if UNALLOCATE_STATUSES.include?(final_status)
+        # Allocate -> unallocate = deallocate inv
+        Groovepacker::Inventory::Orders.deallocate(self, true)
+      elsif SOLD_STATUSES.include?(final_status)
+        # Allocate -> sold = sell inventory
+        Groovepacker::Inventory::Orders.sell(self)
       end
-
-      unless changed_hash['status'].nil?
-        #if changing for awaiting to scanned
-          if changed_hash['status'][0] == 'awaiting' and
-            changed_hash['status'][1] == 'scanned'
-            result = true
-            #move items from allocated to sold for each order items
-            self.order_items.each do |order_item|
-              result &= order_item.product.update_allocated_product_sold_level(self.store.inventory_warehouse_id,
-              order_item.qty, order_item)
-            end
-
-            logger.info('error updating sold inventory level') if !result
-          end
+    elsif UNALLOCATE_STATUSES.include?(initial_status)
+      if ALLOCATE_STATUSES.include?(final_status)
+        # Unallocate -> allocate = Allocate inventory
+        Groovepacker::Inventory::Orders.allocate(self, true)
+      end
+    elsif SOLD_STATUSES.include?(initial_status)
+      if ALLOCATE_STATUSES.include?(final_status)
+        Groovepacker::Inventory::Orders.unsell(self)
+        self.reset_scanned_status
       end
     end
-  end
-
-  def update_inventory_levels_for_status_change(override = true)
-    changed_hash = self.changes
-    unless changed_hash['status'].nil?
-      if GeneralSetting.first.inventory_auto_allocation
-        if (changed_hash['status'][0] == 'serviceissue' or
-            changed_hash['status'][0] == 'awaiting') and
-            changed_hash['status'][1] == 'scanned'
-          result = true
-          self.order_items.each do |order_item|
-            result &= order_item.product.update_allocated_product_sold_level(self.store.inventory_warehouse_id,
-            order_item.qty, order_item)
-          end
-        elsif changed_hash['status'][0] == 'cancelled' and 
-          changed_hash['status'][1] == 'scanned'
-          result =true
-          self.order_items.each do |order_item|
-            result &= order_item.update_inventory_levels_for_packing(true)
-            if result
-              result &= order_item.product.update_allocated_product_sold_level(self.store.inventory_warehouse_id,
-               order_item.qty, order_item)
-            end
-          end
-        end
-      # else
-      #   if (changed_hash['status'][0] == 'service issue' or
-      #       changed_hash['status'][0] == 'awaiting') and
-      #     changed_hash['status'][1] == 'scanned'
-      #     result = true
-      #     self.order_items.each do |order_item|
-      #       result &= order_item.update_inventory_levels_for_return(true)
-      #     end
-      #   elsif changed_hash['status'][0] == 'cancelled' and
-      #     (changed_hash['status'][1] == 'scanned')
-      #     result = true
-      #   end
-      end
-    end
-    logger.info('error updating inventory level') if !result
+    self.update_column(:reallocate_inventory, false)
+    true
   end
 
   def update_non_hyphen_increment_id
@@ -669,7 +597,7 @@ class Order < ActiveRecord::Base
   def scanned_items_count
     count = 0
       self.order_items.each do |item|
-        if item.product.is_kit
+        if item.product.is_kit == 1
           if item.product.kit_parsing == 'depends'
             count = count + item.single_scanned_qty
             item.order_item_kit_products.each do |kit_product|
@@ -692,7 +620,7 @@ class Order < ActiveRecord::Base
   def clicked_items_count
     count = 0
       self.order_items.each do |item|
-        if item.product.is_kit
+        if item.product.is_kit == 1
           if item.product.kit_parsing == 'depends'
             count = count + item.clicked_qty
             item.order_item_kit_products.each do |kit_product|
@@ -716,5 +644,18 @@ class Order < ActiveRecord::Base
     order_activities.
       where('activity_type in (:types)', types: 'deleted_item').
       where(acknowledged: false)
+  end
+
+  def add_item_to_order(product)
+    order_item = OrderItem.new
+    order_item.product = product
+    order_item.name = product.name
+    unless product.product_skus.empty?
+      order_item.sku = product.product_skus.first.sku
+    end
+    order_item.qty = 1
+    order_item.order = self
+    order_item.save
+    self.update_order_status
   end
 end

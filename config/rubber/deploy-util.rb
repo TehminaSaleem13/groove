@@ -70,15 +70,12 @@ namespace :rubber do
         db_backup_cmd = eval('%Q{' + db_backup_cmd + '}')
 
         # dbdump (or backup app) needs to be in your path
-        puts "Backing up database with command:"
         system(db_backup_cmd)
-        puts "Created backup: #{backup_file}"
 
         # Upload Local to Cloud
         backup_bucket = Rubber.cloud.env.backup_bucket
         dest = "db/#{File.basename(backup_file)}"
           
-        puts "Saving db dump to cloud: #{backup_bucket}:#{dest}"
         Rubber.cloud.storage(backup_bucket).store(dest, open(backup_file))
         
         send :restore_cloud

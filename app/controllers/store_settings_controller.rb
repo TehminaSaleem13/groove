@@ -1,5 +1,5 @@
 class StoreSettingsController < ApplicationController
-  before_filter :authenticate_user!, :except => [:handle_ebay_redirect]
+  before_filter :groovepacker_authorize!, :except => [:handle_ebay_redirect]
 
   include StoreSettingsHelper
   def storeslist
@@ -47,6 +47,7 @@ class StoreSettingsController < ApplicationController
           @result['status'] = false
           @result['messages'].push('Please select a store type to create a store')
         else
+          params[:name]=nil if params[:name]=='undefined'
           @store.name = params[:name] || get_default_warehouse_name
           @store.store_type = params[:store_type]
           @store.status = params[:status]
@@ -238,6 +239,7 @@ class StoreSettingsController < ApplicationController
             @shipstation.warehouse_location_update = params[:warehouse_location_update]
             @shipstation.shall_import_customer_notes = params[:shall_import_customer_notes]
             @shipstation.shall_import_internal_notes = params[:shall_import_internal_notes]
+            @shipstation.regular_import_range = params[:regular_import_range] unless params[:regular_import_range].nil?
             @store.shipstation_rest_credential = @shipstation
 
             begin
@@ -290,8 +292,8 @@ class StoreSettingsController < ApplicationController
 
           if @store.store_type == 'Shopify'
             @shopify = ShopifyCredential.find_by_store_id(@store.id)
-            puts @shopify.inspect
             begin
+              params[:shop_name] = nil if params[:shop_name] == 'null'
               if @shopify.nil?
                 @store.shopify_credential = ShopifyCredential.new(
                   shop_name: params[:shop_name])
@@ -404,7 +406,7 @@ class StoreSettingsController < ApplicationController
 
           #check if previous mapping exists
           #else fill in defaults
-          default_csv_map ={ 'name' =>'', 'map' =>{'rows' => 1, 'sep' => ',' , 'other_sep' => 0, 'delimiter'=> '"', 'fix_width' => 0, 'fixed_width' => 4, 'map' => {} }}
+          default_csv_map ={ 'name' =>'', 'map' =>{'rows' => 2, 'sep' => ',' , 'other_sep' => 0, 'delimiter'=> '"', 'fix_width' => 0, 'fixed_width' => 4, 'contains_unique_order_items' => false, 'generate_barcode_from_sku' => false, 'use_sku_as_product_name' => false, 'order_placed_at' => nil, 'order_date_time_format' => 'None', 'map' => {} }}
           csv_map = CsvMapping.find_or_create_by_store_id(@store.id)
           # end check for mapping
 
@@ -428,7 +430,12 @@ class StoreSettingsController < ApplicationController
                 { value: 'postcode', name: 'Postal Code'},
                 { value: 'country', name: 'Country'},
                 { value: 'method', name: 'Shipping Method'},
-                { value: 'customer_comments', name: 'Customer Comments'}
+                { value: 'customer_comments', name: 'Customer Comments'},
+                { value: 'product_name', name: 'Product Name'},
+                { value: 'product_instructions', name: 'Product Instructions'},
+                { value: 'tracking_num', name: 'Tracking Number'},
+                { value: 'category', name: 'Category Name'},
+                { value: 'barcode', name: 'Barcode/UPC'}
             ]
             if csv_map.order_csv_map.nil?
               @result['order']['settings'] = default_csv_map
@@ -460,7 +467,8 @@ class StoreSettingsController < ApplicationController
                 { value: 'barcode', name: 'UPC/Barcode'},
                 { value: 'secondary_barcode', name: 'Secondary Barcode'},
                 { value: 'tertiary_barcode', name: 'Tertiary Barcode'},
-                { value: 'product_weight', name: 'Product Weight'}
+                { value: 'product_weight', name: 'Product Weight'},
+                { value: 'product_instructions', name: 'Product Instructions'}
             ]
             if csv_map.product_csv_map.nil?
               @result["product"]["settings"] = default_csv_map
@@ -556,6 +564,10 @@ class StoreSettingsController < ApplicationController
           :fix_width => params[:fix_width],
           :fixed_width => params[:fixed_width],
           :import_action => params[:import_action],
+          :contains_unique_order_items => params[:contains_unique_order_items],
+          :generate_barcode_from_sku => params[:generate_barcode_from_sku],
+          :use_sku_as_product_name => params[:use_sku_as_product_name],
+          :order_date_time_format => params[:order_date_time_format],
           :map => params[:map]
       }
       map_data.save
@@ -569,7 +581,6 @@ class StoreSettingsController < ApplicationController
         @result['messages'].push(e.message)
       end
     end
-    logger.info "CSV Map stored."
     if @result['status']
       data = {}
       data[:type] = params[:type]
@@ -581,9 +592,15 @@ class StoreSettingsController < ApplicationController
       data[:map] = params[:map]
       data[:store_id] = params[:store_id]
       data[:import_action] = params[:import_action]
+      data[:contains_unique_order_items] = params[:contains_unique_order_items]
+      data[:generate_barcode_from_sku] = params[:generate_barcode_from_sku]
+      data[:use_sku_as_product_name] = params[:use_sku_as_product_name]
+      data[:order_placed_at] = params[:order_placed_at]
+      data[:order_date_time_format] = params[:order_date_time_format]
 
       import_csv = ImportCsv.new
       delayed_job = import_csv.delay(:run_at =>1.seconds.from_now).import Apartment::Tenant.current_tenant, data
+      # delayed_job = import_csv.import Apartment::Tenant.current_tenant, data
 
       if params[:type] == 'order'
         import_item = ImportItem.find_by_store_id(@store.id)
@@ -834,7 +851,6 @@ class StoreSettingsController < ApplicationController
     end
     ebaytoken_resp = MultiXml.parse(res.body)
     @result['response'] = ebaytoken_resp
-    puts "fetch token response:" + ebaytoken_resp.inspect
     if ebaytoken_resp['FetchTokenResponse']['Ack'] == 'Success'
       session[:ebay_auth_token] = ebaytoken_resp['FetchTokenResponse']['eBayAuthToken']
       session[:ebay_auth_expiration] = ebaytoken_resp['FetchTokenResponse']['HardExpirationTime']
@@ -1060,7 +1076,7 @@ class StoreSettingsController < ApplicationController
           single_row[:CustomsValue] = ''
           single_row[:CustomsTariffNo] = ''
           single_row[:CustomsCountry] = product.order_items.first.order.country unless product.order_items.empty? || product.order_items.first.order.nil?
-          single_row[:ThumbnailUrl] = product.primary_image
+          single_row[:ThumbnailUrl] = ''
           single_row[:UPC] = product.primary_barcode
           single_row[:FillSKU] = ''
           single_row[:Length] = ''
@@ -1073,7 +1089,7 @@ class StoreSettingsController < ApplicationController
         end
       end
     else
-
+      result['messages'] << 'There are no active products'
     end
 
     unless result['status']

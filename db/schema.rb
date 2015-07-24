@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150518082130) do
+ActiveRecord::Schema.define(:version => 20150723194806) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0, :null => false
@@ -91,6 +91,7 @@ ActiveRecord::Schema.define(:version => 20150518082130) do
     t.integer  "success_imported", :default => 0
     t.integer  "duplicate_file",   :default => 0
     t.integer  "duplicate_db",     :default => 0
+    t.integer  "success_updated",  :default => 0
   end
 
   create_table "delayed_jobs", :force => true do |t|
@@ -122,7 +123,7 @@ ActiveRecord::Schema.define(:version => 20150518082130) do
 
   create_table "export_settings", :force => true do |t|
     t.boolean  "auto_email_export",         :default => true
-    t.datetime "time_to_send_export_email"
+    t.datetime "time_to_send_export_email", :default => '2000-01-01 00:00:00'
     t.boolean  "send_export_email_on_mon",  :default => false
     t.boolean  "send_export_email_on_tue",  :default => false
     t.boolean  "send_export_email_on_wed",  :default => false
@@ -134,8 +135,8 @@ ActiveRecord::Schema.define(:version => 20150518082130) do
     t.string   "export_orders_option",      :default => "on_same_day"
     t.string   "order_export_type",         :default => "include_all"
     t.string   "order_export_email"
-    t.datetime "created_at",                                           :null => false
-    t.datetime "updated_at",                                           :null => false
+    t.datetime "created_at",                                                   :null => false
+    t.datetime "updated_at",                                                   :null => false
     t.datetime "start_time"
     t.datetime "end_time"
     t.boolean  "manual_export",             :default => false
@@ -145,7 +146,7 @@ ActiveRecord::Schema.define(:version => 20150518082130) do
     t.boolean  "inventory_tracking",                :default => false
     t.boolean  "low_inventory_alert_email",         :default => false
     t.string   "low_inventory_email_address",       :default => ""
-    t.boolean  "hold_orders_due_to_inventory",      :default => true
+    t.boolean  "hold_orders_due_to_inventory",      :default => false
     t.string   "conf_req_on_notes_to_packer",       :default => "optional"
     t.string   "send_email_for_packer_notes",       :default => "always"
     t.string   "email_address_for_packer_notes",    :default => ""
@@ -179,7 +180,6 @@ ActiveRecord::Schema.define(:version => 20150518082130) do
     t.string   "conf_code_product_instruction",     :default => "optional"
     t.string   "admin_email"
     t.string   "export_items",                      :default => "disabled"
-    t.boolean  "inventory_auto_allocation",         :default => false
   end
 
   create_table "generate_barcodes", :force => true do |t|
@@ -197,6 +197,19 @@ ActiveRecord::Schema.define(:version => 20150518082130) do
   end
 
   add_index "generate_barcodes", ["user_id"], :name => "index_generate_barcodes_on_user_id"
+
+  create_table "groove_bulk_actions", :force => true do |t|
+    t.string   "identifier",                          :null => false
+    t.string   "activity",                            :null => false
+    t.integer  "total",      :default => 0
+    t.integer  "completed",  :default => 0
+    t.string   "status",     :default => "scheduled"
+    t.string   "current"
+    t.string   "messages"
+    t.boolean  "cancel",     :default => false
+    t.datetime "created_at",                          :null => false
+    t.datetime "updated_at",                          :null => false
+  end
 
   create_table "import_items", :force => true do |t|
     t.string   "status"
@@ -242,6 +255,14 @@ ActiveRecord::Schema.define(:version => 20150518082130) do
     t.datetime "updated_at",                                                     :null => false
   end
 
+  create_table "leader_boards", :force => true do |t|
+    t.integer  "scan_time"
+    t.integer  "order_id"
+    t.integer  "order_item_count"
+    t.datetime "created_at",       :null => false
+    t.datetime "updated_at",       :null => false
+  end
+
   create_table "magento_credentials", :force => true do |t|
     t.string   "host",                                :null => false
     t.string   "username",                            :null => false
@@ -254,6 +275,46 @@ ActiveRecord::Schema.define(:version => 20150518082130) do
     t.boolean  "import_images",    :default => false, :null => false
     t.datetime "last_imported_at"
   end
+
+  create_table "oauth_access_grants", :force => true do |t|
+    t.integer  "resource_owner_id", :null => false
+    t.integer  "application_id",    :null => false
+    t.string   "token",             :null => false
+    t.integer  "expires_in",        :null => false
+    t.text     "redirect_uri",      :null => false
+    t.datetime "created_at",        :null => false
+    t.datetime "revoked_at"
+    t.string   "scopes"
+  end
+
+  add_index "oauth_access_grants", ["token"], :name => "index_oauth_access_grants_on_token", :unique => true
+
+  create_table "oauth_access_tokens", :force => true do |t|
+    t.integer  "resource_owner_id"
+    t.integer  "application_id"
+    t.string   "token",             :null => false
+    t.string   "refresh_token"
+    t.integer  "expires_in"
+    t.datetime "revoked_at"
+    t.datetime "created_at",        :null => false
+    t.string   "scopes"
+  end
+
+  add_index "oauth_access_tokens", ["refresh_token"], :name => "index_oauth_access_tokens_on_refresh_token", :unique => true
+  add_index "oauth_access_tokens", ["resource_owner_id"], :name => "index_oauth_access_tokens_on_resource_owner_id"
+  add_index "oauth_access_tokens", ["token"], :name => "index_oauth_access_tokens_on_token", :unique => true
+
+  create_table "oauth_applications", :force => true do |t|
+    t.string   "name",                         :null => false
+    t.string   "uid",                          :null => false
+    t.string   "secret",                       :null => false
+    t.text     "redirect_uri",                 :null => false
+    t.string   "scopes",       :default => "", :null => false
+    t.datetime "created_at",                   :null => false
+    t.datetime "updated_at",                   :null => false
+  end
+
+  add_index "oauth_applications", ["uid"], :name => "index_oauth_applications_on_uid", :unique => true
 
   create_table "order_activities", :force => true do |t|
     t.datetime "activitytime"
@@ -290,6 +351,14 @@ ActiveRecord::Schema.define(:version => 20150518082130) do
     t.string   "import_summary_type", :default => "import_orders"
   end
 
+  create_table "order_item_kit_product_scan_times", :force => true do |t|
+    t.datetime "scan_start"
+    t.datetime "scan_end"
+    t.integer  "order_item_kit_product_id"
+    t.datetime "created_at",                :null => false
+    t.datetime "updated_at",                :null => false
+  end
+
   create_table "order_item_kit_products", :force => true do |t|
     t.integer  "order_item_id"
     t.integer  "product_kit_skus_id"
@@ -302,6 +371,23 @@ ActiveRecord::Schema.define(:version => 20150518082130) do
 
   add_index "order_item_kit_products", ["order_item_id"], :name => "index_order_item_kit_products_on_order_item_id"
   add_index "order_item_kit_products", ["product_kit_skus_id"], :name => "index_order_item_kit_products_on_product_kit_skus_id"
+
+  create_table "order_item_order_serial_product_lots", :force => true do |t|
+    t.integer  "order_item_id"
+    t.integer  "product_lot_id"
+    t.integer  "order_serial_id"
+    t.datetime "created_at",                     :null => false
+    t.datetime "updated_at",                     :null => false
+    t.integer  "qty",             :default => 0
+  end
+
+  create_table "order_item_scan_times", :force => true do |t|
+    t.datetime "scan_start"
+    t.datetime "scan_end"
+    t.integer  "order_item_id"
+    t.datetime "created_at",    :null => false
+    t.datetime "updated_at",    :null => false
+  end
 
   create_table "order_items", :force => true do |t|
     t.string   "sku"
@@ -322,6 +408,7 @@ ActiveRecord::Schema.define(:version => 20150518082130) do
     t.string   "inv_status",                                           :default => "unprocessed"
     t.string   "inv_status_reason",                                    :default => ""
     t.integer  "clicked_qty",                                          :default => 0
+    t.boolean  "is_barcode_printed",                                   :default => false
   end
 
   add_index "order_items", ["order_id"], :name => "index_order_items_on_order_id"
@@ -387,14 +474,14 @@ ActiveRecord::Schema.define(:version => 20150518082130) do
     t.string   "postcode"
     t.string   "country"
     t.string   "method"
-    t.datetime "created_at",                                                               :null => false
-    t.datetime "updated_at",                                                               :null => false
+    t.datetime "created_at",                                                                :null => false
+    t.datetime "updated_at",                                                                :null => false
     t.text     "notes_internal"
     t.text     "notes_toPacker"
     t.text     "notes_fromPacker"
     t.boolean  "tracking_processed"
     t.string   "status"
-    t.date     "scanned_on"
+    t.datetime "scanned_on"
     t.string   "tracking_num"
     t.string   "company"
     t.integer  "packing_user_id"
@@ -403,14 +490,20 @@ ActiveRecord::Schema.define(:version => 20150518082130) do
     t.integer  "seller_id"
     t.integer  "order_status_id"
     t.string   "ship_name"
-    t.decimal  "shipping_amount",         :precision => 9, :scale => 2, :default => 0.0
-    t.decimal  "order_total",             :precision => 9, :scale => 2, :default => 0.0
+    t.decimal  "shipping_amount",         :precision => 9,  :scale => 2, :default => 0.0
+    t.decimal  "order_total",             :precision => 9,  :scale => 2, :default => 0.0
     t.string   "notes_from_buyer"
     t.integer  "weight_oz"
     t.string   "non_hyphen_increment_id"
-    t.boolean  "note_confirmation",                                     :default => false
+    t.boolean  "note_confirmation",                                      :default => false
     t.string   "store_order_id"
-    t.boolean  "update_inventory_level",                                :default => true
+    t.integer  "inaccurate_scan_count",                                  :default => 0
+    t.datetime "scan_start_time"
+    t.boolean  "reallocate_inventory",                                   :default => false
+    t.datetime "last_suggested_at"
+    t.integer  "total_scan_time",                                        :default => 0
+    t.integer  "total_scan_count",                                       :default => 0
+    t.decimal  "packing_score",           :precision => 10, :scale => 0, :default => 0
   end
 
   create_table "product_barcodes", :force => true do |t|
@@ -437,10 +530,12 @@ ActiveRecord::Schema.define(:version => 20150518082130) do
   create_table "product_images", :force => true do |t|
     t.integer  "product_id"
     t.string   "image"
-    t.datetime "created_at",                :null => false
-    t.datetime "updated_at",                :null => false
+    t.datetime "created_at",                                         :null => false
+    t.datetime "updated_at",                                         :null => false
     t.string   "caption"
-    t.integer  "order",      :default => 0
+    t.integer  "order",                           :default => 0
+    t.boolean  "added_to_receiving_instructions", :default => false
+    t.string   "image_note"
   end
 
   add_index "product_images", ["product_id"], :name => "index_product_images_on_product_id"
@@ -461,6 +556,7 @@ ActiveRecord::Schema.define(:version => 20150518082130) do
     t.string   "location_tertiary",       :limit => 50
     t.integer  "product_inv_alert_level",               :default => 0
     t.boolean  "product_inv_alert",                     :default => false
+    t.integer  "sold_inv",                              :default => 0
   end
 
   add_index "product_inventory_warehouses", ["inventory_warehouse_id"], :name => "index_product_inventory_warehouses_on_inventory_warehouse_id"
@@ -487,6 +583,15 @@ ActiveRecord::Schema.define(:version => 20150518082130) do
 
   add_index "product_kit_skus", ["product_id"], :name => "index_product_kit_skus_on_product_id"
 
+  create_table "product_lots", :force => true do |t|
+    t.integer  "product_id"
+    t.string   "lot_number"
+    t.datetime "created_at", :null => false
+    t.datetime "updated_at", :null => false
+  end
+
+  add_index "product_lots", ["product_id"], :name => "index_product_lots_on_product_id"
+
   create_table "product_skus", :force => true do |t|
     t.string   "sku"
     t.string   "purpose"
@@ -500,28 +605,32 @@ ActiveRecord::Schema.define(:version => 20150518082130) do
   add_index "product_skus", ["sku"], :name => "index_product_skus_on_sku"
 
   create_table "products", :force => true do |t|
-    t.string   "store_product_id",                                                                     :null => false
-    t.string   "name",                                                                                 :null => false
+    t.string   "store_product_id",                                                                        :null => false
+    t.string   "name",                                                                                    :null => false
     t.string   "product_type"
-    t.integer  "store_id",                                                                             :null => false
-    t.datetime "created_at",                                                                           :null => false
-    t.datetime "updated_at",                                                                           :null => false
+    t.integer  "store_id",                                                                                :null => false
+    t.datetime "created_at",                                                                              :null => false
+    t.datetime "updated_at",                                                                              :null => false
     t.string   "status",                                                        :default => "new"
     t.text     "spl_instructions_4_packer"
     t.boolean  "spl_instructions_4_confirmation",                               :default => false
     t.boolean  "is_skippable",                                                  :default => false
     t.integer  "packing_placement",                                             :default => 50
     t.integer  "pack_time_adj"
-    t.string   "kit_parsing",                                                   :default => "depends"
+    t.string   "kit_parsing",                                                   :default => "individual"
     t.integer  "is_kit",                                                        :default => 0
     t.boolean  "disable_conf_req",                                              :default => false
-    t.integer  "total_avail_ext",                                               :default => 0,         :null => false
-    t.decimal  "weight",                          :precision => 8, :scale => 2, :default => 0.0,       :null => false
+    t.integer  "total_avail_ext",                                               :default => 0,            :null => false
+    t.decimal  "weight",                          :precision => 8, :scale => 2, :default => 0.0,          :null => false
     t.decimal  "shipping_weight",                 :precision => 8, :scale => 2, :default => 0.0
     t.boolean  "record_serial",                                                 :default => false
     t.string   "type_scan_enabled",                                             :default => "on"
     t.string   "click_scan_enabled",                                            :default => "on"
     t.string   "weight_format"
+    t.boolean  "add_to_any_order",                                              :default => false
+    t.string   "base_sku"
+    t.boolean  "is_intangible",                                                 :default => false
+    t.text     "product_receiving_instructions"
   end
 
   add_index "products", ["store_id"], :name => "index_products_on_store_id"
@@ -592,6 +701,9 @@ ActiveRecord::Schema.define(:version => 20150518082130) do
     t.boolean  "record_lot_number",             :default => false
     t.boolean  "show_customer_notes",           :default => false
     t.boolean  "show_internal_notes",           :default => false
+    t.boolean  "scan_by_tracking_number",       :default => false
+    t.boolean  "intangible_setting_enabled",    :default => false
+    t.string   "intangible_string",             :default => ""
   end
 
   create_table "shipstation_credentials", :force => true do |t|
@@ -615,6 +727,7 @@ ActiveRecord::Schema.define(:version => 20150518082130) do
     t.boolean  "warehouse_location_update",      :default => false
     t.boolean  "shall_import_customer_notes",    :default => false
     t.boolean  "shall_import_internal_notes",    :default => false
+    t.integer  "regular_import_range",           :default => 3
   end
 
   create_table "shipworks_credentials", :force => true do |t|
@@ -636,14 +749,6 @@ ActiveRecord::Schema.define(:version => 20150518082130) do
     t.integer  "store_id"
     t.datetime "created_at",   :null => false
     t.datetime "updated_at",   :null => false
-  end
-
-  create_table "sold_inventory_warehouses", :force => true do |t|
-    t.integer  "product_inventory_warehouses_id"
-    t.integer  "sold_qty"
-    t.datetime "sold_date"
-    t.datetime "created_at",                      :null => false
-    t.datetime "updated_at",                      :null => false
   end
 
   create_table "stores", :force => true do |t|

@@ -1,11 +1,10 @@
 <div bindonce="options" class="binder">
-
     <div bo-if="options.select_all !== false" class="select_all_box col-md-2 col-lg-2" dropdown ng-mouseenter="show_dropdown()" ng-mouseleave="start_dropdown_timer()" is-open="dropdown.show">
         <button ng-click="options.select_all(!options.setup.select_all)" type="button" class="btn groove-button" ng-class="{active:options.setup.select_all, inverted: options.setup.inverted}">
             <span ng-hide="options.setup.select_all" translate>common.select_all</span>
             <span ng-show="options.setup.select_all" translate>common.select_none</span>
             <br/>
-            <span ng-show="options.paginate.show">{{options.paginate.total_items}}</span>
+            <span ng-show="options.paginate.show">{{options.paginate.tenants_count}}</span>
             <span ng-hide="options.paginate.show">{{rows.length}}</span>
         </button>
         <ul class="dropdown-menu" role="menu" ng-mouseleave="dropdown.show = false" ng-mouseenter="show_dropdown()">
@@ -14,7 +13,7 @@
         </ul>
     </div>
     <div class="col-md-12 text-center" ng-show="options.paginate.show">
-        <pagination total-items="options.paginate.total_items" ng-model="options.paginate.current_page" max-size="options.paginate.max_size" items-per-page="options.paginate.items_per_page" class="pagination-sm"  rotate="false"></pagination>
+        <pagination total-items="options.paginate.tenants_count" ng-model="options.paginate.current_page" max-size="options.paginate.max_size" items-per-page="options.paginate.items_per_page" class="pagination-sm"  rotate="false"></pagination>
     </div>
     <div class="col-md-12">
         <table groov-dragtable="dragOptions" groov-enabled="options.draggable" groov-model="theads" id="{{custom_identifier}}" class="well table-well table table-striped table-hover table-alt">
@@ -49,7 +48,7 @@
         </table>
     </div>
     <div class="col-md-12 text-center" ng-show="options.paginate.show">
-        <pagination total-items="options.paginate.total_items" ng-model="options.paginate.current_page" max-size="options.paginate.max_size" items-per-page="options.paginate.items_per_page" class="pagination-sm"  rotate="false"></pagination>
+        <pagination total-items="options.paginate.tenants_count" ng-model="options.paginate.current_page" max-size="options.paginate.max_size" items-per-page="options.paginate.items_per_page" class="pagination-sm"  rotate="false"></pagination>
     </div>
     <div bo-if="options.show_hide">
         <div class="clearfix"  ng-click="context_menu_event()" groov-rt-click="context_menu_event()" dropdown  is-open="context_menu.shown">

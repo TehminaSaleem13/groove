@@ -3,6 +3,7 @@ module Groovepacker
     module Importers
       module Magento
         class ProductsImporter < Groovepacker::Store::Importers::Importer
+          include ProductsHelper
           def import
             handler = self.get_handler
             credential = handler[:credential]
@@ -125,7 +126,6 @@ module Groovepacker
               end
 
               #add inventory warehouse
-              puts credential.store.inventory_warehouse_id.to_s
               unless credential.store.nil? && credential.store.inventory_warehouse_id.nil?
                 inv_wh = ProductInventoryWarehouses.new
                 inv_wh.inventory_warehouse_id = credential.store.inventory_warehouse_id
@@ -133,6 +133,7 @@ module Groovepacker
               end
 
               @productdb.save
+              make_product_intangible(@productdb)
               @productdb.set_product_status
               result_product_id = @productdb.id
             end

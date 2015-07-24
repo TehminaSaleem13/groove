@@ -1,4 +1,4 @@
-groovepacks_services.factory('orders',['$http','$window','notification',function($http,$window,notification) {
+groovepacks_services.factory('orders',['$http','$window','notification','$q',function($http,$window,notification,$q) {
 
     var success_messages = {
         update_status: "Status updated Successfully",
@@ -24,6 +24,7 @@ groovepacks_services.factory('orders',['$http','$window','notification',function
                 offset: 0,
                 //used for updating only
                 status:'',
+                reallocate_inventory: false,
                 orderArray:[]
             },
             orders_count: {
@@ -46,6 +47,35 @@ groovepacks_services.factory('orders',['$http','$window','notification',function
         }
         setup[type] = value;
         return setup;
+    };
+
+    var update_items_setup = function (items,type,value) {
+        var ascending = true;
+        var i = 0, length = items.length;
+        while (i < items.length-1) {
+            if (items[i].category.toLowerCase() > items[++i].category.toLowerCase()) {
+                ascending &= false;
+                break;
+            };
+        };
+        if (!ascending) {
+            items.sort(sort_by_category_ascend);
+        } else{
+            items.sort(sort_by_category_descend);
+        };
+        return items;
+    };
+
+    var sort_by_category_ascend = function (a, b){
+      var aName = a.category.toLowerCase();
+      var bName = b.category.toLowerCase();
+      return ((aName < bName) ? -1 : ((aName > bName) ? 1 : 0));
+    };
+
+    var sort_by_category_descend = function (a, b){
+      var aName = a.category.toLowerCase();
+      var bName = b.category.toLowerCase();
+      return ((aName < bName) ? 1 : ((aName > bName) ? -1 : 0));
     };
 
     //list related functions
@@ -386,6 +416,25 @@ groovepacks_services.factory('orders',['$http','$window','notification',function
         }).error(notification.server_error);
     };
 
+    var single_update_print_status = function(item) {
+        var result = $q.defer();
+        return $http.post('/orders/updateiteminorder.json',{orderitem: item.id}).success(function(data) {
+            if(data.status) {
+                if (data.messages.length > 0) {
+                    alert(data.messages[0]);
+                    result.resolve();
+                };
+            } else {
+                notification.notify(data.messages,0);
+            }
+        }).error(notification.server_error);
+        return result.promise;
+    };
+
+    var single_print_barcode = function(item) {
+        $window.open('/products/generate_barcode_slip.pdf?id='+item.id);
+    };
+
     var acknowledge_activity = function(activity_id) {
         return $http.post('/order_activities/acknowledge/'+activity_id, null).success(function(data) {
             if(data.status) {
@@ -401,8 +450,8 @@ groovepacks_services.factory('orders',['$http','$window','notification',function
             get:get_default
         },
         setup: {
-            update:update_setup
-
+            update:update_setup,
+            update_items: update_items_setup
         },
         list: {
             get: get_list,
@@ -422,7 +471,9 @@ groovepacks_services.factory('orders',['$http','$window','notification',function
             item: {
                 add: single_add_item,
                 remove: single_remove_item,
-                update:  single_update_item_qty
+                update:  single_update_item_qty,
+                print_status: single_update_print_status,
+                print_barcode: single_print_barcode
             },
             exception: {
                 record: single_record_exception,

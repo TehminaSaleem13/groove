@@ -22,12 +22,14 @@ describe ScanPackController do
     @prod_inv_wh.reload
     expect(@prod_inv_wh.available_inv).to eq(40)
     expect(@prod_inv_wh.allocated_inv).to eq(0)
-    expect(@prod_inv_wh.sold_inventory_warehouses.first.sold_qty).to eq(10)
+    expect(@prod_inv_wh.sold_inv).to eq(10)
   end
   it "synchronizes available inventory, allocated inventory and sold_qty for kit items with kit_parsing as single" do
     @product = FactoryGirl.create(:product, :name=>'KIT_PRODUCT', :total_avail_ext=>50, :is_kit=>true, :store=>@store, :kit_parsing=>'single')
-    create_order_info
+
     create_kit_item_info
+    create_order_info
+
 
     request.accept = "application/json"
     @order.set_order_status
@@ -45,12 +47,14 @@ describe ScanPackController do
     expect(@prod_inv_wh1.allocated_inv).to eq(0)
     expect(@prod_inv_wh2.available_inv).to eq(50)
     expect(@prod_inv_wh2.allocated_inv).to eq(0)
-    expect(@prod_inv_wh.sold_inventory_warehouses.first.sold_qty).to eq(10)
+    expect(@prod_inv_wh.sold_inv).to eq(10)
   end
   it "synchronizes available inventory, allocated inventory and sold_qty for kit items with kit_parsing as individual" do
     @product = FactoryGirl.create(:product, :name=>'KIT_PRODUCT', :total_avail_ext=>50, :is_kit=>true, :store=>@store, :kit_parsing=>'individual')
-    create_order_info
+
     create_kit_item_info
+    create_order_info
+
 
     request.accept = "application/json"
     @order.set_order_status
@@ -69,14 +73,16 @@ describe ScanPackController do
     expect(@prod_inv_wh1.allocated_inv).to eq(0)
     expect(@prod_inv_wh2.available_inv).to eq(40)
     expect(@prod_inv_wh2.allocated_inv).to eq(0)
-    expect(@prod_inv_wh1.sold_inventory_warehouses.first.sold_qty).to eq(10)
-    expect(@prod_inv_wh2.sold_inventory_warehouses.first.sold_qty).to eq(10)
+    expect(@prod_inv_wh1.sold_inv).to eq(10)
+    expect(@prod_inv_wh2.sold_inv).to eq(10)
   end
   it "synchronizes available inventory, allocated inventory and sold_qty for kit items with kit_parsing as depends scan as single" do
     @product = FactoryGirl.create(:product, :name=>'KIT_PRODUCT', :total_avail_ext=>50, :is_kit=>true, :store=>@store, :kit_parsing=>'depends')
-    create_order_info
-    
+
+
     create_kit_item_info
+    create_order_info
+
 
     request.accept = "application/json"
     @order.set_order_status
@@ -108,13 +114,13 @@ describe ScanPackController do
     expect(@prod_inv_wh1.allocated_inv).to eq(0)
     expect(@prod_inv_wh2.available_inv).to eq(50)
     expect(@prod_inv_wh2.allocated_inv).to eq(0)
-    expect(@prod_inv_wh.sold_inventory_warehouses.first.sold_qty).to eq(10)
+    expect(@prod_inv_wh.sold_inv).to eq(10)
   end
   it "synchronizes available inventory, allocated inventory and sold_qty for kit items with kit_parsing as depends scan as individual" do
     @product = FactoryGirl.create(:product, :name=>'KIT_PRODUCT', :total_avail_ext=>50, :is_kit=>true, :store=>@store, :kit_parsing=>'depends')
-    create_order_info
-    
+
     create_kit_item_info
+		create_order_info
 
     request.accept = "application/json"
     @order.set_order_status
@@ -147,8 +153,8 @@ describe ScanPackController do
     expect(@prod_inv_wh1.allocated_inv).to eq(0)
     expect(@prod_inv_wh2.available_inv).to eq(40)
     expect(@prod_inv_wh2.allocated_inv).to eq(0)
-    expect(@prod_inv_wh1.sold_inventory_warehouses.first.sold_qty).to eq(10)
-    expect(@prod_inv_wh2.sold_inventory_warehouses.first.sold_qty).to eq(10)
+    expect(@prod_inv_wh1.sold_inv).to eq(10)
+    expect(@prod_inv_wh2.sold_inv).to eq(10)
 
   end
   def create_order_info

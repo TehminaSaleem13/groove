@@ -15,7 +15,6 @@ groovepacks_admin_services.factory('tenants',['$http','notification','editable',
             list: [],
             selected:[],
             single: {},
-            load_new: true,
             current: 0,
             setup:{
                 sort: "",
@@ -24,28 +23,25 @@ groovepacks_admin_services.factory('tenants',['$http','notification','editable',
                 search: '',
                 select_all: false,
                 inverted:false,
-                is_kit: 0,
                 limit: 20,
-                offset: 0,
-                //for per product setting only
                 setting:'',
-                //used for updating only
                 status:''
             },
-            products_count: {
+            tenants_count: {
             }
         };
     };
 
     //list related functions
-    var get_list = function(object) {
-        console.log("object:"+object);
-
+    var get_list = function(tenants) {
+        console.log("tenants:");
+        console.log(tenants);
         return $http.get("/tenants/getinfo.json").success(
             function(data) {
                 if(data.status) {
                     console.log(data);
-                    object.list = data.tenants
+                    tenants.list = data.tenants;
+                    tenants.tenants_count = data.tenants.length;
                 } else {
                     notification.notify("Can't load list of tenants",0);
                 }
@@ -57,7 +53,7 @@ groovepacks_admin_services.factory('tenants',['$http','notification','editable',
 
     };
 
-    var total_items_list = function(products) {
+    var total_items_list = function(tenants) {
         var total_items;
         if(products.setup.search != "") {
             total_items = products.products_count['search'];

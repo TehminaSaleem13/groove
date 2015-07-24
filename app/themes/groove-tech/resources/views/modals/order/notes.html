@@ -1,38 +1,45 @@
 <div class="container-fluid">
-    <fieldset>
-        <legend>Internal Notes</legend>
-        <textarea ng-model="orders.single.basicinfo.notes_internal" ng-blur="update_single_order()"
-                  class="form-control input-style" rows="4"></textarea>
-    </fieldset>
-    <fieldset>
-        <legend>Notes to Packer</legend>
-        <textarea ng-model="orders.single.basicinfo.notes_toPacker" ng-blur="update_single_order()"
-                  class="form-control input-style" rows="4"></textarea>
-    </fieldset>
-    <fieldset class="well-main form-horizontal">
-    <div class="form-group">
-        <label class="control-label col-sm-2">Packer Confirmation</label>
-        <div class="controls col-sm-2 col-lg-1" ng-show="general_settings.single.conf_req_on_notes_to_packer =='optional'">
-            <div toggle-switch ng-model="orders.single.basicinfo.note_confirmation" groov-click="update_single_order()"></div>
+    <div class="well well-notes">
+        <div class="row">
+            <fieldset class="form-horizontal">
+                <div class="form-group">
+                    <label class="control-label col-sm-10 col-md-10">Packer Confirmation</label>
+                    <div class="controls col-sm-2 col-md-2 col-lg-1" ng-show="general_settings.single.conf_req_on_notes_to_packer =='optional'">
+                        <div toggle-switch ng-model="orders.single.basicinfo.note_confirmation" groov-click="update_single_order()"></div>
+                    </div>
+                    <div class="control-label col-sm-2 col-lg-1" ng-show="general_settings.single.conf_req_on_notes_to_packer !='optional'">
+                        <div class="label col-xs-12 label-default" ng-class="{'label-success':general_settings.single.conf_req_on_notes_to_packer=='always'}">
+                            <span ng-show="general_settings.single.conf_req_on_notes_to_packer=='always'" translate>common.always</span>
+                            <span ng-show="general_settings.single.conf_req_on_notes_to_packer=='never'" translate>common.never</span>
+                        </div>
+                    </div>
+                    <div class="info col-sm-1 col-md-1"><i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" popover-placement="left" groov-popover="{{translations.tooltips.confirmation}} <br/> {{confirmation_setting_text}}"></i></div>
+                </div>
+            </fieldset>
         </div>
-        <div class="control-label col-sm-2 col-lg-1" ng-show="general_settings.single.conf_req_on_notes_to_packer !='optional'">
-            <div class="label col-xs-12 label-default" ng-class="{'label-success':general_settings.single.conf_req_on_notes_to_packer=='always'}">
-                <span ng-show="general_settings.single.conf_req_on_notes_to_packer=='always'" translate>common.always</span>
-                <span ng-show="general_settings.single.conf_req_on_notes_to_packer=='never'" translate>common.never</span>
-            </div>
-        </div>
-        <div class="info col-sm-2" ><i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" groov-popover="{{translations.tooltips.confirmation}} <br/> {{confirmation_setting_text}}"></i></div>
+        <fieldset>
+            <p style="font-size: 21px; margin-bottom:0px;">Internal Notes</p>
+            <textarea ng-model="orders.single.basicinfo.notes_internal" ng-blur="update_single_order()"
+                      class="form-control input-style" rows="4"></textarea>
+        </fieldset>
+        <hr/>
+        <fieldset>
+            <p style="font-size: 21px; margin-bottom:0px;">Notes to Packer</p>
+            <textarea ng-model="orders.single.basicinfo.notes_toPacker" ng-blur="update_single_order()"
+                      class="form-control input-style" rows="4"></textarea>
+        </fieldset>
+        <hr/>
+        <fieldset>
+            <p style="font-size: 21px; margin-bottom:0px;">Customer Comments</p>
+            <textarea ng-model="orders.single.basicinfo.customer_comments"
+                      ng-blur="update_single_order()" class="form-control input-style" rows="4"></textarea>
+        </fieldset>
     </div>
-    </fieldset>
-
-    <fieldset>
-        <legend>Notes from Packer</legend>
-        <textarea ng-model="orders.single.basicinfo.notes_fromPacker"
-                  ng-blur="update_single_order()" class="form-control input-style" rows="4"></textarea>
-    </fieldset>
-    <fieldset>
-        <legend>Customer Comments</legend>
-        <textarea ng-model="orders.single.basicinfo.customer_comments"
-                  ng-blur="update_single_order()" class="form-control input-style" rows="4"></textarea>
-    </fieldset>
+    <hr/>
+        <fieldset>
+            <p style="font-size: 21px; margin-bottom:0px;">Notes from Packer</p>
+            <textarea ng-model="orders.single.basicinfo.notes_fromPacker"
+                      ng-blur="update_single_order()" class="form-control input-style" rows="4"></textarea>
+        </fieldset>
+    <hr/>
 </div>

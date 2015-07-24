@@ -35,6 +35,23 @@
           <div toggle-switch ng-model="stores.single.shall_import_shipped" groov-click="update_single_store()"></div>
         </div>
       </div>
+
+      <div class="form-group">
+        <label class="control-label col-md-4">Regular Import Range</label>
+
+        <div class="controls col-md-8" dropdown>
+          <button class="dropdown-toggle groove-button" style="text-transform: none;">
+              <span>{{stores.single.regular_import_range}} day(s)</span>
+              <span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu" role="menu">
+            <li ng-repeat="day in stores.single.import_days">
+              <a class="dropdown-toggle" ng-click="stores.single.regular_import_range=day; update_single_store()">{{day}} day(s)</a>
+            </li>
+          </ul>
+          <i class="pull-right icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" groov-popover="This setting allows you to choose how many days prior to the previous import GroovePacker should check when looking for orders during a regular import. A lower setting will reduce import times. This is particularly helpful when you are importing Shipped orders and here are hundreds or thousands of orders that match the status and date range.<br/> If you routinely place orders on hold for 3 days, then a setting of 4 days would be advisable as you would rarely have out of range orders. Orders that have been placed on hold for longer, and then changed to awaiting, will be outside of the Date range that is checked. These can be imported using the Deep import which looks back 7 days prior to the previous import or by using the GP Ready tag to import select orders."></i>
+        </div>
+      </div>
     </div>
   </div>
   <div class="row">
@@ -63,20 +80,6 @@
           </div>
         </div>
 
-      </div>
-    </div>
-  </div>
-  <div class="row">
-    <div class="col-md-6">
-      <legend>Update Warehouse Location in ShipStation</legend>
-      <div class="form-group">
-        <label class="control-label col-md-4">Warehouse Location Updating</label>
-        <div class="controls col-md-8">
-          <div toggle-switch ng-model="stores.single.warehouse_location_update" groov-click="update_single_store()"></div> <i class="pull-right icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" popover="When enabled, the Primary Bin Location in GroovePacker can be sent back to ShipStation so it can be used when printing pick lists or packing slips. ShipStaiton does not permit the location of the default product to be changed, instead the location of each product is updated within orders that are Awaiting Shipment and On Hold in ShipStation. This means you will not see the updated location when opening the order and going to Order Items > Product Details > Shipping and Customs. Instead you'll need to select the order containing the item and print the pick list to see the location change for the items in that order. Enabling the feature will add a button beside the regular and deep import buttons in the Import Summary Window (hover over the Import Orders button in the main navigation to see the summary window)"></i>
-          <div class="alert" ng-class="{'alert-success':shipstation_loc_update_response.status==true && shipstation_loc_update_response.data.update_status==true, 'alert-danger': shipstation_loc_update_response.status==false || shipstation_loc_update_response.data.update_status==false}" style="margin-top: 10px; margin-bottom: 0px;">
-            <p>{{shipstation_loc_update_response.data.message}}</p>
-          </div>
-        </div>
       </div>
     </div>
   </div>

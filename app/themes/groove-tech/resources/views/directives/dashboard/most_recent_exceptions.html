@@ -1,0 +1,20 @@
+<div class="col-md-offset-1 col-md-10 col-lg-offset-1 col-lg-10">
+  <div  class="row">
+    <div class="pull-right" style="margin-top: 10px; margin-bottom:10px; margin-right: 20px;" dropdown>
+      <button class="dropdown-toggle groove-button">
+          <span ng-repeat="user in exceptions.users" ng-show="exceptions.current_user_idx==$index" >{{user.username}}</span>
+          <span class="caret"></span>
+      </button>
+      <ul class="dropdown-menu" role="menu">
+          <li ng-repeat="user in exceptions.users"><a class="dropdown-toggle" ng-click="exceptions.change_user($index)">
+          <i class="fa fa-check" style="margin-left:-18px;" ng-show="exceptions.users[exceptions.current_user_idx].username==user.username"/>
+          {{user.username}}</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="row" style="max-height:450px; overflow-y:overlay;">
+    <div ng-show="exceptions.type=='most_recent'" groov-data-grid="most_recent_exceptions.options" groov-list="most_recent_exceptions.list"></div>
+    <div ng-show="exceptions.type=='by_frequency'" groov-data-grid="exceptions_by_frequency.options" groov-list="exceptions_by_frequency.list">
+    </div>
+  </div>
+</div>

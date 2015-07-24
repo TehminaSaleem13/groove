@@ -1,0 +1,152 @@
+<div class="col-md-offset-1 col-md-10 col-lg-offset-1 col-lg-10">
+  <div  class="row">
+    <div class="pull-right" style="margin-top: 10px; margin-bottom:10px; margin-right: 0px;" dropdown>
+      <button class="dropdown-toggle groove-button">
+          <span ng-repeat="filter in charts.days_filters" ng-show="charts.current_filter_idx==$index" >{{filter.name}}</span>
+          <span class="caret"></span>
+      </button>
+      <ul class="dropdown-menu" role="menu">
+          <li ng-repeat="filter in charts.days_filters"><a class="dropdown-toggle" ng-click="charts.change_days_filter($index)">
+          <i class="fa fa-check" style="margin-left:-18px;" ng-show="charts.days_filters[charts.current_filter_idx].name==filter.name"/>
+          {{filter.name}}</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-4 tab-col" ng-click="charts.set_type('packing_stats')">
+      <div class="tab-pill tab-red tab-pill-active" ng-class="{'tab-pill-active': charts.type=='packing_stats'}">
+        <div class="col-md-6 col-lg-6">
+          <span class="fa fa-dot-circle-o fa-dash"></span>
+          <h3>PACKING ACCURACY</h3>
+        </div>
+        <div class="col-md-4 col-lg-4 pill-col">
+          <div class="well">
+            <h4>{{dashboard.main_summary.packing_accuracy_summary.current_period}}%</h4>
+            <span class="fa fa-calendar fa-pill-col"></span>
+            <span>Current Period</span>
+          </div>
+        </div>
+        <div class="col-md-2 col-lg-2 pill-col-last">
+          <div class="well">
+            <span class="fa fa-arrow-circle-up fa-pill-col fa-red" 
+            ng-show="dashboard.main_summary.packing_accuracy_summary.delta > 0"></span>
+            <span class="fa fa-arrow-circle-down fa-pill-col fa-red" 
+            ng-show="dashboard.main_summary.packing_accuracy_summary.delta < 0"></span>
+            <span class="fa fa-minus-circle fa-pill-col fa-red" ng-show="dashboard.main_summary.packing_accuracy_summary.delta == '-' || dashboard.main_summary.packing_accuracy_summary.delta == 0"></span>
+            <p>{{dashboard.main_summary.packing_accuracy_summary.delta}}% From Prev {{charts.days_filters[charts.current_filter_idx].name}}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4 tab-col" ng-click="charts.set_type('packing_speed_stats')">
+      <div class=" tab-pill tab-green" ng-class="{'tab-pill-active': charts.type=='packing_speed_stats'}">
+        <div class="col-md-6 col-lg-6">
+          <span class="fa fa-tachometer fa-dash"></span>
+          <h3>PACKING SPEED</h3>
+        </div>
+        <div class="col-md-4 col-lg-4 pill-col">
+          <div class="well">
+            <h4>{{dashboard.main_summary.packing_speed_summary.current_period}}</h4>
+            <span class="fa fa-calendar fa-pill-col"></span>
+            <span>Current Period</span>
+          </div>
+        </div>
+        <div class="col-md-2 col-lg-2 pill-col-last">
+          <div class="well">
+            <span class="fa fa-arrow-circle-up fa-pill-col fa-green" 
+            ng-show="dashboard.main_summary.packing_speed_summary.delta > 0"></span>
+            <span class="fa fa-arrow-circle-down fa-pill-col fa-green" 
+            ng-show="dashboard.main_summary.packing_speed_summary.delta < 0"></span>
+            <span class="fa fa-minus-circle fa-pill-col fa-green" ng-show="dashboard.main_summary.packing_speed_summary.delta == '-' || dashboard.main_summary.packing_speed_summary.delta == 0"></span>
+            <p>{{dashboard.main_summary.packing_speed_summary.delta}} From Prev {{charts.days_filters[charts.current_filter_idx].name}}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4 tab-col tab-col-last" 
+    ng-click="charts.set_type('packed_item_stats')">
+      <div class="tab-pill tab-violet" ng-class="{'tab-pill-active': charts.type=='packed_item_stats'}">
+        <div class="col-md-6 col-lg-6">
+          <span class="fa fa-flag-checkered fa-dash"></span>
+          <h3>ITEMS PACKED</h3>
+        </div>
+        <div class="col-md-4 col-lg-4 pill-col">
+          <div class="well">
+            <h4>{{dashboard.main_summary.packed_items_summary.current_period}}</h4>
+            <span class="fa fa-calendar fa-pill-col"></span>
+            <span>Current Period</span>
+          </div>
+        </div>
+        <div class="col-md-2 col-lg-2 pill-col-last">
+          <div class="well">
+            <span class="fa fa-arrow-circle-up fa-pill-col fa-violet" ng-show="dashboard.main_summary.packed_items_summary.delta>0"></span>
+            <span class="fa fa-minus-circle fa-pill-col fa-violet" ng-show="dashboard.main_summary.packed_items_summary.delta == '-' || dashboard.main_summary.packed_items_summary.delta == 0"></span>
+            <span class="fa fa-arrow-circle-down fa-pill-col fa-violet" ng-show="dashboard.main_summary.packed_items_summary.delta<0"></span>
+            <p style="line-height: 19px;">
+              {{dashboard.main_summary.packed_items_summary.delta}} 
+              From Prev {{charts.days_filters[charts.current_filter_idx].name}}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-12 col-lg-12 dash-home-container">
+      <nvd3-line-chart
+        data="dashboard.packing_stats"
+        width="900"
+        height="310"
+        xAxisTickFormat="xAxisTickFormatFunction()"
+        yAxisTickFormat="yAxisTickFormatFunction()"
+        showXAxis="true"
+        showYAxis="true"
+        interactive="true"
+        tooltips="true"
+        tooltipcontent="toolTipContentFunction()"
+        showLegend="true"
+        color = "legendColorFunction()"
+        legendRightAlign="false"
+        legendColor="legendColorFunction()" ng-show="charts.type=='packing_stats'">
+          <svg></svg>
+      </nvd3-line-chart>
+      <nvd3-line-chart
+        data="dashboard.packing_speed_stats"
+        width="900"
+        height="310"
+        xAxisTickFormat="xAxisTickFormatFunction()"
+        yAxisTickFormat="yAxisTickFormatFunction()"
+        showXAxis="true"
+        showYAxis="true"
+        interactive="true"
+        tooltips="true"
+        tooltipcontent="toolTipContentFunction()"
+        showLegend="true"
+        color = "legendColorFunction()"
+        legendRightAlign="false"
+        legendColor="legendColorFunction()" ng-show="charts.type=='packing_speed_stats'">
+          <svg></svg>
+      </nvd3-line-chart>
+      <nvd3-line-chart
+        data="dashboard.packed_item_stats"
+        width="900"
+        height="310"
+        xAxisTickFormat="xAxisTickFormatFunction()"
+        yAxisTickFormat="yAxisTickFormatFunction()"
+        showXAxis="true"
+        showYAxis="true"
+        interactive="true"
+        tooltips="true"
+        tooltipcontent="toolTipContentFunction()"
+        showLegend="true"
+        color = "legendColorFunction()"
+        legendRightAlign="false"
+        legendColor="legendColorFunction()" ng-show="charts.type=='packed_item_stats'">
+          <svg></svg>
+      </nvd3-line-chart>
+    </div>
+  </div>
+</div>
+

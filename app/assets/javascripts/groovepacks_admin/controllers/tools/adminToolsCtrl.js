@@ -1,6 +1,6 @@
 groovepacks_admin_controllers. 
-controller('adminToolsCtrl', [ '$scope', '$http', '$timeout', '$location', '$state', '$cookies','tenants',
-function( $scope, $http, $timeout, $location, $state, $cookies, tenants) {
+controller('adminToolsCtrl', [ '$scope', '$http', '$timeout', '$location', '$state', '$cookies', '$q','tenants',
+function( $scope, $http, $timeout, $location, $state, $cookies, $q, tenants) {
 
     var myscope= {};
     
@@ -140,7 +140,7 @@ function( $scope, $http, $timeout, $location, $state, $cookies, tenants) {
     };
 
     myscope.load_page_number = function(page) {
-        if(page > 0 && page <= Math.ceil($scope.gridOptions.paginate.total_items/$scope.gridOptions.paginate.items_per_page)) {
+        if(page > 0 && page <= Math.ceil($scope.gridOptions.paginate.tenants_count/$scope.gridOptions.paginate.items_per_page)) {
             if($scope.products.setup.search =='') {
                 var toParams = {};
                 for (var key in $state.params) {
@@ -184,6 +184,7 @@ function( $scope, $http, $timeout, $location, $state, $cookies, tenants) {
             invert: myscope.invert,
             sort_func: $scope.handlesort,
             setup: $scope.tenants.setup,
+            list: $scope.tenants.list,
             selections: {
                 show_dropdown: true,
                 single_callback: myscope.select_single,
@@ -195,7 +196,7 @@ function( $scope, $http, $timeout, $location, $state, $cookies, tenants) {
             paginate:{
                 show: true,
                 //send a large number to prevent resetting page number
-                total_items: 50000,
+                tenants_count: 50000,
                 current_page: $state.params.page,
                 // items_per_page: $scope.products.setup.limit,
                 callback: myscope.load_page_number
@@ -217,14 +218,52 @@ function( $scope, $http, $timeout, $location, $state, $cookies, tenants) {
             },
             all_fields: {
                 name: {
-                    name: "Name",
+                    name: "Tenant",
                     editable: false
                 },
-                online: {
-                    name: "Online"
+                plan: {
+                    name: "Plan",
+                    editable: false
                 },
-                active: {
-                    name: "Active"
+                shipped_last: {
+                    name: "Shipped Last Month",
+                    editable: false
+                },
+                total_shipped: {
+                    name: "Shipped This Month",
+                    editable: false
+                },
+                max_allowed: {
+                    name: "Plan Max",
+                    editable: false
+                },
+                last_activity: {
+                    name: "Last Activity",
+                    editable: false
+                },
+                is_importing: {
+                    name: "Import Running",
+                    editable: false
+                },
+                cpu: {
+                    name: "CPU",
+                    editable: false
+                },
+                memory: {
+                    name: "Memory",
+                    editable: false
+                },
+                import_log: {
+                    name: "Import Log Log",
+                    editable: false
+                },
+                url: {
+                    name: "URL",
+                    editable: false
+                },
+                stripe_url: {
+                    name: "Stripe",
+                    editable: false
                 }
             }
         };
@@ -236,11 +275,14 @@ function( $scope, $http, $timeout, $location, $state, $cookies, tenants) {
         });
     };
     myscope.get_tenants = function() {
-        console.log("get_tenatns");
+        console.log("get_tenants");
         $scope.gridOptions.selections.show_delete = myscope.show_delete();
         return tenants.list.get($scope.tenants).success(function(response) {
             console.log("response:"+response);
-            $scope.gridOptions.paginate.total_items = tenants.list.total_items($scope.tenants);
+            tenants.list.get($scope.tenants);
+            $scope.gridOptions.list = $scope.tenants.list;
+            $scope.gridOptions.paginate.tenants_count = $scope.tenants.tenants_count;
+            console.log($scope.gridOptions.paginate.tenants_count);
             // myscope.update_selected_count();
         }).error(function(){
         });

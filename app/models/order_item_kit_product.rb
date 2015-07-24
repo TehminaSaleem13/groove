@@ -1,7 +1,12 @@
 class OrderItemKitProduct < ActiveRecord::Base
   belongs_to :order_item
   belongs_to :product_kit_skus
+  has_many :order_item_kit_product_scan_times
   attr_accessible :scanned_qty, :scanned_status
+
+	SCANNED_STATUS = 'scanned'
+	UNSCANNED_STATUS = 'unscanned'
+	PARTIALLY_SCANNED_STATUS = 'partially_scanned'
 
   def process_item(clicked, username)
   	order_item_unscanned = false
@@ -13,7 +18,6 @@ class OrderItemKitProduct < ActiveRecord::Base
 		total_qty = self.order_item.qty
   	end
 
-  	#puts "Processng Kit product"+self.scanned_qty.to_s
   	if self.scanned_qty < total_qty * self.product_kit_skus.qty
   		self.scanned_qty = self.scanned_qty + 1
       if clicked
@@ -21,13 +25,22 @@ class OrderItemKitProduct < ActiveRecord::Base
         self.order_item.order.addactivity("Item with SKU: " + 
           self.product_kit_skus.option_product.primary_sku + " has been click scanned", username)
       end
+
   		if self.scanned_qty ==  total_qty * self.product_kit_skus.qty
-  			self.scanned_status = 'scanned'
+  			self.scanned_status = SCANNED_STATUS
   		else
-  			self.scanned_status = 'partially_scanned'
+  			self.scanned_status = PARTIALLY_SCANNED_STATUS
   		end
   		self.save
-  		#puts "Status:"+self.scanned_status
+
+      scan_time = self.order_item_kit_product_scan_times.create(
+        scan_start: self.order_item.order.last_suggested_at, 
+        scan_end: DateTime.now)
+
+      self.order_item.order.total_scan_time = self.order_item.order.total_scan_time + 
+        (scan_time.scan_end - scan_time.scan_start).to_i
+      self.order_item.order.total_scan_count = self.order_item.order.total_scan_count + 1
+      self.order_item.order.save
 
 	  	#need to update order item quantity,
 	  	# for this calculate minimum of order items
@@ -54,15 +67,15 @@ class OrderItemKitProduct < ActiveRecord::Base
 	  	end
 
 	  	if self.order_item.scanned_qty != self.order_item.qty
-	  		self.order_item.scanned_status = 'partially_scanned'
+	  		self.order_item.scanned_status = PARTIALLY_SCANNED_STATUS
 	  	else
-  			self.order_item.scanned_status = 'scanned'
+  			self.order_item.scanned_status = SCANNED_STATUS
 	  	end
 	  	self.order_item.save
 
 	  	#update order status
 	  	# self.order_item.order.order_items.each do |order_item|
-	  	# 	if order_item.scanned_status != 'scanned'
+	  	# 	if order_item.scanned_status != SCANNED_STATUS
 	  	# 		order_unscanned = true
 	  	# 	end
 	  	# end
@@ -73,5 +86,11 @@ class OrderItemKitProduct < ActiveRecord::Base
 	  	# end
 	  	# self.order_item.order.save
   	end
-  end
+	end
+
+	def reset_scanned
+		self.scanned_status = UNSCANNED_STATUS
+		self.scanned_qty = 0
+		self.save
+	end
 end

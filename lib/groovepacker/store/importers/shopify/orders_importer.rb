@@ -12,7 +12,9 @@ module Groovepacker
             result = self.build_result
 
             response = client.orders
-            result[:total_imported] = response["orders"].length
+
+            result[:total_imported] = 
+              response["orders"].nil? ? 0 : response["orders"].length
             
             import_item.current_increment_id = ''
             import_item.success_imported = 0
@@ -22,79 +24,81 @@ module Groovepacker
             import_item.to_import = result[:total_imported]
             import_item.save
 
-            response["orders"].each do |order|
-              import_item.current_increment_id = order["id"]
-              import_item.current_order_items = -1
-              import_item.current_order_imported_item = -1
-              import_item.save
-              shipstation_order = nil
-              if Order.where(increment_id: order["id"]).empty?
-                
-                #create order
-                shopify_order = Order.new
-                import_order(shopify_order, order)
-
-                #import items in an order
-                unless order["line_items"].nil?
-                  import_item.current_order_items = order["line_items"].length
-                  import_item.current_order_imported_item = 0
-                  import_item.save
+            unless response["orders"].nil?
+              response["orders"].each do |order|
+                import_item.current_increment_id = order["id"]
+                import_item.current_order_items = -1
+                import_item.current_order_imported_item = -1
+                import_item.save
+                shipstation_order = nil
+                if Order.where(increment_id: order["id"]).empty?
                   
-                  order["line_items"].each do |item|
-                    order_item = OrderItem.new
-                    import_order_item(order_item, item)
-                    import_item.current_order_imported_item = import_item.current_order_imported_item + 1
+                  #create order
+                  shopify_order = Order.new
+                  import_order(shopify_order, order)
+
+                  #import items in an order
+                  unless order["line_items"].nil?
+                    import_item.current_order_items = order["line_items"].length
+                    import_item.current_order_imported_item = 0
                     import_item.save
-                    if item["sku"].nil? or item["sku"] == ''
-                      # if sku is nil or empty
-                      if Product.find_by_name(item["name"]).nil?
-                        # if item is not found by name then create the item
-                        order_item.product = create_new_product_from_order(item, credential.store, ProductSku.get_temp_sku, client)
-                      else
-                        # product exists add temp sku if it does not exist
-                        products = Product.where(name: item["name"])
-                        unless contains_temp_skus(products)
+                    
+                    order["line_items"].each do |item|
+                      order_item = OrderItem.new
+                      import_order_item(order_item, item)
+                      import_item.current_order_imported_item = import_item.current_order_imported_item + 1
+                      import_item.save
+                      if item["sku"].nil? or item["sku"] == ''
+                        # if sku is nil or empty
+                        if Product.find_by_name(item["name"]).nil?
+                          # if item is not found by name then create the item
                           order_item.product = create_new_product_from_order(item, credential.store, ProductSku.get_temp_sku, client)
                         else
-                          order_item.product = get_product_with_temp_skus(products)
+                          # product exists add temp sku if it does not exist
+                          products = Product.where(name: item["name"])
+                          unless contains_temp_skus(products)
+                            order_item.product = create_new_product_from_order(item, credential.store, ProductSku.get_temp_sku, client)
+                          else
+                            order_item.product = get_product_with_temp_skus(products)
+                          end
                         end
+                      elsif ProductSku.where(sku: item["sku"]).length == 0
+                        # if non-nil sku is not found
+                        product = create_new_product_from_order(item, credential.store, item["sku"], client)
+                        order_item.product = product
+                      else
+                        order_item_product = ProductSku.where(sku: item["sku"]).
+                        first.product
+                        order_item.product = order_item_product
                       end
-                    elsif ProductSku.where(sku: item["sku"]).length == 0
-                      # if non-nil sku is not found
-                      product = create_new_product_from_order(item, credential.store, item["sku"], client)
-                      order_item.product = product
-                    else
-                      order_item_product = ProductSku.where(sku: item["sku"]).
-                      first.product
-                      order_item.product = order_item_product
+
+                      shopify_order.order_items << order_item
                     end
-
-                    shopify_order.order_items << order_item
                   end
-                end
 
-                #update store
-                shopify_order.store = credential.store
-                shopify_order.save
-                shopify_order.set_order_status
-                
-                #add order activities
-                shopify_order.addactivity("Order Import", credential.store.name+" Import")
-                shopify_order.order_items.each do |item|
-                  unless item.product.nil? || item.product.primary_sku.nil?
-                    shopify_order.addactivity("Item with SKU: "+item.product.primary_sku+" Added", credential.store.name+" Import")
+                  #update store
+                  shopify_order.store = credential.store
+                  shopify_order.save
+                  shopify_order.set_order_status
+                  
+                  #add order activities
+                  shopify_order.addactivity("Order Import", credential.store.name+" Import")
+                  shopify_order.order_items.each do |item|
+                    unless item.product.nil? || item.product.primary_sku.nil?
+                      shopify_order.addactivity("Item with SKU: "+item.product.primary_sku+" Added", credential.store.name+" Import")
+                    end
                   end
+
+
+                  import_item.success_imported = import_item.success_imported + 1
+                  import_item.save
+                  result[:success_imported] = result[:success_imported] + 1
+                else
+                  #mark previously imported
+                  import_item.previous_imported = import_item.previous_imported + 1
+                  import_item.save
+                  result[:previous_imported] = result[:previous_imported] + 1
                 end
-
-
-                import_item.success_imported = import_item.success_imported + 1
-                import_item.save
-                result[:success_imported] = result[:success_imported] + 1
-              else
-                #mark previously imported
-                import_item.previous_imported = import_item.previous_imported + 1
-                import_item.save
-                result[:previous_imported] = result[:previous_imported] + 1
               end
             end
 
@@ -197,6 +201,7 @@ module Groovepacker
 
             end
             product.save
+            make_product_intangible(product)
             product.update_product_status
             product
           end

@@ -1,7 +1,7 @@
 <div>
 
     <div class="modal-header">
-        <button type="button" class="close-btn" ng-click="ok()"><i class="glyphicon glyphicon-remove"></i></button>
+        <button type="button" class="close-btn" ng-click="cancel()"><i class="glyphicon glyphicon-remove"></i></button>
         <div class="modal-title">
             <span ng-show="csv.importer.type == 'product'">Import Detailed Products from CSV</span>
         </div>
@@ -77,14 +77,35 @@
                             </label>
                         </div>
                     </div>
+                </div>
+                <div class="col-md-4"></div>
+
+                <div class="col-md-8">
                     <legend >Csv Map Name</legend>
                     <div class="form-group" >
                         <div class="controls col-md-8">
                             Name <input type="text" class="form-control input-style" ng-model="csv.current.name" />
                         </div>
                     </div>
+                </div>
+                <div class="col-md-4">
+                    <br>
+                    <br>
+                    <br>
+                    <div class="form-group">
+                        <label class="control-label col-sm-8 col-md-8">Generate Barcode From SKU?</label>
+                        <div class="controls col-sm-4 col-md-4 form-inline pull-left">
+                            <div toggle-switch ng-model="csv.current.generate_barcode_from_sku"></div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-8 col-md-8">Use SKU as Product Name?</label>
+                        <div class="controls col-sm-4 col-md-4 form-inline pull-left">
+                            <div toggle-switch ng-model="csv.current.use_sku_as_product_name"></div>
+                        </div>
                     </div>
                 </div>
+            </div>
             <div class="row">
                 <div class="pull-right col-xs-4 col-sm-3 col-md-2">
                     <button ng-click="ok()" class="modal-save-button">Import</button>
@@ -92,8 +113,12 @@
                 </div>
                 <div class="col-xs-12">
                     <legend>Preview</legend>
+                    <div class="csv-preview-top">
+                        <div id="csv_table_top_scroll" style="height: 10px;"></div>
+                    </div>
                     <div class="csv-preview">
-                        <table class="table table-hover table-bordered table-striped table-condensed">
+                        <table class="table table-hover table-bordered table-striped table-condensed" id=
+                        "map_table">
                             <thead>
                             <tr>
                                 <th ng-repeat="column in empty_cols">
@@ -115,7 +140,9 @@
                                 </th>
                             </tr>
                             </thead>
-
+                            <tr>
+                                <td ng-repeat="column_number in empty_cols"> <div class="csv-preview-fix-height"> {{csv.current.head[0][column_number]}}</div> </td>
+                            </tr>
                             <tr ng-repeat="(row_number, preview_row) in csv.current.data">
                                 <td ng-repeat="column_number in empty_cols"> <div class="csv-preview-fix-height"> {{csv.current.data[row_number][column_number]}}</div> </td>
                             </tr>
@@ -132,3 +159,13 @@
         <button ng-click="cancel()" class="modal-cancel-button">Cancel</button>
     </div>
 </div>
+<script>
+    $(function(){
+      $(".csv-preview").scroll(function(){
+        $(".csv-preview-top").scrollLeft($(".csv-preview").scrollLeft());
+      });
+      $(".csv-preview-top").scroll(function(){
+        $(".csv-preview").scrollLeft($(".csv-preview-top").scrollLeft());
+      });
+    });
+</script>

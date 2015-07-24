@@ -18,7 +18,8 @@ groovepacks_controllers.
                         size:'lg',
                         resolve: {
                             order_data: function(){return $scope.orders},
-                            load_page: function(){return $scope.load_page}
+                            load_page: function(){return $scope.load_page},
+                            order_id: function(){return false;}
                         }
                     });
                     $previousState.forget("order-modal-previous");

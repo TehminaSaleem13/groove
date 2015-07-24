@@ -61,7 +61,7 @@ git stash
 git checkout ${ENV}
 git pull origin ${ENV}
 
-
+rm vendor/assets/components/**/*.js.{gzip,map}
 RAILS_ENV=${ENV} bundle install --deployment
 RAILS_ENV=${ENV} rake db:migrate
 RAILS_ENV=${ENV} rake db:seed

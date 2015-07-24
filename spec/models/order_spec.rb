@@ -1,6 +1,11 @@
 require 'spec_helper'
 
 describe Order do
+  before(:each) do
+    SeedTenant.new.seed
+    @generalsetting = GeneralSetting.all.first
+    @generalsetting.update_column(:inventory_tracking,true)
+  end
    	it "should not split kits" do
       order = FactoryGirl.create(:order, :status=>'awaiting')
       
@@ -186,12 +191,13 @@ describe Order do
 
       product_inv_wh.reload
 
-      expect(product_inv_wh.available_inv).to equal(23)
-      expect(product_inv_wh.allocated_inv).to equal(2)
+      expect(product_inv_wh.available_inv).to eq(23)
+      expect(product_inv_wh.allocated_inv).to eq(2)
     end
 
     it "should create order then delete order and update allocated inventory count" do      
       inv_wh = FactoryGirl.create(:inventory_warehouse)
+      general_setting = FactoryGirl.create(:general_setting, :inventory_tracking=>true)
 
       store = FactoryGirl.create(:store, :inventory_warehouse_id => inv_wh.id)
 
@@ -209,12 +215,13 @@ describe Order do
 
       product_inv_wh.reload
 
-      expect(product_inv_wh.available_inv).to equal(25)
-      expect(product_inv_wh.allocated_inv).to equal(0)
+      expect(product_inv_wh.available_inv).to eq(25)
+      expect(product_inv_wh.allocated_inv).to eq(0)
     end
 
-    it "should create order with status awaiting change it to onhold and update allocated inventory count" do      
+    it "should create order with status awaiting change it to onhold should not change data" do
       inv_wh = FactoryGirl.create(:inventory_warehouse)
+      general_setting = FactoryGirl.create(:general_setting, :inventory_tracking=>true)
 
       store = FactoryGirl.create(:store, :inventory_warehouse_id => inv_wh.id)
 
@@ -236,12 +243,13 @@ describe Order do
       order.save
 
       product_inv_wh.reload
-      expect(product_inv_wh.available_inv).to eq(25)
-      expect(product_inv_wh.allocated_inv).to eq(0)
+      expect(product_inv_wh.available_inv).to eq(23)
+      expect(product_inv_wh.allocated_inv).to eq(2)
     end
 
     it "should create order which has a kit with single with status awaiting change it to onhold and update allocated inventory count" do      
       inv_wh = FactoryGirl.create(:inventory_warehouse)
+      general_setting = FactoryGirl.create(:general_setting, :inventory_tracking=>true)
 
       store = FactoryGirl.create(:store, :inventory_warehouse_id => inv_wh.id)
 
@@ -269,12 +277,13 @@ describe Order do
       order.save
 
       product_inv_wh.reload
-      expect(product_inv_wh.available_inv).to eq(25)
-      expect(product_inv_wh.allocated_inv).to eq(0)
+      expect(product_inv_wh.available_inv).to eq(23)
+      expect(product_inv_wh.allocated_inv).to eq(2)
     end
 
     it "should create order which has a kit with individual status awaiting change it to onhold and update allocated inventory count" do      
       inv_wh = FactoryGirl.create(:inventory_warehouse)
+      general_setting = FactoryGirl.create(:general_setting, :inventory_tracking=>true)
 
       store = FactoryGirl.create(:store, :inventory_warehouse_id => inv_wh.id)
 
@@ -304,8 +313,8 @@ describe Order do
       order.save
 
       kit_product_inv_wh.reload
-      expect(kit_product_inv_wh.available_inv).to eq(25)
-      expect(kit_product_inv_wh.allocated_inv).to eq(0)
+      expect(kit_product_inv_wh.available_inv).to eq(19)
+      expect(kit_product_inv_wh.allocated_inv).to eq(6)
     end
 
     it "should create order with status awaiting change it to scanned and update sold inventory count" do      
@@ -333,9 +342,7 @@ describe Order do
       product_inv_wh.reload
       expect(product_inv_wh.available_inv).to eq(23)
       expect(product_inv_wh.allocated_inv).to eq(0)
-      sold_inv_wh = SoldInventoryWarehouse.where(:product_inventory_warehouses_id => product_inv_wh.id)
-      expect(sold_inv_wh.count).to eq(1)
-      expect(sold_inv_wh.first.sold_qty).to eq(2)
+      expect(product_inv_wh.sold_inv).to eq(2)
     end
 
 end

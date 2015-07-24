@@ -102,6 +102,26 @@ groovepacks_controllers.
                 }
             };
 
+            $scope.order_details = function(id) {
+                if($scope.current_user.can('add_edit_orders')) {
+                    var item_modal = $modal.open({
+                        templateUrl: '/assets/views/modals/order/main.html',
+                        controller: 'ordersSingleModal',
+                        size:'lg',
+                        resolve: {
+                            order_data: function(){return orders.model.get()},
+                            load_page: function(){return function() {
+                                var req = $q.defer();
+                                req.reject();
+                                return req.promise;
+                            }},
+                            order_id: function(){return id;}
+                        }
+                    });
+                    item_modal.result.finally(myscope.check_reload_compute);
+                }
+            };
+
             myscope.show_type_scan_confirm = function () {
                 if(myscope.type_scan_confirmed_id != $scope.data.order.next_item.product_id) {
                     myscope.type_scan_confirm_obj = $modal.open({
@@ -150,6 +170,7 @@ groovepacks_controllers.
                         size:'lg',
                         resolve: {
                             order_data: function(){return $scope.data.order;},
+                            scan_pack_settings: function(){return $scope.scan_pack.settings;},
                             confirm:function(){return function(){myscope.order_instruction_confirmed = true;}}
                         }
                     });
@@ -195,7 +216,12 @@ groovepacks_controllers.
             };
 
             myscope.compute_counts = function() {
-                if(!myscope.order_instruction_confirmed && ($scope.general_settings.single.conf_req_on_notes_to_packer ==="always" || ($scope.general_settings.single.conf_req_on_notes_to_packer ==="optional" && $scope.data.order.note_confirmation)) && $scope.data.order.notes_toPacker) {
+                if(!myscope.order_instruction_confirmed && 
+                    ($scope.general_settings.single.conf_req_on_notes_to_packer ==="always" || 
+                        ($scope.general_settings.single.conf_req_on_notes_to_packer ==="optional" && 
+                            $scope.data.order.note_confirmation)) && 
+                    ($scope.data.order.notes_toPacker || ($scope.data.order.notes_internal && $scope.scan_pack.settings.show_internal_notes)
+                        || ($scope.data.order.customer_comments && $scope.scan_pack.settings.show_customer_notes))) {
                     $timeout(myscope.show_order_instructions);
                 }
                 if(typeof $scope.data.order['next_item'] !== 'undefined' && ($scope.general_settings.single.conf_code_product_instruction ==="always" || ($scope.general_settings.single.conf_code_product_instruction ==="optional" && $scope.data.order.next_item.confirmation)) && myscope.product_instruction_confirmed_id !== $scope.data.order.next_item.product_id) {

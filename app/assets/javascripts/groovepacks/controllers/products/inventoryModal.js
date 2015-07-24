@@ -1,5 +1,5 @@
-groovepacks_controllers.controller('inventoryModal', [ '$scope', 'hotkeys', '$state', '$stateParams', '$modalInstance', '$timeout','warehouses','inventory_manager','products',
-function($scope, hotkeys, $state,$stateParams,$modalInstance,$timeout,warehouses,inventory_manager,products) {
+groovepacks_controllers.controller('inventoryModal', [ '$scope', 'hotkeys', '$state', '$stateParams', '$modalInstance', '$timeout','warehouses','inventory_manager','products','Lightbox',
+function($scope, hotkeys, $state,$stateParams,$modalInstance,$timeout,warehouses,inventory_manager,products,Lightbox) {
     var myscope = {};
 
 
@@ -21,6 +21,10 @@ function($scope, hotkeys, $state,$stateParams,$modalInstance,$timeout,warehouses
         }
     };
 
+    $scope.openLightboxModal = function (index) {
+        Lightbox.openModal($scope.products_inv_manager.single.images, index);
+    };
+
     $scope.submit_recount_or_receive_inventory = function() {
     };
 
@@ -30,7 +34,6 @@ function($scope, hotkeys, $state,$stateParams,$modalInstance,$timeout,warehouses
             $scope.products_inv_manager = products.model.get();
             products.single.get_by_barcode($scope.inventory_manager.single.product_barcode,
                 $scope.products_inv_manager).then(function(){
-                    console.log($scope.products_inv_manager);
                     $scope._inventory_count_inputObj = $('input#inventory_count');
                     $scope.inventory_manager.single.id = $scope.products_inv_manager.single.basicinfo.id;
                     $scope.inventory_manager.single.inventory_count = '';
@@ -39,9 +42,17 @@ function($scope, hotkeys, $state,$stateParams,$modalInstance,$timeout,warehouses
                     $scope.inventory_manager.single.location_tertiary = '';
                     $scope.check_if_inv_wh_is_associated_with_product();
                     $timeout(function() {$scope._inventory_count_inputObj.focus()},20);
+                    $scope.set_image_data();
                 });
             //console.log($scope.inventory_manager.single.product_barcode);
-        }
+        };
+    };
+
+    $scope.set_image_data = function() {
+        for (var i = 0; i < $scope.products_inv_manager.single.images.length; i++) {
+            $scope.products_inv_manager.single.images[i].url = $scope.products_inv_manager.single.images[i].image
+            $scope.products_inv_manager.single.images[i].caption = $scope.products_inv_manager.single.images[i].image_note
+        };
     };
 
     $scope.check_if_inv_wh_is_associated_with_product = function() {
@@ -78,6 +89,19 @@ function($scope, hotkeys, $state,$stateParams,$modalInstance,$timeout,warehouses
         }
         $scope.check_if_inv_wh_is_associated_with_product();
         $timeout(function() {$scope._inventory_warehouse_inputObj.focus()},20);
+    };
+
+    $scope.print_receive_label = function(event) {
+        event.preventDefault();
+        inventory_manager.single.update($scope.inventory_manager).then(function(){
+            var prods = products.model.get();
+            prods.selected.push({id: $scope.products_inv_manager.single.basicinfo.id,checked:true});
+            products.list.update('receiving_label',prods).then(function() {
+                var e = jQuery.Event( "click" );
+                e.which = 13;
+                $scope._handle_inv_manager_key_event(e);
+            });
+        });
     };
 
     myscope.init = function() {

@@ -12,11 +12,9 @@ class Subscription < ActiveRecord::Base
           Apartment::Tenant.switch()
           # if coupon.valid
           #   unless coupon.max_redemptions.nil? || coupon.times_redeemed >= coupon.max_redemptions
-          #     puts "about to update coupon."
           #     coupon.metadata[times_redeemed] = coupon.times_redeemed + 1
           #     one_time_payment = one_time_payment.to_i - ((one_time_payment.to_i * coupon.percent_off) / 100)
           #     coupon.save
-          #     puts coupon.inspect
           #   end
           # end
           # coupon_data = Stripe::Coupon.retrieve(self.coupon_id)

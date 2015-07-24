@@ -1,6 +1,6 @@
 groovepacks_controllers.
-    controller('ordersSingleModal', [ '$scope', 'order_data', 'load_page', '$state', '$stateParams','$modal', '$modalInstance', '$timeout','$q', 'hotkeys', 'orders','products','generalsettings','auth','groov_translator',
-        function(scope,order_data,load_page,$state,$stateParams,$modal, $modalInstance,$timeout,$q,hotkeys,orders,products,generalsettings,auth,groov_translator) {
+    controller('ordersSingleModal', [ '$scope', 'order_data', 'order_id','load_page', '$state', '$stateParams','$modal', '$modalInstance', '$timeout','$q', 'hotkeys', 'orders','products','generalsettings','auth','groov_translator',
+        function(scope,order_data,order_id,load_page,$state,$stateParams,$modal, $modalInstance,$timeout,$q,hotkeys,orders,products,generalsettings,auth,groov_translator) {
 
             var myscope = {};
 
@@ -126,11 +126,26 @@ groovepacks_controllers.
                 }
             };
 
+            scope.update_print_status = function(item,product) {
+                orders.single.item.print_status({id: item.id});
+                myscope.init();
+                scope.modal_tabs[1].active = true;
+                orders.single.item.print_barcode({id: product.id});
+            }
+
             scope.acknowledge_activity = function(activity_id) {
                 orders.single.activity.acknowledge(activity_id).then(function(response){
                     myscope.order_single_details(scope.orders.single.basicinfo.id);
                 })
             }
+
+            scope.handlesort = function(value) {
+                myscope.order_items_setup_opt('sort',value);
+            };
+
+            myscope.order_items_setup_opt = function(type,value) {
+                orders.setup.update_items(scope.orders.single.items,type,value);
+            };
 
             myscope.up_key = function(event) {
                 event.preventDefault();
@@ -342,11 +357,12 @@ groovepacks_controllers.
                     draggable:true,
                     show_hide:true,
                     selectable:true,
+                    sort_func: scope.handlesort,
                     editable: {
                         update: scope.save_item,
+                        print_status:scope.update_print_status,
                         elements: {
                             qty: {type:'number',min:0},
-                            qty_on_hand: {type:'number',min:0},
                             is_skippable: {
                                 type:'select',
                                 options:[
@@ -371,7 +387,12 @@ groovepacks_controllers.
                         image: {
                             name:"Primary Image",
                             editable:false,
-                            transclude:'<div ng-click="options.editable.functions.name(row,$event)" class="pointer single-image"><img class="img-responsive" ng-src="{{row.image}}" /></div>'
+                            transclude:"<div ng-show=\"row.productinfo.is_intangible == false\" " + 
+                                       "ng-click=\"options.editable.functions.name(row,$event)\"" +
+                                       " class=\"pointer single-image\"><img class=\"img-responsive\" ng-src=\"{{row.image}}\" /></div>" + 
+                                       "<div ng-show=\"row.productinfo.is_intangible\" " + 
+                                       "ng-click=\"options.editable.functions.name(row,$event)\" " +
+                                       "class=\"pointer single-image\"><img class=\"img-responsive img-reduced-transparency\" ng-src=\"{{row.image}}\" /></div>"
                         },
                         name: {
                             name:"Product",
@@ -395,14 +416,14 @@ groovepacks_controllers.
                           name:"Primary Barcode"
                         },
                         qty: {
-                            name:"Qty ordered",
+                            name:"Qty Ordered",
                             model:"row.iteminfo",
                             transclude: '<span>{{row.iteminfo.qty}}</span>'
                         },
                         location_primary: {
-                            name:"Primary location"
+                            name:"Primary Location"
                         },
-                        qty_on_hand: {
+                        available_inv: {
                             name:"Available Inv",
                             editable:false,
                             hidden:true
@@ -412,11 +433,35 @@ groovepacks_controllers.
                             model:"row.productinfo",
                             transclude: '<div toggle-switch ng-model="row.productinfo.is_skippable" groov-click="options.editable.update(row.productinfo,\'is_skippable\')"></div>',
                             hidden:true
+                        },
+                        print_barcode: {
+                            name: "Print Barcode",
+                            editable:false,
+                            hidden: true,
+                            model: "row.iteminfo",
+                            transclude: "<a class='groove-button label label-default' ng-class=\"{" +
+                                        "'label-success': row.iteminfo.is_barcode_printed == false, " +
+                                        "'label-default': row.iteminfo.is_barcode_printed == true }\" " +
+                                        " groov-click=\"options.editable.print_status(row.iteminfo,row.productinfo)\" href=\"\">" +
+                                        "&nbsp;&nbsp;<i class=\"glyphicon glyphicon-print icon-large white\"></i>&nbsp;&nbsp;</a>"
+                        },
+                        category: {
+                            name: "Category",
+                            sortable:true,
+                            hidden: true
+                        },
+                        spl_instructions_4_packer: {
+                            name: "Product Instructions",
+                            hidden: true
                         }
                     }
                 };
                 myscope.add_hotkeys();
-                myscope.order_single_details($stateParams.order_id,true);
+                if(order_id) {
+                    myscope.order_single_details(order_id,true);
+                } else {
+                    myscope.order_single_details($stateParams.order_id,true);
+                };
             };
             myscope.init();
             //$('.icon-question-sign').popover({trigger: 'hover focus'});

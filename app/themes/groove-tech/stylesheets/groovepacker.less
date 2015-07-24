@@ -526,6 +526,7 @@ min-width:150px;
   .box-shadow(~"1px 4px 10px rgba(204, 213, 190, 0.80)");
   background:rgba(243,243,242,0.9);
   padding:0px;
+  min-width:180px;
 }
 .dropdown-menu > li > a {
   &:hover,
@@ -824,7 +825,6 @@ li{
 }
 
 .nav-tabs {
-
   color: #504f4f;
   > li {
     float: left;
@@ -860,6 +860,163 @@ li{
 
       }
     }
+  }
+}
+
+.dashboard-nav {
+  margin-top: 15px;
+  
+  .tab-content {
+    background-color: rgba(220, 219, 219, 0.9);
+    border: 1px solid rgb(165, 165, 165);
+    border-radius: 4px;
+    height: 550px;
+
+    .dash-home-container {
+      background-color: white;
+      border-radius: 4px;
+    }
+
+    .tab-col {
+      padding-left: 0px;
+      padding-right: 5px;
+
+      .tab-pill {
+        height: 150px;
+        border-radius: 8px;
+        margin-bottom: 5px;
+        color: white;
+
+        &.tab-red {
+          background-color: red;
+          &.tab-pill-active {
+            border:1px solid #eee;
+          }
+        }
+
+        &.tab-green {
+          background-color: green;
+          &.tab-pill-active {
+            border:1px solid #eee;
+          }
+        }
+
+        &.tab-violet {
+          background-color: #0573CF;
+          &.tab-pill-active {
+            border:1px solid #eee;
+          }
+        }
+
+        .fa-dash {
+          font-size: 80px;
+        }
+
+        .fa-red {
+          color:red;
+        }
+
+        .fa-green {
+          color: green;
+        }
+
+        .fa-violet {
+          color: #0573CF;
+        }
+
+        .pill-col {
+          padding-left: 0px;
+          padding-right: 10px;
+          .well {
+            height: 105px;
+            margin-top: 45px;
+            margin-bottom: 0px;
+            border-radius: 0px;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            color: black;
+            padding-top: 2px;
+            padding-bottom: 0px;
+            .fa-pill-col {
+              font-size: 35px;
+            }
+          }
+        }
+
+        .pill-col-last {
+          padding-left: 0px;
+          padding-right: 0px;
+          margin-left: -4px;
+          .well {
+            padding-left: 0px;
+            padding-right: 0px;
+            padding-top: 0px;
+            text-align: center;
+            height: 135px;
+            margin-top: 15px;
+            margin-bottom: 0px;
+            border-radius: 0px;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            color: black;
+            .fa-pill-col {
+              font-size: 40px;
+            }
+          }
+        }
+      }
+    }
+
+    .tab-col-last {
+      padding-right: 0px;
+    }
+  }
+  
+  .nav:after {
+    content: "";
+    border-bottom: 0px;
+    border-top: 0px;
+  }
+
+
+  .nav-tabs {
+    margin-left: 20px;
+    >li {
+      padding-right: 10px;
+      >a {
+        color: white;
+        border: 1px solid rgb(165, 165, 165);
+        border-top-right-radius: 4px;
+        border-top-left-radius: 4px;
+        background-color: rgb(92, 92, 92);
+        &:hover,
+        &:focus {
+          border-radius: 0px;
+          border-top-right-radius: 4px;
+          border-top-left-radius: 4px;
+        }
+      }
+      &.active > a {
+        background-color: rgba(220, 219, 219, 0.9);
+        &,
+        &:hover,
+        &:focus {
+          border-radius: 0px;
+          border-top-right-radius: 4px;
+          border-top-left-radius: 4px;
+          border-top: 1px solid #BEBDBD;
+          border-left: 1px solid #BEBDBD;
+          border-right: 1px solid #BEBDBD;
+          color: rgb(92, 92, 92);
+        }
+      }
+    }
+  }
+  .nvtooltip {
+    background-color: #eee;
+    padding: 5px;
+    border: 2px solid rgba(0,0,0,.2);
+    border-radius: 5px;
   }
 }
 
@@ -1116,9 +1273,9 @@ div.input-style {
 }
 .right-well-heading{
   .well-heading;
-  padding-top:20px;
-  height:60px;
-  font-size:14px;
+  padding-top:10px;
+  height:45px;
+  font-size:16px;
 }
 .scanpack-image-well{
   .bottom-well;
@@ -1226,7 +1383,7 @@ div.input-style {
   border-top-left-radius: 0.5em;
   border-top-right-radius: 0.5em;
   .box-shadow(~" inset 0px -1.5px 0px rgba(0,0,1,.26)");
-  font-size: 20px;
+  font-size: 16px;
   padding-top:10px;
   font-weight: bold;
   text-align:center;
@@ -1267,7 +1424,7 @@ div.input-style {
    margin-top:-25px;
    margin-left:-25px;
    padding: 10px;
-   width:112%;
+   width:110%;
    border: 4px solid rgba(240, 237, 237, 0.69);
    border-left-color: #E0DFDF;
    background-size: 100%;
@@ -1344,7 +1501,9 @@ div.input-style {
 }
 .packing-well{
   .bottom-well;
-  background: asset-url('images/packing-well.png') no-repeat;
+  background: asset-url('images/packing-well.png');
+  background-size: 470px;
+  background-repeat: no-repeat;
   border: 4px solid rgba(235, 233, 233, 0.69);
   border-radius: 10px;
   padding: 3px;
@@ -1370,6 +1529,7 @@ div.input-style {
 }
 .middle-items{
   margin-left:1.6%;
+  width:47%;
 }
 .time-display{
   background: asset-url('images/timer.png') no-repeat;
@@ -1611,10 +1771,15 @@ div.input-style {
   position:fixed;
   z-index:8000;
   width:100%;
-  top:0px;
   height:0%;
   cursor:pointer;
   background: transparent;
+}
+.persist-notifications-background-bottom {
+  bottom: 0px;
+}
+.persist-notifications-background-top {
+  top: 0px;
 }
 .pnotif-open {
   .persist-notifications {
@@ -1626,11 +1791,27 @@ div.input-style {
     height: 100%;
   }
 }
+.pdash-open {
+  .persist-notifications {
+    .details {
+      height: 650px;
+      padding-top: 20px;
+    }
+  }
+  .persist-notifications-background {
+    height: 100%;
+  }
+}
+.persist-notifications-bottom {
+  bottom: 0px;
+}
+.persist-notifications-top {
+  top: 0px;
+}
 .persist-notifications {
   position:fixed;
   z-index:8000;
   width:100%;
-  top:0px;
   background: rgba(0, 0, 10,  0.7);
   .glow {
     -webkit-animation: bar_glow 2s infinite alternate;
@@ -1647,6 +1828,23 @@ div.input-style {
       color:#fff;
     }
   }
+  
+  .dropdown-menu {
+    background-color: #efefef;
+  }
+  
+  .dropdown-menu > li > a {
+    color: black;
+    &:hover,
+    &:focus {
+      text-decoration: none;
+      cursor:pointer;
+      color:#fff;
+      background-color: rgba(87, 99, 90, 0.87);
+      .box-shadow(~"0 0 4px rgba(64, 137, 22, 0.10)");
+    } 
+  }
+
   .progress {
     margin-bottom:0px;
     height:22px;
@@ -1703,6 +1901,9 @@ div.input-style {
       top:-5px;
       margin-left:50%;
       color: rgba(255, 250, 250, 0.90);
+    }
+    .glyphicon-top {
+      top: -650px;
     }
     .glow {
       -webkit-animation: bar_glow 1s infinite alternate;
@@ -1882,6 +2083,33 @@ div.input-style {
   border-radius: 15px;
 }
 
+.img-reduced-transparency {
+  opacity: 0.2;
+}
+
+.img-thumbnail {
+  position:relative;
+  float:left;
+  margin:0 5px;
+  width:65px;
+  img {
+    margin:0 auto;
+    max-height:65px;
+  }
+  .glyphicon-remove {
+    position: absolute;
+    top:1px;
+    right:1px;
+    border-radius: 5px;
+    padding:2px;
+    cursor:pointer;
+    background:rgba(180,180, 180, 0.7);
+    &:hover {
+      background:rgba(255,255, 255, 0.9);
+    }
+  }
+}
+
 .single-image {
   position:relative;
   float:left;
@@ -1905,7 +2133,55 @@ div.input-style {
   }
 }
 
+.single-image-clickable {
+  position:relative;
+  float:left;
+  margin:0 10px;
+  width:130px;
+  img {
+    margin:0 auto;
+    max-height:130px;
+  };
+  cursor: pointer;
+}
+
+.img-note {
+  position: absolute;
+  width: 130px;
+  height: 130px;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding-top: 3px;
+  padding-left: 5px;
+  padding-bottom: 3px;
+  padding-right: 5px;
+  font-size: 22px;
+  text-align: center;
+  display: table;
+  border-radius: 15px;
+  background: rgba(180,180, 180, 0.9);
+  color: #fff;
+  visibility: hidden;
+  opacity: 0;
+}
+
+.image-span {
+  display: table-cell;
+  vertical-align: middle;
+}
+
+.single-image-clickable:hover .img-note {
+  visibility: visible;
+  opacity: 1;
+}
+
 .csv-preview {
+  overflow-x: scroll;
+}
+
+.csv-preview-top {
   overflow-x: scroll;
 }
 
@@ -1944,6 +2220,10 @@ div.input-style {
 
 .form-horizontal .control-label.timepicker-label {
   padding-top:35px;
+}
+
+label.control-label {
+  font-weight: bold;
 }
 
 #loading-bar .bar {
@@ -2030,6 +2310,31 @@ div.input-style {
   margin-bottom: 10px;
   padding: 5px 10px;
   color:#fff;
+}
+
+.white, .white a {
+  color: #fff;
+}
+
+.remove_padding {
+  padding-left: 0px;
+  padding-right: 0px;
+}
+
+.remove_padding_left {
+  padding-left: 0px;
+}
+
+.subtract_margin_left15 {
+  margin-left: -15px;
+}
+
+.subtract_margin_left20 {
+  margin-left: -20px;
+}
+
+.subtract_margin_left60 {
+  margin-left: -60px;
 }
 
 @-moz-keyframes spin {

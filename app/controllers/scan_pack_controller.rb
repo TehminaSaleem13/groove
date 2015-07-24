@@ -1,5 +1,5 @@
 class ScanPackController < ApplicationController
-  before_filter :authenticate_user!
+  before_filter :groovepacker_authorize!
   include ScanPackHelper
 
 
@@ -41,9 +41,8 @@ class ScanPackController < ApplicationController
     end
 
     if params[:state] == "scanpack.rfp.default" && @result['status'] == true
-      Order.find(params[:id]).addactivity("Product with barcode: " + params[:input] + " scanned", current_user.name)
+      Order.find(params[:id]).addactivity("Product with barcode: " + params[:input].to_s + " scanned", current_user.name)
     end
-
     respond_to do |format|
       format.html # show.html.erb
       format.json { render json: @result }
@@ -67,11 +66,11 @@ class ScanPackController < ApplicationController
         @result['data']['next_state'] = 'scanpack.rfo'
       else
         @result['status'] &= false
-        @result['error_messages'].push("Order with id: "+params[:order_id]+" is already in scanned state")
+        @result['error_messages'].push("Order with id: "+params[:order_id].to_s+" is already in scanned state")
       end
     else
       @result['status'] &= false
-      @result['error_messages'].push("Could not find order with id: "+params[:order_id])
+      @result['error_messages'].push("Could not find order with id: "+params[:order_id].to_s)
     end
 
     respond_to do |format|
@@ -107,13 +106,44 @@ class ScanPackController < ApplicationController
           @result['status'] &= false
           @result['error_messages'].push('Product Serial number: "'+params[:serial].to_s+'" can not be the same as a confirmation code, one of the action codes or any product barcode')
         else
-          order_serial = OrderSerial.new
-          order_serial.order = order
-          order_serial.product_id = product.id
-          order_serial.serial = params[:serial].to_s
-          order_serial.save
+          order_serials = OrderSerial.where(order_id: order.id, product_id: product.id, serial: params[:serial])
+          unless order_serials.empty?
+            order_serial = order_serials.first
+          else
+            order_serial = OrderSerial.new
+            order_serial.order = order
+            order_serial.product = product
+            order_serial.serial = params[:serial]
+            order_serial.save
+          end
+
+          if params[:product_lot_id].nil?
+            order_item_serial_lots = OrderItemOrderSerialProductLot.where(order_item_id: params[:order_item_id], product_lot_id: params[:product_lot_id], order_serial_id: order_serial.id)
+            if order_item_serial_lots.empty?
+              OrderItemOrderSerialProductLot.create(order_item_id: params[:order_item_id], product_lot_id: params[:product_lot_id], order_serial_id: order_serial.id, qty: 1)
+            else
+              existing_serial = order_item_serial_lots.first
+              existing_serial.qty  += 1
+              existing_serial.save
+            end
+          else
+            order_item_serial_lots = OrderItemOrderSerialProductLot.where(order_item_id: params[:order_item_id], product_lot_id: params[:product_lot_id])
+            unless order_item_serial_lots.empty?
+              existing_serials = order_item_serial_lots.where(order_serial_id: order_serial.id)
+              if existing_serials.empty?
+                new_serial = order_item_serial_lots.where(order_serial_id: nil).first
+                new_serial.order_serial = order_serial
+                new_serial.save
+              else
+                order_item_serial_lots.where(order_serial_id: nil).first.destroy
+                existing_serial = existing_serials.first
+                existing_serial.qty  += 1
+                existing_serial.save
+              end
+            end
+          end
           @result = product_scan(params[:barcode],'scanpack.rfp.default',params[:order_id],params[:clicked],true)
-          order.addactivity('Product: "'+product.name.to_s+'" Serial scanned: "'+params[:serial]+'"',current_user.name)
+          order.addactivity('Product: "'+product.name.to_s+'" Serial scanned: "'+params[:serial].to_s+'"',current_user.name)
         end
       end
     end
@@ -251,7 +281,7 @@ class ScanPackController < ApplicationController
               (1..params[:next_item][:qty_remaining]).each do
                 @result['data'] = product_scan(params[:next_item][:barcodes][0][:barcode],'scanpack.rfp.default',params[:id],false)
               end
-              @order.addactivity('Type-In count Scanned for product'+params[:next_item][:sku],current_user.username)
+              @order.addactivity('Type-In count Scanned for product'+params[:next_item][:sku].to_s,current_user.username)
             end
           else
             @result['status'] &= false
@@ -315,7 +345,4 @@ class ScanPackController < ApplicationController
       format.json { render json: @result }
     end
   end
-
-
-
 end

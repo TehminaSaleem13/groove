@@ -34,7 +34,10 @@ function( $scope, $http, $timeout, $location, $state, $cookies, scanPack,groov_t
                 "escape_string":"",
                 "lot_number":"",
                 "show_customer_notes":"",
-                "show_internal_notes":""
+                "show_internal_notes":"",
+                "cue_orders_for_scanpack":"",
+                "intangible_setting":"",
+                "intangible_string":""
             },
             "tooltips" :{
                 "enable_click_sku":"",
@@ -49,7 +52,9 @@ function( $scope, $http, $timeout, $location, $state, $cookies, scanPack,groov_t
                 "escape_string":"",
                 "ask_post_scanning_functions":"",
                 "show_internal_notes":"",
-                "show_customer_notes":""
+                "show_customer_notes":"",
+                "cue_orders_optons":"",
+                "intanginle_setting":""
             }
         };
         groov_translator.translate('settings.system.scan_pack',$scope.translations);
@@ -86,6 +91,12 @@ function( $scope, $http, $timeout, $location, $state, $cookies, scanPack,groov_t
     $scope.change_post_scanning_opt = function(value) {
         $scope.scan_pack.settings.post_scanning_option = value;
         $scope.update_settings();
+    };
+
+    $scope.update_product_intangibleness = function() {
+        scanPack.update_products($scope.scan_pack).then(function(data){
+            $scope.update_settings();
+        });
     };
 
     $scope.update_settings = function() {

@@ -1,4 +1,4 @@
-groovepacks_directives.directive('groovPersistNotification',['$window','$document','$sce','$timeout','$interval','groovIO','orders','stores','notification',function ($window,$document,$sce,$timeout,$interval,groovIO,orders,stores,notification) {
+groovepacks_directives.directive('groovPersistNotification',['$window','$document','$sce','$timeout','$interval','groovIO','orders','stores','notification', '$rootScope', 'settings', function ($window,$document,$sce,$timeout,$interval,groovIO,orders,stores,notification,$rootScope, settings) {
     return {
         restrict:"A",
         templateUrl:"/assets/views/directives/persistnotification.html",
@@ -129,6 +129,61 @@ groovepacks_directives.directive('groovPersistNotification',['$window','$documen
                 };
             };
 
+            myscope.groove_bulk_actions = function(message, hash) {
+                scope.notifications[hash].percent = (message['completed']/message['total'])*100;
+                var notif_message = '';
+                var notif_details = '';
+                if(message['identifier'] == 'product') {
+                    if(message['activity'] == 'status_update') {
+                        notif_message = '<b>Product Status Update:</b> ';
+                    } else if(message['activity'] == 'delete') {
+                        notif_message = '<b>Product Delete:</b> ';
+                    }  else if(message['activity'] == 'duplicate') {
+                        notif_message = '<b>Product Duplicate:</b> ';
+                    }
+
+                } else if(message['identifier'] == 'inventory') {
+                    if(message['activity'] == 'enable') {
+                        notif_message = '<b>Enabling Inventory Tracking:</b> ';
+                    } else if(message['activity'] == 'disable') {
+                        notif_message = '<b>Disabling Inventory Tracking:</b> ';
+                    }
+                }
+                myscope.repurpose_selected();
+                scope.notifications[hash].type = message['status'];
+                if(message['status'] == "scheduled") {
+                    notif_message += 'Queued';
+                } else if(message['status'] == "in_progress") {
+                    notif_message += message['completed']+'/'+message['total']+'&nbsp;';
+                    notif_details = '<b>Currently processing:<b> '+message['current']+ notif_details;
+                } else if(message['status'] == "completed" || message['status'] == "cancelled" || message['status'] == 'failed') {
+                    $rootScope.$emit('bulk_action_finished',message);
+                    notif_details = '';
+                    $timeout(function() {
+                        delete scope.notifications[hash];
+                        myscope.repurpose_selected();
+                    },5000);
+                    groovIO.emit('delete_tenant_pnotif',hash);
+                    if(message['status'] == "completed" ) {
+                        notif_message += "Complete!";
+                    } else if(message['status'] == "cancelled") {
+                        notif_message += "Cancelled";
+                    } else if(message['status'] == 'failed') {
+                        notif_message += 'Failed';
+                        notification.notify(message['messages']);
+                    }
+                }
+                scope.notifications[hash].message = $sce.trustAsHtml(notif_message);
+                scope.notifications[hash].details = $sce.trustAsHtml(notif_details);
+                scope.notifications[hash].cancel = function($event) {
+                    $event.preventDefault();
+                    $event.stopPropagation();
+                    settings.cancel_bulk_action(message.id).then(function() {
+                        myscope.repurpose_selected();
+                    });
+                };
+            };
+
             myscope.csv_product_import = function(message,hash) {
                 var import_stock_messages = {
                     importing_products: 'Product Import in progress',
@@ -136,7 +191,8 @@ groovepacks_directives.directive('groovPersistNotification',['$window','$documen
                     importing_barcodes:'Barcode Import in Progress',
                     importing_cats: 'Categories Import in Progress',
                     importing_images: 'Images import in Progress',
-                    importing_inventory: 'Inventory Data import in Progress'
+                    importing_inventory: 'Inventory Data import in Progress',
+                    processing_status: 'Updating Product Status'
                 };
                 scope.notifications[hash].percent = (message['success']/message['total'])*100;
                 myscope.repurpose_selected();
@@ -145,7 +201,7 @@ groovepacks_directives.directive('groovPersistNotification',['$window','$documen
                 if(message['status'] == 'scheduled') {
                     scope.notifications[hash].type = 'scheduled';
                     notif_message += 'Queued';
-                } else if(['processing_csv','processing_products','importing_products','processing_rest','importing_skus','importing_barcodes','importing_cats','importing_images','importing_inventory'].indexOf(message['status']) >= 0) {
+                } else if(['processing_csv','processing_products','importing_products','processing_rest','importing_skus','importing_barcodes','importing_cats','importing_images','importing_inventory','processing_status'].indexOf(message['status']) >= 0) {
                     scope.notifications[hash].type = message.status.split('_').shift();
                     if(message['status'] == 'processing_csv') {
                         notif_message += 'Processing CSV file ';
@@ -159,7 +215,7 @@ groovepacks_directives.directive('groovPersistNotification',['$window','$documen
                         notif_message += 'Preparing to import Skus, Barcodes, Categories, Images and Inventory Data.';
                     }
 
-                    if (['importing_products','importing_skus','importing_barcodes','importing_cats','importing_images','importing_inventory'].indexOf(message['status']) >= 0) {
+                    if (['importing_products','importing_skus','importing_barcodes','importing_cats','importing_images','importing_inventory','processing_status'].indexOf(message['status']) >= 0) {
                         notif_message += import_stock_messages[message['status']];
                         if (notif_message == '') {
                             notif_message += 'Import in Progress.';
@@ -208,7 +264,7 @@ groovepacks_directives.directive('groovPersistNotification',['$window','$documen
                     },5000);
                     groovIO.emit('delete_tenant_pnotif',hash);
                     if(message['status'] == "completed" ) {
-                        notif_message += "Complete! Imported "+message["success_imported"]+" Products";
+                        notif_message += "Complete! Imported "+message["success_imported"]+" New Products. Updated "+message["success_updated"]+" Products.";
                         if(message["duplicate_file"] > 0 ) {
                             notification.notify(message["duplicate_file"]+' items appeared in the import file more than once and were skipped.',2);
                         }
@@ -230,7 +286,7 @@ groovepacks_directives.directive('groovPersistNotification',['$window','$documen
             };
 
             scope.toggle_detail = function() {
-                $document.find('body').eq(0).toggleClass('pnotif-open');
+                $('#notification').toggleClass('pnotif-open');
                 scope.detail_open = !scope.detail_open;
                 if(scope.detail_open) {
                     if(scope.selected == '') {

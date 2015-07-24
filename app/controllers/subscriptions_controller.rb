@@ -67,7 +67,6 @@
     end
 
     def valid_tenant_name
-      puts "valid_tenant_name..."
       result = {}
       result['valid'] = true
       result['message'] = ''
@@ -109,7 +108,6 @@
     end
 
     def validate_coupon_id
-      puts "in validate_coupon_id..."
       is_coupon_valid(params[:coupon_id])
       render json: @result
     end

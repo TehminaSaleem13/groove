@@ -1,4 +1,4 @@
-require 'debugger'
+#require 'debugger'
 require "#{Rails.root}/app/helpers/products_helper"
 include ProductsHelper
 
@@ -82,13 +82,9 @@ namespace :db do
 			#if store type is amazon
 			elsif store.store_type == 'Amazon'
 				products = store.products
-				# puts "products"
-				# puts products.inspect
 				# for each product in amazon
 				products.each do |product|
 					product_skus = product.product_skus
-					# puts "product_skus:"
-					# puts product_skus
 					product_skus.each do |product_sku|
 						#use the call from amazon import and import the weight attribute
 						import_amazon_product_details(store.id, product_sku.sku, product.id)

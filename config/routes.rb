@@ -1,6 +1,8 @@
 Groovepacks::Application.routes.draw do
 
 
+  use_doorkeeper
+
   match 'subscriptions', :to => 'subscriptions#new', :as => 'subscriptions'
   match 'subscriptions_login', :to => 'subscriptions#login', :as => 'subscriptions/login'
   # match 'subscriptions/new', :to => 'subscriptions#new'
@@ -101,6 +103,16 @@ Groovepacks::Application.routes.draw do
     end
   end
 
+  resources :dashboard do
+    collection do
+      get 'packing_stats'
+      get 'packed_item_stats'
+      get 'packing_speed'
+      get 'main_summary'
+      get 'exceptions'
+      get 'leader_board'
+    end
+  end
 
   
   # Sample resource route with options:

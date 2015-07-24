@@ -57,6 +57,51 @@ namespace :groove do
     exit(1)
   end
 
+  task :fix_inventory => :environment do
+    Tenant.all.each do |tenant|
+      begin
+        Apartment::Tenant.process(tenant.name) do
+          puts 'Upgrading Tenant: '+Apartment::Tenant.current.to_s
+          #Add upgrade code to run for every tenant after this line
+          general_setting = GeneralSetting.all.first
+          bulk_action = Groovepacker::Inventory::BulkActions.new
+          inventory_data = []
+          if general_setting.inventory_tracking?
+            product_inventory_warehouses = ProductInventoryWarehouses.all
+            product_inventory_warehouses.each do |single_warehouse|
+              inventory_data << { id: single_warehouse.id, quantity_on_hand: single_warehouse.available_inv}
+            end
+            bulk_action.do_unprocess_all
+            product_inventory_warehouses = nil
+            Order.all.each do |single_order|
+              bulk_action.do_process_single(single_order)
+            end
+            inventory_data.each do |single_warehouse|
+              product_inv = ProductInventoryWarehouses.find(single_warehouse[:id])
+              product_inv.quantity_on_hand = single_warehouse[:quantity_on_hand]
+              product_inv.save
+            end
+          else
+            bulk_action.do_unprocess_all
+          end
+          #Add upgrade code to run for every tenant before this line
+        end
+      rescue Exception => e
+        puts e.message
+        if e.message == 'Cannot find tenant '+tenant.name
+          puts 'Trying to delete missing tenant '+tenant.name
+          if tenant.destroy
+            puts 'Success!'
+          end
+        end
+      end
+    end
+
+    # Add all non-tenant upgrade code after this line
+    # Add all non-tenant upgrade code before this line
+    exit(1)
+  end
+
   task :long_spec do
     begin
       webdriver_pid = fork do

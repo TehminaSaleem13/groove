@@ -18,6 +18,14 @@ class Store < ActiveRecord::Base
 
   before_create 'Store.can_create_new?'
 
+  def ensure_warehouse?
+    if self.inventory_warehouse.nil?
+      self.inventory_warehouse = InventoryWarehouse.where(:is_default => true).first
+      self.save
+    end
+    true
+  end
+
   def get_store_credentials
   	@result = Hash.new
     @result['status'] =false

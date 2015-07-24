@@ -1,6 +1,6 @@
 groovepacks_controllers.controller('csvSingleModal', [ '$scope', 'store_data', '$state', '$stateParams','$modal',
-         '$modalInstance', '$timeout', 'hotkeys', 'stores','warehouses','notification',
-function(scope, store_data, $state, $stateParams, $modal, $modalInstance, $timeout, hotkeys, stores, warehouses, notification) {
+         '$modalInstance', '$timeout', 'hotkeys', 'stores','warehouses','notification','$q','groov_translator',
+function(scope, store_data, $state, $stateParams, $modal, $modalInstance, $timeout, hotkeys, stores, warehouses, notification, $q, groov_translator) {
      var myscope = {};
 
      /**
@@ -8,6 +8,31 @@ function(scope, store_data, $state, $stateParams, $modal, $modalInstance, $timeo
       */
 
     scope.ok = function() {
+        var result = $q.defer();
+        if (scope.csv.current.order_date_time_format == 'None' || scope.csv.current.order_date_time_format == null) {
+            alert("Select an Order Date/Time format to start import");
+        } else {
+            for(var i = 0; i < scope.csv.importer[scope.csv.importer.type]['map_options'].length; i++) {
+                if (scope.csv.importer[scope.csv.importer.type]['map_options'][i].name == "Order Date/Time") {
+                    if (scope.csv.importer[scope.csv.importer.type]['map_options'][i].disabled) {
+                        scope.csv.current.order_placed_at = null;
+                        myscope.ok_import();
+                        break;
+                    } else {
+                        if (confirm("An Order Date/Time has not been mapped. Would you like to continue using the current Date/Time for each imported order?")) {
+                            scope.csv.current.order_placed_at = new Date();
+                            myscope.ok_import();
+                            result.resolve();
+                            break;
+                        } else {result.resolve();};
+                    };
+                } else {continue;};
+            }
+        };
+        return result.promise;
+    };
+
+    myscope.ok_import = function() {
         stores.csv.do_import(scope.csv).success(function(data) {
             if(data.status) {
                 $modalInstance.close("ok-button-click");
@@ -15,6 +40,11 @@ function(scope, store_data, $state, $stateParams, $modal, $modalInstance, $timeo
                 scope.parse();
             }
         });
+    };
+
+    scope.change_order_date_time_format = function (format) {
+        console.log(format);
+        scope.csv.current.order_date_time_format = format;
     };
 
     scope.cancel = function () {
@@ -65,6 +95,7 @@ function(scope, store_data, $state, $stateParams, $modal, $modalInstance, $timeo
 
     myscope.doparse = function() {
         scope.csv.current.data = [];
+        scope.csv.current.head = [];
         scope.empty_cols = [];
         var in_entry = false;
         var secondary_split = [];
@@ -134,17 +165,30 @@ function(scope, store_data, $state, $stateParams, $modal, $modalInstance, $timeo
                 scope.csv.current.map[i] = scope.csv.importer.default_map;
             }
         }
-
+        scope.csv.current.head = final_record.slice(0,1)
         scope.csv.current.data = final_record.slice(scope.csv.current.rows-1);
 
         scope.csv.current.data.pop(1);
         final_record = [];
         row_array = [];
+        $timeout(function(){
+        $('#csv_table_top_scroll').css("width",$('#map_table').width());
+        }, 1000);
+        
     };
 
      myscope.init = function() {
          scope.csv = {};
          scope.stores = store_data;
+         scope.translations = {
+            "tooltips": {
+                "unique_order_items": "",
+                "generate_barcode_from_sku": "",
+                "use_sku_as_product_name": "",
+                "order_date_time_format": ""
+            }
+        };
+        groov_translator.translate('settings.backup_restore',scope.translations);
          stores.csv.import(scope.stores, scope.stores.single.id).success(function(data) {
              scope.csv.importer = {};
              scope.csv.importer.default_map = {value:'none', name:"Unmapped"};

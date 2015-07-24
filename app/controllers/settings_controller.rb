@@ -1,5 +1,5 @@
 class SettingsController < ApplicationController
-  before_filter :authenticate_user!
+  before_filter :groovepacker_authorize!
   include SettingsHelper
   def restore
     @result = Hash.new
@@ -8,10 +8,8 @@ class SettingsController < ApplicationController
     if current_user.can? 'restore_backups'
         # Every entry on mapping[current_mapping][:map] should be in the format
       # csv_header => db_table_header
-      mapping = {
-          'products' => {
-              model: Product,
-              map: {
+      if params[:method] == 'del_import_old'
+        product_map = {
                   'id' => 'id',
                   'store_product_id' => 'store_product_id',
                   'name' => 'name',
@@ -34,6 +32,45 @@ class SettingsController < ApplicationController
                   'weight' =>'weight',
                   'shipping_weight'=>'shipping_weight'
               }
+        default_warehouse_map = {
+                  'default_wh_avbl' => 'available_inv',
+                  'default_wh_loc_primary' =>'location_primary',
+                  'default_wh_loc_secondary' => 'location_secondary'
+              }
+      else
+        product_map = {
+                  'ID' => 'id',
+                  'Name' => 'name',
+                  'store_product_id' => 'store_product_id',
+                  'product_type' => 'product_type',
+                  'store_id' => 'store_id',
+                  'created_at' => 'created_at',
+                  'updated_at' => 'updated_at',
+                  'BinLocation 1' => 'inv_wh1',
+                  'status' => 'status',
+                  'spl_instructions_4_packer' => 'spl_instructions_4_packer',
+                  'spl_instructions_4_confirmation' => 'spl_instructions_4_confirmation',
+                  'Barcode 1' => 'barcode',
+                  'is_skippable' => 'is_skippable',
+                  'packing_placement' => 'packing_placement',
+                  'pack_time_adj' => 'pack_time_adj',
+                  'kit_parsing' => 'kit_parsing',
+                  'is_kit' => 'is_kit',
+                  'disable_conf_req' => 'disable_conf_req',
+                  'total_avail_ext' =>'total_avail_ext',
+                  'Weight' =>'weight',
+                  'shipping_weight'=>'shipping_weight'
+              }
+        default_warehouse_map = {
+                  'Quantity Avbl' => 'available_inv',
+                  'BinLocation 1' =>'location_primary',
+                  'BinLocation 2' => 'location_secondary'
+              }
+      end
+      mapping = {
+          'products' => {
+              model: Product,
+              map: product_map
           },
 
           'product_barcodes' => {
@@ -113,14 +150,7 @@ class SettingsController < ApplicationController
           }
       }
 
-      default_warehouse_map = {
-          'default_wh_avbl' => 'available_inv',
-          'default_wh_loc_primary' =>'location_primary',
-          'default_wh_loc_secondary' => 'location_secondary'
-      }
-
-
-      if params[:method].nil? || !['del_import','update_only'].include?(params[:method])
+      if params[:method].nil? || !['del_import_old','del_import_new'].include?(params[:method])
         @result['status'] = false
         @result.messages.push("No action selected")
       elsif params[:file].nil?
@@ -130,11 +160,10 @@ class SettingsController < ApplicationController
         require 'zip'
         require 'csv'
         # Clear tables if delete method is invoked
-        if params[:method] == 'del_import'
-          mapping.each do |single_map|
-            single_map[1][:model].delete_all
-          end
+        mapping.each do |single_map|
+          single_map[1][:model].delete_all
         end
+
         products_to_check_later = []
         # Open uploaded zip file
         Zip::File.open(params[:file].path) do |zipfile|
@@ -148,39 +177,36 @@ class SettingsController < ApplicationController
                 single_row = nil
                 create_new = false
                 # Create new row if deleted all else find and select by id for updating
-                if params[:method] == 'del_import'
-                  if current_mapping == 'product_barcodes'
-                    all_rows = mapping[current_mapping][:model].where(:barcode =>csv_row['barcode'].strip,:product_id=>csv_row['product_id'])
-                    if all_rows.length >0
-                      single_row = all_rows.first
-                    end
-                  elsif current_mapping == 'product_skus'
-                    all_rows = mapping[current_mapping][:model].where(:sku =>csv_row['sku'].strip,:product_id=>csv_row['product_id'])
-                    if all_rows.length >0
-                      single_row = all_rows.first
-                    end
-                  elsif current_mapping == 'product_cats'
-                    all_rows = mapping[current_mapping][:model].where(:category =>csv_row['category'].strip,:product_id=>csv_row['product_id'])
-                    if all_rows.length >0
-                      single_row = all_rows.first
-                    end
-                  elsif current_mapping == 'product_images'
-                    all_rows = mapping[current_mapping][:model].where(:image =>csv_row['image'],:product_id=>csv_row['product_id'])
-                    if all_rows.length > 0
-                      single_row = all_rows.first
-                    end
-                  elsif current_mapping == 'product_inventory_warehouses'
-                    all_rows = mapping[current_mapping][:model].where(:inventory_warehouse_id =>csv_row['inventory_warehouse_id'],:product_id=>csv_row['product_id'])
-                    if all_rows.length > 0
-                      single_row = all_rows.first
-                    end
+                # if params[:method] == 'del_import'
+                if current_mapping == 'product_barcodes'
+                  all_rows = mapping[current_mapping][:model].where(:barcode =>csv_row['barcode'].strip,:product_id=>csv_row['product_id'])
+                  if all_rows.length >0
+                    single_row = all_rows.first
                   end
-                  if single_row.nil?
-                    single_row = mapping[current_mapping][:model].new
-                    create_new = true
+                elsif current_mapping == 'product_skus'
+                  all_rows = mapping[current_mapping][:model].where(:sku =>csv_row['sku'].strip,:product_id=>csv_row['product_id'])
+                  if all_rows.length >0
+                    single_row = all_rows.first
                   end
-                else
-                  single_row = mapping[current_mapping][:model].find_by_id(csv_row['id'])
+                elsif current_mapping == 'product_cats'
+                  all_rows = mapping[current_mapping][:model].where(:category =>csv_row['category'].strip,:product_id=>csv_row['product_id'])
+                  if all_rows.length >0
+                    single_row = all_rows.first
+                  end
+                elsif current_mapping == 'product_images'
+                  all_rows = mapping[current_mapping][:model].where(:image =>csv_row['image'],:product_id=>csv_row['product_id'])
+                  if all_rows.length > 0
+                    single_row = all_rows.first
+                  end
+                elsif current_mapping == 'product_inventory_warehouses'
+                  all_rows = mapping[current_mapping][:model].where(:inventory_warehouse_id =>csv_row['inventory_warehouse_id'],:product_id=>csv_row['product_id'])
+                  if all_rows.length > 0
+                    single_row = all_rows.first
+                  end
+                end
+                if single_row.nil?
+                  single_row = mapping[current_mapping][:model].new
+                  create_new = true
                 end
 
                 unless single_row.nil?
@@ -228,9 +254,7 @@ class SettingsController < ApplicationController
                     unless csv_row['is_kit'].blank?
                       products_to_check_later << single_row
                     end
-                    single_row.update_product_status
                   end
-
                 end
               end
             end
@@ -283,7 +307,7 @@ class SettingsController < ApplicationController
         result['status'] = false
         result['messages'].push('We need a start and an end time')
       else
-        exceptions = OrderExceptions.where(updated_at: Time.parse(params[:start])..Time.parse(params[:end]))
+        exceptions = OrderException.where(updated_at: Time.parse(params[:start])..Time.parse(params[:end]))
         filename = 'groove-order-exceptions-'+Time.now.to_s+'.csv'
         row_map = {
             :order_number => '',
@@ -493,7 +517,6 @@ class SettingsController < ApplicationController
         general_setting.low_inventory_alert_email = params[:low_inventory_alert_email]
         general_setting.low_inventory_email_address = params[:low_inventory_email_address]
         general_setting.send_email_for_packer_notes = params[:send_email_for_packer_notes]
-        general_setting.inventory_auto_allocation = params[:inventory_auto_allocation]
         if params[:default_low_inventory_alert_limit].to_i < 1
           params[:default_low_inventory_alert_limit] = 1
         end
@@ -546,6 +569,33 @@ class SettingsController < ApplicationController
     end
   end
 
+  def cancel_bulk_action
+    result = Hash.new
+    result['status'] = true
+    result['success_messages'] = []
+    result['notice_messages'] = []
+    result['error_messages'] = []
+
+    if params[:id].nil?
+      result['status'] = false
+      result['error_messages'].push('No id given. Can not cancel generating')
+    else
+      bulk_action = GrooveBulkActions.find_by_id(params[:id])
+      unless bulk_action.nil?
+        bulk_action.cancel = true
+        if bulk_action.save
+          result['notice_messages'].push('Bulk action marked for cancellation. Please wait for acknowledgement.')
+        end
+      else
+        result['error_messages'].push('No bulk action found with the id.')
+      end
+    end
+
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json: result }
+    end
+  end
 
   def get_scan_pack_settings
     @result = Hash.new
@@ -636,6 +686,9 @@ class SettingsController < ApplicationController
         scan_pack_setting.record_lot_number = params[:record_lot_number]
         scan_pack_setting.show_customer_notes = params[:show_customer_notes]
         scan_pack_setting.show_internal_notes = params[:show_internal_notes]
+        scan_pack_setting.scan_by_tracking_number = params[:scan_by_tracking_number]
+        scan_pack_setting.intangible_setting_enabled = params[:intangible_setting_enabled]
+        scan_pack_setting.intangible_string = params[:intangible_string]
 
         if scan_pack_setting.save
           @result['success_messages'].push('Settings updated successfully.')

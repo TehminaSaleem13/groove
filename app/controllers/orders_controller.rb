@@ -1,5 +1,5 @@
 class OrdersController < ApplicationController
-  before_filter :authenticate_user!, except: [:import_shipworks]
+  before_filter :groovepacker_authorize!, except: [:import_shipworks]
   include OrdersHelper
   include ProductsHelper
   include SettingsHelper
@@ -53,7 +53,6 @@ class OrdersController < ApplicationController
           import_result = context.import_orders  
         end
       rescue Exception => e
-        puts e.backtrace.join(", ")
         @result['status'] = false
         @result['messages'].push(e.message)
       end
@@ -80,7 +79,6 @@ class OrdersController < ApplicationController
   def import_shipworks
     #find store by using the auth_token
     auth_token = params[:auth_token]
-    logger.info(auth_token)
     unless auth_token.nil? || request.headers["HTTP_USER_AGENT"] != 'shipworks'
       begin
         credential = ShipworksCredential.find_by_auth_token(auth_token)
@@ -100,15 +98,15 @@ class OrdersController < ApplicationController
           import_item.save
           Groovepacker::Store::Context.new(
             Groovepacker::Store::Handlers::ShipworksHandler.new(credential.store,import_item)).import_order(params["ShipWorks"]["Customer"]["Order"])
-          import_item.status = 'completed'
-          import_item.save
+          if import_item.status != 'failed'
+            import_item.status = 'completed'
+            import_item.save
+          end
           render nothing: true
         else
           render status: 401, nothing: true
         end
       rescue Exception => e
-        logger.info(e.message)
-        logger.info(e.backtrace.inspect)
         import_item.status = 'failed'
         import_item.message = e.message
         import_item.save
@@ -259,8 +257,13 @@ class OrdersController < ApplicationController
             #add activity
             @order_items = @order.order_items
             @order_items.each do |order_item|
-              neworder_item = order_item.dup
+              neworder_item = OrderItem.new
               neworder_item.order_id = @neworder.id
+              neworder_item.product_id = order_item.product_id
+              neworder_item.qty = order_item.qty
+              neworder_item.name = order_item.name
+              neworder_item.price = order_item.price
+              neworder_item.row_total = order_item.row_total
               neworder_item.save
             end
             username = current_user.name
@@ -289,9 +292,6 @@ class OrdersController < ApplicationController
       unless @orders.nil?
         @orders.each do|order|
           @order = Order.find(order["id"])
-          # in order to adjust inventory on deletion of order assign order status as 'cancelled'
-          @order.status = 'cancelled'
-          @order.save
           if @order.destroy
             @result['status'] &= true
           else
@@ -347,27 +347,24 @@ class OrdersController < ApplicationController
         @orders.each do|order|
           @order = Order.find(order['id'])
           
-          if @order.status =='scanned' && params[:status] =='awaiting'
-            @order.reset_scanned_status
-            @result['notice_messages'].push('Items in scanned orders have already been removed from inventory so no further inventory adjustments will be made during packing.')
-          end
-          @order.status = params[:status]
+          if (Order::SOLD_STATUSES.include?(@order.status) && Order::UNALLOCATE_STATUSES.include?(params[:status])) ||
+              (Order::UNALLOCATE_STATUSES.include?(@order.status) && Order::SOLD_STATUSES.include?(params[:status]))
 
-          if params[:status] == 'scanned'
-            @order.update_inventory_level = false
-            @order.update_inventory_levels_for_status_change
-          end 
-          unless @order.save
-            @result['status'] = false
-            @result['error_messages'] = @order.errors.full_messages
+            @result['error_messages'].push('This status change is not permitted.')
+          else
+            @order.status = params[:status]
+            @order.reallocate_inventory = params[:reallocate_inventory]
+            unless @order.save
+              @result['status'] = false
+              @result['error_messages'] = @order.errors.full_messages
+            end
           end
         end
       end
     else
       @result['status'] = false
-      @result['error_messages'].push("You do not have enough permissions to delete order")
+      @result['error_messages'].push("You do not have enough permissions to change order status")
     end
-    @order.update_inventory_level = true
     respond_to do |format|
       format.html # show.html.erb
       format.json { render json: @result }
@@ -394,18 +391,20 @@ class OrdersController < ApplicationController
           @orderitem['productimages'] = nil
         else
           @orderitem['productinfo'] = product
-          @orderitem['qty_on_hand'] = 0
+          @orderitem['available_inv'] = 0
           product.product_inventory_warehousess.each do |inventory|
-            @orderitem['qty_on_hand'] +=  inventory.available_inv.to_i
+            @orderitem['available_inv'] +=  inventory.available_inv.to_i
           end
-          if product.product_inventory_warehousess.length > 0
+          if product.product_inventory_warehousess.all.length > 0
             @orderitem['location_primary'] =
             product.primary_warehouse.nil? ? "" : product.primary_warehouse.location_primary
                 #ProductInventoryWarehouses.where(product_id:product.id,inventory_warehouse_id: current_user.inventory_warehouse_id).first.location_primary
           end
           @orderitem['sku'] = product.primary_sku
           @orderitem['barcode'] = product.primary_barcode
+          @orderitem['category'] = product.primary_category
           @orderitem['image'] = product.primary_image
+          @orderitem['spl_instructions_4_packer'] = product.spl_instructions_4_packer
 
         end
         @result['order']['items'].push(@orderitem)
@@ -419,9 +418,9 @@ class OrdersController < ApplicationController
 
       #Retrieve Unacknowledged activities
       @result['order']['unacknowledged_activities'] = @order.unacknowledged_activities
-      @result['order']['exception'] = @order.order_exceptions if current_user.can?('view_packing_ex')
+      @result['order']['exception'] = @order.order_exception if current_user.can?('view_packing_ex')
       @result['order']['exception']['assoc'] =
-        User.find(@order.order_exceptions.user_id) if current_user.can?('view_packing_ex') && !@order.order_exceptions.nil? && @order.order_exceptions.user_id !=0
+        User.find(@order.order_exception.user_id) if current_user.can?('view_packing_ex') && !@order.order_exception.nil? && @order.order_exception.user_id !=0
 
       @result['order']['users'] = User.all
 
@@ -465,13 +464,13 @@ class OrdersController < ApplicationController
     @order = Order.find(params[:id])
 
     if !params[:reason].nil?
-      if (current_user.can?('create_packing_ex') &&  @order.order_exceptions.nil?) ||
-          (current_user.can?('edit_packing_ex') &&  !@order.order_exceptions.nil?)
-        if @order.order_exceptions.nil?
-          @exception = OrderExceptions.new
+      if (current_user.can?('create_packing_ex') &&  @order.order_exception.nil?) ||
+          (current_user.can?('edit_packing_ex') &&  !@order.order_exception.nil?)
+        if @order.order_exception.nil?
+          @exception = OrderException.new
           @exception.order_id = @order.id
         else
-          @exception = @order.order_exceptions
+          @exception = @order.order_exception
         end
 
         @exception.reason = params[:reason]
@@ -509,12 +508,12 @@ class OrdersController < ApplicationController
     @result['messages'] = []
 
     @order = Order.find(params[:id])
-    if @order.order_exceptions.nil?
+    if @order.order_exception.nil?
       @result['status'] &= false
       @result['messages'].push('Order does not have exception to clear')
     else
       if current_user.can? 'edit_packing_ex'
-        if @order.order_exceptions.destroy
+        if @order.order_exception.destroy
           @order.addactivity("Order Exception Cleared", current_user.name)
         else
           @result['status'] &= false
@@ -599,19 +598,38 @@ class OrdersController < ApplicationController
         @result['status'] &= false
         @result['messages'].push("Could not find order item")
       else
-        if GeneralSetting.first.inventory_auto_allocation
-          @orderitem.update_inventory_levels_for_return(true)
-          @orderitem.qty = params[:qty]
-          @orderitem.update_inventory_levels_for_packing(true)
+        if params.keys.include? ('qty')
+          if Order::SOLD_STATUSES.include? @orderitem.order.status
+            @result['status'] &= false
+            @result['messages'].push("Scanned Orders item quantities can't be changed")
+          else
+            @orderitem.qty = params[:qty]
+          end
+          unless @orderitem.save
+            @result['status'] &= false
+            @result['messages'].push("Could not update order item")
+          end
+          @orderitem.order.update_order_status
         else
-          @orderitem.qty = params[:qty]
+          unless @orderitem.product.base_sku.nil?
+            @orderitem.is_barcode_printed = true
+            unless @orderitem.save
+              @result['status'] &= false
+              @result['messages'].push("Could not update order item")
+            else
+              all_printed = true
+              @orderitem.order.order_items.each do |item|
+                unless item.is_barcode_printed
+                  all_printed &= false
+                  break
+                end
+              end
+              if all_printed
+                @result['messages'].push('All item barcodes have now been printed. This order should now be ready to ship.')
+              end
+            end
+          end
         end
-
-        unless @orderitem.save
-          @result['status'] &= false
-          @result['messages'].push("Could not update order item")
-        end
-        @orderitem.order.update_order_status
       end
     else
       @result['status'] = false
@@ -708,7 +726,6 @@ class OrdersController < ApplicationController
                 current_product = Product.find(current_item['iteminfo']['product_id'])
                 updatelist(current_product,'name',current_item['productinfo']['name'])
                 updatelist(current_product,'is_skippable',current_item['productinfo']['is_skippable'])
-                updatelist(current_product,'qty',current_item['qty_on_hand'])
                 updatelist(current_product,'location_name',current_item['location'])
                 updatelist(current_product,'sku',current_item['sku'])
               rescue Exception => e
@@ -739,11 +756,11 @@ class OrdersController < ApplicationController
         if current_user.can? 'edit_packing_ex'
           #exception
           if params[:single]['exception'].nil?
-            unless order.order_exceptions.nil?
-              order.order_exceptions.destroy
+            unless order.order_exception.nil?
+              order.order_exception.destroy
             end
           else
-            exception = OrderExceptions.find_or_create_by_order_id(order.id)
+            exception = OrderException.find_or_create_by_order_id(order.id)
             params[:single]['exception'].each do |value|
               unless ["id","created_at","updated_at","order_id","assoc"].include?(value[0])
                 exception[value[0]] = value[1]
@@ -848,22 +865,24 @@ class OrdersController < ApplicationController
           Groovepacker::PickList::DependsPickListBuilder.new
         order.order_items.each do |order_item|
           if !order_item.product.nil?
-            # for single products which are not kit
-            if order_item.product.is_kit == 0
-              @pick_list = single_pick_list_obj.build(
-                order_item.qty, order_item.product, @pick_list, inventory_warehouse_id)
-            else # for products which are kits
-              if order_item.product.kit_parsing == 'single'
+            unless order_item.product.is_intangible
+              # for single products which are not kit
+              if order_item.product.is_kit == 0
                 @pick_list = single_pick_list_obj.build(
                   order_item.qty, order_item.product, @pick_list, inventory_warehouse_id)
-              else #for individual kits
-                if order_item.product.kit_parsing == 'individual'
-                  @pick_list = individual_pick_list_obj.build(
-                  order_item.qty, order_item.product, @pick_list, inventory_warehouse_id)
-                else #for automatic depends kits
-                  if order_item.product.kit_parsing == 'depends'
-                    @depends_pick_list = depends_pick_list_obj.build(
-                    order_item.qty, order_item.product, @depends_pick_list, inventory_warehouse_id)
+              else # for products which are kits
+                if order_item.product.kit_parsing == 'single'
+                  @pick_list = single_pick_list_obj.build(
+                    order_item.qty, order_item.product, @pick_list, inventory_warehouse_id)
+                else #for individual kits
+                  if order_item.product.kit_parsing == 'individual'
+                    @pick_list = individual_pick_list_obj.build(
+                    order_item.qty, order_item.product, @pick_list, inventory_warehouse_id)
+                  else #for automatic depends kits
+                    if order_item.product.kit_parsing == 'depends'
+                      @depends_pick_list = depends_pick_list_obj.build(
+                      order_item.qty, order_item.product, @depends_pick_list, inventory_warehouse_id)
+                    end
                   end
                 end
               end
@@ -976,6 +995,7 @@ class OrdersController < ApplicationController
 
       @generate_barcode.save
       delayed_job = GeneratePackingSlipPdf.delay(:run_at => 1.seconds.from_now).generate_packing_slip_pdf(@orders, Apartment::Tenant.current_tenant, @result, @page_height,@page_width,@orientation,@file_name, @size, @header,@generate_barcode.id)
+      # delayed_job = GeneratePackingSlipPdf.generate_packing_slip_pdf(@orders, Apartment::Tenant.current_tenant, @result, @page_height,@page_width,@orientation,@file_name, @size, @header,@generate_barcode.id)
       @generate_barcode.delayed_job_id = delayed_job.id
       @generate_barcode.save
       result['status'] = true
@@ -1192,29 +1212,34 @@ class OrdersController < ApplicationController
     result['status'] = true
     result['success_messages'] = []
     result['error_messages'] = []
-    order_summary = OrderImportSummary.where(
-      status: 'in_progress')
+    if current_user.can? 'import_orders'
+      order_summary = OrderImportSummary.where(
+        status: 'in_progress')
 
-    if order_summary.empty?
-      if Store.where("status = '1' AND store_type != 'system'").length > 0
-        order_summary_info = OrderImportSummary.new
-        order_summary_info.user_id = current_user.id
-        order_summary_info.status = 'not_started'
-        order_summary_info.save
-        # call delayed job
-        tenant = Apartment::Tenant.current_tenant
-        import_orders_obj = ImportOrders.new
-        Delayed::Job.where(queue: "importing_orders_#{tenant}").destroy_all
-        import_orders_obj.delay(:run_at => 1.seconds.from_now,:queue => "importing_orders_#{tenant}").import_orders  tenant
-        # import_orders_obj.import_orders
-        result['success_messages'].push('Scouring the interwebs for new orders...')
+      if order_summary.empty?
+        if Store.where("status = '1' AND store_type != 'system'").length > 0
+          order_summary_info = OrderImportSummary.new
+          order_summary_info.user_id = current_user.id
+          order_summary_info.status = 'not_started'
+          order_summary_info.save
+          # call delayed job
+          tenant = Apartment::Tenant.current_tenant
+          import_orders_obj = ImportOrders.new
+          Delayed::Job.where(queue: "importing_orders_#{tenant}").destroy_all
+          import_orders_obj.delay(:run_at => 1.seconds.from_now,:queue => "importing_orders_#{tenant}").import_orders  tenant
+          # import_orders_obj.import_orders
+          result['success_messages'].push('Scouring the interwebs for new orders...')
+        else
+          result['error_messages'].push('You currently have no Active Stores in your Store List')
+          result['status'] = false
+        end
       else
-        result['error_messages'].push('You currently have no Active Stores in your Store List')
+        #Send a message back to the user saying that import is already in progress
+        result['error_messages'].push('Import is in progress')
         result['status'] = false
       end
     else
-      #Send a message back to the user saying that import is already in progress
-      result['error_messages'].push('Import is in progress')
+      result['error_messages'].push('You do not have the permission to import orders')
       result['status'] = false
     end
     render json: result

@@ -127,4 +127,7 @@ Groovepacks::Application.configure do
   ENV['S3_ACCESS_KEY_SECRET'] = 'dq2B07y+4D+yA7kOJHqWEE3ohQco6ZbFhNSssTLB'
   ENV['S3_BUCKET_NAME'] = 'groove-dev'
   ENV['S3_BASE_URL'] = 'https://s3-ap-southeast-1.amazonaws.com/groove-dev'
+
+  #Feature Variables
+  ENV['DASHBOARD_ENABLE'] = 'YES'
 end

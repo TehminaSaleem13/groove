@@ -1,4 +1,4 @@
-groovepacks_admin_directives.directive('groovDataGrid', ['$timeout','$http','$sce','settings','hotkeys',function ($timeout,$http,$sce,settings,hotkeys) {
+groovepacks_admin_directives.directive('groovDataGrid', ['$timeout','$http',function ($timeout,$http) {
     var default_options = function() {
         return {
             identifier: 'datagrid',
@@ -45,9 +45,11 @@ groovepacks_admin_directives.directive('groovDataGrid', ['$timeout','$http','$sc
             groovDataGrid: "=",
             rows: "=groovList"
         },
-        templateUrl:"/assets/views/directives/datagrid.html",
+        templateUrl:"/assets/admin_views/directives/admin_datagrid.html",
         link: function(scope,el,attrs) {
             var myscope = {};
+            console.log("scope");
+            console.log(scope);
             scope.context_menu_event = function(event) {
                 if(scope.options.show_hide) {
                     if (typeof event == 'undefined' || typeof event['pointerType'] == 'undefined') {
@@ -113,10 +115,10 @@ groovepacks_admin_directives.directive('groovDataGrid', ['$timeout','$http','$sc
                 }
             };
 
-            scope.update = function() {
-                myscope.make_theads(scope.theads);
-                settings.column_preferences.save(scope.options.identifier,scope.theads);
-            };
+            // scope.update = function() {
+            //     myscope.make_theads(scope.theads);
+            //     settings.column_preferences.save(scope.options.identifier,scope.theads);
+            // };
 
             scope.compile = function(ind,field) {
 
@@ -173,6 +175,7 @@ groovepacks_admin_directives.directive('groovDataGrid', ['$timeout','$http','$sc
                 myscope.dropdown_promise = $timeout(function(){scope.dropdown.show = false},500);
             };
             myscope.init = function() {
+                console.log("init");
                 scope.theads = [];
                 myscope.last_clicked =null;
 
@@ -210,31 +213,31 @@ groovepacks_admin_directives.directive('groovDataGrid', ['$timeout','$http','$sc
                 };
                 scope.custom_identifier = scope.options.identifier + Math.floor(Math.random()*1000);
 
-                settings.column_preferences.get(scope.options.identifier).success(function(data){
-                    if(data.status) {
-                        var theads = [];
-                        if(data.data && typeof data.data['theads'] != "undefined" && data.data.theads) {
-                            theads = data.data.theads;
-                            for(var i in scope.options.all_fields) {
-                                if(scope.options.all_fields.hasOwnProperty(i)) {
-                                    if(scope.options.all_fields[i].hideable) {
-                                        scope.options.all_fields[i].hidden = true;
-                                    }
-                                    if(theads.indexOf(i) != -1) {
-                                        scope.options.all_fields[i].hidden = false;
-                                    }
-                                }
-                            }
-                        }
-                        myscope.make_theads(theads);
-                    }
-                });
-                if(scope.options.selectable && !scope.options.selections.unbind) {
-                    hotkeys.add({
-                        combo: 'mod+i',
-                        callback: myscope.invert_selection
-                     });
-                }
+                // settings.column_preferences.get(scope.options.identifier).success(function(data){
+                //     if(data.status) {
+                //         var theads = [];
+                //         if(data.data && typeof data.data['theads'] != "undefined" && data.data.theads) {
+                //             theads = data.data.theads;
+                //             for(var i in scope.options.all_fields) {
+                //                 if(scope.options.all_fields.hasOwnProperty(i)) {
+                //                     if(scope.options.all_fields[i].hideable) {
+                //                         scope.options.all_fields[i].hidden = true;
+                //                     }
+                //                     if(theads.indexOf(i) != -1) {
+                //                         scope.options.all_fields[i].hidden = false;
+                //                     }
+                //                 }
+                //             }
+                //         }
+                //         myscope.make_theads(theads);
+                //     }
+                // });
+                // if(scope.options.selectable && !scope.options.selections.unbind) {
+                //     hotkeys.add({
+                //         combo: 'mod+i',
+                //         callback: myscope.invert_selection
+                //      });
+                // }
                 if(typeof scope.groovDataGrid['paginate']  != "undefined") {
                     scope.$watch('groovDataGrid.paginate',myscope.update_paginate,true);
                     scope.$watch('options.paginate.current_page',scope.options.paginate.callback);

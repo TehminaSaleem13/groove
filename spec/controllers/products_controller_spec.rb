@@ -194,83 +194,88 @@ RSpec.describe ProductsController, :type => :controller do
   end
 
   describe "Order status" do
-    it "shows order status as onHold when all its items are not allocated" do
-      request.accept = "application/json"
-      general_setting = FactoryGirl.create(:general_setting, :inventory_tracking=>true, :hold_orders_due_to_inventory=>true, :inventory_auto_allocation=>true)
-      inv_wh = FactoryGirl.create(:inventory_warehouse,:is_default => true)
-      store = FactoryGirl.create(:store, :inventory_warehouse_id => inv_wh.id)
-      @user.role.update_attribute(:add_edit_products, true)
-      product1 = FactoryGirl.create(:product)
-      product1_sku = FactoryGirl.create(:product_sku, :product=> product1)
-      product1_barcode = FactoryGirl.create(:product_barcode, :product=> product1)
+		# We do not put orders on hold due to inventory
+    # it "shows order status as onHold when all its items are not allocated" do
+    #   request.accept = "application/json"
+    #   general_setting = FactoryGirl.create(:general_setting, :inventory_tracking=>true, :hold_orders_due_to_inventory=>true, :inventory_auto_allocation=>true)
+    #   inv_wh = FactoryGirl.create(:inventory_warehouse,:is_default => true)
+    #   store = FactoryGirl.create(:store, :inventory_warehouse_id => inv_wh.id)
+    #   @user.role.update_attribute(:add_edit_products, true)
+    #   product1 = FactoryGirl.create(:product)
+    #   product1_sku = FactoryGirl.create(:product_sku, :product=> product1)
+    #   product1_barcode = FactoryGirl.create(:product_barcode, :product=> product1)
+		#
+    #   product2 = FactoryGirl.create(:product, :name=>"Apple iPhone5C")
+    #   product2_sku = FactoryGirl.create(:product_sku, :product=> product2, :sku=>'iPhone5C')
+    #   product2_barcode = FactoryGirl.create(:product_barcode, :product=> product2, :barcode=>"2456789")
+		#
+    #   order = FactoryGirl.create(:order, :status=>'onhold', :store=>store)
+    #   order_item1 = FactoryGirl.create(:order_item, :product_id=>product1.id,
+    #                 :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>product1.name, :inv_status=>'unallocated')
+    #   order_item2 = FactoryGirl.create(:order_item, :product_id=>product2.id,
+    #                 :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>product2.name, :inv_status=>'unallocated')
+		#
+    #   put :updateproductlist, { :id => product1.id, var: "qty", value: "5"  }
+		#
+    #   expect(response.status).to eq(200)
+    #   result = JSON.parse(response.body)
+    #   order.reload
+    #   order_item1.reload
+    #   expect(order_item1.product.product_inventory_warehousess.first.available_inv).to eq(4)
+    #   expect(order_item1.inv_status).to eq("allocated")
+    #   expect(order_item2.inv_status).to eq("unallocated")
+    #   expect(order.status).to eq ("onhold")
+    # end
 
-      product2 = FactoryGirl.create(:product, :name=>"Apple iPhone5C")
-      product2_sku = FactoryGirl.create(:product_sku, :product=> product2, :sku=>'iPhone5C')
-      product2_barcode = FactoryGirl.create(:product_barcode, :product=> product2, :barcode=>"2456789")
-
-      order = FactoryGirl.create(:order, :status=>'onhold', :store=>store)
-      order_item1 = FactoryGirl.create(:order_item, :product_id=>product1.id,
-                    :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>product1.name, :inv_status=>'unallocated')
-      order_item2 = FactoryGirl.create(:order_item, :product_id=>product2.id,
-                    :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>product2.name, :inv_status=>'unallocated')
-
-      put :updateproductlist, { :id => product1.id, var: "qty", value: "5"  }
-
-      expect(response.status).to eq(200)
-      result = JSON.parse(response.body)
-      order.reload
-      order_item1.reload
-      expect(order_item1.product.product_inventory_warehousess.first.available_inv).to eq(4)
-      expect(order_item1.inv_status).to eq("allocated")
-      expect(order_item2.inv_status).to eq("unallocated")
-      expect(order.status).to eq ("onhold")
-    end
-
-    it "shows order status as awaiting when all its items are allocated" do
-      request.accept = "application/json"
-      general_setting = FactoryGirl.create(:general_setting, :inventory_tracking=>true, :hold_orders_due_to_inventory=>true, :inventory_auto_allocation=>true)
-      inv_wh = FactoryGirl.create(:inventory_warehouse,:is_default => true)
-      store = FactoryGirl.create(:store, :inventory_warehouse_id => inv_wh.id)
-      @user.role.update_attribute(:add_edit_products, true)
-      product1 = FactoryGirl.create(:product)
-      product1_sku = FactoryGirl.create(:product_sku, :product=> product1)
-      product1_barcode = FactoryGirl.create(:product_barcode, :product=> product1)
-
-      product2 = FactoryGirl.create(:product, :name=>"Apple iPhone5C")
-      product2_sku = FactoryGirl.create(:product_sku, :product=> product2, :sku=>'iPhone5C')
-      product2_barcode = FactoryGirl.create(:product_barcode, :product=> product2, :barcode=>"2456789")
-
-      order = FactoryGirl.create(:order, :status=>'onhold', :store=>store)
-      order_item1 = FactoryGirl.create(:order_item, :product_id=>product1.id,
-                    :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>product1.name, :inv_status=>'unallocated')
-      order_item2 = FactoryGirl.create(:order_item, :product_id=>product2.id,
-                    :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>product2.name, :inv_status=>'unallocated')
-
-      put :updateproductlist, { :id => product1.id, var: "qty", value: "5"  }
-      put :updateproductlist, { :id => product2.id, var: "qty", value: "5"  }
-
-      expect(response.status).to eq(200)
-      result = JSON.parse(response.body)
-      order.reload
-      order_item1.reload
-      order_item2.reload
-      expect(order_item1.product.product_inventory_warehousess.first.available_inv).to eq(4)
-      expect(order_item2.product.product_inventory_warehousess.first.available_inv).to eq(4)
-      expect(order_item1.inv_status).to eq("allocated")
-      expect(order_item2.inv_status).to eq("allocated")
-      expect(order.status).to eq ("awaiting")
-    end
+    # it "shows order status as awaiting when all its items are allocated" do
+    #   request.accept = "application/json"
+    #   general_setting = FactoryGirl.create(:general_setting, :inventory_tracking=>true, :hold_orders_due_to_inventory=>true)
+    #   inv_wh = FactoryGirl.create(:inventory_warehouse,:is_default => true)
+    #   store = FactoryGirl.create(:store, :inventory_warehouse_id => inv_wh.id)
+    #   @user.role.update_attribute(:add_edit_products, true)
+    #   product1 = FactoryGirl.create(:product)
+    #   product1_sku = FactoryGirl.create(:product_sku, :product=> product1)
+    #   product1_barcode = FactoryGirl.create(:product_barcode, :product=> product1)
+		#
+    #   product2 = FactoryGirl.create(:product, :name=>"Apple iPhone5C")
+    #   product2_sku = FactoryGirl.create(:product_sku, :product=> product2, :sku=>'iPhone5C')
+    #   product2_barcode = FactoryGirl.create(:product_barcode, :product=> product2, :barcode=>"2456789")
+		#
+    #   order = FactoryGirl.create(:order, :status=>'onhold', :store=>store)
+    #   order_item1 = FactoryGirl.create(:order_item, :product_id=>product1.id,
+    #                 :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>product1.name)
+    #   order_item2 = FactoryGirl.create(:order_item, :product_id=>product2.id,
+    #                 :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>product2.name)
+		#
+    #   put :updateproductlist, { :id => product1.id, var: "qty", value: "5"  }
+    #   put :updateproductlist, { :id => product2.id, var: "qty", value: "5"  }
+		#
+    #   expect(response.status).to eq(200)
+    #   result = JSON.parse(response.body)
+    #   order.reload
+    #   order_item1.reload
+    #   order_item2.reload
+    #   expect(order_item1.product.product_inventory_warehousess.first.available_inv).to eq(4)
+    #   expect(order_item2.product.product_inventory_warehousess.first.available_inv).to eq(4)
+    #   expect(order_item1.inv_status).to eq("allocated")
+    #   expect(order_item2.inv_status).to eq("allocated")
+    #   expect(order.status).to eq ("awaiting")
+    # end
     it "auto allocates inventory for awaiting, onhold and serveice issue orders" do
       request.accept = "application/json"
       inv_wh = FactoryGirl.create(:inventory_warehouse,:is_default => true)
       store = FactoryGirl.create(:store, :inventory_warehouse_id => inv_wh.id)
-      general_setting = FactoryGirl.create(:general_setting, :inventory_tracking=>true, :hold_orders_due_to_inventory=>true, :inventory_auto_allocation=>true)
+      general_setting = FactoryGirl.create(:general_setting, :inventory_tracking=>true, :hold_orders_due_to_inventory=>true)
       order1 = FactoryGirl.create(:order, :status=>'awaiting', :increment_id=>'1234567890', :store => store)
       order2 = FactoryGirl.create(:order, :status=>'onhold', :increment_id=>'1234567891', :store => store)
       order3 = FactoryGirl.create(:order, :status=>'serviceissue', :increment_id=>'1234567892', :store => store)
-      product1 = FactoryGirl.create(:product)
-      product2 = FactoryGirl.create(:product)
-      product3 = FactoryGirl.create(:product)
+      product1 = FactoryGirl.create(:product, :name=>"Apple iPhone 5S")
+      product2 = FactoryGirl.create(:product, :name=>"Apple iPhone 5T")
+      product3 = FactoryGirl.create(:product, :name=>"Apple iPhone 5Z")
+
+      product_sku1 = FactoryGirl.create(:product_sku, :product=> product1, :sku=>"E-VEGAN-EPIC1")
+      product_sku2 = FactoryGirl.create(:product_sku, :product=> product2, :sku=>"E-VEGAN-EPIC2")
+      product_sku3 = FactoryGirl.create(:product_sku, :product=> product3, :sku=>"E-VEGAN-EPIC3")
 
       order_item1 = FactoryGirl.create(:order_item, :product_id=>product1.id,
                     :qty=>1, :price=>"10", :row_total=>"10", :order=>order1, :name=>product1.name)
@@ -278,9 +283,12 @@ RSpec.describe ProductsController, :type => :controller do
                     :qty=>1, :price=>"10", :row_total=>"10", :order=>order2, :name=>product2.name)
       order_item3 = FactoryGirl.create(:order_item, :product_id=>product3.id,
                     :qty=>1, :price=>"10", :row_total=>"10", :order=>order3, :name=>product3.name)
-      put :updateproductlist, {:id=>product1.id, :var=> 'qty', :value=>'10'}
-      put :updateproductlist, {:id=>product2.id, :var=> 'qty', :value=>'10'}
-      put :updateproductlist, {:id=>product3.id, :var=> 'qty', :value=>'10'}
+      put :updateproductlist, {:id=>product1.id, :var=> 'qty_on_hand', :value=>'10'}
+      expect(response.status).to eq(200)
+      put :updateproductlist, {:id=>product2.id, :var=> 'qty_on_hand', :value=>'10'}
+      expect(response.status).to eq(200)
+      put :updateproductlist, {:id=>product3.id, :var=> 'qty_on_hand', :value=>'10'}
+      expect(response.status).to eq(200)
       product1.reload
       product2.reload
       product3.reload
@@ -302,7 +310,7 @@ RSpec.describe ProductsController, :type => :controller do
       request.accept = "application/json"
       inv_wh = FactoryGirl.create(:inventory_warehouse,:is_default => true)
       store = FactoryGirl.create(:store, :inventory_warehouse_id => inv_wh.id)
-      general_setting = FactoryGirl.create(:general_setting, :inventory_tracking=>true, :hold_orders_due_to_inventory=>true, :inventory_auto_allocation=>true)
+      general_setting = FactoryGirl.create(:general_setting, :inventory_tracking=>true, :hold_orders_due_to_inventory=>true)
       order1 = FactoryGirl.create(:order, :status=>'scanned', :increment_id=>'1234567890', :store => store)
       order2 = FactoryGirl.create(:order, :status=>'cancelled', :increment_id=>'1234567891', :store => store)
       product1 = FactoryGirl.create(:product)
@@ -313,8 +321,8 @@ RSpec.describe ProductsController, :type => :controller do
       order_item2 = FactoryGirl.create(:order_item, :product_id=>product2.id,
                     :qty=>1, :price=>"10", :row_total=>"10", :order=>order2, :name=>product2.name)
 
-      put :updateproductlist, {:id=>product1.id, :var=> 'qty', :value=>'10'}
-      put :updateproductlist, {:id=>product2.id, :var=> 'qty', :value=>'10'}
+      put :updateproductlist, {:id=>product1.id, :var=> 'qty_on_hand', :value=>'10'}
+      put :updateproductlist, {:id=>product2.id, :var=> 'qty_on_hand', :value=>'10'}
       product1.reload
       product2.reload
       expect(product1.product_inventory_warehousess.first.allocated_inv).to eq(0)
@@ -323,37 +331,58 @@ RSpec.describe ProductsController, :type => :controller do
       expect(product2.product_inventory_warehousess.first.available_inv).to eq(10)
     end
 
-    it "disables auto-allocation when auto-allocation switch is off" do
+    # it "disables auto-allocation when inventory tracking switch is off" do
+    #   request.accept = "application/json"
+    #   inv_wh = FactoryGirl.create(:inventory_warehouse,:is_default => true)
+    #   store = FactoryGirl.create(:store, :inventory_warehouse_id => inv_wh.id)
+    #   general_setting = FactoryGirl.create(:general_setting, :inventory_tracking=>false, :hold_orders_due_to_inventory=>true)
+    #   order1 = FactoryGirl.create(:order, :status=>'awaiting', :increment_id=>'1234567890', :store => store)
+    #   order2 = FactoryGirl.create(:order, :status=>'onhold', :increment_id=>'1234567891', :store => store)
+    #   order3 = FactoryGirl.create(:order, :status=>'serviceissue', :increment_id=>'1234567892', :store => store)
+    #   product1 = FactoryGirl.create(:product)
+    #   product2 = FactoryGirl.create(:product)
+    #   product3 = FactoryGirl.create(:product)
+		#
+    #   order_item1 = FactoryGirl.create(:order_item, :product_id=>product1.id,
+    #                 :qty=>1, :price=>"10", :row_total=>"10", :order=>order1, :name=>product1.name)
+    #   order_item2 = FactoryGirl.create(:order_item, :product_id=>product2.id,
+    #                 :qty=>1, :price=>"10", :row_total=>"10", :order=>order2, :name=>product2.name)
+    #   order_item3 = FactoryGirl.create(:order_item, :product_id=>product3.id,
+    #                 :qty=>1, :price=>"10", :row_total=>"10", :order=>order3, :name=>product3.name)
+		#
+    #   put :updateproductlist, {:id=>product1.id, :var=> 'qty', :value=>'10'}
+    #   put :updateproductlist, {:id=>product2.id, :var=> 'qty', :value=>'10'}
+    #   put :updateproductlist, {:id=>product3.id, :var=> 'qty', :value=>'10'}
+    #   product1.reload
+    #   product2.reload
+    #   product3.reload
+    #   expect(product1.product_inventory_warehousess.first.allocated_inv).to eq(0)
+    #   expect(product2.product_inventory_warehousess.first.allocated_inv).to eq(0)
+    #   expect(product3.product_inventory_warehousess.first.allocated_inv).to eq(0)
+    #   expect(product1.product_inventory_warehousess.first.available_inv).to eq(10)
+    #   expect(product2.product_inventory_warehousess.first.available_inv).to eq(10)
+    #   expect(product3.product_inventory_warehousess.first.available_inv).to eq(10)
+    # end
+  end
+  describe "Products CSV" do
+    it "generates a csv file in public/csv when product csv is generated for selected products" do
       request.accept = "application/json"
       inv_wh = FactoryGirl.create(:inventory_warehouse,:is_default => true)
       store = FactoryGirl.create(:store, :inventory_warehouse_id => inv_wh.id)
-      general_setting = FactoryGirl.create(:general_setting, :inventory_tracking=>true, :hold_orders_due_to_inventory=>true, :inventory_auto_allocation=>false)
-      order1 = FactoryGirl.create(:order, :status=>'awaiting', :increment_id=>'1234567890', :store => store)
-      order2 = FactoryGirl.create(:order, :status=>'onhold', :increment_id=>'1234567891', :store => store)
-      order3 = FactoryGirl.create(:order, :status=>'serviceissue', :increment_id=>'1234567892', :store => store)
       product1 = FactoryGirl.create(:product)
-      product2 = FactoryGirl.create(:product)
-      product3 = FactoryGirl.create(:product)
+      product1_sku = FactoryGirl.create(:product_sku, :product=> product1)
+      product1_barcode = FactoryGirl.create(:product_barcode, :product=> product1)
 
-      order_item1 = FactoryGirl.create(:order_item, :product_id=>product1.id,
-                    :qty=>1, :price=>"10", :row_total=>"10", :order=>order1, :name=>product1.name)
-      order_item2 = FactoryGirl.create(:order_item, :product_id=>product2.id,
-                    :qty=>1, :price=>"10", :row_total=>"10", :order=>order2, :name=>product2.name)
-      order_item3 = FactoryGirl.create(:order_item, :product_id=>product3.id,
-                    :qty=>1, :price=>"10", :row_total=>"10", :order=>order3, :name=>product3.name)
+      product2 = FactoryGirl.create(:product, :name=>'Apple iPhone 5C')
+      product2_sku = FactoryGirl.create(:product_sku, :product=> product2, :sku=>'IPHONE5C')
+      product2_barcode = FactoryGirl.create(:product_barcode, :product=> product2, :barcode=>'1234567891')
 
-      put :updateproductlist, {:id=>product1.id, :var=> 'qty', :value=>'10'}
-      put :updateproductlist, {:id=>product2.id, :var=> 'qty', :value=>'10'}
-      put :updateproductlist, {:id=>product3.id, :var=> 'qty', :value=>'10'}
-      product1.reload
-      product2.reload
-      product3.reload
-      expect(product1.product_inventory_warehousess.first.allocated_inv).to eq(0)
-      expect(product2.product_inventory_warehousess.first.allocated_inv).to eq(0)
-      expect(product3.product_inventory_warehousess.first.allocated_inv).to eq(0)
-      expect(product1.product_inventory_warehousess.first.available_inv).to eq(10)
-      expect(product2.product_inventory_warehousess.first.available_inv).to eq(10)
-      expect(product3.product_inventory_warehousess.first.available_inv).to eq(10)
+      post :generate_products_csv, {:select_all=>false, :inverted=>false, :search=>'', :productArray=>[{'id' => product1.id},{'id' => product2.id}]}
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["status"]).to eq(true)      
+      File.exist?(File.dirname(__FILE__) + '/../../public/csv/'+result['filename']).should == true
+      File.delete(File.dirname(__FILE__) + '/../../public/csv/'+result['filename'])
     end
   end
 end

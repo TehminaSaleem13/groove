@@ -6269,7 +6269,9 @@ body {
       <%order_items = @order.order_items%>
       <%order_count = 0%>
       <%order_items.each do |order_item|%>
-        <%order_count = order_count + order_item.qty%>
+        <%unless order_item.product.is_intangible%>
+          <%order_count = order_count + order_item.qty%>
+        <%end%>
       <%end%>
 
       <div class="row">
@@ -6316,11 +6318,13 @@ body {
           </thead>
 
           <%order_items.each do |order_item|%>
-            <tr>
-              <td><%=order_item.product.primary_sku%></td>
-              <td><%=order_item.product.name%></td>
-              <td><center><%=order_item.qty%></center></td>
-            </tr>
+            <%unless order_item.product.is_intangible%>
+              <tr>
+                <td><%=order_item.product.primary_sku%></td>
+                <td><%=order_item.product.name%></td>
+                <td><center><%=order_item.qty%></center></td>
+              </tr>
+            <%end%>
           <%end%>
         </table>
       </div>

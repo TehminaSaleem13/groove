@@ -1,6 +1,6 @@
 groovepacks_controllers.
-controller('productsCtrl', [ '$scope', '$http', '$timeout', '$stateParams', '$location', '$state', '$cookies','$q','$modal','products',
-function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,$modal,products) {
+controller('productsCtrl', [ '$scope', '$http', '$timeout', '$stateParams', '$location', '$state', '$cookies','$q','$modal','products','$rootScope',
+function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,$modal,products, $rootScope) {
     //Definitions
 
     var myscope= {};
@@ -87,6 +87,12 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
 
     $scope.product_barcode = function() {
         products.list.update('barcode',$scope.products).then(function(data) {
+            myscope.get_products();
+        });
+    };
+
+    $scope.backup_product_csv = function() {
+        products.list.generate($scope.products).then(function(data) {
             myscope.get_products();
         });
     };
@@ -265,7 +271,7 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
                             {name: "New", value: 'new'}
                         ]
                     },
-                    qty:{
+                    qty_on_hand:{
                         type: 'number',
                         min: 0
                     }
@@ -307,8 +313,13 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
                     name: "Store",
                     editable: false
                 },
-                qty: {
-                    name: "Avbl Inv"
+                qty_on_hand:{
+                    name: "QoH",
+                    sortable:false
+                },
+                available_inv: {
+                    name: "Avbl Inv",
+                    editable: false
                 },
                 cat:{
                     name: "Category",
@@ -344,6 +355,7 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,$q,
 
         $scope.product_modal_closed_callback = myscope.get_products;
         $scope.$watch('products.selected', myscope.update_selected_count,true);
+        $rootScope.$on('bulk_action_finished',function(){myscope.get_products();});
         //$("#product-search-query").focus();
     };
 
