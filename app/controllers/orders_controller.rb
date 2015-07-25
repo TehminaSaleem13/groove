@@ -215,7 +215,7 @@ class OrdersController < ApplicationController
 
     @orders = do_getorders
     #GroovRealtime::emit('test',{does:'it work for user '+current_user.username+'?'})
-    #GroovRealtime::emit('test',{does:'it work for tenant '+Apartment::Tenant.current_tenant+'+'?'},:tenant)
+    #GroovRealtime::emit('test',{does:'it work for tenant '+Apartment::Tenant.current+'?'},:tenant)
     #GroovRealtime::emit('test',{does:'it work for global?'},:global)
     @result['orders'] = make_orders_list(@orders)
     @result['orders_count'] = get_orders_count()
@@ -974,7 +974,7 @@ class OrdersController < ApplicationController
     end
     @header = ''
 
-    @file_name = Apartment::Tenant.current_tenant+Time.now.strftime('%d_%b_%Y_%I__%M_%p')
+    @file_name = Apartment::Tenant.current+Time.now.strftime('%d_%b_%Y_%I__%M_%p')
     @orders = []
     orders = list_selected_orders
     orders.each do |order|
@@ -994,8 +994,8 @@ class OrdersController < ApplicationController
       @generate_barcode.status = 'scheduled'
 
       @generate_barcode.save
-      delayed_job = GeneratePackingSlipPdf.delay(:run_at => 1.seconds.from_now).generate_packing_slip_pdf(@orders, Apartment::Tenant.current_tenant, @result, @page_height,@page_width,@orientation,@file_name, @size, @header,@generate_barcode.id)
-      # delayed_job = GeneratePackingSlipPdf.generate_packing_slip_pdf(@orders, Apartment::Tenant.current_tenant, @result, @page_height,@page_width,@orientation,@file_name, @size, @header,@generate_barcode.id)
+      delayed_job = GeneratePackingSlipPdf.delay(:run_at => 1.seconds.from_now).generate_packing_slip_pdf(@orders, Apartment::Tenant.current, @result, @page_height,@page_width,@orientation,@file_name, @size, @header,@generate_barcode.id)
+      # delayed_job = GeneratePackingSlipPdf.generate_packing_slip_pdf(@orders, Apartment::Tenant.current, @result, @page_height,@page_width,@orientation,@file_name, @size, @header,@generate_barcode.id)
       @generate_barcode.delayed_job_id = delayed_job.id
       @generate_barcode.save
       result['status'] = true
@@ -1063,7 +1063,7 @@ class OrdersController < ApplicationController
         result['status'] = false
         result['messages'].push('Order export items is disabled.')
       else
-        filename = 'groove-order-items-'+Apartment::Tenant.current_tenant+'-'+Time.now.strftime('%d_%b_%Y_%H_%M_%S_%Z')+'.csv'
+        filename = 'groove-order-items-'+Apartment::Tenant.current+'-'+Time.now.strftime('%d_%b_%Y_%H_%M_%S_%Z')+'.csv'
         row_map = {
             :quantity =>'',
             :product_name=>'',
@@ -1223,7 +1223,7 @@ class OrdersController < ApplicationController
           order_summary_info.status = 'not_started'
           order_summary_info.save
           # call delayed job
-          tenant = Apartment::Tenant.current_tenant
+          tenant = Apartment::Tenant.current
           import_orders_obj = ImportOrders.new
           Delayed::Job.where(queue: "importing_orders_#{tenant}").destroy_all
           import_orders_obj.delay(:run_at => 1.seconds.from_now,:queue => "importing_orders_#{tenant}").import_orders  tenant
@@ -1258,7 +1258,7 @@ class OrdersController < ApplicationController
 
     if order_summary.empty?
       store = Store.find(params[:store_id])
-      tenant = Apartment::Tenant.current_tenant
+      tenant = Apartment::Tenant.current
       Delayed::Job.where(queue: "importing_orders_"+tenant).destroy_all
       import_orders_obj = ImportOrders.new
       import_params = {tenant: tenant, store: store, import_type: params[:import_type], user: current_user}

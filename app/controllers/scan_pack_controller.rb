@@ -179,7 +179,7 @@ class ScanPackController < ApplicationController
             mail_settings = Hash.new
             mail_settings['email'] = general_settings.email_address_for_packer_notes
             mail_settings['sender'] = current_user.name + ' ('+current_user.username+')'
-            mail_settings['tenant_name'] = Apartment::Tenant.current_tenant
+            mail_settings['tenant_name'] = Apartment::Tenant.current
             mail_settings['order_number'] = @order.increment_id
             mail_settings['order_id'] = @order.id
             mail_settings['note_from_packer'] = @order.notes_fromPacker

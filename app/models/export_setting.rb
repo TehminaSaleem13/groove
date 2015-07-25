@@ -21,7 +21,7 @@ class ExportSetting < ActiveRecord::Base
         break if job_scheduled
       end
     else
-      tenant = Apartment::Tenant.current_tenant
+      tenant = Apartment::Tenant.current
       Delayed::Job.where(queue: "order_export_email_scheduled_#{tenant}").destroy_all
     end
   end

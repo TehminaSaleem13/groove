@@ -104,7 +104,7 @@
     end
 
     def check_tenant_name
-      Apartment::Tenant.current_tenant==""?true:(render status: 401)
+      (Apartment::Tenant.current == '') ? true:(render status: 401)
     end
 
     def validate_coupon_id

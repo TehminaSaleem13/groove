@@ -158,7 +158,7 @@ class StoreSettingsController < ApplicationController
               @result['messages'] = [e.message]
             end
             @result['store_id'] = @store.id
-            @result['tenant_name'] = Apartment::Tenant.current_tenant
+            @result['tenant_name'] = Apartment::Tenant.current
           end
 
           if @store.store_type == 'CSV' || @store.store_type == 'system'
@@ -176,7 +176,7 @@ class StoreSettingsController < ApplicationController
             if @store.id
               @result["store_id"] = @store.id
               csv_directory = "uploads/csv"
-              current_tenant = Apartment::Tenant.current_tenant
+              current_tenant = Apartment::Tenant.current
               unless params[:orderfile].nil?
                 path = File.join(csv_directory, "#{current_tenant}.#{@store.id}.order.csv")
                 order_file_data = params[:orderfile].read
@@ -599,8 +599,8 @@ class StoreSettingsController < ApplicationController
       data[:order_date_time_format] = params[:order_date_time_format]
 
       import_csv = ImportCsv.new
-      delayed_job = import_csv.delay(:run_at =>1.seconds.from_now).import Apartment::Tenant.current_tenant, data
-      # delayed_job = import_csv.import Apartment::Tenant.current_tenant, data
+      delayed_job = import_csv.delay(:run_at =>1.seconds.from_now).import Apartment::Tenant.current, data
+      # delayed_job = import_csv.import Apartment::Tenant.current, data
 
       if params[:type] == 'order'
         import_item = ImportItem.find_by_store_id(@store.id)
@@ -808,7 +808,7 @@ class StoreSettingsController < ApplicationController
     @store = Store.new
     @result = @store.get_ebay_signin_url
     session[:ebay_session_id] = @result['ebay_sessionid']
-    @result['current_tenant'] = Apartment::Tenant.current_tenant
+    @result['current_tenant'] = Apartment::Tenant.current
 
     respond_to do |format|
         format.html # show.html.erb
@@ -1009,7 +1009,7 @@ class StoreSettingsController < ApplicationController
       status: 'in_progress')
 
     if order_summary.empty? && store.store_type == 'Shipstation API 2'
-      tenant = Apartment::Tenant.current_tenant
+      tenant = Apartment::Tenant.current
       Delayed::Job.where(queue: "importing_orders_"+tenant).destroy_all
       store.shipstation_rest_credential.update_all_locations(tenant, current_user)
     else

@@ -16,17 +16,17 @@ class GeneralSetting < ActiveRecord::Base
     if @@all_tenants_settings.nil?
       @@all_tenants_settings = {}
     end
-    if @@all_tenants_settings[Apartment::Tenant.current_tenant].nil?
-      @@all_tenants_settings[Apartment::Tenant.current_tenant] = self.all.first
+    if @@all_tenants_settings[Apartment::Tenant.current].nil?
+      @@all_tenants_settings[Apartment::Tenant.current] = self.all.first
     end
-    @@all_tenants_settings[Apartment::Tenant.current_tenant]
+    @@all_tenants_settings[Apartment::Tenant.current]
   end
 
   def self.unset_setting
     if @@all_tenants_settings.nil?
       @@all_tenants_settings = {}
     end
-    @@all_tenants_settings[Apartment::Tenant.current_tenant] = nil
+    @@all_tenants_settings[Apartment::Tenant.current] = nil
     true
   end
 
@@ -45,12 +45,12 @@ class GeneralSetting < ActiveRecord::Base
       groove_bulk_actions.activity = 'enable'
       groove_bulk_actions.save
 
-      bulk_actions.delay(:run_at =>1.minutes.from_now).process_all(Apartment::Tenant.current_tenant, groove_bulk_actions.id)
+      bulk_actions.delay(:run_at =>1.minutes.from_now).process_all(Apartment::Tenant.current, groove_bulk_actions.id)
     else
       groove_bulk_actions.activity = 'disable'
       groove_bulk_actions.save
 
-      bulk_actions.delay(:run_at =>1.minutes.from_now).unprocess_all(Apartment::Tenant.current_tenant, groove_bulk_actions.id)
+      bulk_actions.delay(:run_at =>1.minutes.from_now).unprocess_all(Apartment::Tenant.current, groove_bulk_actions.id)
     end
     true
   end
@@ -68,7 +68,7 @@ class GeneralSetting < ActiveRecord::Base
         break if job_scheduled
       end
     else
-      tenant = Apartment::Tenant.current_tenant
+      tenant = Apartment::Tenant.current
       Delayed::Job.where(queue: "import_orders_scheduled_#{tenant}").destroy_all
     end
     true
@@ -145,7 +145,7 @@ class GeneralSetting < ActiveRecord::Base
         break if job_scheduled
       end
     else
-      tenant = Apartment::Tenant.current_tenant
+      tenant = Apartment::Tenant.current
       Delayed::Job.where(queue: "low_inventory_email_scheduled_#{tenant}").destroy_all
     end
     true
@@ -158,7 +158,7 @@ class GeneralSetting < ActiveRecord::Base
       :min => time.min, :sec => time.sec})
     time_diff = ((run_at_date - DateTime.now.getutc) * 24 * 60 * 60).to_i
     if time_diff > 0
-      tenant = Apartment::Tenant.current_tenant
+      tenant = Apartment::Tenant.current
       if job_type == 'low_inventory_email'
                 if self.low_inventory_alert_email? && !self.low_inventory_email_address.blank? && self.should_send_email(date)
           Delayed::Job.where(queue: "low_inventory_email_scheduled_#{tenant}").destroy_all
