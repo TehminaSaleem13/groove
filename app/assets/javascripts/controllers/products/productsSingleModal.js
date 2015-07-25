@@ -120,7 +120,7 @@ groovepacks_controllers.
                 }
             });
             receiving_image_modal.result.then(function(data) {
-                myscope.init();
+                myscope.product_single_details(scope.products.single.basicinfo.id);
             });
         };
         scope.add_image = function () {
@@ -130,11 +130,11 @@ groovepacks_controllers.
             scope.products.single.images.splice(index,1);
             scope.update_single_product();
         };
-        scope.remove_instruction_image = function(index) {
-            scope.products.single.images[index].added_to_receiving_instructions = false;
-            products.single.update_image(scope.products.single.images[index]).then(function() {
-                myscope.init();
-            })
+        scope.remove_instruction_image = function(image) {
+            image.added_to_receiving_instructions = false;
+            products.single.update_image(image).then(function() {
+                myscope.product_single_details(scope.products.single.basicinfo.id);
+            });
         };
         scope.$on("fileSelected", function (event, args) {
             $("input[type='file']").val('');

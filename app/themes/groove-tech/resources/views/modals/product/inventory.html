@@ -56,10 +56,10 @@
                     </div>
                     <div class="col-sm-12 form-group">
                         <div class="controls col-sm-12">
-                            <div class="single-image-clickable" ng-model="products_inv_manager.single.images" ng-class="{'primary-image': $index==0}" ng-repeat="image in products_inv_manager.single.images" ng-hide="image.added_to_receiving_instructions==0">
+                            <div class="single-image-clickable" ng-model="products_inv_manager.single.images" ng-repeat="image in products_inv_manager.single.images | filter:{added_to_receiving_instructions: true} track by image.id">
                                 <a ng-click="openLightboxModal($index)">
                                   <img ng-src="{{image.image}}" class="img-polaroid img-thumb img-responsive" alt="">
-                                  <div class="img-note mini-popover" popover-trigger="mouseenter" groov-popover="{{image.image_note}}"><div class="image-span">GREAT IMAGE</div></div>
+                                  <div class="img-note mini-popover" popover-trigger="mouseenter" groov-popover="{{image.image_note}}"></div>
                                 </a>
                             </div>
                         </div>

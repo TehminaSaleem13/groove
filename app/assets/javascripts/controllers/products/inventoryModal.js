@@ -1,5 +1,5 @@
-groovepacks_controllers.controller('inventoryModal', [ '$scope', 'hotkeys', '$state', '$stateParams', '$modalInstance', '$timeout','warehouses','inventory_manager','products','Lightbox',
-function($scope, hotkeys, $state,$stateParams,$modalInstance,$timeout,warehouses,inventory_manager,products,Lightbox) {
+groovepacks_controllers.controller('inventoryModal', [ '$scope', 'hotkeys', '$state', '$stateParams', '$modalInstance', '$timeout','warehouses','inventory_manager','products','Lightbox','$filter',
+function($scope, hotkeys, $state,$stateParams,$modalInstance,$timeout,warehouses,inventory_manager,products,Lightbox,$filter) {
     var myscope = {};
 
 
@@ -22,7 +22,8 @@ function($scope, hotkeys, $state,$stateParams,$modalInstance,$timeout,warehouses
     };
 
     $scope.openLightboxModal = function (index) {
-        Lightbox.openModal($scope.products_inv_manager.single.images, index);
+        var filtered_images = $filter('filter')($scope.products_inv_manager.single.images, {added_to_receiving_instructions: true});
+        Lightbox.openModal(filtered_images , index);
     };
 
     $scope.submit_recount_or_receive_inventory = function() {
@@ -50,9 +51,9 @@ function($scope, hotkeys, $state,$stateParams,$modalInstance,$timeout,warehouses
 
     $scope.set_image_data = function() {
         for (var i = 0; i < $scope.products_inv_manager.single.images.length; i++) {
-            $scope.products_inv_manager.single.images[i].url = $scope.products_inv_manager.single.images[i].image
-            $scope.products_inv_manager.single.images[i].caption = $scope.products_inv_manager.single.images[i].image_note
-        };
+            $scope.products_inv_manager.single.images[i].url = $scope.products_inv_manager.single.images[i].image;
+            $scope.products_inv_manager.single.images[i].caption = $scope.products_inv_manager.single.images[i].image_note;
+        }
     };
 
     $scope.check_if_inv_wh_is_associated_with_product = function() {
