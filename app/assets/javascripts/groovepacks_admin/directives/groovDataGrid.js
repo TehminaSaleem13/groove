@@ -1,4 +1,4 @@
-groovepacks_admin_directives.directive('groovDataGrid', ['$timeout','$http',function ($timeout,$http) {
+groovepacks_admin_directives.directive('groovDataGrid', ['$timeout','$http','$sce',function ($timeout,$http,$sce) {
     var default_options = function() {
         return {
             identifier: 'datagrid',

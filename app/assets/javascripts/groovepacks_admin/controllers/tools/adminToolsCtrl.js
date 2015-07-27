@@ -175,6 +175,14 @@ function( $scope, $http, $timeout, $location, $state, $cookies, $q, tenants) {
         return false;
     };
 
+    myscope.open_tenant_url = function(url,event) {
+        if(typeof event !='undefined') {
+            event.stopPropagation();
+        }
+        window.open("http://"+url);
+        myscope.init();
+    }
+
 
     myscope.init = function() {
         myscope.do_load_tentants = false;
@@ -223,7 +231,8 @@ function( $scope, $http, $timeout, $location, $state, $cookies, $q, tenants) {
                     
                 },
                 functions: {
-                    name: myscope.handle_click_fn
+                    name: myscope.handle_click_fn,
+                    open: myscope.open_tenant_url
                 }
 
             },
@@ -270,11 +279,13 @@ function( $scope, $http, $timeout, $location, $state, $cookies, $q, tenants) {
                 },
                 url: {
                     name: "URL",
-                    editable: false
+                    editable: false,
+                    transclude: '<a href="" ng-click="options.editable.functions.open(row[field],$event)" >{{row[field]}}</a>'
                 },
                 stripe_url: {
                     name: "Stripe",
-                    editable: false
+                    editable: false,
+                    transclude: '<a href="" ng-click="options.editable.functions.open(\'dashboard.stripe.com/customers/\'+row[field],$event)" >Stripe URL</a>'
                 }
             }
         };

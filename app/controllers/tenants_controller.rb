@@ -166,6 +166,14 @@
         @tenant_hash = Hash.new
         @tenant_hash['id'] = tenant.id
         @tenant_hash['name'] = tenant.name
+        plan_data = get_subscription_data(tenant.id)
+        @tenant_hash['plan'] = plan_data['plan']
+        @tenant_hash['stripe_url'] = plan_data['customer_id']
+        shipping_data = get_shipping_data(tenant.id)
+        @tenant_hash['total_shipped'] = shipping_data['shipped_current']
+        @tenant_hash['shipped_last'] = shipping_data['shipped_last']
+        @tenant_hash['max_allowed'] = shipping_data['max_allowed']
+        @tenant_hash['url'] = tenant.name + ".groovepacker.com"
 
         @tenants_result.push(@tenant_hash)
       end
@@ -183,5 +191,69 @@
       count['all'] = all
       count['search'] = 0
       count
+    end
+
+    def get_subscription_data(id)
+      @subscripton_result = Hash.new
+      current_tenant = Apartment::Tenant.current_tenant
+      Apartment::Tenant.switch()
+      tenant = Tenant.find(id)
+      unless tenant.nil?
+        unless tenant.subscription.nil?
+          subscription = tenant.subscription
+          case subscription.subscription_plan_id
+          when "groove-solo"
+            @subscripton_result['plan'] = "solo"
+          when "groove-duo"
+            @subscripton_result['plan'] = "duo"
+          when "groove-trio"
+            @subscripton_result['plan'] = "trio"
+          when "groove-quinet"
+            @subscripton_result['plan'] = "quinet"
+          when "groove-symphony"
+            @subscripton_result['plan'] = "symphony"    
+          when "annual-groove-solo"
+            @subscripton_result['plan'] = "annual-solo"
+          when "annual-groove-duo"
+            @subscripton_result['plan'] = "annual-duo"
+          when "annual-groove-trio"
+            @subscripton_result['plan'] = "annual-trio"
+          when "annual-groove-quinet"
+            @subscripton_result['plan'] = "annual-quinet"
+          when "annual-groove-symphony"
+            @subscripton_result['plan'] = "annual-symphony"
+          end
+          @subscripton_result['customer_id'] = subscription.stripe_customer_id
+        end
+      else
+        @subscripton_result['plan'] = ""
+      end
+      Apartment::Tenant.switch(current_tenant)
+      @subscripton_result
+    end
+
+    def get_shipping_data(id)
+      @shipping_result = Hash.new
+      @shipping_result['shipped_current'] = 0
+      @shipping_result['shipped_last'] = 0
+      @shipping_result['max_allowed'] = 0
+      tenant = Tenant.find(id)
+      unless tenant.nil?
+        begin
+          puts "about to switch db....."
+          Apartment::Tenant.switch(tenant.name)
+          unless AccessRestriction.all.first.nil?
+            access_restrictions = AccessRestriction.all
+            data_length = access_restrictions.length
+            @shipping_result['shipped_current'] = access_restrictions[data_length - 1].total_scanned_shipments
+            @shipping_result['shipped_last'] = access_restrictions[data_length - 2].total_scanned_shipments if data_length > 1
+            @shipping_result['max_allowed'] = access_restrictions[data_length - 1].num_shipments
+          end
+        rescue
+
+        end
+      end
+      Apartment::Tenant.switch()
+      @shipping_result
     end
   end
