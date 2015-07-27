@@ -51,7 +51,7 @@ source /usr/local/rvm/scripts/rvm
 
 cd ~/groove
 
-RAILS_ENV=${ENV} script/delayed_job stop
+RAILS_ENV=${ENV} bundle exec script/delayed_job stop
 git remote set-url origin git@bitbucket.org:jonnyclean/groovepacker.git
 
 git stash
@@ -59,8 +59,8 @@ git checkout ${ENV}
 git pull origin ${ENV}
 
 
-RAILS_ENV=${ENV} bundle install --deployment
-RAILS_ENV=${ENV} script/delayed_job -n ${NUM_JOBS} start
+RAILS_ENV=${ENV} bundle exec bundle install --deployment
+RAILS_ENV=${ENV} bundle exec script/delayed_job -n ${NUM_JOBS} start
 
 exit
 EOF

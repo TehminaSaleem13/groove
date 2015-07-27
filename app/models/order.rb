@@ -14,7 +14,7 @@ class Order < ActiveRecord::Base
   has_many :order_serials, :dependent => :destroy
   has_and_belongs_to_many :order_tags
   after_update :update_inventory_levels_for_items
-  before_save :update_non_hyphen_increment_id
+  before_save :perform_pre_save_checks
   after_save :process_unprocessed_orders
   validates_uniqueness_of :increment_id
 
@@ -597,8 +597,11 @@ class Order < ActiveRecord::Base
     true
   end
 
-  def update_non_hyphen_increment_id
+  def perform_pre_save_checks
     self.non_hyphen_increment_id = non_hyphenated_string(self.increment_id.to_s)
+    if self.status.nil?
+      self.status = 'onhold'
+    end
   end
 
   def scanned_items_count
