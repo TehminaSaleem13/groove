@@ -9,8 +9,8 @@ function($stateProvider, $urlRouterProvider,hotkeysProvider,cfpLoadingBarProvide
     $urlMatcherFactoryProvider.strictMode(false);
     $stateProvider
         .state('home',{url:'/home'})
-        .state('tools',{url:'/tools', templateUrl:'/assets/admin_views/base.html'})
-        .state('tools.admin_tools',{url:'/admin_tools',templateUrl:'/assets/admin_views/tools/admin_tools.html', controller:'adminToolsCtrl'});
+        .state('tools',{url:'/tools/admin_tools', templateUrl:'/assets/admin_views/base.html', controller:'adminToolsCtrl'})
+        // .state('tools.admin_tools',{url:'/admin_tools',templateUrl:'/assets/admin_views/base.html', controller:'adminToolsCtrl'});
 
     hotkeysProvider.cheatSheetHotkey =['mod+f1','g','G'];
     hotkeysProvider.cheatSheetDescription = '(or \'g\') Show / hide this help menu';
