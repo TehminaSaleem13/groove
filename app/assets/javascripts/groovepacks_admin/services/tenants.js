@@ -34,19 +34,6 @@ groovepacks_admin_services.factory('tenants',['$http','notification','editable',
 
     //list related functions
     var get_list = function(tenants,page) {
-        return $http.get("/tenants/getinfo.json").success(
-            function(data) {
-                if(data.status) {
-                    tenants.list = data.tenants;
-                    tenants.tenants_count = data.tenants.length;
-                } else {
-                    notification.notify("Can't load list of tenants",0);
-                }
-            }
-        ).error(notification.server_error);
-    };
-
-    var get_list = function(tenants,page) {
         var url = '';
         var setup = tenants.setup;
         if(typeof page != 'undefined' && page > 0) {
@@ -125,45 +112,6 @@ groovepacks_admin_services.factory('tenants',['$http','notification','editable',
         return total_items;
     };
 
-    var update_list = function(action,products) {
-        if(['update_status','delete','duplicate','barcode','receiving_label','update_per_product'].indexOf(action) != -1) {
-            products.setup.productArray = [];
-            for(var i =0; i < products.selected.length; i++) {
-                if (products.selected[i].checked == true) {
-                    products.setup.productArray.push({id: products.selected[i].id});
-                }
-            }
-            var url = '';
-            if(action == "delete") {
-                url = '/products/deleteproduct.json';
-            } else if(action =="duplicate") {
-                url = '/products/duplicateproduct.json';
-            } else if(action == "update_status") {
-                url = '/products/changeproductstatus.json';
-            } else if(action == "barcode") {
-                url = '/products/generatebarcode.json';
-            } else if(action == "receiving_label") {
-                url = '/products/print_receiving_label.json';
-            } else if(action == 'update_per_product') {
-                url = '/products/scan_per_product.json';
-            }
-
-            return $http.post(url,products.setup).success(function(data) {
-                if(data.status) {
-                    notification.notify(success_messages[action],1);
-                    products.setup.select_all =  false;
-                    products.setup.inverted = false;
-                    products.selected = [];
-                    if (action == "receiving_label") {
-                        $window.open(data.receiving_label_path);
-                    }
-                } else {
-                    notification.notify(data.messages,0);
-                }
-            }).error(notification.server_error);
-        }
-    };
-
     var select_list = function(tenants,from,to,state) {
         var url = '';
         var setup = tenants.setup;
@@ -208,66 +156,10 @@ groovepacks_admin_services.factory('tenants',['$http','notification','editable',
         }).error(notification.server_error);
     };
 
-    //single product related functions
-    var get_single = function(id,products) {
-        return $http.get('/products/getdetails/'+ id+'.json').success(function(data) {
-            if(data.product) {
-                if(typeof products.single['basicinfo'] != "undefined" && data.product.basicinfo.id == products.single.basicinfo.id) {
-                    angular.extend(products.single,data.product);
-                } else {
-                    products.single = {};
-                    products.single = data.product;
-                }
-            } else {
-                products.single = {};
-            }
-        }).error(notification.server_error).success(editable.force_exit).error(editable.force_exit);
-    };
-
-    //single product retrieval by barcode
-    var get_single_product_by_barcode = function(barcode,products) {
-        return $http.get('/products/getdetails.json?barcode='+barcode).success(function(data) {
-            products.single = {};
-            if(data.product) {
-                products.single = data.product;
-            }
-            else {
-               notification.notify('Cannot find product with barcode: '+barcode, 0);
-            }
-        }).error(notification.server_error);
-    };
-
-    var create_single = function(products) {
-        return $http.post('/products/create.json').success(function(data) {
-            products.single = {};
-            if(!data.status) {
-                notification.notify(data.messages,0);
-            }
-        }).error(notification.server_error);
-    };
-    var update_single = function(products,auto) {
-        if(typeof auto !== "boolean") {
-            auto = true;
-        }
-        return $http.post('/products/updateproduct.json', products.single).success(function(data) {
-            if(data.status) {
-                if(!auto) {
-                    notification.notify("Successfully Updated",1);
-                }
-            } else {
-                if(data.message) {
-                    notification.notify(data.message,0);
-                } else {
-                    notification.notify("Some error Occurred",0);
-                }
-            }
-        }).error(notification.server_error);
-    };
-
-    var select_single = function(products,row) {
+    var select_single = function(tenants,row) {
         var found = false;
-        for(var i = 0; i < products.selected.length; i++) {
-            if(products.selected[i].id == row.id) {
+        for(var i = 0; i < tenants.selected.length; i++) {
+            if(tenants.selected[i].id == row.id) {
                 found = i;
                 break;
             }
@@ -275,96 +167,13 @@ groovepacks_admin_services.factory('tenants',['$http','notification','editable',
 
         if(found !== false) {
             if (!row.checked) {
-                products.selected.splice(found,1);
+                tenants.selected.splice(found,1);
             }
         } else {
             if(row.checked) {
-                products.selected.push(row);
+                tenants.selected.push(row);
             }
         }
-    };
-
-    var add_image = function(products,image) {
-        return $http({
-        method: 'POST',
-        headers: { 'Content-Type': undefined },
-        url:'/products/addimage.json',
-        transformRequest: function (data) {
-            var request = new FormData();
-            for (var key in data) {
-                request.append(key,data[key]);
-            }
-            return request;
-        },
-        data: {product_id: products.single.basicinfo.id, product_image: image.file}
-        }).success(function(data) {
-            if(data.status) {
-                notification.notify("Successfully Updated",1);
-
-            } else {
-                notification.notify("Some error Occurred",0);
-            }
-
-        }).error(notification.server_error);
-    };
-
-    var set_alias = function (products,ids) {
-        return $http.post("products/setalias.json",{product_orig_id: ids[0] , product_alias_ids: [products.single.basicinfo.id]}).success(
-            function(data) {
-                if(data.status) {
-                    notification.notify("Successfully Updated",1);
-                } else {
-                    notification.notify("Some error Occurred",0);
-                }
-            }
-        ).error(notification.server_error);
-    };
-    var master_alias = function(products,selected) {
-        return $http.post("products/setalias.json",{product_orig_id: products.single.basicinfo.id , product_alias_ids: selected}).success(
-            function(data) {
-                if(data.status) {
-                    notification.notify("Successfully Updated",1);
-                } else {
-                    notification.notify("Some error Occurred",0);
-                }
-            }
-        ).error(notification.server_error);
-    };
-
-    var add_to_kit = function(kits,ids) {
-        return $http.post("/products/addproducttokit.json",{product_ids: ids , kit_id: kits.single.basicinfo.id}).success(
-            function(data) {
-                if(data.status) {
-                    notification.notify("Successfully Added",1);
-                } else {
-                    notification.notify(data.messages,0);
-                }
-            }
-        ).error(notification.server_error);
-    };
-
-    var remove_from_kit = function(products,skus) {
-        return $http.post('/products/removeproductsfromkit.json',{kit_id: products.single.basicinfo.id, kit_products: skus }).success(function(data){
-            if(data.status) {
-                notification.notify("Successfully Removed",1);
-            } else {
-                notification.notify(data.messages,0);
-            }
-        }).error(notification.server_error);
-    };
-
-    var reset_single_obj = function(products) {
-        products.single = {};
-    };
-
-    var acknowledge_activity = function(activity_id) {
-        return $http.post('/product_kit_activities/acknowledge/'+activity_id, null).success(function(data) {
-            if(data.status) {
-                notification.notify("Activity Acknowledged.", 1);
-            } else {
-                notification.notify(data.messages, 0);
-            }
-        }).error(notification.server_error);
     };
 
     //Public facing API
@@ -378,27 +187,11 @@ groovepacks_admin_services.factory('tenants',['$http','notification','editable',
         list: {
             get: get_list,
             total_tenants:total_tenants_list,
-            update: update_list,
             select: select_list,
             update_node: update_list_node
         },
         single: {
-            get: get_single,
-            get_by_barcode: get_single_product_by_barcode,
-            create:create_single,
-            update:update_single,
-            select: select_single,
-            image_upload: add_image,
-            alias: set_alias,
-            master_alias: master_alias,
-            reset_obj: reset_single_obj,
-            kit:{
-                add: add_to_kit,
-                remove:remove_from_kit
-            },
-            activity: {
-                acknowledge: acknowledge_activity
-            }
+            select: select_single
         }
     };
 }]);

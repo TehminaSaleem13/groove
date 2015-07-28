@@ -30,92 +30,8 @@ function( $scope, $http, $timeout, $location, $state, $cookies, $q, tenants) {
         }).then(function(){myscope.get_tenants()});
     };
 
-    $scope.create_product = function () {
-        $scope.tenants.setup.search = '';
-        tenants.single.create($scope.tenants).success(function(data) {
-            if(data.status) {
-                $state.params.filter = 'new';
-                data.product.new_product = true;
-                myscope.handle_click_fn(data.product);
-            }
-        });
-    };
-
-    //Setup options
-    $scope.product_setup_opt = function(type,value) {
-        myscope.common_setup_opt(type,value,'product');
-    };
-
-    $scope.kit_setup_opt = function(type,value) {
-        myscope.common_setup_opt(type,value,'kit');
-    };
-
     $scope.handlesort = function(predicate) {
         myscope.common_setup_opt('sort',predicate,'tenant');
-    };
-
-    $scope.product_change_status = function(status) {
-        $scope.tenants.setup.status = status;
-        tenants.list.update('update_status',$scope.tenants).then(function(data) {
-            $scope.tenants.setup.status = "";
-            myscope.get_tenants();
-        });
-    };
-
-    $scope.product_delete = function() {
-        if (confirm('All orders with these product(s) will be put On Hold. Are you sure you want to delete the selected product(s)?')) {
-            tenants.list.update('delete',$scope.tenants).then(function(data) {
-                myscope.get_tenants();
-            });
-        }
-    };
-
-    $scope.product_receiving_label = function() {
-        tenants.list.update('receiving_label',$scope.tenants).then(function(data) {
-            myscope.get_tenants();
-        });
-    };
-
-    $scope.product_duplicate = function() {
-        tenants.list.update('duplicate',$scope.tenants).then(function(data) {
-            myscope.get_tenants();
-        });
-    };
-
-    $scope.product_barcode = function() {
-        tenants.list.update('barcode',$scope.tenants).then(function(data) {
-            myscope.get_tenants();
-        });
-    };
-
-    $scope.setup_child = function(childStateParams) {
-        if(typeof childStateParams['type'] == 'undefined') {
-            childStateParams['type'] = 'product';
-        }
-        myscope.select_tab(childStateParams['type']);
-        if(typeof childStateParams['filter']!='undefined') {
-            myscope.common_setup_opt('filter',childStateParams['filter'],childStateParams['type']);
-        } else if(typeof childStateParams['search']!='undefined') {
-            myscope.common_setup_opt('search',childStateParams['search'],childStateParams['type']);
-        }
-        if(typeof childStateParams['page']=='undefined' || childStateParams['page'] <= 0) {
-            childStateParams['page'] = 1;
-        }
-        if($scope.tenants.setup.select_all) {
-            $scope.select_all_toggle(false);
-        }
-        return myscope.get_tenants(childStateParams['page']);
-    };
-
-    /*
-     * Private methods
-     */
-    myscope.select_tab = function(type) {
-        var index = (type == 'kit')? 1 : ((type == 'inventory')? 2: 0);
-        for (var i = 0; i<$scope.tabs.length; i++) {
-          $scope.tabs[i].open = false;
-        }
-        $scope.tabs[index].open = true;
     };
 
     myscope.update_selected_count = function() {
@@ -296,13 +212,14 @@ function( $scope, $http, $timeout, $location, $state, $cookies, $q, tenants) {
             myscope.get_tenants(1);
         });
     };
-
+    
     myscope.get_tenants = function(page) {
         if(typeof page == 'undefined') {
             page = $state.params.page;
         }
         if($scope._can_load_tenants) {
             $scope._can_load_tenants = false;
+            $scope.gridOptions.selections.show_delete = myscope.show_delete();
             return tenants.list.get($scope.tenants,page).success(function(data) {
                 $scope.gridOptions.paginate.tenants_count = tenants.list.total_tenants($scope.tenants);
                 myscope.update_selected_count();

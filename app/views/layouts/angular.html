@@ -14,7 +14,7 @@
     <%= yield(:head) %>
     <%= airbrake_javascript_notifier %>
 </head>
-<% if Apartment::Tenant.current_tenant == 'groovepackeradmin' %>
+<% if Apartment::Tenant.current_tenant == 'groovepacks_production' %>
     <body class="container-well" ng-app="groovepacks_admin" ng-controller="appCtrl">
         <div class="logout-box fade" ng-show="show_logout_box">
         <div class="center-message">
