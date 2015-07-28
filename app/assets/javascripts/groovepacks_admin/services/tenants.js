@@ -96,8 +96,20 @@ groovepacks_admin_services.factory('tenants',['$http','notification','editable',
         ).error(notification.server_error);
     };
 
-    var update_setup = function() {
-
+    var update_setup = function(setup,type,value) {
+        if(type =='sort') {
+            if(setup[type] == value) {
+                if(setup.order == "DESC") {
+                    setup.order = "ASC";
+                } else {
+                    setup.order = "DESC";
+                }
+            } else {
+                setup.order = "DESC";
+            }
+        }
+        setup[type] = value;
+        return setup;
     };
 
     var total_tenants_list = function(tenants) {

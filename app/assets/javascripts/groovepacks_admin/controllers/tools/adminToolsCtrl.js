@@ -22,11 +22,11 @@ function( $scope, $http, $timeout, $location, $state, $cookies, $q, tenants) {
         }
     };
 
-    $scope.update_product_list = function(product, prop) {
+    $scope.update_tenants_list = function(tenant, prop) {
         tenants.list.update_node({
-            id: product.id,
+            id: tenant.id,
             var: prop,
-            value: product[prop]
+            value: tenant[prop]
         }).then(function(){myscope.get_tenants()});
     };
 
@@ -51,7 +51,7 @@ function( $scope, $http, $timeout, $location, $state, $cookies, $q, tenants) {
     };
 
     $scope.handlesort = function(predicate) {
-        myscope.common_setup_opt('sort',predicate,'product');
+        myscope.common_setup_opt('sort',predicate,'tenant');
     };
 
     $scope.product_change_status = function(status) {
@@ -296,19 +296,6 @@ function( $scope, $http, $timeout, $location, $state, $cookies, $q, tenants) {
             myscope.get_tenants(1);
         });
     };
-    // myscope.get_tenants = function(page) {
-    //     console.log("get_tenants");
-    //     $scope.gridOptions.selections.show_delete = myscope.show_delete();
-    //     return tenants.list.get($scope.tenants,page).success(function(response) {
-    //         console.log("response:"+response);
-    //         // tenants.list.get($scope.tenants,page);
-    //         $scope.gridOptions.list = $scope.tenants.list;
-    //         $scope.gridOptions.paginate.tenants_count = $scope.tenants.tenants_count;
-    //         console.log($scope.gridOptions.paginate.tenants_count);
-    //         myscope.update_selected_count();
-    //     }).error(function(){
-    //     });
-    // };
 
     myscope.get_tenants = function(page) {
         if(typeof page == 'undefined') {
@@ -330,6 +317,11 @@ function( $scope, $http, $timeout, $location, $state, $cookies, $q, tenants) {
             return req.promise;
         }
 
+    };
+
+    myscope.common_setup_opt = function(type,value,selector) {
+        tenants.setup.update($scope.tenants.setup,type,value);
+        myscope.get_tenants(1);
     };
 	myscope.init();
 }]);

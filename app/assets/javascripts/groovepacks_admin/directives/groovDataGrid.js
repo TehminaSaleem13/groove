@@ -1,4 +1,4 @@
-groovepacks_admin_directives.directive('groovDataGrid', ['$timeout','$http','$sce',function ($timeout,$http,$sce) {
+groovepacks_admin_directives.directive('groovDataGrid', ['$timeout','$http','$sce','settings',function ($timeout,$http,$sce,settings) {
     var default_options = function() {
         return {
             identifier: 'datagrid',
@@ -115,10 +115,10 @@ groovepacks_admin_directives.directive('groovDataGrid', ['$timeout','$http','$sc
                 }
             };
 
-            // scope.update = function() {
-            //     myscope.make_theads(scope.theads);
-            //     settings.column_preferences.save(scope.options.identifier,scope.theads);
-            // };
+            scope.update = function() {
+                myscope.make_theads(scope.theads);
+                settings.column_preferences.save(scope.options.identifier,scope.theads);
+            };
 
             scope.compile = function(ind,field) {
 
