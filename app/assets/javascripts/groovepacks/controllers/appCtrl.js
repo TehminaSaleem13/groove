@@ -221,6 +221,7 @@ groovepacks_controllers.
 
         $scope.is_active_tab = function(string) {
                 var name = $state.current.name;
+                console.log('name: ' + name);
                 if(name.indexOf('.') != -1) {
                     name = name.substr(0, name.indexOf('.'))
                 }

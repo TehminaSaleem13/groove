@@ -4,6 +4,8 @@ class HomeController < ApplicationController
   	#if current user is not signed in, show login page
   	if !user_signed_in?
   		redirect_to new_user_session_path
+    else
+      @groovepacks_admin = (Apartment::Tenant.current_tenant == 'groovepacks_production')
   	end
 
   end
