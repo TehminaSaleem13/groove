@@ -42,7 +42,6 @@
       @result['status'] = true
       if !params[:search].nil? && params[:search] != ''
         @tenants = do_search(params, false)
-        puts "@tenants: " + @tenants.inspect
         @result['tenants'] = make_tenants_list(@tenants['tenants'])
         @result['tenants_count'] = get_tenants_count
         @result['tenants_count']['search'] = @tenants['count']
@@ -50,7 +49,7 @@
         @result['status'] = false
         @result['message'] = 'Improper search string'
       end
-      puts "@result: " + @result.inspect
+
       respond_to do |format|
         format.html # show.html.erb
         format.json { render json: @result }
@@ -143,7 +142,6 @@
 
       result_rows = Tenant.find_by_sql(base_query+query_add)
 
-      puts "result_rows: " + result_rows.inspect
       if results_only
         result = result_rows
       else
@@ -155,7 +153,6 @@
           result['count'] = Tenant.count_by_sql('SELECT count(*) as count from('+base_query+') as tmp')
         end
       end
-      puts "result: " + result.inspect
 
       return result
     end
@@ -240,7 +237,6 @@
       tenant = Tenant.find(id)
       unless tenant.nil?
         begin
-          puts "about to switch db....."
           Apartment::Tenant.switch(tenant.name)
           unless AccessRestriction.all.first.nil?
             access_restrictions = AccessRestriction.all
