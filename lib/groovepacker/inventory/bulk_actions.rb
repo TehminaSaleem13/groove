@@ -4,6 +4,21 @@ module Groovepacker
 
       include Groovepacker::Inventory::Helper
 
+      def process_unprocessed
+        unless inventory_tracking_enabled?
+          return true
+        end
+        order_items = OrderItem.where(inv_status: OrderItem::DEFAULT_INV_STATUS)
+        order_items.each do |single_order_item|
+          Groovepacker::Inventory::Orders.allocate_item(single_order_item, true)
+          if Order::UNALLOCATE_STATUSES.include?(single_order_item.order.status)
+            Groovepacker::Inventory::Orders.deallocate_item(single_order_item, true)
+          elsif Order::SOLD_STATUSES.include?(single_order_item.order.status)
+            Groovepacker::Inventory::Orders.process_sell_item(single_order_item, 1)
+          end
+        end
+      end
+
       def process_all(tenant, bulk_actions_id)
         Apartment::Tenant.switch(tenant)
         bulk_action = GrooveBulkActions.find(bulk_actions_id)

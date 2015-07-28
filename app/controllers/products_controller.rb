@@ -506,7 +506,7 @@ class ProductsController < ApplicationController
       groove_bulk_actions.activity = 'status_update'
       groove_bulk_actions.save
 
-      bulk_actions.delay(:run_at =>1.seconds.from_now).status_update(Apartment::Tenant.current_tenant, params, groove_bulk_actions.id)
+      bulk_actions.delay(:run_at =>1.seconds.from_now).status_update(Apartment::Tenant.current, params, groove_bulk_actions.id)
 
     else
       @result['status'] = false
@@ -531,7 +531,7 @@ class ProductsController < ApplicationController
       groove_bulk_actions.activity = 'delete'
       groove_bulk_actions.save
 
-      bulk_actions.delay(:run_at =>1.seconds.from_now).delete(Apartment::Tenant.current_tenant, params, groove_bulk_actions.id, current_user.username)
+      bulk_actions.delay(:run_at =>1.seconds.from_now).delete(Apartment::Tenant.current, params, groove_bulk_actions.id, current_user.username)
     else
       @result['status'] = false
       @result['messages'].push('You do not have enough permissions to delete products')
@@ -555,7 +555,7 @@ class ProductsController < ApplicationController
       groove_bulk_actions.identifier = 'product'
       groove_bulk_actions.activity = 'duplicate'
       groove_bulk_actions.save
-      bulk_actions.delay(:run_at =>1.seconds.from_now).duplicate(Apartment::Tenant.current_tenant, params, groove_bulk_actions.id)
+      bulk_actions.delay(:run_at =>1.seconds.from_now).duplicate(Apartment::Tenant.current, params, groove_bulk_actions.id)
     else
       @result['status'] = false
       @result['messages'].push('You do not have enough permissions to duplicate products')
@@ -1268,7 +1268,7 @@ class ProductsController < ApplicationController
         @image = ProductImage.new
 
           #image_directory = "public/images"
-          current_tenant = Apartment::Tenant.current_tenant
+          current_tenant = Apartment::Tenant.current
           file_name = Time.now.strftime('%d_%b_%Y_%I__%M_%p')+@product.id.to_s+params[:product_image].original_filename
           GroovS3.create_image(current_tenant,file_name,params[:product_image].read,params[:product_image].content_type)
           #path = File.join(image_directory, file_name )
@@ -1406,8 +1406,8 @@ class ProductsController < ApplicationController
       intangible_setting_enabled = scan_pack_setting.intangible_setting_enabled
       intangible_string = scan_pack_setting.intangible_string
 
-      action_intangible.delay(:run_at =>1.seconds.from_now).update_intangibleness(Apartment::Tenant.current_tenant, params, intangible_setting_enabled, intangible_string)
-      # action_intangible.update_intangibleness(Apartment::Tenant.current_tenant, params, intangible_setting_enabled, intangible_string)
+      action_intangible.delay(:run_at =>1.seconds.from_now).update_intangibleness(Apartment::Tenant.current, params, intangible_setting_enabled, intangible_string)
+      # action_intangible.update_intangibleness(Apartment::Tenant.current, params, intangible_setting_enabled, intangible_string)
     else
       result['status'] = false
       result['messages'].push('You do not have enough permissions to edit product status')

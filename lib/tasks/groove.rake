@@ -69,7 +69,7 @@ namespace :groove do
           if general_setting.inventory_tracking?
             product_inventory_warehouses = ProductInventoryWarehouses.all
             product_inventory_warehouses.each do |single_warehouse|
-              inventory_data << { id: single_warehouse.id, quantity_on_hand: single_warehouse.available_inv}
+              inventory_data << { id: single_warehouse.id, quantity_on_hand: single_warehouse.quantity_on_hand}
             end
             bulk_action.do_unprocess_all
             product_inventory_warehouses = nil

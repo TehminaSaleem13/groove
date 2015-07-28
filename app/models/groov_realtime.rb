@@ -24,7 +24,7 @@ class GroovRealtime
     def emit_to_channel(scope,data,uid)
       channel = 'groovepacker'
       if [:tenant,:user].include?(scope)
-        channel+= ':'+Apartment::Tenant.current_tenant
+        channel+= ':'+Apartment::Tenant.current
       end
       if scope == :user
         channel+= ':'+ uid.to_s

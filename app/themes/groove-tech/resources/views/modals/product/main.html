@@ -214,14 +214,14 @@
                 <label class="control-label col-sm-4 remove_padding_left"><br/><br/>Product Receiving Instructions</label>
                 <div class="controls col-sm-8 remove_padding">
                     <i class="info icon-large glyphicon glyphicon-info-sign pull-right" popover-trigger="mouseenter" popover="{{translations.tooltips.product_receiving_instructions}}"></i>
-                    <div text-angular ng-model="products.single.basicinfo.product_receiving_instructions" ng-blur="update_single_product()"></div>
+                    <div text-angular ta-toolbar="[['html','h1','h2','h3','h4','h5','h6','p','ol','ul'],['bold','italics','underline','strikeThrough'],['justifyLeft','justifyCenter','justifyRight','indent','outdent'],['wordcount','charcount']]" ng-model="products.single.basicinfo.product_receiving_instructions" ng-blur="update_single_product()"></div>
                 </div>
                 <div class="form-group">
                     <label class="control-label col-sm-4"></label>
-                    <div class="controls col-sm-8"  ng-class="{'primary-image': $index==0}" ng-model="products.single.images">
-                        <div class="img-thumbnail" ng-hide="image.added_to_receiving_instructions==0" ng-repeat="image in products.single.images">
+                    <div class="controls col-sm-8">
+                        <div class="img-thumbnail" ng-repeat="image in products.single.images | filter:{added_to_receiving_instructions:true} track by image.id" >
                             <img ng-src="{{ image.image }}" class="img-polaroid img-thumb img-responsive" style="border: 1px solid grey;"/>
-                            <i class="glyphicon glyphicon-remove" ng-click="remove_instruction_image($index)"></i>
+                            <i class="glyphicon glyphicon-remove" ng-click="remove_instruction_image(image)"></i>
                         </div>
                         <button class="modal-save-button" ng-click="add_image_for_receiving_instructions()">Add Image</button>
                     </div>

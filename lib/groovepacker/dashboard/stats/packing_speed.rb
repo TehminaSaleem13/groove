@@ -45,8 +45,7 @@ module Groovepacker
           avg_stats = []
           @users = User.all
 
-          pallete = Groovepacker::Dashboard::Color::Pallete.new(
-            @users.count, "006699")
+          pallete = Groovepacker::Dashboard::Color::Pallete.new
           
           if @duration == -1
             start_time = nil
@@ -58,7 +57,7 @@ module Groovepacker
           @users.each_with_index do |user, index|
             stat = {}
             stat[:key] = user.username
-            stat[:color] = "#" + pallete.get(index)
+            stat[:color] = pallete.get(index)
             result = get_packing_speed_stats(user, start_time, end_time)
             stat[:values] = result[:packing_stats]
             avg_stats.push(key: user.username, 

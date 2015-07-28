@@ -20,7 +20,7 @@ groovepacks_controllers.
 
         scope.update_image_note = function (index) {
             products.single.update_image(scope.products.single.images[index]);
-        }
+        };
 
         scope.select_unselect = function (image) {
             for (var i = 0; i < scope.products.single.images.length; i++) {
@@ -30,7 +30,7 @@ groovepacks_controllers.
             };
             image.checked = !image.checked;
             scope.products.single.selected_image = image;
-        }
+        };
 
         myscope.init = function() {
             scope.arrayEditableOptions = {

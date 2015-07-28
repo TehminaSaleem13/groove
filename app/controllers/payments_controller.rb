@@ -33,6 +33,6 @@ class PaymentsController < ApplicationController
   private
 
   def get_current_tenant
-    @current_tenant = Apartment::Tenant.current_tenant
+    @current_tenant = Apartment::Tenant.current
   end
 end

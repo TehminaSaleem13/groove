@@ -62,13 +62,12 @@ git checkout ${ENV}
 git pull origin ${ENV}
 
 rm vendor/assets/components/**/*.js.{gzip,map}
-RAILS_ENV=${ENV} bundle install --deployment
-RAILS_ENV=${ENV} rake db:migrate
-RAILS_ENV=${ENV} rake db:seed
-RAILS_ENV=${ENV} rake groove:upgrade
-RAILS_ENV=${ENV} rake assets:clean
-RAILS_ENV=${ENV} rake assets:precompile
-RAILS_ENV=${ENV} rake fs:delete_files
+RAILS_ENV=${ENV} bundle exec bundle install --deployment
+RAILS_ENV=${ENV} bundle exec rake db:migrate
+RAILS_ENV=${ENV} bundle exec rake db:seed
+RAILS_ENV=${ENV} bundle exec rake assets:clean
+RAILS_ENV=${ENV} bundle exec rake assets:precompile
+RAILS_ENV=${ENV} bundle exec rake fs:delete_files
 
 exit
 EOF

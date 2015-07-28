@@ -28,9 +28,9 @@ class ApplicationController < ActionController::Base
     #store session to redis
     if current_user
       # an unique MD5 key
-      cookies['_validation_token_key'] = Digest::MD5.hexdigest("#{current_user.id}:#{session.to_json}:#{Apartment::Tenant.current_tenant}")
+      cookies['_validation_token_key'] = Digest::MD5.hexdigest("#{current_user.id}:#{session.to_json}:#{Apartment::Tenant.current}")
       # store session data or any authentication data you want here, generate to JSON data
-      stored_session = JSON.generate({'tenant'=>Apartment::Tenant.current_tenant, 'user_id'=> current_user.id, 'username'=>current_user.username})
+      stored_session = JSON.generate({'tenant'=>Apartment::Tenant.current, 'user_id'=> current_user.id, 'username'=>current_user.username})
       $redis.hset('groovehacks:session',cookies['_validation_token_key'],stored_session)
       if session[:redirect_uri]
         session[:redirect_uri]
