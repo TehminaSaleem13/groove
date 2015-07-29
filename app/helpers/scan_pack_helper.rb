@@ -19,7 +19,7 @@ module ScanPackHelper
     if !input.nil? && input != ""
       orders = Order.where(['increment_id = ? or non_hyphen_increment_id =?', input, input])
       if orders.length==0 && scanpack_settings.scan_by_tracking_number
-        orders = Order.where(['tracking_num = ?', input])
+        orders = Order.where(['tracking_num like ?', '%'+input+'%'])
       end
       single_order = nil
       single_order_result = Hash.new
