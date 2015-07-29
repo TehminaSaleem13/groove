@@ -50,6 +50,8 @@ Groovepacks::Application.routes.draw do
 
   get "home/index"
 
+  get "/404", :to => "specials#error_action"
+
   devise_for :users
 
   # The priority is based upon order of creation:
@@ -75,6 +77,12 @@ Groovepacks::Application.routes.draw do
     # member do
     #   put 'add_new_card'
     # end
+  end
+
+  resources :specials do
+    collection do
+      get 'error_action'
+    end
   end
 
   resources :order_activities do
