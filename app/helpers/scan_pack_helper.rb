@@ -21,9 +21,11 @@ module ScanPackHelper
       orders = Order.where(['increment_id = ? or non_hyphen_increment_id =?', input, input])
       if orders.length==0 && scanpack_settings.scan_by_tracking_number
         all_orders = Order.where("orders.tracking_num IS NOT NULL and orders.tracking_num <> ''")
-        all_orders.each do |order|
-          if order.tracking_num.in? (input)
-            orders << order
+        unless all_orders.empty?
+          all_orders.each do |order|
+            if order.tracking_num.in? (input)
+              orders << order
+            end
           end
         end
       end
