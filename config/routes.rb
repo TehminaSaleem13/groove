@@ -50,7 +50,11 @@ Groovepacks::Application.routes.draw do
 
   get "home/index"
 
-  get "/404", :to => "specials#error_action"
+  get "/404", :to => "specials#error_404"
+
+  get "/422", :to => "specials#error_422"
+
+  get "/500", :to => "specials#error_500"
 
   devise_for :users
 
