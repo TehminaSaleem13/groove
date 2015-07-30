@@ -284,7 +284,7 @@ module ProductsHelper
     if sort_key == 'sku'
       products = Product.find_by_sql("SELECT products.* FROM products LEFT JOIN product_skus ON ("+
                                          "products.id = product_skus.product_id ) "+kit_query+
-                                         status_filter_text+" ORDER BY product_skus.sku "+sort_order+query_add)
+                                         status_filter_text+"GROUP BY product_id ORDER BY product_skus.sku "+sort_order+query_add)
     elsif sort_key == 'store_type'
       products = Product.find_by_sql("SELECT products.* FROM products LEFT JOIN stores ON ("+
                                          "products.store_id = stores.id ) "+kit_query+

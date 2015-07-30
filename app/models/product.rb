@@ -16,7 +16,8 @@ class Product < ActiveRecord::Base
     :disable_conf_req,
     :store,
     :weight,
-    :add_to_any_order
+    :add_to_any_order,
+    :is_intangible
 
   has_many :product_skus, :dependent => :destroy
   has_many :product_cats, :dependent => :destroy
