@@ -227,6 +227,11 @@ module Groovepacker
             product = Product.create(name: item["name"], store: store,
               store_product_id: 0)
             product.product_skus.create(sku: sku)
+
+            if store.shipstation_rest_credential.gen_barcode_from_sku
+              product.product_barcodes.create(barcode: sku)
+            end
+
             #Build Image
             unless item["imageUrl"].nil? || product.product_images.length > 0
               product.product_images.create(image: item["imageUrl"])

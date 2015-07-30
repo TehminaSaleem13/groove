@@ -1,5 +1,5 @@
 class ShipstationRestCredential < ActiveRecord::Base
-  attr_accessible :api_key, :api_secret, :store_id, :shall_import_, :regular_import_range
+  attr_accessible :api_key, :api_secret, :store_id, :shall_import_, :regular_import_range, :gen_barcode_from_sku
   validates_presence_of :api_key, :api_secret, :regular_import_range
 
   belongs_to :store
