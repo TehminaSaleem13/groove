@@ -228,7 +228,8 @@ module Groovepacker
               store_product_id: 0)
             product.product_skus.create(sku: sku)
 
-            if store.shipstation_rest_credential.gen_barcode_from_sku
+            if store.shipstation_rest_credential.gen_barcode_from_sku &&
+                ProductBarcode.where(barcode: sku).empty?
               product.product_barcodes.create(barcode: sku)
             end
 
