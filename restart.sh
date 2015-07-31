@@ -55,7 +55,7 @@ source /usr/local/rvm/scripts/rvm
 
 cd ~/groove
 
-git remote set-url origin git@bitbucket.org:jonnyclean/groovepacker.git
+git remote set-url origin git@bitbucket.org:groovepacker/groovepacker.git
 
 git stash
 git checkout ${ENV}
