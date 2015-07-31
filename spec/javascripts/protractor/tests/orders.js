@@ -81,7 +81,7 @@ describe('Orders:',function() {
             //     });
             // });
             // it('Right click on the Status makes the field editable for the order',function() {
-            //     status.value = "On Hold";
+            //     status.value = "Action Required";
 
             //     element.all(by.repeater('field in theads')).getText().then (function(text) {
             //         var titles_count_status = text.indexOf('Status');
@@ -95,7 +95,7 @@ describe('Orders:',function() {
             //             // browser.actions().click(protractor.Button.RIGHT).perform();
             //             // browser.actions().click().perform();
             //             browser.sleep(1000);
-            //             // td.element(by.cssContainingText('.ng-scope .ng-binding.ng-scope .ng-isolate-scope.ng-pristine.ng-valid .ng-scope .tag-bubble.false-tag-bubble.input-text .span3.ng-pristine.ng-valid option','On HOld')).click();
+            //             // td.element(by.cssContainingText('.ng-scope .ng-binding.ng-scope .ng-isolate-scope.ng-pristine.ng-valid .ng-scope .tag-bubble.false-tag-bubble.input-text .span3.ng-pristine.ng-valid option','Action Required')).click();
             //             // browser.actions().sendKeys(status.value).perform();
             //             browser.actions().sendKeys(protractor.Key.ARROW_DOWN).perform();
             //             // table.exit_button = element(by.className("top-message"));
@@ -104,7 +104,7 @@ describe('Orders:',function() {
             //             browser.executeScript('window.scrollTo(0,0);').then(function () {
             //                 // table.exit_button = element(by.className("top-message"));
             //                 // table.exit_button.element(by.buttonText('Exit Edit Mode')).click();
-            //                 element(by.cssContainingText('.panel-collapse.in .panel-body li','On Hold')).click();
+            //                 element(by.cssContainingText('.panel-collapse.in .panel-body li','Action Required')).click();
             //                 table.tbody = element.all(by.tagName("tbody")).first();
             //                 table.row = table.tbody.all(by.tagName("tr")).first();
             //                 table.order_number1 = table.row.all(by.tagName('td')).get(titles_count_order_number).getText();
@@ -148,7 +148,7 @@ describe('Orders:',function() {
                     status.parent = status.button.element(by.xpath(".."));
                     status.ul = status.parent.element(by.tagName("ul"));
                     status.li = status.ul.all(by.tagName("li")).get(1).click();
-                    element(by.cssContainingText('.panel-collapse.in .panel-body li','On Hold')).click();
+                    element(by.cssContainingText('.panel-collapse.in .panel-body li','Action Required')).click();
 
                     table.tbody = element.all(by.tagName("tbody")).first();
                     table.row = table.tbody.all(by.tagName("tr")).first();
@@ -353,7 +353,7 @@ describe('Orders:',function() {
                     });
                 });
                 it('\'Remove Selected Items\', removes items from the existing items list',function() {
-                    // element(by.cssContainingText('.panel-collapse.in .panel-body li','On Hold')).click();
+                    // element(by.cssContainingText('.panel-collapse.in .panel-body li','Action Required')).click();
                     table.list_table = element.all(by.tagName('table')).first();
                     table.thead = table.list_table.element(by.tagName('thead'));
                     table.thead.all(by.repeater('field in theads')).getText().then (function(text) {

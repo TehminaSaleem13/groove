@@ -171,14 +171,14 @@ describe('Products:',function() {
         it('Click on a title in the list to view it in the table',function() {
             var elem = {};
             elem.list_elements = element.all(by.repeater('field in options.all_fields'));
-            elem.list_elements.get(6).click();
+            elem.list_elements.get(7).click();
 
             table.list_table = element.all(by.tagName('table')).first();
             table.thead = table.list_table.element(by.tagName('thead'));
             table.thead.all(by.repeater('field in theads')).getText().then (function(text) {
                 expect(text).toContain('Tertiary Location');
                 elem.list_elements = element.all(by.repeater('field in options.all_fields'));
-                elem.list_elements.get(6).click();
+                elem.list_elements.get(7).click();
             });
         });
     });
@@ -348,41 +348,41 @@ describe('Products:',function() {
                 });
             });
         });
-        it('Modifying the available inventory in product modal reflects in the products list',function() {
-            table.list_table = element.all(by.tagName('table')).first();
-            table.thead = table.list_table.element(by.tagName('thead'));
-            table.thead.all(by.repeater('field in theads')).getText().then (function(text) {
-                new openProductModal(text);
-                element.all(by.cssContainingText('.modal-dialog.modal-lg .modal-content .modal-body .container-fluid.form-horizontal table','Warehouse Name')).first().then(function(inventory_table) {
-                    inventory_table.all(by.repeater('field in theads')).getText().then (function(text) {
-                        table.titles_available_inv_count = text.indexOf('Available Inv');
-                        table.tbody = inventory_table.all(by.tagName("tbody")).first();
-                        table.row = table.tbody.all(by.tagName("tr")).first();
+        // it('Modifying the available inventory in product modal reflects in the products list',function() {
+        //     table.list_table = element.all(by.tagName('table')).first();
+        //     table.thead = table.list_table.element(by.tagName('thead'));
+        //     table.thead.all(by.repeater('field in theads')).getText().then (function(text) {
+        //         new openProductModal(text);
+        //         element.all(by.cssContainingText('.modal-dialog.modal-lg .modal-content .modal-body .container-fluid.form-horizontal table','Warehouse Name')).first().then(function(inventory_table) {
+        //             inventory_table.all(by.repeater('field in theads')).getText().then (function(text) {
+        //                 table.titles_available_inv_count = text.indexOf('Available Inv');
+        //                 table.tbody = inventory_table.all(by.tagName("tbody")).first();
+        //                 table.row = table.tbody.all(by.tagName("tr")).first();
                     
-                        table.row.all(by.tagName('td')).get(table.titles_available_inv_count).then(function(td) {
-                            browser.actions().mouseMove(td).perform();
-                            browser.actions().click(protractor.Button.RIGHT).perform();
-                            browser.actions().sendKeys(protractor.Key.ARROW_UP).perform();
+        //                 table.row.all(by.tagName('td')).get(table.titles_available_inv_count).then(function(td) {
+        //                     browser.actions().mouseMove(td).perform();
+        //                     browser.actions().click(protractor.Button.RIGHT).perform();
+        //                     browser.actions().sendKeys(protractor.Key.ARROW_UP).perform();
 
-                            table.exit_button = element(by.className("top-message"));
-                            table.exit_button.element(by.buttonText('Exit Edit Mode')).click();
-                            browser.sleep(1000);
-                            table.available_inv = table.row.all(by.tagName('td')).get(table.titles_available_inv_count).getText();
-                            element(by.className("close-btn")).click();
-                            table.list_table = element.all(by.tagName('table')).first();
-                            table.thead = table.list_table.element(by.tagName('thead'));
-                            table.thead.all(by.repeater('field in theads')).getText().then (function(text) {
-                                table.titles_available_inv_count = text.indexOf('Avbl Inv');
-                                table.tbody = element.all(by.tagName("tbody")).first();
-                                table.row = table.tbody.all(by.tagName("tr")).first();
-                                table.available_inv1 = table.row.all(by.tagName('td')).get(table.titles_available_inv_count).getText();
-                                expect(String(table.available_inv1)).toEqual(String(table.available_inv).trim());
-                            });
-                        });
-                    });
-                });
-            });
-        });
+        //                     table.exit_button = element(by.className("top-message"));
+        //                     table.exit_button.element(by.buttonText('Exit Edit Mode')).click();
+        //                     browser.sleep(1000);
+        //                     table.available_inv = table.row.all(by.tagName('td')).get(table.titles_available_inv_count).getText();
+        //                     element(by.className("close-btn")).click();
+        //                     table.list_table = element.all(by.tagName('table')).first();
+        //                     table.thead = table.list_table.element(by.tagName('thead'));
+        //                     table.thead.all(by.repeater('field in theads')).getText().then (function(text) {
+        //                         table.titles_available_inv_count = text.indexOf('Avbl Inv');
+        //                         table.tbody = element.all(by.tagName("tbody")).first();
+        //                         table.row = table.tbody.all(by.tagName("tr")).first();
+        //                         table.available_inv1 = table.row.all(by.tagName('td')).get(table.titles_available_inv_count).getText();
+        //                         expect(String(table.available_inv1)).toEqual(String(table.available_inv).trim());
+        //                     });
+        //                 });
+        //             });
+        //         });
+        //     });
+        // });
     });
     var selectFirstRowInList = function() {
         table.tbody = element.all(by.tagName("tbody")).first();
