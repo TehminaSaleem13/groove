@@ -300,11 +300,8 @@ module Groovepacker
 								if !mapping['product_instructions'].nil? #&& mapping['product_instructions'][:action] == 'overwrite'
 									duplicate_product.spl_instructions_4_packer = record[:spl_instructions_4_packer]
 								end
-								if record[:skus].length > 0 && record[:barcodes].length > 0
-									duplicate_product.status = 'active'
-								else
-									products_for_status_update << duplicate_product
-								end
+
+								products_for_status_update << duplicate_product
 								duplicate_product.save
 								success_updated = success_updated + 1
 
