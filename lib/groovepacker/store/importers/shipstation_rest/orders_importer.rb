@@ -244,6 +244,8 @@ module Groovepacker
               )
             end
 
+            product.set_product_status
+
             product
           end
         end
