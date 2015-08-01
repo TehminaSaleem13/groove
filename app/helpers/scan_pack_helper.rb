@@ -20,14 +20,7 @@ module ScanPackHelper
     if !input.nil? && input != ""
       orders = Order.where(['increment_id = ? or non_hyphen_increment_id =?', input, input])
       if orders.length==0 && scanpack_settings.scan_by_tracking_number
-        all_orders = Order.where("orders.tracking_num IS NOT NULL and orders.tracking_num <> ''")
-        unless all_orders.empty?
-          all_orders.each do |order|
-            if order.tracking_num.in? (input)
-              orders << order
-            end
-          end
-        end
+        orders = Order.where('tracking_num LIKE ? ', '%'+input+'%')
       end
       single_order = nil
       single_order_result = Hash.new
@@ -50,7 +43,7 @@ module ScanPackHelper
             single_order = matched_single
           end
           unless ['scanned','cancelled'].include?(matched_single.status)
-            single_order_result['matched_orders'].push(matched_single.increment_id)
+            single_order_result['matched_orders'].push(matched_single)
           end
         end
       end
