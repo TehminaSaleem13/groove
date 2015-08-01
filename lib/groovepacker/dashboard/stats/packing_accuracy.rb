@@ -85,6 +85,11 @@ module Groovepacker
                 '#{end_time.utc.to_formatted_s(:db)}'"
             end
 
+            order_result = ActiveRecord::Base.connection.exec_query("SELECT date(orders.scanned_on) AS date_scanned_on,
+            COUNT(*) AS order_item_count FROM orders WHERE orders.packing_user_id = #{user.id}
+            AND (#{order_scanned_on_predicate})
+            GROUP BY date(scanned_on)")
+
             order_items_result = ActiveRecord::Base.connection.exec_query("SELECT date(orders.scanned_on) AS date_scanned_on,
             COUNT(*) AS order_item_count FROM orders
             INNER JOIN order_items ON order_items.order_id = orders.id WHERE orders.packing_user_id = #{user.id}
@@ -93,19 +98,21 @@ module Groovepacker
 
             order_exceptions_result = ActiveRecord::Base.connection.exec_query("SELECT date(orders.scanned_on) AS date_scanned_on,
             COUNT(*) AS order_exception_count FROM orders
-            INNER JOIN order_exceptions ON order_exceptions.order_id = orders.id WHERE orders.packing_user_id = 17
+            INNER JOIN order_exceptions ON order_exceptions.order_id = orders.id WHERE orders.packing_user_id = #{user.id}
             AND (#{order_scanned_on_predicate})
             GROUP BY date(scanned_on)")
 
-            order_items_result.rows.each do |order|
+            order_result.rows.each do |order|
+              items_count = get_order_items(order_items_result, order[0])
               exception_count = get_order_exception(order_exceptions_result, order[0])
-              percent = 100 - (exception_count.to_f/order[1].to_f)
+              percent = 100 - (exception_count.to_f*100/order[1].to_f)
               order[0] = order[0].to_time.to_i
               order.push(order[1])
+              order.push(items_count)
               order.push(exception_count)
               order[1] = percent
               total_items_count = total_items_count + order[2]
-              total_exceptions_count = total_exceptions_count + order[3]
+              total_exceptions_count = total_exceptions_count + order[4]
               stats_result.push(order)
             end
             {avg_packing_accuracy: compute_avg_packing_accuracy(total_exceptions_count, total_items_count),
@@ -114,7 +121,16 @@ module Groovepacker
 
           def compute_avg_packing_accuracy(total_exceptions_count, total_items_count)
             ((total_items_count == 0 || total_items_count==nil) ? 0 : (100 -
-                total_exceptions_count.to_f/total_items_count.to_f).round(2))
+                total_exceptions_count.to_f*100/total_items_count.to_f).round(2))
+          end
+
+          def get_order_items(order_items, date)
+            order_items.rows.each do |order_item|
+              if order_item[0] == date
+                return order_item[1]
+              end
+            end
+            return 0
           end
 
           def get_order_exception(order_exceptions, date)

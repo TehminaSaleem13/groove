@@ -164,7 +164,6 @@ groovepacks_directives.directive('groovDashboard',['$window','$document','$sce',
             users: function() {
               users.list.get(null).then(function(response){
                 scope.exceptions.users = response.data;
-                console.log(scope.exceptions.users);
               })
             },
             exception_by_frequency: function() {
@@ -236,7 +235,6 @@ groovepacks_directives.directive('groovDashboard',['$window','$document','$sce',
                 scope.exceptions.users[scope.exceptions.current_user_idx].id, 
                 scope.exceptions.type).then(
                 function(response){
-                  console.log(response.data);
                   scope.most_recent_exceptions.list = response.data;
               });
             },
@@ -245,7 +243,6 @@ groovepacks_directives.directive('groovDashboard',['$window','$document','$sce',
                 scope.exceptions.users[scope.exceptions.current_user_idx].id, 
                 scope.exceptions.type).then(
                 function(response){
-                  console.log(response.data);
                   scope.exceptions_by_frequency.list = response.data;
               });
             }
@@ -271,7 +268,6 @@ groovepacks_directives.directive('groovDashboard',['$window','$document','$sce',
         scope.toolTipContentFunction = function(){
           return function(key, x, y, e, graph) {
               var tooltipText = '';
-              console.log(e.point[2]);
               if (scope.charts.type == 'packing_stats'){
 
                   var average_packing_accuracy = "-";
@@ -283,14 +279,14 @@ groovepacks_directives.directive('groovDashboard',['$window','$document','$sce',
                           break;
                       }
                   }
-                  console.log(scope.dashboard.avg_packing_accuracy_stats)
-                  console.log(average_packing_accuracy);
                 return ('<div><h4 style="text-transform: capitalize; color:'+e.series.color+
                 '">' + key + '</h4>' +
-                '<span><strong>Period Accuracy: </strong>' + average_packing_accuracy +'% </span><br/>'+
                 '<span><strong>Date: </strong>' + x + '</span><br/>' +
-                '<span><strong>' + e.point[2] + ' Items Packed </strong></span><br/>' +
-                '<span><strong>' + e.point[3] + ' Exceptions Recorded</strong></span>' +
+                '<span><strong>Accuracy: </strong>' + e.point[1] + '% </span><br/>' +
+                '<span><strong>Period Accuracy: </strong>' + average_packing_accuracy +'% </span><br/>'+
+                '<span><strong>' + e.point[2] + ' Orders Scanned</strong></span><br/>' +
+                '<span><strong>' + e.point[3] + ' Items Packed </strong></span><br/>' +
+                '<span><strong>' + e.point[4] + ' Exceptions Recorded</strong></span>' +
                 '</div>')
               } else if (scope.charts.type == 'packing_speed_stats') {
                 avg_period_score = "-"
