@@ -175,6 +175,7 @@ groovepacks_services.factory('stores',['$http','notification','$filter',function
                         stores.single.warehouse_location_update = data.credentials.shipstation_rest_credentials.warehouse_location_update;
                         stores.single.gp_ready_tag_name = data.credentials.shipstation_rest_credentials.gp_ready_tag_name;
                         stores.single.gp_imported_tag_name = data.credentials.shipstation_rest_credentials.gp_imported_tag_name;
+                        stores.single.gen_barcode_from_sku = data.credentials.shipstation_rest_credentials.gen_barcode_from_sku;
                         //shall_import_customer_notes
                     } else if(data.store.store_type == 'Shipworks') {
                         stores.single.auth_token = data.credentials.shipworks_credentials.auth_token;

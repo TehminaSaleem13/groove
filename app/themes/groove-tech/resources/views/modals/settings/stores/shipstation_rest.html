@@ -52,6 +52,14 @@
           <i class="pull-right icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" groov-popover="This setting allows you to choose how many days prior to the previous import GroovePacker should check when looking for orders during a regular import. A lower setting will reduce import times. This is particularly helpful when you are importing Shipped orders and here are hundreds or thousands of orders that match the status and date range.<br/> If you routinely place orders on hold for 3 days, then a setting of 4 days would be advisable as you would rarely have out of range orders. Orders that have been placed on hold for longer, and then changed to awaiting, will be outside of the Date range that is checked. These can be imported using the Deep import which looks back 7 days prior to the previous import or by using the GP Ready tag to import select orders."></i>
         </div>
       </div>
+      <div class="form-group">
+        <label class="control-label col-md-4">Generate Barcode from SKU</label>
+
+        <div class="controls col-md-8">
+          <div toggle-switch ng-model="stores.single.gen_barcode_from_sku" groov-click="update_single_store()"></div>
+          <i class="pull-right icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" groov-popover="If your Barcodes match your SKU, you can enable this option to have GroovePacker automatically generate Barcodes when new products are found during order imports."/>
+        </div>
+      </div>
     </div>
   </div>
   <div class="row">
