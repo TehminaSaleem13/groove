@@ -5,6 +5,7 @@ groovepacks_services.factory('dashboard',['$http','notification',function($http,
       packed_item_stats: [],
       packing_speed_stats:[],
       avg_packing_speed_stats: [],
+      avg_packing_accuracy_stats: [],
       main_summary: {}
     };
   };

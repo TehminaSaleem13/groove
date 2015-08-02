@@ -90,7 +90,8 @@ groovepacks_directives.directive('groovDashboard',['$window','$document','$sce',
             packing_stats: function(days) {
               dashboard.stats.packing_stats(days).then(
                 function(response){
-                  scope.dashboard.packing_stats = response.data;
+                    scope.dashboard.packing_stats = response.data.daily_stats;
+                    scope.dashboard.avg_packing_accuracy_stats = response.data.avg_stats;
               });
             },
             packed_item_stats: function(days) {
@@ -163,7 +164,6 @@ groovepacks_directives.directive('groovDashboard',['$window','$document','$sce',
             users: function() {
               users.list.get(null).then(function(response){
                 scope.exceptions.users = response.data;
-                console.log(scope.exceptions.users);
               })
             },
             exception_by_frequency: function() {
@@ -235,7 +235,6 @@ groovepacks_directives.directive('groovDashboard',['$window','$document','$sce',
                 scope.exceptions.users[scope.exceptions.current_user_idx].id, 
                 scope.exceptions.type).then(
                 function(response){
-                  console.log(response.data);
                   scope.most_recent_exceptions.list = response.data;
               });
             },
@@ -244,7 +243,6 @@ groovepacks_directives.directive('groovDashboard',['$window','$document','$sce',
                 scope.exceptions.users[scope.exceptions.current_user_idx].id, 
                 scope.exceptions.type).then(
                 function(response){
-                  console.log(response.data);
                   scope.exceptions_by_frequency.list = response.data;
               });
             }
@@ -271,10 +269,25 @@ groovepacks_directives.directive('groovDashboard',['$window','$document','$sce',
           return function(key, x, y, e, graph) {
               var tooltipText = '';
               if (scope.charts.type == 'packing_stats'){
-                tooltipText = y + ' order scans on ' + x
+
+                  var average_packing_accuracy = "-";
+                  for (idx = 0; idx < scope.dashboard.avg_packing_accuracy_stats.length;
+                       idx++) {
+                      if (scope.dashboard.avg_packing_accuracy_stats[idx].key == key){
+                          average_packing_accuracy = scope.dashboard.avg_packing_accuracy_stats[idx].
+                              avg_packing_accuracy;
+                          break;
+                      }
+                  }
                 return ('<div><h4 style="text-transform: capitalize; color:'+e.series.color+
-                      '">' + key + '</h4>' +
-                      '<span>' +  tooltipText + '</span></div>')
+                '">' + key + '</h4>' +
+                '<span><strong>Date: </strong>' + x + '</span><br/>' +
+                '<span><strong>Accuracy: </strong>' + e.point[1] + '% </span><br/>' +
+                '<span><strong>Period Accuracy: </strong>' + average_packing_accuracy +'% </span><br/>'+
+                '<span><strong>' + e.point[2] + ' Orders Scanned</strong></span><br/>' +
+                '<span><strong>' + e.point[3] + ' Items Packed </strong></span><br/>' +
+                '<span><strong>' + e.point[4] + ' Exceptions Recorded</strong></span>' +
+                '</div>')
               } else if (scope.charts.type == 'packing_speed_stats') {
                 avg_period_score = "-"
                 for (idx = 0; idx < scope.dashboard.avg_packing_speed_stats.length;
