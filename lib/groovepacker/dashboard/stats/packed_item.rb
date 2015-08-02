@@ -106,7 +106,7 @@ module Groovepacker
               scanned_orders.each do |scanned_order|
                 count = count + get_scanned_count(scanned_order)
               end
-              stats_result.push([scanned_date.to_time.to_i, count])
+              stats_result.push([scanned_date.beginning_of_day.utc.to_time.to_i, count])
             end
 
             stats_result
