@@ -3,6 +3,7 @@ class CsvMapping < ActiveRecord::Base
   belongs_to :store
   belongs_to :product_csv_map, :class_name => 'CsvMap'
   belongs_to :order_csv_map, :class_name => 'CsvMap'
+  belongs_to :kit_csv_map, :class_name => 'CsvMap'
   serialize :order_map
   serialize :product_map
 end

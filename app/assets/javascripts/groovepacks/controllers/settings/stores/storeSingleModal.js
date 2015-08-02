@@ -212,7 +212,7 @@ function(scope, store_data, $window, $sce, $interval, $state, $stateParams, $mod
                                 return result.promise;
                             } else {
                                 var csv_modal;
-                                if(scope.stores.single.type == 'order') {
+                                if(scope.stores.single.type == 'order' || scope.stores.single.type == 'kit') {
                                     csv_modal = $modal.open({
                                         templateUrl: '/assets/views/modals/settings/stores/csv_import.html',
                                         controller: 'csvSingleModal',
@@ -223,7 +223,7 @@ function(scope, store_data, $window, $sce, $interval, $state, $stateParams, $mod
                                             }
                                         }
                                     });
-                                } else {
+                                } else if (scope.stores.single.type == 'product') {
                                     csv_modal = $modal.open({
                                         templateUrl: '/assets/views/modals/settings/stores/csv_import_detailed.html',
                                         controller: 'csvDetailedModal',
@@ -504,15 +504,17 @@ function(scope, store_data, $window, $sce, $interval, $state, $stateParams, $mod
 
 
         scope.$on("fileSelected", function (event, args) {
-            if(args.name =='orderfile' || args.name == 'productfile') {
+            if(args.name =='orderfile' || args.name == 'productfile' || args.name == 'kitfile') {
                 scope.$apply(function () {
                     scope.stores.single[args.name] = args.file;
                 });
                 $("input[type='file']").val('');
                 if(args.name == 'orderfile') {
                     scope.stores.single.type = 'order';
-                } else {
+                } else if(args.name == 'productfile') {
                     scope.stores.single.type = 'product';
+                } else if(args.name == 'kitfile'){
+                    scope.stores.single.type = 'kit';
                 }
                 //scope.update_single_store(false);
             }

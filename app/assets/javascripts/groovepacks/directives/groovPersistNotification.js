@@ -148,6 +148,10 @@ groovepacks_directives.directive('groovPersistNotification',['$window','$documen
                     } else if(message['activity'] == 'disable') {
                         notif_message = '<b>Disabling Inventory Tracking:</b> ';
                     }
+                } else if(message['identifier'] == 'csv_import') {
+                    if(message['activity'] == 'kit') {
+                        notif_message = '<b>Importing Kits:</b> ';
+                    }
                 }
                 myscope.repurpose_selected();
                 scope.notifications[hash].type = message['status'];

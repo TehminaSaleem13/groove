@@ -193,6 +193,14 @@ class StoreSettingsController < ApplicationController
                 GroovS3.create_csv(current_tenant, 'product', @store.id, product_file_data)
                 @result['csv_import'] = true
               end
+              unless params[:kitfile].nil?
+                path = File.join(csv_directory, "#{current_tenant}.#{@store.id}.kit.csv")
+                kit_file_data = params[:kitfile].read
+                File.open(path, "wb") { |f| f.write(kit_file_data) }
+
+                GroovS3.create_csv(current_tenant, 'kit', @store.id, kit_file_data)
+                @result['csv_import'] = true
+              end
             end
           end
           if @store.store_type == 'Shipstation'
@@ -333,6 +341,7 @@ class StoreSettingsController < ApplicationController
     result = Hash.new
     result['product'] = CsvMap.find_all_by_kind('product')
     result['order'] = CsvMap.find_all_by_kind('order')
+    result['kit'] = CsvMap.find_all_by_kind('kit')
     respond_to do |format|
       format.json { render json: result}
     end
@@ -352,6 +361,8 @@ class StoreSettingsController < ApplicationController
         mapping.order_csv_map_id = nil
       elsif  params[:kind] == 'product'
         mapping.product_csv_map_id = nil
+      elsif params[:kind] == 'kit'
+        mapping.kit_csv_map_id = nil
       end
       mapping.save
     end
@@ -374,6 +385,8 @@ class StoreSettingsController < ApplicationController
         mapping.order_csv_map_id = params[:map]['id']
       elsif params[:map]['kind'] == 'product'
         mapping.product_csv_map_id = params[:map]['id']
+      elsif params[:map]['kind'] == 'kit'
+        mapping.kit_csv_map_id = params[:map]['id']
       end
       mapping.save
     end
@@ -397,17 +410,33 @@ class StoreSettingsController < ApplicationController
 
     if @result["status"]
       if !@store.nil?
-        if params[:type].nil? || !["both","order","product"].include?(params[:type])
-          params[:type] = "both"
+        if params[:type].nil? || !['both','order','product','kit'].include?(params[:type])
+          params[:type] = 'both'
         end
-        if (params[:type] == "order" && current_user.can?('import_orders'))||
-            (params[:type] == "both" && current_user.can?('import_orders') && current_user.can?('import_products')) ||
-            (params[:type] == "product" && current_user.can?('import_products'))
-          @result["store_id"] = @store.id
+        if (params[:type] == 'order' && current_user.can?('import_orders'))||
+            (params[:type] == 'both' && current_user.can?('import_orders') && current_user.can?('import_products')) ||
+            (['product','kit'].include?(params[:type])  && current_user.can?('import_products'))
+          @result['store_id'] = @store.id
 
           #check if previous mapping exists
           #else fill in defaults
-          default_csv_map ={ 'name' =>'', 'map' =>{'rows' => 2, 'sep' => ',' , 'other_sep' => 0, 'delimiter'=> '"', 'fix_width' => 0, 'fixed_width' => 4, 'contains_unique_order_items' => false, 'generate_barcode_from_sku' => false, 'use_sku_as_product_name' => false, 'order_placed_at' => nil, 'order_date_time_format' => 'None', 'map' => {} }}
+          default_csv_map = {
+              'name' =>'',
+              'map' => {
+                  'rows' => 2,
+                  'sep' => ',',
+                  'other_sep' => 0,
+                  'delimiter'=> '"',
+                  'fix_width' => 0,
+                  'fixed_width' => 4,
+                  'contains_unique_order_items' => false,
+                  'generate_barcode_from_sku' => false,
+                  'use_sku_as_product_name' => false,
+                  'order_placed_at' => nil,
+                  'order_date_time_format' => 'None',
+                  'map' => {}
+              }
+          }
           csv_map = CsvMapping.find_or_create_by_store_id(@store.id)
           # end check for mapping
 
@@ -472,25 +501,50 @@ class StoreSettingsController < ApplicationController
                 { value: 'product_instructions', name: 'Product Instructions'}
             ]
             if csv_map.product_csv_map.nil?
-              @result["product"]["settings"] = default_csv_map
+              @result['product']['settings'] = default_csv_map
             else
-              @result["product"]["settings"] = csv_map.product_csv_map
+              @result['product']['settings'] = csv_map.product_csv_map
             end
 
             product_file_path = File.join(csv_directory, "#{current_tenant}.#{@store.id}.product.csv")
             if File.exists? product_file_path
               product_file_data = IO.read(product_file_path,40960)
-              @result["product"]["data"] = product_file_data
+              @result['product']['data'] = product_file_data
               File.delete(product_file_path)
             end
           end
+          if['both','kit'].include?(params[:type])
+            @result['kit'] = Hash.new
+            @result['kit']['map_options'] = [
+                { value:'kit_sku' , name:'KIT-SKU' },
+                { value:'kit_name', name:'KIT-NAME' },
+                {value:'kit_barcode', name:'KIT-BARCODE' },
+                {value:'part_sku', name:'PART-SKU' },
+                {value:'part_name', name:'PART-NAME' },
+                {value:'part_barcode', name:'PART-BARCODE' },
+                {value:'part_qty', name:'PART-QTY' },
+                #{value:'kit_scan', name:'KIT-SCAN' },
+            ]
+            if csv_map.kit_csv_map.nil?
+              @result['kit']['settings'] = default_csv_map
+            else
+              @result['kit']['settings'] = csv_map.kit_csv_map
+            end
+
+            kit_file_path = File.join(csv_directory, "#{current_tenant}.#{@store.id}.kit.csv")
+            if File.exists? kit_file_path
+              kit_file_data = IO.read(kit_file_path,40960)
+              @result['kit']['data'] = kit_file_data
+              File.delete(kit_file_path)
+            end
+          end
         else
-          @result["status"] = false
-          @result["messages"].push("Not enough permissions")
+          @result['status'] = false
+          @result['messages'].push('Not enough permissions')
         end
       else
-        @result["status"] = false
-        @result["messages"].push("Cannot find store")
+        @result['status'] = false
+        @result['messages'].push('Cannot find store')
       end
     end
 
@@ -501,33 +555,33 @@ class StoreSettingsController < ApplicationController
 
   def csvDoImport
     @result = Hash.new
-    @result["status"] = true
-    @result["last_row"] = 0
-    @result["messages"] = []
+    @result['status'] = true
+    @result['last_row'] = 0
+    @result['messages'] = []
 
     if params[:store_id]
       @store = Store.find_by_id params[:store_id]
       if @store.nil?
-        @result["status"] = false
-        @result["messages"].push("Store doesn't exist")
+        @result['status'] = false
+        @result['messages'].push('Store doesn\'t exist')
       end
     else
-      @result["status"] = false
-      @result["messages"].push("No store selected")
+      @result['status'] = false
+      @result['messages'].push('No store selected')
     end
 
-    if params[:type].nil? || !["order","product"].include?(params[:type])
-      @result["status"] = false
-      @result["messages"].push("No Type specified to import")
+    if params[:type].nil? || !['order','product','kit'].include?(params[:type])
+      @result['status'] = false
+      @result['messages'].push('No Type specified to import')
     end
 
-    if (params[:type] == "order" && !current_user.can?('import_orders')) ||
-        (params[:type] == "product" && !current_user.can?('import_products'))
-      @result["status"] = false
-      @result["messages"].push("User does not have permissions to import #{params[:type]}")
+    if (params[:type] == 'order' && !current_user.can?('import_orders')) ||
+        (['product', 'kit'].include?(params[:type]) && !current_user.can?('import_products'))
+      @result['status'] = false
+      @result['messages'].push("User does not have permissions to import #{params[:type]}")
     end
 
-    if @result["status"]
+    if @result['status']
       #store mapping for later
       csv_map = CsvMapping.find_by_store_id(@store.id)
       if params[:type] =='product'
@@ -541,8 +595,18 @@ class StoreSettingsController < ApplicationController
         else
           map_data = csv_map.product_csv_map
         end
-
-      else
+      elsif params[:type] =='kit'
+        if params[:name].blank?
+          params[:name] = csv_map.store.name+' - Default Kit Map'
+        end
+        if csv_map.kit_csv_map_id.nil?
+          map_data = CsvMap.create(:kind=>'kit',:name=>params[:name], :map=>{})
+          csv_map.kit_csv_map_id = map_data.id
+          csv_map.save
+        else
+          map_data = csv_map.kit_csv_map
+        end
+      elsif params[:type] == 'order'
         if params[:name].blank?
           params[:name] = csv_map.store.name+' - Default Order Map'
         end
@@ -599,24 +663,48 @@ class StoreSettingsController < ApplicationController
       data[:order_placed_at] = params[:order_placed_at]
       data[:order_date_time_format] = params[:order_date_time_format]
 
-      import_csv = ImportCsv.new
-      delayed_job = import_csv.delay(:run_at =>1.seconds.from_now).import Apartment::Tenant.current, data
-      # delayed_job = import_csv.import Apartment::Tenant.current, data
+      # Uncomment this when everything is moved to bulk actions
+      # groove_bulk_actions = GrooveBulkActions.new
+      # groove_bulk_actions.identifier = 'csv_import'
+      # groove_bulk_actions.activity = params[:type]
+      # groove_bulk_actions.save
+      #
+      # data[:bulk_action_id] = groove_bulk_actions.id
+      #
+      # import_csv = ImportCsv.new
+      # import_csv.delay(:run_at =>1.seconds.from_now).import Apartment::Tenant.current, data
 
+
+      # Comment everything after this line till next comment (i.e. the entire if block) when everything is moved to bulk actions
       if params[:type] == 'order'
         import_item = ImportItem.find_by_store_id(@store.id)
         if import_item.nil?
           import_item = ImportItem.new
           import_item.store_id = @store.id
         end
+        import_csv = ImportCsv.new
+        import_csv.delay(:run_at =>1.seconds.from_now).import Apartment::Tenant.current, data
         import_item.status = 'not_started'
         import_item.save
-      else
+      elsif params[:type] == 'kit'
+        groove_bulk_actions = GrooveBulkActions.new
+        groove_bulk_actions.identifier = 'csv_import'
+        groove_bulk_actions.activity = 'kit'
+        groove_bulk_actions.save
+        data[:bulk_action_id] = groove_bulk_actions.id
+        import_csv = ImportCsv.new
+        import_csv.delay(:run_at =>1.seconds.from_now).import Apartment::Tenant.current, data
+
+      elsif params[:type] == 'product'
         product_import = CsvProductImport.find_by_store_id(@store.id)
         if product_import.nil?
           product_import = CsvProductImport.new
           product_import.store_id = @store.id
         end
+
+        import_csv = ImportCsv.new
+        delayed_job = import_csv.delay(:run_at =>1.seconds.from_now).import Apartment::Tenant.current, data
+
         product_import.delayed_job_id = delayed_job.id
         product_import.total = 0
         product_import.success = 0
@@ -624,6 +712,7 @@ class StoreSettingsController < ApplicationController
         product_import.status = 'scheduled'
         product_import.save
       end
+      # Comment everything before this line till previous comment (i.e. the entire if block) when everything is moved to bulk actions
 
     end
 

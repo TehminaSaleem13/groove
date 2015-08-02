@@ -9,31 +9,35 @@ function(scope, store_data, $state, $stateParams, $modal, $modalInstance, $timeo
 
     scope.ok = function() {
         var result = $q.defer();
-        if (scope.csv.current.order_date_time_format == 'None' || scope.csv.current.order_date_time_format == null) {
-            alert("Select an Order Date/Time format to start import");
-        } else {
-            for(var i = 0; i < scope.csv.importer[scope.csv.importer.type]['map_options'].length; i++) {
-                if (scope.csv.importer[scope.csv.importer.type]['map_options'][i].name == "Order Date/Time") {
-                    if (scope.csv.importer[scope.csv.importer.type]['map_options'][i].disabled) {
-                        scope.csv.current.order_placed_at = null;
-                        myscope.ok_import();
-                        break;
-                    } else {
-                        if (confirm("An Order Date/Time has not been mapped. Would you like to continue using the current Date/Time for each imported order?")) {
-                            scope.csv.current.order_placed_at = new Date();
-                            myscope.ok_import();
-                            result.resolve();
+        if (scope.csv.importer.type == "order") {
+            if (scope.csv.current.order_date_time_format == 'None' || scope.csv.current.order_date_time_format == null) {
+                alert("Select an Order Date/Time format to start import");
+            } else {
+                for(var i = 0; i < scope.csv.importer[scope.csv.importer.type]['map_options'].length; i++) {
+                    if (scope.csv.importer[scope.csv.importer.type]['map_options'][i].name == "Order Date/Time") {
+                        if (scope.csv.importer[scope.csv.importer.type]['map_options'][i].disabled) {
+                            scope.csv.current.order_placed_at = null;
+                            myscope.ok_import().then(result.resolve);
                             break;
-                        } else {result.resolve();};
-                    };
-                } else {continue;};
+                        } else {
+                            if (confirm("An Order Date/Time has not been mapped. Would you like to continue using the current Date/Time for each imported order?")) {
+                                scope.csv.current.order_placed_at = new Date();
+                                myscope.ok_import().then(result.resolve);
+                                break;
+                            } else {result.resolve();}
+                        }
+                    }
+                }
             }
-        };
+        } else {
+            myscope.ok_import().then(result.resolve);
+        }
+
         return result.promise;
     };
 
     myscope.ok_import = function() {
-        stores.csv.do_import(scope.csv).success(function(data) {
+        return stores.csv.do_import(scope.csv).success(function(data) {
             if(data.status) {
                 $modalInstance.close("ok-button-click");
             } else {
@@ -192,9 +196,9 @@ function(scope, store_data, $state, $stateParams, $modal, $modalInstance, $timeo
          stores.csv.import(scope.stores, scope.stores.single.id).success(function(data) {
              scope.csv.importer = {};
              scope.csv.importer.default_map = {value:'none', name:"Unmapped"};
-             if("product" in data && "data" in data["product"]) {
-                 scope.csv.importer.product = data["product"];
-                 scope.csv.importer.type = "product";
+             if("kit" in data && "data" in data["kit"]) {
+                 scope.csv.importer.kit = data["kit"];
+                 scope.csv.importer.type = "kit";
              }
              if("order" in data && "data" in data["order"]) {
                  scope.csv.importer.order = data["order"];
