@@ -90,11 +90,10 @@ module Groovepacker
             AND (#{order_scanned_on_predicate})
             GROUP BY date(scanned_on)")
 
-            order_items_result = ActiveRecord::Base.connection.exec_query("SELECT date(orders.scanned_on) AS date_scanned_on,
-            COUNT(*) AS order_item_count FROM orders
-            INNER JOIN order_items ON order_items.order_id = orders.id WHERE orders.packing_user_id = #{user.id}
+            order_ids_result = ActiveRecord::Base.connection.exec_query("SELECT date(orders.scanned_on) AS date_scanned_on,
+            orders.id AS order_id FROM orders WHERE orders.packing_user_id = #{user.id}
             AND (#{order_scanned_on_predicate})
-            GROUP BY date(scanned_on)")
+            ORDER BY scanned_on ASC")
 
             order_exceptions_result = ActiveRecord::Base.connection.exec_query("SELECT date(orders.scanned_on) AS date_scanned_on,
             COUNT(*) AS order_exception_count FROM orders
@@ -103,7 +102,7 @@ module Groovepacker
             GROUP BY date(scanned_on)")
 
             order_result.rows.each do |order|
-              items_count = get_order_items(order_items_result, order[0])
+              items_count = get_order_items(order_ids_result, order[0])
               exception_count = get_order_exception(order_exceptions_result, order[0])
               percent = 100 - (exception_count.to_f*100/order[1].to_f)
               order[0] = order[0].to_time.to_i
@@ -124,13 +123,14 @@ module Groovepacker
                 total_exceptions_count.to_f*100/total_items_count.to_f).round(2))
           end
 
-          def get_order_items(order_items, date)
-            order_items.rows.each do |order_item|
-              if order_item[0] == date
-                return order_item[1]
+          def get_order_items(order_ids_result, date)
+            count = 0
+            order_ids_result.rows.each do |order|
+              if order[0] == date
+                count = count + get_scanned_count(Order.find(order[1]))
               end
             end
-            return 0
+            return count
           end
 
           def get_order_exception(order_exceptions, date)
