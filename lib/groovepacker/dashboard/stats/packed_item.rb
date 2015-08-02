@@ -104,8 +104,6 @@ module Groovepacker
                 packing_user_id: user.id)
               count = 0
               scanned_orders.each do |scanned_order|
-                # puts scanned_order.increment_id
-                # puts get_scanned_count(scanned_order).inspect
                 count = count + get_scanned_count(scanned_order)
               end
               stats_result.push([scanned_date.to_time.to_i, count])
@@ -113,37 +111,6 @@ module Groovepacker
 
             stats_result
 
-          end
-
-          def get_scanned_count(order)
-            count = 0
-            order.order_items.each do |order_item|
-              if order_item.product.is_kit == 1
-                if order_item.product.kit_parsing == 'single'
-                  count = count + order_item.scanned_qty
-                elsif order_item.product.kit_parsing == 'individual'
-                  count = count + get_individual_kit_qty(order_item)
-                else
-                  count = count + order_item.single_scanned_qty
-                  count = count + get_individual_kit_qty(order_item)
-                end
-              else
-                count = count + order_item.scanned_qty
-              end
-              # puts order_item.id.inspect
-              # puts order_item.product.is_kit.inspect
-              # puts order_item.product.kit_parsing.inspect
-              # puts count.inspect
-            end
-            count
-          end
-
-          def get_individual_kit_qty(order_item)
-            count = 0
-            order_item.order_item_kit_products.each do |kit_product|
-              count = count + kit_product.scanned_qty
-            end
-            count
           end
 
       end
