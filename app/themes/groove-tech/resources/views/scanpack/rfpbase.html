@@ -1,6 +1,6 @@
 <div class="row" ng-show="alternate_orders.length">
     <div class="alert alert-info"><h4>The following orders also matched. Click to scan</h4></div>
-    <div class="alert alert-warning" ng-repeat="alternate_order in alternate_orders">
+    <div class="alert alert-warning" ng-repeat="alternate_order in alternate_orders" ng-show="alternate_order.id != data.order.id">
         <h4><a ui-sref="scanpack.rfp({order_num: alternate_order.increment_id})"><span>Order number: {{alternate_order.increment_id}}, Order date: {{alternate_order.order_placed_time |  date:'MMM d, hh:mm a'}}</span> <span ng-hide="alternate_order.tracking_num==''">Tracking Number: {{alternate_order.tracking_num}}</span></a> </h4>
     </div>
 </div>

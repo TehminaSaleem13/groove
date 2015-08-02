@@ -12,10 +12,6 @@ groovepacks_controllers.
                     if(typeof $scope.data.raw.data != "undefined"
                            && typeof $scope.data.raw.data.matched_orders != "undefined"
                         &&  $scope.data.raw.data.matched_orders.length > 0) {
-                        var index = $scope.data.raw.data.matched_orders.indexOf($scope.data.order.increment_id);
-                        if(index!= -1) {
-                            $scope.data.raw.data.matched_orders.splice(index,1);
-                        }
                         $scope.alternate_orders = $scope.data.raw.data.matched_orders;
 
                     }
