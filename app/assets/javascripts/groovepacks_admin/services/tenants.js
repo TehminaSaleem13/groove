@@ -6,7 +6,7 @@ groovepacks_admin_services.factory('tenants',['$http','notification','editable',
     //     duplicate: "Duplicated Successfully",
     //     barcode: "Barcodes generated Successfully",
     //     receiving_label: "Labels generated Successfully",
-    //     update_per_product: "Updated Successfully"
+    //     update_per_tenant: "Updated Successfully"
     // };
 
     //default object
@@ -77,7 +77,7 @@ groovepacks_admin_services.factory('tenants',['$http','notification','editable',
                         }
                     }
                 } else {
-                    notification.notify("Can't load list of products",0);
+                    notification.notify("Can't load list of tenants",0);
                 }
             }
         ).error(notification.server_error);
@@ -147,7 +147,7 @@ groovepacks_admin_services.factory('tenants',['$http','notification','editable',
     };
 
     var update_list_node = function(obj) {
-        return $http.post('/tenants/updateproductlist.json',obj).success(function(data) {
+        return $http.post('/tenants/updatetenantlist.json',obj).success(function(data) {
             if(data.status) {
                 notification.notify("Successfully Updated",1);
             } else {
@@ -176,6 +176,21 @@ groovepacks_admin_services.factory('tenants',['$http','notification','editable',
         }
     };
 
+    var get_sinlge = function(id,tenants) {
+        return $http.get('/tenants/getdetails/'+ id+'.json').success(function(data) {
+            if(data.tenant) {
+                if(typeof tenants.single['basicinfo'] != "undefined" && data.tenant.basicinfo.id == tenants.single.basicinfo.id) {
+                    angular.extend(tenants.single,data.tenant);
+                } else {
+                    tenants.single = {};
+                    tenants.single = data.tenant;
+                }
+            } else {
+                tenants.single = {};
+            }
+        }).error(notification.server_error).success(editable.force_exit).error(editable.force_exit);
+    }
+
     //Public facing API
     return {
         model: {
@@ -191,6 +206,7 @@ groovepacks_admin_services.factory('tenants',['$http','notification','editable',
             update_node: update_list_node
         },
         single: {
+            get: get_sinlge,
             select: select_single
         }
     };

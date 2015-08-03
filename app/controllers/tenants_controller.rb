@@ -252,4 +252,27 @@
       Apartment::Tenant.switch()
       @shipping_result
     end
+
+    def getdetails
+      @result = Hash.new
+      @tenant = nil
+      if !params[:id].nil?
+        @tenant = Tenant.find_by_id(params[:id])
+      end
+      if !@tenant.nil?
+        @tenant.reload
+        general_setting = GeneralSetting.all.first
+        scan_pack_setting = ScanPackSetting.all.first
+
+        @result['tenant'] = Hash.new
+        @result['tenant']['basicinfo'] = @tenant.attributes
+        @result['tenant']['subscription_info'] = get_subscription_data(params[:id])
+        @result['tenant']['access_restrictions_info'] = get_shipping_data(params[:id])
+      end
+
+      respond_to do |format|
+        format.html # show.html.erb
+        format.json { render json: @result }
+      end
+    end
   end
