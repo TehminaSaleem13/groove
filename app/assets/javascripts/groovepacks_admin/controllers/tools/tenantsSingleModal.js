@@ -16,6 +16,12 @@ groovepacks_admin_controllers.
                 $modalInstance.dismiss("cancel-button-click");
             };
 
+            $scope.update_access_restrictions = function() {
+                console.log("in update_access_restricions");
+                console.log($scope.tenants);
+                tenants.single.update($scope.tenants);
+            }
+
             myscope.tenant_single_details = function(id) {
                 //console.log(index);
                 //console.log(scope.tenants);

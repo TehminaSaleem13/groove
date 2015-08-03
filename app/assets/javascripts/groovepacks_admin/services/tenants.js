@@ -191,6 +191,16 @@ groovepacks_admin_services.factory('tenants',['$http','notification','editable',
         }).error(notification.server_error).success(editable.force_exit).error(editable.force_exit);
     }
 
+    var update_access_restriction_data = function(tenants) {
+        return $http.post('/tenants/update_access_restrictions.json',tenants.single).success(function(data) {
+            if (data.status) {
+                notification.notify("Successfully Updated.",1);
+            } else{
+                notification.notify(data.error_messages,0);
+            };
+        }).error(notification.server_error);
+    }
+
     //Public facing API
     return {
         model: {
@@ -207,7 +217,8 @@ groovepacks_admin_services.factory('tenants',['$http','notification','editable',
         },
         single: {
             get: get_sinlge,
-            select: select_single
+            select: select_single,
+            update: update_access_restriction_data
         }
     };
 }]);

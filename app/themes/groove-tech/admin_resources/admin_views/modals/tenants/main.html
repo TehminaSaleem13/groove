@@ -3,7 +3,7 @@
 
     <div class="modal-header">
         <button type="button" class="close-btn" ng-click="ok()"><i class="glyphicon glyphicon-remove"></i></button>
-        <div class="modal-title">Editing: {{tenants.checked.skus[0].sku}} - ID #{{tenants.checked.basicinfo.id}}</div>
+        <div class="modal-title">Editing: Tenant - ID #{{tenants.single.basicinfo.id}}</div>
     </div>
 
 
@@ -23,7 +23,7 @@
                             <div>Shipments</div>
                         </center>
                         <div class="col-sm-offset-2 col-sm-8">
-                            <input type="text" ng-model="" ng-focus="" ng-blur="" class="form-control input-style"/>
+                            <input type="number" ng-model="tenants.single.access_restrictions_info.max_allowed" class="form-control input-style"/>
                         </div>
                     </div>
                     <div class="col-sm-4">
@@ -32,7 +32,7 @@
                             <div>Users</div>
                         </center>
                         <div class="col-sm-offset-2 col-sm-8">
-                            <input type="text" ng-model="" ng-focus="" ng-blur="" class="form-control input-style"/>
+                            <input type="number" ng-model="tenants.single.access_restrictions_info.max_users" class="form-control input-style"/>
                         </div>
                     </div>
                     <div class="col-sm-4">
@@ -41,7 +41,7 @@
                             <div>Sources</div>
                         </center>
                         <div class="col-sm-offset-2 col-sm-8">
-                            <input type="text" ng-model="" ng-focus="" ng-blur="" class="form-control input-style"/>
+                            <input type="number" ng-model="tenants.single.access_restrictions_info.max_import_sources" class="form-control input-style"/>
                         </div>
                     </div>                
                 </div>
@@ -50,7 +50,7 @@
             <br/>
             <div class="col-sm-12">
                 <br/>
-                <center><button ng-click="" class="dropdown-toggle groove-button label label-default label-success" translate>Update</button></center>
+                <center><button ng-click="update_access_restrictions()" class="dropdown-toggle groove-button label label-default label-success" translate>Update</button></center>
                 <hr>
                 <br/>
             </div>

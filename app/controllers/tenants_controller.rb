@@ -244,6 +244,8 @@
             @shipping_result['shipped_current'] = access_restrictions[data_length - 1].total_scanned_shipments
             @shipping_result['shipped_last'] = access_restrictions[data_length - 2].total_scanned_shipments if data_length > 1
             @shipping_result['max_allowed'] = access_restrictions[data_length - 1].num_shipments
+            @shipping_result['max_users'] = access_restrictions[data_length-1].num_users
+            @shipping_result['max_import_sources'] = access_restrictions[data_length-1].num_import_sources
           end
         rescue
 
@@ -269,6 +271,42 @@
         @result['tenant']['subscription_info'] = get_subscription_data(params[:id])
         @result['tenant']['access_restrictions_info'] = get_shipping_data(params[:id])
       end
+
+      respond_to do |format|
+        format.html # show.html.erb
+        format.json { render json: @result }
+      end
+    end
+
+    def update_access_restrictions
+      puts params[:access_restrictions_info][:max_allowed]
+      puts params[:access_restrictions_info][:max_users]
+      puts params[:access_restrictions_info][:max_import_sources]
+      @result = Hash.new
+      @result['status'] = true
+      @result['error_messages'] = []
+      @tenant = nil
+      tenant = Tenant.find(params[:basicinfo][:id])
+      unless tenant.nil?
+        begin
+          Apartment::Tenant.switch(tenant.name)
+          unless AccessRestriction.all.first.nil?
+            access_restrictions = AccessRestriction.all
+            data_length = access_restrictions.length
+            access_restrictions[data_length - 1].num_shipments = params[:access_restrictions_info][:max_allowed]
+            access_restrictions[data_length-1].num_users = params[:access_restrictions_info][:max_users]
+            access_restrictions[data_length-1].num_import_sources = params[:access_restrictions_info][:max_import_sources]
+            access_restrictions[data_length-1].save
+          end
+        rescue Exception => e
+          @result['status'] = false
+          @result['error_messages'].push(e.message);
+        end
+      else
+        @result['status'] = false
+        puts e.message
+      end
+      Apartment::Tenant.switch('groovepackeradmin')
 
       respond_to do |format|
         format.html # show.html.erb
