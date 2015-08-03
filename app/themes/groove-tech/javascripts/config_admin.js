@@ -11,7 +11,9 @@ function($stateProvider, $urlRouterProvider,hotkeysProvider,cfpLoadingBarProvide
         .state('home',{url:'/home'})
         .state('tools',{url:'/tools/admin_tools', templateUrl:'/assets/admin_views/base.html', controller:'adminToolsCtrl'})
         // .state('tools.admin_tools',{url:'/admin_tools',templateUrl:'/assets/admin_views/base.html', controller:'adminToolsCtrl'});
-
+        .state('tools.single', {url: '/tenants/{tenant_id:[0-9]+}',template:"<div ui-view></div>",
+                       controller:'tenantsSingleCtrl'})
+        
     hotkeysProvider.cheatSheetHotkey =['mod+f1','g','G'];
     hotkeysProvider.cheatSheetDescription = '(or \'g\') Show / hide this help menu';
     cfpLoadingBarProvider.includeSpinner = false;
