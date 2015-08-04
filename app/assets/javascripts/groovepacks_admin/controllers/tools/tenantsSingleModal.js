@@ -16,14 +16,19 @@ groovepacks_admin_controllers.
                 $modalInstance.dismiss("cancel-button-click");
             };
 
+            $scope.update = function(reason) {
+                if(reason == "cancel-button-click" || reason == "ok-button-click") {
+                    myscope.rollback();
+                }
+            }
+
             $scope.update_access_restrictions = function() {
-                console.log("in update_access_restricions");
-                console.log($scope.tenants);
-                tenants.single.update($scope.tenants);
+                tenants.single.update($scope.tenants).then(function() {
+                    myscope.init();
+                });
             }
 
             $scope.delete_orders = function() {
-                console.log(tenant_id);
                 tenants.single.delete($scope.tenants.single.basicinfo.id,'orders');
             }
 
@@ -36,12 +41,16 @@ groovepacks_admin_controllers.
             }
 
             $scope.delete_all = function() {
-                tenants.single.delete($scope.tenants.single.basicinfo.id,'all');
+                tenants.single.delete($scope.tenants.single.basicinfo.id,'all').then(function() {
+                    myscope.init();
+                });
+            }
+
+            myscope.rollback = function() {
+                $state.go("tools.type.page",$stateParams);
             }
 
             myscope.tenant_single_details = function(id) {
-                //console.log(index);
-                //console.log(scope.tenants);
 
                 for(var i = 0; i< $scope.tenants.list.length; i++) {
                     if($scope.tenants.list[i].id == id) {
@@ -50,23 +59,18 @@ groovepacks_admin_controllers.
                     }
                 }
 
-                tenants.single.get(id,$scope.tenants).success(function(data) {
-                    console.log("tenant_data");
-                    console.log(tenant_data);
-                });
+                tenants.single.get(id,$scope.tenants).success(function(data) {});
             };
 
             myscope.init = function() {
                 
                 $scope.tenants = tenant_data;
-                console.log("tenant_id");
-                console.log(tenant_id);
                 if (tenant_id) {
                     myscope.tenant_single_details(tenant_id);
                 } else {
                     myscope.tenant_single_details($stateParams.tenant_id);
                 };
-                
+                $modalInstance.result.then($scope.update,$scope.update);
             };
 
             myscope.init();

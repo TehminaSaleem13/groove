@@ -189,7 +189,7 @@ groovepacks_admin_services.factory('tenants',['$http','notification','editable',
                 tenants.single = {};
             }
         }).error(notification.server_error).success(editable.force_exit).error(editable.force_exit);
-    }
+    };
 
     var update_access_restriction_data = function(tenants) {
         return $http.post('/tenants/update_access_restrictions.json',tenants.single).success(function(data) {
@@ -199,7 +199,7 @@ groovepacks_admin_services.factory('tenants',['$http','notification','editable',
                 notification.notify(data.error_messages,0);
             };
         }).error(notification.server_error);
-    }
+    };
 
     var delete_tenant_data = function(id, action) {
         return $http.post('/tenants/delete_tenant_data.json?id='+id+'&action='+action).success(function(response) {
@@ -208,8 +208,20 @@ groovepacks_admin_services.factory('tenants',['$http','notification','editable',
             } else{
                 notification.notify(response.error_messages,0);
             };
-        }).error(notify.server_error);
-    }
+        }).error(notification.server_error);
+    };
+
+    var rollback_single_tenant = function() {
+        return $http.post("tenants/rollback.json",{single: single}).success(
+            function(data) {
+                if(data.status) {
+                    //notification.notify("Successfully Updated",1);
+                } else {
+                    notification.notify(data.messages,0);
+                }
+            }
+        ).error(notification.server_error);
+    };
 
     //Public facing API
     return {
@@ -229,7 +241,8 @@ groovepacks_admin_services.factory('tenants',['$http','notification','editable',
             get: get_sinlge,
             select: select_single,
             update: update_access_restriction_data,
-            delete: delete_tenant_data
+            delete: delete_tenant_data,
+            rollback: rollback_single_tenant
         }
     };
 }]);

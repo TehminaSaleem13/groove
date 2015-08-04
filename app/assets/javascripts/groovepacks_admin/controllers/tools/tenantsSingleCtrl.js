@@ -10,11 +10,9 @@ groovepacks_admin_controllers.
 
 
             myscope.init = function() {
-                if(!$previousState.get("order-modal-previous") || $modalStack.getTop() == null) {
-                    console.log("$scope");
-                    console.log($scope.tenants);
+                if(!$previousState.get("tenant-modal-previous") || $modalStack.getTop() == null) {
                     //Show modal here
-                    myscope.order_obj= $modal.open({
+                    myscope.tenant_obj= $modal.open({
                         templateUrl: '/assets/admin_views/modals/tenants/main.html',
                         controller: 'tenantsSingleModal',
                         size:'lg',
@@ -24,13 +22,13 @@ groovepacks_admin_controllers.
                             tenant_id: function(){return false;}
                         }
                     });
-                    $previousState.forget("order-modal-previous");
-                    $previousState.memo("order-modal-previous");
-                    myscope.order_obj.result.finally(function(){
+                    $previousState.forget("tenant-modal-previous");
+                    $previousState.memo("tenant-modal-previous");
+                    myscope.tenant_obj.result.finally(function(){
                         $scope.select_all_toggle(false);
-                        $scope.order_modal_closed_callback();
-                        if($previousState.get("order-modal-previous").state.name == "" ||
-                            $previousState.get("order-modal-previous").state.name.indexOf('single', $previousState.get("order-modal-previous").state.name.length - 6) !== -1) {
+                        $scope.tenant_modal_closed_callback();
+                        if($previousState.get("tenant-modal-previous").state.name == "" ||
+                            $previousState.get("tenant-modal-previous").state.name.indexOf('single', $previousState.get("tenant-modal-previous").state.name.length - 6) !== -1) {
                             //If you landed directly on this URL, we assume that the last part of the state is the modal
                             //So we remove that and send user on their way.
                             // If there is no . in the string, we send user to home
@@ -39,15 +37,14 @@ groovepacks_admin_controllers.
                             if (pos!=-1) {
                                 toState = $state.current.name.slice(0,pos);
                             }
-                            $previousState.forget("order-modal-previous");
+                            $previousState.forget("tenant-modal-previous");
                             $timeout(function(){$state.go(toState,$stateParams);},700);
                         } else {
-                            $timeout(function(){$previousState.go("order-modal-previous");$previousState.forget("order-modal-previous");},700);
+                            $timeout(function(){$previousState.go("tenant-modal-previous");$previousState.forget("tenant-modal-previous");},700);
 
                         }
                     });
                 }
-
             };
 
             myscope.init();

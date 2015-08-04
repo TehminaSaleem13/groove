@@ -246,9 +246,19 @@
             @shipping_result['max_allowed'] = access_restrictions[data_length - 1].num_shipments
             @shipping_result['max_users'] = access_restrictions[data_length-1].num_users
             @shipping_result['max_import_sources'] = access_restrictions[data_length-1].num_import_sources
+          else
+            @shipping_result['shipped_current'] = 0
+            @shipping_result['shipped_last'] = 0
+            @shipping_result['max_allowed'] = 0
+            @shipping_result['max_users'] = 0
+            @shipping_result['max_import_sources'] = 0
           end
         rescue
-
+          @shipping_result['shipped_current'] = 0
+          @shipping_result['shipped_last'] = 0
+          @shipping_result['max_allowed'] = 0
+          @shipping_result['max_users'] = 0
+          @shipping_result['max_import_sources'] = 0
         end
       end
       Apartment::Tenant.switch()

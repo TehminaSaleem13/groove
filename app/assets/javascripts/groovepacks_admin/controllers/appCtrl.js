@@ -3,7 +3,6 @@ groovepacks_admin_controllers.
     function( $rootScope, $scope, $timeout, $modalStack, $state, $filter, $document, $window, hotkeys, auth,notification,importOrders,groovIO,editable, stores) {
 
         $scope.$on("user-data-reloaded", function() {
-            console.log('about to retrieve current_user');
             $scope.current_user = auth;
         });
 

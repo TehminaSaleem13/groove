@@ -3,7 +3,7 @@ var groovepacks_admin = angular.module('groovepacks_admin', ['groovepacks_admin.
 	 'groovepacks_admin.directives', 'groovepacks_admin.controllers','ui.sortable','pasvaz.bindonce', 'ngCookies',
 	 'ct.ui.router.extras','ngAnimate', 'ui.bootstrap','cfp.hotkeys',
    'angular-loading-bar','pascalprecht.translate','toggle-switch','ngTouch',
-   'hmTouchEvents','btford.socket-io','textAngular', 'ngClipboard']);
+   'hmTouchEvents','btford.socket-io','textAngular', 'ngClipboard', 'ng-rails-csrf']);
 var groovepacks_admin_controllers = angular.module('groovepacks_admin.controllers', []);
 var groovepacks_admin_filters = angular.module('groovepacks_admin.filters', []);
 var groovepacks_admin_services = angular.module('groovepacks_admin.services', []);

@@ -27,11 +27,21 @@ function( $scope, $http, $timeout, $location, $state, $cookies, $q, tenants) {
             id: tenant.id,
             var: prop,
             value: tenant[prop]
-        }).then(function(){myscope.get_tenants()});
+        }).then(function(){myscope.get_tenants(1)});
     };
 
     $scope.handlesort = function(predicate) {
         myscope.common_setup_opt('sort',predicate,'tenant');
+    };
+
+    $scope.setup_child = function(childStateParams) {
+        if(typeof childStateParams['type'] == 'undefined') {
+            childStateParams['type'] = 'tenant';
+        }
+        if(typeof childStateParams['page']=='undefined' || childStateParams['page'] <= 0) {
+            childStateParams['page'] = 1
+        }
+        myscope.get_tenants(childStateParams['page']);
     };
 
     myscope.update_selected_count = function() {
@@ -100,11 +110,7 @@ function( $scope, $http, $timeout, $location, $state, $cookies, $q, tenants) {
     }
 
     myscope.handle_click_fn = function(row,event) {
-        console.log(row);
-        console.log($state);
-        
-        console.log("......");
-        var toState = 'tools.single';
+        var toState = 'tools.type.page.single';
         var toParams = {};
         for (var key in $state.params) {
             if(['filter','page'].indexOf(key) !=-1) {
