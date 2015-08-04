@@ -201,6 +201,16 @@ groovepacks_admin_services.factory('tenants',['$http','notification','editable',
         }).error(notification.server_error);
     }
 
+    var delete_tenant_data = function(id, action) {
+        return $http.post('/tenants/delete_tenant_data.json?id='+id+'&action='+action).success(function(response) {
+            if (response.status) {
+                notification.notify("Successfully Updated.",1);
+            } else{
+                notification.notify(response.error_messages,0);
+            };
+        }).error(notify.server_error);
+    }
+
     //Public facing API
     return {
         model: {
@@ -218,7 +228,8 @@ groovepacks_admin_services.factory('tenants',['$http','notification','editable',
         single: {
             get: get_sinlge,
             select: select_single,
-            update: update_access_restriction_data
+            update: update_access_restriction_data,
+            delete: delete_tenant_data
         }
     };
 }]);

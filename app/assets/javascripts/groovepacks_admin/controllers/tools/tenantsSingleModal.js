@@ -22,6 +22,23 @@ groovepacks_admin_controllers.
                 tenants.single.update($scope.tenants);
             }
 
+            $scope.delete_orders = function() {
+                console.log(tenant_id);
+                tenants.single.delete($scope.tenants.single.basicinfo.id,'orders');
+            }
+
+            $scope.delete_products = function() {
+                tenants.single.delete($scope.tenants.single.basicinfo.id,'products');
+            }
+
+            $scope.delete_orders_and_products = function() {
+                tenants.single.delete($scope.tenants.single.basicinfo.id,'both');
+            }
+
+            $scope.delete_all = function() {
+                tenants.single.delete($scope.tenants.single.basicinfo.id,'all');
+            }
+
             myscope.tenant_single_details = function(id) {
                 //console.log(index);
                 //console.log(scope.tenants);

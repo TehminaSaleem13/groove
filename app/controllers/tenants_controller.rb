@@ -279,9 +279,6 @@
     end
 
     def update_access_restrictions
-      puts params[:access_restrictions_info][:max_allowed]
-      puts params[:access_restrictions_info][:max_users]
-      puts params[:access_restrictions_info][:max_import_sources]
       @result = Hash.new
       @result['status'] = true
       @result['error_messages'] = []
@@ -311,6 +308,80 @@
       respond_to do |format|
         format.html # show.html.erb
         format.json { render json: @result }
+      end
+    end
+
+    def delete_tenant_data
+      @result = Hash.new
+      @result['status'] = true
+      @result['error_messages'] = []
+      @tenant = nil
+      tenant = Tenant.find(params[:id])
+      unless tenant.nil?
+        begin
+          Apartment::Tenant.switch(tenant.name)
+          if params[:action] == 'orders'
+            delete_orders(@result)
+          elsif params[:action] == 'products'
+            delete_products(@result)
+          elsif params[:action] == 'both'
+            delete_orders(@result)
+            delete_products(@result)
+          else 
+            ActiveRecord::Base.connection.tables.each do |table|
+              ActiveRecord::Base.connection.execute("TRUNCATE #{table}")
+            end   
+          end
+        rescue Exception => e
+          @result['status'] = false
+          @result['error_messages'].push(e.message);
+        end
+      else
+        @result['status'] = false
+        puts e.message
+      end
+      Apartment::Tenant.switch()
+
+      respond_to do |format|
+        format.html # show.html.erb
+        format.json { render json: @result }
+      end
+    end
+
+    def delete_orders(result)
+      if current_user.can? 'add_edit_order_items'
+        orders = Order.all
+        unless orders.nil?
+          orders.each do|order|
+            if order.destroy
+              @result['status'] &= true
+            else
+              result['status'] &= false
+              result['error_messages'] = order.errors.full_messages
+            end
+          end
+        end
+      else
+        result['status'] = false
+        result['error_messages'].push("You do not have enough permissions to delete order")
+      end
+    end
+
+    def delete_products(result)
+      if current_user.can?('delete_products')
+        parameters = Hash.new
+        parameters['select_all'] = true
+        parameters['inverted'] = false
+        bulk_actions = Groovepacker::Products::BulkActions.new
+        groove_bulk_actions = GrooveBulkActions.new
+        groove_bulk_actions.identifier = 'product'
+        groove_bulk_actions.activity = 'delete'
+        groove_bulk_actions.save
+
+        bulk_actions.delete(Apartment::Tenant.current, parameters, groove_bulk_actions.id, current_user.username)
+      else
+        result['status'] = false
+        result['error_messages'].push('You do not have enough permissions to delete products')
       end
     end
   end
