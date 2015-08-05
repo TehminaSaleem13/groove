@@ -201,8 +201,8 @@ groovepacks_admin_services.factory('tenants',['$http','notification','editable',
         }).error(notification.server_error);
     };
 
-    var delete_tenant_data = function(id, action) {
-        return $http.post('/tenants/delete_tenant_data.json?id='+id+'&action='+action).success(function(response) {
+    var delete_tenant_data = function(id, action_type) {
+        return $http.post('/tenants/delete_tenant_data.json?&id='+id+'&action_type='+action_type).success(function(response) {
             if (response.status) {
                 notification.notify("Successfully Updated.",1);
             } else{

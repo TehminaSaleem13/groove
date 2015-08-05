@@ -3,9 +3,12 @@ class HomeController < ApplicationController
   def index
   	#if current user is not signed in, show login page
   	if !user_signed_in?
+      puts "user not signed in..."
   		redirect_to new_user_session_path
     else
+      puts "current_tenant: " + Apartment::Tenant.current_tenant.to_s
       @groovepacks_admin = (Apartment::Tenant.current_tenant == 'groovepacks_production')
+      puts "@groovepacks_admin: " + @groovepacks_admin.to_s
   	end
 
   end

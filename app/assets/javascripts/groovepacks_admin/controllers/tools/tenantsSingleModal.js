@@ -20,35 +20,49 @@ groovepacks_admin_controllers.
                 if(reason == "cancel-button-click" || reason == "ok-button-click") {
                     myscope.rollback();
                 }
-            }
+            };
 
             $scope.update_access_restrictions = function() {
                 tenants.single.update($scope.tenants).then(function() {
                     myscope.init();
                 });
-            }
+            };
 
             $scope.delete_orders = function() {
-                tenants.single.delete($scope.tenants.single.basicinfo.id,'orders');
-            }
+                $scope.delete('orders');
+            };
 
             $scope.delete_products = function() {
-                tenants.single.delete($scope.tenants.single.basicinfo.id,'products');
-            }
+                $scope.delete('products');
+            };
 
             $scope.delete_orders_and_products = function() {
-                tenants.single.delete($scope.tenants.single.basicinfo.id,'both');
-            }
+                $scope.delete('both');
+            };
 
             $scope.delete_all = function() {
-                tenants.single.delete($scope.tenants.single.basicinfo.id,'all').then(function() {
+                $scope.delete('all');
+            };
+
+            $scope.delete = function(type) {
+                myscope.tenant_obj= $modal.open({
+                    templateUrl: '/assets/admin_views/modals/tenants/delete.html',
+                    controller: 'tenantsDeleteModal',
+                    size:'md',
+                    resolve: {
+                        tenant_data: function(){return $scope.tenants},
+                        load_page: function(){return $scope.load_page},
+                        deletion_type: function(){return type;}
+                    }
+                });
+                myscope.tenant_obj.result.finally(function(){
                     myscope.init();
                 });
-            }
+            };
 
             myscope.rollback = function() {
                 $state.go("tools.type.page",$stateParams);
-            }
+            };
 
             myscope.tenant_single_details = function(id) {
 

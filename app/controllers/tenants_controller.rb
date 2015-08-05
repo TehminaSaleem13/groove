@@ -311,7 +311,6 @@
         end
       else
         @result['status'] = false
-        puts e.message
       end
       Apartment::Tenant.switch('groovepackeradmin')
 
@@ -330,14 +329,14 @@
       unless tenant.nil?
         begin
           Apartment::Tenant.switch(tenant.name)
-          if params[:action] == 'orders'
+          if params[:action_type] == 'orders'
             delete_orders(@result)
-          elsif params[:action] == 'products'
+          elsif params[:action_type] == 'products'
             delete_products(@result)
-          elsif params[:action] == 'both'
+          elsif params[:action_type] == 'both'
             delete_orders(@result)
             delete_products(@result)
-          else 
+          elsif params[:action_type] == 'all'
             ActiveRecord::Base.connection.tables.each do |table|
               ActiveRecord::Base.connection.execute("TRUNCATE #{table}")
             end   
@@ -348,7 +347,6 @@
         end
       else
         @result['status'] = false
-        puts e.message
       end
       Apartment::Tenant.switch()
 
@@ -380,8 +378,10 @@
     def delete_products(result)
       if current_user.can?('delete_products')
         parameters = Hash.new
-        parameters['select_all'] = true
-        parameters['inverted'] = false
+        parameters[:select_all] = true
+        parameters[:inverted] = false
+        parameters[:filter] = 'all'
+        parameters[:is_kit] = '-1'
         bulk_actions = Groovepacker::Products::BulkActions.new
         groove_bulk_actions = GrooveBulkActions.new
         groove_bulk_actions.identifier = 'product'
