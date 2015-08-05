@@ -10,6 +10,13 @@ groovepacks_admin_controllers.
 
 
             myscope.init = function() {
+                if(typeof $scope.load_page !='function') {
+                    $scope.load_page = function() {
+                        var req = $q.defer();
+                        req.reject();
+                        return req.promise;
+                    };
+                }
                 if(!$previousState.get("tenant-modal-previous") || $modalStack.getTop() == null) {
                     //Show modal here
                     myscope.tenant_obj= $modal.open({
