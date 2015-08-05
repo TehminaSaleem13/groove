@@ -6,7 +6,7 @@ groovepacks_admin_services.factory('tenants',['$http','notification','editable',
     //     duplicate: "Duplicated Successfully",
     //     barcode: "Barcodes generated Successfully",
     //     receiving_label: "Labels generated Successfully",
-    //     update_per_product: "Updated Successfully"
+    //     update_per_tenant: "Updated Successfully"
     // };
 
     //default object
@@ -77,7 +77,7 @@ groovepacks_admin_services.factory('tenants',['$http','notification','editable',
                         }
                     }
                 } else {
-                    notification.notify("Can't load list of products",0);
+                    notification.notify("Can't load list of tenants",0);
                 }
             }
         ).error(notification.server_error);
@@ -147,7 +147,7 @@ groovepacks_admin_services.factory('tenants',['$http','notification','editable',
     };
 
     var update_list_node = function(obj) {
-        return $http.post('/tenants/updateproductlist.json',obj).success(function(data) {
+        return $http.post('/tenants/updatetenantlist.json',obj).success(function(data) {
             if(data.status) {
                 notification.notify("Successfully Updated",1);
             } else {
@@ -176,6 +176,53 @@ groovepacks_admin_services.factory('tenants',['$http','notification','editable',
         }
     };
 
+    var get_sinlge = function(id,tenants) {
+        return $http.get('/tenants/getdetails/'+ id+'.json').success(function(data) {
+            if(data.tenant) {
+                if(typeof tenants.single['basicinfo'] != "undefined" && data.tenant.basicinfo.id == tenants.single.basicinfo.id) {
+                    angular.extend(tenants.single,data.tenant);
+                } else {
+                    tenants.single = {};
+                    tenants.single = data.tenant;
+                }
+            } else {
+                tenants.single = {};
+            }
+        }).error(notification.server_error).success(editable.force_exit).error(editable.force_exit);
+    };
+
+    var update_access_restriction_data = function(tenants) {
+        return $http.post('/tenants/update_access_restrictions.json',tenants.single).success(function(data) {
+            if (data.status) {
+                notification.notify("Successfully Updated.",1);
+            } else{
+                notification.notify(data.error_messages,0);
+            };
+        }).error(notification.server_error);
+    };
+
+    var delete_tenant_data = function(id, action_type) {
+        return $http.post('/tenants/delete_tenant_data.json?&id='+id+'&action_type='+action_type).success(function(response) {
+            if (response.status) {
+                notification.notify("Successfully Updated.",1);
+            } else{
+                notification.notify(response.error_messages,0);
+            };
+        }).error(notification.server_error);
+    };
+
+    var rollback_single_tenant = function() {
+        return $http.post("tenants/rollback.json",{single: single}).success(
+            function(data) {
+                if(data.status) {
+                    //notification.notify("Successfully Updated",1);
+                } else {
+                    notification.notify(data.messages,0);
+                }
+            }
+        ).error(notification.server_error);
+    };
+
     //Public facing API
     return {
         model: {
@@ -191,7 +238,11 @@ groovepacks_admin_services.factory('tenants',['$http','notification','editable',
             update_node: update_list_node
         },
         single: {
-            select: select_single
+            get: get_sinlge,
+            select: select_single,
+            update: update_access_restriction_data,
+            delete: delete_tenant_data,
+            rollback: rollback_single_tenant
         }
     };
 }]);

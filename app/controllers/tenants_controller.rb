@@ -244,12 +244,154 @@
             @shipping_result['shipped_current'] = access_restrictions[data_length - 1].total_scanned_shipments
             @shipping_result['shipped_last'] = access_restrictions[data_length - 2].total_scanned_shipments if data_length > 1
             @shipping_result['max_allowed'] = access_restrictions[data_length - 1].num_shipments
+            @shipping_result['max_users'] = access_restrictions[data_length-1].num_users
+            @shipping_result['max_import_sources'] = access_restrictions[data_length-1].num_import_sources
+          else
+            @shipping_result['shipped_current'] = 0
+            @shipping_result['shipped_last'] = 0
+            @shipping_result['max_allowed'] = 0
+            @shipping_result['max_users'] = 0
+            @shipping_result['max_import_sources'] = 0
           end
         rescue
-
+          @shipping_result['shipped_current'] = 0
+          @shipping_result['shipped_last'] = 0
+          @shipping_result['max_allowed'] = 0
+          @shipping_result['max_users'] = 0
+          @shipping_result['max_import_sources'] = 0
         end
       end
       Apartment::Tenant.switch()
       @shipping_result
+    end
+
+    def getdetails
+      @result = Hash.new
+      @tenant = nil
+      if !params[:id].nil?
+        @tenant = Tenant.find_by_id(params[:id])
+      end
+      if !@tenant.nil?
+        @tenant.reload
+        general_setting = GeneralSetting.all.first
+        scan_pack_setting = ScanPackSetting.all.first
+
+        @result['tenant'] = Hash.new
+        @result['tenant']['basicinfo'] = @tenant.attributes
+        @result['tenant']['subscription_info'] = get_subscription_data(params[:id])
+        @result['tenant']['access_restrictions_info'] = get_shipping_data(params[:id])
+      end
+
+      respond_to do |format|
+        format.html # show.html.erb
+        format.json { render json: @result }
+      end
+    end
+
+    def update_access_restrictions
+      @result = Hash.new
+      @result['status'] = true
+      @result['error_messages'] = []
+      @tenant = nil
+      tenant = Tenant.find(params[:basicinfo][:id])
+      unless tenant.nil?
+        begin
+          Apartment::Tenant.switch(tenant.name)
+          unless AccessRestriction.all.first.nil?
+            access_restrictions = AccessRestriction.all
+            data_length = access_restrictions.length
+            access_restrictions[data_length - 1].num_shipments = params[:access_restrictions_info][:max_allowed]
+            access_restrictions[data_length-1].num_users = params[:access_restrictions_info][:max_users]
+            access_restrictions[data_length-1].num_import_sources = params[:access_restrictions_info][:max_import_sources]
+            access_restrictions[data_length-1].save
+          end
+        rescue Exception => e
+          @result['status'] = false
+          @result['error_messages'].push(e.message);
+        end
+      else
+        @result['status'] = false
+      end
+      Apartment::Tenant.switch('groovepackeradmin')
+
+      respond_to do |format|
+        format.html # show.html.erb
+        format.json { render json: @result }
+      end
+    end
+
+    def delete_tenant_data
+      @result = Hash.new
+      @result['status'] = true
+      @result['error_messages'] = []
+      @tenant = nil
+      tenant = Tenant.find(params[:id])
+      unless tenant.nil?
+        begin
+          Apartment::Tenant.switch(tenant.name)
+          if params[:action_type] == 'orders'
+            delete_orders(@result)
+          elsif params[:action_type] == 'products'
+            delete_products(@result)
+          elsif params[:action_type] == 'both'
+            delete_orders(@result)
+            delete_products(@result)
+          elsif params[:action_type] == 'all'
+            ActiveRecord::Base.connection.tables.each do |table|
+              ActiveRecord::Base.connection.execute("TRUNCATE #{table}")
+            end   
+          end
+        rescue Exception => e
+          @result['status'] = false
+          @result['error_messages'].push(e.message);
+        end
+      else
+        @result['status'] = false
+      end
+      Apartment::Tenant.switch()
+
+      respond_to do |format|
+        format.html # show.html.erb
+        format.json { render json: @result }
+      end
+    end
+
+    def delete_orders(result)
+      if current_user.can? 'add_edit_order_items'
+        orders = Order.all
+        unless orders.nil?
+          orders.each do|order|
+            if order.destroy
+              @result['status'] &= true
+            else
+              result['status'] &= false
+              result['error_messages'] = order.errors.full_messages
+            end
+          end
+        end
+      else
+        result['status'] = false
+        result['error_messages'].push("You do not have enough permissions to delete order")
+      end
+    end
+
+    def delete_products(result)
+      if current_user.can?('delete_products')
+        parameters = Hash.new
+        parameters[:select_all] = true
+        parameters[:inverted] = false
+        parameters[:filter] = 'all'
+        parameters[:is_kit] = '-1'
+        bulk_actions = Groovepacker::Products::BulkActions.new
+        groove_bulk_actions = GrooveBulkActions.new
+        groove_bulk_actions.identifier = 'product'
+        groove_bulk_actions.activity = 'delete'
+        groove_bulk_actions.save
+
+        bulk_actions.delete(Apartment::Tenant.current, parameters, groove_bulk_actions.id, current_user.username)
+      else
+        result['status'] = false
+        result['error_messages'].push('You do not have enough permissions to delete products')
+      end
     end
   end

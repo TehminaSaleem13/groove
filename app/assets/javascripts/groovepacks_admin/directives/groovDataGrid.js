@@ -48,8 +48,6 @@ groovepacks_admin_directives.directive('groovDataGrid', ['$timeout','$http','$sc
         templateUrl:"/assets/admin_views/directives/admin_datagrid.html",
         link: function(scope,el,attrs) {
             var myscope = {};
-            console.log("scope");
-            console.log(scope);
             scope.context_menu_event = function(event) {
                 if(scope.options.show_hide) {
                     if (typeof event == 'undefined' || typeof event['pointerType'] == 'undefined') {
@@ -175,7 +173,6 @@ groovepacks_admin_directives.directive('groovDataGrid', ['$timeout','$http','$sc
                 myscope.dropdown_promise = $timeout(function(){scope.dropdown.show = false},500);
             };
             myscope.init = function() {
-                console.log("init");
                 scope.theads = [];
                 myscope.last_clicked =null;
 
