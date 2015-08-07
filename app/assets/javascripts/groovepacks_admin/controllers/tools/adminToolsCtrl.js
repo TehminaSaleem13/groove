@@ -228,12 +228,14 @@ function( $scope, $http, $timeout, $location, $state, $cookies, $q, tenants) {
                 }
             }
         };
+
         $scope.$watch('tenants.setup.search',function() {
             if($scope.tenants.setup.select_all) {
                 $scope.select_all_toggle(false);
             }
             myscope.get_tenants(1);
         });
+        $scope.tenant_modal_closed_callback = myscope.get_tenants;
     };
     
     myscope.get_tenants = function(page) {
