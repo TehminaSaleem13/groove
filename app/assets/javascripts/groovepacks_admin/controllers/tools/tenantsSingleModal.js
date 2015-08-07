@@ -62,16 +62,16 @@ groovepacks_admin_controllers.
                     }
                 });
                 myscope.tenant_obj.result.finally(function(){
-                    myscope.init();
+                    myscope.load_item($scope.tenants.current);
                 });
             };
 
             myscope.rollback = function() {
-                $state.go("tools.type.page",$stateParams);
+                myscope.single = {};
+                angular.copy($scope.tenants.single, myscope.single);
             };
 
             myscope.tenant_single_details = function(id) {
-
                 for(var i = 0; i< $scope.tenants.list.length; i++) {
                     if($scope.tenants.list[i].id == id) {
                         $scope.tenants.current = parseInt(i);

@@ -312,7 +312,7 @@
       else
         @result['status'] = false
       end
-      Apartment::Tenant.switch('groovepackeradmin')
+      Apartment::Tenant.switch()
 
       respond_to do |format|
         format.html # show.html.erb
