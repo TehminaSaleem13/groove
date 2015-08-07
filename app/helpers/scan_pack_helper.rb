@@ -269,7 +269,7 @@ module ScanPackHelper
                 item['child_items'].each do |child_item|
                   if !child_item['barcodes'].nil?
                     child_item['barcodes'].each do |barcode|
-                      if barcode.barcode == clean_input || (scanpack_settings.skip_code_enabled? && clean_input == scanpack_settings.skip_code && child_item['skippable'])
+                      if barcode.barcode.downcase == clean_input.downcase ||  (scanpack_settings.skip_code_enabled? && clean_input == scanpack_settings.skip_code && child_item['skippable'])
                         barcode_found = true
                         #process product barcode scan
                         order_item_kit_product =
@@ -323,7 +323,7 @@ module ScanPackHelper
               end
             elsif item['product_type'] == 'single'
               item['barcodes'].each do |barcode|
-                if barcode.barcode == clean_input || (scanpack_settings.skip_code_enabled? && clean_input == scanpack_settings.skip_code && item['skippable'])
+                if barcode.barcode.downcase == clean_input.downcase || (scanpack_settings.skip_code_enabled? && clean_input == scanpack_settings.skip_code && item['skippable'])
                   barcode_found = true
                   #process product barcode scan
                   order_item = OrderItem.find(item['order_item_id'])
