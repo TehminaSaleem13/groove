@@ -148,7 +148,7 @@ describe('Orders:',function() {
                     status.parent = status.button.element(by.xpath(".."));
                     status.ul = status.parent.element(by.tagName("ul"));
                     status.li = status.ul.all(by.tagName("li")).get(1).click();
-                    element(by.cssContainingText('.panel-collapse.in .panel-body li','Action Required')).click();
+                    element(by.cssContainingText('.panel-collapse.in .panel-body li','Service Issue')).click();
 
                     table.tbody = element.all(by.tagName("tbody")).first();
                     table.row = table.tbody.all(by.tagName("tr")).first();

@@ -27,11 +27,21 @@ function( $scope, $http, $timeout, $location, $state, $cookies, $q, tenants) {
             id: tenant.id,
             var: prop,
             value: tenant[prop]
-        }).then(function(){myscope.get_tenants()});
+        }).then(function(){myscope.get_tenants(1)});
     };
 
     $scope.handlesort = function(predicate) {
         myscope.common_setup_opt('sort',predicate,'tenant');
+    };
+
+    $scope.setup_child = function(childStateParams) {
+        if(typeof childStateParams['type'] == 'undefined') {
+            childStateParams['type'] = 'tenant';
+        }
+        if(typeof childStateParams['page']=='undefined' || childStateParams['page'] <= 0) {
+            childStateParams['page'] = 1
+        }
+        myscope.get_tenants(childStateParams['page']);
     };
 
     myscope.update_selected_count = function() {
@@ -99,7 +109,19 @@ function( $scope, $http, $timeout, $location, $state, $cookies, $q, tenants) {
         myscope.init();
     }
 
-
+    myscope.handle_click_fn = function(row,event) {
+        var toState = 'tools.type.page.single';
+        var toParams = {};
+        for (var key in $state.params) {
+            if(['filter','page'].indexOf(key) !=-1) {
+                toParams[key] = $state.params[key];
+            }
+        }
+        toParams.tenant_id = row.id;
+        $scope.select_all_toggle(false);
+        $state.go(toState,toParams);
+    }
+    
     myscope.init = function() {
         myscope.do_load_tentants = false;
         $scope._can_load_tentants = true;
@@ -155,7 +177,8 @@ function( $scope, $http, $timeout, $location, $state, $cookies, $q, tenants) {
             all_fields: {
                 name: {
                     name: "Tenant",
-                    editable: false
+                    editable: false,
+                    transclude: '<a href="" ng-click="options.editable.functions.name(row,$event)" >{{row[field]}}</a>'
                 },
                 plan: {
                     name: "Plan",
@@ -205,12 +228,14 @@ function( $scope, $http, $timeout, $location, $state, $cookies, $q, tenants) {
                 }
             }
         };
+
         $scope.$watch('tenants.setup.search',function() {
             if($scope.tenants.setup.select_all) {
                 $scope.select_all_toggle(false);
             }
             myscope.get_tenants(1);
         });
+        $scope.tenant_modal_closed_callback = myscope.get_tenants;
     };
     
     myscope.get_tenants = function(page) {

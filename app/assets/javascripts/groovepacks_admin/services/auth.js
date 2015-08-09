@@ -1,7 +1,6 @@
 groovepacks_admin_services.factory("auth", ['$http','$rootScope','groovIO',function($http,$rootScope,groovIO) {
     var current_user = {};
     var check = function () {
-        console.log('in check...');
         return $http.get('/home/userinfo.json',{ignoreLoadingBar: true}).success(function(data) {
             if(!jQuery.isEmptyObject(data)) {
                 groovIO.connect();

@@ -74,7 +74,7 @@ module Groovepacker
             end
             count = 0
             orders.each do |order|
-              count = count + order.order_items.length
+              count = count + get_scanned_count(order)
             end
             count
           end
@@ -104,13 +104,15 @@ module Groovepacker
                 packing_user_id: user.id)
               count = 0
               scanned_orders.each do |scanned_order|
-                count = count + scanned_order.order_items.count
+                count = count + get_scanned_count(scanned_order)
               end
-              stats_result.push([scanned_date.to_time.to_i, count])
+              stats_result.push([scanned_date.beginning_of_day.utc.to_time.to_i, count])
             end
 
             stats_result
+
           end
+
       end
     end
   end
