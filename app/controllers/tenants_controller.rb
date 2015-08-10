@@ -339,7 +339,14 @@
           elsif params[:action_type] == 'all'
             ActiveRecord::Base.connection.tables.each do |table|
               ActiveRecord::Base.connection.execute("TRUNCATE #{table}")
-            end   
+            end
+            SeedTenant.new.seed()
+            users = User.where(:name => 'admin')
+            unless users.empty?
+              users.first.destroy unless users.first.nil?
+            end
+            subscription = tenant.subscription if tenant.subscription
+            CreateTenant.apply_restrictions(subscription.subscription_plan_id) unless subscription.nil?
           end
         rescue Exception => e
           @result['status'] = false
