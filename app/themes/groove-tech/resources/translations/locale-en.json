@@ -91,7 +91,7 @@
                     "packing_slip_message_to_customer": "Custom Packing-Slip Message-All Stores"
                 },
                 "tooltips": {
-                    "inventory_tracking": "If you do not wish to track inventory for any items you can disable it here. Disabling Inventory Tracking will automatically disable Low Inventory Alert and Hold Orders due to Inventory. If you only need to disable inventory tracking for specific items you can do so on their product page.",
+                    "inventory_tracking": "If you do not wish to track inventory for any items you can disable it here. Disabling Inventory Tracking will automatically disable Low Inventory Alert and Hold Orders due to Inventory.",
                     "low_inventory_alert_email": "Low Inventory Alerts limits can be set on the product edit page. If you're not using alerts they can be disabled for all products here. To disable alerts for individual products set their alert level to 0 on their page",
                     "default_low_inventory_alert_limit": "The Alert level set here will be assigned to all products that do not have a value set.",
                     "conf_req_on_notes_to_packer": "Notes to Packer can be added for any order from the notes tab of the Order detail window. If a confirmation is required the Packer will be prompted to scan their unique confirmation code to proceed when the note is shown. If you want to ensure that confirmations are always required or never required for this type of notification you can do that here. Leaving it optional allows the user creating the Note to choose if confirmation is required.",

@@ -69,8 +69,6 @@
     end
 
     def do_gettenants(params)
-      sort_key = 'updated_at'
-      sort_order = 'DESC'
       limit = 10
       offset = 0
       query_add = ""
@@ -82,17 +80,11 @@
 
       offset = params[:offset].to_i if !params[:offset].nil? && params[:offset].to_i >= 0
 
-      sort_order = params[:order] if !params[:order].nil? &&
-          supported_order_keys.include?(params[:order].to_s)
-
-      sort_key = params[:sort] if !params[:sort].nil? &&
-        supported_sort_keys.include?(params[:sort].to_s)
-
       unless params[:select_all] || params[:inverted]
         query_add += " LIMIT "+limit.to_s+" OFFSET "+offset.to_s
       end
 
-      tenants = Tenant.order(sort_key+" "+sort_order)
+      tenants = Tenant.order('')
       unless params[:select_all] || params[:inverted]
         tenants =  tenants.limit(limit).offset(offset)
       end  
@@ -131,11 +123,11 @@
         query_add = ' LIMIT '+limit.to_s+' OFFSET '+offset.to_s
       end
       Apartment::Tenant.switch()
-      base_query = 'SELECT tenants.id as id, tenants.name as name, tenants.updated_at as updated_at
-        FROM tenants
+      base_query = 'SELECT tenants.id as id, tenants.name as name, tenants.updated_at as updated_at, tenants.created_at as created_at, subscriptions.subscription_plan_id as plan, subscriptions.stripe_customer_id as stripe_url
+        FROM tenants LEFT JOIN subscriptions ON (subscriptions.tenant_id = tenants.id) 
           WHERE
             (
-              tenants.name like '+search+'
+              tenants.name like '+search+' OR subscriptions.subscription_plan_id like '+search+'
             )
             '+'
           GROUP BY tenants.id ORDER BY '+sort_key+' '+sort_order
@@ -159,20 +151,31 @@
 
     def make_tenants_list(tenants)
       @tenants_result = []
-      tenants.each do |tenant|
-        @tenant_hash = Hash.new
-        @tenant_hash['id'] = tenant.id
-        @tenant_hash['name'] = tenant.name
-        plan_data = get_subscription_data(tenant.id)
-        @tenant_hash['plan'] = plan_data['plan']
-        @tenant_hash['stripe_url'] = plan_data['customer_id']
-        shipping_data = get_shipping_data(tenant.id)
-        @tenant_hash['total_shipped'] = shipping_data['shipped_current']
-        @tenant_hash['shipped_last'] = shipping_data['shipped_last']
-        @tenant_hash['max_allowed'] = shipping_data['max_allowed']
-        @tenant_hash['url'] = tenant.name + ".groovepacker.com"
+      begin
+        tenants.each do |tenant|
+          @tenant_hash = Hash.new
+          @tenant_hash['id'] = tenant.id
+          @tenant_hash['name'] = tenant.name
+          plan_data = get_subscription_data(tenant.id)
+          @tenant_hash['plan'] = plan_data['plan']
+          @tenant_hash['stripe_url'] = plan_data['customer_id']
+          shipping_data = get_shipping_data(tenant.id)
+          @tenant_hash['total_shipped'] = shipping_data['shipped_current']
+          @tenant_hash['shipped_last'] = shipping_data['shipped_last']
+          @tenant_hash['max_allowed'] = shipping_data['max_allowed']
+          @tenant_hash['url'] = tenant.name + ".groovepacker.com"
 
-        @tenants_result.push(@tenant_hash)
+          @tenants_result.push(@tenant_hash)
+        end
+        unless params[:sort].nil? || params[:sort] == ''
+          if params[:order] == 'DESC'
+            @tenants_result =  @tenants_result.sort_by {|v| v[params[:sort]].class == Fixnum ? v[params[:sort]] : v[params[:sort]].downcase}.reverse!
+          else
+            @tenants_result =  @tenants_result.sort_by {|v| v[params[:sort]].class == Fixnum ? v[params[:sort]] : v[params[:sort]].downcase}
+          end
+        end
+      rescue Exception => e
+        puts e.message
       end
       return @tenants_result
     end
@@ -219,11 +222,18 @@
             @subscripton_result['plan'] = "annual-quinet"
           when "annual-groove-symphony"
             @subscripton_result['plan'] = "annual-symphony"
+          else
+            @subscripton_result['plan'] = ''
           end
-          @subscripton_result['customer_id'] = subscription.stripe_customer_id
-        end
-      else
-        @subscripton_result['plan'] = ""
+          unless subscription.stripe_customer_id.nil?
+            @subscripton_result['customer_id'] = subscription.stripe_customer_id
+          else
+            @subscripton_result['customer_id'] = ''
+          end
+        else
+          @subscripton_result['plan'] = ""
+          @subscripton_result['customer_id'] = ''
+        end       
       end
       Apartment::Tenant.switch(current_tenant)
       @subscripton_result
@@ -339,7 +349,14 @@
           elsif params[:action_type] == 'all'
             ActiveRecord::Base.connection.tables.each do |table|
               ActiveRecord::Base.connection.execute("TRUNCATE #{table}")
-            end   
+            end
+            SeedTenant.new.seed()
+            users = User.where(:name => 'admin')
+            unless users.empty?
+              users.first.destroy unless users.first.nil?
+            end
+            subscription = tenant.subscription if tenant.subscription
+            CreateTenant.apply_restrictions(subscription.subscription_plan_id) unless subscription.nil?
           end
         rescue Exception => e
           @result['status'] = false
