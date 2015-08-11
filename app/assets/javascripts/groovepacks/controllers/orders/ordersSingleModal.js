@@ -127,10 +127,11 @@ groovepacks_controllers.
             };
 
             scope.update_print_status = function(item,product) {
-                orders.single.item.print_status({id: item.id});
-                myscope.init();
-                scope.modal_tabs[1].active = true;
-                orders.single.item.print_barcode({id: product.id});
+                orders.single.item.print_status({id: item.id}).then(function(response) {
+                    myscope.init();
+                    scope.modal_tabs[0].active = true;
+                    orders.single.item.print_barcode({id: product.id});
+                });
             }
 
             scope.acknowledge_activity = function(activity_id) {
@@ -313,11 +314,6 @@ groovepacks_controllers.
                 scope.modal_tabs = [
                     {
                         active:true,
-                        heading:"Information",
-                        templateUrl:'/assets/views/modals/order/information.html'
-                    },
-                    {
-                        active:false,
                         heading:"Items",
                         templateUrl:'/assets/views/modals/order/items.html'
                     },
@@ -325,6 +321,11 @@ groovepacks_controllers.
                         active:false,
                         heading:"Notes",
                         templateUrl:'/assets/views/modals/order/notes.html'
+                    },
+                    {
+                        active:false,
+                        heading:"Information",
+                        templateUrl:'/assets/views/modals/order/information.html'
                     },
                     {
                         active:false,
