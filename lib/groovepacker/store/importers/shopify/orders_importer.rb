@@ -2,8 +2,8 @@ module Groovepacker
   module Store
     module Importers
       module Shopify
-        include ProductsHelper
         class OrdersImporter < Groovepacker::Store::Importers::Importer
+          include ProductsHelper
           def import
             handler = self.get_handler
             credential = handler[:credential]
