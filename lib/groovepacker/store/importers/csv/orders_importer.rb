@@ -124,19 +124,82 @@ module Groovepacker
                   #order_placed_time,price,qty
                   order_required = ['qty','sku','increment_id']
                   order_map.each do |single_map|
-                    if !mapping[single_map].nil? && mapping[single_map][:position] >= 0
-                      #if sku, create order item with product id, qty
-                      if single_map == 'sku' && !params[:contains_unique_order_items] == true
-                        unless mapping['sku'].nil?
-                          import_item.current_order_items = 1
-                          import_item.current_order_imported_item = 0
-                          import_item.save
+                    begin
+                      if !mapping[single_map].nil? && mapping[single_map][:position] >= 0
+                        #if sku, create order item with product id, qty
+                        if single_map == 'sku' && !params[:contains_unique_order_items] == true
+                          unless mapping['sku'].nil?
+                            import_item.current_order_items = 1
+                            import_item.current_order_imported_item = 0
+                            import_item.save
 
-                          product_skus = ProductSku.where(:sku => single_row[mapping[single_map][:position]])
-                          if product_skus.length > 0
-                            if OrderItem.where(:product_id => product_skus.first.product.id, :order_id => order.id).length == 0
+                            product_skus = ProductSku.where(:sku => single_row[mapping[single_map][:position]])
+                            if product_skus.length > 0
+                              if OrderItem.where(:product_id => product_skus.first.product.id, :order_id => order.id).length == 0
+                                order_item  = OrderItem.new
+                                order_item.product = product_skus.first.product
+                                order_item.sku = single_row[mapping['sku'][:position]]
+                                if !mapping['image'].nil? && mapping['image'][:position] >= 0
+                                  product_images = order_item.product.product_images
+                                  exists = false
+                                  product_images.each do |single_image|
+                                    if single_image.image == single_row[mapping['image'][:position]]
+                                      exists = true
+                                      break
+                                    end
+                                  end
+                                  unless exists
+                                    product_image = ProductImage.new
+                                    product_image.image = single_row[mapping['image'][:position]]
+                                    order_item.product.product_images << product_image
+                                  end
+                                end
+                                if !mapping['qty'].nil? && mapping['qty'][:position] >= 0
+                                  order_item.qty = single_row[mapping['qty'][:position]]
+                                  order_required.delete('qty')
+                                end
+                                order.order_items << order_item
+                              end
+                            else # no sku is found
+                              product = Product.new
+                              if params[:use_sku_as_product_name] == true
+                                product.name = single_row[mapping['sku'][:position]]
+                              elsif !mapping['product_name'].nil?
+                                product.name = single_row[mapping['product_name'][:position]]
+                              else
+                                product.name = 'Product created from order import'
+                              end
+
+                              sku = ProductSku.new
+                              sku.sku = single_row[mapping['sku'][:position]]
+                              product.product_skus << sku
+                              if params[:generate_barcode_from_sku] == true
+                                product_barcode = ProductBarcode.new
+                                product_barcode.barcode = single_row[mapping['sku'][:position]]
+                                product.product_barcodes << product_barcode
+                              elsif !mapping['barcode'].nil? && !single_row[mapping['barcode'][:position]].nil?
+                                product_barcode = ProductBarcode.new
+                                product_barcode.barcode = single_row[mapping['barcode'][:position]]
+                                product.product_barcodes << product_barcode
+                              end
+                              product.store_product_id = 0
+                              product.store_id = params[:store_id]
+                              unless mapping['product_instructions'].nil?
+                                product.spl_instructions_4_packer = single_row[mapping['product_instructions'][:position]]
+                              end
+
+                              if !mapping['image'].nil? && mapping['image'][:position] >= 0
+                                product_image = ProductImage.new
+                                product_image.image = single_row[mapping['image'][:position]]
+                                product.product_images << product_image
+                              end
+
+                              product.save
+                              make_product_intangible(product)
+                              product.update_product_status
+
                               order_item  = OrderItem.new
-                              order_item.product = product_skus.first.product
+                              order_item.product = product
                               order_item.sku = single_row[mapping['sku'][:position]]
                               if !mapping['qty'].nil? && mapping['qty'][:position] >= 0
                                 order_item.qty = single_row[mapping['qty'][:position]]
@@ -144,160 +207,143 @@ module Groovepacker
                               end
                               order.order_items << order_item
                             end
-                          else # no sku is found
-                            product = Product.new
-                            if params[:use_sku_as_product_name] == true
-                              product.name = single_row[mapping['sku'][:position]]
-                            elsif !mapping['product_name'].nil?
+                            import_item.current_order_imported_item = 1
+                            import_item.save
+                          end
+                          
+                        elsif single_map == 'firstname'
+                          if mapping['lastname'].nil? || mapping['lastname'][:position] == 0
+                            arr = single_row[mapping[single_map][:position]].blank? ? [] : single_row[mapping[single_map][:position]].split(' ')
+                            order.firstname = arr.shift
+                            order.lastname = arr.join(' ')
+                          else
+                            order.firstname = single_row[mapping[single_map][:position]]
+                          end
+                        elsif single_map == 'increment_id' && params[:contains_unique_order_items] == true && !mapping['increment_id'].nil? && !mapping['sku'].nil?
+                          order[single_map] = single_row[mapping[single_map][:position]]
+                          order_required.delete('increment_id')
+
+                          import_item.current_order_items = 1
+                          import_item.current_order_imported_item = 0
+                          import_item.save
+                          
+                          order_increment_sku = single_row[mapping['increment_id'][:position]]+'-'+single_row[mapping['sku'][:position]]
+                          
+                          product_skus = ProductSku.where(['sku like (?)', order_increment_sku+'%'])
+                          if product_skus.length > 0
+                            product_sku = product_skus.where(:sku=>order_increment_sku).first
+                            unless product_sku.nil?
+                              product_sku.sku = order_increment_sku + '-1'
+                              if params[:generate_barcode_from_sku] == true
+                                product_sku.product.product_barcodes.last.delete
+                                product_barcode = ProductBarcode.new
+                                product_barcode.barcode = product_sku.sku
+                                product_sku.product.product_barcodes << product_barcode
+                              end
+                              product_sku.save
+                            end
+                            order_increment_sku = order_increment_sku + '-' + (product_skus.length+1).to_s 
+                          end
+
+                          product = Product.new
+                          if params[:use_sku_as_product_name] == true
+                            product.name = order_increment_sku
+                          else
+                            unless mapping['product_name'].nil? || single_row[mapping['product_name'][:position]].nil?
                               product.name = single_row[mapping['product_name'][:position]]
                             else
                               product.name = 'Product created from order import'
                             end
-
-                            sku = ProductSku.new
-                            sku.sku = single_row[mapping['sku'][:position]]
-                            product.product_skus << sku
-                            if params[:generate_barcode_from_sku] == true
-                              product_barcode = ProductBarcode.new
-                              product_barcode.barcode = single_row[mapping['sku'][:position]]
-                              product.product_barcodes << product_barcode
-                            elsif !mapping['barcode'].nil? && !single_row[mapping['barcode'][:position]].nil?
-                              product_barcode = ProductBarcode.new
-                              product_barcode.barcode = single_row[mapping['barcode'][:position]]
-                              product.product_barcodes << product_barcode
-                            end
-                            product.store_product_id = 0
-                            product.store_id = params[:store_id]
-                            unless mapping['product_instructions'].nil?
-                              product.spl_instructions_4_packer = single_row[mapping['product_instructions'][:position]]
-                            end
-
-                            product.save
-                            make_product_intangible(product)
-                            product.update_product_status
-
-                            order_item  = OrderItem.new
-                            order_item.product = product
-                            order_item.sku = single_row[mapping['sku'][:position]]
-                            if !mapping['qty'].nil? && mapping['qty'][:position] >= 0
-                              order_item.qty = single_row[mapping['qty'][:position]]
-                              order_required.delete('qty')
-                            end
-                            order.order_items << order_item
                           end
-                          import_item.current_order_imported_item = 1
-                          import_item.save
-                        end
-                        
-                      elsif single_map == 'firstname'
-                        if mapping['lastname'].nil? || mapping['lastname'][:position] == 0
-                          arr = single_row[mapping[single_map][:position]].blank? ? [] : single_row[mapping[single_map][:position]].split(' ')
-                          order.firstname = arr.shift
-                          order.lastname = arr.join(' ')
-                        else
-                          order.firstname = single_row[mapping[single_map][:position]]
-                        end
-                      elsif single_map == 'increment_id' && params[:contains_unique_order_items] == true && !mapping['increment_id'].nil? && !mapping['sku'].nil?
-                        order[single_map] = single_row[mapping[single_map][:position]]
-                        order_required.delete('increment_id')
 
-                        import_item.current_order_items = 1
-                        import_item.current_order_imported_item = 0
-                        import_item.save
-                        
-                        order_increment_sku = single_row[mapping['increment_id'][:position]]+'-'+single_row[mapping['sku'][:position]]
-                        
-                        product_skus = ProductSku.where(['sku like (?)', order_increment_sku+'%'])
-                        if product_skus.length > 0
-                          product_sku = product_skus.where(:sku=>order_increment_sku).first
-                          unless product_sku.nil?
-                            product_sku.sku = order_increment_sku + '-1'
-                            if params[:generate_barcode_from_sku] == true
-                              product_sku.product.product_barcodes.last.delete
-                              product_barcode = ProductBarcode.new
-                              product_barcode.barcode = product_sku.sku
-                              product_sku.product.product_barcodes << product_barcode
-                            end
-                            product_sku.save
+                          if params[:generate_barcode_from_sku] == true
+                            product_barcode = ProductBarcode.new
+                            product_barcode.barcode = order_increment_sku
+                            product.product_barcodes << product_barcode
+                          elsif !mapping['barcode'].nil? && !single_row[mapping['barcode'][:position]].nil?
+                            product_barcode = ProductBarcode.new
+                            product_barcode.barcode = single_row[mapping['barcode'][:position]]
+                            product.product_barcodes << product_barcode
                           end
-                          order_increment_sku = order_increment_sku + '-' + (product_skus.length+1).to_s 
-                        end
-
-                        product = Product.new
-                        if params[:use_sku_as_product_name] == true
-                          product.name = order_increment_sku
-                        else
-                          unless mapping['product_name'].nil? || single_row[mapping['product_name'][:position]].nil?
-                            product.name = single_row[mapping['product_name'][:position]]
+                                        
+                          sku = ProductSku.new
+                          sku.sku = order_increment_sku
+                          product.product_skus << sku
+                          product.store_product_id = 0
+                          product.store_id = params[:store_id]
+                          base_sku = ProductSku.where(:sku=>single_row[mapping['sku'][:position]]).first unless ProductSku.where(:sku=>single_row[mapping['sku'][:position]]).empty?
+                          if base_sku.nil?
+                            base_product = Product.new()
+                            base_product.name = "Base Product " + single_row[mapping['sku'][:position]]
+                            base_product.store_product_id = 0
+                            base_product.store_id = params[:store_id]
+                            base_sku = ProductSku.new
+                            base_sku.sku = single_row[mapping['sku'][:position]]
+                            base_product.product_skus << base_sku
+                            base_product.is_intangible = false
+                            if !mapping['image'].nil? && mapping['image'][:position] >= 0
+                              product_image = ProductImage.new
+                              product_image.image = single_row[mapping['image'][:position]]
+                              base_product.product_images << product_image
+                            end
                           else
-                            product.name = 'Product created from order import'
+                            base_product = base_sku.product
+                            if !mapping['image'].nil? && mapping['image'][:position] >= 0
+                              product_images = base_product.product_images
+                              exists = false
+                              product_images.each do |single_image|
+                                if single_image.image == single_row[mapping['image'][:position]]
+                                  exists = true
+                                  break
+                                end
+                              end
+                              unless exists
+                                product_image = ProductImage.new
+                                product_image.image = single_row[mapping['image'][:position]]
+                                base_product.product_images << product_image
+                              end
+                            end
                           end
-                        end
-
-                        if params[:generate_barcode_from_sku] == true
-                          product_barcode = ProductBarcode.new
-                          product_barcode.barcode = order_increment_sku
-                          product.product_barcodes << product_barcode
-                        elsif !mapping['barcode'].nil? && !single_row[mapping['barcode'][:position]].nil?
-                          product_barcode = ProductBarcode.new
-                          product_barcode.barcode = single_row[mapping['barcode'][:position]]
-                          product.product_barcodes << product_barcode
-                        end
-                                      
-                        sku = ProductSku.new
-                        sku.sku = order_increment_sku
-                        product.product_skus << sku
-                        product.store_product_id = 0
-                        product.store_id = params[:store_id]
-                        base_product = ProductSku.where(:sku=>single_row[mapping['sku'][:position]]).first unless ProductSku.where(:sku=>single_row[mapping['sku'][:position]]).empty?
-                        if base_product.nil?
-                          base_product = Product.new()
-                          base_product.name = "Base Product " + single_row[mapping['sku'][:position]]
-                          base_product.store_product_id = 0
-                          base_product.store_id = params[:store_id]
-                          basesku = ProductSku.new
-                          basesku.sku = single_row[mapping['sku'][:position]]
-                          base_product.product_skus << basesku
-                          base_product.is_intangible = false
-                          
                           base_product.save
                           make_product_intangible(base_product)
+
+                          unless mapping['category'].nil?
+                            cat = ProductCat.new
+                            cat.category = single_row[mapping['category'][:position]] unless single_row[mapping['category'][:position]].nil?
+                            product.product_cats << cat
+                          end
+                          
+                          unless mapping['product_instructions'].nil?
+                            product.spl_instructions_4_packer = single_row[mapping['product_instructions'][:position]] unless single_row[mapping['product_instructions'][:position]].nil?
+                          end
+                          product.base_sku = single_row[mapping['sku'][:position]] unless single_row[mapping['sku'][:position]].nil?
+                          product.save
+                          product.update_product_status
+
+                          order_item  = OrderItem.new
+                          order_item.product = product
+                          order_item.sku = order_increment_sku
+                          if !mapping['qty'].nil? && mapping['qty'][:position] >= 0
+                            order_item.qty = single_row[mapping['qty'][:position]]
+                            order_required.delete('qty')
+                          end
+                          order_required.delete('sku')
+                          order.order_items << order_item
+
+                          import_item.current_order_imported_item = 1
+                          import_item.save
+                        else
+                          unless mapping[single_map].nil?
+                            order[single_map] = single_row[mapping[single_map][:position]]
+                          end
                         end
 
-                        unless mapping['category'].nil?
-                          cat = ProductCat.new
-                          cat.category = single_row[mapping['category'][:position]] unless single_row[mapping['category'][:position]].nil?
-                          product.product_cats << cat
-                        end
-                        
-                        unless mapping['product_instructions'].nil?
-                          product.spl_instructions_4_packer = single_row[mapping['product_instructions'][:position]] unless single_row[mapping['product_instructions'][:position]].nil?
-                        end
-                        product.base_sku = single_row[mapping['sku'][:position]] unless single_row[mapping['sku'][:position]].nil?
-                        product.save
-                        product.update_product_status
-
-                        order_item  = OrderItem.new
-                        order_item.product = product
-                        order_item.sku = order_increment_sku
-                        if !mapping['qty'].nil? && mapping['qty'][:position] >= 0
-                          order_item.qty = single_row[mapping['qty'][:position]]
-                          order_required.delete('qty')
-                        end
-                        order_required.delete('sku')
-                        order.order_items << order_item
-
-                        import_item.current_order_imported_item = 1
-                        import_item.save
-                      else
-                        unless mapping[single_map].nil?
-                          order[single_map] = single_row[mapping[single_map][:position]]
+                        if order_required.include? single_map
+                          order_required.delete(single_map)
                         end
                       end
-
-                      if order_required.include? single_map
-                        order_required.delete(single_map)
-                      end
+                    rescue Exception => e
+                      puts e.message
                     end
                   end
                   if order_required.length > 0
