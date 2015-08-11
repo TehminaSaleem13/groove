@@ -411,4 +411,46 @@
         result['error_messages'].push('You do not have enough permissions to delete products')
       end
     end
+
+    def delete_tenant
+      @result = Hash.new
+      @result['status'] = true
+      @result['error_messages'] = []
+      @result['success_messages'] = []
+      @tenants = list_selected_tenants
+      unless @tenants.nil?
+        @tenants.each do|tenant|
+          begin
+            @tenant = Tenant.find_by_name(tenant)
+            Apartment::Tenant.drop(tenant)
+            if @tenant.destroy
+              @result['status'] &= true
+              @result['success_messages'].push('Removed '+tenant+' from tenants table')
+            end
+          rescue Exception=>e
+            @result['status'] &= false
+            @result['error_messages'].push(e.message)
+          else
+            @result['success_messages'].push('Removed tenant '+tenant+' Database')
+          end
+        end
+      else
+        @result['status'] = false
+        @result['error_messages'].push("Selected list is empty")
+      end
+
+      respond_to do |format|
+          format.html # show.html.erb
+          format.json { render json: @result }
+      end
+    end
+
+    def list_selected_tenants
+      tenants_list = params['_json']
+      tenants = []
+      tenants_list.each do |tenant|
+        tenants.push(tenant['name'])
+      end
+      tenants
+    end
   end

@@ -44,6 +44,12 @@ function( $scope, $http, $timeout, $location, $state, $cookies, $q, tenants) {
         myscope.get_tenants(childStateParams['page']);
     };
 
+    $scope.delete_selected_tenants = function() {
+        tenants.list.update($scope.tenants).then(function(data) {
+            myscope.get_tenants();
+        });
+    };
+
     myscope.update_selected_count = function() {
         if($scope.tenants.setup.inverted && $scope.gridOptions.paginate.show) {
             $scope.gridOptions.selections.selected_count = $scope.gridOptions.paginate.total_items - $scope.tenants.selected.length;
@@ -236,6 +242,7 @@ function( $scope, $http, $timeout, $location, $state, $cookies, $q, tenants) {
             myscope.get_tenants(1);
         });
         $scope.tenant_modal_closed_callback = myscope.get_tenants;
+        $scope.$watch('tenants.selected', myscope.update_selected_count,true);
     };
     
     myscope.get_tenants = function(page) {

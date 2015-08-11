@@ -146,6 +146,19 @@ groovepacks_admin_services.factory('tenants',['$http','notification','editable',
 
     };
 
+    var update_list = function(tenants) {
+        return $http.post('/tenants/delete_tenant.json',tenants.selected).success(function(data) {
+            tenants.selected = [];
+            if (data.status) {
+                tenants.setup.select_all =  false;
+                tenants.setup.inverted = false;
+                notification.notify(data.success_messages,1);
+            } else {
+                notification.notify(data.error_messages,0);
+            };
+        }).error(notification.server_error);
+    }
+
     var update_list_node = function(obj) {
         return $http.post('/tenants/updatetenantlist.json',obj).success(function(data) {
             if(data.status) {
@@ -235,6 +248,7 @@ groovepacks_admin_services.factory('tenants',['$http','notification','editable',
             get: get_list,
             total_tenants:total_tenants_list,
             select: select_list,
+            update: update_list,
             update_node: update_list_node
         },
         single: {
