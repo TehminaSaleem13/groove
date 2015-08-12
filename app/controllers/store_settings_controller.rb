@@ -465,7 +465,8 @@ class StoreSettingsController < ApplicationController
                 { value: 'product_instructions', name: 'Product Instructions'},
                 { value: 'tracking_num', name: 'Tracking Number'},
                 { value: 'category', name: 'Category Name'},
-                { value: 'barcode', name: 'Barcode/UPC'}
+                { value: 'barcode', name: 'Barcode/UPC'},
+                { value: 'image', name: 'Image URL'}
             ]
             if csv_map.order_csv_map.nil?
               @result['order']['settings'] = default_csv_map

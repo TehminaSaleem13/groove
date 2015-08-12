@@ -603,7 +603,7 @@ class ProductsController < ApplicationController
       @result['product']['skus'] = @product.product_skus.order("product_skus.order ASC")
       @result['product']['cats'] = @product.product_cats
       @result['product']['spl_instructions_4_packer'] = @product.spl_instructions_4_packer
-      @result['product']['images'] = @product.product_images.order("product_images.order ASC")
+      @result['product']['images'] = @product.base_product.product_images.order("product_images.order ASC")
       @result['product']['barcodes'] = @product.product_barcodes.order("product_barcodes.order ASC")
       @result['product']['inventory_warehouses'] = []
 
@@ -1478,7 +1478,7 @@ class ProductsController < ApplicationController
       @product_hash['barcode'] = product.primary_barcode
       @product_hash['sku'] = product.primary_sku
       @product_hash['cat'] = product.primary_category
-      @product_hash['image'] = product.primary_image
+      @product_hash['image'] = product.base_product.primary_image
       unless product.store.nil?
         @product_hash['store_name'] = product.store.name
       end

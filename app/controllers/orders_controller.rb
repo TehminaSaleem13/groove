@@ -403,7 +403,7 @@ class OrdersController < ApplicationController
           @orderitem['sku'] = product.primary_sku
           @orderitem['barcode'] = product.primary_barcode
           @orderitem['category'] = product.primary_category
-          @orderitem['image'] = product.primary_image
+          @orderitem['image'] = product.base_product.primary_image
           @orderitem['spl_instructions_4_packer'] = product.spl_instructions_4_packer
 
         end
