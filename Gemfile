@@ -5,7 +5,7 @@ gem 'rails', '3.2.13'
 # Bundle edge Rails instead:
 # gem 'rails', :git => 'git://github.com/rails/rails.git'
 
-gem 'mysql2'
+gem 'mysql2', '>=0.3.19'
 
 gem 'json'
 
@@ -47,6 +47,7 @@ group :test do
   gem 'cucumber-rails', '>= 1.3.0', :require => false
   gem 'capybara', '>= 2.0.1'
   gem 'mocha', :require => 'mocha/api'
+  gem 'test-unit'
 end
 
 gem 'redis-session-store'
