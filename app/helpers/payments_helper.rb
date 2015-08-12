@@ -106,7 +106,7 @@ module PaymentsHelper
     end
   end
 
-  def getNextPaymentDate(subscription) 
+  def get_next_payment_date(subscription) 
     create_result_hash
     @result['next_date'] = nil
     unless subscription.nil? || subscription.stripe_customer_id.nil?
@@ -114,32 +114,6 @@ module PaymentsHelper
       @result['next_date'] = (Time.at(customer.subscriptions.data.first.current_period_end).to_datetime).strftime "%B %d %Y" unless customer.subscriptions.data.empty?
     end
     @result
-  end
-
-  def getAllPlans
-    create_result_hash
-    @result['all_plans'] = []
-    begin
-      plans = Stripe::Plan.all(limit: 20)
-      plans.each do |plan|
-        @result['all_plans'].push(plan.name)
-      end
-    rescue Stripe::InvalidRequestError => e
-      @result['status'] = false
-      @result['messages'].push(e.message)
-    end
-  end
-
-  def getPlanWithIndex(plan_index)
-    create_result_hash
-    @result['plan'] = []
-    begin
-      plans = Stripe::Plan.all(limit: 20)
-      @result['plan'].push(plans.data[plan_index.to_i])
-    rescue Stripe::InvalidRequestError => e
-      @result['status'] = false
-      @result['messages'].push(e.message);
-    end
   end
 
   def is_coupon_valid(coupon_id)

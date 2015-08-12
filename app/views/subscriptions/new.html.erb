@@ -214,8 +214,9 @@
                       $('#processing_alert_error').show();
                   }
                   else {
+                    var redirect_url = 'subscriptions/show?transaction_id=' + response.transaction_id + '&notice=' + response.notice + '&email=' + response.email + '&next_date=' + response.next_date
                       window.location.href =
-                              response.redirect_url
+                              redirect_url
                   }
               });
               $('#customButton').hide();

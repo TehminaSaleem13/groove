@@ -42,11 +42,11 @@ groovepacks_admin_services.factory('tenants',['$http','notification','editable',
             page = 0;
         }
         tenants.setup.offset = page * tenants.setup.limit;
-        if(setup.search=='') {
-            url = '/tenants/gettenants.json?&sort='+setup.sort+'&order='+setup.order;
-        } else {
-            url = '/tenants/search.json?search='+setup.search+'&sort='+setup.sort+'&order='+setup.order;
-        }
+        // if(setup.search=='') {
+        //     url = '/tenants.json?&sort='+setup.sort+'&order='+setup.order;
+        // } else {
+            url = '/tenants.json?search='+setup.search+'&sort='+setup.sort+'&order='+setup.order;
+        // }
         url += '&limit='+setup.limit+'&offset='+setup.offset;
         return $http.get(url).success(
             function(data) {
@@ -190,7 +190,7 @@ groovepacks_admin_services.factory('tenants',['$http','notification','editable',
     };
 
     var get_sinlge = function(id,tenants) {
-        return $http.get('/tenants/getdetails/'+ id+'.json').success(function(data) {
+        return $http.get('/tenants/'+ id+ '.json').success(function(data) {
             if(data.tenant) {
                 if(typeof tenants.single['basicinfo'] != "undefined" && data.tenant.basicinfo.id == tenants.single.basicinfo.id) {
                     angular.extend(tenants.single,data.tenant);

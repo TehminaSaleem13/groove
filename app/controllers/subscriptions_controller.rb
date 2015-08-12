@@ -55,8 +55,9 @@
                 ).permission_url(params[:tenant_name], true)
             }
           else
-            @result = getNextPaymentDate(@subscription)
-            render json: {valid: true, redirect_url: "subscriptions/show?transaction_id=#{@subscription.stripe_transaction_identifier}&notice=Congratulations! Your GroovePacker is being deployed!&email=#{@subscription.email}&next_date=#{@result['next_date']}"}
+            @result = get_next_payment_date(@subscription)
+            # render json: {valid: true, redirect_url: "subscriptions/show?transaction_id=#{@subscription.stripe_transaction_identifier}&notice=Congratulations! Your GroovePacker is being deployed!&email=#{@subscription.email}&next_date=#{@result['next_date']}"}
+            render json: {valid: true, transaction_id: @subscription.stripe_transaction_identifier, notice: "Congratulations! Your GroovePacker is being deployed!", email: @subscription.email, next_date: @result['next_date']}
           end
         else
           render json: {valid: false}
