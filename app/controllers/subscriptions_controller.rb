@@ -1,7 +1,7 @@
   class SubscriptionsController < ApplicationController
     include PaymentsHelper
     include StoreSettingsHelper
-    # before_filter :check_tenant_name
+    before_filter :check_tenant_name
 
     def new
       @subscription = Subscription.new
