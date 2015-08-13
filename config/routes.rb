@@ -126,6 +126,11 @@ Groovepacks::Application.routes.draw do
     end
   end
 
+  resources :tenants do
+    member do
+      delete 'delete_tenant'
+    end
+  end
   
   # Sample resource route with options:
   #   resources :products do
