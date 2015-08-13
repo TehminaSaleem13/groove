@@ -1,38 +1,18 @@
   class TenantsController < ApplicationController
     include PaymentsHelper
 
-    def search
-      @result = Hash.new
-      @result['status'] = true
-      if !params[:search].nil? && params[:search] != ''
-        helper = Groovepacker::Tenants::Helper.new
-        @tenants = helper.do_search(params, false)
-        @result['tenants'] = helper.make_tenants_list(@tenants['tenants'])
-        @result['tenants_count'] = get_tenants_count
-        @result['tenants_count']['search'] = @tenants['count']
-      else
-        @result['status'] = false
-        @result['message'] = 'Improper search string'
-      end
-
-      respond_to do |format|
-        format.html # show.html.erb
-        format.json { render json: @result }
-      end
-    end
-
     def index
       @result = Hash.new
       @result[:status] = true
       helper = Groovepacker::Tenants::Helper.new
       if !params[:search].nil? && params[:search] != ''
-        @tenants = helper.do_search(params, false)
-        @result['tenants'] = helper.make_tenants_list(@tenants['tenants'])
+        @tenants = helper.do_search(params)
+        @result['tenants'] = helper.make_tenants_list(@tenants['tenants'], params)
         @result['tenants_count'] = get_tenants_count
         @result['tenants_count']['search'] = @tenants['count']
       else
         @tenants = helper.do_gettenants(params)
-        @result['tenants'] = helper.make_tenants_list(@tenants)
+        @result['tenants'] = helper.make_tenants_list(@tenants, params)
         @result['tenants_count'] = get_tenants_count()
       end
 
@@ -65,12 +45,12 @@
       end
     end
 
-    def update_access_restrictions
+    def update
       @result = Hash.new
       @result['status'] = true
       @result['error_messages'] = []
       @tenant = nil
-      tenant = Tenant.find(params[:basicinfo][:id])
+      tenant = Tenant.find(params[:id])
       unless tenant.nil?
         helper = Groovepacker::Tenants::Helper.new
         helper.update_restrictions(tenant, params, @result)
@@ -85,7 +65,7 @@
       end
     end
 
-    def delete_tenant_data
+    def destroy
       @result = Hash.new
       @result['status'] = true
       @result['error_messages'] = []

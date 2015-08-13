@@ -128,14 +128,7 @@ Groovepacks::Application.routes.draw do
 
   resources :tenants do
     member do
-      get 'getdetails'
-      delete 'delete_tenant_data'
       delete 'delete_tenant'
-    end
-
-    collection do
-      get 'free_subscription'
-
     end
   end
   

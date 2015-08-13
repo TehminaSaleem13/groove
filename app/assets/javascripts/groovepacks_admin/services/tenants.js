@@ -42,11 +42,7 @@ groovepacks_admin_services.factory('tenants',['$http','notification','editable',
             page = 0;
         }
         tenants.setup.offset = page * tenants.setup.limit;
-        // if(setup.search=='') {
-        //     url = '/tenants.json?&sort='+setup.sort+'&order='+setup.order;
-        // } else {
-            url = '/tenants.json?search='+setup.search+'&sort='+setup.sort+'&order='+setup.order;
-        // }
+        url = '/tenants.json?search='+setup.search+'&sort='+setup.sort+'&order='+setup.order;
         url += '&limit='+setup.limit+'&offset='+setup.offset;
         return $http.get(url).success(
             function(data) {
@@ -205,7 +201,7 @@ groovepacks_admin_services.factory('tenants',['$http','notification','editable',
     };
 
     var update_access_restriction_data = function(tenants) {
-        return $http.post('/tenants/update_access_restrictions.json',tenants.single).success(function(data) {
+        return $http.put('/tenants/'+ tenants.single.basicinfo.id +'.json',tenants.single).success(function(data) {
             if (data.status) {
                 notification.notify("Successfully Updated.",1);
             } else{
@@ -215,7 +211,7 @@ groovepacks_admin_services.factory('tenants',['$http','notification','editable',
     };
 
     var delete_tenant_data = function(id, action_type) {
-        return $http.post('/tenants/delete_tenant_data.json?&id='+id+'&action_type='+action_type).success(function(response) {
+        return $http.delete('/tenants/'+id+'.json?action_type='+action_type).success(function(response) {
             if (response.status) {
                 notification.notify("Successfully Updated.",1);
             } else{
