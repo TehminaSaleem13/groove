@@ -93,8 +93,31 @@ function($stateProvider, $urlRouterProvider,hotkeysProvider,cfpLoadingBarProvide
         suffix: '.json'
     });
     $translateProvider.preferredLanguage('en').fallbackLanguage('en');
-}]).run(['$rootScope','$state','$urlRouter','$timeout','auth',function($rootScope, $state, $urlRouter, $timeout, auth) {
+}]).run(['$rootScope','$state','$urlRouter','$timeout','auth', 'hotkeys', 'logger',
+    function($rootScope, $state, $urlRouter, $timeout, auth, hotkeys, logger) { 
+
         $rootScope.$on('$stateChangeStart', function(e, to,toParams,from,fromParams) {
+
+            var register_hot_keys = function() {
+                if (!hotkeys.get('ctrl+alt+e')){
+                    console.log("registering logger key")
+                    hotkeys.add({
+                      combo: 'ctrl+alt+e',
+                      description: 'Opens log',
+                      allowIn: ['INPUT', 'SELECT', 'TEXTAREA'],
+                      callback: function(event, hotkey) {
+                        event.preventDefault();
+                        var current_user = auth.get()
+                        if (current_user != null &&
+                            typeof(current_user) != {} &&
+                            current_user.role.name == "Super Super Admin") {
+                            logger.open();
+                        }
+                      }
+                    });
+                }
+            }
+
             if(jQuery.isEmptyObject(auth.get())) {
                 if(!from.abstract || from.name =='') {
                     e.preventDefault();
@@ -102,6 +125,7 @@ function($stateProvider, $urlRouterProvider,hotkeysProvider,cfpLoadingBarProvide
                 auth.check().then(function() {
                     var result = auth.prevent(to.name,toParams);
                     if (result && result.to) {
+                        register_hot_keys();
                         $state.go(result.to, result.params);
                     } else if (!jQuery.isEmptyObject(auth.get())){
                         $urlRouter.sync();
@@ -109,6 +133,7 @@ function($stateProvider, $urlRouterProvider,hotkeysProvider,cfpLoadingBarProvide
                 })
             } else {
                 var result = auth.prevent(to.name,toParams);
+                register_hot_keys();
                 if (result && result.to) {
                     e.preventDefault();
                     $state.go(result.to, result.params);
