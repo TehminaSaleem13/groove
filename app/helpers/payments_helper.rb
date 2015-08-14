@@ -89,6 +89,13 @@ module PaymentsHelper
     end
   end
 
+  def delete_customer(customer_id)
+    customer = Stripe::Customer.retrieve(customer_id)
+    if(defined?(customer.deleted).nil?)
+      customer.delete()
+    end
+  end
+
   def create_result_hash
   	@result = {}
   	@result['status'] = true

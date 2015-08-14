@@ -125,8 +125,8 @@
 				if store_type == 'Amazon'
 					import_item.status = 'in_progress'
 					import_item.save
-					context = Groovepacker::Store::Context.new(
-						Groovepacker::Store::Handlers::AmazonHandler.new(store, import_item))
+					context = Groovepacker::Stores::Context.new(
+						Groovepacker::Stores::Handlers::AmazonHandler.new(store, import_item))
 					result = context.import_orders
 					import_item.previous_imported = result[:previous_imported]
 					import_item.success_imported = result[:success_imported]
@@ -139,8 +139,8 @@
 				elsif store_type == 'Ebay'
 					import_item.status = 'in_progress'
 					import_item.save
-					context = Groovepacker::Store::Context.new(
-						Groovepacker::Store::Handlers::EbayHandler.new(store,import_item))
+					context = Groovepacker::Stores::Context.new(
+						Groovepacker::Stores::Handlers::EbayHandler.new(store,import_item))
 					result = context.import_orders
 					import_item.previous_imported = result[:previous_imported]
 					import_item.success_imported = result[:success_imported]
@@ -153,8 +153,8 @@
 				elsif store_type == 'Magento'
 					import_item.status = 'in_progress'
 					import_item.save
-					context = Groovepacker::Store::Context.new(
-						Groovepacker::Store::Handlers::MagentoHandler.new(store,import_item))
+					context = Groovepacker::Stores::Context.new(
+						Groovepacker::Stores::Handlers::MagentoHandler.new(store,import_item))
 					result = context.import_orders
 					import_item.previous_imported = result[:previous_imported]
 					import_item.success_imported = result[:success_imported]
@@ -167,8 +167,8 @@
 				elsif store_type == 'Shipstation'
 					import_item.status = 'in_progress'
 					import_item.save
-					context = Groovepacker::Store::Context.new(
-						Groovepacker::Store::Handlers::ShipstationHandler.new(store,import_item))
+					context = Groovepacker::Stores::Context.new(
+						Groovepacker::Stores::Handlers::ShipstationHandler.new(store,import_item))
 					result = context.import_orders
 					import_item.previous_imported = result[:previous_imported]
 					import_item.success_imported = result[:success_imported]
@@ -181,8 +181,8 @@
 				elsif store_type == 'Shipstation API 2'
 					import_item.status = 'in_progress'
 					import_item.save
-					context = Groovepacker::Store::Context.new(
-						Groovepacker::Store::Handlers::ShipstationRestHandler.new(store,import_item))
+					context = Groovepacker::Stores::Context.new(
+						Groovepacker::Stores::Handlers::ShipstationRestHandler.new(store,import_item))
 					result = context.import_orders
 					import_item.reload
 					import_item.previous_imported = result[:previous_imported]
@@ -198,8 +198,8 @@
 				elsif store_type == 'Shopify'
 					import_item.status = 'in_progress'
 					import_item.save
-					context = Groovepacker::Store::Context.new(
-						Groovepacker::Store::Handlers::ShopifyHandler.new(store,import_item))
+					context = Groovepacker::Stores::Context.new(
+						Groovepacker::Stores::Handlers::ShopifyHandler.new(store,import_item))
 					result = context.import_orders
 					import_item.reload
 					import_item.previous_imported = result[:previous_imported]

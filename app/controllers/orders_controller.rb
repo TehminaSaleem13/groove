@@ -28,28 +28,28 @@ class OrdersController < ApplicationController
       begin
         #import if magento products
         if store.store_type == 'Amazon'
-          context = Groovepacker::Store::Context.new(
-            Groovepacker::Store::Handlers::AmazonHandler.new(store))
+          context = Groovepacker::Stores::Context.new(
+            Groovepacker::Stores::Handlers::AmazonHandler.new(store))
           import_result = context.import_orders
         elsif store.store_type == 'Ebay'
-          context = Groovepacker::Store::Context.new(
-            Groovepacker::Store::Handlers::EbayHandler.new(store))
+          context = Groovepacker::Stores::Context.new(
+            Groovepacker::Stores::Handlers::EbayHandler.new(store))
           import_result = context.import_orders
         elsif store.store_type == 'Magento'
-          context = Groovepacker::Store::Context.new(
-            Groovepacker::Store::Handlers::MagentoHandler.new(store))
+          context = Groovepacker::Stores::Context.new(
+            Groovepacker::Stores::Handlers::MagentoHandler.new(store))
           import_result = context.import_orders
         elsif store.store_type == 'Shipstation'
-          context = Groovepacker::Store::Context.new(
-            Groovepacker::Store::Handlers::ShipstationHandler.new(store))
+          context = Groovepacker::Stores::Context.new(
+            Groovepacker::Stores::Handlers::ShipstationHandler.new(store))
           import_result = context.import_orders
         elsif store.store_type == 'Shipstation API 2'
-          context = Groovepacker::Store::Context.new(
-            Groovepacker::Store::Handlers::ShipstationRestHandler.new(store))
+          context = Groovepacker::Stores::Context.new(
+            Groovepacker::Stores::Handlers::ShipstationRestHandler.new(store))
           import_result = context.import_orders
         elsif store.store_type == 'Shopify'
-          context = Groovepacker::Store::Context.new(
-            Groovepacker::Store::Handlers::ShopifyHandler.new(store))
+          context = Groovepacker::Stores::Context.new(
+            Groovepacker::Stores::Handlers::ShopifyHandler.new(store))
           import_result = context.import_orders  
         end
       rescue Exception => e
@@ -96,8 +96,8 @@ class OrdersController < ApplicationController
           import_item.current_order_imported_item = -1
           import_item.to_import = 1
           import_item.save
-          Groovepacker::Store::Context.new(
-            Groovepacker::Store::Handlers::ShipworksHandler.new(credential.store,import_item)).import_order(params["ShipWorks"]["Customer"]["Order"])
+          Groovepacker::Stores::Context.new(
+            Groovepacker::Stores::Handlers::ShipworksHandler.new(credential.store,import_item)).import_order(params["ShipWorks"]["Customer"]["Order"])
           if import_item.status != 'failed'
             import_item.status = 'completed'
             import_item.save

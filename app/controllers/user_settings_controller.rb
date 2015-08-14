@@ -340,7 +340,7 @@ class UserSettingsController < ApplicationController
     if tenant.save
       Apartment::Tenant.create(tenant.name)
       Apartment::Tenant.switch(tenant.name)
-      seed_obj = SeedTenant.new
+      seed_obj = Groovepacker::SeedTenant.new
       seed_obj.seed
       @result['messages'] = 'Tenant successfully created'
       Apartment::Tenant.switch()

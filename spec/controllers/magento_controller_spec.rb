@@ -2,7 +2,7 @@ require 'rails_helper'
 
 describe StoreSettingsController do
   before(:each) do
-    SeedTenant.new.seed
+    Groovepacker::SeedTenant.new.seed
 
     @user_role = FactoryGirl.create(:role,:name=>'magento_spec_tester_role')
     @user = FactoryGirl.create(:user,:name=>'Magento Tester', :username=>"magento_spec_tester", :role => @user_role)

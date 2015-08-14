@@ -190,6 +190,14 @@ function( $scope, $http, $timeout, $location, $state, $cookies, $q, tenants) {
                     name: "Plan",
                     editable: false
                 },
+                progress: {
+                    name: "Tenant Creation Status",
+                    editable: false
+                },
+                transaction_errors: {
+                    name: "Transaction Errors",
+                    editable: false
+                },
                 shipped_last: {
                     name: "Shipped Last Month",
                     editable: false

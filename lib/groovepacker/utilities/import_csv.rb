@@ -40,13 +40,13 @@ class ImportCsv
         end
 
         if params[:type] == 'order'
-          result = Groovepacker::Store::Importers::CSV::OrdersImporter.new.import_old(params,final_record,mapping)
-          #result = Groovepacker::Store::Importers::CSV::OrdersImporter.new.import(params,final_record,mapping)
+          result = Groovepacker::Stores::Importers::CSV::OrdersImporter.new.import_old(params,final_record,mapping)
+          #result = Groovepacker::Stores::Importers::CSV::OrdersImporter.new.import(params,final_record,mapping)
         elsif params[:type] == 'product'
-          #result = Groovepacker::Store::Importers::CSV::ProductsImporter.new.import_old(params,final_record,mapping)
-          result = Groovepacker::Store::Importers::CSV::ProductsImporter.new.import(params,final_record,mapping, params[:import_action])
+          #result = Groovepacker::Stores::Importers::CSV::ProductsImporter.new.import_old(params,final_record,mapping)
+          result = Groovepacker::Stores::Importers::CSV::ProductsImporter.new.import(params,final_record,mapping, params[:import_action])
         elsif params[:type] == 'kit'
-          result = Groovepacker::Store::Importers::CSV::KitsImporter.new.import(params,final_record,mapping, params[:bulk_action_id])
+          result = Groovepacker::Stores::Importers::CSV::KitsImporter.new.import(params,final_record,mapping, params[:bulk_action_id])
         end
         #File.delete(file_path)
 

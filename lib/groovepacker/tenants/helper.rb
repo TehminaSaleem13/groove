@@ -1,7 +1,8 @@
 module Groovepacker
   module Tenants
     class Helper
-
+      include PaymentsHelper
+      
       def do_gettenants(params)
         limit = 10
         offset = 0
@@ -41,6 +42,8 @@ module Groovepacker
             @tenant_hash['name'] = tenant.name
             plan_data = get_subscription_data(tenant.id)
             @tenant_hash['plan'] = plan_data['plan']
+            @tenant_hash['progress'] = plan_data['progress']
+            @tenant_hash['transaction_errors'] = plan_data['transaction_errors']
             @tenant_hash['stripe_url'] = plan_data['customer_id']
             shipping_data = get_shipping_data(tenant.id)
             @tenant_hash['total_shipped'] = shipping_data['shipped_current']
@@ -115,6 +118,10 @@ module Groovepacker
         Apartment::Tenant.switch()
         tenant = Tenant.find(id)
         unless tenant.nil?
+          @subscripton_result['plan'] = ""
+          @subscripton_result['customer_id'] = ''
+          @subscripton_result['progress'] = ''
+          @subscripton_result['transaction_errors'] = ''
           unless tenant.subscription.nil?
             subscription = tenant.subscription
             case subscription.subscription_plan_id
@@ -138,17 +145,10 @@ module Groovepacker
               @subscripton_result['plan'] = "annual-quinet"
             when "annual-groove-symphony"
               @subscripton_result['plan'] = "annual-symphony"
-            else
-              @subscripton_result['plan'] = ''
-            end
-            unless subscription.stripe_customer_id.nil?
-              @subscripton_result['customer_id'] = subscription.stripe_customer_id
-            else
-              @subscripton_result['customer_id'] = ''
-            end
-          else
-            @subscripton_result['plan'] = ""
-            @subscripton_result['customer_id'] = ''
+            end            
+            @subscripton_result['customer_id'] = subscription.stripe_customer_id unless subscription.stripe_customer_id.nil?
+            @subscripton_result['progress'] = subscription.progress unless subscription.progress.nil?
+            @subscripton_result['transaction_errors'] =subscription.transaction_errors unless subscription.transaction_errors.nil?
           end       
         end
         Apartment::Tenant.switch(current_tenant)
@@ -205,7 +205,7 @@ module Groovepacker
             ActiveRecord::Base.connection.tables.each do |table|
               ActiveRecord::Base.connection.execute("TRUNCATE #{table}")
             end
-            SeedTenant.new.seed()
+            Groovepacker::SeedTenant.new.seed()
             users = User.where(:name => 'admin')
             unless users.empty?
               users.first.destroy unless users.first.nil?
@@ -261,6 +261,8 @@ module Groovepacker
       def delete(tenant, result)
         begin
           @tenant = Tenant.find_by_name(tenant)
+          customer_id = @tenant.subscription.stripe_customer_id unless @tenant.subscription.nil? || @tenant.subscription.stripe_customer_id.nil?
+          delete_customer(customer_id)
           Apartment::Tenant.drop(tenant)
           if @tenant.destroy
             result['status'] &= true

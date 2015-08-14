@@ -17,20 +17,20 @@ class ProductsController < ApplicationController
       begin
       #import if magento products
       if @store.store_type == 'Ebay'
-        context = Groovepacker::Store::Context.new(
-          Groovepacker::Store::Handlers::EbayHandler.new(@store))
+        context = Groovepacker::Stores::Context.new(
+          Groovepacker::Stores::Handlers::EbayHandler.new(@store))
         import_result = context.import_products
       elsif @store.store_type == 'Magento'
-        context = Groovepacker::Store::Context.new(
-          Groovepacker::Store::Handlers::MagentoHandler.new(@store))
+        context = Groovepacker::Stores::Context.new(
+          Groovepacker::Stores::Handlers::MagentoHandler.new(@store))
         import_result = context.import_products
       elsif @store.store_type == 'Shipstation'
-        context = Groovepacker::Store::Context.new(
-          Groovepacker::Store::Handlers::ShipstationHandler.new(@store))
+        context = Groovepacker::Stores::Context.new(
+          Groovepacker::Stores::Handlers::ShipstationHandler.new(@store))
         import_result = context.import_products
       elsif @store.store_type == 'Shipstation API 2'
-        context = Groovepacker::Store::Context.new(
-          Groovepacker::Store::Handlers::ShipstationRestHandler.new(@store))
+        context = Groovepacker::Stores::Context.new(
+          Groovepacker::Stores::Handlers::ShipstationRestHandler.new(@store))
         import_result = context.import_products
       elsif @store.store_type == 'Amazon'
         @amazon_credentials = AmazonCredentials.where(:store_id => @store.id)
@@ -174,8 +174,8 @@ class ProductsController < ApplicationController
     if current_user.can?('import_products')
       begin
         if @store.store_type == 'Shipstation'
-          context = Groovepacker::Store::Context.new(
-            Groovepacker::Store::Handlers::ShipstationHandler.new(@store))
+          context = Groovepacker::Stores::Context.new(
+            Groovepacker::Stores::Handlers::ShipstationHandler.new(@store))
           import_result = context.import_images
         end
       rescue Exception => e

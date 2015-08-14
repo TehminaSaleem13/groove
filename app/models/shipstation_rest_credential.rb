@@ -5,8 +5,8 @@ class ShipstationRestCredential < ActiveRecord::Base
   belongs_to :store
 
   def verify_tags
-    context = Groovepacker::Store::Context.new(
-      Groovepacker::Store::Handlers::ShipstationRestHandler.new(store))
+    context = Groovepacker::Stores::Context.new(
+      Groovepacker::Stores::Handlers::ShipstationRestHandler.new(store))
     context.verify_tags([gp_ready_tag_name, gp_imported_tag_name])
   end
 
@@ -59,8 +59,8 @@ class ShipstationRestCredential < ActiveRecord::Base
       order_import_summary.save
 
       begin
-        context = Groovepacker::Store::Context.new(
-          Groovepacker::Store::Handlers::ShipstationRestHandler.new(import_item.store, ImportItem.find(import_item_id)))
+        context = Groovepacker::Stores::Context.new(
+          Groovepacker::Stores::Handlers::ShipstationRestHandler.new(import_item.store, ImportItem.find(import_item_id)))
         #start importing using delayed job
         context.update_all_products
       rescue Exception => e
