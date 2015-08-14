@@ -1,7 +1,8 @@
 module Groovepacker
   module Tenants
     class Helper
-
+      include PaymentsHelper
+      
       def do_gettenants(params)
         limit = 10
         offset = 0
@@ -260,6 +261,8 @@ module Groovepacker
       def delete(tenant, result)
         begin
           @tenant = Tenant.find_by_name(tenant)
+          customer_id = @tenant.subscription.stripe_customer_id unless @tenant.subscription.nil? || @tenant.subscription.stripe_customer_id.nil?
+          delete_customer(customer_id)
           Apartment::Tenant.drop(tenant)
           if @tenant.destroy
             result['status'] &= true
