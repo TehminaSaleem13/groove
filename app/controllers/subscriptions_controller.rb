@@ -1,7 +1,7 @@
   class SubscriptionsController < ApplicationController
     include PaymentsHelper
     include StoreSettingsHelper
-    # before_filter :check_tenant_name
+    before_filter :check_tenant_name
 
     def new
       @subscription = Subscription.new
@@ -22,7 +22,7 @@
           user_name: params[:user_name],
           password: params[:password],
           status: "started",
-          coupon_id: params[:coupon_id]) 
+          coupon_id: params[:coupon_id])
       if @subscription
         if !params[:shopify_shop_name].nil? &&
             params[:shopify_shop_name] != ''
@@ -55,14 +55,26 @@
                 ).permission_url(params[:tenant_name], true)
             }
           else
-            @result = getNextPaymentDate(@subscription)
-            render json: {valid: true, redirect_url: "subscriptions/show?transaction_id=#{@subscription.stripe_transaction_identifier}&notice=Congratulations! Your GroovePacker is being deployed!&email=#{@subscription.email}&next_date=#{@result['next_date']}"}
+            @result = get_next_payment_date(@subscription)
+            render json: {valid: true, 
+              transaction_id: @subscription.stripe_transaction_identifier, 
+              notice: "Congratulations! Your GroovePacker is being deployed!", 
+              email: @subscription.email, 
+              next_date: @result['next_date']
+            }
           end
         else
-          render json: {valid: false}
+          render json: {
+            valid: false,
+            progress: @subscription.progress,
+            errors: @subscription.get_progress_errors
+          }
         end
       else
-        render json: {valid: false}
+        render json: {
+          valid: false,
+          errors: @subscription.errors.full_messages.join(",")
+        }
       end
     end
 

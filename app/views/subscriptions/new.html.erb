@@ -130,8 +130,7 @@
             <div class="alert alert-success" id="processing_alert_success" style="display:none;">
               <div><i class="glyphicon glyphicon-refresh spin" style="font-size: 12px;"></i> Your subscription is being processed.</div>
             </div>
-            <div class="alert alert-error" id="processing_alert_error" style="display:none;">
-              <p>Your subscription could not be processed. Please try again.</p>
+            <div class="alert alert-danger" id="processing_alert_error" style="display:none;">
             </div>
           </div>
         <% else %>
@@ -205,17 +204,22 @@
                   $('#customButton').show();
                   $('#shopifyButton').show();
                   $('#processing_alert_error').show();
+                  $('#processing_alert_error').append(
+                    "<p>Your subscription could not be processed. Please try again.</p>"
+                  )
               }).success(function (response) {
                   if (!response.valid) {
-
-                      $('#processing_alert_success').hide();
-                      $('#customButton').show();
-                      $('#shopifyButton').show();
-                      $('#processing_alert_error').show();
+                    $('#processing_alert_success').hide();
+                    $('#customButton').show();
+                    $('#shopifyButton').show();
+                    $('#processing_alert_error').show();
+                    $('#processing_alert_error').append(
+                      "<p>" + response.errors + "</p>"
+                    )
                   }
                   else {
-                      window.location.href =
-                              response.redirect_url
+                    var redirect_url = 'subscriptions/show?transaction_id=' + response.transaction_id + '&notice=' + response.notice + '&email=' + response.email + '&next_date=' + response.next_date
+                      window.location.href = redirect_url
                   }
               });
               $('#customButton').hide();

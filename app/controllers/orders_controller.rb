@@ -403,7 +403,7 @@ class OrdersController < ApplicationController
           @orderitem['sku'] = product.primary_sku
           @orderitem['barcode'] = product.primary_barcode
           @orderitem['category'] = product.primary_category
-          @orderitem['image'] = product.primary_image
+          @orderitem['image'] = product.base_product.primary_image
           @orderitem['spl_instructions_4_packer'] = product.spl_instructions_4_packer
 
         end
@@ -611,22 +611,20 @@ class OrdersController < ApplicationController
           end
           @orderitem.order.update_order_status
         else
-          unless @orderitem.product.base_sku.nil?
-            @orderitem.is_barcode_printed = true
-            unless @orderitem.save
-              @result['status'] &= false
-              @result['messages'].push("Could not update order item")
-            else
-              all_printed = true
-              @orderitem.order.order_items.each do |item|
-                unless item.is_barcode_printed
-                  all_printed &= false
-                  break
-                end
+          @orderitem.is_barcode_printed = true
+          unless @orderitem.save
+            @result['status'] &= false
+            @result['messages'].push("Could not update order item")
+          else
+            all_printed = true
+            @orderitem.order.order_items.each do |item|
+              unless item.is_barcode_printed
+                all_printed &= false
+                break
               end
-              if all_printed
-                @result['messages'].push('All item barcodes have now been printed. This order should now be ready to ship.')
-              end
+            end
+            if all_printed
+              @result['messages'].push('All item barcodes have now been printed. This order should now be ready to ship.')
             end
           end
         end

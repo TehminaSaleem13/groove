@@ -17,7 +17,8 @@ class Product < ActiveRecord::Base
     :store,
     :weight,
     :add_to_any_order,
-    :is_intangible
+    :is_intangible,
+    :base_sku
 
   has_many :product_skus, :dependent => :destroy
   has_many :product_cats, :dependent => :destroy

@@ -145,8 +145,10 @@ groovepacks_admin_controllers.
                 $scope.tenants = tenant_data;
                 myscope.add_hotkeys();
                 if (tenant_id) {
+                    myscope.update_state = false;
                     myscope.tenant_single_details(tenant_id);
                 } else {
+                    myscope.update_state = true;
                     myscope.tenant_single_details($stateParams.tenant_id);
                 };
                 $modalInstance.result.then($scope.update,$scope.update);

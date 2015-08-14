@@ -76,7 +76,6 @@ module Groovepacker
                 "sku",
                 "state",
                 "price",
-                "qty",
                 "tracking_num"
             ]
             imported_orders = {}
@@ -138,6 +137,21 @@ module Groovepacker
                               order_item  = OrderItem.new
                               order_item.product = product_skus.first.product
                               order_item.sku = single_row[mapping['sku'][:position]]
+                              if !mapping['image'].nil? && mapping['image'][:position] >= 0
+                                product_images = order_item.product.product_images
+                                exists = false
+                                product_images.each do |single_image|
+                                  if single_image.image == single_row[mapping['image'][:position]]
+                                    exists = true
+                                    break
+                                  end
+                                end
+                                unless exists
+                                  product_image = ProductImage.new
+                                  product_image.image = single_row[mapping['image'][:position]]
+                                  order_item.product.product_images << product_image
+                                end
+                              end
                               if !mapping['qty'].nil? && mapping['qty'][:position] >= 0
                                 order_item.qty = single_row[mapping['qty'][:position]]
                                 order_required.delete('qty')
@@ -170,6 +184,12 @@ module Groovepacker
                             product.store_id = params[:store_id]
                             unless mapping['product_instructions'].nil?
                               product.spl_instructions_4_packer = single_row[mapping['product_instructions'][:position]]
+                            end
+
+                            if !mapping['image'].nil? && mapping['image'][:position] >= 0
+                              product_image = ProductImage.new
+                              product_image.image = single_row[mapping['image'][:position]]
+                              product.product_images << product_image
                             end
 
                             product.save
@@ -249,20 +269,41 @@ module Groovepacker
                         product.product_skus << sku
                         product.store_product_id = 0
                         product.store_id = params[:store_id]
-                        base_product = ProductSku.where(:sku=>single_row[mapping['sku'][:position]]).first unless ProductSku.where(:sku=>single_row[mapping['sku'][:position]]).empty?
-                        if base_product.nil?
+                        base_sku = ProductSku.where(:sku=>single_row[mapping['sku'][:position]]).first unless ProductSku.where(:sku=>single_row[mapping['sku'][:position]]).empty?
+                        if base_sku.nil?
                           base_product = Product.new()
                           base_product.name = "Base Product " + single_row[mapping['sku'][:position]]
                           base_product.store_product_id = 0
                           base_product.store_id = params[:store_id]
-                          basesku = ProductSku.new
-                          basesku.sku = single_row[mapping['sku'][:position]]
-                          base_product.product_skus << basesku
+                          base_sku = ProductSku.new
+                          base_sku.sku = single_row[mapping['sku'][:position]]
+                          base_product.product_skus << base_sku
                           base_product.is_intangible = false
-                          
-                          base_product.save
-                          make_product_intangible(base_product)
+                          if !mapping['image'].nil? && mapping['image'][:position] >= 0
+                            product_image = ProductImage.new
+                            product_image.image = single_row[mapping['image'][:position]]
+                            base_product.product_images << product_image
+                          end
+                        else
+                          base_product = base_sku.product
+                          if !mapping['image'].nil? && mapping['image'][:position] >= 0
+                            product_images = base_product.product_images
+                            exists = false
+                            product_images.each do |single_image|
+                              if single_image.image == single_row[mapping['image'][:position]]
+                                exists = true
+                                break
+                              end
+                            end
+                            unless exists
+                              product_image = ProductImage.new
+                              product_image.image = single_row[mapping['image'][:position]]
+                              base_product.product_images << product_image
+                            end
+                          end
                         end
+                        base_product.save
+                        make_product_intangible(base_product)
 
                         unless mapping['category'].nil?
                           cat = ProductCat.new

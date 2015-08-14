@@ -19,6 +19,14 @@
                         <input type="text" class="form-control search-box" autofocus="autofocus" id="tenants-search-query" ng-model="tenants.setup.search" placeholder="Search">
                     </div>
                 </div>
+                <div class="col-lg-1 col-md-1" dropdown>
+                    <button type="button" class="groove-button dropdown-toggle">
+                        Edit <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu" role="menu">
+                        <li><a class="dropdown-toggle" ng-click="delete_selected_tenants()">Delete <span class="badge badge-important">{{tenants.setup.select_all? gridOptions.paginate.tenants_count: gridOptions.selections.selected_count}}</span></a></li>
+                    </ul>
+                </div>
             </div>
             <div class="row">
                 <div class="col-sm-12">
