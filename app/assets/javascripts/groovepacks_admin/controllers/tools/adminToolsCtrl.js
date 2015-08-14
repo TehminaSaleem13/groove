@@ -191,7 +191,7 @@ function( $scope, $http, $timeout, $location, $state, $cookies, $q, tenants) {
                     editable: false
                 },
                 progress: {
-                    name: "Subscription Status",
+                    name: "Tenant Creation Status",
                     editable: false
                 },
                 transaction_errors: {
