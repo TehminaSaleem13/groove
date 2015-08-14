@@ -205,7 +205,7 @@ module Groovepacker
             ActiveRecord::Base.connection.tables.each do |table|
               ActiveRecord::Base.connection.execute("TRUNCATE #{table}")
             end
-            SeedTenant.new.seed()
+            Groovepacker::SeedTenant.new.seed()
             users = User.where(:name => 'admin')
             unless users.empty?
               users.first.destroy unless users.first.nil?

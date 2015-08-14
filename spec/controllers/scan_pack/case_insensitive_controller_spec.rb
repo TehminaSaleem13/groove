@@ -4,7 +4,7 @@ require 'rails_helper'
 RSpec.describe ScanPackController, :type => :controller do
 
   before(:each) do
-    SeedTenant.new.seed
+    Groovepacker::SeedTenant.new.seed
     @scanpacksetting = ScanPackSetting.first
     @scanpacksetting.post_scanning_option = "Record"
     @scanpacksetting.save

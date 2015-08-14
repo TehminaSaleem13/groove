@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe Order do
   before(:each) do
-    SeedTenant.new.seed
+    Groovepacker::SeedTenant.new.seed
     @generalsetting = GeneralSetting.all.first
     @generalsetting.update_column(:inventory_tracking,true)
   end

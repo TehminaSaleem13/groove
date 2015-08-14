@@ -1,3 +1,4 @@
+module Groovepacker
   class SeedTenant
     include InventoryWarehouseHelper
     def seed(create = false, username='admin', email='abc@gmail.com', password='12345678')
@@ -266,3 +267,4 @@
       end
     end
   end
+end
