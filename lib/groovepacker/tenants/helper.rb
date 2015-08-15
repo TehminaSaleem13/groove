@@ -145,6 +145,8 @@ module Groovepacker
               @subscripton_result['plan'] = "annual-quinet"
             when "annual-groove-symphony"
               @subscripton_result['plan'] = "annual-symphony"
+            else
+              @subscripton_result['plan'] = ""
             end            
             @subscripton_result['customer_id'] = subscription.stripe_customer_id unless subscription.stripe_customer_id.nil?
             @subscripton_result['progress'] = subscription.progress unless subscription.progress.nil?
@@ -161,9 +163,9 @@ module Groovepacker
         @shipping_result['shipped_last'] = 0
         @shipping_result['max_allowed'] = 0
         tenant = Tenant.find(id)
+        current_tenant = Apartment::Tenant.current_tenant
         unless tenant.nil?
           begin
-            current_tenant = Apartment::Tenant.current_tenant
             Apartment::Tenant.switch(tenant.name)
             unless AccessRestriction.all.first.nil?
               access_restrictions = AccessRestriction.all
