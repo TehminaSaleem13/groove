@@ -37,7 +37,7 @@ module Groovepacker
         @tenants_result = []
         begin
           tenants.each do |tenant|
-            @tenant_hash = Hash.new
+            @tenant_hash = {}
             @tenant_hash['id'] = tenant.id
             @tenant_hash['name'] = tenant.name
             plan_data = get_subscription_data(tenant.id)
@@ -90,7 +90,7 @@ module Groovepacker
         unless params[:select_all] || params[:inverted]
           query_add = ' LIMIT '+limit.to_s+' OFFSET 0'
         end
-        Apartment::Tenant.switch()
+        # Apartment::Tenant.switch()
         base_query = 'SELECT tenants.id as id, tenants.name as name, tenants.updated_at as updated_at, tenants.created_at as created_at, subscriptions.subscription_plan_id as plan, subscriptions.stripe_customer_id as stripe_url
           FROM tenants LEFT JOIN subscriptions ON (subscriptions.tenant_id = tenants.id) 
             WHERE
@@ -113,9 +113,9 @@ module Groovepacker
       end
       
       def get_subscription_data(id)
-        @subscripton_result = Hash.new
-        current_tenant = Apartment::Tenant.current_tenant
-        Apartment::Tenant.switch()
+        @subscripton_result = {}
+        # current_tenant = Apartment::Tenant.current_tenant
+        # Apartment::Tenant.switch()
         tenant = Tenant.find(id)
         unless tenant.nil?
           @subscripton_result['plan'] = ""
@@ -151,18 +151,19 @@ module Groovepacker
             @subscripton_result['transaction_errors'] =subscription.transaction_errors unless subscription.transaction_errors.nil?
           end       
         end
-        Apartment::Tenant.switch(current_tenant)
+        # Apartment::Tenant.switch(current_tenant)
         @subscripton_result
       end
 
       def get_shipping_data(id)
-        @shipping_result = Hash.new
+        @shipping_result = {}
         @shipping_result['shipped_current'] = 0
         @shipping_result['shipped_last'] = 0
         @shipping_result['max_allowed'] = 0
         tenant = Tenant.find(id)
         unless tenant.nil?
           begin
+            current_tenant = Apartment::Tenant.current_tenant
             Apartment::Tenant.switch(tenant.name)
             unless AccessRestriction.all.first.nil?
               access_restrictions = AccessRestriction.all
@@ -187,7 +188,7 @@ module Groovepacker
             @shipping_result['max_import_sources'] = 0
           end
         end
-        Apartment::Tenant.switch()
+        Apartment::Tenant.switch(current_tenant)
         @shipping_result
       end
 
@@ -240,7 +241,7 @@ module Groovepacker
 
       def delete_products(result, current_user)
         if current_user.can?('delete_products')
-          parameters = Hash.new
+          parameters = {}
           parameters[:select_all] = true
           parameters[:inverted] = false
           parameters[:filter] = 'all'
