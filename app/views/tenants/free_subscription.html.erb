@@ -27,26 +27,31 @@
         </div>
         <div class="form-group">
           <label for="select" class="control-label">Plan ID*</label>
+
           <div class="">
             <select class="form-control" id="select_plan">
-              <% @result.each_index do |index|%>
-              <option value="<%=index%>"><%= @result[index]%></option>
-              <% end%>
+              <% @result.each_index do |index| %>
+                <option value="<%= index %>"><%= @result[index] %></option>
+              <% end %>
             </select>
           </div>
           <div class="form-group">
             <div id="success-plan-block">
               <div class="col-md-6 col-sm-6 col-lg-6">
-                <label class="control-label">  Trial period</label>
+                <label class="control-label"> Trial period</label>
+
                 <div class="input-group">
                   <input type="text" id="trial_period" class="form-control" readonly/>
+
                   <div class="input-group-addon">days</div>
                 </div>
               </div>
               <div class="col-md-6 col-sm-6 col-lg-6">
-                <label class="control-label">  Price</label>
+                <label class="control-label"> Price</label>
+
                 <div class="input-group">
                   <input type="text" id="price" class="form-control" readonly/>
+
                   <div class="input-group-addon">.00</div>
                 </div>
               </div>
@@ -96,10 +101,12 @@
         </div>
 
         <div class="">
-          <button id="freeSubscriptionButton" class="btn btn-primary" style="margin-bottom: 15px;">Create Tenant</button>
+          <button id="freeSubscriptionButton" class="btn btn-primary" style="margin-bottom: 15px;">Create Tenant
+          </button>
 
           <div class="alert alert-success" id="processing_alert_success" style="display:none;">
-            <div><i class="glyphicon glyphicon-refresh spin" style="font-size: 12px;"></i> Tenant is being created.</div>
+            <div><i class="glyphicon glyphicon-refresh spin" style="font-size: 12px;"></i> Tenant is being created.
+            </div>
           </div>
           <div class="alert alert-error" id="processing_alert_error" style="display:none;">
             <p>Tenant could not be created. Please try again.</p>
@@ -108,207 +115,207 @@
       </fieldset>
     </form>
     <script>
-        var valid = {
-            tenant_name: false,
-            email: false,
-            user_name: false,
-            password: false,
-            password_conf: false,
-        };
-        var radio_button_value=null;
-        var amount=0;
-        var plan_id = null;
+      var valid = {
+        tenant_name: false,
+        email: false,
+        user_name: false,
+        password: false,
+        password_conf: false,
+      };
+      var radio_button_value = null;
+      var amount = 0;
+      var plan_id = null;
 
-        $('html').click(function () {
-            $('#tos_iframe').hide();
-            $('#privacy_iframe').hide();
+      $('html').click(function () {
+        $('#tos_iframe').hide();
+        $('#privacy_iframe').hide();
+      });
+
+      window.onload = function getDefault() {
+        retrievePlanInfo();
+      }
+
+      $('#select_plan').change(function () {
+        retrievePlanInfo();
+      });
+      function retrievePlanInfo() {
+        $.ajax({
+          type: "GET",
+          contentType: "application/json; charset=utf-8",
+          url: "/tenants/get_plan_info",
+          data: {plan_index: $('#select_plan').val()},
+          dataType: "json"
+
+        }).error(function (response) {
+
+        }).success(function (response) {
+          $('#trial_period').val(response[0].trial_period_days);
+          $('#price').val(response[0].amount / 100);
+          plan_id = response[0].id;
         });
+      }
 
-        window.onload = function getDefault() {
-          retrievePlanInfo();
+      $('#tenant_name').blur(function () {
+        var tenant_name = document.forms["myForm"]["tenant_name"].value;
+        tenant_name = tenant_name.toLowerCase();
+        document.forms["myForm"]["tenant_name"].value = tenant_name;
+        if (tenant_name == null || tenant_name == "" || tenant_name.length < 4) {
+          valid.tenant_name = false;
+          $('#error-tenant-block').html("Site name must be at least 4 characters long");
+          //this.focus();
         }
-
-        $('#select_plan').change(function() {
-          retrievePlanInfo();
-        });
-        function retrievePlanInfo() {
+        else {
           $.ajax({
-                    type: "GET",
-                    contentType: "application/json; charset=utf-8",
-                    url: "/tenants/get_plan_info",
-                    data: {plan_index: $('#select_plan').val()},
-                    dataType: "json"
+            type: "GET",
+            contentType: "application/json; charset=utf-8",
+            url: "/subscriptions/valid_tenant_name",
+            data: {tenant_name: $('#tenant_name').val()},
+            dataType: "json"
 
-                }).error(function (response) {
+          }).error(function (response) {
 
-                }).success(function(response) {
-                  $('#trial_period').val(response[0].trial_period_days);
-                  $('#price').val(response[0].amount/100);
-                  plan_id = response[0].id;
-                });
-        }
-
-        $('#tenant_name').blur(function () {
-            var tenant_name = document.forms["myForm"]["tenant_name"].value;
-            tenant_name = tenant_name.toLowerCase();
-            document.forms["myForm"]["tenant_name"].value = tenant_name;
-            if (tenant_name == null || tenant_name == "" || tenant_name.length < 4) {
-                valid.tenant_name = false;
-                $('#error-tenant-block').html("Site name must be at least 4 characters long");
-                //this.focus();
+          }).success(function (response) {
+            if (!response.valid) {
+              $('#error-tenant-block').html(response.message);
+              valid.tenant_name = false;
+              //$('#tenant_name').focus();
             }
             else {
-                $.ajax({
-                    type: "GET",
-                    contentType: "application/json; charset=utf-8",
-                    url: "/subscriptions/valid_tenant_name",
-                    data: {tenant_name: $('#tenant_name').val()},
-                    dataType: "json"
-
-                }).error(function (response) {
-
-                }).success(function (response) {
-                    if (!response.valid) {
-                        $('#error-tenant-block').html(response.message);
-                        valid.tenant_name = false;
-                        //$('#tenant_name').focus();
-                    }
-                    else {
-                        $('#error-tenant-block').html("");
-                        valid.tenant_name = true;
-                        //email.focus();
-                    }
-                });
-            }
-        });
-
-        $('#email').blur(function () {
-            var email = document.forms["myForm"]["email"].value;
-            var atpos = email.indexOf("@");
-            var dotpos = email.lastIndexOf(".");
-            if (email == null || email == "") {
-                valid.email = false;
-                if (valid.tenant_name) {
-                    $('#error-email-block').html("email must be filled out");
-                    //this.focus();
-                }
-
-            }
-            else if (atpos < 1 || dotpos < atpos + 2 || dotpos + 2 >= email.length) {
-                valid.email = false;
-                $('#error-email-block').html("email is not valid");
-            } else {
-                $.ajax({
-                    type: "GET",
-                    contentType: "application/json; charset=utf-8",
-                    url: "/subscriptions/valid_email",
-                    data: {email: $('#email').val()},
-                    dataType: "json"
-
-                }).error(function (response) {
-
-                }).success(function (response) {
-                    if (!response.valid) {
-                        $('#error-email-block').html($('#email').val() + " email already exists");
-                        valid.email = false;
-                        //$('#email').focus();
-                    }
-                    else {
-                        $('#error-email-block').html("");
-                        valid.email = true;
-                        //user_name.focus();
-                    }
-                });
-            }
-        });
-
-        $('#user_name').blur(function () {
-            var user_name = document.forms["myForm"]["user_name"].value;
-            if (user_name == null || user_name == "") {
-                valid.user_name = false;
-                if (valid.email) {
-                    $('#error-username-block').html("username must be filled out");
-                    //this.focus();
-                }
-            } else {
-                $('#error-username-block').html("");
-                valid.user_name = true;
-                //password.focus();
-            }
-        });
-        $('#password').blur(function () {
-            var password = document.forms["myForm"]["password"].value;
-            if (password == null || password == "") {
-
-                valid.password = false;
-                if (valid.user_name) {
-                    $('#error-password-block').html("password must be filled out");
-                    $('#error-password-conf-block').html("");
-                    //this.focus();
-                }
-            } else if (password.length < 6) {
-                valid.password = false;
-                if (valid.user_name) {
-                    $('#error-password-block').html("Password should be at least 6 characters");
-                    $('#error-password-conf-block').html("");
-                    //this.focus();
-                }
-            } else {
-                valid.password = true;
-                $('#error-password-block').html("");
-                $('#error-password-conf-block, #error-password-block').html("");
-                //password_conf.focus();
-            }
-        });
-        $('#password_conf').blur(function () {
-            var password_conf = document.forms["myForm"]["password_conf"].value;
-            if (password_conf == null || password_conf == "" || password_conf != password.value) {
-                valid.password_conf = false;
-                $('#error-password-conf-block, #error-password-block').html("password and password confirmation must match");
-                //password.value = "";
-                //this.value = "";
-                //password.focus();
-            }
-            else {
-                valid.password_conf = true;
-                $('#error-password-conf-block, #error-password-block').html("");
-                //customButton.focus();
-            }
-        });
-    
-        document.getElementById('freeSubscriptionButton').addEventListener('click', function (e1) {
-            e1.preventDefault();
-            if (valid.tenant_name && valid.email && valid.user_name && valid.password && valid.password_conf) {
-              $.ajax({
-                    type: "POST",
-                                contentType: "application/json; charset=utf-8",
-                                url: "/tenants",
-                                data: JSON.stringify({
-                                    tenant_name: $('#tenant_name').val(),
-                                    email: $('#email').val(),
-                                    amount: $('#price').val(),
-                                    plan_id: plan_id,
-                                    user_name: $('#user_name').val(),
-                                    password: $('#password').val(),
-                                }),
-                                dataType: "json"
-                }).error(function (response) {
-
-                }).success(function(response) {
-                  if (!response.valid) {
-                      $('#processing_alert_success').hide();
-                      $('#customButton').show();
-                      $('#processing_alert_error').show();
-                  }
-                  else {
-                    window.location.href = response.redirect_url
-                  }
-                });
-                $('#freeSubscriptionButton').hide();
-                $('#processing_alert_success').show();
-                $('#processing_alert_error').hide();
+              $('#error-tenant-block').html("");
+              valid.tenant_name = true;
+              //email.focus();
             }
           });
+        }
+      });
+
+      $('#email').blur(function () {
+        var email = document.forms["myForm"]["email"].value;
+        var atpos = email.indexOf("@");
+        var dotpos = email.lastIndexOf(".");
+        if (email == null || email == "") {
+          valid.email = false;
+          if (valid.tenant_name) {
+            $('#error-email-block').html("email must be filled out");
+            //this.focus();
+          }
+
+        }
+        else if (atpos < 1 || dotpos < atpos + 2 || dotpos + 2 >= email.length) {
+          valid.email = false;
+          $('#error-email-block').html("email is not valid");
+        } else {
+          $.ajax({
+            type: "GET",
+            contentType: "application/json; charset=utf-8",
+            url: "/subscriptions/valid_email",
+            data: {email: $('#email').val()},
+            dataType: "json"
+
+          }).error(function (response) {
+
+          }).success(function (response) {
+            if (!response.valid) {
+              $('#error-email-block').html($('#email').val() + " email already exists");
+              valid.email = false;
+              //$('#email').focus();
+            }
+            else {
+              $('#error-email-block').html("");
+              valid.email = true;
+              //user_name.focus();
+            }
+          });
+        }
+      });
+
+      $('#user_name').blur(function () {
+        var user_name = document.forms["myForm"]["user_name"].value;
+        if (user_name == null || user_name == "") {
+          valid.user_name = false;
+          if (valid.email) {
+            $('#error-username-block').html("username must be filled out");
+            //this.focus();
+          }
+        } else {
+          $('#error-username-block').html("");
+          valid.user_name = true;
+          //password.focus();
+        }
+      });
+      $('#password').blur(function () {
+        var password = document.forms["myForm"]["password"].value;
+        if (password == null || password == "") {
+
+          valid.password = false;
+          if (valid.user_name) {
+            $('#error-password-block').html("password must be filled out");
+            $('#error-password-conf-block').html("");
+            //this.focus();
+          }
+        } else if (password.length < 6) {
+          valid.password = false;
+          if (valid.user_name) {
+            $('#error-password-block').html("Password should be at least 6 characters");
+            $('#error-password-conf-block').html("");
+            //this.focus();
+          }
+        } else {
+          valid.password = true;
+          $('#error-password-block').html("");
+          $('#error-password-conf-block, #error-password-block').html("");
+          //password_conf.focus();
+        }
+      });
+      $('#password_conf').blur(function () {
+        var password_conf = document.forms["myForm"]["password_conf"].value;
+        if (password_conf == null || password_conf == "" || password_conf != password.value) {
+          valid.password_conf = false;
+          $('#error-password-conf-block, #error-password-block').html("password and password confirmation must match");
+          //password.value = "";
+          //this.value = "";
+          //password.focus();
+        }
+        else {
+          valid.password_conf = true;
+          $('#error-password-conf-block, #error-password-block').html("");
+          //customButton.focus();
+        }
+      });
+
+      document.getElementById('freeSubscriptionButton').addEventListener('click', function (e1) {
+        e1.preventDefault();
+        if (valid.tenant_name && valid.email && valid.user_name && valid.password && valid.password_conf) {
+          $.ajax({
+            type: "POST",
+            contentType: "application/json; charset=utf-8",
+            url: "/tenants",
+            data: JSON.stringify({
+              tenant_name: $('#tenant_name').val(),
+              email: $('#email').val(),
+              amount: $('#price').val(),
+              plan_id: plan_id,
+              user_name: $('#user_name').val(),
+              password: $('#password').val(),
+            }),
+            dataType: "json"
+          }).error(function (response) {
+
+          }).success(function (response) {
+            if (!response.valid) {
+              $('#processing_alert_success').hide();
+              $('#customButton').show();
+              $('#processing_alert_error').show();
+            }
+            else {
+              window.location.href = response.redirect_url
+            }
+          });
+          $('#freeSubscriptionButton').hide();
+          $('#processing_alert_success').show();
+          $('#processing_alert_error').hide();
+        }
+      });
     </script>
   </div>
 </div>

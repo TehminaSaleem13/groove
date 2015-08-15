@@ -1,6 +1,6 @@
 module Groovepacker
-	module Inventory
-		class BulkActions
+  module Inventory
+    class BulkActions
 
       include Groovepacker::Inventory::Helper
 
@@ -140,6 +140,6 @@ module Groovepacker
         return 100
       end
 
-		end
-	end
+    end
+  end
 end

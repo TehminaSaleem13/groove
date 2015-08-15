@@ -3,22 +3,22 @@ class Product < ActiveRecord::Base
   belongs_to :store
 
   attr_accessible :name,
-    :product_type,
-    :store_product_id,
-    :status,
-    :spl_instructions_4_packer,
-    :spl_instructions_4_confirmation,
-    :is_skippable,
-    :packing_placement,
-    :pack_time_adj,
-    :is_kit,
-    :kit_parsing,
-    :disable_conf_req,
-    :store,
-    :weight,
-    :add_to_any_order,
-    :is_intangible,
-    :base_sku
+                  :product_type,
+                  :store_product_id,
+                  :status,
+                  :spl_instructions_4_packer,
+                  :spl_instructions_4_confirmation,
+                  :is_skippable,
+                  :packing_placement,
+                  :pack_time_adj,
+                  :is_kit,
+                  :kit_parsing,
+                  :disable_conf_req,
+                  :store,
+                  :weight,
+                  :add_to_any_order,
+                  :is_intangible,
+                  :base_sku
 
   has_many :product_skus, :dependent => :destroy
   has_many :product_cats, :dependent => :destroy
@@ -41,24 +41,23 @@ class Product < ActiveRecord::Base
   INDIVIDUAL_SCAN_STATUSES = [INDIVIDUAL_KIT_PARSING]
 
 
-
-  def self.to_csv(folder,options= {})
+  def self.to_csv(folder, options= {})
     require 'csv'
     response = {}
     tables = {
       products: self,
       product_barcodes: ProductBarcode,
       product_images: ProductImage,
-      product_skus:ProductSku,
-      product_cats:ProductCat,
+      product_skus: ProductSku,
+      product_cats: ProductCat,
       product_kit_skus: ProductKitSkus,
-      product_inventory_warehouses:ProductInventoryWarehouses
+      product_inventory_warehouses: ProductInventoryWarehouses
     }
-    tables.each do |ident,model|
-      CSV.open("#{folder}/#{ident}.csv",'w',options) do |csv|
+    tables.each do |ident, model|
+      CSV.open("#{folder}/#{ident}.csv", 'w', options) do |csv|
         headers= []
         if ident == :products
-          ProductsHelper.products_csv(model.all,csv)          
+          ProductsHelper.products_csv(model.all, csv)
         else
           headers= model.column_names.dup
 
@@ -111,7 +110,7 @@ class Product < ActiveRecord::Base
         self.product_kit_skuss.each do |kit_product|
           option_product = Product.find(kit_product.option_product_id)
           if !option_product.nil? &&
-              option_product.status != 'active'
+            option_product.status != 'active'
             result &= false
           end
         end
@@ -127,59 +126,59 @@ class Product < ActiveRecord::Base
       end
 
       # unless self.status == original_status
-        # for non kit products, update all kits product statuses where the
-        # current product is an item of the kit
-        if self.is_kit == 0
-          @kit_products  = ProductKitSkus.where(:option_product_id => self.id)
-          result_kit = true
-          @kit_products.each do |kit_product|
-            if kit_product.product.status != 'inactive'
-              kit_product.product.update_product_status
-            end
+      # for non kit products, update all kits product statuses where the
+      # current product is an item of the kit
+      if self.is_kit == 0
+        @kit_products = ProductKitSkus.where(:option_product_id => self.id)
+        result_kit = true
+        @kit_products.each do |kit_product|
+          if kit_product.product.status != 'inactive'
+            kit_product.product.update_product_status
           end
         end
-
-        if result && self.base_sku.nil?
-          products = Product.where(:base_sku => self.primary_sku)
-          unless products.empty?
-            products.each do |child_product|
-              child_product.update_product_status
-            end
-          end
-        end
-
-        #update order items status from onhold to awaiting
-        @order_items = OrderItem.where(:product_id=>self.id)
-        @order_items.each do |item|
-          item.order.update_order_status unless item.order.nil? or !['awaiting','onhold'].include?(item.order.status)
-        end
-      # end
-  else
-      #update order items status from onhold to awaiting
-      @order_items = OrderItem.where(:product_id=>self.id)
-      @order_items.each do |item|
-        item.order.update_order_status unless item.order.nil? or !['awaiting','onhold'].include?(item.order.status)
       end
-  end
-  result
+
+      if result && self.base_sku.nil?
+        products = Product.where(:base_sku => self.primary_sku)
+        unless products.empty?
+          products.each do |child_product|
+            child_product.update_product_status
+          end
+        end
+      end
+
+      #update order items status from onhold to awaiting
+      @order_items = OrderItem.where(:product_id => self.id)
+      @order_items.each do |item|
+        item.order.update_order_status unless item.order.nil? or !['awaiting', 'onhold'].include?(item.order.status)
+      end
+      # end
+    else
+      #update order items status from onhold to awaiting
+      @order_items = OrderItem.where(:product_id => self.id)
+      @order_items.each do |item|
+        item.order.update_order_status unless item.order.nil? or !['awaiting', 'onhold'].include?(item.order.status)
+      end
+    end
+    result
   end
 
   def update_due_to_inactive_product
     if self.status == 'inactive'
-      kit_products  = ProductKitSkus.where(:option_product_id => self.id)
+      kit_products = ProductKitSkus.where(:option_product_id => self.id)
       unless kit_products.empty?
         kit_products.each do |kit_product|
           if kit_product.product.status != 'inactive'
             kit_product.product.status = 'new'
             kit_product.product.save
-            order_items = OrderItem.where(:product_id=>kit_product.product.id)
+            order_items = OrderItem.where(:product_id => kit_product.product.id)
             order_items.each do |item|
               item.order.update_order_status unless item.order.nil?
             end
           end
         end
       end
-      @order_items = OrderItem.where(:product_id=>self.id)
+      @order_items = OrderItem.where(:product_id => self.id)
       @order_items.each do |item|
         item.order.update_order_status unless item.order.nil?
       end
@@ -189,10 +188,10 @@ class Product < ActiveRecord::Base
   def set_product_status
     result = true
 
-    @skus = ProductSku.where(:product_id=>self.id)
+    @skus = ProductSku.where(:product_id => self.id)
     result &= false if @skus.length == 0
 
-    @barcodes = ProductBarcode.where(:product_id=>self.id)
+    @barcodes = ProductBarcode.where(:product_id => self.id)
     result &= false if @barcodes.length == 0
 
     result &= false if unacknowledged_kit_activities.length > 0
@@ -247,7 +246,7 @@ class Product < ActiveRecord::Base
       return (weight_gms / 1000).round(3)
     else
       return weight_gms.round
-    end     
+    end
   end
 
   def get_shipping_weight
@@ -266,8 +265,8 @@ class Product < ActiveRecord::Base
 
   def get_inventory_warehouse_info(inventory_warehouse_id)
     product_inventory_warehouses =
-     ProductInventoryWarehouses.where(:inventory_warehouse_id => inventory_warehouse_id).
-      where(:product_id => self.id)
+      ProductInventoryWarehouses.where(:inventory_warehouse_id => inventory_warehouse_id).
+        where(:product_id => self.id)
     product_inventory_warehouses.first
   end
 
@@ -288,7 +287,7 @@ class Product < ActiveRecord::Base
 
   # provides primary image if exists
   def primary_image
-    self.product_images.order('product_images.order ASC').first.image unless  self.product_images.order('product_images.order ASC').first.nil?
+    self.product_images.order('product_images.order ASC').first.image unless self.product_images.order('product_images.order ASC').first.nil?
   end
 
   def primary_image=(value)
@@ -308,7 +307,7 @@ class Product < ActiveRecord::Base
 
   def base_product
     unless self.base_sku.nil?
-      base_product_sku = ProductSku.where(:sku=>self.base_sku).first unless ProductSku.where(:sku=>self.base_sku).empty?
+      base_product_sku = ProductSku.where(:sku => self.base_sku).first unless ProductSku.where(:sku => self.base_sku).empty?
       return base_product_sku.product unless base_product_sku.nil?
     else
       return self
@@ -341,7 +340,7 @@ class Product < ActiveRecord::Base
 
   def primary_warehouse
     self.product_inventory_warehousess.where(inventory_warehouse_id:
-      InventoryWarehouse.where(:is_default => true).first.id).first
+                                               InventoryWarehouse.where(:is_default => true).first.id).first
   end
 
   def unacknowledged_kit_activities
@@ -357,7 +356,7 @@ class Product < ActiveRecord::Base
   def get_product_weight(weight)
     unless self.weight_format.nil?
       if self.weight_format=='lb'
-        @lbs =  16 * weight.to_f
+        @lbs = 16 * weight.to_f
       elsif self.weight_format=='oz'
         @oz = weight.to_f
       elsif self.weight_format=='kg'
@@ -369,7 +368,7 @@ class Product < ActiveRecord::Base
       end
     else
       if GeneralSetting.get_product_weight_format=='lb'
-        @lbs =  16 * weight.to_f
+        @lbs = 16 * weight.to_f
       elsif GeneralSetting.get_product_weight_format=='oz'
         @oz = weight.to_f
       elsif GeneralSetting.get_product_weight_format=='kg'

@@ -4,6 +4,7 @@ module Groovepacker
       module Shopify
         class OrdersImporter < Groovepacker::Stores::Importers::Importer
           include ProductsHelper
+
           def import
             handler = self.get_handler
             credential = handler[:credential]
@@ -13,9 +14,9 @@ module Groovepacker
 
             response = client.orders
 
-            result[:total_imported] = 
+            result[:total_imported] =
               response["orders"].nil? ? 0 : response["orders"].length
-            
+
             import_item.current_increment_id = ''
             import_item.success_imported = 0
             import_item.previous_imported = 0
@@ -32,7 +33,7 @@ module Groovepacker
                 import_item.save
                 shipstation_order = nil
                 if Order.where(increment_id: order["id"]).empty?
-                  
+
                   #create order
                   shopify_order = Order.new
                   import_order(shopify_order, order)
@@ -42,7 +43,7 @@ module Groovepacker
                     import_item.current_order_items = order["line_items"].length
                     import_item.current_order_imported_item = 0
                     import_item.save
-                    
+
                     order["line_items"].each do |item|
                       order_item = OrderItem.new
                       import_order_item(order_item, item)
@@ -68,7 +69,7 @@ module Groovepacker
                         order_item.product = product
                       else
                         order_item_product = ProductSku.where(sku: item["sku"]).
-                        first.product
+                          first.product
                         order_item.product = order_item_product
                       end
 
@@ -80,7 +81,7 @@ module Groovepacker
                   shopify_order.store = credential.store
                   shopify_order.save
                   shopify_order.set_order_status
-                  
+
                   #add order activities
                   shopify_order.addactivity("Order Import", credential.store.name+" Import")
                   shopify_order.order_items.each do |item|
@@ -109,13 +110,13 @@ module Groovepacker
             shopify_order.increment_id = order["id"].to_s
             shopify_order.store_order_id = order["order_number"]
             shopify_order.order_placed_time = order["created_at"]
-            
+
             unless order["customer"].nil?
               shopify_order.email = order["customer"]["email"]
               shopify_order.lastname = order["customer"]["last_name"]
               shopify_order.firstname = order["customer"]["first_name"]
             end
-            
+
             unless order["shipping_address"].nil?
               shopify_order.address_1 = order["shipping_address"]["address1"] unless order["shipping_address"]["address1"].nil?
               shopify_order.address_2 = order["shipping_address"]["address2"] unless order["shipping_address"]["address2"].nil?
@@ -125,10 +126,10 @@ module Groovepacker
               shopify_order.country = order["shipping_address"]["country"] unless order["shipping_address"]["country"].nil?
             end
 
-            unless order["shipping_lines"].nil? || 
-                order["shipping_lines"].empty?
+            unless order["shipping_lines"].nil? ||
+              order["shipping_lines"].empty?
               shipping = order["shipping_lines"].first
-              shopify_order.shipping_amount = 
+              shopify_order.shipping_amount =
                 shipping["price"].to_f unless shipping.nil?
             end
 
@@ -139,15 +140,15 @@ module Groovepacker
           def import_order_item(order_item, line_item)
             order_item.qty = line_item["quantity"]
             order_item.price = line_item["price"]
-            order_item.row_total = line_item["price"].to_f * 
-            line_item["quantity"].to_f
+            order_item.row_total = line_item["price"].to_f *
+              line_item["quantity"].to_f
             order_item
           end
 
           def create_new_product_from_order(item, store, sku, client)
             #create and import product
             product = Product.create(name: item["name"], store: store,
-              store_product_id: item["product_id"])
+                                     store_product_id: item["product_id"])
             product.product_skus.create(sku: sku)
 
             #get from products api
@@ -156,7 +157,7 @@ module Groovepacker
             shopify_product = response["product"]
             unless shopify_product.nil?
               # get product categories
-              unless shopify_product["tags"].nil? || 
+              unless shopify_product["tags"].nil? ||
                 shopify_product["tags"] == ""
                 tags = shopify_product["tags"].split(", ")
                 tags.each do |tag|
@@ -193,7 +194,7 @@ module Groovepacker
               end
 
               # if product images are empty then import product image
-              if product.product_images.empty? && 
+              if product.product_images.empty? &&
                 !shopify_product["image"].nil? &&
                 shopify_product["image"] != ''
                 product.product_images.create(image: shopify_product["image"]["src"])

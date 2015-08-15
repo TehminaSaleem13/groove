@@ -11,7 +11,7 @@ module Groovepacker
 
             order_count = 0
             product_count = 0
-            
+
             handler = self.get_handler
             credential = handler[:credential]
             client = handler[:store_handle]
@@ -32,13 +32,13 @@ module Groovepacker
               shipstation_orders = []
               statuses.each do |status|
                 response = client.get_orders(
-                  status, 
+                  status,
                   nil
                 )
                 shipstation_orders = shipstation_orders + response["orders"] unless response["orders"].nil?
               end
-                
-              
+
+
               import_item.to_import = shipstation_orders.length unless shipstation_orders.nil?
               import_item.save
               shipstation_orders.each do |order|
@@ -107,8 +107,8 @@ module Groovepacker
               if shipstation_order["orderStatus"] == 'awaiting_shipment' ||
                 shipstation_order["orderStatus"] == 'on_hold'
                 shipstation_order["items"].each_with_index do |item, index|
-                  if item["sku"] == product.primary_sku && 
-                    !product.primary_warehouse.nil? && 
+                  if item["sku"] == product.primary_sku &&
+                    !product.primary_warehouse.nil? &&
                     product.primary_warehouse.location_primary != nil &&
                     product.primary_warehouse.location_primary != '' &&
                     item["warehouseLocation"] != product.primary_warehouse.location_primary
@@ -125,7 +125,7 @@ module Groovepacker
               result[:message] = ex.message
             end
 
-            result         
+            result
           end
 
         end

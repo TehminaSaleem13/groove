@@ -17,7 +17,7 @@ class TransactionEmail < ActionMailer::Base
     @tenant_name = subscription.tenant_name
     @user_name = subscription.user_name
     @password = subscription.password
-  	mail to: subscription.email,
-  		subject: "GroovePacker Access Information"
+    mail to: subscription.email,
+         subject: "GroovePacker Access Information"
   end
 end

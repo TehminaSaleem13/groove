@@ -1,6 +1,6 @@
-groovepacks_admin_controllers.controller('tenantsFilterCtrl', [ '$scope', '$http', '$timeout', '$stateParams', '$location',
-'$state', '$cookies','tenants',
-function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,tenants) {
+groovepacks_admin_controllers.controller('tenantsFilterCtrl', ['$scope', '$http', '$timeout', '$stateParams', '$location',
+  '$state', '$cookies', 'tenants',
+  function ($scope, $http, $timeout, $stateParams, $location, $state, $cookies, tenants) {
 //Definitions
 
     var myscope = {};
@@ -9,9 +9,9 @@ function( $scope, $http, $timeout, $stateParams, $location, $state, $cookies,ten
      */
 
 
-    myscope.init = function() {
-        $scope.setup_child($stateParams);
+    myscope.init = function () {
+      $scope.setup_child($stateParams);
     };
 
     myscope.init();
-}]);
+  }]);

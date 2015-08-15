@@ -11,11 +11,11 @@ module Groovepacker
             result = self.build_result
 
             begin
-              response = mws.orders.list_orders :last_updated_after => 2.months.ago, 
-                :order_status => ['Unshipped', 'PartiallyShipped']
-              
+              response = mws.orders.list_orders :last_updated_after => 2.months.ago,
+                                                :order_status => ['Unshipped', 'PartiallyShipped']
+
               @orders = []
-              if !response.orders.kind_of?(Array) && 
+              if !response.orders.kind_of?(Array) &&
                 !response.orders.nil?
                 @orders.push(response.orders)
               else
@@ -36,14 +36,14 @@ module Groovepacker
                   import_item.current_order_items = -1
                   import_item.current_order_imported_item = -1
                   import_item.save
-                  if Order.where(:increment_id=>order.amazon_order_id).length == 0
+                  if Order.where(:increment_id => order.amazon_order_id).length == 0
                     @order = Order.new
                     @order.status = 'awaiting'
                     @order.increment_id = order.amazon_order_id
                     @order.order_placed_time = order.purchase_date
                     @order.store = credential.store
-                    
-                    order_items  = 
+
+                    order_items =
                       mws.orders.list_order_items :amazon_order_id => order.amazon_order_id
                     import_item.current_order_items = order_items.length
                     import_item.current_order_imported_item = 0
@@ -51,16 +51,16 @@ module Groovepacker
                     order_items.order_items.each do |item|
                       order_item = OrderItem.new
                       unless item.item_price.nil?
-                        order_item.price = item.item_price.amount 
+                        order_item.price = item.item_price.amount
                         unless item.item_price.amount.nil? && item.quantity_ordered.nil?
-                          order_item.row_total= item.item_price.amount.to_i * 
+                          order_item.row_total= item.item_price.amount.to_i *
                             item.quantity_ordered.to_i
                         end
                       end
                       order_item.qty = item.quantity_ordered
                       order_item.sku = item.seller_sku
 
-                      if ProductSku.where(:sku=>item.seller_sku).length == 0
+                      if ProductSku.where(:sku => item.seller_sku).length == 0
                         #create and import product
                         product = Product.new
                         product.name = 'New imported item'
@@ -74,14 +74,14 @@ module Groovepacker
 
                         #import other product details
                         Groovepacker::Stores::Importers::Amazon::
-                          ProductsImporter.new(handler).import_single({ 
-                            product_sku: item.seller_sku, 
-                            product_id: product.id, 
-                            handler: handler
-                          })
-                          order_item.product = product
+                            ProductsImporter.new(handler).import_single({
+                                                                          product_sku: item.seller_sku,
+                                                                          product_id: product.id,
+                                                                          handler: handler
+                                                                        })
+                        order_item.product = product
                       else
-                        order_item.product = ProductSku.where(:sku=>item.seller_sku).
+                        order_item.product = ProductSku.where(:sku => item.seller_sku).
                           first.product
                       end
                       order_item.name = item.title
@@ -89,9 +89,9 @@ module Groovepacker
                       import_item.current_order_imported_item = import_item.current_order_imported_item + 1
                       import_item.save
                     end
-                    
+
                     unless order.shipping_address.nil?
-                      @order.address_1  = order.shipping_address.address_line1
+                      @order.address_1 = order.shipping_address.address_line1
                       @order.city = order.shipping_address.city
                       @order.country = order.shipping_address.country_code
                       @order.postcode = order.shipping_address.postal_code
@@ -131,7 +131,9 @@ module Groovepacker
               import_item.save
             end
             result
-          end #import order ends
+          end
+
+          #import order ends
 
           def import_single(hash)
             {}

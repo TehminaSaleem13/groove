@@ -1,9 +1,9 @@
 class GeneratePackingSlipPdf
-  def self.generate_packing_slip_pdf(orders, tenant_name, result, page_height, page_width, orientation, file_name, size, header,gen_barcode_id)
+  def self.generate_packing_slip_pdf(orders, tenant_name, result, page_height, page_width, orientation, file_name, size, header, gen_barcode_id)
     begin
       Apartment::Tenant.switch(tenant_name)
       packing_slip_obj =
-            Groovepacker::PackingSlip::PdfMerger.new
+        Groovepacker::PackingSlip::PdfMerger.new
       generate_barcode = GenerateBarcode.find_by_id(gen_barcode_id)
       unless generate_barcode.nil?
         generate_barcode.status = 'in_progress'
@@ -11,7 +11,7 @@ class GeneratePackingSlipPdf
         generate_barcode.total_orders = orders.length
         generate_barcode.next_order_increment_id = orders.first[:increment_id] unless orders.first.nil?
         generate_barcode.save
-        orders.each_with_index do |item,index|
+        orders.each_with_index do |item, index|
 
           order = Order.find(item[:id])
           generate_barcode.reload
@@ -27,7 +27,7 @@ class GeneratePackingSlipPdf
           file_name_order = Digest::MD5.hexdigest(order.increment_id)
           reader_file_path = Rails.root.join('public', 'pdfs', "#{Apartment::Tenant.current}.#{file_name_order}.pdf")
 
-          GeneratePackingSlipPdf.generate_pdf(order,page_height,page_width,orientation,reader_file_path,header)
+          GeneratePackingSlipPdf.generate_pdf(order, page_height, page_width, orientation, reader_file_path, header)
           reader = PDF::Reader.new(reader_file_path)
           page_count = reader.page_count
 
@@ -35,29 +35,30 @@ class GeneratePackingSlipPdf
             # delete the pdf and regenerate if the pdf page-count exceeds 1
             File.delete(reader_file_path)
             multi_header = 'Multi-Slip Order # ' + order.increment_id
-            GeneratePackingSlipPdf.generate_pdf(order,page_height,page_width,orientation,reader_file_path, multi_header)
+            GeneratePackingSlipPdf.generate_pdf(order, page_height, page_width, orientation, reader_file_path, multi_header)
           end
           result['data']['packing_slip_file_paths'].push(reader_file_path)
         end
-        result['data']['destination'] =  Rails.root.join('public','pdfs', "#{file_name}_packing_slip.pdf")
-        result['data']['merged_packing_slip_url'] =  '/pdfs/'+ file_name + '_packing_slip.pdf'
+        result['data']['destination'] = Rails.root.join('public', 'pdfs', "#{file_name}_packing_slip.pdf")
+        result['data']['merged_packing_slip_url'] = '/pdfs/'+ file_name + '_packing_slip.pdf'
 
         #merge the packing-slips
-        packing_slip_obj.merge(result,orientation,size,file_name)
+        packing_slip_obj.merge(result, orientation, size, file_name)
         base_file_name = File.basename(result['data']['destination'])
-        pdf_file = File.open(result['data']['destination'],'rb')
-        GroovS3.create_pdf(tenant_name,base_file_name,pdf_file.read)
+        pdf_file = File.open(result['data']['destination'], 'rb')
+        GroovS3.create_pdf(tenant_name, base_file_name, pdf_file.read)
         pdf_file.close
         generate_barcode.url = ENV['S3_BASE_URL']+'/'+tenant_name+'/pdf/'+base_file_name
         generate_barcode.status = 'completed'
         generate_barcode.save
       end
-    rescue Exception=> e
+    rescue Exception => e
       generate_barcode.status = 'failed'
       generate_barcode.save
     end
   end
-  def self.generate_pdf(order,page_height,page_width,orientation,pdf_path, header)
+
+  def self.generate_pdf(order, page_height, page_width, orientation, pdf_path, header)
     require 'wicked_pdf'
     ActionView::Base.send(:define_method, :protect_against_forgery?) { false }
     av = ActionView::Base.new()
@@ -81,8 +82,8 @@ class GeneratePackingSlipPdf
                   :left => '2',
                   :right => '2'},
       :header => {
-          :content => av.render(:template => 'orders/generate_packing_slip_header', :formats => [:pdf], :locals => {:@header => header}),
-          :spacing => 3
+        :content => av.render(:template => 'orders/generate_packing_slip_header', :formats => [:pdf], :locals => {:@header => header}),
+        :spacing => 3
       },
       :footer => {
         :content => av.render(:template => 'orders/generate_packing_slip_header', :formats => [:pdf], :locals => {:@header => header}),

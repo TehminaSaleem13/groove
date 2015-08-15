@@ -6,28 +6,28 @@ namespace :groove do
     OptionParser.new(args) do |opts|
       opts.banner = 'Usage: groove:del_tenants -- [options]'
 
-      opts.on('-t','--tenant {tenant_name}','Tenant Name',String) do |tenant|
+      opts.on('-t', '--tenant {tenant_name}', 'Tenant Name', String) do |tenant|
         options[:tenant] = tenant
       end
     end.parse!
     unless options[:tenant].nil?
 
-        del_tenant = Tenant.find_by_name(options[:tenant])
-        puts 'Owner Tenant is: '+Apartment::Tenant.current.to_s
-        if del_tenant.nil?
-          puts "Tenant #{options[:tenant]} not found"
+      del_tenant = Tenant.find_by_name(options[:tenant])
+      puts 'Owner Tenant is: '+Apartment::Tenant.current.to_s
+      if del_tenant.nil?
+        puts "Tenant #{options[:tenant]} not found"
+      else
+        begin
+          Apartment::Tenant.drop(options[:tenant])
+        rescue Exception => e
+          puts e.message
         else
-          begin
-            Apartment::Tenant.drop(options[:tenant])
-          rescue Exception=>e
-            puts e.message
-          else
-            puts 'Removed tenant '+options[:tenant]+' Database'
-          end
-          if del_tenant.destroy
-            puts 'Removed '+options[:tenant]+' from tenants table'
-          end
+          puts 'Removed tenant '+options[:tenant]+' Database'
         end
+        if del_tenant.destroy
+          puts 'Removed '+options[:tenant]+' from tenants table'
+        end
+      end
 
     end
     exit(1)
@@ -36,11 +36,11 @@ namespace :groove do
   task :upgrade => :environment do
     Tenant.all.each do |tenant|
       begin
-      Apartment::Tenant.process(tenant.name) do
-        puts 'Upgrading Tenant: '+Apartment::Tenant.current.to_s
-        #Add upgrade code to run for every tenant after this line
-        #Add upgrade code to run for every tenant before this line
-      end
+        Apartment::Tenant.process(tenant.name) do
+          puts 'Upgrading Tenant: '+Apartment::Tenant.current.to_s
+          #Add upgrade code to run for every tenant after this line
+          #Add upgrade code to run for every tenant before this line
+        end
       rescue Exception => e
         puts e.message
         if e.message == 'Cannot find tenant '+tenant.name
@@ -69,7 +69,7 @@ namespace :groove do
           if general_setting.inventory_tracking?
             product_inventory_warehouses = ProductInventoryWarehouses.all
             product_inventory_warehouses.each do |single_warehouse|
-              inventory_data << { id: single_warehouse.id, quantity_on_hand: single_warehouse.quantity_on_hand}
+              inventory_data << {id: single_warehouse.id, quantity_on_hand: single_warehouse.quantity_on_hand}
             end
             bulk_action.do_unprocess_all
             product_inventory_warehouses = nil

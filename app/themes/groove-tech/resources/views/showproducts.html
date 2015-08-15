@@ -1,74 +1,125 @@
 <div class="container-fluid">
-    <div class="row bottom-well">
-        <div class="col-lg-2 col-md-2">
-            <div class="row">
-                <accordion>
-                    <accordion-group is-open="tabs[0].open">
-                        <accordion-heading>
-                            <i></i>
-                            <a ui-sref="products.type.filter.page({type:'product',filter:'active',page:1})" ng-click="products.setup.search=''">Products</a>
-                        </accordion-heading>
-                        <li ng-click="create_product()">Create</li>
-                        <li ng-class="{active: products.setup.search=='' && products.setup.filter=='all' && products.setup.is_kit == 0}" ng-click="products.setup.search=''" ui-sref="products.type.filter.page({type:'product',filter:'all',page:1})" >Show All</li>
-                        <li ng-class="{active: products.setup.search=='' && products.setup.filter=='active' && products.setup.is_kit == 0}" ng-click="products.setup.search=''"  ui-sref="products.type.filter.page({type:'product',filter:'active',page:1})">Active Products</li>
-                        <li ng-class="{active: products.setup.search=='' && products.setup.filter=='inactive' && products.setup.is_kit == 0}" ng-click="products.setup.search=''"  ui-sref="products.type.filter.page({type:'product',filter:'inactive',page:1})">Inactive Products</li>
-                        <li ng-class="{active: products.setup.search=='' && products.setup.filter=='new' && products.setup.is_kit == 0}" ng-click="products.setup.search=''"  ui-sref="products.type.filter.page({type:'product',filter:'new',page:1})">New <span class="pull-right badge badge-important" ng-show="products.setup.is_kit==0 && products.products_count.new>0">{{products.products_count.new}}</span></li>
-                    </accordion-group>
-                    <accordion-group is-open="tabs[1].open">
-                        <accordion-heading>
-                            <a ui-sref="products.type.filter.page({type:'kit',filter:'active',page:1})" ng-click="products.setup.search=''">Kits</a>
-                        </accordion-heading>
-                        <li ng-class="{active: products.setup.search=='' && products.setup.filter=='all' && products.setup.is_kit == 1}" ng-click="products.setup.search=''" ui-sref="products.type.filter.page({type:'kit',filter:'all',page:1})" >Show All</li>
-                        <li ng-class="{active: products.setup.search=='' && products.setup.filter=='active' && products.setup.is_kit == 1}" ng-click="products.setup.search=''"  ui-sref="products.type.filter.page({type:'kit',filter:'active',page:1})">Active Kits</li>
-                        <li ng-class="{active: products.setup.search=='' && products.setup.filter=='inactive' && products.setup.is_kit == 1}" ng-click="products.setup.search=''"  ui-sref="products.type.filter.page({type:'kit',filter:'inactive',page:1})">Inactive Kits</li>
-                        <li ng-class="{active: products.setup.search=='' && products.setup.filter=='new' && products.setup.is_kit == 1}" ng-click="products.setup.search=''" ui-sref="products.type.filter.page({type:'kit',filter:'new',page:1})">New Kits <span class="pull-right badge badge-important" ng-show="products.setup.is_kit==1 && products.products_count.new>0">{{products.products_count.new}}</span></li>
-                    </accordion-group>
-                    <accordion-group is-open="tabs[2].open">
-                        <accordion-heading>
-                            <a ng-click="recount_or_receive_inventory()">Inventory Warehouse Count</a>
-                        </accordion-heading>
-                        <li ng-click="recount_or_receive_inventory()">Receive or Recount Inventory</li>
-                    </accordion-group>
-                </accordion>
-            </div>
-        </div>
-        <div class="col-lg-10 col-md-10">
-            <div class="row">
-                <div class="col-lg-9 col-md-9">
-                    <div class="col-lg-offset-3 col-md-offset-3 col-lg-9 col-md-9 pull-left">
-                        <input type="text" id="product-search-query" autofocus="autofocus" class="form-control search-box" ng-model="products.setup.search" placeholder="Search">
-                    </div>
-                </div>
-                <div class="col-lg-1 col-md-1" dropdown>
-                    <button type="button" class="groove-button dropdown-toggle">
-                        Edit <span class="caret"></span>
-                    </button>
-                    <ul class="dropdown-menu" role="menu">
-                        <li class="dropdown-toggle" ng-if="gridOptions.selections.show_delete"><a ng-click="product_delete()">Delete<span class="pull-right badge badge-important">{{products.setup.select_all? gridOptions.paginate.total_items: gridOptions.selections.selected_count}}</span></a></li>
-                        <li class="dropdown-toggle"><a ng-click="product_duplicate()">Duplicate <span class=" pull-right badge badge-important">{{products.setup.select_all? gridOptions.paginate.total_items: gridOptions.selections.selected_count}}</span></a></li>
-                        <li class="dropdown-toggle"><a ng-click="product_barcode()">Generate barcode from SKU <span class="badge badge-important">{{products.setup.select_all? gridOptions.paginate.total_items: gridOptions.selections.selected_count}}</span></a></li>
-                        <li class="dropdown-toggle"><a ng-click="product_receiving_label()">Print Receiving Labels <span class="pull-right badge badge-important">{{products.setup.select_all? gridOptions.paginate.total_items: gridOptions.selections.selected_count}}</span></a></li>
-                        <li class="dropdown-toggle"><a ng-click="backup_product_csv()">Export Products to CSV <span class="pull-right badge badge-important">{{products.setup.select_all? gridOptions.paginate.total_items: gridOptions.selections.selected_count}}</span></a></li>
-                    </ul>
-                </div>
-                <div class="col-lg-2 col-md-2" dropdown>
-                    <button type="button" class="groove-button dropdown-toggle">
-                        Change Status <span class="caret"></span>
-                    </button>
-                    <ul class="dropdown-menu" role="menu">
-                        <li><a ng-click="product_change_status('active')">Active <span class="pull-right badge badge-important">{{products.setup.select_all? gridOptions.paginate.total_items: gridOptions.selections.selected_count}}</span></a></li>
-                        <li><a ng-click="product_change_status('inactive')">Inactive <span class="pull-right badge badge-important">{{products.setup.select_all? gridOptions.paginate.total_items: gridOptions.selections.selected_count}}</span></a></li>
-                        <li><a ng-click="product_change_status('new')">New <span class="pull-right badge badge-important">{{products.setup.select_all? gridOptions.paginate.total_items: gridOptions.selections.selected_count}}</span></a></li>
-                    </ul>
-                </div>
-
-            </div>
-            <div class="row">
-                <div class="col-sm-12">
-                    <div groov-data-grid="gridOptions" groov-list="products.list"></div>
-                </div>
-            </div>
-            <div ui-view></div>
-        </div>
+  <div class="row bottom-well">
+    <div class="col-lg-2 col-md-2">
+      <div class="row">
+        <accordion>
+          <accordion-group is-open="tabs[0].open">
+            <accordion-heading>
+              <i></i>
+              <a ui-sref="products.type.filter.page({type:'product',filter:'active',page:1})"
+                 ng-click="products.setup.search=''">Products</a>
+            </accordion-heading>
+            <li ng-click="create_product()">Create</li>
+            <li
+              ng-class="{active: products.setup.search=='' && products.setup.filter=='all' && products.setup.is_kit == 0}"
+              ng-click="products.setup.search=''"
+              ui-sref="products.type.filter.page({type:'product',filter:'all',page:1})">Show All
+            </li>
+            <li
+              ng-class="{active: products.setup.search=='' && products.setup.filter=='active' && products.setup.is_kit == 0}"
+              ng-click="products.setup.search=''"
+              ui-sref="products.type.filter.page({type:'product',filter:'active',page:1})">Active Products
+            </li>
+            <li
+              ng-class="{active: products.setup.search=='' && products.setup.filter=='inactive' && products.setup.is_kit == 0}"
+              ng-click="products.setup.search=''"
+              ui-sref="products.type.filter.page({type:'product',filter:'inactive',page:1})">Inactive Products
+            </li>
+            <li
+              ng-class="{active: products.setup.search=='' && products.setup.filter=='new' && products.setup.is_kit == 0}"
+              ng-click="products.setup.search=''"
+              ui-sref="products.type.filter.page({type:'product',filter:'new',page:1})">New <span
+              class="pull-right badge badge-important"
+              ng-show="products.setup.is_kit==0 && products.products_count.new>0">{{products.products_count.new}}</span>
+            </li>
+          </accordion-group>
+          <accordion-group is-open="tabs[1].open">
+            <accordion-heading>
+              <a ui-sref="products.type.filter.page({type:'kit',filter:'active',page:1})"
+                 ng-click="products.setup.search=''">Kits</a>
+            </accordion-heading>
+            <li
+              ng-class="{active: products.setup.search=='' && products.setup.filter=='all' && products.setup.is_kit == 1}"
+              ng-click="products.setup.search=''" ui-sref="products.type.filter.page({type:'kit',filter:'all',page:1})">
+              Show All
+            </li>
+            <li
+              ng-class="{active: products.setup.search=='' && products.setup.filter=='active' && products.setup.is_kit == 1}"
+              ng-click="products.setup.search=''"
+              ui-sref="products.type.filter.page({type:'kit',filter:'active',page:1})">Active Kits
+            </li>
+            <li
+              ng-class="{active: products.setup.search=='' && products.setup.filter=='inactive' && products.setup.is_kit == 1}"
+              ng-click="products.setup.search=''"
+              ui-sref="products.type.filter.page({type:'kit',filter:'inactive',page:1})">Inactive Kits
+            </li>
+            <li
+              ng-class="{active: products.setup.search=='' && products.setup.filter=='new' && products.setup.is_kit == 1}"
+              ng-click="products.setup.search=''" ui-sref="products.type.filter.page({type:'kit',filter:'new',page:1})">
+              New Kits <span class="pull-right badge badge-important"
+                             ng-show="products.setup.is_kit==1 && products.products_count.new>0">{{products.products_count.new}}</span>
+            </li>
+          </accordion-group>
+          <accordion-group is-open="tabs[2].open">
+            <accordion-heading>
+              <a ng-click="recount_or_receive_inventory()">Inventory Warehouse Count</a>
+            </accordion-heading>
+            <li ng-click="recount_or_receive_inventory()">Receive or Recount Inventory</li>
+          </accordion-group>
+        </accordion>
+      </div>
     </div>
+    <div class="col-lg-10 col-md-10">
+      <div class="row">
+        <div class="col-lg-9 col-md-9">
+          <div class="col-lg-offset-3 col-md-offset-3 col-lg-9 col-md-9 pull-left">
+            <input type="text" id="product-search-query" autofocus="autofocus" class="form-control search-box"
+                   ng-model="products.setup.search" placeholder="Search">
+          </div>
+        </div>
+        <div class="col-lg-1 col-md-1" dropdown>
+          <button type="button" class="groove-button dropdown-toggle">
+            Edit <span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu" role="menu">
+            <li class="dropdown-toggle" ng-if="gridOptions.selections.show_delete"><a ng-click="product_delete()">Delete<span
+              class="pull-right badge badge-important">{{products.setup.select_all? gridOptions.paginate.total_items: gridOptions.selections.selected_count}}</span></a>
+            </li>
+            <li class="dropdown-toggle"><a ng-click="product_duplicate()">Duplicate <span
+              class=" pull-right badge badge-important">{{products.setup.select_all? gridOptions.paginate.total_items: gridOptions.selections.selected_count}}</span></a>
+            </li>
+            <li class="dropdown-toggle"><a ng-click="product_barcode()">Generate barcode from SKU <span
+              class="badge badge-important">{{products.setup.select_all? gridOptions.paginate.total_items: gridOptions.selections.selected_count}}</span></a>
+            </li>
+            <li class="dropdown-toggle"><a ng-click="product_receiving_label()">Print Receiving Labels <span
+              class="pull-right badge badge-important">{{products.setup.select_all? gridOptions.paginate.total_items: gridOptions.selections.selected_count}}</span></a>
+            </li>
+            <li class="dropdown-toggle"><a ng-click="backup_product_csv()">Export Products to CSV <span
+              class="pull-right badge badge-important">{{products.setup.select_all? gridOptions.paginate.total_items: gridOptions.selections.selected_count}}</span></a>
+            </li>
+          </ul>
+        </div>
+        <div class="col-lg-2 col-md-2" dropdown>
+          <button type="button" class="groove-button dropdown-toggle">
+            Change Status <span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu" role="menu">
+            <li><a ng-click="product_change_status('active')">Active <span class="pull-right badge badge-important">{{products.setup.select_all? gridOptions.paginate.total_items: gridOptions.selections.selected_count}}</span></a>
+            </li>
+            <li><a ng-click="product_change_status('inactive')">Inactive <span class="pull-right badge badge-important">{{products.setup.select_all? gridOptions.paginate.total_items: gridOptions.selections.selected_count}}</span></a>
+            </li>
+            <li><a ng-click="product_change_status('new')">New <span class="pull-right badge badge-important">{{products.setup.select_all? gridOptions.paginate.total_items: gridOptions.selections.selected_count}}</span></a>
+            </li>
+          </ul>
+        </div>
+
+      </div>
+      <div class="row">
+        <div class="col-sm-12">
+          <div groov-data-grid="gridOptions" groov-list="products.list"></div>
+        </div>
+      </div>
+      <div ui-view></div>
+    </div>
+  </div>
 </div>

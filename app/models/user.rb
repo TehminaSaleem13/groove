@@ -8,10 +8,10 @@ class User < ActiveRecord::Base
 
   # Setup accessible (or protected) attributes for your model
   attr_accessible :username, :password, :password_confirmation, :remember_me, :confirmation_code
-  validates_presence_of  :username, :confirmation_code
+  validates_presence_of :username, :confirmation_code
   validates_uniqueness_of :username, :case_sensitive => false
   validates_uniqueness_of :confirmation_code
-  validates :confirmation_code, length: { maximum: 25 }
+  validates :confirmation_code, length: {maximum: 25}
 
   # attr_accessible :title, :body
   belongs_to :inventory_warehouse
@@ -45,7 +45,7 @@ class User < ActiveRecord::Base
 
   def check_fix_permissions
     InventoryWarehouse.all.each do |inv_wh|
-      fix_user_inventory_permissions(self,inv_wh)
+      fix_user_inventory_permissions(self, inv_wh)
     end
   end
 
@@ -54,7 +54,7 @@ class User < ActiveRecord::Base
       if self.role.make_super_admin
         #Super admin has all permissions
         return true
-      elsif ['create_edit_notes','change_order_status','import_orders'].include?(permission)
+      elsif ['create_edit_notes', 'change_order_status', 'import_orders'].include?(permission)
         #A user with add_edit_order_items permission can do anything with an order
         return (self.role.add_edit_order_items || self.role[permission])
       else

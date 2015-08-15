@@ -17,28 +17,28 @@ module Groovepacker
             item['key'] = 'status'
             item['value'] = 'processing'
             @filter['item'] = item
-            @filters['filter']  = @filter
+            @filters['filter'] = @filter
             @filters_array = @filters
-            
-            @filters1 = {}            
+
+            @filters1 = {}
             @filter1 = {}
             item1 = {}
             if credential.last_imported_at.to_s != ""
               item1['key'] = 'created_at'
-              item1['value'] = [{'key'=>'from', 'value'=>credential.last_imported_at.to_s}]
+              item1['value'] = [{'key' => 'from', 'value' => credential.last_imported_at.to_s}]
               @filter1['item'] = item1
-              @filters1['complex_filter']  = @filter1
-              @filters_array = @filters_array.merge(@filters1)              
+              @filters1['complex_filter'] = @filter1
+              @filters_array = @filters_array.merge(@filters1)
             end
             credential.last_imported_at = DateTime.now
             credential.save
             begin
-              response = client.call(:sales_order_list, message: 
-                { sessionId: session, filters: @filters_array })
-                    
+              response = client.call(:sales_order_list, message:
+                                                        {sessionId: session, filters: @filters_array})
+
               if response.success?
                 if !response.body[:sales_order_list_response][:result][:item].nil?
-                  result[:total_imported] =  response.body[:sales_order_list_response][:result][:item].length
+                  result[:total_imported] = response.body[:sales_order_list_response][:result][:item].length
                   import_item.current_increment_id = ''
                   import_item.success_imported = 0
                   import_item.previous_imported = 0
@@ -53,10 +53,10 @@ module Groovepacker
                     import_item.current_order_imported_item = -1
                     import_item.save
                     order_info = client.call(:sales_order_info,
-                      message:{sessionId: session, orderIncrementId: item[:increment_id]})
+                                             message: {sessionId: session, orderIncrementId: item[:increment_id]})
 
                     order_info = order_info.body[:sales_order_info_response][:result]
-                    if Order.where(:increment_id=>item[:increment_id]).length == 0
+                    if Order.where(:increment_id => item[:increment_id]).length == 0
                       @order = Order.new
                       @order.increment_id = item[:increment_id]
                       @order.status = 'awaiting'
@@ -68,30 +68,30 @@ module Groovepacker
                         import_item.current_order_items = 1
                         import_item.current_order_imported_item = 0
                         import_item.save
-                          if line_items[:item][:product_type] == 'simple'
-                            @order_item = OrderItem.new
-                            @order_item.price = line_items[:item][:price]
-                            @order_item.qty = line_items[:item][:qty_ordered]
-                            @order_item.row_total= line_items[:item][:row_total]
-                            @order_item.name = line_items[:item][:name]
-                            @order_item.sku = line_items[:item][:sku]
-                            if ProductSku.where(:sku=>@order_item.sku).length == 0
-                              #import other product details
-                              product_id = Groovepacker::Stores::Importers::Magento::
-                                ProductsImporter.new(handler).import_single({ 
-                                  sku: @order_item.sku })
-                            else
-                              product_id = ProductSku.where(:sku=>@order_item.sku).first.product_id
-                            end
-                            @order_item.product_id = product_id
-                            @order.order_items << @order_item
+                        if line_items[:item][:product_type] == 'simple'
+                          @order_item = OrderItem.new
+                          @order_item.price = line_items[:item][:price]
+                          @order_item.qty = line_items[:item][:qty_ordered]
+                          @order_item.row_total= line_items[:item][:row_total]
+                          @order_item.name = line_items[:item][:name]
+                          @order_item.sku = line_items[:item][:sku]
+                          if ProductSku.where(:sku => @order_item.sku).length == 0
+                            #import other product details
+                            product_id = Groovepacker::Stores::Importers::Magento::
+                                ProductsImporter.new(handler).import_single({
+                                                                              sku: @order_item.sku})
                           else
-                            if ProductSku.where(:sku=>line_items[:item][:sku]).length == 0
-                              Groovepacker::Stores::Importers::Magento::
-                                ProductsImporter.new(handler).import_single({ 
-                                  sku:line_items[:item][:sku] })
-                            end
+                            product_id = ProductSku.where(:sku => @order_item.sku).first.product_id
                           end
+                          @order_item.product_id = product_id
+                          @order.order_items << @order_item
+                        else
+                          if ProductSku.where(:sku => line_items[:item][:sku]).length == 0
+                            Groovepacker::Stores::Importers::Magento::
+                                ProductsImporter.new(handler).import_single({
+                                                                              sku: line_items[:item][:sku]})
+                          end
+                        end
                         import_item.current_order_imported_item = 1
                         import_item.save
                       else
@@ -107,20 +107,20 @@ module Groovepacker
                             @order_item.name = line_item[:name]
                             @order_item.sku = line_item[:sku]
 
-                            if ProductSku.where(:sku=>@order_item.sku).length == 0
+                            if ProductSku.where(:sku => @order_item.sku).length == 0
                               product_id = Groovepacker::Stores::Importers::Magento::
-                                ProductsImporter.new(handler).import_single({
-                                  sku: @order_item.sku })
+                                  ProductsImporter.new(handler).import_single({
+                                                                                sku: @order_item.sku})
                             else
-                              product_id = ProductSku.where(:sku=>@order_item.sku).first.product_id
+                              product_id = ProductSku.where(:sku => @order_item.sku).first.product_id
                             end
                             @order_item.product_id = product_id
                             @order.order_items << @order_item
                           else
-                            if ProductSku.where(:sku=>line_item[:sku]).length == 0
+                            if ProductSku.where(:sku => line_item[:sku]).length == 0
                               Groovepacker::Stores::Importers::Magento::
-                                ProductsImporter.new(handler).import_single({
-                                  sku: line_item[:sku] })
+                                  ProductsImporter.new(handler).import_single({
+                                                                                sku: line_item[:sku]})
                             end
                           end
                           import_item.current_order_imported_item = import_item.current_order_imported_item + 1
@@ -129,7 +129,7 @@ module Groovepacker
                       end
 
                       #if product does not exist import product using product.info
-                      @order.address_1  = order_info[:shipping_address][:street]
+                      @order.address_1 = order_info[:shipping_address][:street]
                       @order.city = order_info[:shipping_address][:city]
                       @order.country = order_info[:shipping_address][:country_id]
                       @order.postcode = order_info[:shipping_address][:postcode]

@@ -2,10 +2,10 @@ class Order < ActiveRecord::Base
   belongs_to :store
   attr_accessible :customercomments, :status, :storename, :store_order_id, :store, :order_total
   attr_accessible :address_1, :address_2, :city, :country, :customer_comments, :email, :firstname,
-  :increment_id, :lastname,
-  		:method, :order_placed_time, :postcode, :price, :qty, :sku, :state, :store_id, :notes_internal,
-  		:notes_toPacker, :notes_fromPacker, :tracking_processed, :scanned_on, :tracking_num, :company,
-      :packing_user_id, :status_reason, :non_hyphen_increment_id
+                  :increment_id, :lastname,
+                  :method, :order_placed_time, :postcode, :price, :qty, :sku, :state, :store_id, :notes_internal,
+                  :notes_toPacker, :notes_fromPacker, :tracking_processed, :scanned_on, :tracking_num, :company,
+                  :packing_user_id, :status_reason, :non_hyphen_increment_id
 
   has_many :order_items, :dependent => :destroy
   has_one :order_shipping, :dependent => :destroy
@@ -31,17 +31,17 @@ class Order < ActiveRecord::Base
   end
 
   def addactivity(order_activity_message, username='', activity_type ='regular')
-  	@activity = OrderActivity.new
-  	@activity.order_id = self.id
-  	@activity.action = order_activity_message
-  	@activity.username = username
+    @activity = OrderActivity.new
+    @activity.order_id = self.id
+    @activity.action = order_activity_message
+    @activity.username = username
     @activity.activitytime = current_time_from_proper_timezone
     @activity.activity_type = activity_type
-  	if @activity.save
-  		true
-  	else
-  		false
-  	end
+    if @activity.save
+      true
+    else
+      false
+    end
   end
 
   def process_unprocessed_orders
@@ -51,12 +51,12 @@ class Order < ActiveRecord::Base
   end
 
   def addnewitems
-    @order_items = OrderItem.where(:order_id=>self.id)
+    @order_items = OrderItem.where(:order_id => self.id)
     result = true
 
     @order_items.each do |item|
       #add new product if item is not added.
-      if ProductSku.where(:sku=>item.sku).length == 0 &&
+      if ProductSku.where(:sku => item.sku).length == 0 &&
         !item.name.nil? && item.name != '' && !item.sku.nil?
         product = Product.new
         product.name = item.name
@@ -79,7 +79,7 @@ class Order < ActiveRecord::Base
         item.save
         import_amazon_product_details(self.store_id, item.sku, item.product_id)
       else
-        item.product_id = ProductSku.where(:sku=>item.sku).first.product_id
+        item.product_id = ProductSku.where(:sku => item.sku).first.product_id
         item.save
       end
     end
@@ -128,7 +128,7 @@ class Order < ActiveRecord::Base
       product = Product.find_by_id(order_item.product_id)
       unless product.nil?
         if product.status == "new" or product.status == "inactive"
-            products_list << product
+          products_list << product
         end
       end
     end
@@ -144,7 +144,7 @@ class Order < ActiveRecord::Base
         product = Product.find_by_id(order_item.product_id)
         unless product.nil?
           if product.status == "new" or product.status == "inactive"
-              result &= false
+            result &= false
           end
         end
       end
@@ -153,11 +153,11 @@ class Order < ActiveRecord::Base
 
       if result
         if self.status == "onhold"
-         self.status = "awaiting"
+          self.status = "awaiting"
         end
       else
         if self.status == "awaiting"
-         self.status = "onhold"
+          self.status = "onhold"
         end
       end
 
@@ -175,19 +175,19 @@ class Order < ActiveRecord::Base
       product = Product.find_by_id(order_item.product_id)
       if !product.nil?
         if product.status == "new" or product.status == "inactive"
-            result &= false
+          result &= false
         end
       else
         result &= false
       end
     end
-    
+
     result &= false if self.unacknowledged_activities.length > 0
-    
+
     if result
-      self.update_column(:status,'awaiting')
+      self.update_column(:status, 'awaiting')
     else
-      self.update_column(:status,'onhold')
+      self.update_column(:status, 'onhold')
     end
 
     #self.apply_and_update_predefined_tags
@@ -223,7 +223,7 @@ class Order < ActiveRecord::Base
     result = false
     self.order_items.each do |order_item|
       if order_item.product.is_kit == 1 &&
-          order_item.product.kit_parsing == 'depends'
+        order_item.product.kit_parsing == 'depends'
         result = true
         break
       end
@@ -237,7 +237,7 @@ class Order < ActiveRecord::Base
     product_inside_kit = false
     matched_product_id = 0
 
-    product_barcode = ProductBarcode.where(:barcode=>barcode)
+    product_barcode = ProductBarcode.where(:barcode => barcode)
 
     if product_barcode.length > 0
       product_barcode = product_barcode.first
@@ -273,7 +273,7 @@ class Order < ActiveRecord::Base
     product_available_as_single_item = false
     matched_product_id = 0
     matched_order_item_id = 0
-    product_barcode = ProductBarcode.where(:barcode=>barcode)
+    product_barcode = ProductBarcode.where(:barcode => barcode)
 
     if product_barcode.length > 0
       product_barcode = product_barcode.first
@@ -411,7 +411,7 @@ class Order < ActiveRecord::Base
 
     self.order_items.each do |order_item|
       if order_item.scanned_status == 'scanned' ||
-          order_item.scanned_status == 'partially_scanned'
+        order_item.scanned_status == 'partially_scanned'
         if order_item.product.is_kit == 1
           if order_item.product.kit_parsing == 'single'
             #if single, then add order item to unscanned list
@@ -450,7 +450,7 @@ class Order < ActiveRecord::Base
               if single_scanned_item['product_type'] == 'single'
                 if single_scanned_item['product_id'] == child_item['product_id']
                   single_scanned_item['scanned_qty'] = single_scanned_item['scanned_qty'] +
-                      child_item['scanned_qty']
+                    child_item['scanned_qty']
                   found_single_item = true
                 end
               end
@@ -459,9 +459,9 @@ class Order < ActiveRecord::Base
             #if not found, then add this child item as a new single item
             if !found_single_item
               new_item = build_pack_item(child_item['name'], 'single', child_item['images'], child_item['sku'],
-                child_item['qty_remaining'],
-                child_item['scanned_qty'], child_item['packing_placement'], child_item['barcodes'],
-                child_item['product_id'], scanned_item['order_item_id'], nil,child_item['instruction'],child_item['confirmation'],child_item['skippable'], child_item['record_serial'])
+                                         child_item['qty_remaining'],
+                                         child_item['scanned_qty'], child_item['packing_placement'], child_item['barcodes'],
+                                         child_item['product_id'], scanned_item['order_item_id'], nil, child_item['instruction'], child_item['confirmation'], child_item['skippable'], child_item['record_serial'])
               scanned_list.push(new_item)
             end
           end
@@ -513,7 +513,7 @@ class Order < ActiveRecord::Base
   def apply_and_update_predefined_tags
 
     #apply contains new tag, if any of the order items contain new products
-    contains_new_tag = OrderTag.where(:name=>'Contains New')
+    contains_new_tag = OrderTag.where(:name => 'Contains New')
     contains_new_tag = contains_new_tag.first if contains_new_tag.length > 0
     if !contains_new_tag.nil?
       contains_new = false
@@ -532,7 +532,7 @@ class Order < ActiveRecord::Base
     end
 
     #apply contains inactive tag, if any of the order items contain inactive products
-    contains_inactive_tag = OrderTag.where(:name=>'Contains Inactive')
+    contains_inactive_tag = OrderTag.where(:name => 'Contains Inactive')
     contains_inactive_tag = contains_inactive_tag.first if contains_inactive_tag.length > 0
     if !contains_inactive_tag.nil?
       contains_inactive = false
@@ -554,6 +554,7 @@ class Order < ActiveRecord::Base
     self.save
 
   end
+
   def get_items_count
     count = 0
     unless self.order_items.empty?
@@ -606,47 +607,47 @@ class Order < ActiveRecord::Base
 
   def scanned_items_count
     count = 0
-      self.order_items.each do |item|
-        if item.product.is_kit == 1
-          if item.product.kit_parsing == 'depends'
-            count = count + item.single_scanned_qty
-            item.order_item_kit_products.each do |kit_product|
-              count = count + kit_product.scanned_qty
-            end
-          elsif item.product.kit_parsing == 'individual'
-            item.order_item_kit_products.each do |kit_product|
-              count = count + kit_product.scanned_qty
-            end
-          else
-            count = count + item.scanned_qty
+    self.order_items.each do |item|
+      if item.product.is_kit == 1
+        if item.product.kit_parsing == 'depends'
+          count = count + item.single_scanned_qty
+          item.order_item_kit_products.each do |kit_product|
+            count = count + kit_product.scanned_qty
+          end
+        elsif item.product.kit_parsing == 'individual'
+          item.order_item_kit_products.each do |kit_product|
+            count = count + kit_product.scanned_qty
           end
         else
           count = count + item.scanned_qty
         end
+      else
+        count = count + item.scanned_qty
       end
+    end
     count
   end
 
   def clicked_items_count
     count = 0
-      self.order_items.each do |item|
-        if item.product.is_kit == 1
-          if item.product.kit_parsing == 'depends'
-            count = count + item.clicked_qty
-            item.order_item_kit_products.each do |kit_product|
-              count = count + kit_product.clicked_qty
-            end
-          elsif item.product.kit_parsing == 'individual'
-            item.order_item_kit_products.each do |kit_product|
-              count = count + kit_product.clicked_qty
-            end
-          else
-            count = count + item.clicked_qty
+    self.order_items.each do |item|
+      if item.product.is_kit == 1
+        if item.product.kit_parsing == 'depends'
+          count = count + item.clicked_qty
+          item.order_item_kit_products.each do |kit_product|
+            count = count + kit_product.clicked_qty
+          end
+        elsif item.product.kit_parsing == 'individual'
+          item.order_item_kit_products.each do |kit_product|
+            count = count + kit_product.clicked_qty
           end
         else
           count = count + item.clicked_qty
         end
+      else
+        count = count + item.clicked_qty
       end
+    end
     count
   end
 

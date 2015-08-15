@@ -2,13 +2,14 @@ class InventoryWarehouseController < ApplicationController
   before_filter :groovepacker_authorize!
   # this action creates a warehouse with a name
   include InventoryWarehouseHelper
+
   def create
     result = Hash.new
     result['status'] = true
     result['error_messages'] = []
     result['success_messages'] = []
     result['notice_messages'] = []
-    
+
     if !params[:inv_info][:name].nil?
       inv_wh = InventoryWarehouse.new
       inv_wh.name = params[:inv_info][:name]
@@ -47,7 +48,7 @@ class InventoryWarehouseController < ApplicationController
     result['error_messages'] = []
     result['success_messages'] = []
     result['notice_messages'] = []
-    
+
     if !params[:id].nil?
       begin
         inv_wh = InventoryWarehouse.find(params[:id])
@@ -68,8 +69,8 @@ class InventoryWarehouseController < ApplicationController
           result['error_messages'].push('No warehouse found with id:'+params[:id])
         end
       rescue Exception => e
-          result['status'] &= false
-          result['error_messages'].push(e.message)
+        result['status'] &= false
+        result['error_messages'].push(e.message)
       end
     else
       result['status'] &= false
@@ -122,9 +123,9 @@ class InventoryWarehouseController < ApplicationController
 
     inv_whs.each do |inv_wh|
       if current_user.can?('make_super_admin') || UserInventoryPermission.where(
-          :user_id => current_user.id,
-          :inventory_warehouse_id => inv_wh.id,
-          :see => true
+        :user_id => current_user.id,
+        :inventory_warehouse_id => inv_wh.id,
+        :see => true
       ).length>0
         warehouse_info = Hash.new
         warehouse_info['info'] = inv_wh
@@ -145,7 +146,7 @@ class InventoryWarehouseController < ApplicationController
     result['error_messages'] = []
     result['success_messages'] = []
     result['notice_messages'] = []
-      
+
     if !params[:inv_wh_ids].nil?
       params[:inv_wh_ids].each do |inv_wh_id|
 
@@ -195,7 +196,7 @@ class InventoryWarehouseController < ApplicationController
       available_user['checked'] = false
       available_user['user_perms'] = Hash.new
       unless params[:inv_wh_id].nil?
-        available_user['user_perms'] = fix_user_inventory_permissions(user,InventoryWarehouse.find(params[:inv_wh_id]))
+        available_user['user_perms'] = fix_user_inventory_permissions(user, InventoryWarehouse.find(params[:inv_wh_id]))
         if params[:inv_wh_id].to_i == user.inventory_warehouse_id
           available_user['checked'] = true
         end
@@ -215,11 +216,11 @@ class InventoryWarehouseController < ApplicationController
     result['error_messages'] = []
     result['success_messages'] = []
     result['notice_messages'] = []
-    
+
     if params[:id].nil? || params[:user].nil? || params[:user]['user_info']['id'].nil?
       result['status'] &= false
       result['error_messages'].push('Cannot add user to the inventory warehouse without a warehouse id and user.')
-      else
+    else
       inv_wh = InventoryWarehouse.find(params[:id])
       user = User.find(params[:user]['user_info']['id'])
       if inv_wh.nil?
@@ -230,7 +231,7 @@ class InventoryWarehouseController < ApplicationController
         result['error_messages'].push('There is no user with id:'+params[:user]['user_info']['id'])
       else
         if params[:user]['checked']
-          user.inventory_warehouse_id  = inv_wh.id
+          user.inventory_warehouse_id = inv_wh.id
           if user.save
             result['success_messages'].push('User is successfully added to the warehouse')
           else
@@ -277,7 +278,7 @@ class InventoryWarehouseController < ApplicationController
     result['success_messages'] = []
     result['notice_messages'] = []
 
-    params[:inv_wh_ids]. each do |inv_wh_id|
+    params[:inv_wh_ids].each do |inv_wh_id|
       begin
         inv_wh = InventoryWarehouse.find(inv_wh_id)
         if !inv_wh.nil?
@@ -285,15 +286,15 @@ class InventoryWarehouseController < ApplicationController
           if !inv_wh.save
             result['status'] &= false
             result['error_messages'].push('There was an error changing status for inventory warehouse id: '+
-                inv_wh_id)
+                                            inv_wh_id)
           end
-        end 
+        end
       rescue Exception => e
         result['status'] &= false
         result['error_messages'].push(e.message)
       end
-    end    
-    
+    end
+
     respond_to do |format|
       format.html # show.html.erb
       format.json { render json: result }

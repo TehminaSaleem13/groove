@@ -1,8 +1,8 @@
 class ImportItem < ActiveRecord::Base
-	belongs_to :order_import_summary
-	belongs_to :store
-	attr_accessible :status, :store_id, :previous_imported, 
-    :success_imported, :import_type, :store
+  belongs_to :order_import_summary
+  belongs_to :store
+  attr_accessible :status, :store_id, :previous_imported,
+                  :success_imported, :import_type, :store
   after_save :emit_data_to_user
 
 

@@ -35,12 +35,12 @@ module Groovepacker
                   import_item.current_order_items = -1
                   import_item.current_order_imported_item = -1
                   import_item.save
-                  if Order.where(:increment_id=>order.order_number).length == 0
+                  if Order.where(:increment_id => order.order_number).length == 0
                     shipstation_order = Order.new
                     shipstation_order.store = credential.store
                     import_order(shipstation_order, order)
 
-                    order_items = client.order_items.where("order_id"=>order.order_id)
+                    order_items = client.order_items.where("order_id" => order.order_id)
                     unless order_items.nil?
                       import_item.current_order_items = order_items.length
                       import_item.current_order_imported_item = 0
@@ -48,8 +48,8 @@ module Groovepacker
                       order_items.each do |item|
                         order_item = OrderItem.new
                         import_order_item(order_item, item)
-  
-                        Rails.logger.info("SKU Product Id: " + item.to_s) 
+
+                        Rails.logger.info("SKU Product Id: " + item.to_s)
 
                         if item.sku.nil? or item.sku == ''
                           # if sku is nil or empty
@@ -65,20 +65,20 @@ module Groovepacker
                               order_item.product = get_product_with_temp_skus(products)
                             end
                           end
-                        elsif ProductSku.where(:sku=>item.sku).length == 0
+                        elsif ProductSku.where(:sku => item.sku).length == 0
                           # if non-nil sku is not found
                           product = create_new_product_from_order(item, credential.store, item.sku)
                           Groovepacker::Stores::Importers::Shipstation::
-                            ProductsImporter.new(handler).import_single({ 
-                              product_sku: item.sku,
-                              product_id: product.id,
-                              handler: handler
-                            })
+                              ProductsImporter.new(handler).import_single({
+                                                                            product_sku: item.sku,
+                                                                            product_id: product.id,
+                                                                            handler: handler
+                                                                          })
                           order_item.product = product
                         else
-                          order_item_product = ProductSku.where(:sku=>item.sku).
-                          first.product
-                          
+                          order_item_product = ProductSku.where(:sku => item.sku).
+                            first.product
+
                           unless item.thumbnail_url.nil?
                             if order_item_product.product_images.length == 0
                               image = ProductImage.new
@@ -89,7 +89,7 @@ module Groovepacker
                           order_item_product.save
                           order_item.product = order_item_product
                         end
-      
+
                         shipstation_order.order_items << order_item
                         import_item.current_order_imported_item = import_item.current_order_imported_item + 1
                         import_item.save
@@ -108,9 +108,9 @@ module Groovepacker
                       import_item.save
                     end
                   else
-                      result[:previous_imported] = result[:previous_imported] + 1
-                      import_item.previous_imported = result[:previous_imported]
-                      import_item.save
+                    result[:previous_imported] = result[:previous_imported] + 1
+                    import_item.previous_imported = result[:previous_imported]
+                    import_item.save
                   end
                 end
               end
@@ -133,7 +133,7 @@ module Groovepacker
             shipstation_order.increment_id = order.order_number
             shipstation_order.seller_id = order.seller_id
             shipstation_order.order_status_id = order.order_status_id
-            shipstation_order.order_placed_time = order.order_date 
+            shipstation_order.order_placed_time = order.order_date
             split_name = order.ship_name.split(' ')
             shipstation_order.lastname = split_name.pop
             shipstation_order.firstname = split_name.join(' ')
@@ -143,7 +143,7 @@ module Groovepacker
             shipstation_order.city = order.ship_city
             shipstation_order.state = order.ship_state
             shipstation_order.postcode = order.ship_postal_code unless order.ship_postal_code.nil?
-            shipstation_order.country = order.ship_country_code 
+            shipstation_order.country = order.ship_country_code
             shipstation_order.shipping_amount = order.shipping_amount unless order.shipping_amount.nil?
             shipstation_order.order_total = order.order_total
             shipstation_order.notes_from_buyer = order.notes_from_buyer unless order.notes_from_buyer.nil?
@@ -155,8 +155,8 @@ module Groovepacker
             order_item.qty = item.quantity
             order_item.price = item.unit_price
             order_item.name = item.description
-            order_item.row_total = item.unit_price.to_f * 
-            item.quantity.to_i
+            order_item.row_total = item.unit_price.to_f *
+              item.quantity.to_i
             order_item.product_id = item.product_id unless item.product_id.nil?
             order_item.order_id = item.order_id
           end
@@ -164,12 +164,12 @@ module Groovepacker
           def create_new_product_from_order(item, store, sku)
             #create and import product
             product = Product.create(name: item.description, store: store,
-              store_product_id: 0)
+                                     store_product_id: 0)
             product.product_skus.create(sku: sku)
             #Build Image
             unless item.thumbnail_url.nil? || product.product_images.length > 0
               product.product_images.create(image: item.thumbnail_url)
-            end                          
+            end
 
             #build barcode
             unless item.upc.nil? || product.product_barcodes.length > 0

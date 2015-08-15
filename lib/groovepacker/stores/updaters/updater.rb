@@ -13,7 +13,7 @@ module Groovepacker
         def update_single(hash)
           {}
         end
-        
+
         def get_handler
           self.handler
         end
@@ -24,13 +24,13 @@ module Groovepacker
             previous_imported: 0,
             success_imported: 0,
             total_imported: 0,
-            debug_messages:[],
+            debug_messages: [],
             status: true
           }
         end
 
         protected
-          attr_accessor :handler
+        attr_accessor :handler
       end
     end
   end

@@ -3,7 +3,7 @@ class GroovS3
     require 's3'
     @bucket = nil
 
-    def create(tenant, file, content_type =  'application/octet-stream',  privacy = :public_read)
+    def create(tenant, file, content_type = 'application/octet-stream', privacy = :public_read)
       object = self.bucket.objects.build(tenant+'/'+file)
       object.acl = privacy
       object.content_type = content_type
@@ -39,15 +39,15 @@ class GroovS3
 
     def create_image(tenant, file_name, data, content_type)
       object = self.create(tenant, "image/#{file_name}", content_type, :public_read)
-      self.save(object,data)
+      self.save(object, data)
     end
 
 
     def bucket
       if @bucket.nil?
         service = S3::Service.new(
-            :access_key_id => ENV['S3_ACCESS_KEY_ID'],
-            :secret_access_key => ENV['S3_ACCESS_KEY_SECRET']
+          :access_key_id => ENV['S3_ACCESS_KEY_ID'],
+          :secret_access_key => ENV['S3_ACCESS_KEY_SECRET']
         )
         @bucket = service.buckets.find(ENV['S3_BUCKET_NAME'])
       end

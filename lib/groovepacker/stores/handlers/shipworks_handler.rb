@@ -2,7 +2,7 @@ module Groovepacker
   module Stores
     module Handlers
       class ShipworksHandler < Handler
-        def build_handle   
+        def build_handle
           self.make_handle(self.store.shipworks_credential, self.store)
         end
 

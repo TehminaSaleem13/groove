@@ -1,36 +1,52 @@
-<div style="-webkit-box-sizing: content-box; -moz-box-sizing: content-box; box-sizing: content-box; position: relative; margin: auto; padding: 10px 50px 100px 50px; border: 4px solid rgba(128, 128, 128, 1); -webkit-border-radius: 24px / 23px; border-radius: 24px / 23px; color: rgba(0,0,0,0.9); -o-text-overflow: clip; text-overflow: clip; background: url('http://www.groovepacker.com/site/images/background_image.png') no-repeat #000; background-position: 50% 50%; -webkit-background-origin: padding-box; background-origin: padding-box; -webkit-background-clip: border-box; background-clip: border-box; -webkit-background-size: cover; background-size: cover; -webkit-box-shadow: 5px 5px 8px 2px rgba(0,0,0,0.4); box-shadow: 5px 5px 8px 2px rgba(0,0,0,0.4);"><a href="https://<%=@tenant_name%>.groovepacker.com/"><img style="margin: auto; display: block;" src="http://www.groovepacker.com/site/images/GroovePacker_Bc_logo_400x73.png" alt=""></a>
+<div style="-webkit-box-sizing: content-box; -moz-box-sizing: content-box; box-sizing: content-box; position: relative; margin: auto; padding: 10px 50px 100px 50px; border: 4px solid rgba(128, 128, 128, 1); -webkit-border-radius: 24px / 23px; border-radius: 24px / 23px; color: rgba(0,0,0,0.9); -o-text-overflow: clip; text-overflow: clip; background: url('http://www.groovepacker.com/site/images/background_image.png') no-repeat #000; background-position: 50% 50%; -webkit-background-origin: padding-box; background-origin: padding-box; -webkit-background-clip: border-box; background-clip: border-box; -webkit-background-size: cover; background-size: cover; -webkit-box-shadow: 5px 5px 8px 2px rgba(0,0,0,0.4); box-shadow: 5px 5px 8px 2px rgba(0,0,0,0.4);">
+  <a href="https://<%= @tenant_name %>.groovepacker.com/"><img style="margin: auto; display: block;" src="http://www.groovepacker.com/site/images/GroovePacker_Bc_logo_400x73.png" alt=""></a>
+
   <h1 style="text-align: center; text-shadow: 0 0 20px rgba(0, 0, 0, 0.8);  font-family: 'Arial', sans-serif; font-family: 'Play', sans-serif; font-weight: 700; color: #95E329; font-size: 25px;">
-    Thank you for your Payment.<br />
+    Thank you for your Payment.<br/>
   </h1>
+
   <div style="width: 96%; margin-left:auto; margin-right:auto; background: #F2F3FF; border-color: #59638B; border-width: 4px; border-radius: 20px; font-family: 'Lato', sans-serif; padding: 15px; border-style: double; -webkit-box-shadow: 5px 5px 8px 2px rgba(0,0,0,0.4); box-shadow: 5px 5px 8px 2px rgba(0,0,0,0.8);">
-    <p>This invoice is to let you know that billing for your GroovePacker, at <i><%=@tenant_name%>.groovepacker.com</i> was successful and your account is all paid up,</p>
+    <p>This invoice is to let you know that billing for your GroovePacker, at
+      <i><%= @tenant_name %>.groovepacker.com</i> was successful and your account is all paid up,</p>
+
     <p>No further action is required at this time.</p>
-    <p>Your current GroovePacker Plan is <b><%=@invoice.plan_id%></b> </p>
-    <p>Your account email is: <b><%=@email%></b></p>
-    <p>The amount of the invoice is: <b><%=@invoice.amount%></b></p>
+
+    <p>Your current GroovePacker Plan is <b><%= @invoice.plan_id %></b></p>
+
+    <p>Your account email is: <b><%= @email %></b></p>
+
+    <p>The amount of the invoice is: <b><%= @invoice.amount %></b></p>
+
     <p>This invoice is for the following billing period:</p>
-    <p><b><%=@invoice.period_start.strftime('%B %d, %Y')%></b> to <b><%=@invoice.period_end.strftime('%B %d, %Y')%></b></p>
+
+    <p><b><%= @invoice.period_start.strftime('%B %d, %Y') %></b> to
+      <b><%= @invoice.period_end.strftime('%B %d, %Y') %></b></p>
+
     <p>Thank you for using GroovePacker!</p>
+
     <p>If you require assistance or have any questions please do not hesitate to contact us at:</p>
+
     <p><a href="mailto:support@groovepacker.com"> Support@GroovePacker.com</a></p>
-    <p>Do you have a killer feature in mind? Let us know on <a href="http://groovepacker.uservoice.com/" style="color:#66A909;">UserVoice.</a></p>
+
+    <p>Do you have a killer feature in mind? Let us know on
+      <a href="http://groovepacker.uservoice.com/" style="color:#66A909;">UserVoice.</a></p>
 
   </div>
 </div>
 <div>
 
 
-<!--
-	<p>A new invoice has been created for the website <i><%=@tenant_name%>.groovepacker.com</i></p>
-	<p>invoice date: <%=@invoice.date%></p>
-	<p>invoice id: <%=@invoice.invoice_id%></p>
-	<p>invoice subscription_id: <%=@invoice.subscription_id%></p>
-	<p>invoice customer_id: <%=@invoice.customer_id%></p>
-	<p>invoice charge_id: <%=@invoice.charge_id%></p>
-	<p>invoice paid: <%=@invoice.paid%></p>
-	<p>invoice plan_id: <%=@invoice.plan_id%></p>
-	<p>invoice period_start: <%=@invoice.period_start%></p>
-	<p>invoice period_end: <%=@invoice.period_end%></p>
-	<p>invoice amount: <%=@invoice.amount%></p>
-	<p>invoice quantity: <%=@invoice.quantity%></p>-->
+  <!--
+	<p>A new invoice has been created for the website <i><%= @tenant_name %>.groovepacker.com</i></p>
+	<p>invoice date: <%= @invoice.date %></p>
+	<p>invoice id: <%= @invoice.invoice_id %></p>
+	<p>invoice subscription_id: <%= @invoice.subscription_id %></p>
+	<p>invoice customer_id: <%= @invoice.customer_id %></p>
+	<p>invoice charge_id: <%= @invoice.charge_id %></p>
+	<p>invoice paid: <%= @invoice.paid %></p>
+	<p>invoice plan_id: <%= @invoice.plan_id %></p>
+	<p>invoice period_start: <%= @invoice.period_start %></p>
+	<p>invoice period_end: <%= @invoice.period_end %></p>
+	<p>invoice amount: <%= @invoice.amount %></p>
+	<p>invoice quantity: <%= @invoice.quantity %></p>-->
 </div>

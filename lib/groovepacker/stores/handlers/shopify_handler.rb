@@ -8,7 +8,7 @@ module Groovepacker
           if !shopify_credential.nil?
             client = Groovepacker::ShopifyRuby::Client.new(shopify_credential)
           end
-            
+
           self.make_handle(shopify_credential, client)
         end
 

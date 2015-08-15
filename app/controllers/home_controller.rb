@@ -1,20 +1,21 @@
 class HomeController < ApplicationController
   layout 'angular'
+
   def index
-  	#if current user is not signed in, show login page
-  	if !user_signed_in?
+    #if current user is not signed in, show login page
+    if !user_signed_in?
       puts "user not signed in..."
-  		redirect_to new_user_session_path
+      redirect_to new_user_session_path
     else
       puts "current_tenant: " + Apartment::Tenant.current_tenant.to_s
       @groovepacks_admin = (Apartment::Tenant.current_tenant == 'groovepacks_production')
       puts "@groovepacks_admin: " + @groovepacks_admin.to_s
-  	end
+    end
 
   end
 
   def userinfo
-    user =  Hash.new
+    user = Hash.new
     unless current_user.nil?
       user['username'] = current_user.username
       user['name'] = current_user.name
@@ -25,7 +26,7 @@ class HomeController < ApplicationController
 
     respond_to do |format|
       format.html # show.html.erb
-      format.json { render json: user}
+      format.json { render json: user }
     end
   end
 
@@ -40,6 +41,6 @@ class HomeController < ApplicationController
     unless import_summary.nil?
       import_summary.emit_data_to_user
     end
-    render json:{status:true}
+    render json: {status: true}
   end
 end

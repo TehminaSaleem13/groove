@@ -51,7 +51,7 @@ module Groovepacker
                     end
                   end
                   if should_import
-                    matching_sku =  ProductSku.where(:sku => kit_sku)
+                    matching_sku = ProductSku.where(:sku => kit_sku)
                     if matching_sku.length == 0
                       kit_product = Product.new
                       kit_product_sku = ProductSku.new
@@ -59,7 +59,7 @@ module Groovepacker
                       kit_product_sku.order = 0
                       kit_product.product_skus << kit_product_sku
                       # Add barcode only when creating a new kit, this solves having to check every time.
-                      if not_blank?('kit_barcode',single_row, mapping)
+                      if not_blank?('kit_barcode', single_row, mapping)
                         kit_product_barcode = ProductBarcode.new
                         kit_product_barcode.barcode = single_row[mapping['kit_barcode'][:position]]
                         kit_product.product_barcodes << kit_product_barcode
@@ -71,7 +71,7 @@ module Groovepacker
                     kit_product.store_product_id = 'csv_import_'+params[:store_id].to_s+'_'+SecureRandom.uuid+'_'+kit_sku
                     kit_product.is_kit = 1
                     kit_product.kit_parsing = Product::SINGLE_KIT_PARSING
-                    if not_blank?('kit_name',single_row, mapping)
+                    if not_blank?('kit_name', single_row, mapping)
                       kit_product.name = single_row[mapping['kit_name'][:position]]
                     end
                     if kit_product.name.blank?
@@ -80,15 +80,15 @@ module Groovepacker
                     kit_product.save
 
                     #import product
-                    if not_blank?('part_sku',single_row,mapping)
+                    if not_blank?('part_sku', single_row, mapping)
                       product_sku = single_row[mapping['part_sku'][:position]]
-                      list_product_sku =  ProductSku.where(:sku => product_sku)
+                      list_product_sku = ProductSku.where(:sku => product_sku)
                       if list_product_sku.length == 0
                         single_import_product = Product.new
                         single_import_product_sku = ProductSku.new
                         single_import_product_sku.sku = product_sku
                         single_import_product.product_skus << single_import_product_sku
-                        if not_blank?('part_barcode',single_row, mapping)
+                        if not_blank?('part_barcode', single_row, mapping)
                           single_import_product_barcode = ProductBarcode.new
                           single_import_product_barcode.barcode = single_row[mapping['part_barcode'][:position]]
                           single_import_product.product_barcodes << single_import_product_barcode
@@ -98,7 +98,7 @@ module Groovepacker
                       end
                       single_import_product.store_id = params[:store_id]
                       single_import_product.store_product_id = 'csv_import_'+params[:store_id].to_s+'_'+SecureRandom.uuid+'_'+product_sku
-                      if not_blank?('part_name',single_row, mapping)
+                      if not_blank?('part_name', single_row, mapping)
                         single_import_product.name = single_row[mapping['part_name'][:position]]
                       end
                       if single_import_product.name.blank?

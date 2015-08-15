@@ -7,9 +7,9 @@ module Groovepacker
 
           if !shipstation_rest_credential.nil?
             client = Groovepacker::ShipstationRuby::Rest::Client.new(shipstation_rest_credential.api_key,
-              shipstation_rest_credential.api_secret)
+                                                                     shipstation_rest_credential.api_secret)
           end
-            
+
           self.make_handle(shipstation_rest_credential, client)
         end
 

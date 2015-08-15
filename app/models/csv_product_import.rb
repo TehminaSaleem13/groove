@@ -3,6 +3,6 @@ class CsvProductImport < ActiveRecord::Base
   after_save :emit_data_to_user
 
   def emit_data_to_user
-    GroovRealtime::emit('pnotif',{type:'csv_product_import',data:self},:tenant)
+    GroovRealtime::emit('pnotif', {type: 'csv_product_import', data: self}, :tenant)
   end
 end

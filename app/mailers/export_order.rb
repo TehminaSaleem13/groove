@@ -1,6 +1,6 @@
 class ExportOrder < ActionMailer::Base
   default from: "app@groovepacker.com"
-  
+
   def export(tenant)
     Apartment::Tenant.switch(tenant)
     export_settings = ExportSetting.all.first
@@ -20,9 +20,9 @@ class ExportOrder < ActionMailer::Base
 
     attachments["#{filename}"] = File.read("#{Rails.root}/public/csv/#{filename}")
     mail to: export_settings.order_export_email,
-      subject: "GroovePacker Order Export Report"
+         subject: "GroovePacker Order Export Report"
     import_orders_obj = ImportOrders.new
-    import_orders_obj.reschedule_job('export_order',tenant)
+    import_orders_obj.reschedule_job('export_order', tenant)
     File.delete("#{Rails.root}/public/csv/#{filename}")
   end
 
@@ -30,9 +30,9 @@ class ExportOrder < ActionMailer::Base
     result = Hash.new
     result['imported'] = Order.where("created_at >= ?", Time.now.beginning_of_day).size
     result['scanned'] = Order.where("scanned_on >= ?", Time.now.beginning_of_day).size
-    result['awaiting'] = Order.where("created_at >= ? and status = ?", Time.now.beginning_of_day,'awaiting').size
-    result['onhold'] = Order.where("created_at >= ? and status = ?", Time.now.beginning_of_day,'onhold').size
-    result['cancelled'] = Order.where("created_at >= ? and status = ?", Time.now.beginning_of_day,'cancelled').size
+    result['awaiting'] = Order.where("created_at >= ? and status = ?", Time.now.beginning_of_day, 'awaiting').size
+    result['onhold'] = Order.where("created_at >= ? and status = ?", Time.now.beginning_of_day, 'onhold').size
+    result['cancelled'] = Order.where("created_at >= ? and status = ?", Time.now.beginning_of_day, 'cancelled').size
     result
   end
 end

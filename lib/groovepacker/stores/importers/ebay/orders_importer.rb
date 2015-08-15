@@ -9,17 +9,17 @@ module Groovepacker
             ebay = handler[:store_handle]
             import_item = handler[:import_item]
             result = self.build_result
-            
+
             begin
-              seller_list = ebay.GetMyeBaySelling(:soldList=> 
-                {:orderStatusFilter=>'AwaitingShipment'})
+              seller_list = ebay.GetMyeBaySelling(:soldList =>
+                                                    {:orderStatusFilter => 'AwaitingShipment'})
 
               if (seller_list.soldList != nil &&
-                  seller_list.soldList.orderTransactionArray != nil)
-                order_or_transactionArray = 
+                seller_list.soldList.orderTransactionArray != nil)
+                order_or_transactionArray =
                   seller_list.soldList.orderTransactionArray
 
-                result[:total_imported] = 
+                result[:total_imported] =
                   seller_list.soldList.orderTransactionArray.length
                 import_item.current_increment_id = ''
                 import_item.success_imported = 0
@@ -38,7 +38,7 @@ module Groovepacker
 
                     #get sellingmanager SalesRecordNumber
                     item_transactions = ebay.GetItemTransactions(:itemID => itemID,
-                      :transactionID=> transactionID)
+                                                                 :transactionID => transactionID)
                     if item_transactions.transactionArray.length == 1
                       transaction = item_transactions.transactionArray.first
                       sellingManagerSalesRecordNumber =
@@ -47,11 +47,11 @@ module Groovepacker
                       import_item.current_order_items = -1
                       import_item.current_order_imported_item = -1
                       import_item.save
-                      if Order.where(:increment_id=>sellingManagerSalesRecordNumber).length == 0
+                      if Order.where(:increment_id => sellingManagerSalesRecordNumber).length == 0
                         order = Order.new
 
-                        order = build_order_with_single_item_from_ebay(order, transaction, 
-                          order_transaction, handler)
+                        order = build_order_with_single_item_from_ebay(order, transaction,
+                                                                       order_transaction, handler)
                         if order.save
                           order.addactivity("Order Import", credential.store.name+" Import")
                           order.order_items.each do |item|
@@ -70,28 +70,28 @@ module Groovepacker
                     else # transactions Array is not equal to 1
                       result[:status] &= false
                       result[:messages].push('There was an error importing the order transactions from Ebay,
-                        Order transactions length: '+ item_transactions.transactionArray.length )
+                        Order transactions length: '+ item_transactions.transactionArray.length)
                     end
                   elsif !order_transaction.order.nil?
                     # for orders with multiple line items
                     order_id = order_transaction.order.orderID
-                    order_detail = ebay.GetOrders(:orderIDArray =>[order_id])
+                    order_detail = ebay.GetOrders(:orderIDArray => [order_id])
 
                     if !order_detail.orderArray.nil? &&
-                        order_detail.orderArray.length == 1
+                      order_detail.orderArray.length == 1
 
                       order_detail = order_detail.orderArray.first
 
                       if !order_detail.shippingDetails.nil?
-                       sellingManagerSalesRecordNumber = order_detail.shippingDetails.sellingManagerSalesRecordNumber
+                        sellingManagerSalesRecordNumber = order_detail.shippingDetails.sellingManagerSalesRecordNumber
                       else
-                       sellingManagerSalesRecordNumber = nil
+                        sellingManagerSalesRecordNumber = nil
                       end
                       import_item.current_increment_id = sellingManagerSalesRecordNumber
                       import_item.current_order_items = -1
                       import_item.current_order_imported_item = -1
                       import_item.save
-                      if Order.where(:increment_id=>sellingManagerSalesRecordNumber).length == 0
+                      if Order.where(:increment_id => sellingManagerSalesRecordNumber).length == 0
                         order = Order.new
                         order = build_order_with_multiple_items_from_ebay(order, order_detail, handler)
                         if order.save
@@ -134,13 +134,13 @@ module Groovepacker
           end
 
           private
-          
-          def build_order_with_single_item_from_ebay(order, transaction, 
-              order_transaction, handler)
+
+          def build_order_with_single_item_from_ebay(order, transaction,
+                                                     order_transaction, handler)
             credential = handler[:credential]
             ebay = handler[:store_handle]
             import_item = handler[:import_item]
-            
+
             order.status = 'awaiting'
             order.store = credential.store
             order.increment_id = transaction.shippingDetails.sellingManagerSalesRecordNumber
@@ -148,7 +148,7 @@ module Groovepacker
 
             if !transaction.buyer.nil? && !transaction.buyer.buyerInfo.nil? &&
               !transaction.buyer.buyerInfo.shippingAddress.nil?
-              order.address_1  = transaction.buyer.buyerInfo.shippingAddress.street1
+              order.address_1 = transaction.buyer.buyerInfo.shippingAddress.street1
               order.city = transaction.buyer.buyerInfo.shippingAddress.cityName
               order.state = transaction.buyer.buyerInfo.shippingAddress.stateOrProvince
               order.country = transaction.buyer.buyerInfo.shippingAddress.country
@@ -172,12 +172,12 @@ module Groovepacker
             #create product if it does not exist already
             order_item.product_id =
               Groovepacker::Stores::Importers::Ebay::
-                ProductsImporter.new(handler).import_single({ 
-                  itemID: order_transaction.transaction.item.itemID, 
-                  sku: order_transaction.transaction.item.sKU, 
-                  ebay: ebay,
-                  credential: credential
-                })
+                  ProductsImporter.new(handler).import_single({
+                                                                itemID: order_transaction.transaction.item.itemID,
+                                                                sku: order_transaction.transaction.item.sKU,
+                                                                ebay: ebay,
+                                                                credential: credential
+                                                              })
             order.order_items << order_item
             import_item.current_order_imported_item = 1
             import_item.save
@@ -194,7 +194,7 @@ module Groovepacker
             order.order_placed_time = order_detail.createdTime
 
             if !order_detail.shippingAddress.nil?
-              order.address_1  = order_detail.shippingAddress.street1
+              order.address_1 = order_detail.shippingAddress.street1
               order.city = order_detail.shippingAddress.cityName
               order.state = order_detail.shippingAddress.stateOrProvince
               order.country = order_detail.shippingAddress.country
@@ -219,12 +219,12 @@ module Groovepacker
               #create product if it does not exist already
               order_item.product_id =
                 Groovepacker::Stores::Importers::Ebay::
-                  ProductsImporter.new(handler).import_single({ 
-                    itemID: transaction.item.itemID, 
-                    sku: transaction.item.sKU, 
-                    ebay: ebay,
-                    credential: credential
-                  })
+                    ProductsImporter.new(handler).import_single({
+                                                                  itemID: transaction.item.itemID,
+                                                                  sku: transaction.item.sKU,
+                                                                  ebay: ebay,
+                                                                  credential: credential
+                                                                })
               order.order_items << order_item
               import_item.current_order_imported_item = import_item.current_order_imported_item + 1
               import_item.save

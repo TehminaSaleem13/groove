@@ -30,10 +30,10 @@ module Groovepacker
                       previous_import = true
                     end
                   end
-                elsif ProductSku.where(:sku => item["sku"]).length == 0 
+                elsif ProductSku.where(:sku => item["sku"]).length == 0
                   # valid sku but not found earlier
                   import_result = create_new_product(item, item["sku"], credential)
-                else 
+                else
                   # sku is already found
                   previous_import = true
                 end
@@ -59,14 +59,14 @@ module Groovepacker
             begin
               credential = import_hash[:handler][:credential]
               client = import_hash[:handler][:store_handle]
-              sku = import_hash[:product_sku] 
+              sku = import_hash[:product_sku]
               id = import_hash[:product_id]
-              products = client.product.where("SKU"=>sku)
+              products = client.product.where("SKU" => sku)
               unless products.nil?
                 product = products.first
                 @product = Product.find(id)
-                set_product_fields(@product,product,credential)
-              end 
+                set_product_fields(@product, product, credential)
+              end
             rescue Exception => e
               result &= false
               Rails.logger.info('Error updating the product sku ' + e.to_s)
@@ -74,31 +74,31 @@ module Groovepacker
             result
           end
 
-          private 
+          private
 
           def create_new_product(item, sku, credential)
             product = Product.create(store: credential.store, store_product_id: 0,
-              name: item["name"])
+                                     name: item["name"])
             product.product_skus.create(sku: sku)
             set_product_fields(product, item, credential)
           end
 
           def set_product_fields(product, ssproduct, credential)
-            result = false 
+            result = false
             product.name = ssproduct["name"]
 
-            unless credential.store.nil? or 
-              credential.store.inventory_warehouse_id.nil? or 
+            unless credential.store.nil? or
+              credential.store.inventory_warehouse_id.nil? or
               product.product_inventory_warehousess.pluck(:inventory_warehouse_id).include?(credential.store.inventory_warehouse_id) then
               inv_wh = ProductInventoryWarehouses.new
               inv_wh.inventory_warehouse_id = credential.store.inventory_warehouse_id
               inv_wh.location_primary = ssproduct["warehouseLocation"]
               product.product_inventory_warehousess << inv_wh
             end
-            
+
             unless ssproduct["productCategory"].nil?
-              product.product_cats.create(category: 
-                ssproduct["productCategory"]["name"])
+              product.product_cats.create(category:
+                                            ssproduct["productCategory"]["name"])
             end
 
             unless ssproduct["weightOz"].nil?
