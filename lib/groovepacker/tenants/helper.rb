@@ -90,7 +90,8 @@ module Groovepacker
         unless params[:select_all] || params[:inverted]
           query_add = ' LIMIT '+limit.to_s+' OFFSET 0'
         end
-        # Apartment::Tenant.switch()
+        current_tenant = Apartment::Tenant.current_tenant
+        Apartment::Tenant.switch()
         base_query = 'SELECT tenants.id as id, tenants.name as name, tenants.updated_at as updated_at, tenants.created_at as created_at, subscriptions.subscription_plan_id as plan, subscriptions.stripe_customer_id as stripe_url
           FROM tenants LEFT JOIN subscriptions ON (subscriptions.tenant_id = tenants.id) 
             WHERE
@@ -108,7 +109,7 @@ module Groovepacker
         else
           result['count'] = Tenant.count_by_sql('SELECT count(*) as count from('+base_query+') as tmp')
         end
-
+        Apartment::Tenant.switch(current_tenant)
         return result
       end
 
