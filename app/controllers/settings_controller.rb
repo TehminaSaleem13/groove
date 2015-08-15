@@ -1,156 +1,157 @@
 class SettingsController < ApplicationController
   before_filter :groovepacker_authorize!
   include SettingsHelper
+
   def restore
     @result = Hash.new
     @result['status'] = true
     @result['messages'] = []
     if current_user.can? 'restore_backups'
-        # Every entry on mapping[current_mapping][:map] should be in the format
+      # Every entry on mapping[current_mapping][:map] should be in the format
       # csv_header => db_table_header
       if params[:method] == 'del_import_old'
         product_map = {
-                  'id' => 'id',
-                  'store_product_id' => 'store_product_id',
-                  'name' => 'name',
-                  'product_type' => 'product_type',
-                  'store_id' => 'store_id',
-                  'created_at' => 'created_at',
-                  'updated_at' => 'updated_at',
-                  'inv_wh1' => 'inv_wh1',
-                  'status' => 'status',
-                  'spl_instructions_4_packer' => 'spl_instructions_4_packer',
-                  'spl_instructions_4_confirmation' => 'spl_instructions_4_confirmation',
-                  'barcode' => 'barcode',
-                  'is_skippable' => 'is_skippable',
-                  'packing_placement' => 'packing_placement',
-                  'pack_time_adj' => 'pack_time_adj',
-                  'kit_parsing' => 'kit_parsing',
-                  'is_kit' => 'is_kit',
-                  'disable_conf_req' => 'disable_conf_req',
-                  'total_avail_ext' =>'total_avail_ext',
-                  'weight' =>'weight',
-                  'shipping_weight'=>'shipping_weight'
-              }
+          'id' => 'id',
+          'store_product_id' => 'store_product_id',
+          'name' => 'name',
+          'product_type' => 'product_type',
+          'store_id' => 'store_id',
+          'created_at' => 'created_at',
+          'updated_at' => 'updated_at',
+          'inv_wh1' => 'inv_wh1',
+          'status' => 'status',
+          'spl_instructions_4_packer' => 'spl_instructions_4_packer',
+          'spl_instructions_4_confirmation' => 'spl_instructions_4_confirmation',
+          'barcode' => 'barcode',
+          'is_skippable' => 'is_skippable',
+          'packing_placement' => 'packing_placement',
+          'pack_time_adj' => 'pack_time_adj',
+          'kit_parsing' => 'kit_parsing',
+          'is_kit' => 'is_kit',
+          'disable_conf_req' => 'disable_conf_req',
+          'total_avail_ext' => 'total_avail_ext',
+          'weight' => 'weight',
+          'shipping_weight' => 'shipping_weight'
+        }
         default_warehouse_map = {
-                  'default_wh_avbl' => 'available_inv',
-                  'default_wh_loc_primary' =>'location_primary',
-                  'default_wh_loc_secondary' => 'location_secondary'
-              }
+          'default_wh_avbl' => 'available_inv',
+          'default_wh_loc_primary' => 'location_primary',
+          'default_wh_loc_secondary' => 'location_secondary'
+        }
       else
         product_map = {
-                  'ID' => 'id',
-                  'Name' => 'name',
-                  'store_product_id' => 'store_product_id',
-                  'product_type' => 'product_type',
-                  'store_id' => 'store_id',
-                  'created_at' => 'created_at',
-                  'updated_at' => 'updated_at',
-                  'BinLocation 1' => 'inv_wh1',
-                  'status' => 'status',
-                  'spl_instructions_4_packer' => 'spl_instructions_4_packer',
-                  'spl_instructions_4_confirmation' => 'spl_instructions_4_confirmation',
-                  'Barcode 1' => 'barcode',
-                  'is_skippable' => 'is_skippable',
-                  'packing_placement' => 'packing_placement',
-                  'pack_time_adj' => 'pack_time_adj',
-                  'kit_parsing' => 'kit_parsing',
-                  'is_kit' => 'is_kit',
-                  'disable_conf_req' => 'disable_conf_req',
-                  'total_avail_ext' =>'total_avail_ext',
-                  'Weight' =>'weight',
-                  'shipping_weight'=>'shipping_weight'
-              }
+          'ID' => 'id',
+          'Name' => 'name',
+          'store_product_id' => 'store_product_id',
+          'product_type' => 'product_type',
+          'store_id' => 'store_id',
+          'created_at' => 'created_at',
+          'updated_at' => 'updated_at',
+          'BinLocation 1' => 'inv_wh1',
+          'status' => 'status',
+          'spl_instructions_4_packer' => 'spl_instructions_4_packer',
+          'spl_instructions_4_confirmation' => 'spl_instructions_4_confirmation',
+          'Barcode 1' => 'barcode',
+          'is_skippable' => 'is_skippable',
+          'packing_placement' => 'packing_placement',
+          'pack_time_adj' => 'pack_time_adj',
+          'kit_parsing' => 'kit_parsing',
+          'is_kit' => 'is_kit',
+          'disable_conf_req' => 'disable_conf_req',
+          'total_avail_ext' => 'total_avail_ext',
+          'Weight' => 'weight',
+          'shipping_weight' => 'shipping_weight'
+        }
         default_warehouse_map = {
-                  'Quantity Avbl' => 'available_inv',
-                  'BinLocation 1' =>'location_primary',
-                  'BinLocation 2' => 'location_secondary'
-              }
+          'Quantity Avbl' => 'available_inv',
+          'BinLocation 1' => 'location_primary',
+          'BinLocation 2' => 'location_secondary'
+        }
       end
       mapping = {
-          'products' => {
-              model: Product,
-              map: product_map
-          },
+        'products' => {
+          model: Product,
+          map: product_map
+        },
 
-          'product_barcodes' => {
-              model: ProductBarcode,
-              map: {
-                  'id' => 'id',
-                  'product_id' => 'product_id',
-                  'barcode' =>'barcode',
-                  'created_at' => 'created_at',
-                  'updated_at' => 'updated_at',
-                  'order' => 'order'
-              }
-          },
-          'product_images' => {
-              model: ProductImage,
-              map: {
-                  'id' => 'id',
-                  'product_id' => 'product_id',
-                  'image' =>'image',
-                  'caption' =>'caption',
-                  'created_at' => 'created_at',
-                  'updated_at' => 'updated_at',
-                  'order' => 'order'
-              }
-          },
-          'product_skus' => {
-              model: ProductSku,
-              map: {
-                  'id' => 'id',
-                  'product_id' => 'product_id',
-                  'sku' => 'sku',
-                  'purpose' => 'purpose',
-                  'created_at' => 'created_at',
-                  'updated_at' => 'updated_at',
-                  'order' => 'order'
-              }
-          },
-          'product_cats' => {
-              model: ProductCat,
-              map: {
-                  'id' => 'id',
-                  'category'=> 'category',
-                  'product_id' => 'product_id',
-                  'created_at' => 'created_at',
-                  'updated_at' => 'updated_at'
-              }
-          },
-          'product_kit_skus' => {
-              model:ProductKitSkus,
-              map: {
-                  'id' => 'id',
-                  'option_product_id'=> 'option_product_id',
-                  'qty'=> 'qty',
-                  'product_id' => 'product_id',
-                  'created_at' => 'created_at',
-                  'updated_at' => 'updated_at',
-                  'packing_order' => 'packing_order'
-              }
-          },
-          'product_inventory_warehouses' => {
-              model: ProductInventoryWarehouses,
-              map: {
-                  'id' => 'id',
-                  'location'=> 'location',
-                  'qty'=> 'qty',
-                  'product_id' => 'product_id',
-                  'created_at' => 'created_at',
-                  'updated_at' => 'updated_at',
-                  'alert' =>'alert',
-                  'location_primary' => 'location_primary',
-                  'location_secondary' => 'location_secondary',
-                  'name'=> 'name',
-                  'inventory_warehouse_id' => 'inventory_warehouse_id',
-                  'available_inv' => 'available_inv',
-                  'allocated_inv' =>'allocated_inv'
-              }
+        'product_barcodes' => {
+          model: ProductBarcode,
+          map: {
+            'id' => 'id',
+            'product_id' => 'product_id',
+            'barcode' => 'barcode',
+            'created_at' => 'created_at',
+            'updated_at' => 'updated_at',
+            'order' => 'order'
           }
+        },
+        'product_images' => {
+          model: ProductImage,
+          map: {
+            'id' => 'id',
+            'product_id' => 'product_id',
+            'image' => 'image',
+            'caption' => 'caption',
+            'created_at' => 'created_at',
+            'updated_at' => 'updated_at',
+            'order' => 'order'
+          }
+        },
+        'product_skus' => {
+          model: ProductSku,
+          map: {
+            'id' => 'id',
+            'product_id' => 'product_id',
+            'sku' => 'sku',
+            'purpose' => 'purpose',
+            'created_at' => 'created_at',
+            'updated_at' => 'updated_at',
+            'order' => 'order'
+          }
+        },
+        'product_cats' => {
+          model: ProductCat,
+          map: {
+            'id' => 'id',
+            'category' => 'category',
+            'product_id' => 'product_id',
+            'created_at' => 'created_at',
+            'updated_at' => 'updated_at'
+          }
+        },
+        'product_kit_skus' => {
+          model: ProductKitSkus,
+          map: {
+            'id' => 'id',
+            'option_product_id' => 'option_product_id',
+            'qty' => 'qty',
+            'product_id' => 'product_id',
+            'created_at' => 'created_at',
+            'updated_at' => 'updated_at',
+            'packing_order' => 'packing_order'
+          }
+        },
+        'product_inventory_warehouses' => {
+          model: ProductInventoryWarehouses,
+          map: {
+            'id' => 'id',
+            'location' => 'location',
+            'qty' => 'qty',
+            'product_id' => 'product_id',
+            'created_at' => 'created_at',
+            'updated_at' => 'updated_at',
+            'alert' => 'alert',
+            'location_primary' => 'location_primary',
+            'location_secondary' => 'location_secondary',
+            'name' => 'name',
+            'inventory_warehouse_id' => 'inventory_warehouse_id',
+            'available_inv' => 'available_inv',
+            'allocated_inv' => 'allocated_inv'
+          }
+        }
       }
 
-      if params[:method].nil? || !['del_import_old','del_import_new'].include?(params[:method])
+      if params[:method].nil? || !['del_import_old', 'del_import_new'].include?(params[:method])
         @result['status'] = false
         @result.messages.push("No action selected")
       elsif params[:file].nil?
@@ -173,33 +174,33 @@ class SettingsController < ApplicationController
             current_mapping = file.name.chomp(".csv")
             if mapping.key?(current_mapping)
               # Parse the file by it's data
-              CSV.parse(zipfile.read(file.name),:headers=> true) do |csv_row|
+              CSV.parse(zipfile.read(file.name), :headers => true) do |csv_row|
                 single_row = nil
                 create_new = false
                 # Create new row if deleted all else find and select by id for updating
                 # if params[:method] == 'del_import'
                 if current_mapping == 'product_barcodes'
-                  all_rows = mapping[current_mapping][:model].where(:barcode =>csv_row['barcode'].strip,:product_id=>csv_row['product_id'])
+                  all_rows = mapping[current_mapping][:model].where(:barcode => csv_row['barcode'].strip, :product_id => csv_row['product_id'])
                   if all_rows.length >0
                     single_row = all_rows.first
                   end
                 elsif current_mapping == 'product_skus'
-                  all_rows = mapping[current_mapping][:model].where(:sku =>csv_row['sku'].strip,:product_id=>csv_row['product_id'])
+                  all_rows = mapping[current_mapping][:model].where(:sku => csv_row['sku'].strip, :product_id => csv_row['product_id'])
                   if all_rows.length >0
                     single_row = all_rows.first
                   end
                 elsif current_mapping == 'product_cats'
-                  all_rows = mapping[current_mapping][:model].where(:category =>csv_row['category'].strip,:product_id=>csv_row['product_id'])
+                  all_rows = mapping[current_mapping][:model].where(:category => csv_row['category'].strip, :product_id => csv_row['product_id'])
                   if all_rows.length >0
                     single_row = all_rows.first
                   end
                 elsif current_mapping == 'product_images'
-                  all_rows = mapping[current_mapping][:model].where(:image =>csv_row['image'],:product_id=>csv_row['product_id'])
+                  all_rows = mapping[current_mapping][:model].where(:image => csv_row['image'], :product_id => csv_row['product_id'])
                   if all_rows.length > 0
                     single_row = all_rows.first
                   end
                 elsif current_mapping == 'product_inventory_warehouses'
-                  all_rows = mapping[current_mapping][:model].where(:inventory_warehouse_id =>csv_row['inventory_warehouse_id'],:product_id=>csv_row['product_id'])
+                  all_rows = mapping[current_mapping][:model].where(:inventory_warehouse_id => csv_row['inventory_warehouse_id'], :product_id => csv_row['product_id'])
                   if all_rows.length > 0
                     single_row = all_rows.first
                   end
@@ -221,7 +222,7 @@ class SettingsController < ApplicationController
                         single_row['name'] = 'Product from Restore'
                       end
                     elsif !(current_mapping != 'products' && column[1] =='id')
-                      if ['barcode','sku','category'].include? column[0]
+                      if ['barcode', 'sku', 'category'].include? column[0]
                         single_row[column[1]] = csv_row[column[0]].strip
                       else
                         single_row[column[1]] = csv_row[column[0]]
@@ -270,17 +271,17 @@ class SettingsController < ApplicationController
     end
 
     respond_to do |format|
-      format.json { render json: @result}
+      format.json { render json: @result }
     end
   end
 
   def export_csv
 
     if current_user.can? 'create_backups'
-      dir = Dir.mktmpdir([current_user.username+'groov-export-',Time.now.to_s])
+      dir = Dir.mktmpdir([current_user.username+'groov-export-', Time.now.to_s])
       filename = 'groove-export-'+Time.now.to_s+'.zip'
       begin
-        data = zip_to_files(filename,Product.to_csv(dir))
+        data = zip_to_files(filename, Product.to_csv(dir))
 
       ensure
         FileUtils.remove_entry_secure dir
@@ -288,12 +289,12 @@ class SettingsController < ApplicationController
     else
       #prevent a fail and send empty zip
       filename = 'insufficient_permissions.zip'
-      data = zip_to_files(filename,{})
+      data = zip_to_files(filename, {})
     end
 
     respond_to do |format|
       format.html # show.html.erb
-      format.zip { send_data  data,:type => 'application/zip', :filename => filename }
+      format.zip { send_data data, :type => 'application/zip', :filename => filename }
     end
   end
 
@@ -310,15 +311,15 @@ class SettingsController < ApplicationController
         exceptions = OrderException.where(updated_at: Time.parse(params[:start])..Time.parse(params[:end]))
         filename = 'groove-order-exceptions-'+Time.now.to_s+'.csv'
         row_map = {
-            :order_number => '',
-            :order_date =>'',
-            :scanned_date =>'',
-            :packing_user =>'',
-            :reason =>'',
-            :description =>'',
-            :associated_user =>'',
-            :total_packed_items => '',
-            :total_clicked_items => ''
+          :order_number => '',
+          :order_date => '',
+          :scanned_date => '',
+          :packing_user => '',
+          :reason => '',
+          :description => '',
+          :associated_user => '',
+          :total_packed_items => '',
+          :total_clicked_items => ''
         }
         data = CSV.generate do |csv|
           csv << row_map.keys
@@ -335,7 +336,7 @@ class SettingsController < ApplicationController
             end
             single_row[:reason] = exception.reason
             single_row[:description] = exception.description
-            single_row[:associated_user] =  exception.user.name + ' ('+exception.user.username+')' unless exception.user.nil?
+            single_row[:associated_user] = exception.user.name + ' ('+exception.user.username+')' unless exception.user.nil?
             single_row[:order_item_count] = exception.order.scanned_items_count
             single_row[:click_scanned_items] = exception.order.clicked_items_count
             csv << single_row.values
@@ -357,7 +358,7 @@ class SettingsController < ApplicationController
 
     respond_to do |format|
       format.html # show.html.erb
-      format.csv { send_data  data, :type => 'text/csv', :filename => filename }
+      format.csv { send_data data, :type => 'text/csv', :filename => filename }
     end
   end
 
@@ -374,16 +375,16 @@ class SettingsController < ApplicationController
         serials = OrderSerial.where(updated_at: Time.parse(params[:start])..Time.parse(params[:end]))
         filename = 'groove-order-serials-'+Time.now.to_s+'.csv'
         row_map = {
-            :order_date =>'',
-            :order_number => '',
-            :serial =>'',
-            :primary_sku =>'',
-            :primary_barcode =>'',
-            :product_name=>'',
-            :packing_user =>'',
-            :order_item_count => '',
-            :scanned_date =>'',
-            :warehouse_name =>''
+          :order_date => '',
+          :order_number => '',
+          :serial => '',
+          :primary_sku => '',
+          :primary_barcode => '',
+          :product_name => '',
+          :packing_user => '',
+          :order_item_count => '',
+          :scanned_date => '',
+          :warehouse_name => ''
         }
         data = CSV.generate do |csv|
           csv << row_map.keys
@@ -397,12 +398,12 @@ class SettingsController < ApplicationController
             packing_user = User.find(serial.order.packing_user_id) unless serial.order.packing_user_id.blank?
             unless packing_user.nil?
               single_row[:packing_user] = packing_user.name + ' ('+packing_user.username+')'
-              single_row[:warehouse_name] =  serial.product.primary_warehouse.inventory_warehouse.name unless serial.product.primary_warehouse.nil? || serial.product.primary_warehouse.inventory_warehouse.nil?
+              single_row[:warehouse_name] = serial.product.primary_warehouse.inventory_warehouse.name unless serial.product.primary_warehouse.nil? || serial.product.primary_warehouse.inventory_warehouse.nil?
             end
             single_row[:serial] = serial.serial
             single_row[:product_name] = serial.product.name
-            single_row[:primary_sku] =  serial.product.primary_sku
-            single_row[:primary_barcode] =  serial.product.primary_barcode
+            single_row[:primary_sku] = serial.product.primary_sku
+            single_row[:primary_barcode] = serial.product.primary_barcode
             single_row[:order_item_count] = serial.order.get_items_count
 
             csv << single_row.values
@@ -424,7 +425,7 @@ class SettingsController < ApplicationController
 
     respond_to do |format|
       format.html # show.html.erb
-      format.csv { send_data  data, :type => 'text/csv', :filename => filename }
+      format.csv { send_data data, :type => 'text/csv', :filename => filename }
     end
   end
 
@@ -436,14 +437,14 @@ class SettingsController < ApplicationController
       @result['messages'].push("No Identifier for state preference given")
       @result['status'] = false
     else
-      preference = ColumnPreference.find_by_user_id_and_identifier(current_user.id,params[:identifier])
+      preference = ColumnPreference.find_by_user_id_and_identifier(current_user.id, params[:identifier])
       unless preference.nil?
         @result['data'] = preference
       end
     end
     respond_to do |format|
       format.html # show.html.erb
-      format.json { render json:@result}
+      format.json { render json: @result }
     end
   end
 
@@ -455,13 +456,13 @@ class SettingsController < ApplicationController
       @result['messages'].push("No Identifier for state preference given")
       @result['status'] = false
     else
-      preference = ColumnPreference.find_or_create_by_user_id_and_identifier(current_user.id,params[:identifier])
+      preference = ColumnPreference.find_or_create_by_user_id_and_identifier(current_user.id, params[:identifier])
       preference.theads = params[:theads]
       preference.save!
     end
     respond_to do |format|
       format.html # show.html.erb
-      format.json { render json:@result}
+      format.json { render json: @result }
     end
   end
 
@@ -555,8 +556,8 @@ class SettingsController < ApplicationController
           @result['error_messages'].push('Error saving general settings.')
         end
       else
-       @result['status'] &= false
-       @result['error_messages'].push('You are not authorized to update general preferences.')
+        @result['status'] &= false
+        @result['error_messages'].push('You are not authorized to update general preferences.')
       end
     else
       @result['status'] &= false
@@ -633,10 +634,10 @@ class SettingsController < ApplicationController
                :page_height => '1in',
                :page_width => '3in',
                :margin => {
-                   :top => '0',
-                   :bottom => '0',
-                   :left => '0',
-                   :right => '0'
+                 :top => '0',
+                 :bottom => '0',
+                 :left => '0',
+                 :right => '0'
                }
       }
     end

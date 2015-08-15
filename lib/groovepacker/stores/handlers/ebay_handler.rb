@@ -8,7 +8,7 @@ module Groovepacker
 
           if !ebay_credential.nil?
             require 'eBayAPI'
-            
+
             if ENV['EBAY_SANDBOX_MODE'] == 'YES'
               sandbox = true
             else
@@ -16,10 +16,10 @@ module Groovepacker
             end
 
             ebay = EBay::API.new(ebay_credential.auth_token,
-              ENV['EBAY_DEV_ID'], ENV['EBAY_APP_ID'],
-              ENV['EBAY_CERT_ID'], :sandbox=>sandbox)
+                                 ENV['EBAY_DEV_ID'], ENV['EBAY_APP_ID'],
+                                 ENV['EBAY_CERT_ID'], :sandbox => sandbox)
           end
-            
+
           self.make_handle(ebay_credential, ebay)
         end
 

@@ -2,12 +2,12 @@ module Groovepacker
   module Tenants
     class Helper
       include PaymentsHelper
-      
+
       def do_gettenants(params)
         limit = 10
         offset = 0
         query_add = ""
-        supported_order_keys = ['ASC', 'DESC' ] #Caps letters only
+        supported_order_keys = ['ASC', 'DESC'] #Caps letters only
         supported_sort_keys = ['updated_at', 'name']
 
         # Get passed in parameter variables if they are valid.
@@ -21,19 +21,19 @@ module Groovepacker
 
         tenants = Tenant.order('')
         unless params[:select_all] || params[:inverted]
-          tenants =  tenants.limit(limit).offset(offset)
-        end  
+          tenants = tenants.limit(limit).offset(offset)
+        end
 
         if tenants.length == 0
           tenants = Tenant.where(1)
           unless params[:select_all] || params[:inverted]
-            tenants =  tenants.limit(limit).offset(offset)
+            tenants = tenants.limit(limit).offset(offset)
           end
         end
         return tenants
       end
 
-      def make_tenants_list(tenants,params)
+      def make_tenants_list(tenants, params)
         @tenants_result = []
         begin
           tenants.each do |tenant|
@@ -55,9 +55,9 @@ module Groovepacker
           end
           unless params[:sort].nil? || params[:sort] == ''
             if params[:order] == 'DESC'
-              @tenants_result =  @tenants_result.sort_by {|v| v[params[:sort]].class == Fixnum ? v[params[:sort]] : v[params[:sort]].downcase}.reverse!
+              @tenants_result = @tenants_result.sort_by { |v| v[params[:sort]].class == Fixnum ? v[params[:sort]] : v[params[:sort]].downcase }.reverse!
             else
-              @tenants_result =  @tenants_result.sort_by {|v| v[params[:sort]].class == Fixnum ? v[params[:sort]] : v[params[:sort]].downcase}
+              @tenants_result = @tenants_result.sort_by { |v| v[params[:sort]].class == Fixnum ? v[params[:sort]] : v[params[:sort]].downcase }
             end
           end
         rescue Exception => e
@@ -72,13 +72,13 @@ module Groovepacker
         sort_key = 'updated_at'
         sort_order = 'DESC'
         supported_sort_keys = ['updated_at', 'name']
-        supported_order_keys = ['ASC', 'DESC' ] #Caps letters only
+        supported_order_keys = ['ASC', 'DESC'] #Caps letters only
 
         sort_key = params[:sort] if !params[:sort].nil? &&
-            supported_sort_keys.include?(params[:sort].to_s)
+          supported_sort_keys.include?(params[:sort].to_s)
 
         sort_order = params[:order] if !params[:order].nil? &&
-            supported_order_keys.include?(params[:order].to_s)
+          supported_order_keys.include?(params[:order].to_s)
 
         # Get passed in parameter variables if they are valid.
         limit = params[:limit].to_i if !params[:limit].nil? && params[:limit].to_i > 0
@@ -90,7 +90,8 @@ module Groovepacker
         unless params[:select_all] || params[:inverted]
           query_add = ' LIMIT '+limit.to_s+' OFFSET 0'
         end
-        # Apartment::Tenant.switch()
+        current_tenant = Apartment::Tenant.current_tenant
+        Apartment::Tenant.switch()
         base_query = 'SELECT tenants.id as id, tenants.name as name, tenants.updated_at as updated_at, tenants.created_at as created_at, subscriptions.subscription_plan_id as plan, subscriptions.stripe_customer_id as stripe_url
           FROM tenants LEFT JOIN subscriptions ON (subscriptions.tenant_id = tenants.id) 
             WHERE
@@ -108,10 +109,10 @@ module Groovepacker
         else
           result['count'] = Tenant.count_by_sql('SELECT count(*) as count from('+base_query+') as tmp')
         end
-
+        Apartment::Tenant.switch(current_tenant)
         return result
       end
-      
+
       def get_subscription_data(id)
         @subscripton_result = {}
         # current_tenant = Apartment::Tenant.current_tenant
@@ -125,33 +126,33 @@ module Groovepacker
           unless tenant.subscription.nil?
             subscription = tenant.subscription
             case subscription.subscription_plan_id
-            when "groove-solo"
-              @subscripton_result['plan'] = "solo"
-            when "groove-duo"
-              @subscripton_result['plan'] = "duo"
-            when "groove-trio"
-              @subscripton_result['plan'] = "trio"
-            when "groove-quinet"
-              @subscripton_result['plan'] = "quinet"
-            when "groove-symphony"
-              @subscripton_result['plan'] = "symphony"    
-            when "annual-groove-solo"
-              @subscripton_result['plan'] = "annual-solo"
-            when "annual-groove-duo"
-              @subscripton_result['plan'] = "annual-duo"
-            when "annual-groove-trio"
-              @subscripton_result['plan'] = "annual-trio"
-            when "annual-groove-quinet"
-              @subscripton_result['plan'] = "annual-quinet"
-            when "annual-groove-symphony"
-              @subscripton_result['plan'] = "annual-symphony"
-            else
-              @subscripton_result['plan'] = ""
-            end            
+              when "groove-solo"
+                @subscripton_result['plan'] = "solo"
+              when "groove-duo"
+                @subscripton_result['plan'] = "duo"
+              when "groove-trio"
+                @subscripton_result['plan'] = "trio"
+              when "groove-quinet"
+                @subscripton_result['plan'] = "quinet"
+              when "groove-symphony"
+                @subscripton_result['plan'] = "symphony"
+              when "annual-groove-solo"
+                @subscripton_result['plan'] = "annual-solo"
+              when "annual-groove-duo"
+                @subscripton_result['plan'] = "annual-duo"
+              when "annual-groove-trio"
+                @subscripton_result['plan'] = "annual-trio"
+              when "annual-groove-quinet"
+                @subscripton_result['plan'] = "annual-quinet"
+              when "annual-groove-symphony"
+                @subscripton_result['plan'] = "annual-symphony"
+              else
+                @subscripton_result['plan'] = ""
+            end
             @subscripton_result['customer_id'] = subscription.stripe_customer_id unless subscription.stripe_customer_id.nil?
             @subscripton_result['progress'] = subscription.progress unless subscription.progress.nil?
             @subscripton_result['transaction_errors'] =subscription.transaction_errors unless subscription.transaction_errors.nil?
-          end       
+          end
         end
         # Apartment::Tenant.switch(current_tenant)
         @subscripton_result
@@ -226,7 +227,7 @@ module Groovepacker
         if current_user.can? 'add_edit_order_items'
           orders = Order.all
           unless orders.nil?
-            orders.each do|order|
+            orders.each do |order|
               if order.destroy
                 result['status'] &= true
               else
@@ -271,7 +272,7 @@ module Groovepacker
             result['status'] &= true
             result['success_messages'].push('Removed '+tenant+' from tenants table')
           end
-        rescue Exception=>e
+        rescue Exception => e
           result['status'] &= false
           result['error_messages'].push(e.message)
         else

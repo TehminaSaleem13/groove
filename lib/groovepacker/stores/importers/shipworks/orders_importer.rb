@@ -61,9 +61,9 @@ module Groovepacker
                     end
                   end
                 else
-                import_item.status = 'failed'
-                import_item.message = 'No new orders with the currently enabled statuses.'
-                import_item.save
+                  import_item.status = 'failed'
+                  import_item.message = 'No new orders with the currently enabled statuses.'
+                  import_item.save
                 end
               else
                 import_item.status = 'failed'
@@ -167,7 +167,7 @@ module Groovepacker
             end
 
             unless found_sku
-              product.product_skus.create(sku:  ProductSku.get_temp_sku)
+              product.product_skus.create(sku: ProductSku.get_temp_sku)
             end
 
             #Barcodes
@@ -182,7 +182,7 @@ module Groovepacker
 
             #Location
             unless item["Location"].nil?
-              inv_wh = ProductInventoryWarehouses.find_or_create_by_product_id_and_inventory_warehouse_id(product.id , store.inventory_warehouse_id)
+              inv_wh = ProductInventoryWarehouses.find_or_create_by_product_id_and_inventory_warehouse_id(product.id, store.inventory_warehouse_id)
               inv_wh.location_primary = item["Location"]
               inv_wh.save
             end
@@ -197,14 +197,11 @@ module Groovepacker
 end
 
 
+# # temporary method for importing shipworks
+#  def import_shipworks
+#    shipworks = params["ShipWorks"]
+#    order = Order.new
 
-
-
- # # temporary method for importing shipworks
- #  def import_shipworks
- #    shipworks = params["ShipWorks"]
- #    order = Order.new
-
- #    order.increment_id = shipworks["Order"]["Number"]
- #    order.
- #  end
+#    order.increment_id = shipworks["Order"]["Number"]
+#    order.
+#  end

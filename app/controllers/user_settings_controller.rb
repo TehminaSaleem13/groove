@@ -7,20 +7,20 @@ class UserSettingsController < ApplicationController
 
     respond_to do |format|
       format.html # show.html.erb
-      format.json { render json: @users, :only => [:id, :username, :last_sign_in_at, :active], :include => :role}
+      format.json { render json: @users, :only => [:id, :username, :last_sign_in_at, :active], :include => :role }
     end
   end
 
 
   def createUpdateUser
-      @result = Hash.new
-      @result['status'] = true
-      @result['messages'] = []
+    @result = Hash.new
+    @result['status'] = true
+    @result['messages'] = []
 
     if current_user.can? 'add_edit_users'
       if params[:id].nil?
         if User.can_create_new?
-            @user = User.new
+          @user = User.new
         else
           @result['status'] = false
           @result['messages'].push('You have reached the maximum limit of number of users for your subscription.')
@@ -29,7 +29,7 @@ class UserSettingsController < ApplicationController
         @user = User.find(params[:id])
       end
 
-      if !params[:password].nil? && params[:password] != '' && ( params[:conf_password].blank? || params[:conf_password].length < 6)
+      if !params[:password].nil? && params[:password] != '' && (params[:conf_password].blank? || params[:conf_password].length < 6)
         @result['status'] = false
         @result['messages'].push('Password and Confirm Password can not be less than 6 characters')
       end
@@ -69,17 +69,17 @@ class UserSettingsController < ApplicationController
         else
           # Make sure we have at least one super admin
           if current_user.can?('make_super_admin') && !params[:role]['make_super_admin'] &&
-              User.includes(:role).where('roles.make_super_admin = 1').length < 2 && !@user.role.nil? && @user.role.make_super_admin
+            User.includes(:role).where('roles.make_super_admin = 1').length < 2 && !@user.role.nil? && @user.role.make_super_admin
             @result['status'] = false
             @result['messages'].push('The app needs at least one super admin at all times')
           elsif !current_user.can?('make_super_admin') &&
-              ((params[:role]['make_super_admin'] && (@user.role.nil? || !@user.role.make_super_admin)) ||
-                  (!params[:role]['make_super_admin'] && !@user.role.nil? && @user.role.make_super_admin))
+            ((params[:role]['make_super_admin'] && (@user.role.nil? || !@user.role.make_super_admin)) ||
+              (!params[:role]['make_super_admin'] && !@user.role.nil? && @user.role.make_super_admin))
             @result['status'] = false
             @result['messages'].push('You can not grant or revoke super admin privileges.')
           else
             if user_role.custom && !user_role.display
-              user_role = update_role(user_role,params[:role])
+              user_role = update_role(user_role, params[:role])
             end
 
             @user.role = user_role
@@ -101,8 +101,8 @@ class UserSettingsController < ApplicationController
     end
 
     respond_to do |format|
-        format.html # show.html.erb
-        format.json { render json: @result}
+      format.html # show.html.erb
+      format.json { render json: @result }
     end
   end
 
@@ -110,7 +110,7 @@ class UserSettingsController < ApplicationController
     @result = Hash.new
     @result['status'] = true
     @result['messages'] = []
-    @result['roles'] = Role.where(:display=>true);
+    @result['roles'] = Role.where(:display => true);
 
     respond_to do |format|
       format.html # show.html.erb
@@ -131,14 +131,15 @@ class UserSettingsController < ApplicationController
                :page_height => '1in',
                :page_width => '3in',
                :margin => {
-                   :top => '0',
-                   :bottom => '0',
-                   :left => '0',
-                   :right => '0'
+                 :top => '0',
+                 :bottom => '0',
+                 :left => '0',
+                 :right => '0'
                }
       }
     end
   end
+
   def createRole
     @result = Hash.new
     @result['status'] = true
@@ -148,7 +149,7 @@ class UserSettingsController < ApplicationController
       if params[:role].nil?
         @result['status'] = false
         @result['messages'].push("No role data sent")
-      elsif params[:role]['new_name'].blank? || params[:role]['new_name'][0,5] == "role_" || !Role.find_by_name(params[:role]['new_name']).nil?
+      elsif params[:role]['new_name'].blank? || params[:role]['new_name'][0, 5] == "role_" || !Role.find_by_name(params[:role]['new_name']).nil?
         @result['status'] = false
         @result['messages'].push("Role name invalid. Please input a valid Role name")
       else
@@ -163,7 +164,7 @@ class UserSettingsController < ApplicationController
         user_role.custom = true
         user_role.display = true
         user_role.name = params[:role]['new_name']
-        user_role = update_role(user_role,params[:role])
+        user_role = update_role(user_role, params[:role])
         @result['role'] = user_role
         user = User.find(params[:id])
         if user.nil?
@@ -206,7 +207,7 @@ class UserSettingsController < ApplicationController
         end
 
         scan_pack_role = Role.find_by_name("Scan & Pack User")
-        User.where(:role_id => user_role.id).update_all(:role_id=> scan_pack_role.id)
+        User.where(:role_id => user_role.id).update_all(:role_id => scan_pack_role.id)
         user_role.destroy
 
         @result['role'] = scan_pack_role
@@ -226,7 +227,7 @@ class UserSettingsController < ApplicationController
     @result = Hash.new
     @result['status'] = true
     if current_user.can? 'add_edit_user'
-      params['_json'].each do|user|
+      params['_json'].each do |user|
         @user = User.find(user["id"])
         @user.active = user["active"]
         if !@user.save
@@ -238,8 +239,8 @@ class UserSettingsController < ApplicationController
     end
 
     respond_to do |format|
-        format.html # show.html.erb
-        format.json { render json: @result }
+      format.html # show.html.erb
+      format.json { render json: @result }
     end
   end
 
@@ -251,19 +252,19 @@ class UserSettingsController < ApplicationController
     @result = Hash.new
     @result['status'] = true
     if current_user.can? 'add_edit_user'
-      params['_json'].each do|user|
+      params['_json'].each do |user|
         if User.can_create_new?
           @user = User.find(user["id"])
           #@newuser = User.new
           @newuser = @user.dup
           index = 0
           @newuser.username = @user.username+"(duplicate"+index.to_s+")"
-          @userslist = User.where(:username=>@newuser.username)
+          @userslist = User.where(:username => @newuser.username)
           begin
             index = index + 1
             @newuser.username = @user.username+"(duplicate"+index.to_s+")"
-            @userslist = User.where(:username=>@newuser.username)
-          end while(!@userslist.nil? && @userslist.length > 0)
+            @userslist = User.where(:username => @newuser.username)
+          end while (!@userslist.nil? && @userslist.length > 0)
 
           @newuser.password = @user.password
           @newuser.password_confirmation = @user.password_confirmation
@@ -285,8 +286,8 @@ class UserSettingsController < ApplicationController
 
 
     respond_to do |format|
-        format.html # show.html.erb
-        format.json { render json: @result }
+      format.html # show.html.erb
+      format.json { render json: @result }
     end
   end
 
@@ -294,7 +295,7 @@ class UserSettingsController < ApplicationController
     @result = Hash.new
     @result['status'] = true
     if current_user.can? 'add_edit_user'
-      params['_json'].each do|user|
+      params['_json'].each do |user|
         unless user['id'] == current_user.id
           @user = User.find(user['id'])
           if !@user.destroy
@@ -308,8 +309,8 @@ class UserSettingsController < ApplicationController
     end
 
     respond_to do |format|
-        format.html # show.html.erb
-        format.json { render json: @result }
+      format.html # show.html.erb
+      format.json { render json: @result }
     end
   end
 
@@ -326,8 +327,8 @@ class UserSettingsController < ApplicationController
     end
 
     respond_to do |format|
-        format.html # show.html.erb
-        format.json { render json: @result }
+      format.html # show.html.erb
+      format.json { render json: @result }
     end
   end
 
@@ -348,13 +349,13 @@ class UserSettingsController < ApplicationController
       @result['messages'] = tenant.errors.full_messages
     end
     respond_to do |format|
-      format.json {render json: @result}
+      format.json { render json: @result }
     end
   end
 
   def let_user_be_created
     render json: {
-        can_create: User.can_create_new?
-    }
+             can_create: User.can_create_new?
+           }
   end
 end

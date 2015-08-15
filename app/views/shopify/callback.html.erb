@@ -26,28 +26,28 @@
           </div>
         </div>
 
-        <button id="continue_button" class="btn btn-primary btn-disabled" 
-        style="margin-bottom: 15px;">
+        <button id="continue_button" class="btn btn-primary btn-disabled"
+                style="margin-bottom: 15px;">
           Continue
         </button>
       </fieldset>
     </form>
 
     <script type="text/javascript">
-      $(document).on('ready page:load', function() {
-        var valid = { };
+      $(document).on('ready page:load', function () {
+        var valid = {};
 
-        $('#continue_button').on('click', function(e) {
+        $('#continue_button').on('click', function (e) {
           e.preventDefault();
           validate_email();
           if (valid.email) {
-            url = 'http://admin.'+ '<%=ENV["HOST_NAME"]%>'+ '/subscriptions/select_plan?email=' + 
+            url = 'http://admin.' + '<%=ENV["HOST_NAME"]%>' + '/subscriptions/select_plan?email=' +
               $('#tenant_email').val() + '&shopify=<%=@shop_name%>';
             window.location.href = url;
-          } 
+          }
         });
 
-        var validate_email = function() {
+        var validate_email = function () {
           var email = $('#tenant_email').val();
           var atpos = email.indexOf("@");
           var dotpos = email.lastIndexOf(".");
@@ -60,12 +60,12 @@
             $('#error-email-block').html("email is not valid");
           } else {
             $.ajax({
-                type: "GET",
-                contentType: "application/json; charset=utf-8",
-                url: "/subscriptions/valid_email",
-                data: { email: email },
-                dataType: "json",
-                async: false
+              type: "GET",
+              contentType: "application/json; charset=utf-8",
+              url: "/subscriptions/valid_email",
+              data: {email: email},
+              dataType: "json",
+              async: false
             }).error(function (response) {
 
             }).success(function (response) {

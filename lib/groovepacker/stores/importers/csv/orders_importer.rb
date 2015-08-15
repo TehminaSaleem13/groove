@@ -5,26 +5,26 @@ module Groovepacker
         class OrdersImporter
           include ProductsHelper
 
-          def import(params,final_record,mapping)
+          def import(params, final_record, mapping)
             result = Hash.new
             result['status'] = true
             result['messages'] = []
             order_map = [
-                "address_1",
-                "address_2",
-                "city",
-                "country",
-                "customer_comments",
-                "email",
-                "firstname",
-                "increment_id",
-                "lastname",
-                "method",
-                "postcode",
-                "sku",
-                "state",
-                "price",
-                "qty"
+              "address_1",
+              "address_2",
+              "city",
+              "country",
+              "customer_comments",
+              "email",
+              "firstname",
+              "increment_id",
+              "lastname",
+              "method",
+              "postcode",
+              "sku",
+              "state",
+              "price",
+              "qty"
             ]
             imported_orders = {}
             import_item = ImportItem.find_by_store_id(params[:store_id])
@@ -41,7 +41,7 @@ module Groovepacker
             import_item.to_import = final_record.length
             import_item.save
 
-            final_record.each_with_index do |single_row,index|
+            final_record.each_with_index do |single_row, index|
               if !mapping['increment_id'].nil? && mapping['increment_id'][:position] >= 0 && !single_row[mapping['increment_id'][:position]].blank?
                 import_item.current_increment_id = single_row[mapping['increment_id'][:position]]
                 import_item.current_order_items = -1
@@ -57,26 +57,26 @@ module Groovepacker
             result
           end
 
-          def import_old(params,final_record,mapping)
+          def import_old(params, final_record, mapping)
             result = Hash.new
             result['status'] = true
             result['messages'] = []
             order_map = [
-                "address_1",
-                "address_2",
-                "city",
-                "country",
-                "customer_comments",
-                "email",
-                "firstname",
-                "increment_id",
-                "lastname",
-                "method",
-                "postcode",
-                "sku",
-                "state",
-                "price",
-                "tracking_num"
+              "address_1",
+              "address_2",
+              "city",
+              "country",
+              "customer_comments",
+              "email",
+              "firstname",
+              "increment_id",
+              "lastname",
+              "method",
+              "postcode",
+              "sku",
+              "state",
+              "price",
+              "tracking_num"
             ]
             imported_orders = {}
             scan_pack_settings = ScanPackSetting.all.first
@@ -96,11 +96,11 @@ module Groovepacker
             if params[:contains_unique_order_items] == true
               existing_order_numbers = []
               filtered_final_record = []
-              existing_orders =  Order.all
+              existing_orders = Order.all
               existing_orders.each do |order|
                 existing_order_numbers << order.increment_id
-              end 
-              final_record.each_with_index do |single_row,index|
+              end
+              final_record.each_with_index do |single_row, index|
                 if !mapping['increment_id'].nil? && mapping['increment_id'][:position] >= 0 && !single_row[mapping['increment_id'][:position]].blank?
                   unless existing_order_numbers.include? (single_row[mapping['increment_id'][:position]])
                     filtered_final_record << single_row
@@ -110,7 +110,7 @@ module Groovepacker
               final_record = filtered_final_record
             end
 
-            final_record.each_with_index do |single_row,index|
+            final_record.each_with_index do |single_row, index|
               if !mapping['increment_id'].nil? && mapping['increment_id'][:position] >= 0 && !single_row[mapping['increment_id'][:position]].blank?
                 import_item.current_increment_id = single_row[mapping['increment_id'][:position]]
                 import_item.current_order_items = -1
@@ -121,7 +121,7 @@ module Groovepacker
                   order = Order.find_or_create_by_increment_id(single_row[mapping['increment_id'][:position]])
                   order.store_id = params[:store_id]
                   #order_placed_time,price,qty
-                  order_required = ['qty','sku','increment_id']
+                  order_required = ['qty', 'sku', 'increment_id']
                   order_map.each do |single_map|
                     if !mapping[single_map].nil? && mapping[single_map][:position] >= 0
                       #if sku, create order item with product id, qty
@@ -134,7 +134,7 @@ module Groovepacker
                           product_skus = ProductSku.where(:sku => single_row[mapping[single_map][:position]])
                           if product_skus.length > 0
                             if OrderItem.where(:product_id => product_skus.first.product.id, :order_id => order.id).length == 0
-                              order_item  = OrderItem.new
+                              order_item = OrderItem.new
                               order_item.product = product_skus.first.product
                               order_item.sku = single_row[mapping['sku'][:position]]
                               if !mapping['image'].nil? && mapping['image'][:position] >= 0
@@ -196,7 +196,7 @@ module Groovepacker
                             make_product_intangible(product)
                             product.update_product_status
 
-                            order_item  = OrderItem.new
+                            order_item = OrderItem.new
                             order_item.product = product
                             order_item.sku = single_row[mapping['sku'][:position]]
                             if !mapping['qty'].nil? && mapping['qty'][:position] >= 0
@@ -208,7 +208,7 @@ module Groovepacker
                           import_item.current_order_imported_item = 1
                           import_item.save
                         end
-                        
+
                       elsif single_map == 'firstname'
                         if mapping['lastname'].nil? || mapping['lastname'][:position] == 0
                           arr = single_row[mapping[single_map][:position]].blank? ? [] : single_row[mapping[single_map][:position]].split(' ')
@@ -224,12 +224,12 @@ module Groovepacker
                         import_item.current_order_items = 1
                         import_item.current_order_imported_item = 0
                         import_item.save
-                        
+
                         order_increment_sku = single_row[mapping['increment_id'][:position]]+'-'+single_row[mapping['sku'][:position]]
-                        
+
                         product_skus = ProductSku.where(['sku like (?)', order_increment_sku+'%'])
                         if product_skus.length > 0
-                          product_sku = product_skus.where(:sku=>order_increment_sku).first
+                          product_sku = product_skus.where(:sku => order_increment_sku).first
                           unless product_sku.nil?
                             product_sku.sku = order_increment_sku + '-1'
                             if params[:generate_barcode_from_sku] == true
@@ -240,7 +240,7 @@ module Groovepacker
                             end
                             product_sku.save
                           end
-                          order_increment_sku = order_increment_sku + '-' + (product_skus.length+1).to_s 
+                          order_increment_sku = order_increment_sku + '-' + (product_skus.length+1).to_s
                         end
 
                         product = Product.new
@@ -263,13 +263,13 @@ module Groovepacker
                           product_barcode.barcode = single_row[mapping['barcode'][:position]]
                           product.product_barcodes << product_barcode
                         end
-                                      
+
                         sku = ProductSku.new
                         sku.sku = order_increment_sku
                         product.product_skus << sku
                         product.store_product_id = 0
                         product.store_id = params[:store_id]
-                        base_sku = ProductSku.where(:sku=>single_row[mapping['sku'][:position]]).first unless ProductSku.where(:sku=>single_row[mapping['sku'][:position]]).empty?
+                        base_sku = ProductSku.where(:sku => single_row[mapping['sku'][:position]]).first unless ProductSku.where(:sku => single_row[mapping['sku'][:position]]).empty?
                         if base_sku.nil?
                           base_product = Product.new()
                           base_product.name = "Base Product " + single_row[mapping['sku'][:position]]
@@ -310,7 +310,7 @@ module Groovepacker
                           cat.category = single_row[mapping['category'][:position]] unless single_row[mapping['category'][:position]].nil?
                           product.product_cats << cat
                         end
-                        
+
                         unless mapping['product_instructions'].nil?
                           product.spl_instructions_4_packer = single_row[mapping['product_instructions'][:position]] unless single_row[mapping['product_instructions'][:position]].nil?
                         end
@@ -318,7 +318,7 @@ module Groovepacker
                         product.save
                         product.update_product_status
 
-                        order_item  = OrderItem.new
+                        order_item = OrderItem.new
                         order_item.product = product
                         order_item.sku = order_increment_sku
                         if !mapping['qty'].nil? && mapping['qty'][:position] >= 0
@@ -354,21 +354,21 @@ module Groovepacker
                         imported_order_time = single_row[mapping['order_placed_time'][:position]]
                         if params[:order_date_time_format] == 'YYYY/MM/DD TIME'
                           if imported_order_time.split("/").first.length == 4
-                            order['order_placed_time'] = DateTime.strptime(imported_order_time,"%Y/%m/%d %H:%M")
+                            order['order_placed_time'] = DateTime.strptime(imported_order_time, "%Y/%m/%d %H:%M")
                           else
-                            order['order_placed_time'] = DateTime.strptime(imported_order_time,"%y/%m/%d %H:%M")
+                            order['order_placed_time'] = DateTime.strptime(imported_order_time, "%y/%m/%d %H:%M")
                           end
                         elsif params[:order_date_time_format] == 'MM/DD/YYYY TIME'
                           if imported_order_time.split(" ").first.split("/").last.length == 4
-                            order['order_placed_time'] = DateTime.strptime(imported_order_time,"%m/%d/%Y %H:%M")
+                            order['order_placed_time'] = DateTime.strptime(imported_order_time, "%m/%d/%Y %H:%M")
                           else
-                            order['order_placed_time'] = DateTime.strptime(imported_order_time,"%m/%d/%y %H:%M")
+                            order['order_placed_time'] = DateTime.strptime(imported_order_time, "%m/%d/%y %H:%M")
                           end
                         elsif params[:order_date_time_format] == 'DD/MM/YYYY TIME'
                           if imported_order_time.split(" ").first.split("/").last.length == 4
-                            order['order_placed_time'] = DateTime.strptime(imported_order_time,"%d/%m/%Y %H:%M")
+                            order['order_placed_time'] = DateTime.strptime(imported_order_time, "%d/%m/%Y %H:%M")
                           else
-                            order['order_placed_time'] = DateTime.strptime(imported_order_time,"%d/%m/%y %H:%M")
+                            order['order_placed_time'] = DateTime.strptime(imported_order_time, "%d/%m/%y %H:%M")
                           end
                         end
                       rescue ArgumentError => e

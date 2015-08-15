@@ -1,4 +1,4 @@
-namespace :karma  do
+namespace :karma do
   task :install do
     system 'npm install -g karma'
     system 'npm install -g karma-cli'
@@ -23,7 +23,7 @@ namespace :karma  do
   private
 
   def with_tmp_config(command, args = nil)
-    Tempfile.open('karma_unit.js', Rails.root.join('tmp') ) do |f|
+    Tempfile.open('karma_unit.js', Rails.root.join('tmp')) do |f|
       f.write unit_js(application_spec_files)
       f.flush
 
@@ -34,7 +34,7 @@ namespace :karma  do
   def application_spec_files
     sprockets = Rails.application.assets
     sprockets.append_path Rails.root.join('spec/javascripts/karma')
-    files = Rails.application.assets.find_asset('application_spec.js').to_a.map {|e| e.pathname.to_s }
+    files = Rails.application.assets.find_asset('application_spec.js').to_a.map { |e| e.pathname.to_s }
   end
 
   def unit_js(files)

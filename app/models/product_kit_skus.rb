@@ -4,25 +4,25 @@ class ProductKitSkus < ActiveRecord::Base
   has_many :order_item_kit_products, dependent: :destroy
 
   def add_product_in_order_items
-  	@order_items = OrderItem.where(:product_id => self.product_id)
-  	@order_items.each do |order_item|
+    @order_items = OrderItem.where(:product_id => self.product_id)
+    @order_items.each do |order_item|
       if OrderItemKitProduct.where(:order_item_id => order_item.id).where(:product_kit_skus_id => self.id).length == 0
-    		order_item_kit_product = OrderItemKitProduct.new
-    		order_item_kit_product.product_kit_skus = self
-    		order_item_kit_product.order_item = order_item
-    		order_item_kit_product.save
+        order_item_kit_product = OrderItemKitProduct.new
+        order_item_kit_product.product_kit_skus = self
+        order_item_kit_product.order_item = order_item
+        order_item_kit_product.save
       end
-  	end
+    end
   end
 
   def remove_product_from_order_items
-  	@order_items = OrderItem.where(:product_id => self.product_id)
-  	@order_items.each do |order_item|
-  		order_item_kit_product = OrderItemKitProduct.new
-  		order_item_kit_product.product_kit_skus = self
-  		order_item_kit_product.order_item = order_item
-  		order_item_kit_product.save
-  	end  	
+    @order_items = OrderItem.where(:product_id => self.product_id)
+    @order_items.each do |order_item|
+      order_item_kit_product = OrderItemKitProduct.new
+      order_item_kit_product.product_kit_skus = self
+      order_item_kit_product.order_item = order_item
+      order_item_kit_product.save
+    end
   end
 
   def option_product

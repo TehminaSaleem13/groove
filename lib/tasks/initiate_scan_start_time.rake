@@ -4,9 +4,9 @@ namespace :scan_pack do
   task :initiate_scan_start_time => :environment do
     Tenant.all.each do |tenant|
       begin
-      Apartment::Tenant.process(tenant.name) do
-        #Groovepacker::Dashboard::Stats::LeaderBoard.new.compute_leader_board
-      end
+        Apartment::Tenant.process(tenant.name) do
+          #Groovepacker::Dashboard::Stats::LeaderBoard.new.compute_leader_board
+        end
       rescue Exception => e
         puts e.message
         if e.message == 'Cannot find tenant '+tenant.name
@@ -22,14 +22,14 @@ namespace :scan_pack do
   task :initiate_incorrect_scan_count => :environment do
     Tenant.all.each do |tenant|
       begin
-      Apartment::Tenant.process(tenant.name) do
-        puts 'Upgrading Tenant: '+Apartment::Tenant.current.to_s
-        puts "OrderCount:" + Order.where(status: 'scanned').count.to_s
-        Order.where(status: 'scanned').each do |order|
-          order.inaccurate_scan_count = rand(0..1)
-          order.save
+        Apartment::Tenant.process(tenant.name) do
+          puts 'Upgrading Tenant: '+Apartment::Tenant.current.to_s
+          puts "OrderCount:" + Order.where(status: 'scanned').count.to_s
+          Order.where(status: 'scanned').each do |order|
+            order.inaccurate_scan_count = rand(0..1)
+            order.save
+          end
         end
-      end
       rescue Exception => e
         puts e.message
         if e.message == 'Cannot find tenant '+tenant.name
@@ -42,12 +42,12 @@ namespace :scan_pack do
     end
   end
 
-  task :initiate_leader_board=> :environment do
+  task :initiate_leader_board => :environment do
     Tenant.all.each do |tenant|
       begin
-      Apartment::Tenant.process(tenant.name) do
-        Groovepacker::Dashboard::Stats::LeaderBoardStats.new.compute_leader_board
-      end
+        Apartment::Tenant.process(tenant.name) do
+          Groovepacker::Dashboard::Stats::LeaderBoardStats.new.compute_leader_board
+        end
       rescue Exception => e
         puts e.message
         if e.message == 'Cannot find tenant '+tenant.name

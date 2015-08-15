@@ -14,19 +14,19 @@ module Groovepacker
         def compute_leader_board_for_order_item_count(order_item_count)
           begin
             order = Order.find_by_sql("SELECT * from orders where timediff(scanned_on, scan_start_time) = (SELECT MIN(timediff(scanned_on, scan_start_time)) " +
-                "FROM orders where orders.id IN(SELECT orders.id from orders INNER JOIN " +
-                "order_items ON orders.id = order_items.order_id AND " +
-                "orders.scan_start_time != 'NULL' GROUP BY order_items.order_id " +
-                "HAVING COUNT(*) = '"+ (order_item_count).to_s+"'))")
+                                        "FROM orders where orders.id IN(SELECT orders.id from orders INNER JOIN " +
+                                        "order_items ON orders.id = order_items.order_id AND " +
+                                        "orders.scan_start_time != 'NULL' GROUP BY order_items.order_id " +
+                                        "HAVING COUNT(*) = '"+ (order_item_count).to_s+"'))")
             leader_board = LeaderBoard.where(order_item_count: order_item_count)
             if leader_board.empty?
               if order.first.nil?
-                LeaderBoard.create(order_item_count: (order_item_count), 
-                order_id: nil, scan_time: nil)
+                LeaderBoard.create(order_item_count: (order_item_count),
+                                   order_id: nil, scan_time: nil)
               else
                 order = order.first
-                LeaderBoard.create(order_item_count: (order_item_count), 
-                  order_id: order.id, scan_time: (order.scanned_on - order.scan_start_time))
+                LeaderBoard.create(order_item_count: (order_item_count),
+                                   order_id: order.id, scan_time: (order.scanned_on - order.scan_start_time))
               end
             else
               leader_board = leader_board.first

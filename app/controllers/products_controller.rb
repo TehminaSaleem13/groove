@@ -1,6 +1,7 @@
 class ProductsController < ApplicationController
   before_filter :groovepacker_authorize!
   include ProductsHelper
+
   def importproducts
     @store = Store.find(params[:id])
     @result = Hash.new
@@ -15,132 +16,132 @@ class ProductsController < ApplicationController
 
     if current_user.can?('import_products')
       begin
-      #import if magento products
-      if @store.store_type == 'Ebay'
-        context = Groovepacker::Stores::Context.new(
-          Groovepacker::Stores::Handlers::EbayHandler.new(@store))
-        import_result = context.import_products
-      elsif @store.store_type == 'Magento'
-        context = Groovepacker::Stores::Context.new(
-          Groovepacker::Stores::Handlers::MagentoHandler.new(@store))
-        import_result = context.import_products
-      elsif @store.store_type == 'Shipstation'
-        context = Groovepacker::Stores::Context.new(
-          Groovepacker::Stores::Handlers::ShipstationHandler.new(@store))
-        import_result = context.import_products
-      elsif @store.store_type == 'Shipstation API 2'
-        context = Groovepacker::Stores::Context.new(
-          Groovepacker::Stores::Handlers::ShipstationRestHandler.new(@store))
-        import_result = context.import_products
-      elsif @store.store_type == 'Amazon'
-        @amazon_credentials = AmazonCredentials.where(:store_id => @store.id)
+        #import if magento products
+        if @store.store_type == 'Ebay'
+          context = Groovepacker::Stores::Context.new(
+            Groovepacker::Stores::Handlers::EbayHandler.new(@store))
+          import_result = context.import_products
+        elsif @store.store_type == 'Magento'
+          context = Groovepacker::Stores::Context.new(
+            Groovepacker::Stores::Handlers::MagentoHandler.new(@store))
+          import_result = context.import_products
+        elsif @store.store_type == 'Shipstation'
+          context = Groovepacker::Stores::Context.new(
+            Groovepacker::Stores::Handlers::ShipstationHandler.new(@store))
+          import_result = context.import_products
+        elsif @store.store_type == 'Shipstation API 2'
+          context = Groovepacker::Stores::Context.new(
+            Groovepacker::Stores::Handlers::ShipstationRestHandler.new(@store))
+          import_result = context.import_products
+        elsif @store.store_type == 'Amazon'
+          @amazon_credentials = AmazonCredentials.where(:store_id => @store.id)
 
-        if @amazon_credentials.length > 0
-          @credential = @amazon_credentials.first
-          mws = MWS.new(:aws_access_key_id =>
-            ENV['AMAZON_MWS_ACCESS_KEY_ID'],
-            :secret_access_key => ENV['AMAZON_MWS_SECRET_ACCESS_KEY'],
-            :seller_id => @credential.merchant_id,
-            :marketplace_id => @credential.marketplace_id)
-          #@result['aws-response'] = mws.reports.request_report :report_type=>'_GET_MERCHANT_LISTINGS_DATA_'
-          #@result['aws-rewuest_status'] = mws.reports.get_report_request_list
-          response = mws.reports.get_report :report_id=> params[:reportid]
+          if @amazon_credentials.length > 0
+            @credential = @amazon_credentials.first
+            mws = MWS.new(:aws_access_key_id =>
+                            ENV['AMAZON_MWS_ACCESS_KEY_ID'],
+                          :secret_access_key => ENV['AMAZON_MWS_SECRET_ACCESS_KEY'],
+                          :seller_id => @credential.merchant_id,
+                          :marketplace_id => @credential.marketplace_id)
+            #@result['aws-response'] = mws.reports.request_report :report_type=>'_GET_MERCHANT_LISTINGS_DATA_'
+            #@result['aws-rewuest_status'] = mws.reports.get_report_request_list
+            response = mws.reports.get_report :report_id => params[:reportid]
 
-          # _GET_MERCHANT_LISTINGS_DATA_
-          # item-name
-          # item-description
-          # listing-id
-          # seller-sku
-          # price
-          # quantity
-          # open-date
-          # image-url
-          # item-is-marketplace
-          # product-id-type
-          # zshop-shipping-fee
-          # item-note
-          # item-condition
-          # zshop-category1
-          # zshop-browse-path
-          # zshop-storefront-feature
-          # asin1
-          # asin2
-          # asin3
-          # will-ship-internationally
-          # expedited-shipping
-          # zshop-boldface
-          # product-id
-          # bid-for-featured-placement
-          # add-delete
-          # pending-quantity
-          # fulfillment-channel
+            # _GET_MERCHANT_LISTINGS_DATA_
+            # item-name
+            # item-description
+            # listing-id
+            # seller-sku
+            # price
+            # quantity
+            # open-date
+            # image-url
+            # item-is-marketplace
+            # product-id-type
+            # zshop-shipping-fee
+            # item-note
+            # item-condition
+            # zshop-category1
+            # zshop-browse-path
+            # zshop-storefront-feature
+            # asin1
+            # asin2
+            # asin3
+            # will-ship-internationally
+            # expedited-shipping
+            # zshop-boldface
+            # product-id
+            # bid-for-featured-placement
+            # add-delete
+            # pending-quantity
+            # fulfillment-channel
 
-          require 'csv'
-          csv = CSV.parse(response.body,:quote_char => "|")
+            require 'csv'
+            csv = CSV.parse(response.body, :quote_char => "|")
 
-          csv.each_with_index do | row, index|
-            if index > 0
-              product_row = row.first.split(/\t/)
+            csv.each_with_index do |row, index|
+              if index > 0
+                product_row = row.first.split(/\t/)
 
-              if !product_row[3].nil? && product_row[3] != ''
-                @result['total_imported']  = @result['total_imported'] + 1
-                if ProductSku.where(:sku => product_row[3]).length  == 0
-                  @productdb = Product.new
-                  @productdb.name = product_row[0]
-                  @productdb.store_product_id = product_row[2]
-                  if @productdb.store_product_id.nil?
-                    @productdb.store_product_id = 'not_available'
-                  end
+                if !product_row[3].nil? && product_row[3] != ''
+                  @result['total_imported'] = @result['total_imported'] + 1
+                  if ProductSku.where(:sku => product_row[3]).length == 0
+                    @productdb = Product.new
+                    @productdb.name = product_row[0]
+                    @productdb.store_product_id = product_row[2]
+                    if @productdb.store_product_id.nil?
+                      @productdb.store_product_id = 'not_available'
+                    end
 
-                  @productdb.product_type = 'not_used'
-                  @productdb.status = 'new'
-                  @productdb.store = @store
+                    @productdb.product_type = 'not_used'
+                    @productdb.status = 'new'
+                    @productdb.store = @store
 
-                  #add productdb sku
-                  @productdbsku = ProductSku.new
-                  @productdbsku.sku = product_row[3]
-                  @productdbsku.purpose = 'primary'
+                    #add productdb sku
+                    @productdbsku = ProductSku.new
+                    @productdbsku.sku = product_row[3]
+                    @productdbsku.purpose = 'primary'
 
-                  #publish the sku to the product record
-                  @productdb.product_skus << @productdbsku
+                    #publish the sku to the product record
+                    @productdb.product_skus << @productdbsku
 
-                  #add inventory warehouse
-                  inv_wh = ProductInventoryWarehouses.new
-                  inv_wh.inventory_warehouse_id = @store.inventory_warehouse_id
-                  @productdb.product_inventory_warehousess << inv_wh
+                    #add inventory warehouse
+                    inv_wh = ProductInventoryWarehouses.new
+                    inv_wh.inventory_warehouse_id = @store.inventory_warehouse_id
+                    @productdb.product_inventory_warehousess << inv_wh
 
-                  #save
-                  if @productdbsku.sku != nil && @productdbsku.sku != ''
-                    if ProductSku.where(:sku=>@productdbsku.sku).length == 0
-                      #save
+                    #save
+                    if @productdbsku.sku != nil && @productdbsku.sku != ''
+                      if ProductSku.where(:sku => @productdbsku.sku).length == 0
+                        #save
+                        if @productdb.save
+                          import_amazon_product_details(@store.id, @productdbsku.sku, @productdb.id)
+                          #import_amazon_product_details(mws, @credential, @productdb.id)
+                          @result['success_imported'] = @result['success_imported'] + 1
+                        end
+                      else
+                        @result['messages'].push("sku: "+product_row[3]) unless @productdbsku.sku.nil?
+                        @result['previous_imported'] = @result['previous_imported'] + 1
+                      end
+                    else
                       if @productdb.save
-                        import_amazon_product_details(@store.id, @productdbsku.sku, @productdb.id)
+                        #import_amazon_product_details(@store.id, @productdbsku.sku, @productdb.id)
                         #import_amazon_product_details(mws, @credential, @productdb.id)
                         @result['success_imported'] = @result['success_imported'] + 1
                       end
-                    else
-                      @result['messages'].push("sku: "+product_row[3]) unless @productdbsku.sku.nil?
-                      @result['previous_imported'] = @result['previous_imported'] + 1
                     end
                   else
-                    if @productdb.save
-                      #import_amazon_product_details(@store.id, @productdbsku.sku, @productdb.id)
-                      #import_amazon_product_details(mws, @credential, @productdb.id)
-                      @result['success_imported'] = @result['success_imported'] + 1
-                    end
+                    @result['previous_imported'] = @result['previous_imported'] + 1
                   end
-                else
-                  @result['previous_imported'] = @result['previous_imported'] + 1
                 end
               end
             end
           end
         end
+      rescue Exception => e
+        @result['status'] = false
+        @result['messages'].push(e.message)
       end
-    rescue Exception => e
-      @result['status'] = false
-      @result['messages'].push(e.message)
-    end
     else
       @result['status'] = false
       @result['messages'].push('You can not import products')
@@ -155,7 +156,7 @@ class ProductsController < ApplicationController
     end
 
     respond_to do |format|
-      format.json { render json: @result}
+      format.json { render json: @result }
     end
 
   end
@@ -196,7 +197,7 @@ class ProductsController < ApplicationController
     end
 
     respond_to do |format|
-      format.json { render json: @result}
+      format.json { render json: @result }
     end
   end
 
@@ -212,12 +213,12 @@ class ProductsController < ApplicationController
         require 'mws-connect'
 
         mws = Mws.connect(
-            merchant: @credential.merchant_id,
-            access: ENV['AMAZON_MWS_ACCESS_KEY_ID'],
-            secret: ENV['AMAZON_MWS_SECRET_ACCESS_KEY']
-          )
-        products_api = mws.products.get_matching_products_for_id(:marketplace_id=>@credential.marketplace_id,
-          :id_type=>'SellerSKU', :id_list=>['T-TOOL'])
+          merchant: @credential.merchant_id,
+          access: ENV['AMAZON_MWS_ACCESS_KEY_ID'],
+          secret: ENV['AMAZON_MWS_SECRET_ACCESS_KEY']
+        )
+        products_api = mws.products.get_matching_products_for_id(:marketplace_id => @credential.marketplace_id,
+                                                                 :id_type => 'SellerSKU', :id_list => ['T-TOOL'])
         require 'active_support/core_ext/hash/conversions'
         product_hash = Hash.from_xml(products_api.to_s)
         # product_hash = from_xml(products_api)
@@ -245,11 +246,11 @@ class ProductsController < ApplicationController
       @credential = @amazon_credentials.first
 
       mws = MWS.new(:aws_access_key_id => ENV['AMAZON_MWS_ACCESS_KEY_ID'],
-        :secret_access_key => ENV['AMAZON_MWS_SECRET_ACCESS_KEY'],
-          :seller_id => @credential.merchant_id,
-        :marketplace_id => @credential.marketplace_id)
+                    :secret_access_key => ENV['AMAZON_MWS_SECRET_ACCESS_KEY'],
+                    :seller_id => @credential.merchant_id,
+                    :marketplace_id => @credential.marketplace_id)
 
-      response = mws.reports.request_report :report_type=>'_GET_MERCHANT_LISTINGS_DATA_'
+      response = mws.reports.request_report :report_type => '_GET_MERCHANT_LISTINGS_DATA_'
       @credential.productreport_id = response.report_request_info.report_request_id
       @credential.productgenerated_report_id = nil
 
@@ -260,9 +261,9 @@ class ProductsController < ApplicationController
 
     end
 
-      respond_to do |format|
-        format.json { render json: @result}
-      end
+    respond_to do |format|
+      format.json { render json: @result }
+    end
   end
 
   def checkamazonreportstatus
@@ -275,9 +276,9 @@ class ProductsController < ApplicationController
       @credential = @amazon_credentials.first
 
       mws = MWS.new(:aws_access_key_id => ENV['AMAZON_MWS_ACCESS_KEY_ID'],
-        :secret_access_key => ENV['AMAZON_MWS_SECRET_ACCESS_KEY'],
-        :seller_id => @credential.merchant_id,
-        :marketplace_id => @credential.marketplace_id)
+                    :secret_access_key => ENV['AMAZON_MWS_SECRET_ACCESS_KEY'],
+                    :seller_id => @credential.merchant_id,
+                    :marketplace_id => @credential.marketplace_id)
 
       @report_list = mws.reports.get_report_request_list
       @report_list.report_request_info.each do |report_request|
@@ -314,10 +315,11 @@ class ProductsController < ApplicationController
       end
     end
 
-      respond_to do |format|
-        format.json { render json: @result}
-      end
+    respond_to do |format|
+      format.json { render json: @result }
+    end
   end
+
   # Get list of products based on limit and offset. It is by default sorted by updated_at field
   # If sort parameter is passed in then the corresponding sort filter will be used to sort the list
   # The expected parameters in params[:sort] are 'updated_at', name', 'sku', 'status', 'barcode', 'location_primary'
@@ -335,7 +337,7 @@ class ProductsController < ApplicationController
     @result['products'] = make_products_list(@products)
     @result['products_count'] = get_products_count()
     respond_to do |format|
-          format.json { render json: @result}
+      format.json { render json: @result }
     end
   end
 
@@ -346,7 +348,7 @@ class ProductsController < ApplicationController
     if current_user.can?('add_edit_products')
       product = Product.new
       product.name = "New Product"
-      product.store_id = Store.where(:store_type=>'system').first.id
+      product.store_id = Store.where(:store_type => 'system').first.id
       product.store_product_id = 0
       product_inv_wh = ProductInventoryWarehouses.new
       product_inv_wh.inventory_warehouse_id = InventoryWarehouse.where(:is_default => true).first.id
@@ -362,7 +364,7 @@ class ProductsController < ApplicationController
     end
 
     respond_to do |format|
-      format.json { render json: @result}
+      format.json { render json: @result }
     end
   end
 
@@ -394,9 +396,9 @@ class ProductsController < ApplicationController
                            :bottom => '0',
                            :left => '2',
                            :right => '2'},
-               :handlers =>[:erb],
+               :handlers => [:erb],
                :formats => [:html],
-               :save_to_file => Rails.root.join('public','pdfs', "#{file_name}.pdf")
+               :save_to_file => Rails.root.join('public', 'pdfs', "#{file_name}.pdf")
 
         render json: result
       }
@@ -410,7 +412,7 @@ class ProductsController < ApplicationController
     if current_user.can?('add_edit_products')
       @products = list_selected_products(params)
       unless @products.nil?
-        @products.each do|product|
+        @products.each do |product|
           @product = Product.find(product["id"])
           if @product.product_barcodes.first.nil?
             sku = @product.product_skus.first
@@ -442,21 +444,21 @@ class ProductsController < ApplicationController
   def search
     @result = Hash.new
     @result['status'] = true
-  if !params[:search].nil? && params[:search] != ''
+    if !params[:search].nil? && params[:search] != ''
 
-    @products = do_search(params, false)
-    @result['products'] = make_products_list(@products['products'])
-    @result['products_count'] = get_products_count
-    @result['products_count']['search'] = @products['count']
-  else
-    @result['status'] = false
-    @result['message'] = 'Improper search string'
-  end
+      @products = do_search(params, false)
+      @result['products'] = make_products_list(@products['products'])
+      @result['products_count'] = get_products_count
+      @result['products_count']['search'] = @products['count']
+    else
+      @result['status'] = false
+      @result['message'] = 'Improper search string'
+    end
 
 
     respond_to do |format|
-        format.html # show.html.erb
-        format.json { render json: @result }
+      format.html # show.html.erb
+      format.json { render json: @result }
     end
   end
 
@@ -466,10 +468,10 @@ class ProductsController < ApplicationController
     @result['messages'] = []
 
     if current_user.can?('add_edit_products')
-      if !params[:setting].blank? && ['type_scan_enabled','click_scan_enabled'].include?(params[:setting])
+      if !params[:setting].blank? && ['type_scan_enabled', 'click_scan_enabled'].include?(params[:setting])
         @products = list_selected_products(params)
         unless @products.nil?
-          @products.each do|product|
+          @products.each do |product|
             @product = Product.find(product['id'])
             @product[params[:setting]] = params[:status]
             unless @product.save
@@ -506,7 +508,7 @@ class ProductsController < ApplicationController
       groove_bulk_actions.activity = 'status_update'
       groove_bulk_actions.save
 
-      bulk_actions.delay(:run_at =>1.seconds.from_now).status_update(Apartment::Tenant.current, params, groove_bulk_actions.id)
+      bulk_actions.delay(:run_at => 1.seconds.from_now).status_update(Apartment::Tenant.current, params, groove_bulk_actions.id)
 
     else
       @result['status'] = false
@@ -531,7 +533,7 @@ class ProductsController < ApplicationController
       groove_bulk_actions.activity = 'delete'
       groove_bulk_actions.save
 
-      bulk_actions.delay(:run_at =>1.seconds.from_now).delete(Apartment::Tenant.current, params, groove_bulk_actions.id, current_user.username)
+      bulk_actions.delay(:run_at => 1.seconds.from_now).delete(Apartment::Tenant.current, params, groove_bulk_actions.id, current_user.username)
     else
       @result['status'] = false
       @result['messages'].push('You do not have enough permissions to delete products')
@@ -555,7 +557,7 @@ class ProductsController < ApplicationController
       groove_bulk_actions.identifier = 'product'
       groove_bulk_actions.activity = 'duplicate'
       groove_bulk_actions.save
-      bulk_actions.delay(:run_at =>1.seconds.from_now).duplicate(Apartment::Tenant.current, params, groove_bulk_actions.id)
+      bulk_actions.delay(:run_at => 1.seconds.from_now).duplicate(Apartment::Tenant.current, params, groove_bulk_actions.id)
     else
       @result['status'] = false
       @result['messages'].push('You do not have enough permissions to duplicate products')
@@ -572,7 +574,7 @@ class ProductsController < ApplicationController
     if !params[:id].nil?
       @product = Product.find_by_id(params[:id])
     else
-      prod_barcodes = ProductBarcode.where(:barcode=>params[:barcode])
+      prod_barcodes = ProductBarcode.where(:barcode => params[:barcode])
       if prod_barcodes.length > 0
         @product = prod_barcodes.first.product
       end
@@ -580,13 +582,13 @@ class ProductsController < ApplicationController
     if !@product.nil?
       @product.reload
       store_id = @product.store_id
-      stores = Store.where(:id=>store_id)
+      stores = Store.where(:id => store_id)
       if !stores.nil?
         @store = stores.first
       end
       general_setting = GeneralSetting.all.first
       scan_pack_setting = ScanPackSetting.all.first
-      amazon_products = AmazonCredentials.where(:store_id=>store_id)
+      amazon_products = AmazonCredentials.where(:store_id => store_id)
       if !amazon_products.nil?
         @amazon_product = amazon_products.first
       end
@@ -609,9 +611,9 @@ class ProductsController < ApplicationController
 
       @product.product_inventory_warehousess.each do |inv_wh|
         if UserInventoryPermission.where(
-            :user_id => current_user.id,
-            :inventory_warehouse_id => inv_wh.inventory_warehouse_id,
-            :see => true
+          :user_id => current_user.id,
+          :inventory_warehouse_id => inv_wh.inventory_warehouse_id,
+          :see => true
         ).length > 0
           inv_wh_result = Hash.new
           inv_wh_result['info'] = inv_wh.attributes
@@ -643,21 +645,21 @@ class ProductsController < ApplicationController
           kit_sku['qty'] = kit.qty
           kit_sku['available_inv'] = 0
           option_product.product_inventory_warehousess.each do |inventory|
-            kit_sku['available_inv'] +=  inventory.available_inv.to_i
+            kit_sku['available_inv'] += inventory.available_inv.to_i
           end
           kit_sku['packing_order'] = kit.packing_order
           kit_sku['option_product_id'] = option_product.id
           @result['product']['productkitskus'].push(kit_sku)
         end
         @result['product']['productkitskus'] =
-          @result['product']['productkitskus'].sort_by {|hsh| hsh['packing_order']}
+          @result['product']['productkitskus'].sort_by { |hsh| hsh['packing_order'] }
         @result['product']['product_kit_activities'] = @product.product_kit_activities
         @result['product']['unacknowledged_kit_activities'] = @product.unacknowledged_kit_activities
       end
 
       if @product.product_skus.length > 0
-        @result['product']['pendingorders'] = Order.where(:status=>'awaiting').where(:status=>'onhold').
-          where(:sku=>@product.product_skus.first.sku)
+        @result['product']['pendingorders'] = Order.where(:status => 'awaiting').where(:status => 'onhold').
+          where(:sku => @product.product_skus.first.sku)
       else
         @result['product']['pendingorders'] = nil
       end
@@ -738,19 +740,19 @@ class ProductsController < ApplicationController
           @result['messages'].push("No sku sent in the request")
           @result['status'] &= false
         else
-          params[:kit_products].reject!{|a| a==""}
+          params[:kit_products].reject! { |a| a=="" }
           params[:kit_products].each do |kit_product|
-        product_kit_sku = ProductKitSkus.find_by_option_product_id_and_product_id(kit_product,@kit.id)
+            product_kit_sku = ProductKitSkus.find_by_option_product_id_and_product_id(kit_product, @kit.id)
 
-          if product_kit_sku.nil?
-            @result['messages'].push("Product #{kit_product} not found in item")
-            @result['status'] &= false
-          else
-            unless product_kit_sku.destroy
-              @result['messages'].push("Product #{kit_product} could not be removed fronm kit")
+            if product_kit_sku.nil?
+              @result['messages'].push("Product #{kit_product} not found in item")
               @result['status'] &= false
+            else
+              unless product_kit_sku.destroy
+                @result['messages'].push("Product #{kit_product} could not be removed fronm kit")
+                @result['status'] &= false
+              end
             end
-          end
           end
         end
         @kit.update_product_status
@@ -768,6 +770,7 @@ class ProductsController < ApplicationController
       format.json { render json: @result }
     end
   end
+
   def updateproduct
     @result = Hash.new
     @product = Product.find(params[:basicinfo][:id]) unless params.nil? && params[:basicinfo].nil?
@@ -777,7 +780,7 @@ class ProductsController < ApplicationController
 
     if !@product.nil?
       if current_user.can?('add_edit_products') ||
-          (session[:product_edit_matched_for_current_user] && session[:product_edit_matched_for_products].include?(@product.id))
+        (session[:product_edit_matched_for_current_user] && session[:product_edit_matched_for_products].include?(@product.id))
         @product.reload
         #Update Basic Info
         @product.disable_conf_req = params[:basicinfo][:disable_conf_req]
@@ -807,18 +810,18 @@ class ProductsController < ApplicationController
           @result['status'] &= false
         end
         #Update product status and also update the containing kit and orders
-        updatelist(@product,'status',params[:basicinfo][:status]) unless params[:basicinfo][:status].nil?
+        updatelist(@product, 'status', params[:basicinfo][:status]) unless params[:basicinfo][:status].nil?
 
         #Update product inventory warehouses
         #check if a product inventory warehouse is defined.
-        product_inv_whs = ProductInventoryWarehouses.where(:product_id=>@product.id)
+        product_inv_whs = ProductInventoryWarehouses.where(:product_id => @product.id)
 
         if product_inv_whs.length > 0
           product_inv_whs.each do |inv_wh|
             if UserInventoryPermission.where(
-                :user_id => current_user.id,
-                :inventory_warehouse_id => inv_wh.inventory_warehouse_id,
-                :edit => true
+              :user_id => current_user.id,
+              :inventory_warehouse_id => inv_wh.inventory_warehouse_id,
+              :edit => true
             ).length > 0
               found_inv_wh = false
               unless params[:inventory_warehouses].nil?
@@ -843,9 +846,9 @@ class ProductsController < ApplicationController
           general_setting = GeneralSetting.all.first
           params[:inventory_warehouses].each do |wh|
             if UserInventoryPermission.where(
-                :user_id => current_user.id,
-                :inventory_warehouse_id => wh['warehouse_info']['id'],
-                :edit => true
+              :user_id => current_user.id,
+              :inventory_warehouse_id => wh['warehouse_info']['id'],
+              :edit => true
             ).length > 0
               if !wh["info"]["id"].nil?
                 product_inv_wh = ProductInventoryWarehouses.find(wh["info"]["id"])
@@ -877,7 +880,7 @@ class ProductsController < ApplicationController
 
         #Update product categories
         #check if a product category is defined.
-        product_cats = ProductCat.where(:product_id=>@product.id)
+        product_cats = ProductCat.where(:product_id => @product.id)
 
         if product_cats.length > 0
           product_cats.each do |productcat|
@@ -921,7 +924,7 @@ class ProductsController < ApplicationController
         #Update product skus
         #check if a product sku is defined.
 
-        product_skus = ProductSku.where(:product_id=>@product.id)
+        product_skus = ProductSku.where(:product_id => @product.id)
 
         if product_skus.length > 0
           product_skus.each do |productsku|
@@ -974,7 +977,7 @@ class ProductsController < ApplicationController
 
         #Update product barcodes
         #check if a product barcode is defined.
-        product_barcodes = ProductBarcode.where(:product_id=>@product.id)
+        product_barcodes = ProductBarcode.where(:product_id => @product.id)
         product_barcodes.reload
         if product_barcodes.length > 0
           product_barcodes.each do |productbarcode|
@@ -1028,7 +1031,7 @@ class ProductsController < ApplicationController
 
         #Update product barcodes
         #check if a product barcode is defined.
-        product_images = ProductImage.where(:product_id=>@product.id)
+        product_images = ProductImage.where(:product_id => @product.id)
 
         if product_images.length > 0
           product_images.each do |productimage|
@@ -1116,15 +1119,15 @@ class ProductsController < ApplicationController
       format.html
       format.pdf {
         render :pdf => "file_name",
-        :template => 'products/generate_barcode_slip.html.erb',
-        :orientation => 'Portrait',
-        :page_height => '1in',
-        :page_width => '3in',
-        :margin => {:top => '0',
-                    :bottom => '0',
-                    :left => '0',
-                    :right => '0'}
-       }
+               :template => 'products/generate_barcode_slip.html.erb',
+               :orientation => 'Portrait',
+               :page_height => '1in',
+               :page_width => '3in',
+               :margin => {:top => '0',
+                           :bottom => '0',
+                           :left => '0',
+                           :right => '0'}
+      }
     end
   end
 
@@ -1138,7 +1141,7 @@ class ProductsController < ApplicationController
         @result['status'] = false
         @result['error_msg'] ="Cannot find Product"
       else
-        updatelist(@product,params[:var],params[:value])
+        updatelist(@product, params[:var], params[:value])
       end
     else
       @result['status'] = false
@@ -1170,7 +1173,7 @@ class ProductsController < ApplicationController
       if @product_aliases.length > 0
         @product_aliases.each do |product_alias|
           #all SKUs of the alias will be copied. dont use product_alias.product_skus
-          @product_skus = ProductSku.where(:product_id=>product_alias.id)
+          @product_skus = ProductSku.where(:product_id => product_alias.id)
           @product_skus.each do |alias_sku|
             alias_sku.product_id = @product_orig.id
             alias_sku.order = skus_len
@@ -1181,7 +1184,7 @@ class ProductsController < ApplicationController
             end
           end
 
-          @product_barcodes = ProductBarcode.where(:product_id=>product_alias.id)
+          @product_barcodes = ProductBarcode.where(:product_id => product_alias.id)
           @product_barcodes.each do |alias_barcode|
             alias_barcode.product_id = @product_orig.id
             alias_barcode.order = barcodes_len
@@ -1193,7 +1196,7 @@ class ProductsController < ApplicationController
           end
 
           #update order items of aliased products to original products
-          @order_items = OrderItem.where(:product_id=>product_alias.id)
+          @order_items = OrderItem.where(:product_id => product_alias.id)
           @order_items.each do |order_item|
             order_item.product_id = @product_orig.id
             if !order_item.save
@@ -1267,13 +1270,13 @@ class ProductsController < ApplicationController
       if !@product.nil? && !params[:product_image].nil?
         @image = ProductImage.new
 
-          #image_directory = "public/images"
-          current_tenant = Apartment::Tenant.current
-          file_name = Time.now.strftime('%d_%b_%Y_%I__%M_%p')+@product.id.to_s+params[:product_image].original_filename
-          GroovS3.create_image(current_tenant,file_name,params[:product_image].read,params[:product_image].content_type)
-          #path = File.join(image_directory, file_name )
-          #File.open(path, "wb") { |f| f.write(params[:product_image].read) }
-          @image.image = ENV['S3_BASE_URL']+'/'+current_tenant+'/image/'+file_name
+        #image_directory = "public/images"
+        current_tenant = Apartment::Tenant.current
+        file_name = Time.now.strftime('%d_%b_%Y_%I__%M_%p')+@product.id.to_s+params[:product_image].original_filename
+        GroovS3.create_image(current_tenant, file_name, params[:product_image].read, params[:product_image].content_type)
+        #path = File.join(image_directory, file_name )
+        #File.open(path, "wb") { |f| f.write(params[:product_image].read) }
+        @image.image = ENV['S3_BASE_URL']+'/'+current_tenant+'/image/'+file_name
         @image.caption = params[:caption] if !params[:caption].nil?
         @product.product_images << @image
         if !@product.save
@@ -1281,8 +1284,8 @@ class ProductsController < ApplicationController
           @result['messages'].push("Adding image failed")
         end
       else
-          @result['status'] = false
-          @result['messages'].push("Invalid data sent to the server")
+        @result['status'] = false
+        @result['messages'].push("Invalid data sent to the server")
       end
     else
       @result['status'] = false
@@ -1314,8 +1317,8 @@ class ProductsController < ApplicationController
       params[:method].nil?
       product = Product.find(params[:id])
       unless product.nil?
-        product_inv_whs = ProductInventoryWarehouses.where(:product_id=> product.id).
-          where(:inventory_warehouse_id=>params[:inv_wh_id])
+        product_inv_whs = ProductInventoryWarehouses.where(:product_id => product.id).
+          where(:inventory_warehouse_id => params[:inv_wh_id])
 
         unless product_inv_whs.length == 1
           product_inv_wh = ProductInventoryWarehouses.new
@@ -1330,7 +1333,7 @@ class ProductsController < ApplicationController
             product_inv_whs.first.quantity_on_hand = params[:inventory_count]
           elsif params[:method] == 'receive'
             product_inv_whs.first.available_inv =
-                product_inv_whs.first.available_inv + (params[:inventory_count].to_i)
+              product_inv_whs.first.available_inv + (params[:inventory_count].to_i)
           else
             result['status'] &= false
             result['error_messages'].push("Invalid method passed in parameter.
@@ -1349,8 +1352,8 @@ class ProductsController < ApplicationController
         product_inv_whs.first.save
 
       else
-      result['status'] &= false
-      result['error_messages'].push('Cannot find product with id: ' +params[:id])
+        result['status'] &= false
+        result['error_messages'].push('Cannot find product with id: ' +params[:id])
       end
     else
       result['status'] &= false
@@ -1376,8 +1379,8 @@ class ProductsController < ApplicationController
         products.push(Product.find(product['id']))
       end
       result['filename'] = 'products-'+Time.now.to_s+'.csv'
-      CSV.open("#{Rails.root}/public/csv/#{result['filename']}","w") do |csv|
-        ProductsHelper.products_csv(products,csv)
+      CSV.open("#{Rails.root}/public/csv/#{result['filename']}", "w") do |csv|
+        ProductsHelper.products_csv(products, csv)
       end
     else
       result['status'] = false
@@ -1385,7 +1388,7 @@ class ProductsController < ApplicationController
     end
     unless result['status']
       result['filename'] = 'error.csv'
-      CSV.open("#{Rails.root}/public/csv/#{result['filename']}","w") do |csv|
+      CSV.open("#{Rails.root}/public/csv/#{result['filename']}", "w") do |csv|
         csv << result['messages']
       end
     end
@@ -1406,7 +1409,7 @@ class ProductsController < ApplicationController
       intangible_setting_enabled = scan_pack_setting.intangible_setting_enabled
       intangible_string = scan_pack_setting.intangible_string
 
-      action_intangible.delay(:run_at =>1.seconds.from_now).update_intangibleness(Apartment::Tenant.current, params, intangible_setting_enabled, intangible_string)
+      action_intangible.delay(:run_at => 1.seconds.from_now).update_intangibleness(Apartment::Tenant.current, params, intangible_setting_enabled, intangible_string)
       # action_intangible.update_intangibleness(Apartment::Tenant.current, params, intangible_setting_enabled, intangible_string)
     else
       result['status'] = false
@@ -1422,10 +1425,10 @@ class ProductsController < ApplicationController
     result = Hash.new
     result['status'] = true
     begin
-     image = ProductImage.find(params[:image][:id])
-     image.added_to_receiving_instructions = params[:image][:added_to_receiving_instructions]
-     image.image_note = params[:image][:image_note]
-     image.save
+      image = ProductImage.find(params[:image][:id])
+      image.added_to_receiving_instructions = params[:image][:added_to_receiving_instructions]
+      image.image_note = params[:image][:image_note]
+      image.save
     rescue
       result['status'] = false
     end
@@ -1483,7 +1486,7 @@ class ProductsController < ApplicationController
         @product_hash['store_name'] = product.store.name
       end
 
-      @product_kit_skus = ProductKitSkus.where(:product_id=>product.id)
+      @product_kit_skus = ProductKitSkus.where(:product_id => product.id)
       if @product_kit_skus.length > 0
         @product_hash['productkitskus'] = []
         @product_kit_skus.each do |kitsku|
@@ -1497,17 +1500,16 @@ class ProductsController < ApplicationController
   end
 
 
-
   def get_products_count
     count = Hash.new
     is_kit = 0
     supported_kit_params = ['0', '1', '-1']
-    is_kit = params[:is_kit] if !params[:is_kit].nil?  &&
-        supported_kit_params.include?(params[:is_kit])
+    is_kit = params[:is_kit] if !params[:is_kit].nil? &&
+      supported_kit_params.include?(params[:is_kit])
     if is_kit == '-1'
-      counts = Product.select('status,count(*) as count').where(:status=>['active','inactive','new']).group(:status)
+      counts = Product.select('status,count(*) as count').where(:status => ['active', 'inactive', 'new']).group(:status)
     else
-      counts = Product.select('status,count(*) as count').where(:is_kit=>is_kit.to_s,:status=>['active','inactive','new']).group(:status)
+      counts = Product.select('status,count(*) as count').where(:is_kit => is_kit.to_s, :status => ['active', 'inactive', 'new']).group(:status)
     end
     all = 0
     counts.each do |single|

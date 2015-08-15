@@ -22,15 +22,15 @@ module Groovepacker
           combined_response["orders"] = []
           begin
             Rails.logger.info "Retrieving for page " + page_index.to_s + " at " + DateTime.now.to_s
-            response = HTTParty.get('https://ssapi.shipstation.com/Orders/List?orderStatus=' + 
-              status + '&page=' + page_index.to_s + '&pageSize=500' + orderDateStart,
-              headers: {
-                "Authorization" => "Basic "+ Base64.encode64(@auth[:api_key] + ":" + @auth[:api_secret]).gsub(/\n/, ''),
-                "X-Mashape-Key" => "E6cSux0BVQmshJh0VacUkqXP1sJgp1I1APKjsntC26JSOTy0pP",
-              })
+            response = HTTParty.get('https://ssapi.shipstation.com/Orders/List?orderStatus=' +
+                                      status + '&page=' + page_index.to_s + '&pageSize=500' + orderDateStart,
+                                    headers: {
+                                      "Authorization" => "Basic "+ Base64.encode64(@auth[:api_key] + ":" + @auth[:api_secret]).gsub(/\n/, ''),
+                                      "X-Mashape-Key" => "E6cSux0BVQmshJh0VacUkqXP1sJgp1I1APKjsntC26JSOTy0pP",
+                                    })
             handle_exceptions(response)
-            combined_response["orders"] = 
-              combined_response["orders"] + 
+            combined_response["orders"] =
+              combined_response["orders"] +
                 response.parsed_response["orders"] unless response.parsed_response["orders"].length == 0
             page_index = page_index + 1
           end while response.parsed_response["orders"].length > 0
@@ -40,10 +40,10 @@ module Groovepacker
         def get_products
           Rails.logger.info "Getting all active products"
           response = HTTParty.get('https://ssapi.shipstation.com/Products?showInactive=false',
-            headers: {
-              "Authorization" => "Basic "+ Base64.encode64(@auth[:api_key] + ":" + @auth[:api_secret]).gsub(/\n/, ''),
-              "X-Mashape-Key" => "E6cSux0BVQmshJh0VacUkqXP1sJgp1I1APKjsntC26JSOTy0pP"
-            })
+                                  headers: {
+                                    "Authorization" => "Basic "+ Base64.encode64(@auth[:api_key] + ":" + @auth[:api_secret]).gsub(/\n/, ''),
+                                    "X-Mashape-Key" => "E6cSux0BVQmshJh0VacUkqXP1sJgp1I1APKjsntC26JSOTy0pP"
+                                  })
           handle_exceptions(response)
           response.parsed_response
         end
@@ -53,20 +53,20 @@ module Groovepacker
           unless orderNumber.nil?
             orderNumberParam = '&orderNumber=' + orderNumber.to_s
             Rails.logger.info "Getting shipment with order number: " + orderNumber
-            response = HTTParty.get('https://ssapi.shipstation.com/Shipments/List?' + 
-                'page=1&pageSize=100' + URI.encode(orderNumberParam),
-                headers: {
-                  "Authorization" => "Basic "+ Base64.encode64(@auth[:api_key] + ":" + @auth[:api_secret]).gsub(/\n/, ''),
-                  "X-Mashape-Key" => "E6cSux0BVQmshJh0VacUkqXP1sJgp1I1APKjsntC26JSOTy0pP"
-                })
+            response = HTTParty.get('https://ssapi.shipstation.com/Shipments/List?' +
+                                      'page=1&pageSize=100' + URI.encode(orderNumberParam),
+                                    headers: {
+                                      "Authorization" => "Basic "+ Base64.encode64(@auth[:api_key] + ":" + @auth[:api_secret]).gsub(/\n/, ''),
+                                      "X-Mashape-Key" => "E6cSux0BVQmshJh0VacUkqXP1sJgp1I1APKjsntC26JSOTy0pP"
+                                    })
 
             handle_exceptions(response)
             unless response.parsed_response["shipments"].nil? ||
-             response.parsed_response["shipments"].empty?
+              response.parsed_response["shipments"].empty?
               response.parsed_response["shipments"].each do |shipment|
                 if !shipment["trackingNumber"].nil? && shipment["orderNumber"] == orderNumber
                   tracking_number = shipment["trackingNumber"]
-                end 
+                end
               end
             end
           end
@@ -75,14 +75,14 @@ module Groovepacker
 
         def update_order(orderId, order)
           Rails.logger.info "Updating order with orderId: " + orderId.to_s
-          response = HTTParty.post('https://ssapi.shipstation.com/Orders/CreateOrder',{
-            body: JSON.dump(order),
-            headers: {
-              "Authorization" => "Basic "+ Base64.encode64(@auth[:api_key] + ":" + @auth[:api_secret]).gsub(/\n/, ''),
-              "X-Mashape-Key" => "E6cSux0BVQmshJh0VacUkqXP1sJgp1I1APKjsntC26JSOTy0pP",
-              "Content-Type" => "application/json",
-              "Accept" => "application/json"
-            }, :debug_output => $stdout})
+          response = HTTParty.post('https://ssapi.shipstation.com/Orders/CreateOrder', {
+                                                                                       body: JSON.dump(order),
+                                                                                       headers: {
+                                                                                         "Authorization" => "Basic "+ Base64.encode64(@auth[:api_key] + ":" + @auth[:api_secret]).gsub(/\n/, ''),
+                                                                                         "X-Mashape-Key" => "E6cSux0BVQmshJh0VacUkqXP1sJgp1I1APKjsntC26JSOTy0pP",
+                                                                                         "Content-Type" => "application/json",
+                                                                                         "Accept" => "application/json"
+                                                                                       }, :debug_output => $stdout})
           handle_exceptions(response)
           response
         end
@@ -90,23 +90,23 @@ module Groovepacker
         def get_order(orderId)
           Rails.logger.info "Getting orders with orderId: " + orderId
           response = HTTParty.get('https://ssapi.shipstation.com/Orders/' + orderId,
-            headers: {
-              "Authorization" => "Basic "+ Base64.encode64(@auth[:api_key] + ":" + @auth[:api_secret]).gsub(/\n/, ''),
-              "X-Mashape-Key" => "E6cSux0BVQmshJh0VacUkqXP1sJgp1I1APKjsntC26JSOTy0pP"
-            })
+                                  headers: {
+                                    "Authorization" => "Basic "+ Base64.encode64(@auth[:api_key] + ":" + @auth[:api_secret]).gsub(/\n/, ''),
+                                    "X-Mashape-Key" => "E6cSux0BVQmshJh0VacUkqXP1sJgp1I1APKjsntC26JSOTy0pP"
+                                  })
           handle_exceptions(response)
           response
         end
 
         def get_tag_id(tag)
           response = HTTParty.get(@endpoint + '/accounts/listtags',
-            headers: {
-              "Authorization" => authorization_token
-          })
+                                  headers: {
+                                    "Authorization" => authorization_token
+                                  })
           handle_exceptions(response)
           tags = response.parsed_response
-          index = tags.empty?? nil : tags.index{|x| x["name"] == tag }
-          index.nil?? -1 : tags[index]["tagId"]
+          index = tags.empty? ? nil : tags.index { |x| x["name"] == tag }
+          index.nil? ? -1 : tags[index]["tagId"]
         end
 
         def get_orders_by_tag(tag)
@@ -115,8 +115,8 @@ module Groovepacker
           response = {}
           response["orders"] = []
           unless tag_id == -1
-            ["awaiting_payment", "awaiting_shipment", "shipped", 
-              "on_hold", "cancelled"].each do |status|
+            ["awaiting_payment", "awaiting_shipment", "shipped",
+             "on_hold", "cancelled"].each do |status|
               orders = find_orders_by_tag_and_status(tag_id, status)
               response["orders"] = response["orders"] + orders unless orders.nil?
             end
@@ -129,12 +129,12 @@ module Groovepacker
           total_pages = 0
           orders = []
           begin
-            response = HTTParty.get(@endpoint + '/orders/listbytag?orderStatus=' + 
-              status + '&tagId=' + tag_id.to_s + '&page=' + page_index.to_s + '&pageSize=100',
-                headers: {
-                  "Authorization" => authorization_token
-                }
-              )
+            response = HTTParty.get(@endpoint + '/orders/listbytag?orderStatus=' +
+                                      status + '&tagId=' + tag_id.to_s + '&page=' + page_index.to_s + '&pageSize=100',
+                                    headers: {
+                                      "Authorization" => authorization_token
+                                    }
+            )
             orders = orders + response["orders"] unless response["orders"].nil?
             total_pages = response.parsed_response["pages"]
             page_index = page_index + 1
@@ -145,21 +145,21 @@ module Groovepacker
 
         def remove_tag_from_order(order_id, tag_id)
           response = HTTParty.post(@endpoint + '/orders/removetag', {
-            body: {orderId: order_id, tagId: tag_id},
-            headers: {
-              "Authorization" => authorization_token
-            }
-          })
+                                                                    body: {orderId: order_id, tagId: tag_id},
+                                                                    headers: {
+                                                                      "Authorization" => authorization_token
+                                                                    }
+                                                                  })
           handle_exceptions(response)
         end
 
         def add_tag_to_order(order_id, tag_id)
           response = HTTParty.post(@endpoint + '/orders/addtag', {
-            body: {orderId: order_id, tagId: tag_id},
-            headers: {
-              "Authorization" => authorization_token
-            }
-          })
+                                                                 body: {orderId: order_id, tagId: tag_id},
+                                                                 headers: {
+                                                                   "Authorization" => authorization_token
+                                                                 }
+                                                               })
           handle_exceptions(response)
         end
 

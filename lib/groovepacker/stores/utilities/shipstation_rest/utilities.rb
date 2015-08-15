@@ -17,7 +17,7 @@ module Groovepacker
                 result[:message] = "#{tag} Tag is not available"
               end
             end
-            result[:message] = 
+            result[:message] =
               "Tags are available in your shipstation account." if result[:verification_result]
             result
           end

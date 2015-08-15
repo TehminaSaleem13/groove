@@ -1,6 +1,6 @@
 class StripeInvoiceEmail < ActionMailer::Base
   default from: "app@groovepacker.com"
-  
+
   def send_success_invoice(invoice)
     Apartment::Tenant.switch()
     unless Subscription.where(customer_subscription_id: invoice.subscription_id).empty?
@@ -12,8 +12,8 @@ class StripeInvoiceEmail < ActionMailer::Base
           Apartment::Tenant.switch(tenant)
           @tenant_name = tenant
           @invoice = invoice
-          mail to: [@email,'groovepacker@gmail.com'], 
-            subject: "GroovePacker Invoice Email"
+          mail to: [@email, 'groovepacker@gmail.com'],
+               subject: "GroovePacker Invoice Email"
         end
       end
     end
@@ -30,8 +30,8 @@ class StripeInvoiceEmail < ActionMailer::Base
           Apartment::Tenant.switch(tenant)
           @tenant_name = tenant
           @invoice = invoice
-          mail to: [@email,'groovepacker@gmail.com'], 
-            subject: "Attention Required: Account Billing Failure for "+tenant+".groovepacker.com"
+          mail to: [@email, 'groovepacker@gmail.com'],
+               subject: "Attention Required: Account Billing Failure for "+tenant+".groovepacker.com"
         end
       end
     end
@@ -40,7 +40,7 @@ class StripeInvoiceEmail < ActionMailer::Base
   def get_customer_email_from_stripe(subscription)
     unless subscription.stripe_customer_id.nil?
       begin
-        customer = Stripe::Customer.retrieve(subscription.stripe_customer_id) 
+        customer = Stripe::Customer.retrieve(subscription.stripe_customer_id)
         return customer.email
       rescue Stripe::InvalidRequestError => er
         return nil

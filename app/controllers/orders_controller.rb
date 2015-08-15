@@ -50,7 +50,7 @@ class OrdersController < ApplicationController
         elsif store.store_type == 'Shopify'
           context = Groovepacker::Stores::Context.new(
             Groovepacker::Stores::Handlers::ShopifyHandler.new(store))
-          import_result = context.import_orders  
+          import_result = context.import_orders
         end
       rescue Exception => e
         @result['status'] = false
@@ -72,7 +72,7 @@ class OrdersController < ApplicationController
     end
 
     respond_to do |format|
-      format.json { render json: @result}
+      format.json { render json: @result }
     end
   end
 
@@ -97,7 +97,7 @@ class OrdersController < ApplicationController
           import_item.to_import = 1
           import_item.save
           Groovepacker::Stores::Context.new(
-            Groovepacker::Stores::Handlers::ShipworksHandler.new(credential.store,import_item)).import_order(params["ShipWorks"]["Customer"]["Order"])
+            Groovepacker::Stores::Handlers::ShipworksHandler.new(credential.store, import_item)).import_order(params["ShipWorks"]["Customer"]["Order"])
           if import_item.status != 'failed'
             import_item.status = 'completed'
             import_item.save
@@ -132,7 +132,7 @@ class OrdersController < ApplicationController
       @order.notes_internal = params[:order]['notes_internal']
       @order.notes_toPacker = params[:order]['notes_toPacker']
     elsif @order.notes_internal != params[:order]['notes_internal'] ||
-          @order.notes_toPacker != params[:order]['notes_toPacker']
+      @order.notes_toPacker != params[:order]['notes_toPacker']
       @result['status'] = false
       @result['messages'].push('You do not have the permissions to edit notes')
     end
@@ -163,29 +163,29 @@ class OrdersController < ApplicationController
       @order.order_total = params[:order]['order_total'] unless params[:order]['order_total'].nil?
       @order.weight_oz = params[:order]['weight_oz'] unless params[:order]['weight_oz'].nil?
     elsif @order.firstname != params[:order]['firstname'] ||
-          @order.lastname != params[:order]['lastname'] ||
-          @order.company != params[:order]['company'] ||
-          @order.address_1 != params[:order]['address_1'] ||
-          @order.address_2 != params[:order]['address_2'] ||
-          @order.city != params[:order]['city'] ||
-          @order.state != params[:order]['state'] ||
-          @order.postcode != params[:order]['postcode'] ||
-          @order.country != params[:order]['country'] ||
-          @order.email != params[:order]['email'] ||
-          @order.increment_id != params[:order]['increment_id'] ||
-          @order.order_placed_time != params[:order]['order_placed_time'] ||
-          @order.customer_comments != params[:order]['customer_comments'] ||
-          @order.scanned_on != params[:order]['scanned_on'] ||
-          @order.tracking_num != params[:order]['tracking_num'] ||
-          @order.seller_id != params[:order]['seller_id'] ||
-          @order.order_status_id != params[:order]['order_status_id'] ||
-          @order.order_number != params[:order]['order_number'] ||
-          @order.ship_name != params[:order]['ship_name'] ||
-          @order.notes_from_buyer != params[:order]['notes_from_buyer'] ||
-          @order.shipping_amount != params[:order]['shipping_amount'] ||
-          @order.order_total != params[:order]['order_total'] ||
-          @order.weight_oz != params[:order]['weight_oz'] ||
-          @order.note_confirmation != params[:order]['note_confirmation']
+      @order.lastname != params[:order]['lastname'] ||
+      @order.company != params[:order]['company'] ||
+      @order.address_1 != params[:order]['address_1'] ||
+      @order.address_2 != params[:order]['address_2'] ||
+      @order.city != params[:order]['city'] ||
+      @order.state != params[:order]['state'] ||
+      @order.postcode != params[:order]['postcode'] ||
+      @order.country != params[:order]['country'] ||
+      @order.email != params[:order]['email'] ||
+      @order.increment_id != params[:order]['increment_id'] ||
+      @order.order_placed_time != params[:order]['order_placed_time'] ||
+      @order.customer_comments != params[:order]['customer_comments'] ||
+      @order.scanned_on != params[:order]['scanned_on'] ||
+      @order.tracking_num != params[:order]['tracking_num'] ||
+      @order.seller_id != params[:order]['seller_id'] ||
+      @order.order_status_id != params[:order]['order_status_id'] ||
+      @order.order_number != params[:order]['order_number'] ||
+      @order.ship_name != params[:order]['ship_name'] ||
+      @order.notes_from_buyer != params[:order]['notes_from_buyer'] ||
+      @order.shipping_amount != params[:order]['shipping_amount'] ||
+      @order.order_total != params[:order]['order_total'] ||
+      @order.weight_oz != params[:order]['weight_oz'] ||
+      @order.note_confirmation != params[:order]['note_confirmation']
       @result['status'] = false
       @result['messages'].push('You do not have enough permissions to edit the order')
     end
@@ -221,7 +221,7 @@ class OrdersController < ApplicationController
     @result['orders_count'] = get_orders_count()
 
     respond_to do |format|
-      format.json { render json: @result}
+      format.json { render json: @result }
     end
   end
 
@@ -235,7 +235,7 @@ class OrdersController < ApplicationController
 
     if current_user.can?('add_edit_order_items')
       unless @orders.nil?
-        @orders.each do|order|
+        @orders.each do |order|
 
           @order = Order.find(order["id"])
 
@@ -246,9 +246,9 @@ class OrdersController < ApplicationController
           begin
             temp_increment_id = @order.increment_id + "(duplicate"+index.to_s+ ")"
             @neworder.increment_id = temp_increment_id
-            @orderslist = Order.where(:increment_id=>temp_increment_id)
+            @orderslist = Order.where(:increment_id => temp_increment_id)
             index = index + 1
-          end while(!@orderslist.nil? && @orderslist.length > 0)
+          end while (!@orderslist.nil? && @orderslist.length > 0)
 
           if !@neworder.save(:validate => false)
             @result['status'] = false
@@ -277,8 +277,8 @@ class OrdersController < ApplicationController
     end
 
     respond_to do |format|
-        format.html # show.html.erb
-        format.json { render json: @result }
+      format.html # show.html.erb
+      format.json { render json: @result }
     end
   end
 
@@ -290,7 +290,7 @@ class OrdersController < ApplicationController
     @orders = list_selected_orders
     if current_user.can? 'add_edit_order_items'
       unless @orders.nil?
-        @orders.each do|order|
+        @orders.each do |order|
           @order = Order.find(order["id"])
           if @order.destroy
             @result['status'] &= true
@@ -306,10 +306,11 @@ class OrdersController < ApplicationController
     end
 
     respond_to do |format|
-        format.html # show.html.erb
-        format.json { render json: @result }
+      format.html # show.html.erb
+      format.json { render json: @result }
     end
   end
+
   # For search pass in parameter params[:search] and a params[:limit] and params[:offset].
   # If limit and offset are not passed, then it will be default to 10 and 0
   def search
@@ -330,8 +331,8 @@ class OrdersController < ApplicationController
 
 
     respond_to do |format|
-        format.html # show.html.erb
-        format.json { render json: @result }
+      format.html # show.html.erb
+      format.json { render json: @result }
     end
   end
 
@@ -344,11 +345,11 @@ class OrdersController < ApplicationController
     @orders = list_selected_orders
     if current_user.can? 'change_order_status'
       unless @orders.nil?
-        @orders.each do|order|
+        @orders.each do |order|
           @order = Order.find(order['id'])
-          
+
           if (Order::SOLD_STATUSES.include?(@order.status) && Order::UNALLOCATE_STATUSES.include?(params[:status])) ||
-              (Order::UNALLOCATE_STATUSES.include?(@order.status) && Order::SOLD_STATUSES.include?(params[:status]))
+            (Order::UNALLOCATE_STATUSES.include?(@order.status) && Order::SOLD_STATUSES.include?(params[:status]))
 
             @result['error_messages'].push('This status change is not permitted.')
           else
@@ -393,12 +394,12 @@ class OrdersController < ApplicationController
           @orderitem['productinfo'] = product
           @orderitem['available_inv'] = 0
           product.product_inventory_warehousess.each do |inventory|
-            @orderitem['available_inv'] +=  inventory.available_inv.to_i
+            @orderitem['available_inv'] += inventory.available_inv.to_i
           end
           if product.product_inventory_warehousess.all.length > 0
             @orderitem['location_primary'] =
-            product.primary_warehouse.nil? ? "" : product.primary_warehouse.location_primary
-                #ProductInventoryWarehouses.where(product_id:product.id,inventory_warehouse_id: current_user.inventory_warehouse_id).first.location_primary
+              product.primary_warehouse.nil? ? "" : product.primary_warehouse.location_primary
+            #ProductInventoryWarehouses.where(product_id:product.id,inventory_warehouse_id: current_user.inventory_warehouse_id).first.location_primary
           end
           @orderitem['sku'] = product.primary_sku
           @orderitem['barcode'] = product.primary_barcode
@@ -464,8 +465,8 @@ class OrdersController < ApplicationController
     @order = Order.find(params[:id])
 
     if !params[:reason].nil?
-      if (current_user.can?('create_packing_ex') &&  @order.order_exception.nil?) ||
-          (current_user.can?('edit_packing_ex') &&  !@order.order_exception.nil?)
+      if (current_user.can?('create_packing_ex') && @order.order_exception.nil?) ||
+        (current_user.can?('edit_packing_ex') && !@order.order_exception.nil?)
         if @order.order_exception.nil?
           @exception = OrderException.new
           @exception.order_id = @order.id
@@ -713,21 +714,21 @@ class OrdersController < ApplicationController
           end
           unless params[:single]['items'].blank?
             params[:single]['items'].each do |current_item|
-              single_item = OrderItem.find_or_create_by_order_id_and_product_id( order.id, current_item['iteminfo']['product_id'])
-                current_item['iteminfo'].each do |value|
-                  unless ["id","created_at","updated_at","order_id","product_id"].include?(value[0])
-                    single_item[value[0]] = value[1]
-                  end
+              single_item = OrderItem.find_or_create_by_order_id_and_product_id(order.id, current_item['iteminfo']['product_id'])
+              current_item['iteminfo'].each do |value|
+                unless ["id", "created_at", "updated_at", "order_id", "product_id"].include?(value[0])
+                  single_item[value[0]] = value[1]
                 end
-                single_item.save!
+              end
+              single_item.save!
               begin
                 current_product = Product.find(current_item['iteminfo']['product_id'])
-                updatelist(current_product,'name',current_item['productinfo']['name'])
-                updatelist(current_product,'is_skippable',current_item['productinfo']['is_skippable'])
-                updatelist(current_product,'location_name',current_item['location'])
-                updatelist(current_product,'sku',current_item['sku'])
+                updatelist(current_product, 'name', current_item['productinfo']['name'])
+                updatelist(current_product, 'is_skippable', current_item['productinfo']['is_skippable'])
+                updatelist(current_product, 'location_name', current_item['location'])
+                updatelist(current_product, 'sku', current_item['sku'])
               rescue Exception => e
-                
+
               end
             end
           end
@@ -760,7 +761,7 @@ class OrdersController < ApplicationController
           else
             exception = OrderException.find_or_create_by_order_id(order.id)
             params[:single]['exception'].each do |value|
-              unless ["id","created_at","updated_at","order_id","assoc"].include?(value[0])
+              unless ["id", "created_at", "updated_at", "order_id", "assoc"].include?(value[0])
                 exception[value[0]] = value[1]
               end
             end
@@ -790,18 +791,18 @@ class OrdersController < ApplicationController
       @result['error_msg'] = "Cannot find Order"
     else
       accepted_data = {
-          #"ordernum" => "increment_id",
-          "order_date" => "order_placed_time",
-          "recipient" => 1,
-          "notes" => "notes_internal",
-          "notes_from_packer" => "notes_fromPacker",
-          "status" => "status",
-          "email" => "email",
-          "tracking_num" => "tracking_num",
-          "city"=>"city",
-          "state"=>"state",
-          "postcode"=>"postcode",
-          "country"=>"country"
+        #"ordernum" => "increment_id",
+        "order_date" => "order_placed_time",
+        "recipient" => 1,
+        "notes" => "notes_internal",
+        "notes_from_packer" => "notes_fromPacker",
+        "status" => "status",
+        "email" => "email",
+        "tracking_num" => "tracking_num",
+        "city" => "city",
+        "state" => "state",
+        "postcode" => "postcode",
+        "country" => "country"
       }
       if accepted_data.has_key?(params[:var])
         if params[:var] == "recipient"
@@ -809,8 +810,8 @@ class OrdersController < ApplicationController
           @order.firstname = arr.shift
           @order.lastname = arr.join(' ')
         elsif params[:var] == 'notes_from_packer' ||
-              (params[:var] == 'notes' && current_user.can?('create_edit_notes')) ||
-              current_user.can?('add_edit_order_items')
+          (params[:var] == 'notes' && current_user.can?('create_edit_notes')) ||
+          current_user.can?('add_edit_order_items')
           key = accepted_data[params[:var]]
           @order[key] = params[:value]
         else
@@ -875,11 +876,11 @@ class OrdersController < ApplicationController
                 else #for individual kits
                   if order_item.product.kit_parsing == 'individual'
                     @pick_list = individual_pick_list_obj.build(
-                    order_item.qty, order_item.product, @pick_list, inventory_warehouse_id)
+                      order_item.qty, order_item.product, @pick_list, inventory_warehouse_id)
                   else #for automatic depends kits
                     if order_item.product.kit_parsing == 'depends'
                       @depends_pick_list = depends_pick_list_obj.build(
-                      order_item.qty, order_item.product, @depends_pick_list, inventory_warehouse_id)
+                        order_item.qty, order_item.product, @depends_pick_list, inventory_warehouse_id)
                     end
                   end
                 end
@@ -890,7 +891,7 @@ class OrdersController < ApplicationController
       end
     end
     unless @pick_list.length == 0
-      @pick_list = @pick_list.sort_by  do |h|
+      @pick_list = @pick_list.sort_by do |h|
         if h['primary_location'].blank?
           ''
         else
@@ -899,7 +900,7 @@ class OrdersController < ApplicationController
       end
     end
     unless @depends_pick_list.length == 0
-      @depends_pick_list = @depends_pick_list.sort_by  do |h|
+      @depends_pick_list = @depends_pick_list.sort_by do |h|
         unless h['individual'].length == 0
           h['individual'] = h['individual'].sort_by do |hash|
             if hash['primary_location'].blank?
@@ -927,20 +928,20 @@ class OrdersController < ApplicationController
         file_name = 'pick_list_'+time.strftime('%d_%b_%Y')
         result['data']['pick_list_file_paths'] = '/pdfs/'+ file_name + '.pdf'
         render :pdf => file_name,
-        :template => 'orders/generate_pick_list',
-        :orientation => 'portrait',
-        :page_height => '8in',
-        :save_only => true,
-        :page_width => '11.5in',
-        :margin => {:top => '20',
-                    :bottom => '20',
-                    :left => '10',
-                    :right => '10'},
-        :header=> {:spacing=>5,:right => '[page] of [topage]'},
-        :footer=> {:spacing=>1},
-        :handlers =>[:erb],
-        :formats => [:html],
-        :save_to_file => Rails.root.join('public','pdfs', "#{file_name}.pdf")
+               :template => 'orders/generate_pick_list',
+               :orientation => 'portrait',
+               :page_height => '8in',
+               :save_only => true,
+               :page_width => '11.5in',
+               :margin => {:top => '20',
+                           :bottom => '20',
+                           :left => '10',
+                           :right => '10'},
+               :header => {:spacing => 5, :right => '[page] of [topage]'},
+               :footer => {:spacing => 1},
+               :handlers => [:erb],
+               :formats => [:html],
+               :save_to_file => Rails.root.join('public', 'pdfs', "#{file_name}.pdf")
 
         render json: result
       }
@@ -978,12 +979,12 @@ class OrdersController < ApplicationController
     orders.each do |order|
       single_order = Order.find(order['id'])
       unless single_order.nil?
-        @orders.push({id:single_order.id, increment_id:single_order.increment_id})
+        @orders.push({id: single_order.id, increment_id: single_order.increment_id})
       end
     end
     unless @orders.empty?
 
-      GenerateBarcode.where('updated_at < ?',24.hours.ago).delete_all
+      GenerateBarcode.where('updated_at < ?', 24.hours.ago).delete_all
       @generate_barcode = GenerateBarcode.new
       @generate_barcode.user_id = current_user.id
       @generate_barcode.current_order_position = 0
@@ -992,7 +993,7 @@ class OrdersController < ApplicationController
       @generate_barcode.status = 'scheduled'
 
       @generate_barcode.save
-      delayed_job = GeneratePackingSlipPdf.delay(:run_at => 1.seconds.from_now).generate_packing_slip_pdf(@orders, Apartment::Tenant.current, @result, @page_height,@page_width,@orientation,@file_name, @size, @header,@generate_barcode.id)
+      delayed_job = GeneratePackingSlipPdf.delay(:run_at => 1.seconds.from_now).generate_packing_slip_pdf(@orders, Apartment::Tenant.current, @result, @page_height, @page_width, @orientation, @file_name, @size, @header, @generate_barcode.id)
       # delayed_job = GeneratePackingSlipPdf.generate_packing_slip_pdf(@orders, Apartment::Tenant.current, @result, @page_height,@page_width,@orientation,@file_name, @size, @header,@generate_barcode.id)
       @generate_barcode.delayed_job_id = delayed_job.id
       @generate_barcode.save
@@ -1063,19 +1064,19 @@ class OrdersController < ApplicationController
       else
         filename = 'groove-order-items-'+Apartment::Tenant.current+'-'+Time.now.strftime('%d_%b_%Y_%H_%M_%S_%Z')+'.csv'
         row_map = {
-            :quantity =>'',
-            :product_name=>'',
-            :primary_sku =>'',
-            :primary_barcode =>'',
-            :secondary_barcode => '',
-            :tertiary_barcode => '',
-            :location_primary => '',
-            :location_secondary => '',
-            :location_tertiary => '',
-            :image_url => '',
-            :available_inventory=>'',
-            :product_status => '',
-            :order_number => '',
+          :quantity => '',
+          :product_name => '',
+          :primary_sku => '',
+          :primary_barcode => '',
+          :secondary_barcode => '',
+          :tertiary_barcode => '',
+          :location_primary => '',
+          :location_secondary => '',
+          :location_tertiary => '',
+          :image_url => '',
+          :available_inventory => '',
+          :product_status => '',
+          :order_number => '',
         }
         selected_orders.each do |single_order|
 
@@ -1086,7 +1087,7 @@ class OrdersController < ApplicationController
           end
           order.order_items.each do |single_item|
             unless single_item.product.nil?
-              if single_item.product.is_kit == 0 || ['single','depends'].include?(single_item.product.kit_parsing)
+              if single_item.product.is_kit == 0 || ['single', 'depends'].include?(single_item.product.kit_parsing)
                 product_sku = single_item.product.product_skus.order("product_skus.order ASC").first
                 unless product_sku.nil?
 
@@ -1135,7 +1136,7 @@ class OrdersController < ApplicationController
                 end
               end
 
-              if single_item.product.is_kit == 1 && ['individual','depends'].include?(single_item.product.kit_parsing)
+              if single_item.product.is_kit == 1 && ['individual', 'depends'].include?(single_item.product.kit_parsing)
                 single_item.product.product_kit_skuss.each do |kit_item|
                   product_sku = kit_item.option_product.product_skus.order("product_skus.order ASC").first
                   unless product_sku.nil?
@@ -1187,7 +1188,7 @@ class OrdersController < ApplicationController
             end
           end
         end
-        CSV.open(Rails.root.join('public','pdfs', filename ),'wb') do |csv|
+        CSV.open(Rails.root.join('public', 'pdfs', filename), 'wb') do |csv|
           csv << row_map.keys
           items_list.values.each do |line|
             csv << line.values
@@ -1224,7 +1225,7 @@ class OrdersController < ApplicationController
           tenant = Apartment::Tenant.current
           import_orders_obj = ImportOrders.new
           Delayed::Job.where(queue: "importing_orders_#{tenant}").destroy_all
-          import_orders_obj.delay(:run_at => 1.seconds.from_now,:queue => "importing_orders_#{tenant}").import_orders  tenant
+          import_orders_obj.delay(:run_at => 1.seconds.from_now, :queue => "importing_orders_#{tenant}").import_orders tenant
           # import_orders_obj.import_orders
           result['success_messages'].push('Scouring the interwebs for new orders...')
         else
@@ -1297,11 +1298,12 @@ class OrdersController < ApplicationController
   def confirmation
 
   end
+
   def match
     email = params['confirm']['email']
     postcode = params['confirm']['postcode']
 
-    @matching_orders = Order.where('postcode LIKE ?',"#{postcode}%")
+    @matching_orders = Order.where('postcode LIKE ?', "#{postcode}%")
     unless @matching_orders.nil?
       @matching_orders = @matching_orders.where(email: email)
     end
@@ -1316,13 +1318,13 @@ class OrdersController < ApplicationController
     limit = 10
     offset = 0
     supported_sort_keys = ['updated_at', 'notes',
-                           'ordernum', 'order_date', 'itemslength', 'recipient', 'status','email','tracking_num','city','state','postcode','country' ]
-    supported_order_keys = ['ASC', 'DESC' ] #Caps letters only
+                           'ordernum', 'order_date', 'itemslength', 'recipient', 'status', 'email', 'tracking_num', 'city', 'state', 'postcode', 'country']
+    supported_order_keys = ['ASC', 'DESC'] #Caps letters only
     sort_key = params[:sort] if !params[:sort].nil? &&
-        supported_sort_keys.include?(params[:sort])
+      supported_sort_keys.include?(params[:sort])
 
     sort_order = params[:order] if !params[:order].nil? &&
-        supported_order_keys.include?(params[:order])
+      supported_order_keys.include?(params[:order])
 
     if sort_key == 'ordernum'
       sort_key = 'increment_id'
@@ -1348,7 +1350,7 @@ class OrdersController < ApplicationController
     base_query = 'Select orders.*, sum(order_items.qty) AS itemslength from orders LEFT JOIN stores ON (orders.store_id = stores.id)
                       LEFT JOIN order_items ON (order_items.order_id = orders.id) WHERE
                       increment_id like '+search+' OR non_hyphen_increment_id like '+ search +
-                      ' OR email like '+search+' OR CONCAT(IFNULL(firstname,"")," ",IFNULL(lastname,"")) like '+search+' OR postcode like '+search+' GROUP BY orders.id Order BY '+sort_key+' '+sort_order
+      ' OR email like '+search+' OR CONCAT(IFNULL(firstname,"")," ",IFNULL(lastname,"")) like '+search+' OR postcode like '+search+' GROUP BY orders.id Order BY '+sort_key+' '+sort_order
     query_add = ''
     unless params[:select_all] || params[:inverted]
       query_add = " LIMIT #{limit} OFFSET #{offset}"
@@ -1374,8 +1376,8 @@ class OrdersController < ApplicationController
     query_add = ""
     status_filter_text = ""
     supported_sort_keys = ['updated_at', 'store_name', 'notes',
-                           'ordernum', 'order_date', 'itemslength', 'recipient', 'status','email','tracking_num','city','state','postcode','country' ]
-    supported_order_keys = ['ASC', 'DESC' ] #Caps letters only
+                           'ordernum', 'order_date', 'itemslength', 'recipient', 'status', 'email', 'tracking_num', 'city', 'state', 'postcode', 'country']
+    supported_order_keys = ['ASC', 'DESC'] #Caps letters only
     supported_status_filters = ['all', 'awaiting', 'onhold', 'cancelled', 'scanned', 'serviceissue']
 
 
@@ -1389,13 +1391,13 @@ class OrdersController < ApplicationController
     end
 
     sort_key = params[:sort] if !params[:sort].nil? &&
-        supported_sort_keys.include?(params[:sort])
+      supported_sort_keys.include?(params[:sort])
 
     sort_order = params[:order] if !params[:order].nil? &&
-        supported_order_keys.include?(params[:order])
+      supported_order_keys.include?(params[:order])
 
     status_filter = params[:filter] if !params[:filter].nil? &&
-        supported_status_filters.include?(params[:filter])
+      supported_status_filters.include?(params[:filter])
 
 
     #overrides
@@ -1425,15 +1427,15 @@ class OrdersController < ApplicationController
     #todo status filters to be implemented
     if sort_key == 'store_name'
       orders = Order.find_by_sql("SELECT orders.* FROM orders LEFT JOIN stores ON orders.store_id = stores.id "+status_filter_text+
-                                     " ORDER BY stores.name "+ sort_order+query_add)
+                                   " ORDER BY stores.name "+ sort_order+query_add)
     elsif sort_key == 'itemslength'
       orders = Order.find_by_sql("SELECT orders.*, sum(order_items.qty) AS count FROM orders LEFT JOIN order_items"+
-                                      " ON (order_items.order_id = orders.id) "+status_filter_text+" GROUP BY orders.id "+
-                                      "ORDER BY count "+sort_order+query_add)
+                                   " ON (order_items.order_id = orders.id) "+status_filter_text+" GROUP BY orders.id "+
+                                   "ORDER BY count "+sort_order+query_add)
     else
       orders = Order.order(sort_key+" "+sort_order)
       unless status_filter == "all"
-        orders = orders.where(:status=>status_filter)
+        orders = orders.where(:status => status_filter)
       end
       unless params[:select_all] || params[:inverted]
         orders = orders.limit(limit).offset(offset)
@@ -1486,7 +1488,7 @@ class OrdersController < ApplicationController
       if sort_by_order_number
         result = Order.where(:id => params[:orderArray].map(&:values).flatten).order(:increment_id)
       else
-        result =  params[:orderArray]
+        result = params[:orderArray]
       end
     elsif !params[:id].nil?
       result = Order.find(params[:id])
@@ -1517,7 +1519,7 @@ class OrdersController < ApplicationController
 
   def get_orders_count
     count = Hash.new
-    counts = Order.select('status,count(*) as count').where(:status=>['scanned','cancelled','onhold','awaiting','serviceissue']).group(:status)
+    counts = Order.select('status,count(*) as count').where(:status => ['scanned', 'cancelled', 'onhold', 'awaiting', 'serviceissue']).group(:status)
     all = 0
     counts.each do |single|
       count[single.status] = single.count

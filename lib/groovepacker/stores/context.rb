@@ -8,7 +8,7 @@ module Groovepacker
       def import_products
         self.handler.import_products
       end
-      
+
       def import_order(order)
         self.handler.import_order(order)
       end

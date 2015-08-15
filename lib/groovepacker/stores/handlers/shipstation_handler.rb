@@ -6,8 +6,8 @@ module Groovepacker
           shipstation_credential = ShipstationCredential.where(:store_id => self.store.id).first
 
           if !shipstation_credential.nil?
-            ShipStationRuby.username  = shipstation_credential.username
-            ShipStationRuby.password  = shipstation_credential.password
+            ShipStationRuby.username = shipstation_credential.username
+            ShipStationRuby.password = shipstation_credential.password
             client = Groovepacker::ShipstationRuby::Client.new
           end
 

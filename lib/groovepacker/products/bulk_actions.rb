@@ -3,7 +3,7 @@ module Groovepacker
     class BulkActions
       include ProductsHelper
 
-      def status_update(tenant,params,bulk_actions_id)
+      def status_update(tenant, params, bulk_actions_id)
         Apartment::Tenant.switch(tenant)
         result = Hash.new
         result['messages'] =[]
@@ -16,7 +16,7 @@ module Groovepacker
             bulk_action.completed = 0
             bulk_action.status = 'in_progress'
             bulk_action.save
-            products.each do|single_product|
+            products.each do |single_product|
               product = Product.find(single_product['id'])
               bulk_action.reload
               if bulk_action.cancel?
@@ -35,12 +35,12 @@ module Groovepacker
                     result['status'] &= false
                     if product.is_kit == 1
                       result['messages'].push('There was a problem changing kit status for '+
-                                                   product.name + '. Reason: In order for a Kit to be Active it needs to '+
-                                                   'have at least one item and every item in the Kit must be Active.')
+                                                product.name + '. Reason: In order for a Kit to be Active it needs to '+
+                                                'have at least one item and every item in the Kit must be Active.')
                     else
                       result['messages'].push('There was a problem changing product status for '+
-                                                   product.name + '. Reason: In order for a product to be Active it needs to '+
-                                                   'have at least one SKU and one barcode.')
+                                                product.name + '. Reason: In order for a product to be Active it needs to '+
+                                                'have at least one SKU and one barcode.')
                     end
                     product.status = current_status
                     product.save
@@ -70,7 +70,7 @@ module Groovepacker
         end
       end
 
-      def delete(tenant,params,bulk_actions_id, username)
+      def delete(tenant, params, bulk_actions_id, username)
         Apartment::Tenant.switch(tenant)
         result = Hash.new
         result['messages'] =[]
@@ -84,7 +84,7 @@ module Groovepacker
           bulk_action.status = 'in_progress'
           bulk_action.save
           unless products.nil?
-            products.each do|single_product|
+            products.each do |single_product|
               product = Product.find(single_product['id'])
               bulk_action.reload
               if bulk_action.cancel?
@@ -99,7 +99,7 @@ module Groovepacker
                   order_item.order.status = 'onhold'
                   order_item.order.save
                   order_item.order.addactivity("An item with Name #{product.name} and " +
-                                                   "SKU #{product.primary_sku} has been deleted",
+                                                 "SKU #{product.primary_sku} has been deleted",
                                                username,
                                                'deleted_item'
                   )
@@ -111,10 +111,10 @@ module Groovepacker
                 product_kit_sku.product.status = 'new'
                 product_kit_sku.product.save
                 product_kit_sku.product.product_kit_activities.create(
-                    activity_message: "An item with Name #{product.name} and " +
-                        "SKU #{product.primary_sku} has been deleted",
-                    username: username,
-                    activity_type: 'deleted_item'
+                  activity_message: "An item with Name #{product.name} and " +
+                    "SKU #{product.primary_sku} has been deleted",
+                  username: username,
+                  activity_type: 'deleted_item'
                 )
                 product_kit_sku.destroy
               end
@@ -143,7 +143,7 @@ module Groovepacker
         end
       end
 
-      def duplicate(tenant,params,bulk_actions_id)
+      def duplicate(tenant, params, bulk_actions_id)
         Apartment::Tenant.switch(tenant)
         result = Hash.new
         result['messages'] =[]
@@ -157,7 +157,7 @@ module Groovepacker
           bulk_action.status = 'in_progress'
           bulk_action.save
           unless products.nil?
-            products.each do|single_product|
+            products.each do |single_product|
               #copy product
               product = Product.find(single_product['id'])
               bulk_action.reload
@@ -173,25 +173,25 @@ module Groovepacker
               newproduct = product.dup
               index = 0
               newproduct.name = product.name+" "+index.to_s
-              productslist = Product.where(:name=>newproduct.name)
+              productslist = Product.where(:name => newproduct.name)
               begin
                 index = index + 1
                 #todo: duplicate sku, images, categories associated with product too.
                 newproduct.name = product.name+" "+index.to_s
-                productslist = Product.where(:name=>newproduct.name)
-              end while(!productslist.nil? && productslist.length > 0)
+                productslist = Product.where(:name => newproduct.name)
+              end while (!productslist.nil? && productslist.length > 0)
 
               #copy barcodes
               product.product_barcodes.each do |barcode|
                 index = 0
                 newbarcode = barcode.barcode+" "+index.to_s
-                barcodeslist = ProductBarcode.where(:barcode=>newbarcode)
+                barcodeslist = ProductBarcode.where(:barcode => newbarcode)
                 begin
                   index = index + 1
                   #todo: duplicate sku, images, categories associated with product too.
                   newbarcode = barcode.barcode+" "+index.to_s
-                  barcodeslist = ProductBarcode.where(:barcode=>newbarcode)
-                end while(!barcodeslist.nil? && barcodeslist.length > 0)
+                  barcodeslist = ProductBarcode.where(:barcode => newbarcode)
+                end while (!barcodeslist.nil? && barcodeslist.length > 0)
 
                 newbarcode_item = ProductBarcode.new
                 newbarcode_item.barcode = newbarcode
@@ -202,13 +202,13 @@ module Groovepacker
               product.product_skus.each do |sku|
                 index = 0
                 newsku = sku.sku+" "+index.to_s
-                skuslist = ProductSku.where(:sku=>newsku)
+                skuslist = ProductSku.where(:sku => newsku)
                 begin
                   index = index + 1
                   #todo: duplicate sku, images, categories associated with product too.
                   newsku = sku.sku+" "+index.to_s
-                  skuslist = ProductSku.where(:sku=>newsku)
-                end while(!skuslist.nil? && skuslist.length > 0)
+                  skuslist = ProductSku.where(:sku => newsku)
+                end while (!skuslist.nil? && skuslist.length > 0)
 
                 newsku_item = ProductSku.new
                 newsku_item.sku = newsku

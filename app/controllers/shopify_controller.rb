@@ -16,11 +16,11 @@ class ShopifyController < ApplicationController
     @shopify_credential = store.shopify_credential
     session = ShopifyAPI::Session.new(@shopify_credential.shop_name + ".myshopify.com")
     @result = false
-    
+
     begin
-      @result = true if @shopify_credential.update_attributes({ 
-          access_token: session.request_token(params.except(:id))
-        })
+      @result = true if @shopify_credential.update_attributes({
+                                                                access_token: session.request_token(params.except(:id))
+                                                              })
     rescue Exception => ex
       @result = false
     end
@@ -41,12 +41,12 @@ class ShopifyController < ApplicationController
     store = Store.find(params[:id])
     @shopify_credential = store.shopify_credential
     session = ShopifyAPI::Session.new(@shopify_credential.shop_name + ".myshopify.com")
-    if @shopify_credential.update_attributes({ 
-        access_token: nil
-      })
+    if @shopify_credential.update_attributes({
+                                               access_token: nil
+                                             })
       render status: 200, json: 'disconnected'
     else
-      render status: 304, json:'not disconnected'
+      render status: 304, json: 'not disconnected'
     end
   end
 

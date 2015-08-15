@@ -10,15 +10,18 @@ module ShipStationRuby
   class ShipStationRubyError < StandardError
   end
 
-  class AuthenticationError < ShipStationRubyError; end
-  class ConfigurationError < ShipStationRubyError; end
+  class AuthenticationError < ShipStationRubyError;
+  end
+  class ConfigurationError < ShipStationRubyError;
+  end
 
   class << self
-   def username
+    def username
       defined? @username and @username or raise(
         ConfigurationError, "ShipStationRuby username not configured"
       )
     end
+
     attr_writer :username
 
     def password
@@ -26,6 +29,7 @@ module ShipStationRuby
         ConfigurationError, "ShipStationRuby password not configured"
       )
     end
+
     attr_writer :password
 
   end

@@ -17,7 +17,8 @@
 
           <div class="input-group">
             <div class="input-group-addon">https://</div>
-            <input type="text" id="tenant_name" class="form-control" autofocus value="<%= non_hyphenated_string(params[:shopify])%>"/>
+            <input type="text" id="tenant_name" class="form-control" autofocus value="<%= non_hyphenated_string(params[:shopify]) %>"/>
+
             <div class="input-group-addon">.groovepacker.com</div>
           </div>
           <div class="form-group error" style="color: red;">
@@ -25,17 +26,17 @@
           </div>
         </div>
 
-        <button id="login_button" class="btn btn-primary" 
-        style="margin-bottom: 15px;">
+        <button id="login_button" class="btn btn-primary"
+                style="margin-bottom: 15px;">
           Continue to Login
         </button>
       </fieldset>
     </form>
 
     <script type="text/javascript">
-      $(document).on('ready page:load', function() {
-        $('#login_button').on('click', function(e) {
-          if ($('#tenant_name').val() != null && 
+      $(document).on('ready page:load', function () {
+        $('#login_button').on('click', function (e) {
+          if ($('#tenant_name').val() != null &&
             typeof($('#tenant_name').val()) != 'undefined' &&
             $('#tenant_name').val() != '') {
             e.preventDefault();

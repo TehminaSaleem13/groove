@@ -1,7 +1,7 @@
 class ApplicationController < ActionController::Base
   before_filter :set_current_user_id
   protect_from_forgery with: :null_session
-  
+
   respond_to :html, :json
 
   def groovepacker_authorize!
@@ -15,7 +15,7 @@ class ApplicationController < ActionController::Base
       render status: 401
     end
   end
-  
+
   def set_current_user_id
     if current_user
       GroovRealtime.current_user_id = current_user.id
@@ -30,8 +30,8 @@ class ApplicationController < ActionController::Base
       # an unique MD5 key
       cookies['_validation_token_key'] = Digest::MD5.hexdigest("#{current_user.id}:#{session.to_json}:#{Apartment::Tenant.current}")
       # store session data or any authentication data you want here, generate to JSON data
-      stored_session = JSON.generate({'tenant'=>Apartment::Tenant.current, 'user_id'=> current_user.id, 'username'=>current_user.username})
-      $redis.hset('groovehacks:session',cookies['_validation_token_key'],stored_session)
+      stored_session = JSON.generate({'tenant' => Apartment::Tenant.current, 'user_id' => current_user.id, 'username' => current_user.username})
+      $redis.hset('groovehacks:session', cookies['_validation_token_key'], stored_session)
       if session[:redirect_uri]
         session[:redirect_uri]
       else

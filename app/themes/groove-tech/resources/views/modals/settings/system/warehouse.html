@@ -1,70 +1,90 @@
 <!-- Modal popup for creating user -->
 <div>
 
-    <div class="modal-header">
-        <button type="button" class="close-btn" ng-click="ok()"><i class="glyphicon glyphicon-remove"></i></button>
-        <div class="modal-title">
-            <span ng-show="edit_status">Update Warehouse</span>
-            <span ng-hide="edit_status">Create Warehouse</span>
+  <div class="modal-header">
+    <button type="button" class="close-btn" ng-click="ok()"><i class="glyphicon glyphicon-remove"></i></button>
+    <div class="modal-title">
+      <span ng-show="edit_status">Update Warehouse</span>
+      <span ng-hide="edit_status">Create Warehouse</span>
+    </div>
+  </div>
+  <div class="modal-body">
+    <div class="container-fluid form-horizontal">
+      <div class="form-group">
+        <label class="control-label col-md-2">Name </label>
+
+        <div class="controls col-md-6">
+          <input class="form-control input-style" ng-blur="update_single_warehouse()" name="name"
+                 ng-model="warehouses.single.inv_wh_info.name" type="text" required/>
         </div>
-    </div>
-    <div class="modal-body" >
-        <div class="container-fluid form-horizontal">
-                <div class="form-group">
-                    <label class="control-label col-md-2">Name </label>
-                    <div class="controls col-md-6">
-                        <input class="form-control input-style" ng-blur="update_single_warehouse()" name="name" ng-model="warehouses.single.inv_wh_info.name" type="text" required/>
-                    </div>
-                </div>
+      </div>
 
-                <div class="form-group">
-                    <label class="control-label col-md-2">Location</label>
-                    <div class="controls col-md-6">
-                        <input class="form-control input-style" ng-blur="update_single_warehouse()" name="location" ng-model="warehouses.single.inv_wh_info.location" type="text" />
-                    </div>
-                </div>
+      <div class="form-group">
+        <label class="control-label col-md-2">Location</label>
 
-                <div class="form-group">
-                    <label class="control-label col-md-2">Status</label>
-                    <div class="controls col-md-6">
-                        <label class="radio inline">
-                            <input type="radio" ng-model="warehouses.single.inv_wh_info.status" ng-click="update_single_warehouse()" value="active" />  Active
-                        </label>
-                        <label class="radio inline">
-                            <input type="radio" ng-model="warehouses.single.inv_wh_info.status" ng-click="update_single_warehouse()" value="inactive" /> Inactive
-                        </label>
-                    </div>
-                </div>
-
-            <hr/>
-            <!-- Associated Users -->
-            <div class="form-group">
-                <label class="control-label col-md-2">Associated Users</label>
-                <div class="controls col-md-4">
-                    <table class="well table-well table table-striped table-hover">
-                        <thead>
-                            <tr>
-                                <th><div><span class="glyphicon glyphicon-user"></span><br/>User</div><span class="holder"></span></th>
-                                <th><div><span class="glyphicon glyphicon-eye-open"></span><br/>See Inv</div><span class="holder"></span></th>
-                                <th><div><span class="glyphicon glyphicon-pencil"></span><br/>Edit Inv</div><span class="holder"></span></th>
-                                <th><div><span class="glyphicon glyphicon-home"></span><br />Home</div></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr ng-repeat="user in warehouses.available_users">
-                                <td>{{user.user_info.name}}</td>
-                                <td><input type="checkbox" ng-disabled="user.checked == true || auth.user_can(user.user_info,'make_super_admin')" ng-model="user.user_perms.see" ng-change="user_permissions(user)" /></td>
-                                <td><input type="checkbox" ng-disabled="user.checked == true || auth.user_can(user.user_info,'make_super_admin') || !auth.user_can(user.user_info,'add_edit_products')" ng-model="user.user_perms.edit" ng-change="user_permissions(user)" /></td>
-                                <td><input type="radio" ng-model="user.checked" ng-value="true" ng-change="user_permissions(user)" /></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+        <div class="controls col-md-6">
+          <input class="form-control input-style" ng-blur="update_single_warehouse()" name="location"
+                 ng-model="warehouses.single.inv_wh_info.location" type="text"/>
         </div>
+      </div>
+
+      <div class="form-group">
+        <label class="control-label col-md-2">Status</label>
+
+        <div class="controls col-md-6">
+          <label class="radio inline">
+            <input type="radio" ng-model="warehouses.single.inv_wh_info.status" ng-click="update_single_warehouse()"
+                   value="active"/> Active
+          </label>
+          <label class="radio inline">
+            <input type="radio" ng-model="warehouses.single.inv_wh_info.status" ng-click="update_single_warehouse()"
+                   value="inactive"/> Inactive
+          </label>
+        </div>
+      </div>
+
+      <hr/>
+      <!-- Associated Users -->
+      <div class="form-group">
+        <label class="control-label col-md-2">Associated Users</label>
+
+        <div class="controls col-md-4">
+          <table class="well table-well table table-striped table-hover">
+            <thead>
+            <tr>
+              <th>
+                <div><span class="glyphicon glyphicon-user"></span><br/>User</div>
+                <span class="holder"></span></th>
+              <th>
+                <div><span class="glyphicon glyphicon-eye-open"></span><br/>See Inv</div>
+                <span class="holder"></span></th>
+              <th>
+                <div><span class="glyphicon glyphicon-pencil"></span><br/>Edit Inv</div>
+                <span class="holder"></span></th>
+              <th>
+                <div><span class="glyphicon glyphicon-home"></span><br/>Home</div>
+              </th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="user in warehouses.available_users">
+              <td>{{user.user_info.name}}</td>
+              <td><input type="checkbox"
+                         ng-disabled="user.checked == true || auth.user_can(user.user_info,'make_super_admin')"
+                         ng-model="user.user_perms.see" ng-change="user_permissions(user)"/></td>
+              <td><input type="checkbox"
+                         ng-disabled="user.checked == true || auth.user_can(user.user_info,'make_super_admin') || !auth.user_can(user.user_info,'add_edit_products')"
+                         ng-model="user.user_perms.edit" ng-change="user_permissions(user)"/></td>
+              <td><input type="radio" ng-model="user.checked" ng-value="true" ng-change="user_permissions(user)"/></td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
-    <div class="modal-footer">
-        <button ng-click="ok()" class="modal-save-button" translate>modal.save_close</button>
-        <button ng-click="cancel()" class="modal-cancel-button" translate>modal.cancel</button>
-    </div>
+  </div>
+  <div class="modal-footer">
+    <button ng-click="ok()" class="modal-save-button" translate>modal.save_close</button>
+    <button ng-click="cancel()" class="modal-cancel-button" translate>modal.cancel</button>
+  </div>
 </div>

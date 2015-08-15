@@ -1,26 +1,28 @@
 <div>
-    <div class="modal-header">
-        <div class="modal-title">Special Instruction for this Product</div>
-        <button type="button" class="close-btn" ng-click="ok()"><i class="glyphicon glyphicon-remove"></i></button>
-    </div>
-    <div class="modal-body">
-        <div class="container-fluid form-horizontal">
-            <div class="row" >
-                <div class="col-xs-12">
-                    <h4>{{order.next_item.instruction}}</h4>
-                    <legend>Please acknowledge with your confirmation code to continue</legend>
-                    <div class="form-group ">
-                        <label class="control-label col-sm-3">Confirmation code</label>
-                        <div class="controls col-sm-5">
-                            <input type="text" class="form-control search-box" autofocus="autofocus" ng-keydown="check_product_confirm($event)" ng-model="code.confirmation" />
-                        </div>
-                    </div>
-                </div>
+  <div class="modal-header">
+    <div class="modal-title">Special Instruction for this Product</div>
+    <button type="button" class="close-btn" ng-click="ok()"><i class="glyphicon glyphicon-remove"></i></button>
+  </div>
+  <div class="modal-body">
+    <div class="container-fluid form-horizontal">
+      <div class="row">
+        <div class="col-xs-12">
+          <h4>{{order.next_item.instruction}}</h4>
+          <legend>Please acknowledge with your confirmation code to continue</legend>
+          <div class="form-group ">
+            <label class="control-label col-sm-3">Confirmation code</label>
+
+            <div class="controls col-sm-5">
+              <input type="text" class="form-control search-box" autofocus="autofocus"
+                     ng-keydown="check_product_confirm($event)" ng-model="code.confirmation"/>
             </div>
+          </div>
         </div>
+      </div>
     </div>
-    <div class="modal-footer">
-        <button ng-click="cancel()" class="modal-cancel-button" translate>modal.cancel</button>
-    </div>
+  </div>
+  <div class="modal-footer">
+    <button ng-click="cancel()" class="modal-cancel-button" translate>modal.cancel</button>
+  </div>
 
 </div>

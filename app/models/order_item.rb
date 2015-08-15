@@ -25,13 +25,14 @@ class OrderItem < ActiveRecord::Base
   SCANNED_STATUS = 'scanned'
   UNSCANNED_STATUS = 'unscanned'
   PARTIALLY_SCANNED_STATUS = 'partially_scanned'
+
   def has_unscanned_kit_items
     result = false
     self.order_item_kit_products.each do |kit_product|
-    if kit_product.scanned_status != SCANNED_STATUS
-      result = true
-      break
-    end
+      if kit_product.scanned_status != SCANNED_STATUS
+        result = true
+        break
+      end
     end
     result
   end
@@ -94,16 +95,16 @@ class OrderItem < ActiveRecord::Base
       result['product_type'] = 'single'
       if depends_kit
         result['qty_remaining'] =
-            (self.qty - self.kit_split_qty) - (self.scanned_qty-self.kit_split_scanned_qty)
+          (self.qty - self.kit_split_qty) - (self.scanned_qty-self.kit_split_scanned_qty)
       else
         result['qty_remaining'] =
-            self.qty - self.scanned_qty
+          self.qty - self.scanned_qty
       end
     end
     result
   end
 
-  def build_single_child_item(kit_product,depends_kit)
+  def build_single_child_item(kit_product, depends_kit)
     child_item = Hash.new
     child_item = build_basic_item(kit_product.product_kit_skus.option_product)
     #overwrite scanned qty from basic build
@@ -111,10 +112,10 @@ class OrderItem < ActiveRecord::Base
 
     if depends_kit
       child_item['qty_remaining'] = self.kit_split_qty * kit_product.product_kit_skus.qty -
-          kit_product.scanned_qty
+        kit_product.scanned_qty
     else
       child_item['qty_remaining'] = self.qty * kit_product.product_kit_skus.qty -
-          kit_product.scanned_qty
+        kit_product.scanned_qty
     end
 
     child_item['kit_packing_placement'] = kit_product.product_kit_skus.packing_order
@@ -151,9 +152,9 @@ class OrderItem < ActiveRecord::Base
       result = self.build_individual_kit(depends_kit)
       self.order_item_kit_products.each do |kit_product|
         if !kit_product.product_kit_skus.nil? &&
-           !kit_product.product_kit_skus.product.nil? &&
-            kit_product.scanned_status != 'scanned'
-          child_item = self.build_single_child_item(kit_product,depends_kit)
+          !kit_product.product_kit_skus.product.nil? &&
+          kit_product.scanned_status != 'scanned'
+          child_item = self.build_single_child_item(kit_product, depends_kit)
 
           result['child_items'].push(child_item) if child_item['qty_remaining'] != 0
         end
@@ -185,10 +186,10 @@ class OrderItem < ActiveRecord::Base
       end
       self.order_item_kit_products.each do |kit_product|
         if !kit_product.product_kit_skus.nil? &&
-            !kit_product.product_kit_skus.product.nil? &&
-            (kit_product.scanned_status == SCANNED_STATUS or
-                kit_product.scanned_status == PARTIALLY_SCANNED_STATUS)
-          child_item = self.build_single_child_item(kit_product,depends_kit)
+          !kit_product.product_kit_skus.product.nil? &&
+          (kit_product.scanned_status == SCANNED_STATUS or
+            kit_product.scanned_status == PARTIALLY_SCANNED_STATUS)
+          child_item = self.build_single_child_item(kit_product, depends_kit)
           result['child_items'].push(child_item) if child_item['scanned_qty'] != 0
         end
       end
@@ -215,7 +216,7 @@ class OrderItem < ActiveRecord::Base
       scan_time = self.order_item_scan_times.create(
         scan_start: self.order.last_suggested_at,
         scan_end: DateTime.now)
-      self.order.total_scan_time = self.order.total_scan_time + 
+      self.order.total_scan_time = self.order.total_scan_time +
         (scan_time.scan_end - scan_time.scan_start).to_i
       self.order.total_scan_count = self.order.total_scan_count + 1
       self.order.save
@@ -232,19 +233,19 @@ class OrderItem < ActiveRecord::Base
   def should_kit_split_qty_be_increased(product_id)
     result = false
     if self.product.is_kit == 1 && self.kit_split &&
-        self.product.kit_parsing == 'depends'
+      self.product.kit_parsing == 'depends'
 
-        #if no of unscanned items in the kit split qty for the corrseponding item
-        #is greater than 0 and the kit split can be increased in the order item,
-        #then the quantity should be increased
-        self.order_item_kit_products.each do |kit_product|
-          if kit_product.product_kit_skus.option_product.id == product_id &&
-              kit_product.scanned_qty != 0 &&
-              (kit_product.scanned_qty % (self.kit_split_qty * kit_product.product_kit_skus.qty) == 0) &&
-              self.scanned_qty < self.qty
-            result = true
-          end
+      #if no of unscanned items in the kit split qty for the corrseponding item
+      #is greater than 0 and the kit split can be increased in the order item,
+      #then the quantity should be increased
+      self.order_item_kit_products.each do |kit_product|
+        if kit_product.product_kit_skus.option_product.id == product_id &&
+          kit_product.scanned_qty != 0 &&
+          (kit_product.scanned_qty % (self.kit_split_qty * kit_product.product_kit_skus.qty) == 0) &&
+          self.scanned_qty < self.qty
+          result = true
         end
+      end
     end
 
     result
@@ -294,7 +295,7 @@ class OrderItem < ActiveRecord::Base
     result = true
     changed_hash = self.changes
     if !changed_hash.nil? and (!changed_hash['qty'].nil?)
-      result &= Groovepacker::Inventory::Orders.item_update(self,changed_hash['qty'][0],changed_hash['qty'][1])
+      result &= Groovepacker::Inventory::Orders.item_update(self, changed_hash['qty'][0], changed_hash['qty'][1])
     end
     result
   end
@@ -302,8 +303,8 @@ class OrderItem < ActiveRecord::Base
   def add_kit_products
     if !self.product.nil? && self.product.is_kit == 1
       self.product.product_kit_skuss.each do |kit_sku|
-        if OrderItemKitProduct.where(:order_item_id=>self.id).
-            where(:product_kit_skus_id=>kit_sku.id).length == 0
+        if OrderItemKitProduct.where(:order_item_id => self.id).
+          where(:product_kit_skus_id => kit_sku.id).length == 0
           order_item_kit_product = OrderItemKitProduct.new
           order_item_kit_product.product_kit_skus = kit_sku
           order_item_kit_product.order_item = self
@@ -330,7 +331,7 @@ class OrderItem < ActiveRecord::Base
     end
   end
 
-  def get_barcode_with_lotnumber(barcode,lot_number)
+  def get_barcode_with_lotnumber(barcode, lot_number)
     scanpack_settings = ScanPackSetting.all.first
     unless scanpack_settings.escape_string.nil?
       return barcode + scanpack_settings.escape_string + lot_number
@@ -342,8 +343,8 @@ class OrderItem < ActiveRecord::Base
   def set_clicked_quantity(clicked, sku, username)
     if clicked
       self.clicked_qty = self.clicked_qty + 1
-      self.order.addactivity("Item with SKU: " + 
-      sku + " has been click scanned", username)
+      self.order.addactivity("Item with SKU: " +
+                               sku + " has been click scanned", username)
     end
   end
 

@@ -1,23 +1,25 @@
 <% if @is_admin == 'true' %>
   <% Apartment::Tenant.switch()
-    unless Subscription.where(tenant_name: @tenant_name).empty?
-      @email = Subscription.where(tenant_name: @tenant_name).first.email
-    end
-    Apartment::Tenant.switch(@tenant_name) %>
-  <%= render 'shared/registration_confirmation', 
-    direct: false, result: @result, email: @email %>
+     unless Subscription.where(tenant_name: @tenant_name).empty?
+       @email = Subscription.where(tenant_name: @tenant_name).first.email
+     end
+     Apartment::Tenant.switch(@tenant_name) %>
+  <%= render 'shared/registration_confirmation',
+             direct: false, result: @result, email: @email %>
 <% else %>
   <%= render 'shared/header' %>
   <div class="row bottom-well col-sm-offset-1 col-sm-10">
     <div class="row">
       <div class="col-sm-12">
         <% if @result %>
-          <h3 class="text-center">Nice Work! Your shopify connection is complete! </h3> 
+          <h3 class="text-center">Nice Work! Your shopify connection is complete! </h3>
+
           <p class="text-center">
             Please close this window to continue.
           </p>
         <% else %>
-          <h3 class="text-center">There was an error authenticating with your shopify store. </h3> 
+          <h3 class="text-center">There was an error authenticating with your shopify store. </h3>
+
           <p class="text-center">
             Please close this window and retry again. If the problem persists, kindly call support.
           </p>
