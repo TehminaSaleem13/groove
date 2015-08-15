@@ -699,10 +699,7 @@ class ProductsController < ApplicationController
                 @productkitsku.option_product_id = item.id
                 @productkitsku.qty = 1
                 @kit.product_kit_skuss << @productkitsku
-                if @kit.save
-                  @productkitsku.reload
-                  @productkitsku.add_product_in_order_items
-                else
+                unless @kit.save
                   @result['messages'].push("Could not save kit with sku: "+@product_skus.first.sku)
                   @result['status'] &= false
                 end
@@ -748,6 +745,8 @@ class ProductsController < ApplicationController
               @result['messages'].push("Product #{kit_product} not found in item")
               @result['status'] &= false
             else
+              product_kit_sku.qty = 0
+              product_kit_sku.save
               unless product_kit_sku.destroy
                 @result['messages'].push("Product #{kit_product} could not be removed fronm kit")
                 @result['status'] &= false

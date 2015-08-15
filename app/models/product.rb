@@ -205,17 +205,11 @@ class Product < ActiveRecord::Base
   end
 
   def should_scan_as_single_product?
-    if self.is_kit == 1
-      return SINGLE_SCAN_STATUSES.include? self.kit_parsing
-    end
-    true
+    return !self.should_scan_as_individual_items?
   end
 
   def should_scan_as_individual_items?
-    if self.is_kit == 1
-      return INDIVIDUAL_SCAN_STATUSES.include? self.kit_parsing
-    end
-    false
+    return self.is_kit == 1
   end
 
   def get_total_avail_loc

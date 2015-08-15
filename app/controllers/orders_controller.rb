@@ -562,12 +562,6 @@ class OrdersController < ApplicationController
             end
             username = current_user.name
             @order.addactivity("Item with sku " + product_sku.to_s + " added", username)
-            if product.is_kit == 1
-              kit_skus = ProductKitSkus.where(:product_id => @orderitem.product_id)
-              kit_skus.each do |kit_sku|
-                kit_sku.add_product_in_order_items
-              end
-            end
           end
         end
 
