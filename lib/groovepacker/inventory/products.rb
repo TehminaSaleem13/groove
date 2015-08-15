@@ -32,7 +32,52 @@ module Groovepacker
           result
         end
 
+        def kit_item_inv_change(kit_item, difference)
+          unless inventory_tracking_enabled?
+            return false
+          end
+          order_items = OrderItem.where(:product_id=>kit_item.product_id)
+          order_items.each do |order_item|
+            Groovepacker::Inventory::Orders.kit_item_process(order_item,kit_item,difference)
+          end
+        end
+
+        def sell(product, qty, warehouse_id = nil)
+          unless inventory_tracking_enabled?
+            return false
+          end
+          result = true
+          if product.base_product.should_scan_as_single_product?
+            result &= do_sell(select_product_warehouse(product, warehouse_id), qty)
+          elsif product.base_product.should_scan_as_individual_items?
+            result &= individual_sell(product, qty, warehouse_id)
+          end
+          result
+        end
+
+        def individual_sell(kit, qty, warehouse_id = nil)
+          unless inventory_tracking_enabled?
+            return false
+          end
+          result = true
+          kit.product_kit_skuss.each do |kit_item|
+            result &= do_sell(select_product_warehouse(kit_item.option_product, warehouse_id), qty * kit_item.qty)
+          end
+          result
+        end
+
         private
+
+        def do_sell(product_warehouse,qty)
+          unless inventory_tracking_enabled?
+            return false
+          end
+          if product_warehouse.nil? || qty == 0
+            return false
+          end
+          product_warehouse.sold_qty = product_warehouse.sold_qty + qty
+          product_warehouse.save
+        end
 
         def do_allocate(product_warehouse, qty)
           unless inventory_tracking_enabled?

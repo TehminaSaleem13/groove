@@ -303,13 +303,7 @@ class OrderItem < ActiveRecord::Base
   def add_kit_products
     if !self.product.nil? && self.product.is_kit == 1
       self.product.product_kit_skuss.each do |kit_sku|
-        if OrderItemKitProduct.where(:order_item_id => self.id).
-          where(:product_kit_skus_id => kit_sku.id).length == 0
-          order_item_kit_product = OrderItemKitProduct.new
-          order_item_kit_product.product_kit_skus = kit_sku
-          order_item_kit_product.order_item = self
-          order_item_kit_product.save
-        end
+        kit_sku.add_product_in_order_items
       end
     end
 

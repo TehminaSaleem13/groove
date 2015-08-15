@@ -96,18 +96,24 @@ module Groovepacker
           if (multiplier == 1 && !order_item.is_inventory_allocated?) || (multiplier == -1 && !order_item.is_inventory_sold?)
             return false
           end
-          if is_depends_kit?(order_item) && order_item.kit_split
-            split_depends_kit(order_item, multiplier*order_item.kit_split_qty)
-            result &= sell_depends_kit(order_item, multiplier*order_item.kit_split_scanned_qty, multiplier*order_item.single_scanned_qty)
-          else
-            result &= sell_item(order_item, multiplier*order_item.qty, order_item.order.store.inventory_warehouse_id)
-          end
+          result &= sell_item(order_item, multiplier*order_item.qty, order_item.order.store.inventory_warehouse_id)
           if multiplier == 1
             order_item.update_column(:inv_status, OrderItem::SOLD_INV_STATUS)
           else
             order_item.update_column(:inv_status, OrderItem::ALLOCATED_INV_STATUS)
           end
           result
+        end
+
+        def kit_item_process(order_item, kit_item, difference)
+          unless inventory_tracking_enabled? && order_item.is_not_ghost?
+            return false
+          end
+          if Order::ALLOCATE_STATUSES.include?(order_item.order.status)
+            Groovepacker::Inventory::Products.allocate(kit_item.option_product, difference*order_item.qty, order_item.order.store.inventory_warehouse_id)
+          elsif Order::SOLD_STATUSES.include?(order_item.order.status)
+            Groovepacker::Inventory::Products.sell(kit_item.option_product, difference*order_item.qty, order_item.order.store.inventory_warehouse_id)
+          end
         end
 
         private
@@ -166,28 +172,6 @@ module Groovepacker
             order_item.update_column(:inv_status, status)
           end
           result
-        end
-
-        def split_depends_kit(order_item, qty)
-          # Negative sign deallocates
-          result = do_allocate_item(order_item, -qty, OrderItem::ALLOCATED_INV_STATUS, true)
-          if result
-            result &= Groovepacker::Inventory::Products.individual_allocate(order_item.product.base_product, qty, order_item.order.store.inventory_warehouse_id)
-          end
-          result
-        end
-
-        def sell_depends_kit(order_item, split_scanned_qty, single_scanned_qty)
-          result = individual_sell(order_item, split_scanned_qty, order_item.order.store.inventory_warehouse_id)
-          if order_item.single_scanned_qty
-            result &= sell_item(order_item, single_scanned_qty, order_item.order.store.inventory_warehouse_id)
-          end
-
-          result
-        end
-
-        def is_depends_kit?(order_item)
-          !order_item.product.nil? && order_item.product.is_kit == 1 && order_item.product.kit_parsing == Product::DEPENDS_KIT_PARSING
         end
 
         def should_process_allocation?(order_item, status_match)
