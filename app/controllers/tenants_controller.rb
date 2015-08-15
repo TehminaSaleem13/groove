@@ -2,7 +2,7 @@
     include PaymentsHelper
 
     def index
-      @result = Hash.new
+      @result = {}
       @result[:status] = true
       helper = Groovepacker::Tenants::Helper.new
       if !params[:search].nil? && params[:search] != ''
@@ -22,7 +22,7 @@
     end
 
     def show
-      @result = Hash.new
+      @result = {}
       @tenant = nil
       if !params[:id].nil?
         @tenant = Tenant.find_by_id(params[:id])
@@ -46,10 +46,11 @@
     end
 
     def update
-      @result = Hash.new
+      @result = {}
       @result['status'] = true
       @result['error_messages'] = []
       @tenant = nil
+      current_tenant = Apartment::Tenant.current_tenant
       tenant = Tenant.find(params[:id])
       unless tenant.nil?
         helper = Groovepacker::Tenants::Helper.new
@@ -57,7 +58,7 @@
       else
         @result['status'] = false
       end
-      Apartment::Tenant.switch()
+      Apartment::Tenant.switch(current_tenant)
 
       respond_to do |format|
         format.html # show.html.erb
@@ -66,10 +67,11 @@
     end
 
     def destroy
-      @result = Hash.new
+      @result = {}
       @result['status'] = true
       @result['error_messages'] = []
       @tenant = nil
+      current_tenant = Apartment::Tenant.current_tenant
       tenant = Tenant.find(params[:id])
       unless tenant.nil?
         helper = Groovepacker::Tenants::Helper.new
@@ -77,7 +79,7 @@
       else
         @result['status'] = false
       end
-      Apartment::Tenant.switch()
+      Apartment::Tenant.switch(current_tenant)
 
       respond_to do |format|
         format.html # show.html.erb
@@ -86,7 +88,7 @@
     end
 
     def delete_tenant
-      @result = Hash.new
+      @result = {}
       @result['status'] = true
       @result['error_messages'] = []
       @result['success_messages'] = []
@@ -110,7 +112,7 @@
     private
 
     def get_tenants_count
-      count = Hash.new
+      count = {}
       counts = Tenant.select('count(*) as count')
       all = 0
       counts.each do |single|
