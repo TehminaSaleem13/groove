@@ -3,7 +3,7 @@ require 'rails_helper'
 
 describe ScanPackController do
 	before(:each) do
-    SeedTenant.new.seed
+    Groovepacker::SeedTenant.new.seed
     scanpacksetting = ScanPackSetting.first
     scanpacksetting.post_scanning_option = "None"
     scanpacksetting.record_lot_number = true

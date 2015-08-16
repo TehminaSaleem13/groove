@@ -1,5 +1,6 @@
 class ExportsettingsController < ApplicationController
   before_filter :groovepacker_authorize!
+
   def get_export_settings
     @result = Hash.new
     @result['status'] = true
@@ -58,8 +59,8 @@ class ExportsettingsController < ApplicationController
           @result['error_messages'].push('Error saving export settings.')
         end
       else
-       @result['status'] &= false
-       @result['error_messages'].push('You are not authorized to update export preferences.')
+        @result['status'] &= false
+        @result['error_messages'].push('You are not authorized to update export preferences.')
       end
     else
       @result['status'] &= false

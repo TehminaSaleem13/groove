@@ -1,123 +1,148 @@
-  <div class="row">
-    <div class="col-md-6">
-      <legend>Shipstation Credentials</legend>
-      <div class="form-group">
-        <label class="control-label col-md-4">API Key</label>
-        <div class="controls col-md-8">
-          <input name="api_key" xs-input-sync ng-model="stores.single.api_key" type="text" ng-blur="update_single_store()" class="form-control input-style" value="" required/>
-        </div>
-      </div>
+<div class="row">
+  <div class="col-md-6">
+    <legend>Shipstation Credentials</legend>
+    <div class="form-group">
+      <label class="control-label col-md-4">API Key</label>
 
-      <div class="form-group">
-        <label class="control-label col-md-4">API Secret</label>
-        <div class="controls col-md-8">
-          <input name="api_secret" xs-input-sync ng-model="stores.single.api_secret" type="text" ng-blur="update_single_store()" class="form-control input-style" value="" required/>
-        </div>
+      <div class="controls col-md-8">
+        <input name="api_key" xs-input-sync ng-model="stores.single.api_key" type="text" ng-blur="update_single_store()"
+               class="form-control input-style" value="" required/>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="control-label col-md-4">API Secret</label>
+
+      <div class="controls col-md-8">
+        <input name="api_secret" xs-input-sync ng-model="stores.single.api_secret" type="text"
+               ng-blur="update_single_store()" class="form-control input-style" value="" required/>
       </div>
     </div>
   </div>
-  <div class="row">
-    <div class="col-md-6">
-      <legend>Import Orders with following statuses</legend>
-      <div class="form-group">
-        <label class="control-label col-md-4">Awaiting Shipment</label>
-        <div class="controls col-md-8">
-          <div toggle-switch ng-model="stores.single.shall_import_awaiting_shipment" groov-click="update_single_store()"></div>
-          <i class="pull-right icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" popover="Orders with the statuses enabled here will be imported during each import. Existing orders will be recognized by order number and skipped. The date range included in the import can be extended by using the Deep Import option in the Import Orders popover.&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+</div>
+<div class="row">
+  <div class="col-md-6">
+    <legend>Import Orders with following statuses</legend>
+    <div class="form-group">
+      <label class="control-label col-md-4">Awaiting Shipment</label>
+
+      <div class="controls col-md-8">
+        <div toggle-switch ng-model="stores.single.shall_import_awaiting_shipment"
+             groov-click="update_single_store()"></div>
+        <i class="pull-right icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter"
+           popover="Orders with the statuses enabled here will be imported during each import. Existing orders will be recognized by order number and skipped. The date range included in the import can be extended by using the Deep Import option in the Import Orders popover.&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
           &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
           If both statuses are disabled here only orders with the GP Ready tag will be imported, otherwise the tagged orders will be imported in addition to orders of the enabled status."></i>
-        </div>
       </div>
+    </div>
 
-      <div class="form-group">
-        <label class="control-label col-md-4">Shipped</label>
-        <div class="controls col-md-8">
-          <div toggle-switch ng-model="stores.single.shall_import_shipped" groov-click="update_single_store()"></div>
-        </div>
+    <div class="form-group">
+      <label class="control-label col-md-4">Shipped</label>
+
+      <div class="controls col-md-8">
+        <div toggle-switch ng-model="stores.single.shall_import_shipped" groov-click="update_single_store()"></div>
       </div>
+    </div>
 
-      <div class="form-group">
-        <label class="control-label col-md-4">Regular Import Range</label>
+    <div class="form-group">
+      <label class="control-label col-md-4">Regular Import Range</label>
 
-        <div class="controls col-md-8" dropdown>
-          <button class="dropdown-toggle groove-button" style="text-transform: none;">
-              <span>{{stores.single.regular_import_range}} day(s)</span>
-              <span class="caret"></span>
-          </button>
-          <ul class="dropdown-menu" role="menu">
-            <li ng-repeat="day in stores.single.import_days">
-              <a class="dropdown-toggle" ng-click="stores.single.regular_import_range=day; update_single_store()">{{day}} day(s)</a>
-            </li>
-          </ul>
-          <i class="pull-right icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" groov-popover="This setting allows you to choose how many days prior to the previous import GroovePacker should check when looking for orders during a regular import. A lower setting will reduce import times. This is particularly helpful when you are importing Shipped orders and here are hundreds or thousands of orders that match the status and date range.<br/> If you routinely place orders on hold for 3 days, then a setting of 4 days would be advisable as you would rarely have out of range orders. Orders that have been placed on hold for longer, and then changed to awaiting, will be outside of the Date range that is checked. These can be imported using the Deep import which looks back 7 days prior to the previous import or by using the GP Ready tag to import select orders."></i>
-        </div>
+      <div class="controls col-md-8" dropdown>
+        <button class="dropdown-toggle groove-button" style="text-transform: none;">
+          <span>{{stores.single.regular_import_range}} day(s)</span>
+          <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu" role="menu">
+          <li ng-repeat="day in stores.single.import_days">
+            <a class="dropdown-toggle" ng-click="stores.single.regular_import_range=day; update_single_store()">{{day}}
+              day(s)</a>
+          </li>
+        </ul>
+        <i class="pull-right icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter"
+           groov-popover="This setting allows you to choose how many days prior to the previous import GroovePacker should check when looking for orders during a regular import. A lower setting will reduce import times. This is particularly helpful when you are importing Shipped orders and here are hundreds or thousands of orders that match the status and date range.<br/> If you routinely place orders on hold for 3 days, then a setting of 4 days would be advisable as you would rarely have out of range orders. Orders that have been placed on hold for longer, and then changed to awaiting, will be outside of the Date range that is checked. These can be imported using the Deep import which looks back 7 days prior to the previous import or by using the GP Ready tag to import select orders."></i>
       </div>
-      <div class="form-group">
-        <label class="control-label col-md-4">Generate Barcode from SKU</label>
+    </div>
+    <div class="form-group">
+      <label class="control-label col-md-4">Generate Barcode from SKU</label>
 
-        <div class="controls col-md-8">
-          <div toggle-switch ng-model="stores.single.gen_barcode_from_sku" groov-click="update_single_store()"></div>
-          <i class="pull-right icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" groov-popover="If your Barcodes match your SKU, you can enable this option to have GroovePacker automatically generate Barcodes when new products are found during order imports."/>
-        </div>
+      <div class="controls col-md-8">
+        <div toggle-switch ng-model="stores.single.gen_barcode_from_sku" groov-click="update_single_store()"></div>
+        <i class="pull-right icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter"
+           groov-popover="If your Barcodes match your SKU, you can enable this option to have GroovePacker automatically generate Barcodes when new products are found during order imports."/>
       </div>
     </div>
   </div>
-  <div class="row">
-    <div class="col-md-6">
-      <legend>Import specific orders using a tag</legend>
-      <div class="form-group">
-        <label class="control-label col-md-4">{{stores.single.gp_ready_tag_name}}</label>
-        <div class="controls col-md-8">
-          <button class="btn btn-success" clip-copy="stores.single.gp_ready_tag_name">Copy to clipboard</button> <i class="pull-right icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" popover="The GP Ready Tag can be used to import or re-import (update) specific orders from ShipStation. Any order with the GP Ready tag will be imported to GroovePacker on the next import regardless of the order status or order date. Once imported, the GP Ready tag will be removed.
+</div>
+<div class="row">
+  <div class="col-md-6">
+    <legend>Import specific orders using a tag</legend>
+    <div class="form-group">
+      <label class="control-label col-md-4">{{stores.single.gp_ready_tag_name}}</label>
+
+      <div class="controls col-md-8">
+        <button class="btn btn-success" clip-copy="stores.single.gp_ready_tag_name">Copy to clipboard</button>
+        <i class="pull-right icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" popover="The GP Ready Tag can be used to import or re-import (update) specific orders from ShipStation. Any order with the GP Ready tag will be imported to GroovePacker on the next import regardless of the order status or order date. Once imported, the GP Ready tag will be removed.
           &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
           &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
           For additional confirmation you can also create a GP Imported tag. After the order is successfully imported the GP Ready tag will be replaced with a GP Imported tag. Both tags need to be created once in ShipStation before they can be used by GroovePacker.
           &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
           &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
           The tags can be copied to the clipboard and pasted when you create the tag in ShipStation in ensure an exact match. Once you've created the tags you can use the Test Tag button to verify they are found."></i>
-        </div>
-      </div>
-      <div class="form-group">
-        <label class="control-label col-md-4">{{stores.single.gp_imported_tag_name}}</label>
-        <div class="controls col-md-8">
-          <button class="btn btn-success" clip-copy="stores.single.gp_imported_tag_name" clip-click="alert('clicked')">Copy to clipboard</button>
-
-          <button class="btn btn-success pull-right" ng-click="shipstation_verify_tags(stores.single.id)">Test tags</button>
-          <div class="alert" ng-class="{'alert-success':verification_tags.verification_result, 'alert-danger': verification_tags.verification_result == false}" style="margin-top: 10px; margin-bottom: 0px;">
-            <p>{{verification_tags.message}}</p>
-          </div>
-        </div>
-
       </div>
     </div>
-  </div>
-  <div class="row">
-    <div class="col-md-6">
-      <legend>Import Notes</legend>
-      <div class="form-group">
-        <label class="control-label col-md-4">Import Internal Notes</label>
-        <div class="controls col-md-8">
-          <div toggle-switch ng-model="stores.single.shall_import_internal_notes" groov-click="update_single_store()"></div>
-          <i class="pull-right icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" groov-popover="Notes enabled here will be imported along with the orders.<br/><br/>You should also turn on the <strong>Show Internal Notes</strong> and <strong>Show Customer Notes</strong> in the Scan Pack settings to view the notes while scanning and packing."></i>
+    <div class="form-group">
+      <label class="control-label col-md-4">{{stores.single.gp_imported_tag_name}}</label>
+
+      <div class="controls col-md-8">
+        <button class="btn btn-success" clip-copy="stores.single.gp_imported_tag_name" clip-click="alert('clicked')">
+          Copy to clipboard
+        </button>
+
+        <button class="btn btn-success pull-right" ng-click="shipstation_verify_tags(stores.single.id)">Test tags
+        </button>
+        <div class="alert"
+             ng-class="{'alert-success':verification_tags.verification_result, 'alert-danger': verification_tags.verification_result == false}"
+             style="margin-top: 10px; margin-bottom: 0px;">
+          <p>{{verification_tags.message}}</p>
         </div>
       </div>
 
-      <div class="form-group">
-        <label class="control-label col-md-4">Import Customer Notes</label>
-        <div class="controls col-md-8">
-          <div toggle-switch ng-model="stores.single.shall_import_customer_notes" groov-click="update_single_store()"></div>
-        </div>
+    </div>
+  </div>
+</div>
+<div class="row">
+  <div class="col-md-6">
+    <legend>Import Notes</legend>
+    <div class="form-group">
+      <label class="control-label col-md-4">Import Internal Notes</label>
+
+      <div class="controls col-md-8">
+        <div toggle-switch ng-model="stores.single.shall_import_internal_notes"
+             groov-click="update_single_store()"></div>
+        <i class="pull-right icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter"
+           groov-popover="Notes enabled here will be imported along with the orders.<br/><br/>You should also turn on the <strong>Show Internal Notes</strong> and <strong>Show Customer Notes</strong> in the Scan Pack settings to view the notes while scanning and packing."></i>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="control-label col-md-4">Import Customer Notes</label>
+
+      <div class="controls col-md-8">
+        <div toggle-switch ng-model="stores.single.shall_import_customer_notes"
+             groov-click="update_single_store()"></div>
       </div>
     </div>
   </div>
-  <div class="row">
-    <div class="col-md-6">
-      <legend>Export Products</legend>
-      <div class="form-group">
-        <label class="control-label col-md-4">Export Active Products</label>
-        <div class="controls col-md-8">
-          <button class="btn btn-success" ng-click="export_active_products()">Export</button>        
-        </div>
+</div>
+<div class="row">
+  <div class="col-md-6">
+    <legend>Export Products</legend>
+    <div class="form-group">
+      <label class="control-label col-md-4">Export Active Products</label>
+
+      <div class="controls col-md-8">
+        <button class="btn btn-success" ng-click="export_active_products()">Export</button>
       </div>
     </div>
   </div>
+</div>

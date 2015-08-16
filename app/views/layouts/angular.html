@@ -1,50 +1,60 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1">
-    <title><%= content_for?(:title) ? yield(:title) : "GroovePacker - Online Inventory and Barcode Packing Solution" %></title>
-    <meta name="description" content="<%= content_for?(:description) ? yield(:description) : 'Groovepacks' %>">
-    <link href='https://fonts.googleapis.com/css?family=Play:400,700' rel='stylesheet' type='text/css'>
-    <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
-    <%= stylesheet_link_tag "application", :media => "all" %>
-    <%= javascript_include_tag "https://js.stripe.com/v2/","/socket/socket.io.js","application" %>
+  <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1">
+  <title><%= content_for?(:title) ? yield(:title) : "GroovePacker - Online Inventory and Barcode Packing Solution"
+    %></title>
+  <meta name="description" content="<%= content_for?(:description) ? yield(:description) : 'Groovepacks' %>">
+  <link href='https://fonts.googleapis.com/css?family=Play:400,700' rel='stylesheet' type='text/css'>
+  <link
+    href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800'
+    rel='stylesheet' type='text/css'>
+  <%= stylesheet_link_tag "application", :media => "all" %>
+  <%= javascript_include_tag "https://js.stripe.com/v2/","/socket/socket.io.js","application" %>
 
-    <%= csrf_meta_tags %>
-    <%= tag :meta, :name => "stripe-key", :content => ENV['STRIPE_PUBLIC_KEY'] %>
-    <%= yield(:head) %>
-    <%= airbrake_javascript_notifier %>
+  <%= csrf_meta_tags %>
+  <%= tag :meta, :name => "stripe-key", :content => ENV['STRIPE_PUBLIC_KEY'] %>
+  <%= yield(:head) %>
+  <%= airbrake_javascript_notifier %>
 </head>
-    <body class="container-well" ng-app="<%= (Apartment::Tenant.current == 'admintools')? 'groovepacks_admin' : 'groovepacks' %>" ng-controller="appCtrl">
-    <%= Apartment::Tenant.current %>
-        <div class="logout-box fade" ng-show="show_logout_box">
-            <div class="center-message">
-                <h2>Continue session?</h2>
-                <button class="modal-save-button" ng-click="log_out('everyone_else')">Yes, Sign Out all other sessions</button>
-                <button ng-click="log_out('me')" class="modal-cancel-button">No, Sign this session out</button>
-            </div>
-        </div>
-        <div class="editing-mode" ng-class="{in: currently_editing}">
-            <div class="top-message">
-                <button class="groove-button label label-info" ng-click="stop_editing()">Exit Edit Mode</button>
-            </div>
-        </div>
+<body class="container-well"
+      ng-app="<%= (Apartment::Tenant.current == 'admintools')? 'groovepacks_admin' : 'groovepacks' %>"
+      ng-controller="appCtrl">
+<%= Apartment::Tenant.current %>
+<div class="logout-box fade" ng-show="show_logout_box">
+  <div class="center-message">
+    <h2>Continue session?</h2>
+    <button class="modal-save-button" ng-click="log_out('everyone_else')">Yes, Sign Out all other sessions</button>
+    <button ng-click="log_out('me')" class="modal-cancel-button">No, Sign this session out</button>
+  </div>
+</div>
+<div class="editing-mode" ng-class="{in: currently_editing}">
+  <div class="top-message">
+    <button class="groove-button label label-info" ng-click="stop_editing()">Exit Edit Mode</button>
+  </div>
+</div>
 
-        <div id="notification" groov-persist-notification></div>
-        <div class="container main-body">
-            <div class="gradient-well">
-                <div class="container-fluid gradient-well-inner">
-                    <%= yield %>
-                </div>
-            </div>
-        </div>
-        <div groov-notification></div>
-        <% if !current_user.nil? && current_user.username == 'gpadmin' %>
-            <div id="dashboard" groov-dashboard></div>
-        <% end %>
-        <script>
-            (function()
-                    {var s=document.createElement('script'); s.type='text/javascript';s.async=true; s.src=('https:'==document.location.protocol?'https':'http') + '://groovepacker.groovehq.com/widgets/19f8daa6-1ffc-4b6e-811c-61d2ea7ce575/ticket.js'; var q = document.getElementsByTagName('script')[0];q.parentNode.insertBefore(s, q);}
-            )();
-        </script>
-    </body>
+<div id="notification" groov-persist-notification></div>
+<div class="container main-body">
+  <div class="gradient-well">
+    <div class="container-fluid gradient-well-inner">
+      <%= yield %>
+    </div>
+  </div>
+</div>
+<div groov-notification></div>
+<% if !current_user.nil? && current_user.username == 'gpadmin' %>
+<div id="dashboard" groov-dashboard></div>
+<% end %>
+<script>
+  (function () {
+      var s = document.createElement('script');
+      s.type = 'text/javascript';
+      s.async = true;
+      s.src = ('https:' == document.location.protocol ? 'https' : 'http') + '://groovepacker.groovehq.com/widgets/19f8daa6-1ffc-4b6e-811c-61d2ea7ce575/ticket.js';
+      var q = document.getElementsByTagName('script')[0];
+      q.parentNode.insertBefore(s, q);
+    })();
+</script>
+</body>
 </html>

@@ -40,12 +40,12 @@ describe OrdersController do
     @prod_inv_wh.reload
     @prod_inv_wh1.reload
     @prod_inv_wh2.reload
-    expect(@prod_inv_wh.available_inv).to eq(40)
-    expect(@prod_inv_wh.allocated_inv).to eq(10)
-    expect(@prod_inv_wh1.available_inv).to eq(50)
-    expect(@prod_inv_wh1.allocated_inv).to eq(0)
-    expect(@prod_inv_wh2.available_inv).to eq(50)
-    expect(@prod_inv_wh2.allocated_inv).to eq(0)
+    expect(@prod_inv_wh.available_inv).to eq(50)
+    expect(@prod_inv_wh.allocated_inv).to eq(0)
+    expect(@prod_inv_wh1.available_inv).to eq(40)
+    expect(@prod_inv_wh1.allocated_inv).to eq(10)
+    expect(@prod_inv_wh2.available_inv).to eq(40)
+    expect(@prod_inv_wh2.allocated_inv).to eq(10)
   end
   it "synchronizes available inventory and allocated inventory for kit items for kit_parsing as individual" do
   	@product = FactoryGirl.create(:product, :name=>'KIT_PRODUCT', :total_avail_ext=>50, 
@@ -81,12 +81,12 @@ describe OrdersController do
     @prod_inv_wh1.reload
     @prod_inv_wh2.reload
 
-    expect(@prod_inv_wh.available_inv).to eq(40)
-    expect(@prod_inv_wh.allocated_inv).to eq(10)
-    expect(@prod_inv_wh1.available_inv).to eq(50)
-    expect(@prod_inv_wh1.allocated_inv).to eq(0)
-    expect(@prod_inv_wh2.available_inv).to eq(50)
-    expect(@prod_inv_wh2.allocated_inv).to eq(0)
+    expect(@prod_inv_wh.available_inv).to eq(50)
+    expect(@prod_inv_wh.allocated_inv).to eq(0)
+    expect(@prod_inv_wh1.available_inv).to eq(40)
+    expect(@prod_inv_wh1.allocated_inv).to eq(10)
+    expect(@prod_inv_wh2.available_inv).to eq(40)
+    expect(@prod_inv_wh2.allocated_inv).to eq(10)
   end
   def create_order_info
     @prod_inv_wh = ProductInventoryWarehouses.where(product_id: @product.id).first

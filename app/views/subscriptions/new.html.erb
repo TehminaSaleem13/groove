@@ -18,7 +18,8 @@
 
           <div class="input-group">
             <div class="input-group-addon">https://</div>
-            <input type="text" id="tenant_name" class="form-control" autofocus value="<%= non_hyphenated_string(params[:shopify])%>"/>
+            <input type="text" id="tenant_name" class="form-control" autofocus value="<%= non_hyphenated_string(params[:shopify]) %>"/>
+
             <div class="input-group-addon">.groovepacker.com</div>
           </div>
           <div class="form-group error" style="color: red;">
@@ -28,8 +29,8 @@
 
         <div class="form-group">
           <label for="email" class="control-label">Email*</label>
-          <input type="email" id="email" class="form-control" 
-            value="<%= params[:email]%>"/>
+          <input type="email" id="email" class="form-control"
+                 value="<%= params[:email] %>"/>
 
           <div class="form-group error" style="color: red;">
             <div id="error-email-block" class="help-inline"></div>
@@ -86,24 +87,35 @@
         </div>
         <hr width="95%">
         <% if params[:shopify].nil? %>
-          <div><h4><center>Risk Free 30-day Evaluation</center></h4></div>
-          <div style ="padding-left:12px;font-size: 14px;">
-            <label>If you are not completely satisfied, please let us know at any time during the evaluation period and all charges will be credited in full.</label>
+          <div>
+            <h4>
+              <center>Risk Free 30-day Evaluation</center>
+            </h4>
+          </div>
+          <div style="padding-left:12px;font-size: 14px;">
+            <label>If you are not completely satisfied, please let us know at any time during the evaluation period and
+              all charges will be credited in full.</label>
           </div>
 
-          <div style ="padding-left:23px;"><h4>Please choose how you would like to be billed:</h4></div>
+          <div style="padding-left:23px;"><h4>Please choose how you would like to be billed:</h4></div>
           <div class="form-group" style="padding-top: 2px;margin-top: -5px;">
             <div>
-              <label class="radio" style="margin-left: -5px;"><input type="radio" id="radio_subscription1" name="radio_subscription" value="monthly" checked/>Monthly:($<%=@monthly_amount/100%>.00)</label>
-              <div style ="padding-left:23px;width: 97%;font-size: 14px; margin-top: -10px;">
-                <label id="monthly_billing_label">The first monthly billing will be charged after 30 days. A one time initialization charge of $500 is paid today on deployment.</label>
+              <label class="radio" style="margin-left: -5px;"><input type="radio" id="radio_subscription1" name="radio_subscription" value="monthly" checked/>Monthly:($<%= @monthly_amount/100 %>
+                .00)</label>
+
+              <div style="padding-left:23px;width: 97%;font-size: 14px; margin-top: -10px;">
+                <label id="monthly_billing_label">The first monthly billing will be charged after 30 days. A one time
+                  initialization charge of $500 is paid today on deployment.</label>
                 <label id="monthly_discount_label"></label>
               </div>
             </div>
             <div style="padding-top: 5px;">
-              <label class="radio" style="margin-left: -5px;"><input type="radio" id="radio_subscription2" name="radio_subscription" value="annually" style="-webkit-appearance:block; background:green;"/>Annually:(<strike>$<%=@monthly_amount*12/100%>.00</strike>)($<%=@annually_amount/100%>.00) Save 10%</label>
-              <div style ="padding-left:23px;width: 85%;font-size: 14px; margin-top: -10px;">
-                <label id="annual_billing_label">The first annual billing will be charged after 30 days at a 10% discount. A one time initialization charge of $500 is paid today on deployment.</label>
+              <label class="radio" style="margin-left: -5px;"><input type="radio" id="radio_subscription2" name="radio_subscription" value="annually" style="-webkit-appearance:block; background:green;"/>Annually:(<strike>$<%= @monthly_amount*12/100 %>
+                .00</strike>)($<%= @annually_amount/100 %>.00) Save 10%</label>
+
+              <div style="padding-left:23px;width: 85%;font-size: 14px; margin-top: -10px;">
+                <label id="annual_billing_label">The first annual billing will be charged after 30 days at a 10%
+                  discount. A one time initialization charge of $500 is paid today on deployment.</label>
                 <label id="annual_discount_label"></label>
               </div>
             </div>
@@ -111,6 +123,7 @@
 
           <div class="form-group">
             <label for="coupon_id" class="control-label">Promotional Code</label>
+
             <div class="input-group">
               <input type="text" id="coupon_id" class="form-control" value="<%= params[:coupon_id] %>"/>
               <span class="input-group-btn">
@@ -128,10 +141,11 @@
             <button id="customButton" class="btn btn-primary" style="margin-bottom: 15px;">Purchase</button>
 
             <div class="alert alert-success" id="processing_alert_success" style="display:none;">
-              <div><i class="glyphicon glyphicon-refresh spin" style="font-size: 12px;"></i> Your subscription is being processed.</div>
+              <div><i class="glyphicon glyphicon-refresh spin" style="font-size: 12px;"></i> Your subscription is being
+                processed.
+              </div>
             </div>
-            <div class="alert alert-error" id="processing_alert_error" style="display:none;">
-              <p>Your subscription could not be processed. Please try again.</p>
+            <div class="alert alert-danger" id="processing_alert_error" style="display:none;">
             </div>
           </div>
         <% else %>
@@ -139,225 +153,233 @@
         <% end %>
       </fieldset>
     </form>
-      <script>
-          var valid = {
-              tenant_name: false,
-              email: false,
-              user_name: false,
-              password: false,
-              password_conf: false,
-              tos: false
-          };
+    <script>
+      var valid = {
+        tenant_name: false,
+        email: false,
+        user_name: false,
+        password: false,
+        password_conf: false,
+        tos: false
+      };
 
-          var radio_button_value = null;
-          var amount = 0;
-          var plan_id = null;
-          var coupon_id = null;
-          var one_time_payment = $('#one_time_payment').val();
-          var show_coupon_block = false;
+      var radio_button_value = null;
+      var amount = 0;
+      var plan_id = null;
+      var coupon_id = null;
+      var one_time_payment = $('#one_time_payment').val();
+      var show_coupon_block = false;
 
-          $('html').click(function () {
-            $('#tos_iframe').hide();
-            $('#privacy_iframe').hide();
-          });
-          $('#tos_link').click(function (event) {
-            event.preventDefault();
-            event.stopPropagation();
-            $('#privacy_iframe').hide();
-            $('#tos_iframe').show();
-          });
-          $('#privacy_link').click(function (event) {
-            event.preventDefault();
-            event.stopPropagation();
-            $('#tos_iframe').hide();
-            $('#privacy_iframe').show();
-          });
-          $('#shopifyButton').on('click', function(event) {
-              event.preventDefault();
-              plan_id = $('#plan_id').val();
-              open_handler(plan_id, "shopify");
-          })
+      $('html').click(function () {
+        $('#tos_iframe').hide();
+        $('#privacy_iframe').hide();
+      });
+      $('#tos_link').click(function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        $('#privacy_iframe').hide();
+        $('#tos_iframe').show();
+      });
+      $('#privacy_link').click(function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        $('#tos_iframe').hide();
+        $('#privacy_iframe').show();
+      });
+      $('#shopifyButton').on('click', function (event) {
+        event.preventDefault();
+        plan_id = $('#plan_id').val();
+        open_handler(plan_id, "shopify");
+      })
 
-          var handler = StripeCheckout.configure({
-            key: $('#stripe_public_key').val(),
-            image: '/assets/images/apple-touch-icon.png',
-            token: function (token) {
-              $.ajax({
-                  type: "POST",
-                  contentType: "application/json; charset=utf-8",
-                  url: "/subscriptions/confirm_payment",
-                  data: JSON.stringify({
-                      tenant_name: $('#tenant_name').val(),
-                      stripe_user_token: token.id,
-                      email: $('#email').val(),
-                      amount: amount,
-                      plan_id: plan_id,
-                      user_name: $('#user_name').val(),
-                      password: $('#password').val(),
-                      radio_subscription: radio_button_value,
-                      coupon_id: coupon_id,
-                      shopify_shop_name: "<%= params[:shopify] %>"
-                  }),
-                  dataType: "json"
+      var handler = StripeCheckout.configure({
+        key: $('#stripe_public_key').val(),
+        image: '/assets/images/apple-touch-icon.png',
+        token: function (token) {
+          $.ajax({
+            type: "POST",
+            contentType: "application/json; charset=utf-8",
+            url: "/subscriptions/confirm_payment",
+            data: JSON.stringify({
+              tenant_name: $('#tenant_name').val(),
+              stripe_user_token: token.id,
+              email: $('#email').val(),
+              amount: amount,
+              plan_id: plan_id,
+              user_name: $('#user_name').val(),
+              password: $('#password').val(),
+              radio_subscription: radio_button_value,
+              coupon_id: coupon_id,
+              shopify_shop_name: "<%= params[:shopify] %>"
+            }),
+            dataType: "json"
 
-              }).error(function (response) {
-                  $('#processing_alert_success').hide();
-                  $('#customButton').show();
-                  $('#shopifyButton').show();
-                  $('#processing_alert_error').show();
-              }).success(function (response) {
-                  if (!response.valid) {
-
-                      $('#processing_alert_success').hide();
-                      $('#customButton').show();
-                      $('#shopifyButton').show();
-                      $('#processing_alert_error').show();
-                  }
-                  else {
-                      window.location.href =
-                              response.redirect_url
-                  }
-              });
-              $('#customButton').hide();
-              $('#shopifyButton').hide();
-              $('#processing_alert_success').show();
-              $('#processing_alert_error').hide();
+          }).error(function (response) {
+            $('#processing_alert_success').hide();
+            $('#customButton').show();
+            $('#shopifyButton').show();
+            $('#processing_alert_error').show();
+            $('#processing_alert_error').append(
+              "<p>Your subscription could not be processed. Please try again.</p>"
+            )
+          }).success(function (response) {
+            if (!response.valid) {
+              $('#processing_alert_success').hide();
+              $('#customButton').show();
+              $('#shopifyButton').show();
+              $('#processing_alert_error').show();
+              $('#processing_alert_error').append(
+                "<p>" + response.errors + "</p>"
+              )
+            }
+            else {
+              var redirect_url = 'subscriptions/show?transaction_id=' + response.transaction_id + '&notice=' + response.notice + '&email=' + response.email + '&next_date=' + response.next_date
+              window.location.href = redirect_url
             }
           });
+          $('#customButton').hide();
+          $('#shopifyButton').hide();
+          $('#processing_alert_success').show();
+          $('#processing_alert_error').hide();
+        }
+      });
 
-          $(document).ready(function() {
-            show_coupon_block = false;
-            checkOneTimePayment();
-          });
-          
-          $('#apply').on('click',function(a) {
-            a.preventDefault();
-            show_coupon_block = true;
-            checkOneTimePayment();
-          });
-          
-          var checkOneTimePayment = function() {
-            var coupon = $('#coupon_id').val();
-            if (coupon != '') {
-              $.ajax({
-                type: "GET",
-                contentType: "application/json; charset=utf-8",
-                url: "/subscriptions/validate_coupon_id",
-                data: {coupon_id: $('#coupon_id').val()},
-                dataType: "json"
-              }).error(function (response) {
+      $(document).ready(function () {
+        show_coupon_block = false;
+        checkOneTimePayment();
+      });
 
-              }).success(function(response) {
-                if (response.status == false) {
-                  coupon_id = null;
-                  one_time_payment = $('#one_time_payment').val();
-                  console.log(one_time_payment);
-                  if (show_coupon_block) {
-                    $('#error-coupon-block').show();
-                    $('#success-coupon-block').hide();
-                  };
-                  $('#error-coupon-block').html(response.messages);
-                  $('#monthly_discount_label').hide();
-                  $('#annual_discount_label').hide();
-                  $('#monthly_billing_label').show();
-                  $('#annual_billing_label').show();
-                }
-                else {
-                  coupon_id = $('#coupon_id').val();
-                  one_time_payment = $('#one_time_payment').val() - (($('#one_time_payment').val() * response.percent_off) / 100);
-                  if (show_coupon_block) {
-                    $('#error-coupon-block').hide();
-                    $('#success-coupon-block').show();
-                    $('#success-coupon-block').html(response.messages);
-                  };
-                  $('#monthly_billing_label').hide();
-                  $('#monthly_discount_label').show();
-                  $('#monthly_discount_label').html('The first monthly billing will be charged after 30 days. A one time initialization charge of <strike>$500</strike> $' + one_time_payment/100 + '(' + response.percent_off + '% off) is paid today on deployment.');
-                  $('#annual_billing_label').hide();
-                  $('#annual_discount_label').show();
-                  $('#annual_discount_label').html('The first annual billing will be charged after 30 days at a 10% discount. A one time initialization charge of <strike>$500</strike> $' + one_time_payment/100 + '(' + response.percent_off + '% off) is paid today on deployment.');
-                }
-              });
-            };
-          };
+      $('#apply').on('click', function (a) {
+        a.preventDefault();
+        show_coupon_block = true;
+        checkOneTimePayment();
+      });
 
-          $('#tenant_name').blur(function () {
-            Subscription.validate_tenant_name();
-          });
+      var checkOneTimePayment = function () {
+        var coupon = $('#coupon_id').val();
+        if (coupon != '') {
+          $.ajax({
+            type: "GET",
+            contentType: "application/json; charset=utf-8",
+            url: "/subscriptions/validate_coupon_id",
+            data: {coupon_id: $('#coupon_id').val()},
+            dataType: "json"
+          }).error(function (response) {
 
-          $('#email').blur(function () {
-            Subscription.validate_email();
-          });
-
-          $('#user_name').blur(function () {
-            Subscription.validate_username();
-          });
-
-          $('#password').blur(function () {
-            Subscription.validate_password();
-          });
-
-          $('#password_conf').blur(function () {
-            Subscription.validate_password_confirmation();
-          });
-          
-          $('#tos_checkbox').click(function () {
-            Subscription.validate_tos();
-          });
-
-          var open_handler = function(plan_id, channel) {
-            $.ajax({
-              type: "GET",
-              contentType: "application/json; charset=utf-8",
-              url: "/subscriptions/planInfo",
-              data: {plan_id: plan_id},
-              dataType: "json"
-            }).error(function (response) {
-
-            }).success(function(response) {
-              if(response.status == true) {
-                amount = response.plan_info.amount;
+          }).success(function (response) {
+            if (response.status == false) {
+              coupon_id = null;
+              one_time_payment = $('#one_time_payment').val();
+              console.log(one_time_payment);
+              if (show_coupon_block) {
+                $('#error-coupon-block').show();
+                $('#success-coupon-block').hide();
               }
-              setTimeout(function () {
-                if (Subscription.validate()) {
-                    // Open Checkout with further options
-                  var description = null;
-                  var amount = 0;
-                  if(channel == 'shopify') {
-                    amount = 0;
-                    description = 'Add a card to your account';
-                  } else {
-                    amount = one_time_payment;
-                    description = 'Initialization fee ($' + 
-                      Number(one_time_payment/100).toFixed(2) + ')';
-                  }
+              ;
+              $('#error-coupon-block').html(response.messages);
+              $('#monthly_discount_label').hide();
+              $('#annual_discount_label').hide();
+              $('#monthly_billing_label').show();
+              $('#annual_billing_label').show();
+            }
+            else {
+              coupon_id = $('#coupon_id').val();
+              one_time_payment = $('#one_time_payment').val() - (($('#one_time_payment').val() * response.percent_off) / 100);
+              if (show_coupon_block) {
+                $('#error-coupon-block').hide();
+                $('#success-coupon-block').show();
+                $('#success-coupon-block').html(response.messages);
+              }
+              ;
+              $('#monthly_billing_label').hide();
+              $('#monthly_discount_label').show();
+              $('#monthly_discount_label').html('The first monthly billing will be charged after 30 days. A one time initialization charge of <strike>$500</strike> $' + one_time_payment / 100 + '(' + response.percent_off + '% off) is paid today on deployment.');
+              $('#annual_billing_label').hide();
+              $('#annual_discount_label').show();
+              $('#annual_discount_label').html('The first annual billing will be charged after 30 days at a 10% discount. A one time initialization charge of <strike>$500</strike> $' + one_time_payment / 100 + '(' + response.percent_off + '% off) is paid today on deployment.');
+            }
+          });
+        }
+        ;
+      };
 
-                  handler.open({
-                    name: 'Groovepacker',
-                    description: description,
-                    amount: amount,
-                    email: $('#email').val(),
-                    allowRememberMe: false
-                  });
-                }
-              }, 400);
-            });
+      $('#tenant_name').blur(function () {
+        Subscription.validate_tenant_name();
+      });
+
+      $('#email').blur(function () {
+        Subscription.validate_email();
+      });
+
+      $('#user_name').blur(function () {
+        Subscription.validate_username();
+      });
+
+      $('#password').blur(function () {
+        Subscription.validate_password();
+      });
+
+      $('#password_conf').blur(function () {
+        Subscription.validate_password_confirmation();
+      });
+
+      $('#tos_checkbox').click(function () {
+        Subscription.validate_tos();
+      });
+
+      var open_handler = function (plan_id, channel) {
+        $.ajax({
+          type: "GET",
+          contentType: "application/json; charset=utf-8",
+          url: "/subscriptions/planInfo",
+          data: {plan_id: plan_id},
+          dataType: "json"
+        }).error(function (response) {
+
+        }).success(function (response) {
+          if (response.status == true) {
+            amount = response.plan_info.amount;
           }
-          $('#customButton').on('click', function (e) {
-              e.preventDefault();
-              if ($("input[name='radio_subscription']:checked").length > 0){
-                radio_button_value = $('input:radio[name=radio_subscription]:checked').val();
-                if(radio_button_value == 'annually') {
-                  plan_id = 'annual-' + $('#plan_id').val();
-                }
-                else {
-                  plan_id = $('#plan_id').val();
-                }
-                open_handler(plan_id, "regular");
+          setTimeout(function () {
+            if (Subscription.validate()) {
+              // Open Checkout with further options
+              var description = null;
+              var amount = 0;
+              if (channel == 'shopify') {
+                amount = 0;
+                description = 'Add a card to your account';
+              } else {
+                amount = one_time_payment;
+                description = 'Initialization fee ($' +
+                  Number(one_time_payment / 100).toFixed(2) + ')';
               }
-          });
-      </script>
-    </div>
+
+              handler.open({
+                name: 'Groovepacker',
+                description: description,
+                amount: amount,
+                email: $('#email').val(),
+                allowRememberMe: false
+              });
+            }
+          }, 400);
+        });
+      }
+      $('#customButton').on('click', function (e) {
+        e.preventDefault();
+        if ($("input[name='radio_subscription']:checked").length > 0) {
+          radio_button_value = $('input:radio[name=radio_subscription]:checked').val();
+          if (radio_button_value == 'annually') {
+            plan_id = 'annual-' + $('#plan_id').val();
+          }
+          else {
+            plan_id = $('#plan_id').val();
+          }
+          open_handler(plan_id, "regular");
+        }
+      });
+    </script>
   </div>
+</div>
 </div>
 

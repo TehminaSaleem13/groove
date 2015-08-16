@@ -2,27 +2,41 @@ class ProductKitSkus < ActiveRecord::Base
   belongs_to :product
   attr_accessible :sku
   has_many :order_item_kit_products, dependent: :destroy
+  after_save :add_product_in_order_items
+  after_save :update_inventory_levels
+  #after_destroy :remove_product_from_order_items
 
   def add_product_in_order_items
-  	@order_items = OrderItem.where(:product_id => self.product_id)
-  	@order_items.each do |order_item|
+    @order_items = OrderItem.where(:product_id => self.product_id)
+    @order_items.each do |order_item|
       if OrderItemKitProduct.where(:order_item_id => order_item.id).where(:product_kit_skus_id => self.id).length == 0
-    		order_item_kit_product = OrderItemKitProduct.new
-    		order_item_kit_product.product_kit_skus = self
-    		order_item_kit_product.order_item = order_item
-    		order_item_kit_product.save
+        order_item_kit_product = OrderItemKitProduct.new
+        order_item_kit_product.product_kit_skus = self
+        order_item_kit_product.order_item = order_item
+        order_item_kit_product.save
       end
-  	end
+    end
+    true
   end
 
-  def remove_product_from_order_items
-  	@order_items = OrderItem.where(:product_id => self.product_id)
-  	@order_items.each do |order_item|
-  		order_item_kit_product = OrderItemKitProduct.new
-  		order_item_kit_product.product_kit_skus = self
-  		order_item_kit_product.order_item = order_item
-  		order_item_kit_product.save
-  	end  	
+  def update_inventory_levels
+    changed_hash = self.changes
+    if changed_hash['qty'].nil?
+      return true
+    end
+    initial_count = changed_hash['qty'][0]
+    final_count = changed_hash['qty'][1]
+    if initial_count.nil?
+      initial_count = 0
+    end
+    if final_count.nil?
+      final_count = 0
+    end
+    difference = final_count - initial_count
+
+    Groovepacker::Inventory::Products.kit_item_inv_change(self, difference)
+
+    true
   end
 
   def option_product

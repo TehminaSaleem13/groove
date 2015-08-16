@@ -1,6 +1,6 @@
 Subscription = {
 
-  validate: function() {
+  validate: function () {
     return (
       this.validate_email() &
       this.validate_tenant_name() &
@@ -11,7 +11,7 @@ Subscription = {
     )
   },
 
-  validate_email : function() {
+  validate_email: function () {
     var email = $('#email').val();
     var atpos = email.indexOf("@");
     var dotpos = email.lastIndexOf(".");
@@ -27,41 +27,41 @@ Subscription = {
       $('#error-email-block').html("email is not valid");
     } else {
       $.ajax({
-          type: "GET",
-          contentType: "application/json; charset=utf-8",
-          url: "/subscriptions/valid_email",
-          data: {email: $('#email').val()},
-          dataType: "json",
-          async: false
+        type: "GET",
+        contentType: "application/json; charset=utf-8",
+        url: "/subscriptions/valid_email",
+        data: {email: $('#email').val()},
+        dataType: "json",
+        async: false
 
       }).error(function (response) {
 
       }).success(function (response) {
-          if (!response.valid) {
-              $('#error-email-block').html($('#email').val() + " email already exists");
-              valid = false;
-              //$('#email').focus();
-          }
-          else {
-              $('#error-email-block').html("");
-              valid = true;
-              //user_name.focus();
-          }
+        if (!response.valid) {
+          $('#error-email-block').html($('#email').val() + " email already exists");
+          valid = false;
+          //$('#email').focus();
+        }
+        else {
+          $('#error-email-block').html("");
+          valid = true;
+          //user_name.focus();
+        }
       });
     }
 
     return valid;
   },
 
-  validate_tenant_name : function() {
+  validate_tenant_name: function () {
     var tenant_name = $("#tenant_name").val();
     tenant_name = tenant_name.toLowerCase();
     var valid = false;
     $("#tenant_name").val(tenant_name);
     if (tenant_name == null || tenant_name == "" || tenant_name.length < 4) {
-        valid = false;
-        $('#error-tenant-block').html("Site name must be at least 4 characters long");
-        //this.focus();
+      valid = false;
+      $('#error-tenant-block').html("Site name must be at least 4 characters long");
+      //this.focus();
     }
     else {
       $.ajax({
@@ -85,10 +85,10 @@ Subscription = {
         }
       });
     }
-    return(valid);
+    return (valid);
   },
 
-  validate_username : function() {
+  validate_username: function () {
     var user_name = $('#user_name').val();
     var valid = false;
 
@@ -103,7 +103,7 @@ Subscription = {
     return (valid);
   },
 
-  validate_password : function() {
+  validate_password: function () {
     var password = $('#password').val();
     var valid = false;
     if (password == null || password == "") {
@@ -115,18 +115,18 @@ Subscription = {
     } else if (password.length < 6) {
       valid = false;
       if (valid.user_name) {
-          $('#error-password-block').html("Password should be at least 6 characters");
-          $('#error-password-conf-block').html("");
+        $('#error-password-block').html("Password should be at least 6 characters");
+        $('#error-password-conf-block').html("");
       }
     } else {
       valid = true;
       $('#error-password-block').html("");
       $('#error-password-conf-block, #error-password-block').html("");
     }
-    return(valid);
+    return (valid);
   },
 
-  validate_password_confirmation : function() {
+  validate_password_confirmation: function () {
     var password_conf = $('#password_conf').val();
     var valid = false;
     if (password_conf == null || password_conf == "" || password_conf != password.value) {
@@ -140,15 +140,15 @@ Subscription = {
     return (valid);
   },
 
-  validate_tos : function() {
+  validate_tos: function () {
     var tos = $('#tos_checkbox').is(':checked');
     var valid = false;
     if (tos == null || tos == "" || tos == false) {
-        valid = false;
-        $('#error-tos-block').html("Please click I agree for TOS and Privacy Policy");
+      valid = false;
+      $('#error-tos-block').html("Please click I agree for TOS and Privacy Policy");
     } else {
-        valid = true;
-        $('#error-tos-block').html("");
+      valid = true;
+      $('#error-tos-block').html("");
     }
     return (valid);
   }

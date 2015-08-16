@@ -1,11 +1,11 @@
 class ImportCsv
-  def import(tenant,params)
+  def import(tenant, params)
     result = {}
     result['messages'] = []
     begin
       Apartment::Tenant.switch(tenant)
       #download CSV and save
-      csv_file = GroovS3.find_csv(tenant,params[:type],params[:store_id])
+      csv_file = GroovS3.find_csv(tenant, params[:type], params[:store_id])
       if csv_file.nil?
         result['messages'].push("No file present to import #{params[:type]}")
       else
@@ -19,7 +19,7 @@ class ImportCsv
           end
         else
           require 'csv'
-          CSV.parse(csv_file.content,:col_sep => params[:sep], :quote_char => params[:delimiter] ,:encoding => 'windows-1251:utf-8') do |single|
+          CSV.parse(csv_file.content, :col_sep => params[:sep], :quote_char => params[:delimiter], :encoding => 'windows-1251:utf-8') do |single|
             final_record.push(single)
           end
         end
@@ -40,13 +40,13 @@ class ImportCsv
         end
 
         if params[:type] == 'order'
-          result = Groovepacker::Store::Importers::CSV::OrdersImporter.new.import_old(params,final_record,mapping)
-          #result = Groovepacker::Store::Importers::CSV::OrdersImporter.new.import(params,final_record,mapping)
+          result = Groovepacker::Stores::Importers::CSV::OrdersImporter.new.import_old(params, final_record, mapping)
+          #result = Groovepacker::Stores::Importers::CSV::OrdersImporter.new.import(params,final_record,mapping)
         elsif params[:type] == 'product'
-          #result = Groovepacker::Store::Importers::CSV::ProductsImporter.new.import_old(params,final_record,mapping)
-          result = Groovepacker::Store::Importers::CSV::ProductsImporter.new.import(params,final_record,mapping, params[:import_action])
+          #result = Groovepacker::Stores::Importers::CSV::ProductsImporter.new.import_old(params,final_record,mapping)
+          result = Groovepacker::Stores::Importers::CSV::ProductsImporter.new.import(params, final_record, mapping, params[:import_action])
         elsif params[:type] == 'kit'
-          result = Groovepacker::Store::Importers::CSV::KitsImporter.new.import(params,final_record,mapping, params[:bulk_action_id])
+          result = Groovepacker::Stores::Importers::CSV::KitsImporter.new.import(params, final_record, mapping, params[:bulk_action_id])
         end
         #File.delete(file_path)
 

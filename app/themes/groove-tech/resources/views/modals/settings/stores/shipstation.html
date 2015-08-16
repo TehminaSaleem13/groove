@@ -1,81 +1,87 @@
-  <div class="row">
-    <div class="col-md-6">
-      <legend>Shipstation Credentials</legend>
-      <div class="form-group">
-        <label class="control-label col-md-4">Username</label>
-        <div class="controls col-md-8">
-          <input name="username" xs-input-sync ng-model="stores.single.username" type="text" ng-blur="update_single_store()" class="form-control input-style" value="" required/>
-        </div>
-      </div>
+<div class="row">
+  <div class="col-md-6">
+    <legend>Shipstation Credentials</legend>
+    <div class="form-group">
+      <label class="control-label col-md-4">Username</label>
 
-      <div class="form-group">
-        <label class="control-label col-md-4">Password</label>
-        <div class="controls col-md-8">
-          <input name="password" xs-input-sync ng-model="stores.single.password" type="text" ng-blur="update_single_store()" class="form-control input-style" value="" required/>
-        </div>
+      <div class="controls col-md-8">
+        <input name="username" xs-input-sync ng-model="stores.single.username" type="text"
+               ng-blur="update_single_store()" class="form-control input-style" value="" required/>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="control-label col-md-4">Password</label>
+
+      <div class="controls col-md-8">
+        <input name="password" xs-input-sync ng-model="stores.single.password" type="text"
+               ng-blur="update_single_store()" class="form-control input-style" value="" required/>
       </div>
     </div>
   </div>
+</div>
 
-  <div class="row" ng-hide="true">
-    <div class="col-md-6">
-      <legend>Import Orders</legend>
-      <div class="form-group">
-        <div class="controls col-md-8">
-          <button ng-click="import_orders()"class="modal-save-button" ng-show="edit_status">Import Orders</button>
-        </div>
+<div class="row" ng-hide="true">
+  <div class="col-md-6">
+    <legend>Import Orders</legend>
+    <div class="form-group">
+      <div class="controls col-md-8">
+        <button ng-click="import_orders()" class="modal-save-button" ng-show="edit_status">Import Orders</button>
       </div>
-      <div class="form-group">
-        <div class="col-xs-12">
-          <label class="alert alert-info" ng-show="stores.import.order.status_show">{{stores.import.order.status}}</label>
-        </div>
+    </div>
+    <div class="form-group">
+      <div class="col-xs-12">
+        <label class="alert alert-info" ng-show="stores.import.order.status_show">{{stores.import.order.status}}</label>
       </div>
     </div>
   </div>
+</div>
 
-  <div class="row" ng-hide="true">
-    <div class="col-md-6">
+<div class="row" ng-hide="true">
+  <div class="col-md-6">
     <legend>Import Products</legend>
 
-      <div class="form-group">
-        <div class="controls col-md-8">
-          <button ng-click="import_products()"class="modal-save-button" ng-show="edit_status">Import Products</button>
-        </div>
+    <div class="form-group">
+      <div class="controls col-md-8">
+        <button ng-click="import_products()" class="modal-save-button" ng-show="edit_status">Import Products</button>
       </div>
+    </div>
 
-      <div class="form-group">
-        <div class="col-xs-12">
-          <label class="alert alert-info" ng-show="stores.import.product.status_show">{{stores.import.product.status}}</label>
-        </div>
+    <div class="form-group">
+      <div class="col-xs-12">
+        <label class="alert alert-info"
+               ng-show="stores.import.product.status_show">{{stores.import.product.status}}</label>
       </div>
     </div>
   </div>
+</div>
 
-  <div class="row" ng-hide="true">
-    <div class="col-md-6">
+<div class="row" ng-hide="true">
+  <div class="col-md-6">
     <legend>Import Product Images</legend>
 
-      <div class="form-group">
-        <div class="controls col-md-8">
-          <button ng-click="import_images()"class="modal-save-button" ng-show="edit_status">Import Product Images</button>
-        </div>
+    <div class="form-group">
+      <div class="controls col-md-8">
+        <button ng-click="import_images()" class="modal-save-button" ng-show="edit_status">Import Product Images
+        </button>
       </div>
+    </div>
 
-      <div class="form-group">
-        <div class="col-xs-12">
-          <label class="alert alert-info" ng-show="stores.import.image.status_show">{{stores.import.image.status}}</label>
-        </div>
+    <div class="form-group">
+      <div class="col-xs-12">
+        <label class="alert alert-info" ng-show="stores.import.image.status_show">{{stores.import.image.status}}</label>
       </div>
     </div>
   </div>
+</div>
 
-  <div class="row">
-    <div class="col-md-6">
-      <legend>Automatically Update Products?</legend>
-      <div class="form-group">
-          <div class="col-md-9 form-inline">
-            <div toggle-switch ng-model="stores.single.auto_update_products" groov-click="update_single_store()"></div>
-          </div>
+<div class="row">
+  <div class="col-md-6">
+    <legend>Automatically Update Products?</legend>
+    <div class="form-group">
+      <div class="col-md-9 form-inline">
+        <div toggle-switch ng-model="stores.single.auto_update_products" groov-click="update_single_store()"></div>
       </div>
     </div>
   </div>
+</div>

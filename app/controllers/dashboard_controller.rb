@@ -2,15 +2,15 @@ class DashboardController < ApplicationController
   before_filter :groovepacker_authorize!
   # perform authorization too
 
-  def main_summary    
+  def main_summary
     results = {}
     #default duration to 30
     params[:duration] = params[:duration] || 30
-    
+
     #packed items
     results[:packed_items_summary] = {}
 
-    packed_item_stats = 
+    packed_item_stats =
       Groovepacker::Dashboard::Stats::PackedItem.new(params[:duration].to_i)
     results[:packed_items_summary] = packed_item_stats.summary
 
@@ -18,14 +18,14 @@ class DashboardController < ApplicationController
     #packing speed
     results[:packing_speed_summary] = {}
 
-    packing_speed_stats = 
+    packing_speed_stats =
       Groovepacker::Dashboard::Stats::PackingSpeed.new(params[:duration].to_i)
     results[:packing_speed_summary] = packing_speed_stats.summary
 
     #packing accuracy
     results[:packing_accuracy_summary] = {}
 
-    packing_accuracy_stats = 
+    packing_accuracy_stats =
       Groovepacker::Dashboard::Stats::PackingAccuracy.new(params[:duration].to_i)
     results[:packing_accuracy_summary] = packing_accuracy_stats.summary
 
@@ -37,21 +37,21 @@ class DashboardController < ApplicationController
     #default duration to 30
     params[:duration] = params[:duration] || 30
 
-    packed_accuracy_stats = 
+    packed_accuracy_stats =
       Groovepacker::Dashboard::Stats::PackingAccuracy.new(params[:duration].to_i)
 
     results = packed_accuracy_stats.detail
 
     render json: results
   end
-  
+
   def packing_speed
     results = []
 
     #default duration to 30
     params[:duration] = params[:duration] || 30
 
-    packing_speed_stats = 
+    packing_speed_stats =
       Groovepacker::Dashboard::Stats::PackingSpeed.new(params[:duration].to_i)
 
     results = packing_speed_stats.detail
@@ -65,7 +65,7 @@ class DashboardController < ApplicationController
     #default duration to 30
     params[:duration] = params[:duration] || 30
 
-    packed_item_stats = 
+    packed_item_stats =
       Groovepacker::Dashboard::Stats::PackedItem.new(params[:duration].to_i)
 
     results = packed_item_stats.detail
@@ -73,7 +73,7 @@ class DashboardController < ApplicationController
     render json: results
   end
 
-  def exceptions 
+  def exceptions
     results = []
 
     params[:exception_type] = params[:exception_type] || 'most_recent'
@@ -91,7 +91,7 @@ class DashboardController < ApplicationController
     render json: results
   end
 
-  def leader_board 
+  def leader_board
     results = []
 
     results = Groovepacker::Dashboard::Stats::LeaderBoardStats.new.list

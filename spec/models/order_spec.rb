@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe Order do
   before(:each) do
-    SeedTenant.new.seed
+    Groovepacker::SeedTenant.new.seed
     @generalsetting = GeneralSetting.all.first
     @generalsetting.update_column(:inventory_tracking,true)
   end
@@ -265,20 +265,29 @@ describe Order do
       kit_product_sku = FactoryGirl.create(:product_sku, :product=> kit_product, :sku=> 'IPROTO1')
       kit_product_barcode = FactoryGirl.create(:product_barcode, :product=> kit_product, :barcode => 'KITITEM1')
       product_kit_sku = FactoryGirl.create(:product_kit_sku, :product => product, :option_product_id=>kit_product.id, :qty=> 3)
+      kit_product_inv_wh = FactoryGirl.create(:product_inventory_warehouse, :product=> kit_product,
+                                          :inventory_warehouse_id =>inv_wh.id, :available_inv => 25)
 
       order_item = FactoryGirl.create(:order_item, :product_id=>product.id,
                     :qty=>2, :price=>"10", :row_total=>"10", :order=>order, :name=>product.name)
 
       product_inv_wh.reload
-      expect(product_inv_wh.available_inv).to eq(23)
-      expect(product_inv_wh.allocated_inv).to eq(2)
+      kit_product_inv_wh.reload
+      expect(product_inv_wh.available_inv).to eq(25)
+      expect(product_inv_wh.allocated_inv).to eq(0)
+      expect(kit_product_inv_wh.available_inv).to eq(19)
+      expect(kit_product_inv_wh.allocated_inv).to eq(6)
 
       order.status = 'onhold'
       order.save
 
       product_inv_wh.reload
-      expect(product_inv_wh.available_inv).to eq(23)
-      expect(product_inv_wh.allocated_inv).to eq(2)
+      kit_product_inv_wh.reload
+      expect(product_inv_wh.available_inv).to eq(25)
+      expect(product_inv_wh.allocated_inv).to eq(0)
+      expect(kit_product_inv_wh.available_inv).to eq(19)
+      expect(kit_product_inv_wh.allocated_inv).to eq(6)
+
     end
 
     it "should create order which has a kit with individual status awaiting change it to onhold and update allocated inventory count" do      

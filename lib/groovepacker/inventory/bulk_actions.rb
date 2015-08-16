@@ -1,6 +1,6 @@
 module Groovepacker
-	module Inventory
-		class BulkActions
+  module Inventory
+    class BulkActions
 
       include Groovepacker::Inventory::Helper
 
@@ -10,11 +10,14 @@ module Groovepacker
         end
         order_items = OrderItem.where(inv_status: OrderItem::DEFAULT_INV_STATUS)
         order_items.each do |single_order_item|
-          Groovepacker::Inventory::Orders.allocate_item(single_order_item, true)
-          if Order::UNALLOCATE_STATUSES.include?(single_order_item.order.status)
-            Groovepacker::Inventory::Orders.deallocate_item(single_order_item, true)
-          elsif Order::SOLD_STATUSES.include?(single_order_item.order.status)
-            Groovepacker::Inventory::Orders.process_sell_item(single_order_item, 1)
+          if single_order_item.is_not_ghost?
+            if Order::ALLOCATE_STATUSES.include?(single_order_item.order.status)
+              Groovepacker::Inventory::Orders.allocate_item(single_order_item)
+            elsif Order::SOLD_STATUSES.include?(single_order_item.order.status)
+              Groovepacker::Inventory::Orders.process_sell_item(single_order_item, 1, false)
+            elsif Order::UNALLOCATE_STATUSES.include?(single_order_item.order.status)
+              single_order_item.update_column(:inv_status, OrderItem::UNALLOCATED_INV_STATUS)
+            end
           end
         end
       end
@@ -58,6 +61,7 @@ module Groovepacker
                 bulk_action.save
               end
             end
+            process_unprocessed
             bulk_action.status = 'completed'
             bulk_action.save
           else
@@ -109,14 +113,10 @@ module Groovepacker
       end
 
       def do_process_single(order)
-        #Force allocate the order (just like it would when you start)
-        Groovepacker::Inventory::Orders.allocate(order, true)
-        # Try to deallocate with the status check
-        # Try to sell off the ones which weren't deallocated
-        if Order::UNALLOCATE_STATUSES.include? order.status
-          Groovepacker::Inventory::Orders.deallocate(order)
+        if Order::ALLOCATE_STATUSES.include? order.status
+          Groovepacker::Inventory::Orders.allocate(order)
         elsif Order::SOLD_STATUSES.include? order.status
-          Groovepacker::Inventory::Orders.sell(order)
+          Groovepacker::Inventory::Orders.sell(order, false)
         end
         true
       end
@@ -140,6 +140,6 @@ module Groovepacker
         return 100
       end
 
-		end
-	end
+    end
+  end
 end

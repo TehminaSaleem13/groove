@@ -1,13 +1,13 @@
 module UserSettingsHelper
 
-  def update_role(user_role,role)
+  def update_role(user_role, role)
 
     if current_user.can? 'add_edit_users'
       if role.nil?
         role = Hash.new
       end
       if role['make_super_admin'].nil? ||
-          (role['make_super_admin'] && !current_user.can?('make_super_admin'))
+        (role['make_super_admin'] && !current_user.can?('make_super_admin'))
         role['make_super_admin'] = false
       end
 
@@ -25,7 +25,7 @@ module UserSettingsHelper
       #user details permissions
       user_role.make_super_admin = role['make_super_admin']
       user_role.add_edit_users = (role['make_super_admin'] || (!role['add_edit_users'].nil? && role['add_edit_users']))
-  
+
       #order details
       user_role.add_edit_order_items = role['add_edit_order_items']
       user_role.import_orders = (role['add_edit_order_items'] || (!role['import_orders'].nil? && role['import_orders']))
@@ -54,7 +54,7 @@ module UserSettingsHelper
       user_role.add_edit_stores = (role['make_super_admin'] || (!role['add_edit_stores'].nil? && role['add_edit_stores']))
       user_role.create_backups = (role['make_super_admin'] || (!role['create_backups'].nil? && role['create_backups']))
       user_role.restore_backups = (role['make_super_admin'] || (!role['restore_backups'].nil? && role['restore_backups']))
-  
+
       user_role.save
     end
     return user_role

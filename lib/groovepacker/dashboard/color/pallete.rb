@@ -24,7 +24,7 @@ module Groovepacker
         def get(index)
           @palettes[index]
         end
-      
+
       end
     end
   end

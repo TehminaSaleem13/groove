@@ -1,45 +1,59 @@
-<div ng-if="editable.array" ng-class="editable_class" >
-    <div ui-sortable="editable.sortableOptions" ng-model="ngModel">
-        <div class="tag-bubble" ng-dblclick="edit_node($index)" hm-press="edit_node($index)" groov-rt-click="edit_node($index)" ng-repeat="single in ngModel">
-            <div ng-show="editing != $index || disabled == true" class="tag tag-blue" ng-class="{'tag-green':$first}">
-                {{single[prop]}}
+<div ng-if="editable.array" ng-class="editable_class">
+  <div ui-sortable="editable.sortableOptions" ng-model="ngModel">
+    <div class="tag-bubble" ng-dblclick="edit_node($index)" hm-press="edit_node($index)"
+         groov-rt-click="edit_node($index)" ng-repeat="single in ngModel">
+      <div ng-show="editing != $index || disabled == true" class="tag tag-blue" ng-class="{'tag-green':$first}">
+        {{single[prop]}}
                 <span ng-show="disabled == false && editing == -1">
                     <i class="glyphicon glyphicon-pencil" ng-click="edit_node($index)"></i>
                     <i class="glyphicon glyphicon-remove" ng-click="remove_node($index)"></i>
                 </span>
-            </div>
-            <div ng-show="editing == $index && disabled == false" class="tag tag-blue" ng-class="{'tag-green':$first}">
+      </div>
+      <div ng-show="editing == $index && disabled == false" class="tag tag-blue" ng-class="{'tag-green':$first}">
                <span bindonce="input" bo-switch="input.type">
                    <span bo-switch-when="number">
-                       <input id="{{custom_identifier}}{{identifier}}-{{prop}}-{{$index}}" ng-model="single[prop]" ng-focus="focus_event()" ng-blur="blur_event()" ng-keydown="handle_key_event($event)" type="number" min="{{input.min}}" max="{{input.max}}" placeholder="Edit..."/>
+                       <input id="{{custom_identifier}}{{identifier}}-{{prop}}-{{$index}}" ng-model="single[prop]"
+                              ng-focus="focus_event()" ng-blur="blur_event()" ng-keydown="handle_key_event($event)"
+                              type="number" min="{{input.min}}" max="{{input.max}}" placeholder="Edit..."/>
                    </span>
                    <span bo-switch-default>
-                        <input id="{{custom_identifier}}{{identifier}}-{{prop}}-{{$index}}" ng-model="single[prop]" ng-focus="focus_event()" ng-blur="blur_event()" ng-keydown="handle_key_event($event)" type="text" placeholder="Edit..."/>
+                        <input id="{{custom_identifier}}{{identifier}}-{{prop}}-{{$index}}" ng-model="single[prop]"
+                               ng-focus="focus_event()" ng-blur="blur_event()" ng-keydown="handle_key_event($event)"
+                               type="text" placeholder="Edit..."/>
                    </span>
                </span>
-                <i ng-show="single[prop] != ''" class="glyphicon glyphicon-ok" ng-click="save_node()"></i>
-                <i class="glyphicon glyphicon-remove"  ng-click="remove_node($index)"></i>
-            </div>
+        <i ng-show="single[prop] != ''" class="glyphicon glyphicon-ok" ng-click="save_node()"></i>
+        <i class="glyphicon glyphicon-remove" ng-click="remove_node($index)"></i>
+      </div>
 
-        </div>
     </div>
-    <div ng-click="add_node()" ng-show="editing == -1 && disabled == false" class="tag-bubble"><div class="false-tag-bubble">Add...</div></div>
+  </div>
+  <div ng-click="add_node()" ng-show="editing == -1 && disabled == false" class="tag-bubble">
+    <div class="false-tag-bubble">Add...</div>
+  </div>
 </div>
 <div ng-if="!editable.array">
-    <div ng-show="editing != 1 || disabled == true"> <span ng-transclude></span> <span ng-hide="is_transcluded">{{ngModel[prop]}}</span> &nbsp;</div>
-    <div ng-show="editing == 1 && disabled == false" ng-class="tag_class">
+  <div ng-show="editing != 1 || disabled == true"><span ng-transclude></span> <span ng-hide="is_transcluded">{{ngModel[prop]}}</span>
+    &nbsp;</div>
+  <div ng-show="editing == 1 && disabled == false" ng-class="tag_class">
            <span bindonce="input" bo-switch="input.type">
                <span bo-switch-when="number">
-                   <input bo-id="single_editable_id" class="span3" ng-model="ngModel[prop]" ng-focus="focus_event()" ng-blur="blur_event()" ng-keydown="handle_key_event($event)" type="number" min="{{input.min}}" max="{{input.max}}" placeholder="Edit..."/>
+                   <input bo-id="single_editable_id" class="span3" ng-model="ngModel[prop]" ng-focus="focus_event()"
+                          ng-blur="blur_event()" ng-keydown="handle_key_event($event)" type="number" min="{{input.min}}"
+                          max="{{input.max}}" placeholder="Edit..."/>
                </span>
                <span bo-switch-when="select">
-                   <select bo-id="single_editable_id" class="span3" ng-change="save_node()"  ng-model="ngModel[prop]" ng-focus="focus_event()" ng-blur="blur_event()" ng-options="item.value as item.name for item in input.options">
+                   <select bo-id="single_editable_id" class="span3" ng-change="save_node()" ng-model="ngModel[prop]"
+                           ng-focus="focus_event()" ng-blur="blur_event()"
+                           ng-options="item.value as item.name for item in input.options">
                    </select>
                </span>
                <span bo-switch-default>
-                    <input bo-id="single_editable_id" class="span3" ng-model="ngModel[prop]" ng-focus="focus_event()" ng-blur="blur_event()" ng-keydown="handle_key_event($event)" type="text" placeholder="Edit..."/>
+                    <input bo-id="single_editable_id" class="span3" ng-model="ngModel[prop]" ng-focus="focus_event()"
+                           ng-blur="blur_event()" ng-keydown="handle_key_event($event)" type="text"
+                           placeholder="Edit..."/>
                </span>
            </span>
-        <i ng-hide="input.type=='select' || input.type=='checkbox'" class="icon-ok" ng-click="save_node()"></i>
-    </div>
+    <i ng-hide="input.type=='select' || input.type=='checkbox'" class="icon-ok" ng-click="save_node()"></i>
+  </div>
 </div>

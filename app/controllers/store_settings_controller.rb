@@ -2,11 +2,12 @@ class StoreSettingsController < ApplicationController
   before_filter :groovepacker_authorize!, :except => [:handle_ebay_redirect]
 
   include StoreSettingsHelper
+
   def storeslist
     @stores = Store.where("store_type != 'system'")
 
     respond_to do |format|
-      format.json { render json: @stores}
+      format.json { render json: @stores }
     end
   end
 
@@ -17,7 +18,7 @@ class StoreSettingsController < ApplicationController
     @result['stores'] = Store.where("status = '1' AND store_type != 'system'")
 
     respond_to do |format|
-      format.json { render json: @result}
+      format.json { render json: @result }
     end
   end
 
@@ -64,7 +65,7 @@ class StoreSettingsController < ApplicationController
             params[:import_products] = false
           end
           if @store.store_type == 'Magento'
-            @magento = MagentoCredentials.where(:store_id=>@store.id)
+            @magento = MagentoCredentials.where(:store_id => @store.id)
 
             if @magento.nil? || @magento.length == 0
               @magento = MagentoCredentials.new
@@ -76,7 +77,7 @@ class StoreSettingsController < ApplicationController
             @magento.username = params[:username]
             # We do not need password GROOV-168
             #@magento.password = params[:password]
-            @magento.api_key  = params[:api_key]
+            @magento.api_key = params[:api_key]
 
             @magento.import_products = params[:import_products]
             @magento.import_images = params[:import_images]
@@ -97,7 +98,7 @@ class StoreSettingsController < ApplicationController
           end
 
           if @store.store_type == 'Amazon'
-            @amazon = AmazonCredentials.where(:store_id=>@store.id)
+            @amazon = AmazonCredentials.where(:store_id => @store.id)
 
             if @amazon.nil? || @amazon.length == 0
               @amazon = AmazonCredentials.new
@@ -128,7 +129,7 @@ class StoreSettingsController < ApplicationController
           end
 
           if @store.store_type == 'Ebay'
-            @ebay = EbayCredentials.where(:store_id=>@store.id)
+            @ebay = EbayCredentials.where(:store_id => @store.id)
 
             if @ebay.nil? || @ebay.length == 0
               @ebay = EbayCredentials.new
@@ -204,7 +205,7 @@ class StoreSettingsController < ApplicationController
             end
           end
           if @store.store_type == 'Shipstation'
-            @shipstation = ShipstationCredential.where(:store_id=>@store.id)
+            @shipstation = ShipstationCredential.where(:store_id => @store.id)
             if @shipstation.nil? || @shipstation.length == 0
               @shipstation = ShipstationCredential.new
               new_record = true
@@ -313,8 +314,8 @@ class StoreSettingsController < ApplicationController
               @store.save
             rescue ActiveRecord::RecordInvalid => e
               @result['status'] = false
-              @result['messages'] = [@store.errors.full_messages, 
-                @store.shopify_credential.errors.full_messages]
+              @result['messages'] = [@store.errors.full_messages,
+                                     @store.shopify_credential.errors.full_messages]
 
             rescue ActiveRecord::StatementInvalid => e
               @result['status'] = false
@@ -333,7 +334,7 @@ class StoreSettingsController < ApplicationController
     end
 
     respond_to do |format|
-        format.json { render json: @result}
+      format.json { render json: @result }
     end
   end
 
@@ -343,7 +344,7 @@ class StoreSettingsController < ApplicationController
     result['order'] = CsvMap.find_all_by_kind('order')
     result['kit'] = CsvMap.find_all_by_kind('kit')
     respond_to do |format|
-      format.json { render json: result}
+      format.json { render json: result }
     end
   end
 
@@ -359,7 +360,7 @@ class StoreSettingsController < ApplicationController
 
       if params[:kind] == 'order'
         mapping.order_csv_map_id = nil
-      elsif  params[:kind] == 'product'
+      elsif params[:kind] == 'product'
         mapping.product_csv_map_id = nil
       elsif params[:kind] == 'kit'
         mapping.kit_csv_map_id = nil
@@ -368,7 +369,7 @@ class StoreSettingsController < ApplicationController
     end
 
     respond_to do |format|
-      format.json {render json: result}
+      format.json { render json: result }
     end
   end
 
@@ -392,7 +393,7 @@ class StoreSettingsController < ApplicationController
     end
 
     respond_to do |format|
-      format.json {render json: result}
+      format.json { render json: result }
     end
   end
 
@@ -410,62 +411,63 @@ class StoreSettingsController < ApplicationController
 
     if @result["status"]
       if !@store.nil?
-        if params[:type].nil? || !['both','order','product','kit'].include?(params[:type])
+        if params[:type].nil? || !['both', 'order', 'product', 'kit'].include?(params[:type])
           params[:type] = 'both'
         end
         if (params[:type] == 'order' && current_user.can?('import_orders'))||
-            (params[:type] == 'both' && current_user.can?('import_orders') && current_user.can?('import_products')) ||
-            (['product','kit'].include?(params[:type])  && current_user.can?('import_products'))
+          (params[:type] == 'both' && current_user.can?('import_orders') && current_user.can?('import_products')) ||
+          (['product', 'kit'].include?(params[:type]) && current_user.can?('import_products'))
           @result['store_id'] = @store.id
 
           #check if previous mapping exists
           #else fill in defaults
           default_csv_map = {
-              'name' =>'',
-              'map' => {
-                  'rows' => 2,
-                  'sep' => ',',
-                  'other_sep' => 0,
-                  'delimiter'=> '"',
-                  'fix_width' => 0,
-                  'fixed_width' => 4,
-                  'contains_unique_order_items' => false,
-                  'generate_barcode_from_sku' => false,
-                  'use_sku_as_product_name' => false,
-                  'order_placed_at' => nil,
-                  'order_date_time_format' => 'None',
-                  'map' => {}
-              }
+            'name' => '',
+            'map' => {
+              'rows' => 2,
+              'sep' => ',',
+              'other_sep' => 0,
+              'delimiter' => '"',
+              'fix_width' => 0,
+              'fixed_width' => 4,
+              'contains_unique_order_items' => false,
+              'generate_barcode_from_sku' => false,
+              'use_sku_as_product_name' => false,
+              'order_placed_at' => nil,
+              'order_date_time_format' => 'None',
+              'map' => {}
+            }
           }
           csv_map = CsvMapping.find_or_create_by_store_id(@store.id)
           # end check for mapping
 
           csv_directory = 'uploads/csv'
           current_tenant = Apartment::Tenant.current
-          if ['both','order'].include?(params[:type])
+          if ['both', 'order'].include?(params[:type])
             @result['order'] = Hash.new
             @result['order']['map_options'] = [
-                { value: 'increment_id', name: 'Order number'},
-                { value: 'order_placed_time', name: 'Order Date/Time'},
-                { value: 'sku', name: 'SKU'},
-                { value: 'qty', name: 'Quantity'},
-                { value: 'price', name: 'Order Total'},
-                { value: 'firstname', name: '(First) Name'},
-                { value: 'lastname', name: 'Last Name'},
-                { value: 'email', name: 'Email'},
-                { value: 'address_1', name: 'Address 1'},
-                { value: 'address_2', name: 'Address 2'},
-                { value: 'city', name: 'City'},
-                { value: 'state', name: 'State'},
-                { value: 'postcode', name: 'Postal Code'},
-                { value: 'country', name: 'Country'},
-                { value: 'method', name: 'Shipping Method'},
-                { value: 'customer_comments', name: 'Customer Comments'},
-                { value: 'product_name', name: 'Product Name'},
-                { value: 'product_instructions', name: 'Product Instructions'},
-                { value: 'tracking_num', name: 'Tracking Number'},
-                { value: 'category', name: 'Category Name'},
-                { value: 'barcode', name: 'Barcode/UPC'}
+              {value: 'increment_id', name: 'Order number'},
+              {value: 'order_placed_time', name: 'Order Date/Time'},
+              {value: 'sku', name: 'SKU'},
+              {value: 'qty', name: 'Quantity'},
+              {value: 'price', name: 'Order Total'},
+              {value: 'firstname', name: '(First) Name'},
+              {value: 'lastname', name: 'Last Name'},
+              {value: 'email', name: 'Email'},
+              {value: 'address_1', name: 'Address 1'},
+              {value: 'address_2', name: 'Address 2'},
+              {value: 'city', name: 'City'},
+              {value: 'state', name: 'State'},
+              {value: 'postcode', name: 'Postal Code'},
+              {value: 'country', name: 'Country'},
+              {value: 'method', name: 'Shipping Method'},
+              {value: 'customer_comments', name: 'Customer Comments'},
+              {value: 'product_name', name: 'Product Name'},
+              {value: 'product_instructions', name: 'Product Instructions'},
+              {value: 'tracking_num', name: 'Tracking Number'},
+              {value: 'category', name: 'Category Name'},
+              {value: 'barcode', name: 'Barcode/UPC'},
+              {value: 'image', name: 'Image URL'}
             ]
             if csv_map.order_csv_map.nil?
               @result['order']['settings'] = default_csv_map
@@ -476,29 +478,29 @@ class StoreSettingsController < ApplicationController
             order_file_path = File.join(csv_directory, "#{current_tenant}.#{@store.id}.order.csv")
             if File.exists? order_file_path
               # read 4 kb data
-              order_file_data = IO.read(order_file_path,40960)
+              order_file_data = IO.read(order_file_path, 40960)
               @result['order']['data'] = order_file_data
               File.delete(order_file_path)
             end
           end
-          if ['both','product'].include?(params[:type])
+          if ['both', 'product'].include?(params[:type])
             @result['product'] = Hash.new
             @result['product']['map_options'] = [
-                { value:'sku' , name:'SKU'},
-                { value:'secondary_sku', name:'Secondary Sku'},
-                { value:'tertiary_sku', name:'Tertiary Sku'},
-                { value: 'product_name', name: 'Product Name'},
-                { value: 'category_name', name: 'Category Name'},
-                { value: 'inv_wh1', name: 'Inventory Count'},
-                { value: 'product_images', name: 'Image URL(absolute)'},
-                { value: 'location_primary', name: 'Location Primary'},
-                { value: 'location_secondary', name: 'Location Secondary'},
-                { value: 'location_tertiary', name: 'Location Tertiary'},
-                { value: 'barcode', name: 'UPC/Barcode'},
-                { value: 'secondary_barcode', name: 'Secondary Barcode'},
-                { value: 'tertiary_barcode', name: 'Tertiary Barcode'},
-                { value: 'product_weight', name: 'Product Weight'},
-                { value: 'product_instructions', name: 'Product Instructions'}
+              {value: 'sku', name: 'SKU'},
+              {value: 'secondary_sku', name: 'Secondary Sku'},
+              {value: 'tertiary_sku', name: 'Tertiary Sku'},
+              {value: 'product_name', name: 'Product Name'},
+              {value: 'category_name', name: 'Category Name'},
+              {value: 'inv_wh1', name: 'Inventory Count'},
+              {value: 'product_images', name: 'Image URL(absolute)'},
+              {value: 'location_primary', name: 'Location Primary'},
+              {value: 'location_secondary', name: 'Location Secondary'},
+              {value: 'location_tertiary', name: 'Location Tertiary'},
+              {value: 'barcode', name: 'UPC/Barcode'},
+              {value: 'secondary_barcode', name: 'Secondary Barcode'},
+              {value: 'tertiary_barcode', name: 'Tertiary Barcode'},
+              {value: 'product_weight', name: 'Product Weight'},
+              {value: 'product_instructions', name: 'Product Instructions'}
             ]
             if csv_map.product_csv_map.nil?
               @result['product']['settings'] = default_csv_map
@@ -508,22 +510,22 @@ class StoreSettingsController < ApplicationController
 
             product_file_path = File.join(csv_directory, "#{current_tenant}.#{@store.id}.product.csv")
             if File.exists? product_file_path
-              product_file_data = IO.read(product_file_path,40960)
+              product_file_data = IO.read(product_file_path, 40960)
               @result['product']['data'] = product_file_data
               File.delete(product_file_path)
             end
           end
-          if['both','kit'].include?(params[:type])
+          if ['both', 'kit'].include?(params[:type])
             @result['kit'] = Hash.new
             @result['kit']['map_options'] = [
-                { value:'kit_sku' , name:'KIT-SKU' },
-                { value:'kit_name', name:'KIT-NAME' },
-                {value:'kit_barcode', name:'KIT-BARCODE' },
-                {value:'part_sku', name:'PART-SKU' },
-                {value:'part_name', name:'PART-NAME' },
-                {value:'part_barcode', name:'PART-BARCODE' },
-                {value:'part_qty', name:'PART-QTY' },
-                #{value:'kit_scan', name:'KIT-SCAN' },
+              {value: 'kit_sku', name: 'KIT-SKU'},
+              {value: 'kit_name', name: 'KIT-NAME'},
+              {value: 'kit_barcode', name: 'KIT-BARCODE'},
+              {value: 'part_sku', name: 'PART-SKU'},
+              {value: 'part_name', name: 'PART-NAME'},
+              {value: 'part_barcode', name: 'PART-BARCODE'},
+              {value: 'part_qty', name: 'PART-QTY'},
+            #{value:'kit_scan', name:'KIT-SCAN' },
             ]
             if csv_map.kit_csv_map.nil?
               @result['kit']['settings'] = default_csv_map
@@ -533,7 +535,7 @@ class StoreSettingsController < ApplicationController
 
             kit_file_path = File.join(csv_directory, "#{current_tenant}.#{@store.id}.kit.csv")
             if File.exists? kit_file_path
-              kit_file_data = IO.read(kit_file_path,40960)
+              kit_file_data = IO.read(kit_file_path, 40960)
               @result['kit']['data'] = kit_file_data
               File.delete(kit_file_path)
             end
@@ -549,7 +551,7 @@ class StoreSettingsController < ApplicationController
     end
 
     respond_to do |format|
-      format.json { render json: @result}
+      format.json { render json: @result }
     end
   end
 
@@ -570,13 +572,13 @@ class StoreSettingsController < ApplicationController
       @result['messages'].push('No store selected')
     end
 
-    if params[:type].nil? || !['order','product','kit'].include?(params[:type])
+    if params[:type].nil? || !['order', 'product', 'kit'].include?(params[:type])
       @result['status'] = false
       @result['messages'].push('No Type specified to import')
     end
 
     if (params[:type] == 'order' && !current_user.can?('import_orders')) ||
-        (['product', 'kit'].include?(params[:type]) && !current_user.can?('import_products'))
+      (['product', 'kit'].include?(params[:type]) && !current_user.can?('import_products'))
       @result['status'] = false
       @result['messages'].push("User does not have permissions to import #{params[:type]}")
     end
@@ -589,7 +591,7 @@ class StoreSettingsController < ApplicationController
           params[:name] = csv_map.store.name+' - Default Product Map'
         end
         if csv_map.product_csv_map_id.nil?
-          map_data = CsvMap.create(:kind=>'product',:name=>params[:name], :map=>{})
+          map_data = CsvMap.create(:kind => 'product', :name => params[:name], :map => {})
           csv_map.product_csv_map_id = map_data.id
           csv_map.save
         else
@@ -600,7 +602,7 @@ class StoreSettingsController < ApplicationController
           params[:name] = csv_map.store.name+' - Default Kit Map'
         end
         if csv_map.kit_csv_map_id.nil?
-          map_data = CsvMap.create(:kind=>'kit',:name=>params[:name], :map=>{})
+          map_data = CsvMap.create(:kind => 'kit', :name => params[:name], :map => {})
           csv_map.kit_csv_map_id = map_data.id
           csv_map.save
         else
@@ -611,7 +613,7 @@ class StoreSettingsController < ApplicationController
           params[:name] = csv_map.store.name+' - Default Order Map'
         end
         if csv_map.order_csv_map_id.nil?
-          map_data = CsvMap.create(:kind=>'order',:name=>params[:name], :map=>{})
+          map_data = CsvMap.create(:kind => 'order', :name => params[:name], :map => {})
           csv_map.order_csv_map_id = map_data.id
           csv_map.save
         else
@@ -622,18 +624,18 @@ class StoreSettingsController < ApplicationController
       map_data.name = params[:name]
 
       map_data.map = {
-          :rows => params[:rows],
-          :sep => params[:sep] ,
-          :other_sep => params[:other_sep],
-          :delimiter=> params[:delimiter],
-          :fix_width => params[:fix_width],
-          :fixed_width => params[:fixed_width],
-          :import_action => params[:import_action],
-          :contains_unique_order_items => params[:contains_unique_order_items],
-          :generate_barcode_from_sku => params[:generate_barcode_from_sku],
-          :use_sku_as_product_name => params[:use_sku_as_product_name],
-          :order_date_time_format => params[:order_date_time_format],
-          :map => params[:map]
+        :rows => params[:rows],
+        :sep => params[:sep],
+        :other_sep => params[:other_sep],
+        :delimiter => params[:delimiter],
+        :fix_width => params[:fix_width],
+        :fixed_width => params[:fixed_width],
+        :import_action => params[:import_action],
+        :contains_unique_order_items => params[:contains_unique_order_items],
+        :generate_barcode_from_sku => params[:generate_barcode_from_sku],
+        :use_sku_as_product_name => params[:use_sku_as_product_name],
+        :order_date_time_format => params[:order_date_time_format],
+        :map => params[:map]
       }
       map_data.save
       begin
@@ -683,7 +685,7 @@ class StoreSettingsController < ApplicationController
           import_item.store_id = @store.id
         end
         import_csv = ImportCsv.new
-        import_csv.delay(:run_at =>1.seconds.from_now).import Apartment::Tenant.current, data
+        import_csv.delay(:run_at => 1.seconds.from_now).import Apartment::Tenant.current, data
         import_item.status = 'not_started'
         import_item.save
       elsif params[:type] == 'kit'
@@ -693,7 +695,7 @@ class StoreSettingsController < ApplicationController
         groove_bulk_actions.save
         data[:bulk_action_id] = groove_bulk_actions.id
         import_csv = ImportCsv.new
-        import_csv.delay(:run_at =>1.seconds.from_now).import Apartment::Tenant.current, data
+        import_csv.delay(:run_at => 1.seconds.from_now).import Apartment::Tenant.current, data
 
       elsif params[:type] == 'product'
         product_import = CsvProductImport.find_by_store_id(@store.id)
@@ -703,7 +705,7 @@ class StoreSettingsController < ApplicationController
         end
 
         import_csv = ImportCsv.new
-        delayed_job = import_csv.delay(:run_at =>1.seconds.from_now).import Apartment::Tenant.current, data
+        delayed_job = import_csv.delay(:run_at => 1.seconds.from_now).import Apartment::Tenant.current, data
 
         product_import.delayed_job_id = delayed_job.id
         product_import.total = 0
@@ -717,7 +719,7 @@ class StoreSettingsController < ApplicationController
     end
 
     respond_to do |format|
-      format.json { render json: @result}
+      format.json { render json: @result }
     end
   end
 
@@ -757,7 +759,7 @@ class StoreSettingsController < ApplicationController
     @result['status'] = true
     @result['messages'] =[]
     if current_user.can? 'add_edit_stores'
-      params['_json'].each do|store|
+      params['_json'].each do |store|
         @store = Store.find(store["id"])
         @store.status = store["status"]
         if !@store.save
@@ -771,8 +773,8 @@ class StoreSettingsController < ApplicationController
 
 
     respond_to do |format|
-        format.html # show.html.erb
-        format.json { render json: @result }
+      format.html # show.html.erb
+      format.json { render json: @result }
     end
   end
 
@@ -783,19 +785,19 @@ class StoreSettingsController < ApplicationController
     @result['messages'] = []
 
     if current_user.can? 'add_edit_stores'
-      params['_json'].each do|store|
+      params['_json'].each do |store|
         if Store.can_create_new?
           @store = Store.find(store["id"])
 
           @newstore = @store.dup
           index = 0
           @newstore.name = @store.name+"(duplicate"+index.to_s+")"
-          @storeslist = Store.where(:name=>@newstore.name)
+          @storeslist = Store.where(:name => @newstore.name)
           begin
             index = index + 1
             @newstore.name = @store.name+"(duplicate"+index.to_s+")"
-            @storeslist = Store.where(:name=>@newstore.name)
-          end while(!@storeslist.nil? && @storeslist.length > 0)
+            @storeslist = Store.where(:name => @newstore.name)
+          end while (!@storeslist.nil? && @storeslist.length > 0)
 
           if !@newstore.save(:validate => false) || !@newstore.dupauthentications(@store.id)
             @result['status'] = false
@@ -814,8 +816,8 @@ class StoreSettingsController < ApplicationController
 
 
     respond_to do |format|
-        format.html # show.html.erb
-        format.json { render json: @result }
+      format.html # show.html.erb
+      format.json { render json: @result }
     end
   end
 
@@ -825,11 +827,11 @@ class StoreSettingsController < ApplicationController
     @result['messages'] = []
     if current_user.can? 'add_edit_stores'
       system_store_id = Store.find_by_store_type('system').id.to_s
-      params['_json'].each do|store|
+      params['_json'].each do |store|
         @store = Store.find(store["id"])
         unless @store.nil?
-          Product.update_all('store_id = '+system_store_id,'store_id ='+@store.id.to_s)
-          Order.update_all('store_id = '+system_store_id,'store_id ='+@store.id.to_s)
+          Product.update_all('store_id = '+system_store_id, 'store_id ='+@store.id.to_s)
+          Order.update_all('store_id = '+system_store_id, 'store_id ='+@store.id.to_s)
           if @store.store_type == 'CSV'
             csv_mapping = CsvMapping.find_by_store_id(@store.id)
             unless csv_mapping.nil?
@@ -848,8 +850,8 @@ class StoreSettingsController < ApplicationController
 
 
     respond_to do |format|
-        format.html # show.html.erb
-        format.json { render json: @result }
+      format.html # show.html.erb
+      format.json { render json: @result }
     end
   end
 
@@ -869,8 +871,8 @@ class StoreSettingsController < ApplicationController
     end
 
     respond_to do |format|
-        format.html # show.html.erb
-        format.json { render json: @result }
+      format.html # show.html.erb
+      format.json { render json: @result }
     end
   end
 
@@ -901,8 +903,8 @@ class StoreSettingsController < ApplicationController
     @result['current_tenant'] = Apartment::Tenant.current
 
     respond_to do |format|
-        format.html # show.html.erb
-        format.json { render json: @result }
+      format.html # show.html.erb
+      format.json { render json: @result }
     end
   end
 
@@ -931,9 +933,9 @@ class StoreSettingsController < ApplicationController
     req.add_field("X-EBAY-API-CALL-NAME", "FetchToken")
 
     req.body ='<?xml version="1.0" encoding="utf-8"?>'+
-              '<FetchTokenRequest xmlns="urn:ebay:apis:eBLBaseComponents">'+
-                '<SessionID>'+session[:ebay_session_id]+'</SessionID>' +
-              '</FetchTokenRequest>'
+      '<FetchTokenRequest xmlns="urn:ebay:apis:eBLBaseComponents">'+
+      '<SessionID>'+session[:ebay_session_id]+'</SessionID>' +
+      '</FetchTokenRequest>'
     http = Net::HTTP.new(url.host, url.port)
     http.use_ssl = true
     res = http.start do |http_runner|
@@ -947,10 +949,11 @@ class StoreSettingsController < ApplicationController
       @result['status'] = true
     end
     respond_to do |format|
-        format.html # show.html.erb
-        format.json { render json: @result }
+      format.html # show.html.erb
+      format.json { render json: @result }
     end
   end
+
   def updateebayusertoken
     require "net/http"
     require "uri"
@@ -965,7 +968,7 @@ class StoreSettingsController < ApplicationController
       url = "https://api.ebay.com/ws/api.dll"
     end
     url = URI.parse(url)
-    @store = EbayCredentials.where(:store_id=>params[:storeid])
+    @store = EbayCredentials.where(:store_id => params[:storeid])
 
     if !@store.nil? && @store.length > 0
       @store = @store.first
@@ -979,9 +982,9 @@ class StoreSettingsController < ApplicationController
       req.add_field("X-EBAY-API-CALL-NAME", "FetchToken")
 
       req.body ='<?xml version="1.0" encoding="utf-8"?>'+
-                '<FetchTokenRequest xmlns="urn:ebay:apis:eBLBaseComponents">'+
-                  '<SessionID>'+session[:ebay_session_id]+'</SessionID>' +
-                '</FetchTokenRequest>'
+        '<FetchTokenRequest xmlns="urn:ebay:apis:eBLBaseComponents">'+
+        '<SessionID>'+session[:ebay_session_id]+'</SessionID>' +
+        '</FetchTokenRequest>'
       http = Net::HTTP.new(url.host, url.port)
       http.use_ssl = true
       res = http.start do |http_runner|
@@ -1004,22 +1007,23 @@ class StoreSettingsController < ApplicationController
       @result['status'] = false;
     end
     respond_to do |format|
-        format.html  {render layout: 'close_window'}
-        format.json { render json: @result }
+      format.html { render layout: 'close_window' }
+      format.json { render json: @result }
     end
   end
+
   def deleteebaytoken
     @result = Hash.new
     @result['status'] = false
 
     if params[:storeid] == 'undefined'
-        session[:ebay_auth_token] = nil
-        session[:ebay_auth_expiration] = nil
-        @result['status'] = true
+      session[:ebay_auth_token] = nil
+      session[:ebay_auth_expiration] = nil
+      @result['status'] = true
     else
       @store = Store.find(params[:storeid])
       if @store.store_type == 'Ebay'
-        @ebaycredentials = EbayCredentials.where(:store_id=>params[:storeid])
+        @ebaycredentials = EbayCredentials.where(:store_id => params[:storeid])
         @ebaycredentials = @ebaycredentials.first
         @ebaycredentials.auth_token = ''
         @ebaycredentials.productauth_token = ''
@@ -1032,8 +1036,8 @@ class StoreSettingsController < ApplicationController
       end
     end
     respond_to do |format|
-        format.html # show.html.erb
-        format.json { render json: @result }
+      format.html # show.html.erb
+      format.json { render json: @result }
     end
   end
 
@@ -1054,13 +1058,13 @@ class StoreSettingsController < ApplicationController
     tenant_name = params['tenantname']
 
     # redirect_to (URI::encode("https://#{tenant_name}.groovepacker.com:3001//") + "#" + URI::encode("/settings/showstores/ebay?ebaytkn=#{ebaytkn}&tknexp=#{tknexp}&username=#{username}&redirect=#{redirect}&editstatus=#{editstatus}&name=#{name}&status=#{status}&storetype=#{storetype}&storeid=#{storeid}&inventorywarehouseid=#{inventorywarehouseid}&importimages=#{importimages}&importproducts=#{importproducts}&messagetocustomer=#{messagetocustomer}&tenantname=#{tenant_name}") )
-    redirect_to (URI::encode("https://#{tenant_name}.#{ENV['HOST_NAME']}/") + URI::encode("store_settings/updateebayusertoken?storeid=#{storeid}") )
+    redirect_to (URI::encode("https://#{tenant_name}.#{ENV['HOST_NAME']}/") + URI::encode("store_settings/updateebayusertoken?storeid=#{storeid}"))
   end
 
   def let_store_be_created
     render json: {
-        can_create: Store.can_create_new?
-    }
+             can_create: Store.can_create_new?
+           }
   end
 
   def verify_tags
@@ -1115,33 +1119,33 @@ class StoreSettingsController < ApplicationController
     result = Hash.new
     result['status'] = true
     result['messages'] = []
-    
+
     products = Product.where(status: 'active')
     unless products.empty?
       filename = 'groove-products-'+Time.now.to_s+'.csv'
       row_map = {
-          :SKU => '',
-          :Name => '',
-          :WarehouseLocation =>'',
-          :WeightOz =>'',
-          :Category =>'',
-          :Tag1 =>'',
-          :Tag2 =>'',
-          :Tag3 =>'',
-          :Tag4 =>'',
-          :Tag5 =>'',
-          :CustomsDescription =>'',
-          :CustomsValue =>'',
-          :CustomsTariffNo =>'',
-          :CustomsCountry =>'',
-          :ThumbnailUrl =>'',
-          :UPC =>'',
-          :FillSKU =>'',
-          :Length =>'',
-          :Width =>'',
-          :Height =>'',
-          :UseProductName =>'',
-          :Active =>''
+        :SKU => '',
+        :Name => '',
+        :WarehouseLocation => '',
+        :WeightOz => '',
+        :Category => '',
+        :Tag1 => '',
+        :Tag2 => '',
+        :Tag3 => '',
+        :Tag4 => '',
+        :Tag5 => '',
+        :CustomsDescription => '',
+        :CustomsValue => '',
+        :CustomsTariffNo => '',
+        :CustomsCountry => '',
+        :ThumbnailUrl => '',
+        :UPC => '',
+        :FillSKU => '',
+        :Length => '',
+        :Width => '',
+        :Height => '',
+        :UseProductName => '',
+        :Active => ''
       }
       data = CSV.generate do |csv|
         csv << row_map.keys
@@ -1191,7 +1195,7 @@ class StoreSettingsController < ApplicationController
 
     respond_to do |format|
       format.html # show.html.erb
-      format.csv { send_data  data, :type => 'text/csv', :filename => filename }
+      format.csv { send_data data, :type => 'text/csv', :filename => filename }
     end
   end
 end

@@ -14,7 +14,7 @@ class InventoryWarehouse < ActiveRecord::Base
 
   def check_fix_permissions
     User.all.each do |user|
-      fix_user_inventory_permissions(user,self)
+      fix_user_inventory_permissions(user, self)
     end
   end
 end

@@ -1,71 +1,80 @@
-  <div class="container-fluid"> 		
-    <div class="row bottom-well col-sm-offset-1 col-md-offset-1 col-lg-offset-1 col-md-10 col-sm-10 col-lg-10">
-    	<div class="span1">
-				<%= link_to 'Back', {action: 'confirmation', controller: 'orders'}, class: "btn btn-primary"%>
-			</div>
-    	<%if @matching_orders.nil? || @matching_orders.empty? %>
-    		<%if GeneralSetting.all.first.tracking_error_order_not_found.nil? || 
-    			GeneralSetting.all.first.tracking_error_order_not_found==""%>
-    			<div class="col-sm-12">
-		        <h3>I'm sorry, no orders were found matching the information given. </h3>
-		        <p>
-		        Please make sure that the zip code matches the shipping zip code of the order. (it may differ from the billing zip code) <br>
-		        The email address should match the address given when you placed your order. This is also the same address your order confirmation should have been sent to.
-		        </p>
-		      </div>
-		    <%else%>
-		      <div class="col-sm-12" >
-		      	<p><%=GeneralSetting.all.first.tracking_error_order_not_found%></p>
-		      </div>
-		    <%end%>
-	    <%else%>
-			  <div>
-		    	<table border='1' style="border: 1px solid #98bf21; margin-top: 5px;" class="col-sm-12 col-md-12 col-lg-12">
-						<thead style="background-color: #A7C942; text-align: center;">
-							<td>Order Number</td>
-							<td>Tracking Number</td>
-						</thead>
-						<% @matching_orders.each do |order| %>
-						  <tr>
-						  	<td><%= order.increment_id%></td>
-						  	<td>
-						  		<%if order.status=='cancelled'%>
-						  			<div class="col-sm-12">
-							        <h3>Your order is in our system but appears to have been cancelled.</h3>
-											<p>
-											If you did not cancel the order please contact support and provide your order number above so we can assist you.
-											</p>
-							      </div>
-								  <%elsif order.status=='serviceissue'%>
-								  	<div class="col-sm-12">
-							        <h3>Your order is in our system but appears to have an exception of some type. We may be waiting on a response from you.</h3>
-											<p>
-											Please contact support and provide your order number so we can assist you.
-											</p>
-							      </div>
-						  		<%elsif order.tracking_num.nil?%>
-					    			<%if (GeneralSetting.all.first.tracking_error_info_not_found.nil? || 
-					    				GeneralSetting.all.first.tracking_error_info_not_found=="") && (order.status=='scanned' || order.status=='awaiting' || order.status=='onhold')%>
-					    				<div class="col-sm-12">
-								        <h3>Your order is in our system but we do not have tracking information available yet.</h3>
-								        <p>
-								        If three or more business days have passed since the order was placed please contact our support team.
-								        </p>
-								      </div>
-								    <%else%>
-								      <div class="col-sm-12">
-						    				<p><%=GeneralSetting.all.first.tracking_error_info_not_found%></p>
-								      </div>
-								    <%end%>
-								  <%end%>
-								  <%unless order.tracking_num.nil?%>
-							  		<%= link_to order.tracking_num, "https://www.google.com/search?q=" + order.tracking_num%>
-					  			<%end%>
-						  	</td>	
-						  </tr>
-						<% end %>
-					</table>
-	      </div>
-	    <%end%>
+<div class="container-fluid">
+  <div class="row bottom-well col-sm-offset-1 col-md-offset-1 col-lg-offset-1 col-md-10 col-sm-10 col-lg-10">
+    <div class="span1">
+      <%= link_to 'Back', {action: 'confirmation', controller: 'orders'}, class: "btn btn-primary" %>
     </div>
+    <% if @matching_orders.nil? || @matching_orders.empty? %>
+      <% if GeneralSetting.all.first.tracking_error_order_not_found.nil? ||
+        GeneralSetting.all.first.tracking_error_order_not_found=="" %>
+        <div class="col-sm-12">
+          <h3>I'm sorry, no orders were found matching the information given. </h3>
+
+          <p>
+            Please make sure that the zip code matches the shipping zip code of the order. (it may differ from the
+            billing zip code) <br>
+            The email address should match the address given when you placed your order. This is also the same address
+            your order confirmation should have been sent to.
+          </p>
+        </div>
+      <% else %>
+        <div class="col-sm-12">
+          <p><%= GeneralSetting.all.first.tracking_error_order_not_found %></p>
+        </div>
+      <% end %>
+    <% else %>
+      <div>
+        <table border='1' style="border: 1px solid #98bf21; margin-top: 5px;" class="col-sm-12 col-md-12 col-lg-12">
+          <thead style="background-color: #A7C942; text-align: center;">
+          <td>Order Number</td>
+          <td>Tracking Number</td>
+          </thead>
+          <% @matching_orders.each do |order| %>
+            <tr>
+              <td><%= order.increment_id %></td>
+              <td>
+                <% if order.status=='cancelled' %>
+                  <div class="col-sm-12">
+                    <h3>Your order is in our system but appears to have been cancelled.</h3>
+
+                    <p>
+                      If you did not cancel the order please contact support and provide your order number above so we
+                      can assist you.
+                    </p>
+                  </div>
+                <% elsif order.status=='serviceissue' %>
+                  <div class="col-sm-12">
+                    <h3>Your order is in our system but appears to have an exception of some type. We may be waiting on
+                      a response from you.</h3>
+
+                    <p>
+                      Please contact support and provide your order number so we can assist you.
+                    </p>
+                  </div>
+                <% elsif order.tracking_num.nil? %>
+                  <% if (GeneralSetting.all.first.tracking_error_info_not_found.nil? ||
+                    GeneralSetting.all.first.tracking_error_info_not_found=="") && (order.status=='scanned' || order.status=='awaiting' || order.status=='onhold') %>
+                    <div class="col-sm-12">
+                      <h3>Your order is in our system but we do not have tracking information available yet.</h3>
+
+                      <p>
+                        If three or more business days have passed since the order was placed please contact our support
+                        team.
+                      </p>
+                    </div>
+                  <% else %>
+                    <div class="col-sm-12">
+                      <p><%= GeneralSetting.all.first.tracking_error_info_not_found %></p>
+                    </div>
+                  <% end %>
+                <% end %>
+                <% unless order.tracking_num.nil? %>
+                  <%= link_to order.tracking_num, "https://www.google.com/search?q=" + order.tracking_num %>
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        </table>
+      </div>
+    <% end %>
   </div>
+</div>

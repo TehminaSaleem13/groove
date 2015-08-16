@@ -5,11 +5,11 @@ class SpecialsController < ApplicationController
   end
 
   def error_422
-  	
+
   end
 
   def error_500
-  	
+
   end
 
 end
