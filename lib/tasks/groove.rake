@@ -76,6 +76,7 @@ namespace :groove do
             Order.all.each do |single_order|
               bulk_action.do_process_single(single_order)
             end
+            bulk_action.process_unprocessed
             inventory_data.each do |single_warehouse|
               product_inv = ProductInventoryWarehouses.find(single_warehouse[:id])
               product_inv.quantity_on_hand = single_warehouse[:quantity_on_hand]
