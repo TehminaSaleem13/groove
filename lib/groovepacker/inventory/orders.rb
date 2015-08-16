@@ -96,6 +96,9 @@ module Groovepacker
           if (multiplier == 1 && (order_item.is_inventory_allocated? ^ update_allocated)) || (multiplier == -1 && !order_item.is_inventory_sold?)
             return false
           end
+          unless order_item.is_not_ghost?
+            return false
+          end
           result &= Groovepacker::Inventory::Products.sell(order_item.product.base_product,multiplier*order_item.qty, order_item.order.store.inventory_warehouse_id, order_item.order.reallocate_inventory?, update_allocated)
           if multiplier == 1
             order_item.update_column(:inv_status, OrderItem::SOLD_INV_STATUS)
