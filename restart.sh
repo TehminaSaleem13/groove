@@ -61,7 +61,7 @@ git stash
 git checkout ${ENV}
 git pull origin ${ENV}
 
-git mv app/views/specials/maintainance_off.html app/views/specials/maintainance_on.html
+git mv public/maintainance_off.html public/maintainance_on.html
 rm vendor/assets/components/**/*.js.{gzip,map}
 RAILS_ENV=${ENV} bundle exec bundle install --deployment
 RAILS_ENV=${ENV} bundle exec rake db:migrate
@@ -69,7 +69,7 @@ RAILS_ENV=${ENV} bundle exec rake db:seed
 RAILS_ENV=${ENV} bundle exec rake assets:clean
 RAILS_ENV=${ENV} bundle exec rake assets:precompile
 RAILS_ENV=${ENV} bundle exec rake fs:
-git mv app/views/specials/maintainance_on.html app/views/specials/maintainance_off.html
+git mv public/maintainance_on.html public/maintainance_off.html
 
 exit
 EOF
