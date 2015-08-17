@@ -40,7 +40,7 @@ if [ ${ENV} != 'staging' ] && [ ${ENV} != 'production' ]; then
 fi
 echo "${bold}$ENV${normal} environment selected"
 
-# sudo service nginx stop
+sudo service nginx stop
 
 sudo chown groovepacker:groovepacker /home/groovepacker/groove -R
 
@@ -74,5 +74,5 @@ git mv public/maintainance_on.html public/maintainance_off.html
 exit
 EOF
 #RAILS_ENV=${ENV} script/delayed_job -n ${NUM_JOBS} start
-sudo service nginx stop
+
 sudo service nginx start
