@@ -50,7 +50,7 @@ Groovepacks::Application.routes.draw do
 
   get "home/index"
 
-  get "/404", :to => "specials#error_404"
+  # get "/404", :to => "specials#error_404"
 
   get "/422", :to => "specials#error_422"
 
