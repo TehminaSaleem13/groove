@@ -68,7 +68,7 @@ RAILS_ENV=${ENV} bundle exec rake db:migrate
 RAILS_ENV=${ENV} bundle exec rake db:seed
 RAILS_ENV=${ENV} bundle exec rake assets:clean
 RAILS_ENV=${ENV} bundle exec rake assets:precompile
-RAILS_ENV=${ENV} bundle exec rake fs:
+RAILS_ENV=${ENV} bundle exec rake fs:delete_files
 git mv public/maintainance_on.html public/maintainance_off.html
 
 exit
