@@ -40,7 +40,6 @@ if [ ${ENV} != 'staging' ] && [ ${ENV} != 'production' ]; then
 fi
 echo "${bold}$ENV${normal} environment selected"
 
-sudo service nginx stop
 
 sudo chown groovepacker:groovepacker /home/groovepacker/groove -R
 
@@ -51,6 +50,7 @@ fi
 #RAILS_ENV=${ENV} script/delayed_job stop
 
 sudo su groovepacker <<EOF
+mv public/maintainance_off.html public/maintainance_on.html
 source /usr/local/rvm/scripts/rvm
 
 cd ~/groove
@@ -61,7 +61,7 @@ git stash
 git checkout ${ENV}
 git pull origin ${ENV}
 
-git mv public/maintainance_off.html public/maintainance_on.html
+
 rm vendor/assets/components/**/*.js.{gzip,map}
 RAILS_ENV=${ENV} bundle exec bundle install --deployment
 RAILS_ENV=${ENV} bundle exec rake db:migrate
@@ -69,10 +69,11 @@ RAILS_ENV=${ENV} bundle exec rake db:seed
 RAILS_ENV=${ENV} bundle exec rake assets:clean
 RAILS_ENV=${ENV} bundle exec rake assets:precompile
 RAILS_ENV=${ENV} bundle exec rake fs:delete_files
-git mv public/maintainance_on.html public/maintainance_off.html
+mv public/maintainance_on.html public/maintainance_off.html
 
 exit
 EOF
 #RAILS_ENV=${ENV} script/delayed_job -n ${NUM_JOBS} start
 
+sudo service nginx stop
 sudo service nginx start
