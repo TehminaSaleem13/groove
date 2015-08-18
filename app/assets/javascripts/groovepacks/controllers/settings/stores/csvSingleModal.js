@@ -10,13 +10,22 @@ groovepacks_controllers.controller('csvSingleModal', ['$scope', 'store_data', '$
     scope.ok = function () {
       var result = $q.defer();
       if (scope.csv.importer.type == "order") {
-        if (scope.csv.current.order_date_time_format == 'None' || scope.csv.current.order_date_time_format == null) {
-          alert("Select an Order Date/Time format to start import");
-        } else {
-          for (var i = 0; i < scope.csv.importer[scope.csv.importer.type]['map_options'].length; i++) {
-            if (scope.csv.importer[scope.csv.importer.type]['map_options'][i].name == "Order Date/Time") {
-              if (scope.csv.importer[scope.csv.importer.type]['map_options'][i].disabled) {
-                scope.csv.current.order_placed_at = null;
+        for (var i = 0; i < scope.csv.importer[scope.csv.importer.type]['map_options'].length; i++) {
+          if (scope.csv.importer[scope.csv.importer.type]['map_options'][i].name == "Order Date/Time") {
+            if (scope.csv.importer[scope.csv.importer.type]['map_options'][i].disabled) {
+              if (scope.csv.current.order_date_time_format == 'Default') {
+                alert("choose a closest Date/Time Format");
+                result.resolve();
+              } else{
+                myscope.ok_import().then(result.resolve);
+                break;
+              };
+              scope.csv.current.order_placed_at = null;
+              myscope.ok_import().then(result.resolve);
+              break;
+            } else {
+              if (scope.csv.current.order_date_time_format == 'Default') {
+                scope.csv.current.order_placed_at = new Date();
                 myscope.ok_import().then(result.resolve);
                 break;
               } else {
@@ -26,7 +35,7 @@ groovepacks_controllers.controller('csvSingleModal', ['$scope', 'store_data', '$
                   break;
                 } else {
                   result.resolve();
-                }
+                };
               }
             }
           }
@@ -49,8 +58,11 @@ groovepacks_controllers.controller('csvSingleModal', ['$scope', 'store_data', '$
     };
 
     scope.change_order_date_time_format = function (format) {
-      console.log(format);
       scope.csv.current.order_date_time_format = format;
+    };
+
+    scope.change_day_month_sequence = function (sequence) {
+      scope.csv.current.day_month_sequence = sequence;
     };
 
     scope.cancel = function () {
@@ -191,7 +203,8 @@ groovepacks_controllers.controller('csvSingleModal', ['$scope', 'store_data', '$
           "unique_order_items": "",
           "generate_barcode_from_sku": "",
           "use_sku_as_product_name": "",
-          "order_date_time_format": ""
+          "order_date_time_format": "",
+          "day_month_sequence": ""
         }
       };
       groov_translator.translate('settings.backup_restore', scope.translations);
