@@ -353,20 +353,26 @@ module Groovepacker
                         require 'time'
                         imported_order_time = single_row[mapping['order_placed_time'][:position]]
                         if params[:order_date_time_format] == 'YYYY/MM/DD TIME'
-                          if imported_order_time.split("/").first.length == 4
+                          if params[:day_time_sequence] == 'MM/DD'
                             order['order_placed_time'] = DateTime.strptime(imported_order_time, "%Y/%m/%d %H:%M")
                           else
-                            order['order_placed_time'] = DateTime.strptime(imported_order_time, "%y/%m/%d %H:%M")
+                            order['order_placed_time'] = DateTime.strptime(imported_order_time, "%Y/%d/%m %H:%M")
                           end
                         elsif params[:order_date_time_format] == 'MM/DD/YYYY TIME'
-                          if imported_order_time.split(" ").first.split("/").last.length == 4
+                          if params[:day_time_sequence] == 'MM/DD'
                             order['order_placed_time'] = DateTime.strptime(imported_order_time, "%m/%d/%Y %H:%M")
                           else
-                            order['order_placed_time'] = DateTime.strptime(imported_order_time, "%m/%d/%y %H:%M")
-                          end
-                        elsif params[:order_date_time_format] == 'DD/MM/YYYY TIME'
-                          if imported_order_time.split(" ").first.split("/").last.length == 4
                             order['order_placed_time'] = DateTime.strptime(imported_order_time, "%d/%m/%Y %H:%M")
+                          end
+                        elsif params[:order_date_time_format] == 'YY/MM/DD TIME'
+                          if params[:day_time_sequence] == 'MM/DD'
+                            order['order_placed_time'] = DateTime.strptime(imported_order_time, "%y/%m/%d %H:%M")
+                          else
+                            order['order_placed_time'] = DateTime.strptime(imported_order_time, "%y/%d/%m %H:%M")
+                          end
+                        elsif params[:order_date_time_format] == 'MM/DD/YY TIME'
+                          if params[:day_time_sequence] == 'MM/DD'
+                            order['order_placed_time'] = DateTime.strptime(imported_order_time, "%m/%d/%y %H:%M")
                           else
                             order['order_placed_time'] = DateTime.strptime(imported_order_time, "%d/%m/%y %H:%M")
                           end
