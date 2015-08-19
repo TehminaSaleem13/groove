@@ -76,7 +76,8 @@ module Groovepacker
               "sku",
               "state",
               "price",
-              "tracking_num"
+              "tracking_num",
+              "qty"
             ]
             imported_orders = {}
             scan_pack_settings = ScanPackSetting.all.first
@@ -126,6 +127,7 @@ module Groovepacker
                     if !mapping[single_map].nil? && mapping[single_map][:position] >= 0
                       #if sku, create order item with product id, qty
                       if single_map == 'sku' && !params[:contains_unique_order_items] == true
+                        
                         unless mapping['sku'].nil?
                           import_item.current_order_items = 1
                           import_item.current_order_imported_item = 0
@@ -352,23 +354,34 @@ module Groovepacker
                       begin
                         require 'time'
                         imported_order_time = single_row[mapping['order_placed_time'][:position]]
+                        if imported_order_time.include? ('/')
+                          separator = '/'
+                        else
+                          separator = '-'
+                        end
                         if params[:order_date_time_format] == 'YYYY/MM/DD TIME'
-                          if imported_order_time.split("/").first.length == 4
-                            order['order_placed_time'] = DateTime.strptime(imported_order_time, "%Y/%m/%d %H:%M")
+                          if params[:day_month_sequence] == 'DD/MM'
+                            order['order_placed_time'] = DateTime.strptime(imported_order_time, "%Y#{separator}%d#{separator}%m %H:%M")
                           else
-                            order['order_placed_time'] = DateTime.strptime(imported_order_time, "%y/%m/%d %H:%M")
+                            order['order_placed_time'] = DateTime.strptime(imported_order_time, "%Y#{separator}%m#{separator}%d %H:%M")
                           end
                         elsif params[:order_date_time_format] == 'MM/DD/YYYY TIME'
-                          if imported_order_time.split(" ").first.split("/").last.length == 4
-                            order['order_placed_time'] = DateTime.strptime(imported_order_time, "%m/%d/%Y %H:%M")
+                          if params[:day_month_sequence] == 'DD/MM'
+                            order['order_placed_time'] = DateTime.strptime(imported_order_time, "%d#{separator}%m#{separator}%Y %H:%M")
                           else
-                            order['order_placed_time'] = DateTime.strptime(imported_order_time, "%m/%d/%y %H:%M")
+                            order['order_placed_time'] = DateTime.strptime(imported_order_time, "%m#{separator}%d#{separator}%Y %H:%M")
                           end
-                        elsif params[:order_date_time_format] == 'DD/MM/YYYY TIME'
-                          if imported_order_time.split(" ").first.split("/").last.length == 4
-                            order['order_placed_time'] = DateTime.strptime(imported_order_time, "%d/%m/%Y %H:%M")
+                        elsif params[:order_date_time_format] == 'YY/MM/DD TIME'
+                          if params[:day_month_sequence] == 'DD/MM'
+                            order['order_placed_time'] = DateTime.strptime(imported_order_time, "%y#{separator}%d#{separator}%m %H:%M")
                           else
-                            order['order_placed_time'] = DateTime.strptime(imported_order_time, "%d/%m/%y %H:%M")
+                            order['order_placed_time'] = DateTime.strptime(imported_order_time, "%y#{separator}%m#{separator}%d %H:%M")
+                          end
+                        elsif params[:order_date_time_format] == 'MM/DD/YY TIME'
+                          if params[:day_month_sequence] == 'DD/MM'
+                            order['order_placed_time'] = DateTime.strptime(imported_order_time, "%d#{separator}%m#{separator}%y %H:%M")
+                          else
+                            order['order_placed_time'] = DateTime.strptime(imported_order_time, "%m#{separator}%d#{separator}%y %H:%M")
                           end
                         end
                       rescue ArgumentError => e

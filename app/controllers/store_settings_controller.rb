@@ -434,7 +434,8 @@ class StoreSettingsController < ApplicationController
               'generate_barcode_from_sku' => false,
               'use_sku_as_product_name' => false,
               'order_placed_at' => nil,
-              'order_date_time_format' => 'None',
+              'order_date_time_format' => 'Default',
+              'day_month_sequence' => 'MM/DD',
               'map' => {}
             }
           }
@@ -635,6 +636,7 @@ class StoreSettingsController < ApplicationController
         :generate_barcode_from_sku => params[:generate_barcode_from_sku],
         :use_sku_as_product_name => params[:use_sku_as_product_name],
         :order_date_time_format => params[:order_date_time_format],
+        :day_month_sequence => params[:day_month_sequence],
         :map => params[:map]
       }
       map_data.save
@@ -664,6 +666,7 @@ class StoreSettingsController < ApplicationController
       data[:use_sku_as_product_name] = params[:use_sku_as_product_name]
       data[:order_placed_at] = params[:order_placed_at]
       data[:order_date_time_format] = params[:order_date_time_format]
+      data[:day_month_sequence] = params[:day_month_sequence]
 
       # Uncomment this when everything is moved to bulk actions
       # groove_bulk_actions = GrooveBulkActions.new
