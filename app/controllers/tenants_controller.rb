@@ -109,6 +109,17 @@ class TenantsController < ApplicationController
     end
   end
 
+  def create_duplicate
+    
+    @result = {}
+    @result['status'] = true
+    @tenant = Tenant.find(params[:id])
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json: @result }
+    end
+  end
+
   private
 
   def get_tenants_count

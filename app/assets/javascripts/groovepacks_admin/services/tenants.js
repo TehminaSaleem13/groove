@@ -27,7 +27,8 @@ groovepacks_admin_services.factory('tenants', ['$http', 'notification', 'editabl
         setting: '',
         status: ''
       },
-      tenants_count: {}
+      tenants_count: {},
+      duplicate_name: ""
     };
   };
 
@@ -211,6 +212,20 @@ groovepacks_admin_services.factory('tenants', ['$http', 'notification', 'editabl
     }).error(notification.server_error);
   };
 
+  var duplicate_tenant = function (tenants) {
+    alert("zok");
+    console.log(tenants);
+    return $http.post('/tenants/'+ tenants.selected[0].id +'/create_duplicate.json?name='+ tenants.duplicate_name).success(function (data) {
+      console.log(data);
+      if (data.status) {
+        notification.notify("Successfully Updated.", 1);
+      } else {
+        notification.notify(data.error_messages, 0);
+      }
+      ;
+    }).error(notification.server_error);
+  }
+
   var delete_tenant_data = function (id, action_type) {
     return $http.delete('/tenants/' + id + '.json?action_type=' + action_type).success(function (response) {
       if (response.status) {
@@ -254,7 +269,8 @@ groovepacks_admin_services.factory('tenants', ['$http', 'notification', 'editabl
       select: select_single,
       update: update_access_restriction_data,
       delete: delete_tenant_data,
-      rollback: rollback_single_tenant
+      rollback: rollback_single_tenant,
+      duplicate: duplicate_tenant
     }
   };
 }]);
