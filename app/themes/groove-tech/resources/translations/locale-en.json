@@ -158,7 +158,7 @@
         "generate_barcode_from_sku": "In some cases you may want to use your SKU as both a SKU and in internal barcode. To do so, enable this setting.",
         "use_sku_as_product_name": "In some cases you may want to use your SKU as both a SKU and product name. To do so, enable this setting.",
         "order_date_time_format": "Choose the Date/Time format closest to your file. Please note that both double digit ( 05/05 ) and single digit ( 5/5 ) date formats are accepted.",
-        "day_month_sequence": "Check the box to swap the month and day in the date."
+        "day_month_sequence": "Select the appropriate radio button to specify the sequence of month and day in the mapped column of csv Order Date/Time."
       }
     },
     "accounts": {
