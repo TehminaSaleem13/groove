@@ -1,0 +1,3 @@
+[submodule "nodeserver"]
+	path = nodeserver
+	url = git@bitbucket.org:groovepacker/nodeserver.git
