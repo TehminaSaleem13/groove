@@ -296,6 +296,20 @@ module Groovepacker
           result['error_messages'].push(e.message);
         end
       end
+
+      def duplicate(tenant, result, duplicate_name)
+        begin
+          current_tenant = tenant.name
+          Apartment::Tenant.create(duplicate_name)
+          ActiveRecord::Base.connection.tables.each do |tbale_name|
+            ActiveRecord::Base.connection.execute("INSERT INTO #{duplicate_name}.#{tbale_name} SELECT * FROM #{current_tenant}.#{tbale_name}")
+          end
+          Tenant.create(name: duplicate_name)
+        rescue Exception => e
+          result['status'] = false
+          result['error_messages'].push(e.message);
+        end
+      end
     end
   end
 end

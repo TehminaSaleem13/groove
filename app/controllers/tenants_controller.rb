@@ -113,7 +113,16 @@ class TenantsController < ApplicationController
     
     @result = {}
     @result['status'] = true
+    @result['error_messages'] = []
+    @result['success_messages'] = []
     @tenant = Tenant.find(params[:id])
+    unless @tenant.nil?
+      helper = Groovepacker::Tenants::Helper.new
+      helper.duplicate(@tenant, @result, params[:name])
+    else
+      @result['status'] = false
+      @result['error_messages'].push("The tenant doesn't exist")
+    end
     respond_to do |format|
       format.html # show.html.erb
       format.json { render json: @result }
