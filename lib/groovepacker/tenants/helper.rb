@@ -302,9 +302,17 @@ module Groovepacker
           current_tenant = tenant.name
           Apartment::Tenant.create(duplicate_name)
           ActiveRecord::Base.connection.tables.each do |tbale_name|
+            if tbale_name == 'orders'
+              ActiveRecord::Base.connection.execute("ALTER TABLE #{current_tenant}.orders MODIFY store_order_id varchar(20) AFTER note_confirmation")
+            elsif tbale_name == 'schema_migrations'
+              next
+            end
             ActiveRecord::Base.connection.execute("INSERT INTO #{duplicate_name}.#{tbale_name} SELECT * FROM #{current_tenant}.#{tbale_name}")
           end
           Tenant.create(name: duplicate_name)
+          @tenant = Tenant.find(tenant.id)
+          @tenant.duplicate_tenant_id = Tenant.all.last.id
+          @tenant.save
         rescue Exception => e
           result['status'] = false
           result['error_messages'].push(e.message);
