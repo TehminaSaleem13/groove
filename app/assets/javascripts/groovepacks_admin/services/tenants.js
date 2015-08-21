@@ -213,10 +213,7 @@ groovepacks_admin_services.factory('tenants', ['$http', 'notification', 'editabl
   };
 
   var duplicate_tenant = function (tenants) {
-    alert("zok");
-    console.log(tenants);
     return $http.post('/tenants/'+ tenants.selected[0].id +'/create_duplicate.json?name='+ tenants.duplicate_name).success(function (data) {
-      console.log(data);
       if (data.status) {
         notification.notify("Successfully Updated.", 1);
       } else {

@@ -20,7 +20,6 @@ groovepacks_admin_controllers.
 
       myscope.init = function () {
         $scope.tenants = tenant_data;
-        console.log($scope.tenants);
       };
 
       myscope.init();

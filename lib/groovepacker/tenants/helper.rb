@@ -266,7 +266,34 @@ module Groovepacker
         begin
           @tenant = Tenant.find_by_name(tenant)
           customer_id = @tenant.subscription.stripe_customer_id unless @tenant.subscription.nil? || @tenant.subscription.stripe_customer_id.nil?
-          delete_customer(customer_id)
+          if @tenant.duplicate_tenant_id.nil?
+            unless customer_id.nil?
+              delete_customer(customer_id)
+            end
+          else
+            subscription_data = @tenant.subscription
+            duplicate_tenant_name = Tenant.find(@tenant.duplicate_tenant_id).name unless Tenant.find(@tenant.duplicate_tenant_id).nil?
+            Subscription.create(email: subscription_data.email,
+                                tenant_name: duplicate_tenant_name,
+                                amount: subscription_data.amount,
+                                stripe_user_token: subscription_data.stripe_user_token,
+                                status: subscription_data.status, 
+                                tenant_id: @tenant.duplicate_tenant_id,
+                                stripe_transaction_identifier: subscription_data.stripe_transaction_identifier,
+                                created_at: subscription_data.created_at,
+                                updated_at: subscription_data.updated_at,
+                                transaction_errors: subscription_data.transaction_errors,
+                                subscription_plan_id: subscription_data.subscription_plan_id,
+                                customer_subscription_id: subscription_data.customer_subscription_id,
+                                stripe_customer_id: subscription_data.stripe_customer_id,
+                                is_active: true, password: subscription_data.password,
+                                user_name: subscription_data.user_name,
+                                coupon_id: subscription_data.coupon_id,
+                                progress: subscription_data.progress
+                                )
+            subscription_data.is_active = false
+            subscription_data.save
+          end
           Apartment::Tenant.drop(tenant)
           if @tenant.destroy
             result['status'] &= true
