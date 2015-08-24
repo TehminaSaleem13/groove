@@ -3,8 +3,8 @@ class StripeInvoiceEmail < ActionMailer::Base
 
   def send_success_invoice(invoice)
     Apartment::Tenant.switch()
-    unless Subscription.where(customer_subscription_id: invoice.subscription_id).empty?
-      subscription = Subscription.where(customer_subscription_id: invoice.subscription_id).first
+    unless Subscription.where(customer_subscription_id: invoice.subscription_id, is_active: true).empty?
+      subscription = Subscription.where(customer_subscription_id: invoice.subscription_id, is_active: true).first
       unless subscription.tenant.nil? || subscription.tenant.name.nil?
         tenant = subscription.tenant.name
         @email = get_customer_email_from_stripe(subscription)
@@ -21,8 +21,8 @@ class StripeInvoiceEmail < ActionMailer::Base
 
   def send_failure_invoice(invoice)
     Apartment::Tenant.switch()
-    unless Subscription.where(customer_subscription_id: invoice.subscription_id).empty?
-      subscription = Subscription.where(customer_subscription_id: invoice.subscription_id).first
+    unless Subscription.where(customer_subscription_id: invoice.subscription_id, is_active: true).empty?
+      subscription = Subscription.where(customer_subscription_id: invoice.subscription_id, is_active: true).first
       unless subscription.tenant.nil? || subscription.tenant.name.nil?
         tenant = subscription.tenant.name
         @email = get_customer_email_from_stripe(subscription)

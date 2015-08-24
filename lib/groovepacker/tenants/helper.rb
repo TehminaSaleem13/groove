@@ -266,7 +266,34 @@ module Groovepacker
         begin
           @tenant = Tenant.find_by_name(tenant)
           customer_id = @tenant.subscription.stripe_customer_id unless @tenant.subscription.nil? || @tenant.subscription.stripe_customer_id.nil?
-          delete_customer(customer_id)
+          if @tenant.duplicate_tenant_id.nil?
+            unless customer_id.nil?
+              delete_customer(customer_id)
+            end
+          else
+            subscription_data = @tenant.subscription
+            duplicate_tenant_name = Tenant.find(@tenant.duplicate_tenant_id).name unless Tenant.find(@tenant.duplicate_tenant_id).nil?
+            Subscription.create(email: subscription_data.email,
+                                tenant_name: duplicate_tenant_name,
+                                amount: subscription_data.amount,
+                                stripe_user_token: subscription_data.stripe_user_token,
+                                status: subscription_data.status, 
+                                tenant_id: @tenant.duplicate_tenant_id,
+                                stripe_transaction_identifier: subscription_data.stripe_transaction_identifier,
+                                created_at: subscription_data.created_at,
+                                updated_at: subscription_data.updated_at,
+                                transaction_errors: subscription_data.transaction_errors,
+                                subscription_plan_id: subscription_data.subscription_plan_id,
+                                customer_subscription_id: subscription_data.customer_subscription_id,
+                                stripe_customer_id: subscription_data.stripe_customer_id,
+                                is_active: true, password: subscription_data.password,
+                                user_name: subscription_data.user_name,
+                                coupon_id: subscription_data.coupon_id,
+                                progress: subscription_data.progress
+                                )
+            subscription_data.is_active = false
+            subscription_data.save
+          end
           Apartment::Tenant.drop(tenant)
           if @tenant.destroy
             result['status'] &= true
@@ -291,6 +318,28 @@ module Groovepacker
             access_restrictions[data_length-1].num_import_sources = params[:access_restrictions_info][:max_import_sources]
             access_restrictions[data_length-1].save
           end
+        rescue Exception => e
+          result['status'] = false
+          result['error_messages'].push(e.message);
+        end
+      end
+
+      def duplicate(tenant, result, duplicate_name)
+        begin
+          current_tenant = tenant.name
+          Apartment::Tenant.create(duplicate_name)
+          ActiveRecord::Base.connection.tables.each do |tbale_name|
+            if tbale_name == 'orders'
+              ActiveRecord::Base.connection.execute("ALTER TABLE #{current_tenant}.orders MODIFY store_order_id varchar(20) AFTER note_confirmation")
+            elsif tbale_name == 'schema_migrations'
+              next
+            end
+            ActiveRecord::Base.connection.execute("INSERT INTO #{duplicate_name}.#{tbale_name} SELECT * FROM #{current_tenant}.#{tbale_name}")
+          end
+          Tenant.create(name: duplicate_name)
+          @tenant = Tenant.find(tenant.id)
+          @tenant.duplicate_tenant_id = Tenant.all.last.id
+          @tenant.save
         rescue Exception => e
           result['status'] = false
           result['error_messages'].push(e.message);

@@ -1,6 +1,6 @@
 groovepacks_admin_controllers.
-  controller('adminToolsCtrl', ['$scope', '$http', '$timeout', '$location', '$state', '$cookies', '$q', 'tenants',
-    function ($scope, $http, $timeout, $location, $state, $cookies, $q, tenants) {
+  controller('adminToolsCtrl', ['$scope', '$http', '$timeout', '$location', '$state', '$cookies', '$modal', '$q', 'notification', 'tenants',
+    function ($scope, $http, $timeout, $location, $state, $cookies, $modal, $q, notification, tenants) {
 
       var myscope = {};
 
@@ -47,9 +47,54 @@ groovepacks_admin_controllers.
       };
 
       $scope.delete_selected_tenants = function () {
-        tenants.list.update($scope.tenants).then(function (data) {
-          myscope.get_tenants();
-        });
+        var result = $q.defer();
+        if ($scope.tenants.selected.length > 0) {
+          if (confirm("Are you sure you want to delete the selected tenants?")) {
+            tenants.list.update($scope.tenants).then(function (data) {
+              myscope.get_tenants().then(result.resolve);
+            });
+          } else {
+            myscope.get_tenants().then(result.resolve);
+          };
+        } else {
+          notification.notify('select a tenant to delete');
+          result.resolve();
+        };
+        return result.promise;
+      };
+
+      $scope.duplicate_selected_tenants = function() {
+        var result = $q.defer();
+        if ($scope.tenants.selected.length == 1) {
+          myscope.tenant_obj = $modal.open({
+            templateUrl: '/assets/admin_views/modals/tenants/tenant_name.html',
+            controller: 'tenantsDuplicateModal',
+            size: 'md',
+            resolve: {
+              tenant_data: function () {
+                return $scope.tenants
+              }
+            }
+          });
+          myscope.tenant_obj.result.finally(function () {
+            if ($scope.tenants.duplicate_name == '')
+              myscope.get_tenants().then(result.resolve);
+            else {
+              tenants.single.duplicate($scope.tenants).then(function(data) {
+                $scope.tenants.duplicate_name = '';
+                console.log($scope.tenants);
+                myscope.get_tenants().then(result.resolve);
+              });
+            }
+          });
+        } else if ($scope.tenants.selected.length == 0) {
+          notification.notify('select a tenant to duplicate.');
+          result.resolve();
+        } else {
+          notification.notify('only one tenant can be dupicated at a time.');
+          result.resolve();
+        };
+        return result.promise;
       };
 
       myscope.update_selected_count = function () {
