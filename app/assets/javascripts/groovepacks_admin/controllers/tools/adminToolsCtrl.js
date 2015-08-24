@@ -76,6 +76,9 @@ groovepacks_admin_controllers.
               }
             }
           });
+          $timeout(function () {
+            $('#name').focus();
+          }, 1000);
           myscope.tenant_obj.result.finally(function () {
             if ($scope.tenants.duplicate_name == '')
               myscope.get_tenants().then(result.resolve);
