@@ -450,9 +450,14 @@ class StoreSettingsController < ApplicationController
               {value: 'increment_id', name: 'Order number'},
               {value: 'order_placed_time', name: 'Order Date/Time'},
               {value: 'sku', name: 'SKU'},
-              {value: 'qty', name: 'Quantity'},
-              {value: 'price', name: 'Order Total'},
-              {value: 'firstname', name: '(First) Name'},
+              {value: 'product_name', name: 'Product Name'},
+              {value: 'barcode', name: 'Barcode/UPC'},
+              {value: 'qty', name: 'QTY'},
+              {value: 'category', name: 'Product Category'},
+              {value: 'product_weight', name: 'Weight Oz'},
+              {value: 'product_instructions', name: 'Product Instructions'},
+              {value: 'image', name: 'Image Absolute URL'},
+              {value: 'firstname', name: '(First)Full Name'},
               {value: 'lastname', name: 'Last Name'},
               {value: 'email', name: 'Email'},
               {value: 'address_1', name: 'Address 1'},
@@ -462,14 +467,13 @@ class StoreSettingsController < ApplicationController
               {value: 'postcode', name: 'Postal Code'},
               {value: 'country', name: 'Country'},
               {value: 'method', name: 'Shipping Method'},
+              {value: 'price', name: 'Order Total'},
               {value: 'customer_comments', name: 'Customer Comments'},
-              {value: 'product_name', name: 'Product Name'},
-              {value: 'product_instructions', name: 'Product Instructions'},
-              {value: 'tracking_num', name: 'Tracking Number'},
-              {value: 'category', name: 'Category Name'},
-              {value: 'barcode', name: 'Barcode/UPC'},
-              {value: 'image', name: 'Image URL'}
+              {value: 'notes_internal', name: 'Internal Notes'},
+              {value: 'packer_notes', name: 'Notes to Packer'},
+              {value: 'tracking_num', name: 'Tracking Number'}
             ]
+            
             if csv_map.order_csv_map.nil?
               @result['order']['settings'] = default_csv_map
             else
@@ -488,21 +492,22 @@ class StoreSettingsController < ApplicationController
             @result['product'] = Hash.new
             @result['product']['map_options'] = [
               {value: 'sku', name: 'SKU'},
-              {value: 'secondary_sku', name: 'Secondary Sku'},
-              {value: 'tertiary_sku', name: 'Tertiary Sku'},
-              {value: 'product_name', name: 'Product Name'},
-              {value: 'category_name', name: 'Category Name'},
-              {value: 'inv_wh1', name: 'Inventory Count'},
-              {value: 'product_images', name: 'Image URL(absolute)'},
-              {value: 'location_primary', name: 'Location Primary'},
-              {value: 'location_secondary', name: 'Location Secondary'},
-              {value: 'location_tertiary', name: 'Location Tertiary'},
-              {value: 'barcode', name: 'UPC/Barcode'},
-              {value: 'secondary_barcode', name: 'Secondary Barcode'},
-              {value: 'tertiary_barcode', name: 'Tertiary Barcode'},
-              {value: 'product_weight', name: 'Product Weight'},
-              {value: 'product_instructions', name: 'Product Instructions'}
+              {value: 'barcode', name: 'Barcode'},
+              {value: 'product_name', name: 'Name'},
+              {value: 'inv_wh1', name: 'QTY On Hand'},
+              {value: 'location_primary', name: 'Bin Location'},
+              {value: 'product_images', name: 'Image Absolute URL'},
+              {value: 'product_weight', name: 'Weight Oz'},
+              {value: 'category_name', name: 'Category'},
+              {value: 'product_instructions', name: 'Product Instructions'},
+              {value: 'secondary_sku', name: 'SKU 2'},
+              {value: 'tertiary_sku', name: 'SKU 3'},
+              {value: 'secondary_barcode', name: 'Barcode 2'},
+              {value: 'tertiary_barcode', name: 'Barcode 3'},
+              {value: 'location_secondary', name: 'Bin Location 2'},
+              {value: 'location_tertiary', name: 'Bin Location 3'}         
             ]
+
             if csv_map.product_csv_map.nil?
               @result['product']['settings'] = default_csv_map
             else

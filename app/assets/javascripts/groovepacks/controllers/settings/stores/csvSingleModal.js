@@ -223,8 +223,9 @@ groovepacks_controllers.controller('csvSingleModal', ['$scope', 'store_data', '$
         scope.csv.current.store_id = data["store_id"];
         scope.csv.current.type = scope.csv.importer.type;
         scope.csv.current.name = scope.csv.importer[scope.csv.importer.type]["settings"].name;
-        angular.forEach(scope.csv.importer[scope.csv.importer.type]["map_options"], function (opt) {
+        angular.forEach(scope.csv.importer[scope.csv.importer.type]["map_options"], function (opt,index) {
           opt.disabled = false;
+          opt.index = index;
         });
 
         scope.parse();

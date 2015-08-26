@@ -154,7 +154,7 @@
 
 
                     <ul class="dropdown-menu" role="menu" ng-show="csv.current.map[column].value!= 'sku'">
-                      <li ng-repeat="opt in csv.importer[csv.importer.type]['map_options']"
+                      <li ng-repeat="opt in csv.importer[csv.importer.type]['map_options'] | orderBy:['disabled', 'index']"
                           ng-class="{disabled:opt.disabled}">
                         <a dropdown-toggle ng-click="column_map(column,opt)">{{opt.name}}</a>
                       </li>
