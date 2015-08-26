@@ -190,8 +190,9 @@ groovepacks_controllers.controller('csvDetailedModal', ['$scope', 'store_data', 
         if (typeof scope.csv.current['import_action'] == "undefined") {
           scope.csv.current['import_action'] = 'create_new';
         }
-        angular.forEach(scope.csv.importer[scope.csv.importer.type]["map_options"], function (opt) {
+        angular.forEach(scope.csv.importer[scope.csv.importer.type]["map_options"], function (opt, index) {
           opt.disabled = false;
+          opt.index = index;
         });
         scope.parse();
       });

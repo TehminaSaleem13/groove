@@ -499,7 +499,7 @@ class StoreSettingsController < ApplicationController
               {value: 'product_images', name: 'Image Absolute URL'},
               {value: 'product_weight', name: 'Weight Oz'},
               {value: 'category_name', name: 'Category'},
-              {value: 'product_instructions', name: 'Product Instructions'}
+              {value: 'product_instructions', name: 'Product Instructions'},
               {value: 'secondary_sku', name: 'SKU 2'},
               {value: 'tertiary_sku', name: 'SKU 3'},
               {value: 'secondary_barcode', name: 'Barcode 2'},
