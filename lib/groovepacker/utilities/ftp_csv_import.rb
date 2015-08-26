@@ -2,11 +2,15 @@ class FTPCsvImport
   require ('net/sftp')
 
   def self.retrieve_csv_file
+    @host='45.55.84.212'
+    @username='deployer'
+    @password='dsodevtest!'
+    @directory='csv/'
     begin
-      sftp = Net::SFTP.start('45.55.84.212', 'deployer', :password => 'dsodevtest!')
-      files = sftp.dir.glob('csv/', "*.csv").sort {|f| File.mtime(f)}
+      sftp = Net::SFTP.start(@host, @username, :password => @password)
+      files = sftp.dir.glob(@directory, "*.csv").sort {|f| File.mtime(f)}
       file = files.first.name
-      sftp.download!('csv/'+file, 'public/local.csv')
+      sftp.download!(@directory+file, 'public/local.csv')
     rescue Exception => e
       puts e.message
     end
@@ -14,17 +18,14 @@ class FTPCsvImport
 
   def self.update_csv_file
     begin
-      sftp = Net::SFTP.start('45.55.84.212', 'deployer', :password => 'dsodevtest!')
-      files = sftp.dir.glob('csv/', "*.csv").sort {|f| File.mtime(f)}
+      sftp = Net::SFTP.start(@host, @username, :password => @password)
+      files = sftp.dir.glob(@directory, "*.csv").sort {|f| File.mtime(f)}
       file = files.first.name
       puts "file: " + file
       new_file = ''
       new_file = rename_file(file,new_file)
       puts "new_file: " + new_file
-      sftp.rename!('csv/'+file, 'csv/'+new_file)
-      # files = sftp.dir.glob('csv/', "*.csv").sort {|f| File.mtime(f)}
-      # file = files.first.name
-      # puts "updated_file: " + file
+      sftp.rename!(@directory+file, @directory+new_file)
     rescue Exception => e
       puts e.message
     end

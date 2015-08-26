@@ -1,6 +1,6 @@
 groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', '$window', '$sce', '$interval', '$state', '$stateParams', '$modal',
-  '$modalInstance', '$timeout', 'hotkeys', 'stores', 'warehouses', 'notification', '$q',
-  function (scope, store_data, $window, $sce, $interval, $state, $stateParams, $modal, $modalInstance, $timeout, hotkeys, stores, warehouses, notification, $q) {
+  '$modalInstance', '$timeout', 'hotkeys', 'stores', 'warehouses', 'notification', '$q', 'groov_translator',
+  function (scope, store_data, $window, $sce, $interval, $state, $stateParams, $modal, $modalInstance, $timeout, hotkeys, stores, warehouses, notification, $q, groov_translator) {
     var myscope = {};
 
     /**
@@ -385,6 +385,13 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
     };
 
     myscope.init = function () {
+      scope.translations = {
+        "tooltips": {
+          "ftp_address": "",
+          "import_from_ftp": ""
+        }
+      };
+      groov_translator.translate('settings.csv_modal', scope.translations);
       scope.stores = store_data;
       scope.stores.single = {};
       scope.stores.ebay = {};
