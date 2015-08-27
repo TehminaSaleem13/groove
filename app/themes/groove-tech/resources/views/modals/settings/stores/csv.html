@@ -72,7 +72,8 @@
     </div>
     <div class="col-sm-offset-3 text-center">
       <br/><br/><br/>
-      <button class="modal-save-button mini-popover" ng-show="stores.import_from_ftp_enabled && stores.csv.mapping.order_csv_map_id">Import From FTP</button>
+
+      <button class="modal-save-button mini-popover" ng-show="stores.import_from_ftp_enabled && stores.csv.mapping.order_csv_map_id" ng-click="import_ftp()">Import From FTP</button>
       <button class="modal-save-button mini-popover" style="opacity: .50;" popover-trigger="mouseenter"  ng-show="!stores.import_from_ftp_enabled || !stores.csv.mapping.order_csv_map_id" groov-popover="{{translations.tooltips.import_from_ftp}}">Import From FTP</button>
     </div>
   </div>

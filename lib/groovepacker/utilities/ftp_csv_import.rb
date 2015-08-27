@@ -27,6 +27,7 @@ class FTPCsvImport
     @result['status'] = true
     @result['error_messages'] = []
     @result['success_messages'] = []
+    @result['downloaded_file'] = {}
     begin
       sftp = self.establish_connection
       if @result['error_messages'].empty?
@@ -46,6 +47,9 @@ class FTPCsvImport
         sftp.download!("#{@directory}/#{@file}", 'public/local.csv')
         puts ":::::::::::"
         @result['success_messages'].push("Connection succeeded! #{@file} was found.")
+        downloaded_files = Dir.glob("#{Rails.root}/public/local.csv")
+        downloaded_file = downloaded_files.first
+        @result['downloaded_file'] = downloaded_file
       else
         puts "in else"
         return @result

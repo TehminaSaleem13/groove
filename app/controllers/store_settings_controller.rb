@@ -231,7 +231,10 @@ class StoreSettingsController < ApplicationController
               current_tenant = Apartment::Tenant.current
               unless params[:orderfile].nil?
                 path = File.join(csv_directory, "#{current_tenant}.#{@store.id}.order.csv")
+                puts params[:orderfile].inspect
                 order_file_data = params[:orderfile].read
+                puts "??????????????"
+                puts order_file_data.inspect
                 File.open(path, "wb") { |f| f.write(order_file_data) }
 
                 GroovS3.create_csv(current_tenant, 'order', @store.id, order_file_data)
@@ -703,6 +706,8 @@ class StoreSettingsController < ApplicationController
     end
     if @result['status']
       data = {}
+      data[:flag] = params[:flag]
+      data[:file_path] = params[:file_path]
       data[:type] = params[:type]
       data[:fix_width] = params[:fix_width]
       data[:fixed_width] = params[:fixed_width]
@@ -733,12 +738,14 @@ class StoreSettingsController < ApplicationController
 
       # Comment everything after this line till next comment (i.e. the entire if block) when everything is moved to bulk actions
       if params[:type] == 'order'
+        puts "in order....."
         import_item = ImportItem.find_by_store_id(@store.id)
         if import_item.nil?
           import_item = ImportItem.new
           import_item.store_id = @store.id
         end
         import_csv = ImportCsv.new
+        puts "about to execute delayed_job....."
         import_csv.delay(:run_at => 1.seconds.from_now).import Apartment::Tenant.current, data
         import_item.status = 'not_started'
         import_item.save

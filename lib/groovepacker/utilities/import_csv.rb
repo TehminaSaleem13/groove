@@ -5,7 +5,12 @@ class ImportCsv
     begin
       Apartment::Tenant.switch(tenant)
       #download CSV and save
-      csv_file = GroovS3.find_csv(tenant, params[:type], params[:store_id])
+      if params[:flag] == 'ftp_download'
+        csv_file = File.read(params[:file_path])
+      else
+        csv_file = GroovS3.find_csv(tenant, params[:type], params[:store_id])
+      end
+      
       if csv_file.nil?
         result['messages'].push("No file present to import #{params[:type]}")
       else
