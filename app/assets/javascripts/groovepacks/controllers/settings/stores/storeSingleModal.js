@@ -148,6 +148,18 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
       });
     };
 
+    scope.update_ftp_credentials = function () {
+      stores.single.update_ftp(scope.stores).then(function(data) {
+        myscope.init();
+      });
+    }
+
+    scope.establish_connection = function() {
+      stores.single.update_ftp(scope.stores).then(function(data) {
+        stores.single.connect(scope.stores);
+      });
+    }
+
     scope.update_single_store = function (auto) {
       if (scope.edit_status || stores.single.validate_create(scope.stores)) {
         return stores.single.update(scope.stores, auto).success(function (data) {
@@ -399,6 +411,7 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
       scope.stores.csv.maps = {order: [], product: []};
       scope.stores.csv.mapping = {};
       scope.start_editing_map = false;
+      scope.stores.import_from_ftp_enabled = false;
       scope.stores.import = {
         order: {},
         product: {},
