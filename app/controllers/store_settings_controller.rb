@@ -73,6 +73,15 @@ class StoreSettingsController < ApplicationController
     end
   end
 
+  def connect_and_rename
+    @result = {}
+    @result['connection'] = FTPCsvImport.update_csv_file
+
+    respond_to do |format|
+      format.json { render json: @result }
+    end
+  end
+
   def createUpdateStore
     @result = Hash.new
 
@@ -747,6 +756,7 @@ class StoreSettingsController < ApplicationController
         import_csv = ImportCsv.new
         puts "about to execute delayed_job....."
         import_csv.delay(:run_at => 1.seconds.from_now).import Apartment::Tenant.current, data
+        # import_csv.import(Apartment::Tenant.current, data)
         import_item.status = 'not_started'
         import_item.save
       elsif params[:type] == 'kit'

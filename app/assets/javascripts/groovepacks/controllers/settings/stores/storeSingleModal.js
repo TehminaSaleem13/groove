@@ -278,7 +278,9 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
     };
 
     scope.import_ftp = function() {
+      scope.stores.single.type = 'order';
       console.log("in import_ftp");
+      console.log(scope.stores)
       console.log(scope.stores.csv.mapping[scope.stores.single.type + '_csv_map_id']);
       // if (scope.stores.csv.mapping[scope.stores.single.type + '_csv_map_id'] && !scope.start_editing_map) {
         console.log("in if in import_ftp");
@@ -298,7 +300,7 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
         current_map.map.file_path = scope.stores.single.file_path;
         console.log(current_map.map);
         stores.csv.do_import({current: current_map.map}).then(function() {
-          stores.single.rename.then(function(){
+          stores.single.rename().then(function(){
             myscope.init;
           });
         });

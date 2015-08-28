@@ -10,7 +10,7 @@ class ImportCsv
       else
         csv_file = GroovS3.find_csv(tenant, params[:type], params[:store_id])
       end
-      
+      puts "csv_file: " + csv_file.inspect
       if csv_file.nil?
         result['messages'].push("No file present to import #{params[:type]}")
       else
@@ -18,14 +18,24 @@ class ImportCsv
         #file_path = File.join(csv_directory, "#{tenant}.#{params[:store_id]}.#{params[:type]}.csv")
         final_record = []
         if params[:fix_width] == 1
-          initial_split = csv_file.content.split(/\n/).reject(&:empty?)
+          if params[:flag] == 'ftp_download'
+            initial_split = csv_file.split(/\n/).reject(&:empty?)
+          else
+            initial_split = csv_file.content.split(/\n/).reject(&:empty?)
+          end
           initial_split.each do |single|
             final_record.push(single.scan(/.{1,#{params[:fixed_width]}}/m))
           end
         else
           require 'csv'
-          CSV.parse(csv_file.content, :col_sep => params[:sep], :quote_char => params[:delimiter], :encoding => 'windows-1251:utf-8') do |single|
-            final_record.push(single)
+          if params[:flag] == 'ftp_download'
+            CSV.parse(csv_file, :col_sep => params[:sep], :quote_char => params[:delimiter], :encoding => 'windows-1251:utf-8') do |single|
+              final_record.push(single)
+            end
+          else
+            CSV.parse(csv_file.content, :col_sep => params[:sep], :quote_char => params[:delimiter], :encoding => 'windows-1251:utf-8') do |single|
+              final_record.push(single)
+            end
           end
         end
         if params[:rows].to_i && params[:rows].to_i > 1
