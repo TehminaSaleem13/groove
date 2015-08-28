@@ -282,20 +282,12 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
   };
 
   var connect_ftp_server = function(stores) {
-    return $http.get('/store_settings/connect_and_retrieve.json').success(function (data) {
+    return $http.get('/store_settings/connect_and_retrieve.json?store_id='+ stores.single.id).success(function (data) {
       if (data.connection.status) {
         notification.notify(data.connection.success_messages, 1);
         stores.import_from_ftp_enabled = true;
         stores.single.file_path = data.connection.downloaded_file;
       } else {
-        notification.notify(data.connection.error_messages, 0);
-      }
-    }).error(notification.server_error);
-  };
-
-  var rename_file = function() {
-    return $http.get('/store_settings/connect_and_rename.json').success(function (data) {
-      if (!data.connection.status) {
         notification.notify(data.connection.error_messages, 0);
       }
     }).error(notification.server_error);
@@ -559,8 +551,7 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
       validate_create: validate_create_single,
       update: create_update_single,
       update_ftp: create_update_ftp_credentials,
-      connect: connect_ftp_server,
-      rename: rename_file
+      connect: connect_ftp_server
     },
     ebay: {
       sign_in_url: {

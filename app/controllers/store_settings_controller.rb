@@ -23,10 +23,10 @@ class StoreSettingsController < ApplicationController
   end
 
   def create_update_ftp_credentials
-    @result = Hash.new
+    result = {}
 
-    @result['status'] = true
-    @result['messages'] =[]
+    result['status'] = true
+    result['messages'] =[]
     store = Store.find(params[:id])
     unless store.nil?
       if store.store_type == 'CSV'
@@ -49,38 +49,28 @@ class StoreSettingsController < ApplicationController
             store.ftp_credential.save
           end
         rescue ActiveRecord::RecordInvalid => e
-          @result['status'] = false
-          @result['messages'] = [store.errors.full_messages, store.ftp_credential.errors.full_messages]
+          result['status'] = false
+          result['messages'] = [store.errors.full_messages, store.ftp_credential.errors.full_messages]
 
         rescue ActiveRecord::StatementInvalid => e
-          @result['status'] = false
-          @result['messages'] = [e.message]
+          result['status'] = false
+          result['messages'] = [e.message]
         end
       end
     end
 
     respond_to do |format|
-      format.json { render json: @result }
+      format.json { render json: result }
     end
   end
 
   def connect_and_retrieve
-    @result = {}
-    ftp_csv_import = FTPCsvImport.new
-    @result['connection'] = ftp_csv_import.retrieve_csv_file
+    result = {}
+    groov_ftp = GroovFTP.new
+    result['connection'] = groov_ftp.retrieve(params[:store_id])
 
     respond_to do |format|
-      format.json { render json: @result }
-    end
-  end
-
-  def connect_and_rename
-    @result = {}
-    ftp_csv_import = FTPCsvImport.new
-    @result['connection'] = ftp_csv_import.update_csv_file
-
-    respond_to do |format|
-      format.json { render json: @result }
+      format.json { render json: result }
     end
   end
 
@@ -715,7 +705,6 @@ class StoreSettingsController < ApplicationController
     if @result['status']
       data = {}
       data[:flag] = params[:flag]
-      data[:file_path] = params[:file_path]
       data[:type] = params[:type]
       data[:fix_width] = params[:fix_width]
       data[:fixed_width] = params[:fixed_width]

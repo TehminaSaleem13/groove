@@ -5,8 +5,17 @@ class ImportCsv
     begin
       Apartment::Tenant.switch(tenant)
       #download CSV and save
+      response = nil
+      file_path = nil
       if params[:flag] == 'ftp_download'
-        csv_file = File.read(params[:file_path])
+        groov_ftp = GroovFTP.new
+        response = groov_ftp.download(params[:store_id],tenant)
+        if response['status']
+          file_path = response['file_info']['file_path']
+          csv_file = File.read(file_path)
+        else
+          result['messages'].push(response['error_messages'])
+        end
       else
         csv_file = GroovS3.find_csv(tenant, params[:type], params[:store_id])
       end
@@ -63,7 +72,15 @@ class ImportCsv
           result = Groovepacker::Stores::Importers::CSV::KitsImporter.new.import(params, final_record, mapping, params[:bulk_action_id])
         end
         #File.delete(file_path)
-
+        if params[:flag] == 'ftp_download'
+          groov_ftp = GroovFTP.new
+          response = groov_ftp.update(params[:store_id],response['file_info']['ftp_file_name'])
+          unless response['status']
+            result['messages'].push(response['error_messages'])
+          else
+            File.delete(file_path)
+          end
+        end
       end
     rescue Exception => e
       raise e

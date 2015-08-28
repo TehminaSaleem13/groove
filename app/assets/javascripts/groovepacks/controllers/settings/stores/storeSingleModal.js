@@ -190,7 +190,6 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
                   current_map.map.type = scope.stores.single.type;
                   current_map.map.name = current_map.name;
                   current_map.map.flag = 'file_upload';
-                  current_map.map.file_path = scope.stores.single.file_path;
                   if (current_map.map.type == 'order') {
                     if (current_map.map.order_date_time_format == null || current_map.map.order_date_time_format == 'None') {
                       alert("Order Date/Time foramt has not been set. Edit map to select one.");
@@ -291,12 +290,8 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
         current_map.map.type = scope.stores.single.type;
         current_map.map.name = current_map.name;
         current_map.map.flag = 'ftp_download';
-        current_map.map.file_path = scope.stores.single.file_path;
-        stores.csv.do_import({current: current_map.map}).then(function() {
-          stores.single.rename().then(function(){
-            myscope.init();
-          });
-        });
+        stores.csv.do_import({current: current_map.map});
+        $modalInstance.close("csv-modal-closed");
         return result.promise;
       }
     }
