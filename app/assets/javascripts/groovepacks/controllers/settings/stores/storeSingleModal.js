@@ -162,8 +162,6 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
 
     scope.update_single_store = function (auto) {
       if (scope.edit_status || stores.single.validate_create(scope.stores)) {
-        console.log("scope.stores");
-        console.log(scope.stores);
         return stores.single.update(scope.stores, auto).success(function (data) {
           if (data.status && data.store_id) {
             if (scope.stores.single['id'] != 0) {
@@ -279,11 +277,7 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
 
     scope.import_ftp = function() {
       scope.stores.single.type = 'order';
-      console.log("in import_ftp");
-      console.log(scope.stores)
-      console.log(scope.stores.csv.mapping[scope.stores.single.type + '_csv_map_id']);
-      // if (scope.stores.csv.mapping[scope.stores.single.type + '_csv_map_id'] && !scope.start_editing_map) {
-        console.log("in if in import_ftp");
+      if (scope.stores.csv.mapping[scope.stores.single.type + '_csv_map_id'] && !scope.start_editing_map) {
         var result = $q.defer();
         for (var i = 0; i < scope.stores.csv.maps[scope.stores.single.type].length; i++) {
           if (scope.stores.csv.mapping[scope.stores.single.type + '_csv_map_id'] == scope.stores.csv.maps[scope.stores.single.type][i].id) {
@@ -291,20 +285,17 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
             break;
           }
         }
-        console.log("stores.single");
-        console.log(stores.single);
         current_map.map.store_id = scope.stores.single.id;
         current_map.map.type = scope.stores.single.type;
         current_map.map.name = current_map.name;
         current_map.map.flag = 'ftp_download';
         current_map.map.file_path = scope.stores.single.file_path;
-        console.log(current_map.map);
         stores.csv.do_import({current: current_map.map}).then(function() {
           stores.single.rename().then(function(){
             myscope.init;
           });
         });
-      // }
+      }
     }
 
     scope.edit_map = function () {
@@ -374,7 +365,6 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
     scope.launch_shopify_popup = function () {
       var shopify_url = $sce.trustAsResourceUrl(scope.stores.single.shopify_permission_url);
       if (shopify_url == null) {
-        console.log(scope.stores);
         if (typeof scope.stores.single.shop_name == 'undefined') {
           notification.notify("Please enter your store name first.");
         }
@@ -567,8 +557,6 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
 
 
       scope.$on("fileSelected", function (event, args) {
-        alert("selected");
-        console.log(args);
         if (args.name == 'orderfile' || args.name == 'productfile' || args.name == 'kitfile') {
           scope.$apply(function () {
             scope.stores.single[args.name] = args.file;

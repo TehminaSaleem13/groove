@@ -270,7 +270,6 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
     }).success(function (data) {
       if (data.status && data.store_id) {
         if (!auto) {
-          console.log(data);
           if (data.csv_import) {
             notification.notify("Successfully Updated", 1);
           }
@@ -284,13 +283,10 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
 
   var connect_ftp_server = function(stores) {
     return $http.get('/store_settings/connect_and_retrieve.json').success(function (data) {
-      console.log('data');
-      console.log(data);
       if (data.connection.status) {
         notification.notify(data.connection.success_messages, 1);
         stores.import_from_ftp_enabled = true;
         stores.single.file_path = data.connection.downloaded_file;
-        alert(stores.import_from_ftp_enabled);
       } else {
         notification.notify(data.connection.error_messages, 0);
       }
@@ -306,7 +302,6 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
   };
 
   var create_update_ftp_credentials = function(stores) {
-    console.log(stores);
     return $http({
       method: 'POST',
       headers: {'Content-Type': undefined},
@@ -453,8 +448,6 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
   };
 
   var csv_do_import = function (csv) {
-    console.log('csv.current');
-    console.log(csv.current);
     return $http.post('/store_settings/csvDoImport.json', csv.current).success(function (data) {
       if (data.status) {
         notification.notify("CSV import queued successfully.", 1);

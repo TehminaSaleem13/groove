@@ -10,7 +10,6 @@ class ImportCsv
       else
         csv_file = GroovS3.find_csv(tenant, params[:type], params[:store_id])
       end
-      puts "csv_file: " + csv_file.inspect
       if csv_file.nil?
         result['messages'].push("No file present to import #{params[:type]}")
       else

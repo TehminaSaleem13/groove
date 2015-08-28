@@ -2,9 +2,6 @@ class FTPCsvImport
   require ('net/sftp')
 
   def self.establish_connection
-    # @host='45.55.84.212'
-    # @username='deployer'
-    # @password='dsodevtest!'
     @directory = ''
     @host = ''
     begin
@@ -20,7 +17,6 @@ class FTPCsvImport
         @result['error_messages'].push("FTP Credentials are required")
       end
     rescue Exception => e
-      puts "establish_connection....................."
       @result['status'] = false
       @result['error_messages'].push(e.message)
     end
@@ -35,12 +31,10 @@ class FTPCsvImport
     begin
       sftp = self.establish_connection
       if @result['error_messages'].empty?
-        # puts "sftp: " + sftp.inspect
         files = sftp.dir.glob(@directory, "*.csv").sort {|f| File.mtime(f)}
         files.each do |individual_file|
           unless '-imported'.in? individual_file.name
             @file = individual_file.name
-            puts "file: " + @file
             break
           else
             next
@@ -51,19 +45,15 @@ class FTPCsvImport
           @result['error_messages'].push("No CSV files could be found without '-imported' in the file name")
         else
           sftp.download!("#{@directory}/#{@file}", 'public/local.csv')
-          puts ":::::::::::"
           @result['success_messages'].push("Connection succeeded! #{@file} was found.")
           downloaded_files = Dir.glob("#{Rails.root}/public/local.csv")
           downloaded_file = downloaded_files.first
           @result['downloaded_file'] = downloaded_file
         end
       else
-        puts "in else"
         return @result
       end
     rescue Exception => e
-      puts "in rescue"
-      puts e.message
       @result['status'] = false
       @result['error_messages'].push(e.message)
     end
@@ -86,16 +76,13 @@ class FTPCsvImport
             next
           end
         end
-        puts "file: " + @file
         new_file = ''
         new_file = rename_file(@file,new_file)
-        puts "new_file: " + new_file
         sftp.rename!("#{@directory}/#{@file}", "#{@directory}/#{new_file}")
       else
         return @result
       end
     rescue Exception => e
-      puts e.message
       @result['status'] = false
       @result['error_messages'].push(e.message)
     end
