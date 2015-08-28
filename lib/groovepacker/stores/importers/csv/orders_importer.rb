@@ -67,6 +67,8 @@ module Groovepacker
               "city",
               "country",
               "customer_comments",
+              "notes_internal",
+              "notes_toPacker",
               "email",
               "firstname",
               "increment_id",

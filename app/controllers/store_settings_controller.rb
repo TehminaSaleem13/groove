@@ -470,7 +470,7 @@ class StoreSettingsController < ApplicationController
               {value: 'price', name: 'Order Total'},
               {value: 'customer_comments', name: 'Customer Comments'},
               {value: 'notes_internal', name: 'Internal Notes'},
-              {value: 'packer_notes', name: 'Notes to Packer'},
+              {value: 'notes_toPacker', name: 'Notes to Packer'},
               {value: 'tracking_num', name: 'Tracking Number'}
             ]
             

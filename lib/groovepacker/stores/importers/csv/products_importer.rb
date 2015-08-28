@@ -78,6 +78,7 @@ module Groovepacker
                 else
                   usable_record = {}
                   usable_record[:name] = ''
+                  usable_record[:weight] = 0
                   usable_record[:skus] = []
                   usable_record[:barcodes] = []
                   usable_record[:store_product_id] = store_product_id_base+index.to_s
@@ -93,6 +94,9 @@ module Groovepacker
 
                   if !mapping['product_name'].nil? && mapping['product_name'][:position] >= 0 && !single_row[mapping['product_name'][:position]].blank?
                     usable_record[:name] = single_row[mapping['product_name'][:position]]
+                  end
+                  if !mapping['product_weight'].nil? && mapping['product_weight'][:position] >= 0 && !single_row[mapping['product_weight'][:position]].blank?
+                    usable_record[:weight] = single_row[mapping['product_weight'][:position]]
                   end
                   if params[:use_sku_as_product_name]
                     usable_record[:name] = single_row[mapping['sku'][:position]]
@@ -271,7 +275,7 @@ module Groovepacker
               end
 
               if duplicate_found === false && new_action == 'create'
-                single_import = Product.new(:name => record[:name], :product_type => record[:product_type], :spl_instructions_4_packer => record[:spl_instructions_4_packer], :is_intangible => record[:is_intangible])
+                single_import = Product.new(:name => record[:name], :product_type => record[:product_type], :spl_instructions_4_packer => record[:spl_instructions_4_packer], :is_intangible => record[:is_intangible], :weight => record[:weight])
                 single_import.store_id = params[:store_id]
                 single_import.store_product_id = record[:store_product_id]
                 if record[:skus].length > 0 && record[:barcodes].length > 0
@@ -292,6 +296,9 @@ module Groovepacker
                 duplicate_product.store_id = params[:store_id]
                 if !mapping['product_name'].nil? #&& mapping['product_name'][:action] == 'overwrite'
                   duplicate_product.name = record[:name]
+                end
+                if !mapping['product_weight'].nil? #&& mapping['product_weight'][:action] == 'overwrite'
+                  duplicate_product.weight = record[:weight]
                 end
                 duplicate_product.is_intangible = record[:is_intangible]
                 if !mapping['product_type'].nil? #&& mapping['product_type'][:action] == 'overwrite'

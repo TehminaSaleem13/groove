@@ -265,7 +265,6 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
     }).success(function (data) {
       if (data.status && data.store_id) {
         if (!auto) {
-          console.log(data);
           if (data.csv_import) {
             notification.notify("Successfully Updated", 1);
           }
