@@ -403,7 +403,7 @@ module Groovepacker
                         #if Order.where(:increment_id=> order.increment_id).length == 0
                         order.status = 'onhold'
                         order.save!
-                        order.addactivity('Order Import CSV Import')
+                        order.addactivity('Order Import CSV Import', Store.find(params[:store_id]).name+" Import")
                         imported_orders[order.increment_id] = true
                         order.update_order_status
                         import_item.success_imported = import_item.success_imported + 1
