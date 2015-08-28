@@ -66,7 +66,8 @@ class StoreSettingsController < ApplicationController
 
   def connect_and_retrieve
     @result = {}
-    @result['connection'] = FTPCsvImport.retrieve_csv_file
+    ftp_csv_import = FTPCsvImport.new
+    @result['connection'] = ftp_csv_import.retrieve_csv_file
 
     respond_to do |format|
       format.json { render json: @result }
@@ -75,7 +76,8 @@ class StoreSettingsController < ApplicationController
 
   def connect_and_rename
     @result = {}
-    @result['connection'] = FTPCsvImport.update_csv_file
+    ftp_csv_import = FTPCsvImport.new
+    @result['connection'] = ftp_csv_import.update_csv_file
 
     respond_to do |format|
       format.json { render json: @result }

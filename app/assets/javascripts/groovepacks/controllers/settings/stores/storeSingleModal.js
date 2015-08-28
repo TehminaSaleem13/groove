@@ -156,7 +156,9 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
 
     scope.establish_connection = function() {
       stores.single.update_ftp(scope.stores).then(function(data) {
-        stores.single.connect(scope.stores);
+        stores.single.connect(scope.stores).then(function(data) {
+          $('#test_connection').blur();
+        });
       });
     }
 
@@ -292,9 +294,10 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
         current_map.map.file_path = scope.stores.single.file_path;
         stores.csv.do_import({current: current_map.map}).then(function() {
           stores.single.rename().then(function(){
-            myscope.init;
+            myscope.init();
           });
         });
+        return result.promise;
       }
     }
 

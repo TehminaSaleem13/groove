@@ -1,7 +1,7 @@
 class FTPCsvImport
   require ('net/sftp')
 
-  def self.establish_connection
+  def establish_connection
     @directory = ''
     @host = ''
     begin
@@ -22,7 +22,7 @@ class FTPCsvImport
     end
   end
 
-  def self.retrieve_csv_file
+  def retrieve_csv_file
     @result = {}
     @result['status'] = true
     @result['error_messages'] = []
@@ -60,7 +60,7 @@ class FTPCsvImport
     @result
   end
 
-  def self.update_csv_file
+  def update_csv_file
     @result = {}
     @result['status'] = true
     @result['error_messages'] = []
@@ -89,7 +89,7 @@ class FTPCsvImport
     @result
   end
 
-  def self.rename_file(file, new_file)
+  def rename_file(file, new_file)
     substrings = file.split('.')
     substrings.each do |value|
       if(value == substrings[-1])
