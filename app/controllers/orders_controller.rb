@@ -342,8 +342,16 @@ class OrdersController < ApplicationController
     @result['error_messages'] = []
     @result['notice_messages'] = []
 
-    @orders = list_selected_orders
     if current_user.can? 'change_order_status'
+      bulk_actions = Groovepacker::Orders::BulkActions.new
+      groove_bulk_actions = GrooveBulkActions.new
+      groove_bulk_actions.identifier = 'order'
+      groove_bulk_actions.activity = 'status_update'
+      groove_bulk_actions.save
+
+      bulk_actions.delay(:run_at => 1.seconds.from_now).status_update(Apartment::Tenant.current, params, groove_bulk_actions.id)
+
+=begin      
       unless @orders.nil?
         @orders.each do |order|
           @order = Order.find(order['id'])
@@ -353,6 +361,9 @@ class OrdersController < ApplicationController
 
             @result['error_messages'].push('This status change is not permitted.')
           else
+            puts "Params #{params}"
+            puts "orders #{order}"
+            binding.pry
             @order.status = params[:status]
             @order.reallocate_inventory = params[:reallocate_inventory]
             unless @order.save
@@ -362,6 +373,7 @@ class OrdersController < ApplicationController
           end
         end
       end
+=end      
     else
       @result['status'] = false
       @result['error_messages'].push("You do not have enough permissions to change order status")
