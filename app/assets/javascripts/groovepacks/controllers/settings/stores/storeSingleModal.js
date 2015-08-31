@@ -523,7 +523,7 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
           scope.$apply(function () {
             scope.stores.single[args.name] = args.file;
           });
-          $("input[type='file']").val('');
+          // $("input[type='file']").val('');
           if (args.name == 'orderfile') {
             scope.stores.single.type = 'order';
           } else if (args.name == 'productfile') {
@@ -532,9 +532,7 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
             scope.stores.single.type = 'kit';
           }
           //scope.update_single_store(false);
-          console.log(scope.stores);
         }
-
       });
       $modalInstance.result.then(scope.update, scope.update);
       hotkeys.bindTo(scope).add({
