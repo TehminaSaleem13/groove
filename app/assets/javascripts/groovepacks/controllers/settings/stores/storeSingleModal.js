@@ -162,7 +162,6 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
               //Use FileReader API here if it exists (post prototype feature)
               if (data.csv_import && data.store_id) {
                 if (scope.stores.csv.mapping[scope.stores.single.type + '_csv_map_id'] && !scope.start_editing_map) {
-
                   var result = $q.defer();
                   for (var i = 0; i < scope.stores.csv.maps[scope.stores.single.type].length; i++) {
                     if (scope.stores.csv.mapping[scope.stores.single.type + '_csv_map_id'] == scope.stores.csv.maps[scope.stores.single.type][i].id) {
@@ -176,9 +175,15 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
                   current_map.map.type = scope.stores.single.type;
                   current_map.map.name = current_map.name;
                   if (current_map.map.type == 'order') {
-                    if (current_map.map.order_date_time_format == null || current_map.map.order_date_time_format == 'None') {
-                      alert("Order Date/Time foramt has not been set. Edit map to select one.");
-                      result.resolve();
+                    if (current_map.map.order_date_time_format == null || current_map.map.order_date_time_format == 'Default') {
+                      if(confirm("Order Date/Time foramt has not been set. Would you like to continue using the current Date/Time for each imported order? Click ok to continue the import using the current date/time for all orders or click cancel and edit map to select one.")){
+                        current_map.map.order_placed_at = new Date();
+                        stores.csv.do_import({current: current_map.map});
+                        $modalInstance.close("csv-modal-closed");
+                        result.resolve();
+                      } else {
+                        result.resolve();
+                      };
                     } else {
                       var not_found = true
                       for (var i = 0; i < Object.keys(current_map.map.map).length; i++) {
@@ -248,7 +253,9 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
                 }
                 delete scope.stores.single['orderfile'];
                 delete scope.stores.single['productfile'];
-              }
+              } else {
+                notification.notify("Please choose a file to import first",0);
+              };
             }
           }
 
@@ -525,6 +532,7 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
             scope.stores.single.type = 'kit';
           }
           //scope.update_single_store(false);
+          console.log(scope.stores);
         }
 
       });

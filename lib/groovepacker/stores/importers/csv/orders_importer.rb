@@ -352,7 +352,7 @@ module Groovepacker
                     end
                   end
                   if result['status']
-                    if !mapping['order_placed_time'].nil? && mapping['order_placed_time'][:position] >= 0 && !params[:order_date_time_format].nil?
+                    if (!mapping['order_placed_time'].nil? && mapping['order_placed_time'][:position] >= 0) && (!params[:order_date_time_format].nil? && params[:order_date_time_format] != 'Default')
                       begin
                         require 'time'
                         imported_order_time = single_row[mapping['order_placed_time'][:position]]

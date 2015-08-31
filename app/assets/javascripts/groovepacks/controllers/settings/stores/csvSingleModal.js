@@ -14,15 +14,19 @@ groovepacks_controllers.controller('csvSingleModal', ['$scope', 'store_data', '$
           if (scope.csv.importer[scope.csv.importer.type]['map_options'][i].name == "Order Date/Time") {
             if (scope.csv.importer[scope.csv.importer.type]['map_options'][i].disabled) {
               if (scope.csv.current.order_date_time_format == 'Default') {
-                alert("choose a closest Date/Time Format");
-                result.resolve();
+                if(confirm("A Date/Time is mapped but no format has been chosen. Click ok to continue the import using the current date/time for all orders or click cancel and choose a date format that best matches your file")) {
+                  scope.csv.current.order_placed_at = new Date();
+                  myscope.ok_import().then(result.resolve);
+                  break;
+                } else {
+                  $('#date_time_format').focus();
+                  result.resolve();
+                  break;
+                };
               } else{
                 myscope.ok_import().then(result.resolve);
                 break;
               };
-              scope.csv.current.order_placed_at = null;
-              myscope.ok_import().then(result.resolve);
-              break;
             } else {
               if (scope.csv.current.order_date_time_format == 'Default') {
                 scope.csv.current.order_placed_at = new Date();
