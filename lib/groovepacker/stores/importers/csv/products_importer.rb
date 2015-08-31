@@ -299,6 +299,9 @@ module Groovepacker
 
 
                 products_to_import << single_import
+              elsif duplicate_found === false && duplicate_action == 'overwrite'
+                #skip the current record and move on to the next one.
+                next
               elsif duplicate_action == 'overwrite'
                 #update the product directly
                 single_product_duplicate_sku = ProductSku.find_by_sku(duplicate_found)
