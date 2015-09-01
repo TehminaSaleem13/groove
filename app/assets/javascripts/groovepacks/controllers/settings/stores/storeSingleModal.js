@@ -1,6 +1,6 @@
 groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', '$window', '$sce', '$interval', '$state', '$stateParams', '$modal',
-  '$modalInstance', '$timeout', 'hotkeys', 'stores', 'warehouses', 'notification', '$q',
-  function (scope, store_data, $window, $sce, $interval, $state, $stateParams, $modal, $modalInstance, $timeout, hotkeys, stores, warehouses, notification, $q) {
+  '$modalInstance', '$timeout', 'hotkeys', 'stores', 'warehouses', 'notification', '$q', 'groov_translator',
+  function (scope, store_data, $window, $sce, $interval, $state, $stateParams, $modal, $modalInstance, $timeout, hotkeys, stores, warehouses, notification, $q, groov_translator) {
     var myscope = {};
 
     /**
@@ -148,6 +148,20 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
       });
     };
 
+    scope.update_ftp_credentials = function () {
+      stores.single.update_ftp(scope.stores).then(function(data) {
+        myscope.init();
+      });
+    }
+
+    scope.establish_connection = function() {
+      stores.single.update_ftp(scope.stores).then(function(data) {
+        stores.single.connect(scope.stores).then(function(data) {
+          $('#test_connection').blur();
+        });
+      });
+    }
+
     scope.update_single_store = function (auto) {
       if (scope.edit_status || stores.single.validate_create(scope.stores)) {
         return stores.single.update(scope.stores, auto).success(function (data) {
@@ -174,6 +188,7 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
                   current_map.map.store_id = scope.stores.single.id;
                   current_map.map.type = scope.stores.single.type;
                   current_map.map.name = current_map.name;
+                  current_map.map.flag = 'file_upload';
                   if (current_map.map.type == 'order') {
                     if (current_map.map.order_date_time_format == null || current_map.map.order_date_time_format == 'Default') {
                       if(confirm("Order Date/Time foramt has not been set. Would you like to continue using the current Date/Time for each imported order? Click ok to continue the import using the current date/time for all orders or click cancel and edit map to select one.")){
@@ -268,6 +283,26 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
       scope.update_single_store(false);
     };
 
+    scope.import_ftp = function() {
+      scope.stores.single.type = 'order';
+      if (scope.stores.csv.mapping[scope.stores.single.type + '_csv_map_id'] && !scope.start_editing_map) {
+        var result = $q.defer();
+        for (var i = 0; i < scope.stores.csv.maps[scope.stores.single.type].length; i++) {
+          if (scope.stores.csv.mapping[scope.stores.single.type + '_csv_map_id'] == scope.stores.csv.maps[scope.stores.single.type][i].id) {
+            var current_map = jQuery.extend(true, {}, scope.stores.csv.maps[scope.stores.single.type][i]);
+            break;
+          }
+        }
+        current_map.map.store_id = scope.stores.single.id;
+        current_map.map.type = scope.stores.single.type;
+        current_map.map.name = current_map.name;
+        current_map.map.flag = 'ftp_download';
+        stores.csv.do_import({current: current_map.map});
+        $modalInstance.close("csv-modal-closed");
+        return result.promise;
+      }
+    }
+
     scope.edit_map = function () {
       scope.start_editing_map = true;
       scope.update_single_store(false);
@@ -335,7 +370,6 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
     scope.launch_shopify_popup = function () {
       var shopify_url = $sce.trustAsResourceUrl(scope.stores.single.shopify_permission_url);
       if (shopify_url == null) {
-        console.log(scope.stores);
         if (typeof scope.stores.single.shop_name == 'undefined') {
           notification.notify("Please enter your store name first.");
         }
@@ -392,6 +426,13 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
     };
 
     myscope.init = function () {
+      scope.translations = {
+        "tooltips": {
+          "ftp_address": "",
+          "import_from_ftp": ""
+        }
+      };
+      groov_translator.translate('settings.csv_modal', scope.translations);
       scope.stores = store_data;
       scope.stores.single = {};
       scope.stores.ebay = {};
@@ -399,6 +440,8 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
       scope.stores.csv.maps = {order: [], product: []};
       scope.stores.csv.mapping = {};
       scope.start_editing_map = false;
+      scope.stores.import_from_ftp_enabled = false;
+      scope.stores.single.file_path = '';
       scope.stores.import = {
         order: {},
         product: {},

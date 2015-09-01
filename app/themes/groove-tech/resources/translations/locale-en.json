@@ -161,6 +161,12 @@
         "day_month_sequence": "Select the appropriate radio button to specify the sequence of month and day in the mapped column of csv Order Date/Time."
       }
     },
+    "csv_modal": {
+      "tooltips": {
+        "ftp_address": "Include the path to the directory the csv files are found. GroovePacker will automatically detect the most recently updated csv file that does not include \"-imported\" in its file name. After a successfull import \"-imported\" will be appended to the file name.",
+        "import_from_ftp": "Please choose a saved import map to use for the FTP import.<br/> If you do not have a saved map you can import an order file with the same format from your computer and save a map that can be used for FTP imports."
+      }
+    },
     "accounts": {
       "headings": {
         "credit_cards": "Card Details"

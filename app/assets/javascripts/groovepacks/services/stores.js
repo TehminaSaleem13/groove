@@ -190,6 +190,11 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
             stores.single.shop_name = data.credentials.shopify_credentials.shop_name;
             stores.single.access_token = data.credentials.shopify_credentials.access_token;
             stores.single.shopify_permission_url = data.credentials.shopify_permission_url;
+          } else if (data.store.store_type == 'CSV') {
+            stores.single.host = data.credentials.ftp_credentials.host;
+            stores.single.port = data.credentials.ftp_credentials.port;
+            stores.single.username = data.credentials.ftp_credentials.username;
+            stores.single.password = data.credentials.ftp_credentials.password;
           }
         }
       }
@@ -275,6 +280,42 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
       }
     }).error(notification.server_error);
   };
+
+  var connect_ftp_server = function(stores) {
+    return $http.get('/store_settings/connect_and_retrieve.json?store_id='+ stores.single.id).success(function (data) {
+      if (data.connection.status) {
+        notification.notify(data.connection.success_messages, 1);
+        stores.import_from_ftp_enabled = true;
+        stores.single.file_path = data.connection.downloaded_file;
+      } else {
+        notification.notify(data.connection.error_messages, 0);
+      }
+    }).error(notification.server_error);
+  };
+
+  var create_update_ftp_credentials = function(stores) {
+    return $http({
+      method: 'POST',
+      headers: {'Content-Type': undefined},
+      url: '/store_settings/create_update_ftp_credentials.json',
+      transformRequest: function (data) {
+        var request = new FormData();
+        for (var key in data) {
+          if (data.hasOwnProperty(key)) {
+            request.append(key, data[key]);
+          }
+        }
+        return request;
+      },
+      data: stores.single
+    }).success(function(data) {
+      if(data.status) {
+        notification.notify("Successfully Updated", 1);
+      } else {
+        notification.notify(data.messages, 0);
+      }
+    }).error(notification.server_error);
+  }
 
   //ebay related functions
   var ebay_sign_in_url = function (stores) {
@@ -508,7 +549,9 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
       get_system: get_system,
       can_create: can_create_single,
       validate_create: validate_create_single,
-      update: create_update_single
+      update: create_update_single,
+      update_ftp: create_update_ftp_credentials,
+      connect: connect_ftp_server
     },
     ebay: {
       sign_in_url: {

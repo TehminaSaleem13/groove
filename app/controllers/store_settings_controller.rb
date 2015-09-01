@@ -22,6 +22,58 @@ class StoreSettingsController < ApplicationController
     end
   end
 
+  def create_update_ftp_credentials
+    result = {}
+
+    result['status'] = true
+    result['messages'] =[]
+    store = Store.find(params[:id])
+    unless store.nil?
+      if store.store_type == 'CSV'
+        ftp = FtpCredential.where(:store_id => store.id)
+
+        if ftp.empty? || ftp.length == 0
+          ftp = FtpCredential.new
+          new_record = true
+        else
+          ftp = ftp.first
+        end
+        ftp.host = params[:host]
+        ftp.username = params[:username]
+        ftp.password = params[:password]
+
+        store.ftp_credential = ftp
+        begin
+          store.save!
+          if !new_record
+            store.ftp_credential.save
+          end
+        rescue ActiveRecord::RecordInvalid => e
+          result['status'] = false
+          result['messages'] = [store.errors.full_messages, store.ftp_credential.errors.full_messages]
+
+        rescue ActiveRecord::StatementInvalid => e
+          result['status'] = false
+          result['messages'] = [e.message]
+        end
+      end
+    end
+
+    respond_to do |format|
+      format.json { render json: result }
+    end
+  end
+
+  def connect_and_retrieve
+    result = {}
+    groov_ftp = GroovFTP.new
+    result['connection'] = groov_ftp.retrieve(params[:store_id])
+
+    respond_to do |format|
+      format.json { render json: result }
+    end
+  end
+
   def createUpdateStore
     @result = Hash.new
 
@@ -657,6 +709,7 @@ class StoreSettingsController < ApplicationController
     end
     if @result['status']
       data = {}
+      data[:flag] = params[:flag]
       data[:type] = params[:type]
       data[:fix_width] = params[:fix_width]
       data[:fixed_width] = params[:fixed_width]
@@ -694,6 +747,7 @@ class StoreSettingsController < ApplicationController
         end
         import_csv = ImportCsv.new
         import_csv.delay(:run_at => 1.seconds.from_now).import Apartment::Tenant.current, data
+        # import_csv.import(Apartment::Tenant.current, data)
         import_item.status = 'not_started'
         import_item.save
       elsif params[:type] == 'kit'

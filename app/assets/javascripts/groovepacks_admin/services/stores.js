@@ -469,14 +469,12 @@ groovepacks_admin_services.factory('stores', ['$http', 'notification', '$filter'
   var verify_tags = function (store_id) {
     return $http.get('/store_settings/verify_tags/' + store_id + '.json').success(
       function (data) {
-        console.log(store_id);
       }).error(notification.server_error);
   }
 
   var update_all_locations = function (store_id) {
     return $http.put('/store_settings/update_all_locations/' + store_id + '.json', null).success(
       function (data) {
-        console.log(store_id);
       }).error(notification.server_error);
   }
 
