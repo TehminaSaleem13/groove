@@ -147,6 +147,7 @@ module Groovepacker
                       unless single_row[mapping['barcode'][:position]].nil?
                         barcodes = single_row[mapping['barcode'][:position]].split(',')
                         barcodes.each do |single_barcode|
+                          break unless ProductBarcode.where(:barcode => single_barcode).empty? && (!all_barcodes.include? single_barcode)
                           all_barcodes << single_barcode
                           usable_record[:barcodes] << single_barcode
                         end
@@ -163,6 +164,7 @@ module Groovepacker
                       unless single_row[mapping['secondary_barcode'][:position]].nil?
                         secondary_barcodes = single_row[mapping['secondary_barcode'][:position]].split(',')
                         secondary_barcodes.each do |single_secondary_barcode|
+                          break unless ProductBarcode.where(:barcode => single_secondary_barcode).empty? && (!all_barcodes.include? single_secondary_barcode)
                           all_barcodes << single_secondary_barcode
                           usable_record[:barcodes] << single_secondary_barcode
                         end
@@ -173,6 +175,7 @@ module Groovepacker
                       unless single_row[mapping['tertiary_barcode'][:position]].nil?
                         tertiary_barcodes = single_row[mapping['tertiary_barcode'][:position]].split(',')
                         tertiary_barcodes.each do |single_tertiary_barcode|
+                          break unless ProductBarcode.where(:barcode => single_tertiary_barcode).empty? && (!all_barcodes.include? single_tertiary_barcode)
                           all_barcodes << single_tertiary_barcode
                           usable_record[:barcodes] << single_tertiary_barcode
                         end
@@ -220,7 +223,6 @@ module Groovepacker
 
                     success = success + 1
                   end
-
 
                 end
 

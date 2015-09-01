@@ -189,9 +189,11 @@ module Groovepacker
                                 product_barcode.barcode = single_row[mapping['sku'][:position]]
                                 product.product_barcodes << product_barcode
                               elsif !mapping['barcode'].nil? && !single_row[mapping['barcode'][:position]].nil?
-                                product_barcode = ProductBarcode.new
-                                product_barcode.barcode = single_row[mapping['barcode'][:position]]
-                                product.product_barcodes << product_barcode
+                                if ProductBarcode.where(:barcode => single_row[mapping['barcode'][:position]]).empty?
+                                  product_barcode = ProductBarcode.new
+                                  product_barcode.barcode = single_row[mapping['barcode'][:position]]
+                                  product.product_barcodes << product_barcode
+                                end
                               end
                               product.store_product_id = 0
                               product.store_id = params[:store_id]
