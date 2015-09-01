@@ -443,9 +443,6 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
     return $http.post('/store_settings/csvDoImport.json', csv.current).success(function (data) {
       if (data.status) {
         notification.notify("CSV import queued successfully.", 1);
-        if (data.messages.length>0) {
-          notification.notify(data.messages, 0);
-        };
         csv.current = {};
         csv.importer = {};
       } else {

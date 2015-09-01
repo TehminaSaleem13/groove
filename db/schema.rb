@@ -216,7 +216,7 @@ ActiveRecord::Schema.define(:version => 20150827055338) do
     t.integer  "completed",  :default => 0
     t.string   "status",     :default => "scheduled"
     t.string   "current"
-    t.string   "messages"
+    t.text     "messages"
     t.boolean  "cancel",     :default => false
     t.datetime "created_at",                          :null => false
     t.datetime "updated_at",                          :null => false
