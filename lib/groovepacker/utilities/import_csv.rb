@@ -77,9 +77,8 @@ class ImportCsv
           response = groov_ftp.update(params[:store_id],response['file_info']['ftp_file_name'])
           unless response['status']
             result['messages'].push(response['error_messages'])
-          else
-            File.delete(file_path)
           end
+          File.delete(file_path)
         end
       end
     rescue Exception => e
@@ -87,5 +86,4 @@ class ImportCsv
     end
     result
   end
-
 end

@@ -741,8 +741,9 @@ class StoreSettingsController < ApplicationController
           import_item.store_id = @store.id
         end
         import_csv = ImportCsv.new
-        import_csv.delay(:run_at => 1.seconds.from_now).import Apartment::Tenant.current, data
+        response = import_csv.delay(:run_at => 1.seconds.from_now).import Apartment::Tenant.current, data
         # import_csv.import(Apartment::Tenant.current, data)
+        @result['messages'].push(response['messages']) unless response['messages'].nil?
         import_item.status = 'not_started'
         import_item.save
       elsif params[:type] == 'kit'

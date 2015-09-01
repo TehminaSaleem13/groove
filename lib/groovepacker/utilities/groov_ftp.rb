@@ -38,7 +38,7 @@ class GroovFTP
       if response['error_messages'].empty? && response['status'] == true
         sftp = response['connection_obj']
         file = nil
-        files = sftp.dir.glob(self.directory, "*.csv").sort {|f| File.mtime(f)}
+        files = sftp.dir.glob(self.directory, "*.csv").sort_by {|f| f.attributes.mtime}.reverse
         files.each do |individual_file|
           unless '-imported'.in? individual_file.name
             file = individual_file.name
@@ -77,7 +77,7 @@ class GroovFTP
         found_file = nil
         file_name = nil
         file_path = nil
-        files = sftp.dir.glob(self.directory, "*.csv").sort {|f| File.mtime(f)}
+        files = sftp.dir.glob(self.directory, "*.csv").sort_by {|f| f.attributes.mtime}.reverse
         files.each do |individual_file|
           unless '-imported'.in? individual_file.name
             found_file = individual_file.name
@@ -118,10 +118,12 @@ class GroovFTP
       else
         result['status'] = false
         result['error_messages'].push('Error in updating file name in the ftp server')
+        result['error_messages'].push(response['error_messages'])
       end
-    rescue
+    rescue Exception => e
       result['status'] = false
       result['error_messages'].push('Error in updating file name in the ftp server')
+      result['error_messages'].push(e.message)
     end
     result
   end
