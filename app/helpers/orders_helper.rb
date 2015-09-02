@@ -204,9 +204,4 @@ module OrdersHelper
     increment_id
   end
 
-  # List all orders which are selected for change of status
-  def list_selected_orders(params)
-    puts "In selected orders method"
-    binding.pry
-  end
 end
