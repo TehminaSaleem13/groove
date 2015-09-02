@@ -1,7 +1,6 @@
 module Groovepacker
   module Orders
     class BulkActions
-      # include OrdersHelper
 
       # Changes the status of orders
       def status_update(tenant, params, bulk_actions_id)
@@ -26,17 +25,18 @@ module Groovepacker
               order.order_items.each do |order_item|
                 unless order_item.product.status.eql?('active')
                   result['status'] &= false
-                  result['messages'].push(orders)
+                  result['messages'].push('There was a problem changing order status for '+
+                    order.increment_id + '. Reason: Order must have active products in it'
+                  )
                   break
                 end
               end
               # All the products in the order have status of active
               # so update the order status to awaiting
-              
-                order.status = params['status']
-                order.save
-                bulk_action.completed += 1
-                bulk_action.save
+              order.status = params['status']
+              order.save
+              bulk_action.completed += 1
+              bulk_action.save
             end
             unless bulk_action.cancel?
               bulk_action.status = result['status'] ? 'completed' : 'failed'
