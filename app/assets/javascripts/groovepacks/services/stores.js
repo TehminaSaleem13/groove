@@ -467,13 +467,15 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
       if (data.status) {
         if (map.kind == 'order') {
           stores.csv.mapping.order_csv_map_id = map.id;
-        } else {
+        } else if (map.kind == 'product') {
           stores.csv.mapping.product_csv_map_id = map.id;
-        }
+        } else {
+          stores.csv.mapping.kit_csv_map_id = map.id;
+        };
 
       } else {
         notification.notify(data['messages']);
-      }
+      };
     }).error(notification.server_error);
   };
 
@@ -485,13 +487,15 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
       if (data.status) {
         if (kind == 'order') {
           stores.csv.mapping.order_csv_map_id = null;
-        } else {
+        } else if (kind == 'product') {
           stores.csv.mapping.product_csv_map_id = null;
-        }
+        } else {
+          stores.csv.mapping.kit_csv_map_id = null;
+        };
 
       } else {
         notification.notify(data['messages']);
-      }
+      };
     }).error(notification.server_error);
   };
   var get_csv_maps = function (stores) {
