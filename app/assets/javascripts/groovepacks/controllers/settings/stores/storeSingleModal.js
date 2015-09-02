@@ -20,7 +20,8 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
       } else if (reason == "csv-modal-closed") {
         scope.update_single_store(true);
       } else if (typeof scope.stores.single.id != "undefined") {
-        scope.update_single_store(false);
+        // scope.update_single_store(false);
+        scope.update_single_store(true);
       }
     };
 
@@ -127,7 +128,7 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
 
     scope.change_opt = function (id, value) {
       scope.stores.single[id] = value;
-      scope.update_single_store();
+      scope.update_single_store(true);
     };
 
     myscope.store_single_details = function (id, new_rollback) {
@@ -261,13 +262,11 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
                         }
                       }
                     });
-                  }
-                  csv_modal.result.finally(function () {
-                    $modalInstance.close("csv-modal-closed");
-                  });
-                }
+                  };
+                };
                 delete scope.stores.single['orderfile'];
                 delete scope.stores.single['productfile'];
+                delete scope.stores.single['kitfile'];
               } else {
                 notification.notify("Please choose a file to import first",0);
               };
@@ -386,7 +385,7 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
       } else {
         scope.stores.single = {};
         angular.copy(myscope.single, scope.stores.single);
-        scope.update_single_store();
+        scope.update_single_store(true);
       }
     };
 
@@ -547,7 +546,7 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
             scope.stores.single.thank_you_message_to_customer = $stateParams.messagetocustomer;
             stores.ebay.user_token.fetch(scope.stores).then(function (response) {
               if (response.data.status) {
-                scope.update_single_store();
+                scope.update_single_store(true);
               }
             });
           }
