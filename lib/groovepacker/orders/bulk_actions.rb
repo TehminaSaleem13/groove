@@ -19,6 +19,7 @@ module Groovepacker
             orders.each do |order|
               #TODO# Add code for orders cancelation
               bulk_action.current = order.increment_id
+              product_not_active = false
               bulk_action.save
               # Iterate all products and check if the status is something other 
               # than active then the order status can't be changed
@@ -28,15 +29,18 @@ module Groovepacker
                   result['messages'].push('There was a problem changing order status for '+
                     order.increment_id + '. Reason: Order must have active products in it'
                   )
+                  product_not_active = true
                   break
                 end
               end
-              # All the products in the order have status of active
-              # so update the order status to awaiting
-              order.status = params['status']
-              order.save
-              bulk_action.completed += 1
-              bulk_action.save
+              # If no products have status other than active then change the
+              # status to requested status
+              unless product_not_active.present?
+                order.status = params['status']
+                order.save
+                bulk_action.completed += 1
+                bulk_action.save
+              end
             end
             unless bulk_action.cancel?
               bulk_action.status = result['status'] ? 'completed' : 'failed'
