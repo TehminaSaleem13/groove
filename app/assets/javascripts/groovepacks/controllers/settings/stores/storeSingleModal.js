@@ -263,6 +263,9 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
                       }
                     });
                   };
+                  csv_modal.result.finally(function () {
+                    $modalInstance.close("csv-modal-closed");
+                  });
                 };
                 delete scope.stores.single['orderfile'];
                 delete scope.stores.single['productfile'];
