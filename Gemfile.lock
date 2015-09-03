@@ -232,6 +232,7 @@ GEM
       mime-types (~> 1.16)
       treetop (~> 1.4.8)
     metaclass (0.0.1)
+    method_source (0.8.2)
     mime-types (1.25.1)
     mini_portile (0.6.0)
     mocha (0.14.0)
@@ -275,6 +276,10 @@ GEM
       colorize
       railties
     proxies (0.2.1)
+    pry (0.10.1)
+      coderay (~> 1.1.0)
+      method_source (~> 0.8.1)
+      slop (~> 3.4)
     quiet_assets (1.0.2)
       railties (>= 3.1, < 5.0)
     rack (1.4.5)
@@ -379,6 +384,7 @@ GEM
     simple_form (2.1.0)
       actionpack (~> 3.0)
       activemodel (~> 3.0)
+    slop (3.6.0)
     spring (1.0.0)
     spring-commands-rspec (1.0.1)
       spring (>= 0.9.1)
@@ -476,6 +482,7 @@ DEPENDENCIES
   pdftk
   prawn
   protractor-rails
+  pry
   quiet_assets (>= 1.0.1)
   rails (= 3.2.13)
   redis-session-store
@@ -500,6 +507,3 @@ DEPENDENCIES
   wicked_pdf (>= 0.11)
   wkhtmltopdf-binary
   xmlparser
-
-BUNDLED WITH
-   1.10.6

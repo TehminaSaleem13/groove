@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150813013226) do
+ActiveRecord::Schema.define(:version => 20150827055338) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0, :null => false
@@ -143,6 +143,16 @@ ActiveRecord::Schema.define(:version => 20150813013226) do
     t.boolean  "manual_export",             :default => false
   end
 
+  create_table "ftp_credentials", :force => true do |t|
+    t.string   "host"
+    t.integer  "port",       :default => 21
+    t.string   "username",   :default => ""
+    t.string   "password",   :default => ""
+    t.integer  "store_id",                   :null => false
+    t.datetime "created_at",                 :null => false
+    t.datetime "updated_at",                 :null => false
+  end
+
   create_table "general_settings", :force => true do |t|
     t.boolean  "inventory_tracking",                :default => false
     t.boolean  "low_inventory_alert_email",         :default => false
@@ -206,7 +216,7 @@ ActiveRecord::Schema.define(:version => 20150813013226) do
     t.integer  "completed",  :default => 0
     t.string   "status",     :default => "scheduled"
     t.string   "current"
-    t.string   "messages"
+    t.text     "messages"
     t.boolean  "cancel",     :default => false
     t.datetime "created_at",                          :null => false
     t.datetime "updated_at",                          :null => false
@@ -788,8 +798,9 @@ ActiveRecord::Schema.define(:version => 20150813013226) do
 
   create_table "tenants", :force => true do |t|
     t.string   "name"
-    t.datetime "created_at", :null => false
-    t.datetime "updated_at", :null => false
+    t.datetime "created_at",          :null => false
+    t.datetime "updated_at",          :null => false
+    t.integer  "duplicate_tenant_id"
   end
 
   create_table "transactions", :force => true do |t|

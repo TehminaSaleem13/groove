@@ -57,7 +57,7 @@ class StripeController < ApplicationController
     invoice.forgiven = event.data.object.forgiven
     invoice.paid = event.data.object.paid
     unless event.data.object.lines.data.first.nil?
-      invoice.plan_id = event.data.object.lines.data.first.plan.id unless event.data.object.lines.data.first.plan.id.nil? || event.data.object.lines.data.first.plan.nil?
+      invoice.plan_id = event.data.object.lines.data.first.plan.id unless event.data.object.lines.data.first.plan.nil? || event.data.object.lines.data.first.plan.id.nil?
       invoice.period_start = Time.at(event.data.object.lines.data.first.period.start).utc
       invoice.period_end = Time.at(event.data.object.lines.data.first.period.end).utc
       if event.data.object.starting_balance == 0

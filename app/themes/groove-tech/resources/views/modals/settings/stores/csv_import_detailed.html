@@ -87,8 +87,8 @@
                 <span class="icon-large glyphicon glyphicon-info-sign"></span>
               </label>
               <label class="radio inline">
-                <input type="radio" ng-model="csv.current.import_action" value="update_existing"/> Add or Update
-                Existing Product Records <span class="icon-large glyphicon glyphicon-info-sign"></span>
+                <input type="radio" ng-model="csv.current.import_action" value="update_existing"/> Add to or Update Existing Product Records 
+                <span class="icon-large glyphicon glyphicon-info-sign"></span>
               </label>
               <label class="radio inline">
                 <input type="radio" ng-model="csv.current.import_action" value="create_update"/> Create and Update
@@ -154,7 +154,7 @@
 
 
                     <ul class="dropdown-menu" role="menu" ng-show="csv.current.map[column].value!= 'sku'">
-                      <li ng-repeat="opt in csv.importer[csv.importer.type]['map_options']"
+                      <li ng-repeat="opt in csv.importer[csv.importer.type]['map_options'] | orderBy:['disabled', 'index']"
                           ng-class="{disabled:opt.disabled}">
                         <a dropdown-toggle ng-click="column_map(column,opt)">{{opt.name}}</a>
                       </li>

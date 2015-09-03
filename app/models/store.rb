@@ -9,6 +9,7 @@ class Store < ActiveRecord::Base
   has_one :shipstation_rest_credential
   has_one :shipworks_credential
   has_one :shopify_credential
+  has_one :ftp_credential
 
   belongs_to :inventory_warehouse
 
@@ -79,6 +80,13 @@ class Store < ActiveRecord::Base
         @result['shopify_permission_url'] = shopify_handle.permission_url(Apartment::Database.current)
       end
       @result['status'] =true
+    end
+    if self.store_type == 'CSV'
+      @credentials = FtpCredential.where(:store_id => self.id)
+      unless @credentials.nil? || @credentials.length==0
+        @result['ftp_credentials'] = @credentials.first
+        @result['status'] = true
+      end
     end
     @result
   end

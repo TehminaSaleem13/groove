@@ -2,8 +2,8 @@ class ApplyAccessRestrictions
   def self.apply_access_restrictions(invoice_id)
     Apartment::Tenant.switch()
     invoice = Invoice.find(invoice_id)
-    unless Subscription.where(stripe_customer_id: invoice.customer_id).empty?
-      subscription = Subscription.where(stripe_customer_id: invoice.customer_id).first
+    unless Subscription.where(stripe_customer_id: invoice.customer_id, is_active: true).empty?
+      subscription = Subscription.where(stripe_customer_id: invoice.customer_id, is_active: true).first
       unless subscription.tenant.nil? || subscription.tenant.name.nil?
         tenant = subscription.tenant.name
         Apartment::Tenant.switch(tenant)

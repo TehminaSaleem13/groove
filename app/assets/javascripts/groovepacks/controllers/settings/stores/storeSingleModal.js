@@ -1,6 +1,6 @@
 groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', '$window', '$sce', '$interval', '$state', '$stateParams', '$modal',
-  '$modalInstance', '$timeout', 'hotkeys', 'stores', 'warehouses', 'notification', '$q',
-  function (scope, store_data, $window, $sce, $interval, $state, $stateParams, $modal, $modalInstance, $timeout, hotkeys, stores, warehouses, notification, $q) {
+  '$modalInstance', '$timeout', 'hotkeys', 'stores', 'warehouses', 'notification', '$q', 'groov_translator',
+  function (scope, store_data, $window, $sce, $interval, $state, $stateParams, $modal, $modalInstance, $timeout, hotkeys, stores, warehouses, notification, $q, groov_translator) {
     var myscope = {};
 
     /**
@@ -20,7 +20,8 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
       } else if (reason == "csv-modal-closed") {
         scope.update_single_store(true);
       } else if (typeof scope.stores.single.id != "undefined") {
-        scope.update_single_store(false);
+        // scope.update_single_store(false);
+        scope.update_single_store(true);
       }
     };
 
@@ -127,7 +128,7 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
 
     scope.change_opt = function (id, value) {
       scope.stores.single[id] = value;
-      scope.update_single_store();
+      scope.update_single_store(true);
     };
 
     myscope.store_single_details = function (id, new_rollback) {
@@ -148,6 +149,20 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
       });
     };
 
+    scope.update_ftp_credentials = function () {
+      stores.single.update_ftp(scope.stores).then(function(data) {
+        myscope.init();
+      });
+    }
+
+    scope.establish_connection = function() {
+      stores.single.update_ftp(scope.stores).then(function(data) {
+        stores.single.connect(scope.stores).then(function(data) {
+          $('#test_connection').blur();
+        });
+      });
+    }
+
     scope.update_single_store = function (auto) {
       if (scope.edit_status || stores.single.validate_create(scope.stores)) {
         return stores.single.update(scope.stores, auto).success(function (data) {
@@ -162,7 +177,6 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
               //Use FileReader API here if it exists (post prototype feature)
               if (data.csv_import && data.store_id) {
                 if (scope.stores.csv.mapping[scope.stores.single.type + '_csv_map_id'] && !scope.start_editing_map) {
-
                   var result = $q.defer();
                   for (var i = 0; i < scope.stores.csv.maps[scope.stores.single.type].length; i++) {
                     if (scope.stores.csv.mapping[scope.stores.single.type + '_csv_map_id'] == scope.stores.csv.maps[scope.stores.single.type][i].id) {
@@ -175,10 +189,17 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
                   current_map.map.store_id = scope.stores.single.id;
                   current_map.map.type = scope.stores.single.type;
                   current_map.map.name = current_map.name;
+                  current_map.map.flag = 'file_upload';
                   if (current_map.map.type == 'order') {
-                    if (current_map.map.order_date_time_format == null || current_map.map.order_date_time_format == 'None') {
-                      alert("Order Date/Time foramt has not been set. Edit map to select one.");
-                      result.resolve();
+                    if (current_map.map.order_date_time_format == null || current_map.map.order_date_time_format == 'Default') {
+                      if(confirm("Order Date/Time foramt has not been set. Would you like to continue using the current Date/Time for each imported order? Click ok to continue the import using the current date/time for all orders or click cancel and edit map to select one.")){
+                        current_map.map.order_placed_at = new Date();
+                        stores.csv.do_import({current: current_map.map});
+                        $modalInstance.close("csv-modal-closed");
+                        result.resolve();
+                      } else {
+                        result.resolve();
+                      };
                     } else {
                       var not_found = true
                       for (var i = 0; i < Object.keys(current_map.map.map).length; i++) {
@@ -241,14 +262,14 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
                         }
                       }
                     });
-                  }
-                  csv_modal.result.finally(function () {
-                    $modalInstance.close("csv-modal-closed");
-                  });
-                }
+                  };
+                };
                 delete scope.stores.single['orderfile'];
                 delete scope.stores.single['productfile'];
-              }
+                delete scope.stores.single['kitfile'];
+              } else {
+                notification.notify("Please choose a file to import first",0);
+              };
             }
           }
 
@@ -260,6 +281,26 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
     scope.import_map = function () {
       scope.update_single_store(false);
     };
+
+    scope.import_ftp = function() {
+      scope.stores.single.type = 'order';
+      if (scope.stores.csv.mapping[scope.stores.single.type + '_csv_map_id'] && !scope.start_editing_map) {
+        var result = $q.defer();
+        for (var i = 0; i < scope.stores.csv.maps[scope.stores.single.type].length; i++) {
+          if (scope.stores.csv.mapping[scope.stores.single.type + '_csv_map_id'] == scope.stores.csv.maps[scope.stores.single.type][i].id) {
+            var current_map = jQuery.extend(true, {}, scope.stores.csv.maps[scope.stores.single.type][i]);
+            break;
+          }
+        }
+        current_map.map.store_id = scope.stores.single.id;
+        current_map.map.type = scope.stores.single.type;
+        current_map.map.name = current_map.name;
+        current_map.map.flag = 'ftp_download';
+        stores.csv.do_import({current: current_map.map});
+        $modalInstance.close("csv-modal-closed");
+        return result.promise;
+      }
+    }
 
     scope.edit_map = function () {
       scope.start_editing_map = true;
@@ -328,7 +369,6 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
     scope.launch_shopify_popup = function () {
       var shopify_url = $sce.trustAsResourceUrl(scope.stores.single.shopify_permission_url);
       if (shopify_url == null) {
-        console.log(scope.stores);
         if (typeof scope.stores.single.shop_name == 'undefined') {
           notification.notify("Please enter your store name first.");
         }
@@ -345,7 +385,7 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
       } else {
         scope.stores.single = {};
         angular.copy(myscope.single, scope.stores.single);
-        scope.update_single_store();
+        scope.update_single_store(true);
       }
     };
 
@@ -385,6 +425,13 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
     };
 
     myscope.init = function () {
+      scope.translations = {
+        "tooltips": {
+          "ftp_address": "",
+          "import_from_ftp": ""
+        }
+      };
+      groov_translator.translate('settings.csv_modal', scope.translations);
       scope.stores = store_data;
       scope.stores.single = {};
       scope.stores.ebay = {};
@@ -392,6 +439,8 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
       scope.stores.csv.maps = {order: [], product: []};
       scope.stores.csv.mapping = {};
       scope.start_editing_map = false;
+      scope.stores.import_from_ftp_enabled = false;
+      scope.stores.single.file_path = '';
       scope.stores.import = {
         order: {},
         product: {},
@@ -497,7 +546,7 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
             scope.stores.single.thank_you_message_to_customer = $stateParams.messagetocustomer;
             stores.ebay.user_token.fetch(scope.stores).then(function (response) {
               if (response.data.status) {
-                scope.update_single_store();
+                scope.update_single_store(true);
               }
             });
           }
@@ -516,7 +565,7 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
           scope.$apply(function () {
             scope.stores.single[args.name] = args.file;
           });
-          $("input[type='file']").val('');
+          // $("input[type='file']").val('');
           if (args.name == 'orderfile') {
             scope.stores.single.type = 'order';
           } else if (args.name == 'productfile') {
@@ -526,7 +575,6 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
           }
           //scope.update_single_store(false);
         }
-
       });
       $modalInstance.result.then(scope.update, scope.update);
       hotkeys.bindTo(scope).add({
