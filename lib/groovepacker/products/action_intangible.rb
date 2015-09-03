@@ -1,7 +1,7 @@
 module Groovepacker
   module Products
     class ActionIntangible
-      def update_intangibleness(tenant,params,intangible_setting_enabled, intangible_string)
+      def update_intangibleness(tenant, params, intangible_setting_enabled, intangible_string)
         Apartment::Tenant.switch(tenant)
         intangible_strings = intangible_string.split(",")
         intangible_param_strings = params[:intangible_string].split(",")
@@ -10,7 +10,7 @@ module Groovepacker
             products = Product.all
             products.each do |product|
               intangible_strings.each do |string|
-                if (product.name.start_with? (string)) || sku_starts_with_intangible_string(product,string)
+                if (product.name.start_with? (string)) || sku_starts_with_intangible_string(product, string)
                   product.is_intangible = false
                   product.save
                 end
@@ -19,7 +19,7 @@ module Groovepacker
             products = Product.all
             products.each do |product|
               intangible_param_strings.each do |param_string|
-                if (product.name.start_with? (param_string)) || sku_starts_with_intangible_string(product,param_string)
+                if (product.name.start_with? (param_string)) || sku_starts_with_intangible_string(product, param_string)
                   product.is_intangible = true
                   product.save
                 end
@@ -31,7 +31,7 @@ module Groovepacker
           products.each do |product|
             intangible_param_strings.each do |string|
               # sku_starts_with_intangible_string(product,string)
-              if (product.name.start_with? (string)) || sku_starts_with_intangible_string(product,string)
+              if (product.name.start_with? (string)) || sku_starts_with_intangible_string(product, string)
                 product.is_intangible = false
                 product.save
               end
@@ -42,7 +42,7 @@ module Groovepacker
 
       private
 
-      def sku_starts_with_intangible_string(product,intangible_string)
+      def sku_starts_with_intangible_string(product, intangible_string)
         product_skus = product.product_skus
         intangible = false
         product_skus.each do |product_sku|

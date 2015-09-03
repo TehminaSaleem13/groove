@@ -10,7 +10,7 @@ module Groovepacker
       end
 
       def find(id)
-        @client.send("#{@resource}",id)
+        @client.send("#{@resource}", id)
         result = @client.execute
         single_result = result.first
         json_hash = JSON.parse(single_result.to_json)
@@ -67,7 +67,7 @@ module Groovepacker
         result = @client.execute
         result = result.first
         unless location.nil? || location == ''
-          result.WarehouseLocation = location 
+          result.WarehouseLocation = location
           @client.update_object(result)
           @client.save_changes
         end

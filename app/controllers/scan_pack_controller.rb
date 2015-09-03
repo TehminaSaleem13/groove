@@ -11,17 +11,17 @@ class ScanPackController < ApplicationController
     @result['notice_messages'] = []
 
     @matcher = {
-        'scanpack.rfo' => ['order_scan'],
-        'scanpack.rfp.default' => ['product_scan'],
-        'scanpack.rfp.recording' => ['scan_recording'],
-        'scanpack.rfp.verifying' => ['scan_verifying'],
-        'scanpack.rfp.no_tracking_info' => ['render_order_scan'],
-        'scanpack.rfp.no_match' => ['scan_again_or_render_order_scan'],
-        'scanpack.rfp.product_edit' => ['order_scan'],
-        'scanpack.rfp.product_edit.single' => ['order_scan'],
-        'scanpack.rfp.confirmation.product_edit' => ['product_edit_conf','order_scan'],
-        'scanpack.rfp.confirmation.order_edit' => ['order_edit_conf','order_scan'],
-        'scanpack.rfp.confirmation.cos' => ['cos_conf','order_scan']
+      'scanpack.rfo' => ['order_scan'],
+      'scanpack.rfp.default' => ['product_scan'],
+      'scanpack.rfp.recording' => ['scan_recording'],
+      'scanpack.rfp.verifying' => ['scan_verifying'],
+      'scanpack.rfp.no_tracking_info' => ['render_order_scan'],
+      'scanpack.rfp.no_match' => ['scan_again_or_render_order_scan'],
+      'scanpack.rfp.product_edit' => ['order_scan'],
+      'scanpack.rfp.product_edit.single' => ['order_scan'],
+      'scanpack.rfp.confirmation.product_edit' => ['product_edit_conf', 'order_scan'],
+      'scanpack.rfp.confirmation.order_edit' => ['order_edit_conf', 'order_scan'],
+      'scanpack.rfp.confirmation.cos' => ['cos_conf', 'order_scan']
     }
 
     if params[:state].nil?
@@ -30,7 +30,7 @@ class ScanPackController < ApplicationController
     else
 
       @matcher[params[:state]].each do |state_func|
-        output = send(state_func,params[:input],params[:state],params[:id])
+        output = send(state_func, params[:input], params[:state], params[:id])
         @result['error_messages'] = @result['error_messages'] + output['error_messages']
         @result['success_messages'] = @result['success_messages'] + output['success_messages']
         @result['notice_messages'] = @result['notice_messages'] + output['notice_messages']
@@ -123,7 +123,7 @@ class ScanPackController < ApplicationController
               OrderItemOrderSerialProductLot.create(order_item_id: params[:order_item_id], product_lot_id: params[:product_lot_id], order_serial_id: order_serial.id, qty: 1)
             else
               existing_serial = order_item_serial_lots.first
-              existing_serial.qty  += 1
+              existing_serial.qty += 1
               existing_serial.save
             end
           else
@@ -137,13 +137,13 @@ class ScanPackController < ApplicationController
               else
                 order_item_serial_lots.where(order_serial_id: nil).first.destroy
                 existing_serial = existing_serials.first
-                existing_serial.qty  += 1
+                existing_serial.qty += 1
                 existing_serial.save
               end
             end
           end
-          @result = product_scan(params[:barcode],'scanpack.rfp.default',params[:order_id],params[:clicked],true)
-          order.addactivity('Product: "'+product.name.to_s+'" Serial scanned: "'+params[:serial].to_s+'"',current_user.name)
+          @result = product_scan(params[:barcode], 'scanpack.rfp.default', params[:order_id], params[:clicked], true)
+          order.addactivity('Product: "'+product.name.to_s+'" Serial scanned: "'+params[:serial].to_s+'"', current_user.name)
         end
       end
     end
@@ -174,7 +174,7 @@ class ScanPackController < ApplicationController
           @result['success_messages'].push('Note from Packer saved successfully')
           general_settings = GeneralSetting.all.first
           if general_settings.send_email_for_packer_notes == 'always' ||
-              (general_settings.send_email_for_packer_notes == 'optional' && email)
+            (general_settings.send_email_for_packer_notes == 'optional' && email)
             #send email
             mail_settings = Hash.new
             mail_settings['email'] = general_settings.email_address_for_packer_notes
@@ -233,7 +233,7 @@ class ScanPackController < ApplicationController
   def click_scan
     respond_to do |format|
       format.html # show.html.erb
-      format.json { render json: product_scan(params[:barcode],'scanpack.rfp.default',params[:id],true) }
+      format.json { render json: product_scan(params[:barcode], 'scanpack.rfp.default', params[:id], true) }
     end
   end
 
@@ -241,7 +241,7 @@ class ScanPackController < ApplicationController
     general_setting = GeneralSetting.all.first
     respond_to do |format|
       format.html # show.html.erb
-      format.json {render json: {confirmed: (!general_setting.strict_cc || current_user.confirmation_code == params[:code])}}
+      format.json { render json: {confirmed: (!general_setting.strict_cc || current_user.confirmation_code == params[:code])} }
     end
   end
 
@@ -268,8 +268,8 @@ class ScanPackController < ApplicationController
         if @order_item.nil?
           @result['status'] &= false
           @result['error_messages'].push('Couldnt find order item')
-        elsif !params[:next_item]['kit_product_id'].nil? && (@order_kit_product.nil?  ||
-            @order_kit_product.order_item_id != @order_item.id)
+        elsif !params[:next_item]['kit_product_id'].nil? && (@order_kit_product.nil? ||
+          @order_kit_product.order_item_id != @order_item.id)
           @result['status'] &= false
           @result['error_messages'].push('Couldnt find child item')
         elsif @order_item.order_id != @order.id
@@ -279,9 +279,9 @@ class ScanPackController < ApplicationController
           if params[:count] == params[:next_item][:qty]
             unless params[:next_item][:barcodes].blank? || params[:next_item][:barcodes][0].blank? || params[:next_item][:barcodes][0][:barcode].blank?
               (1..params[:next_item][:qty_remaining]).each do
-                @result['data'] = product_scan(params[:next_item][:barcodes][0][:barcode],'scanpack.rfp.default',params[:id],false)
+                @result['data'] = product_scan(params[:next_item][:barcodes][0][:barcode], 'scanpack.rfp.default', params[:id], false)
               end
-              @order.addactivity('Type-In count Scanned for product'+params[:next_item][:sku].to_s,current_user.username)
+              @order.addactivity('Type-In count Scanned for product'+params[:next_item][:sku].to_s, current_user.username)
             end
           else
             @result['status'] &= false
@@ -323,8 +323,8 @@ class ScanPackController < ApplicationController
         if @order_item.nil?
           @result['status'] &= false
           @result['error_messages'].push('Couldnt find order item')
-        elsif !params[:next_item]['kit_product_id'].nil? && (@order_kit_product.nil?  ||
-            @order_kit_product.order_item_id != @order_item.id)
+        elsif !params[:next_item]['kit_product_id'].nil? && (@order_kit_product.nil? ||
+          @order_kit_product.order_item_id != @order_item.id)
           @result['status'] &= false
           @result['error_messages'].push('Couldnt find child item')
         elsif @order_item.order_id != @order.id

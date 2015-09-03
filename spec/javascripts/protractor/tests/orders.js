@@ -148,7 +148,7 @@ describe('Orders:',function() {
                     status.parent = status.button.element(by.xpath(".."));
                     status.ul = status.parent.element(by.tagName("ul"));
                     status.li = status.ul.all(by.tagName("li")).get(1).click();
-                    element(by.cssContainingText('.panel-collapse.in .panel-body li','Action Required')).click();
+                    element(by.cssContainingText('.panel-collapse.in .panel-body li','Service Issue')).click();
 
                     table.tbody = element.all(by.tagName("tbody")).first();
                     table.row = table.tbody.all(by.tagName("tr")).first();
@@ -191,92 +191,12 @@ describe('Orders:',function() {
             
             describe('Modal:',function() {
                 var order = {};
-                it('asserts the information in Order modal',function() {
-                    table.list_table = element.all(by.tagName('table')).first();
-                    table.thead = table.list_table.element(by.tagName('thead'));
-                    table.thead.all(by.repeater('field in theads')).getText().then (function(text) {
-                        new openOrderModal(text);
-                        order.first_field_set = element.all(by.tagName('fieldset')).get(0);
-
-                        order.first_name_label = order.first_field_set.element(by.cssContainingText('.row .container-fluid .form-group label', 'First Name'));
-                        order.first_name_div = order.first_name_label.element(by.xpath('..'));
-                        order.first_name_value = order.first_name_div.element(by.tagName('input')).getAttribute('value');
-                        expect(order.first_name_value).toEqual(element(by.model('orders.single.basicinfo.firstname')).getAttribute('value'));
-
-                        order.last_name_label = order.first_field_set.element(by.cssContainingText('.row .container-fluid .form-group label', 'Last Name'));
-                        order.last_name_div = order.last_name_label.element(by.xpath('..'));
-                        order.last_name_value = order.last_name_div.element(by.tagName('input')).getAttribute('value');
-                        expect(order.last_name_value).toEqual(element(by.model('orders.single.basicinfo.lastname')).getAttribute('value'));
-
-                        order.company_label = order.first_field_set.element(by.cssContainingText('.row .container-fluid .form-group label', 'Company'));
-                        order.company_div = order.company_label.element(by.xpath('..'));
-                        order.company_value = order.company_div.element(by.tagName('input')).getAttribute('value');
-                        expect(order.company_value).toEqual(element(by.model('orders.single.basicinfo.company')).getAttribute('value'));
-
-                        order.address1_label = order.first_field_set.element(by.cssContainingText('.row .container-fluid .form-group label', 'Address line 1'));
-                        order.address1_div = order.address1_label.element(by.xpath('..'));
-                        order.address1_value = order.address1_div.element(by.tagName('input')).getAttribute('value');
-                        expect(order.address1_value).toEqual(element(by.model('orders.single.basicinfo.address_1')).getAttribute('value'));
-
-                        order.address2_label = order.first_field_set.element(by.cssContainingText('.row .container-fluid .form-group label', 'Address line 2'));
-                        order.address2_div = order.address2_label.element(by.xpath('..'));
-                        order.address2_value = order.address2_div.element(by.tagName('input')).getAttribute('value');
-                        expect(order.address2_value).toEqual(element(by.model('orders.single.basicinfo.address_2')).getAttribute('value'));
-
-                        order.city_label = order.first_field_set.element(by.cssContainingText('.row .container-fluid .form-group label', 'City'));
-                        order.city_div = order.city_label.element(by.xpath('..'));
-                        order.city_value = order.city_div.element(by.tagName('input')).getAttribute('value');
-                        expect(order.city_value).toEqual(element(by.model('orders.single.basicinfo.city')).getAttribute('value'));
-
-                        order.state_label = order.first_field_set.element(by.cssContainingText('.row .container-fluid .form-group label', 'State'));
-                        order.state_div = order.state_label.element(by.xpath('..'));
-                        order.state_value = order.state_div.element(by.tagName('input')).getAttribute('value');
-                        expect(order.state_value).toEqual(element(by.model('orders.single.basicinfo.state')).getAttribute('value'));
-
-                        order.increment_id_label = order.first_field_set.element(by.cssContainingText('.row .container-fluid .form-group label', 'Order #'));
-                        order.increment_id_div = order.increment_id_label.element(by.xpath('..'));
-                        order.increment_id_value = order.increment_id_div.element(by.tagName('input')).getAttribute('value');
-                        expect(order.increment_id_value).toEqual(element(by.model('orders.single.basicinfo.increment_id')).getAttribute('value'));
-
-                        order.email_label = order.first_field_set.element(by.cssContainingText('.row .container-fluid .form-group label', 'Buyer Email'));
-                        order.email_div = order.email_label.element(by.xpath('..'));
-                        order.email_value = order.email_div.element(by.tagName('input')).getAttribute('value');
-                        expect(order.email_value).toEqual(element(by.model('orders.single.basicinfo.email')).getAttribute('value'));
-
-                        order.store_order_id_label = order.first_field_set.element(by.cssContainingText('.row .container-fluid .form-group label', 'Store Order id'));
-                        order.store_order_id_div = order.store_order_id_label.element(by.xpath('..'));
-                        order.store_order_id_value = order.store_order_id_div.element(by.tagName('input')).getAttribute('value');
-                        expect(order.store_order_id_value).toEqual(element(by.model('orders.single.basicinfo.store_order_id')).getAttribute('value'));
-
-                        order.postcode_label = order.first_field_set.element(by.cssContainingText('.row .container-fluid .form-group label', 'Zip'));
-                        order.postcode_div = order.postcode_label.element(by.xpath('..'));
-                        order.postcode_value = order.postcode_div.element(by.tagName('input')).getAttribute('value');
-                        expect(order.postcode_value).toEqual(element(by.model('orders.single.basicinfo.postcode')).getAttribute('value'));
-
-                        order.country_label = order.first_field_set.element(by.cssContainingText('.row .container-fluid .form-group label', 'Country'));
-                        order.country_div = order.country_label.element(by.xpath('..'));
-                        order.country_value = order.country_div.element(by.tagName('input')).getAttribute('value');
-                        expect(order.country_value).toEqual(element(by.model('orders.single.basicinfo.country')).getAttribute('value'));
-
-                        order.last_field_set = element.all(by.tagName('fieldset')).get(1);
-                        order.scanned_on_label = order.last_field_set.element(by.cssContainingText('.row .form-group label', 'Scanned on'));
-                        order.scanned_on_div = order.scanned_on_label.element(by.xpath('..'));
-                        order.scanned_on_value = order.scanned_on_div.element(by.tagName('input')).getAttribute('value');
-                        expect(order.scanned_on_value).toEqual(element(by.model('orders.single.basicinfo.scanned_on')).getAttribute('value'));
-
-                        order.tracking_num_label = order.last_field_set.element(by.cssContainingText('.row .form-group label', 'Tracking id #'));
-                        order.tracking_num_div = order.tracking_num_label.element(by.xpath('..'));
-                        order.tracking_num_value = order.tracking_num_div.element(by.tagName('input')).getAttribute('value');
-                        expect(order.tracking_num_value).toEqual(element(by.model('orders.single.basicinfo.tracking_num')).getAttribute('value'));
-                        element(by.className("close-btn")).click();
-                    });
-                    
-                });
+                
                 it('asserts the items in Order modal',function() {
                     table.list_table = element.all(by.tagName('table')).first();
                     table.thead = table.list_table.element(by.tagName('thead'));
                     table.thead.all(by.repeater('field in theads')).getText().then (function(text) {
-                        var titles_items_count = text.indexOf('Items');
+                        // var titles_items_count = text.indexOf('Items');
                         new openOrderModal(text);
                         element(by.cssContainingText('.modal-body .tabbable .nav.nav-tabs.modal-nav.ng-isolate-scope .nav.nav-tabs li','Items')).all(by.tagName('a')).first().click();
                         browser.sleep(2000);
@@ -305,7 +225,7 @@ describe('Orders:',function() {
                     table.list_table = element.all(by.tagName('table')).first();
                     table.thead = table.list_table.element(by.tagName('thead'));
                     table.thead.all(by.repeater('field in theads')).getText().then (function(text) {
-                        var titles_items_count = text.indexOf('Items');
+                        // var titles_items_count = text.indexOf('Items');
                         new openOrderModal(text);
                         element(by.cssContainingText('.modal-body .tabbable .nav.nav-tabs.modal-nav.ng-isolate-scope .nav.nav-tabs li','Items')).all(by.tagName('a')).first().click();
                         element.all(by.className('tab-content')).then (function(row) {
@@ -357,7 +277,7 @@ describe('Orders:',function() {
                     table.list_table = element.all(by.tagName('table')).first();
                     table.thead = table.list_table.element(by.tagName('thead'));
                     table.thead.all(by.repeater('field in theads')).getText().then (function(text) {
-                        var titles_items_count = text.indexOf('Items');
+                        // var titles_items_count = text.indexOf('Items');
                         new openOrderModal(text);
                         element(by.cssContainingText('.modal-body .tabbable .nav.nav-tabs.modal-nav.ng-isolate-scope .nav.nav-tabs li','Items')).all(by.tagName('a')).first().click();
                         element.all(by.className('tab-content')).then (function(row) {
@@ -383,8 +303,94 @@ describe('Orders:',function() {
                         });
                     });
                 });
-            });
+                it('asserts the information in Order modal',function() {
+                    table.list_table = element.all(by.tagName('table')).first();
+                    table.thead = table.list_table.element(by.tagName('thead'));
+                    table.thead.all(by.repeater('field in theads')).getText().then (function(text) {
+                        // var titles_items_count = text.indexOf('Information');
+                        new openOrderModal(text);
+                        element(by.cssContainingText('.modal-body .tabbable .nav.nav-tabs.modal-nav.ng-isolate-scope .nav.nav-tabs li','Information')).all(by.tagName('a')).first().click();
+                        element.all(by.className('tab-content')).then (function(row) {
+                            order.first_field_set = row[row.length-1].all(by.cssContainingText('fieldset legend', 'Order Details')).first();
+                            // order.first_field_set = element.all(by.tagName('fieldset')).get(0);
 
+                            order.first_name_label = order.first_field_set.element(by.cssContainingText('.row .container-fluid .form-group label', 'First Name'));
+                            order.first_name_div = order.first_name_label.element(by.xpath('..'));
+                            order.first_name_value = order.first_name_div.element(by.tagName('input')).getAttribute('value');
+                            expect(order.first_name_value).toEqual(element(by.model('orders.single.basicinfo.firstname')).getAttribute('value'));
+
+                            order.last_name_label = order.first_field_set.element(by.cssContainingText('.row .container-fluid .form-group label', 'Last Name'));
+                            order.last_name_div = order.last_name_label.element(by.xpath('..'));
+                            order.last_name_value = order.last_name_div.element(by.tagName('input')).getAttribute('value');
+                            expect(order.last_name_value).toEqual(element(by.model('orders.single.basicinfo.lastname')).getAttribute('value'));
+
+                            order.company_label = order.first_field_set.element(by.cssContainingText('.row .container-fluid .form-group label', 'Company'));
+                            order.company_div = order.company_label.element(by.xpath('..'));
+                            order.company_value = order.company_div.element(by.tagName('input')).getAttribute('value');
+                            expect(order.company_value).toEqual(element(by.model('orders.single.basicinfo.company')).getAttribute('value'));
+
+                            order.address1_label = order.first_field_set.element(by.cssContainingText('.row .container-fluid .form-group label', 'Address line 1'));
+                            order.address1_div = order.address1_label.element(by.xpath('..'));
+                            order.address1_value = order.address1_div.element(by.tagName('input')).getAttribute('value');
+                            expect(order.address1_value).toEqual(element(by.model('orders.single.basicinfo.address_1')).getAttribute('value'));
+
+                            order.address2_label = order.first_field_set.element(by.cssContainingText('.row .container-fluid .form-group label', 'Address line 2'));
+                            order.address2_div = order.address2_label.element(by.xpath('..'));
+                            order.address2_value = order.address2_div.element(by.tagName('input')).getAttribute('value');
+                            expect(order.address2_value).toEqual(element(by.model('orders.single.basicinfo.address_2')).getAttribute('value'));
+
+                            order.city_label = order.first_field_set.element(by.cssContainingText('.row .container-fluid .form-group label', 'City'));
+                            order.city_div = order.city_label.element(by.xpath('..'));
+                            order.city_value = order.city_div.element(by.tagName('input')).getAttribute('value');
+                            expect(order.city_value).toEqual(element(by.model('orders.single.basicinfo.city')).getAttribute('value'));
+
+                            order.state_label = order.first_field_set.element(by.cssContainingText('.row .container-fluid .form-group label', 'State'));
+                            order.state_div = order.state_label.element(by.xpath('..'));
+                            order.state_value = order.state_div.element(by.tagName('input')).getAttribute('value');
+                            expect(order.state_value).toEqual(element(by.model('orders.single.basicinfo.state')).getAttribute('value'));
+
+                            order.increment_id_label = order.first_field_set.element(by.cssContainingText('.row .container-fluid .form-group label', 'Order #'));
+                            order.increment_id_div = order.increment_id_label.element(by.xpath('..'));
+                            order.increment_id_value = order.increment_id_div.element(by.tagName('input')).getAttribute('value');
+                            expect(order.increment_id_value).toEqual(element(by.model('orders.single.basicinfo.increment_id')).getAttribute('value'));
+
+                            order.email_label = order.first_field_set.element(by.cssContainingText('.row .container-fluid .form-group label', 'Buyer Email'));
+                            order.email_div = order.email_label.element(by.xpath('..'));
+                            order.email_value = order.email_div.element(by.tagName('input')).getAttribute('value');
+                            expect(order.email_value).toEqual(element(by.model('orders.single.basicinfo.email')).getAttribute('value'));
+
+                            order.store_order_id_label = order.first_field_set.element(by.cssContainingText('.row .container-fluid .form-group label', 'Store Order id'));
+                            order.store_order_id_div = order.store_order_id_label.element(by.xpath('..'));
+                            order.store_order_id_value = order.store_order_id_div.element(by.tagName('input')).getAttribute('value');
+                            expect(order.store_order_id_value).toEqual(element(by.model('orders.single.basicinfo.store_order_id')).getAttribute('value'));
+
+                            order.postcode_label = order.first_field_set.element(by.cssContainingText('.row .container-fluid .form-group label', 'Zip'));
+                            order.postcode_div = order.postcode_label.element(by.xpath('..'));
+                            order.postcode_value = order.postcode_div.element(by.tagName('input')).getAttribute('value');
+                            expect(order.postcode_value).toEqual(element(by.model('orders.single.basicinfo.postcode')).getAttribute('value'));
+
+                            order.country_label = order.first_field_set.element(by.cssContainingText('.row .container-fluid .form-group label', 'Country'));
+                            order.country_div = order.country_label.element(by.xpath('..'));
+                            order.country_value = order.country_div.element(by.tagName('input')).getAttribute('value');
+                            expect(order.country_value).toEqual(element(by.model('orders.single.basicinfo.country')).getAttribute('value'));
+
+                            order.last_field_set = element.all(by.tagName('fieldset')).get(1);
+                            order.scanned_on_label = order.last_field_set.element(by.cssContainingText('.row .form-group label', 'Scanned on'));
+                            order.scanned_on_div = order.scanned_on_label.element(by.xpath('..'));
+                            order.scanned_on_value = order.scanned_on_div.element(by.tagName('input')).getAttribute('value');
+                            expect(order.scanned_on_value).toEqual(element(by.model('orders.single.basicinfo.scanned_on')).getAttribute('value'));
+
+                            order.tracking_num_label = order.last_field_set.element(by.cssContainingText('.row .form-group label', 'Tracking id #'));
+                            order.tracking_num_div = order.tracking_num_label.element(by.xpath('..'));
+                            order.tracking_num_value = order.tracking_num_div.element(by.tagName('input')).getAttribute('value');
+                            expect(order.tracking_num_value).toEqual(element(by.model('orders.single.basicinfo.tracking_num')).getAttribute('value'));
+                            element(by.className("close-btn")).click();
+                        });
+                    });
+                    
+                });
+            });
+            
             var selectFirstRowInList = function() {
                 table.tbody = element.all(by.tagName("tbody")).first();
                 table.row = table.tbody.all(by.tagName("tr")).first();

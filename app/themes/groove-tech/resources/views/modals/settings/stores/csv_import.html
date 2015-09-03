@@ -1,190 +1,245 @@
 <div>
 
-    <div class="modal-header">
-        <button type="button" class="close-btn" ng-click="cancel()"><i class="glyphicon glyphicon-remove"></i></button>
-        <div class="modal-title">
-            <span ng-show="csv.importer.type == 'order'">Import Orders from CSV</span>
-            <span ng-show="csv.importer.type == 'kit'">Import Kits from CSV</span>
-        </div>
+  <div class="modal-header">
+    <button type="button" class="close-btn" ng-click="cancel()"><i class="glyphicon glyphicon-remove"></i></button>
+    <div class="modal-title">
+      <span ng-show="csv.importer.type == 'order'">Import Orders from CSV</span>
+      <span ng-show="csv.importer.type == 'kit'">Import Kits from CSV</span>
     </div>
+  </div>
 
 
-    <div class="modal-body" >
+  <div class="modal-body">
 
-        <div class="container-fluid form-horizontal">
-            <div class="row">
-                <div class="col-md-8">
-                    <legend>Import Options</legend>
-                    <div class="form-group">
-                        <label class="control-label col-md-4">From Row</label>
-                        <div class="controls col-md-2">
-                            <input type="number" class="form-control input-style" min="2" ng-change="parse()"  ng-model="csv.current.rows" />
-                        </div>
-                    </div>
-                    <div class="form-group"  ng-show="csv.importer.type == 'order'">
-                        <label class="control-label col-sm-4">Order Date/Time Format</label>
-                        <div class="controls col-sm-4 form-inline" dropdown>
-                            <button class="dropdown-toggle groove-button label label-default col-sm-9" ng-class="{
+    <div class="container-fluid form-horizontal">
+      <div class="row">
+        <div class="col-md-8">
+          <legend>Import Options</legend>
+          <div class="form-group">
+            <label class="control-label col-md-4">From Row</label>
+
+            <div class="controls col-md-2">
+              <input type="number" class="form-control input-style" min="2" ng-change="parse()"
+                     ng-model="csv.current.rows"/>
+            </div>
+          </div>
+          <legend>Separator Options</legend>
+          <div class="container-fluid">
+            <label class="radio col-sm-2">
+              <input type="radio" name="fixed_width" ng-model="csv.current.fix_width" ng-change="parse()" value="1"/>
+              Fixed width
+            </label>
+
+            <div class="form-group" ng-show="csv.current.fix_width == '1'">
+              <label class="control-label col-md-4">Width</label>
+
+              <div class="controls col-md-2">
+                <input type="number" class="form-control input-style" ng-change="parse()"
+                       ng-model="csv.current.fixed_width" min="1"/>
+              </div>
+            </div>
+
+            <label class="radio col-sm-12">
+              <input type="radio" name="fixed_width" ng-model="csv.current.fix_width" ng-change="parse()" value="0">
+              Separated by
+            </label>
+
+            <div class="container-fluid" ng-show="csv.current.fix_width == '0'">
+              <div class="controls col-md-8">
+                <label class="radio inline">
+                  <input type="radio" ng-model="csv.current.sep" ng-click="csv.current.other_sep = 0"
+                         ng-change="parse()" value=","/> Comma
+                </label>
+                <label class="radio inline">
+                  <input type="radio" ng-model="csv.current.sep" ng-click="csv.current.other_sep = 0"
+                         ng-change="parse()" value=";"/> Semi-colon
+                </label>
+                <label class="radio inline">
+                  <input type="radio" ng-model="csv.current.sep" ng-click="csv.current.other_sep = 0"
+                         ng-change="parse()" value="\t"/> Tab
+                </label>
+                <br/>
+                <label class="radio inline">
+                  <input type="radio" ng-model="csv.current.sep" ng-click="csv.current.other_sep = 0"
+                         ng-change="parse()" value=" "/> Space
+                </label>
+
+                <label class="radio inline">
+                  <input type="radio" ng-model="csv.current.other_sep" value="1"/> Other <input type="text"
+                                                                                                ng-model="csv.current.sep"
+                                                                                                ng-show="csv.current.separator == '1'"
+                                                                                                ng-change="parse()"/>
+                </label>
+              </div>
+            </div>
+          </div>
+          <legend ng-show="csv.current.fix_width == '0'">Delimiter</legend>
+          <div class="form-group" ng-show="csv.current.fix_width == '0'">
+            <div class="controls col-md-8">
+              Text delimiter <input type="text" class="form-control input-style" ng-model="csv.current.delimiter"
+                                    ng-change="parse()"/>
+            </div>
+            <div></div>
+          </div>
+        </div>
+        <div class="col-md-4"></div>
+
+        <div class="col-md-8">
+          <legend>Csv Map Name</legend>
+          <div class="form-group">
+            <div class="controls col-md-8">
+              Name <input type="text" class="form-control input-style" ng-model="csv.current.name"/>
+            </div>
+          </div>
+          <legend>Date/Time Format</legend>
+          <div class="form-group" ng-show="csv.importer.type == 'order'">
+            <label class="control-label col-sm-4">Order Date/Time Format</label>
+
+            <div class="controls col-sm-8 form-inline" dropdown>
+              <button id="date_time_format" class="dropdown-toggle groove-button label label-default col-sm-5" ng-class="{
                             'label-success':csv.current.order_date_time_format=='YYYY/MM/DD TIME',
-                            'label-info':csv.current.order_date_time_format=='MM/DD/YYYY TIME',
-                            'label-warning':csv.current.order_date_time_format=='DD/MM/YYYY TIME'}">
-                                <span ng-show="csv.current.order_date_time_format=='None'">None</span>
-                                <span ng-show="csv.current.order_date_time_format=='YYYY/MM/DD TIME'">YYYY/MM/DD TIME</span>
-                                <span ng-show="csv.current.order_date_time_format=='MM/DD/YYYY TIME'">MM/DD/YYYY TIME</span>
-                                <span ng-show="csv.current.order_date_time_format=='DD/MM/YYYY TIME'">DD/MM/YYYY TIME</span>
-                                <span class="caret"></span>
-                            </button>
-                            <ul class="dropdown-menu" role="menu">
-                                <li><a class="dropdown-toggle" ng-click="change_order_date_time_format('None')">None</a></li>
-                                <li><a class="dropdown-toggle" ng-click="change_order_date_time_format('YYYY/MM/DD TIME')">YYYY/MM/DD TIME</a></li>
-                                <li><a class="dropdown-toggle" ng-click="change_order_date_time_format('MM/DD/YYYY TIME')">MM/DD/YYYY TIME</a></li>
-                                <li><a class="dropdown-toggle" ng-click="change_order_date_time_format('DD/MM/YYYY TIME')">DD/MM/YYYY TIME</a></li>
-                            </ul>
-                            <i class="info col-sm-2 icon-large glyphicon glyphicon-info-sign pull-right" popover-trigger="mouseenter" groov-popover="{{translations.tooltips.order_date_time_format}}"></i>
-                        </div>
-                    </div>
-                    <legend>Separator Options</legend>
-                    <div class="container-fluid">
-                        <label class="radio col-sm-2">
-                            <input type="radio" name="fixed_width" ng-model="csv.current.fix_width" ng-change="parse()" value="1"/>  Fixed width
-                        </label>
-                        <div class="form-group" ng-show="csv.current.fix_width == '1'">
-                            <label class="control-label col-md-4">Width</label>
-                            <div class="controls col-md-2">
-                                <input type="number" class="form-control input-style" ng-change="parse()" ng-model="csv.current.fixed_width" min="1" />
-                            </div>
-                        </div>
-
-                        <label class="radio col-sm-12">
-                            <input type="radio" name="fixed_width" ng-model="csv.current.fix_width" ng-change="parse()" value="0"  > Separated by
-                        </label>
-                        <div class="container-fluid" ng-show="csv.current.fix_width == '0'" >
-                            <div class="controls col-md-8">
-                                <label class="radio inline">
-                                    <input type="radio" ng-model="csv.current.sep" ng-click="csv.current.other_sep = 0" ng-change="parse()" value="," /> Comma
-                                </label>
-                                <label class="radio inline">
-                                    <input type="radio" ng-model="csv.current.sep" ng-click="csv.current.other_sep = 0"  ng-change="parse()" value=";" /> Semi-colon
-                                </label>
-                                <label class="radio inline">
-                                    <input type="radio" ng-model="csv.current.sep" ng-click="csv.current.other_sep = 0"  ng-change="parse()" value="\t" /> Tab
-                                </label>
-                                <br/>
-                                <label class="radio inline">
-                                    <input type="radio" ng-model="csv.current.sep" ng-click="csv.current.other_sep = 0"  ng-change="parse()" value=" " /> Space
-                                </label>
-
-                                <label class="radio inline">
-                                    <input type="radio" ng-model="csv.current.other_sep" value="1" /> Other <input type="text" ng-model="csv.current.sep" ng-show="csv.current.separator == '1'" ng-change="parse()" />
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                    <legend ng-show="csv.current.fix_width == '0'">Delimiter</legend>
-                    <div class="form-group" ng-show="csv.current.fix_width == '0'">
-                        <div class="controls col-md-8">
-                            Text delimiter <input type="text" class="form-control input-style" ng-model="csv.current.delimiter" ng-change="parse()" />
-                        </div>
-                        <div></div>
-                    </div>
-                </div>
-                <div class="col-md-4"></div>
-
-                <div class="col-md-8">
-                    <legend>Csv Map Name</legend>
-                    <div class="form-group" >
-                        <div class="controls col-md-8">
-                            Name <input type="text" class="form-control input-style" ng-model="csv.current.name" />
-                        </div>
-                    </div>
-                </div>                
-                
-                <div class="col-md-4" ng-show="csv.importer.type == 'order'">
-                    <br>
-                    <br>
-                    <br>
-                    <div class="form-group">
-                        <label class="control-label col-sm-8 col-md-8">Unique Ordernum/SKU Barcodes</label>
-                        <div class="controls col-sm-4 col-md-4 form-inline pull-left">
-                            <div toggle-switch ng-model="csv.current.contains_unique_order_items"></div>&nbsp;&nbsp;<i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" popover="{{translations.tooltips.unique_order_items}}"></i>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="control-label col-sm-8 col-md-8">Generate Barcode From SKU?</label>
-                        <div class="controls col-sm-4 col-md-4 form-inline pull-left">
-                            <div toggle-switch ng-model="csv.current.generate_barcode_from_sku"></div>&nbsp;&nbsp;<i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" popover="{{translations.tooltips.generate_barcode_from_sku}}"></i>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="control-label col-sm-8 col-md-8">Use SKU as Product Name?</label>
-                        <div class="controls col-sm-4 col-md-4 form-inline pull-left">
-                            <div toggle-switch ng-model="csv.current.use_sku_as_product_name"></div>&nbsp;&nbsp;<i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" popover="{{translations.tooltips.use_sku_as_product_name}}"></i>
-                        </div>
-                    </div>
-                </div>
+                            'label-info':csv.current.order_date_time_format=='YY/MM/DD TIME',
+                            'label-warning':csv.current.order_date_time_format=='MM/DD/YYYY TIME'}">
+                <span ng-show="csv.current.order_date_time_format=='Default'">Use Current Date/Time</span>
+                <span ng-show="csv.current.order_date_time_format=='YYYY/MM/DD TIME'">YYYY/MM/DD TIME</span>
+                <span ng-show="csv.current.order_date_time_format=='YY/MM/DD TIME'">YY/MM/DD TIME</span>
+                <span ng-show="csv.current.order_date_time_format=='MM/DD/YYYY TIME'">MM/DD/YYYY TIME</span>
+                <span ng-show="csv.current.order_date_time_format=='MM/DD/YY TIME'">MM/DD/YY TIME</span>
+                <span class="caret"></span>
+              </button>
+              <ul class="dropdown-menu" role="menu">
+                <li><a class="dropdown-toggle" ng-click="change_order_date_time_format('Default')">Use Current Date/Time</a></li>
+                <li><a class="dropdown-toggle" ng-click="change_order_date_time_format('YYYY/MM/DD TIME')">YYYY/MM/DD
+                  TIME</a></li>
+                <li><a class="dropdown-toggle" ng-click="change_order_date_time_format('YY/MM/DD TIME')">YY/MM/DD
+                  TIME</a></li>
+                <li><a class="dropdown-toggle" ng-click="change_order_date_time_format('MM/DD/YYYY TIME')">MM/DD/YYYY
+                  TIME</a></li>
+                <li><a class="dropdown-toggle" ng-click="change_order_date_time_format('MM/DD/YY TIME')">MM/DD/YY
+                  TIME</a></li>
+              </ul>
+              <div class="col-md-2">
+                <i class="info icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter"
+                 groov-popover="{{translations.tooltips.order_date_time_format}}"></i>
+              </div>
             </div>
-            <div class="row">
-                <div class="col-xs-8 col-sm-9 col-md-10"></div>
-                <div class="col-xs-4 col-sm-3 col-md-2 pull-right">
-                    <button ng-click="ok()" class="modal-save-button">Import</button>
-                    <button ng-click="cancel()" class="modal-cancel-button">Cancel</button>
-                </div>
-                <div class="col-xs-12">
-                    <legend>Preview</legend>
-                    <div class="csv-preview-top">
-                        <div id="csv_table_top_scroll" style="height: 10px;"></div>
-                    </div>
-                    <!-- <div><center><div class="glyphicon glyphicon-plus-sign"></div></center></div> -->
-                    <div class="csv-preview">
-                        <table class="table table-hover table-bordered table-striped table-condensed" id=
-                        "map_table">
-                            <thead>
-                            <tr>
-                                <th ng-repeat="column in empty_cols">
-                                    <div class="btn-group btn-group-sm" dropdown>
-                                        <button class="groove-button dropdown-toggle" ng-click="column_unmap(column)">
-                                            {{csv.current.map[column].name}}
-                                            <span ng-show="csv.current.map[column].value == csv.importer.default_map.value" class="caret"></span>
-                                            <span ng-show="csv.current.map[column].value != csv.importer.default_map.value" >x</span>
-                                        </button>
+            <label class="control-label col-sm-4">(DD/MM) <i class="groove-fa fa fa-exchange"></i> (MM/DD)</label>
+            <div class="controls col-md-8 form-inline">
+              <div class="radio col-md-3">
+                <input type="radio" ng-model="csv.current.day_month_sequence" value="DD/MM" ng-click="change_day_month_sequence('DD/MM')"/> DD/MM
+              </div>
 
-
-                                        <ul class="dropdown-menu" role="menu">
-                                            <li ng-repeat="opt in csv.importer[csv.importer.type]['map_options'] | orderBy:'disabled':'false'" ng-class="{disabled:opt.disabled}">
-                                                <a dropdown-toggle ng-click="column_map(column,opt)">{{opt.name}}</a>
-                                            </li>
-                                        </ul>
-
-                                    </div>
-                                </th>
-                            </tr>
-                            </thead>
-                            <tr>
-                                <td ng-repeat="column_number in empty_cols"> <div class="csv-preview-fix-height"> {{csv.current.head[0][column_number]}}</div> </td>
-                            </tr>
-                            <tr ng-repeat="(row_number, preview_row) in csv.current.data">
-                                <td ng-repeat="column_number in empty_cols"> <div class="csv-preview-fix-height"> {{csv.current.data[row_number][column_number]}}</div> </td>
-                            </tr>
-
-                        </table>
-                    </div>
-                </div>
+              <div class="radio col-md-3">
+                <input type="radio" ng-model="csv.current.day_month_sequence" value="MM/DD" ng-click="change_day_month_sequence('MM/DD')"/> MM/DD
+              </div>
+              <i class="info icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter"
+                                       popover="{{translations.tooltips.day_month_sequence}}"></i>
             </div>
-
+          </div>
         </div>
+
+        <div class="col-md-4" ng-show="csv.importer.type == 'order'">
+          <br>
+          <br>
+          <br>
+
+          <div class="form-group">
+            <label class="control-label col-sm-8 col-md-8">Unique Ordernum/SKU Barcodes</label>
+
+            <div class="controls col-sm-4 col-md-4 form-inline pull-left">
+              <div toggle-switch ng-model="csv.current.contains_unique_order_items"></div>
+              &nbsp;&nbsp;<i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter"
+                             popover="{{translations.tooltips.unique_order_items}}"></i>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="control-label col-sm-8 col-md-8">Generate Barcode From SKU?</label>
+
+            <div class="controls col-sm-4 col-md-4 form-inline pull-left">
+              <div toggle-switch ng-model="csv.current.generate_barcode_from_sku"></div>
+              &nbsp;&nbsp;<i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter"
+                             popover="{{translations.tooltips.generate_barcode_from_sku}}"></i>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="control-label col-sm-8 col-md-8">Use SKU as Product Name?</label>
+
+            <div class="controls col-sm-4 col-md-4 form-inline pull-left">
+              <div toggle-switch ng-model="csv.current.use_sku_as_product_name"></div>
+              &nbsp;&nbsp;<i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter"
+                             popover="{{translations.tooltips.use_sku_as_product_name}}"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-xs-8 col-sm-9 col-md-10"></div>
+        <div class="col-xs-4 col-sm-3 col-md-2 pull-right">
+          <button ng-click="ok()" class="modal-save-button">Import</button>
+          <button ng-click="cancel()" class="modal-cancel-button">Cancel</button>
+        </div>
+        <div class="col-xs-12">
+          <legend>Preview</legend>
+          <div class="csv-preview-top">
+            <div id="csv_table_top_scroll" style="height: 10px;"></div>
+          </div>
+          <!-- <div><center><div class="glyphicon glyphicon-plus-sign"></div></center></div> -->
+          <div class="csv-preview">
+            <table class="table table-hover table-bordered table-striped table-condensed" id=
+              "map_table">
+              <thead>
+              <tr>
+                <th ng-repeat="column in empty_cols">
+                  <div class="btn-group btn-group-sm" dropdown>
+                    <button class="groove-button dropdown-toggle" ng-click="column_unmap(column)">
+                      {{csv.current.map[column].name}}
+                      <span ng-show="csv.current.map[column].value == csv.importer.default_map.value"
+                            class="caret"></span>
+                      <span ng-show="csv.current.map[column].value != csv.importer.default_map.value">x</span>
+                    </button>
+
+
+                    <ul class="dropdown-menu" role="menu">
+                      <li ng-repeat="opt in csv.importer[csv.importer.type]['map_options'] | orderBy:['disabled', 'index']"
+                          ng-class="{disabled:opt.disabled}">
+                        <a dropdown-toggle ng-click="column_map(column,opt)">{{opt.name}}</a>
+                      </li>
+                    </ul>
+
+                  </div>
+                </th>
+              </tr>
+              </thead>
+              <tr>
+                <td ng-repeat="column_number in empty_cols">
+                  <div class="csv-preview-fix-height"> {{csv.current.head[0][column_number]}}</div>
+                </td>
+              </tr>
+              <tr ng-repeat="(row_number, preview_row) in csv.current.data">
+                <td ng-repeat="column_number in empty_cols">
+                  <div class="csv-preview-fix-height"> {{csv.current.data[row_number][column_number]}}</div>
+                </td>
+              </tr>
+
+            </table>
+          </div>
+        </div>
+      </div>
+
     </div>
-    <div class="modal-footer">
-        <button ng-click="ok()" class="modal-save-button">Import</button>
-        <button ng-click="cancel()" class="modal-cancel-button">Cancel</button>
-    </div>
+  </div>
+  <div class="modal-footer">
+    <button ng-click="ok()" class="modal-save-button">Import</button>
+    <button ng-click="cancel()" class="modal-cancel-button">Cancel</button>
+  </div>
 </div>
 <script>
-    $(function(){
-      $(".csv-preview").scroll(function(){
-        $(".csv-preview-top").scrollLeft($(".csv-preview").scrollLeft());
-      });
-      $(".csv-preview-top").scroll(function(){
-        $(".csv-preview").scrollLeft($(".csv-preview-top").scrollLeft());
-      });
+  $(function () {
+    $(".csv-preview").scroll(function () {
+      $(".csv-preview-top").scrollLeft($(".csv-preview").scrollLeft());
     });
+    $(".csv-preview-top").scroll(function () {
+      $(".csv-preview").scrollLeft($(".csv-preview-top").scrollLeft());
+    });
+  });
 </script>

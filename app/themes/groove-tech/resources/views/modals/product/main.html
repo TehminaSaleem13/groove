@@ -1,404 +1,503 @@
 <!-- show order modal -->
 <div>
 
-    <div class="modal-header">
-        <button type="button" class="close-btn" ng-click="ok()"><i class="glyphicon glyphicon-remove"></i></button>
-        <div class="modal-title">Editing: {{products.single.skus[0].sku}} - ID #{{products.single.basicinfo.id}}</div>
-    </div>
+  <div class="modal-header">
+    <button type="button" class="close-btn" ng-click="ok()"><i class="glyphicon glyphicon-remove"></i></button>
+    <div class="modal-title">Editing: {{products.single.skus[0].sku}} - ID #{{products.single.basicinfo.id}}</div>
+  </div>
 
 
-    <div class="modal-body">
-        <div class="container-fluid form-horizontal">
-            <div class="row" ng-show="products.single.unacknowledged_kit_activities.length > 0">
-              <div class="col-sm-12">
-                <fieldset>
-                  <h4>There have been changes to the kit. Kindly acknowledge the activity if the change is expected or contact your administrator</h4>
-                  <span ng-repeat="activity in products.single.unacknowledged_kit_activities" >
+  <div class="modal-body">
+    <div class="container-fluid form-horizontal">
+      <div class="row" ng-show="products.single.unacknowledged_kit_activities.length > 0">
+        <div class="col-sm-12">
+          <fieldset>
+            <h4>There have been changes to the kit. Kindly acknowledge the activity if the change is expected or contact
+              your administrator</h4>
+                  <span ng-repeat="activity in products.single.unacknowledged_kit_activities">
                       <div class="alert alert-acknowledge" ng-show="activity.activity_type=='deleted_item'">
-                          <div class="pull-right">
-                              <button class="btn btn-info btn-xs"
-                                ng-click="acknowledge_activity(activity.id)">Acknowledge</button>
-                          </div>
-                          <h5>{{ activity.activitytime | date:'EEEE MM/dd/yyyy hh:mm:ss a'}}</h5>
-                          {{ activity.activity_message}} - by: {{ activity.username }}
+                        <div class="pull-right">
+                          <button class="btn btn-info btn-xs"
+                                  ng-click="acknowledge_activity(activity.id)">Acknowledge
+                          </button>
+                        </div>
+                        <h5>{{ activity.activitytime | date:'EEEE MM/dd/yyyy hh:mm:ss a'}}</h5>
+                        {{ activity.activity_message}} - by: {{ activity.username }}
                       </div>
                   </span>
-                </fieldset>
-              </div>
+          </fieldset>
+        </div>
+      </div>
+      <table class="product_single_top_table">
+        <tr>
+          <td>
+            <h4>{{products.single.basicinfo.name}}</h4>
+            <h4>SKU# {{products.single.skus[0].sku}}</h4>
+          </td>
+          <td class="col-sm-6">
+            <p ng-show="products.single.basicinfo.is_kit==0">
+              <i class="icon-large glyphicon glyphicon-briefcase"></i>
+              <a href="" ng-click="products.single.basicinfo.is_kit=1;update_single_product();">Change this product to
+                a kit</a>
+            </p>
+
+            <p ng-show="products.single.basicinfo.is_kit==1">
+              <i class="icon-large glyphicon glyphicon-random"></i>
+              <a href="" ng-click="products.single.basicinfo.is_kit=0;update_single_product();">Change this kit back to
+                a product</a>
+            </p>
+
+            <p ng-show="products.single.basicinfo.is_kit==0">
+              <i class="icon-large glyphicon glyphicon-export"></i>
+              <a href="" ng-click="product_alias('alias',[],products.single.basicinfo.id)">Make this product an alias of
+                another product</a>
+            </p>
+
+            <p><i class="icon-large glyphicon glyphicon-import"></i>
+              <a href="" ng-click="product_alias('master_alias',[],products.single.basicinfo.id)">Choose aliases of this
+                product</a> &nbsp;&nbsp;
+              <i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter"
+                 popover-placement="bottom" groov-popover="{{translations.tooltips.master_alias}}"></i></p>
+          </td>
+          <td>
+            <h5>Status </h5>
+
+            <div class="radio">
+              <label class="control-label"><input type="radio" ng-change="update_single_product()"
+                                                  ng-model="products.single.basicinfo.status" value="active"> Active
+              </label>
             </div>
-            <table class="product_single_top_table">
-                <tr>
-                    <td>
-                        <h4>{{products.single.basicinfo.name}}</h4>
-                        <h4>SKU# {{products.single.skus[0].sku}}</h4>
-                    </td>
-                    <td class="col-sm-6">
-                        <p ng-show="products.single.basicinfo.is_kit==0">
-                            <i class="icon-large glyphicon glyphicon-briefcase"></i>
-                            <a href="" ng-click="products.single.basicinfo.is_kit=1;update_single_product();">Change this product to
-                                a kit</a>
-                        </p>
-
-                        <p ng-show="products.single.basicinfo.is_kit==1">
-                            <i class="icon-large glyphicon glyphicon-random"></i>
-                            <a href="" ng-click="products.single.basicinfo.is_kit=0;update_single_product();">Change this kit back to
-                                a product</a>
-                        </p>
-
-                        <p ng-show="products.single.basicinfo.is_kit==0">
-                            <i class="icon-large glyphicon glyphicon-export"></i>
-                            <a href="" ng-click="product_alias('alias',[],products.single.basicinfo.id)">Make this product an alias of another product</a>
-                        </p>
-                        <p><i class="icon-large glyphicon glyphicon-import"></i>
-                        <a href="" ng-click="product_alias('master_alias',[],products.single.basicinfo.id)">Choose aliases of this product</a> &nbsp;&nbsp;
-                            <i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" popover-placement="bottom" groov-popover="{{translations.tooltips.master_alias}}"></i></p>
-                    </td>
-                    <td>
-                        <h5>Status </h5>
-                        <div class="radio">
-                            <label class="control-label"><input type="radio" ng-change="update_single_product()"
-                                                    ng-model="products.single.basicinfo.status" value="active"> Active </label>
-                        </div>
-                        <div class="radio">
-                            <label class="control-label"><input type="radio" ng-change="update_single_product()"
-                                                    ng-model="products.single.basicinfo.status" value="inactive"> Inactive </label>
-                        </div>
-                        <div class="radio">
-                            <label class="control-label"><input type="radio" ng-change="update_single_product()"
-                                                    ng-model="products.single.basicinfo.status" value="new"> New </label>
-                        </div>
-                    </td>
-                </tr>
-            </table>
-
-            <h4>Product Images</h4>
-            <div class="form-group">
-
-                <div class="col-sm-12">
-
-                <div ui-sortable="arrayEditableOptions.sortableOptions" ng-model="products.single.images">
-                    <div class="single-image" ng-class="{'primary-image': $index==0}" ng-repeat="image in products.single.images">
-                        <img ng-src="{{ image.image }}" class="img-polaroid img-thumb img-responsive"/>
-                        <i class="glyphicon glyphicon-remove" ng-click="remove_image($index)"></i>
-                    </div>
-                </div>
-                <div class="alert alert-info" ng-show="products.single.store.store_type =='Shipstation' && !products.single.images.length">If a product image is available for this item it will be imported automatically when this product occurs in an order. You can also upload images manually at any time.</div>
-                <div ng-hide="true">
-                    <input name="product_image" id="product_image{{custom_identifier}}" file-upload type="file" value="Add Image" required/>
-                </div>
-                <div>
-                <button class="modal-save-button" ng-click="add_image()">Add Image</button>
-                </div>
-                </div>
+            <div class="radio">
+              <label class="control-label"><input type="radio" ng-change="update_single_product()"
+                                                  ng-model="products.single.basicinfo.status" value="inactive"> Inactive
+              </label>
             </div>
-
-            <h4>Product Details</h4>
-
-            <div class="form-group">
-                <label class="control-label col-sm-2">Name</label>
-
-                <div class="controls col-sm-8">
-                    <input type="text" ng-model="products.single.basicinfo.name" ng-focus="check_remove_prod_name()" ng-blur="update_single_product()" class="form-control input-style"/>
-                </div>
+            <div class="radio">
+              <label class="control-label"><input type="radio" ng-change="update_single_product()"
+                                                  ng-model="products.single.basicinfo.status" value="new"> New </label>
             </div>
-            <div class="form-group">
-                <label class="control-label col-sm-2">SKUs</label>
+          </td>
+        </tr>
+      </table>
 
-                <div class="controls col-sm-8">
-                    <div groov-editable="arrayEditableOptions"  prop="sku" identifier="product_single_skus" ng-model="products.single.skus" class="form-control input-style"></div>
-                </div>
-                <div class="info col-sm-2" ><i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" popover="{{translations.tooltips.sku}}"></i></div>
+      <h4>Product Images</h4>
+
+      <div class="form-group">
+
+        <div class="col-sm-12">
+
+          <div ui-sortable="arrayEditableOptions.sortableOptions" ng-model="products.single.images">
+            <div class="single-image" ng-class="{'primary-image': $index==0}"
+                 ng-repeat="image in products.single.images">
+              <img ng-src="{{ image.image }}" class="img-polaroid img-thumb img-responsive"/>
+              <i class="glyphicon glyphicon-remove" ng-click="remove_image($index)"></i>
             </div>
-            <div class="form-group">
-                <label class="control-label col-sm-2">Barcodes</label>
+          </div>
+          <div class="alert alert-info"
+               ng-show="products.single.store.store_type =='Shipstation' && !products.single.images.length">If a product
+            image is available for this item it will be imported automatically when this product occurs in an order. You
+            can also upload images manually at any time.
+          </div>
+          <div ng-hide="true">
+            <input name="product_image" id="product_image{{custom_identifier}}" file-upload type="file"
+                   value="Add Image" required/>
+          </div>
+          <div>
+            <button class="modal-save-button" ng-click="add_image()">Add Image</button>
+          </div>
+        </div>
+      </div>
 
-                <div class="controls col-sm-8">
-                    <div groov-editable="arrayEditableOptions" identifier="product_single_barcodes" prop="barcode" ng-model="products.single.barcodes" class="form-control input-style"></div>
-                    <label ng-show="products.single.barcodes == ''" class="checkbox inline">
-                        <input type="checkbox" ng-change="update_single_product()"
-                               ng-model="products.single.basicinfo.disable_conf_req"/> Disable Confirmation Requests
-                    </label>
-                </div>
-                <div class="info col-sm-2"><i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" popover="{{translations.tooltips.barcode}}"></i>
-                    &nbsp;&nbsp;
-                    <a href="/products/generate_barcode_slip/{{products.single.basicinfo.id}}.pdf" target="_blank">
-                    <i class="glyphicon glyphicon-print icon-large"></i>
-                </a>
-                </div>
+      <h4>Product Details</h4>
+
+      <div class="form-group">
+        <label class="control-label col-sm-2">Name</label>
+
+        <div class="controls col-sm-8">
+          <input type="text" ng-model="products.single.basicinfo.name" ng-focus="check_remove_prod_name()"
+                 ng-blur="update_single_product()" class="form-control input-style"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="control-label col-sm-2">SKUs</label>
+
+        <div class="controls col-sm-8">
+          <div groov-editable="arrayEditableOptions" prop="sku" identifier="product_single_skus"
+               ng-model="products.single.skus" class="form-control input-style"></div>
+        </div>
+        <div class="info col-sm-2"><i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter"
+                                      popover="{{translations.tooltips.sku}}"></i></div>
+      </div>
+      <div class="form-group">
+        <label class="control-label col-sm-2">Barcodes</label>
+
+        <div class="controls col-sm-8">
+          <div groov-editable="arrayEditableOptions" identifier="product_single_barcodes" prop="barcode"
+               ng-model="products.single.barcodes" class="form-control input-style"></div>
+          <label ng-show="products.single.barcodes == ''" class="checkbox inline col-sm-8">
+            <input type="checkbox" ng-change="update_single_product()"
+                   ng-model="products.single.basicinfo.disable_conf_req"/> Disable Confirmation Requests
+          </label>
+        </div>
+        <div class="info col-sm-2"><i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter"
+                                      popover="{{translations.tooltips.barcode}}"></i>
+          &nbsp;&nbsp;
+          <a href="/products/generate_barcode_slip/{{products.single.basicinfo.id}}.pdf" target="_blank">
+            <i class="glyphicon glyphicon-print icon-large"></i>
+          </a>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="control-label col-sm-2">Categories</label>
+
+        <div class="controls col-sm-8">
+          <div groov-editable="arrayEditableOptions" identifier="product_single_cats" prop="category"
+               ng-model="products.single.cats" class="form-control input-style"></div>
+        </div>
+      </div>
+
+
+      <div class="form-group"
+           ng-show="products.single.store.store_type!='Amazon' || (products.single.store.store_type=='Amazon' && products.single.amazon_product.show_shipping_weight_only==false)">
+        <label class="control-label col-sm-2">Product Weight</label>
+
+        <div class="col-sm-8 controls">
+          <div class="input-group col-sm-12">
+            <input class="form-control input-style" ng-model="products.single.weight" ng-blur="update_single_product()"
+                   onclick="select()">
+
+            <div class="input-group-btn dropdown">
+              <button class="btn btn-default dropdown-toggle input-style" type="button" data-toggle="dropdown"
+                      aria-expanded="false"><span>{{products.single.basicinfo.weight_format}}</span> <span
+                class="caret"></span></button>
+              <ul class="dropdown-menu" role="menu">
+                <li><a class="dropdown-toggle" ng-click="change_setting('weight_format','lb')">lb</a></li>
+                <li><a class="dropdown-toggle" ng-click="change_setting('weight_format','oz')">oz</a></li>
+                <li><a class="dropdown-toggle" ng-click="change_setting('weight_format','kg')">kg</a></li>
+                <li><a class="dropdown-toggle" ng-click="change_setting('weight_format','g')">g</a></li>
+              </ul>
             </div>
-            <div class="form-group">
-                <label class="control-label col-sm-2">Categories</label>
-                <div class="controls col-sm-8">
-                    <div groov-editable="arrayEditableOptions" identifier="product_single_cats" prop="category" ng-model="products.single.cats" class="form-control input-style"></div>
-                </div>
+          </div>
+        </div>
+      </div>
+      <div class="form-group"
+           ng-show="products.single.store.store_type=='Amazon' && products.single.amazon_product.show_shipping_weight_only==true">
+        <label class="control-label col-sm-2">Shipping Weight</label>
+
+        <div class="col-sm-8 controls">
+          <div class="input-group col-sm-12 controls">
+            <input class="form-control input-style" aria-describedby="basic-addon2"
+                   ng-model="products.single.shipping_weight" ng-blur="update_single_product()" onclick="select()">
+
+            <div class="input-group-btn dropdown">
+              <button class="btn btn-default dropdown-toggle input-style" type="button" data-toggle="dropdown"
+                      aria-expanded="false"><span>{{products.single.basicinfo.weight_format}}</span> <span
+                class="caret"></span></button>
+              <ul class="dropdown-menu" role="menu">
+                <li><a class="dropdown-toggle" ng-click="change_setting('weight_format','lb')">lb</a></li>
+                <li><a class="dropdown-toggle" ng-click="change_setting('weight_format','oz')">oz</a></li>
+                <li><a class="dropdown-toggle" ng-click="change_setting('weight_format','kg')">kg</a></li>
+                <li><a class="dropdown-toggle" ng-click="change_setting('weight_format','g')">g</a></li>
+              </ul>
             </div>
+          </div>
+        </div>
+      </div>
+      <h4>Packing options</h4>
 
+      <div class="col-sm-6 remove_padding">
+        <div class="form-group">
+          <label class="control-label col-sm-4">Packing placement</label>
 
-            <div class="form-group" ng-show="products.single.store.store_type!='Amazon' || (products.single.store.store_type=='Amazon' && products.single.amazon_product.show_shipping_weight_only==false)">
-                <label class="control-label col-sm-2">Product Weight</label>
-                <div class="col-sm-8 controls">
-                    <div class="input-group col-sm-12">
-                        <input class="form-control input-style" ng-model="products.single.weight" ng-blur="update_single_product()" onclick="select()">
-                        <div class="input-group-btn dropdown">
-                            <button class="btn btn-default dropdown-toggle input-style" type="button" data-toggle="dropdown" aria-expanded="false"><span>{{products.single.basicinfo.weight_format}}</span> <span class="caret"></span></button>
-                            <ul class="dropdown-menu" role="menu">
-                                <li><a class="dropdown-toggle" ng-click="change_setting('weight_format','lb')" >lb</a></li>
-                                <li><a class="dropdown-toggle" ng-click="change_setting('weight_format','oz')" >oz</a></li>
-                                <li><a class="dropdown-toggle" ng-click="change_setting('weight_format','kg')" >kg</a></li>
-                                <li><a class="dropdown-toggle" ng-click="change_setting('weight_format','g')" >g</a></li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
+          <div class="controls col-sm-3">
+            <input type="number" min="1" max="100" ng-blur="update_single_product()" class="form-control input-style"
+                   ng-model="products.single.basicinfo.packing_placement"/>
+          </div>
+          <div class="info col-sm-4"><i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter"
+                                        popover="{{translations.tooltips.placement}}"></i></div>
+        </div>
+        <!--
+        <div class="form-group">
+            <label class="control-label col-sm-2">Packing time adjustment</label>
+
+            <div class="controls col-sm-1">
+                <input type="number" class="form-control input-style" ng-blur="update_single_product()" ng-model="products.single.basicinfo.pack_time_adj"/>
             </div>
-            <div class="form-group" ng-show="products.single.store.store_type=='Amazon' && products.single.amazon_product.show_shipping_weight_only==true">
-                <label class="control-label col-sm-2">Shipping Weight</label>
-                <div class="col-sm-8 controls">
-                    <div class="input-group col-sm-12 controls">
-                        <input class="form-control input-style" aria-describedby="basic-addon2"  ng-model="products.single.shipping_weight" ng-blur="update_single_product()" onclick="select()">
-                        <div class="input-group-btn dropdown">
-                            <button class="btn btn-default dropdown-toggle input-style" type="button" data-toggle="dropdown" aria-expanded="false"><span>{{products.single.basicinfo.weight_format}}</span> <span class="caret"></span></button>
-                            <ul class="dropdown-menu" role="menu">
-                                <li><a class="dropdown-toggle" ng-click="change_setting('weight_format','lb')" >lb</a></li>
-                                <li><a class="dropdown-toggle" ng-click="change_setting('weight_format','oz')" >oz</a></li>
-                                <li><a class="dropdown-toggle" ng-click="change_setting('weight_format','kg')" >kg</a></li>
-                                <li><a class="dropdown-toggle" ng-click="change_setting('weight_format','g')" >g</a></li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
+            <div class="info col-sm-2" ><i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" popover="{{translations.tooltips.time_adjust}}"></i></div>
+        </div>
+        -->
+
+        <div class="form-group">
+          <label class="control-label col-sm-4">Special instructions for Packer</label>
+
+          <div class="controls col-sm-8">
+            <textarea class="form-control input-style" ng-model="products.single.basicinfo.spl_instructions_4_packer"
+                      ng-blur="update_single_product()" class="col-sm-8" rows="4"></textarea>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="control-label col-sm-4">Packer Confirmation</label>
+
+          <div class="controls col-sm-4 col-lg-2"
+               ng-show="general_settings.single.conf_code_product_instruction =='optional'">
+            <div toggle-switch ng-model="products.single.basicinfo.spl_instructions_4_confirmation"
+                 groov-click="update_single_product()"></div>
+          </div>
+          <div class="control-label col-sm-4 col-lg-2"
+               ng-show="general_settings.single.conf_code_product_instruction !='optional'">
+            <div class="label col-xs-12 label-default"
+                 ng-class="{'label-success':general_settings.single.conf_code_product_instruction=='always'}">
+              <span ng-show="general_settings.single.conf_code_product_instruction=='always'"
+                    translate>common.always</span>
+              <span ng-show="general_settings.single.conf_code_product_instruction=='never'"
+                    translate>common.never</span>
             </div>
-            <h4>Packing options</h4>
-            <div class="col-sm-6 remove_padding">
-                <div class="form-group">
-                    <label class="control-label col-sm-4">Packing placement</label>
+          </div>
+          <div class="info col-sm-1"><i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter"
+                                        groov-popover="{{translations.tooltips.confirmation}} <br/> {{confirmation_setting_text}}"></i>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-6 remove_padding_left subtract_margin_left15">
+        <label class="control-label col-sm-4 remove_padding_left"><br/><br/>Product Receiving Instructions</label>
 
-                    <div class="controls col-sm-2">
-                        <input type="number" min="1" max="100" ng-blur="update_single_product()" class="form-control input-style" ng-model="products.single.basicinfo.packing_placement"/>
-                    </div>
-                    <div class="info col-sm-4" ><i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" popover="{{translations.tooltips.placement}}"></i></div>
-                </div>
-                <!--
-                <div class="form-group">
-                    <label class="control-label col-sm-2">Packing time adjustment</label>
+        <div class="controls col-sm-8 remove_padding">
+          <i class="info icon-large glyphicon glyphicon-info-sign pull-right" popover-trigger="mouseenter"
+             popover="{{translations.tooltips.product_receiving_instructions}}"></i>
 
-                    <div class="controls col-sm-1">
-                        <input type="number" class="form-control input-style" ng-blur="update_single_product()" ng-model="products.single.basicinfo.pack_time_adj"/>
-                    </div>
-                    <div class="info col-sm-2" ><i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" popover="{{translations.tooltips.time_adjust}}"></i></div>
-                </div>
-                -->
+          <div text-angular
+               ta-toolbar="[['html','h1','h2','h3','h4','h5','h6','p','ol','ul'],['bold','italics','underline','strikeThrough'],['justifyLeft','justifyCenter','justifyRight','indent','outdent'],['wordcount','charcount']]"
+               ng-model="products.single.basicinfo.product_receiving_instructions"
+               ng-blur="update_single_product()"></div>
+        </div>
+        <div class="form-group">
+          <label class="control-label col-sm-4"></label>
 
-                <div class="form-group">
-                    <label class="control-label col-sm-4">Special instructions for Packer</label>
-
-                    <div class="controls col-sm-8">
-                        <textarea class="form-control input-style" ng-model="products.single.basicinfo.spl_instructions_4_packer" ng-blur="update_single_product()" class="col-sm-8" rows="4"></textarea>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="control-label col-sm-4">Packer Confirmation</label>
-                    <div class="controls col-sm-4 col-lg-2" ng-show="general_settings.single.conf_code_product_instruction =='optional'">
-                        <div toggle-switch ng-model="products.single.basicinfo.spl_instructions_4_confirmation" groov-click="update_single_product()"></div>
-                    </div>
-                    <div class="control-label col-sm-4 col-lg-2" ng-show="general_settings.single.conf_code_product_instruction !='optional'">
-                        <div class="label col-xs-12 label-default" ng-class="{'label-success':general_settings.single.conf_code_product_instruction=='always'}">
-                            <span ng-show="general_settings.single.conf_code_product_instruction=='always'" translate>common.always</span>
-                            <span ng-show="general_settings.single.conf_code_product_instruction=='never'" translate>common.never</span>
-                        </div>
-                    </div>
-                    <div class="info col-sm-1" ><i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" groov-popover="{{translations.tooltips.confirmation}} <br/> {{confirmation_setting_text}}"></i></div>
-                </div>
+          <div class="controls col-sm-8">
+            <div class="img-thumbnail"
+                 ng-repeat="image in products.single.images | filter:{added_to_receiving_instructions:true} track by image.id">
+              <img ng-src="{{ image.image }}" class="img-polaroid img-thumb img-responsive"
+                   style="border: 1px solid grey;"/>
+              <i class="glyphicon glyphicon-remove" ng-click="remove_instruction_image(image)"></i>
             </div>
-            <div class="col-sm-6 remove_padding_left subtract_margin_left15">
-                <label class="control-label col-sm-4 remove_padding_left"><br/><br/>Product Receiving Instructions</label>
-                <div class="controls col-sm-8 remove_padding">
-                    <i class="info icon-large glyphicon glyphicon-info-sign pull-right" popover-trigger="mouseenter" popover="{{translations.tooltips.product_receiving_instructions}}"></i>
-                    <div text-angular ta-toolbar="[['html','h1','h2','h3','h4','h5','h6','p','ol','ul'],['bold','italics','underline','strikeThrough'],['justifyLeft','justifyCenter','justifyRight','indent','outdent'],['wordcount','charcount']]" ng-model="products.single.basicinfo.product_receiving_instructions" ng-blur="update_single_product()"></div>
-                </div>
-                <div class="form-group">
-                    <label class="control-label col-sm-4"></label>
-                    <div class="controls col-sm-8">
-                        <div class="img-thumbnail" ng-repeat="image in products.single.images | filter:{added_to_receiving_instructions:true} track by image.id" >
-                            <img ng-src="{{ image.image }}" class="img-polaroid img-thumb img-responsive" style="border: 1px solid grey;"/>
-                            <i class="glyphicon glyphicon-remove" ng-click="remove_instruction_image(image)"></i>
-                        </div>
-                        <button class="modal-save-button" ng-click="add_image_for_receiving_instructions()">Add Image</button>
-                    </div>
-                </div>
-            </div>
+            <button class="modal-save-button" ng-click="add_image_for_receiving_instructions()">Add Image</button>
+          </div>
+        </div>
+      </div>
 
-            <h4>Scanning Options</h4>
-            <div class="form-group">
-                <label class="control-label col-sm-2">Product can be skipped</label>
+      <h4>Scanning Options</h4>
 
-                <div class="controls col-sm-2 col-lg-1">
-                    <div toggle-switch ng-model="products.single.basicinfo.is_skippable" groov-click="update_single_product()"></div>
-                </div>
-                <div class="info col-sm-1" ><i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" popover="{{translations.tooltips.skippable}}"></i></div>
+      <div class="form-group">
+        <label class="control-label col-sm-2">Product can be skipped</label>
 
-                <div ng-hide="products.single.basicinfo.is_kit==1">
-                    <label class="control-label col-sm-2 subtract_margin_left60">Add to any order</label>
+        <div class="controls col-sm-2 col-lg-1">
+          <div toggle-switch ng-model="products.single.basicinfo.is_skippable"
+               groov-click="update_single_product()"></div>
+        </div>
+        <div class="info col-sm-1"><i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter"
+                                      popover="{{translations.tooltips.skippable}}"></i></div>
 
-                    <div class="controls col-sm-2 col-lg-1">
-                        <div toggle-switch ng-model="products.single.basicinfo.add_to_any_order" groov-click="update_single_product()"></div>
-                    </div>
-                    <div class="info col-sm-1" ><i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" groov-popover="{{translations.tooltips.add_to_any_order}}"></i></div>
-                </div>
-                <label class="control-label col-sm-2 subtract_margin_left20">Type-In Scan Setting</label>
-                <div class="col-sm-2 col-lg-2" dropdown ng-show="scan_pack_settings.settings.type_scan_code_enabled">
-                    <button class="dropdown-toggle groove-button label label-default" ng-class="{'label-success':products.single.basicinfo.type_scan_enabled=='on',
+        <div ng-hide="products.single.basicinfo.is_kit==1">
+          <label class="control-label col-sm-2 subtract_margin_left60">Add to any order</label>
+
+          <div class="controls col-sm-2 col-lg-1">
+            <div toggle-switch ng-model="products.single.basicinfo.add_to_any_order"
+                 groov-click="update_single_product()"></div>
+          </div>
+          <div class="info col-sm-1"><i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter"
+                                        groov-popover="{{translations.tooltips.add_to_any_order}}"></i></div>
+        </div>
+        <label class="control-label col-sm-2 subtract_margin_left20">Type-In Scan Setting</label>
+
+        <div class="col-sm-2 col-lg-2" dropdown ng-show="scan_pack_settings.settings.type_scan_code_enabled">
+          <button class="dropdown-toggle groove-button label label-default" ng-class="{'label-success':products.single.basicinfo.type_scan_enabled=='on',
                             'label-warning':products.single.basicinfo.type_scan_enabled=='on_with_confirmation'}">
-                        <span ng-show="products.single.basicinfo.type_scan_enabled=='on'" >On</span>
-                        <span ng-show="products.single.basicinfo.type_scan_enabled=='off'" >Off</span>
-                        <span ng-show="products.single.basicinfo.type_scan_enabled=='on_with_confirmation'"> On with Confirmation</span>
-                        <span class="caret"></span>
-                    </button>
-                    <ul class="dropdown-menu" role="menu">
-                        <li><a class="dropdown-toggle" ng-click="change_setting('type_scan_enabled','on')" >On</a></li>
-                        <li><a class="dropdown-toggle" ng-click="change_setting('type_scan_enabled','off')" >Off</a></li>
-                        <li><a class="dropdown-toggle" ng-click="change_setting('type_scan_enabled','on_with_confirmation')" >On with confirmation</a></li>
-                    </ul>&nbsp;
-                    <i class="info icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" groov-popover="{{translations.tooltips.type_in_scan_setting}}"></i>
-                </div>
-                <div class="col-sm-2" ng-hide="scan_pack_settings.settings.type_scan_code_enabled">
-                    <button class="groove-button label label-default">Disabled</button>
-                </div>
+            <span ng-show="products.single.basicinfo.type_scan_enabled=='on'">On</span>
+            <span ng-show="products.single.basicinfo.type_scan_enabled=='off'">Off</span>
+            <span
+              ng-show="products.single.basicinfo.type_scan_enabled=='on_with_confirmation'"> On with Confirmation</span>
+            <span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu" role="menu">
+            <li><a class="dropdown-toggle" ng-click="change_setting('type_scan_enabled','on')">On</a></li>
+            <li><a class="dropdown-toggle" ng-click="change_setting('type_scan_enabled','off')">Off</a></li>
+            <li><a class="dropdown-toggle" ng-click="change_setting('type_scan_enabled','on_with_confirmation')">On with
+              confirmation</a></li>
+          </ul>
+          &nbsp;
+          <i class="info icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter"
+             groov-popover="{{translations.tooltips.type_in_scan_setting}}"></i>
+        </div>
+        <div class="col-sm-2" ng-hide="scan_pack_settings.settings.type_scan_code_enabled">
+          <button class="groove-button label label-default">Disabled</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="control-label col-sm-2">Record Serial Number?</label>
+
+        <div class="controls col-sm-1 col-lg-1">
+          <div toggle-switch ng-model="products.single.basicinfo.record_serial"
+               groov-click="update_single_product()"></div>
+        </div>
+        <div class="info col-sm-1"><i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter"
+                                      popover="{{translations.tooltips.record_serial}}"></i></div>
+
+        <div ng-hide="products.single.basicinfo.is_kit==1">
+          <label class="control-label col-sm-2 subtract_margin_left60">Intangible Item</label>
+
+          <div class="controls col-sm-1 col-lg-1">
+            <div
+              ng-show="products.single.basicinfo.contains_intangible_string && products.single.basicinfo.is_intangible">
+              <div toggle-switch ng-model="products.single.basicinfo.is_intangible" disabled="disabled"
+                   style="opacity: 0.5;"></div>
             </div>
-            <div class="form-group">
-                <label class="control-label col-sm-2">Record Serial Number?</label>
+            <div
+              ng-hide="products.single.basicinfo.contains_intangible_string && products.single.basicinfo.is_intangible">
+              <div toggle-switch ng-model="products.single.basicinfo.is_intangible"
+                   groov-click="update_single_product()"></div>
+            </div>
+          </div>
 
-                <div class="controls col-sm-1 col-lg-1">
-                    <div toggle-switch ng-model="products.single.basicinfo.record_serial" groov-click="update_single_product()"></div>
-                </div>
-                <div class="info col-sm-1" ><i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" popover="{{translations.tooltips.record_serial}}"></i></div>
+          <div class="info col-sm-1"><i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter"
+                                        groov-popover="{{translations.tooltips.intangible_item}}"></i></div>
+        </div>
 
-                <div ng-hide="products.single.basicinfo.is_kit==1">
-                    <label class="control-label col-sm-2 subtract_margin_left60">Intangible Item</label>
-    
-                    <div class="controls col-sm-1 col-lg-1">
-                        <div ng-show="products.single.basicinfo.contains_intangible_string && products.single.basicinfo.is_intangible">
-                            <div toggle-switch ng-model="products.single.basicinfo.is_intangible" disabled="disabled" style="opacity: 0.5;"></div>
-                        </div>
-                        <div ng-hide="products.single.basicinfo.contains_intangible_string && products.single.basicinfo.is_intangible">
-                            <div toggle-switch ng-model="products.single.basicinfo.is_intangible" groov-click="update_single_product()"></div>
-                        </div>
-                    </div>
-                    
-                    <div class="info col-sm-1" ><i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" groov-popover="{{translations.tooltips.intangible_item}}"></i></div>
-                </div>
+        <label class="control-label col-sm-2 subtract_margin_left20">Click Scanning Setting</label>
 
-                <label class="control-label col-sm-2 subtract_margin_left20">Click Scanning Setting</label>
-                <div class="col-sm-2 col-lg-2" dropdown ng-show="scan_pack_settings.settings.enable_click_sku">
-                    <button class="dropdown-toggle groove-button label label-default" ng-class="{'label-success':products.single.basicinfo.click_scan_enabled=='on',
+        <div class="col-sm-2 col-lg-2" dropdown ng-show="scan_pack_settings.settings.enable_click_sku">
+          <button class="dropdown-toggle groove-button label label-default" ng-class="{'label-success':products.single.basicinfo.click_scan_enabled=='on',
                             'label-warning':products.single.basicinfo.click_scan_enabled=='on_with_confirmation'}">
-                        <span ng-show="products.single.basicinfo.click_scan_enabled=='on'" >On</span>
-                        <span ng-show="products.single.basicinfo.click_scan_enabled=='off'" >Off</span>
-                        <span ng-show="products.single.basicinfo.click_scan_enabled=='on_with_confirmation'">On with Confirmation</span>
-                        <span class="caret"></span>
-                    </button>
-                    <ul class="dropdown-menu" role="menu">
-                        <li><a class="dropdown-toggle" ng-click="change_setting('click_scan_enabled','on')" >On</a></li>
-                        <li><a class="dropdown-toggle" ng-click="change_setting('click_scan_enabled','off')" >Off</a></li>
-                        <li><a class="dropdown-toggle" ng-click="change_setting('click_scan_enabled','on_with_confirmation')" >On with confirmation</a></li>
-                    </ul>&nbsp;
-                    <i class="info icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" groov-popover="{{translations.tooltips.click_scanning_setting}}"></i>
-                </div>
-                <div class="col-sm-2" ng-hide="scan_pack_settings.settings.enable_click_sku">
-                    <button class="groove-button label label-default">Disabled</button>
-                </div>
-            </div><br/><br/>
-            
-            <h4 class="text-right">Print Inventory Receiving Label&nbsp;<a href="" ng-click="print_receive_label($event)" style="padding:10px;"><i class="icon-large glyphicon glyphicon-print"></i></a></h4>
-            <div class="form-group">
-                <div class="controls col-xs-12">
-                    <div groov-data-grid="warehouseGridOptions" groov-list="products.single.inventory_warehouses"></div>
-                </div>
-            </div>
-            <div class="form-group">
-                <div class="controls col-xs-12" dropdown>
-                    <button class="modal-save-button dropdown-toggle" ng-show="warehouses.list.length" >Add warehouse <span class="caret"></span></button>
-                    <button ng-click="remove_warehouses()" class="modal-remove-button">Remove selected</button>
-                    <ul class="dropdown-menu" role="menu">
-                        <li ng-repeat="warehouse in warehouses.list"><a ng-click="add_warehouse(warehouse)">{{warehouse.info.name}}</a></li>
-                    </ul>
-                </div>
-            </div>
+            <span ng-show="products.single.basicinfo.click_scan_enabled=='on'">On</span>
+            <span ng-show="products.single.basicinfo.click_scan_enabled=='off'">Off</span>
+            <span
+              ng-show="products.single.basicinfo.click_scan_enabled=='on_with_confirmation'">On with Confirmation</span>
+            <span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu" role="menu">
+            <li><a class="dropdown-toggle" ng-click="change_setting('click_scan_enabled','on')">On</a></li>
+            <li><a class="dropdown-toggle" ng-click="change_setting('click_scan_enabled','off')">Off</a></li>
+            <li><a class="dropdown-toggle" ng-click="change_setting('click_scan_enabled','on_with_confirmation')">On
+              with confirmation</a></li>
+          </ul>
+          &nbsp;
+          <i class="info icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter"
+             groov-popover="{{translations.tooltips.click_scanning_setting}}"></i>
+        </div>
+        <div class="col-sm-2" ng-hide="scan_pack_settings.settings.enable_click_sku">
+          <button class="groove-button label label-default">Disabled</button>
+        </div>
+      </div>
+      <br/><br/>
 
-            <fieldset ng-show="products.single.basicinfo.is_kit==1">
-                <legend>Kit Options</legend>
+      <h4 class="text-right">Print Inventory Receiving Label&nbsp;<a href="" ng-click="print_receive_label($event)"
+                                                                     style="padding:10px;"><i
+        class="icon-large glyphicon glyphicon-print"></i></a></h4>
 
-                <table class="table table-hover table-bordered table-striped table-condensed">
-                    <thead>
-                    <tr>
-                        <th><div>Item Name</div></th>
-                        <th><div>Item SKU</div></th>
-                        <th><div>Quantity in Kit</div></th>
-                        <th><div>Available Inv</div></th>
-                        <th><div>Packing Order</div></th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr ng-repeat="kit_sku in products.single.productkitskus" ng-class="{selected:kit_sku.checked}"
-                        ng-click="kit_sku.checked = !kit_sku.checked">
-                        <td><a href="" ng-click="load_kit(kit_sku,$event)">{{kit_sku.name}}</a></td>
-                        <td>{{kit_sku.sku}}</td>
-                        <td groov-editable="kitEditableOptions" ng-model="kit_sku" prop="qty" identifier="kit_sku-qty-{{$index}}"></td>
-                        <td>{{kit_sku.available_inv}}</td>
-                        <td groov-editable="kitEditableOptions" ng-model="kit_sku" prop="packing_order" identifier="kit_sku-packing_order-{{$index}}"></td>
-                    </tr>
-                    </tbody>
-                </table>
+      <div class="form-group">
+        <div class="controls col-xs-12">
+          <div groov-data-grid="warehouseGridOptions" groov-list="products.single.inventory_warehouses"></div>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="controls col-xs-12" dropdown>
+          <button class="modal-save-button dropdown-toggle" ng-show="warehouses.list.length">Add warehouse <span
+            class="caret"></span></button>
+          <button ng-click="remove_warehouses()" class="modal-remove-button">Remove selected</button>
+          <ul class="dropdown-menu" role="menu">
+            <li ng-repeat="warehouse in warehouses.list"><a
+              ng-click="add_warehouse(warehouse)">{{warehouse.info.name}}</a></li>
+          </ul>
+        </div>
+      </div>
 
-                <div class="form-group">
-                    <div class="controls col-sm-8">
-                        <button class="modal-save-button" ng-click="product_alias('kit',kit_products.list,products.single.basicinfo.id)">Add product to kit</button>
-                        <button ng-click="remove_skus_from_kit()" class="modal-remove-button">Remove selected</button>
-                    </div>
-                </div>
+      <fieldset ng-show="products.single.basicinfo.is_kit==1">
+        <legend>Kit Options</legend>
+
+        <table class="table table-hover table-bordered table-striped table-condensed">
+          <thead>
+          <tr>
+            <th>
+              <div>Item Name</div>
+            </th>
+            <th>
+              <div>Item SKU</div>
+            </th>
+            <th>
+              <div>Quantity in Kit</div>
+            </th>
+            <th>
+              <div>Available Inv</div>
+            </th>
+            <th>
+              <div>Packing Order</div>
+            </th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr ng-repeat="kit_sku in products.single.productkitskus" ng-class="{selected:kit_sku.checked}"
+              ng-click="kit_sku.checked = !kit_sku.checked">
+            <td><a href="" ng-click="load_kit(kit_sku,$event)">{{kit_sku.name}}</a></td>
+            <td>{{kit_sku.sku}}</td>
+            <td groov-editable="kitEditableOptions" ng-model="kit_sku" prop="qty"
+                identifier="kit_sku-qty-{{$index}}"></td>
+            <td>{{kit_sku.available_inv}}</td>
+            <td groov-editable="kitEditableOptions" ng-model="kit_sku" prop="packing_order"
+                identifier="kit_sku-packing_order-{{$index}}"></td>
+          </tr>
+          </tbody>
+        </table>
+
+        <div class="form-group">
+          <div class="controls col-sm-8">
+            <button class="modal-save-button"
+                    ng-click="product_alias('kit',kit_products.list,products.single.basicinfo.id)">Add product to kit
+            </button>
+            <button ng-click="remove_skus_from_kit()" class="modal-remove-button">Remove selected</button>
+          </div>
+        </div>
                 <span ng-show="products.single.unacknowledged_kit_activities.length > 0">
                     <h4>Activity Log</h4>
                     <div class="form-group">
-                        <div class="controls col-sm-8"
-                            ng-repeat="activity in products.single.unacknowledged_kit_activities">
-                            <h5>{{ activity.created_at | date:'EEEE MM/dd/yyyy hh:mm:ss a'}}</h5>
-                            {{ activity.activity_message}} - by: {{ activity.username }}
-                        </div>
+                      <div class="controls col-sm-8"
+                           ng-repeat="activity in products.single.unacknowledged_kit_activities">
+                        <h5>{{ activity.created_at | date:'EEEE MM/dd/yyyy hh:mm:ss a'}}</h5>
+                        {{ activity.activity_message}} - by: {{ activity.username }}
+                      </div>
                     </div>
                 </span>
 
-                <h4>This Kit Should</h4>
+        <h4>This Kit Should</h4>
 
-                <div class="form-group">
-                    <div class="controls col-sm-8">
-                        <div class="radio">
-                            <label class="control-label">
-                                <input type="radio" ng-change="update_single_product()" ng-model="products.single.basicinfo.kit_parsing"
-                                       value="single"/> Always be scanned as single SKU
-                            </label>
-                        </div>
-                        <div class="radio">
-                            <label class="control-label">
-                                <input type="radio" ng-change="update_single_product()" ng-model="products.single.basicinfo.kit_parsing"
-                                       value="individual"/> Always be scanned as individual part SKUs
-                            </label>
-                        </div>
-                        <div class="radio">
-                            <label class="control-label">
-                                <input type="radio" ng-change="update_single_product()" ng-model="products.single.basicinfo.kit_parsing"
-                                       value="depends"/> Automatically switch as needed when part SKUs are scanned
-                            </label>
-                        </div>
-                    </div>
-                </div>
-            </fieldset>
+        <div class="form-group">
+          <div class="controls col-sm-8">
+            <div class="radio">
+              <label class="control-label">
+                <input type="radio" ng-change="update_single_product()" ng-model="products.single.basicinfo.kit_parsing"
+                       value="single"/> Always be scanned as single SKU
+              </label>
+            </div>
+            <div class="radio">
+              <label class="control-label">
+                <input type="radio" ng-change="update_single_product()" ng-model="products.single.basicinfo.kit_parsing"
+                       value="individual"/> Always be scanned as individual part SKUs
+              </label>
+            </div>
+            <div class="radio">
+              <label class="control-label">
+                <input type="radio" ng-change="update_single_product()" ng-model="products.single.basicinfo.kit_parsing"
+                       value="depends"/> Automatically switch as needed when part SKUs are scanned
+              </label>
+            </div>
+          </div>
         </div>
+      </fieldset>
     </div>
+  </div>
 
-    <div class="modal-footer">
-        <button ng-click="ok()" class="modal-save-button" translate>modal.save_close</button>
-        <button ng-click="cancel()" class="modal-cancel-button" translate>modal.cancel</button>
-    </div>
+  <div class="modal-footer">
+    <button ng-click="ok()" class="modal-save-button" translate>modal.save_close</button>
+    <button ng-click="cancel()" class="modal-cancel-button" translate>modal.cancel</button>
+  </div>
 </div>
 <!-- Kit product modal ends -->
 

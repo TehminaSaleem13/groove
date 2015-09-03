@@ -1,11 +1,11 @@
 module SettingsHelper
-  def zip_to_files(filename,data_object)
+  def zip_to_files(filename, data_object)
     require 'zip'
     temp_file = Tempfile.new(filename)
     begin
-      Zip::OutputStream.open(temp_file) { |zos| }
+      Zip::OutputStream.open(temp_file) { |zos|}
       Zip::File.open(temp_file.path, Zip::File::CREATE) do |zip|
-        data_object.each do |ident,file|
+        data_object.each do |ident, file|
           zip.add(ident.to_s+".csv", file)
         end
       end
@@ -15,6 +15,7 @@ module SettingsHelper
       temp_file.unlink
     end
   end
+
   def import_orders_helper(tenant)
     Apartment::Tenant.switch(tenant)
     order_summary = OrderImportSummary.where(
@@ -29,7 +30,7 @@ module SettingsHelper
       import_orders_obj = ImportOrders.new
       # import_orders_obj.delay(:run_at => 1.seconds.from_now,:queue => 'importing orders').import_orders
       import_orders_obj.import_orders(tenant)
-      import_orders_obj.reschedule_job('import_orders',tenant)
+      import_orders_obj.reschedule_job('import_orders', tenant)
     end
   end
 end

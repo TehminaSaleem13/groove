@@ -1,139 +1,181 @@
 <div class="container-fluid form-horizontal">
-    <div class="row">
-        <div class="col-md-6">
-            <legend>Basic User Info</legend>
-            <div class="form-group">
-                <label class="control-label col-md-4">Username *</label>
-                <div class="controls col-md-7">
-                    <input class="form-control input-style" name="username" ng-blur="update_single_user()" ng-model="users.single.username" type="text" value="" required/>
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="control-label col-md-4">Password *</label>
-                <div class="controls col-md-7" ng-show="show_password">
-                    <input class="form-control input-style" ng-minlength="6" name="password" ng-blur="update_single_user()" ng-model="users.single.password" type="password" required/>
-                </div>
-                <div class="controls col-md-7" ng-hide="show_password">
-                    <a href="" ng-click='change_password()'> Change Password</a>
-                </div>
-            </div>
+  <div class="row">
+    <div class="col-md-6">
+      <legend>Basic User Info</legend>
+      <div class="form-group">
+        <label class="control-label col-md-4">Username *</label>
 
-            <div class="form-group" ng-show="show_password">
-                <label class="control-label col-md-4">Confirm Password *</label>
-                <div class="controls col-md-7" >
-                    <input class="form-control input-style" ng-minlength="6" name="conf_password" ng-blur="update_single_user()" ng-model="users.single.conf_password" type="password" required/>
-                </div>
-            </div>
-            <div ng-show="show_password" class="col-md-9 col-md-offset-2 password-label">Please choose a password with at least 6 characters.</div>
-            <div class="form-group">
-                <label class="control-label col-md-4">Confirmation Code *</label>
-                <div class="controls col-md-7">
-                    <input class="form-control input-style" name="confirmation_code" ng-blur="update_single_user()" ng-model="users.single.confirmation_code" type="text"/>
-                </div>
-                <div class="info col-sm-1">
-                    <a ng-show="users.single.id != null" href="/user_settings/print_confirmation_code/{{users.single.id}}.pdf" target="_blank"><i class="icon-large glyphicon glyphicon-print"></i></a>&nbsp;
-                    <i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" groov-popover="{{translations.tooltips.conf_code}}"></i>
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="control-label col-md-4">Name</label>
-                <div class="controls col-md-7">
-                    <input class="form-control input-style" name="name" ng-blur="update_single_user()" ng-model="users.single.name" type="text"/>
-                </div>
-                <div class="info col-sm-1">
-                    <i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" groov-popover="{{translations.tooltips.name}}"></i>
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="control-label col-md-4">Other</label>
-                <div class="controls col-md-7">
-                    <input class="form-control input-style" name="other1" ng-blur="update_single_user()" ng-model="users.single.other" type="text"/>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label class="control-label col-md-4">Active</label>
-                <div class="controls col-md-2">
-                    <div toggle-switch ng-model="users.single.active" groov-click="update_single_user()"></div>
-                </div>
-            </div>
-
-
+        <div class="controls col-md-7">
+          <input class="form-control input-style" name="username" ng-blur="update_single_user()"
+                 ng-model="users.single.username" type="text" value="" required/>
         </div>
-        <div class="col-md-6">
-            <legend>Apply and Manage Roles</legend>
-            <div class="form-group">
-                <label class="control-label col-md-1">Role</label>
-                <div class="controls col-md-7">
-                    <select class="form-control input-style" ng-model="roles_data.selectedRole" ng-change="set_selected_role($event)" ng-options="role.name for role in users.roles">
-                        <option value="">Custom</option>
-                    </select>
-                </div>
-                <div class="info col-sm-1">
-                    <i class="icon-large mini-popover glyphicon glyphicon-info-sign" popover-trigger="mouseenter" groov-popover="{{translations.tooltips.role}}"></i>
-                </div>
-            </div>
-            <div ng-show="roles_data.selectedRole == null" class="form-group">
-                <label class="control-label col-md-2">Select Base Role to customize</label>
-                <div class="controls col-md-7 col-md-4">
-                    <table class="well table-well table table-striped table-hover table-roles">
-                        <tr ng-repeat="role in users.roles" ng-click="set_base_role(role)">
-                            <td>{{role.name}}</td>
-                        </tr>
-                    </table>
-                </div>
-                <div class="info col-sm-1">
-                    <i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" groov-popover="{{translations.tooltips.base_role}}"></i>
-                </div>
-            </div>
-            <div ng-show="!roles_data.showSelectBaseRole && roles_data.selectedRole == null"  class="form-group">
-                <label class="control-label col-md-4">Save new Role</label>
-                <div class="controls col-md-5">
-                    <input class="form-control input-style" type="text" ng-model="users.single.role.new_name" placeholder="Role name" />
-                </div>
-                <div class="col-md-2"><button class="modal-save-button" ng-click="make_new_role()">Save</button></div>
-            </div>
+      </div>
+      <div class="form-group">
+        <label class="control-label col-md-4">Password *</label>
 
-            <div ng-show="!roles_data.showSelectBaseRole && roles_data.selectedRole != null && users.single.role.custom && users.single.role.display"  class="form-group">
-                <label class="control-label col-md-4">Delete current Role</label>
-                <div class="controls col-md-7">
-                    <button class="modal-remove-button" ng-click="delete_role()">Delete</button>
-                </div>
-            </div>
-            <div class="col-md-12">
-                <legend>Section access </legend>
-
-                <div class="form-group">
-                    <label class="control-label col-md-3">Settings</label>
-                    <div class="controls col-md-2">
-                        <input name="access_settings" ng-model="users.single.role.access_settings" ng-disabled="roles_data.selectedRole!=null || roles_data.showSelectBaseRole==true" ng-change="update_single_user()"  type="checkbox" checked/>
-                    </div>
-                    <div class="info col-sm-1">
-                        <i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" groov-popover="{{translations.tooltips.section_access}}"></i>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="control-label col-md-3">Scan &amp; Pack</label>
-                    <div class="controls col-md-2">
-                        <input name="access_scanpack" ng-model="users.single.role.access_scanpack" ng-change="update_single_user()"  type="checkbox" disabled/>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="control-label col-md-3">Orders</label>
-                    <div class="controls col-md-2">
-                        <input name="access_orders" ng-model="users.single.role.access_orders" ng-disabled="roles_data.selectedRole!=null || roles_data.showSelectBaseRole==true" ng-change="update_single_user()"  type="checkbox" checked/>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="control-label col-md-3">Products</label>
-                    <div class="controls col-md-2">
-                        <input name="access_products" ng-model="users.single.role.access_products" ng-disabled="roles_data.selectedRole!=null || roles_data.showSelectBaseRole==true" ng-change="update_single_user()"  type="checkbox" checked/>
-                    </div>
-                </div>
-            </div>
+        <div class="controls col-md-7" ng-show="show_password">
+          <input class="form-control input-style" ng-minlength="6" name="password" ng-blur="update_single_user()"
+                 ng-model="users.single.password" type="password" required/>
         </div>
+        <div class="controls col-md-7" ng-hide="show_password">
+          <a href="" ng-click='change_password()'> Change Password</a>
+        </div>
+      </div>
+
+      <div class="form-group" ng-show="show_password">
+        <label class="control-label col-md-4">Confirm Password *</label>
+
+        <div class="controls col-md-7">
+          <input class="form-control input-style" ng-minlength="6" name="conf_password" ng-blur="update_single_user()"
+                 ng-model="users.single.conf_password" type="password" required/>
+        </div>
+      </div>
+      <div ng-show="show_password" class="col-md-9 col-md-offset-2 password-label">Please choose a password with at
+        least 6 characters.
+      </div>
+      <div class="form-group">
+        <label class="control-label col-md-4">Confirmation Code *</label>
+
+        <div class="controls col-md-7">
+          <input class="form-control input-style" name="confirmation_code" ng-blur="update_single_user()"
+                 ng-model="users.single.confirmation_code" type="text"/>
+        </div>
+        <div class="info col-sm-1">
+          <a ng-show="users.single.id != null" href="/user_settings/print_confirmation_code/{{users.single.id}}.pdf"
+             target="_blank"><i class="icon-large glyphicon glyphicon-print"></i></a>&nbsp;
+          <i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter"
+             groov-popover="{{translations.tooltips.conf_code}}"></i>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="control-label col-md-4">Name</label>
+
+        <div class="controls col-md-7">
+          <input class="form-control input-style" name="name" ng-blur="update_single_user()"
+                 ng-model="users.single.name" type="text"/>
+        </div>
+        <div class="info col-sm-1">
+          <i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter"
+             groov-popover="{{translations.tooltips.name}}"></i>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="control-label col-md-4">Other</label>
+
+        <div class="controls col-md-7">
+          <input class="form-control input-style" name="other1" ng-blur="update_single_user()"
+                 ng-model="users.single.other" type="text"/>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="control-label col-md-4">Active</label>
+
+        <div class="controls col-md-2">
+          <div toggle-switch ng-model="users.single.active" groov-click="update_single_user()"></div>
+        </div>
+      </div>
+
+
     </div>
+    <div class="col-md-6">
+      <legend>Apply and Manage Roles</legend>
+      <div class="form-group">
+        <label class="control-label col-md-1">Role</label>
+
+        <div class="controls col-md-7">
+          <select class="form-control input-style" ng-model="roles_data.selectedRole"
+                  ng-change="set_selected_role($event)" ng-options="role.name for role in users.roles">
+            <option value="">Custom</option>
+          </select>
+        </div>
+        <div class="info col-sm-1">
+          <i class="icon-large mini-popover glyphicon glyphicon-info-sign" popover-trigger="mouseenter"
+             groov-popover="{{translations.tooltips.role}}"></i>
+        </div>
+      </div>
+      <div ng-show="roles_data.selectedRole == null" class="form-group">
+        <label class="control-label col-md-2">Select Base Role to customize</label>
+
+        <div class="controls col-md-7 col-md-4">
+          <table class="well table-well table table-striped table-hover table-roles">
+            <tr ng-repeat="role in users.roles" ng-click="set_base_role(role)">
+              <td>{{role.name}}</td>
+            </tr>
+          </table>
+        </div>
+        <div class="info col-sm-1">
+          <i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter"
+             groov-popover="{{translations.tooltips.base_role}}"></i>
+        </div>
+      </div>
+      <div ng-show="!roles_data.showSelectBaseRole && roles_data.selectedRole == null" class="form-group">
+        <label class="control-label col-md-4">Save new Role</label>
+
+        <div class="controls col-md-5">
+          <input class="form-control input-style" type="text" ng-model="users.single.role.new_name"
+                 placeholder="Role name"/>
+        </div>
+        <div class="col-md-2">
+          <button class="modal-save-button" ng-click="make_new_role()">Save</button>
+        </div>
+      </div>
+
+      <div
+        ng-show="!roles_data.showSelectBaseRole && roles_data.selectedRole != null && users.single.role.custom && users.single.role.display"
+        class="form-group">
+        <label class="control-label col-md-4">Delete current Role</label>
+
+        <div class="controls col-md-7">
+          <button class="modal-remove-button" ng-click="delete_role()">Delete</button>
+        </div>
+      </div>
+      <div class="col-md-12">
+        <legend>Section access</legend>
+
+        <div class="form-group">
+          <label class="control-label col-md-3">Settings</label>
+
+          <div class="controls col-md-2">
+            <input name="access_settings" ng-model="users.single.role.access_settings"
+                   ng-disabled="roles_data.selectedRole!=null || roles_data.showSelectBaseRole==true"
+                   ng-change="update_single_user()" type="checkbox" checked/>
+          </div>
+          <div class="info col-sm-1">
+            <i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter"
+               groov-popover="{{translations.tooltips.section_access}}"></i>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="control-label col-md-3">Scan &amp; Pack</label>
+
+          <div class="controls col-md-2">
+            <input name="access_scanpack" ng-model="users.single.role.access_scanpack" ng-change="update_single_user()"
+                   type="checkbox" disabled/>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="control-label col-md-3">Orders</label>
+
+          <div class="controls col-md-2">
+            <input name="access_orders" ng-model="users.single.role.access_orders"
+                   ng-disabled="roles_data.selectedRole!=null || roles_data.showSelectBaseRole==true"
+                   ng-change="update_single_user()" type="checkbox" checked/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="control-label col-md-3">Products</label>
+
+          <div class="controls col-md-2">
+            <input name="access_products" ng-model="users.single.role.access_products"
+                   ng-disabled="roles_data.selectedRole!=null || roles_data.showSelectBaseRole==true"
+                   ng-change="update_single_user()" type="checkbox" checked/>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
 </div>

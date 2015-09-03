@@ -1,30 +1,30 @@
 groovepacks_controllers.
-controller('selectionModal', [ '$scope', 'selected_data','selected_table_options', '$modalInstance',
-function(scope,selected_data,selected_table_options,$modalInstance) {
-    var myscope = {};
+  controller('selectionModal', ['$scope', 'selected_data', 'selected_table_options', '$modalInstance',
+    function (scope, selected_data, selected_table_options, $modalInstance) {
+      var myscope = {};
 
 
-    /**
-     * Public methods
-     */
+      /**
+       * Public methods
+       */
 
-    scope.ok = function() {
+      scope.ok = function () {
         $modalInstance.close("ok-button-click");
-    };
-    scope.cancel = function () {
+      };
+      scope.cancel = function () {
         $modalInstance.dismiss("cancel-button-click");
-    };
+      };
 
-    myscope.init = function() {
+      myscope.init = function () {
         scope.selected = selected_data;
 
         scope.gridOptions = selected_table_options;
 
-        scope.$watch('selected',function() {
-           if(scope.selected.length == 0) {
-               scope.ok();
-           }
-        },true);
-    };
-    myscope.init();
-}]);
+        scope.$watch('selected', function () {
+          if (scope.selected.length == 0) {
+            scope.ok();
+          }
+        }, true);
+      };
+      myscope.init();
+    }]);

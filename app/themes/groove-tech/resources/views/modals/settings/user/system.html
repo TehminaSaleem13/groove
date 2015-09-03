@@ -1,38 +1,53 @@
 <div class="container-fluid form-horizontal">
-    <div class="row">
-        <div class="col-md-12">
-            <legend>System settings permissions</legend>
-            <div class="form-group">
-                <label class="control-label col-md-3">Edit General Preferences</label>
-                <div class="controls col-md-2">
-                    <input name="edit_general_prefs" ng-model="users.single.role.edit_general_prefs" ng-disabled="roles_data.selectedRole!=null || roles_data.showSelectBaseRole==true" ng-change="update_single_user()"  type="checkbox" checked/>
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="control-label col-md-3">Edit Scan and pack Preferences</label>
-                <div class="controls col-md-2">
-                    <input name="edit_scanning_prefs" ng-model="users.single.role.edit_scanning_prefs" ng-disabled="roles_data.selectedRole!=null || roles_data.showSelectBaseRole==true" ng-change="update_single_user()"  type="checkbox" checked/>
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="control-label col-md-3">Create, Edit and Delete Stores</label>
-                <div class="controls col-md-2">
-                    <input name="add_edit_stores" ng-model="users.single.role.add_edit_stores" ng-disabled="roles_data.selectedRole!=null || roles_data.showSelectBaseRole==true" ng-change="update_single_user()"  type="checkbox" checked/>
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="control-label col-md-3">Create Backups</label>
-                <div class="controls col-md-2">
-                    <input name="create_backups" ng-model="users.single.role.create_backups" ng-disabled="roles_data.selectedRole!=null || roles_data.showSelectBaseRole==true" ng-change="update_single_user()"  type="checkbox" checked/>
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="control-label col-md-3">Restore Backups</label>
-                <div class="controls col-md-2">
-                    <input name="restore_backups" ng-model="users.single.role.restore_backups" ng-disabled="roles_data.selectedRole!=null || roles_data.showSelectBaseRole==true" ng-change="update_single_user()"  type="checkbox" checked/>
-                </div>
-            </div>
+  <div class="row">
+    <div class="col-md-12">
+      <legend>System settings permissions</legend>
+      <div class="form-group">
+        <label class="control-label col-md-3">Edit General Preferences</label>
+
+        <div class="controls col-md-2">
+          <input name="edit_general_prefs" ng-model="users.single.role.edit_general_prefs"
+                 ng-disabled="roles_data.selectedRole!=null || roles_data.showSelectBaseRole==true"
+                 ng-change="update_single_user()" type="checkbox" checked/>
         </div>
+      </div>
+      <div class="form-group">
+        <label class="control-label col-md-3">Edit Scan and pack Preferences</label>
+
+        <div class="controls col-md-2">
+          <input name="edit_scanning_prefs" ng-model="users.single.role.edit_scanning_prefs"
+                 ng-disabled="roles_data.selectedRole!=null || roles_data.showSelectBaseRole==true"
+                 ng-change="update_single_user()" type="checkbox" checked/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="control-label col-md-3">Create, Edit and Delete Stores</label>
+
+        <div class="controls col-md-2">
+          <input name="add_edit_stores" ng-model="users.single.role.add_edit_stores"
+                 ng-disabled="roles_data.selectedRole!=null || roles_data.showSelectBaseRole==true"
+                 ng-change="update_single_user()" type="checkbox" checked/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="control-label col-md-3">Create Backups</label>
+
+        <div class="controls col-md-2">
+          <input name="create_backups" ng-model="users.single.role.create_backups"
+                 ng-disabled="roles_data.selectedRole!=null || roles_data.showSelectBaseRole==true"
+                 ng-change="update_single_user()" type="checkbox" checked/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="control-label col-md-3">Restore Backups</label>
+
+        <div class="controls col-md-2">
+          <input name="restore_backups" ng-model="users.single.role.restore_backups"
+                 ng-disabled="roles_data.selectedRole!=null || roles_data.showSelectBaseRole==true"
+                 ng-change="update_single_user()" type="checkbox" checked/>
+        </div>
+      </div>
     </div>
+  </div>
 
 </div>

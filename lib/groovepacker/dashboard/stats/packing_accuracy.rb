@@ -9,20 +9,20 @@ module Groovepacker
           result = {}
           #current month packing accuracy
           if @duration.to_i == -1
-            start_time = nil 
+            start_time = nil
           else
-            start_time = (DateTime.now - @duration.to_i.days).beginning_of_day 
+            start_time = (DateTime.now - @duration.to_i.days).beginning_of_day
           end
           end_time = DateTime.now.end_of_day
-          current_month_packing_accuracy = 
+          current_month_packing_accuracy =
             get_overall_packing_accuracy_stats(start_time, end_time)
 
 
-          if @duration.to_i != -1    
+          if @duration.to_i != -1
             #previous month packed items
-            start_time = (DateTime.now - (2*(@duration.to_i)).days).beginning_of_day 
+            start_time = (DateTime.now - (2*(@duration.to_i)).days).beginning_of_day
             end_time = (DateTime.now - (@duration.to_i - 1).days).end_of_day
-            previous_month_packing_accuracy = 
+            previous_month_packing_accuracy =
               get_overall_packing_accuracy_stats(start_time, end_time)
 
             result = {
@@ -37,7 +37,7 @@ module Groovepacker
               delta: '-'
             }
           end
-          result        
+          result
         end
 
         def detail
@@ -46,7 +46,7 @@ module Groovepacker
           avg_stats = []
 
           pallete = Groovepacker::Dashboard::Color::Pallete.new
-          
+
           # if @duration == -1
           #   start_time = nil
           # else
@@ -66,100 +66,100 @@ module Groovepacker
           end
           {avg_stats: avg_stats, daily_stats: results}
         end
-        
+
 
         private
 
-          def get_packing_stats(user)
-            stats_result = []
-            start_time = (DateTime.now - @duration.days).beginning_of_day
-            end_time = DateTime.now.end_of_day
-            avg_packing_accuracy = 0
-            total_items_count = 0
-            total_exceptions_count = 0
+        def get_packing_stats(user)
+          stats_result = []
+          start_time = (DateTime.now - @duration.days).beginning_of_day
+          end_time = DateTime.now.end_of_day
+          avg_packing_accuracy = 0
+          total_items_count = 0
+          total_exceptions_count = 0
 
-            if @duration == -1
-              order_scanned_on_predicate = "orders.scanned_on <= '#{end_time.utc.to_formatted_s(:db)}'"
-            else
-              order_scanned_on_predicate = "orders.scanned_on BETWEEN '#{start_time.utc.to_formatted_s(:db)}' AND
+          if @duration == -1
+            order_scanned_on_predicate = "orders.scanned_on <= '#{end_time.utc.to_formatted_s(:db)}'"
+          else
+            order_scanned_on_predicate = "orders.scanned_on BETWEEN '#{start_time.utc.to_formatted_s(:db)}' AND
                 '#{end_time.utc.to_formatted_s(:db)}'"
-            end
+          end
 
-            order_result = ActiveRecord::Base.connection.exec_query("SELECT date(orders.scanned_on) AS date_scanned_on,
+          order_result = ActiveRecord::Base.connection.exec_query("SELECT date(orders.scanned_on) AS date_scanned_on,
             COUNT(*) AS order_item_count FROM orders WHERE orders.packing_user_id = #{user.id}
             AND (#{order_scanned_on_predicate})
             GROUP BY date(scanned_on)")
 
-            order_items_result = ActiveRecord::Base.connection.exec_query("SELECT date(orders.scanned_on) AS date_scanned_on,
-            COUNT(*) AS order_item_count FROM orders
-            INNER JOIN order_items ON order_items.order_id = orders.id WHERE orders.packing_user_id = #{user.id}
+          order_ids_result = ActiveRecord::Base.connection.exec_query("SELECT date(orders.scanned_on) AS date_scanned_on,
+            orders.id AS order_id FROM orders WHERE orders.packing_user_id = #{user.id}
             AND (#{order_scanned_on_predicate})
-            GROUP BY date(scanned_on)")
+            ORDER BY scanned_on ASC")
 
-            order_exceptions_result = ActiveRecord::Base.connection.exec_query("SELECT date(orders.scanned_on) AS date_scanned_on,
+          order_exceptions_result = ActiveRecord::Base.connection.exec_query("SELECT date(orders.scanned_on) AS date_scanned_on,
             COUNT(*) AS order_exception_count FROM orders
             INNER JOIN order_exceptions ON order_exceptions.order_id = orders.id WHERE orders.packing_user_id = #{user.id}
             AND (#{order_scanned_on_predicate})
             GROUP BY date(scanned_on)")
 
-            order_result.rows.each do |order|
-              items_count = get_order_items(order_items_result, order[0])
-              exception_count = get_order_exception(order_exceptions_result, order[0])
-              percent = 100 - (exception_count.to_f*100/order[1].to_f)
-              order[0] = order[0].to_time.to_i
-              order.push(order[1])
-              order.push(items_count)
-              order.push(exception_count)
-              order[1] = percent
-              total_items_count = total_items_count + order[2]
-              total_exceptions_count = total_exceptions_count + order[4]
-              stats_result.push(order)
-            end
-            {avg_packing_accuracy: compute_avg_packing_accuracy(total_exceptions_count, total_items_count),
-             packing_accuracy_stats: stats_result}
+          order_result.rows.each do |order|
+            items_count = get_order_items(order_ids_result, order[0])
+            exception_count = get_order_exception(order_exceptions_result, order[0])
+            percent = 100 - (exception_count.to_f*100/order[1].to_f)
+            order[0] = order[0].to_time.to_i
+            order.push(order[1])
+            order.push(items_count)
+            order.push(exception_count)
+            order[1] = percent
+            total_items_count = total_items_count + order[2]
+            total_exceptions_count = total_exceptions_count + order[4]
+            stats_result.push(order)
           end
+          {avg_packing_accuracy: compute_avg_packing_accuracy(total_exceptions_count, total_items_count),
+           packing_accuracy_stats: stats_result}
+        end
 
-          def compute_avg_packing_accuracy(total_exceptions_count, total_items_count)
-            ((total_items_count == 0 || total_items_count==nil) ? 0 : (100 -
-                total_exceptions_count.to_f*100/total_items_count.to_f).round(2))
-          end
+        def compute_avg_packing_accuracy(total_exceptions_count, total_items_count)
+          ((total_items_count == 0 || total_items_count==nil) ? 0 : (100 -
+            total_exceptions_count.to_f*100/total_items_count.to_f).round(2))
+        end
 
-          def get_order_items(order_items, date)
-            order_items.rows.each do |order_item|
-              if order_item[0] == date
-                return order_item[1]
-              end
+        def get_order_items(order_ids_result, date)
+          count = 0
+          order_ids_result.rows.each do |order|
+            if order[0] == date
+              count = count + get_scanned_count(Order.find(order[1]))
             end
-            return 0
           end
+          return count
+        end
 
-          def get_order_exception(order_exceptions, date)
-            order_exceptions.rows.each do |order_ex|
-              if order_ex[0] == date
-                return order_ex[1]
-              end
+        def get_order_exception(order_exceptions, date)
+          order_exceptions.rows.each do |order_ex|
+            if order_ex[0] == date
+              return order_ex[1]
             end
-            return 0
           end
+          return 0
+        end
 
-          def get_overall_packing_accuracy_stats(start_time, end_time)
-            if start_time.nil?
-              orders = Order.where(status: 'scanned').where('scanned_on < ?', end_time)
-            else
-              orders = Order.where(status: 'scanned').where(scanned_on: start_time..end_time)
-            end
-            total_items_count = 0
-            total_incorrect = 0
-            orders.each do |order|
-              total_items_count = total_items_count + order.order_items.count
-              if !order.order_exception.nil? && 
-                ["missing_item", "incorrect_item", "qty_related"].include?(order.order_exception.reason)
-                total_incorrect = total_incorrect + 1
-              end
-            end
-            total_incorrect == 0 ? 100 : 
-              ((total_items_count - total_incorrect).to_f/ total_items_count) * 100
+        def get_overall_packing_accuracy_stats(start_time, end_time)
+          if start_time.nil?
+            orders = Order.where(status: 'scanned').where('scanned_on < ?', end_time)
+          else
+            orders = Order.where(status: 'scanned').where(scanned_on: start_time..end_time)
           end
+          total_items_count = 0
+          total_incorrect = 0
+          orders.each do |order|
+            total_items_count = total_items_count + order.order_items.count
+            if !order.order_exception.nil? &&
+              ["missing_item", "incorrect_item", "qty_related"].include?(order.order_exception.reason)
+              total_incorrect = total_incorrect + 1
+            end
+          end
+          total_incorrect == 0 ? 100 :
+            ((total_items_count - total_incorrect).to_f/ total_items_count) * 100
+        end
       end
     end
   end

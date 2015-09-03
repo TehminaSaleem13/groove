@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150802123158) do
+ActiveRecord::Schema.define(:version => 20150827055338) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0, :null => false
@@ -124,7 +124,7 @@ ActiveRecord::Schema.define(:version => 20150802123158) do
 
   create_table "export_settings", :force => true do |t|
     t.boolean  "auto_email_export",         :default => true
-    t.datetime "time_to_send_export_email"
+    t.datetime "time_to_send_export_email", :default => '2000-01-01 00:00:00'
     t.boolean  "send_export_email_on_mon",  :default => false
     t.boolean  "send_export_email_on_tue",  :default => false
     t.boolean  "send_export_email_on_wed",  :default => false
@@ -136,11 +136,21 @@ ActiveRecord::Schema.define(:version => 20150802123158) do
     t.string   "export_orders_option",      :default => "on_same_day"
     t.string   "order_export_type",         :default => "include_all"
     t.string   "order_export_email"
-    t.datetime "created_at",                                           :null => false
-    t.datetime "updated_at",                                           :null => false
+    t.datetime "created_at",                                                   :null => false
+    t.datetime "updated_at",                                                   :null => false
     t.datetime "start_time"
     t.datetime "end_time"
     t.boolean  "manual_export",             :default => false
+  end
+
+  create_table "ftp_credentials", :force => true do |t|
+    t.string   "host"
+    t.integer  "port",       :default => 21
+    t.string   "username",   :default => ""
+    t.string   "password",   :default => ""
+    t.integer  "store_id",                   :null => false
+    t.datetime "created_at",                 :null => false
+    t.datetime "updated_at",                 :null => false
   end
 
   create_table "general_settings", :force => true do |t|
@@ -206,7 +216,7 @@ ActiveRecord::Schema.define(:version => 20150802123158) do
     t.integer  "completed",  :default => 0
     t.string   "status",     :default => "scheduled"
     t.string   "current"
-    t.string   "messages"
+    t.text     "messages"
     t.boolean  "cancel",     :default => false
     t.datetime "created_at",                          :null => false
     t.datetime "updated_at",                          :null => false
@@ -477,7 +487,6 @@ ActiveRecord::Schema.define(:version => 20150802123158) do
     t.string   "method"
     t.datetime "created_at",                                                                :null => false
     t.datetime "updated_at",                                                                :null => false
-    t.string   "store_order_id"
     t.text     "notes_internal"
     t.text     "notes_toPacker"
     t.text     "notes_fromPacker"
@@ -498,6 +507,7 @@ ActiveRecord::Schema.define(:version => 20150802123158) do
     t.integer  "weight_oz"
     t.string   "non_hyphen_increment_id"
     t.boolean  "note_confirmation",                                      :default => false
+    t.string   "store_order_id"
     t.integer  "inaccurate_scan_count",                                  :default => 0
     t.datetime "scan_start_time"
     t.boolean  "reallocate_inventory",                                   :default => false
@@ -506,19 +516,6 @@ ActiveRecord::Schema.define(:version => 20150802123158) do
     t.integer  "total_scan_count",                                       :default => 0
     t.decimal  "packing_score",           :precision => 10, :scale => 0, :default => 0
   end
-
-  create_table "orders_import_summaries", :force => true do |t|
-    t.integer  "total_retrieved"
-    t.integer  "success_imported"
-    t.integer  "previous_imported"
-    t.boolean  "status"
-    t.string   "error_message"
-    t.integer  "store_id"
-    t.datetime "created_at",        :null => false
-    t.datetime "updated_at",        :null => false
-  end
-
-  add_index "orders_import_summaries", ["store_id"], :name => "index_orders_import_summaries_on_store_id"
 
   create_table "product_barcodes", :force => true do |t|
     t.integer  "product_id"
@@ -786,22 +783,24 @@ ActiveRecord::Schema.define(:version => 20150802123158) do
     t.string   "status"
     t.integer  "tenant_id"
     t.string   "stripe_transaction_identifier"
-    t.datetime "created_at",                                                                   :null => false
-    t.datetime "updated_at",                                                                   :null => false
+    t.datetime "created_at",                                                                             :null => false
+    t.datetime "updated_at",                                                                             :null => false
     t.text     "transaction_errors"
     t.string   "subscription_plan_id"
     t.string   "customer_subscription_id"
     t.string   "stripe_customer_id"
     t.boolean  "is_active"
-    t.string   "password",                                                                     :null => false
-    t.string   "user_name",                                                                    :null => false
+    t.string   "password",                                                                               :null => false
+    t.string   "user_name",                                                                              :null => false
     t.string   "coupon_id"
+    t.string   "progress",                                                    :default => "not_started"
   end
 
   create_table "tenants", :force => true do |t|
     t.string   "name"
-    t.datetime "created_at", :null => false
-    t.datetime "updated_at", :null => false
+    t.datetime "created_at",          :null => false
+    t.datetime "updated_at",          :null => false
+    t.integer  "duplicate_tenant_id"
   end
 
   create_table "transactions", :force => true do |t|
@@ -849,13 +848,6 @@ ActiveRecord::Schema.define(:version => 20150802123158) do
   add_index "users", ["inventory_warehouse_id"], :name => "index_users_on_inventory_warehouse_id"
   add_index "users", ["reset_password_token"], :name => "index_users_on_reset_password_token", :unique => true
   add_index "users", ["role_id"], :name => "index_users_on_role_id"
-
-  create_table "users_roles", :id => false, :force => true do |t|
-    t.integer "user_id"
-    t.integer "role_id"
-  end
-
-  add_index "users_roles", ["user_id", "role_id"], :name => "index_users_roles_on_user_id_and_role_id"
 
   create_table "webhooks", :force => true do |t|
     t.binary   "event",      :limit => 16777215

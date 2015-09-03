@@ -3,16 +3,20 @@
     <legend>Shopify Information</legend>
     <div class="form-group">
       <label class="control-label col-md-4">Shop Name</label>
+
       <div class="controls col-md-8">
         <div class="input-group">
           <span class="input-group-addon"><strong>https://</strong></span>
-          <input name="username" xs-input-sync ng-model="stores.single.shop_name" type="text" ng-blur="update_single_store()" class="form-control input-style" placeholder="yourshopname" value="" required/>
+          <input name="username" xs-input-sync ng-model="stores.single.shop_name" type="text"
+                 ng-blur="update_single_store()" class="form-control input-style" placeholder="yourshopname" value=""
+                 required/>
           <span class="input-group-addon"><strong>.myshopify.com</strong></span>
         </div>
       </div>
     </div>
     <div class="form-group">
       <label class="control-label col-md-4"></label>
+
       <div class="controls col-md-8">
         <button class="btn btn-success" ng-click="launch_shopify_popup()">
           Authorize access
@@ -22,12 +26,14 @@
     <div ng-hide="stores.single.access_token == null || stores.single.access_token == 'null'">
       <div class="form-group">
         <label class="control-label col-md-4">Access token</label>
+
         <div class="controls col-md-8">
           <p class="form-control-static">Available</p>
         </div>
       </div>
       <div class="form-group">
         <label class="control-label col-md-4"></label>
+
         <div class="controls col-md-8">
           <button class="btn btn-success" ng-click="disconnect_shopify()">
             Disconnect access

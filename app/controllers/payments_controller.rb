@@ -9,18 +9,18 @@ class PaymentsController < ApplicationController
   end
 
   def create
-    add_card(params[:payment],@current_tenant) unless @current_tenant.nil?
+    add_card(params[:payment], @current_tenant) unless @current_tenant.nil?
     render json: @result
   end
 
   def edit
-    make_default_card(params[:id],@current_tenant) unless @current_tenant.nil?
+    make_default_card(params[:id], @current_tenant) unless @current_tenant.nil?
     render json: @result
   end
 
   def delete_cards
     params[:id].each do |id|
-      delete_a_card(id,@current_tenant) unless @current_tenant.nil?
+      delete_a_card(id, @current_tenant) unless @current_tenant.nil?
     end
     render json: @result
   end

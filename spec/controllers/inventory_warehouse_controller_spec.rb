@@ -3,7 +3,7 @@ require 'rails_helper'
 
 describe InventoryWarehouseController do
   before(:each) do
-    SeedTenant.new.seed
+    Groovepacker::SeedTenant.new.seed
     scanpacksetting = ScanPackSetting.first
     scanpacksetting.ask_tracking_number = true
     scanpacksetting.save

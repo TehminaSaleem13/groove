@@ -3,58 +3,58 @@
 <head>
   <link href='http://fonts.googleapis.com/css?family=Play' rel='stylesheet' type='text/css'>
   <style>
-      div {
-          word-wrap: break-word;
-          overflow: hidden;
-      }
+    div {
+      word-wrap: break-word;
+      overflow: hidden;
+    }
   </style>
 </head>
 <body style="font-family:'Play'; width:95%;background:#fff;font-weight: bold;">
 <% @products.each_with_index do |product, index| %>
-    <% unless index == 0 %>
-        <div style="page-break-before: always;"></div>
-    <% end %>
-    <div style="page-break-inside: avoid;height:405pt;">
-      <div style="height:337pt">
-        <div style="font-size:40pt; line-height:41pt;max-height:246pt;">
-          <%= truncate(product.name, length: 70) %>
-        </div>
-        <div style="margin-top:1pt;font-size:17pt;line-height:18pt;max-height:18pt;">
-          <%= truncate(product.primary_sku, length: 39) %>
-        </div>
-        <div style="font-size:17pt;line-height:18pt; max-height:18pt;margin-top:5pt;">
-          <% unless product.primary_warehouse.location_primary.blank? %>
-              <strong>L1:</strong>&nbsp;<%= product.primary_warehouse.location_primary %>
-          <% end %>
-        </div>
-        <div style="font-size:15pt;line-height:16pt; max-height:16pt;margin-top:2pt;">
-          <% unless product.primary_warehouse.location_secondary.blank? %>
-              <strong>L2:</strong>&nbsp;<%= product.primary_warehouse.location_secondary %>
-          <% end %>
-        </div>
-        <div style="font-size:15pt;line-height:16pt; max-height:16pt;margin-top:2pt;">
-          <% unless product.primary_warehouse.location_tertiary.blank? %>
-              <strong>L3:</strong>&nbsp;<%= product.primary_warehouse.location_tertiary %>
-          <% end %>
-        </div>
-
-        <div style="font-size:12pt;line-height:13pt;max-height:13pt;margin-top:5pt;">
-          <%= truncate(product.primary_category, length: 39) %>
-        </div>
+  <% unless index == 0 %>
+    <div style="page-break-before: always;"></div>
+  <% end %>
+  <div style="page-break-inside: avoid;height:405pt;">
+    <div style="height:337pt">
+      <div style="font-size:40pt; line-height:41pt;max-height:246pt;">
+        <%= truncate(product.name, length: 70) %>
       </div>
-      <div style="margin-top:3pt;font-size:18pt; line-height:19pt;max-height:19pt;">
-        QTY:&nbsp;<span style="text-decoration: underline">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-
-        <div style="float:right;">
-          <span style="text-decoration: underline">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>&nbsp;OF&nbsp;<span style="text-decoration: underline">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-        </div>
+      <div style="margin-top:1pt;font-size:17pt;line-height:18pt;max-height:18pt;">
+        <%= truncate(product.primary_sku, length: 39) %>
       </div>
-      <% unless product.primary_barcode.blank? %>
-          <% barcode_string = generate_barcode(product.primary_barcode) %>
-          <div style="font-weight:normal;margin-top:4pt;text-align:center;font-size:10pt;line-height:11pt;max-height:11pt;"><%= truncate(product.primary_barcode, length: 40) %></div>
-          <div style="margin-top:1pt;text-align:center;"><%= pdf_image_tag(barcode_string+'.png', {:width => 300, :height => 50}) %></div>
-      <% end %>
+      <div style="font-size:17pt;line-height:18pt; max-height:18pt;margin-top:5pt;">
+        <% unless product.primary_warehouse.location_primary.blank? %>
+          <strong>L1:</strong>&nbsp;<%= product.primary_warehouse.location_primary %>
+        <% end %>
+      </div>
+      <div style="font-size:15pt;line-height:16pt; max-height:16pt;margin-top:2pt;">
+        <% unless product.primary_warehouse.location_secondary.blank? %>
+          <strong>L2:</strong>&nbsp;<%= product.primary_warehouse.location_secondary %>
+        <% end %>
+      </div>
+      <div style="font-size:15pt;line-height:16pt; max-height:16pt;margin-top:2pt;">
+        <% unless product.primary_warehouse.location_tertiary.blank? %>
+          <strong>L3:</strong>&nbsp;<%= product.primary_warehouse.location_tertiary %>
+        <% end %>
+      </div>
+
+      <div style="font-size:12pt;line-height:13pt;max-height:13pt;margin-top:5pt;">
+        <%= truncate(product.primary_category, length: 39) %>
+      </div>
     </div>
+    <div style="margin-top:3pt;font-size:18pt; line-height:19pt;max-height:19pt;">
+      QTY:&nbsp;<span style="text-decoration: underline">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+
+      <div style="float:right;">
+        <span style="text-decoration: underline">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>&nbsp;OF&nbsp;<span style="text-decoration: underline">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+      </div>
+    </div>
+    <% unless product.primary_barcode.blank? %>
+      <% barcode_string = generate_barcode(product.primary_barcode) %>
+      <div style="font-weight:normal;margin-top:4pt;text-align:center;font-size:10pt;line-height:11pt;max-height:11pt;"><%= truncate(product.primary_barcode, length: 40) %></div>
+      <div style="margin-top:1pt;text-align:center;"><%= pdf_image_tag(barcode_string+'.png', {:width => 300, :height => 50}) %></div>
+    <% end %>
+  </div>
 <% end %>
 </body>
 </html>

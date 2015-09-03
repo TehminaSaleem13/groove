@@ -2,7 +2,7 @@ module ScanPackHelper
 
   include OrdersHelper
 
-  def order_scan(input,state,id)
+  def order_scan(input, state, id)
     result = Hash.new
     result['status'] = true
     result['matched'] = true
@@ -36,16 +36,16 @@ module ScanPackHelper
           if single_order.nil?
             single_order = matched_single
           elsif matched_single.status == 'awaiting' &&
-              (single_order.status != 'awaiting' || single_order.order_placed_time < matched_single.order_placed_time)
+            (single_order.status != 'awaiting' || single_order.order_placed_time < matched_single.order_placed_time)
             single_order = matched_single
           elsif matched_single.status == 'onhold' && single_order.status != 'awaiting' &&
-              (single_order.status != 'onhold' || single_order.order_placed_time < matched_single.order_placed_time)
+            (single_order.status != 'onhold' || single_order.order_placed_time < matched_single.order_placed_time)
             single_order = matched_single
           elsif matched_single.status == 'serviceissue' && single_order.status != 'awaiting' && single_order.status != 'onhold' &&
-              (single_order.status != 'serviceissue' || single_order.order_placed_time < matched_single.order_placed_time)
+            (single_order.status != 'serviceissue' || single_order.order_placed_time < matched_single.order_placed_time)
             single_order = matched_single
           end
-          unless ['scanned','cancelled'].include?(matched_single.status)
+          unless ['scanned', 'cancelled'].include?(matched_single.status)
             single_order_result['matched_orders'].push(matched_single)
           end
         end
@@ -54,10 +54,10 @@ module ScanPackHelper
       if single_order.nil?
         if scanpack_settings.scan_by_tracking_number
           result['notice_messages'].push('Order with tracking number '+
-            input +' cannot be found. It may not have been imported yet')
+                                           input +' cannot be found. It may not have been imported yet')
         else
           result['notice_messages'].push('Order with number '+
-            input +' cannot be found. It may not have been imported yet')
+                                           input +' cannot be found. It may not have been imported yet')
         end
       else
         single_order_result['status'] = single_order.status
@@ -93,15 +93,15 @@ module ScanPackHelper
                 session[:product_edit_matched_for_products] = []
                 single_order_result['next_state'] = 'scanpack.rfp.confirmation.product_edit'
                 result['notice_messages'].push("This order was automatically placed on hold because it contains items that have a "+
-                                                    "status of New or Inactive. These items may not have barcodes or other information needed for processing. "+
-                                                    "Please ask a user with product edit permissions to scan their code so that these items can be edited or scan a different order.")
+                                                 "status of New or Inactive. These items may not have barcodes or other information needed for processing. "+
+                                                 "Please ask a user with product edit permissions to scan their code so that these items can be edited or scan a different order.")
               end
             else
               single_order_result['order_edit_permission'] = current_user.can?('import_orders')
               single_order_result['next_state'] = 'scanpack.rfp.confirmation.order_edit'
               result['notice_messages'].push('This order is currently on Hold. Please scan or enter '+
-                                                  'confirmation code with order edit permission to continue scanning this order or '+
-                                                  'scan a different order.')
+                                               'confirmation code with order edit permission to continue scanning this order or '+
+                                               'scan a different order.')
             end
           end
 
@@ -110,12 +110,12 @@ module ScanPackHelper
             single_order_result['next_state'] = 'scanpack.rfp.confirmation.cos'
             if current_user.can?('change_order_status')
               result['notice_messages'].push('This order has a pending Service Issue. '+
-                                                  'To clear the Service Issue and continue packing the order please scan your confirmation code or scan a different order.')
+                                               'To clear the Service Issue and continue packing the order please scan your confirmation code or scan a different order.')
             else
               result['notice_messages'].push('This order has a pending Service Issue. To continue with this order, '+
-                                                  'please ask another user who has Change Order Status permissions to scan their '+
-                                                  'confirmation code and clear the issue. Alternatively, you can pack another order '+
-                                                  'by scanning another order number.')
+                                               'please ask another user who has Change Order Status permissions to scan their '+
+                                               'confirmation code and clear the issue. Alternatively, you can pack another order '+
+                                               'by scanning another order number.')
             end
           end
 
@@ -194,7 +194,7 @@ module ScanPackHelper
     true
   end
 
-  def product_scan(input,state,id,clicked=false,serial_added=false)
+  def product_scan(input, state, id, clicked=false, serial_added=false)
     result = Hash.new
     result['status'] = true
     result['matched'] = true
@@ -269,11 +269,11 @@ module ScanPackHelper
                 item['child_items'].each do |child_item|
                   if !child_item['barcodes'].nil?
                     child_item['barcodes'].each do |barcode|
-                      if barcode.barcode == clean_input || (scanpack_settings.skip_code_enabled? && clean_input == scanpack_settings.skip_code && child_item['skippable'])
+                      if barcode.barcode.strip.downcase == clean_input.downcase || (scanpack_settings.skip_code_enabled? && clean_input == scanpack_settings.skip_code && child_item['skippable'])
                         barcode_found = true
                         #process product barcode scan
                         order_item_kit_product =
-                            OrderItemKitProduct.find(child_item['kit_product_id'])
+                          OrderItemKitProduct.find(child_item['kit_product_id'])
 
                         unless serial_added
                           order_item = order_item_kit_product.order_item unless order_item_kit_product.order_item.nil?
@@ -323,7 +323,7 @@ module ScanPackHelper
               end
             elsif item['product_type'] == 'single'
               item['barcodes'].each do |barcode|
-                if barcode.barcode == clean_input || (scanpack_settings.skip_code_enabled? && clean_input == scanpack_settings.skip_code && item['skippable'])
+                if barcode.barcode.strip.downcase == clean_input.strip.downcase || (scanpack_settings.skip_code_enabled? && clean_input == scanpack_settings.skip_code && item['skippable'])
                   barcode_found = true
                   #process product barcode scan
                   order_item = OrderItem.find(item['order_item_id'])
@@ -347,7 +347,7 @@ module ScanPackHelper
                       result['data']['serial']['product_lot_id'] = nil
                     end
                   end
-                  
+
                   process_scan(clicked, order_item, serial_added, result)
                   break
                 end
@@ -452,7 +452,7 @@ module ScanPackHelper
     return result
   end
 
-  def store_lot_number(scanpack_settings, input, order_item, serial_added,result)
+  def store_lot_number(scanpack_settings, input, order_item, serial_added, result)
     if scanpack_settings.record_lot_number
       unless serial_added
         product = order_item.product
@@ -505,7 +505,7 @@ module ScanPackHelper
     end
   end
 
-  def scan_recording(input,state,id)
+  def scan_recording(input, state, id)
     result = Hash.new
     result['status'] = true
     result['matched'] = true
@@ -542,7 +542,7 @@ module ScanPackHelper
     return result
   end
 
-  def scan_verifying(input,state,id)
+  def scan_verifying(input, state, id)
     result = Hash.new
     result['status'] = true
     result['matched'] = true
@@ -586,7 +586,7 @@ module ScanPackHelper
     return result
   end
 
-  def render_order_scan(input,state,id)
+  def render_order_scan(input, state, id)
     result = Hash.new
     result['status'] = true
     result['matched'] = true
@@ -613,7 +613,7 @@ module ScanPackHelper
     result
   end
 
-  def scan_again_or_render_order_scan(input,state,id)
+  def scan_again_or_render_order_scan(input, state, id)
     result = Hash.new
     result['status'] = true
     result['matched'] = true
@@ -656,7 +656,7 @@ module ScanPackHelper
     result
   end
 
-  def order_edit_conf(input,state,id)
+  def order_edit_conf(input, state, id)
     result = Hash.new
     result['status'] = true
     result['matched'] = false
@@ -678,7 +678,7 @@ module ScanPackHelper
             result['matched'] = true
             single_order.status = 'awaiting'
             single_order.addactivity("Status changed from onhold to awaiting",
-                               User.where(:confirmation_code => input).first.username)
+                                     User.where(:confirmation_code => input).first.username)
             single_order.save
             result['data']['scanned_on'] = single_order.scanned_on
             result['data']['next_state'] = 'scanpack.rfp.default'
@@ -689,7 +689,7 @@ module ScanPackHelper
         else
           result['status'] &= false
           result['error_messages'].push("Only orders with status On Hold and has inactive or new products "+
-                                             "can use edit confirmation code.")
+                                          "can use edit confirmation code.")
         end
         result['data']['order'] = order_details_and_next_item(single_order)
       end
@@ -703,7 +703,7 @@ module ScanPackHelper
     return result
   end
 
-  def cos_conf(input,state,id)
+  def cos_conf(input, state, id)
     result = Hash.new
     result['status'] = true
     result['matched'] = false
@@ -744,7 +744,7 @@ module ScanPackHelper
         else
           result['status'] &= false
           result['error_messages'].push("Only orders with status Service issue"+
-                                             "can use change of status confirmation code")
+                                          "can use change of status confirmation code")
         end
         result['data']['order'] = order_details_and_next_item(single_order)
       end
@@ -758,7 +758,7 @@ module ScanPackHelper
     return result
   end
 
-  def product_edit_conf(input,state,id)
+  def product_edit_conf(input, state, id)
     result = Hash.new
     result['status'] = true
     result['matched'] = false
@@ -791,7 +791,7 @@ module ScanPackHelper
               result['data']['next_state'] = 'scanpack.rfp.confirmation.product_edit'
               result['matched'] = true
               result['error_messages'].push("User with confirmation code "+ input +
-                                                 " does not have permission for editing products.")
+                                              " does not have permission for editing products.")
             end
           else
             result['data']['next_state'] = 'scanpack.rfo'
@@ -799,7 +799,7 @@ module ScanPackHelper
         else
           result['status'] &= false
           result['error_messages'].push("Only orders with status On Hold and has inactive or new products "+
-                                             "can use edit confirmation code.")
+                                          "can use edit confirmation code.")
         end
         result['data']['order'] = order_details_and_next_item(single_order)
       end
@@ -828,8 +828,8 @@ module ScanPackHelper
                 break
               end
             elsif unscanned_item['product_type'] == 'single' &&
-                scanned_product_id == unscanned_item['product_id'] &&
-                unscanned_item['scanned_qty'] + unscanned_item['qty_remaining'] > 0
+              scanned_product_id == unscanned_item['product_id'] &&
+              unscanned_item['scanned_qty'] + unscanned_item['qty_remaining'] > 0
               data['next_item'] = unscanned_item.clone
               break
             elsif unscanned_item['product_type'] == 'individual'
@@ -897,10 +897,10 @@ module ScanPackHelper
 
     single_order = Order.find(order.id)
     unless single_order.nil?
-      @orders.push({id:single_order.id, increment_id:single_order.increment_id})
+      @orders.push({id: single_order.id, increment_id: single_order.increment_id})
     end
     unless @orders.empty?
-      GenerateBarcode.where('updated_at < ?',24.hours.ago).delete_all
+      GenerateBarcode.where('updated_at < ?', 24.hours.ago).delete_all
       @generate_barcode = GenerateBarcode.new
       @generate_barcode.user_id = current_user.id
       @generate_barcode.current_order_position = 0
@@ -909,7 +909,7 @@ module ScanPackHelper
       @generate_barcode.status = 'scheduled'
 
       @generate_barcode.save
-      delayed_job = GeneratePackingSlipPdf.delay(:run_at => 1.seconds.from_now).generate_packing_slip_pdf(@orders, Apartment::Tenant.current, @result, @page_height,@page_width,@orientation,@file_name, @size, @header,@generate_barcode.id)
+      delayed_job = GeneratePackingSlipPdf.delay(:run_at => 1.seconds.from_now).generate_packing_slip_pdf(@orders, Apartment::Tenant.current, @result, @page_height, @page_width, @orientation, @file_name, @size, @header, @generate_barcode.id)
       @generate_barcode.delayed_job_id = delayed_job.id
       @generate_barcode.save
       result['status'] = true
@@ -918,7 +918,7 @@ module ScanPackHelper
 
   def generate_order_barcode_slip(order)
     require 'wicked_pdf'
-    GenerateBarcode.where('updated_at < ?',24.hours.ago).delete_all
+    GenerateBarcode.where('updated_at < ?', 24.hours.ago).delete_all
     @generate_barcode = GenerateBarcode.new
     @generate_barcode.user_id = current_user.id
     @generate_barcode.current_order_position = 0
@@ -959,7 +959,7 @@ module ScanPackHelper
     end
     base_file_name = File.basename(pdf_path)
     pdf_file = File.open(reader_file_path)
-    GroovS3.create_pdf(tenant_name,base_file_name,pdf_file.read)
+    GroovS3.create_pdf(tenant_name, base_file_name, pdf_file.read)
     pdf_file.close
     @generate_barcode.url = ENV['S3_BASE_URL']+'/'+tenant_name+'/pdf/'+base_file_name
     @generate_barcode.status = 'completed'

@@ -4,94 +4,94 @@ module ProductsHelper
   require 'barby/barcode/code_128'
   require 'barby/outputter/png_outputter'
 
-	require 'mws-connect'
-	#requires a product is created with appropriate seller sku
-	def import_amazon_product_details(store_id, product_sku, product_id)
-		begin
-			@store = Store.find(store_id)
-			@amazon_credentials = AmazonCredentials.where(:store_id => store_id)
+  require 'mws-connect'
+  #requires a product is created with appropriate seller sku
+  def import_amazon_product_details(store_id, product_sku, product_id)
+    begin
+      @store = Store.find(store_id)
+      @amazon_credentials = AmazonCredentials.where(:store_id => store_id)
 
-			if @amazon_credentials.length > 0
-				@credential = @amazon_credentials.first
+      if @amazon_credentials.length > 0
+        @credential = @amazon_credentials.first
 
-				mws = Mws.connect(
-					  merchant: @credential.merchant_id,
-					  access: ENV['AMAZON_MWS_ACCESS_KEY_ID'],
-					  secret: ENV['AMAZON_MWS_SECRET_ACCESS_KEY']
-					)
-				#send request to amazon mws get matching product API
-				products_xml = mws.products.get_matching_products_for_id(:marketplace_id=>@credential.marketplace_id,
-						:id_type=>'SellerSKU', :id_list=>[product_sku])
+        mws = Mws.connect(
+          merchant: @credential.merchant_id,
+          access: ENV['AMAZON_MWS_ACCESS_KEY_ID'],
+          secret: ENV['AMAZON_MWS_SECRET_ACCESS_KEY']
+        )
+        #send request to amazon mws get matching product API
+        products_xml = mws.products.get_matching_products_for_id(:marketplace_id => @credential.marketplace_id,
+                                                                 :id_type => 'SellerSKU', :id_list => [product_sku])
 
-				require 'active_support/core_ext/hash/conversions'
-				product_hash = Hash.from_xml(products_xml.to_s)
+        require 'active_support/core_ext/hash/conversions'
+        product_hash = Hash.from_xml(products_xml.to_s)
 
-				product = Product.find(product_id)
+        product = Product.find(product_id)
 
-				product.name = product_hash['GetMatchingProductForIdResult']['Products']['Product']['AttributeSets']['ItemAttributes']['Title']
+        product.name = product_hash['GetMatchingProductForIdResult']['Products']['Product']['AttributeSets']['ItemAttributes']['Title']
 
         if !product_hash['GetMatchingProductForIdResult']['Products']['Product']['AttributeSets']['ItemAttributes']['ItemDimensions'].nil? &&
-          !product_hash['GetMatchingProductForIdResult']['Products']['Product']['AttributeSets']['ItemAttributes']['ItemDimensions']['Weight'].nil? 
+          !product_hash['GetMatchingProductForIdResult']['Products']['Product']['AttributeSets']['ItemAttributes']['ItemDimensions']['Weight'].nil?
           product.weight = product_hash['GetMatchingProductForIdResult']['Products']['Product']['AttributeSets']['ItemAttributes']['ItemDimensions']['Weight'].to_f * 16
         end
 
         if !product_hash['GetMatchingProductForIdResult']['Products']['Product']['AttributeSets']['ItemAttributes']['PackageDimensions'].nil? &&
-          !product_hash['GetMatchingProductForIdResult']['Products']['Product']['AttributeSets']['ItemAttributes']['PackageDimensions']['Weight'].nil? 
+          !product_hash['GetMatchingProductForIdResult']['Products']['Product']['AttributeSets']['ItemAttributes']['PackageDimensions']['Weight'].nil?
           product.shipping_weight = product_hash['GetMatchingProductForIdResult']['Products']['Product']['AttributeSets']['ItemAttributes']['PackageDimensions']['Weight'].to_f * 16
         end
 
-				product.store_product_id = product_hash['GetMatchingProductForIdResult']['Products']['Product']['Identifiers']['MarketplaceASIN']['ASIN']
+        product.store_product_id = product_hash['GetMatchingProductForIdResult']['Products']['Product']['Identifiers']['MarketplaceASIN']['ASIN']
 
-				if @credential.import_images
-					image = ProductImage.new
-					image.image = product_hash['GetMatchingProductForIdResult']['Products']['Product']['AttributeSets']['ItemAttributes']['SmallImage']['URL']
-					product.product_images << image
-				end
+        if @credential.import_images
+          image = ProductImage.new
+          image.image = product_hash['GetMatchingProductForIdResult']['Products']['Product']['AttributeSets']['ItemAttributes']['SmallImage']['URL']
+          product.product_images << image
+        end
 
-				if @credential.import_products
-					category = ProductCat.new
-					category.category =  product_hash['GetMatchingProductForIdResult']['Products']['Product']['AttributeSets']['ItemAttributes']['ProductGroup']
-					product.product_cats << category
-				end
-        
+        if @credential.import_products
+          category = ProductCat.new
+          category.category = product_hash['GetMatchingProductForIdResult']['Products']['Product']['AttributeSets']['ItemAttributes']['ProductGroup']
+          product.product_cats << category
+        end
+
         #add inventory warehouse
         inv_wh = ProductInventoryWarehouses.new
         inv_wh.inventory_warehouse_id = @store.inventory_warehouse_id
         product.product_inventory_warehousess << inv_wh
 
-				product.save
-				product.update_product_status
-			end
-		rescue Exception => e
+        product.save
+        product.update_product_status
+      end
+    rescue Exception => e
       puts e.inspect
-		end
+    end
   end
 
-  def updatelist(product,var,value)
+  def updatelist(product, var, value)
     begin
-    if ['name','status','is_skippable','type_scan_enabled','click_scan_enabled','spl_instructions_4_packer'].include?(var)
-      product[var] = value
-      product.save
-      if var == 'status'
-        if value == 'inactive'
-          product.update_due_to_inactive_product
-        else
-          product.update_product_status
+      if ['name', 'status', 'is_skippable', 'type_scan_enabled', 'click_scan_enabled', 'spl_instructions_4_packer'].include?(var)
+        product[var] = value
+        product.save
+        if var == 'status'
+          if value == 'inactive'
+            product.update_due_to_inactive_product
+          else
+            product.update_product_status
+          end
         end
-      end
-    elsif var ==  'sku'
-      product.primary_sku = value
-    elsif var ==  'category'
-      product.primary_category = value
-    elsif var ==  'barcode'
-      product.primary_barcode = value
-    elsif ['location_primary' ,'location_secondary', 'location_tertiary','location_name','qty_on_hand'].include?(var)
-      product_location = product.primary_warehouse
-      if product_location.nil?
-        product_location = ProductInventoryWarehouses.new
-        product_location.product_id = product.id
-        product_location.inventory_warehouse_id = current_user.inventory_warehouse_id
-      end
+      elsif var == 'sku'
+        product.primary_sku = value
+      elsif var == 'category'
+        product.primary_category = value
+      elsif var == 'barcode'
+        product.primary_barcode = value
+      elsif ['location_primary', 'location_secondary', 'location_tertiary', 'location_name', 'qty_on_hand'].include?(var)
+        product_location = product.primary_warehouse
+        if product_location.nil?
+          product_location = ProductInventoryWarehouses.new
+          product_location.product_id = product.id
+          product_location.inventory_warehouse_id = current_user.inventory_warehouse_id
+        end
         if var == 'location_primary'
           product_location.location_primary = value
         elsif var == 'location_secondary'
@@ -103,9 +103,9 @@ module ProductsHelper
         elsif var == 'qty_on_hand'
           product_location.quantity_on_hand= value
         end
-      product_location.save
-    end
-    product.update_product_status
+        product_location.save
+      end
+      product.update_product_status
     rescue Exception => e
       puts e.inspect
     end
@@ -114,7 +114,7 @@ module ProductsHelper
   #gets called from orders helper
   def import_ebay_product(itemID, sku, ebay, credential)
     product_id = 0
-    if ProductSku.where(:sku=> sku).length == 0
+    if ProductSku.where(:sku => sku).length == 0
       @item = ebay.getItem(:ItemID => itemID).item
       @productdb = Product.new
       @productdb.name = @item.title
@@ -129,7 +129,7 @@ module ProductsHelper
 
       #add productdb sku
       @productdbsku = ProductSku.new
-      if  @item.sKU.nil?
+      if @item.sKU.nil?
         @productdbsku.sku = "not_available"
       else
         @productdbsku.sku = @item.sKU
@@ -166,17 +166,17 @@ module ProductsHelper
           @productdb.product_cats << @product_cat
         end
       end
-      
+
       #add inventory warehouse
       inv_wh = ProductInventoryWarehouses.new
       inv_wh.inventory_warehouse_id = @store.inventory_warehouse_id
       @productdb.product_inventory_warehousess << inv_wh
-      
+
       @productdb.save
       @productdb.set_product_status
       product_id = @productdb.id
     else
-      product_id  = ProductSku.where(:sku=> sku).first.product_id
+      product_id = ProductSku.where(:sku => sku).first.product_id
     end
 
     product_id
@@ -188,8 +188,8 @@ module ProductsHelper
     outputter.margin = 0
     blob = outputter.to_png #Raw PNG data
     image_name = Digest::MD5.hexdigest(barcode_string)
-    File.open("#{Rails.root}/public/images/#{image_name}.png", 
-      'w') do |f|
+    File.open("#{Rails.root}/public/images/#{image_name}.png",
+              'w') do |f|
       f.write blob
     end
     image_name
@@ -219,7 +219,7 @@ module ProductsHelper
       end
     else
       result.each do |single_product|
-        result_rows.push({ 'id' => single_product['id']})
+        result_rows.push({'id' => single_product['id']})
       end
     end
 
@@ -237,8 +237,8 @@ module ProductsHelper
     status_filter_text = ""
     is_kit = 0
     supported_sort_keys = ['updated_at', 'name', 'sku',
-                           'status', 'barcode', 'location_primary','location_secondary','location_tertiary','location_name','cat','available_inv', 'store_type' ]
-    supported_order_keys = ['ASC', 'DESC' ] #Caps letters only
+                           'status', 'barcode', 'location_primary', 'location_secondary', 'location_tertiary', 'location_name', 'cat', 'available_inv', 'store_type']
+    supported_order_keys = ['ASC', 'DESC'] #Caps letters only
     supported_status_filters = ['all', 'active', 'inactive', 'new']
     supported_kit_params = ['0', '1', '-1']
 
@@ -248,16 +248,16 @@ module ProductsHelper
     offset = params[:offset].to_i if !params[:offset].nil? && params[:offset].to_i >= 0
 
     sort_key = params[:sort] if !params[:sort].nil? &&
-        supported_sort_keys.include?(params[:sort].to_s)
+      supported_sort_keys.include?(params[:sort].to_s)
 
     sort_order = params[:order] if !params[:order].nil? &&
-        supported_order_keys.include?(params[:order].to_s)
+      supported_order_keys.include?(params[:order].to_s)
 
     status_filter = params[:filter] if !params[:filter].nil? &&
-        supported_status_filters.include?(params[:filter].to_s)
+      supported_status_filters.include?(params[:filter].to_s)
 
-    is_kit = params[:is_kit].to_i if !params[:is_kit].nil?  &&
-        supported_kit_params.include?(params[:is_kit].to_s)
+    is_kit = params[:is_kit].to_i if !params[:is_kit].nil? &&
+      supported_kit_params.include?(params[:is_kit].to_s)
 
     unless is_kit == -1
       kit_query = " WHERE products.is_kit="+is_kit.to_s
@@ -283,64 +283,64 @@ module ProductsHelper
 
     if sort_key == 'sku'
       products = Product.find_by_sql("SELECT products.* FROM products LEFT JOIN product_skus ON ("+
-                                         "products.id = product_skus.product_id ) "+kit_query+
-                                         status_filter_text+"GROUP BY product_id ORDER BY product_skus.sku "+sort_order+query_add)
+                                       "products.id = product_skus.product_id ) "+kit_query+
+                                       status_filter_text+"GROUP BY product_id ORDER BY product_skus.sku "+sort_order+query_add)
     elsif sort_key == 'store_type'
       products = Product.find_by_sql("SELECT products.* FROM products LEFT JOIN stores ON ("+
-                                         "products.store_id = stores.id ) "+kit_query+
-                                         status_filter_text+" ORDER BY stores.name "+sort_order+query_add)
+                                       "products.store_id = stores.id ) "+kit_query+
+                                       status_filter_text+" ORDER BY stores.name "+sort_order+query_add)
     elsif sort_key == 'barcode'
       products = Product.find_by_sql("SELECT products.* FROM products LEFT JOIN product_barcodes ON ("+
-                                         "products.id = product_barcodes.product_id ) "+kit_query+
-                                         status_filter_text+" ORDER BY product_barcodes.barcode "+sort_order+query_add)
+                                       "products.id = product_barcodes.product_id ) "+kit_query+
+                                       status_filter_text+" ORDER BY product_barcodes.barcode "+sort_order+query_add)
     elsif sort_key == 'location_primary'
       products = Product.find_by_sql("SELECT products.* FROM products LEFT JOIN product_inventory_warehouses ON ( "+
-                                         "products.id = product_inventory_warehouses.product_id ) "+ kit_query+
-                                         status_filter_text+" ORDER BY product_inventory_warehouses.location_primary "+sort_order+query_add)
+                                       "products.id = product_inventory_warehouses.product_id ) "+ kit_query+
+                                       status_filter_text+" ORDER BY product_inventory_warehouses.location_primary "+sort_order+query_add)
     elsif sort_key == 'location_secondary'
       products = Product.find_by_sql("SELECT products.* FROM products LEFT JOIN product_inventory_warehouses ON ( "+
-                                         "products.id = product_inventory_warehouses.product_id ) "+kit_query+
-                                         status_filter_text+" ORDER BY product_inventory_warehouses.location_secondary "+sort_order+query_add)
+                                       "products.id = product_inventory_warehouses.product_id ) "+kit_query+
+                                       status_filter_text+" ORDER BY product_inventory_warehouses.location_secondary "+sort_order+query_add)
     elsif sort_key == 'location_tertiary'
       products = Product.find_by_sql("SELECT products.* FROM products LEFT JOIN product_inventory_warehouses ON ( "+
-                                         "products.id = product_inventory_warehouses.product_id ) "+kit_query+
-                                         status_filter_text+" ORDER BY product_inventory_warehouses.location_tertiary "+sort_order+query_add)
+                                       "products.id = product_inventory_warehouses.product_id ) "+kit_query+
+                                       status_filter_text+" ORDER BY product_inventory_warehouses.location_tertiary "+sort_order+query_add)
     elsif sort_key == 'location_name'
       products = Product.find_by_sql("SELECT products.* FROM products LEFT JOIN product_inventory_warehouses ON ( "+
-                                         "products.id = product_inventory_warehouses.product_id )  LEFT JOIN inventory_warehouses ON("+
-                                         "product_inventory_warehouses.inventory_warehouse_id = inventory_warehouses.id ) "+kit_query+
-                                         status_filter_text+" ORDER BY inventory_warehouses.name "+sort_order+query_add)
+                                       "products.id = product_inventory_warehouses.product_id )  LEFT JOIN inventory_warehouses ON("+
+                                       "product_inventory_warehouses.inventory_warehouse_id = inventory_warehouses.id ) "+kit_query+
+                                       status_filter_text+" ORDER BY inventory_warehouses.name "+sort_order+query_add)
     elsif sort_key == 'available_inv'
       products = Product.find_by_sql("SELECT products.* FROM products LEFT JOIN product_inventory_warehouses ON ( "+
-                                         "products.id = product_inventory_warehouses.product_id ) "+kit_query+
-                                         status_filter_text+" ORDER BY product_inventory_warehouses.available_inv "+sort_order+query_add)
+                                       "products.id = product_inventory_warehouses.product_id ) "+kit_query+
+                                       status_filter_text+" ORDER BY product_inventory_warehouses.available_inv "+sort_order+query_add)
     elsif sort_key == 'cat'
       products = Product.find_by_sql("SELECT products.* FROM products LEFT JOIN product_cats ON ( "+
-                                         "products.id = product_cats.product_id ) "+kit_query+
-                                         status_filter_text+" ORDER BY product_cats.category "+sort_order+query_add)
+                                       "products.id = product_cats.product_id ) "+kit_query+
+                                       status_filter_text+" ORDER BY product_cats.category "+sort_order+query_add)
     else
       products = Product.order(sort_key+" "+sort_order)
       unless is_kit == -1
-        products = products.where(:is_kit=> is_kit.to_s)
+        products = products.where(:is_kit => is_kit.to_s)
       end
       unless status_filter == 'all'
-        products = products.where(:status=>status_filter)
+        products = products.where(:status => status_filter)
       end
       unless params[:select_all] || params[:inverted]
-        products =  products.limit(limit).offset(offset)
+        products = products.limit(limit).offset(offset)
       end
     end
 
     if products.length == 0
       products = Product.where(1)
       unless is_kit == -1
-        products = products.where(:is_kit=> is_kit.to_s)
+        products = products.where(:is_kit => is_kit.to_s)
       end
       unless status_filter == 'all'
-        products = products.where(:status=>status_filter)
+        products = products.where(:status => status_filter)
       end
       unless params[:select_all] || params[:inverted]
-        products =  products.limit(limit).offset(offset)
+        products = products.limit(limit).offset(offset)
       end
     end
     return products
@@ -352,14 +352,14 @@ module ProductsHelper
     sort_key = 'updated_at'
     sort_order = 'DESC'
     supported_sort_keys = ['updated_at', 'name', 'sku',
-                           'status', 'barcode', 'location_primary','location_secondary','location_tertiary','location_name','cat','qty', 'store_type' ]
-    supported_order_keys = ['ASC', 'DESC' ] #Caps letters only
+                           'status', 'barcode', 'location_primary', 'location_secondary', 'location_tertiary', 'location_name', 'cat', 'qty', 'store_type']
+    supported_order_keys = ['ASC', 'DESC'] #Caps letters only
 
     sort_key = params[:sort] if !params[:sort].nil? &&
-        supported_sort_keys.include?(params[:sort].to_s)
+      supported_sort_keys.include?(params[:sort].to_s)
 
     sort_order = params[:order] if !params[:order].nil? &&
-        supported_order_keys.include?(params[:order].to_s)
+      supported_order_keys.include?(params[:order].to_s)
 
     # Get passed in parameter variables if they are valid.
     limit = params[:limit].to_i if !params[:limit].nil? && params[:limit].to_i > 0
@@ -371,8 +371,8 @@ module ProductsHelper
     kit_query = ''
     query_add = ''
 
-    is_kit = params[:is_kit].to_i if !params[:is_kit].nil?  &&
-        supported_kit_params.include?(params[:is_kit])
+    is_kit = params[:is_kit].to_i if !params[:is_kit].nil? &&
+      supported_kit_params.include?(params[:is_kit])
     unless is_kit == -1
       kit_query = 'AND products.is_kit='+is_kit.to_s+' '
     end
@@ -380,7 +380,7 @@ module ProductsHelper
       query_add = ' LIMIT '+limit.to_s+' OFFSET '+offset.to_s
     end
 
-    base_query = 'SELECT products.id as id, products.name as name, products.type_scan_enabled as type_scan_enabled, products.click_scan_enabled as click_scan_enabled, products.status as status, products.updated_at as updated_at, product_skus.sku as sku, product_barcodes.barcode as barcode, product_cats.category as cat, product_inventory_warehouses.location_primary, product_inventory_warehouses.location_secondary, product_inventory_warehouses.location_tertiary, product_inventory_warehouses.available_inv as qty, inventory_warehouses.name as location_name, stores.name as store_type, products.store_id as store_id
+    base_query = 'SELECT products.id as id, products.name as name, products.type_scan_enabled as type_scan_enabled, products.base_sku as base_sku, products.click_scan_enabled as click_scan_enabled, products.status as status, products.updated_at as updated_at, product_skus.sku as sku, product_barcodes.barcode as barcode, product_cats.category as cat, product_inventory_warehouses.location_primary, product_inventory_warehouses.location_secondary, product_inventory_warehouses.location_tertiary, product_inventory_warehouses.available_inv as qty, inventory_warehouses.name as location_name, stores.name as store_type, products.store_id as store_id
       FROM products
         LEFT JOIN product_skus ON (products.id = product_skus.product_id)
         LEFT JOIN product_barcodes ON (product_barcodes.product_id = products.id)
@@ -420,19 +420,19 @@ module ProductsHelper
     return result
   end
 
-  def self.products_csv(products,csv)
+  def self.products_csv(products, csv)
     headers = []
-    headers.push('ID','Name','SKU 1','Barcode 1','BinLocation 1','Quantity Avbl','Primary Image','Weight','Primary Category',
-      'SKU 2','SKU 3','Barcode 2','Barcode 3','BinLocation 2','BinLocation 3')
+    headers.push('ID', 'Name', 'SKU 1', 'Barcode 1', 'BinLocation 1', 'Quantity Avbl', 'Primary Image', 'Weight', 'Primary Category',
+                 'SKU 2', 'SKU 3', 'Barcode 2', 'Barcode 3', 'BinLocation 2', 'BinLocation 3')
     Product.column_names.each do |name|
-      unless headers.any?{|s| s.casecmp(name)==0}
+      unless headers.any? { |s| s.casecmp(name)==0 }
         headers.push(name)
       end
     end
     csv << headers
     products.each do |item|
       data = []
-      inventory_wh = ProductInventoryWarehouses.where(:product_id=>item.id,:inventory_warehouse_id => InventoryWarehouse.where(:is_default => true).first.id).first
+      inventory_wh = ProductInventoryWarehouses.where(:product_id => item.id, :inventory_warehouse_id => InventoryWarehouse.where(:is_default => true).first.id).first
       headers.each do |title|
         if title == 'ID'
           data.push(item.id)
@@ -491,7 +491,6 @@ module ProductsHelper
   end
 
   def make_product_intangible(product)
-    puts product.inspect
     scan_pack_settings = ScanPackSetting.all.first
     if scan_pack_settings.intangible_setting_enabled
       unless scan_pack_settings.intangible_string.nil? || (scan_pack_settings.intangible_string.strip.equal? (''))

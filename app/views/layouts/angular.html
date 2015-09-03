@@ -1,155 +1,54 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1">
-    <title><%= content_for?(:title) ? yield(:title) : "GroovePacker - Online Inventory and Barcode Packing Solution" %></title>
-    <meta name="description" content="<%= content_for?(:description) ? yield(:description) : "Groovepacks" %>">
-    <link href='https://fonts.googleapis.com/css?family=Play:400,700' rel='stylesheet' type='text/css'>
-    <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
-    <%= stylesheet_link_tag "application", :media => "all" %>
-    <%= javascript_include_tag "https://js.stripe.com/v2/","/socket/socket.io.js","application" %>
+  <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1">
+  <title><%= content_for?(:title) ? yield(:title) : "GroovePacker - Online Inventory and Barcode Packing Solution"
+    %></title>
+  <meta name="description" content="<%= content_for?(:description) ? yield(:description) : 'Groovepacks' %>">
+  <link href='https://fonts.googleapis.com/css?family=Play:400,700' rel='stylesheet' type='text/css'>
+  <link
+    href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800'
+    rel='stylesheet' type='text/css'>
+  <%= stylesheet_link_tag "application", :media => "all" %>
+  <%= javascript_include_tag "https://js.stripe.com/v2/","/socket/socket.io.js","application" %>
 
-    <%= csrf_meta_tags %>
-    <%= tag :meta, :name => "stripe-key", :content => ENV['STRIPE_PUBLIC_KEY'] %>
-    <%= yield(:head) %>
-    <%= airbrake_javascript_notifier %>
+  <%= csrf_meta_tags %>
+  <%= tag :meta, :name => "stripe-key", :content => ENV['STRIPE_PUBLIC_KEY'] %>
+  <%= yield(:head) %>
+  <%= airbrake_javascript_notifier %>
 </head>
-<% if Apartment::Tenant.current == 'groovepacks_production' %>
-    <body class="container-well" ng-app="groovepacks_admin" ng-controller="appCtrl">
-        <div class="logout-box fade" ng-show="show_logout_box">
-        <div class="center-message">
-            <h2>Continue session?</h2>
-            <button class="modal-save-button" ng-click="log_out('everyone_else')">Yes, Sign Out all other sessions</button>
-            <button ng-click="log_out('me')" class="modal-cancel-button">No, Sign this session out</button>
-        </div>
-        </div>
-        <div class="editing-mode" ng-class="{in: currently_editing}">
-            <div class="top-message">
-                <button class="groove-button label label-info" ng-click="stop_editing()">Exit Edit Mode</button>
-            </div>
-        </div>
-        <div groov-persist-notification></div>
-        <div class="container main-body">
-            <div class="gradient-well">
-                <div class="container-fluid gradient-well-inner">
-                    <%= yield %>
-                </div>
-            </div>
-        </div>
-        <div groov-notification></div>
-        <script>
-            // Include the UserVoice JavaScript SDK (only needed once on a page)
-            UserVoice=window.UserVoice||[];(function(){var uv=document.createElement('script');uv.type='text/javascript';uv.async=true;uv.src='//widget.uservoice.com/3ZTbdvkPQEdrJEP5n2nndA.js';var s=document.getElementsByTagName('script')[0];s.parentNode.insertBefore(uv,s)})();
+<body class="container-well"
+      ng-app="<%= (Apartment::Tenant.current == 'admintools')? 'groovepacks_admin' : 'groovepacks' %>"
+      ng-controller="appCtrl">
+<%= Apartment::Tenant.current %>
+<div class="logout-box fade" ng-show="show_logout_box">
+  <div class="center-message">
+    <h2>Continue session?</h2>
+    <button class="modal-save-button" ng-click="log_out('everyone_else')">Yes, Sign Out all other sessions</button>
+    <button ng-click="log_out('me')" class="modal-cancel-button">No, Sign this session out</button>
+  </div>
+</div>
+<div class="editing-mode" ng-class="{in: currently_editing}">
+  <div class="top-message">
+    <button class="groove-button label label-info" ng-click="stop_editing()">Exit Edit Mode</button>
+  </div>
+</div>
 
-            //
-            // UserVoice Javascript SDK developer documentation:
-            // https://www.uservoice.com/o/javascript-sdk
-            //
-
-            // Set colors
-            UserVoice.push(['set', {
-                accent_color: '#6aba2e',
-                trigger_color: 'white',
-                trigger_background_color: '#6aba2e'
-            }]);
-
-            // Identify the user and pass traits
-            // To enable, replace sample data with actual user traits and uncomment the line
-            UserVoice.push(['identify', {
-                //email:      'john.doe@example.com', // User’s email address
-                //name:       'John Doe', // User’s real name
-                //created_at: 1364406966, // Unix timestamp for the date the user signed up
-                //id:         123, // Optional: Unique id of the user (if set, this should not change)
-                //type:       'Owner', // Optional: segment your users by type
-                //account: {
-                //  id:           123, // Optional: associate multiple users with a single account
-                //  name:         'Acme, Co.', // Account name
-                //  created_at:   1364406966, // Unix timestamp for the date the account was created
-                //  monthly_rate: 9.99, // Decimal; monthly rate of the account
-                //  ltv:          1495.00, // Decimal; lifetime value of the account
-                //  plan:         'Enhanced' // Plan name for the account
-                //}
-            }]);
-
-            // Add default trigger to the bottom-right corner of the window:
-            UserVoice.push(['addTrigger', { mode: 'contact', trigger_position: 'bottom-right' }]);
-
-            // Or, use your own custom trigger:
-            //UserVoice.push(['addTrigger', '#id', { mode: 'contact' }]);
-
-            // Autoprompt for Satisfaction and SmartVote (only displayed under certain conditions)
-            UserVoice.push(['autoprompt', {}]);
-        </script>
-    </body>
-<% else %>
-    <body class="container-well" ng-app="groovepacks" ng-controller="appCtrl">
-        <div class="logout-box fade" ng-show="show_logout_box">
-            <div class="center-message">
-                <h2>Continue session?</h2>
-                <button class="modal-save-button" ng-click="log_out('everyone_else')">Yes, Sign Out all other sessions</button>
-                <button ng-click="log_out('me')" class="modal-cancel-button">No, Sign this session out</button>
-            </div>
-        </div>
-        <div class="editing-mode" ng-class="{in: currently_editing}">
-            <div class="top-message">
-                <button class="groove-button label label-info" ng-click="stop_editing()">Exit Edit Mode</button>
-            </div>
-        </div>
-
-        <div id="notification" groov-persist-notification></div>
-        <div class="container main-body">
-            <div class="gradient-well">
-                <div class="container-fluid gradient-well-inner">
-                    <%= yield %>
-                </div>
-            </div>
-        </div>
-        <div groov-notification></div>
-        <% if !current_user.nil? && current_user.username == 'gpadmin' %>
-            <div id="dashboard" groov-dashboard></div>
-        <% end %>
-        <script>
-            // Include the UserVoice JavaScript SDK (only needed once on a page)
-            UserVoice=window.UserVoice||[];(function(){var uv=document.createElement('script');uv.type='text/javascript';uv.async=true;uv.src='//widget.uservoice.com/3ZTbdvkPQEdrJEP5n2nndA.js';var s=document.getElementsByTagName('script')[0];s.parentNode.insertBefore(uv,s)})();
-            //
-            // UserVoice Javascript SDK developer documentation:
-            // https://www.uservoice.com/o/javascript-sdk
-            //
-
-            // Set colors
-            UserVoice.push(['set', {
-                accent_color: '#6aba2e',
-                trigger_color: 'white',
-                trigger_background_color: '#6aba2e'
-            }]);
-
-            // Identify the user and pass traits
-            // To enable, replace sample data with actual user traits and uncomment the line
-            UserVoice.push(['identify', {
-                //email:      'john.doe@example.com', // User’s email address
-                //name:       'John Doe', // User’s real name
-                //created_at: 1364406966, // Unix timestamp for the date the user signed up
-                //id:         123, // Optional: Unique id of the user (if set, this should not change)
-                //type:       'Owner', // Optional: segment your users by type
-                //account: {
-                //  id:           123, // Optional: associate multiple users with a single account
-                //  name:         'Acme, Co.', // Account name
-                //  created_at:   1364406966, // Unix timestamp for the date the account was created
-                //  monthly_rate: 9.99, // Decimal; monthly rate of the account
-                //  ltv:          1495.00, // Decimal; lifetime value of the account
-                //  plan:         'Enhanced' // Plan name for the account
-                //}
-            }]);
-
-            // Add default trigger to the bottom-right corner of the window:
-            UserVoice.push(['addTrigger', { mode: 'contact', trigger_position: 'bottom-right' }]);
-
-            // Or, use your own custom trigger:
-            //UserVoice.push(['addTrigger', '#id', { mode: 'contact' }]);
-
-            // Autoprompt for Satisfaction and SmartVote (only displayed under certain conditions)
-            UserVoice.push(['autoprompt', {}]);
-        </script>
-    </body>
+<div id="notification" groov-persist-notification></div>
+<div class="container main-body">
+  <div class="gradient-well">
+    <div class="container-fluid gradient-well-inner">
+      <%= yield %>
+    </div>
+  </div>
+</div>
+<div groov-notification></div>
+<% if !current_user.nil? && current_user.username == 'gpadmin' %>
+<div id="dashboard" groov-dashboard></div>
 <% end %>
+<script type="text/javascript" src="https://s3.amazonaws.com/assets.freshdesk.com/widget/freshwidget.js"></script>
+<script type="text/javascript">
+    FreshWidget.init("", {"queryString": "&widgetType=popup&formTitle=Customer+Support&submitThanks=Thank+you!+We'll+be+in+touch+shortly.", "utf8": "✓", "widgetType": "popup", "buttonType": "text", "buttonText": "Get Support", "buttonColor": "white", "buttonBg": "#73ae0c ", "alignment": "2", "offset": "500px", "submitThanks": "Thank you! We'll be in touch shortly.", "formHeight": "825px", "url": "https://groovepacker.freshdesk.com"} );
+</script>
+</body>
 </html>

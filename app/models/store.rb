@@ -9,6 +9,7 @@ class Store < ActiveRecord::Base
   has_one :shipstation_rest_credential
   has_one :shipworks_credential
   has_one :shopify_credential
+  has_one :ftp_credential
 
   belongs_to :inventory_warehouse
 
@@ -27,30 +28,30 @@ class Store < ActiveRecord::Base
   end
 
   def get_store_credentials
-  	@result = Hash.new
+    @result = Hash.new
     @result['status'] =false
-  	if self.store_type == 'Amazon'
-  		@credentials = AmazonCredentials.where(:store_id => self.id)
-  		if !@credentials.nil? && @credentials.length > 0
-  			@result['amazon_credentials'] = @credentials.first
+    if self.store_type == 'Amazon'
+      @credentials = AmazonCredentials.where(:store_id => self.id)
+      if !@credentials.nil? && @credentials.length > 0
+        @result['amazon_credentials'] = @credentials.first
         @result['status'] =true
-  		end
-  	end
-  	if self.store_type == 'Ebay'
-  		@credentials = EbayCredentials.where(:store_id => self.id)
+      end
+    end
+    if self.store_type == 'Ebay'
+      @credentials = EbayCredentials.where(:store_id => self.id)
 
-  		if !@credentials.nil? && @credentials.length > 0
-  			@result['ebay_credentials'] = @credentials.first
+      if !@credentials.nil? && @credentials.length > 0
+        @result['ebay_credentials'] = @credentials.first
         @result['status'] =true
-  		end
-  	end
-  	if self.store_type == 'Magento'
-  		@credentials = MagentoCredentials.where(:store_id => self.id)
-  		if !@credentials.nil? && @credentials.length > 0
-  			@result['magento_credentials'] = @credentials.first
+      end
+    end
+    if self.store_type == 'Magento'
+      @credentials = MagentoCredentials.where(:store_id => self.id)
+      if !@credentials.nil? && @credentials.length > 0
+        @result['magento_credentials'] = @credentials.first
         @result['status'] =true
-  		end
-  	end
+      end
+    end
     if self.store_type == 'Shipstation'
       @credentials = ShipstationCredential.where(:store_id => self.id)
       if !@credentials.nil? && @credentials.length > 0
@@ -80,7 +81,14 @@ class Store < ActiveRecord::Base
       end
       @result['status'] =true
     end
-  	@result
+    if self.store_type == 'CSV'
+      @credentials = FtpCredential.where(:store_id => self.id)
+      unless @credentials.nil? || @credentials.length==0
+        @result['ftp_credentials'] = @credentials.first
+        @result['status'] = true
+      end
+    end
+    @result
   end
 
   def deleteauthentications
@@ -113,7 +121,7 @@ class Store < ActiveRecord::Base
     if self.store_type == 'Amazon'
       @credentials = AmazonCredentials.where(:store_id => id)
       if !@credentials.nil? && @credentials.length > 0
-        @newcredentials = AmazonCredentials.new 
+        @newcredentials = AmazonCredentials.new
         @newcredentials = @credentials.first.dup
         @newcredentials.store_id = self.id
         if !@newcredentials.save
@@ -124,7 +132,7 @@ class Store < ActiveRecord::Base
     if self.store_type == 'Ebay'
       @credentials = EbayCredentials.where(:store_id => id)
       if !@credentials.nil? && @credentials.length > 0
-        @newcredentials = EbayCredentials.new 
+        @newcredentials = EbayCredentials.new
         @newcredentials = @credentials.first.dup
         @newcredentials.store_id = self.id
         if !@newcredentials.save
@@ -135,7 +143,7 @@ class Store < ActiveRecord::Base
     if self.store_type == 'Magento'
       @credentials = MagentoCredentials.where(:store_id => id)
       if !@credentials.nil? && @credentials.length > 0
-        @newcredentials = MagentoCredentials.new 
+        @newcredentials = MagentoCredentials.new
         @newcredentials = @credentials.first.dup
         @newcredentials.store_id = self.id
         if !@newcredentials.save
@@ -146,7 +154,7 @@ class Store < ActiveRecord::Base
     if self.store_type == 'Shipstation'
       @credentials = ShipstationCredential.where(:store_id => id)
       if !@credentials.nil? && @credentials.length > 0
-        @newcredentials = ShipstationCredential.new 
+        @newcredentials = ShipstationCredential.new
         @newcredentials = @credentials.first.dup
         @newcredentials.store_id = self.id
         if !@newcredentials.save
@@ -161,22 +169,23 @@ class Store < ActiveRecord::Base
   end
 
   def get_signin_url
-   ebaysession_resp = self.get_ebay_sessionid()
-   if ebaysession_resp['GetSessionIDResponse']['Ack'] == "Success"
-    session_id = ebaysession_resp['GetSessionIDResponse']['SessionID']
-    if ENV['EBAY_SANDBOX_MODE'] == 'YES'
-      @result['ebay_signin_url'] = "https://signin.sandbox.ebay.com/ws/eBayISAPI.dll?SignIn&RuName="+
-        ENV['EBAY_RU_NAME']+"&SessID="+session_id
+    ebaysession_resp = self.get_ebay_sessionid()
+    if ebaysession_resp['GetSessionIDResponse']['Ack'] == "Success"
+      session_id = ebaysession_resp['GetSessionIDResponse']['SessionID']
+      if ENV['EBAY_SANDBOX_MODE'] == 'YES'
+        @result['ebay_signin_url'] = "https://signin.sandbox.ebay.com/ws/eBayISAPI.dll?SignIn&RuName="+
+          ENV['EBAY_RU_NAME']+"&SessID="+session_id
+      else
+        @result['ebay_signin_url'] = "https://signin.ebay.com/ws/eBayISAPI.dll?SignIn&RuName="+
+          ENV['EBAY_RU_NAME']+"&SessID="+session_id
+      end
+      @result['ebay_signin_url_status'] = true
     else
-      @result['ebay_signin_url'] = "https://signin.ebay.com/ws/eBayISAPI.dll?SignIn&RuName="+
-        ENV['EBAY_RU_NAME']+"&SessID="+session_id
+      @result['ebay_signin_url'] = ebaysession_resp
+      @result['ebay_signin_url_status'] = false
     end
-    @result['ebay_signin_url_status'] = true
-  else
-    @result['ebay_signin_url'] = ebaysession_resp
-    @result['ebay_signin_url_status'] = false      
-   end
   end
+
   def get_ebay_signin_url
     require "net/http"
     require "uri"
@@ -185,7 +194,7 @@ class Store < ActiveRecord::Base
     appName = ENV['EBAY_APP_ID']
     certName = ENV['EBAY_CERT_ID']
     #authToken = 'AgAAAA**AQAAAA**aAAAAA**YD88Ug**nY+sHZ2PrBmdj6wVnY+sEZ2PrA2dj6wJnY+lDpOGowqdj6x9nY+seQ**llgCAA**AAMAAA**sMVS7bsvPTHE2O6w45xeuCrZKL/HBe71C0lkE3apOV6DeTJdF/AgncabtJkm/KrznQC+AzBB/jDVKpHnOkyVm6u5vWDK4cG2lgvdKOCp67YsJmmWHMZu72dGMGvlvdwghPKQYbldFSfJRNQvTriekNSaaSkZMXigVA9S3Aqf8kYae12GFmg1d0eTMH55YWu5C5fjRQTxQRqMWSUI1czgNkl9ENK45D3Hzuo+XWegvs3NVzlSG85WIhRSrItyeUzaOOiY9TpPfb129Bke23+5a6Z0WwV7MrMWKLHhLxzIOc3tvy2zMzLj9UW2avx5JEWbgDe08MmeN4WgOGQGP0+5Zi8YWjqqhLtgDuEpA0W2rXRoONtRPM7nx8HDWCAMAToCz52pQS/No5tCArf3v+9R2fNnTltO/paVzFdSZOXzV2htODtqnasTKrgW4iNd9SO1X7Bcj4dOHtIy64eQCItx1A137mM/tqY5/jUfSJlnL3qkD/xPfCrKFiVbBQUS4nBjNTRVPLM0DpuBhtd+EI3z3LEUuXRwjHMm5Gh3CLfBXG444CV7zpT1m3i1Po1qHfjipm0OIPoCaTm/lad3QUak3WC+E85QYicJHFXBMKS/XjsPSqxxFbnywys+39hiRHpkFzxEFGEQOfBLTKHv41PgAB4DoopGf1kD6AeJZdlu2OVWv05HawYFfPysOTf9oPbXJt9yL/2LJ46qzT9w4s35NgNHj8tn6QojLvNfc8fOguF17YUioYiUFhEDNd9txYmt'
-    ruName =   ENV['EBAY_RU_NAME']
+    ruName = ENV['EBAY_RU_NAME']
     if ENV['EBAY_SANDBOX_MODE'] == 'YES'
       url = "https://api.sandbox.ebay.com/ws/api.dll"
     else
@@ -203,29 +212,29 @@ class Store < ActiveRecord::Base
     req.add_field("X-EBAY-API-CALL-NAME", "GetSessionID")
 
     req.body = '<?xml version="1.0" encoding="utf-8"?>'+
-                '<GetSessionIDRequest xmlns="urn:ebay:apis:eBLBaseComponents">'+
-                "<RuName>#{ruName}</RuName>"+
-                '</GetSessionIDRequest>'
+      '<GetSessionIDRequest xmlns="urn:ebay:apis:eBLBaseComponents">'+
+      "<RuName>#{ruName}</RuName>"+
+      '</GetSessionIDRequest>'
 
     http = Net::HTTP.new(url.host, url.port)
     http.use_ssl = true
     res = http.start do |http_runner|
       http_runner.request(req)
     end
-  ebaysession_resp = MultiXml.parse(res.body)
-  if ebaysession_resp['GetSessionIDResponse']['Ack'] == "Success"
-    session_id = ebaysession_resp['GetSessionIDResponse']['SessionID']
-    if ENV['EBAY_SANDBOX_MODE'] == 'YES'
-    @result['ebay_signin_url'] = "https://signin.sandbox.ebay.com/ws/eBayISAPI.dll?SignIn&RuName="+ENV['EBAY_RU_NAME']+"&SessID="+session_id
+    ebaysession_resp = MultiXml.parse(res.body)
+    if ebaysession_resp['GetSessionIDResponse']['Ack'] == "Success"
+      session_id = ebaysession_resp['GetSessionIDResponse']['SessionID']
+      if ENV['EBAY_SANDBOX_MODE'] == 'YES'
+        @result['ebay_signin_url'] = "https://signin.sandbox.ebay.com/ws/eBayISAPI.dll?SignIn&RuName="+ENV['EBAY_RU_NAME']+"&SessID="+session_id
+      else
+        @result['ebay_signin_url'] = "https://signin.ebay.com/ws/eBayISAPI.dll?SignIn&RuName="+ENV['EBAY_RU_NAME']+"&SessID="+session_id
+      end
+      @result['ebay_signin_url_status'] = true
+      @result['ebay_sessionid'] = session_id
     else
-    @result['ebay_signin_url'] = "https://signin.ebay.com/ws/eBayISAPI.dll?SignIn&RuName="+ENV['EBAY_RU_NAME']+"&SessID="+session_id
+      @result['ebay_signin_url'] = ebaysession_resp
+      @result['ebay_signin_url_status'] = false
     end
-    @result['ebay_signin_url_status'] = true
-    @result['ebay_sessionid'] = session_id
-  else
-    @result['ebay_signin_url'] = ebaysession_resp
-    @result['ebay_signin_url_status'] = false      
-   end
     return @result
   end
 

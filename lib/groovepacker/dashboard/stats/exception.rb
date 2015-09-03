@@ -4,7 +4,7 @@ module Groovepacker
       class Exception
         def initialize (user_id)
           @user_id = user_id
-          @exceptions_considered = ["qty_related", "incorrect_item","missing_item"]
+          @exceptions_considered = ["qty_related", "incorrect_item", "missing_item"]
         end
 
         def most_recent
@@ -12,12 +12,12 @@ module Groovepacker
           exceptions = []
 
           if @user_id.nil?
-            exceptions = OrderException.where("reason IN (?)", 
-              @exceptions_considered).order(created_at: :desc).all
+            exceptions = OrderException.where("reason IN (?)",
+                                              @exceptions_considered).order(created_at: :desc).all
           else
             exceptions = OrderException.where(
-              user_id: @user_id).where("reason IN (?)", 
-                @exceptions_considered).order(created_at: :desc)
+              user_id: @user_id).where("reason IN (?)",
+                                       @exceptions_considered).order(created_at: :desc)
           end
 
           percentages = get_percentages(exceptions)
@@ -61,7 +61,7 @@ module Groovepacker
           results.sort_by { |k| k[:frequency] }.reverse!
         end
 
-        private 
+        private
 
         def get_percentages(exceptions)
           percentages = {}
@@ -69,7 +69,7 @@ module Groovepacker
             percentages[exception] = exceptions.where(reason: exception).count
           end
 
-          percentages.each do |key, value| 
+          percentages.each do |key, value|
             percentages[key] = ((value.to_f * 100)/ exceptions.count).round(2)
           end
 
