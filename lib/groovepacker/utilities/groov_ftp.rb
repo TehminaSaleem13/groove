@@ -23,7 +23,7 @@ class GroovFTP
       end
     rescue Exception => e
       result['status'] = false
-      result['error_messages'].push(e.message)
+      result['error_messages'].push("Error in connecting the server. Please check your credentails.")
     end
     result
   end
@@ -52,7 +52,10 @@ class GroovFTP
           result['success_messages'].push("Connection succeeded! #{file} was found.")
         end
       else
-        result['error_messages'].push(response['error_messages'])
+        result['status'] = false
+        response['error_messages'].each do |message|
+          result['error_messages'].push(message)
+        end
         return result
       end
     rescue Exception => e
@@ -95,6 +98,10 @@ class GroovFTP
           result['error_messages'].push("No CSV files could be found without '-imported' in the file name")
         end
       else
+        result['status'] = false
+        response['error_messages'].each do |message|
+          result['error_messages'].push(message)
+        end
         return result
       end
     rescue Exception => e
