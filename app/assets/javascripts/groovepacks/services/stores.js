@@ -110,13 +110,16 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
   //single store related functions
   var get_single = function (id, stores) {
     return $http.get('/store_settings/getstoreinfo.json?id=' + id).success(function (data) {
-      stores.single = {};
+      // stores.single = {};
       stores.import.product.status = "";
       stores.import.order.status = "";
       stores.import.product.status_show = false;
       stores.import.order.status_show = false;
       if (data.status) {
-        stores.single = data.store;
+        // stores.single = data.store;
+        for (var key in data.store) {
+          stores.single[key] = data.store[key];
+        }
         if (data.mapping) {
           stores.csv.mapping = data.mapping;
         }

@@ -195,6 +195,7 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
                       if(confirm("Order Date/Time foramt has not been set. Would you like to continue using the current Date/Time for each imported order? Click ok to continue the import using the current date/time for all orders or click cancel and edit map to select one.")){
                         current_map.map.order_placed_at = new Date();
                         stores.csv.do_import({current: current_map.map});
+                        myscope.reset_choose_file();
                         $modalInstance.close("csv-modal-closed");
                         result.resolve();
                       } else {
@@ -215,26 +216,25 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
                         if (confirm("An Order Date/Time has not been mapped. Would you like to continue using the current Date/Time for each imported order?")) {
                           current_map.map.order_placed_at = new Date();
                           stores.csv.do_import({current: current_map.map});
+                          myscope.reset_choose_file();
                           $modalInstance.close("csv-modal-closed");
                           result.resolve();
-                        }
-                        ;
+                        };
                       } else {
                         current_map.map.order_placed_at = null;
                         stores.csv.do_import({current: current_map.map});
+                        myscope.reset_choose_file();
                         $modalInstance.close("csv-modal-closed");
                         result.resolve();
-                      }
-                      ;
-                    }
-                    ;
+                      };
+                    };
 
                   } else {
                     stores.csv.do_import({current: current_map.map});
+                    myscope.reset_choose_file();
                     $modalInstance.close("csv-modal-closed");
                     result.resolve();
-                  }
-                  ;
+                  };
                   // stores.csv.do_import({current:current_map.map});
                   // $modalInstance.close("csv-modal-closed");
                   return result.promise;
@@ -264,12 +264,10 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
                     });
                   };
                   csv_modal.result.finally(function () {
+                    myscope.reset_choose_file();
                     $modalInstance.close("csv-modal-closed");
                   });
                 };
-                delete scope.stores.single['orderfile'];
-                delete scope.stores.single['productfile'];
-                delete scope.stores.single['kitfile'];
               } else {
                 notification.notify("Please choose a file to import first",0);
               };
@@ -279,6 +277,12 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
           scope.start_editing_map = false;
         });
       }
+    };
+
+    myscope.reset_choose_file = function() {
+      delete scope.stores.single['orderfile'];
+      delete scope.stores.single['productfile'];
+      delete scope.stores.single['kitfile'];
     };
 
     scope.import_map = function () {
@@ -299,8 +303,34 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
         current_map.map.type = scope.stores.single.type;
         current_map.map.name = current_map.name;
         current_map.map.flag = 'ftp_download';
-        stores.csv.do_import({current: current_map.map});
-        $modalInstance.close("csv-modal-closed");
+
+        if (current_map.map.order_date_time_format == null || current_map.map.order_date_time_format == 'Default') {
+          current_map.map.order_placed_at = new Date();
+          stores.csv.do_import({current: current_map.map});
+          $modalInstance.close("csv-modal-closed");
+          result.resolve();
+        } else {
+          var not_found = true
+          for (var i = 0; i < Object.keys(current_map.map.map).length; i++) {
+            if (current_map.map.map[i].name == "Order Date/Time") {
+              not_found &= false
+              break;
+            } else {
+              continue;
+            };
+          }
+          if (not_found) {
+            current_map.map.order_placed_at = new Date();
+            stores.csv.do_import({current: current_map.map});
+            $modalInstance.close("csv-modal-closed");
+            result.resolve();
+          } else {
+            current_map.map.order_placed_at = null;
+            stores.csv.do_import({current: current_map.map});
+            $modalInstance.close("csv-modal-closed");
+            result.resolve();
+          };
+        };
         return result.promise;
       }
     }
