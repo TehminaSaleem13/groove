@@ -58,14 +58,14 @@ module Groovepacker
 
                   prim_skus = single_row[mapping['sku'][:position]].split(',')
                   prim_skus.each do |prim_single_sku|
-                    single_row_skus << prim_single_sku
+                    single_row_skus << prim_single_sku.strip
                   end
                   if !mapping['secondary_sku'].nil? && mapping['secondary_sku'][:position] >= 0
                     unless single_row[mapping['secondary_sku'][:position]].nil?
                       sec_skus = single_row[mapping['secondary_sku'][:position]].split(',')
                       sec_skus.each do |sec_single_sku|
-                        unless single_row_skus.include? sec_single_sku
-                          single_row_skus << sec_single_sku
+                        unless single_row_skus.include? sec_single_sku.strip
+                          single_row_skus << sec_single_sku.strip
                         end
                       end
                     end
@@ -74,8 +74,8 @@ module Groovepacker
                     unless single_row[mapping['tertiary_sku'][:position]].nil?
                       tert_skus = single_row[mapping['tertiary_sku'][:position]].split(',')
                       tert_skus.each do |tert_single_sku|
-                        unless single_row_skus.include? tert_single_sku
-                          single_row_skus << tert_single_sku
+                        unless single_row_skus.include? tert_single_sku.strip
+                          single_row_skus << tert_single_sku.strip
                         end
                       end
                     end
@@ -108,7 +108,7 @@ module Groovepacker
                       usable_record[:weight] = single_row[mapping['product_weight'][:position]]
                     end
                     if params[:use_sku_as_product_name]
-                      usable_record[:name] = single_row[mapping['sku'][:position]]
+                      usable_record[:name] = single_row[mapping['sku'][:position]].strip
                     end
                     if usable_record[:name].blank?
                       usable_record[:name] = 'Product from CSV Import'
@@ -147,16 +147,16 @@ module Groovepacker
                       unless single_row[mapping['barcode'][:position]].nil?
                         barcodes = single_row[mapping['barcode'][:position]].split(',')
                         barcodes.each do |single_barcode|
-                          break unless ProductBarcode.where(:barcode => single_barcode).empty? && (!all_barcodes.include? single_barcode)
-                          all_barcodes << single_barcode
-                          usable_record[:barcodes] << single_barcode
+                          break unless ProductBarcode.where(:barcode => single_barcode.strip).empty? && (!all_barcodes.include? single_barcode.strip)
+                          all_barcodes << single_barcode.strip
+                          usable_record[:barcodes] << single_barcode.strip
                         end
                       end
                     elsif params[:generate_barcode_from_sku]
                       barcodes = single_row[mapping['sku'][:position]].split(',')
                       barcodes.each do |single_barcode|
-                        all_barcodes << single_barcode
-                        usable_record[:barcodes] << single_barcode
+                        all_barcodes << single_barcode.strip
+                        usable_record[:barcodes] << single_barcode.strip
                       end
                     end
 
@@ -164,9 +164,9 @@ module Groovepacker
                       unless single_row[mapping['secondary_barcode'][:position]].nil?
                         secondary_barcodes = single_row[mapping['secondary_barcode'][:position]].split(',')
                         secondary_barcodes.each do |single_secondary_barcode|
-                          break unless ProductBarcode.where(:barcode => single_secondary_barcode).empty? && (!all_barcodes.include? single_secondary_barcode)
-                          all_barcodes << single_secondary_barcode
-                          usable_record[:barcodes] << single_secondary_barcode
+                          break unless ProductBarcode.where(:barcode => single_secondary_barcode.strip).empty? && (!all_barcodes.include? single_secondary_barcode.strip)
+                          all_barcodes << single_secondary_barcode.strip
+                          usable_record[:barcodes] << single_secondary_barcode.strip
                         end
                       end
                     end
@@ -175,9 +175,9 @@ module Groovepacker
                       unless single_row[mapping['tertiary_barcode'][:position]].nil?
                         tertiary_barcodes = single_row[mapping['tertiary_barcode'][:position]].split(',')
                         tertiary_barcodes.each do |single_tertiary_barcode|
-                          break unless ProductBarcode.where(:barcode => single_tertiary_barcode).empty? && (!all_barcodes.include? single_tertiary_barcode)
-                          all_barcodes << single_tertiary_barcode
-                          usable_record[:barcodes] << single_tertiary_barcode
+                          break unless ProductBarcode.where(:barcode => single_tertiary_barcode.strip).empty? && (!all_barcodes.include? single_tertiary_barcode.strip)
+                          all_barcodes << single_tertiary_barcode.strip
+                          usable_record[:barcodes] << single_tertiary_barcode.strip
                         end
                       end
                     end

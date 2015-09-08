@@ -4,6 +4,7 @@ class ImportCsv
     result['messages'] = []
     begin
       Apartment::Tenant.switch(tenant)
+      params = eval(params)
       #download CSV and save
       response = nil
       file_path = nil
@@ -51,13 +52,15 @@ class ImportCsv
         end
         mapping = {}
         params[:map].each do |map_single|
-          if map_single[1][:value] != 'none'
-            mapping[map_single[1][:value]] = {}
-            mapping[map_single[1][:value]][:position] = map_single[0].to_i
+          puts map_single[1]['value'].to_s
+          puts (map_single[1]['value'] == 'none').to_s
+          if map_single[1]['value'] != 'none'
+            mapping[map_single[1]['value']] = {}
+            mapping[map_single[1]['value']][:position] = map_single[0].to_i
             if map_single[1][:action].nil?
-              mapping[map_single[1][:value]][:action] = 'skip'
+              mapping[map_single[1]['value']][:action] = 'skip'
             else
-              mapping[map_single[1][:value]][:action] = map_single[1][:action]
+              mapping[map_single[1]['value']][:action] = map_single[1][:action]
             end
           end
         end

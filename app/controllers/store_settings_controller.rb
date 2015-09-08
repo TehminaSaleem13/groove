@@ -746,7 +746,7 @@ class StoreSettingsController < ApplicationController
           import_item.store_id = @store.id
         end
         import_csv = ImportCsv.new
-        import_csv.delay(:run_at => 1.seconds.from_now).import Apartment::Tenant.current, data
+        import_csv.delay(:run_at => 1.seconds.from_now).import Apartment::Tenant.current, data.to_s
         # import_csv.import(Apartment::Tenant.current, data)
         import_item.status = 'not_started'
         import_item.save
@@ -757,7 +757,8 @@ class StoreSettingsController < ApplicationController
         groove_bulk_actions.save
         data[:bulk_action_id] = groove_bulk_actions.id
         import_csv = ImportCsv.new
-        import_csv.delay(:run_at => 1.seconds.from_now).import Apartment::Tenant.current, data
+        import_csv.delay(:run_at => 1.seconds.from_now).import Apartment::Tenant.current, data.to_s
+        # import_csv.import(Apartment::Tenant.current, data.to_s)
 
       elsif params[:type] == 'product'
         product_import = CsvProductImport.find_by_store_id(@store.id)
@@ -767,7 +768,8 @@ class StoreSettingsController < ApplicationController
         end
 
         import_csv = ImportCsv.new
-        delayed_job = import_csv.delay(:run_at => 1.seconds.from_now).import Apartment::Tenant.current, data
+        delayed_job = import_csv.delay(:run_at => 1.seconds.from_now).import Apartment::Tenant.current, data.to_s
+        # delayed_job = import_csv.import(Apartment::Tenant.current, data.to_s)
 
         product_import.delayed_job_id = delayed_job.id
         product_import.total = 0
