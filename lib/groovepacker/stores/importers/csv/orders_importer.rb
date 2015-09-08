@@ -175,7 +175,7 @@ module Groovepacker
                               product = Product.new
                               if params[:use_sku_as_product_name] == true
                                 product.name = single_row[mapping['sku'][:position]].strip
-                              elsif !mapping['product_name'].nil?
+                              elsif !mapping['product_name'].nil? && !single_row[mapping['product_name'][:position]].nil?
                                 product.name = single_row[mapping['product_name'][:position]]
                               else
                                 product.name = 'Product created from order import'
