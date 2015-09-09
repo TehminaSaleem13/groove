@@ -52,8 +52,6 @@ class ImportCsv
         end
         mapping = {}
         params[:map].each do |map_single|
-          puts map_single[1]['value'].to_s
-          puts (map_single[1]['value'] == 'none').to_s
           if map_single[1]['value'] != 'none'
             mapping[map_single[1]['value']] = {}
             mapping[map_single[1]['value']][:position] = map_single[0].to_i
