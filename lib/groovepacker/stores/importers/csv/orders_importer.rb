@@ -144,12 +144,12 @@ module Groovepacker
                             import_item.current_order_imported_item = 0
                             import_item.save
 
-                            product_skus = ProductSku.where(:sku => single_row[mapping[single_map][:position]])
+                            product_skus = ProductSku.where(:sku => single_row[mapping[single_map][:position]].strip)
                             if product_skus.length > 0
                               if OrderItem.where(:product_id => product_skus.first.product.id, :order_id => order.id).length == 0
                                 order_item = OrderItem.new
                                 order_item.product = product_skus.first.product
-                                order_item.sku = single_row[mapping['sku'][:position]]
+                                order_item.sku = single_row[mapping['sku'][:position]].strip
                                 if !mapping['image'].nil? && mapping['image'][:position] >= 0
                                   product_images = order_item.product.product_images
                                   exists = false
@@ -174,24 +174,24 @@ module Groovepacker
                             else # no sku is found
                               product = Product.new
                               if params[:use_sku_as_product_name] == true
-                                product.name = single_row[mapping['sku'][:position]]
-                              elsif !mapping['product_name'].nil?
+                                product.name = single_row[mapping['sku'][:position]].strip
+                              elsif !mapping['product_name'].nil? && !single_row[mapping['product_name'][:position]].nil?
                                 product.name = single_row[mapping['product_name'][:position]]
                               else
                                 product.name = 'Product created from order import'
                               end
 
                               sku = ProductSku.new
-                              sku.sku = single_row[mapping['sku'][:position]]
+                              sku.sku = single_row[mapping['sku'][:position]].strip
                               product.product_skus << sku
                               if params[:generate_barcode_from_sku] == true
                                 product_barcode = ProductBarcode.new
-                                product_barcode.barcode = single_row[mapping['sku'][:position]]
+                                product_barcode.barcode = single_row[mapping['sku'][:position]].strip
                                 product.product_barcodes << product_barcode
                               elsif !mapping['barcode'].nil? && !single_row[mapping['barcode'][:position]].nil?
-                                if ProductBarcode.where(:barcode => single_row[mapping['barcode'][:position]]).empty?
+                                if ProductBarcode.where(:barcode => single_row[mapping['barcode'][:position]].strip).empty?
                                   product_barcode = ProductBarcode.new
-                                  product_barcode.barcode = single_row[mapping['barcode'][:position]]
+                                  product_barcode.barcode = single_row[mapping['barcode'][:position]].strip
                                   product.product_barcodes << product_barcode
                                 end
                               end
@@ -213,7 +213,7 @@ module Groovepacker
 
                               order_item = OrderItem.new
                               order_item.product = product
-                              order_item.sku = single_row[mapping['sku'][:position]]
+                              order_item.sku = single_row[mapping['sku'][:position]].strip
                               if !mapping['qty'].nil? && mapping['qty'][:position] >= 0
                                 order_item.qty = single_row[mapping['qty'][:position]]
                                 order_required.delete('qty')
@@ -240,7 +240,7 @@ module Groovepacker
                           import_item.current_order_imported_item = 0
                           import_item.save
 
-                          order_increment_sku = single_row[mapping['increment_id'][:position]]+'-'+single_row[mapping['sku'][:position]]
+                          order_increment_sku = single_row[mapping['increment_id'][:position]]+'-'+single_row[mapping['sku'][:position]].strip
 
                           product_skus = ProductSku.where(['sku like (?)', order_increment_sku+'%'])
                           if product_skus.length > 0
@@ -275,7 +275,7 @@ module Groovepacker
                             product.product_barcodes << product_barcode
                           elsif !mapping['barcode'].nil? && !single_row[mapping['barcode'][:position]].nil?
                             product_barcode = ProductBarcode.new
-                            product_barcode.barcode = single_row[mapping['barcode'][:position]]
+                            product_barcode.barcode = single_row[mapping['barcode'][:position]].strip
                             product.product_barcodes << product_barcode
                           end
 
@@ -284,14 +284,14 @@ module Groovepacker
                           product.product_skus << sku
                           product.store_product_id = 0
                           product.store_id = params[:store_id]
-                          base_sku = ProductSku.where(:sku => single_row[mapping['sku'][:position]]).first unless ProductSku.where(:sku => single_row[mapping['sku'][:position]]).empty?
+                          base_sku = ProductSku.where(:sku => single_row[mapping['sku'][:position]].strip).first unless ProductSku.where(:sku => single_row[mapping['sku'][:position]].strip).empty?
                           if base_sku.nil?
                             base_product = Product.new()
-                            base_product.name = "Base Product " + single_row[mapping['sku'][:position]]
+                            base_product.name = "Base Product " + single_row[mapping['sku'][:position]].strip
                             base_product.store_product_id = 0
                             base_product.store_id = params[:store_id]
                             base_sku = ProductSku.new
-                            base_sku.sku = single_row[mapping['sku'][:position]]
+                            base_sku.sku = single_row[mapping['sku'][:position]].strip
                             base_product.product_skus << base_sku
                             base_product.is_intangible = false
                             if !mapping['image'].nil? && mapping['image'][:position] >= 0
@@ -329,7 +329,7 @@ module Groovepacker
                           unless mapping['product_instructions'].nil?
                             product.spl_instructions_4_packer = single_row[mapping['product_instructions'][:position]] unless single_row[mapping['product_instructions'][:position]].nil?
                           end
-                          product.base_sku = single_row[mapping['sku'][:position]] unless single_row[mapping['sku'][:position]].nil?
+                          product.base_sku = single_row[mapping['sku'][:position]].strip unless single_row[mapping['sku'][:position]].nil?
                           product.save
                           product.update_product_status
 
