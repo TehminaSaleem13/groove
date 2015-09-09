@@ -15,7 +15,7 @@
             <label class="control-label col-md-3">Store Name</label>
 
             <div class="controls col-md-9">
-              <input name="name" ng-model="stores.single.name" ng-blur="update_single_store()" type="text"
+              <input name="name" ng-model="stores.single.name" ng-blur="update_single_store(true)" type="text"
                      class="form-control input-style" value="" required/>
             </div>
           </div>
@@ -24,7 +24,7 @@
             <label class="control-label col-md-3">Active</label>
 
             <div class="controls col-md-2">
-              <div toggle-switch ng-model="stores.single.status" groov-click="update_single_store()"></div>
+              <div toggle-switch ng-model="stores.single.status" groov-click="update_single_store(true)"></div>
             </div>
           </div>
 
