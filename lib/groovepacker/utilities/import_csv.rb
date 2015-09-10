@@ -1,27 +1,34 @@
 class ImportCsv
   def import(tenant, params)
     result = {}
-    result['messages'] = []
+    result[:messages] = []
     begin
       Apartment::Tenant.switch(tenant)
       params = eval(params)
       #download CSV and save
       response = nil
       file_path = nil
+      store = Store.find(params[:store_id])
+      credential = store.ftp_credential
       if params[:flag] == 'ftp_download'
-        groov_ftp = GroovFTP.new
-        response = groov_ftp.download(params[:store_id],tenant)
-        if response['status']
-          file_path = response['file_info']['file_path']
+        if credential.connection_method == 'ftp'
+          groov_ftp = FTP.new(store)
+          response = groov_ftp.download(tenant)
+        elsif credential.connection_method == 'sftp'
+          groov_sftp = SFTP.new(store)
+          response = groov_sftp.download(tenant)
+        end
+        if response[:status]
+          file_path = response[:file_info][:file_path]
           csv_file = File.read(file_path)
         else
-          result['messages'].push(response['error_messages'])
+          result[:messages].push(response[:error_messages])
         end
       else
         csv_file = GroovS3.find_csv(tenant, params[:type], params[:store_id])
       end
       if csv_file.nil?
-        result['messages'].push("No file present to import #{params[:type]}")
+        result[:messages].push("No file present to import #{params[:type]}")
       else
         #csv_directory = 'uploads/csv'
         #file_path = File.join(csv_directory, "#{tenant}.#{params[:store_id]}.#{params[:type]}.csv")
@@ -74,10 +81,15 @@ class ImportCsv
         end
         #File.delete(file_path)
         if params[:flag] == 'ftp_download'
-          groov_ftp = GroovFTP.new
-          response = groov_ftp.update(params[:store_id],response['file_info']['ftp_file_name'])
-          unless response['status']
-            result['messages'].push(response['error_messages'])
+          if credential.connection_method == 'ftp'
+            groov_ftp = FTP.new(store)
+            response = groov_ftp.update(response[:file_info][:ftp_file_name])
+          elsif credential.connection_method == 'sftp'
+            groov_sftp = SFTP.new(store)
+            response = groov_sftp.update(response[:file_info][:ftp_file_name])
+          end
+          unless response[:status]
+            result[:messages].push(response[:error_messages])
           end
           File.delete(file_path)
         end

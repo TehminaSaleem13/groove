@@ -26,4 +26,19 @@ module ApplicationHelper
   def is_base_tenant(request)
     request.original_url =~ /admin./
   end
+
+  def rename_file(file)
+    new_file = ''
+    substrings = file.split('.')
+    substrings.each do |value|
+      if(value == substrings[-1])
+        new_file+=('.'+value)
+      elsif(value == substrings[-2])
+        new_file+=(value+'-imported')
+      else
+        new_file+=value
+      end
+    end
+    new_file
+  end
 end

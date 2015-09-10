@@ -30,17 +30,16 @@ class StoreSettingsController < ApplicationController
     store = Store.find(params[:id])
     unless store.nil?
       if store.store_type == 'CSV'
-        ftp = FtpCredential.where(:store_id => store.id)
+        ftp = store.ftp_credential
 
-        if ftp.empty? || ftp.length == 0
+        if ftp.nil?
           ftp = FtpCredential.new
           new_record = true
-        else
-          ftp = ftp.first
         end
         ftp.host = params[:host]
         ftp.username = params[:username]
         ftp.password = params[:password]
+        ftp.connection_method = params[:connection_method]
 
         store.ftp_credential = ftp
         begin
@@ -66,9 +65,16 @@ class StoreSettingsController < ApplicationController
 
   def connect_and_retrieve
     result = {}
-    groov_ftp = GroovFTP.new
-    result['connection'] = groov_ftp.retrieve(params[:store_id])
-
+    store = Store.find(params[:store_id])
+    ftp_credential = store.ftp_credential
+    if ftp_credential.connection_method == 'ftp'
+      groov_ftp = FTP.new(store)
+      result['connection'] = groov_ftp.retrieve()
+    elsif ftp_credential.connection_method == 'sftp'
+      groov_sftp = SFTP.new(store)
+      result['connection'] = groov_sftp.retrieve(store)     
+    end
+    
     respond_to do |format|
       format.json { render json: result }
     end

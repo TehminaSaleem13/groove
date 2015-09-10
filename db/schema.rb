@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150827055338) do
+ActiveRecord::Schema.define(:version => 20150910100110) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0, :null => false
@@ -145,12 +145,13 @@ ActiveRecord::Schema.define(:version => 20150827055338) do
 
   create_table "ftp_credentials", :force => true do |t|
     t.string   "host"
-    t.integer  "port",       :default => 21
-    t.string   "username",   :default => ""
-    t.string   "password",   :default => ""
-    t.integer  "store_id",                   :null => false
-    t.datetime "created_at",                 :null => false
-    t.datetime "updated_at",                 :null => false
+    t.integer  "port",              :default => 21
+    t.string   "username",          :default => ""
+    t.string   "password",          :default => ""
+    t.integer  "store_id",                             :null => false
+    t.datetime "created_at",                           :null => false
+    t.datetime "updated_at",                           :null => false
+    t.string   "connection_method", :default => "ftp"
   end
 
   create_table "general_settings", :force => true do |t|

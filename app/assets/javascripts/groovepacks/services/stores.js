@@ -196,6 +196,7 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
           } else if (data.store.store_type == 'CSV') {
             stores.single.host = data.credentials.ftp_credentials.host;
             stores.single.port = data.credentials.ftp_credentials.port;
+            stores.single.connection_method = data.credentials.ftp_credentials.connection_method;
             stores.single.username = data.credentials.ftp_credentials.username;
             stores.single.password = data.credentials.ftp_credentials.password;
           }
