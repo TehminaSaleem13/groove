@@ -30,17 +30,16 @@ class StoreSettingsController < ApplicationController
     store = Store.find(params[:id])
     unless store.nil?
       if store.store_type == 'CSV'
-        ftp = FtpCredential.where(:store_id => store.id)
+        ftp = store.ftp_credential
 
-        if ftp.empty? || ftp.length == 0
+        if ftp.nil?
           ftp = FtpCredential.new
           new_record = true
-        else
-          ftp = ftp.first
         end
         ftp.host = params[:host]
         ftp.username = params[:username]
         ftp.password = params[:password]
+        ftp.connection_method = params[:connection_method]
 
         store.ftp_credential = ftp
         begin
@@ -66,9 +65,10 @@ class StoreSettingsController < ApplicationController
 
   def connect_and_retrieve
     result = {}
-    groov_ftp = GroovFTP.new
-    result['connection'] = groov_ftp.retrieve(params[:store_id])
-
+    store = Store.find(params[:store_id])
+    groove_ftp = FTP::FtpConnectionManager.get_instance(store)
+    result['connection'] = groove_ftp.retrieve()
+    
     respond_to do |format|
       format.json { render json: result }
     end
@@ -747,7 +747,7 @@ class StoreSettingsController < ApplicationController
         end
         import_csv = ImportCsv.new
         import_csv.delay(:run_at => 1.seconds.from_now).import Apartment::Tenant.current, data.to_s
-        # import_csv.import(Apartment::Tenant.current, data)
+        # import_csv.import(Apartment::Tenant.current, data.to_s)
         import_item.status = 'not_started'
         import_item.save
       elsif params[:type] == 'kit'
