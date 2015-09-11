@@ -23,14 +23,16 @@ module Groovepacker
               bulk_action.save
               # Iterate all products and check if the status is something other 
               # than active then the order status can't be changed
-              order.order_items.each do |order_item|
-                unless order_item.product.status.eql?('active')
-                  result['status'] &= false
-                  result['messages'].push('There was a problem changing order status for '+
-                    order.increment_id + '. Reason: Order must have active products in it'
-                  )
-                  product_not_active = true
-                  break
+              if params['status'].eql?('awaiting')
+                order.order_items.each do |order_item|
+                  unless order_item.product.status.eql?('active')
+                    result['status'] &= false
+                    result['messages'].push('There was a problem changing order status for '+
+                      order.increment_id + '. Reason: Order must have active products in it'
+                    )
+                    product_not_active = true
+                    break
+                  end
                 end
               end
               # If no products have status other than active then change the
