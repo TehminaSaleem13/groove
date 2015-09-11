@@ -11,13 +11,8 @@ class ImportCsv
       store = Store.find(params[:store_id])
       credential = store.ftp_credential
       if params[:flag] == 'ftp_download'
-        if credential.connection_method == 'ftp'
-          groov_ftp = FTP.new(store)
-          response = groov_ftp.download(tenant)
-        elsif credential.connection_method == 'sftp'
-          groov_sftp = SFTP.new(store)
-          response = groov_sftp.download(tenant)
-        end
+        groove_ftp = FTP::FtpConnectionManager.get_instance(store)
+        response = groove_ftp.download(tenant)
         if response[:status]
           file_path = response[:file_info][:file_path]
           csv_file = File.read(file_path)
@@ -81,13 +76,8 @@ class ImportCsv
         end
         #File.delete(file_path)
         if params[:flag] == 'ftp_download'
-          if credential.connection_method == 'ftp'
-            groov_ftp = FTP.new(store)
-            response = groov_ftp.update(response[:file_info][:ftp_file_name])
-          elsif credential.connection_method == 'sftp'
-            groov_sftp = SFTP.new(store)
-            response = groov_sftp.update(response[:file_info][:ftp_file_name])
-          end
+          groove_ftp = FTP::FtpConnectionManager.get_instance(store)
+          response = groove_ftp.update(response[:file_info][:ftp_file_name])
           unless response[:status]
             result[:messages].push(response[:error_messages])
           end

@@ -66,14 +66,8 @@ class StoreSettingsController < ApplicationController
   def connect_and_retrieve
     result = {}
     store = Store.find(params[:store_id])
-    ftp_credential = store.ftp_credential
-    if ftp_credential.connection_method == 'ftp'
-      groov_ftp = FTP.new(store)
-      result['connection'] = groov_ftp.retrieve()
-    elsif ftp_credential.connection_method == 'sftp'
-      groov_sftp = SFTP.new(store)
-      result['connection'] = groov_sftp.retrieve(store)     
-    end
+    groove_ftp = FTP::FtpConnectionManager.get_instance(store)
+    result['connection'] = groove_ftp.retrieve()
     
     respond_to do |format|
       format.json { render json: result }
@@ -753,7 +747,7 @@ class StoreSettingsController < ApplicationController
         end
         import_csv = ImportCsv.new
         import_csv.delay(:run_at => 1.seconds.from_now).import Apartment::Tenant.current, data.to_s
-        # import_csv.import(Apartment::Tenant.current, data)
+        # import_csv.import(Apartment::Tenant.current, data.to_s)
         import_item.status = 'not_started'
         import_item.save
       elsif params[:type] == 'kit'
