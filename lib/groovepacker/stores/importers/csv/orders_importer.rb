@@ -181,6 +181,10 @@ module Groovepacker
                                 product.name = 'Product created from order import'
                               end
 
+                              unless mapping['product_weight'].nil? || single_row[mapping['product_weight'][:position]].nil?
+                                product.weight = single_row[mapping['product_weight'][:position]]
+                              end
+
                               sku = ProductSku.new
                               sku.sku = single_row[mapping['sku'][:position]].strip
                               product.product_skus << sku
@@ -205,6 +209,12 @@ module Groovepacker
                                 product_image = ProductImage.new
                                 product_image.image = single_row[mapping['image'][:position]]
                                 product.product_images << product_image
+                              end
+
+                              unless mapping['category'].nil?
+                                cat = ProductCat.new
+                                cat.category = single_row[mapping['category'][:position]] unless single_row[mapping['category'][:position]].nil?
+                                product.product_cats << cat
                               end
 
                               product.save
@@ -267,6 +277,10 @@ module Groovepacker
                             else
                               product.name = 'Product created from order import'
                             end
+                          end
+
+                          unless mapping['product_weight'].nil? || single_row[mapping['product_weight'][:position]].nil?
+                            product.weight = single_row[mapping['product_weight'][:position]]
                           end
 
                           if params[:generate_barcode_from_sku] == true

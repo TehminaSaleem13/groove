@@ -104,7 +104,8 @@ module Groovepacker
                     if !mapping['product_name'].nil? && mapping['product_name'][:position] >= 0 && !single_row[mapping['product_name'][:position]].blank?
                       usable_record[:name] = single_row[mapping['product_name'][:position]]
                     end
-                    if !mapping['product_weight'].nil? && mapping['product_weight'][:position] >= 0 && !single_row[mapping['product_weight'][:position]].blank?
+                    
+                    if !mapping['product_weight'].nil? && mapping['product_weight'][:position] >= 0 && !single_row[mapping['product_weight'][:position]].blank? && !single_row[mapping['product_weight'][:position]].nil?
                       usable_record[:weight] = single_row[mapping['product_weight'][:position]]
                     end
                     if params[:use_sku_as_product_name]
@@ -310,10 +311,10 @@ module Groovepacker
                 duplicate_product = Product.find_by_id(single_product_duplicate_sku.product_id)
                 duplicate_product.store_id = params[:store_id]
                 if !mapping['product_name'].nil? #&& mapping['product_name'][:action] == 'overwrite'
-                  duplicate_product.name = record[:name]
+                  duplicate_product.name = record[:name] if duplicate_product.name == 'Product created from order import' || duplicate_product.name.strip == '' || duplicate_product.name.nil?
                 end
                 if !mapping['product_weight'].nil? #&& mapping['product_weight'][:action] == 'overwrite'
-                  duplicate_product.weight = record[:weight]
+                  duplicate_product.weight = record[:weight] if record[:weight] > 0
                 end
                 duplicate_product.is_intangible = record[:is_intangible]
                 if !mapping['product_type'].nil? #&& mapping['product_type'][:action] == 'overwrite'
