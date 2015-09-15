@@ -66,7 +66,8 @@ class ImportCsv
         end
 
         if params[:type] == 'order'
-          result = Groovepacker::Stores::Importers::CSV::OrdersImporter.new.import_old(params, final_record, mapping)
+          import_order = Groovepacker::Stores::Importers::CSV::OrdersImporter.new(params, final_record, mapping, nil)
+          result = import_order.import()
           #result = Groovepacker::Stores::Importers::CSV::OrdersImporter.new.import(params,final_record,mapping)
         elsif params[:type] == 'product'
           #result = Groovepacker::Stores::Importers::CSV::ProductsImporter.new.import_old(params,final_record,mapping)
