@@ -111,9 +111,9 @@ module Groovepacker
                     if params[:use_sku_as_product_name]
                       usable_record[:name] = single_row[mapping['sku'][:position]].strip
                     end
-                    if usable_record[:name].blank?
-                      usable_record[:name] = 'Product from CSV Import'
-                    end
+                    # if usable_record[:name].blank?
+                    #   usable_record[:name] = 'Product from CSV Import'
+                    # end
 
                     scan_pack_settings = ScanPackSetting.all.first
                     if scan_pack_settings.intangible_setting_enabled
@@ -288,6 +288,7 @@ module Groovepacker
               end
 
               if duplicate_found === false && new_action == 'create'
+                record[:name] = 'Product from CSV Import' if record[:name].blank?
                 single_import = Product.new(:name => record[:name], :product_type => record[:product_type], :spl_instructions_4_packer => record[:spl_instructions_4_packer], :is_intangible => record[:is_intangible], :weight => record[:weight])
                 single_import.store_id = params[:store_id]
                 single_import.store_product_id = record[:store_product_id]
@@ -309,9 +310,26 @@ module Groovepacker
                 #update the product directly
                 single_product_duplicate_sku = ProductSku.find_by_sku(duplicate_found)
                 duplicate_product = Product.find_by_id(single_product_duplicate_sku.product_id)
+                puts "record[:name]: " + record[:name]
+                if record[:name] == "['DELETE']"
+                  puts "Getting Ready to Delete..."
+                  product_info = {}
+                  product_info[:select_all] = false
+                  product_info[:inverted] = false
+                  product_info[:productArray] = []
+                  product_info[:productArray] << duplicate_product
+                  bulk_actions = Groovepacker::Products::BulkActions.new
+                  groove_bulk_actions = GrooveBulkActions.new
+                  groove_bulk_actions.identifier = 'product'
+                  groove_bulk_actions.activity = 'delete'
+                  groove_bulk_actions.save
+
+                  bulk_actions.delete(Apartment::Tenant.current, product_info, groove_bulk_actions.id, "during csv product import")
+                  next
+                end
                 duplicate_product.store_id = params[:store_id]
                 if !mapping['product_name'].nil? #&& mapping['product_name'][:action] == 'overwrite'
-                  duplicate_product.name = record[:name] if duplicate_product.name == 'Product created from order import' || duplicate_product.name.strip == '' || duplicate_product.name.nil?
+                  duplicate_product.name = record[:name]
                 end
                 if !mapping['product_weight'].nil? #&& mapping['product_weight'][:action] == 'overwrite'
                   duplicate_product.weight = record[:weight] if record[:weight] > 0
