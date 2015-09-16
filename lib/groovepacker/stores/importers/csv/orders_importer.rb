@@ -18,88 +18,81 @@ module Groovepacker
             end
 
             final_record.each_with_index do |single_row, index|
-              if is_blank_row(single_row)
-                next
-              else
-                if !self.mapping['increment_id'].nil? && self.mapping['increment_id'][:position] >= 0 && !single_row[self.mapping['increment_id'][:position]].blank?
-                  @import_item.current_increment_id = single_row[self.mapping['increment_id'][:position]]
-                  @import_item.current_order_items = -1
-                  @import_item.current_order_imported_item = -1
-                  @import_item.save
+              next if is_blank_row(single_row)
+              if !self.mapping['increment_id'].nil? && self.mapping['increment_id'][:position] >= 0 && !single_row[self.mapping['increment_id'][:position]].blank?
+                @import_item.current_increment_id = single_row[self.mapping['increment_id'][:position]]
+                @import_item.current_order_items = -1
+                @import_item.current_order_imported_item = -1
+                @import_item.save
 
-                  if @imported_orders.has_key?(single_row[self.mapping['increment_id'][:position]]) || Order.where(:increment_id => single_row[self.mapping['increment_id'][:position]]).length == 0 || self.params[:contains_unique_order_items] == true
-                    @order = Order.find_or_create_by_increment_id(single_row[self.mapping['increment_id'][:position]])
-                    @order.store_id = self.params[:store_id]
-                    @order_required = ['qty', 'sku', 'increment_id']
-                    order_map.each do |single_map|
-                      if !self.mapping[single_map].nil? && self.mapping[single_map][:position] >= 0
-                        #if sku, create order item with product id, qty
-                        if single_map == 'sku' && !self.params[:contains_unique_order_items] == true
-                          import_for_nonunique_order_items(single_row, single_map)
-                        elsif single_map == 'firstname'
-                          if self.mapping['lastname'].nil? || self.mapping['lastname'][:position] == 0
-                            arr = single_row[self.mapping[single_map][:position]].blank? ? [] : single_row[self.mapping[single_map][:position]].split(' ')
-                            @order.firstname = arr.shift
-                            @order.lastname = arr.join(' ')
-                          else
-                            @order.firstname = single_row[self.mapping[single_map][:position]]
-                          end
-                        elsif single_map == 'increment_id' && self.params[:contains_unique_order_items] == true && !self.mapping['increment_id'].nil? && !self.mapping['sku'].nil?
-                          import_for_unique_order_items(single_row, single_map)
+                if @imported_orders.has_key?(single_row[self.mapping['increment_id'][:position]]) || Order.where(:increment_id => single_row[self.mapping['increment_id'][:position]]).length == 0 || self.params[:contains_unique_order_items] == true
+                  @order = Order.find_or_create_by_increment_id(single_row[self.mapping['increment_id'][:position]])
+                  @order.store_id = self.params[:store_id]
+                  @order_required = ['qty', 'sku', 'increment_id']
+                  order_map.each do |single_map|
+                    if !self.mapping[single_map].nil? && self.mapping[single_map][:position] >= 0
+                      #if sku, create order item with product id, qty
+                      if single_map == 'sku' && !self.params[:contains_unique_order_items] == true
+                        import_for_nonunique_order_items(single_row, single_map)
+                      elsif single_map == 'firstname'
+                        if self.mapping['lastname'].nil? || self.mapping['lastname'][:position] == 0
+                          arr = single_row[self.mapping[single_map][:position]].blank? ? [] : single_row[self.mapping[single_map][:position]].split(' ')
+                          @order.firstname = arr.shift
+                          @order.lastname = arr.join(' ')
                         else
-                          unless self.mapping[single_map].nil?
-                            @order[single_map] = single_row[self.mapping[single_map][:position]]
-                          end
+                          @order.firstname = single_row[self.mapping[single_map][:position]]
                         end
+                      elsif single_map == 'increment_id' && self.params[:contains_unique_order_items] == true && !self.mapping['increment_id'].nil? && !self.mapping['sku'].nil?
+                        import_for_unique_order_items(single_row, single_map)
+                      else
+                        @order[single_map] = single_row[self.mapping[single_map][:position]] unless self.mapping[single_map].nil?
+                      end
 
-                        if @order_required.include? single_map
-                          @order_required.delete(single_map)
-                        end
-                      end
+                      @order_required.delete(single_map) if @order_required.include? single_map
                     end
-                    if @order_required.length > 0
-                      result[:status] = false
-                      @order_required.each do |required_element|
-                        result[:messages].push("#{required_element} is missing.")
+                  end
+                  if @order_required.length > 0
+                    result[:status] = false
+                    @order_required.each do |required_element|
+                      result[:messages].push("#{required_element} is missing.")
+                    end
+                  end
+                  if result[:status]
+                    if (!self.mapping['order_placed_time'].nil? && self.mapping['order_placed_time'][:position] >= 0) && (!self.params[:order_date_time_format].nil? && self.params[:order_date_time_format] != 'Default')
+                      begin
+                        set_order_placed_time(single_row)
+                      rescue ArgumentError => e
+                        result[:messages].push("Order Placed has bad parameter - #{single_row[self.mapping['order_placed_time'][:position]]}")
                       end
+                    elsif !self.params[:order_placed_at].nil?
+                      require 'time'
+                      time = Time.parse(self.params[:order_placed_at])
+                      @order['order_placed_time'] = time
+                    else
+                      result[:status] = false
+                      result[:messages].push('Order Placed is missing.')
                     end
                     if result[:status]
-                      if (!self.mapping['order_placed_time'].nil? && self.mapping['order_placed_time'][:position] >= 0) && (!self.params[:order_date_time_format].nil? && self.params[:order_date_time_format] != 'Default')
-                        begin
-                          set_order_placed_time(single_row)
-                        rescue ArgumentError => e
-                          result[:messages].push("Order Placed has bad parameter - #{single_row[self.mapping['order_placed_time'][:position]]}")
-                        end
-                      elsif !self.params[:order_placed_at].nil?
-                        require 'time'
-                        time = Time.parse(self.params[:order_placed_at])
-                        @order['order_placed_time'] = time
-                      else
-                        result[:status] = false
-                        result[:messages].push('Order Placed is missing.')
-                      end
-                      if result[:status]
-                        result = save_order_and_update_count(result)
-                      end
+                      result = save_order_and_update_count(result)
                     end
-                  else
-                    @import_item.previous_imported = @import_item.previous_imported + 1
-                    @import_item.save
-                    #Skipped because of duplicate order
                   end
                 else
-                  #No increment id found
-                  @import_item.status = 'failed'
-                  @import_item.message = 'No increment id was found on current order'
+                  @import_item.previous_imported = @import_item.previous_imported + 1
                   @import_item.save
-                  result[:status] = false
+                  #Skipped because of duplicate order
                 end
-                unless result[:status]
-                  @import_item.status = 'failed'
-                  @import_item.message = 'Import halted because of errors, the last imported row was '+index.to_s+'Errors: '+ result[:messages].join(',')
-                  @import_item.save
-                  break
-                end
+              else
+                #No increment id found
+                @import_item.status = 'failed'
+                @import_item.message = 'No increment id was found on current order'
+                @import_item.save
+                result[:status] = false
+              end
+              unless result[:status]
+                @import_item.status = 'failed'
+                @import_item.message = 'Import halted because of errors, the last imported row was '+index.to_s+'Errors: '+ result[:messages].join(',')
+                @import_item.save
+                break
               end
             end
 
@@ -197,9 +190,7 @@ module Groovepacker
           end
 
           def import_product_weight(product, single_row)
-            unless self.mapping['product_weight'].nil? || single_row[self.mapping['product_weight'][:position]].nil?
-              product.weight = single_row[self.mapping['product_weight'][:position]]
-            end
+            product.weight = single_row[self.mapping['product_weight'][:position]] unless self.mapping['product_weight'].nil? || single_row[self.mapping['product_weight'][:position]].nil?
           end
 
           def import_product_barcode(product, single_row, unique_order_item = false)
@@ -262,7 +253,7 @@ module Groovepacker
                 return true
               end
             end
-            return false
+            false
           end
 
           def create_order_map
@@ -302,7 +293,8 @@ module Groovepacker
             import_item.current_order_imported_item = -1
             import_item.to_import = self.final_record.length
             import_item.save
-            return import_item
+
+            import_item
           end
 
           def set_product_info(product, single_row, unique_order_item = false)
@@ -345,11 +337,7 @@ module Groovepacker
           end
 
           def get_sku(single_row, unique_order_item)
-            if unique_order_item
-              return @order_increment_sku
-            else
-              return single_row[self.mapping['sku'][:position]].strip unless single_row[self.mapping['sku'][:position]].nil?
-            end
+            unique_order_item ? @order_increment_sku : (!single_row[self.mapping['sku'][:position]].nil? ? single_row[self.mapping['sku'][:position]].strip : nil)
           end
 
           def get_filtered_final_record
@@ -361,51 +349,39 @@ module Groovepacker
             end
             self.final_record.each_with_index do |single_row, index|
               if !self.mapping['increment_id'].nil? && self.mapping['increment_id'][:position] >= 0 && !single_row[self.mapping['increment_id'][:position]].blank?
-                unless existing_order_numbers.include? (single_row[self.mapping['increment_id'][:position]])
-                  filtered_final_record << single_row
-                end
+                filtered_final_record << single_row unless existing_order_numbers.include? (single_row[self.mapping['increment_id'][:position]])
               end
             end
-            return filtered_final_record
+            filtered_final_record
           end
 
           def is_blank_row(single_row)
             for i in 0..(single_row.length-1)
-              unless single_row[i].blank?
-                return false
-              end
+              return false unless single_row[i].blank?
             end
-            return true
+            true
           end
 
           def set_order_placed_time(single_row)
             require 'time'
             imported_order_time = single_row[self.mapping['order_placed_time'][:position]]
-            separator = (imported_order_time.include? ('/')) ? '/' : '-'
+            separator = (imported_order_time.include? '/') ? '/' : '-'
             if self.params[:order_date_time_format] == 'YYYY/MM/DD TIME'
-              if self.params[:day_month_sequence] == 'DD/MM'
-                @order['order_placed_time'] = DateTime.strptime(imported_order_time, "%Y#{separator}%d#{separator}%m %H:%M")
-              else
-                @order['order_placed_time'] = DateTime.strptime(imported_order_time, "%Y#{separator}%m#{separator}%d %H:%M")
-              end
+              @order['order_placed_time'] = self.params[:day_month_sequence] == 'DD/MM' ? 
+              DateTime.strptime(imported_order_time, "%Y#{separator}%d#{separator}%m %H:%M") : 
+              DateTime.strptime(imported_order_time, "%Y#{separator}%m#{separator}%d %H:%M")
             elsif self.params[:order_date_time_format] == 'MM/DD/YYYY TIME'
-              if self.params[:day_month_sequence] == 'DD/MM'
-                @order['order_placed_time'] = DateTime.strptime(imported_order_time, "%d#{separator}%m#{separator}%Y %H:%M")
-              else
-                @order['order_placed_time'] = DateTime.strptime(imported_order_time, "%m#{separator}%d#{separator}%Y %H:%M")
-              end
+              @order['order_placed_time'] = self.params[:day_month_sequence] == 'DD/MM' ? 
+              DateTime.strptime(imported_order_time, "%d#{separator}%m#{separator}%Y %H:%M") : 
+              DateTime.strptime(imported_order_time, "%m#{separator}%d#{separator}%Y %H:%M")
             elsif self.params[:order_date_time_format] == 'YY/MM/DD TIME'
-              if self.params[:day_month_sequence] == 'DD/MM'
-                @order['order_placed_time'] = DateTime.strptime(imported_order_time, "%y#{separator}%d#{separator}%m %H:%M")
-              else
-                @order['order_placed_time'] = DateTime.strptime(imported_order_time, "%y#{separator}%m#{separator}%d %H:%M")
-              end
+              @order['order_placed_time'] = self.params[:day_month_sequence] == 'DD/MM' ? 
+              DateTime.strptime(imported_order_time, "%y#{separator}%d#{separator}%m %H:%M") : 
+              DateTime.strptime(imported_order_time, "%y#{separator}%m#{separator}%d %H:%M")
             elsif self.params[:order_date_time_format] == 'MM/DD/YY TIME'
-              if self.params[:day_month_sequence] == 'DD/MM'
-                @order['order_placed_time'] = DateTime.strptime(imported_order_time, "%d#{separator}%m#{separator}%y %H:%M")
-              else
-                @order['order_placed_time'] = DateTime.strptime(imported_order_time, "%m#{separator}%d#{separator}%y %H:%M")
-              end
+              @order['order_placed_time'] = self.params[:day_month_sequence] == 'DD/MM' ? 
+              DateTime.strptime(imported_order_time, "%d#{separator}%m#{separator}%y %H:%M") : 
+              DateTime.strptime(imported_order_time, "%m#{separator}%d#{separator}%y %H:%M")
             end
           end
 
