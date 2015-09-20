@@ -203,5 +203,4 @@ module OrdersHelper
     end
     increment_id
   end
-
 end
