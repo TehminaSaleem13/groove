@@ -310,9 +310,7 @@ module Groovepacker
                 #update the product directly
                 single_product_duplicate_sku = ProductSku.find_by_sku(duplicate_found)
                 duplicate_product = Product.find_by_id(single_product_duplicate_sku.product_id)
-                puts "record[:name]: " + record[:name]
                 if record[:name] == "['DELETE']"
-                  puts "Getting Ready to Delete..."
                   product_info = {}
                   product_info[:select_all] = false
                   product_info[:inverted] = false
@@ -332,7 +330,7 @@ module Groovepacker
                   duplicate_product.name = record[:name]
                 end
                 if !mapping['product_weight'].nil? #&& mapping['product_weight'][:action] == 'overwrite'
-                  duplicate_product.weight = record[:weight] if record[:weight] > 0
+                  duplicate_product.weight = record[:weight] if record[:weight].to_f > 0
                 end
                 duplicate_product.is_intangible = record[:is_intangible]
                 if !mapping['product_type'].nil? #&& mapping['product_type'][:action] == 'overwrite'
@@ -374,7 +372,7 @@ module Groovepacker
                   all_found_cats = ProductCat.where(product_id: duplicate_product.id)
                   to_not_add_cats = []
                   all_found_cats.each do |single_found_dup_cat|
-                    unless record[:cats].include? single_found_dup_cat.category
+                    if record[:cats].include? single_found_dup_cat.category
                       to_not_add_cats << single_found_dup_cat.category
                     end
                   end
@@ -396,7 +394,7 @@ module Groovepacker
                   all_found_barcodes = ProductBarcode.where(product_id: duplicate_product.id)
                   to_not_add_barcodes = []
                   all_found_barcodes.each do |single_found_dup_barcode|
-                    unless record[:barcodes].include? single_found_dup_barcode.barcode
+                    if record[:barcodes].include? single_found_dup_barcode.barcode
                       to_not_add_barcodes << single_found_dup_barcode.barcode
                     end
                   end
@@ -420,7 +418,7 @@ module Groovepacker
                   all_found_skus = ProductSku.where(product_id: duplicate_product.id)
                   to_not_add_skus = []
                   all_found_skus.each do |single_found_dup_sku|
-                    unless record[:skus].include? single_found_dup_sku.sku
+                    if record[:skus].include? single_found_dup_sku.sku
                       to_not_add_skus << single_found_dup_sku.sku
                     end
                   end
@@ -444,7 +442,7 @@ module Groovepacker
                   all_found_images = ProductImage.where(product_id: duplicate_product.id)
                   to_not_add_images = []
                   all_found_images.each do |single_found_dup_image|
-                    unless record[:images].include? single_found_dup_image.image
+                    if record[:images].include? single_found_dup_image.image
                       to_not_add_images << single_found_dup_image.image
                     end
                   end
