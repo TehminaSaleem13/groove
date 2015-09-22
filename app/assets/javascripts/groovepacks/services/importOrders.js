@@ -53,7 +53,7 @@ groovepacks_services.factory("importOrders", ['$http', 'notification', function 
       //             {
       //                 //$scope.active_stores[i].status="in_progress";
       //                 //$timeout()
-      //                 $http.get('/orders/importorders/'+scope.active_stores[i].info.id+'.json?activestoreindex='+i).success(
+      //                 $http.get('/orders/import_orders/'+scope.active_stores[i].info.id+'.json?activestoreindex='+i).success(
       //                     function(orderdata){
 
       //                         if (orderdata.status)

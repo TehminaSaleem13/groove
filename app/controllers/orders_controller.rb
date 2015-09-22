@@ -124,7 +124,6 @@ class OrdersController < ApplicationController
     @result = Hash.new
     @result['status'] = true
     @result['messages'] = []
-
     #Everyone can create notes from Packer
     @order.notes_fromPacker = params[:order]['notes_fromPacker']
 
@@ -209,7 +208,7 @@ class OrdersController < ApplicationController
   # then the API considers order to be descending.The API also supports a product status filter.
   # The filter expects one of the following parameters in params[:filter] 'all', 'active', 'inactive', 'new'.
   # If no filter is passed, then the API will default to 'active'
-  def getorders
+  def index
     @result = Hash.new
     @result['status'] = true
 
@@ -225,7 +224,7 @@ class OrdersController < ApplicationController
     end
   end
 
-  def duplicateorder
+  def duplicate_orders
 
     @result = Hash.new
     @result['status'] = true
@@ -282,7 +281,7 @@ class OrdersController < ApplicationController
     end
   end
 
-  def deleteorder
+  def delete_orders
     @result = Hash.new
     @result['status'] = true
     @result['error_messages'] = []
@@ -336,7 +335,7 @@ class OrdersController < ApplicationController
     end
   end
 
-  def changeorderstatus
+  def change_orders_status
     @result = Hash.new
     @result['status'] = true
     @result['error_messages'] = []
@@ -372,7 +371,7 @@ class OrdersController < ApplicationController
     end
   end
 
-  def getdetails
+  def show
     @result = Hash.new
     @order = Order.find_by_id(params[:id])
     @result['status'] = true
@@ -456,7 +455,7 @@ class OrdersController < ApplicationController
   end
 
 
-  def recordexception
+  def record_exception
     @result = Hash.new
     @result['status'] = true
     username = current_user.name
@@ -503,7 +502,7 @@ class OrdersController < ApplicationController
     end
   end
 
-  def clearexception
+  def clear_exception
     @result = Hash.new
     @result['status'] = true
     @result['messages'] = []
@@ -532,7 +531,7 @@ class OrdersController < ApplicationController
     end
   end
 
-  def additemtoorder
+  def add_item_to_order
     @result = Hash.new
     @result['status'] = true
     @result['messages'] = []
@@ -583,7 +582,7 @@ class OrdersController < ApplicationController
     end
   end
 
-  def updateiteminorder
+  def update_item_in_order
     @result = Hash.new
     @result['status'] = true
     @result['messages'] = []
@@ -635,7 +634,7 @@ class OrdersController < ApplicationController
     end
   end
 
-  def removeitemfromorder
+  def remove_item_from_order
     @result = Hash.new
     @result['status'] = true
     @result['messages'] =[]
@@ -776,7 +775,7 @@ class OrdersController < ApplicationController
     end
   end
 
-  def updateorderlist
+  def update_order_list
     @result = Hash.new
     @result['status'] = true
     @order = Order.find_by_id(params[:id])

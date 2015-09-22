@@ -73,6 +73,53 @@ Groovepacks::Application.routes.draw do
   #   resources :products
   root :to => "home#index"
 
+  resources :orders do
+    collection do
+      get 'search'
+      get 'import_orders'
+      post 'generate_pick_list'
+      post 'generate_packing_slip'
+      post 'order_items_export'
+      post 'cancel_packing_slip'
+      post 'delete_orders'
+      post 'duplicate_orders'
+      post 'change_orders_status'
+      post 'update_order_list'
+      post 'rollback'
+      post 'remove_item_from_order'
+      post 'update_item_in_order'
+    end
+    member do
+      post 'add_item_to_order'
+      post 'record_exception'
+      post 'clear_exception'
+    end
+  end
+
+  resources :products do
+    collection do
+      get 'import_products'
+      get 'search'
+      get 'import_images'
+      get 'import_product_details'
+      post 'delete_product'
+      post 'duplicate_product'
+      post 'change_product_status'
+      post 'generate_barcode'
+      post 'scan_per_product'
+      post 'generate_products_csv'
+      post 'update_product_list'
+      post 'update_image'
+    end
+    member do
+      get 'show'
+      post 'add_image'
+      post 'set_alias'
+      post 'add_product_to_kit'
+      post 'remove_products_from_kit'
+    end
+  end
+
   resources :payments do
     collection do
       get 'default_card'

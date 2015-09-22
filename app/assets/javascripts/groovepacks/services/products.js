@@ -65,7 +65,7 @@ groovepacks_services.factory('products', ['$http', 'notification', 'editable', '
     }
     object.setup.offset = page * object.setup.limit;
     if (setup.search == '') {
-      url = '/products/getproducts.json?filter=' + setup.filter + '&sort=' + setup.sort + '&order=' + setup.order;
+      url = '/products.json?filter=' + setup.filter + '&sort=' + setup.sort + '&order=' + setup.order;
     } else {
       url = '/products/search.json?search=' + setup.search + '&sort=' + setup.sort + '&order=' + setup.order;
     }
@@ -128,13 +128,13 @@ groovepacks_services.factory('products', ['$http', 'notification', 'editable', '
       }
       var url = '';
       if (action == "delete") {
-        url = '/products/deleteproduct.json';
+        url = '/products/delete_product.json';
       } else if (action == "duplicate") {
-        url = '/products/duplicateproduct.json';
+        url = '/products/duplicate_product.json';
       } else if (action == "update_status") {
-        url = '/products/changeproductstatus.json';
+        url = '/products/change_product_status.json';
       } else if (action == "barcode") {
-        url = '/products/generatebarcode.json';
+        url = '/products/generate_barcode.json';
       } else if (action == "receiving_label") {
         url = '/products/print_receiving_label.json';
       } else if (action == 'update_per_product') {
@@ -193,7 +193,7 @@ groovepacks_services.factory('products', ['$http', 'notification', 'editable', '
     var to_limit = (to_page * setup.limit) + to.index + 1 - from_offset;
 
     if (setup.search == '') {
-      url = '/products/getproducts.json?filter=' + setup.filter + '&sort=' + setup.sort + '&order=' + setup.order;
+      url = '/products.json?filter=' + setup.filter + '&sort=' + setup.sort + '&order=' + setup.order;
     } else {
       url = '/products/search.json?search=' + setup.search;
     }
@@ -212,7 +212,7 @@ groovepacks_services.factory('products', ['$http', 'notification', 'editable', '
   };
 
   var update_list_node = function (obj) {
-    return $http.post('/products/updateproductlist.json', obj).success(function (data) {
+    return $http.post('/products/update_product_list.json', obj).success(function (data) {
       if (data.status) {
         notification.notify("Successfully Updated", 1);
       } else {
@@ -223,7 +223,7 @@ groovepacks_services.factory('products', ['$http', 'notification', 'editable', '
 
   //single product related functions
   var get_single = function (id, products) {
-    return $http.get('/products/getdetails/' + id + '.json').success(function (data) {
+    return $http.get('/products/' + id + '.json').success(function (data) {
       if (data.product) {
         if (typeof products.single['basicinfo'] != "undefined" && data.product.basicinfo.id == products.single.basicinfo.id) {
           angular.extend(products.single, data.product);
@@ -239,7 +239,7 @@ groovepacks_services.factory('products', ['$http', 'notification', 'editable', '
 
   //single product retrieval by barcode
   var get_single_product_by_barcode = function (barcode, products) {
-    return $http.get('/products/getdetails.json?barcode=' + barcode).success(function (data) {
+    return $http.get('/products/show.json?barcode=' + barcode).success(function (data) {
       products.single = {};
       if (data.product) {
         products.single = data.product;
@@ -251,7 +251,7 @@ groovepacks_services.factory('products', ['$http', 'notification', 'editable', '
   };
 
   var create_single = function (products) {
-    return $http.post('/products/create.json').success(function (data) {
+    return $http.post('/products').success(function (data) {
       products.single = {};
       if (!data.status) {
         notification.notify(data.messages, 0);
@@ -262,7 +262,7 @@ groovepacks_services.factory('products', ['$http', 'notification', 'editable', '
     if (typeof auto !== "boolean") {
       auto = true;
     }
-    return $http.post('/products/updateproduct.json', products.single).success(function (data) {
+    return $http.put('/products/'+products.single.basicinfo.id+'.json', products.single).success(function (data) {
       if (data.status) {
         if (!auto) {
           notification.notify("Successfully Updated", 1);
@@ -301,7 +301,7 @@ groovepacks_services.factory('products', ['$http', 'notification', 'editable', '
     return $http({
       method: 'POST',
       headers: {'Content-Type': undefined},
-      url: '/products/addimage.json',
+      url: '/products/'+products.single.basicinfo.id+'.json',
       transformRequest: function (data) {
         var request = new FormData();
         for (var key in data) {
@@ -309,7 +309,7 @@ groovepacks_services.factory('products', ['$http', 'notification', 'editable', '
         }
         return request;
       },
-      data: {product_id: products.single.basicinfo.id, product_image: image.file}
+      data: {product_image: image.file}
     }).success(function (data) {
       if (data.status) {
         notification.notify("Successfully Updated", 1);
@@ -335,8 +335,7 @@ groovepacks_services.factory('products', ['$http', 'notification', 'editable', '
   };
 
   var set_alias = function (products, ids) {
-    return $http.post("products/setalias.json", {
-      product_orig_id: ids[0],
+    return $http.post("products/"+ids[0]+"/set_alias.json", {
       product_alias_ids: [products.single.basicinfo.id]
     }).success(
       function (data) {
@@ -349,8 +348,7 @@ groovepacks_services.factory('products', ['$http', 'notification', 'editable', '
     ).error(notification.server_error);
   };
   var master_alias = function (products, selected) {
-    return $http.post("products/setalias.json", {
-      product_orig_id: products.single.basicinfo.id,
+    return $http.post("products/"+products.single.basicinfo.id+"/set_alias.json", {
       product_alias_ids: selected
     }).success(
       function (data) {
@@ -364,7 +362,7 @@ groovepacks_services.factory('products', ['$http', 'notification', 'editable', '
   };
 
   var add_to_kit = function (kits, ids) {
-    return $http.post("/products/addproducttokit.json", {product_ids: ids, kit_id: kits.single.basicinfo.id}).success(
+    return $http.post("/products/"+kits.single.basicinfo.id+"/add_product_to_kit.json", {product_ids: ids}).success(
       function (data) {
         if (data.status) {
           notification.notify("Successfully Added", 1);
@@ -376,8 +374,7 @@ groovepacks_services.factory('products', ['$http', 'notification', 'editable', '
   };
 
   var remove_from_kit = function (products, skus) {
-    return $http.post('/products/removeproductsfromkit.json', {
-      kit_id: products.single.basicinfo.id,
+    return $http.post('/products/'+products.single.basicinfo.id+'/remove_products_from_kit.json', {
       kit_products: skus
     }).success(function (data) {
       if (data.status) {

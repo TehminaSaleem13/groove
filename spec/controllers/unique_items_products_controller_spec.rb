@@ -27,9 +27,9 @@ RSpec.describe ProductsController, :type => :controller do
                     :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>child_product2.name)
       expect(child_product1.status).to eq('new')
       expect(child_product2.status).to eq('new')
-      put :generatebarcode, {:select_all=>false, :inverted=>false, :productArray=>[{:id=>child_product1.id}]}
+      put :generate_barcode, {:select_all=>false, :inverted=>false, :productArray=>[{:id=>child_product1.id}]}
       expect(response.status).to eq(200)
-      put :generatebarcode, {:select_all=>false, :inverted=>false, :productArray=>[{:id=>child_product2.id}]}
+      put :generate_barcode, {:select_all=>false, :inverted=>false, :productArray=>[{:id=>child_product2.id}]}
       expect(response.status).to eq(200)
       
       base_product.reload
@@ -58,7 +58,7 @@ RSpec.describe ProductsController, :type => :controller do
                     :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>child_product2.name)
       expect(child_product1.status).to eq('new')
       expect(child_product2.status).to eq('new')
-      put :generatebarcode, {:select_all=>false, :inverted=>false, :productArray=>[{:id=>base_product.id}]}
+      put :generate_barcode, {:select_all=>false, :inverted=>false, :productArray=>[{:id=>base_product.id}]}
       expect(response.status).to eq(200)
       
       base_product.reload
@@ -87,9 +87,9 @@ RSpec.describe ProductsController, :type => :controller do
                     :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>child_product2.name)
       expect(child_product1.status).to eq('new')
       expect(child_product2.status).to eq('new')
-      put :generatebarcode, {:select_all=>false, :inverted=>false, :productArray=>[{:id=>child_product1.id}]}
+      put :generate_barcode, {:select_all=>false, :inverted=>false, :productArray=>[{:id=>child_product1.id}]}
       expect(response.status).to eq(200)
-      put :generatebarcode, {:select_all=>false, :inverted=>false, :productArray=>[{:id=>child_product2.id}]}
+      put :generate_barcode, {:select_all=>false, :inverted=>false, :productArray=>[{:id=>child_product2.id}]}
       expect(response.status).to eq(200)
       
       base_product.reload
@@ -118,11 +118,11 @@ RSpec.describe ProductsController, :type => :controller do
                     :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>child_product2.name)
       expect(child_product1.status).to eq('new')
       expect(child_product2.status).to eq('new')
-      put :generatebarcode, {:select_all=>false, :inverted=>false, :productArray=>[{:id=>base_product.id}]}
+      put :generate_barcode, {:select_all=>false, :inverted=>false, :productArray=>[{:id=>base_product.id}]}
       expect(response.status).to eq(200)
-      put :generatebarcode, {:select_all=>false, :inverted=>false, :productArray=>[{:id=>child_product1.id}]}
+      put :generate_barcode, {:select_all=>false, :inverted=>false, :productArray=>[{:id=>child_product1.id}]}
       expect(response.status).to eq(200)
-      put :generatebarcode, {:select_all=>false, :inverted=>false, :productArray=>[{:id=>child_product2.id}]}
+      put :generate_barcode, {:select_all=>false, :inverted=>false, :productArray=>[{:id=>child_product2.id}]}
       expect(response.status).to eq(200)
       
       base_product.reload
@@ -155,7 +155,7 @@ RSpec.describe ProductsController, :type => :controller do
     #   order_item2 = FactoryGirl.create(:order_item, :product_id=>child_product2.id,
     #                 :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>child_product2.name, :inv_status=>'unallocated')
 		#
-    #   put :updateproductlist, { :id => base_product.id, var: "qty", value: "100"  }
+    #   put :update_product_list, { :id => base_product.id, var: "qty", value: "100"  }
     #   expect(response.status).to eq(200)
     #
     #   base_product.reload
@@ -186,7 +186,7 @@ RSpec.describe ProductsController, :type => :controller do
       order_item2 = FactoryGirl.create(:order_item, :product_id=>child_product2.id,
                     :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>child_product2.name, :inv_status=>'unallocated')
 
-      put :updateproductlist, { :id => base_product.id, var: "qty_on_hand", value: "100"  }
+      put :update_product_list, { :id => base_product.id, var: "qty_on_hand", value: "100"  }
       expect(response.status).to eq(200)
       
       base_product.reload

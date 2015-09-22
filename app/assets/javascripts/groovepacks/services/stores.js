@@ -362,7 +362,7 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
 
   //Import related functions
   var import_products = function (stores, report_id) {
-    return $http.get('/products/importproducts/' + stores.single.id + '.json?reportid=' + report_id).success(function (data) {
+    return $http.get('/products/import_products/' + stores.single.id + '.json?reportid=' + report_id).success(function (data) {
       if (data.status) {
         stores.import.product.status = "Successfully imported " + data.success_imported + " of " + data.total_imported +
           " products. " + data.previous_imported + " products were previously imported";
@@ -378,7 +378,7 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
   };
 
   var import_orders = function (stores) {
-    return $http.get('/orders/importorders/' + stores.single.id + '.json').success(function (data) {
+    return $http.get('/orders/import_orders/' + stores.single.id + '.json').success(function (data) {
       if (data.status) {
         stores.import.order.status = "Successfully imported " + data.success_imported + " of " + data.total_imported +
           " orders. " + data.previous_imported + " orders were previously imported";
@@ -394,7 +394,7 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
   };
 
   var import_images = function (stores, report_id) {
-    return $http.get('/products/importimages/' + stores.single.id + '.json').success(function (data) {
+    return $http.get('/products/import_images/' + stores.single.id + '.json').success(function (data) {
       if (data.status) {
         stores.import.image.status = "Successfully imported " + data.success_imported + " of " + data.total_imported +
           " images. " + data.previous_imported + " images were previously imported";
