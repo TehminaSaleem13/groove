@@ -22,19 +22,19 @@ Groovepacks::Application.routes.draw do
 
   get "inventory_warehouse/removeuser"
 
-  get "store_settings/createStore"
+  # get "store_settings/createStore"
 
-  get "store_settings/csvImportData"
+  # get "store_settings/csvImportData"
 
-  get "store_settings/csvDoImport"
+  # get "store_settings/csv_do_import"
 
-  get "store_settings/changestorestatus"
+  # get "store_settings/change_store_status"
 
-  get "store_settings/editstore"
+  # get "store_settings/editstore"
 
-  get "store_settings/duplicatestore"
+  # get "store_settings/duplicate_store"
 
-  get "store_settings/deletestore"
+  # get "store_settings/delete_store"
 
   get "user_settings/userslist"
 
@@ -72,6 +72,13 @@ Groovepacks::Application.routes.draw do
   # Sample resource route (maps HTTP verbs to controller actions automatically):
   #   resources :products
   root :to => "home#index"
+
+  resources :home do
+    collection do
+      get 'userinfo'
+      get 'request_socket_notifs'
+    end
+  end
 
   resources :orders do
     collection do
@@ -119,6 +126,51 @@ Groovepacks::Application.routes.draw do
       post 'remove_products_from_kit'
     end
   end
+
+  resources :settings do
+    collection do
+      get 'get_columns_state'
+      post 'save_columns_state'
+      post 'cancel_bulk_action'
+    end
+    member do
+    end
+  end
+
+  resources :store_settings do
+    collection do
+      get 'get_system'
+      get 'let_store_be_created'
+      get 'get_ebay_signin_url'
+      get 'ebay_user_fetch_token'
+      get 'csv_map_data'
+      post 'delete_store'
+      post 'duplicate_store'
+      post 'change_store_status'
+      post 'create_update_store'
+
+    end
+    member do
+      get 'verify_tags'
+      put 'update_all_locations'
+      post 'connect_and_retrieve'
+      post 'create_update_ftp_credentials'
+      post 'delete_ebay_token'
+      post 'update_ebay_user_token'
+      post 'csv_import_data'
+      post 'csv_do_import'
+      post 'csv_product_import_cancel'
+      post 'update_csv_map'
+      post 'delete_csv_map'
+    end
+  end
+
+  # resources :user_settings do
+  #   collection do
+  #   end
+  #   member do
+  #   end
+  # end
 
   resources :payments do
     collection do

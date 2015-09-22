@@ -15,7 +15,7 @@ describe StoreSettingsController do
     it "creates an shipworks store" do
       request.accept = "application/json"
       @user.role.update_attribute(:add_edit_stores, true)
-      post :createUpdateStore, { :store_type => 'Shipworks', :status => false }
+      post :create_update_store, { :store_type => 'Shipworks', :status => false }
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
       expect(result['status']).to eq(true)
@@ -28,7 +28,7 @@ describe StoreSettingsController do
       @shipworks_credentials = FactoryGirl.create(:shipworks_credential, :store_id=>@store.id)
       request.accept = "application/json"
       @user.role.update_attribute(:add_edit_stores, true)
-      post :createUpdateStore, { :store_type => 'Shipworks', :id => @store.id, :status => false }
+      post :create_update_store, { :store_type => 'Shipworks', :id => @store.id, :status => false }
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
       expect(result['status']).to eq(true)
