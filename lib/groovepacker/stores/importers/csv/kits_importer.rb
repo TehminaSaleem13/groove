@@ -31,7 +31,7 @@ module Groovepacker
                   return true
                 end
                 if not_blank?('kit_sku', single_row, mapping)
-                  kit_sku = single_row[mapping['kit_sku'][:position]]
+                  kit_sku = single_row[mapping['kit_sku'][:position]].strip
                   bulk_action.current = kit_sku
                   bulk_action.completed = index
                   bulk_action.save
@@ -61,7 +61,7 @@ module Groovepacker
                       # Add barcode only when creating a new kit, this solves having to check every time.
                       if not_blank?('kit_barcode', single_row, mapping)
                         kit_product_barcode = ProductBarcode.new
-                        kit_product_barcode.barcode = single_row[mapping['kit_barcode'][:position]]
+                        kit_product_barcode.barcode = single_row[mapping['kit_barcode'][:position]].strip
                         kit_product.product_barcodes << kit_product_barcode
                       end
                     else
@@ -81,7 +81,7 @@ module Groovepacker
 
                     #import product
                     if not_blank?('part_sku', single_row, mapping)
-                      product_sku = single_row[mapping['part_sku'][:position]]
+                      product_sku = single_row[mapping['part_sku'][:position]].strip
                       list_product_sku = ProductSku.where(:sku => product_sku)
                       if list_product_sku.length == 0
                         single_import_product = Product.new
@@ -90,7 +90,7 @@ module Groovepacker
                         single_import_product.product_skus << single_import_product_sku
                         if not_blank?('part_barcode', single_row, mapping)
                           single_import_product_barcode = ProductBarcode.new
-                          single_import_product_barcode.barcode = single_row[mapping['part_barcode'][:position]]
+                          single_import_product_barcode.barcode = single_row[mapping['part_barcode'][:position]].strip
                           single_import_product.product_barcodes << single_import_product_barcode
                         end
                       else

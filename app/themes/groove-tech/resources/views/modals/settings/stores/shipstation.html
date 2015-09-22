@@ -6,7 +6,7 @@
 
       <div class="controls col-md-8">
         <input name="username" xs-input-sync ng-model="stores.single.username" type="text"
-               ng-blur="update_single_store()" class="form-control input-style" value="" required/>
+               ng-blur="update_single_store(true)" class="form-control input-style" value="" required/>
       </div>
     </div>
 
@@ -15,7 +15,7 @@
 
       <div class="controls col-md-8">
         <input name="password" xs-input-sync ng-model="stores.single.password" type="text"
-               ng-blur="update_single_store()" class="form-control input-style" value="" required/>
+               ng-blur="update_single_store(true)" class="form-control input-style" value="" required/>
       </div>
     </div>
   </div>
@@ -80,7 +80,7 @@
     <legend>Automatically Update Products?</legend>
     <div class="form-group">
       <div class="col-md-9 form-inline">
-        <div toggle-switch ng-model="stores.single.auto_update_products" groov-click="update_single_store()"></div>
+        <div toggle-switch ng-model="stores.single.auto_update_products" groov-click="update_single_store(true)"></div>
       </div>
     </div>
   </div>

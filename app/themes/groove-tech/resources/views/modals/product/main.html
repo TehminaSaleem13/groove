@@ -412,7 +412,6 @@
 
       <fieldset ng-show="products.single.basicinfo.is_kit==1">
         <legend>Kit Options</legend>
-
         <table class="table table-hover table-bordered table-striped table-condensed">
           <thead>
           <tr>
@@ -429,6 +428,12 @@
               <div>Available Inv</div>
             </th>
             <th>
+              <div>QTY On Hand</div>
+            </th>
+            <th>
+              <div>Product Status</div>
+            </th>
+            <th>
               <div>Packing Order</div>
             </th>
           </tr>
@@ -441,6 +446,8 @@
             <td groov-editable="kitEditableOptions" ng-model="kit_sku" prop="qty"
                 identifier="kit_sku-qty-{{$index}}"></td>
             <td>{{kit_sku.available_inv}}</td>
+            <td>{{kit_sku.qty_on_hand}}</td>
+            <td><span class="label label-default" ng-class="{'label-success': kit_sku.product_status=='active', 'label-info': kit_sku.product_status=='new'}" style="text-transform: capitalize;">{{kit_sku.product_status}}</span></td>
             <td groov-editable="kitEditableOptions" ng-model="kit_sku" prop="packing_order"
                 identifier="kit_sku-packing_order-{{$index}}"></td>
           </tr>

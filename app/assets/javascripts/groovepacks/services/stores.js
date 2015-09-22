@@ -110,13 +110,16 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
   //single store related functions
   var get_single = function (id, stores) {
     return $http.get('/store_settings/getstoreinfo.json?id=' + id).success(function (data) {
-      stores.single = {};
+      // stores.single = {};
       stores.import.product.status = "";
       stores.import.order.status = "";
       stores.import.product.status_show = false;
       stores.import.order.status_show = false;
       if (data.status) {
-        stores.single = data.store;
+        // stores.single = data.store;
+        for (var key in data.store) {
+          stores.single[key] = data.store[key];
+        }
         if (data.mapping) {
           stores.csv.mapping = data.mapping;
         }
@@ -193,6 +196,7 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
           } else if (data.store.store_type == 'CSV') {
             stores.single.host = data.credentials.ftp_credentials.host;
             stores.single.port = data.credentials.ftp_credentials.port;
+            stores.single.connection_method = data.credentials.ftp_credentials.connection_method;
             stores.single.username = data.credentials.ftp_credentials.username;
             stores.single.password = data.credentials.ftp_credentials.password;
           }
