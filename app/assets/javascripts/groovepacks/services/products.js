@@ -301,7 +301,7 @@ groovepacks_services.factory('products', ['$http', 'notification', 'editable', '
     return $http({
       method: 'POST',
       headers: {'Content-Type': undefined},
-      url: '/products/'+products.single.basicinfo.id+'.json',
+      url: '/products/'+products.single.basicinfo.id+'/add_image.json',
       transformRequest: function (data) {
         var request = new FormData();
         for (var key in data) {

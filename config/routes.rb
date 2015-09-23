@@ -84,6 +84,7 @@ Groovepacks::Application.routes.draw do
     collection do
       get 'search'
       get 'import_orders'
+      get 'import_all'
       post 'generate_pick_list'
       post 'generate_packing_slip'
       post 'order_items_export'
@@ -134,7 +135,12 @@ Groovepacks::Application.routes.draw do
     collection do
       get 'get_settings'
       get 'get_columns_state'
+      put 'update_settings'
       get 'get_scan_pack_settings'
+      get 'order_exceptions'
+      get 'order_serials'
+      get 'export_csv'
+      post 'restore'
       post 'save_columns_state'
       post 'cancel_bulk_action'
       post 'update_scan_pack_settings'
@@ -184,9 +190,11 @@ Groovepacks::Application.routes.draw do
   end
 
   resources :exportsettings do
-    get 'get_export_settings'
-    put 'update_export_settings'
-    post 'order_exports'
+    collection do
+      get 'get_export_settings'
+      put 'update_export_settings'
+      get 'order_exports'
+    end
   end
 
   resources :scan_pack do
