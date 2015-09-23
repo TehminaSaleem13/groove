@@ -387,7 +387,7 @@ groovepacks_admin_services.factory('stores', ['$http', 'notification', '$filter'
 
   //csv related functions
   var csv_import_data = function (stores, id) {
-    return $http.get('/store_settings/csvImportData.json?id=' + id + '&type=' + stores.single.type).
+    return $http.get('/store_settings/csv_import_data.json?id=' + id + '&type=' + stores.single.type).
       error(notification.server_error);
   };
 

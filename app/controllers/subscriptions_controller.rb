@@ -110,8 +110,8 @@ class SubscriptionsController < ApplicationController
 
   end
 
-  def planInfo
-    getPlanInfo(params[:plan_id])
+  def plan_info
+    get_plan_info(params[:plan_id])
     render json: @result
   end
 

@@ -54,7 +54,7 @@ groovepacks_services.factory('warehouses', ['$http', 'notification', '$filter', 
   //list related functions
   var get_list = function (object) {
     var result = [];
-    return $http.get('/inventory_warehouse/index.json').success(function (data) {
+    return $http.get('/inventory_warehouse.json').success(function (data) {
       if (data.status) {
         result = $filter('filter')(data.data.inv_whs, object.setup.search);
         result = $filter('orderBy')(result, object.setup.sort, (object.setup.order == 'DESC'));

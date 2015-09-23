@@ -439,12 +439,12 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
 
   //csv related functions
   var csv_import_data = function (stores, id) {
-    return $http.post('/store_settings/'+id+'csvImportData.json?&type=' + stores.single.type).
+    return $http.post('/store_settings/'+id+'/csv_import_data.json?&type=' + stores.single.type).
       error(notification.server_error);
   };
 
   var csv_do_import = function (csv) {
-    return $http.post('/store_settings/'+csv.current.store_id+'csv_do_import.json', csv.current).success(function (data) {
+    return $http.post('/store_settings/'+csv.current.store_id+'/csv_do_import.json', csv.current).success(function (data) {
       if (data.status) {
         notification.notify("CSV import queued successfully.", 1);
         csv.current = {};
@@ -457,14 +457,14 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
   };
 
   var csv_product_import_cancel = function (id) {
-    return $http.post('/store_settings/'+id+'csv_product_import_cancel.json').success(function (data) {
+    return $http.post('/store_settings/'+id+'/csv_product_import_cancel.json').success(function (data) {
       notification.notify(data['error_messages']);
       notification.notify(data['success_messages'], 1);
       notification.notify(data['notice_messages'], 2);
     }).error(notification.server_error);
   };
   var update_csv_map = function (stores, map) {
-    return $http.post('/store_settings/'+stores.single.id+'update_csv_map.json', {
+    return $http.post('/store_settings/'+stores.single.id+'/update_csv_map.json', {
       map: map
     }).success(function (data) {
       if (data.status) {
@@ -483,7 +483,7 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
   };
 
   var delete_csv_map = function (stores, kind) {
-    return $http.post('/store_settings/'+stores.single.id+'delete_csv_map.json', {
+    return $http.post('/store_settings/'+stores.single.id+'/delete_csv_map.json', {
       kind: kind
     }).success(function (data) {
       if (data.status) {

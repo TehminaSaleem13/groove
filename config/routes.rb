@@ -8,23 +8,23 @@ Groovepacks::Application.routes.draw do
   # match 'subscriptions/new', :to => 'subscriptions#new'
   # match 'subscriptions/show', :to => 'subscriptions#show'
   # get "subscriptions/show"
-  get "inventory_warehouse/create"
+  # get "inventory_warehouse/create"
 
-  get "inventory_warehouse/update"
+  # get "inventory_warehouse/update"
 
-  get "inventory_warehouse/show"
+  # get "inventory_warehouse/show"
 
-  get "inventory_warehouse/index"
+  # get "inventory_warehouse/index"
 
-  get "inventory_warehouse/destroy"
+  # get "inventory_warehouse/destroy"
 
-  get "inventory_warehouse/adduser"
+  # get "inventory_warehouse/adduser"
 
-  get "inventory_warehouse/removeuser"
+  # get "inventory_warehouse/removeuser"
 
   # get "store_settings/createStore"
 
-  # get "store_settings/csvImportData"
+  # get "store_settings/csv_import_data"
 
   # get "store_settings/csv_do_import"
 
@@ -36,19 +36,19 @@ Groovepacks::Application.routes.draw do
 
   # get "store_settings/delete_store"
 
-  get "user_settings/userslist"
+  # get "user_settings/userslist"
 
-  get "user_settings/createUser"
+  # get "user_settings/createUser"
 
-  get "user_settings/changeuserstatus"
+  # get "user_settings/change_user_status"
 
-  get "user_settings/edituser"
+  # get "user_settings/edituser"
 
-  get "user_settings/duplicateuser"
+  # get "user_settings/duplicate_user"
 
-  get "user_settings/deleteuser"
+  # get "user_settings/delete_user"
 
-  get "home/index"
+  # get "home/index"
 
   get "/404", :to => "specials#error_404"
 
@@ -95,6 +95,7 @@ Groovepacks::Application.routes.draw do
       post 'rollback'
       post 'remove_item_from_order'
       post 'update_item_in_order'
+      post 'import_shipworks'
     end
     member do
       post 'add_item_to_order'
@@ -117,6 +118,8 @@ Groovepacks::Application.routes.draw do
       post 'generate_products_csv'
       post 'update_product_list'
       post 'update_image'
+      post 'update_intangibleness'
+      post 'adjust_available_inventory'
     end
     member do
       get 'show'
@@ -129,11 +132,12 @@ Groovepacks::Application.routes.draw do
 
   resources :settings do
     collection do
+      get 'get_settings'
       get 'get_columns_state'
+      get 'get_scan_pack_settings'
       post 'save_columns_state'
       post 'cancel_bulk_action'
-    end
-    member do
+      post 'update_scan_pack_settings'
     end
   end
 
@@ -165,12 +169,41 @@ Groovepacks::Application.routes.draw do
     end
   end
 
-  # resources :user_settings do
-  #   collection do
-  #   end
-  #   member do
-  #   end
-  # end
+  resources :user_settings do
+    collection do
+      get 'get_roles'
+      get 'let_user_be_created'
+      post 'delete_user'
+      post 'duplicate_user'
+      post 'change_user_status'
+      post 'delete_role'
+    end
+    member do
+      put 'create_role'
+    end
+  end
+
+  resources :exportsettings do
+    get 'get_export_settings'
+    put 'update_export_settings'
+    post 'order_exports'
+  end
+
+  resources :scan_pack do
+    collection do
+      post 'scan_barcode'
+      post 'reset_order_scan'
+      post 'serial_scan'
+      post 'click_scan'
+      post 'product_instruction'
+      post 'type_scan'
+      post 'confirmation_code'
+      post 'add_note'
+      post 'reset_order_scan'
+    end
+    member do
+    end
+  end
 
   resources :payments do
     collection do
@@ -184,7 +217,6 @@ Groovepacks::Application.routes.draw do
 
   resources :specials do
     collection do
-      get 'error_action'
     end
   end
 
@@ -231,6 +263,24 @@ Groovepacks::Application.routes.draw do
       post   'create_duplicate'
     end
   end
+
+  resources :inventory_warehouse do
+  end
+
+  resources :subscriptions do
+    collection do
+      post 'select_plan'
+      post 'confirm_payment'
+      get 'valid_tenant_name'
+      get 'valid_email'
+    end
+  end
+
+  resources :stripe do
+    collection do
+      post 'webhook'
+    end
+  end
   
   # Sample resource route with options:
   #   resources :products do
@@ -273,5 +323,5 @@ Groovepacks::Application.routes.draw do
 
   # This is a legacy wild controller route that's not recommended for RESTful applications.
   # Note: This route will make all actions in every controller accessible via GET requests.
-  match ':controller(/:action(/:id))(.:format)'
+  # match ':controller(/:action(/:id))(.:format)'
 end

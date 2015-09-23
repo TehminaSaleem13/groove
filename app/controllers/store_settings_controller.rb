@@ -448,7 +448,7 @@ class StoreSettingsController < ApplicationController
     end
   end
 
-  def csvImportData
+  def csv_import_data
     @result = Hash.new
     @result["status"] = true
     @result["messages"] = []
