@@ -121,6 +121,7 @@ Groovepacks::Application.routes.draw do
       post 'update_image'
       post 'update_intangibleness'
       post 'adjust_available_inventory'
+      post 'print_receiving_label'
     end
     member do
       get 'show'
