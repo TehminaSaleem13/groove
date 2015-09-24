@@ -6362,6 +6362,7 @@
         <thead>
         <td> Item</td>
         <td> Description</td>
+        <td style="white-space: nowrap;"> Pr Loc.</td>
         <td>
           <center> Qty</center>
         </td>
@@ -6372,6 +6373,11 @@
             <tr>
               <td><%= order_item.product.primary_sku %></td>
               <td><%= order_item.product.name %></td>
+              <td>
+                <% order_item.product.product_inventory_warehousess.each do |warehouse| %>
+                  <%= warehouse.location_primary %>
+                <% end %>
+              </td>
               <td>
                 <center><%= order_item.qty %></center>
               </td>
