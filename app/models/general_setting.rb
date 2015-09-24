@@ -45,12 +45,12 @@ class GeneralSetting < ActiveRecord::Base
       groove_bulk_actions.activity = 'enable'
       groove_bulk_actions.save
 
-      bulk_actions.delay(:run_at => 1.minutes.from_now).process_all(Apartment::Tenant.current, groove_bulk_actions.id)
+      bulk_actions.delay(:run_at => 10.seconds.from_now).process_all(Apartment::Tenant.current, groove_bulk_actions.id)
     else
       groove_bulk_actions.activity = 'disable'
       groove_bulk_actions.save
 
-      bulk_actions.delay(:run_at => 1.minutes.from_now).unprocess_all(Apartment::Tenant.current, groove_bulk_actions.id)
+      bulk_actions.delay(:run_at => 10.seconds.from_now).unprocess_all(Apartment::Tenant.current, groove_bulk_actions.id)
     end
     true
   end
