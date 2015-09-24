@@ -124,7 +124,7 @@ Groovepacks::Application.routes.draw do
       post 'print_receiving_label'
     end
     member do
-      get 'show'
+      get 'generate_barcode_slip'
       post 'add_image'
       post 'set_alias'
       post 'add_product_to_kit'

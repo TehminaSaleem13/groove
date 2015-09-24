@@ -436,7 +436,7 @@ groovepacks_services.factory('orders', ['$http', '$window', 'notification', '$q'
   };
 
   var single_print_barcode = function (item) {
-    $window.open('/products/generate_barcode_slip.pdf?id=' + item.id);
+    $window.open('/products/' + item.id + '/generate_barcode_slip.pdf');
   };
 
   var acknowledge_activity = function (activity_id) {
