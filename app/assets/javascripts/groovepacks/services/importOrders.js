@@ -34,7 +34,7 @@ groovepacks_services.factory("importOrders", ['$http', 'notification', function 
       // do_import: function(scope) {
 
       //     /* Get all the active stores */
-      //     $http.get('/store_settings/getactivestores.json').success(function(data) {
+      //     $http.get('/stores/getactivestores.json').success(function(data) {
       //         if (data.status)
       //         {
       //             //console.log("data status");

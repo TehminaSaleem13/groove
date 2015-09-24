@@ -454,7 +454,7 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
     };
 
     scope.export_active_products = function () {
-      $window.open('/store_settings/export_active_products.csv');
+      $window.open('/stores/export_active_products.csv');
     };
 
     myscope.init = function () {

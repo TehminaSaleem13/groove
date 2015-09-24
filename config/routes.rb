@@ -5,50 +5,6 @@ Groovepacks::Application.routes.draw do
 
   match 'subscriptions', :to => 'subscriptions#new', :as => 'subscriptions'
   match 'subscriptions_login', :to => 'subscriptions#login', :as => 'subscriptions/login'
-  # match 'subscriptions/new', :to => 'subscriptions#new'
-  # match 'subscriptions/show', :to => 'subscriptions#show'
-  # get "subscriptions/show"
-  # get "inventory_warehouse/create"
-
-  # get "inventory_warehouse/update"
-
-  # get "inventory_warehouse/show"
-
-  # get "inventory_warehouse/index"
-
-  # get "inventory_warehouse/destroy"
-
-  # get "inventory_warehouse/adduser"
-
-  # get "inventory_warehouse/removeuser"
-
-  # get "store_settings/createStore"
-
-  # get "store_settings/csv_import_data"
-
-  # get "store_settings/csv_do_import"
-
-  # get "store_settings/change_store_status"
-
-  # get "store_settings/editstore"
-
-  # get "store_settings/duplicate_store"
-
-  # get "store_settings/delete_store"
-
-  # get "user_settings/userslist"
-
-  # get "user_settings/createUser"
-
-  # get "user_settings/change_user_status"
-
-  # get "user_settings/edituser"
-
-  # get "user_settings/duplicate_user"
-
-  # get "user_settings/delete_user"
-
-  # get "home/index"
 
   get "/404", :to => "specials#error_404"
 
@@ -148,7 +104,7 @@ Groovepacks::Application.routes.draw do
     end
   end
 
-  resources :store_settings do
+  resources :stores do
     collection do
       get 'get_system'
       get 'let_store_be_created'
@@ -164,7 +120,7 @@ Groovepacks::Application.routes.draw do
     member do
       get 'verify_tags'
       put 'update_all_locations'
-      post 'connect_and_retrieve'
+      get 'connect_and_retrieve'
       post 'create_update_ftp_credentials'
       post 'delete_ebay_token'
       post 'update_ebay_user_token'
@@ -176,7 +132,7 @@ Groovepacks::Application.routes.draw do
     end
   end
 
-  resources :user_settings do
+  resources :users do
     collection do
       get 'get_roles'
       get 'let_user_be_created'
@@ -187,6 +143,7 @@ Groovepacks::Application.routes.draw do
     end
     member do
       put 'create_role'
+      get 'print_confirmation_code'
     end
   end
 
@@ -219,9 +176,6 @@ Groovepacks::Application.routes.draw do
       get 'default_card'
       delete 'delete_cards'
     end
-    # member do
-    #   put 'add_new_card'
-    # end
   end
 
   resources :specials do
@@ -274,6 +228,14 @@ Groovepacks::Application.routes.draw do
   end
 
   resources :inventory_warehouse do
+    collection do
+      put 'changestatus'
+      put 'destroy'
+      get 'available_users'
+    end
+    member do
+      post 'edit_user_perms'
+    end
   end
 
   resources :subscriptions do

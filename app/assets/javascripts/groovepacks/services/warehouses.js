@@ -111,7 +111,7 @@ groovepacks_services.factory('warehouses', ['$http', 'notification', '$filter', 
 
   var get_single = function (id, object) {
 
-    var url = '/inventory_warehouse/show.json?id=' + id;
+    var url = '/inventory_warehouse/' + id + '.json';
 
     return $http.get(url).success(
       function (data) {
@@ -126,7 +126,7 @@ groovepacks_services.factory('warehouses', ['$http', 'notification', '$filter', 
   };
 
   var create_single = function (object) {
-    var url = '/inventory_warehouse/create.json';
+    var url = '/inventory_warehouse.json';
     var warehouse = {};
     warehouse.inv_info = object.single.inv_wh_info;
     warehouse.inv_users = [];
@@ -147,11 +147,11 @@ groovepacks_services.factory('warehouses', ['$http', 'notification', '$filter', 
   };
 
   var update_single = function (object) {
-    var url = '/inventory_warehouse/update.json';
+    
     var warehouse = {};
     warehouse = object.single.inv_wh_info;
-
-    return $http.post(url, warehouse).success(
+    var url = '/inventory_warehouse/'+warehouse.id+'.json';
+    return $http.put(url, warehouse).success(
       function (data) {
         if (data.status) {
           notification.notify(data.error_messages, 0);
@@ -161,8 +161,7 @@ groovepacks_services.factory('warehouses', ['$http', 'notification', '$filter', 
   };
 
   var update_inv_wh_user = function (user, object) {
-    return $http.put(url = '/inventory_warehouse/edituserperms.json', {
-      id: object.single.inv_wh_info.id,
+    return $http.post(url = '/inventory_warehouse/'+object.single.inv_wh_info.id+'/edit_user_perms.json', {
       user: user
     }).success(
       function (data) {

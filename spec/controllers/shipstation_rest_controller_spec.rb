@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-describe StoreSettingsController do
+describe StoresController do
   before(:each) do
     Groovepacker::SeedTenant.new.seed
 

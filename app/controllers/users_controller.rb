@@ -1,6 +1,6 @@
-class UserSettingsController < ApplicationController
+class UsersController < ApplicationController
   before_filter :groovepacker_authorize!
-  include UserSettingsHelper
+  include UsersHelper
 
   def index
     @users = User.where('username != ?', 'gpadmin')

@@ -42,7 +42,7 @@ groovepacks_services.factory('users', ['$http', 'notification', '$filter', funct
   //list related functions
   var get_list = function (object) {
     var result = [];
-    return $http.get('/user_settings.json').success(
+    return $http.get('/users.json').success(
       function (data) {
         if (object != null) {
           result = $filter('filter')(data, object.setup.search);
@@ -63,11 +63,11 @@ groovepacks_services.factory('users', ['$http', 'notification', '$filter', funct
       }
       var url = '';
       if (action == "delete") {
-        url = '/user_settings/delete_user.json';
+        url = '/users/delete_user.json';
       } else if (action == "duplicate") {
-        url = '/user_settings/duplicate_user.json';
+        url = '/users/duplicate_user.json';
       } else if (action == "update_status") {
-        url = '/user_settings/change_user_status.json';
+        url = '/users/change_user_status.json';
       }
 
       return $http.post(url, users.setup.userArray).success(function (data) {
@@ -82,7 +82,7 @@ groovepacks_services.factory('users', ['$http', 'notification', '$filter', funct
   };
   //Roles related functions
   var get_roles = function (users) {
-    return $http.get('/user_settings/get_roles.json').success(function (data) {
+    return $http.get('/users/get_roles.json').success(function (data) {
       if (data.status) {
         users.roles = data.roles;
       }
@@ -90,7 +90,7 @@ groovepacks_services.factory('users', ['$http', 'notification', '$filter', funct
   };
 
   var create_role = function (users) {
-    return $http.put('/user_settings/'+users.single.id+'/create_role.json', users.single).success(function (data) {
+    return $http.put('/users/'+users.single.id+'/create_role.json', users.single).success(function (data) {
       if (data.status) {
         notification.notify("Role successfully applied", 1);
         users.single.role = data.role;
@@ -100,7 +100,7 @@ groovepacks_services.factory('users', ['$http', 'notification', '$filter', funct
     }).error(notification.server_error);
   };
   var delete_role = function (users) {
-    return $http.post('/user_settings/delete_role.json', users.single).success(function (data) {
+    return $http.post('/users/delete_role.json', users.single).success(function (data) {
       if (data.status) {
         notification.notify("Role successfully deleted", 1);
         users.single.role = data.role;
@@ -113,7 +113,7 @@ groovepacks_services.factory('users', ['$http', 'notification', '$filter', funct
 
   //single user related functions
   var get_single = function (id, users) {
-    return $http.get('/user_settings/'+id+'.json').success(function (data) {
+    return $http.get('/users/'+id+'.json').success(function (data) {
       users.single = {};
       if (data.status) {
         users.single = data.user;
@@ -122,7 +122,7 @@ groovepacks_services.factory('users', ['$http', 'notification', '$filter', funct
   };
 
   var can_create_single = function () {
-    return $http.get('/user_settings/let_user_be_created.json')
+    return $http.get('/users/let_user_be_created.json')
   };
 
   var validate_single = function (users, auto, edit_status) {
@@ -179,7 +179,7 @@ groovepacks_services.factory('users', ['$http', 'notification', '$filter', funct
       users.single.confirmation_code == null) {
       confirmation_code_auto_generated = true;
     }
-    return $http.post('/user_settings/createUpdateUser.json', users.single).success(function (data) {
+    return $http.post('/users/createUpdateUser.json', users.single).success(function (data) {
       if (data.status) {
         users.single = data.user;
         users.single.role = data.user.role;
