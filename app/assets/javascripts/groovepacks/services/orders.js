@@ -384,7 +384,7 @@ groovepacks_services.factory('orders', ['$http', '$window', 'notification', '$q'
 
   var single_record_exception = function (orders) {
     return $http.post(
-      '/orders/'+orders.single.basicinfo.id+'record_exception.json',
+      '/orders/'+orders.single.basicinfo.id+'/record_exception.json',
       {
         reason: orders.single.exception.reason,
         description: orders.single.exception.description,
@@ -400,7 +400,7 @@ groovepacks_services.factory('orders', ['$http', '$window', 'notification', '$q'
   };
 
   var single_clear_exception = function (orders) {
-    return $http.post('/orders/'+orders.single.basicinfo.id+'clear_exception.json').success(function (data) {
+    return $http.post('/orders/'+orders.single.basicinfo.id+'/clear_exception.json').success(function (data) {
       if (data.status) {
         notification.notify("Exception successfully cleared", 1);
       } else {
