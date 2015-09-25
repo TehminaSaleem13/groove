@@ -4,8 +4,10 @@
   <progressbar ng-show="selected != '' && !detail_open" ng-click="toggle_detail()" class="progress-striped"
                value="notifications[selected].percent" type="{{notifications[selected].type}}"><span
     ng-bind-html="notifications[selected].message"></span></progressbar>
-  <div ng-show="selected != '' && !detail_open" class="pull-right"><a href=""
-                                                                      ng-click="notifications[selected].cancel($event)">Cancel</a>
+  <div ng-show="selected != '' && !detail_open" 
+    class="pull-right">
+      <!-- <a href="" ng-click="notifications[selected].cancel($event)">Cancel All</a> -->
+      <a href="" ng-click="bulkCancelAction()">Cancel All</a>
   </div>
   <div class="details">
     <div ng-show="selected==''" class="text-center"><h3>No notifications here</h3></div>

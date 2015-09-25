@@ -121,7 +121,7 @@ groovepacks_controllers.controller('csvSingleModal', ['$scope', 'store_data', '$
       scope.empty_cols = [];
       var in_entry = false;
       var secondary_split = [];
-      var initial_split = scope.csv.importer[scope.csv.importer.type]["data"].split(/\r?\n/g);
+      var initial_split = scope.csv.importer[scope.csv.importer.type]["data"].split(/\r|\n|\r\n|\n\r?\n/g);
       var tmp_record = '';
       var row_array = [];
       var separator = scope.csv.current.sep;

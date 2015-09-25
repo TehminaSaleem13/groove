@@ -30,6 +30,17 @@ groovepacks_services.factory('settings', ['$http', 'notification', function ($ht
     }).error(notification.server_error);
   };
 
+  var cancel_bulk_actions = function(ids_array) {
+    return $http.post('/settings/cancel_bulk_action.json', {id: ids_array})
+      .success(function(response) {
+        console.log('Bulk actions cancelled', response);
+        // show notification
+      })
+      .error(function(error){
+        // show error message
+      });
+  }
+
 
   //Public facing API
   return {
@@ -37,7 +48,8 @@ groovepacks_services.factory('settings', ['$http', 'notification', function ($ht
       get: get_column_preference,
       save: save_column_preference
     },
-    cancel_bulk_action: cancel_bulk_action
+    cancel_bulk_action: cancel_bulk_action,
+    cancel_bulk_actions: cancel_bulk_actions
   };
 
 
