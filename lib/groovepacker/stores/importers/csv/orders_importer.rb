@@ -318,10 +318,11 @@ module Groovepacker
             import_product_category(product, single_row)
             if unique_order_item
               product.base_sku = single_row[self.mapping['sku'][:position]].strip unless single_row[self.mapping['sku'][:position]].nil?
+              product.save
             else
+              product.save
               make_product_intangible(product)
             end
-            product.save
             product.update_product_status
             order_item = OrderItem.new
             order_item.product = product
