@@ -132,14 +132,14 @@ groovepacks_services.factory('users', ['$http', 'notification', '$filter', funct
     //console.log(users.single);
     if (typeof users.single.username == 'undefined' ||
       users.single.username == null || users.single.username == '') {
-      valid &= false;
+      valid = false;
     }
     if (edit_status) {
       //console.log(users.single.confirmation_code);
       if (typeof users.single.confirmation_code == 'undefined' ||
         users.single.confirmation_code == null ||
         users.single.confirmation_code == '') {
-        valid &= false;
+        valid = false;
       }
       //If password or conf password is blank while the other is not
       if (
@@ -150,22 +150,23 @@ groovepacks_services.factory('users', ['$http', 'notification', '$filter', funct
           && (typeof users.single.password == 'undefined' || users.single.password == null || users.single.password == '')
         )
       ) {
-        valid &= false;
+        valid = false;
       }
     } else {
       if (typeof users.single.password == 'undefined' ||
         users.single.password == null ||
         users.single.password == '') {
-        valid &= false;
+        valid = false;
       }
 
       if (typeof users.single.conf_password == 'undefined' ||
         users.single.conf_password == null ||
         users.single.conf_password == '') {
-        valid &= false;
+        valid = false;
       }
     }
-    notification.notify(valid);
+    //We really don't want this notification to be shown.
+    // notification.notify(valid);
 
     return (valid);
   };
