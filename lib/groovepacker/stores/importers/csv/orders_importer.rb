@@ -174,9 +174,8 @@ module Groovepacker
             end
             base_product.save
             make_product_intangible(base_product)
-
             product = Product.new
-            set_product_info(product, single_row, ture)
+            set_product_info(product, single_row, true)
           end
 
           def import_product_name(product, single_row)
@@ -298,14 +297,14 @@ module Groovepacker
           end
 
           def set_product_info(product, single_row, unique_order_item = false)
-            product = Product.new
-                
+            # product = Product.new
             import_product_name(product, single_row)
 
             import_product_weight(product, single_row)
 
             sku = ProductSku.new
-            sku.sku = single_row[self.mapping['sku'][:position]].strip
+            # sku.sku = single_row[self.mapping['sku'][:position]].strip
+            sku.sku = get_sku(single_row, unique_order_item)
             product.product_skus << sku
             
             import_product_barcode(product, single_row, unique_order_item)
