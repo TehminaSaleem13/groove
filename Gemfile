@@ -39,6 +39,7 @@ group :development,:test do
   gem 'rspec_junit_formatter'
   gem 'factory_girl_rails', '>= 4.1.0'
   gem 'protractor-rails'
+  gem "rubycritic", :require => false
 end
 
 group :test do
