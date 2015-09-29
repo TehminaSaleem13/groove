@@ -2,12 +2,19 @@ require 'rails_helper'
 require 'spec_helper'
 describe ScanPackController do
   before(:each) do
-    @user = FactoryGirl.create(:user,:name=>'Admin Tester', :username=>"admin", :password=>'12345678')
+    Groovepacker::SeedTenant.new.seed
+    # @user = FactoryGirl.create(:user,:name=>'Admin Tester', :username=>"admin", :password=>'12345678')
+    @user = User.first
     sign_in @user
-    @inv_wh = FactoryGirl.create(:inventory_warehouse, :name=>'test_inventory_warehouse', :is_default=>true, :status=>"active")
-    @general_settings = FactoryGirl.create(:general_setting, :inventory_tracking=>true, :hold_orders_due_to_inventory=>true)
+    # @inv_wh = FactoryGirl.create(:inventory_warehouse, :name=>'test_inventory_warehouse', :is_default=>true, :status=>"active")
+    @inv_wh = InventoryWarehouse.all.first
+    @inv_wh.update_column(:is_default,true)
+    @inv_wh.update_column(:status,"active")
+    @generalsetting = GeneralSetting.all.first
+    @generalsetting.update_column(:inventory_tracking, true)
+    @generalsetting.update_column(:hold_orders_due_to_inventory, true)
     @store = FactoryGirl.create(:store, :name=>'amazon_store', :inventory_warehouse=>@inv_wh, :store_type=> 'Amazon')
-    @scan_pack_settings = ScanPackSetting.new
+    @scan_pack_settings = ScanPackSetting.first
     @scan_pack_settings.save!
   end
   it "synchronizes available inventory count ,allocated inventory count and sold_qty for non-kit item" do
