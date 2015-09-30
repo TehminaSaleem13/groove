@@ -310,7 +310,7 @@ module Groovepacker
                 #update the product directly
                 single_product_duplicate_sku = ProductSku.find_by_sku(duplicate_found)
                 duplicate_product = Product.find_by_id(single_product_duplicate_sku.product_id)
-                if record[:name] == "['DELETE']"
+                if record[:name] == "`[DELETE]`"
                   product_info = {}
                   product_info[:select_all] = false
                   product_info[:inverted] = false
