@@ -1,0 +1,12 @@
+KIT-SKU,KIT-NAME,KIT-BARCODE,PART-SKU,,,PART-QTY,SCAN-OPTION
+K.SS.M,"SingleScanKit, Multi-count - Inventory will 0 - for now expect -3",K.SS.M,R.S-PART-A ,,,2,1
+K.SS.M,"SingleScanKit, Multi-count - Inventory will 0 - for now expect -3",K.SS.M,R.S-PART-B ,,,1,1
+K.IS.M ,IndividualScanKit Multi-count ,K.IS.M ,R.S-PART-C ,,,2,2
+K.IS.M ,IndividualScanKit Multi-count ,K.IS.M ,R.S-PART-D ,,,1,2
+K.AS1.M ,"AutoSplitKit Scan Kit as a single item, Multi-count - Inventory will 0 - for now expect -2",K.AS1.M ,R.S-PART-E ,,,2,3
+K.AS1.M ,"AutoSplitKit Scan Kit as a single item, Multi-count - Inventory will 0 - for now expect -2",K.AS1.M ,R.S-PART-F ,,,1,3
+K.AS2.M ,AutoSplitKit Scan items individually Multi-count,K.AS2.M ,R.S-PART-G,,,2,3
+K.AS2.M ,AutoSplitKit Scan items individually Multi-count,K.AS2.M ,R.S-PART-H ,,,1,3
+K.AS2.M-ADDTEST ,"AutoSplitKit Scan items individually, Multi-count ",K.AS2.M-ADDTEST ,R.S-REMOVEPART ,,,6,3
+K.AS2-MASTER ,,K.AS2-MASTER ,K-MASTER-PARTA ,,,1,3
+K.AS2-MASTER ,,K.AS2-MASTER ,K-MASTER-PARTB ,,,2,3
