@@ -129,6 +129,13 @@ groovepacks_directives.directive('groovPersistNotification', ['$window', '$docum
         };
       };
 
+      // method to cancel all the bulk actions
+      scope.bulkCancelAction = function(){
+        settings.cancel_bulk_actions(scope.bulk_action_ids).then(function(response){
+          myscope.repurpose_selected();
+        });
+      }
+
       myscope.groove_bulk_actions = function (message, hash) {
         scope.notifications[hash].percent = (message['completed'] / message['total']) * 100;
         var notif_message = '';
@@ -182,7 +189,11 @@ groovepacks_directives.directive('groovPersistNotification', ['$window', '$docum
         scope.notifications[hash].cancel = function ($event) {
           $event.preventDefault();
           $event.stopPropagation();
-          settings.cancel_bulk_action(message.id).then(function () {
+          // Using the same api for cancel of single bulk action
+          // object as well as bulk cancel action, so converting the
+          // message id into an array
+          var messageId = [message.id];
+          settings.cancel_bulk_action(messageId).then(function () {
             myscope.repurpose_selected();
           });
         };
@@ -306,6 +317,13 @@ groovepacks_directives.directive('groovPersistNotification', ['$window', '$docum
       };
 
       scope.$on('groove_socket:pnotif', function (event, messages) {
+        // Saving original bulk action ids for later use.
+        if(messages[0] && messages[0].type === 'groove_bulk_actions') {
+          scope.bulk_action_ids = [];
+          angular.forEach(messages, function(item){
+            scope.bulk_action_ids.push(item.data.id);
+          });
+        }
         if (messages instanceof Array === false) {
           messages = [messages];
         }

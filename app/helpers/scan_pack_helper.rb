@@ -349,6 +349,11 @@ module ScanPackHelper
                   end
 
                   process_scan(clicked, order_item, serial_added, result)
+                  # If the product was skippable and CODE is SKIP
+                  # then we can remove that order_item from the order
+                  if scanpack_settings.skip_code_enabled? && clean_input == scanpack_settings.skip_code && item['skippable']
+                    remove_skippable_product(item)
+                  end
                   break
                 end
               end
@@ -964,5 +969,14 @@ module ScanPackHelper
     @generate_barcode.url = ENV['S3_BASE_URL']+'/'+tenant_name+'/pdf/'+base_file_name
     @generate_barcode.status = 'completed'
     @generate_barcode.save
+  end
+
+  # Remove those order_items that are skippable when the scanned barcode
+  # is SKIP entered as the barcode.
+  def remove_skippable_product item
+    order_item = OrderItem.find(item['order_item_id'])
+    order = order_item.order
+    order.order_items.delete(order_item)
+    order.save
   end
 end

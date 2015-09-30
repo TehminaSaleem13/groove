@@ -104,15 +104,16 @@ module Groovepacker
                     if !mapping['product_name'].nil? && mapping['product_name'][:position] >= 0 && !single_row[mapping['product_name'][:position]].blank?
                       usable_record[:name] = single_row[mapping['product_name'][:position]]
                     end
-                    if !mapping['product_weight'].nil? && mapping['product_weight'][:position] >= 0 && !single_row[mapping['product_weight'][:position]].blank?
+                    
+                    if !mapping['product_weight'].nil? && mapping['product_weight'][:position] >= 0 && !single_row[mapping['product_weight'][:position]].blank? && !single_row[mapping['product_weight'][:position]].nil?
                       usable_record[:weight] = single_row[mapping['product_weight'][:position]]
                     end
                     if params[:use_sku_as_product_name]
                       usable_record[:name] = single_row[mapping['sku'][:position]].strip
                     end
-                    if usable_record[:name].blank?
-                      usable_record[:name] = 'Product from CSV Import'
-                    end
+                    # if usable_record[:name].blank?
+                    #   usable_record[:name] = 'Product from CSV Import'
+                    # end
 
                     scan_pack_settings = ScanPackSetting.all.first
                     if scan_pack_settings.intangible_setting_enabled
@@ -287,6 +288,7 @@ module Groovepacker
               end
 
               if duplicate_found === false && new_action == 'create'
+                record[:name] = 'Product from CSV Import' if record[:name].blank?
                 single_import = Product.new(:name => record[:name], :product_type => record[:product_type], :spl_instructions_4_packer => record[:spl_instructions_4_packer], :is_intangible => record[:is_intangible], :weight => record[:weight])
                 single_import.store_id = params[:store_id]
                 single_import.store_product_id = record[:store_product_id]
@@ -308,12 +310,27 @@ module Groovepacker
                 #update the product directly
                 single_product_duplicate_sku = ProductSku.find_by_sku(duplicate_found)
                 duplicate_product = Product.find_by_id(single_product_duplicate_sku.product_id)
+                if record[:name] == "`[DELETE]`"
+                  product_info = {}
+                  product_info[:select_all] = false
+                  product_info[:inverted] = false
+                  product_info[:productArray] = []
+                  product_info[:productArray] << duplicate_product
+                  bulk_actions = Groovepacker::Products::BulkActions.new
+                  groove_bulk_actions = GrooveBulkActions.new
+                  groove_bulk_actions.identifier = 'product'
+                  groove_bulk_actions.activity = 'delete'
+                  groove_bulk_actions.save
+
+                  bulk_actions.delete(Apartment::Tenant.current, product_info, groove_bulk_actions.id, "during csv product import")
+                  next
+                end
                 duplicate_product.store_id = params[:store_id]
                 if !mapping['product_name'].nil? #&& mapping['product_name'][:action] == 'overwrite'
                   duplicate_product.name = record[:name]
                 end
                 if !mapping['product_weight'].nil? #&& mapping['product_weight'][:action] == 'overwrite'
-                  duplicate_product.weight = record[:weight]
+                  duplicate_product.weight = record[:weight] if record[:weight].to_f > 0
                 end
                 duplicate_product.is_intangible = record[:is_intangible]
                 if !mapping['product_type'].nil? #&& mapping['product_type'][:action] == 'overwrite'
@@ -355,7 +372,7 @@ module Groovepacker
                   all_found_cats = ProductCat.where(product_id: duplicate_product.id)
                   to_not_add_cats = []
                   all_found_cats.each do |single_found_dup_cat|
-                    unless record[:cats].include? single_found_dup_cat.category
+                    if record[:cats].include? single_found_dup_cat.category
                       to_not_add_cats << single_found_dup_cat.category
                     end
                   end
@@ -377,7 +394,7 @@ module Groovepacker
                   all_found_barcodes = ProductBarcode.where(product_id: duplicate_product.id)
                   to_not_add_barcodes = []
                   all_found_barcodes.each do |single_found_dup_barcode|
-                    unless record[:barcodes].include? single_found_dup_barcode.barcode
+                    if record[:barcodes].include? single_found_dup_barcode.barcode
                       to_not_add_barcodes << single_found_dup_barcode.barcode
                     end
                   end
@@ -401,7 +418,7 @@ module Groovepacker
                   all_found_skus = ProductSku.where(product_id: duplicate_product.id)
                   to_not_add_skus = []
                   all_found_skus.each do |single_found_dup_sku|
-                    unless record[:skus].include? single_found_dup_sku.sku
+                    if record[:skus].include? single_found_dup_sku.sku
                       to_not_add_skus << single_found_dup_sku.sku
                     end
                   end
@@ -425,7 +442,7 @@ module Groovepacker
                   all_found_images = ProductImage.where(product_id: duplicate_product.id)
                   to_not_add_images = []
                   all_found_images.each do |single_found_dup_image|
-                    unless record[:images].include? single_found_dup_image.image
+                    if record[:images].include? single_found_dup_image.image
                       to_not_add_images << single_found_dup_image.image
                     end
                   end

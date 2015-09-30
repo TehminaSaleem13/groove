@@ -10,23 +10,28 @@ class ImportCsv
       file_path = nil
       store = Store.find(params[:store_id])
       credential = store.ftp_credential
+      encoding_options = {
+        :invalid           => :replace,  # Replace invalid byte sequences
+        :undef             => :replace,  # Replace anything not defined in ASCII
+        :replace           => '',        # Use a blank for those replacements
+        :universal_newline => true       # Always break lines with \n
+      }
       if params[:flag] == 'ftp_download'
         groove_ftp = FTP::FtpConnectionManager.get_instance(store)
         response = groove_ftp.download(tenant)
         if response[:status]
           file_path = response[:file_info][:file_path]
-          csv_file = File.read(file_path)
+          csv_file = File.read(file_path).encode(Encoding.find('ASCII'), encoding_options)
         else
           result[:messages].push(response[:error_messages])
         end
       else
-        csv_file = GroovS3.find_csv(tenant, params[:type], params[:store_id])
+        file = GroovS3.find_csv(tenant, params[:type], params[:store_id])
+        csv_file = file.content.encode(Encoding.find('ASCII'), encoding_options)
       end
       if csv_file.nil?
         result[:messages].push("No file present to import #{params[:type]}")
       else
-        #csv_directory = 'uploads/csv'
-        #file_path = File.join(csv_directory, "#{tenant}.#{params[:store_id]}.#{params[:type]}.csv")
         final_record = []
         if params[:fix_width] == 1
           if params[:flag] == 'ftp_download'
@@ -39,14 +44,8 @@ class ImportCsv
           end
         else
           require 'csv'
-          if params[:flag] == 'ftp_download'
-            CSV.parse(csv_file, :col_sep => params[:sep], :quote_char => params[:delimiter], :encoding => 'windows-1251:utf-8') do |single|
-              final_record.push(single)
-            end
-          else
-            CSV.parse(csv_file.content, :col_sep => params[:sep], :quote_char => params[:delimiter], :encoding => 'windows-1251:utf-8') do |single|
-              final_record.push(single)
-            end
+          CSV.parse(csv_file, :col_sep => params[:sep], :quote_char => params[:delimiter], :encoding => 'windows-1251:utf-8') do |single|
+            final_record.push(single)
           end
         end
         if params[:rows].to_i && params[:rows].to_i > 1
@@ -66,7 +65,8 @@ class ImportCsv
         end
 
         if params[:type] == 'order'
-          result = Groovepacker::Stores::Importers::CSV::OrdersImporter.new.import_old(params, final_record, mapping)
+          import_order = Groovepacker::Stores::Importers::CSV::OrdersImporter.new(params, final_record, mapping, nil)
+          result = import_order.import()
           #result = Groovepacker::Stores::Importers::CSV::OrdersImporter.new.import(params,final_record,mapping)
         elsif params[:type] == 'product'
           #result = Groovepacker::Stores::Importers::CSV::ProductsImporter.new.import_old(params,final_record,mapping)

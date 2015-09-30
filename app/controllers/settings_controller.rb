@@ -576,19 +576,26 @@ class SettingsController < ApplicationController
     result['success_messages'] = []
     result['notice_messages'] = []
     result['error_messages'] = []
+    result['bulk_action_cancelled_ids'] = []
 
     if params[:id].nil?
       result['status'] = false
-      result['error_messages'].push('No id given. Can not cancel generating')
+      result['error_messages'].push('no id bulk action id provided')
     else
-      bulk_action = GrooveBulkActions.find_by_id(params[:id])
-      unless bulk_action.nil?
-        bulk_action.cancel = true
-        if bulk_action.save
-          result['notice_messages'].push('Bulk action marked for cancellation. Please wait for acknowledgement.')
+      params[:id].each do |bulk_action_id|
+        bulk_action = GrooveBulkActions.find_by_id(bulk_action_id)
+        unless bulk_action.nil?
+          bulk_action.cancel = true
+          bulk_action.status = 'cancelled'
+          if bulk_action.save
+            result['bulk_action_cancelled_ids'].push(bulk_action_id)
+            puts "We saved the bulk action objects"
+          else
+            puts "Error occurred while saving bulk action object"
+          end
+        else
+          result['error_messages'].push('No bulk action found with the id.')
         end
-      else
-        result['error_messages'].push('No bulk action found with the id.')
       end
     end
 
