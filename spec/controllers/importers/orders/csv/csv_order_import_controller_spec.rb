@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-describe StoreSettingsController do
+describe StoresController do
   before(:each) do
     Groovepacker::SeedTenant.new.seed
     @generalsetting = GeneralSetting.all.first
@@ -24,18 +24,18 @@ describe StoreSettingsController do
         expect(Order.all.count).to eq(0)
         expect(Product.all.count).to eq(0)
         request.accept = "application/json"
-        get :csvImportData, {:type => 'order', :id => @store.id}
+        get :csv_import_data, {:type => 'order', :id => @store.id}
         expect(response.status).to eq(200)
 
         request.accept = "application/json"
-        get :createUpdateStore, {:store_type => 'CSV', :id => @store.id, :orderfile => fixture_file_upload(Rails.root.join('/files/MT_Orders_04.csv'))}
+        get :create_update_store, {:store_type => 'CSV', :id => @store.id, :orderfile => fixture_file_upload(Rails.root.join('/files/MT_Orders_04.csv'))}
         expect(response.status).to eq(200)
 
         doc = IO.read(Rails.root.join("spec/fixtures/files/MT_Orders_04_map"))
         doc = eval(doc)
 
         request.accept = "application/json"
-        post :csvDoImport, {:rows=>"2", :sep=>",", :other_sep=>"0", :delimiter=>"\"", :fix_width=>"0", :fixed_width=>"4", :import_action=>nil, :contains_unique_order_items=>false, :generate_barcode_from_sku=>false, :use_sku_as_product_name=>false, :order_date_time_format=>"MM/DD/YY TIME", :day_month_sequence=>"DD/MM", :map=>doc[:map][:map], :controller=>"store_settings", :action=>"csvDoImport", :store_id=> @store.id, :name=>doc[:name], :type=>'order', :flag=>'file_upload'}
+        post :csv_do_import, {:id => @store.id, :rows=>"2", :sep=>",", :other_sep=>"0", :delimiter=>"\"", :fix_width=>"0", :fixed_width=>"4", :import_action=>nil, :contains_unique_order_items=>false, :generate_barcode_from_sku=>false, :use_sku_as_product_name=>false, :order_date_time_format=>"MM/DD/YY TIME", :day_month_sequence=>"DD/MM", :map=>doc[:map][:map], :controller=>"stores", :action=>"csv_do_import", :store_id=> @store.id, :name=>doc[:name], :type=>'order', :flag=>'file_upload'}
         expect(response.status).to eq(200)
         expect(Order.all.count).to eq(9)
         expect(Product.all.count).to eq(21)
@@ -51,18 +51,18 @@ describe StoreSettingsController do
         expect(Order.all.count).to eq(0)
         expect(Product.all.count).to eq(0)
         request.accept = "application/json"
-        get :csvImportData, {:type => 'order', :id => @store.id}
+        get :csv_import_data, {:type => 'order', :id => @store.id}
         expect(response.status).to eq(200)
 
         request.accept = "application/json"
-        get :createUpdateStore, {:store_type => 'CSV', :id => @store.id, :orderfile => fixture_file_upload(Rails.root.join('/files/MT_Orders_04.csv'))}
+        get :create_update_store, {:store_type => 'CSV', :id => @store.id, :orderfile => fixture_file_upload(Rails.root.join('/files/MT_Orders_04.csv'))}
         expect(response.status).to eq(200)
 
         doc = IO.read(Rails.root.join("spec/fixtures/files/MT_Orders_04_map"))
         doc = eval(doc)
 
         request.accept = "application/json"
-        post :csvDoImport, {:rows=>"2", :sep=>",", :other_sep=>"0", :delimiter=>"\"", :fix_width=>"0", :fixed_width=>"4", :import_action=>nil, :contains_unique_order_items=>false, :generate_barcode_from_sku=>false, :use_sku_as_product_name=>false, :order_date_time_format=>"MM/DD/YY TIME", :day_month_sequence=>"DD/MM", :map=>doc[:map][:map], :controller=>"store_settings", :action=>"csvDoImport", :store_id=> @store.id, :name=>doc[:name], :type=>'order', :flag=>'file_upload'}
+        post :csv_do_import, {:id => @store.id, :rows=>"2", :sep=>",", :other_sep=>"0", :delimiter=>"\"", :fix_width=>"0", :fixed_width=>"4", :import_action=>nil, :contains_unique_order_items=>false, :generate_barcode_from_sku=>false, :use_sku_as_product_name=>false, :order_date_time_format=>"MM/DD/YY TIME", :day_month_sequence=>"DD/MM", :map=>doc[:map][:map], :controller=>"stores", :action=>"csv_do_import", :store_id=> @store.id, :name=>doc[:name], :type=>'order', :flag=>'file_upload'}
         expect(response.status).to eq(200)
         expect(Order.all.count).to eq(9)
         expect(Product.all.count).to eq(21)
@@ -79,18 +79,18 @@ describe StoreSettingsController do
         expect(Order.all.count).to eq(0)
         expect(Product.all.count).to eq(0)
         request.accept = "application/json"
-        get :csvImportData, {:type => 'order', :id => @store.id}
+        get :csv_import_data, {:type => 'order', :id => @store.id}
         expect(response.status).to eq(200)
 
         request.accept = "application/json"
-        get :createUpdateStore, {:store_type => 'CSV', :id => @store.id, :orderfile => fixture_file_upload(Rails.root.join('/files/MT_Orders_04.csv'))}
+        get :create_update_store, {:store_type => 'CSV', :id => @store.id, :orderfile => fixture_file_upload(Rails.root.join('/files/MT_Orders_04.csv'))}
         expect(response.status).to eq(200)
 
         doc = IO.read(Rails.root.join("spec/fixtures/files/MT_Orders_04_map"))
         doc = eval(doc)
 
         request.accept = "application/json"
-        post :csvDoImport, {:rows=>"2", :sep=>",", :other_sep=>"0", :delimiter=>"\"", :fix_width=>"0", :fixed_width=>"4", :import_action=>nil, :contains_unique_order_items=>false, :generate_barcode_from_sku=>false, :use_sku_as_product_name=>false, :order_date_time_format=>"MM/DD/YY TIME", :day_month_sequence=>"DD/MM", :map=>doc[:map][:map], :controller=>"store_settings", :action=>"csvDoImport", :store_id=> @store.id, :name=>doc[:name], :type=>'order', :flag=>'file_upload'}
+        post :csv_do_import, {:id => @store.id, :rows=>"2", :sep=>",", :other_sep=>"0", :delimiter=>"\"", :fix_width=>"0", :fixed_width=>"4", :import_action=>nil, :contains_unique_order_items=>false, :generate_barcode_from_sku=>false, :use_sku_as_product_name=>false, :order_date_time_format=>"MM/DD/YY TIME", :day_month_sequence=>"DD/MM", :map=>doc[:map][:map], :controller=>"stores", :action=>"csv_do_import", :store_id=> @store.id, :name=>doc[:name], :type=>'order', :flag=>'file_upload'}
         expect(response.status).to eq(200)
         expect(Order.all.count).to eq(9)
         expect(Product.all.count).to eq(21)
@@ -105,18 +105,18 @@ describe StoreSettingsController do
         expect(Order.all.count).to eq(0)
         expect(Product.all.count).to eq(0)
         request.accept = "application/json"
-        get :csvImportData, {:type => 'order', :id => @store.id}
+        get :csv_import_data, {:type => 'order', :id => @store.id}
         expect(response.status).to eq(200)
 
         request.accept = "application/json"
-        get :createUpdateStore, {:store_type => 'CSV', :id => @store.id, :orderfile => fixture_file_upload(Rails.root.join('/files/Order_Import_Test.csv'))}
+        get :create_update_store, {:store_type => 'CSV', :id => @store.id, :orderfile => fixture_file_upload(Rails.root.join('/files/Order_Import_Test.csv'))}
         expect(response.status).to eq(200)
 
         doc = IO.read(Rails.root.join("spec/fixtures/files/Unique_Orders_map"))
         doc = eval(doc)
 
         request.accept = "application/json"
-        post :csvDoImport, {:rows=>"2", :sep=>",", :other_sep=>"0", :delimiter=>"\"", :fix_width=>"0", :fixed_width=>"4", :import_action=>nil, :contains_unique_order_items=>true, :generate_barcode_from_sku=>false, :use_sku_as_product_name=>false, :order_date_time_format=>doc[:map][:order_date_time_format], :day_month_sequence=>"DD/MM", :map=>doc[:map][:map], :controller=>"store_settings", :action=>"csvDoImport", :store_id=> @store.id, :name=>doc[:name], :type=>'order', :flag=>'file_upload'}
+        post :csv_do_import, {:id => @store.id, :rows=>"2", :sep=>",", :other_sep=>"0", :delimiter=>"\"", :fix_width=>"0", :fixed_width=>"4", :import_action=>nil, :contains_unique_order_items=>true, :generate_barcode_from_sku=>false, :use_sku_as_product_name=>false, :order_date_time_format=>doc[:map][:order_date_time_format], :day_month_sequence=>"DD/MM", :map=>doc[:map][:map], :controller=>"stores", :action=>"csv_do_import", :store_id=> @store.id, :name=>doc[:name], :type=>'order', :flag=>'file_upload'}
         expect(response.status).to eq(200)
         expect(Order.all.count).to eq(4)
         expect(Product.all.count).to eq(13)
@@ -133,18 +133,18 @@ describe StoreSettingsController do
         expect(Order.all.count).to eq(0)
         expect(Product.all.count).to eq(0)
         request.accept = "application/json"
-        get :csvImportData, {:type => 'order', :id => @store.id}
+        get :csv_import_data, {:type => 'order', :id => @store.id}
         expect(response.status).to eq(200)
 
         request.accept = "application/json"
-        get :createUpdateStore, {:store_type => 'CSV', :id => @store.id, :orderfile => fixture_file_upload(Rails.root.join('/files/Order_Import_Test.csv'))}
+        get :create_update_store, {:store_type => 'CSV', :id => @store.id, :orderfile => fixture_file_upload(Rails.root.join('/files/Order_Import_Test.csv'))}
         expect(response.status).to eq(200)
 
         doc = IO.read(Rails.root.join("spec/fixtures/files/Unique_Orders_map"))
         doc = eval(doc)
 
         request.accept = "application/json"
-        post :csvDoImport, {:rows=>"2", :sep=>",", :other_sep=>"0", :delimiter=>"\"", :fix_width=>"0", :fixed_width=>"4", :import_action=>nil, :contains_unique_order_items=>true, :generate_barcode_from_sku=>false, :use_sku_as_product_name=>false, :order_date_time_format=>doc[:map][:order_date_time_format], :day_month_sequence=>"DD/MM", :map=>doc[:map][:map], :controller=>"store_settings", :action=>"csvDoImport", :store_id=> @store.id, :name=>doc[:name], :type=>'order', :flag=>'file_upload'}
+        post :csv_do_import, {:id => @store.id, :rows=>"2", :sep=>",", :other_sep=>"0", :delimiter=>"\"", :fix_width=>"0", :fixed_width=>"4", :import_action=>nil, :contains_unique_order_items=>true, :generate_barcode_from_sku=>false, :use_sku_as_product_name=>false, :order_date_time_format=>doc[:map][:order_date_time_format], :day_month_sequence=>"DD/MM", :map=>doc[:map][:map], :controller=>"stores", :action=>"csv_do_import", :store_id=> @store.id, :name=>doc[:name], :type=>'order', :flag=>'file_upload'}
         expect(response.status).to eq(200)
         expect(Order.all.count).to eq(4)
         expect(Product.all.count).to eq(13)
@@ -162,18 +162,18 @@ describe StoreSettingsController do
         expect(Order.all.count).to eq(0)
         expect(Product.all.count).to eq(0)
         request.accept = "application/json"
-        get :csvImportData, {:type => 'order', :id => @store.id}
+        get :csv_import_data, {:type => 'order', :id => @store.id}
         expect(response.status).to eq(200)
 
         request.accept = "application/json"
-        get :createUpdateStore, {:store_type => 'CSV', :id => @store.id, :orderfile => fixture_file_upload(Rails.root.join('/files/Order_Import_Test.csv'))}
+        get :create_update_store, {:store_type => 'CSV', :id => @store.id, :orderfile => fixture_file_upload(Rails.root.join('/files/Order_Import_Test.csv'))}
         expect(response.status).to eq(200)
 
         doc = IO.read(Rails.root.join("spec/fixtures/files/Unique_Orders_map"))
         doc = eval(doc)
 
         request.accept = "application/json"
-        post :csvDoImport, {:rows=>"2", :sep=>",", :other_sep=>"0", :delimiter=>"\"", :fix_width=>"0", :fixed_width=>"4", :import_action=>nil, :contains_unique_order_items=>true, :generate_barcode_from_sku=>false, :use_sku_as_product_name=>false, :order_date_time_format=>doc[:map][:order_date_time_format], :day_month_sequence=>"DD/MM", :map=>doc[:map][:map], :controller=>"store_settings", :action=>"csvDoImport", :store_id=> @store.id, :name=>doc[:name], :type=>'order', :flag=>'file_upload'}
+        post :csv_do_import, {:id => @store.id, :rows=>"2", :sep=>",", :other_sep=>"0", :delimiter=>"\"", :fix_width=>"0", :fixed_width=>"4", :import_action=>nil, :contains_unique_order_items=>true, :generate_barcode_from_sku=>false, :use_sku_as_product_name=>false, :order_date_time_format=>doc[:map][:order_date_time_format], :day_month_sequence=>"DD/MM", :map=>doc[:map][:map], :controller=>"stores", :action=>"csv_do_import", :store_id=> @store.id, :name=>doc[:name], :type=>'order', :flag=>'file_upload'}
         expect(response.status).to eq(200)
         expect(Order.all.count).to eq(4)
         expect(Product.all.count).to eq(13)
