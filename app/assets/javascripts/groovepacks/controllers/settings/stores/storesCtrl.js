@@ -70,7 +70,7 @@ groovepacks_controllers.
         $scope.stores = stores.model.get();
         myscope.get_stores();
         $scope.gridOptions = {
-          identifier: 'store_settings',
+          identifier: 'stores',
           select_all: $scope.select_all_toggle,
           draggable: false,
           sortable: true,

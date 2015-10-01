@@ -1,16 +1,15 @@
-class StoreSettingsController < ApplicationController
+class StoresController < ApplicationController
   before_filter :groovepacker_authorize!, :except => [:handle_ebay_redirect]
 
-  include StoreSettingsHelper
+  include StoresHelper
 
-  def storeslist
+  def index
     @stores = Store.where("store_type != 'system'")
 
     respond_to do |format|
       format.json { render json: @stores }
     end
   end
-
 
   def getactivestores
     @result = Hash.new
@@ -65,7 +64,7 @@ class StoreSettingsController < ApplicationController
 
   def connect_and_retrieve
     result = {}
-    store = Store.find(params[:store_id])
+    store = Store.find(params[:id])
     groove_ftp = FTP::FtpConnectionManager.get_instance(store)
     result['connection'] = groove_ftp.retrieve()
     
@@ -74,7 +73,7 @@ class StoreSettingsController < ApplicationController
     end
   end
 
-  def createUpdateStore
+  def create_update_store
     @result = Hash.new
 
     @result['status'] = true
@@ -390,7 +389,7 @@ class StoreSettingsController < ApplicationController
     end
   end
 
-  def csvMapData
+  def csv_map_data
     result = Hash.new
     result['product'] = CsvMap.find_all_by_kind('product')
     result['order'] = CsvMap.find_all_by_kind('order')
@@ -400,15 +399,15 @@ class StoreSettingsController < ApplicationController
     end
   end
 
-  def deleteCsvMap
+  def delete_csv_map
     result = Hash.new
     result['status'] = true
     result['messages'] = []
-    if params[:kind].nil? || params[:store_id].nil?
+    if params[:kind].nil? || params[:id].nil?
       result['status'] = false
       result['messages'].push('You need kind and store id to delete csv map')
     else
-      mapping = CsvMapping.find_or_create_by_store_id(params[:store_id])
+      mapping = CsvMapping.find_or_create_by_store_id(params[:id])
 
       if params[:kind] == 'order'
         mapping.order_csv_map_id = nil
@@ -425,15 +424,15 @@ class StoreSettingsController < ApplicationController
     end
   end
 
-  def updateCsvMap
+  def update_csv_map
     result = Hash.new
     result['status'] = true
     result['messages'] = []
-    if params[:map].nil? || params[:store_id].nil?
+    if params[:map].nil? || params[:id].nil?
       result['status'] = false
       result['messages'].push('You need map and store id to update csv map')
     else
-      mapping = CsvMapping.find_or_create_by_store_id(params[:store_id])
+      mapping = CsvMapping.find_or_create_by_store_id(params[:id])
       if params[:map]['kind'] == 'order'
         mapping.order_csv_map_id = params[:map]['id']
       elsif params[:map]['kind'] == 'product'
@@ -449,7 +448,7 @@ class StoreSettingsController < ApplicationController
     end
   end
 
-  def csvImportData
+  def csv_import_data
     @result = Hash.new
     @result["status"] = true
     @result["messages"] = []
@@ -613,14 +612,14 @@ class StoreSettingsController < ApplicationController
     end
   end
 
-  def csvDoImport
+  def csv_do_import
     @result = Hash.new
     @result['status'] = true
     @result['last_row'] = 0
     @result['messages'] = []
 
     if params[:store_id]
-      @store = Store.find_by_id params[:store_id]
+      @store = Store.find_by_id params[:id]
       if @store.nil?
         @result['status'] = false
         @result['messages'].push('Store doesn\'t exist')
@@ -787,7 +786,7 @@ class StoreSettingsController < ApplicationController
     end
   end
 
-  def csvProductImportCancel
+  def csv_product_import_cancel
     result = Hash.new
     result['status'] = true
     result['success_messages'] = []
@@ -818,7 +817,7 @@ class StoreSettingsController < ApplicationController
     end
   end
 
-  def changestorestatus
+  def change_store_status
     @result = Hash.new
     @result['status'] = true
     @result['messages'] =[]
@@ -842,7 +841,7 @@ class StoreSettingsController < ApplicationController
     end
   end
 
-  def duplicatestore
+  def duplicate_store
 
     @result = Hash.new
     @result['status'] = true
@@ -885,7 +884,7 @@ class StoreSettingsController < ApplicationController
     end
   end
 
-  def deletestore
+  def delete_store
     @result = Hash.new
     @result['status'] = false
     @result['messages'] = []
@@ -919,7 +918,7 @@ class StoreSettingsController < ApplicationController
     end
   end
 
-  def getstoreinfo
+  def show
     @store = Store.find(params[:id])
     @result = Hash.new
 
@@ -940,7 +939,7 @@ class StoreSettingsController < ApplicationController
     end
   end
 
-  def getSystem
+  def get_system
     @store = Store.find_by_store_type('system')
     @result = Hash.new
 
@@ -957,7 +956,7 @@ class StoreSettingsController < ApplicationController
     end
   end
 
-  def getebaysigninurl
+  def get_ebay_signin_url
     @result = Hash.new
     @result[:status] = true
 
@@ -972,7 +971,7 @@ class StoreSettingsController < ApplicationController
     end
   end
 
-  def ebayuserfetchtoken
+  def ebay_user_fetch_token
     require "net/http"
     require "uri"
     @result = Hash.new
@@ -1018,7 +1017,7 @@ class StoreSettingsController < ApplicationController
     end
   end
 
-  def updateebayusertoken
+  def update_ebay_user_token
     require "net/http"
     require "uri"
     @result = Hash.new
@@ -1032,7 +1031,7 @@ class StoreSettingsController < ApplicationController
       url = "https://api.ebay.com/ws/api.dll"
     end
     url = URI.parse(url)
-    @store = EbayCredentials.where(:store_id => params[:storeid])
+    @store = EbayCredentials.where(:store_id => params[:id])
 
     if !@store.nil? && @store.length > 0
       @store = @store.first
@@ -1076,18 +1075,18 @@ class StoreSettingsController < ApplicationController
     end
   end
 
-  def deleteebaytoken
+  def delete_ebay_token
     @result = Hash.new
     @result['status'] = false
 
-    if params[:storeid] == 'undefined'
+    if params[:id] == 'undefined'
       session[:ebay_auth_token] = nil
       session[:ebay_auth_expiration] = nil
       @result['status'] = true
     else
-      @store = Store.find(params[:storeid])
+      @store = Store.find(params[:id])
       if @store.store_type == 'Ebay'
-        @ebaycredentials = EbayCredentials.where(:store_id => params[:storeid])
+        @ebaycredentials = EbayCredentials.where(:store_id => params[:id])
         @ebaycredentials = @ebaycredentials.first
         @ebaycredentials.auth_token = ''
         @ebaycredentials.productauth_token = ''
@@ -1122,7 +1121,7 @@ class StoreSettingsController < ApplicationController
     tenant_name = params['tenantname']
 
     # redirect_to (URI::encode("https://#{tenant_name}.groovepacker.com:3001//") + "#" + URI::encode("/settings/showstores/ebay?ebaytkn=#{ebaytkn}&tknexp=#{tknexp}&username=#{username}&redirect=#{redirect}&editstatus=#{editstatus}&name=#{name}&status=#{status}&storetype=#{storetype}&storeid=#{storeid}&inventorywarehouseid=#{inventorywarehouseid}&importimages=#{importimages}&importproducts=#{importproducts}&messagetocustomer=#{messagetocustomer}&tenantname=#{tenant_name}") )
-    redirect_to (URI::encode("https://#{tenant_name}.#{ENV['HOST_NAME']}/") + URI::encode("store_settings/updateebayusertoken?storeid=#{storeid}"))
+    redirect_to (URI::encode("https://#{tenant_name}.#{ENV['HOST_NAME']}/") + URI::encode("stores/update_ebay_user_token?id=#{storeid}"))
   end
 
   def let_store_be_created

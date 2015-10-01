@@ -36,7 +36,7 @@ RSpec.describe OrdersController, :type => :controller do
         :inventory_warehouse_id =>inv_wh.id, 
         :available_inv => 25, :allocated_inv => 5)
       
-      put :deleteorder, {:order_ids=>[order.id]}
+      put :delete_orders, {:order_ids=>[order.id]}
       expect(response.status).to eq(200)
       product_inv_wh.reload
       expect(product_inv_wh.allocated_inv).to eq(3)
@@ -69,7 +69,7 @@ RSpec.describe OrdersController, :type => :controller do
         :inventory_warehouse_id =>inv_wh.id, 
         :available_inv => 25, :allocated_inv => 5)
       
-      put :changeorderstatus, {:order_ids=>[order.id], :status=>'cancelled'}
+      put :change_orders_status, {:order_ids=>[order.id], :status=>'cancelled'}
       expect(response.status).to eq(200)
       product_inv_wh.reload
       order_item1.reload
@@ -106,7 +106,7 @@ RSpec.describe OrdersController, :type => :controller do
         :inventory_warehouse_id =>inv_wh.id, 
         :available_inv => 25, :allocated_inv => 5)
       
-      put :changeorderstatus, {:order_ids=>[order.id], :status=>'cancelled'}
+      put :change_orders_status, {:order_ids=>[order.id], :status=>'cancelled'}
       expect(response.status).to eq(200)
       product_inv_wh.reload
       order_item1.reload
@@ -143,7 +143,7 @@ RSpec.describe OrdersController, :type => :controller do
         :inventory_warehouse_id =>inv_wh.id, 
         :available_inv => 25, :allocated_inv => 5)
       
-      put :changeorderstatus, {:order_ids=>[order.id], :status=>'awaiting'}
+      put :change_orders_status, {:order_ids=>[order.id], :status=>'awaiting'}
       expect(response.status).to eq(200)
       product_inv_wh.reload
       order_item1.reload
@@ -180,7 +180,7 @@ RSpec.describe OrdersController, :type => :controller do
         :inventory_warehouse_id =>inv_wh.id, 
         :available_inv => 25, :allocated_inv => 5)
       
-      put :changeorderstatus, {:order_ids=>[order.id], :status=>'serviceissue'}
+      put :change_orders_status, {:order_ids=>[order.id], :status=>'serviceissue'}
       expect(response.status).to eq(200)
       product_inv_wh.reload
       order_item1.reload
@@ -217,7 +217,7 @@ RSpec.describe OrdersController, :type => :controller do
         :inventory_warehouse_id =>inv_wh.id, 
         :available_inv => 25, :allocated_inv => 5)
       
-      put :changeorderstatus, {:order_ids=>[order.id], :status=>'serviceissue'}
+      put :change_orders_status, {:order_ids=>[order.id], :status=>'serviceissue'}
       expect(response.status).to eq(200)
       product_inv_wh.reload
       order_item1.reload
@@ -254,7 +254,7 @@ RSpec.describe OrdersController, :type => :controller do
         :inventory_warehouse_id =>inv_wh.id, 
         :available_inv => 25, :allocated_inv => 5)
       
-      put :changeorderstatus, {:order_ids=>[order.id], :status=>'awaiting'}
+      put :change_orders_status, {:order_ids=>[order.id], :status=>'awaiting'}
       expect(response.status).to eq(200)
       product_inv_wh.reload
       order_item1.reload
@@ -292,7 +292,7 @@ RSpec.describe OrdersController, :type => :controller do
     #     :inventory_warehouse_id =>inv_wh.id,
     #     :available_inv => 25, :allocated_inv => 5)
     #
-    #   put :changeorderstatus, {:order_ids=>[order.id], :status=>'cancelled'}
+    #   put :change_orders_status, {:order_ids=>[order.id], :status=>'cancelled'}
     #   expect(response.status).to eq(200)
     #   product_inv_wh.reload
     #   order_item1.reload

@@ -1,4 +1,4 @@
-module StoreSettingsHelper
+module StoresHelper
   def get_default_warehouse_id
     inventory_warehouses = InventoryWarehouse.where(:is_default => 1)
     if !inventory_warehouses.nil?

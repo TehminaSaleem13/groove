@@ -1,6 +1,6 @@
 class SubscriptionsController < ApplicationController
   include PaymentsHelper
-  include StoreSettingsHelper
+  include StoresHelper
   # before_filter :check_tenant_name
 
   def new
@@ -110,8 +110,8 @@ class SubscriptionsController < ApplicationController
 
   end
 
-  def planInfo
-    getPlanInfo(params[:plan_id])
+  def plan_info
+    get_plan_info(params[:plan_id])
     render json: @result
   end
 

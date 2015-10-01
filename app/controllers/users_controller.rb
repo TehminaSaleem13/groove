@@ -1,8 +1,8 @@
-class UserSettingsController < ApplicationController
+class UsersController < ApplicationController
   before_filter :groovepacker_authorize!
-  include UserSettingsHelper
+  include UsersHelper
 
-  def userslist
+  def index
     @users = User.where('username != ?', 'gpadmin')
 
     respond_to do |format|
@@ -106,7 +106,7 @@ class UserSettingsController < ApplicationController
     end
   end
 
-  def getRoles
+  def get_roles
     @result = Hash.new
     @result['status'] = true
     @result['messages'] = []
@@ -140,7 +140,7 @@ class UserSettingsController < ApplicationController
     end
   end
 
-  def createRole
+  def create_role
     @result = Hash.new
     @result['status'] = true
     @result['messages'] = []
@@ -187,7 +187,7 @@ class UserSettingsController < ApplicationController
     end
   end
 
-  def deleteRole
+  def delete_role
     @result = Hash.new
     @result['status'] = true
     @result['messages'] = []
@@ -223,7 +223,7 @@ class UserSettingsController < ApplicationController
     end
   end
 
-  def changeuserstatus
+  def change_user_status
     @result = Hash.new
     @result['status'] = true
     if current_user.can? 'add_edit_user'
@@ -247,7 +247,7 @@ class UserSettingsController < ApplicationController
   def edituser
   end
 
-  def duplicateuser
+  def duplicate_user
 
     @result = Hash.new
     @result['status'] = true
@@ -291,7 +291,7 @@ class UserSettingsController < ApplicationController
     end
   end
 
-  def deleteuser
+  def delete_user
     @result = Hash.new
     @result['status'] = true
     if current_user.can? 'add_edit_user'
@@ -314,7 +314,7 @@ class UserSettingsController < ApplicationController
     end
   end
 
-  def getuserinfo
+  def show
     @user = User.find(params[:id])
     @result = Hash.new
 

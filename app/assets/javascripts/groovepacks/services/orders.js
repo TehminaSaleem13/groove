@@ -91,7 +91,7 @@ groovepacks_services.factory('orders', ['$http', '$window', 'notification', '$q'
     }
     object.setup.offset = page * object.setup.limit;
     if (setup.search == '') {
-      url = '/orders/getorders.json?filter=' + setup.filter + '&sort=' + setup.sort + '&order=' + setup.order;
+      url = '/orders.json?filter=' + setup.filter + '&sort=' + setup.sort + '&order=' + setup.order;
     } else {
       url = '/orders/search.json?search=' + setup.search + '&sort=' + setup.sort + '&order=' + setup.order;
     }
@@ -189,11 +189,11 @@ groovepacks_services.factory('orders', ['$http', '$window', 'notification', '$q'
       }
       var url = '';
       if (action == "delete") {
-        url = '/orders/deleteorder.json';
+        url = '/orders/delete_orders.json';
       } else if (action == "duplicate") {
-        url = '/orders/duplicateorder.json';
+        url = '/orders/duplicate_orders.json';
       } else if (action == "update_status") {
-        url = '/orders/changeorderstatus.json';
+        url = '/orders/change_orders_status.json';
       }
 
       return $http.post(url, orders.setup).success(function (data) {
@@ -281,7 +281,7 @@ groovepacks_services.factory('orders', ['$http', '$window', 'notification', '$q'
   };
 
   var update_list_node = function (obj) {
-    return $http.post('/orders/updateorderlist.json', obj).success(function (data) {
+    return $http.post('/orders/update_order_list.json', obj).success(function (data) {
       if (data.status) {
         notification.notify("Successfully Updated", 1);
       } else {
@@ -292,7 +292,7 @@ groovepacks_services.factory('orders', ['$http', '$window', 'notification', '$q'
 
   //single order related functions
   var get_single = function (id, orders) {
-    return $http.get('/orders/getdetails/' + id + '.json').success(function (data) {
+    return $http.get('/orders/' + id + '.json').success(function (data) {
       orders.single = {};
       if (data.order) {
         data.order.basicinfo.order_placed_time = new Date(data.order.basicinfo.order_placed_time);
@@ -302,6 +302,7 @@ groovepacks_services.factory('orders', ['$http', '$window', 'notification', '$q'
   };
 
   var update_single = function (orders, auto) {
+    console.log(orders);
     if (typeof auto !== "boolean") {
       auto = true;
     }
@@ -311,7 +312,9 @@ groovepacks_services.factory('orders', ['$http', '$window', 'notification', '$q'
         order_data[i] = orders.single.basicinfo[i];
       }
     }
-    return $http.post("orders/update.json", {id: orders.single.basicinfo.id, order: order_data}).success(
+    console.log("order_data: ");
+    console.log(order_data);
+    return $http.put("orders/" + orders.single.basicinfo.id + ".json",{order: order_data}).success(
       function (data) {
         if (data.status) {
           if (!auto) {
@@ -356,7 +359,7 @@ groovepacks_services.factory('orders', ['$http', '$window', 'notification', '$q'
     ).error(notification.server_error);
   };
   var single_add_item = function (orders, ids) {
-    return $http.post("orders/additemtoorder.json", {productids: ids, id: orders.single.basicinfo.id, qty: 1}).success(
+    return $http.post("orders/" + orders.single.basicinfo.id + "/add_item_to_order.json", {productids: ids, qty: 1}).success(
       function (data) {
         if (data.status) {
           notification.notify("Item Successfully Added", 1);
@@ -368,7 +371,7 @@ groovepacks_services.factory('orders', ['$http', '$window', 'notification', '$q'
   };
 
   var single_remove_item = function (ids) {
-    return $http.post("orders/removeitemfromorder.json", {orderitem: ids}).success(
+    return $http.post("orders/remove_item_from_order.json", {orderitem: ids}).success(
       function (data) {
         if (data.status) {
           notification.notify("Item Successfully Removed", 1);
@@ -381,9 +384,8 @@ groovepacks_services.factory('orders', ['$http', '$window', 'notification', '$q'
 
   var single_record_exception = function (orders) {
     return $http.post(
-      '/orders/recordexception.json',
+      '/orders/'+orders.single.basicinfo.id+'/record_exception.json',
       {
-        id: orders.single.basicinfo.id,
         reason: orders.single.exception.reason,
         description: orders.single.exception.description,
         assoc: orders.single.exception.assoc
@@ -398,7 +400,7 @@ groovepacks_services.factory('orders', ['$http', '$window', 'notification', '$q'
   };
 
   var single_clear_exception = function (orders) {
-    return $http.post('/orders/clearexception.json', {id: orders.single.basicinfo.id}).success(function (data) {
+    return $http.post('/orders/'+orders.single.basicinfo.id+'/clear_exception.json').success(function (data) {
       if (data.status) {
         notification.notify("Exception successfully cleared", 1);
       } else {
@@ -408,7 +410,7 @@ groovepacks_services.factory('orders', ['$http', '$window', 'notification', '$q'
   };
 
   var single_update_item_qty = function (item) {
-    return $http.post('/orders/updateiteminorder.json', {orderitem: item.id, qty: item.qty}).success(function (data) {
+    return $http.post('/orders/update_item_in_order.json', {orderitem: item.id, qty: item.qty}).success(function (data) {
       if (data.status) {
         notification.notify("Item updated", 1);
       } else {
@@ -419,7 +421,7 @@ groovepacks_services.factory('orders', ['$http', '$window', 'notification', '$q'
 
   var single_update_print_status = function (item) {
     var result = $q.defer();
-    return $http.post('/orders/updateiteminorder.json', {orderitem: item.id}).success(function (data) {
+    return $http.post('/orders/update_item_in_order.json', {orderitem: item.id}).success(function (data) {
       if (data.status) {
         if (data.messages.length > 0) {
           alert(data.messages[0]);
@@ -434,7 +436,7 @@ groovepacks_services.factory('orders', ['$http', '$window', 'notification', '$q'
   };
 
   var single_print_barcode = function (item) {
-    $window.open('/products/generate_barcode_slip.pdf?id=' + item.id);
+    $window.open('/products/' + item.id + '/generate_barcode_slip.pdf');
   };
 
   var acknowledge_activity = function (activity_id) {

@@ -69,7 +69,7 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
   //list related functions
   var get_list = function (object) {
     var result = [];
-    return $http.get('/store_settings/storeslist.json').success(
+    return $http.get('/stores.json').success(
       function (data) {
         result = $filter('filter')(data, object.setup.search);
         result = $filter('orderBy')(result, object.setup.sort, (object.setup.order == 'DESC'));
@@ -88,11 +88,11 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
       }
       var url = '';
       if (action == "delete") {
-        url = '/store_settings/deletestore.json';
+        url = '/stores/delete_store.json';
       } else if (action == "duplicate") {
-        url = '/store_settings/duplicatestore.json';
+        url = '/stores/duplicate_store.json';
       } else if (action == "update_status") {
-        url = '/store_settings/changestorestatus.json';
+        url = '/stores/change_store_status.json';
       }
 
       return $http.post(url, stores.setup.storeArray).success(function (data) {
@@ -109,7 +109,7 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
 
   //single store related functions
   var get_single = function (id, stores) {
-    return $http.get('/store_settings/getstoreinfo.json?id=' + id).success(function (data) {
+    return $http.get('/stores/'+id+'.json').success(function (data) {
       // stores.single = {};
       stores.import.product.status = "";
       stores.import.order.status = "";
@@ -205,7 +205,7 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
     }).error(notification.server_error);
   };
   var get_system = function (stores) {
-    return $http.get('/store_settings/getSystem.json').success(function (data) {
+    return $http.get('/stores/get_system.json').success(function (data) {
       if (data.status) {
         stores.single = data.store;
       }
@@ -250,7 +250,7 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
   }
 
   var can_create_single = function () {
-    return $http.get('/store_settings/let_store_be_created.json')
+    return $http.get('/stores/let_store_be_created.json')
   };
 
   var create_update_single = function (stores, auto) {
@@ -260,7 +260,7 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
     return $http({
       method: 'POST',
       headers: {'Content-Type': undefined},
-      url: '/store_settings/createUpdateStore.json',
+      url: '/stores/create_update_store.json',
       transformRequest: function (data) {
         var request = new FormData();
         for (var key in data) {
@@ -286,7 +286,7 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
   };
 
   var connect_ftp_server = function(stores) {
-    return $http.get('/store_settings/connect_and_retrieve.json?store_id='+ stores.single.id).success(function (data) {
+    return $http.get('/stores/'+stores.single.id+'/connect_and_retrieve.json').success(function (data) {
       if (data.connection.status) {
         notification.notify(data.connection.success_messages, 1);
         stores.import_from_ftp_enabled = true;
@@ -301,7 +301,7 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
     return $http({
       method: 'POST',
       headers: {'Content-Type': undefined},
-      url: '/store_settings/create_update_ftp_credentials.json',
+      url: '/stores/'+stores.single.id+'/create_update_ftp_credentials.json',
       transformRequest: function (data) {
         var request = new FormData();
         for (var key in data) {
@@ -323,7 +323,7 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
 
   //ebay related functions
   var ebay_sign_in_url = function (stores) {
-    return $http.get('/store_settings/getebaysigninurl.json').success(function (data) {
+    return $http.get('/stores/get_ebay_signin_url.json').success(function (data) {
       if (data.ebay_signin_url_status) {
         stores.ebay.signin_url = data.ebay_signin_url;
         stores.ebay.signin_url_status = data.ebay_signin_url_status;
@@ -337,7 +337,7 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
   };
 
   var ebay_token_fetch = function (stores) {
-    return $http.get('/store_settings/ebayuserfetchtoken.json').success(function (data) {
+    return $http.get('/stores/ebay_user_fetch_token.json').success(function (data) {
       if (data.status) {
         stores.ebay.show_url = false;
       }
@@ -345,7 +345,7 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
   };
 
   var ebay_token_delete = function (stores) {
-    return $http.get('/store_settings/deleteebaytoken.json?storeid=' + stores.single.id).success(function (data) {
+    return $http.post('/stores/'+stores.single.id+'/delete_ebay_token.json').success(function (data) {
       if (data.status) {
         ebay_sign_in_url(stores);
       }
@@ -353,7 +353,7 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
   };
 
   var ebay_token_update = function (stores, id) {
-    return $http.get('/store_settings/updateebayusertoken.json?storeid=' + id).success(function (data) {
+    return $http.post('/stores/'+id+'/update_ebay_user_token.json').success(function (data) {
       if (data.status) {
         stores.ebay.show_url = false;
       }
@@ -362,7 +362,7 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
 
   //Import related functions
   var import_products = function (stores, report_id) {
-    return $http.get('/products/importproducts/' + stores.single.id + '.json?reportid=' + report_id).success(function (data) {
+    return $http.get('/products/import_products/' + stores.single.id + '.json?reportid=' + report_id).success(function (data) {
       if (data.status) {
         stores.import.product.status = "Successfully imported " + data.success_imported + " of " + data.total_imported +
           " products. " + data.previous_imported + " products were previously imported";
@@ -378,7 +378,7 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
   };
 
   var import_orders = function (stores) {
-    return $http.get('/orders/importorders/' + stores.single.id + '.json').success(function (data) {
+    return $http.get('/orders/import_orders/' + stores.single.id + '.json').success(function (data) {
       if (data.status) {
         stores.import.order.status = "Successfully imported " + data.success_imported + " of " + data.total_imported +
           " orders. " + data.previous_imported + " orders were previously imported";
@@ -394,7 +394,7 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
   };
 
   var import_images = function (stores, report_id) {
-    return $http.get('/products/importimages/' + stores.single.id + '.json').success(function (data) {
+    return $http.get('/products/import_images/' + stores.single.id + '.json').success(function (data) {
       if (data.status) {
         stores.import.image.status = "Successfully imported " + data.success_imported + " of " + data.total_imported +
           " images. " + data.previous_imported + " images were previously imported";
@@ -439,12 +439,12 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
 
   //csv related functions
   var csv_import_data = function (stores, id) {
-    return $http.get('/store_settings/csvImportData.json?id=' + id + '&type=' + stores.single.type).
+    return $http.post('/stores/'+id+'/csv_import_data.json?&type=' + stores.single.type).
       error(notification.server_error);
   };
 
   var csv_do_import = function (csv) {
-    return $http.post('/store_settings/csvDoImport.json', csv.current).success(function (data) {
+    return $http.post('/stores/'+csv.current.store_id+'/csv_do_import.json', csv.current).success(function (data) {
       if (data.status) {
         notification.notify("CSV import queued successfully.", 1);
         csv.current = {};
@@ -457,15 +457,14 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
   };
 
   var csv_product_import_cancel = function (id) {
-    return $http.post('/store_settings/csvProductImportCancel.json', {id: id}).success(function (data) {
+    return $http.post('/stores/'+id+'/csv_product_import_cancel.json').success(function (data) {
       notification.notify(data['error_messages']);
       notification.notify(data['success_messages'], 1);
       notification.notify(data['notice_messages'], 2);
     }).error(notification.server_error);
   };
   var update_csv_map = function (stores, map) {
-    return $http.post('/store_settings/updateCsvMap.json', {
-      store_id: stores.single.id,
+    return $http.post('/stores/'+stores.single.id+'/update_csv_map.json', {
       map: map
     }).success(function (data) {
       if (data.status) {
@@ -484,8 +483,7 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
   };
 
   var delete_csv_map = function (stores, kind) {
-    return $http.post('/store_settings/deleteCsvMap.json', {
-      store_id: stores.single.id,
+    return $http.post('/stores/'+stores.single.id+'/delete_csv_map.json', {
       kind: kind
     }).success(function (data) {
       if (data.status) {
@@ -503,13 +501,13 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
     }).error(notification.server_error);
   };
   var get_csv_maps = function (stores) {
-    return $http.get('/store_settings/csvMapData.json').success(function (data) {
+    return $http.get('/stores/csv_map_data.json').success(function (data) {
       stores.csv.maps = data;
     }).error(notification.server_error);
   };
 
   var update_products = function (store_id) {
-    return $http.put('/store_settings/update_products/' + store_id + '.json', null).success(
+    return $http.put('/stores/' + store_id + '/update_products.json', null).success(
       function (data) {
         if (data.status) {
           notification.notify("CSV imported successfully", 1);
@@ -523,13 +521,13 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
   };
 
   var verify_tags = function (store_id) {
-    return $http.get('/store_settings/verify_tags/' + store_id + '.json').success(
+    return $http.get('/stores/' + store_id + '/verify_tags.json').success(
       function (data) {
       }).error(notification.server_error);
   }
 
   var update_all_locations = function (store_id) {
-    return $http.put('/store_settings/update_all_locations/' + store_id + '.json', null).success(
+    return $http.put('/stores/' + store_id + '/update_all_locations.json', null).success(
       function (data) {
       }).error(notification.server_error);
   }

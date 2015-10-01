@@ -1,4 +1,4 @@
-module UserSettingsHelper
+module UsersHelper
 
   def update_role(user_role, role)
 

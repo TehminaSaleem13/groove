@@ -9,10 +9,14 @@ groovepacks_controllers.
        */
 
       scope.ok = function () {
-        scope.products.single.selected_image.added_to_receiving_instructions = true;
-        products.single.update_image(scope.products.single.selected_image).then(function () {
+        if (!scope.products.single.selected_image) {
           $modalInstance.close("ok-button-click");
-        });
+        } else{
+          scope.products.single.selected_image.added_to_receiving_instructions = true;
+          products.single.update_image(scope.products.single.selected_image).then(function () {
+            $modalInstance.close("ok-button-click");
+          });
+        };
       };
       scope.cancel = function () {
         $modalInstance.dismiss("cancel-button-click");
@@ -31,7 +35,11 @@ groovepacks_controllers.
         }
         ;
         image.checked = !image.checked;
-        scope.products.single.selected_image = image;
+        if (!image.checked) {
+          scope.products.single.selected_image = null;
+        } else{
+          scope.products.single.selected_image = image;
+        };
       };
 
       myscope.init = function () {
