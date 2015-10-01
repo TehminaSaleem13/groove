@@ -571,6 +571,7 @@ class ProductsController < ApplicationController
   def show
     @result = Hash.new
     @product = nil
+    params[:id] = nil if params[:id]=="null"
     if !params[:id].nil?
       @product = Product.find_by_id(params[:id])
     else

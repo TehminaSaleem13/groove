@@ -76,11 +76,11 @@ Groovepacks::Application.routes.draw do
       post 'update_product_list'
       post 'update_image'
       post 'update_intangibleness'
-      post 'adjust_available_inventory'
       post 'print_receiving_label'
     end
     member do
       get 'generate_barcode_slip'
+      put 'adjust_available_inventory'
       post 'add_image'
       post 'set_alias'
       post 'add_product_to_kit'

@@ -12,7 +12,7 @@ groovepacks_services.factory('inventory_manager', ['$http', 'notification', func
 
 
   var post_receive_or_recount_inventory = function (inventory_manager_obj) {
-    var url = '/products/adjust_available_inventory.json';
+    var url = '/products/'+inventory_manager_obj.single.id+'/adjust_available_inventory.json';
     console.log(inventory_manager_obj);
     return $http.put(url, inventory_manager_obj.single).success(
       function (data) {

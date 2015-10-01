@@ -239,7 +239,7 @@ groovepacks_services.factory('products', ['$http', 'notification', 'editable', '
 
   //single product retrieval by barcode
   var get_single_product_by_barcode = function (barcode, products) {
-    return $http.get('/products/show.json?barcode=' + barcode).success(function (data) {
+    return $http.get('/products/'+null+'.json?barcode=' + barcode).success(function (data) {
       products.single = {};
       if (data.product) {
         products.single = data.product;
