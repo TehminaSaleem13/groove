@@ -61,12 +61,6 @@ git pull origin ${ENV}
 git submodule init
 git submodule update --recursive
 
-cd ~/groove/nodeserver/socket-server
-npm install
-
-cd ~/groove/nodeserver/oauth-server
-npm install
-
 RAILS_ENV=${ENV} bundle exec bundle install --deployment
 RAILS_ENV=${ENV} bundle exec script/delayed_job -n ${NUM_JOBS} start
 
