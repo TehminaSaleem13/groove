@@ -5,7 +5,7 @@
       <label class="control-label col-md-4">API Key</label>
 
       <div class="controls col-md-8">
-        <input name="api_key" xs-input-sync ng-model="stores.single.api_key" type="text" ng-blur="update_single_store()"
+        <input name="api_key" xs-input-sync ng-model="stores.single.api_key" type="text" ng-blur="update_single_store(true)"
                class="form-control input-style" value="" required/>
       </div>
     </div>
@@ -15,7 +15,7 @@
 
       <div class="controls col-md-8">
         <input name="api_secret" xs-input-sync ng-model="stores.single.api_secret" type="text"
-               ng-blur="update_single_store()" class="form-control input-style" value="" required/>
+               ng-blur="update_single_store(true)" class="form-control input-style" value="" required/>
       </div>
     </div>
   </div>
@@ -28,7 +28,7 @@
 
       <div class="controls col-md-8">
         <div toggle-switch ng-model="stores.single.shall_import_awaiting_shipment"
-             groov-click="update_single_store()"></div>
+             groov-click="update_single_store(true)"></div>
         <i class="pull-right icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter"
            popover="Orders with the statuses enabled here will be imported during each import. Existing orders will be recognized by order number and skipped. The date range included in the import can be extended by using the Deep Import option in the Import Orders popover.&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
           &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
@@ -40,7 +40,7 @@
       <label class="control-label col-md-4">Shipped</label>
 
       <div class="controls col-md-8">
-        <div toggle-switch ng-model="stores.single.shall_import_shipped" groov-click="update_single_store()"></div>
+        <div toggle-switch ng-model="stores.single.shall_import_shipped" groov-click="update_single_store(true)"></div>
       </div>
     </div>
 
@@ -54,7 +54,7 @@
         </button>
         <ul class="dropdown-menu" role="menu">
           <li ng-repeat="day in stores.single.import_days">
-            <a class="dropdown-toggle" ng-click="stores.single.regular_import_range=day; update_single_store()">{{day}}
+            <a class="dropdown-toggle" ng-click="stores.single.regular_import_range=day; update_single_store(true)">{{day}}
               day(s)</a>
           </li>
         </ul>
@@ -66,7 +66,7 @@
       <label class="control-label col-md-4">Generate Barcode from SKU</label>
 
       <div class="controls col-md-8">
-        <div toggle-switch ng-model="stores.single.gen_barcode_from_sku" groov-click="update_single_store()"></div>
+        <div toggle-switch ng-model="stores.single.gen_barcode_from_sku" groov-click="update_single_store(true)"></div>
         <i class="pull-right icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter"
            groov-popover="If your Barcodes match your SKU, you can enable this option to have GroovePacker automatically generate Barcodes when new products are found during order imports."/>
       </div>
@@ -118,7 +118,7 @@
 
       <div class="controls col-md-8">
         <div toggle-switch ng-model="stores.single.shall_import_internal_notes"
-             groov-click="update_single_store()"></div>
+             groov-click="update_single_store(true)"></div>
         <i class="pull-right icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter"
            groov-popover="Notes enabled here will be imported along with the orders.<br/><br/>You should also turn on the <strong>Show Internal Notes</strong> and <strong>Show Customer Notes</strong> in the Scan Pack settings to view the notes while scanning and packing."></i>
       </div>
@@ -129,7 +129,7 @@
 
       <div class="controls col-md-8">
         <div toggle-switch ng-model="stores.single.shall_import_customer_notes"
-             groov-click="update_single_store()"></div>
+             groov-click="update_single_store(true)"></div>
       </div>
     </div>
   </div>

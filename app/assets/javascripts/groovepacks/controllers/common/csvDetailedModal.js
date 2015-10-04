@@ -1,6 +1,6 @@
 groovepacks_controllers.controller('csvDetailedModal', ['$scope', 'store_data', '$state', '$stateParams', '$modal',
-  '$modalInstance', '$timeout', 'hotkeys', 'stores', 'warehouses', 'notification',
-  function (scope, store_data, $state, $stateParams, $modal, $modalInstance, $timeout, hotkeys, stores, warehouses, notification) {
+  '$modalInstance', '$timeout', 'hotkeys', 'stores', 'warehouses', 'notification', 'groov_translator',
+  function (scope, store_data, $state, $stateParams, $modal, $modalInstance, $timeout, hotkeys, stores, warehouses, notification, groov_translator) {
     var myscope = {};
 
     /**
@@ -176,6 +176,16 @@ groovepacks_controllers.controller('csvDetailedModal', ['$scope', 'store_data', 
     myscope.init = function () {
       scope.csv = {};
       scope.stores = store_data;
+      scope.translations = {
+        "tooltips": {
+          "generate_barcode_from_sku": "",
+          "use_sku_as_product_name": "",
+          "create_new_product": "",
+          "add_update_existing_product": "",
+          "create_update_product": ""
+        }
+      };
+      groov_translator.translate('settings.backup_restore', scope.translations);
       stores.csv.import(scope.stores, scope.stores.single.id).success(function (data) {
         scope.csv.importer = {};
         scope.csv.importer.default_map = {value: 'none', name: "Unmapped", action: "Skip"};
@@ -190,8 +200,9 @@ groovepacks_controllers.controller('csvDetailedModal', ['$scope', 'store_data', 
         if (typeof scope.csv.current['import_action'] == "undefined") {
           scope.csv.current['import_action'] = 'create_new';
         }
-        angular.forEach(scope.csv.importer[scope.csv.importer.type]["map_options"], function (opt) {
+        angular.forEach(scope.csv.importer[scope.csv.importer.type]["map_options"], function (opt, index) {
           opt.disabled = false;
+          opt.index = index;
         });
         scope.parse();
       });

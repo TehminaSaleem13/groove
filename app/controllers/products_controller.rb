@@ -639,13 +639,16 @@ class ProductsController < ApplicationController
 
           kit_sku = Hash.new
           kit_sku['name'] = option_product.name
+          kit_sku['product_status'] = option_product.status
           if option_product.product_skus.length > 0
             kit_sku['sku'] = option_product.primary_sku
           end
           kit_sku['qty'] = kit.qty
           kit_sku['available_inv'] = 0
+          kit_sku['qty_on_hand'] = 0
           option_product.product_inventory_warehousess.each do |inventory|
             kit_sku['available_inv'] += inventory.available_inv.to_i
+            kit_sku['qty_on_hand'] += inventory.quantity_on_hand.to_i
           end
           kit_sku['packing_order'] = kit.packing_order
           kit_sku['option_product_id'] = option_product.id

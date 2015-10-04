@@ -1,7 +1,7 @@
 var env= require('../environment.js');
 exports.config = {
-    sauceUser: process.env.SAUCE_USERNAME || 'techgroove',
-    sauceKey: process.env.SAUCE_ACCESS_KEY || 'f5902625-a1db-464b-9372-2dc1f59023aa',
+    sauceUser: process.env.SAUCE_USERNAME || 'navgroovtech',
+    sauceKey: process.env.SAUCE_ACCESS_KEY || '5a4208f6-e22a-4901-ba63-1487b390da4f',
     // seleniumAddress: env.seleniumAddress,
 
     capabilities: env.capabilities,

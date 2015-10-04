@@ -28,6 +28,9 @@
             <li><a class="dropdown-toggle" ng-click="delete_selected_tenants()">Delete <span
               class="badge badge-important">{{tenants.setup.select_all? gridOptions.paginate.tenants_count: gridOptions.selections.selected_count}}</span></a>
             </li>
+            <li><a class="dropdown-toggle" ng-click="duplicate_selected_tenants()">Duplicate <span
+              class="badge badge-important">{{tenants.setup.select_all? gridOptions.paginate.tenants_count: gridOptions.selections.selected_count}}</span></a>
+            </li>
           </ul>
         </div>
       </div>

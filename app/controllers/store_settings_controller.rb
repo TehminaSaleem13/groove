@@ -22,6 +22,58 @@ class StoreSettingsController < ApplicationController
     end
   end
 
+  def create_update_ftp_credentials
+    result = {}
+
+    result['status'] = true
+    result['messages'] =[]
+    store = Store.find(params[:id])
+    unless store.nil?
+      if store.store_type == 'CSV'
+        ftp = store.ftp_credential
+
+        if ftp.nil?
+          ftp = FtpCredential.new
+          new_record = true
+        end
+        ftp.host = params[:host]
+        ftp.username = params[:username]
+        ftp.password = params[:password]
+        ftp.connection_method = params[:connection_method]
+
+        store.ftp_credential = ftp
+        begin
+          store.save!
+          if !new_record
+            store.ftp_credential.save
+          end
+        rescue ActiveRecord::RecordInvalid => e
+          result['status'] = false
+          result['messages'] = [store.errors.full_messages, store.ftp_credential.errors.full_messages]
+
+        rescue ActiveRecord::StatementInvalid => e
+          result['status'] = false
+          result['messages'] = [e.message]
+        end
+      end
+    end
+
+    respond_to do |format|
+      format.json { render json: result }
+    end
+  end
+
+  def connect_and_retrieve
+    result = {}
+    store = Store.find(params[:store_id])
+    groove_ftp = FTP::FtpConnectionManager.get_instance(store)
+    result['connection'] = groove_ftp.retrieve()
+    
+    respond_to do |format|
+      format.json { render json: result }
+    end
+  end
+
   def createUpdateStore
     @result = Hash.new
 
@@ -434,7 +486,8 @@ class StoreSettingsController < ApplicationController
               'generate_barcode_from_sku' => false,
               'use_sku_as_product_name' => false,
               'order_placed_at' => nil,
-              'order_date_time_format' => 'None',
+              'order_date_time_format' => 'Default',
+              'day_month_sequence' => 'MM/DD',
               'map' => {}
             }
           }
@@ -449,9 +502,14 @@ class StoreSettingsController < ApplicationController
               {value: 'increment_id', name: 'Order number'},
               {value: 'order_placed_time', name: 'Order Date/Time'},
               {value: 'sku', name: 'SKU'},
-              {value: 'qty', name: 'Quantity'},
-              {value: 'price', name: 'Order Total'},
-              {value: 'firstname', name: '(First) Name'},
+              {value: 'product_name', name: 'Product Name'},
+              {value: 'barcode', name: 'Barcode/UPC'},
+              {value: 'qty', name: 'QTY'},
+              {value: 'category', name: 'Product Category'},
+              {value: 'product_weight', name: 'Weight Oz'},
+              {value: 'product_instructions', name: 'Product Instructions'},
+              {value: 'image', name: 'Image Absolute URL'},
+              {value: 'firstname', name: '(First)Full Name'},
               {value: 'lastname', name: 'Last Name'},
               {value: 'email', name: 'Email'},
               {value: 'address_1', name: 'Address 1'},
@@ -461,14 +519,13 @@ class StoreSettingsController < ApplicationController
               {value: 'postcode', name: 'Postal Code'},
               {value: 'country', name: 'Country'},
               {value: 'method', name: 'Shipping Method'},
+              {value: 'price', name: 'Order Total'},
               {value: 'customer_comments', name: 'Customer Comments'},
-              {value: 'product_name', name: 'Product Name'},
-              {value: 'product_instructions', name: 'Product Instructions'},
-              {value: 'tracking_num', name: 'Tracking Number'},
-              {value: 'category', name: 'Category Name'},
-              {value: 'barcode', name: 'Barcode/UPC'},
-              {value: 'image', name: 'Image URL'}
+              {value: 'notes_internal', name: 'Internal Notes'},
+              {value: 'notes_toPacker', name: 'Notes to Packer'},
+              {value: 'tracking_num', name: 'Tracking Number'}
             ]
+            
             if csv_map.order_csv_map.nil?
               @result['order']['settings'] = default_csv_map
             else
@@ -487,21 +544,22 @@ class StoreSettingsController < ApplicationController
             @result['product'] = Hash.new
             @result['product']['map_options'] = [
               {value: 'sku', name: 'SKU'},
-              {value: 'secondary_sku', name: 'Secondary Sku'},
-              {value: 'tertiary_sku', name: 'Tertiary Sku'},
-              {value: 'product_name', name: 'Product Name'},
-              {value: 'category_name', name: 'Category Name'},
-              {value: 'inv_wh1', name: 'Inventory Count'},
-              {value: 'product_images', name: 'Image URL(absolute)'},
-              {value: 'location_primary', name: 'Location Primary'},
-              {value: 'location_secondary', name: 'Location Secondary'},
-              {value: 'location_tertiary', name: 'Location Tertiary'},
-              {value: 'barcode', name: 'UPC/Barcode'},
-              {value: 'secondary_barcode', name: 'Secondary Barcode'},
-              {value: 'tertiary_barcode', name: 'Tertiary Barcode'},
-              {value: 'product_weight', name: 'Product Weight'},
-              {value: 'product_instructions', name: 'Product Instructions'}
+              {value: 'barcode', name: 'Barcode'},
+              {value: 'product_name', name: 'Name'},
+              {value: 'inv_wh1', name: 'QTY On Hand'},
+              {value: 'location_primary', name: 'Bin Location'},
+              {value: 'product_images', name: 'Image Absolute URL'},
+              {value: 'product_weight', name: 'Weight Oz'},
+              {value: 'category_name', name: 'Category'},
+              {value: 'product_instructions', name: 'Product Instructions'},
+              {value: 'secondary_sku', name: 'SKU 2'},
+              {value: 'tertiary_sku', name: 'SKU 3'},
+              {value: 'secondary_barcode', name: 'Barcode 2'},
+              {value: 'tertiary_barcode', name: 'Barcode 3'},
+              {value: 'location_secondary', name: 'Bin Location 2'},
+              {value: 'location_tertiary', name: 'Bin Location 3'}         
             ]
+
             if csv_map.product_csv_map.nil?
               @result['product']['settings'] = default_csv_map
             else
@@ -635,6 +693,7 @@ class StoreSettingsController < ApplicationController
         :generate_barcode_from_sku => params[:generate_barcode_from_sku],
         :use_sku_as_product_name => params[:use_sku_as_product_name],
         :order_date_time_format => params[:order_date_time_format],
+        :day_month_sequence => params[:day_month_sequence],
         :map => params[:map]
       }
       map_data.save
@@ -650,6 +709,7 @@ class StoreSettingsController < ApplicationController
     end
     if @result['status']
       data = {}
+      data[:flag] = params[:flag]
       data[:type] = params[:type]
       data[:fix_width] = params[:fix_width]
       data[:fixed_width] = params[:fixed_width]
@@ -664,6 +724,7 @@ class StoreSettingsController < ApplicationController
       data[:use_sku_as_product_name] = params[:use_sku_as_product_name]
       data[:order_placed_at] = params[:order_placed_at]
       data[:order_date_time_format] = params[:order_date_time_format]
+      data[:day_month_sequence] = params[:day_month_sequence]
 
       # Uncomment this when everything is moved to bulk actions
       # groove_bulk_actions = GrooveBulkActions.new
@@ -685,7 +746,8 @@ class StoreSettingsController < ApplicationController
           import_item.store_id = @store.id
         end
         import_csv = ImportCsv.new
-        import_csv.delay(:run_at => 1.seconds.from_now).import Apartment::Tenant.current, data
+        import_csv.delay(:run_at => 1.seconds.from_now).import Apartment::Tenant.current, data.to_s
+        # import_csv.import(Apartment::Tenant.current, data.to_s)
         import_item.status = 'not_started'
         import_item.save
       elsif params[:type] == 'kit'
@@ -695,7 +757,8 @@ class StoreSettingsController < ApplicationController
         groove_bulk_actions.save
         data[:bulk_action_id] = groove_bulk_actions.id
         import_csv = ImportCsv.new
-        import_csv.delay(:run_at => 1.seconds.from_now).import Apartment::Tenant.current, data
+        import_csv.delay(:run_at => 1.seconds.from_now).import Apartment::Tenant.current, data.to_s
+        # import_csv.import(Apartment::Tenant.current, data.to_s)
 
       elsif params[:type] == 'product'
         product_import = CsvProductImport.find_by_store_id(@store.id)
@@ -705,7 +768,8 @@ class StoreSettingsController < ApplicationController
         end
 
         import_csv = ImportCsv.new
-        delayed_job = import_csv.delay(:run_at => 1.seconds.from_now).import Apartment::Tenant.current, data
+        delayed_job = import_csv.delay(:run_at => 1.seconds.from_now).import Apartment::Tenant.current, data.to_s
+        # delayed_job = import_csv.import(Apartment::Tenant.current, data.to_s)
 
         product_import.delayed_job_id = delayed_job.id
         product_import.total = 0

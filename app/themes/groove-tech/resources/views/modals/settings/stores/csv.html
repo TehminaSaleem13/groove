@@ -6,7 +6,7 @@
     <div class="form-group">
       <div class="controls col-xs-12">
         <input name="orderfile" file-upload type="file" value="" required/>
-        <br/>{{stores.single['orderfile'].name}}
+        <br/>
       </div>
       <div class="controls col-sm-8 text-center" ng-show="stores.csv.mapping.order_csv_map_id">
         <span class="glyphicon glyphicon-globe glyphicon-5x"></span><br/>
@@ -43,6 +43,48 @@
       </div>
     </div>
   </div>
+  <div class="col-sm-6">
+    <br/><br/>
+    <center><h4>FTP/SFTP Order Import</h4></center><br/><br/>
+    <div class="form-group">
+      <label class="control-label col-sm-3 remove_padding_left">FTP/SFTP Address</label>
+      <div class="controls col-sm-5 remove_padding_right remove_padding_left">
+        <input type="text" class="form-control input-style" placeholder="ftp.yourserver.com/files/" ng-model="stores.single.host"/>
+      </div>
+      <div class="info col-sm-1">
+        &nbsp;&nbsp;&nbsp;<i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter"
+           popover="{{translations.tooltips.ftp_address}}"></i>
+      </div>
+      <!-- <label class="control-label col-sm-1">Port</label>
+      <div class="controls col-sm-2">
+        <input type="text" class="form-control input-style" ng-model="stores.single.port" placeholder=21 />
+      </div> -->
+      <label class="control-label col-sm-1 remove_padding">FTP<input  type="radio" class="pull-left" ng-model="stores.single.connection_method" value="ftp" checked="checked"/></label>
+      <label class="control-label col-sm-2">SFTP<input type="radio" class="pull-left" ng-model="stores.single.connection_method" value="sftp">&nbsp;&nbsp;</label>
+    </div>
+    <div class="form-group">
+      <label class="control-label col-sm-3">Username</label>
+      <div class="controls col-sm-3 remove_padding_left">
+        <input type="text" class="form-control input-style col-sm-6" ng-model="stores.single.username"/>
+      </div>
+      <label class="control-label col-sm-3">Password</label>
+      <div class="controls col-sm-3 remove_padding_left">
+        <input type="text" class="form-control input-style" ng-model="stores.single.password"/>
+      </div>
+    </div>
+    <div class="col-sm-offset-3 text-center">
+      <br/><br/><br/>
+
+      <button class="modal-save-button mini-popover" ng-show="stores.import_from_ftp_enabled && stores.csv.mapping.order_csv_map_id" ng-click="import_ftp()">Import From FTP</button>
+      <button class="modal-save-button mini-popover" style="opacity: .50;" popover-trigger="mouseenter"  ng-show="!stores.import_from_ftp_enabled || !stores.csv.mapping.order_csv_map_id" groov-popover="{{translations.tooltips.import_from_ftp}}">Import From FTP</button>
+    </div>
+  </div>
+  <div class="col-sm-2">
+    <br/><br/><br/><br/><br/><br/><br/><br/>
+    <div class="">
+      <button id="test_connection" class="modal-save-button" ng-click="establish_connection()">Test Connection</button>
+    </div>
+  </div>
 </div>
 <div class="row">
   <div class="col-md-4">
@@ -59,7 +101,7 @@
     <div class="form-group">
       <div class="controls col-md-12">
         <input name="productfile" file-upload type="file" value="" required/>
-        <br/>{{stores.single['productfile'].name}}
+        <br/>
       </div>
       <div class="controls col-sm-8 text-center" ng-show="stores.csv.mapping.product_csv_map_id">
         <span class="glyphicon glyphicon-globe glyphicon-5x"></span><br/>
@@ -111,7 +153,7 @@
     <div class="form-group">
       <div class="controls col-md-12">
         <input name="kitfile" file-upload type="file" value="" required/>
-        <br/>{{stores.single['kitfile'].name}}
+        <br/>
       </div>
       <div class="controls col-sm-8 text-center" ng-show="stores.csv.mapping.kit_csv_map_id">
         <span class="glyphicon glyphicon-globe glyphicon-5x"></span><br/>

@@ -1,0 +1,38 @@
+SKU,Barcode,Name,QOH,BIN_LOCATION,IMAGE_URL,WEIGHT_OZ,CATEGORY,PACKING_INSTRUCTIONS,RECEIVING_INSTRUCTIONS,SKU_2,SKU_3,BARCODE_2,BARCODE_3,LOCATION_2,LOCATION_3,OPTION_1,Final INV,Tem Final INV
+R.S ,R.S,"regular product, single count (default: click-scan enabled, type-in enabled) (-4)",0,Pcsv-BIN-1,https://cdn.shopify.com/s/files/1/0469/7993/products/Phantom_2_Vision_-20140303_1686.jpg?v=1401848087,1,1,Verify image is loaded from product CSV,Sku 2 & 3 /  barcode 2 & 3 / and Location 2 & 3 should be added by product import ,SKU2,SKU3,BARCODE2,BARCODE3,LOCATION2,LOCATION3,,-4,
+,,,,,,2,2,,,,,,,,,,,
+R.S-CS.OFF ,R.S-CS.OFF,`[DELETE]`,1,Pcsv-BIN-1,,3,3,Click Scan this item. (see procedure) It should fail. Enter:  R.S-CS.OFF to scan the item. [Set Click Scan setting to Off ],Change Click Scanning Setting to Off,,,,,Pcsv-BIN-2,,,,
+R.M-CS.CONF ,R.M-CS.CONG,"regular product, multi-count with click-scan confirmation enabled",3,Pcsv-BIN-1,,4,4,Have your confirmation code ready. Click scan this item. Enter your confirmation code when prompted. [Change Click Scanning Setting to On with Confirmation],Change Click Scanning Setting to On with Confirmation,,,,,Pcsv-BIN-2,,,,
+R.M ,R.M,multi-count regular product ,3,Pcsv-BIN-1,,5,5,As you scan this item verify X of Y count changes and items move across as scanned ,,,,,,Pcsv-BIN-2,,,,
+R.M-TIC ,R.M-TIC,multi-count regular product ,20,Pcsv-BIN-1,,6,6,"Use type-in count: Enter  R.M-TIC   Then enter * (astrisk), then enter the item count.  ",,,,,,Pcsv-BIN-2,,,,
+R.M-TIC.OFF ,R.M-TIC.OFF,"multi-count regular product, type-in count off ",3,Pcsv-BIN-1,,7,7,Use type-in count: Enter R.M-TIC.OFF then enter * (astrisk) Verify type-in count is disabled. Click-scan to complete. [Set Type-In Count to Off],[Set Type-In Count to Off],,,,,Pcsv-BIN-2,,,,
+R.M-TIC.CONF ,R.M-TIC.CONF,"multi-count regular product, type-in count w confirmation ",20,Pcsv-BIN-1,,8,8,Use type-in count again: Enter   R.M-TIC.CONF  Verify confirmation is required [Set Type-In Count to On With Confirmation],Set Type-In Count to On With Confirmation,,,,,Pcsv-BIN-2,,,,
+K.SS.S,K.SS.S,"SingleScanKit, Single (NOT USED)",0,Pcsv-BIN-1,,9,9,,,,,,,Pcsv-BIN-2,,,,
+K.SS.M,K.SS.M,"SingleScanKit, Multi-count - Inventory will 0 (was -3)",0,Pcsv-BIN-1,,10,10,,,,,,,Pcsv-BIN-2,,,0,-3
+R.S-PART-A ,R.S-PART-A,Part of K.SS.M kit but not scanned -Inventory will 0 (was 6),6,Pcsv-BIN-1,,11,11,,,,,,,Pcsv-BIN-2,,,0,6
+R.S-PART-B ,R.S-PART-B,Part of K.SS.M kit but not scanned -Inventory will 0 (was 3),3,Pcsv-BIN-1,,12,12,,,,,,,Pcsv-BIN-2,,,0,3
+K.IS.S ,K.IS.S,(NOT USED),0,Pcsv-BIN-1,,13,13,,,,,,,Pcsv-BIN-2,,,,
+K.IS.M ,K.IS.M,"IndividualScanKit, Multi-count ",0,Pcsv-BIN-1,,14,14,Scan R.S-PART-C & R.S-PART-D individually ,,,,,,Pcsv-BIN-2,,,,
+R.S-PART-C ,R.S-PART-C,Part of K.IS.M ,6,Pcsv-BIN-1,,15,15,,,,,,,Pcsv-BIN-2,,,0,
+R.S-PART-D ,R.S-PART-D,Part of K.IS.M ,3,Pcsv-BIN-1,,16,16,,,,,,,Pcsv-BIN-2,,,0,
+K.AS1.S ,K.AS1.S,(NOT USED),0,Pcsv-BIN-1,,17,17,,,,,,,Pcsv-BIN-2,,,0,
+K.AS1.M ,K.AS1.M,"AutoSplitKit Scan Kit as a single item, Multi-count - Inventory will 0 (was -2)",0,Pcsv-BIN-1,,18,18,Click Scan this Kit,,,,,,Pcsv-BIN-2,,,0,-2
+R.S-PART-E ,R.S-PART-E,Inventory will 0 (was 6),6,Pcsv-BIN-1,,19,19,,,,,,,Pcsv-BIN-2,,,0,6
+R.S-PART-F ,R.S-PART-F,Inventory will 0 (was 3),3,Pcsv-BIN-1,,20,20,,,,,,,Pcsv-BIN-2,,,0,3
+K.AS2.M ,K.AS2.M,AutoSplitKit Scan items individually Multicount ,0,Pcsv-BIN-1,,21,21,Enter R.S-PART-G   seven times. Verify only 6 are accepted. Enter R.S-PART-H three times [Set Click Scan option to OFF],[Set Click Scan option to OFF],,,,,Pcsv-BIN-2,,,0,
+R.S-PART-G ,R.S-PART-G,Part of K.AS2.M - Inv will 0,6,Pcsv-BIN-1,,22,22,Good Job!,,,,,,Pcsv-BIN-2,,,0,
+R.S-PART-H ,R.S-PART-H,Part of K.AS2.M - Inv will 0,13,Pcsv-BIN-1,,23,23,Now Enter or click scan R.S-PART-H 3 times,,,,,,Pcsv-BIN-2,,,0,
+K.AS2.M-ADDTEST ,K.AS2.M-ADDTEST,Edit this kit. (auto-split) Scan items individually,0,Pcsv-BIN-1,,24,24,Add 4 x R.S-ADDPART006 and remove 2 x R.S-REMOVEPART ,,,,,,Pcsv-BIN-2,,,0,
+R.S-ADDPART006 ,R.S-ADD4to#006,4 will be on hand and 4 will be added to the kit so inv will 0,4,Pcsv-BIN-1,,25,25,,,,,,,Pcsv-BIN-2,,,0,
+R.S-REMOVEPART ,R.S-REMOVE2from#006,"After removing 2, we'll sell 4 from 4 on hand and inv will 0",4,Pcsv-BIN-1,,26,26,"X4 should now show for the quantity, click-scan these",,,,,,Pcsv-BIN-2,,,0,
+R.S-MASTER ,R.S-MASTER,This replaces R.S-2BALIASED2R in 007 once aliased,2,Pcsv-BIN-1,http://media0.giphy.com/media/7MZ0v9KynmiSA/giphy.gif,27,27,,,,,,,Pcsv-BIN-2,,,0,
+K.AS2-MASTER ,K.AS2-MASTER,Choose R.S-2BALIASED2K as an alias of this item,2,Pcsv-BIN-1,http://media3.giphy.com/media/ta83CqOoRwfwQ/giphy.gif,28,28,,,,,,,Pcsv-BIN-2,,,0,
+K-MASTER-PARTA ,K-MASTER-PARTA,Will end up in 007 after aliasing,2,Pcsv-BIN-1,,29,29,,,,,,,Pcsv-BIN-2,,,0,
+K-MASTER-PARTB ,K-MASTER-PARTB,Will end up in 007 after aliasing,4,Pcsv-BIN-1,,30,30,,,,,,,Pcsv-BIN-2,,,0,
+R.ADD2ANY ,R.ADD2ANY,Enable Add to any order,2,Pcsv-BIN-1,,31,31,Great Job! Keep it up! [Enable Add to any Order for this item] 1234 quotes test: 1 2 “3” 4,Enable “Add to any Order” for this item,,,,,Pcsv-BIN-2,,,0,
+R.SKIPABLE ,R.SKIPABLE,Enable SKIP-able,1,Pcsv-BIN-1,,32,32,Enter R.ADD2ANY twice. Verify it is added. Enter SKIP to skip this item & continue. [Set Product can be Skipped to On],Change “Product can be Skipped” to On,,,,,Pcsv-BIN-2,,,0,
+DIFF-BARCODE,DIFF-SKU,DIFF-BARCODE DIFF-SKU,0,Pcsv-BIN-1,,33,33,,,,,,,Pcsv-BIN-2,,,0,
+R.INTANGIBLE.SWITCH ,,Intangible Switch item – Initially “New” as order imports do not add product data.,1,,https://media1.giphy.com/media/oghWrvef4g8co/200.gif,,,not visible on packing slips-Transparency should be 50% [Enable the intangible product option and add barcode: R.INTANGIBLE.SWITCH], [Enable the intangible product option and add barcode: R.INTANGIBLE.SWITCH],,,,,,,,,
+PD-CHECK,PD-CHECK,PD-CHECK,1,PD-CHECK,,11,PD-CHECK,,PD-CHECK,PD-CHECK,PD-CHECK,PD-CHECK,PD-CHECK,PD-CHECK,PD-CHECK,PD-CHECK,,
+PD-CHECK,,Duplicate SKU check for P.Import,1,PD-CHECK,,11,PD-CHECK,This item should get skipped since it's SKU is not unique,PD-CHECK,PD-CHECK,PD-CHECK,PD-CHECK,PD-CHECK,PD-CHECK,PD-CHECK,PD-CHECK,,
+PD-B.CHECK,PD-CHECK,Duplicate Barcode check for P.Import,1,PD-CHECK,,11,PD-CHECK,This item should get created but it should be New since it's Barcode was not unique,PD-CHECK,PD-CHECK,PD-CHECK,PD-CHECK,PD-CHECK,PD-CHECK,PD-CHECK,PD-CHECK,,

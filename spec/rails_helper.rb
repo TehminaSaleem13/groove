@@ -5,6 +5,9 @@ require File.expand_path("../../config/environment", __FILE__)
 require 'rspec/rails'
 # Add additional requires below this line. Rails is not loaded until this point!
 
+# prevent Test::Unit's AutoRunner from executing during RSpec's rake task
+Test::Unit.run = true if defined?(Test::Unit) && Test::Unit.respond_to?(:run=)
+
 # Requires supporting ruby files with custom matchers and macros, etc, in
 # spec/support/ and its subdirectories. Files matching `spec/**/*_spec.rb` are
 # run as spec files by default. This means that files in spec/support that end
@@ -53,6 +56,15 @@ RSpec.configure do |config|
   #
   # The different available types are documented in the features, such as in
   # https://relishapp.com/rspec/rspec-rails/docs
+  config.around(:each, :delayed_job) do |example|
+    old_value = Delayed::Worker.delay_jobs
+    Delayed::Worker.delay_jobs = true
+    Delayed::Job.destroy_all
+
+    example.run
+
+    Delayed::Worker.delay_jobs = old_value
+  end
   DatabaseCleaner.strategy = :truncation
 
   # then, whenever you need to clean the DB
