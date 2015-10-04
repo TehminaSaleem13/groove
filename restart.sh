@@ -61,6 +61,8 @@ git stash
 git checkout ${ENV}
 git pull origin ${ENV}
 
+git submodule init
+git submodule update --recursive
 
 rm vendor/assets/components/**/*.js.{gzip,map}
 RAILS_ENV=${ENV} bundle exec bundle install --deployment
