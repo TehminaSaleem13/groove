@@ -1,4 +1,4 @@
-groovepacks_admin_controllers.
+groovepacks_controllers.
   controller('appCtrl', ['$rootScope', '$scope', '$timeout', '$modalStack', '$state', '$filter', '$document', '$window', 'hotkeys', 'auth', 'notification', 'importOrders', 'groovIO', 'editable', 'stores',
     function ($rootScope, $scope, $timeout, $modalStack, $state, $filter, $document, $window, hotkeys, auth, notification, importOrders, groovIO, editable, stores) {
 

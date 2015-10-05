@@ -1,4 +1,4 @@
-groovepacks_admin_controllers.
+groovepacks_controllers.
   controller('adminToolsCtrl', ['$scope', '$http', '$timeout', '$location', '$state', '$cookies', '$modal', '$q', 'notification', 'tenants',
     function ($scope, $http, $timeout, $location, $state, $cookies, $modal, $q, notification, tenants) {
 
@@ -309,7 +309,7 @@ groovepacks_admin_controllers.
           $scope._can_load_tenants = false;
           $scope.gridOptions.selections.show_delete = myscope.show_delete();
           return tenants.list.get($scope.tenants, page).success(function (data) {
-            $scope.gridOptions.paginate.tenants_count = tenants.list.total_tenants($scope.tenants);
+            $scope.gridOptions.paginate.total_items = tenants.list.total_tenants($scope.tenants);
             myscope.update_selected_count();
             $scope._can_load_tenants = true;
           }).error(function () {

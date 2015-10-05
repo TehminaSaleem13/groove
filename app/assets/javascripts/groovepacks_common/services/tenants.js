@@ -1,4 +1,4 @@
-groovepacks_admin_services.factory('tenants', ['$http', 'notification', 'editable', '$window', function ($http, notification, editable, $window) {
+groovepacks_services.factory('tenants', ['$http', 'notification', 'editable', '$window', function ($http, notification, editable, $window) {
 
   // var success_messages = {
   //     update_status: "Status updated Successfully",
@@ -96,6 +96,7 @@ groovepacks_admin_services.factory('tenants', ['$http', 'notification', 'editabl
   };
 
   var total_tenants_list = function (tenants) {
+    console.log(tenants);
     var total_items;
     if (tenants.setup.search != "") {
       total_items = tenants.tenants_count['search'];

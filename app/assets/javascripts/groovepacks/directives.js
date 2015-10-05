@@ -1,2 +1,2 @@
 //
-//= require_tree ./directives
+//= require_tree ../groovepacks_common/directives

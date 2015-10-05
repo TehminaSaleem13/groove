@@ -1,2 +1,2 @@
 //
-//= require_tree ./services
+//= require_tree ../groovepacks_common/services

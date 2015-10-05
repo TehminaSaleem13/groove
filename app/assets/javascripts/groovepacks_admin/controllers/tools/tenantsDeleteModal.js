@@ -1,4 +1,4 @@
-groovepacks_admin_controllers.
+groovepacks_controllers.
   controller('tenantsDeleteModal', ['$scope', '$http', '$timeout', '$stateParams', '$location', '$state', '$cookies', '$modal', '$modalInstance', 'tenant_data', 'deletion_type', 'tenants',
     function ($scope, $http, $timeout, $stateParams, $location, $state, $cookies, $modal, $modalInstance, tenant_data, deletion_type, tenants) {
       //Definitions

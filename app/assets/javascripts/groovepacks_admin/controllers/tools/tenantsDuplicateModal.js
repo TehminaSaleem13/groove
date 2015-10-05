@@ -1,4 +1,4 @@
-groovepacks_admin_controllers.
+groovepacks_controllers.
   controller('tenantsDuplicateModal', ['$scope', '$http', '$timeout', '$stateParams', '$location', '$state', '$cookies', '$modal', '$modalInstance', 'tenant_data', 'tenants',
     function ($scope, $http, $timeout, $stateParams, $location, $state, $cookies, $modal, $modalInstance, tenant_data, tenants) {
       //Definitions
