@@ -240,7 +240,8 @@ Groovepacks::Application.routes.draw do
 
   resources :subscriptions do
     collection do
-      post 'select_plan'
+      get 'select_plan'
+      get 'plan_info'
       post 'confirm_payment'
       get 'valid_tenant_name'
       get 'valid_email'
