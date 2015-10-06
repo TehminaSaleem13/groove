@@ -169,10 +169,12 @@ groovepacks.config(['$stateProvider', '$urlRouterProvider', 'hotkeysProvider', '
       prefix: '/assets/translations/locale-',
       suffix: '.json'
     });
+    console.log("config.js");
     $translateProvider.preferredLanguage('en').fallbackLanguage('en');
-  }]).run(['$rootScope', '$state', '$urlRouter', '$timeout', 'auth', 'hotkeys', 'logger',
-  function ($rootScope, $state, $urlRouter, $timeout, auth, hotkeys, logger) {
-
+  }]).run(['$rootScope', '$state', '$urlRouter', '$timeout', 'groovIO', 'auth', 'hotkeys', 'logger',
+  function ($rootScope, $state, $urlRouter, $timeout, groovIO, auth, hotkeys, logger) {
+    console.log("config....");
+    console.log(auth);
     $rootScope.$on('$stateChangeStart', function (e, to, toParams, from, fromParams) {
 
       var register_hot_keys = function () {

@@ -33,7 +33,10 @@ groovepacks_admin.config(['$stateProvider', '$urlRouterProvider', 'hotkeysProvid
       suffix: '.json'
     });
     $translateProvider.preferredLanguage('en').fallbackLanguage('en');
+    console.log("1");
   }]).run(['$rootScope', '$state', '$urlRouter', '$timeout', 'auth', function ($rootScope, $state, $urlRouter, $timeout, auth) {
+    console.log("2");
+    console.log(auth);
   $rootScope.$on('$stateChangeStart', function (e, to, toParams, from, fromParams) {
     if (jQuery.isEmptyObject(auth.get())) {
       if (!from.abstract || from.name == '') {
