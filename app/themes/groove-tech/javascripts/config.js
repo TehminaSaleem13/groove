@@ -169,17 +169,13 @@ groovepacks.config(['$stateProvider', '$urlRouterProvider', 'hotkeysProvider', '
       prefix: '/assets/translations/locale-',
       suffix: '.json'
     });
-    console.log("config.js");
     $translateProvider.preferredLanguage('en').fallbackLanguage('en');
-  }]).run(['$rootScope', '$state', '$urlRouter', '$timeout', 'groovIO', 'auth', 'hotkeys', 'logger',
-  function ($rootScope, $state, $urlRouter, $timeout, groovIO, auth, hotkeys, logger) {
-    console.log("config....");
-    console.log(auth);
+  }]).run(['$rootScope', '$state', '$urlRouter', '$timeout', 'auth', 'hotkeys', 'logger',
+  function ($rootScope, $state, $urlRouter, $timeout, auth, hotkeys, logger) {
     $rootScope.$on('$stateChangeStart', function (e, to, toParams, from, fromParams) {
 
       var register_hot_keys = function () {
         if (!hotkeys.get('ctrl+alt+e')) {
-          console.log("registering logger key")
           hotkeys.add({
             combo: 'ctrl+alt+e',
             description: 'Opens log',

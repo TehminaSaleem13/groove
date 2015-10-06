@@ -85,7 +85,6 @@ groovepacks_controllers.
             else {
               tenants.single.duplicate($scope.tenants).then(function(data) {
                 $scope.tenants.duplicate_name = '';
-                console.log($scope.tenants);
                 myscope.get_tenants().then(result.resolve);
               });
             }

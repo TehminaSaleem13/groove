@@ -96,7 +96,6 @@ groovepacks_services.factory('tenants', ['$http', 'notification', 'editable', '$
   };
 
   var total_tenants_list = function (tenants) {
-    console.log(tenants);
     var total_items;
     if (tenants.setup.search != "") {
       total_items = tenants.tenants_count['search'];

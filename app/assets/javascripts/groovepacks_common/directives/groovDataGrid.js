@@ -188,7 +188,6 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout', '$http', '$sce', 
         }, 500);
       };
       myscope.init = function () {
-        console.log("in groove datagrid");
         scope.theads = [];
         myscope.last_clicked = null;
 
@@ -258,7 +257,6 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout', '$http', '$sce', 
         if (typeof scope.groovDataGrid['selections'] != "undefined" && scope.groovDataGrid.selections.show_dropdown) {
           scope.$watch('groovDataGrid.selections', myscope.update_selections, true);
         }
-        console.log(scope.options);
       };
 
       myscope.init();
