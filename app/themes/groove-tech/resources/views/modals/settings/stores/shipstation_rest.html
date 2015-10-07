@@ -23,23 +23,23 @@
 <div class="row">
   <div class="col-md-6">
     <legend>Import Orders with following statuses</legend>
-    <div class="form-group">
+<!--     <div class="form-group">
       <label class="control-label col-md-4">Pending Fulfillment</label>
 
       <div class="controls col-md-8">
         <div toggle-switch ng-model="stores.single.shall_import_pending_fulfillment" groov-click="update_single_store(true)"></div>
-        <i class="pull-right icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter"
-           popover="Orders with the statuses enabled here will be imported during each import. Existing orders will be recognized by order number and skipped. The date range included in the import can be extended by using the Deep Import option in the Import Orders popover.&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
-          &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
-          If all statuses are disabled here only orders with the GP Ready tag will be imported, otherwise the tagged orders will be imported in addition to orders of the enabled status."></i>
+   
       </div>
-    </div>
-
+    </div> -->
     <div class="form-group">
       <label class="control-label col-md-4">Awaiting Shipment</label>
       <div class="controls col-md-8">
         <div toggle-switch ng-model="stores.single.shall_import_awaiting_shipment"
              groov-click="update_single_store(true)"></div>
+        <i class="pull-right icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter"
+             popover="Orders with the statuses enabled here will be imported during each import. Existing orders will be recognized by order number and skipped. The date range included in the import can be extended by using the Deep Import option in the Import Orders popover.&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+            &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+            If all statuses are disabled here only orders with the GP Ready tag will be imported, otherwise the tagged orders will be imported in addition to orders of the enabled status."></i>
       </div>
     </div>
 

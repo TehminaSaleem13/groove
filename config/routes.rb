@@ -53,6 +53,7 @@ Groovepacks::Application.routes.draw do
       post 'remove_item_from_order'
       post 'update_item_in_order'
       post 'import_shipworks'
+      get 'import'
     end
     member do
       post 'add_item_to_order'

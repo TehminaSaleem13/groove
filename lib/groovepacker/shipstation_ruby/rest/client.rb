@@ -33,7 +33,6 @@ module Groovepacker
                                       "Authorization" => "Basic "+ Base64.encode64(@auth[:api_key] + ":" + @auth[:api_secret]).gsub(/\n/, ''),
                                       "X-Mashape-Key" => "E6cSux0BVQmshJh0VacUkqXP1sJgp1I1APKjsntC26JSOTy0pP",
                                     })
-            puts response.inspect
             handle_exceptions(response)
             combined_response["orders"] =
               combined_response["orders"] +

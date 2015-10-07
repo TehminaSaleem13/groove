@@ -32,9 +32,8 @@ module Groovepacker
                   credential.last_imported_at - 1.day
               import_date_type = "modified_at"
             else
-              import_from = Date.today - 2.weeks
-                # credential.last_imported_at.nil? ? Date.today - 2.weeks : 
-                #   credential.last_imported_at - credential.regular_import_range.days
+              import_from = credential.last_imported_at.nil? ? Date.today - 2.weeks : 
+                  credential.last_imported_at - credential.regular_import_range.days
               import_date_type = "created_at"
             end
 
