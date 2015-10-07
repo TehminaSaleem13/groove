@@ -223,8 +223,10 @@ Groovepacks::Application.routes.draw do
   end
 
   resources :tenants do
+    collection do
+      post 'delete_tenant'
+    end
     member do
-      delete 'delete_tenant'
       post   'create_duplicate'
     end
   end

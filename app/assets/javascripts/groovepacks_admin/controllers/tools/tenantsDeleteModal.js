@@ -10,7 +10,6 @@ groovepacks_admin_controllers.
 
       $scope.ok = function () {
         $modalInstance.close("ok-button-click");
-        console.log(deletion_type);
         tenants.single.delete($scope.tenants.single.basicinfo.id, deletion_type);
       };
 
@@ -21,7 +20,6 @@ groovepacks_admin_controllers.
       myscope.init = function () {
         $scope.tenants = tenant_data;
         $scope.tenants.deletion_type = deletion_type;
-        console.log($scope.tenants);
       };
 
       myscope.init();
