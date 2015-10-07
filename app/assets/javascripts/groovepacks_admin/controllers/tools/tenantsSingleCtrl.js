@@ -1,4 +1,4 @@
-groovepacks_controllers.
+groovepacks_admin_controllers.
   controller('tenantsSingleCtrl', ['$scope', '$http', '$timeout', '$stateParams', '$location', '$state', '$cookies', '$modal', '$modalStack', '$previousState',
     function ($scope, $http, $timeout, $stateParams, $location, $state, $cookies, $modal, $modalStack, $previousState) {
       //Definitions

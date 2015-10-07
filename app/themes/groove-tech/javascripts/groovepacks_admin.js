@@ -1,12 +1,9 @@
-var groovepacks_admin = angular.module('groovepacks_admin', ['groovepacks_admin.filters', 'groovepacks_admin.services',
-  'groovepacks_admin.directives', 'groovepacks_admin.controllers', 'ui.sortable', 'pasvaz.bindonce', 'ngCookies',
+var groovepacks_admin = angular.module('groovepacks_admin', ['groovepacks.filters', 'groovepacks.services',
+  'groovepacks.directives', 'groovepacks_admin.controllers', 'ui.sortable', 'pasvaz.bindonce', 'ngCookies',
   'ct.ui.router.extras', 'ngAnimate', 'ui.bootstrap', 'cfp.hotkeys',
   'angular-loading-bar', 'pascalprecht.translate', 'toggle-switch', 'ngTouch',
   'hmTouchEvents', 'btford.socket-io', 'textAngular', 'ngClipboard', 'ng-rails-csrf']);
-var groovepacks_controllers = angular.module('groovepacks_admin.controllers', ['groovepacks.controllers']);
-var groovepacks_filters = angular.module('groovepacks_admin.filters', ['groovepacks.filters']);
-var groovepacks_services = angular.module('groovepacks_admin.services', ['groovepacks.services']);
-var groovepacks_directives = angular.module('groovepacks_admin.directives', ['groovepacks.directives']);
+var groovepacks_admin_controllers = angular.module('groovepacks_admin.controllers', []);
 
 String.prototype.chunk = function (size) {
   return [].concat.apply([],

@@ -1,4 +1,4 @@
-groovepacks_controllers.
+groovepacks_admin_controllers.
   controller('adminToolsCtrl', ['$scope', '$http', '$timeout', '$location', '$state', '$cookies', '$modal', '$q', 'notification', 'tenants',
     function ($scope, $http, $timeout, $location, $state, $cookies, $modal, $q, notification, tenants) {
 
@@ -130,7 +130,7 @@ groovepacks_controllers.
 
       myscope.load_page_number = function (page) {
 
-        if (page > 0 && page <= Math.ceil($scope.gridOptions.paginate.tenants_count / $scope.gridOptions.paginate.items_per_page)) {
+        if (page > 0 && page <= Math.ceil($scope.gridOptions.paginate.total_items / $scope.gridOptions.paginate.items_per_page)) {
           if ($scope.tenants.setup.search == '') {
             var toParams = {};
             for (var key in $state.params) {
