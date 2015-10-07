@@ -384,9 +384,10 @@ class SettingsController < ApplicationController
           :packing_user => '',
           :order_item_count => '',
           :scanned_date => '',
-          :warehouse_name => ''
+          :warehouse_name => '',
+          :item_sale_price => ''
         }
-        data = CSV.generate do |csv|
+      data = CSV.generate do |csv|
           csv << row_map.keys
 
           serials.each do |serial|
@@ -405,6 +406,13 @@ class SettingsController < ApplicationController
             single_row[:primary_sku] = serial.product.primary_sku
             single_row[:primary_barcode] = serial.product.primary_barcode
             single_row[:order_item_count] = serial.order.get_items_count
+            #item sale price
+            order_items = serial.order.order_items.where(product: serial.product)
+            if order_items.empty?
+              single_row[:item_sale_price] = ""
+            else
+              single_row[:item_sale_price] = order_items.first.price
+            end
 
             csv << single_row.values
           end

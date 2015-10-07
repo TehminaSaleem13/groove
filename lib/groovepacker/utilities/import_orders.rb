@@ -36,7 +36,7 @@ class ImportOrders
       if !@order_import_summary.nil? && !@order_import_summary.id.nil?
         import_items = @order_import_summary.import_items
         import_items.each do |import_item|
-          import_orders_with_import_item(import_item,)
+          import_orders_with_import_item(import_item, tenant)
         end
         @order_import_summary.reload
         if @order_import_summary.status != 'cancelled'
@@ -119,7 +119,7 @@ class ImportOrders
     end
   end
 
-  def import_orders_with_import_item(import_item)
+  def import_orders_with_import_item(import_item, tenant)
     begin
       store_type = import_item.store.store_type
       store = import_item.store
@@ -218,6 +218,11 @@ class ImportOrders
       import_item.message = "Import failed: " + e.message
       import_item.status = 'failed'
       import_item.save
+      ImportMailer.failed({
+        tenant: tenant, 
+        import_item: import_item, 
+        exception: e
+      }).deliver
     end
   end
 
@@ -230,7 +235,7 @@ class ImportOrders
       order_import_summary.save
 
       order_import_summary.import_items.each do |import_item|
-        ImportOrders.new.import_orders_with_import_item(import_item)
+        ImportOrders.new.import_orders_with_import_item(import_item, tenant)
       end
       order_import_summary.reload
       if order_import_summary.status != 'cancelled'
