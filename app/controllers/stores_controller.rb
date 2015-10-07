@@ -296,6 +296,7 @@ class StoresController < ApplicationController
             @shipstation.api_secret = params[:api_secret]
             @shipstation.shall_import_awaiting_shipment = params[:shall_import_awaiting_shipment]
             @shipstation.shall_import_shipped = params[:shall_import_shipped]
+            @shipstation.shall_import_pending_fulfillment = params[:shall_import_pending_fulfillment]
             @shipstation.warehouse_location_update = params[:warehouse_location_update]
             @shipstation.shall_import_customer_notes = params[:shall_import_customer_notes]
             @shipstation.shall_import_internal_notes = params[:shall_import_internal_notes]

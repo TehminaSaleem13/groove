@@ -58,6 +58,7 @@ Groovepacks::Application.routes.draw do
       post 'add_item_to_order'
       post 'record_exception'
       post 'clear_exception'
+      get 'importorders'
     end
   end
 

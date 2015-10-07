@@ -10,12 +10,17 @@ module Groovepacker
           @endpoint = "https://ssapi.shipstation.com"
         end
 
-        def get_orders(status, order_placed_after)
+        def get_orders(status, order_placed_after, import_date_type = "created_at")
           Rails.logger.info "Getting orders with status: " + status
           orderDateStart = ''
           unless order_placed_after.nil?
-            orderDateStart = '&orderDateStart=' + order_placed_after.to_s
-            Rails.logger.info "Getting orders placed after: " + order_placed_after.to_s
+            if import_date_type == "created_at"
+              orderDateStart = '&orderDateStart=' + order_placed_after.to_s
+              Rails.logger.info "Getting orders placed after: " + order_placed_after.to_s
+            elsif import_date_type == "modified_at"
+              orderDateStart = '&modifyDateStart=' + order_placed_after.to_s
+              Rails.logger.info "Getting orders modified after: " + order_placed_after.to_s
+            end
           end
           page_index = 1
           combined_response = {}
@@ -28,6 +33,7 @@ module Groovepacker
                                       "Authorization" => "Basic "+ Base64.encode64(@auth[:api_key] + ":" + @auth[:api_secret]).gsub(/\n/, ''),
                                       "X-Mashape-Key" => "E6cSux0BVQmshJh0VacUkqXP1sJgp1I1APKjsntC26JSOTy0pP",
                                     })
+            puts response.inspect
             handle_exceptions(response)
             combined_response["orders"] =
               combined_response["orders"] +
