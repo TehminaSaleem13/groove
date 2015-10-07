@@ -165,6 +165,7 @@ groovepacks_admin_services.factory('stores', ['$http', 'notification', '$filter'
             stores.single.api_secret = data.credentials.shipstation_rest_credentials.api_secret;
             stores.single.shall_import_awaiting_shipment = data.credentials.shipstation_rest_credentials.shall_import_awaiting_shipment;
             stores.single.shall_import_shipped = data.credentials.shipstation_rest_credentials.shall_import_shipped;
+            stores.single.shall_import_pending_fulfillment = data.credentials.shipstation_rest_credentials.shall_import_pending_fulfillment;
             stores.single.shall_import_customer_notes =
               data.credentials.shipstation_rest_credentials.shall_import_customer_notes;
             stores.single.shall_import_internal_notes =

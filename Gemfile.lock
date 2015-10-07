@@ -243,7 +243,7 @@ GEM
       less (~> 2.5.0)
     less-rails-bootstrap (3.1.1.1)
       less-rails (~> 2.5.0)
-    libv8 (3.16.14.3)
+    libv8 (3.16.14.7)
     listen (2.0.0)
       celluloid (>= 0.15.1)
       rb-fsevent (>= 0.9.3)
@@ -443,7 +443,7 @@ GEM
     test-unit (3.0.8)
       power_assert
     therubyracer (0.12.0)
-      libv8 (~> 3.16.14.0)
+      libv8 (~> 3.16.14.7)
       ref
     thor (0.19.1)
     thread_safe (0.3.4)

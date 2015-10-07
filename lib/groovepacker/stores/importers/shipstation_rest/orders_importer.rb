@@ -14,15 +14,27 @@ module Groovepacker
             result = self.build_result
 
             statuses = []
-            statuses.push('awaiting_shipment') if credential.shall_import_awaiting_shipment?
-            statuses.push('shipped') if credential.shall_import_shipped?
+            statuses.push('awaiting_shipment') if 
+              credential.shall_import_awaiting_shipment?
+            statuses.push('shipped') if 
+              credential.shall_import_shipped?
+            statuses.push('pending_fulfillment') if 
+              credential.shall_import_pending_fulfillment?
 
             if import_item.import_type == 'deep'
               import_from =
-                credential.last_imported_at.nil? ? Date.today - 2.weeks : credential.last_imported_at - 7.days
-            else
+                credential.last_imported_at.nil? ? Date.today - 2.weeks : 
+                  credential.last_imported_at - 7.days
+              import_date_type = "created_at"
+            elsif import_item.import_type == 'quick'
               import_from =
-                credential.last_imported_at.nil? ? Date.today - 2.weeks : credential.last_imported_at - credential.regular_import_range.days
+                credential.last_imported_at.nil? ? Date.today - 3.days : 
+                  credential.last_imported_at - 1.day
+              import_date_type = "modified_at"
+            else
+              import_from = credential.last_imported_at.nil? ? Date.today - 2.weeks : 
+                  credential.last_imported_at - credential.regular_import_range.days
+              import_date_type = "created_at"
             end
 
             gp_ready_tag_id = client.get_tag_id(credential.gp_ready_tag_name)
@@ -31,7 +43,7 @@ module Groovepacker
             unless statuses.empty? && gp_ready_tag_id == -1
               response = {}
               response["orders"] = nil
-              response = client.get_orders(statuses.join(","), import_from) unless statuses.empty?
+              response = client.get_orders(statuses.join(","), import_from, import_date_type) unless statuses.empty?
 
               importing_time = Date.today - 1.day
 
