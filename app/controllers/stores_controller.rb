@@ -630,6 +630,11 @@ class StoresController < ApplicationController
       @result['messages'].push('No store selected')
     end
 
+    unless @store.status
+      @result['status'] = false
+      @result['messages'].push('Store is not active')
+    end
+
     if params[:type].nil? || !['order', 'product', 'kit'].include?(params[:type])
       @result['status'] = false
       @result['messages'].push('No Type specified to import')
@@ -740,16 +745,39 @@ class StoresController < ApplicationController
 
       # Comment everything after this line till next comment (i.e. the entire if block) when everything is moved to bulk actions
       if params[:type] == 'order'
-        import_item = ImportItem.find_by_store_id(@store.id)
-        if import_item.nil?
-          import_item = ImportItem.new
-          import_item.store_id = @store.id
+        order_import_summary = OrderImportSummary.new
+        order_import_summary.user_id = current_user.id
+        order_import_summary.status = 'not_started'
+        order_import_summary.save
+        if OrderImportSummary.where(status: 'in_progress').empty?
+          order_import_summaries = OrderImportSummary.where(status: 'not_started')
+          if !order_import_summaries.empty?
+            ordered_import_summaries = order_import_summaries.order('updated_at' + ' ' + 'desc')
+            ordered_import_summaries.each do |order_import_summary|
+              if order_import_summary == ordered_import_summaries.first
+                ImportItem.where(store_id: @store.id).delete_all
+                import_item = ImportItem.find_by_store_id(@store.id)
+                if import_item.nil?
+                  import_item = ImportItem.new
+                  import_item.store_id = @store.id
+                end
+                import_item.order_import_summary_id = order_import_summary.id
+                import_csv = ImportCsv.new
+                import_csv.delay(:run_at => 1.seconds.from_now).import Apartment::Tenant.current, data.to_s
+                # import_csv.import(Apartment::Tenant.current, data.to_s)
+                import_item.status = 'not_started'
+                import_item.save
+                order_import_summary.reload
+                if order_import_summary.status != 'cancelled'
+                  order_import_summary.status = 'completed'
+                  order_import_summary.save
+                end
+              elsif order_import_summary.status != 'in_progress'
+                order_import_summary.delete
+              end
+            end
+          end
         end
-        import_csv = ImportCsv.new
-        import_csv.delay(:run_at => 1.seconds.from_now).import Apartment::Tenant.current, data.to_s
-        # import_csv.import(Apartment::Tenant.current, data.to_s)
-        import_item.status = 'not_started'
-        import_item.save
       elsif params[:type] == 'kit'
         groove_bulk_actions = GrooveBulkActions.new
         groove_bulk_actions.identifier = 'csv_import'

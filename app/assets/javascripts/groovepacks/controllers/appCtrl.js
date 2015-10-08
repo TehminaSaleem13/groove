@@ -82,6 +82,7 @@ groovepacks_controllers.
               single_data.name = import_item.store_info.name;
               single_data.id = import_item.store_info.id;
               single_data.store_type = import_item.store_info.store_type;
+              single_data.status = import_item.store_info.status;
               single_data.progress.type = import_item.import_info.status;
               single_data.progress.value = 0;
               single_data.progress.message = '';
@@ -153,7 +154,7 @@ groovepacks_controllers.
           }
           $scope.import_groov_popover.content =
             '<table style="font-size: 12px;width:100%;">' +
-            '<tr ng-repeat="store in import_groov_popover.data">' +
+            '<tr ng-repeat="store in import_groov_popover.data" ng-hide="store.store_type==\'CSV\' && !store.status">' +
             '<td width="60px;" style="white-space: nowrap;">' +
             '<a class="btn" href="#/settings/stores/{{store.id}}"><img ng-src="{{store.logo.src}}" width="60px" alt="{{store.logo.alt}}"/></a>' +
             '</td>' +
