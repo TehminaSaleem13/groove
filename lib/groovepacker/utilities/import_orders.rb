@@ -18,6 +18,10 @@ class ImportOrders
             stores = Store.where("status = '1' AND store_type != 'system' AND store_type != 'Shipworks'")
             if stores.length != 0
               stores.each do |store|
+                if store.store_type == 'CSV'
+                  mapping = CsvMapping.find_by_store_id(store.id)
+                  next if mapping.nil? || mapping.order_csv_map.nil? || store.ftp_credential.nil?
+                end
                 import_item = ImportItem.new
                 import_item.store_id = store.id
                 import_item.status = 'not_started'
@@ -217,9 +221,8 @@ class ImportOrders
         import_item.status = 'in_progress'
         import_item.save
         mapping = CsvMapping.find_by_store_id(store.id)
-        puts "mapping: " + mapping.inspect
         map = mapping.order_csv_map
-        puts "map: " + map.inspect
+
         data = {}
         data[:flag] = "ftp_download"
         data[:type] = "order"
@@ -240,7 +243,7 @@ class ImportOrders
         
         import_csv = ImportCsv.new
         result = import_csv.import(tenant, data.to_s)
-        
+
         import_item.reload
         if import_item.status != 'cancelled'
           if !result[:status]
@@ -250,6 +253,7 @@ class ImportOrders
             import_item.status = 'completed'
           end
         end
+        
         import_item.save
       end
     rescue Exception => e

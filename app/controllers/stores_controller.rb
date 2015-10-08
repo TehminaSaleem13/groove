@@ -745,39 +745,10 @@ class StoresController < ApplicationController
 
       # Comment everything after this line till next comment (i.e. the entire if block) when everything is moved to bulk actions
       if params[:type] == 'order'
-        order_import_summary = OrderImportSummary.new
-        order_import_summary.user_id = current_user.id
-        order_import_summary.status = 'not_started'
-        order_import_summary.save
-        if OrderImportSummary.where(status: 'in_progress').empty?
-          order_import_summaries = OrderImportSummary.where(status: 'not_started')
-          if !order_import_summaries.empty?
-            ordered_import_summaries = order_import_summaries.order('updated_at' + ' ' + 'desc')
-            ordered_import_summaries.each do |order_import_summary|
-              if order_import_summary == ordered_import_summaries.first
-                ImportItem.where(store_id: @store.id).delete_all
-                import_item = ImportItem.find_by_store_id(@store.id)
-                if import_item.nil?
-                  import_item = ImportItem.new
-                  import_item.store_id = @store.id
-                end
-                import_item.order_import_summary_id = order_import_summary.id
-                import_csv = ImportCsv.new
-                import_csv.delay(:run_at => 1.seconds.from_now).import Apartment::Tenant.current, data.to_s
-                # import_csv.import(Apartment::Tenant.current, data.to_s)
-                import_item.status = 'not_started'
-                import_item.save
-                order_import_summary.reload
-                if order_import_summary.status != 'cancelled'
-                  order_import_summary.status = 'completed'
-                  order_import_summary.save
-                end
-              elsif order_import_summary.status != 'in_progress'
-                order_import_summary.delete
-              end
-            end
-          end
-        end
+        bulk_actions = Groovepacker::Orders::BulkActions.new
+        bulk_actions.delay(:run_at => 1.seconds.from_now).import_csv_orders(Apartment::Tenant.current_tenant, @store.id, data.to_s, current_user.id)
+        # bulk_actions.import_csv_orders(Apartment::Tenant.current_tenant, @store, data, current_user)
+        
       elsif params[:type] == 'kit'
         groove_bulk_actions = GrooveBulkActions.new
         groove_bulk_actions.identifier = 'csv_import'
