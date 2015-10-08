@@ -54,6 +54,7 @@ Groovepacks::Application.routes.draw do
       post 'update_item_in_order'
       post 'import_shipworks'
       get 'import'
+      put 'cancel_import'
     end
     member do
       post 'add_item_to_order'
