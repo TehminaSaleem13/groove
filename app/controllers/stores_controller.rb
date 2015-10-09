@@ -39,6 +39,7 @@ class StoresController < ApplicationController
         ftp.username = params[:username]
         ftp.password = params[:password]
         ftp.connection_method = params[:connection_method]
+        ftp.connection_established = false
 
         store.ftp_credential = ftp
         begin
@@ -66,7 +67,11 @@ class StoresController < ApplicationController
     result = {}
     store = Store.find(params[:id])
     groove_ftp = FTP::FtpConnectionManager.get_instance(store)
-    result['connection'] = groove_ftp.retrieve()
+    result[:connection] = groove_ftp.retrieve()
+    if result[:connection][:status]
+      store.ftp_credential.connection_established = true
+      store.ftp_credential.save!
+    end
     
     respond_to do |format|
       format.json { render json: result }

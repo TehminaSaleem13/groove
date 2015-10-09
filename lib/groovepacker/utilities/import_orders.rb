@@ -18,10 +18,10 @@ class ImportOrders
             stores = Store.where("status = '1' AND store_type != 'system' AND store_type != 'Shipworks'")
             if stores.length != 0
               stores.each do |store|
-                if store.store_type == 'CSV'
-                  mapping = CsvMapping.find_by_store_id(store.id)
-                  next if mapping.nil? || mapping.order_csv_map.nil? || store.ftp_credential.nil?
-                end
+                # if store.store_type == 'CSV'
+                #   mapping = CsvMapping.find_by_store_id(store.id)
+                #   next if mapping.nil? || mapping.order_csv_map.nil? || store.ftp_credential.nil? || 
+                # end
                 import_item = ImportItem.new
                 import_item.store_id = store.id
                 import_item.status = 'not_started'
@@ -218,42 +218,46 @@ class ImportOrders
         end
         import_item.save
       elsif store_type == 'CSV'
-        import_item.status = 'in_progress'
-        import_item.save
         mapping = CsvMapping.find_by_store_id(store.id)
-        map = mapping.order_csv_map
+        unless mapping.nil? && mapping.order_csv_map.nil? && store.ftp_credential.nil? && !store.ftp_credential.connection_established
+          import_item.status = 'in_progress'
+          import_item.save
+          map = mapping.order_csv_map
 
-        data = {}
-        data[:flag] = "ftp_download"
-        data[:type] = "order"
-        data[:fix_width] = map[:map][:fix_width]
-        data[:fixed_width] = map[:map][:fixed_width]
-        data[:sep] = map[:map][:sep]
-        data[:delimiter] = map[:map][:delimiter]
-        data[:rows] = map[:map][:rows]
-        data[:map] = map[:map][:map]
-        data[:store_id] = store.id
-        data[:import_action] = map[:map][:import_action]
-        data[:contains_unique_order_items] = map[:map][:contains_unique_order_items]
-        data[:generate_barcode_from_sku] = map[:map][:generate_barcode_from_sku]
-        data[:use_sku_as_product_name] = map[:map][:use_sku_as_product_name]
-        data[:order_placed_at] = map[:map][:order_placed_at]
-        data[:order_date_time_format] = map[:map][:order_date_time_format]
-        data[:day_month_sequence] = map[:map][:day_month_sequence]
-        
-        import_csv = ImportCsv.new
-        result = import_csv.import(tenant, data.to_s)
+          data = {}
+          data[:flag] = "ftp_download"
+          data[:type] = "order"
+          data[:fix_width] = map[:map][:fix_width]
+          data[:fixed_width] = map[:map][:fixed_width]
+          data[:sep] = map[:map][:sep]
+          data[:delimiter] = map[:map][:delimiter]
+          data[:rows] = map[:map][:rows]
+          data[:map] = map[:map][:map]
+          data[:store_id] = store.id
+          data[:import_action] = map[:map][:import_action]
+          data[:contains_unique_order_items] = map[:map][:contains_unique_order_items]
+          data[:generate_barcode_from_sku] = map[:map][:generate_barcode_from_sku]
+          data[:use_sku_as_product_name] = map[:map][:use_sku_as_product_name]
+          data[:order_placed_at] = map[:map][:order_placed_at]
+          data[:order_date_time_format] = map[:map][:order_date_time_format]
+          data[:day_month_sequence] = map[:map][:day_month_sequence]
+          
+          import_csv = ImportCsv.new
+          result = import_csv.import(tenant, data.to_s)
 
-        import_item.reload
-        if import_item.status != 'cancelled'
-          if !result[:status]
-            import_item.status = 'failed'
-            import_item.message = result[:messages]
-          else
-            import_item.status = 'completed'
+          import_item.reload
+          if import_item.status != 'cancelled'
+            if !result[:status]
+              import_item.status = 'failed'
+              import_item.message = result[:messages]
+            else
+              import_item.status = 'completed'
+            end
           end
+        else
+          import_item.status = 'failed'
+          import_item.message = "connection not established or no maps selected for the csv store"
         end
-        
         import_item.save
       end
     rescue Exception => e
