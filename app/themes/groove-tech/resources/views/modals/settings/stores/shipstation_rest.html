@@ -23,14 +23,6 @@
 <div class="row">
   <div class="col-md-6">
     <legend>Import Orders with following statuses</legend>
-<!--     <div class="form-group">
-      <label class="control-label col-md-4">Pending Fulfillment</label>
-
-      <div class="controls col-md-8">
-        <div toggle-switch ng-model="stores.single.shall_import_pending_fulfillment" groov-click="update_single_store(true)"></div>
-   
-      </div>
-    </div> -->
     <div class="form-group">
       <label class="control-label col-md-4">Awaiting Shipment</label>
       <div class="controls col-md-8">
@@ -42,7 +34,14 @@
             If all statuses are disabled here only orders with the GP Ready tag will be imported, otherwise the tagged orders will be imported in addition to orders of the enabled status."></i>
       </div>
     </div>
+    <div class="form-group">
+      <label class="control-label col-md-4">Pending Fulfillment</label>
 
+      <div class="controls col-md-8">
+        <div toggle-switch ng-model="stores.single.shall_import_pending_fulfillment" groov-click="update_single_store(true)"></div>
+   
+      </div>
+    </div>
     <div class="form-group">
       <label class="control-label col-md-4">Shipped</label>
       <div class="controls col-md-8">
