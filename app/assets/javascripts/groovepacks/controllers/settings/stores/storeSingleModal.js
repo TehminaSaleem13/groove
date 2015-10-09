@@ -162,7 +162,7 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
         typeof scope.stores.single.username == 'undefined' ||
         typeof scope.stores.single.password == 'undefined' ||
         typeof scope.stores.single.connection_method == 'undefined') {
-        alert("Please fillout all the credentials for the ftp store");
+        notification.notify("Please fillout all the credentials for the ftp store");
       } else{
         stores.single.update_ftp(scope.stores).then(function(data) {
           stores.single.connect(scope.stores).then(function(data) {
