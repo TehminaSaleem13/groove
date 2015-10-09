@@ -138,7 +138,7 @@ module Groovepacker
 
             order.order_items.create(
               product: product,
-              price: item["UnitPrice"],
+              price: item["UnitPrice"].to_f,
               qty: item["Quantity"],
               row_total: item["TotalPrice"]
             )
