@@ -29,7 +29,7 @@ module Groovepacker
             elsif import_item.import_type == 'quick'
               import_from =
                 credential.last_imported_at.nil? ? Date.today - 3.days : 
-                  credential.last_imported_at - 1.day
+                  credential.last_imported_at
               import_date_type = "modified_at"
             else
               import_from = credential.last_imported_at.nil? ? Date.today - 2.weeks : 
@@ -41,9 +41,16 @@ module Groovepacker
             gp_imported_tag_id = client.get_tag_id(credential.gp_imported_tag_name)
 
             unless statuses.empty? && gp_ready_tag_id == -1
+
               response = {}
               response["orders"] = nil
-              response = client.get_orders(statuses.join(","), import_from, import_date_type) unless statuses.empty?
+              statuses.each do |status|
+                status_response = {}
+                status_response["orders"] = nil
+                status_response = client.get_orders(status, import_from, import_date_type)
+                response["orders"] = response["orders"].nil? ? status_response["orders"] :
+                  response["orders"] | status_response["orders"]
+              end
 
               importing_time = Date.today - 1.day
 
