@@ -219,24 +219,7 @@ class ImportOrders
           import_item.status = 'in_progress'
           import_item.save
           map = mapping.order_csv_map
-
-          data = {}
-          data[:flag] = "ftp_download"
-          data[:type] = "order"
-          data[:fix_width] = map[:map][:fix_width]
-          data[:fixed_width] = map[:map][:fixed_width]
-          data[:sep] = map[:map][:sep]
-          data[:delimiter] = map[:map][:delimiter]
-          data[:rows] = map[:map][:rows]
-          data[:map] = map[:map][:map]
-          data[:store_id] = store.id
-          data[:import_action] = map[:map][:import_action]
-          data[:contains_unique_order_items] = map[:map][:contains_unique_order_items]
-          data[:generate_barcode_from_sku] = map[:map][:generate_barcode_from_sku]
-          data[:use_sku_as_product_name] = map[:map][:use_sku_as_product_name]
-          data[:order_placed_at] = map[:map][:order_placed_at]
-          data[:order_date_time_format] = map[:map][:order_date_time_format]
-          data[:day_month_sequence] = map[:map][:day_month_sequence]
+          data = build_data(map,store)
           
           import_csv = ImportCsv.new
           result = import_csv.import(tenant, data.to_s)
@@ -266,6 +249,28 @@ class ImportOrders
         exception: e
       }).deliver
     end
+  end
+
+  def build_data(map,store)
+    data = {}
+    data[:flag] = "ftp_download"
+    data[:type] = "order"
+    data[:fix_width] = map[:map][:fix_width]
+    data[:fixed_width] = map[:map][:fixed_width]
+    data[:sep] = map[:map][:sep]
+    data[:delimiter] = map[:map][:delimiter]
+    data[:rows] = map[:map][:rows]
+    data[:map] = map[:map][:map]
+    data[:store_id] = store.id
+    data[:import_action] = map[:map][:import_action]
+    data[:contains_unique_order_items] = map[:map][:contains_unique_order_items]
+    data[:generate_barcode_from_sku] = map[:map][:generate_barcode_from_sku]
+    data[:use_sku_as_product_name] = map[:map][:use_sku_as_product_name]
+    data[:order_placed_at] = map[:map][:order_placed_at]
+    data[:order_date_time_format] = map[:map][:order_date_time_format]
+    data[:day_month_sequence] = map[:map][:day_month_sequence]
+      
+    return data
   end
 
   ImportJob = Struct.new(:tenant, :order_import_summary_id) do

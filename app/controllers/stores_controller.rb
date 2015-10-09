@@ -26,20 +26,22 @@ class StoresController < ApplicationController
 
     result['status'] = true
     result['messages'] =[]
+    result['has_credentials'] = false
     store = Store.find(params[:id])
     unless store.nil?
       if store.store_type == 'CSV'
         ftp = store.ftp_credential
-
         if ftp.nil?
           ftp = FtpCredential.new
           new_record = true
         end
-        ftp.host = params[:host]
-        ftp.username = params[:username]
-        ftp.password = params[:password]
-        ftp.connection_method = params[:connection_method]
-        ftp.connection_established = false
+        if ftp.host != params[:host] || ftp.username != params[:username] || ftp.password != params[:password] || ftp.connection_method != params[:connection_method]
+          ftp.host = params[:host]
+          ftp.username = params[:username]
+          ftp.password = params[:password]
+          ftp.connection_method = params[:connection_method]
+          ftp.connection_established = false
+        end
 
         store.ftp_credential = ftp
         begin
@@ -750,9 +752,14 @@ class StoresController < ApplicationController
 
       # Comment everything after this line till next comment (i.e. the entire if block) when everything is moved to bulk actions
       if params[:type] == 'order'
-        bulk_actions = Groovepacker::Orders::BulkActions.new
-        bulk_actions.delay(:run_at => 1.seconds.from_now).import_csv_orders(Apartment::Tenant.current_tenant, @store.id, data.to_s, current_user.id)
-        # bulk_actions.import_csv_orders(Apartment::Tenant.current_tenant, @store, data, current_user)
+        if OrderImportSummary.where(status: 'in_progress').empty?
+          bulk_actions = Groovepacker::Orders::BulkActions.new
+          bulk_actions.delay(:run_at => 1.seconds.from_now).import_csv_orders(Apartment::Tenant.current_tenant, @store.id, data.to_s, current_user.id)
+          # bulk_actions.import_csv_orders(Apartment::Tenant.current_tenant, @store, data, current_user)
+        else
+          @result['status'] = false
+          @result['messages'].push("Import is in progress. Try after it is complete")
+        end
         
       elsif params[:type] == 'kit'
         groove_bulk_actions = GrooveBulkActions.new
@@ -1266,12 +1273,6 @@ class StoresController < ApplicationController
       format.html # show.html.erb
       format.csv { send_data data, :type => 'text/csv', :filename => filename }
     end
-  end
-
-  def is_import_in_progress
-    result = {status: true}
-    result[:status] = OrderImportSummary.where(status: 'in_progress').empty? ? false : true
-    render json: result
   end
 end
 

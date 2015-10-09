@@ -113,7 +113,6 @@ Groovepacks::Application.routes.draw do
       get 'get_ebay_signin_url'
       get 'ebay_user_fetch_token'
       get 'csv_map_data'
-      get 'is_import_in_progress'
       post 'delete_store'
       post 'duplicate_store'
       post 'change_store_status'

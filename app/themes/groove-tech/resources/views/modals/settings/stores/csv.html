@@ -49,7 +49,7 @@
     <div class="form-group">
       <label class="control-label col-sm-3 remove_padding_left">FTP/SFTP Address</label>
       <div class="controls col-sm-5 remove_padding_right remove_padding_left">
-        <input type="text" class="form-control input-style" placeholder="ftp.yourserver.com/files/" ng-model="stores.single.host" ng-change="update_ftp_credentials()"/>
+        <input type="text" class="form-control input-style" placeholder="ftp.yourserver.com/files/" ng-model="stores.single.host" ng-blur="update_ftp_credentials()"/>
       </div>
       <div class="info col-sm-1">
         &nbsp;&nbsp;&nbsp;<i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter"
@@ -65,11 +65,11 @@
     <div class="form-group">
       <label class="control-label col-sm-3">Username</label>
       <div class="controls col-sm-3 remove_padding_left">
-        <input type="text" class="form-control input-style col-sm-6" ng-model="stores.single.username" ng-change="update_ftp_credentials()"/>
+        <input type="text" class="form-control input-style col-sm-6" ng-model="stores.single.username" ng-blur="update_ftp_credentials()"/>
       </div>
       <label class="control-label col-sm-3">Password</label>
       <div class="controls col-sm-3 remove_padding_left">
-        <input type="text" class="form-control input-style" ng-model="stores.single.password" ng-change="update_ftp_credentials()"/>
+        <input type="text" class="form-control input-style" ng-model="stores.single.password" ng-blur="update_ftp_credentials()"/>
       </div>
     </div>
     <div class="col-sm-offset-3 text-center">

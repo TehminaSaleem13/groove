@@ -290,7 +290,6 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
   var connect_ftp_server = function(stores) {
     return $http.get('/stores/'+stores.single.id+'/connect_and_retrieve.json').success(function (data) {
       if (data.connection.status) {
-        console.log(data.connection);
         notification.notify(data.connection.success_messages, 1);
         stores.single.file_path = data.connection.downloaded_file;
       } else {
@@ -316,7 +315,7 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
       data: stores.single
     }).success(function(data) {
       if(data.status) {
-        notification.notify("Successfully Updated", 1);
+        notification.notify("Successfully Updated", 1);        
       } else {
         notification.notify(data.messages, 0);
       }
@@ -446,22 +445,16 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
   };
 
   var csv_do_import = function (csv) {
-    return $http.get('/stores/is_import_in_progress.json').success(function(data) {
+    return $http.post('/stores/'+csv.current.store_id+'/csv_do_import.json', csv.current).success(function (data) {
       if (data.status) {
-        notification.notify("Import is in progress. Try after it is complete");
-      } else{
-        return $http.post('/stores/'+csv.current.store_id+'/csv_do_import.json', csv.current).success(function (data) {
-          if (data.status) {
-            notification.notify("CSV import queued successfully.", 1);
-            csv.current = {};
-            csv.importer = {};
-          } else {
-            notification.notify(data.messages, 0);
-            csv.current.rows = csv.current.rows + data.last_row;
-          }
-        }).error(notification.server_error);
-      };
-    });
+        notification.notify("CSV import queued successfully.", 1);
+        csv.current = {};
+        csv.importer = {};
+      } else {
+        notification.notify(data.messages, 0);
+        csv.current.rows = csv.current.rows + data.last_row;
+      }
+    }).error(notification.server_error);
   };
 
   var csv_product_import_cancel = function (id) {
