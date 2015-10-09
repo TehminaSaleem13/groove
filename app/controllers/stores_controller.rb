@@ -834,6 +834,7 @@ class StoresController < ApplicationController
           @result['status'] = false
         end
       end
+      OrderImportSummary.first.emit_data_to_user unless OrderImportSummary.first.nil?
     else
       @result["status"] = false
       @result["messages"].push('User does not have permissions to change store status')
