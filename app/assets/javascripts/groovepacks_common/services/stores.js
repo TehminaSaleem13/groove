@@ -446,16 +446,22 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
   };
 
   var csv_do_import = function (csv) {
-    return $http.post('/stores/'+csv.current.store_id+'/csv_do_import.json', csv.current).success(function (data) {
+    return $http.get('/stores/is_import_in_progress.json').success(function(data) {
       if (data.status) {
-        notification.notify("CSV import queued successfully.", 1);
-        csv.current = {};
-        csv.importer = {};
-      } else {
-        notification.notify(data.messages, 0);
-        csv.current.rows = csv.current.rows + data.last_row;
-      }
-    }).error(notification.server_error);
+        notification.notify("Import is in progress. Try after it is complete");
+      } else{
+        return $http.post('/stores/'+csv.current.store_id+'/csv_do_import.json', csv.current).success(function (data) {
+          if (data.status) {
+            notification.notify("CSV import queued successfully.", 1);
+            csv.current = {};
+            csv.importer = {};
+          } else {
+            notification.notify(data.messages, 0);
+            csv.current.rows = csv.current.rows + data.last_row;
+          }
+        }).error(notification.server_error);
+      };
+    });
   };
 
   var csv_product_import_cancel = function (id) {

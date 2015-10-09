@@ -18,10 +18,6 @@ class ImportOrders
             stores = Store.where("status = '1' AND store_type != 'system' AND store_type != 'Shipworks'")
             if stores.length != 0
               stores.each do |store|
-                # if store.store_type == 'CSV'
-                #   mapping = CsvMapping.find_by_store_id(store.id)
-                #   next if mapping.nil? || mapping.order_csv_map.nil? || store.ftp_credential.nil? || 
-                # end
                 import_item = ImportItem.new
                 import_item.store_id = store.id
                 import_item.status = 'not_started'
@@ -219,7 +215,7 @@ class ImportOrders
         import_item.save
       elsif store_type == 'CSV'
         mapping = CsvMapping.find_by_store_id(store.id)
-        unless mapping.nil? && mapping.order_csv_map.nil? && store.ftp_credential.nil? && !store.ftp_credential.connection_established
+        unless mapping.nil? || mapping.order_csv_map.nil? || store.ftp_credential.nil? || (!store.ftp_credential.connection_established)
           import_item.status = 'in_progress'
           import_item.save
           map = mapping.order_csv_map

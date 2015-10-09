@@ -1266,6 +1266,12 @@ class StoresController < ApplicationController
       format.csv { send_data data, :type => 'text/csv', :filename => filename }
     end
   end
+
+  def is_import_in_progress
+    result = {status: true}
+    result[:status] = OrderImportSummary.where(status: 'in_progress').empty? ? false : true
+    render json: result
+  end
 end
 
 
