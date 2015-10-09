@@ -198,6 +198,7 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
             stores.single.host = data.credentials.ftp_credentials.host;
             stores.single.port = data.credentials.ftp_credentials.port;
             stores.single.connection_method = data.credentials.ftp_credentials.connection_method;
+            stores.single.connection_established = data.credentials.ftp_credentials.connection_established;
             stores.single.username = data.credentials.ftp_credentials.username;
             stores.single.password = data.credentials.ftp_credentials.password;
           }
@@ -290,7 +291,6 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
     return $http.get('/stores/'+stores.single.id+'/connect_and_retrieve.json').success(function (data) {
       if (data.connection.status) {
         notification.notify(data.connection.success_messages, 1);
-        stores.import_from_ftp_enabled = true;
         stores.single.file_path = data.connection.downloaded_file;
       } else {
         notification.notify(data.connection.error_messages, 0);
@@ -315,7 +315,7 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
       data: stores.single
     }).success(function(data) {
       if(data.status) {
-        notification.notify("Successfully Updated", 1);
+        notification.notify("Successfully Updated", 1);        
       } else {
         notification.notify(data.messages, 0);
       }
