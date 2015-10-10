@@ -108,8 +108,8 @@ Groovepacks::Application.configure do
   ENV['SHIPSTATION_USERNAME'] = "dreadhead"
   ENV['SHIPSTATION_PASSWORD'] = "g8J$v5KLoP"
 
-  ENV['SHOPIFY_API_KEY'] = "bf794970b0928d5531ed8885e24266ab"
-  ENV['SHOPIFY_SHARED_SECRET'] = "2025390aa1b937fe26a841573f1949b7"
+  ENV['SHOPIFY_API_KEY'] = "74bb4366e7b9b9abfd246ff8eed41201"
+  ENV['SHOPIFY_SHARED_SECRET'] = "d0b33de5f8fadb93ff392505f449402c"
   ENV["SHOPIFY_REDIRECT_HOST"] = "barcodepacker.com"
 
   # Stripe production keys

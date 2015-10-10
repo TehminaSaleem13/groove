@@ -107,8 +107,8 @@ module Groovepacker
           end
 
           def import_order(shopify_order, order)
-            shopify_order.increment_id = order["id"].to_s
-            shopify_order.store_order_id = order["order_number"]
+            shopify_order.increment_id = order["order_number"] 
+            shopify_order.store_order_id = order["id"].to_s
             shopify_order.order_placed_time = order["created_at"]
 
             unless order["customer"].nil?

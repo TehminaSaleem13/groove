@@ -2,6 +2,7 @@ class ImportCsv
   def import(tenant, params)
     result = {}
     result[:messages] = []
+    result[:status] = true
     begin
       Apartment::Tenant.switch(tenant)
       params = eval(params)
@@ -23,6 +24,7 @@ class ImportCsv
           file_path = response[:file_info][:file_path]
           csv_file = File.read(file_path).encode(Encoding.find('ASCII'), encoding_options)
         else
+          result[:status] = false
           result[:messages].push(response[:error_messages])
         end
       else
@@ -30,6 +32,7 @@ class ImportCsv
         csv_file = file.content.encode(Encoding.find('ASCII'), encoding_options)
       end
       if csv_file.nil?
+        result[:status] = false
         result[:messages].push("No file present to import #{params[:type]}")
       else
         final_record = []
@@ -79,6 +82,7 @@ class ImportCsv
           groove_ftp = FTP::FtpConnectionManager.get_instance(store)
           response = groove_ftp.update(response[:file_info][:ftp_file_name])
           unless response[:status]
+            result[:status] = false
             result[:messages].push(response[:error_messages])
           end
           File.delete(file_path)

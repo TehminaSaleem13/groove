@@ -131,7 +131,7 @@ describe OrdersController do
 	  request.accept = "application/json"
 	  order = FactoryGirl.create(:order, :status=>'awaiting', :packing_user_id=> @user.id)
 
-	  get :getdetails, {:id => order.id}
+	  get :show, {:id => order.id}
 
 	  expect(response.status).to eq(200)
 	  result = JSON.parse(response.body)
@@ -145,7 +145,7 @@ describe OrdersController do
 	  request.accept = "application/json"
 	  order = FactoryGirl.create(:order, :status=>'awaiting')
 
-	  put :recordexception, {:id => order.id, :reason=>'Missing item',
+	  put :record_exception, {:id => order.id, :reason=>'Missing item',
 	  	:description=>'Test Description', :assoc=>{:id=> @user.id, :name=>@user.name} }
 
 	  expect(response.status).to eq(200)
@@ -161,7 +161,7 @@ describe OrdersController do
       @user_role.save
 
 
-      put :recordexception, {:id => order.id, :reason=>'Missing item',
+      put :record_exception, {:id => order.id, :reason=>'Missing item',
                              :description=>'Test Description', :assoc=>{:id=> @user.id, :name=>@user.name} }
 
       expect(response.status).to eq(200)
@@ -191,7 +191,7 @@ describe OrdersController do
         :product_inventory_warehouse, :product=> product2,
         :inventory_warehouse_id =>inv_wh.id, 
         :available_inv => 25, :allocated_inv => 5)
-      put :deleteorder, {:order_ids=>[order.id]}
+      put :delete_orders, {:order_ids=>[order.id]}
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
       product_inv_wh1.reload
@@ -224,7 +224,7 @@ describe OrdersController do
         :product_inventory_warehouse, :product=> product2,
         :inventory_warehouse_id =>inv_wh.id, 
         :available_inv => 25, :allocated_inv => 5)
-      put :changeorderstatus, {:order_ids=>[order.id], :status=>'cancelled'}
+      put :change_orders_status, {:order_ids=>[order.id], :status=>'cancelled'}
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
       product_inv_wh1.reload
@@ -261,7 +261,7 @@ describe OrdersController do
         :product_inventory_warehouse, :product=> product2,
         :inventory_warehouse_id =>inv_wh.id, 
         :available_inv => 25, :allocated_inv => 5)
-      put :changeorderstatus, {:order_ids=>[order.id], :status=>'cancelled'}
+      put :change_orders_status, {:order_ids=>[order.id], :status=>'cancelled'}
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
       product_inv_wh1.reload
@@ -300,7 +300,7 @@ describe OrdersController do
         :available_inv => 25, :allocated_inv => 5)
       product_inv_wh1.reload
       product_inv_wh2.reload
-      put :changeorderstatus, {:order_ids=>[order.id], :status=>'awaiting'}
+      put :change_orders_status, {:order_ids=>[order.id], :status=>'awaiting'}
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
       product_inv_wh1.reload
@@ -339,7 +339,7 @@ describe OrdersController do
         :available_inv => 25, :allocated_inv => 5)
       product_inv_wh1.reload
       product_inv_wh2.reload
-      put :changeorderstatus, {:order_ids=>[order.id], :status=>'serviceissue'}
+      put :change_orders_status, {:order_ids=>[order.id], :status=>'serviceissue'}
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
       product_inv_wh1.reload
@@ -386,7 +386,7 @@ describe OrdersController do
       expect(product_inv_wh2.available_inv).to eq(25)
       expect(order.order_items.size).to eq(1)
 
-      put :additemtoorder, {:id=>order.id, :productids=>[product2.id], :qty=>'1', :price=>"10"}
+      put :add_item_to_order, {:id=>order.id, :productids=>[product2.id], :qty=>'1', :price=>"10"}
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
 
@@ -433,7 +433,7 @@ describe OrdersController do
       expect(product_inv_wh2.available_inv).to eq(24)
       expect(order.order_items.size).to eq(2)
 
-      put :removeitemfromorder, {:orderitem=>[order_item1.id]}
+      put :remove_item_from_order, {:orderitem=>[order_item1.id]}
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
       
@@ -471,7 +471,7 @@ describe OrdersController do
 			prod_inv_allocated = product_inv_wh.allocated_inv
 			prod_inv_available = product_inv_wh.available_inv
       
-      put :changeorderstatus, {:order_ids=>[order.id], :status=>'serviceissue'}
+      put :change_orders_status, {:order_ids=>[order.id], :status=>'serviceissue'}
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
       
@@ -503,7 +503,7 @@ describe OrdersController do
       prod_inv_allocated = product_inv_wh.allocated_inv
       prod_inv_available = product_inv_wh.available_inv
       
-      put :changeorderstatus, {:order_ids=>[order.id], :status=>'awaiting'}
+      put :change_orders_status, {:order_ids=>[order.id], :status=>'awaiting'}
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
       
@@ -542,7 +542,7 @@ describe OrdersController do
       expect(product_inv_wh2.allocated_inv).to eq(6)
       expect(product_inv_wh1.available_inv).to eq(24)
       expect(product_inv_wh2.available_inv).to eq(24)
-      put :updateiteminorder, {:orderitem=>order_item1, :qty=>'2'}
+      put :update_item_in_order, {:orderitem=>order_item1, :qty=>'2'}
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
       product_inv_wh1.reload
@@ -586,7 +586,7 @@ describe OrdersController do
     #   expect(product_inv_wh2.allocated_inv).to eq(5)
     #   expect(product_inv_wh1.available_inv).to eq(25)
     #   expect(product_inv_wh2.available_inv).to eq(25)
-    #   put :updateiteminorder, {:orderitem=>order_item1, :qty=>'2'}
+    #   put :update_item_in_order, {:orderitem=>order_item1, :qty=>'2'}
     #   expect(response.status).to eq(200)
     #   result = JSON.parse(response.body)
     #   product_inv_wh1.reload
@@ -619,7 +619,7 @@ describe OrdersController do
     #     :product_inventory_warehouse, :product=> product2,
     #     :inventory_warehouse_id =>inv_wh.id, 
     #     :available_inv => 25, :allocated_inv => 5)
-    #   put :changeorderstatus, {:order_ids=>[order1.id, order2.id],:status=>'scanned',:option=>'yes'}
+    #   put :change_orders_status, {:order_ids=>[order1.id, order2.id],:status=>'scanned',:option=>'yes'}
     #   expect(response.status).to eq(200)
     #   result = JSON.parse(response.body)
     #   expect(result['status']).to eq(true)
@@ -653,7 +653,7 @@ describe OrdersController do
     #     :product_inventory_warehouse, :product=> product2,
     #     :inventory_warehouse_id =>inv_wh.id, 
     #     :available_inv => 25, :allocated_inv => 5)
-    #   put :changeorderstatus, {:order_ids=>[order1.id, order2.id],:status=>'scanned',:option=>'no'}
+    #   put :change_orders_status, {:order_ids=>[order1.id, order2.id],:status=>'scanned',:option=>'no'}
     #   expect(response.status).to eq(200)
     #   result = JSON.parse(response.body)
     #   expect(result['status']).to eq(true)
@@ -687,7 +687,7 @@ describe OrdersController do
     #     :product_inventory_warehouse, :product=> product2,
     #     :inventory_warehouse_id =>inv_wh.id, 
     #     :available_inv => 25, :allocated_inv => 5)
-    #   put :changeorderstatus, {:order_ids=>[order1.id, order2.id],:status=>'scanned',:option=>'yes'}
+    #   put :change_orders_status, {:order_ids=>[order1.id, order2.id],:status=>'scanned',:option=>'yes'}
     #   expect(response.status).to eq(200)
     #   result = JSON.parse(response.body)
     #   expect(result['status']).to eq(true)
@@ -721,7 +721,7 @@ describe OrdersController do
     #     :product_inventory_warehouse, :product=> product2,
     #     :inventory_warehouse_id =>inv_wh.id, 
     #     :available_inv => 25, :allocated_inv => 5)
-    #   put :changeorderstatus, {:order_ids=>[order1.id, order2.id],:status=>'scanned',:option=>'no'}
+    #   put :change_orders_status, {:order_ids=>[order1.id, order2.id],:status=>'scanned',:option=>'no'}
     #   expect(response.status).to eq(200)
     #   result = JSON.parse(response.body)
     #   expect(result['status']).to eq(true)

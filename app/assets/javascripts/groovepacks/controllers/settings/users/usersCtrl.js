@@ -70,7 +70,7 @@ groovepacks_controllers.
 
 
         $scope.gridOptions = {
-          identifier: 'user_settings',
+          identifier: 'users',
           select_all: $scope.select_all_toggle,
           draggable: false,
           sortable: true,

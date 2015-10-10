@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-describe StoreSettingsController do
+describe StoresController do
   before(:each) do
     Groovepacker::SeedTenant.new.seed
 
@@ -15,7 +15,7 @@ describe StoreSettingsController do
     it "creates an shipstation store" do
       request.accept = "application/json"
       @user.role.update_attribute(:add_edit_stores, true)
-      post :createUpdateStore, { :store_type => 'Shipstation', :status => false }
+      post :create_update_store, { :store_type => 'Shipstation', :status => false }
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
       expect(result['status']).to eq(true)
@@ -29,7 +29,7 @@ describe StoreSettingsController do
       @shipstation_credentials = FactoryGirl.create(:shipstation_credential, :store_id=>@store.id)
       request.accept = "application/json"
       @user.role.update_attribute(:add_edit_stores, true)
-      post :createUpdateStore, { :store_type => 'Shipstation', :id => @store.id, :status => false }
+      post :create_update_store, { :store_type => 'Shipstation', :id => @store.id, :status => false }
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
       expect(result['status']).to eq(true)

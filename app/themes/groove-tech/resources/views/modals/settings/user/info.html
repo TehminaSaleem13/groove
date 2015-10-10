@@ -41,7 +41,7 @@
                  ng-model="users.single.confirmation_code" type="text"/>
         </div>
         <div class="info col-sm-1">
-          <a ng-show="users.single.id != null" href="/user_settings/print_confirmation_code/{{users.single.id}}.pdf"
+          <a ng-show="users.single.id != null" href="/users/{{users.single.id}}/print_confirmation_code.pdf"
              target="_blank"><i class="icon-large glyphicon glyphicon-print"></i></a>&nbsp;
           <i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter"
              groov-popover="{{translations.tooltips.conf_code}}"></i>

@@ -210,7 +210,7 @@ class InventoryWarehouseController < ApplicationController
     end
   end
 
-  def edituserperms
+  def edit_user_perms
     result = Hash.new
     result['status'] = true
     result['error_messages'] = []
