@@ -61,7 +61,7 @@ git pull origin ${ENV}
 git submodule init
 git submodule update --recursive
 
-RAILS_ENV=${ENV} bundle exec bundle install --deployment
+RAILS_ENV=${ENV} bundle install --deployment
 RAILS_ENV=${ENV} bundle exec script/delayed_job -n ${NUM_JOBS} start
 
 exit
