@@ -5,304 +5,65 @@ module Groovepacker
         class ProductsImporter
           include ProductsHelper
 
-          def import(params, final_record, mapping, import_action)
-            result = Hash.new
-            result['status'] = true
-            result['messages'] = []
-            check_length = check_after_every(final_record.length)
-            success = 0
-            success_imported = 0
-            success_updated = 0
-            duplicate_file = 0
-            duplicate_db = 0
-            duplicate_action = 'skip'
-            new_action = 'skip'
-            unless import_action.nil?
-              if ['update_existing', 'create_update'].include?(import_action)
-                duplicate_action = 'overwrite'
-              end
+          def import
+            build_initial
 
-              if ['create_new', 'create_update'].include?(import_action)
-                new_action = 'create'
-              end
-            end
-            product_import = CsvProductImport.find_by_store_id(params[:store_id])
-            if product_import.nil?
-              product_import = CsvProductImport.new
-              product_import.store_id = params[:store_id]
-            end
-            store_product_id_base = 'csv_import_'+params[:store_id].to_s+'_'+SecureRandom.uuid+'_'
-            product_import.status = 'processing_csv'
-            product_import.success = success
-            product_import.current_sku = ''
-            product_import.total = final_record.length
-            product_import.save
-            all_skus = []
-            all_barcodes = []
-            usable_records = []
-            products_for_status_update = []
-            default_inventory_warehouse_id = InventoryWarehouse.where(:is_default => true).first.id
-
-            final_record.each_with_index do |single_row, index|
+            self.final_record.each_with_index do |single_row, index|
               do_skip = true
               for i in 0..(single_row.length-1)
-                unless single_row[i].blank?
-                  do_skip = false                  
+                do_skip = false unless single_row[i].blank?
+                break unless do_skip              
+              end
+              next if do_skip
+              if !self.mapping['sku'].nil? && self.mapping['sku'][:position] >= 0 && !single_row[self.mapping['sku'][:position]].blank?
+                single_row_skus = build_single_row_skus
+                
+                if (all_skus & single_row_skus).length > 0
+                  @duplicate_file += 1
+                else
+                  usable_record = init_usable_record(index)
+                  @all_skus += single_row_skus
+                  usable_record[:skus] = single_row_skus
+                  @usable_records << build_usable_record(usable_record,single_row)
+                  @success += 1
                 end
               end
-              if do_skip
-                next
-              else
-                single_row_skus = []
-                if !mapping['sku'].nil? && mapping['sku'][:position] >= 0 && !single_row[mapping['sku'][:position]].blank?
 
-                  prim_skus = single_row[mapping['sku'][:position]].split(',')
-                  prim_skus.each do |prim_single_sku|
-                    single_row_skus << prim_single_sku.strip
-                  end
-                  if !mapping['secondary_sku'].nil? && mapping['secondary_sku'][:position] >= 0
-                    unless single_row[mapping['secondary_sku'][:position]].nil?
-                      sec_skus = single_row[mapping['secondary_sku'][:position]].split(',')
-                      sec_skus.each do |sec_single_sku|
-                        unless single_row_skus.include? sec_single_sku.strip
-                          single_row_skus << sec_single_sku.strip
-                        end
-                      end
-                    end
-                  end
-                  if !mapping['tertiary_sku'].nil? && mapping['tertiary_sku'][:position] >= 0
-                    unless single_row[mapping['tertiary_sku'][:position]].nil?
-                      tert_skus = single_row[mapping['tertiary_sku'][:position]].split(',')
-                      tert_skus.each do |tert_single_sku|
-                        unless single_row_skus.include? tert_single_sku.strip
-                          single_row_skus << tert_single_sku.strip
-                        end
-                      end
-                    end
-                  end
-
-                  if (all_skus & single_row_skus).length > 0
-                    duplicate_file = duplicate_file + 1
-                    #duplicate_skus << (all_skus & single_row_skus)
-                  else
-                    usable_record = {}
-                    usable_record[:name] = ''
-                    usable_record[:weight] = 0
-                    usable_record[:skus] = []
-                    usable_record[:barcodes] = []
-                    usable_record[:store_product_id] = store_product_id_base+index.to_s
-                    usable_record[:cats] = []
-                    usable_record[:images] = []
-                    usable_record[:inventory] = []
-                    usable_record[:product_type] = ''
-                    usable_record[:spl_instructions_4_packer] = ''
-                    usable_record[:is_intangible] = false
-
-                    all_skus = all_skus + single_row_skus
-                    usable_record[:skus] = single_row_skus
-
-                    if !mapping['product_name'].nil? && mapping['product_name'][:position] >= 0 && !single_row[mapping['product_name'][:position]].blank?
-                      usable_record[:name] = single_row[mapping['product_name'][:position]]
-                    end
-                    
-                    if !mapping['product_weight'].nil? && mapping['product_weight'][:position] >= 0 && !single_row[mapping['product_weight'][:position]].blank? && !single_row[mapping['product_weight'][:position]].nil?
-                      usable_record[:weight] = single_row[mapping['product_weight'][:position]]
-                    end
-                    if params[:use_sku_as_product_name]
-                      usable_record[:name] = single_row[mapping['sku'][:position]].strip
-                    end
-                    # if usable_record[:name].blank?
-                    #   usable_record[:name] = 'Product from CSV Import'
-                    # end
-
-                    scan_pack_settings = ScanPackSetting.all.first
-                    if scan_pack_settings.intangible_setting_enabled
-                      unless scan_pack_settings.intangible_string.nil? || (scan_pack_settings.intangible_string.strip.equal? (''))
-                        intangible_strings = scan_pack_settings.intangible_string.strip.split(",")
-                        sku_found = false
-                        intangible_strings.each do |string|
-                          if (usable_record[:name].include? (string))
-                            usable_record[:is_intangible] = true
-                            break
-                          end
-                          usable_record[:skus].each do |sku|
-                            if (sku.include? (string))
-                              sku_found = true
-                              usable_record[:is_intangible] = true
-                              break
-                            end
-                          end
-                          if sku_found
-                            break
-                          end
-                        end
-                      end
-                    end
-
-                    if !mapping['product_instructions'].nil? && mapping['product_instructions'][:position] >= 0 && !single_row[mapping['product_instructions'][:position]].blank?
-                      usable_record[:spl_instructions_4_packer] = single_row[mapping['product_instructions'][:position]]
-                    end
-
-
-                    if !mapping['barcode'].nil? && mapping['barcode'][:position] >= 0
-                      unless single_row[mapping['barcode'][:position]].nil?
-                        barcodes = single_row[mapping['barcode'][:position]].split(',')
-                        barcodes.each do |single_barcode|
-                          break unless ProductBarcode.where(:barcode => single_barcode.strip).empty? && (!all_barcodes.include? single_barcode.strip)
-                          all_barcodes << single_barcode.strip
-                          usable_record[:barcodes] << single_barcode.strip
-                        end
-                      end
-                    elsif params[:generate_barcode_from_sku]
-                      barcodes = single_row[mapping['sku'][:position]].split(',')
-                      barcodes.each do |single_barcode|
-                        all_barcodes << single_barcode.strip
-                        usable_record[:barcodes] << single_barcode.strip
-                      end
-                    end
-
-                    if !mapping['secondary_barcode'].nil? && mapping['secondary_barcode'][:position] >= 0
-                      unless single_row[mapping['secondary_barcode'][:position]].nil?
-                        secondary_barcodes = single_row[mapping['secondary_barcode'][:position]].split(',')
-                        secondary_barcodes.each do |single_secondary_barcode|
-                          break unless ProductBarcode.where(:barcode => single_secondary_barcode.strip).empty? && (!all_barcodes.include? single_secondary_barcode.strip)
-                          all_barcodes << single_secondary_barcode.strip
-                          usable_record[:barcodes] << single_secondary_barcode.strip
-                        end
-                      end
-                    end
-
-                    if !mapping['tertiary_barcode'].nil? && mapping['tertiary_barcode'][:position] >= 0
-                      unless single_row[mapping['tertiary_barcode'][:position]].nil?
-                        tertiary_barcodes = single_row[mapping['tertiary_barcode'][:position]].split(',')
-                        tertiary_barcodes.each do |single_tertiary_barcode|
-                          break unless ProductBarcode.where(:barcode => single_tertiary_barcode.strip).empty? && (!all_barcodes.include? single_tertiary_barcode.strip)
-                          all_barcodes << single_tertiary_barcode.strip
-                          usable_record[:barcodes] << single_tertiary_barcode.strip
-                        end
-                      end
-                    end
-
-                    if !mapping['product_type'].nil? && mapping['product_type'][:position] >= 0
-                      usable_record[:product_type] = single_row[mapping['product_type'][:position]]
-                    end
-                    #add inventory warehouses
-                    product_inventory = {}
-                    product_inventory[:inventory_warehouse_id] = default_inventory_warehouse_id
-                    product_inventory[:quantity_on_hand] = 0
-                    product_inventory[:location_primary] = ''
-                    product_inventory[:location_secondary] = ''
-                    product_inventory[:location_tertiary] = ''
-                    if !mapping['inv_wh1'].nil? && mapping['inv_wh1'][:position] >= 0
-                      product_inventory[:quantity_on_hand] = single_row[mapping['inv_wh1'][:position]]
-                    end
-                    if !mapping['location_primary'].nil? && mapping['location_primary'][:position] >= 0
-                      product_inventory[:location_primary] = single_row[mapping['location_primary'][:position]]
-                    end
-                    if !mapping['location_secondary'].nil? && mapping['location_secondary'][:position] >= 0
-                      product_inventory[:location_secondary] = single_row[mapping['location_secondary'][:position]]
-                    end
-                    if !mapping['location_tertiary'].nil? && mapping['location_tertiary'][:position] >= 0
-                      product_inventory[:location_tertiary] = single_row[mapping['location_tertiary'][:position]]
-                    end
-                    usable_record[:inventory] << product_inventory
-
-                    #add product categories
-                    if !mapping['category_name'].nil? && mapping['category_name'][:position] >= 0
-                      unless single_row[mapping['category_name'][:position]].nil?
-                        usable_record[:cats] = single_row[mapping['category_name'][:position]].split(',')
-                      end
-                    end
-
-                    if !mapping['product_images'].nil? && mapping['product_images'][:position] >= 0
-                      unless single_row[mapping['product_images'][:position]].nil?
-                        usable_record[:images] = single_row[mapping['product_images'][:position]].split(',')
-                      end
-                    end
-
-                    usable_records << usable_record
-
-                    success = success + 1
-                  end
-
+              if (index + 1) % @check_length === 0 || index === (self.final_record.length - 1)
+                @product_import.reload
+                @product_import.success = @success
+                @product_import.current_sku = all_skus.last
+                if @product_import.cancel
+                  @product_import.status = 'cancelled'
+                  @product_import.save
+                  return true
                 end
-
-                if (index + 1) % check_length === 0 || index === (final_record.length - 1)
-                  product_import.reload
-                  product_import.success = success
-                  product_import.current_sku = all_skus.last
-                  if product_import.cancel
-                    product_import.status = 'cancelled'
-                    product_import.save
-                    return true
-                  end
-                  if index === (final_record.length - 1)
-                    success = 0
-                    product_import.status = 'processing_products'
-                    product_import.success = success
-                    product_import.current_sku = ''
-                    product_import.total = usable_records.length
-                  end
-                  product_import.save
+                if index === (self.final_record.length - 1)
+                  @success = 0
+                  @product_import.status = 'processing_products'
+                  @product_import.success = @success
+                  @product_import.current_sku = ''
+                  @product_import.total = @usable_records.length
                 end
+                @product_import.save
               end
             end
-            final_record.clear
+            self.final_record.clear
+            prepare_to_import
 
-            found_skus_raw = ProductSku.find_all_by_sku(all_skus)
-            found_skus = {}
-            found_barcodes_raw = ProductBarcode.find_all_by_barcode(all_barcodes)
-            found_barcodes = []
-            found_skus_raw.each do |found_sku|
-              found_skus[found_sku.sku] = found_sku
-              if duplicate_action !='overwrite'
-                duplicate_db = duplicate_db + 1
-              end
-            end
-            found_barcodes_raw.each do |found_barcode|
-              found_barcodes << found_barcode.barcode
-            end
-            found_skus_raw = nil
-            found_barcodes_raw = nil
-            all_skus.clear
-            all_barcodes.clear
-
-            products_to_import = []
-
-            to_import_records = []
-            all_unique_ids = []
-
-            import_product_skus = []
-            import_product_images = []
-            import_product_barcodes = []
-            import_product_cats = []
-            import_product_inventory_warehouses = []
-
-            usable_records.each_with_index do |record, index|
+            @usable_records.each_with_index do |record, index|
               duplicate_found = false
               record[:skus].each do |sku|
-                if found_skus.has_key? sku
+                if @found_skus.has_key? sku
                   duplicate_found = sku
                   break
                 end
               end
 
               if duplicate_found === false && new_action == 'create'
-                record[:name] = 'Product from CSV Import' if record[:name].blank?
-                single_import = Product.new(:name => record[:name], :product_type => record[:product_type], :spl_instructions_4_packer => record[:spl_instructions_4_packer], :is_intangible => record[:is_intangible], :weight => record[:weight])
-                single_import.store_id = params[:store_id]
-                single_import.store_product_id = record[:store_product_id]
-                if record[:skus].length > 0 && record[:barcodes].length > 0
-                  single_import.status = 'active'
-                else
-                  single_import.status = 'new'
-                end
-
-                to_import_records << record
-                all_unique_ids << record[:store_product_id]
-
-
-                products_to_import << single_import
+                @products_to_import << create_single_import(record)
+                @to_import_records << record
+                @all_unique_ids << record[:store_product_id]
               elsif duplicate_found === false && duplicate_action == 'overwrite'
                 #skip the current record and move on to the next one.
                 next
@@ -325,18 +86,18 @@ module Groovepacker
                   bulk_actions.delete(Apartment::Tenant.current, product_info, groove_bulk_actions.id, "during csv product import")
                   next
                 end
-                duplicate_product.store_id = params[:store_id]
-                if !mapping['product_name'].nil? && record[:name]!=''
+                duplicate_product.store_id = self.params[:store_id]
+                if !self.mapping['product_name'].nil? && record[:name]!=''
                   duplicate_product.name = record[:name]
                 end
-                if !mapping['product_weight'].nil? #&& mapping['product_weight'][:action] == 'overwrite'
+                if !self.mapping['product_weight'].nil? #&& self.mapping['product_weight'][:action] == 'overwrite'
                   duplicate_product.weight = record[:weight] if record[:weight].to_f > 0
                 end
                 duplicate_product.is_intangible = record[:is_intangible]
-                if !mapping['product_type'].nil? #&& mapping['product_type'][:action] == 'overwrite'
+                if !self.mapping['product_type'].nil? #&& self.mapping['product_type'][:action] == 'overwrite'
                   duplicate_product.product_type = record[:product_type]
                 end
-                if !mapping['product_instructions'].nil? #&& mapping['product_instructions'][:action] == 'overwrite'
+                if !self.mapping['product_instructions'].nil? #&& self.mapping['product_instructions'][:action] == 'overwrite'
                   duplicate_product.spl_instructions_4_packer = record[:spl_instructions_4_packer]
                 end
 
@@ -344,31 +105,31 @@ module Groovepacker
                 duplicate_product.save!
                 success_updated = success_updated + 1
 
-                if (!mapping['inv_wh1'].nil? || !mapping['location_primary'].nil? || !mapping['location_secondary'].nil? || !mapping['location_tertiary'].nil?)
+                if (!self.mapping['inv_wh1'].nil? || !self.mapping['location_primary'].nil? || !self.mapping['location_secondary'].nil? || !self.mapping['location_tertiary'].nil?)
                   default_inventory = ProductInventoryWarehouses.find_or_create_by_inventory_warehouse_id_and_product_id(default_inventory_warehouse_id, duplicate_product.id)
                   updatable_record = record[:inventory].first
-                  if !mapping['inv_wh1'].nil? #&& mapping['inv_wh1'][:action] =='overwrite'
+                  if !self.mapping['inv_wh1'].nil? #&& self.mapping['inv_wh1'][:action] =='overwrite'
                     default_inventory.quantity_on_hand = updatable_record[:quantity_on_hand]
                   end
-                  if !mapping['location_primary'].nil? #&& mapping['location_primary'][:action] =='overwrite'
+                  if !self.mapping['location_primary'].nil? #&& self.mapping['location_primary'][:action] =='overwrite'
                     default_inventory.location_primary = updatable_record[:location_primary]
                   end
-                  if !mapping['location_secondary'].nil? #&& mapping['location_secondary'][:action] =='overwrite'
+                  if !self.mapping['location_secondary'].nil? #&& self.mapping['location_secondary'][:action] =='overwrite'
                     default_inventory.location_secondary = updatable_record[:location_secondary]
                   end
-                  if !mapping['location_tertiary'].nil? #&& mapping['location_tertiary'][:action] =='overwrite'
+                  if !self.mapping['location_tertiary'].nil? #&& self.mapping['location_tertiary'][:action] =='overwrite'
                     default_inventory.location_tertiary = updatable_record[:location_tertiary]
                   end
                   default_inventory.save
                 end
 
 
-                if !mapping['category_name'].nil? && record[:cats].length > 0
-                  #if mapping['category_name'][:action] == 'overwrite'
+                if !self.mapping['category_name'].nil? && record[:cats].length > 0
+                  #if self.mapping['category_name'][:action] == 'overwrite'
                   #  ProductCat.where(product_id: duplicate_product.id).delete_all
                   #end
 
-                  #if mapping['category_name'][:action] == 'add' || mapping['category_name'][:action] == 'overwrite'
+                  #if self.mapping['category_name'][:action] == 'add' || self.mapping['category_name'][:action] == 'overwrite'
                   all_found_cats = ProductCat.where(product_id: duplicate_product.id)
                   to_not_add_cats = []
                   all_found_cats.each do |single_found_dup_cat|
@@ -386,11 +147,11 @@ module Groovepacker
                   end
                   #end
                 end
-                if !mapping['barcode'].nil? && record[:barcodes].length > 0
-                  #if mapping['barcode'][:action] == 'overwrite'
+                if !self.mapping['barcode'].nil? && record[:barcodes].length > 0
+                  #if self.mapping['barcode'][:action] == 'overwrite'
                   #  ProductBarcode.where(product_id: duplicate_product.id).delete_all
                   #end
-                  #if mapping['barcode'][:action] == 'add' || mapping['barcode'][:action] == 'overwrite'
+                  #if self.mapping['barcode'][:action] == 'add' || self.mapping['barcode'][:action] == 'overwrite'
                   all_found_barcodes = ProductBarcode.where(product_id: duplicate_product.id)
                   to_not_add_barcodes = []
                   all_found_barcodes.each do |single_found_dup_barcode|
@@ -410,11 +171,11 @@ module Groovepacker
                   #end
                 end
 
-                if !mapping['sku'].nil? && record[:skus].length > 0
-                  #if mapping['sku'][:action] == 'overwrite'
+                if !self.mapping['sku'].nil? && record[:skus].length > 0
+                  #if self.mapping['sku'][:action] == 'overwrite'
                   #  ProductSku.where(product_id: duplicate_product.id).delete_all
                   #end
-                  #if mapping['sku'][:action] == 'add' || mapping['sku'][:action] == 'overwrite'
+                  #if self.mapping['sku'][:action] == 'add' || self.mapping['sku'][:action] == 'overwrite'
                   all_found_skus = ProductSku.where(product_id: duplicate_product.id)
                   to_not_add_skus = []
                   all_found_skus.each do |single_found_dup_sku|
@@ -434,11 +195,11 @@ module Groovepacker
                   #end
                 end
 
-                if !mapping['product_images'].nil? && record[:images].length > 0
-                  #if mapping['product_images'][:action] == 'overwrite'
+                if !self.mapping['product_images'].nil? && record[:images].length > 0
+                  #if self.mapping['product_images'][:action] == 'overwrite'
                   #  ProductImage.where(product_id: duplicate_product.id).delete_all
                   #end
-                  #if mapping['product_images'][:action] == 'add' || mapping['product_images'][:action] == 'overwrite'
+                  #if self.mapping['product_images'][:action] == 'add' || self.mapping['product_images'][:action] == 'overwrite'
                   all_found_images = ProductImage.where(product_id: duplicate_product.id)
                   to_not_add_images = []
                   all_found_images.each do |single_found_dup_image|
@@ -460,7 +221,7 @@ module Groovepacker
 
               end
               success = success + 1
-              if (index + 1) % check_length === 0 || index === (usable_records.length - 1)
+              if (index + 1) % @check_length === 0 || index === (usable_records.length - 1)
                 product_import.reload
                 product_import.success = success
                 product_import.current_sku = record[:skus].last
@@ -475,7 +236,7 @@ module Groovepacker
                 product_import.save
               end
             end
-            success_imported = products_to_import.length
+            @success_imported = products_to_import.length
 
             usable_records.clear
             found_skus = nil
@@ -556,7 +317,7 @@ module Groovepacker
                 end
               end
               success = success + 1
-              if (index + 1) % check_length === 0 || index === (to_import_records.length - 1)
+              if (index + 1) % @check_length === 0 || index === (to_import_records.length - 1)
                 product_import.success = success
                 product_import.current_sku = record[:skus].last
                 if index === (to_import_records.length - 1)
@@ -607,14 +368,274 @@ module Groovepacker
             end
 
 
-            Product.where(:store_id => params[:store_id]).update_all(:store_product_id => 0)
-            product_import.success_imported = success_imported
+            Product.where(:store_id => self.params[:store_id]).update_all(:store_product_id => 0)
+            product_import.success_imported = @success_imported
             product_import.success_updated = success_updated
-            product_import.duplicate_file = duplicate_file
+            product_import.duplicate_file = @duplicate_file
             product_import.duplicate_db = duplicate_db
             product_import.status = 'completed'
             product_import.save
             result
+          end
+
+          def build_initial
+            @result = self.build_result
+            @check_length = check_after_every(self.final_record.length)
+            @success = 0
+            @success_imported = 0
+            @success_updated = 0
+            @duplicate_file = 0
+            @duplicate_db = 0
+            @duplicate_action = 'skip'
+            @new_action = 'skip'
+            set_actions
+            @product_import = set_find_product_import
+            @all_skus = []
+            @all_barcodes = []
+            @usable_records = []
+            @products_for_status_update = []
+            @default_inventory_warehouse_id = InventoryWarehouse.where(:is_default => true).first.id
+            @store_product_id_base = 'csv_import_'+self.params[:store_id].to_s+'_'+SecureRandom.uuid+'_'
+          end
+
+          def set_actions
+            unless self.import_action.nil?
+              if ['update_existing', 'create_update'].include?(self.import_action)
+                @duplicate_action = 'overwrite'
+              end
+
+              if ['create_new', 'create_update'].include?(self.import_action)
+                @new_action = 'create'
+              end
+            end
+          end
+
+          def set_find_product_import
+            product_import = CsvProductImport.find_by_store_id(self.params[:store_id])
+            if product_import.nil?
+              product_import = CsvProductImport.new
+              product_import.store_id = self.params[:store_id]
+            end
+            product_import.status = 'processing_csv'
+            product_import.success = success
+            product_import.current_sku = ''
+            product_import.total = self.final_record.length
+            product_import.save
+            return product_import
+          end
+
+          def init_usable_record(index)
+            {
+              name: '',
+              weight: 0,
+              skus: [],
+              barcodes: [],
+              store_product_id: @store_product_id_base+index.to_s,
+              cats: [],
+              images: [],
+              inventory: [],
+              product_type: '',
+              spl_instructions_4_packer: '',
+              is_intangible: false
+            }
+          end
+
+          def build_single_row_skus
+            single_row_skus = []
+            prim_skus = single_row[self.mapping['sku'][:position]].split(',')
+            prim_skus.each do |prim_single_sku|
+              single_row_skus << prim_single_sku.strip
+            end
+            if !self.mapping['secondary_sku'].nil? && self.mapping['secondary_sku'][:position] >= 0
+              unless single_row[self.mapping['secondary_sku'][:position]].nil?
+                sec_skus = single_row[self.mapping['secondary_sku'][:position]].split(',')
+                sec_skus.each do |sec_single_sku|
+                  unless single_row_skus.include? sec_single_sku.strip
+                    single_row_skus << sec_single_sku.strip
+                  end
+                end
+              end
+            end
+            if !self.mapping['tertiary_sku'].nil? && self.mapping['tertiary_sku'][:position] >= 0
+              unless single_row[self.mapping['tertiary_sku'][:position]].nil?
+                tert_skus = single_row[self.mapping['tertiary_sku'][:position]].split(',')
+                tert_skus.each do |tert_single_sku|
+                  unless single_row_skus.include? tert_single_sku.strip
+                    single_row_skus << tert_single_sku.strip
+                  end
+                end
+              end
+            end
+            single_row_skus
+          end
+
+          def apply_intangible(usable_record)
+            scan_pack_settings = ScanPackSetting.all.first
+            if scan_pack_settings.intangible_setting_enabled
+              unless scan_pack_settings.intangible_string.nil? || (scan_pack_settings.intangible_string.strip.equal? (''))
+                intangible_strings = scan_pack_settings.intangible_string.strip.split(",")
+                intangible_strings.each do |string|
+                  if (usable_record[:name].include? (string))
+                    return true
+                  end
+                  usable_record[:skus].each do |sku|
+                    if (sku.include? (string))
+                      return true
+                    end
+                  end
+                end
+                return false
+              end
+            end
+          end
+
+          def init_prod_inv
+            {
+              inventory_warehouse_id: @default_inventory_warehouse_id,
+              quantity_on_hand: 0,
+              location_primary: '',
+              location_secondary: '',
+              location_tertiary: ''
+            } 
+          end
+
+          def build_prod_inv(product_inventory,single_row)
+            if !self.mapping['inv_wh1'].nil? && self.mapping['inv_wh1'][:position] >= 0
+              product_inventory[:quantity_on_hand] = single_row[self.mapping['inv_wh1'][:position]]
+            end
+            if !self.mapping['location_primary'].nil? && self.mapping['location_primary'][:position] >= 0
+              product_inventory[:location_primary] = single_row[self.mapping['location_primary'][:position]]
+            end
+            if !self.mapping['location_secondary'].nil? && self.mapping['location_secondary'][:position] >= 0
+              product_inventory[:location_secondary] = single_row[self.mapping['location_secondary'][:position]]
+            end
+            if !self.mapping['location_tertiary'].nil? && self.mapping['location_tertiary'][:position] >= 0
+              product_inventory[:location_tertiary] = single_row[self.mapping['location_tertiary'][:position]]
+            end
+            product_inventory
+          end
+
+          def build_usable_record(usable_record,single_row)
+            if !self.mapping['product_name'].nil? && self.mapping['product_name'][:position] >= 0 && !single_row[self.mapping['product_name'][:position]].blank?
+              usable_record[:name] = single_row[self.mapping['product_name'][:position]]
+            end
+            
+            if !self.mapping['product_weight'].nil? && self.mapping['product_weight'][:position] >= 0 && !single_row[self.mapping['product_weight'][:position]].blank? && !single_row[self.mapping['product_weight'][:position]].nil?
+              usable_record[:weight] = single_row[self.mapping['product_weight'][:position]]
+            end
+            if self.params[:use_sku_as_product_name]
+              usable_record[:name] = single_row[self.mapping['sku'][:position]].strip
+            end
+            usable_record[:is_intangible] = apply_intangible(usable_record)
+            
+            if !self.mapping['product_instructions'].nil? && self.mapping['product_instructions'][:position] >= 0 && !single_row[self.mapping['product_instructions'][:position]].blank?
+              usable_record[:spl_instructions_4_packer] = single_row[self.mapping['product_instructions'][:position]]
+            end
+
+            if !self.mapping['barcode'].nil? && self.mapping['barcode'][:position] >= 0
+              unless single_row[self.mapping['barcode'][:position]].nil?
+                barcodes = single_row[self.mapping['barcode'][:position]].split(',')
+                barcodes.each do |single_barcode|
+                  break unless ProductBarcode.where(:barcode => single_barcode.strip).empty? && (!all_barcodes.include? single_barcode.strip)
+                  all_barcodes << single_barcode.strip
+                  usable_record[:barcodes] << single_barcode.strip
+                end
+              end
+            elsif self.params[:generate_barcode_from_sku]
+              barcodes = single_row[self.mapping['sku'][:position]].split(',')
+              barcodes.each do |single_barcode|
+                all_barcodes << single_barcode.strip
+                usable_record[:barcodes] << single_barcode.strip
+              end
+            end
+
+            if !self.mapping['secondary_barcode'].nil? && self.mapping['secondary_barcode'][:position] >= 0
+              unless single_row[self.mapping['secondary_barcode'][:position]].nil?
+                secondary_barcodes = single_row[self.mapping['secondary_barcode'][:position]].split(',')
+                secondary_barcodes.each do |single_secondary_barcode|
+                  break unless ProductBarcode.where(:barcode => single_secondary_barcode.strip).empty? && (!all_barcodes.include? single_secondary_barcode.strip)
+                  all_barcodes << single_secondary_barcode.strip
+                  usable_record[:barcodes] << single_secondary_barcode.strip
+                end
+              end
+            end
+
+            if !self.mapping['tertiary_barcode'].nil? && self.mapping['tertiary_barcode'][:position] >= 0
+              unless single_row[self.mapping['tertiary_barcode'][:position]].nil?
+                tertiary_barcodes = single_row[self.mapping['tertiary_barcode'][:position]].split(',')
+                tertiary_barcodes.each do |single_tertiary_barcode|
+                  break unless ProductBarcode.where(:barcode => single_tertiary_barcode.strip).empty? && (!all_barcodes.include? single_tertiary_barcode.strip)
+                  all_barcodes << single_tertiary_barcode.strip
+                  usable_record[:barcodes] << single_tertiary_barcode.strip
+                end
+              end
+            end
+
+            if !self.mapping['product_type'].nil? && self.mapping['product_type'][:position] >= 0
+              usable_record[:product_type] = single_row[self.mapping['product_type'][:position]]
+            end
+            #add inventory warehouses
+            product_inventory = init_prod_inv
+            
+            usable_record[:inventory] << build_prod_inv(product_inventory,single_row)
+
+            #add product categories
+            if !self.mapping['category_name'].nil? && self.mapping['category_name'][:position] >= 0
+              unless single_row[self.mapping['category_name'][:position]].nil?
+                usable_record[:cats] = single_row[self.mapping['category_name'][:position]].split(',')
+              end
+            end
+
+            if !self.mapping['product_images'].nil? && self.mapping['product_images'][:position] >= 0
+              unless single_row[self.mapping['product_images'][:position]].nil?
+                usable_record[:images] = single_row[self.mapping['product_images'][:position]].split(',')
+              end
+            end
+            usable_record
+          end
+
+          def prepare_to_import
+            found_skus_raw = ProductSku.find_all_by_sku(@all_skus)
+            @found_skus = {}
+            found_barcodes_raw = ProductBarcode.find_all_by_barcode(@all_barcodes)
+            @found_barcodes = []
+            found_skus_raw.each do |found_sku|
+              @found_skus[found_sku.sku] = found_sku
+              if duplicate_action !='overwrite'
+                duplicate_db = duplicate_db + 1
+              end
+            end
+            found_barcodes_raw.each do |found_barcode|
+              @found_barcodes << found_barcode.barcode
+            end
+            found_skus_raw = nil
+            found_barcodes_raw = nil
+            @all_skus.clear
+            @all_barcodes.clear
+
+            @products_to_import = []
+
+            @to_import_records = []
+            @all_unique_ids = []
+
+            @import_product_skus = []
+            @import_product_images = []
+            @import_product_barcodes = []
+            @import_product_cats = []
+            @import_product_inventory_warehouses = []
+          end
+
+          def create_single_import(record)
+            record[:name] = 'Product from CSV Import' if record[:name].blank?
+            single_import = Product.new(:name => record[:name], :product_type => record[:product_type], :spl_instructions_4_packer => record[:spl_instructions_4_packer], :is_intangible => record[:is_intangible], :weight => record[:weight])
+            single_import.store_id = self.params[:store_id]
+            single_import.store_product_id = record[:store_product_id]
+            if record[:skus].length > 0 && record[:barcodes].length > 0
+              single_import.status = 'active'
+            else
+              single_import.status = 'new'
+            end
+            single_import
           end
 
           def check_after_every(length)
