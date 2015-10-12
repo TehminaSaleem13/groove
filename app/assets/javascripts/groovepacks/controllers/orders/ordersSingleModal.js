@@ -434,6 +434,11 @@ groovepacks_controllers.
               model: "row.iteminfo",
               transclude: '<span>{{row.iteminfo.qty}}</span>'
             },
+            qty_on_hand: {
+              name: "QOH",
+              editable: false,
+              hidden: true
+            },
             location_primary: {
               name: "Primary Location"
             },

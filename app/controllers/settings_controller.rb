@@ -63,7 +63,7 @@ class SettingsController < ApplicationController
           'shipping_weight' => 'shipping_weight'
         }
         default_warehouse_map = {
-          'Quantity Avbl' => 'available_inv',
+          'QOH' => 'available_inv',
           'BinLocation 1' => 'location_primary',
           'BinLocation 2' => 'location_secondary'
         }

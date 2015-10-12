@@ -406,6 +406,7 @@ class OrdersController < ApplicationController
           @orderitem['category'] = product.primary_category
           @orderitem['image'] = product.base_product.primary_image
           @orderitem['spl_instructions_4_packer'] = product.spl_instructions_4_packer
+          @orderitem['qty_on_hand'] = product.primary_warehouse.quantity_on_hand
 
         end
         @result['order']['items'].push(@orderitem)
