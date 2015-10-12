@@ -27,12 +27,12 @@ module Groovepacker
 
             unless response["orders"].nil?
               response["orders"].each do |order|
-                import_item.current_increment_id = order["id"]
+                import_item.current_increment_id = order["name"]
                 import_item.current_order_items = -1
                 import_item.current_order_imported_item = -1
                 import_item.save
                 shipstation_order = nil
-                if Order.where(increment_id: order["id"]).empty?
+                if Order.where(increment_id: order["name"]).empty?
 
                   #create order
                   shopify_order = Order.new
@@ -107,7 +107,7 @@ module Groovepacker
           end
 
           def import_order(shopify_order, order)
-            shopify_order.increment_id = order["order_number"] 
+            shopify_order.increment_id = order["name"] 
             shopify_order.store_order_id = order["id"].to_s
             shopify_order.order_placed_time = order["created_at"]
 
