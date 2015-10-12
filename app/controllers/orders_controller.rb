@@ -124,7 +124,6 @@ class OrdersController < ApplicationController
     @result = Hash.new
     @result['status'] = true
     @result['messages'] = []
-
     #Everyone can create notes from Packer
     @order.notes_fromPacker = params[:order]['notes_fromPacker']
 
@@ -209,7 +208,7 @@ class OrdersController < ApplicationController
   # then the API considers order to be descending.The API also supports a product status filter.
   # The filter expects one of the following parameters in params[:filter] 'all', 'active', 'inactive', 'new'.
   # If no filter is passed, then the API will default to 'active'
-  def getorders
+  def index
     @result = Hash.new
     @result['status'] = true
 
@@ -225,7 +224,7 @@ class OrdersController < ApplicationController
     end
   end
 
-  def duplicateorder
+  def duplicate_orders
 
     @result = Hash.new
     @result['status'] = true
@@ -282,7 +281,7 @@ class OrdersController < ApplicationController
     end
   end
 
-  def deleteorder
+  def delete_orders
     @result = Hash.new
     @result['status'] = true
     @result['error_messages'] = []
@@ -336,22 +335,14 @@ class OrdersController < ApplicationController
     end
   end
 
-  def changeorderstatus
+  def change_orders_status
     @result = Hash.new
     @result['status'] = true
     @result['error_messages'] = []
     @result['notice_messages'] = []
 
     if current_user.can? 'change_order_status'
-      bulk_actions = Groovepacker::Orders::BulkActions.new
-      groove_bulk_actions = GrooveBulkActions.new
-      groove_bulk_actions.identifier = 'order'
-      groove_bulk_actions.activity = 'status_update'
-      groove_bulk_actions.save
-
-      bulk_actions.delay(:run_at => 1.seconds.from_now).status_update(Apartment::Tenant.current, params, groove_bulk_actions.id)
-
-=begin      
+      @orders = list_selected_orders
       unless @orders.nil?
         @orders.each do |order|
           @order = Order.find(order['id'])
@@ -361,9 +352,6 @@ class OrdersController < ApplicationController
 
             @result['error_messages'].push('This status change is not permitted.')
           else
-            puts "Params #{params}"
-            puts "orders #{order}"
-            binding.pry
             @order.status = params[:status]
             @order.reallocate_inventory = params[:reallocate_inventory]
             unless @order.save
@@ -373,7 +361,7 @@ class OrdersController < ApplicationController
           end
         end
       end
-=end      
+      
     else
       @result['status'] = false
       @result['error_messages'].push("You do not have enough permissions to change order status")
@@ -384,7 +372,7 @@ class OrdersController < ApplicationController
     end
   end
 
-  def getdetails
+  def show
     @result = Hash.new
     @order = Order.find_by_id(params[:id])
     @result['status'] = true
@@ -468,7 +456,7 @@ class OrdersController < ApplicationController
   end
 
 
-  def recordexception
+  def record_exception
     @result = Hash.new
     @result['status'] = true
     username = current_user.name
@@ -515,7 +503,7 @@ class OrdersController < ApplicationController
     end
   end
 
-  def clearexception
+  def clear_exception
     @result = Hash.new
     @result['status'] = true
     @result['messages'] = []
@@ -544,7 +532,7 @@ class OrdersController < ApplicationController
     end
   end
 
-  def additemtoorder
+  def add_item_to_order
     @result = Hash.new
     @result['status'] = true
     @result['messages'] = []
@@ -595,7 +583,7 @@ class OrdersController < ApplicationController
     end
   end
 
-  def updateiteminorder
+  def update_item_in_order
     @result = Hash.new
     @result['status'] = true
     @result['messages'] = []
@@ -647,7 +635,7 @@ class OrdersController < ApplicationController
     end
   end
 
-  def removeitemfromorder
+  def remove_item_from_order
     @result = Hash.new
     @result['status'] = true
     @result['messages'] =[]
@@ -788,7 +776,7 @@ class OrdersController < ApplicationController
     end
   end
 
-  def updateorderlist
+  def update_order_list
     @result = Hash.new
     @result['status'] = true
     @order = Order.find_by_id(params[:id])
@@ -1232,7 +1220,7 @@ class OrdersController < ApplicationController
           import_orders_obj = ImportOrders.new
           Delayed::Job.where(queue: "importing_orders_#{tenant}").destroy_all
           import_orders_obj.delay(:run_at => 1.seconds.from_now, :queue => "importing_orders_#{tenant}").import_orders tenant
-          # import_orders_obj.import_orders
+          # import_orders_obj.import_orders(tenant)
           result['success_messages'].push('Scouring the interwebs for new orders...')
         else
           result['error_messages'].push('You currently have no Active Stores in your Store List')

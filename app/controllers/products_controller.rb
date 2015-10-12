@@ -2,7 +2,7 @@ class ProductsController < ApplicationController
   before_filter :groovepacker_authorize!
   include ProductsHelper
 
-  def importproducts
+  def import_products
     @store = Store.find(params[:id])
     @result = Hash.new
 
@@ -161,7 +161,7 @@ class ProductsController < ApplicationController
 
   end
 
-  def importimages
+  def import_images
     @store = Store.find(params[:id])
     @result = Hash.new
 
@@ -330,7 +330,7 @@ class ProductsController < ApplicationController
   # If no filter is passed, then the API will default to 'active'
   # if you would like to get Kits, specify params[:is_kit] to 1. it will return product kits and the corresponding skus
   #
-  def getproducts
+  def index
     @result = Hash.new
     @result[:status] = true
     @products = do_getproducts(params)
@@ -405,7 +405,7 @@ class ProductsController < ApplicationController
     end
   end
 
-  def generatebarcode
+  def generate_barcode
     @result = Hash.new
     @result['status'] = true
     @result['messages'] = []
@@ -496,7 +496,7 @@ class ProductsController < ApplicationController
     end
   end
 
-  def changeproductstatus
+  def change_product_status
     @result = Hash.new
     @result['status'] = true
     @result['messages'] = []
@@ -521,7 +521,7 @@ class ProductsController < ApplicationController
     end
   end
 
-  def deleteproduct
+  def delete_product
     @result = Hash.new
     @result['status'] = true
     @result['messages'] = []
@@ -545,7 +545,7 @@ class ProductsController < ApplicationController
     end
   end
 
-  def duplicateproduct
+  def duplicate_product
 
     @result = Hash.new
     @result['status'] = true
@@ -568,9 +568,10 @@ class ProductsController < ApplicationController
     end
   end
 
-  def getdetails
+  def show
     @result = Hash.new
     @product = nil
+    params[:id] = nil if params[:id]=="null"
     if !params[:id].nil?
       @product = Product.find_by_id(params[:id])
     else
@@ -674,13 +675,13 @@ class ProductsController < ApplicationController
     end
   end
 
-  def addproducttokit
+  def add_product_to_kit
     @result = Hash.new
     @result['status'] = true
     @result['messages'] = []
 
     if current_user.can?('add_edit_products')
-      @kit = Product.find_by_id(params[:kit_id])
+      @kit = Product.find_by_id(params[:id])
 
       if !@kit.is_kit
         @result['messages'].push("Product with id="+@kit.id+"is not a kit")
@@ -727,13 +728,13 @@ class ProductsController < ApplicationController
     end
   end
 
-  def removeproductsfromkit
+  def remove_products_from_kit
     @result = Hash.new
     @result['status'] = true
     @result['messages'] = []
 
     if current_user.can?('add_edit_products')
-      @kit = Product.find_by_id(params[:kit_id])
+      @kit = Product.find_by_id(params[:id])
 
       if @kit.is_kit
         if params[:kit_products].nil?
@@ -773,7 +774,7 @@ class ProductsController < ApplicationController
     end
   end
 
-  def updateproduct
+  def update
     @result = Hash.new
     @product = Product.find(params[:basicinfo][:id]) unless params.nil? && params[:basicinfo].nil?
     @result['status'] = true
@@ -1133,7 +1134,7 @@ class ProductsController < ApplicationController
     end
   end
 
-  def updateproductlist
+  def update_product_list
     @result = Hash.new
     @result['status'] = true
 
@@ -1162,13 +1163,13 @@ class ProductsController < ApplicationController
   #The operation can not be undone.
   #If you had a situation where the newly imported product was actually the one you wanted to keep you could
   #find the original product and make it an alias of the new product...
-  def setalias
+  def set_alias
     @result = Hash.new
     @result['status'] = true
     @result['messages'] = []
 
     if current_user.can?('add_edit_products') && current_user.can?('delete_products')
-      @product_orig = Product.find(params[:product_orig_id])
+      @product_orig = Product.find(params[:id])
       skus_len = @product_orig.product_skus.all.length
       barcodes_len = @product_orig.product_barcodes.all.length
       @product_aliases = Product.find_all_by_id(params[:product_alias_ids])
@@ -1262,13 +1263,13 @@ class ProductsController < ApplicationController
     end
   end
 
-  def addimage
+  def add_image
     @result = Hash.new
     @result['status'] = true
     @result['messages'] = []
 
     if current_user.can?('add_edit_products')
-      @product = Product.find(params[:product_id])
+      @product = Product.find(params[:id])
       if !@product.nil? && !params[:product_image].nil?
         @image = ProductImage.new
 

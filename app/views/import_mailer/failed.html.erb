@@ -1,0 +1,19 @@
+<h3>Import has failed:</h3>
+<% unless @import_exception.nil? %>
+  <p><strong>Tenant Name: </strong><%=@import_exception[:tenant]%></p>
+  <% unless @import_exception[:import_item].nil? %>
+    <p>
+      <strong>Store id: </strong><%=@import_exception[:import_item].store.id %>
+    </p>
+    <p>
+      <strong>Store type: </strong><%=@import_exception[:import_item].store.store_type %>
+    </p>
+  <% end %>
+  <p><strong>Import Date/Time: </strong><%=DateTime.now.to_s%></p>
+  <% unless @import_exception[:exception].nil? %>
+  <p><strong>Exception message: </strong><%=@import_exception[:exception].message%></p>
+  <p><strong>Exception backtrace: </strong></p>
+  <p><%= raw(@import_exception[:exception].backtrace.join("<br/>")) %></p>
+  <% end %>
+<%end%>
+

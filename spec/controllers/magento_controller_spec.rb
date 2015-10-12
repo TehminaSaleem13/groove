@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-describe StoreSettingsController do
+describe StoresController do
   before(:each) do
     Groovepacker::SeedTenant.new.seed
 
@@ -15,7 +15,7 @@ describe StoreSettingsController do
     it "creates an magento store" do
       request.accept = "application/json"
       @user.role.update_attribute(:add_edit_stores, true)
-      post :createUpdateStore, { :store_type => 'Magento', :status => false }
+      post :create_update_store, { :store_type => 'Magento', :status => false }
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
       expect(result['status']).to eq(true)
@@ -29,7 +29,7 @@ describe StoreSettingsController do
       @magento_credentials = FactoryGirl.create(:magento_credential, :store_id=>@store.id)
       request.accept = "application/json"
       @user.role.update_attribute(:add_edit_stores, true)
-      post :createUpdateStore, { :store_type => 'Magento', :id => @store.id, :status => false }
+      post :create_update_store, { :store_type => 'Magento', :id => @store.id, :status => false }
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
       expect(result['status']).to eq(true)

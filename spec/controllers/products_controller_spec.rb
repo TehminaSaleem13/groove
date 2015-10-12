@@ -24,7 +24,7 @@ RSpec.describe ProductsController, :type => :controller do
       order_item = FactoryGirl.create(:order_item, :product_id=>product_alias.id,
                     :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>product_alias.name)
 
-      put :setalias, { :product_orig_id => product_orig.id, product_alias_ids: [product_alias.id] }
+      put :set_alias, { :id => product_orig.id, product_alias_ids: [product_alias.id] }
 
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
@@ -55,7 +55,7 @@ RSpec.describe ProductsController, :type => :controller do
       order_item = FactoryGirl.create(:order_item, :product_id=>product1.id,
                     :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>product1.name)
 
-      put :setalias, { :product_orig_id => product_orig.id, product_alias_ids: [product1.id, product2.id] }
+      put :set_alias, { :id => product_orig.id, product_alias_ids: [product1.id, product2.id] }
 
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
@@ -83,7 +83,7 @@ RSpec.describe ProductsController, :type => :controller do
       kit_product = FactoryGirl.create(:product, is_kit: 1)
       product_kit_sku = FactoryGirl.create(:product_kit_sku, product_id: kit_product.id, option_product_id: product_alias.id)
 
-      put :setalias, { :product_orig_id => product_orig.id, product_alias_ids: [product_alias.id] }
+      put :set_alias, { :id => product_orig.id, product_alias_ids: [product_alias.id] }
 
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
@@ -114,7 +114,7 @@ RSpec.describe ProductsController, :type => :controller do
       kit_product = FactoryGirl.create(:product, is_kit: 1)
       product_kit_sku = FactoryGirl.create(:product_kit_sku, product_id: kit_product.id, option_product_id: product1.id)
 
-      put :setalias, { :product_orig_id => product_orig.id, product_alias_ids: [product1.id, product2.id] }
+      put :set_alias, { :id => product_orig.id, product_alias_ids: [product1.id, product2.id] }
 
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
@@ -215,7 +215,7 @@ RSpec.describe ProductsController, :type => :controller do
     #   order_item2 = FactoryGirl.create(:order_item, :product_id=>product2.id,
     #                 :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>product2.name, :inv_status=>'unallocated')
 		#
-    #   put :updateproductlist, { :id => product1.id, var: "qty", value: "5"  }
+    #   put :update_product_list, { :id => product1.id, var: "qty", value: "5"  }
 		#
     #   expect(response.status).to eq(200)
     #   result = JSON.parse(response.body)
@@ -247,8 +247,8 @@ RSpec.describe ProductsController, :type => :controller do
     #   order_item2 = FactoryGirl.create(:order_item, :product_id=>product2.id,
     #                 :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>product2.name)
 		#
-    #   put :updateproductlist, { :id => product1.id, var: "qty", value: "5"  }
-    #   put :updateproductlist, { :id => product2.id, var: "qty", value: "5"  }
+    #   put :update_product_list, { :id => product1.id, var: "qty", value: "5"  }
+    #   put :update_product_list, { :id => product2.id, var: "qty", value: "5"  }
 		#
     #   expect(response.status).to eq(200)
     #   result = JSON.parse(response.body)
@@ -283,11 +283,11 @@ RSpec.describe ProductsController, :type => :controller do
                     :qty=>1, :price=>"10", :row_total=>"10", :order=>order2, :name=>product2.name)
       order_item3 = FactoryGirl.create(:order_item, :product_id=>product3.id,
                     :qty=>1, :price=>"10", :row_total=>"10", :order=>order3, :name=>product3.name)
-      put :updateproductlist, {:id=>product1.id, :var=> 'qty_on_hand', :value=>'10'}
+      put :update_product_list, {:id=>product1.id, :var=> 'qty_on_hand', :value=>'10'}
       expect(response.status).to eq(200)
-      put :updateproductlist, {:id=>product2.id, :var=> 'qty_on_hand', :value=>'10'}
+      put :update_product_list, {:id=>product2.id, :var=> 'qty_on_hand', :value=>'10'}
       expect(response.status).to eq(200)
-      put :updateproductlist, {:id=>product3.id, :var=> 'qty_on_hand', :value=>'10'}
+      put :update_product_list, {:id=>product3.id, :var=> 'qty_on_hand', :value=>'10'}
       expect(response.status).to eq(200)
       product1.reload
       product2.reload
@@ -321,8 +321,8 @@ RSpec.describe ProductsController, :type => :controller do
       order_item2 = FactoryGirl.create(:order_item, :product_id=>product2.id,
                     :qty=>1, :price=>"10", :row_total=>"10", :order=>order2, :name=>product2.name)
 
-      put :updateproductlist, {:id=>product1.id, :var=> 'qty_on_hand', :value=>'10'}
-      put :updateproductlist, {:id=>product2.id, :var=> 'qty_on_hand', :value=>'10'}
+      put :update_product_list, {:id=>product1.id, :var=> 'qty_on_hand', :value=>'10'}
+      put :update_product_list, {:id=>product2.id, :var=> 'qty_on_hand', :value=>'10'}
       product1.reload
       product2.reload
       expect(product1.product_inventory_warehousess.first.allocated_inv).to eq(0)
@@ -350,9 +350,9 @@ RSpec.describe ProductsController, :type => :controller do
     #   order_item3 = FactoryGirl.create(:order_item, :product_id=>product3.id,
     #                 :qty=>1, :price=>"10", :row_total=>"10", :order=>order3, :name=>product3.name)
 		#
-    #   put :updateproductlist, {:id=>product1.id, :var=> 'qty', :value=>'10'}
-    #   put :updateproductlist, {:id=>product2.id, :var=> 'qty', :value=>'10'}
-    #   put :updateproductlist, {:id=>product3.id, :var=> 'qty', :value=>'10'}
+    #   put :update_product_list, {:id=>product1.id, :var=> 'qty', :value=>'10'}
+    #   put :update_product_list, {:id=>product2.id, :var=> 'qty', :value=>'10'}
+    #   put :update_product_list, {:id=>product3.id, :var=> 'qty', :value=>'10'}
     #   product1.reload
     #   product2.reload
     #   product3.reload

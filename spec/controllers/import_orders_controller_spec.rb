@@ -16,7 +16,7 @@ describe OrdersController do
   #   @store = FactoryGirl.create(:store, :name=>'amazon_store', :inventory_warehouse=>@inv_wh, :store_type=> 'Amazon')
   #   @amazon_credentials = FactoryGirl.create(:amazon_credential, :store_id=>@store.id)
   #   request.accept = "application/json"
-  #   post :importorders, {:id => @store.id}
+  #   post :import_orders, {:id => @store.id}
   #   expect(response.status).to eq(200)
   #   result = JSON.parse(response.body)
   #   expect(result['status']).to eq(true)
@@ -27,7 +27,7 @@ describe OrdersController do
   #   @store = FactoryGirl.create(:store, :name=>'ebay_store', :inventory_warehouse=>@inv_wh, :store_type=> 'Ebay')
   #   @ebay_credentials = FactoryGirl.create(:ebay_credential, :store_id=>@store.id)
   #   request.accept = "application/json"
-  #   post :importorders, {:id => @store.id}
+  #   post :import_orders, {:id => @store.id}
   #   expect(response.status).to eq(200)
   #   result = JSON.parse(response.body)
   #   expect(result['status']).to eq(true)
@@ -38,7 +38,7 @@ describe OrdersController do
   #   @store = FactoryGirl.create(:store, :name=>'magento_store', :inventory_warehouse=>@inv_wh, :store_type=> 'Magento')
   #   @magento_credentials = FactoryGirl.create(:magento_credential, :store_id=>@store.id)
   #   request.accept = "application/json"
-  #   post :importorders, {:id => @store.id}
+  #   post :import_orders, {:id => @store.id}
   #   expect(response.status).to eq(200)
   #   result = JSON.parse(response.body)
   #   expect(result['status']).to eq(true)
@@ -49,7 +49,7 @@ describe OrdersController do
   #   @store = FactoryGirl.create(:store, :name=>'shipstation_store', :inventory_warehouse=>@inv_wh, :store_type=> 'Shipstation')
   #   @shipstation_credentials = FactoryGirl.create(:shipstation_credential, :store_id=>@store.id)
   #   request.accept = "application/json"
-  #   post :importorders, {:id => @store.id}
+  #   post :import_orders, {:id => @store.id}
   #   expect(response.status).to eq(200)
   #   result = JSON.parse(response.body)
   #   expect(result['status']).to eq(true)
@@ -60,7 +60,7 @@ describe OrdersController do
   #   @store = FactoryGirl.create(:store, :name=>'shipstation_store', :inventory_warehouse=>@inv_wh, :store_type=> 'Shipstation API 2')
   #   @shipstation_rest_credentials = FactoryGirl.create(:shipstation_rest_credential, :store_id=>@store.id)
   #   request.accept = "application/json"
-  #   post :importorders, {:id => @store.id}
+  #   post :import_orders, {:id => @store.id}
   #   expect(response.status).to eq(200)
   #   result = JSON.parse(response.body)
   #   expect(result['status']).to eq(true)

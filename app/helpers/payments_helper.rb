@@ -102,7 +102,7 @@ module PaymentsHelper
     @result['messages'] = []
   end
 
-  def getPlanInfo(plan_id)
+  def get_plan_info(plan_id)
     create_result_hash
     @result['plan_info'] = nil
     begin

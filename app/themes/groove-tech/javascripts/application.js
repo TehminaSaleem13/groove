@@ -9,11 +9,9 @@
 //= require ng-rails-csrf
 //= require fingerprint
 //= require jquery.ui.sortable
-//= require groovepacks/lib
-//= require groovepacks_admin/lib
 //= require angular-animate
-//= require groovepacks
-//= require groovepacks/common
 //= require groovepacks_admin
-//= require groovepacks_admin/common
+//= require groovepacks
+//= require groovepacks_common/common
+//= require groovepacks_common/lib
 //= require_tree .

@@ -326,7 +326,7 @@ module Groovepacker
                   next
                 end
                 duplicate_product.store_id = params[:store_id]
-                if !mapping['product_name'].nil? #&& mapping['product_name'][:action] == 'overwrite'
+                if !mapping['product_name'].nil? && record[:name]!=''
                   duplicate_product.name = record[:name]
                 end
                 if !mapping['product_weight'].nil? #&& mapping['product_weight'][:action] == 'overwrite'
@@ -341,7 +341,7 @@ module Groovepacker
                 end
 
                 products_for_status_update << duplicate_product
-                duplicate_product.save
+                duplicate_product.save!
                 success_updated = success_updated + 1
 
                 if (!mapping['inv_wh1'].nil? || !mapping['location_primary'].nil? || !mapping['location_secondary'].nil? || !mapping['location_tertiary'].nil?)

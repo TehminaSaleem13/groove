@@ -5,50 +5,6 @@ Groovepacks::Application.routes.draw do
 
   match 'subscriptions', :to => 'subscriptions#new', :as => 'subscriptions'
   match 'subscriptions_login', :to => 'subscriptions#login', :as => 'subscriptions/login'
-  # match 'subscriptions/new', :to => 'subscriptions#new'
-  # match 'subscriptions/show', :to => 'subscriptions#show'
-  # get "subscriptions/show"
-  get "inventory_warehouse/create"
-
-  get "inventory_warehouse/update"
-
-  get "inventory_warehouse/show"
-
-  get "inventory_warehouse/index"
-
-  get "inventory_warehouse/destroy"
-
-  get "inventory_warehouse/adduser"
-
-  get "inventory_warehouse/removeuser"
-
-  get "store_settings/createStore"
-
-  get "store_settings/csvImportData"
-
-  get "store_settings/csvDoImport"
-
-  get "store_settings/changestorestatus"
-
-  get "store_settings/editstore"
-
-  get "store_settings/duplicatestore"
-
-  get "store_settings/deletestore"
-
-  get "user_settings/userslist"
-
-  get "user_settings/createUser"
-
-  get "user_settings/changeuserstatus"
-
-  get "user_settings/edituser"
-
-  get "user_settings/duplicateuser"
-
-  get "user_settings/deleteuser"
-
-  get "home/index"
 
   get "/404", :to => "specials#error_404"
 
@@ -73,19 +29,161 @@ Groovepacks::Application.routes.draw do
   #   resources :products
   root :to => "home#index"
 
+  resources :home do
+    collection do
+      get 'userinfo'
+      get 'request_socket_notifs'
+    end
+  end
+
+  resources :orders do
+    collection do
+      get 'search'
+      get 'import_orders'
+      get 'import_all'
+      post 'generate_pick_list'
+      post 'generate_packing_slip'
+      post 'order_items_export'
+      post 'cancel_packing_slip'
+      post 'delete_orders'
+      post 'duplicate_orders'
+      post 'change_orders_status'
+      post 'update_order_list'
+      post 'rollback'
+      post 'remove_item_from_order'
+      post 'update_item_in_order'
+      post 'import_shipworks'
+      get 'import'
+      put 'cancel_import'
+    end
+    member do
+      post 'add_item_to_order'
+      post 'record_exception'
+      post 'clear_exception'
+      get 'importorders'
+    end
+  end
+
+  resources :products do
+    collection do
+      get 'import_products'
+      get 'search'
+      get 'import_images'
+      get 'import_product_details'
+      post 'delete_product'
+      post 'duplicate_product'
+      post 'change_product_status'
+      post 'generate_barcode'
+      post 'scan_per_product'
+      post 'generate_products_csv'
+      post 'update_product_list'
+      post 'update_image'
+      post 'update_intangibleness'
+      post 'print_receiving_label'
+    end
+    member do
+      get 'generate_barcode_slip'
+      put 'adjust_available_inventory'
+      post 'add_image'
+      post 'set_alias'
+      post 'add_product_to_kit'
+      post 'remove_products_from_kit'
+    end
+  end
+
+  resources :settings do
+    collection do
+      get 'get_settings'
+      get 'get_columns_state'
+      put 'update_settings'
+      get 'get_scan_pack_settings'
+      get 'order_exceptions'
+      get 'order_serials'
+      get 'export_csv'
+      post 'restore'
+      post 'save_columns_state'
+      post 'cancel_bulk_action'
+      post 'update_scan_pack_settings'
+    end
+  end
+
+  resources :stores do
+    collection do
+      get 'get_system'
+      get 'let_store_be_created'
+      get 'get_ebay_signin_url'
+      get 'ebay_user_fetch_token'
+      get 'csv_map_data'
+      post 'delete_store'
+      post 'duplicate_store'
+      post 'change_store_status'
+      post 'create_update_store'
+
+    end
+    member do
+      get 'verify_tags'
+      put 'update_all_locations'
+      get 'connect_and_retrieve'
+      post 'create_update_ftp_credentials'
+      post 'delete_ebay_token'
+      post 'update_ebay_user_token'
+      post 'csv_import_data'
+      post 'csv_do_import'
+      post 'csv_product_import_cancel'
+      post 'update_csv_map'
+      post 'delete_csv_map'
+    end
+  end
+
+  resources :users do
+    collection do
+      get 'get_roles'
+      get 'let_user_be_created'
+      post 'delete_user'
+      post 'duplicate_user'
+      post 'change_user_status'
+      post 'delete_role'
+      post 'createUpdateUser'
+    end
+    member do
+      put 'create_role'
+      get 'print_confirmation_code'
+    end
+  end
+
+  resources :exportsettings do
+    collection do
+      get 'get_export_settings'
+      put 'update_export_settings'
+      get 'order_exports'
+    end
+  end
+
+  resources :scan_pack do
+    collection do
+      post 'scan_barcode'
+      post 'reset_order_scan'
+      post 'serial_scan'
+      post 'click_scan'
+      post 'product_instruction'
+      post 'type_scan'
+      post 'confirmation_code'
+      post 'add_note'
+      post 'reset_order_scan'
+    end
+    member do
+    end
+  end
+
   resources :payments do
     collection do
       get 'default_card'
       delete 'delete_cards'
     end
-    # member do
-    #   put 'add_new_card'
-    # end
   end
 
   resources :specials do
     collection do
-      get 'error_action'
     end
   end
 
@@ -127,9 +225,38 @@ Groovepacks::Application.routes.draw do
   end
 
   resources :tenants do
+    collection do
+      post 'delete_tenant'
+    end
     member do
-      delete 'delete_tenant'
       post   'create_duplicate'
+    end
+  end
+
+  resources :inventory_warehouse do
+    collection do
+      put 'changestatus'
+      put 'destroy'
+      get 'available_users'
+    end
+    member do
+      post 'edit_user_perms'
+    end
+  end
+
+  resources :subscriptions do
+    collection do
+      get 'select_plan'
+      get 'plan_info'
+      post 'confirm_payment'
+      get 'valid_tenant_name'
+      get 'valid_email'
+    end
+  end
+
+  resources :stripe do
+    collection do
+      post 'webhook'
     end
   end
   
@@ -174,5 +301,5 @@ Groovepacks::Application.routes.draw do
 
   # This is a legacy wild controller route that's not recommended for RESTful applications.
   # Note: This route will make all actions in every controller accessible via GET requests.
-  match ':controller(/:action(/:id))(.:format)'
+  # match ':controller(/:action(/:id))(.:format)'
 end
