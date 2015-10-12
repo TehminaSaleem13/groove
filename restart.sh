@@ -71,7 +71,7 @@ cd ~/groove/nodeserver/oauth-server
 npm install
 
 rm vendor/assets/components/**/*.js.{gzip,map}
-RAILS_ENV=${ENV} bundle exec bundle install --deployment
+RAILS_ENV=${ENV} bundle install --deployment
 RAILS_ENV=${ENV} bundle exec rake db:migrate
 RAILS_ENV=${ENV} bundle exec rake db:seed
 RAILS_ENV=${ENV} bundle exec rake assets:clean
