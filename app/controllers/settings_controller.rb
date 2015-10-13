@@ -418,7 +418,7 @@ class SettingsController < ApplicationController
               single_row[:warehouse_name] = serial.product.primary_warehouse.inventory_warehouse.name unless serial.product.primary_warehouse.nil? || serial.product.primary_warehouse.inventory_warehouse.nil?
             end
             single_row[:serial] = serial.serial
-            if serial.product.is_kit
+            if serial.product.is_kit == 1
               single_row[:kit_name] = serial.product.name
             else
               single_row[:product_name] = serial.product.name
