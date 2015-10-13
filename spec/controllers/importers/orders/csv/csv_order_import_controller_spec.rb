@@ -11,7 +11,7 @@ describe StoresController do
     sign_in @user
     @access_restriction = FactoryGirl.create(:access_restriction)
     @inv_wh = FactoryGirl.create(:inventory_warehouse, :name=>'csv_inventory_warehouse')
-    @store = FactoryGirl.create(:store, :name=>'csv_store', :store_type=>'CSV', :inventory_warehouse=>@inv_wh)
+    @store = FactoryGirl.create(:store, :name=>'csv_store', :store_type=>'CSV', :inventory_warehouse=>@inv_wh, :status => true)
     Delayed::Worker.delay_jobs = false
   end
   after(:each) do

@@ -10,6 +10,8 @@ describe StoresController do
     @user = FactoryGirl.create(:user,:name=>'CSV Tester', :username=>"csv_spec_tester", :role => @user_role)
     sign_in @user
     @access_restriction = FactoryGirl.create(:access_restriction)
+    @inv_wh = FactoryGirl.create(:inventory_warehouse, :name=>'csv_inventory_warehouse')
+    @store = FactoryGirl.create(:store, :name=>'csv_store', :store_type=>'CSV', :inventory_warehouse=>@inv_wh, :status => true)
     Delayed::Worker.delay_jobs = false
   end
   after(:each) do
@@ -18,9 +20,6 @@ describe StoresController do
 
   describe "POST 'product import'" do
     it "imports products from csv file with import option 1" do
-      @inv_wh = FactoryGirl.create(:inventory_warehouse, :name=>'csv_inventory_warehouse')
-      @store = FactoryGirl.create(:store, :name=>'csv_store', :store_type=>'CSV', :inventory_warehouse=>@inv_wh)
-      expect(Product.all.count).to eq(0)
       request.accept = "application/json"
       get :csv_import_data, {:type => 'product', :id => @store.id}
       expect(response.status).to eq(200)
@@ -37,9 +36,6 @@ describe StoresController do
       expect(Product.all.count).to eq(34)
     end
     it "imports products from csv file with import option 2 without existing products" do
-      @inv_wh = FactoryGirl.create(:inventory_warehouse, :name=>'csv_inventory_warehouse')
-      @store = FactoryGirl.create(:store, :name=>'csv_store', :store_type=>'CSV', :inventory_warehouse=>@inv_wh)
-      expect(Product.all.count).to eq(0)
       request.accept = "application/json"
       get :csv_import_data, {:type => 'product', :id => @store.id}
       expect(response.status).to eq(200)
@@ -56,10 +52,6 @@ describe StoresController do
       expect(Product.all.count).to eq(0)
     end
     it "imports products from csv file with import option 2 with already existing products" do
-      @inv_wh = FactoryGirl.create(:inventory_warehouse, :name=>'csv_inventory_warehouse')
-      @store = FactoryGirl.create(:store, :name=>'csv_store', :store_type=>'CSV', :inventory_warehouse=>@inv_wh)
-      expect(Order.all.count).to eq(0)
-      expect(Product.all.count).to eq(0)
       # import orders
       request.accept = "application/json"
       get :csv_import_data, {:type => 'order', :id => @store.id}
@@ -94,10 +86,6 @@ describe StoresController do
       expect(Product.all.count).to eq(21)
     end
     it "imports products from csv file with import option 3" do
-      @inv_wh = FactoryGirl.create(:inventory_warehouse, :name=>'csv_inventory_warehouse')
-      @store = FactoryGirl.create(:store, :name=>'csv_store', :store_type=>'CSV', :inventory_warehouse=>@inv_wh)
-      expect(Order.all.count).to eq(0)
-      expect(Product.all.count).to eq(0)
       # import orders
       request.accept = "application/json"
       get :csv_import_data, {:type => 'order', :id => @store.id}
@@ -132,10 +120,6 @@ describe StoresController do
       expect(Product.all.count).to eq(41)
     end
     it "Delete a product during csv product import if the product name matches `[DELETE]`" do
-      @inv_wh = FactoryGirl.create(:inventory_warehouse, :name=>'csv_inventory_warehouse')
-      @store = FactoryGirl.create(:store, :name=>'csv_store', :store_type=>'CSV', :inventory_warehouse=>@inv_wh)
-      expect(Order.all.count).to eq(0)
-      expect(Product.all.count).to eq(0)
       # import orders
       request.accept = "application/json"
       get :csv_import_data, {:type => 'order', :id => @store.id}

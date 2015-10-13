@@ -10,6 +10,8 @@ describe StoresController do
     @user = FactoryGirl.create(:user,:name=>'CSV Tester', :username=>"csv_spec_tester", :role => @user_role)
     sign_in @user
     @access_restriction = FactoryGirl.create(:access_restriction)
+    @inv_wh = FactoryGirl.create(:inventory_warehouse, :name=>'csv_inventory_warehouse')
+    @store = FactoryGirl.create(:store, :name=>'csv_store', :store_type=>'CSV', :inventory_warehouse=>@inv_wh, :status=>true)
     Delayed::Worker.delay_jobs = false
   end
   after(:each) do
@@ -18,9 +20,6 @@ describe StoresController do
 
   describe "POST 'kit import'" do
     it "imports kit products from csv file" do
-      @inv_wh = FactoryGirl.create(:inventory_warehouse, :name=>'csv_inventory_warehouse')
-      @store = FactoryGirl.create(:store, :name=>'csv_store', :store_type=>'CSV', :inventory_warehouse=>@inv_wh)
-      expect(Product.all.count).to eq(0)
       request.accept = "application/json"
       get :csv_import_data, {:type => 'kit', :id => @store.id}
       expect(response.status).to eq(200)
