@@ -26,7 +26,7 @@ describe StoresController do
         expect(response.status).to eq(200)
 
         request.accept = "application/json"
-        get :create_update_store, {:store_type => 'CSV', :id => @store.id, :orderfile => fixture_file_upload(Rails.root.join('/files/MT_Orders_04.csv'))}
+        get :create_update_store, {:store_type => 'CSV', :status=> @store.status, :name => @store.name, :inventory_warehouse_id => @store.inventory_warehouse_id, :id => @store.id, :orderfile => fixture_file_upload(Rails.root.join('/files/MT_Orders_04.csv'))}
         expect(response.status).to eq(200)
 
         doc = IO.read(Rails.root.join("spec/fixtures/files/MT_Orders_04_map"))
@@ -49,7 +49,7 @@ describe StoresController do
         expect(response.status).to eq(200)
 
         request.accept = "application/json"
-        get :create_update_store, {:store_type => 'CSV', :id => @store.id, :orderfile => fixture_file_upload(Rails.root.join('/files/MT_Orders_04.csv'))}
+        get :create_update_store, {:store_type => 'CSV', :status=> @store.status, :name => @store.name, :inventory_warehouse_id => @store.inventory_warehouse_id, :id => @store.id, :orderfile => fixture_file_upload(Rails.root.join('/files/MT_Orders_04.csv'))}
         expect(response.status).to eq(200)
 
         doc = IO.read(Rails.root.join("spec/fixtures/files/MT_Orders_04_map"))
@@ -73,7 +73,7 @@ describe StoresController do
         expect(response.status).to eq(200)
 
         request.accept = "application/json"
-        get :create_update_store, {:store_type => 'CSV', :id => @store.id, :orderfile => fixture_file_upload(Rails.root.join('/files/MT_Orders_04.csv'))}
+        get :create_update_store, {:store_type => 'CSV', :status=> @store.status, :name => @store.name, :inventory_warehouse_id => @store.inventory_warehouse_id, :id => @store.id, :orderfile => fixture_file_upload(Rails.root.join('/files/MT_Orders_04.csv'))}
         expect(response.status).to eq(200)
 
         doc = IO.read(Rails.root.join("spec/fixtures/files/MT_Orders_04_map"))
@@ -93,7 +93,7 @@ describe StoresController do
           expect(response.status).to eq(200)
 
           request.accept = "application/json"
-          get :create_update_store, {:store_type => 'CSV', :id => @store.id, :orderfile => fixture_file_upload(Rails.root.join('/files/MT_Orders_04.csv'))}
+          get :create_update_store, {:store_type => 'CSV', :status=> @store.status, :name => @store.name, :inventory_warehouse_id => @store.inventory_warehouse_id, :id => @store.id, :orderfile => fixture_file_upload(Rails.root.join('/files/MT_Orders_04.csv'))}
           expect(response.status).to eq(200)
 
           doc = IO.read(Rails.root.join("spec/fixtures/files/MT_Orders_04_map"))
@@ -119,7 +119,7 @@ describe StoresController do
           expect(response.status).to eq(200)
 
           request.accept = "application/json"
-          get :create_update_store, {:store_type => 'CSV', :id => @store.id, :orderfile => fixture_file_upload(Rails.root.join('/files/MT_Orders_04.csv'))}
+          get :create_update_store, {:store_type => 'CSV', :status=> @store.status, :name => @store.name, :inventory_warehouse_id => @store.inventory_warehouse_id, :id => @store.id, :orderfile => fixture_file_upload(Rails.root.join('/files/MT_Orders_04.csv'))}
           expect(response.status).to eq(200)
 
           doc = IO.read(Rails.root.join("spec/fixtures/files/MT_Orders_04_map"))
@@ -144,7 +144,7 @@ describe StoresController do
         expect(response.status).to eq(200)
 
         request.accept = "application/json"
-        get :create_update_store, {:store_type => 'CSV', :id => @store.id, :orderfile => fixture_file_upload(Rails.root.join('/files/Order_Import_Test.csv'))}
+        get :create_update_store, {:store_type => 'CSV', :status=> @store.status, :name => @store.name, :inventory_warehouse_id => @store.inventory_warehouse_id, :id => @store.id, :orderfile => fixture_file_upload(Rails.root.join('/files/Order_Import_Test.csv'))}
         expect(response.status).to eq(200)
 
         doc = IO.read(Rails.root.join("spec/fixtures/files/Unique_Orders_map"))
@@ -173,7 +173,7 @@ describe StoresController do
         expect(response.status).to eq(200)
 
         request.accept = "application/json"
-        get :create_update_store, {:store_type => 'CSV', :id => @store.id, :orderfile => fixture_file_upload(Rails.root.join('/files/Order_Import_Test.csv'))}
+        get :create_update_store, {:store_type => 'CSV', :status=> @store.status, :name => @store.name, :inventory_warehouse_id => @store.inventory_warehouse_id, :id => @store.id, :orderfile => fixture_file_upload(Rails.root.join('/files/Order_Import_Test.csv'))}
         expect(response.status).to eq(200)
 
         doc = IO.read(Rails.root.join("spec/fixtures/files/Unique_Orders_map"))
@@ -197,7 +197,7 @@ describe StoresController do
         expect(response.status).to eq(200)
 
         request.accept = "application/json"
-        get :create_update_store, {:store_type => 'CSV', :id => @store.id, :orderfile => fixture_file_upload(Rails.root.join('/files/Order_Import_Test.csv'))}
+        get :create_update_store, {:store_type => 'CSV', :status=> @store.status, :name => @store.name, :inventory_warehouse_id => @store.inventory_warehouse_id, :id => @store.id, :orderfile => fixture_file_upload(Rails.root.join('/files/Order_Import_Test.csv'))}
         expect(response.status).to eq(200)
 
         doc = IO.read(Rails.root.join("spec/fixtures/files/Unique_Orders_map"))
@@ -217,7 +217,7 @@ describe StoresController do
           expect(response.status).to eq(200)
 
           request.accept = "application/json"
-          get :create_update_store, {:store_type => 'CSV', :id => @store.id, :orderfile => fixture_file_upload(Rails.root.join('/files/Order_Import_Test.csv'))}
+          get :create_update_store, {:store_type => 'CSV', :status=> @store.status, :name => @store.name, :inventory_warehouse_id => @store.inventory_warehouse_id, :id => @store.id, :orderfile => fixture_file_upload(Rails.root.join('/files/Order_Import_Test.csv'))}
           expect(response.status).to eq(200)
 
           doc = IO.read(Rails.root.join("spec/fixtures/files/Unique_Orders_map"))
@@ -239,7 +239,7 @@ describe StoresController do
           get :csv_import_data, {:type => 'order', :id => @store.id}
           expect(response.status).to eq(200)
           request.accept = "application/json"
-          get :create_update_store, {:store_type => 'CSV', :id => @store.id, :orderfile => fixture_file_upload(Rails.root.join('/files/Order_Import_Test.csv'))}
+          get :create_update_store, {:store_type => 'CSV', :status=> @store.status, :name => @store.name, :inventory_warehouse_id => @store.inventory_warehouse_id, :id => @store.id, :orderfile => fixture_file_upload(Rails.root.join('/files/Order_Import_Test.csv'))}
           expect(response.status).to eq(200)
           doc = IO.read(Rails.root.join("spec/fixtures/files/Unique_Orders_map"))
           doc = eval(doc)
@@ -281,7 +281,7 @@ describe StoresController do
           #now import ordes from csv by switching on generate barcode from sku.
           Order.destroy_all
           request.accept = "application/json"
-          get :create_update_store, {:store_type => 'CSV', :id => @store.id, :orderfile => fixture_file_upload(Rails.root.join('/files/Order_Import_Test.csv'))}
+          get :create_update_store, {:store_type => 'CSV', :status=> @store.status, :name => @store.name, :inventory_warehouse_id => @store.inventory_warehouse_id, :id => @store.id, :orderfile => fixture_file_upload(Rails.root.join('/files/Order_Import_Test.csv'))}
           expect(response.status).to eq(200)
           doc = IO.read(Rails.root.join("spec/fixtures/files/Unique_Orders_map"))
           doc = eval(doc)
@@ -302,7 +302,7 @@ describe StoresController do
           get :csv_import_data, {:type => 'order', :id => @store.id}
           expect(response.status).to eq(200)
           request.accept = "application/json"
-          get :create_update_store, {:store_type => 'CSV', :id => @store.id, :orderfile => fixture_file_upload(Rails.root.join('/files/Order_Import_Test.csv'))}
+          get :create_update_store, {:store_type => 'CSV', :status=> @store.status, :name => @store.name, :inventory_warehouse_id => @store.inventory_warehouse_id, :id => @store.id, :orderfile => fixture_file_upload(Rails.root.join('/files/Order_Import_Test.csv'))}
           expect(response.status).to eq(200)
           doc = IO.read(Rails.root.join("spec/fixtures/files/Unique_Orders_map"))
           doc = eval(doc)
@@ -327,7 +327,7 @@ describe StoresController do
           #now import ordes from csv by switching on generate barcode from sku.
           Order.destroy_all
           request.accept = "application/json"
-          get :create_update_store, {:store_type => 'CSV', :id => @store.id, :orderfile => fixture_file_upload(Rails.root.join('/files/Order_Import_Test.csv'))}
+          get :create_update_store, {:store_type => 'CSV', :status=> @store.status, :name => @store.name, :inventory_warehouse_id => @store.inventory_warehouse_id, :id => @store.id, :orderfile => fixture_file_upload(Rails.root.join('/files/Order_Import_Test.csv'))}
           expect(response.status).to eq(200)
           doc = IO.read(Rails.root.join("spec/fixtures/files/Unique_Orders_map"))
           doc = eval(doc)
@@ -350,7 +350,7 @@ describe StoresController do
           expect(response.status).to eq(200)
 
           request.accept = "application/json"
-          get :create_update_store, {:store_type => 'CSV', :id => @store.id, :orderfile => fixture_file_upload(Rails.root.join('/files/Order_Import_Test.csv'))}
+          get :create_update_store, {:store_type => 'CSV', :status=> @store.status, :name => @store.name, :inventory_warehouse_id => @store.inventory_warehouse_id, :id => @store.id, :orderfile => fixture_file_upload(Rails.root.join('/files/Order_Import_Test.csv'))}
           expect(response.status).to eq(200)
 
           doc = IO.read(Rails.root.join("spec/fixtures/files/Unique_Orders_map"))

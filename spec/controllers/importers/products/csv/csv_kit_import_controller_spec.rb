@@ -25,7 +25,7 @@ describe StoresController do
       expect(response.status).to eq(200)
 
       request.accept = "application/json"
-      get :create_update_store, {:store_type => 'CSV', :id => @store.id, :kitfile => fixture_file_upload(Rails.root.join('/files/MT_Kits_03.csv'))}
+      get :create_update_store, {:store_type => 'CSV', :status=> @store.status, :name => @store.name, :inventory_warehouse_id => @store.inventory_warehouse_id, :id => @store.id, :kitfile => fixture_file_upload(Rails.root.join('/files/MT_Kits_03.csv'))}
       expect(response.status).to eq(200)
 
       doc = IO.read(Rails.root.join("spec/fixtures/files/MT_Kits_03_map"))
