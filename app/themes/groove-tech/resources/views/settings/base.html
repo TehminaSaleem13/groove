@@ -11,7 +11,7 @@
             <li ng-class="{active:current_page=='show_stores'}" ui-sref="settings.stores">Show All</li>
             <li ui-sref="settings.stores.create" ng-show="settings.stores.allow">Create Store</li>
             <li class="disabled" ng-hide="settings.stores.allow" popover-trigger="mouseenter"
-                popover="You have reached your store limit">Create Store
+                groov-popover="You have reached your store limit">Create Store
             </li>
 
             <li ng-click='import_all_orders()'>Import Orders</li>
@@ -23,7 +23,7 @@
             <li ng-class="{active:current_page=='show_users'}" ui-sref="settings.users">Show All</li>
             <li ui-sref="settings.users.create" ng-show="settings.users.allow">Create User</li>
             <li class="disabled" ng-hide="settings.users.allow" popover-trigger="mouseenter"
-                popover="You have reached your user limit">Create User
+                groov-popover="You have reached your user limit">Create User
             </li>
           </accordion-group>
           <accordion-group is-open="tabs[2].open">
