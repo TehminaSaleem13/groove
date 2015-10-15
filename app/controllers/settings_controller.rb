@@ -381,17 +381,33 @@ class SettingsController < ApplicationController
           :primary_sku => '',
           :primary_barcode => '',
           :product_name => '',
+          :item_sale_price => '',
+          :kit_name => '',
+          :scan_order => 0,
+          :customer_name => '',
+          :address1 => '',
+          :address2 => '',
+          :city => '',
+          :state => '',
+          :zip => '',
           :packing_user => '',
           :order_item_count => '',
           :scanned_date => '',
-          :warehouse_name => '',
-          :item_sale_price => ''
+          :warehouse_name => ''
         }
       data = CSV.generate do |csv|
           csv << row_map.keys
-
+          order_number = ''
+          scan_order = 0
           serials.each do |serial|
             single_row = row_map.dup
+            unless order_number == serial.order.increment_id
+              order_number = serial.order.increment_id
+              scan_order = 1
+            else
+              scan_order += 1
+            end
+            single_row[:scan_order] = scan_order
             single_row[:order_number] = serial.order.increment_id
             single_row[:order_date] = serial.order.order_placed_time
             single_row[:scanned_date] = serial.order.scanned_on
@@ -402,7 +418,17 @@ class SettingsController < ApplicationController
               single_row[:warehouse_name] = serial.product.primary_warehouse.inventory_warehouse.name unless serial.product.primary_warehouse.nil? || serial.product.primary_warehouse.inventory_warehouse.nil?
             end
             single_row[:serial] = serial.serial
-            single_row[:product_name] = serial.product.name
+            if serial.product.is_kit == 1
+              single_row[:kit_name] = serial.product.name
+            else
+              single_row[:product_name] = serial.product.name
+            end
+            single_row[:customer_name] = [serial.order.firstname, serial.order.lastname].join(' ')
+            single_row[:address1] = serial.order.address_1
+            single_row[:address2] = serial.order.address_2
+            single_row[:city] = serial.order.city
+            single_row[:state] = serial.order.state
+            single_row[:zip] = serial.order.postcode
             single_row[:primary_sku] = serial.product.primary_sku
             single_row[:primary_barcode] = serial.product.primary_barcode
             single_row[:order_item_count] = serial.order.get_items_count
@@ -413,7 +439,6 @@ class SettingsController < ApplicationController
             else
               single_row[:item_sale_price] = order_items.first.price
             end
-
             csv << single_row.values
           end
         end
