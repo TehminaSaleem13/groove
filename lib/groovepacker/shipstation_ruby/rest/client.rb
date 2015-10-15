@@ -18,7 +18,7 @@ module Groovepacker
               orderDateStart = '&orderDateStart=' + order_placed_after.to_s
               Rails.logger.info "Getting orders placed after: " + order_placed_after.to_s
             elsif import_date_type == "modified_at"
-              orderDateStart = '&modifyDateStart=' + order_placed_after.to_s
+              orderDateStart = '&modifyDateStart=' + order_placed_after.to_s.gsub(" UTC", "").gsub(" ", "%20")
               Rails.logger.info "Getting orders modified after: " + order_placed_after.to_s
             end
           end
@@ -27,6 +27,7 @@ module Groovepacker
           combined_response["orders"] = []
           begin
             Rails.logger.info "Retrieving for page " + page_index.to_s + " at " + DateTime.now.to_s
+            now_date = Time.now
             response = HTTParty.get('https://ssapi.shipstation.com/Orders/List?orderStatus=' +
                                       status + '&page=' + page_index.to_s + '&pageSize=500' + orderDateStart,
                                     headers: {
@@ -38,6 +39,8 @@ module Groovepacker
               combined_response["orders"] +
                 response.parsed_response["orders"] unless response.parsed_response["orders"].length == 0
             page_index = page_index + 1
+            Rails.logger.info "time elapsed:"
+            Rails.logger.info (Time.now - now_date).inspect
           end while response.parsed_response["orders"].length > 0
           combined_response
         end
