@@ -302,7 +302,6 @@ groovepacks_services.factory('orders', ['$http', '$window', 'notification', '$q'
   };
 
   var update_single = function (orders, auto) {
-    console.log(orders);
     if (typeof auto !== "boolean") {
       auto = true;
     }
@@ -312,8 +311,6 @@ groovepacks_services.factory('orders', ['$http', '$window', 'notification', '$q'
         order_data[i] = orders.single.basicinfo[i];
       }
     }
-    console.log("order_data: ");
-    console.log(order_data);
     return $http.put("orders/" + orders.single.basicinfo.id + ".json",{order: order_data}).success(
       function (data) {
         if (data.status) {

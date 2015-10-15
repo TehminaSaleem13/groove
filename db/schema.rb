@@ -145,13 +145,14 @@ ActiveRecord::Schema.define(:version => 20151015040128) do
 
   create_table "ftp_credentials", :force => true do |t|
     t.string   "host"
-    t.integer  "port",              :default => 21
-    t.string   "username",          :default => ""
-    t.string   "password",          :default => ""
-    t.integer  "store_id",                             :null => false
-    t.datetime "created_at",                           :null => false
-    t.datetime "updated_at",                           :null => false
-    t.string   "connection_method", :default => "ftp"
+    t.integer  "port",                   :default => 21
+    t.string   "username",               :default => ""
+    t.string   "password",               :default => ""
+    t.integer  "store_id",                                  :null => false
+    t.datetime "created_at",                                :null => false
+    t.datetime "updated_at",                                :null => false
+    t.string   "connection_method",      :default => "ftp"
+    t.boolean  "connection_established", :default => false
   end
 
   create_table "general_settings", :force => true do |t|

@@ -31,6 +31,9 @@ groovepacks_services.factory("auth", ['$http', '$rootScope', 'groovIO', function
     if (name == "home" || !has_access(name)) {
       to = home();
     }
+    if (name == "home" && current_user.current_tenant == 'admintools') {
+      to = "tools";
+    };
     if (to == name) {
       to = false;
     }

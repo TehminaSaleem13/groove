@@ -1,4 +1,4 @@
-groovepacks_admin_services.factory('tenants', ['$http', 'notification', 'editable', '$window', function ($http, notification, editable, $window) {
+groovepacks_services.factory('tenants', ['$http', 'notification', 'editable', '$window', function ($http, notification, editable, $window) {
 
   // var success_messages = {
   //     update_status: "Status updated Successfully",

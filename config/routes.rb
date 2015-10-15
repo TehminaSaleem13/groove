@@ -143,6 +143,7 @@ Groovepacks::Application.routes.draw do
       post 'duplicate_user'
       post 'change_user_status'
       post 'delete_role'
+      post 'createUpdateUser'
     end
     member do
       put 'create_role'
@@ -224,8 +225,10 @@ Groovepacks::Application.routes.draw do
   end
 
   resources :tenants do
+    collection do
+      post 'delete_tenant'
+    end
     member do
-      delete 'delete_tenant'
       post   'create_duplicate'
     end
   end
@@ -243,10 +246,12 @@ Groovepacks::Application.routes.draw do
 
   resources :subscriptions do
     collection do
-      post 'select_plan'
+      get 'select_plan'
+      get 'plan_info'
       post 'confirm_payment'
       get 'valid_tenant_name'
       get 'valid_email'
+      get 'validate_coupon_id'
     end
   end
 

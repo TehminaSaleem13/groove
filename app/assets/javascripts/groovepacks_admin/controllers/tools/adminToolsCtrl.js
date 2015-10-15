@@ -85,7 +85,6 @@ groovepacks_admin_controllers.
             else {
               tenants.single.duplicate($scope.tenants).then(function(data) {
                 $scope.tenants.duplicate_name = '';
-                console.log($scope.tenants);
                 myscope.get_tenants().then(result.resolve);
               });
             }
@@ -131,7 +130,7 @@ groovepacks_admin_controllers.
 
       myscope.load_page_number = function (page) {
 
-        if (page > 0 && page <= Math.ceil($scope.gridOptions.paginate.tenants_count / $scope.gridOptions.paginate.items_per_page)) {
+        if (page > 0 && page <= Math.ceil($scope.gridOptions.paginate.total_items / $scope.gridOptions.paginate.items_per_page)) {
           if ($scope.tenants.setup.search == '') {
             var toParams = {};
             for (var key in $state.params) {
@@ -309,7 +308,7 @@ groovepacks_admin_controllers.
           $scope._can_load_tenants = false;
           $scope.gridOptions.selections.show_delete = myscope.show_delete();
           return tenants.list.get($scope.tenants, page).success(function (data) {
-            $scope.gridOptions.paginate.tenants_count = tenants.list.total_tenants($scope.tenants);
+            $scope.gridOptions.paginate.total_items = tenants.list.total_tenants($scope.tenants);
             myscope.update_selected_count();
             $scope._can_load_tenants = true;
           }).error(function () {

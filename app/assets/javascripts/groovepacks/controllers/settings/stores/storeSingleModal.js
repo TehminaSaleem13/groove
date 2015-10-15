@@ -150,18 +150,27 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
     };
 
     scope.update_ftp_credentials = function () {
-      stores.single.update_ftp(scope.stores).then(function(data) {
-        myscope.init();
-      });
-    }
+      if (typeof scope.stores.single.connection_established != 'undefined') {
+        stores.single.update_ftp(scope.stores).then(function(data) {
+          myscope.init();
+        });
+      };
+    };
 
     scope.establish_connection = function() {
-      stores.single.update_ftp(scope.stores).then(function(data) {
-        stores.single.connect(scope.stores).then(function(data) {
-          $('#test_connection').blur();
+      if (typeof scope.stores.single.host == 'undefined' ||
+        typeof scope.stores.single.username == 'undefined' ||
+        typeof scope.stores.single.password == 'undefined' ||
+        typeof scope.stores.single.connection_method == 'undefined') {
+        notification.notify("Please fillout all the credentials for the ftp store");
+      } else{
+        stores.single.update_ftp(scope.stores).then(function(data) {
+          stores.single.connect(scope.stores).then(function(data) {
+            myscope.init();
+          });
         });
-      });
-    }
+      };
+    };
 
     scope.update_single_store = function (auto) {
       if (scope.edit_status || stores.single.validate_create(scope.stores)) {
@@ -400,14 +409,16 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
     };
 
     scope.launch_shopify_popup = function () {
-      var shopify_url = $sce.trustAsResourceUrl(scope.stores.single.shopify_permission_url);
-      if (shopify_url == null) {
-        if (typeof scope.stores.single.shop_name == 'undefined') {
-          notification.notify("Please enter your store name first.");
+      $timeout(function () {
+        var shopify_url = $sce.trustAsResourceUrl(scope.stores.single.shopify_permission_url);
+        if (shopify_url == null) {
+          if (typeof scope.stores.single.shop_name == 'undefined') {
+            notification.notify("Please enter your store name first.");
+          }
+        } else {
+          myscope.open_popup(shopify_url);
         }
-      } else {
-        myscope.open_popup(shopify_url);
-      }
+      }, 200);
     };
 
     myscope.rollback = function () {
@@ -472,7 +483,6 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
       scope.stores.csv.maps = {order: [], product: []};
       scope.stores.csv.mapping = {};
       scope.start_editing_map = false;
-      scope.stores.import_from_ftp_enabled = false;
       scope.stores.single.file_path = '';
       scope.stores.import = {
         order: {},

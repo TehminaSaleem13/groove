@@ -68,6 +68,44 @@ module Groovepacker
         end
         orders
       end
+
+      def import_csv_orders(tenant, store_id, data, current_user_id)
+        if OrderImportSummary.where(status: 'in_progress').empty?
+          OrderImportSummary.delete_all
+          order_import_summary = OrderImportSummary.new
+          order_import_summary.user_id = current_user_id
+          order_import_summary.status = 'not_started'
+          order_import_summary.save
+          order_import_summaries = OrderImportSummary.where(status: 'not_started')
+          if !order_import_summaries.empty?
+            ordered_import_summaries = order_import_summaries.order('updated_at' + ' ' + 'desc')
+            ordered_import_summaries.each do |order_import_summary|
+              if order_import_summary == ordered_import_summaries.first
+                ImportItem.where(store_id: store_id).delete_all
+                import_item = ImportItem.find_by_store_id(store_id)
+                if import_item.nil?
+                  import_item = ImportItem.new
+                  import_item.store_id = store_id
+                end
+                import_item.order_import_summary_id = order_import_summary.id
+                import_item.status = 'not_started'
+                import_item.save
+                import_csv = ImportCsv.new
+                # import_csv.delay(:run_at => 1.seconds.from_now).import Apartment::Tenant.current, data.to_s
+                import_csv.import(tenant, data)
+                
+                order_import_summary.reload
+                if order_import_summary.status != 'cancelled'
+                  order_import_summary.status = 'completed'
+                  order_import_summary.save
+                end
+              elsif order_import_summary.status != 'in_progress'
+                order_import_summary.delete
+              end
+            end
+          end
+        end
+      end
     end
   end
 end

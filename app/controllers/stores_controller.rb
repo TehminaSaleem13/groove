@@ -26,19 +26,22 @@ class StoresController < ApplicationController
 
     result['status'] = true
     result['messages'] =[]
+    result['has_credentials'] = false
     store = Store.find(params[:id])
     unless store.nil?
       if store.store_type == 'CSV'
         ftp = store.ftp_credential
-
         if ftp.nil?
           ftp = FtpCredential.new
           new_record = true
         end
-        ftp.host = params[:host]
-        ftp.username = params[:username]
-        ftp.password = params[:password]
-        ftp.connection_method = params[:connection_method]
+        if ftp.host != params[:host] || ftp.username != params[:username] || ftp.password != params[:password] || ftp.connection_method != params[:connection_method]
+          ftp.host = params[:host]
+          ftp.username = params[:username]
+          ftp.password = params[:password]
+          ftp.connection_method = params[:connection_method]
+          ftp.connection_established = false
+        end
 
         store.ftp_credential = ftp
         begin
@@ -66,7 +69,11 @@ class StoresController < ApplicationController
     result = {}
     store = Store.find(params[:id])
     groove_ftp = FTP::FtpConnectionManager.get_instance(store)
-    result['connection'] = groove_ftp.retrieve()
+    result[:connection] = groove_ftp.retrieve()
+    if result[:connection][:status]
+      store.ftp_credential.connection_established = true
+      store.ftp_credential.save!
+    end
     
     respond_to do |format|
       format.json { render json: result }
@@ -630,6 +637,11 @@ class StoresController < ApplicationController
       @result['messages'].push('No store selected')
     end
 
+    unless @store.status
+      @result['status'] = false
+      @result['messages'].push('Store is not active')
+    end
+
     if params[:type].nil? || !['order', 'product', 'kit'].include?(params[:type])
       @result['status'] = false
       @result['messages'].push('No Type specified to import')
@@ -740,16 +752,15 @@ class StoresController < ApplicationController
 
       # Comment everything after this line till next comment (i.e. the entire if block) when everything is moved to bulk actions
       if params[:type] == 'order'
-        import_item = ImportItem.find_by_store_id(@store.id)
-        if import_item.nil?
-          import_item = ImportItem.new
-          import_item.store_id = @store.id
+        if OrderImportSummary.where(status: 'in_progress').empty?
+          bulk_actions = Groovepacker::Orders::BulkActions.new
+          bulk_actions.delay(:run_at => 1.seconds.from_now).import_csv_orders(Apartment::Tenant.current_tenant, @store.id, data.to_s, current_user.id)
+          # bulk_actions.import_csv_orders(Apartment::Tenant.current_tenant, @store, data, current_user)
+        else
+          @result['status'] = false
+          @result['messages'].push("Import is in progress. Try after it is complete")
         end
-        import_csv = ImportCsv.new
-        import_csv.delay(:run_at => 1.seconds.from_now).import Apartment::Tenant.current, data.to_s
-        # import_csv.import(Apartment::Tenant.current, data.to_s)
-        import_item.status = 'not_started'
-        import_item.save
+        
       elsif params[:type] == 'kit'
         groove_bulk_actions = GrooveBulkActions.new
         groove_bulk_actions.identifier = 'csv_import'
@@ -830,6 +841,7 @@ class StoresController < ApplicationController
           @result['status'] = false
         end
       end
+      OrderImportSummary.first.emit_data_to_user unless OrderImportSummary.first.nil?
     else
       @result["status"] = false
       @result["messages"].push('User does not have permissions to change store status')
