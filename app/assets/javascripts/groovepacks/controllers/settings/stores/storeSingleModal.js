@@ -418,7 +418,7 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
         } else {
           myscope.open_popup(shopify_url);
         }
-      }, 200);
+      }, 500);
     };
 
     myscope.rollback = function () {
