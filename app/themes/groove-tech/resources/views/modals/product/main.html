@@ -126,7 +126,7 @@
                ng-model="products.single.skus" class="form-control input-style"></div>
         </div>
         <div class="info col-sm-2"><i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter"
-                                      popover="{{translations.tooltips.sku}}"></i></div>
+                                      groov-popover="{{translations.tooltips.sku}}"></i></div>
       </div>
       <div class="form-group">
         <label class="control-label col-sm-2">Barcodes</label>
@@ -140,7 +140,7 @@
           </label>
         </div>
         <div class="info col-sm-2"><i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter"
-                                      popover="{{translations.tooltips.barcode}}"></i>
+                                      groov-popover="{{translations.tooltips.barcode}}"></i>
           &nbsp;&nbsp;
           <a href="/products/{{products.single.basicinfo.id}}/generate_barcode_slip.pdf" target="_blank">
             <i class="glyphicon glyphicon-print icon-large"></i>
@@ -214,7 +214,7 @@
                    ng-model="products.single.basicinfo.packing_placement"/>
           </div>
           <div class="info col-sm-4"><i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter"
-                                        popover="{{translations.tooltips.placement}}"></i></div>
+                                        groov-popover="{{translations.tooltips.placement}}"></i></div>
         </div>
         <!--
         <div class="form-group">
@@ -263,7 +263,7 @@
 
         <div class="controls col-sm-8 remove_padding">
           <i class="info icon-large glyphicon glyphicon-info-sign pull-right" popover-trigger="mouseenter"
-             popover="{{translations.tooltips.product_receiving_instructions}}"></i>
+             groov-popover="{{translations.tooltips.product_receiving_instructions}}"></i>
 
           <div text-angular
                ta-toolbar="[['html','h1','h2','h3','h4','h5','h6','p','ol','ul'],['bold','italics','underline','strikeThrough'],['justifyLeft','justifyCenter','justifyRight','indent','outdent'],['wordcount','charcount']]"
@@ -295,7 +295,7 @@
                groov-click="update_single_product()"></div>
         </div>
         <div class="info col-sm-1"><i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter"
-                                      popover="{{translations.tooltips.skippable}}"></i></div>
+                                      groov-popover="{{translations.tooltips.skippable}}"></i></div>
 
         <div ng-hide="products.single.basicinfo.is_kit==1">
           <label class="control-label col-sm-2 subtract_margin_left60">Add to any order</label>
@@ -340,7 +340,7 @@
                groov-click="update_single_product()"></div>
         </div>
         <div class="info col-sm-1"><i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter"
-                                      popover="{{translations.tooltips.record_serial}}"></i></div>
+                                      groov-popover="{{translations.tooltips.record_serial}}"></i></div>
 
         <div ng-hide="products.single.basicinfo.is_kit==1">
           <label class="control-label col-sm-2 subtract_margin_left60">Intangible Item</label>
