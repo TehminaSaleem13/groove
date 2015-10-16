@@ -249,8 +249,16 @@ groovepacks_admin_controllers.
               name: "Shipped Last Month",
               editable: false
             },
+            average_shipped_last: {
+              name: "Avg Shipped Last Month",
+              editable: false
+            },
             total_shipped: {
               name: "Shipped This Month",
+              editable: false
+            },
+            average_shipped: {
+              name: "Avg Shipped This Month",
               editable: false
             },
             max_allowed: {
