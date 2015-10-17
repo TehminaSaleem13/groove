@@ -28,8 +28,8 @@ module Groovepacker
               import_date_type = "created_at"
             elsif import_item.import_type == 'quick'
               import_from =
-                credential.last_imported_at.nil? ? Date.today - 3.days : 
-                  credential.last_imported_at
+                credential.quick_import_last_modified.nil? ? Date.today - 3.days : 
+                  credential.quick_import_last_modified
               import_date_type = "modified_at"
             else
               import_from = credential.last_imported_at.nil? ? Date.today - 2.weeks : 
@@ -53,7 +53,7 @@ module Groovepacker
               end
 
               importing_time = Date.today - 1.day
-
+              quick_importing_time = DateTime.now
               unless gp_ready_tag_id == -1
                 tagged_response = client.get_orders_by_tag(credential.gp_ready_tag_name)
 
@@ -180,6 +180,7 @@ module Groovepacker
             end
             if result[:status]
               credential.last_imported_at = importing_time
+              credential.quick_import_last_modified = quick_importing_time
               credential.save
             end
             result

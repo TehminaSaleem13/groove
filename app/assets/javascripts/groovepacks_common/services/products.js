@@ -390,7 +390,7 @@ groovepacks_services.factory('products', ['$http', 'notification', 'editable', '
   };
 
   var acknowledge_activity = function (activity_id) {
-    return $http.post('/product_kit_activities/acknowledge/' + activity_id, null).success(function (data) {
+    return $http.put('/product_kit_activities/' + activity_id + '/acknowledge/', null).success(function (data) {
       if (data.status) {
         notification.notify("Activity Acknowledged.", 1);
       } else {

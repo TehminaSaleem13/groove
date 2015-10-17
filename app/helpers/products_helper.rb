@@ -422,7 +422,7 @@ module ProductsHelper
 
   def self.products_csv(products, csv)
     headers = []
-    headers.push('ID', 'Name', 'SKU 1', 'Barcode 1', 'BinLocation 1', 'Quantity Avbl', 'Primary Image', 'Weight', 'Primary Category',
+    headers.push('ID', 'Name', 'SKU 1', 'Barcode 1', 'BinLocation 1', 'QOH', 'Primary Image', 'Weight', 'Primary Category',
                  'SKU 2', 'SKU 3', 'Barcode 2', 'Barcode 3', 'BinLocation 2', 'BinLocation 3')
     Product.column_names.each do |name|
       unless headers.any? { |s| s.casecmp(name)==0 }
@@ -444,8 +444,10 @@ module ProductsHelper
           data.push(item.primary_barcode)
         elsif title == 'BinLocation 1'
           data.push(inventory_wh.location_primary)
-        elsif title == 'Quantity Avbl'
-          data.push(inventory_wh.available_inv)
+        # elsif title == 'Quantity Avbl'
+        #   data.push(inventory_wh.available_inv)
+        elsif title == 'QOH'
+          data.push(inventory_wh.quantity_on_hand)
         elsif title == 'Primary Image'
           data.push(item.primary_image)
         elsif title == 'Weight'

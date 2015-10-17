@@ -3,7 +3,7 @@ groovepacks_directives.provider('$groovTooltip', function () {
   var defaultOptions = {
     placement: 'top',
     animation: true,
-    popupDelay: 0
+    popupDelay: "750"
   };
 
 // Default hide triggers for each show trigger
