@@ -409,14 +409,16 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
     };
 
     scope.launch_shopify_popup = function () {
-      var shopify_url = $sce.trustAsResourceUrl(scope.stores.single.shopify_permission_url);
-      if (shopify_url == null) {
-        if (typeof scope.stores.single.shop_name == 'undefined') {
-          notification.notify("Please enter your store name first.");
+      $timeout(function () {
+        var shopify_url = $sce.trustAsResourceUrl(scope.stores.single.shopify_permission_url);
+        if (shopify_url == null) {
+          if (typeof scope.stores.single.shop_name == 'undefined') {
+            notification.notify("Please enter your store name first.");
+          }
+        } else {
+          myscope.open_popup(shopify_url);
         }
-      } else {
-        myscope.open_popup(shopify_url);
-      }
+      }, 500);
     };
 
     myscope.rollback = function () {
