@@ -41,6 +41,7 @@ module Groovepacker
             tenant_hash['id'] = tenant.id
             tenant_hash['name'] = tenant.name
             plan_data = get_subscription_data(tenant.name)
+            tenant_hash['start_day'] = plan_data['start_day']
             tenant_hash['plan'] = plan_data['plan']
             tenant_hash['progress'] = plan_data['progress']
             tenant_hash['transaction_errors'] = plan_data['transaction_errors']
@@ -117,45 +118,46 @@ module Groovepacker
       end
 
       def get_subscription_data(name)
-        subscripton_result = {}
+        subscription_result = {}
         tenant = Tenant.where(name: name).first unless Tenant.where(name: name).empty?
         unless tenant.nil?
-          subscripton_result['plan'] = ""
-          subscripton_result['customer_id'] = ''
-          subscripton_result['progress'] = ''
-          subscripton_result['transaction_errors'] = ''
+          subscription_result['plan'] = ""
+          subscription_result['customer_id'] = ''
+          subscription_result['progress'] = ''
+          subscription_result['transaction_errors'] = ''
           unless tenant.subscription.nil?
             subscription = tenant.subscription
             case subscription.subscription_plan_id
               when "groove-solo"
-                subscripton_result['plan'] = "solo"
+                subscription_result['plan'] = "solo"
               when "groove-duo"
-                subscripton_result['plan'] = "duo"
+                subscription_result['plan'] = "duo"
               when "groove-trio"
-                subscripton_result['plan'] = "trio"
+                subscription_result['plan'] = "trio"
               when "groove-quinet"
-                subscripton_result['plan'] = "quinet"
+                subscription_result['plan'] = "quinet"
               when "groove-symphony"
-                subscripton_result['plan'] = "symphony"
+                subscription_result['plan'] = "symphony"
               when "annual-groove-solo"
-                subscripton_result['plan'] = "annual-solo"
+                subscription_result['plan'] = "annual-solo"
               when "annual-groove-duo"
-                subscripton_result['plan'] = "annual-duo"
+                subscription_result['plan'] = "annual-duo"
               when "annual-groove-trio"
-                subscripton_result['plan'] = "annual-trio"
+                subscription_result['plan'] = "annual-trio"
               when "annual-groove-quinet"
-                subscripton_result['plan'] = "annual-quinet"
+                subscription_result['plan'] = "annual-quinet"
               when "annual-groove-symphony"
-                subscripton_result['plan'] = "annual-symphony"
+                subscription_result['plan'] = "annual-symphony"
               else
-                subscripton_result['plan'] = ""
+                subscription_result['plan'] = ""
             end
-            subscripton_result['customer_id'] = subscription.stripe_customer_id unless subscription.stripe_customer_id.nil?
-            subscripton_result['progress'] = subscription.progress unless subscription.progress.nil?
-            subscripton_result['transaction_errors'] =subscription.transaction_errors unless subscription.transaction_errors.nil?
+            subscription_result['start_day'] = subscription.created_at.strftime("%d %b") unless subscription.created_at.nil?
+            subscription_result['customer_id'] = subscription.stripe_customer_id unless subscription.stripe_customer_id.nil?
+            subscription_result['progress'] = subscription.progress unless subscription.progress.nil?
+            subscription_result['transaction_errors'] =subscription.transaction_errors unless subscription.transaction_errors.nil?
           end
         end
-        subscripton_result
+        subscription_result
       end
 
       def delete_data(tenant, params, result, current_user)

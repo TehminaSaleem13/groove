@@ -245,6 +245,10 @@ groovepacks_admin_controllers.
               name: "Transaction Errors",
               editable: false
             },
+            start_day: {
+              name: "Start Day",
+              editable: false
+            },
             shipped_last: {
               name: "Shipped Last Month",
               editable: false
