@@ -251,7 +251,8 @@ groovepacks_admin_controllers.
             },
             shipped_last: {
               name: "Shipped Last Month",
-              editable: false
+              editable: false,
+              transclude: '<div ng-show="row[field] > row[\'max_allowed\']" style="color: red;">{{row[field]}}</div><div ng-show="row[field] <= row[\'max_allowed\']">{{row[field]}}</div>'
             },
             average_shipped_last: {
               name: "Avg Shipped Last Month",
@@ -259,7 +260,8 @@ groovepacks_admin_controllers.
             },
             total_shipped: {
               name: "Shipped This Month",
-              editable: false
+              editable: false,
+              transclude: '<div ng-show="row[field] > row[\'max_allowed\']" style="color: red;">{{row[field]}}</div><div ng-show="row[field] <= row[\'max_allowed\']">{{row[field]}}</div>'
             },
             average_shipped: {
               name: "Avg Shipped This Month",
