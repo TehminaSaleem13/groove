@@ -114,18 +114,18 @@ class ExportSetting < ActiveRecord::Base
           :part_sku => '',
           :serial_number => '',
           :product_name => '',
-          :packing_user => '',
-          :order_item_count => '',
-          :scanned_date => '',
-          :warehouse_name => '',
-          :item_sale_price => '',
           :kit_name => '',
+          :item_sale_price => '',
           :customer_name => '',
           :address1 => '',
           :address2 => '',
           :city => '',
           :state => '',
-          :zip => ''
+          :zip => '',
+          :packing_user => '',
+          :order_item_count => '',
+          :scanned_date => '',
+          :warehouse_name => ''
         }
         order_hash_array = []
         order_hash = {:order_date => "order_date", :order_number => "order_number",
@@ -326,18 +326,18 @@ class ExportSetting < ActiveRecord::Base
               :barcode => '',
               :primary_sku => '',
               :product_name => '',
-              :packing_user => '',
-              :order_item_count => '',
-              :scanned_date => '',
-              :warehouse_name => '',
-              :item_sale_price => '',
               :kit_name => '',
+              :item_sale_price => '',
               :customer_name => '',
               :address1 => '',
               :address2 => '',
               :city => '',
               :state => '',
-              :zip => ''
+              :zip => '',
+              :packing_user => '',
+              :order_item_count => '',
+              :scanned_date => '',
+              :warehouse_name => ''
             }
           elsif show_serial_number==false && show_lot_number==true
             csv_row_map = {
@@ -349,18 +349,18 @@ class ExportSetting < ActiveRecord::Base
               :primary_sku => '',
               :part_sku => '',
               :product_name => '',
-              :packing_user => '',
-              :order_item_count => '',
-              :scanned_date => '',
-              :warehouse_name => '',
-              :item_sale_price => '',
               :kit_name => '',
+              :item_sale_price => '',
               :customer_name => '',
               :address1 => '',
               :address2 => '',
               :city => '',
               :state => '',
-              :zip => ''
+              :zip => '',
+              :packing_user => '',
+              :order_item_count => '',
+              :scanned_date => '',
+              :warehouse_name => ''
             }
           elsif show_serial_number==true && show_lot_number==false
             csv_row_map = {
@@ -372,18 +372,18 @@ class ExportSetting < ActiveRecord::Base
               :part_sku => '',
               :serial_number => '',
               :product_name => '',
-              :packing_user => '',
-              :order_item_count => '',
-              :scanned_date => '',
-              :warehouse_name => '',
-              :item_sale_price => '',
               :kit_name => '',
+              :item_sale_price => '',
               :customer_name => '',
               :address1 => '',
               :address2 => '',
               :city => '',
               :state => '',
-              :zip => ''
+              :zip => '',
+              :packing_user => '',
+              :order_item_count => '',
+              :scanned_date => '',
+              :warehouse_name => ''
             }
           else
             csv_row_map = {
@@ -397,18 +397,18 @@ class ExportSetting < ActiveRecord::Base
               :part_sku => '',
               :serial_number => '',
               :product_name => '',
-              :packing_user => '',
-              :order_item_count => '',
-              :scanned_date => '',
-              :warehouse_name => '',
-              :item_sale_price => '',
               :kit_name => '',
+              :item_sale_price => '',
               :customer_name => '',
               :address1 => '',
               :address2 => '',
               :city => '',
               :state => '',
-              :zip => ''
+              :zip => '',
+              :packing_user => '',
+              :order_item_count => '',
+              :scanned_date => '',
+              :warehouse_name => ''
             }
           end
 
