@@ -7,7 +7,7 @@ class OrderItem < ActiveRecord::Base
   has_many :order_item_scan_times, :dependent => :destroy
   has_one :product_barcode
   has_one :product_sku
-  attr_accessible :price, :qty, :row_total, :sku, :product, :product_is_deleted
+  attr_accessible :price, :qty, :row_total, :sku, :product, :product_is_deleted, :name
 
   after_create :add_kit_products
   before_destroy :delete_inventory

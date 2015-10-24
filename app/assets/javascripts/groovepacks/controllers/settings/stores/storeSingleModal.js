@@ -421,6 +421,19 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
       }, 500);
     };
 
+    scope.launch_big_commerce_popup = function () {
+      $timeout(function () {
+        var shopify_url = $sce.trustAsResourceUrl("https://login.bigcommerce.com/login");
+        if (shopify_url == null) {
+          if (typeof scope.stores.single.shop_name == 'undefined') {
+            notification.notify("Please enter your store name first.");
+          }
+        } else {
+          myscope.open_popup(shopify_url);
+        }
+      }, 500);
+    };
+
     myscope.rollback = function () {
       if (typeof myscope.single == "undefined" || typeof myscope.single.id == "undefined") {
         if (typeof scope.stores.single['id'] != "undefined") {
@@ -540,6 +553,10 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
         Shopify: {
           name: "Shopify",
           file: "/assets/views/modals/settings/stores/shopify.html"
+        },
+        "BigCommerce": {
+          name: "BigCommerce",
+          file: "/assets/views/modals/settings/stores/big_commerce.html"
         }
       };
 

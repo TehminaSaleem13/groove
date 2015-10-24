@@ -381,6 +381,28 @@ class StoresController < ApplicationController
               @result['messages'] = [e.message]
             end
           end
+          if @store.store_type == 'BigCommerce'
+            @bigcommerce = BigCommerceCredential.find_by_store_id(@store.id)
+            begin
+              params[:shop_name] = nil if params[:shop_name] == 'null'
+              if @bigcommerce.nil?
+                @store.big_commerce_credential = BigCommerceCredential.new(
+                  shop_name: params[:shop_name])
+                new_record = true
+              else
+                @bigcommerce.update_attributes(shop_name: params[:shop_name])
+              end
+              @store.save
+            rescue ActiveRecord::RecordInvalid => e
+              @result['status'] = false
+              @result['messages'] = [@store.errors.full_messages,
+                                     @store.big_commerce_credential.errors.full_messages]
+
+            rescue ActiveRecord::StatementInvalid => e
+              @result['status'] = false
+              @result['messages'] = [e.message]
+            end
+          end
         else
           @result['status'] = false
           @result['messages'].push("Current user does not have permission to create or edit a store")

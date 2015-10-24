@@ -1,0 +1,45 @@
+<div class="row">
+  <div class="col-md-8">
+    <legend>BigCommerce Information</legend>
+    <div class="form-group">
+      <label class="control-label col-md-4">Shop Url</label>
+
+      <div class="controls col-md-8">
+        <div class="input-group">
+          <span class="input-group-addon"><strong>https://</strong></span>
+          <input name="shop_name" xs-input-sync ng-model="stores.single.shop_name" type="text"
+                 ng-blur="update_single_store(true)" class="form-control input-style" placeholder="yourshopname" value=""
+                 required/>
+          <span class="input-group-addon"><strong>.mybigcommerce.com</strong></span>
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="control-label col-md-4"></label>
+
+      <div class="controls col-md-8">
+        <button class="btn btn-success" ng-click="launch_big_commerce_popup()">
+          Authorize access
+        </button>
+      </div>
+      <div ng-hide="stores.single.access_token == null || stores.single.access_token == 'null'">
+        <div class="form-group">
+          <label class="control-label col-md-4">Access token</label>
+
+          <div class="controls col-md-8">
+            <p class="form-control-static">Available</p>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="control-label col-md-4"></label>
+
+          <div class="controls col-md-8">
+            <button class="btn btn-success" ng-click="disconnect_big_commerce()">
+              Disconnect access
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
