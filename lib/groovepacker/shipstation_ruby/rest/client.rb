@@ -17,8 +17,10 @@ module Groovepacker
             if import_date_type == "created_at"
               orderDateStart = '&orderDateStart=' + order_placed_after.to_s
               Rails.logger.info "Getting orders placed after: " + order_placed_after.to_s
-            elsif import_date_type == "modified_at"
-              orderDateStart = '&modifyDateStart=' + order_placed_after.to_s.gsub(" UTC", "").gsub(" ", "%20")
+            elsif import_date_type == "modified_at" || import_date_type == "quick_created_at"
+              predicate = import_date_type == "quick_created_at" ? 
+              "orderDateStart" : "modifyDateStart"
+              orderDateStart = '&' + predicate + '=' + order_placed_after.to_s.gsub(" UTC", "").gsub(" ", "%20")
               Rails.logger.info "Getting orders modified after: " + order_placed_after.to_s
             end
           end

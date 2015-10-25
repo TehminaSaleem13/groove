@@ -50,7 +50,16 @@ module Groovepacker
                 status_response = client.get_orders(status, import_from, import_date_type)
                 response["orders"] = response["orders"].nil? ? status_response["orders"] :
                   response["orders"] | status_response["orders"]
+
+                if import_item.import_type == 'quick'
+                  #get for created time
+                  status_response["orders"] = nil
+                  status_response = client.get_orders(status, import_from, "quick_created_at")
+                  response["orders"] = response["orders"].nil? ? status_response["orders"] :
+                    response["orders"] | status_response["orders"]
+                end
               end
+
 
               importing_time = Date.today - 1.day
               quick_importing_time = DateTime.now

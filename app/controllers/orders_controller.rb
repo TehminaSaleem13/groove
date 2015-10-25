@@ -342,7 +342,7 @@ class OrdersController < ApplicationController
     @result['notice_messages'] = []
 
     if current_user.can? 'change_order_status'
-      @orders = list_selected_orders
+     @orders = list_selected_orders
       unless @orders.nil?
         @orders.each do |order|
           @order = Order.find(order['id'])
@@ -361,11 +361,15 @@ class OrdersController < ApplicationController
           end
         end
       end
-      
     else
       @result['status'] = false
       @result['error_messages'].push("You do not have enough permissions to change order status")
     end
+
+    # TODO: verify this status check
+    # if (Order::SOLD_STATUSES.include?(@order.status) && Order::UNALLOCATE_STATUSES.include?(params[:status])) ||
+    #   (Order::UNALLOCATE_STATUSES.include?(@order.status) && Order::SOLD_STATUSES.include?(params[:status]))
+    #   puts "status change not allowed"
     respond_to do |format|
       format.html # show.html.erb
       format.json { render json: @result }
