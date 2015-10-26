@@ -117,17 +117,19 @@ module Groovepacker
                   order_item.sku = single_row[self.mapping['sku'][:position]].strip
                   
                   import_image(order_item.product, single_row, true)
-                  if !self.mapping['qty'].nil? && self.mapping['qty'][:position] >= 0
+                  if !self.mapping['qty'].nil? && self.mapping['qty'][:position] >= 0 && !single_row[self.mapping['qty'][:position]].nil?
                     order_item.qty = single_row[self.mapping['qty'][:position]]
-                    @order_required.delete('qty')
+                  else
+                    order_item.qty = 0
                   end
+                  @order_required.delete('qty')
                   @order.order_items << order_item
                 elsif OrderItem.where(:product_id => product_skus.first.product.id, :order_id => @order.id, :sku => single_row[self.mapping['sku'][:position]].strip).length > 0
                   order_item = OrderItem.where(:product_id => product_skus.first.product.id, :order_id => @order.id, :sku => single_row[self.mapping['sku'][:position]].strip).first
-                  if !self.mapping['qty'].nil? && self.mapping['qty'][:position] >= 0
+                  if !self.mapping['qty'].nil? && self.mapping['qty'][:position] >= 0 && !single_row[self.mapping['qty'][:position]].nil?
                     order_item.qty = (order_item.qty.to_i + single_row[self.mapping['qty'][:position]].to_i).to_s
-                    @order_required.delete('qty')
                   end
+                  @order_required.delete('qty')
                   @order.order_items << order_item
                 end
               else # no sku is found
@@ -223,15 +225,17 @@ module Groovepacker
 
           def import_product_instructions(product, single_row)
             unless self.mapping['product_instructions'].nil? || single_row[self.mapping['product_instructions'][:position]].nil?
-              product.spl_instructions_4_packer = single_row[self.mapping['product_instructions'][:position]]
+              return single_row[self.mapping['product_instructions'][:position]]
             end
           end
 
           def import_order_item_qty(order_item, single_row)
-            if !self.mapping['qty'].nil? && self.mapping['qty'][:position] >= 0
-              order_item.qty = single_row[self.mapping['qty'][:position]]
-              @order_required.delete('qty')
+            qty = 0
+            if !self.mapping['qty'].nil? && self.mapping['qty'][:position] >= 0 && !single_row[self.mapping['qty'][:position]].nil?
+              qty = single_row[self.mapping['qty'][:position]]
             end
+            @order_required.delete('qty')
+            return qty
           end
 
           def import_image(product, single_row, check_duplicacy = false)
@@ -317,7 +321,7 @@ module Groovepacker
             import_product_barcode(product, single_row, unique_order_item)
             product.store_product_id = 0
             product.store_id = self.params[:store_id]
-            import_product_instructions(product, single_row)
+            product.spl_instructions_4_packer = import_product_instructions(product, single_row)
 
             import_image(product, single_row)
 
@@ -334,7 +338,7 @@ module Groovepacker
             order_item.product = product
             order_item.sku = get_sku(single_row, unique_order_item)
             
-            import_order_item_qty(order_item, single_row)
+            order_item.qty = import_order_item_qty(order_item, single_row)
             
             @order_required.delete('sku')
             @order.order_items << order_item
