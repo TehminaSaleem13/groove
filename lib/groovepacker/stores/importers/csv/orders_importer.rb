@@ -122,6 +122,13 @@ module Groovepacker
                     @order_required.delete('qty')
                   end
                   @order.order_items << order_item
+                elsif OrderItem.where(:product_id => product_skus.first.product.id, :order_id => @order.id, :sku => single_row[self.mapping['sku'][:position]].strip).length > 0
+                  order_item = OrderItem.where(:product_id => product_skus.first.product.id, :order_id => @order.id, :sku => single_row[self.mapping['sku'][:position]].strip).first
+                  if !self.mapping['qty'].nil? && self.mapping['qty'][:position] >= 0
+                    order_item.qty = (order_item.qty.to_i + single_row[self.mapping['qty'][:position]].to_i).to_s
+                    @order_required.delete('qty')
+                  end
+                  @order.order_items << order_item
                 end
               else # no sku is found
                 product = Product.new

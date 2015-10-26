@@ -887,9 +887,11 @@ module ScanPackHelper
     end
     @size = GeneralSetting.get_packing_slip_size
     @orientation = GeneralSetting.get_packing_slip_orientation
-    @result = Hash.new
-    @result['data'] = Hash.new
-    @result['data']['packing_slip_file_paths'] = []
+    # Earlier this was @result so it messed up with @result from the method.
+    # Changed it to @slip_data_hash
+    @slip_data_hash = Hash.new
+    @slip_data_hash['data'] = Hash.new
+    @slip_data_hash['data']['packing_slip_file_paths'] = []
 
     if @orientation == 'landscape'
       @page_height = @page_height.to_f/2
@@ -914,7 +916,7 @@ module ScanPackHelper
       @generate_barcode.status = 'scheduled'
 
       @generate_barcode.save
-      delayed_job = GeneratePackingSlipPdf.delay(:run_at => 1.seconds.from_now).generate_packing_slip_pdf(@orders, Apartment::Tenant.current, @result, @page_height, @page_width, @orientation, @file_name, @size, @header, @generate_barcode.id)
+      delayed_job = GeneratePackingSlipPdf.delay(:run_at => 1.seconds.from_now).generate_packing_slip_pdf(@orders, Apartment::Tenant.current, @slip_data_hash, @page_height, @page_width, @orientation, @file_name, @size, @header, @generate_barcode.id)
       @generate_barcode.delayed_job_id = delayed_job.id
       @generate_barcode.save
       result['status'] = true

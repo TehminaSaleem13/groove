@@ -437,7 +437,7 @@ groovepacks_services.factory('orders', ['$http', '$window', 'notification', '$q'
   };
 
   var acknowledge_activity = function (activity_id) {
-    return $http.post('/order_activities/acknowledge/' + activity_id, null).success(function (data) {
+    return $http.put('/order_activities/' + activity_id + '/acknowledge/', null).success(function (data) {
       if (data.status) {
         notification.notify("Activity Acknowledged.", 1);
       } else {

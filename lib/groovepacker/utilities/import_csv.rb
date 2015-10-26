@@ -73,9 +73,11 @@ class ImportCsv
           #result = Groovepacker::Stores::Importers::CSV::OrdersImporter.new.import(params,final_record,mapping)
         elsif params[:type] == 'product'
           #result = Groovepacker::Stores::Importers::CSV::ProductsImporter.new.import_old(params,final_record,mapping)
-          result = Groovepacker::Stores::Importers::CSV::ProductsImporter.new.import(params, final_record, mapping, params[:import_action])
+          import_product = Groovepacker::Stores::Importers::CSV::ProductsImporter.new(params, final_record, mapping, params[:import_action])
+          result = import_product.import()
         elsif params[:type] == 'kit'
-          result = Groovepacker::Stores::Importers::CSV::KitsImporter.new.import(params, final_record, mapping, params[:bulk_action_id])
+          import_kit = Groovepacker::Stores::Importers::CSV::KitsImporter.new(params, final_record, mapping, params[:bulk_action_id])
+          result = import_kit.import()
         end
         #File.delete(file_path)
         if params[:flag] == 'ftp_download'
