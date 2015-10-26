@@ -103,14 +103,16 @@ module Groovepacker
               bigcommerce_order.lastname = order["customer"]["last_name"]
               bigcommerce_order.firstname = order["customer"]["first_name"]
             end
-
-            unless order["shipping_address"].nil?
-              bigcommerce_order.address_1 = order["shipping_address"]["address1"] unless order["shipping_address"]["address1"].nil?
-              bigcommerce_order.address_2 = order["shipping_address"]["address2"] unless order["shipping_address"]["address2"].nil?
-              bigcommerce_order.city = order["shipping_address"]["city"] unless order["shipping_address"]["city"].nil?
-              bigcommerce_order.state = order["shipping_address"]["province"] unless order["shipping_address"]["province"].nil?
-              bigcommerce_order.postcode = order["shipping_address"]["zip"] unless order["shipping_address"]["zip"].nil?
-              bigcommerce_order.country = order["shipping_address"]["country"] unless order["shipping_address"]["country"].nil?
+            
+            unless order["shipping_addresses"].nil?
+              shipping_addresses = client.shipping_addresses(order["shipping_addresses"]["url"])
+              shipping_address = shipping_addresses.first
+              bigcommerce_order.address_1 = shipping_address["street_1"]
+              bigcommerce_order.address_2 = shipping_address["street_2"]
+              bigcommerce_order.city = shipping_address["city"]
+              bigcommerce_order.state = shipping_address["state"]
+              bigcommerce_order.postcode = shipping_address["zip"]
+              bigcommerce_order.country = shipping_address["country"]
             end
 
             bigcommerce_order.customer_comments = order["customer_message"]
