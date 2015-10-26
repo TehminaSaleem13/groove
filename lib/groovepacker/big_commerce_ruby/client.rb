@@ -6,35 +6,23 @@ module Groovepacker
         options = {}
         combined_response = {}
         combined_response["orders"] = []
-        last_import = credential.last_imported_at.to_datetime rescue nil
+        last_import = credential.last_imported_at.to_datetime rescue (DateTime.now - 4.days)
         options[:min_date_modified] = last_import unless last_import.blank?
+        
         while page_index
           options[:page] = page_index
-          response = HTTParty.get("https://api.bigcommerce.com/#{@store_hash}/v2/orders",
-                                  query: options,
-                                  headers: {
-                                    "X-Auth-Token" => @access_token,
-                                    "X-Auth-Client" => client_id,
-                                    "Content-Type" => "application/json",
-                                    "Accept" => "application/json"
-                                  })
-          break if response.parsed_response.blank?
-          page_index = page_index + 1
-          combined_response["orders"] << response.parsed_response
+          response = get("https://api.bigcommerce.com/#{@store_hash}/v2/orders", options)
+          break if response.blank?
+          page_index += 1
+          combined_response["orders"] << response
         end
+        
         combined_response["orders"] = combined_response["orders"].flatten
         combined_response
       end
 
       def product(product_id)
-        response = HTTParty.get("https://api.bigcommerce.com/#{@store_hash}/v2/products/#{product_id}",
-                                headers: {
-                                  "X-Auth-Token" => @access_token,
-                                  "X-Auth-Client" => client_id,
-                                  "Content-Type" => "application/json",
-                                  "Accept" => "application/json"
-                                })
-        response.parsed_response
+        get("https://api.bigcommerce.com/#{@store_hash}/v2/products/#{product_id}")
       end
 
       def order_products(order_products_url)
@@ -62,8 +50,10 @@ module Groovepacker
       end
 
       private
-        def get(url)
-          response = HTTParty.get(url, headers: {
+        def get(url, query_opts={})
+          response = HTTParty.get(url,
+                                  query: query_opts,
+                                  headers: {
                                     "X-Auth-Token" => @access_token,
                                     "X-Auth-Client" => client_id,
                                     "Content-Type" => "application/json",

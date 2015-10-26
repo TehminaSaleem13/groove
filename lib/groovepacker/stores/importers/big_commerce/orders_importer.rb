@@ -12,6 +12,7 @@ module Groovepacker
             import_item = handler[:import_item]
             result = self.build_result
             response = client.orders(credential)
+            
             #========
             credential.update_attributes( :last_imported_at => Time.now )
             result[:total_imported] = response["orders"].nil? ? 0 : response["orders"].length
@@ -21,30 +22,33 @@ module Groovepacker
             (response["orders"]||[]).each do |order|
               import_item.update_attributes(:current_increment_id => order["id"], :current_order_items => -1, :current_order_imported_item => -1)
               
-              order = Order.where(increment_id: order["id"])
-              if Order.where(increment_id: order["id"]).empty?
+              #order = Order.where(increment_id: order["id"])
+              if existing_order = Order.find_by_increment_id(order["id"])
+                existing_order.destroy
+              end
 
-                #create order
-                bigcommerce_order = Order.new
-                import_order(bigcommerce_order, order, client)
+              #create order
+              bigcommerce_order = Order.new
+              import_order(bigcommerce_order, order, client)
 
-                #import items in an order
-                unless order["products"].nil?
-                  order["products"] = client.order_products(order["products"]["url"])
-                  import_item.update_attributes(:current_order_items => order["products"].length, :current_order_imported_item => 0 )
+              #import items in an order
+              unless order["products"].nil?
+                order["products"] = client.order_products(order["products"]["url"])
+                import_item.update_attributes(:current_order_items => order["products"].length, :current_order_imported_item => 0 )
 
-                  (order["products"]||[]).each do |item|
-                    order_item = OrderItem.new
-                    import_order_item(order_item, item)
-                    import_item.current_order_imported_item += 1
-                    import_item.save
+                (order["products"]||[]).each do |item|
+                  order_item = OrderItem.new
+                  import_order_item(order_item, item)
+                  import_item.current_order_imported_item += 1
+                  import_item.save
 
-                    product_is_nil = Product.find_by_name(item["name"]).nil?
-                    if (item["sku"].nil? or item["sku"] == '') && product_is_nil?
-                      # if sku is nil or empty
-                      # and if item is not found by name then create the item
-                      order_item.product = create_new_product_from_order(item, credential.store, ProductSku.get_temp_sku, client)
-                    elsif product_is_nil?
+                  product_is_nil = Product.find_by_name(item["name"]).nil?
+                  if item["sku"].nil? or item["sku"] == ''
+                    # if sku is nil or empty
+                    if product_is_nil
+                    # and if item is not found by name then create the item
+                    order_item.product = create_new_product_from_order(item, credential.store, ProductSku.get_temp_sku, client)
+                    else
                       # product exists add temp sku if it does not exist
                       products = Product.where(name: item["name"])
                       unless contains_temp_skus(products)
@@ -52,41 +56,36 @@ module Groovepacker
                       else
                         order_item.product = get_product_with_temp_skus(products)
                       end
-                    elsif ProductSku.where(sku: item["sku"]).length == 0
-                      # if non-nil sku is not found
-                      product = create_new_product_from_order(item, credential.store, item["sku"], client)
-                      order_item.product = product
-                    else
-                      order_item_product = ProductSku.where(sku: item["sku"]).first.product
-                      order_item.product = order_item_product
                     end
-
-                    bigcommerce_order.order_items << order_item
+                  elsif ProductSku.where(sku: item["sku"]).length == 0
+                    # if non-nil sku is not found
+                    product = create_new_product_from_order(item, credential.store, item["sku"], client)
+                    order_item.product = product
+                  else
+                    order_item_product = ProductSku.where(sku: item["sku"]).first.product
+                    order_item.product = order_item_product
                   end
+
+                  bigcommerce_order.order_items << order_item
                 end
-
-                #update store
-                bigcommerce_order.store = credential.store
-                bigcommerce_order.save
-                bigcommerce_order.set_order_status
-
-                #add order activities
-                bigcommerce_order.addactivity("Order Import", credential.store.name+" Import")
-                (bigcommerce_order.order_items||[]).each do |item|
-                  unless item.product.nil? || item.product.primary_sku.nil?
-                    bigcommerce_order.addactivity("Item with SKU: "+item.product.primary_sku+" Added", credential.store.name+" Import")
-                  end
-                end
-
-                import_item.success_imported += 1
-                import_item.save
-                result[:success_imported] += 1
-              else
-                #mark previously imported
-                import_item.previous_imported += 1
-                import_item.save
-                result[:previous_imported] += 1
               end
+
+              #update store
+              bigcommerce_order.store = credential.store
+              bigcommerce_order.save
+              bigcommerce_order.set_order_status
+
+              #add order activities
+              bigcommerce_order.addactivity("Order Import", credential.store.name+" Import")
+              (bigcommerce_order.order_items||[]).each do |item|
+                unless item.product.nil? || item.product.primary_sku.nil?
+                  bigcommerce_order.addactivity("Item with SKU: "+item.product.primary_sku+" Added", credential.store.name+" Import")
+                end
+              end
+
+              import_item.success_imported += 1
+              import_item.save
+              result[:success_imported] += 1
             end
 
             #========
@@ -138,7 +137,7 @@ module Groovepacker
             #get from products api
             bigcommerce_product = client.product(item["product_id"])
             unless bigcommerce_product.nil?
-              barcode = bigcommerce_product["upc"].blank? ? bigcommerce_product["sku"] : bigcommerce_product["upc"]
+              barcode = bigcommerce_product["upc"].blank? ? nil : bigcommerce_product["upc"]
               product.product_barcodes.create(barcode: barcode)
               # get product categories
               unless bigcommerce_product["categories"].blank?
@@ -155,7 +154,7 @@ module Groovepacker
                 product_skus.each do |variant|
                   next unless variant["sku"] == sku
                   # create barcode
-                  barcode = variant["upc"].blank? ? variant["sku"] : variant["barcode"]
+                  barcode = variant["upc"].blank? ? nil : variant["upc"]
                   product.product_barcodes.create(barcode: barcode)
                   # get image based on the variant id
                   images = client.product_images(bigcommerce_product["images"]["url"])
@@ -173,7 +172,8 @@ module Groovepacker
             end
             product.save
             make_product_intangible(product)
-            product.update_product_status
+            #product.update_product_status
+            product.set_product_status
             product
           end
         end
