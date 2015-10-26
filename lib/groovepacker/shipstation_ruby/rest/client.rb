@@ -21,7 +21,7 @@ module Groovepacker
               predicate = import_date_type == "quick_created_at" ? 
               "orderDateStart" : "modifyDateStart"
               orderDateStart = '&' + predicate + '=' + order_placed_after.to_s.gsub(" UTC", "").gsub(" ", "%20")
-              Rails.logger.info "Getting orders modified after: " + order_placed_after.to_s
+              Rails.logger.info "Getting orders " + orderDateStart.to_s
             end
           end
           page_index = 1
