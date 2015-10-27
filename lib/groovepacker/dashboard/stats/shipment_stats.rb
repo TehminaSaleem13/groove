@@ -14,7 +14,9 @@ module Groovepacker
             begin
               @access_restrictions = nil
               Apartment::Tenant.switch(tenant.name)
+              # shipping_result['shipped_last6'] = []
               @access_restrictions = AccessRestriction.order("created_at")
+              shipping_result['shipped_last6'] = []
               unless @access_restrictions.empty?
                 data_length = @access_restrictions.length
                 shipping_result['shipped_current'] = @access_restrictions[data_length - 1].total_scanned_shipments
@@ -26,6 +28,16 @@ module Groovepacker
                   shipping_result['average_shipped'] = get_avg_shipped('current')
                   shipping_result['average_shipped_last'] = get_avg_shipped('last')
                 end
+                for i in 2..7 do
+                  if data_length-i >= 0
+                    shipped = {}
+                    shipped['shipping_duration'] = (@access_restrictions[data_length-i].created_at - 1.month).strftime("%d %b") + " - " + @access_restrictions[data_length-i].created_at.strftime("%d %b")
+                    shipped['shipped_count'] = @access_restrictions[data_length-i].total_scanned_shipments.to_s
+                    shipping_result['shipped_last6'] << shipped
+                  else
+                    shipping_result['shipped_last6'] << {'shipping_duration' => '-', 'shipped_count' => '-'}
+                  end
+                end
               else
                 shipping_result['shipped_current'] = 0
                 shipping_result['shipped_last'] = 0
@@ -34,6 +46,7 @@ module Groovepacker
                 shipping_result['max_import_sources'] = 0
                 shipping_result['average_shipped'] = 0
                 shipping_result['average_shipped_last'] = 0
+                shipping_result['shipped_last6'] = [{'shipping_duration' => '-', 'shipped_count' => '-'}]
               end
             rescue
               shipping_result['shipped_current'] = 0
@@ -43,9 +56,11 @@ module Groovepacker
               shipping_result['max_import_sources'] = 0
               shipping_result['average_shipped'] = 0
               shipping_result['average_shipped_last'] = 0
+              shipping_result['shipped_last6'] = [{'shipping_duration' => '-', 'shipped_count' => '-'}]
             end
           end
           Apartment::Tenant.switch(current_tenant)
+          puts "shipping_result['shipped_last6']: " + shipping_result['shipped_last6'].inspect
           shipping_result
         end
 

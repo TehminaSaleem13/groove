@@ -177,11 +177,23 @@ groovepacks_admin_controllers.
         $state.go(toState, toParams);
       }
 
+      myscope.show_popover = function (tenant) {
+        $scope.popover_is_visible = true;
+        console.log($scope.popover_is_visible);
+      }
+
+      myscope.hide_popover = function() {
+        $scope.popover_is_visible = false;
+        console.log($scope.popover_is_visible);
+      }
+
       myscope.init = function () {
         myscope.do_load_tentants = false;
         $scope._can_load_tentants = true;
         $scope.tenants = tenants.model.get();
         $scope.current_page = "show_admin_tools";
+        $scope.popover_is_visible = false;
+        $scope.popover_data = [];
         $scope.tabs = [
           {
             page: 'show_admin_tools',
@@ -223,7 +235,9 @@ groovepacks_admin_controllers.
             elements: {},
             functions: {
               name: myscope.handle_click_fn,
-              open: myscope.open_tenant_url
+              open: myscope.open_tenant_url,
+              show_popover: myscope.show_popover,
+              hide_popover: myscope.hide_popover
             }
 
           },
@@ -252,7 +266,7 @@ groovepacks_admin_controllers.
             shipped_last: {
               name: "Shipped Last Month",
               editable: false,
-              transclude: '<div ng-show="row[field] > row[\'max_allowed\']" style="color: red;">{{row[field]}}</div><div ng-show="row[field] <= row[\'max_allowed\']">{{row[field]}}</div>'
+              transclude: '<span groov-popover="{{row[\'popover\']}}"> <div ng-show="row[field] > row[\'max_allowed\']" style="color: red;">{{row[field]}}</div><div ng-show="row[field] <= row[\'max_allowed\']">{{row[field]}}</div></span>'
             },
             average_shipped_last: {
               name: "Avg Shipped Last Month",
@@ -322,6 +336,8 @@ groovepacks_admin_controllers.
           $scope._can_load_tenants = false;
           $scope.gridOptions.selections.show_delete = myscope.show_delete();
           return tenants.list.get($scope.tenants, page).success(function (data) {
+            console.log("data");
+            console.log($scope.tenants.list);
             $scope.gridOptions.paginate.total_items = tenants.list.total_tenants($scope.tenants);
             myscope.update_selected_count();
             $scope._can_load_tenants = true;

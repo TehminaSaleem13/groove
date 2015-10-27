@@ -54,6 +54,7 @@ module Groovepacker
             tenant_hash['max_allowed'] = shipping_data['max_allowed']
             tenant_hash['average_shipped'] = shipping_data['average_shipped']
             tenant_hash['average_shipped_last'] = shipping_data['average_shipped_last']
+            tenant_hash['shipped_last6'] = shipping_data['shipped_last6']
 
             tenants_result.push(tenant_hash)
           end

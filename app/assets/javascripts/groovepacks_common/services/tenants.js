@@ -55,6 +55,7 @@ groovepacks_services.factory('tenants', ['$http', 'notification', 'editable', '$
             tenants.selected = [];
           }
           for (var i = 0; i < tenants.list.length; i++) {
+            tenants.list[i].popover = construct_popover(tenants.list[i]);
             if (tenants.single && typeof tenants.single['basicinfo'] != "undefined") {
               if (tenants.list[i].id == tenants.single.basicinfo.id) {
                 tenants.current = i;
@@ -78,6 +79,16 @@ groovepacks_services.factory('tenants', ['$http', 'notification', 'editable', '$
       }
     ).error(notification.server_error);
   };
+
+  var construct_popover = function(list) {
+    var row_data = '';
+    for (var i = 0; i < list.shipped_last6.length; i++) {
+      row_data += '<tr><td>'+list.shipped_last6[i].shipping_duration+'</td><td>' + list.shipped_last6[i].shipped_count + '</td></tr>';
+    };
+    return '<table style="font-size: 13px;width:100%;font-weight:bold;">' + 
+           '<tr style="border-bottom: 2px solid gray;"><td>Duration</td><td>Shipped Qty</td></tr>'.concat(row_data ,
+            '</table>');
+  }
 
   var update_setup = function (setup, type, value) {
     if (type == 'sort') {
@@ -267,7 +278,8 @@ groovepacks_services.factory('tenants', ['$http', 'notification', 'editable', '$
       update: update_access_restriction_data,
       delete: delete_tenant_data,
       rollback: rollback_single_tenant,
-      duplicate: duplicate_tenant
+      duplicate: duplicate_tenant,
+      popover: construct_popover
     }
   };
 }]);
