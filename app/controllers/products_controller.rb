@@ -1173,6 +1173,8 @@ class ProductsController < ApplicationController
       skus_len = @product_orig.product_skus.all.length
       barcodes_len = @product_orig.product_barcodes.all.length
       @product_aliases = Product.find_all_by_id(params[:product_alias_ids])
+      puts "@product_orig: " + @product_orig.inspect
+      puts "@product_aliases: " + @product_aliases.inspect
       if @product_aliases.length > 0
         @product_aliases.each do |product_alias|
           #all SKUs of the alias will be copied. dont use product_alias.product_skus
@@ -1220,7 +1222,7 @@ class ProductsController < ApplicationController
 
           #Ensure all inventory data is copied over
           product_alias.product_inventory_warehousess.each do |aliased_inventory|
-            orig_product_inv_whs = ProductInventoryWarehouses.where(@product_orig.id, aliased_inventory.inventory_warehouse_id)
+            orig_product_inv_whs = ProductInventoryWarehouses.where(product_id: @product_orig.id)
             if orig_product_inv_whs.length == 0
               orig_product_inv_wh = ProductInventoryWarehouses.new
               orig_product_inv_wh.inventory_warehouse_id = aliased_inventory.inventory_warehouse_id
@@ -1232,12 +1234,34 @@ class ProductsController < ApplicationController
             end
             #copy over the qoh of original as QOH of original should not change in aliasing
             orig_product_qoh = orig_product_inv_wh.quantity_on_hand
+            # @product_orig.product_inventory_warehousess.each do |orig_inventory|
+            #   orig_product_qoh += orig_inventory.quantity_on_hand
+            # end
+            puts "orig_product_qoh: " + orig_product_qoh.to_s
+            #check all the orders with status of Awaiting, Service Issue or Action Required and sum up the total of the aliased item. And then add that amount to the base items allocated count.
             orig_product_inv_wh.allocated_inv = orig_product_inv_wh.allocated_inv + aliased_inventory.allocated_inv
+            
             orig_product_inv_wh.sold_inv = orig_product_inv_wh.sold_inv + aliased_inventory.sold_inv
-
+            # orig_product_inv_wh.save
             orig_product_inv_wh.quantity_on_hand = orig_product_qoh
             orig_product_inv_wh.save
-
+            puts "orig_product_inv_wh: " + orig_product_inv_wh.inspect
+            puts "original product: " + orig_product_inv_wh.product.inspect
+            if orig_product_inv_wh.product.is_kit == 1
+              orig_product_inv_wh.product.product_kit_skuss.each do |kit_sku|
+                kit_option_product_whs = kit_sku.option_product.product_inventory_warehousess
+                unless kit_option_product_whs.empty?
+                  kit_option_product_wh = kit_option_product_whs.first
+                  orig_kit_product_qoh = kit_option_product_wh.quantity_on_hand
+                  kit_option_product_wh.allocated_inv = kit_option_product_wh.allocated_inv + (kit_sku.qty * aliased_inventory.allocated_inv)
+            
+                  kit_option_product_wh.sold_inv = kit_option_product_wh.sold_inv + (kit_sku.qty * aliased_inventory.sold_inv)
+                  # kit_option_product_wh.save
+                  kit_option_product_wh.quantity_on_hand = orig_kit_product_qoh
+                  kit_option_product_wh.save
+                 end 
+              end
+            end
             aliased_inventory.reload
           end
 
