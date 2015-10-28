@@ -30,7 +30,7 @@ class GroovRealtime
         channel+= ':'+ uid.to_s
       end
 
-      $redis.publish(channel, data.to_json)
+      $redis.publish(channel, data.to_json) unless Rails.env.test?
     end
   end
 end
