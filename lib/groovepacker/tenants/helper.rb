@@ -167,10 +167,10 @@ module Groovepacker
           if params[:action_type] == 'orders'
             delete_orders(result, current_user)
           elsif params[:action_type] == 'products'
-            delete_products(result, current_user)
+            delete_products(current_user)
           elsif params[:action_type] == 'both'
             delete_orders(result, current_user)
-            delete_products(result, current_user)
+            delete_products(current_user)
           elsif params[:action_type] == 'all'
             ActiveRecord::Base.connection.tables.each do |table|
               ActiveRecord::Base.connection.execute("TRUNCATE #{table}")
@@ -190,42 +190,32 @@ module Groovepacker
       end
 
       def delete_orders(result, current_user)
-        if current_user.can? 'add_edit_order_items'
-          orders = Order.all
-          unless orders.nil?
-            orders.each do |order|
-              if order.destroy
-                result['status'] &= true
-              else
-                result['status'] &= false
-                result['error_messages'] = order.errors.full_messages
-              end
+        orders = Order.all
+        unless orders.nil?
+          orders.each do |order|
+            if order.destroy
+              result['status'] &= true
+            else
+              result['status'] &= false
+              result['error_messages'] = order.errors.full_messages
             end
           end
-        else
-          result['status'] = false
-          result['error_messages'].push("You do not have enough permissions to delete order")
         end
       end
 
-      def delete_products(result, current_user)
-        if current_user.can?('delete_products')
-          parameters = {}
-          parameters[:select_all] = true
-          parameters[:inverted] = false
-          parameters[:filter] = 'all'
-          parameters[:is_kit] = '-1'
-          bulk_actions = Groovepacker::Products::BulkActions.new
-          groove_bulk_actions = GrooveBulkActions.new
-          groove_bulk_actions.identifier = 'product'
-          groove_bulk_actions.activity = 'delete'
-          groove_bulk_actions.save
+      def delete_products(current_user)
+        parameters = {}
+        parameters[:select_all] = true
+        parameters[:inverted] = false
+        parameters[:filter] = 'all'
+        parameters[:is_kit] = '-1'
+        bulk_actions = Groovepacker::Products::BulkActions.new
+        groove_bulk_actions = GrooveBulkActions.new
+        groove_bulk_actions.identifier = 'product'
+        groove_bulk_actions.activity = 'delete'
+        groove_bulk_actions.save
 
-          bulk_actions.delete(Apartment::Tenant.current, parameters, groove_bulk_actions.id, current_user.username)
-        else
-          result['status'] = false
-          result['error_messages'].push('You do not have enough permissions to delete products')
-        end
+        bulk_actions.delete(Apartment::Tenant.current, parameters, groove_bulk_actions.id, current_user.username)
       end
 
       def delete(tenant, result)

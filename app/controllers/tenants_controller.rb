@@ -75,8 +75,13 @@ class TenantsController < ApplicationController
     current_tenant = Apartment::Tenant.current_tenant
     tenant = Tenant.find(params[:id])
     unless tenant.nil?
-      helper = Groovepacker::Tenants::Helper.new
-      helper.delete_data(tenant, params, result, current_user)
+      if check_permission(params[:action_type])
+        helper = Groovepacker::Tenants::Helper.new
+        helper.delete_data(tenant, params, result, current_user)
+      else
+        result['status'] = false
+        result['error_messages'].push("You don't have enough permission to delete tenant data")
+      end
     else
       result['status'] = false
     end
@@ -152,5 +157,18 @@ class TenantsController < ApplicationController
       tenants.push(tenant['name'])
     end
     tenants
+  end
+
+  def check_permission(action_type)
+    if action_type == 'orders'
+      return current_user.can?('delete_orders')
+    elsif action_type == 'products'
+      return current_user.can?('delete_products')
+    elsif action_type == 'both'
+      return current_user.can?('delete_products') && current_user.can?('delete_orders')
+    elsif action_type == 'all'
+      return true
+    end
+    return false
   end
 end
