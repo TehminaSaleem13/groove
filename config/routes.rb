@@ -1,6 +1,5 @@
 Groovepacks::Application.routes.draw do
 
-
   use_doorkeeper
 
   match 'subscriptions', :to => 'subscriptions#new', :as => 'subscriptions'
@@ -12,7 +11,12 @@ Groovepacks::Application.routes.draw do
 
   get "/500", :to => "specials#error_500"
 
-  devise_for :users
+  devise_for :users, :controllers => { :omniauth_callbacks => "big_commerce" }
+  
+  devise_scope :user do
+    get '/big_commerce/setup' => 'big_commerce#setup'
+    get '/big_commerce/complete' => 'big_commerce#complete'
+  end
 
   # The priority is based upon order of creation:
   # first created -> highest priority.
@@ -212,6 +216,15 @@ Groovepacks::Application.routes.draw do
       get 'help'
     end
   end
+
+  # resources :big_commerce do
+  #   member do
+  #     get 'auth_callback'
+  #   end
+  #   collection do
+  #     get 'bigcommerce'
+  #   end
+  # end
 
   resources :dashboard do
     collection do

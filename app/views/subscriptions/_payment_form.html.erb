@@ -1,0 +1,52 @@
+<div class="row">
+  <div class="col-md-offset-3 col-md-6 well-header text-center">
+    <p>Risk Free Trial Guarantee</p>
+  </div>
+</div>
+
+<div class="form-group">
+  <div class="control-label">
+    <i class="fa fa-check-square-o"></i>
+    Your creditcard will not be charged during the trial.
+  </div>
+</div>
+
+<div class="form-group">
+  <div class="control-label">
+    <i class="fa fa-check-square-o"></i>
+    You’ll have access to remove your card information at any time, if you do not wish to continue the trial.
+  </div>
+</div>
+
+<div class="form-group">
+  <div class="control-label">
+    <i class="fa fa-check-square-o"></i>
+    Your details are encrypted and secured by Stripe, a certified. Level 1 PCI Service Provider
+    <small>(the most stringent level of certification)</small>
+  </div>
+</div>
+
+<div class="text-center">
+  <script src="https://checkout.stripe.com/checkout.js"></script>
+  <button id="shopButton" class="btn btn-success" style="margin-bottom: 5px;">Groovy, Start My Trial!</button>
+  <p> Why is a Credit Card required for a free trial?
+    <i id="cc_info" data-placement="bottom" data-content="<p>When you start your trial, resources are dedicated to building and running your groovepacker instance. Free support is also provided to ensure you have the best experience possible. We ask that you provide a valid card number to let us know that you are a real person interested in using Groovepacker in your business. This lowers costs while increasing performance and security. When you click 'Start My Trial' you'll be given a form where you can enter your card info securely.</p>" class="fa fa-info-circle"></i><span id=""></span>
+  </p>
+
+  <div class="alert alert-success" id="processing_alert_success" style="display:none;">
+    <div><i class="glyphicon glyphicon-refresh spin" style="font-size: 12px;"></i> Your subscription is being processed.
+    </div>
+  </div>
+  <div class="alert alert-error" id="processing_alert_error" style="display:none;">
+    <p>Your subscription could not be processed. Please try again.</p>
+  </div>
+</div>
+
+<script type="text/javascript">
+  $(document).ready(function () {
+    $('#cc_info').popover({
+      html: true,
+      viewport: '.gradient-well-inner'
+    });
+  });
+</script>
