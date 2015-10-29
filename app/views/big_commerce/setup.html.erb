@@ -42,7 +42,7 @@
           validate_email();
           if (valid.email) {
             url = 'http://admin.' + '<%=ENV["HOST_NAME"]%>' + '/subscriptions/select_plan?email=' +
-              $('#tenant_email').val() + '&shop=<%=@shop_name%>';
+              $('#tenant_email').val() + '&shopify=<%=@shop_name%>';
             window.location.href = url;
           }
         });
