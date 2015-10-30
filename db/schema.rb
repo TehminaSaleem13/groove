@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20151015040128) do
+ActiveRecord::Schema.define(:version => 20151024125255) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0, :null => false
@@ -34,6 +34,16 @@ ActiveRecord::Schema.define(:version => 20151015040128) do
     t.string   "productgenerated_report_id"
     t.datetime "productgenerated_report_date"
     t.boolean  "show_shipping_weight_only",    :default => false
+  end
+
+  create_table "big_commerce_credentials", :force => true do |t|
+    t.integer  "store_id"
+    t.string   "shop_name"
+    t.string   "store_hash"
+    t.string   "access_token"
+    t.datetime "created_at",       :null => false
+    t.datetime "updated_at",       :null => false
+    t.datetime "last_imported_at"
   end
 
   create_table "column_preferences", :force => true do |t|

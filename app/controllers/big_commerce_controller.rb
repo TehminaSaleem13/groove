@@ -17,9 +17,8 @@ class BigCommerceController < Devise::OmniauthCallbacksController
 	  @bigcommerce_credentials.access_token = auth['credentials']['token'].token rescue nil
 	  @bigcommerce_credentials.store_hash = auth['extra']['context'] rescue nil
 	  @bigcommerce_credentials.save
-	  cookies[:tenant_name] = nil
-	  cookies[:store_id] = nil
-	  #redirect_to big_commerce_setup_path(:shop => "#{@bigcommerce_credentials.store_hash}.mybigcommerce.com")
+	  cookies.delete(:tenant_name)
+	  cookies.delete(:store_id)
 	  redirect_to big_commerce_complete_path
 	else
       cookies[:bc_auth] = {:value => auth , :domain => :all}
