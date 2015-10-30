@@ -26,6 +26,28 @@ class BigCommerceController < Devise::OmniauthCallbacksController
 	end
   end
 
+  def check_connection
+    store = Store.find_by_id(params[:store_id])
+    bc_credential = BigCommerceCredential.find_by_store_id(store.try(:id))
+    if bc_credential.access_token && bc_credential.access_token
+      response = HTTParty.get("https://api.bigcommerce.com/#{bc_credential.store_hash}/v2/time",
+                headers: {
+                  "X-Auth-Token" => bc_credential.access_token,
+                  "X-Auth-Client" => ENV["BC_CLIENT_ID"],
+                  "Content-Type" => "application/json",
+                  "Accept" => "application/json"
+                }
+            )
+      if response["error"]
+        render json: {status: false, message: response["error"]}
+      else
+        render json: {status: true, message: "Connection tested successfully"}
+      end
+    else
+      render json: {status: false, message: "Either accss token or store hash doesn't exist, Please go through the installation again"}
+    end
+  end
+
   def complete
   end
 

@@ -543,6 +543,14 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
     );
   }
 
+  var check_connection = function (store_id) {
+    return $http.get('/big_commerce/' + store_id + '/check_connection.json', null).success(
+      function (data) {
+        return data;
+      }
+    ).error(notification.server_error);
+  }
+
   //Public facing API
   return {
     model: {
@@ -602,6 +610,9 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
     },
     shopify: {
       disconnect: shopfiy_disconnect
+    },
+    big_commerce: {
+      check_connection: check_connection
     }
   };
 }]);

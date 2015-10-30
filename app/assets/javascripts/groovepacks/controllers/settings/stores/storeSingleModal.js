@@ -37,6 +37,12 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
       });
     }
 
+    scope.check_bigcommerce_connection = function () {
+      stores.big_commerce.check_connection(scope.stores.single.id).then(function (response) {
+        scope.stores.single.message = response["data"]["message"];
+      });
+    }
+
     scope.import_orders = function (report_id) {
       scope.stores.import.order.status = "Import in progress";
       scope.stores.import.order.status_show = true;

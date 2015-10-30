@@ -16,6 +16,7 @@ Groovepacks::Application.routes.draw do
   devise_scope :user do
     get '/big_commerce/setup' => 'big_commerce#setup'
     get '/big_commerce/complete' => 'big_commerce#complete'
+    get '/big_commerce/:store_id/check_connection' => 'big_commerce#check_connection'
   end
 
   # The priority is based upon order of creation:
