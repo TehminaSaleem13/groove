@@ -113,6 +113,7 @@ class StoresController < ApplicationController
           @store.thank_you_message_to_customer = params[:thank_you_message_to_customer] unless params[:thank_you_message_to_customer] == 'null'
           @store.inventory_warehouse_id = params[:inventory_warehouse_id] || get_default_warehouse_id
           @store.auto_update_products = params[:auto_update_products]
+          @store.update_inv = params[:update_inv]
         end
 
         if @result['status']
@@ -1298,6 +1299,14 @@ class StoresController < ApplicationController
       format.html # show.html.erb
       format.csv { send_data data, :type => 'text/csv', :filename => filename }
     end
+  end
+
+  def pull_store_inventory
+
+  end
+
+  def push_store_inventory
+    
   end
 end
 

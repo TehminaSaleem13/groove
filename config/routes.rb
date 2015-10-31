@@ -137,6 +137,8 @@ Groovepacks::Application.routes.draw do
       post 'csv_product_import_cancel'
       post 'update_csv_map'
       post 'delete_csv_map'
+      get 'pull_store_inventory'
+      get 'push_store_inventory'
     end
   end
 

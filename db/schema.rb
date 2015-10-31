@@ -11,15 +11,16 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20151024125255) do
+ActiveRecord::Schema.define(:version => 20151031095243) do
 
   create_table "access_restrictions", :force => true do |t|
-    t.integer  "num_users",               :default => 0, :null => false
-    t.integer  "num_shipments",           :default => 0, :null => false
-    t.integer  "num_import_sources",      :default => 0, :null => false
-    t.datetime "created_at",                             :null => false
-    t.datetime "updated_at",                             :null => false
-    t.integer  "total_scanned_shipments", :default => 0, :null => false
+    t.integer  "num_users",               :default => 0,     :null => false
+    t.integer  "num_shipments",           :default => 0,     :null => false
+    t.integer  "num_import_sources",      :default => 0,     :null => false
+    t.datetime "created_at",                                 :null => false
+    t.datetime "updated_at",                                 :null => false
+    t.integer  "total_scanned_shipments", :default => 0,     :null => false
+    t.boolean  "allow_inv_push",          :default => false
   end
 
   create_table "amazon_credentials", :force => true do |t|
@@ -232,13 +233,6 @@ ActiveRecord::Schema.define(:version => 20151024125255) do
     t.boolean  "cancel",     :default => false
     t.datetime "created_at",                          :null => false
     t.datetime "updated_at",                          :null => false
-  end
-
-  create_table "import_exceptions", :force => true do |t|
-    t.integer  "import_item_id"
-    t.string   "error_log_url"
-    t.datetime "created_at",     :null => false
-    t.datetime "updated_at",     :null => false
   end
 
   create_table "import_items", :force => true do |t|
@@ -506,6 +500,7 @@ ActiveRecord::Schema.define(:version => 20151024125255) do
     t.string   "method"
     t.datetime "created_at",                                                                :null => false
     t.datetime "updated_at",                                                                :null => false
+    t.string   "store_order_id"
     t.text     "notes_internal"
     t.text     "notes_toPacker"
     t.text     "notes_fromPacker"
@@ -526,7 +521,6 @@ ActiveRecord::Schema.define(:version => 20151024125255) do
     t.integer  "weight_oz"
     t.string   "non_hyphen_increment_id"
     t.boolean  "note_confirmation",                                      :default => false
-    t.string   "store_order_id"
     t.integer  "inaccurate_scan_count",                                  :default => 0
     t.datetime "scan_start_time"
     t.boolean  "reallocate_inventory",                                   :default => false
@@ -535,19 +529,6 @@ ActiveRecord::Schema.define(:version => 20151024125255) do
     t.integer  "total_scan_count",                                       :default => 0
     t.decimal  "packing_score",           :precision => 10, :scale => 0, :default => 0
   end
-
-  create_table "orders_import_summaries", :force => true do |t|
-    t.integer  "total_retrieved"
-    t.integer  "success_imported"
-    t.integer  "previous_imported"
-    t.boolean  "status"
-    t.string   "error_message"
-    t.integer  "store_id"
-    t.datetime "created_at",        :null => false
-    t.datetime "updated_at",        :null => false
-  end
-
-  add_index "orders_import_summaries", ["store_id"], :name => "index_orders_import_summaries_on_store_id"
 
   create_table "product_barcodes", :force => true do |t|
     t.integer  "product_id"
@@ -738,9 +719,9 @@ ActiveRecord::Schema.define(:version => 20151024125255) do
     t.float    "order_complete_sound_vol",      :default => 0.75
     t.boolean  "type_scan_code_enabled",        :default => true
     t.string   "type_scan_code",                :default => "*"
+    t.string   "post_scanning_option",          :default => "None"
     t.string   "escape_string",                 :default => " - "
     t.boolean  "escape_string_enabled",         :default => false
-    t.string   "post_scanning_option",          :default => "None"
     t.boolean  "record_lot_number",             :default => false
     t.boolean  "show_customer_notes",           :default => false
     t.boolean  "show_internal_notes",           :default => false
@@ -807,6 +788,7 @@ ActiveRecord::Schema.define(:version => 20151024125255) do
     t.integer  "inventory_warehouse_id"
     t.text     "thank_you_message_to_customer"
     t.boolean  "auto_update_products",          :default => false
+    t.boolean  "update_inv",                    :default => false
   end
 
   create_table "subscriptions", :force => true do |t|
@@ -882,13 +864,6 @@ ActiveRecord::Schema.define(:version => 20151024125255) do
   add_index "users", ["inventory_warehouse_id"], :name => "index_users_on_inventory_warehouse_id"
   add_index "users", ["reset_password_token"], :name => "index_users_on_reset_password_token", :unique => true
   add_index "users", ["role_id"], :name => "index_users_on_role_id"
-
-  create_table "users_roles", :id => false, :force => true do |t|
-    t.integer "user_id"
-    t.integer "role_id"
-  end
-
-  add_index "users_roles", ["user_id", "role_id"], :name => "index_users_roles_on_user_id_and_role_id"
 
   create_table "webhooks", :force => true do |t|
     t.binary   "event",      :limit => 16777215

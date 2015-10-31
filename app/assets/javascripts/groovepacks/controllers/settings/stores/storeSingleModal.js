@@ -178,6 +178,18 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
       };
     };
 
+    scope.pull_store_inventory = function () {
+      stores.single.pull_inventory(scope.stores.single.id).then(function (response) {
+        notification.notify("Your request has been queued", 1);
+      });
+    }
+    
+    scope.push_store_inventory = function () {
+      stores.single.push_inventory(scope.stores.single.id).then(function (response) {
+        notification.notify("Your request has been queued", 1); 
+      });
+    }
+
     scope.update_single_store = function (auto) {
       if (scope.edit_status || stores.single.validate_create(scope.stores)) {
         return stores.single.update(scope.stores, auto).success(function (data) {

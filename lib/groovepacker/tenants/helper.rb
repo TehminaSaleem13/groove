@@ -176,6 +176,7 @@ module Groovepacker
               @shipping_result['max_allowed'] = access_restrictions[data_length - 1].num_shipments
               @shipping_result['max_users'] = access_restrictions[data_length-1].num_users
               @shipping_result['max_import_sources'] = access_restrictions[data_length-1].num_import_sources
+              @shipping_result['allow_inv_push'] = access_restrictions[data_length-1].allow_inv_push
             else
               @shipping_result['shipped_current'] = 0
               @shipping_result['shipped_last'] = 0
@@ -316,6 +317,7 @@ module Groovepacker
             access_restrictions[data_length - 1].num_shipments = params[:access_restrictions_info][:max_allowed]
             access_restrictions[data_length-1].num_users = params[:access_restrictions_info][:max_users]
             access_restrictions[data_length-1].num_import_sources = params[:access_restrictions_info][:max_import_sources]
+            access_restrictions[data_length-1].allow_inv_push = params[:access_restrictions_info][:allow_inv_push]
             access_restrictions[data_length-1].save
           end
         rescue Exception => e

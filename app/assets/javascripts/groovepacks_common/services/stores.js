@@ -543,6 +543,18 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
     );
   }
 
+  var pull_store_inventory = function (store_id) {
+    return $http.get('/stores/' + store_id + '/pull_store_inventory.json', null).success(
+      function (data) {
+      }).error(notification.server_error);
+  }
+
+  var push_store_inventory = function (store_id) {
+    return $http.get('/stores/' + store_id + '/push_store_inventory.json', null).success(
+      function (data) {
+      }).error(notification.server_error);
+  }
+
   var check_connection = function (store_id) {
     return $http.get('/big_commerce/' + store_id + '/check_connection.json', null).success(
       function (data) {
@@ -570,7 +582,9 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
       validate_create: validate_create_single,
       update: create_update_single,
       update_ftp: create_update_ftp_credentials,
-      connect: connect_ftp_server
+      connect: connect_ftp_server,
+      pull_inventory: pull_store_inventory,
+      push_inventory: push_store_inventory
     },
     ebay: {
       sign_in_url: {

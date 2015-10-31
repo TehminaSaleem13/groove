@@ -30,6 +30,12 @@ groovepacks_admin_controllers.
         });
       };
 
+      $scope.allowinventory_pull_push_all = function () {
+        tenants.single.update($scope.tenants).then(function () {
+          myscope.load_item($scope.tenants.current);
+        });
+      };
+
       $scope.delete_orders = function () {
         $scope.delete('orders');
       };
