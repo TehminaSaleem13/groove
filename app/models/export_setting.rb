@@ -141,6 +141,7 @@ class ExportSetting < ActiveRecord::Base
         orders.each do |order|
           order_items = order.order_items
           unless order_items.empty?
+            order_hash_item_array = []
             order_items.each do |order_item|
               if self.order_export_type == 'order_with_serial_lot'
                 order_item_serial_lots = OrderItemOrderSerialProductLot.where(order_item_id: order_item.id)
@@ -194,7 +195,7 @@ class ExportSetting < ActiveRecord::Base
                                       :customer_name => single_row[:customer_name], :address1 => single_row[:address1], 
                                       :address2 => single_row[:address2], :city => single_row[:city], 
                                       :state => single_row[:state], :zip => single_row[:zip]}
-                        order_hash_array.push(order_hash)
+                        order_hash_item_array.push(order_hash)
                       end
                     else
                       next
@@ -253,7 +254,7 @@ class ExportSetting < ActiveRecord::Base
                                   :customer_name => single_row[:customer_name], :address1 => single_row[:address1], 
                                   :address2 => single_row[:address2], :city => single_row[:city], 
                                   :state => single_row[:state], :zip => single_row[:zip]}
-                    order_hash_array.push(order_hash)
+                    order_hash_item_array.push(order_hash)
                   end
                   if order_item.qty > qty_with_lot_serial
                     single_row = row_map.dup
@@ -274,7 +275,7 @@ class ExportSetting < ActiveRecord::Base
                                   :customer_name => single_row[:customer_name], :address1 => single_row[:address1], 
                                   :address2 => single_row[:address2], :city => single_row[:city], 
                                   :state => single_row[:state], :zip => single_row[:zip]}
-                    order_hash_array.push(order_hash)
+                    order_hash_item_array.push(order_hash)
                   end
                 else
                   single_row = row_map.dup
@@ -295,9 +296,13 @@ class ExportSetting < ActiveRecord::Base
                                 :customer_name => single_row[:customer_name], :address1 => single_row[:address1], 
                                 :address2 => single_row[:address2], :city => single_row[:city], 
                                 :state => single_row[:state], :zip => single_row[:zip]}
-                  order_hash_array.push(order_hash)
+                  order_hash_item_array.push(order_hash)
                 end
               end
+            end
+            ordered_hash_item_array = order_hash_item_array.sort_by { |hsh| hsh[:scan_order].to_i }
+            ordered_hash_item_array.each do |hsh|
+              order_hash_array.push(hsh)
             end
           end
         end

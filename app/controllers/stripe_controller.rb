@@ -24,7 +24,6 @@ class StripeController < ApplicationController
         logger.info("saved the invoice for event invoice.created")
         StripeInvoiceEmail.send_success_invoice(@invoice).deliver
       end
-      ApplyAccessRestrictions.delay(:run_at => 10.minutes.from_now).apply_access_restrictions(@invoice.id) unless @invoice.plan_id.nil?
     elsif event.type == 'invoice.payment_failed'
       logger.info("in event type invoice.payment_failed")
       @invoice = get_invoice(event)

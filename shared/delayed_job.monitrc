@@ -1,0 +1,3 @@
+check process delayed_job with pidfile /home/groovepacker/groove/pids/delayed_job.pid
+start program = "/home/groovepacker/groove/script/delayed_job -e {environment} start"
+stop program = "/home/groovepacker/groove/script/delayed_job -e {environment} stop"
