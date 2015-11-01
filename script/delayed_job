@@ -4,6 +4,6 @@ require File.expand_path(File.join(File.dirname(__FILE__), '..', 'config', 'envi
 require 'delayed/command'
 
 # Specify pid file directory
-ARGV << "--pid-dir=#{Rails.root}/pids"
+# ARGV << "--pid-dir=#{Rails.root}/pids"
 
 Delayed::Command.new(ARGV).daemonize
