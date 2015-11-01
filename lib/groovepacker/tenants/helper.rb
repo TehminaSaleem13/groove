@@ -34,36 +34,41 @@ module Groovepacker
       end
 
       def make_tenants_list(tenants, params)
-        @tenants_result = []
+        tenants_result = []
         begin
           tenants.each do |tenant|
-            @tenant_hash = {}
-            @tenant_hash['id'] = tenant.id
-            @tenant_hash['name'] = tenant.name
-            plan_data = get_subscription_data(tenant.id)
-            @tenant_hash['plan'] = plan_data['plan']
-            @tenant_hash['progress'] = plan_data['progress']
-            @tenant_hash['transaction_errors'] = plan_data['transaction_errors']
-            @tenant_hash['stripe_url'] = plan_data['customer_id']
-            shipping_data = get_shipping_data(tenant.id)
-            @tenant_hash['total_shipped'] = shipping_data['shipped_current']
-            @tenant_hash['shipped_last'] = shipping_data['shipped_last']
-            @tenant_hash['max_allowed'] = shipping_data['max_allowed']
-            @tenant_hash['url'] = tenant.name + ".groovepacker.com"
+            tenant_hash = {}
+            tenant_hash['id'] = tenant.id
+            tenant_hash['name'] = tenant.name
+            plan_data = get_subscription_data(tenant.name)
+            tenant_hash['start_day'] = plan_data['start_day']
+            tenant_hash['plan'] = plan_data['plan']
+            tenant_hash['progress'] = plan_data['progress']
+            tenant_hash['transaction_errors'] = plan_data['transaction_errors']
+            tenant_hash['stripe_url'] = plan_data['customer_id']
+            tenant_hash['url'] = tenant.name + ".groovepacker.com"
+            get_shipping_data = Groovepacker::Dashboard::Stats::ShipmentStats.new
+            shipping_data = get_shipping_data.get_shipment_stats(tenant.name, true)
+            tenant_hash['total_shipped'] = shipping_data['shipped_current']
+            tenant_hash['shipped_last'] = shipping_data['shipped_last']
+            tenant_hash['max_allowed'] = shipping_data['max_allowed']
+            tenant_hash['average_shipped'] = shipping_data['average_shipped']
+            tenant_hash['average_shipped_last'] = shipping_data['average_shipped_last']
+            tenant_hash['shipped_last6'] = shipping_data['shipped_last6']
 
-            @tenants_result.push(@tenant_hash)
+            tenants_result.push(tenant_hash)
           end
           unless params[:sort].nil? || params[:sort] == ''
             if params[:order] == 'DESC'
-              @tenants_result = @tenants_result.sort_by { |v| v[params[:sort]].class == Fixnum ? v[params[:sort]] : v[params[:sort]].downcase }.reverse!
+              tenants_result = tenants_result.sort_by { |v| v[params[:sort]].class == Fixnum ? v[params[:sort]] : v[params[:sort]].downcase }.reverse!
             else
-              @tenants_result = @tenants_result.sort_by { |v| v[params[:sort]].class == Fixnum ? v[params[:sort]] : v[params[:sort]].downcase }
+              tenants_result = tenants_result.sort_by { |v| v[params[:sort]].class == Fixnum ? v[params[:sort]] : v[params[:sort]].downcase }
             end
           end
         rescue Exception => e
           puts e.message
         end
-        return @tenants_result
+        return tenants_result
       end
 
       def do_search(params)
@@ -113,86 +118,47 @@ module Groovepacker
         return result
       end
 
-      def get_subscription_data(id)
-        @subscripton_result = {}
-        # current_tenant = Apartment::Tenant.current_tenant
-        # Apartment::Tenant.switch()
-        tenant = Tenant.find(id)
+      def get_subscription_data(name)
+        subscription_result = {}
+        tenant = Tenant.where(name: name).first unless Tenant.where(name: name).empty?
         unless tenant.nil?
-          @subscripton_result['plan'] = ""
-          @subscripton_result['customer_id'] = ''
-          @subscripton_result['progress'] = ''
-          @subscripton_result['transaction_errors'] = ''
+          subscription_result['plan'] = ""
+          subscription_result['customer_id'] = ''
+          subscription_result['progress'] = ''
+          subscription_result['transaction_errors'] = ''
           unless tenant.subscription.nil?
             subscription = tenant.subscription
             case subscription.subscription_plan_id
               when "groove-solo"
-                @subscripton_result['plan'] = "solo"
+                subscription_result['plan'] = "solo"
               when "groove-duo"
-                @subscripton_result['plan'] = "duo"
+                subscription_result['plan'] = "duo"
               when "groove-trio"
-                @subscripton_result['plan'] = "trio"
+                subscription_result['plan'] = "trio"
               when "groove-quinet"
-                @subscripton_result['plan'] = "quinet"
+                subscription_result['plan'] = "quinet"
               when "groove-symphony"
-                @subscripton_result['plan'] = "symphony"
+                subscription_result['plan'] = "symphony"
               when "annual-groove-solo"
-                @subscripton_result['plan'] = "annual-solo"
+                subscription_result['plan'] = "annual-solo"
               when "annual-groove-duo"
-                @subscripton_result['plan'] = "annual-duo"
+                subscription_result['plan'] = "annual-duo"
               when "annual-groove-trio"
-                @subscripton_result['plan'] = "annual-trio"
+                subscription_result['plan'] = "annual-trio"
               when "annual-groove-quinet"
-                @subscripton_result['plan'] = "annual-quinet"
+                subscription_result['plan'] = "annual-quinet"
               when "annual-groove-symphony"
-                @subscripton_result['plan'] = "annual-symphony"
+                subscription_result['plan'] = "annual-symphony"
               else
-                @subscripton_result['plan'] = ""
+                subscription_result['plan'] = ""
             end
-            @subscripton_result['customer_id'] = subscription.stripe_customer_id unless subscription.stripe_customer_id.nil?
-            @subscripton_result['progress'] = subscription.progress unless subscription.progress.nil?
-            @subscripton_result['transaction_errors'] =subscription.transaction_errors unless subscription.transaction_errors.nil?
+            subscription_result['start_day'] = subscription.created_at.strftime("%d %b") unless subscription.created_at.nil?
+            subscription_result['customer_id'] = subscription.stripe_customer_id unless subscription.stripe_customer_id.nil?
+            subscription_result['progress'] = subscription.progress unless subscription.progress.nil?
+            subscription_result['transaction_errors'] =subscription.transaction_errors unless subscription.transaction_errors.nil?
           end
         end
-        # Apartment::Tenant.switch(current_tenant)
-        @subscripton_result
-      end
-
-      def get_shipping_data(id)
-        @shipping_result = {}
-        @shipping_result['shipped_current'] = 0
-        @shipping_result['shipped_last'] = 0
-        @shipping_result['max_allowed'] = 0
-        tenant = Tenant.find(id)
-        current_tenant = Apartment::Tenant.current_tenant
-        unless tenant.nil?
-          begin
-            Apartment::Tenant.switch(tenant.name)
-            unless AccessRestriction.all.first.nil?
-              access_restrictions = AccessRestriction.all
-              data_length = access_restrictions.length
-              @shipping_result['shipped_current'] = access_restrictions[data_length - 1].total_scanned_shipments
-              @shipping_result['shipped_last'] = access_restrictions[data_length - 2].total_scanned_shipments if data_length > 1
-              @shipping_result['max_allowed'] = access_restrictions[data_length - 1].num_shipments
-              @shipping_result['max_users'] = access_restrictions[data_length-1].num_users
-              @shipping_result['max_import_sources'] = access_restrictions[data_length-1].num_import_sources
-            else
-              @shipping_result['shipped_current'] = 0
-              @shipping_result['shipped_last'] = 0
-              @shipping_result['max_allowed'] = 0
-              @shipping_result['max_users'] = 0
-              @shipping_result['max_import_sources'] = 0
-            end
-          rescue
-            @shipping_result['shipped_current'] = 0
-            @shipping_result['shipped_last'] = 0
-            @shipping_result['max_allowed'] = 0
-            @shipping_result['max_users'] = 0
-            @shipping_result['max_import_sources'] = 0
-          end
-        end
-        Apartment::Tenant.switch(current_tenant)
-        @shipping_result
+        subscription_result
       end
 
       def delete_data(tenant, params, result, current_user)
@@ -201,10 +167,10 @@ module Groovepacker
           if params[:action_type] == 'orders'
             delete_orders(result, current_user)
           elsif params[:action_type] == 'products'
-            delete_products(result, current_user)
+            delete_products(current_user)
           elsif params[:action_type] == 'both'
             delete_orders(result, current_user)
-            delete_products(result, current_user)
+            delete_products(current_user)
           elsif params[:action_type] == 'all'
             ActiveRecord::Base.connection.tables.each do |table|
               ActiveRecord::Base.connection.execute("TRUNCATE #{table}")
@@ -224,42 +190,32 @@ module Groovepacker
       end
 
       def delete_orders(result, current_user)
-        if current_user.can? 'add_edit_order_items'
-          orders = Order.all
-          unless orders.nil?
-            orders.each do |order|
-              if order.destroy
-                result['status'] &= true
-              else
-                result['status'] &= false
-                result['error_messages'] = order.errors.full_messages
-              end
+        orders = Order.all
+        unless orders.nil?
+          orders.each do |order|
+            if order.destroy
+              result['status'] &= true
+            else
+              result['status'] &= false
+              result['error_messages'] = order.errors.full_messages
             end
           end
-        else
-          result['status'] = false
-          result['error_messages'].push("You do not have enough permissions to delete order")
         end
       end
 
-      def delete_products(result, current_user)
-        if current_user.can?('delete_products')
-          parameters = {}
-          parameters[:select_all] = true
-          parameters[:inverted] = false
-          parameters[:filter] = 'all'
-          parameters[:is_kit] = '-1'
-          bulk_actions = Groovepacker::Products::BulkActions.new
-          groove_bulk_actions = GrooveBulkActions.new
-          groove_bulk_actions.identifier = 'product'
-          groove_bulk_actions.activity = 'delete'
-          groove_bulk_actions.save
+      def delete_products(current_user)
+        parameters = {}
+        parameters[:select_all] = true
+        parameters[:inverted] = false
+        parameters[:filter] = 'all'
+        parameters[:is_kit] = '-1'
+        bulk_actions = Groovepacker::Products::BulkActions.new
+        groove_bulk_actions = GrooveBulkActions.new
+        groove_bulk_actions.identifier = 'product'
+        groove_bulk_actions.activity = 'delete'
+        groove_bulk_actions.save
 
-          bulk_actions.delete(Apartment::Tenant.current, parameters, groove_bulk_actions.id, current_user.username)
-        else
-          result['status'] = false
-          result['error_messages'].push('You do not have enough permissions to delete products')
-        end
+        bulk_actions.delete(Apartment::Tenant.current, parameters, groove_bulk_actions.id, current_user.username)
       end
 
       def delete(tenant, result)

@@ -45,7 +45,7 @@ class Subscription < ActiveRecord::Base
           unless customer.subscriptions.data.first.nil?
             self.customer_subscription_id = customer.subscriptions.data.first.id
 
-            CreateTenant.create_tenant self
+            CreateTenant.new.create_tenant self
 
             Apartment::Tenant.switch()
 

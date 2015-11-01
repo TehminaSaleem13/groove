@@ -13,27 +13,27 @@ class UsersController < ApplicationController
 
 
   def createUpdateUser
-    @result = Hash.new
-    @result['status'] = true
-    @result['messages'] = []
+    result = {}
+    result['status'] = true
+    result['messages'] = []
 
     if current_user.can? 'add_edit_users'
       if params[:id].nil?
         if User.can_create_new?
           @user = User.new
         else
-          @result['status'] = false
-          @result['messages'].push('You have reached the maximum limit of number of users for your subscription.')
+          result['status'] = false
+          result['messages'].push('You have reached the maximum limit of number of users for your subscription.')
         end
       else
         @user = User.find(params[:id])
       end
 
       if !params[:password].nil? && params[:password] != '' && (params[:conf_password].blank? || params[:conf_password].length < 6)
-        @result['status'] = false
-        @result['messages'].push('Password and Confirm Password can not be less than 6 characters')
+        result['status'] = false
+        result['messages'].push('Password and Confirm Password can not be less than 6 characters')
       end
-      if @result['status']
+      if result['status']
         @user.password = params[:password] if !params[:password].nil? && params[:password] != ''
         @user.username = params[:username]
         @user.other = params[:other] if !params[:other].nil?
@@ -64,19 +64,19 @@ class UsersController < ApplicationController
         end
 
         if user_role.nil?
-          @result.status = false
-          @result['messages'].push('Invalid user Role')
+          result.status = false
+          result['messages'].push('Invalid user Role')
         else
           # Make sure we have at least one super admin
           if current_user.can?('make_super_admin') && !params[:role]['make_super_admin'] &&
             User.includes(:role).where('roles.make_super_admin = 1').length < 2 && !@user.role.nil? && @user.role.make_super_admin
-            @result['status'] = false
-            @result['messages'].push('The app needs at least one super admin at all times')
+            result['status'] = false
+            result['messages'].push('The app needs at least one super admin at all times')
           elsif !current_user.can?('make_super_admin') &&
             ((params[:role]['make_super_admin'] && (@user.role.nil? || !@user.role.make_super_admin)) ||
               (!params[:role]['make_super_admin'] && !@user.role.nil? && @user.role.make_super_admin))
-            @result['status'] = false
-            @result['messages'].push('You can not grant or revoke super admin privileges.')
+            result['status'] = false
+            result['messages'].push('You can not grant or revoke super admin privileges.')
           else
             if user_role.custom && !user_role.display
               user_role = update_role(user_role, params[:role])
@@ -88,33 +88,33 @@ class UsersController < ApplicationController
 
 
         if @user.save
-          @result['user'] = @user.attributes
-          @result['user']['role'] = @user.role.attributes
+          result['user'] = @user.attributes
+          result['user']['role'] = @user.role.attributes
         else
-          @result['status'] = false
-          @result['messages'] = @user.errors.full_messages
+          result['status'] = false
+          result['messages'] = @user.errors.full_messages
         end
       end
     else
-      @result['status'] = false
-      @result['messages'].push("Current user doesn't have permission to Add or Edit users")
+      result['status'] = false
+      result['messages'].push("Current user doesn't have permission to Add or Edit users")
     end
 
     respond_to do |format|
       format.html # show.html.erb
-      format.json { render json: @result }
+      format.json { render json: result }
     end
   end
 
   def get_roles
-    @result = Hash.new
-    @result['status'] = true
-    @result['messages'] = []
-    @result['roles'] = Role.where(:display => true);
+    result = {}
+    result['status'] = true
+    result['messages'] = []
+    result['roles'] = Role.where(:display => true);
 
     respond_to do |format|
       format.html # show.html.erb
-      format.json { render json: @result }
+      format.json { render json: result }
     end
   end
 
@@ -141,17 +141,17 @@ class UsersController < ApplicationController
   end
 
   def create_role
-    @result = Hash.new
-    @result['status'] = true
-    @result['messages'] = []
+    result = {}
+    result['status'] = true
+    result['messages'] = []
 
     if current_user.can? 'add_edit_users'
       if params[:role].nil?
-        @result['status'] = false
-        @result['messages'].push("No role data sent")
+        result['status'] = false
+        result['messages'].push("No role data sent")
       elsif params[:role]['new_name'].blank? || params[:role]['new_name'][0, 5] == "role_" || !Role.find_by_name(params[:role]['new_name']).nil?
-        @result['status'] = false
-        @result['messages'].push("Role name invalid. Please input a valid Role name")
+        result['status'] = false
+        result['messages'].push("Role name invalid. Please input a valid Role name")
       else
         if params[:role]['id'].nil?
           user_role = Role.find_by_name("role_#{params[:id]}")
@@ -165,37 +165,37 @@ class UsersController < ApplicationController
         user_role.display = true
         user_role.name = params[:role]['new_name']
         user_role = update_role(user_role, params[:role])
-        @result['role'] = user_role
+        result['role'] = user_role
         user = User.find(params[:id])
         if user.nil?
-          @result['status'] = false
-          @result['messages'].push("Role saved but could not apply to user. Please click save and close to apply manually")
+          result['status'] = false
+          result['messages'].push("Role saved but could not apply to user. Please click save and close to apply manually")
         else
           user.role = user_role
           user.save
         end
       end
     else
-      @result['status'] = false
-      @result['messages'].push("Current user doesn't have permission to create roles")
+      result['status'] = false
+      result['messages'].push("Current user doesn't have permission to create roles")
     end
 
 
     respond_to do |format|
       format.html # show.html.erb
-      format.json { render json: @result }
+      format.json { render json: result }
     end
   end
 
   def delete_role
-    @result = Hash.new
-    @result['status'] = true
-    @result['messages'] = []
+    result = {}
+    result['status'] = true
+    result['messages'] = []
 
     if current_user.can? 'add_edit_users'
       if params[:role].nil? || params[:role]['id'].nil?
-        @result['status'] = false
-        @result['messages'].push("No role data sent")
+        result['status'] = false
+        result['messages'].push("No role data sent")
       else
         if params[:role]['id'].nil?
           user_role = Role.find_by_name("role_#{@user.id}")
@@ -210,37 +210,40 @@ class UsersController < ApplicationController
         User.where(:role_id => user_role.id).update_all(:role_id => scan_pack_role.id)
         user_role.destroy
 
-        @result['role'] = scan_pack_role
+        result['role'] = scan_pack_role
       end
     else
-      @result['status'] = false
-      @result['messages'].push("Current user doesn't have permission to delete roles")
+      result['status'] = false
+      result['messages'].push("Current user doesn't have permission to delete roles")
     end
 
     respond_to do |format|
       format.html # show.html.erb
-      format.json { render json: @result }
+      format.json { render json: result }
     end
   end
 
   def change_user_status
-    @result = Hash.new
-    @result['status'] = true
-    if current_user.can? 'add_edit_user'
+    result = {}
+    result['status'] = true
+    result['messages'] = []
+
+    if current_user.can? 'add_edit_users'
       params['_json'].each do |user|
         @user = User.find(user["id"])
         @user.active = user["active"]
         if !@user.save
-          @result['status'] = false
+          result['status'] = false
         end
       end
     else
-      @result['status'] = false
+      result['status'] = false
+      result['messages'].push("Current user doesn't have permission to update user status")
     end
 
     respond_to do |format|
       format.html # show.html.erb
-      format.json { render json: @result }
+      format.json { render json: result }
     end
   end
 
@@ -249,9 +252,9 @@ class UsersController < ApplicationController
 
   def duplicate_user
 
-    @result = Hash.new
-    @result['status'] = true
-    if current_user.can? 'add_edit_user'
+    result = {}
+    result['status'] = true
+    if current_user.can? 'add_edit_users'
       params['_json'].each do |user|
         if User.can_create_new?
           @user = User.find(user["id"])
@@ -272,69 +275,70 @@ class UsersController < ApplicationController
           @newuser.last_sign_in_at = ''
 
           if !@newuser.save(:validate => false)
-            @result['status'] = false
-            @result['messages'] = @newuser.errors.full_messages
+            result['status'] = false
+            result['messages'] = @newuser.errors.full_messages
           end
         else
-          @result['status'] = false
-          @result['messages'] = "You have reached the maximum limit of number of users for your subscription."
+          result['status'] = false
+          result['messages'] = "You have reached the maximum limit of number of users for your subscription."
         end
       end
     else
-      @result['status'] = true
+      result['status'] = true
     end
 
 
     respond_to do |format|
       format.html # show.html.erb
-      format.json { render json: @result }
+      format.json { render json: result }
     end
   end
 
   def delete_user
-    @result = Hash.new
-    @result['status'] = true
-    if current_user.can? 'add_edit_user'
+    result = {}
+    result['status'] = true
+    result['messages'] = []
+    if current_user.can? 'add_edit_users'
       params['_json'].each do |user|
         unless user['id'] == current_user.id
           @user = User.find(user['id'])
           if !@user.destroy
-            @result['status'] = false
+            result['status'] = false
           end
         end
       end
     else
-      @result['status'] = false
-      @result['messages'].push("Current user doesn't have permission to delete users")
+      result['status'] = false
+      result['messages'].push("Current user doesn't have permission to delete users")
     end
 
     respond_to do |format|
       format.html # show.html.erb
-      format.json { render json: @result }
+      format.json { render json: result }
     end
   end
 
   def show
     @user = User.find(params[:id])
-    @result = Hash.new
+    result = {}
 
     if !@user.nil?
-      @result['status'] = true
-      @result['user'] = @user
-      @result['user']['role'] = @user.role
+      result['status'] = true
+      result['user'] = @user
+      result['user']['role'] = @user.role
     else
-      @result['status'] = false
+      result['status'] = false
     end
 
     respond_to do |format|
       format.html # show.html.erb
-      format.json { render json: @result }
+      format.json { render json: result }
     end
   end
 
   def create_tenant
-    @result = Hash.new
-    @result['messages'] = []
+    result = {}
+    result['messages'] = []
     tenant = Tenant.new
     tenant.name = params[:name]
 
@@ -343,13 +347,13 @@ class UsersController < ApplicationController
       Apartment::Tenant.switch(tenant.name)
       seed_obj = Groovepacker::SeedTenant.new
       seed_obj.seed
-      @result['messages'] = 'Tenant successfully created'
+      result['messages'] = 'Tenant successfully created'
       Apartment::Tenant.switch()
     else
-      @result['messages'] = tenant.errors.full_messages
+      result['messages'] = tenant.errors.full_messages
     end
     respond_to do |format|
-      format.json { render json: @result }
+      format.json { render json: result }
     end
   end
 

@@ -145,7 +145,7 @@ module Groovepacker
 
           :edit_general_prefs => true,
           :edit_scanning_prefs => true,
-          :add_edit_stores => false,
+          :add_edit_stores => true,
           :create_backups => true,
           :restore_backups => false
         },
