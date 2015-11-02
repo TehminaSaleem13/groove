@@ -195,6 +195,10 @@ module Groovepacker
               usable_record[:spl_instructions_4_packer] = single_row[self.mapping['product_instructions'][:position]]
             end
 
+            if !self.mapping['receiving_instructions'].nil? && self.mapping['receiving_instructions'][:position] >= 0 && !single_row[self.mapping['receiving_instructions'][:position]].blank?
+              usable_record[:product_receiving_instructions] = single_row[self.mapping['receiving_instructions'][:position]]
+            end
+
             if !self.mapping['barcode'].nil? && self.mapping['barcode'][:position] >= 0
               unless single_row[self.mapping['barcode'][:position]].nil?
                 barcodes = single_row[self.mapping['barcode'][:position]].split(',')
@@ -336,6 +340,9 @@ module Groovepacker
             end
             if !self.mapping['product_instructions'].nil? #&& self.mapping['product_instructions'][:action] == 'overwrite'
               duplicate_product.spl_instructions_4_packer = record[:spl_instructions_4_packer]
+            end
+            if !self.mapping['receiving_instructions'].nil? #&& self.mapping['receiving_instructions'][:action] == 'overwrite'
+              duplicate_product.product_receiving_instructions = record[:product_receiving_instructions]
             end
 
             @products_for_status_update << duplicate_product

@@ -28,7 +28,7 @@ module Groovepacker
                 if @imported_orders.has_key?(single_row[self.mapping['increment_id'][:position]]) || Order.where(:increment_id => single_row[self.mapping['increment_id'][:position]]).length == 0 || self.params[:contains_unique_order_items] == true
                   @order = Order.find_or_create_by_increment_id(single_row[self.mapping['increment_id'][:position]])
                   @order.store_id = self.params[:store_id]
-                  @order_required = ['qty', 'sku', 'increment_id']
+                  @order_required = ['qty', 'sku', 'increment_id', 'price']
                   order_map.each do |single_map|
                     if !self.mapping[single_map].nil? && self.mapping[single_map][:position] >= 0
                       #if sku, create order item with product id, qty
@@ -123,6 +123,13 @@ module Groovepacker
                     order_item.qty = 0
                   end
                   @order_required.delete('qty')
+
+                  if !self.mapping['item_sale_price'].nil? && self.mapping['item_sale_price'][:position] >= 0 && !single_row[self.mapping['item_sale_price'][:position]].nil?
+                    order_item.price = single_row[self.mapping['item_sale_price'][:position]]
+                  else
+                    order_item.price = 0.0
+                  end
+                  @order_required.delete('price')
                   @order.order_items << order_item
                 elsif OrderItem.where(:product_id => product_skus.first.product.id, :order_id => @order.id, :sku => single_row[self.mapping['sku'][:position]].strip).length > 0
                   order_item = OrderItem.where(:product_id => product_skus.first.product.id, :order_id => @order.id, :sku => single_row[self.mapping['sku'][:position]].strip).first
@@ -130,6 +137,12 @@ module Groovepacker
                     order_item.qty = (order_item.qty.to_i + single_row[self.mapping['qty'][:position]].to_i).to_s
                   end
                   @order_required.delete('qty')
+
+                  if !self.mapping['item_sale_price'].nil? && self.mapping['item_sale_price'][:position] >= 0 && !single_row[self.mapping['item_sale_price'][:position]].nil?
+                    order_item.price = single_row[self.mapping['item_sale_price'][:position]]
+                  end
+                  @order_required.delete('price')
+
                   @order.order_items << order_item
                 end
               else # no sku is found
@@ -238,6 +251,15 @@ module Groovepacker
             return qty
           end
 
+          def import_item_sale_price(order_item,single_row)
+            price = 0.0
+            if !self.mapping['item_sale_price'].nil? && self.mapping['item_sale_price'][:position] >= 0 && !single_row[self.mapping['item_sale_price'][:position]].nil?
+              price = single_row[self.mapping['item_sale_price'][:position]]
+            end
+            @order_required.delete('price')
+            return price
+          end
+
           def import_image(product, single_row, check_duplicacy = false)
             if !self.mapping['image'].nil? && self.mapping['image'][:position] >= 0
               if check_duplicacy
@@ -339,6 +361,7 @@ module Groovepacker
             order_item.sku = get_sku(single_row, unique_order_item)
             
             order_item.qty = import_order_item_qty(order_item, single_row)
+            order_item.price = import_item_sale_price(order_item,single_row)
             
             @order_required.delete('sku')
             @order.order_items << order_item
