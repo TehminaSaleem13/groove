@@ -590,7 +590,7 @@ class StoresController < ApplicationController
               {value: 'part_name', name: 'PART-NAME'},
               {value: 'part_barcode', name: 'PART-BARCODE'},
               {value: 'part_qty', name: 'PART-QTY'},
-            #{value:'kit_scan', name:'KIT-SCAN' },
+              {value: 'scan_option', name:'SCAN-OPTION' }
             ]
             if csv_map.kit_csv_map.nil?
               @result['kit']['settings'] = default_csv_map

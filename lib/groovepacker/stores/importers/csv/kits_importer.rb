@@ -99,13 +99,28 @@ module Groovepacker
             kit_product.store_id = self.params[:store_id]
             kit_product.store_product_id = 'csv_import_'+self.params[:store_id].to_s+'_'+SecureRandom.uuid+'_'+kit_sku
             kit_product.is_kit = 1
-            kit_product.kit_parsing = Product::SINGLE_KIT_PARSING
+            kit_product.kit_parsing = apply_kit_parsing(single_row,kit_product)
+            # kit_product.kit_parsing = Product::SINGLE_KIT_PARSING
             kit_product.name = import_name('kit_name', single_row, kit_product)
             kit_product.save
 
             #import product
             if not_blank?('part_sku', single_row)
               import_kit_products(single_row, kit_product)
+            end
+          end
+
+          def apply_kit_parsing(single_row, kit_product)
+            if not_blank?('scan_option',single_row)
+              option = single_row[self.mapping['scan_option'][:position]].to_s
+              case option
+              when "2"
+                return Product::INDIVIDUAL_KIT_PARSING
+              when "3"
+                return Product::DEPENDS_KIT_PARSING
+              else
+                return Product::SINGLE_KIT_PARSING
+              end
             end
           end
 
