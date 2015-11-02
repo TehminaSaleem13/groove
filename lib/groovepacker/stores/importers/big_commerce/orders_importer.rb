@@ -98,7 +98,7 @@ module Groovepacker
             bigcommerce_order.order_placed_time = order["date_created"].to_datetime
 
             unless order["customer_id"].nil?
-              order["customer"] = client.customer("https://api.bigcommerce.com/stores/w9xil/v2/customers/#{order["customer_id"]}")
+              order["customer"] = client.customer("https://api.bigcommerce.com/#{client.as_json["store_hash"]}/v2/customers/#{order["customer_id"]}")
               bigcommerce_order.email = order["customer"]["email"]
               bigcommerce_order.lastname = order["customer"]["last_name"]
               bigcommerce_order.firstname = order["customer"]["first_name"]
@@ -144,7 +144,7 @@ module Groovepacker
               # get product categories
               unless bigcommerce_product["categories"].blank?
                 tags = []
-                categories = client.product_categories("https://api.bigcommerce.com/stores/w9xil/v2/categories")
+                categories = client.product_categories("https://api.bigcommerce.com/#{client.as_json["store_hash"]}/v2/categories")
                 categories.select {|cat| tags << cat["name"] if bigcommerce_product["categories"].include?(cat["id"])}
                 tags.each do |tag|
                   product.product_cats.create(category: tag)

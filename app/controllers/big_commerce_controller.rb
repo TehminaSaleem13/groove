@@ -38,8 +38,9 @@ class BigCommerceController < Devise::OmniauthCallbacksController
                   "Accept" => "application/json"
                 }
             )
-      if response["error"]
-        render json: {status: false, message: response["error"]}
+      parsed_json = JSON.parse(response)
+      if parsed_json && parsed_json["error"]
+        render json: {status: false, message: parsed_json["error"]}
       else
         render json: {status: true, message: "Connection tested successfully"}
       end
