@@ -100,7 +100,6 @@ module Groovepacker
             kit_product.store_product_id = 'csv_import_'+self.params[:store_id].to_s+'_'+SecureRandom.uuid+'_'+kit_sku
             kit_product.is_kit = 1
             kit_product.kit_parsing = apply_kit_parsing(single_row,kit_product)
-            # kit_product.kit_parsing = Product::SINGLE_KIT_PARSING
             kit_product.name = import_name('kit_name', single_row, kit_product)
             kit_product.save
 
@@ -121,6 +120,8 @@ module Groovepacker
               else
                 return Product::SINGLE_KIT_PARSING
               end
+            else
+              return Product::SINGLE_KIT_PARSING
             end
           end
 
