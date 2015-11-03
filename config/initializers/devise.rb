@@ -1,7 +1,7 @@
 # Use this hook to configure devise mailer, warden hooks and so forth.
 # Many of these configuration options can be set straight in your model.
 Devise.setup do |config|
-  config.omniauth :bigcommerce, '4zv7the62weqix2ea72o2sq241r1ose', 'g5tg187dtxjhom50jalbl3q2dt8gasf',
+  config.omniauth :bigcommerce, ENV['BC_CLIENT_ID'], ENV['BC_CLIENT_SECRET'],
            {
              scope: "users_basic_information store_v2_products store_v2_information",
              client_options: {
