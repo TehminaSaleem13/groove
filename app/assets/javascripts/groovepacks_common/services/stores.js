@@ -124,6 +124,7 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
           stores.csv.mapping = data.mapping;
         }
         if (data.credentials.status == true) {
+          stores.single.allow_inv_push = data.access_restrictions.allow_inv_push;
           if (data.store.store_type == 'Magento') {
             stores.single.host = data.credentials.magento_credentials.host;
             stores.single.username = data.credentials.magento_credentials.username;

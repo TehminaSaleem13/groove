@@ -964,6 +964,8 @@ class StoresController < ApplicationController
     if !@store.nil? then
       @result['status'] = true
       @result['store'] = @store
+      access_restrictions = AccessRestriction.last
+      @result['access_restrictions'] = access_restrictions
       @result['credentials'] = @store.get_store_credentials
       if @store.store_type == 'CSV'
         @result['mapping'] = CsvMapping.find_by_store_id(@store.id)
