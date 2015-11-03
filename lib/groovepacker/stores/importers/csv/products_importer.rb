@@ -294,7 +294,7 @@ module Groovepacker
 
           def create_single_import(record)
             record[:name] = 'Product from CSV Import' if record[:name].blank?
-            single_import = Product.new(:name => record[:name], :product_type => record[:product_type], :spl_instructions_4_packer => record[:spl_instructions_4_packer], :is_intangible => record[:is_intangible], :weight => record[:weight])
+            single_import = Product.new(:name => record[:name], :product_type => record[:product_type], :spl_instructions_4_packer => record[:spl_instructions_4_packer], :product_receiving_instructions => record[:product_receiving_instructions], :is_intangible => record[:is_intangible], :weight => record[:weight])
             single_import.store_id = self.params[:store_id]
             single_import.store_product_id = record[:store_product_id]
             if record[:skus].length > 0 && record[:barcodes].length > 0
