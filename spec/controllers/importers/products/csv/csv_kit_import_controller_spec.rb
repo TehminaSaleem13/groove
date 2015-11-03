@@ -38,5 +38,75 @@ describe StoresController do
       expect(Product.where(:is_kit=>true).size).to eq(6)
       expect(Product.where(:is_kit=>false).size).to eq(11)
     end
+    # it "imports kits from csv file and builds kits from existing products" do
+    #   request.accept = "application/json"
+    #   get :csv_import_data, {:type => 'product', :id => @store.id}
+    #   expect(response.status).to eq(200)
+
+    #   request.accept = "application/json"
+    #   get :create_update_store, {:store_type => 'CSV', :status=> @store.status, :name => @store.name, :inventory_warehouse_id => @store.inventory_warehouse_id, :id => @store.id, :productfile => fixture_file_upload(Rails.root.join('/files/MT_Products_04_import_kit.csv'))}
+    #   expect(response.status).to eq(200)
+
+    #   doc = IO.read(Rails.root.join("spec/fixtures/files/MT_Products_04_map_option3"))
+    #   doc = eval(doc)
+    #   request.accept = "application/json"
+    #   post :csv_do_import, {:id => @store.id, :rows=>"2", :sep=>",", :other_sep=>"0", :delimiter=>"\"", :fix_width=>"0", :fixed_width=>"4", :contains_unique_order_items=>false, :generate_barcode_from_sku=>false, :use_sku_as_product_name=>false, :import_action=>doc[:map][:import_action], :map=>doc[:map][:map], :controller=>"stores", :action=>"csv_do_import", :store_id=> @store.id, :name=>doc[:name], :type=>'product', :flag=>'file_upload'}
+    #   expect(response.status).to eq(200)
+    #   expect(Product.all.count).to eq(31)
+
+    #   get :csv_import_data, {:type => 'kit', :id => @store.id}
+    #   expect(response.status).to eq(200)
+
+    #   request.accept = "application/json"
+    #   get :create_update_store, {:store_type => 'CSV', :status=> @store.status, :name => @store.name, :inventory_warehouse_id => @store.inventory_warehouse_id, :id => @store.id, :kitfile => fixture_file_upload(Rails.root.join('/files/MT_Kits_04.csv'))}
+    #   expect(response.status).to eq(200)
+
+    #   doc = IO.read(Rails.root.join("spec/fixtures/files/MT_Kits_04_map"))
+    #   doc = eval(doc)
+
+    #   request.accept = "application/json"
+    #   post :csv_do_import, {:id => @store.id, :rows=>"2", :sep=>",", :other_sep=>"0", :delimiter=>"\"", :fix_width=>"0", :fixed_width=>"4", :import_action=>nil, :contains_unique_order_items=>false, :generate_barcode_from_sku=>false, :use_sku_as_product_name=>false, :order_date_time_format=>"MM/DD/YY TIME", :day_month_sequence=>"DD/MM", :map=>doc[:map][:map], :controller=>"stores", :action=>"csv_do_import", :store_id=> @store.id, :name=>doc[:name], :type=>'kit', :flag=>'file_upload'}
+    #   expect(response.status).to eq(200)
+    #   expect(Product.all.count).to eq(32)
+    #   expect(Product.where(:is_kit=>true).size).to eq(7)
+    #   expect(Product.where(:is_kit=>false).size).to eq(25)
+    # end
+
+    it "imports kits from csv file and builds kits from existing products and records scan option from csv" do
+      request.accept = "application/json"
+      get :csv_import_data, {:type => 'product', :id => @store.id}
+      expect(response.status).to eq(200)
+
+      request.accept = "application/json"
+      get :create_update_store, {:store_type => 'CSV', :status=> @store.status, :name => @store.name, :inventory_warehouse_id => @store.inventory_warehouse_id, :id => @store.id, :productfile => fixture_file_upload(Rails.root.join('/files/MT_Products_04_import_kit.csv'))}
+      expect(response.status).to eq(200)
+
+      doc = IO.read(Rails.root.join("spec/fixtures/files/MT_Products_04_map_option3"))
+      doc = eval(doc)
+      request.accept = "application/json"
+      post :csv_do_import, {:id => @store.id, :rows=>"2", :sep=>",", :other_sep=>"0", :delimiter=>"\"", :fix_width=>"0", :fixed_width=>"4", :contains_unique_order_items=>false, :generate_barcode_from_sku=>false, :use_sku_as_product_name=>false, :import_action=>doc[:map][:import_action], :map=>doc[:map][:map], :controller=>"stores", :action=>"csv_do_import", :store_id=> @store.id, :name=>doc[:name], :type=>'product', :flag=>'file_upload'}
+      expect(response.status).to eq(200)
+      expect(Product.all.count).to eq(31)
+
+      get :csv_import_data, {:type => 'kit', :id => @store.id}
+      expect(response.status).to eq(200)
+
+      request.accept = "application/json"
+      get :create_update_store, {:store_type => 'CSV', :status=> @store.status, :name => @store.name, :inventory_warehouse_id => @store.inventory_warehouse_id, :id => @store.id, :kitfile => fixture_file_upload(Rails.root.join('/files/MT_Kits_04.csv'))}
+      expect(response.status).to eq(200)
+
+      doc = IO.read(Rails.root.join("spec/fixtures/files/MT_Kits_04_map"))
+      doc = eval(doc)
+
+      request.accept = "application/json"
+      post :csv_do_import, {:id => @store.id, :rows=>"2", :sep=>",", :other_sep=>"0", :delimiter=>"\"", :fix_width=>"0", :fixed_width=>"4", :import_action=>nil, :contains_unique_order_items=>false, :generate_barcode_from_sku=>false, :use_sku_as_product_name=>false, :order_date_time_format=>"MM/DD/YY TIME", :day_month_sequence=>"DD/MM", :map=>doc[:map][:map], :controller=>"stores", :action=>"csv_do_import", :store_id=> @store.id, :name=>doc[:name], :type=>'kit', :flag=>'file_upload'}
+      expect(response.status).to eq(200)
+      expect(Product.all.count).to eq(32)
+      expect(Product.where(:is_kit=>true).size).to eq(7)
+      expect(Product.where(:is_kit=>false).size).to eq(25)
+      expect(Product.where(:is_kit=>true, :kit_parsing=>'single').size).to eq(2)
+      expect(Product.where(:is_kit=>true, :kit_parsing=>'individual').size).to eq(1)
+      expect(Product.where(:is_kit=>true, :kit_parsing=>'depends').size).to eq(4)
+    end
   end
 end

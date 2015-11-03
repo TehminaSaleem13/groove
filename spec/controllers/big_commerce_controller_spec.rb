@@ -1,12 +1,12 @@
-require 'rails_helper'
+# require 'rails_helper'
 
-RSpec.describe BigCommerceController, :type => :controller do
+# RSpec.describe BigCommerceController, :type => :controller do
 
-  describe "GET callback" do
-    it "returns http success" do
-      get :callback
-      expect(response).to have_http_status(:success)
-    end
-  end
+#   describe "GET callback" do
+#     it "returns http success" do
+#       get :callback
+#       expect(response).to have_http_status(:success)
+#     end
+#   end
 
-end
+# end
