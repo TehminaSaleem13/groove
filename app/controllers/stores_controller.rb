@@ -616,7 +616,7 @@ class StoresController < ApplicationController
               {value: 'part_name', name: 'PART-NAME'},
               {value: 'part_barcode', name: 'PART-BARCODE'},
               {value: 'part_qty', name: 'PART-QTY'},
-            #{value:'kit_scan', name:'KIT-SCAN' },
+              {value: 'scan_option', name:'SCAN-OPTION' }
             ]
             if csv_map.kit_csv_map.nil?
               @result['kit']['settings'] = default_csv_map
@@ -781,7 +781,7 @@ class StoresController < ApplicationController
         if OrderImportSummary.where(status: 'in_progress').empty?
           bulk_actions = Groovepacker::Orders::BulkActions.new
           bulk_actions.delay(:run_at => 1.seconds.from_now).import_csv_orders(Apartment::Tenant.current_tenant, @store.id, data.to_s, current_user.id)
-          # bulk_actions.import_csv_orders(Apartment::Tenant.current_tenant, @store, data, current_user)
+          # bulk_actions.import_csv_orders(Apartment::Tenant.current_tenant, @store.id, data.to_s, current_user.id)
         else
           @result['status'] = false
           @result['messages'].push("Import is in progress. Try after it is complete")
