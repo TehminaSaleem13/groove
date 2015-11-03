@@ -38,7 +38,7 @@ class BigCommerceController < Devise::OmniauthCallbacksController
                   "Accept" => "application/json"
                 }
             )
-      parsed_json = JSON.parse(response)
+      parsed_json = JSON.parse(response) rescue response
       if parsed_json && parsed_json["error"]
         render json: {status: false, message: parsed_json["error"]}
       else
@@ -50,6 +50,16 @@ class BigCommerceController < Devise::OmniauthCallbacksController
   end
 
   def complete
+  end
+
+  def disconnect
+    store = Store.find_by_id(params[:store_id])
+    store_credentials = store.big_commerce_credential
+    if store_credentials.update_attributes(:store_hash => nil, :access_token => nil)
+      render status: 200, json: 'disconnected'
+    else
+      render status: 304, json: 'not disconnected'
+    end
   end
 
   private

@@ -1,28 +1,30 @@
 <div class="row">
   <div class="col-md-8">
     <legend>BigCommerce Information</legend>
-    <div class="form-group">
-      <label class="control-label col-md-4"></label>
+    <div ng-show="stores.single.store_hash == null || stores.single.store_hash == 'null' || stores.single.access_token == null || stores.single.access_token == 'null'">
+      <div class="form-group">
+        <label class="control-label col-md-4"></label>
 
-      <div class="controls col-md-8">
-        <div class="input-group">
-          1)-Please click the "Install" button below to launch the BigCommerce app store in a new tab.
+        <div class="controls col-md-8">
+          <div class="input-group">
+            1)-Please click the "Install" button below to launch the BigCommerce app store in a new tab.
+          </div>
+          <br/>
+          <button class="btn btn-success" ng-click="launch_big_commerce_popup()">
+            Install
+          </button>
         </div>
-        <br/>
-        <button class="btn btn-success" ng-click="launch_big_commerce_popup()">
-          Install
-        </button>
       </div>
-    </div>
-    
-    <div class="form-group">
-      <label class="control-label col-md-4"></label>
-      <div class="controls col-md-8">
-        <div class="input-group">
-          2)-Click "Get it Now" on the GroovePacker App page and follow the prompts to complete the install.
-        </div>
-        <div class="input-group">
-          3)-When complete please return and click "Check Connection" below.
+      
+      <div class="form-group">
+        <label class="control-label col-md-4"></label>
+        <div class="controls col-md-8">
+          <div class="input-group">
+            2)-Click "Get it Now" on the GroovePacker App page and follow the prompts to complete the install.
+          </div>
+          <div class="input-group">
+            3)-When complete please return and click "Check Connection" below.
+          </div>
         </div>
       </div>
     </div>
@@ -41,8 +43,13 @@
             <button class="btn btn-success" ng-click="check_bigcommerce_connection()">
               Check Connection
             </button>
+
+            <button class="btn btn-success" ng-click="disconnect_bigcommerce_connection()">
+              Disconnect
+            </button>
           </div>
         </div>
+        
         <div class="form-group">
           <label class="control-label col-md-4"></label>
           <div class="controls col-md-8">
