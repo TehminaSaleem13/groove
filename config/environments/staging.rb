@@ -112,6 +112,9 @@ Groovepacks::Application.configure do
   ENV['SHOPIFY_SHARED_SECRET'] = "d0b33de5f8fadb93ff392505f449402c"
   ENV["SHOPIFY_REDIRECT_HOST"] = "barcodepacker.com"
 
+  ENV['BC_CLIENT_ID'] = "cz0f2qcrmvvhwm4waxgxj350db8y3ea"
+  ENV['BC_CLIENT_SECRET'] = "802ppnfiyudfq77ug8e0tv6um1b1etv"
+
   # Stripe production keys
   ENV['STRIPE_API_KEY'] = "sk_test_4QS2OJ8BkMWcuzCWrHrKGlz9"
   ENV['STRIPE_PUBLIC_KEY'] = "pk_test_4QS2UN3famIPlHtp2Q7ykpDf"
