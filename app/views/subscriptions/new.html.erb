@@ -18,7 +18,7 @@
 
           <div class="input-group">
             <div class="input-group-addon">https://</div>
-            <input type="text" id="tenant_name" class="form-control" autofocus value="<%= non_hyphenated_string(params[:shopify]) %>"/>
+            <input type="text" id="tenant_name" class="form-control" autofocus value="<%= non_hyphenated_string(params[:shop_name]) %>"/>
 
             <div class="input-group-addon">.groovepacker.com</div>
           </div>
@@ -86,7 +86,7 @@
           <iframe src="/assets/views/termsofservicetos.html" width="100%" height="200px"></iframe>
         </div>
         <hr width="95%">
-        <% if params[:shopify].nil? %>
+        <% if params[:shop_name].nil? %>
           <div>
             <h4>
               <center>Risk Free 30-day Evaluation</center>
@@ -149,7 +149,7 @@
             </div>
           </div>
         <% else %>
-          <%= render 'shopify_payment_form' %>
+          <%= render 'payment_form' %>
         <% end %>
       </fieldset>
     </form>
@@ -186,10 +186,10 @@
         $('#tos_iframe').hide();
         $('#privacy_iframe').show();
       });
-      $('#shopifyButton').on('click', function (event) {
+      $('#shopButton').on('click', function (event) {
         event.preventDefault();
         plan_id = $('#plan_id').val();
-        open_handler(plan_id, "shopify");
+        open_handler(plan_id, "<%= params[:shop_name] %>");
       })
 
       var handler = StripeCheckout.configure({
@@ -210,14 +210,15 @@
               password: $('#password').val(),
               radio_subscription: radio_button_value,
               coupon_id: coupon_id,
-              shopify_shop_name: "<%= params[:shopify] %>"
+              shop_name: "<%= params[:shop_name] %>",
+              shop_type: "<%= params[:shop_type] %>"
             }),
             dataType: "json"
 
           }).error(function (response) {
             $('#processing_alert_success').hide();
             $('#customButton').show();
-            $('#shopifyButton').show();
+            $('#shopButton').show();
             $('#processing_alert_error').show();
             $('#processing_alert_error').append(
               "<p>Your subscription could not be processed. Please try again.</p>"
@@ -226,7 +227,7 @@
             if (!response.valid) {
               $('#processing_alert_success').hide();
               $('#customButton').show();
-              $('#shopifyButton').show();
+              $('#shopButton').show();
               $('#processing_alert_error').show();
               $('#processing_alert_error').append(
                 "<p>" + response.errors + "</p>"
@@ -238,7 +239,7 @@
             }
           });
           $('#customButton').hide();
-          $('#shopifyButton').hide();
+          $('#shopButton').hide();
           $('#processing_alert_success').show();
           $('#processing_alert_error').hide();
         }
@@ -345,7 +346,7 @@
               // Open Checkout with further options
               var description = null;
               var amount = 0;
-              if (channel == 'shopify') {
+              if (channel == 'Shopify' || channel == 'BigCommerce') {
                 amount = 0;
                 description = 'Add a card to your account';
               } else {

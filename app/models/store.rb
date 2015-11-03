@@ -10,6 +10,7 @@ class Store < ActiveRecord::Base
   has_one :shipworks_credential
   has_one :shopify_credential
   has_one :ftp_credential
+  has_one :big_commerce_credential
 
   belongs_to :inventory_warehouse
 
@@ -79,6 +80,10 @@ class Store < ActiveRecord::Base
         shopify_handle = Groovepacker::ShopifyRuby::Utilities.new(shopify_credential)
         @result['shopify_permission_url'] = shopify_handle.permission_url(Apartment::Database.current)
       end
+      @result['status'] =true
+    end
+    if self.store_type == 'BigCommerce'
+      @result['big_commerce_credentials'] = big_commerce_credential
       @result['status'] =true
     end
     if self.store_type == 'CSV'

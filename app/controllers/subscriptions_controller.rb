@@ -24,8 +24,8 @@ class SubscriptionsController < ApplicationController
                                         status: "started",
                                         coupon_id: params[:coupon_id])
     if @subscription
-      if !params[:shopify_shop_name].nil? &&
-        params[:shopify_shop_name] != ''
+      if !params[:shop_name].nil? &&
+        params[:shop_name] != ''
         one_time_payment = 0
       else
         one_time_payment = ENV['ONE_TIME_PAYMENT']
@@ -33,27 +33,12 @@ class SubscriptionsController < ApplicationController
       @subscription.save_with_payment(one_time_payment)
       if @subscription.status == 'completed'
         #for shopify create the store and send for authentication
-        if !params[:shopify_shop_name].nil? &&
-          params[:shopify_shop_name] != ''
+        if !params[:shop_name].nil? &&
+          params[:shop_name] != ''
           #switch tenant
-          Apartment::Tenant.switch(@subscription.tenant_name)
-          store = Store.create(
-            name: params[:shopify_shop_name],
-            store_type: 'Shopify',
-            status: '1',
-            inventory_warehouse_id: get_default_warehouse_id
-          )
-          shopify_credential = ShopifyCredential.create(
-            shop_name: params[:shopify_shop_name],
-            store_id: store.id
-          )
-          render json: {
-                   valid: true,
-                   redirect_url:
-                     Groovepacker::ShopifyRuby::Utilities.new(
-                       shopify_credential
-                     ).permission_url(params[:tenant_name], true)
-                 }
+          created_tenant = Apartment::Tenant.switch(@subscription.tenant_name)
+          response = create_store_and_credential
+          render json: response
         else
           @result = get_next_payment_date(@subscription)
           render json: {valid: true,
@@ -127,4 +112,37 @@ class SubscriptionsController < ApplicationController
   def login
 
   end
+
+  private
+    def create_store_and_credential
+      store = Store.create(name: params[:shop_name], store_type: params[:shop_type], status: '1', inventory_warehouse_id: get_default_warehouse_id )
+      case params[:shop_type]
+      when "Shopify"
+        response = create_shopify_credential(store.id)
+      when "BigCommerce"
+        response = create_BigCommerce_credential(store.id)
+      end
+      return response
+    end
+
+    def create_shopify_credential(store_id)
+      shopify_credential = ShopifyCredential.create(shop_name: params[:shop_name], store_id: store_id )
+      return {
+               valid: true,
+               redirect_url:
+                 Groovepacker::ShopifyRuby::Utilities.new(
+                   shopify_credential
+                 ).permission_url(params[:tenant_name], true)
+             }
+    end
+
+    def create_BigCommerce_credential(store_id)
+      bc_auth = cookies[:bc_auth]
+      access_token = bc_auth['credentials']['token'] rescue nil
+      store_hash = bc_auth['extra']['context'] rescue nil
+      cookies.delete(:bc_auth)
+      BigCommerceCredential.create(shop_name: params[:shop_name], store_id: store_id, access_token: access_token, store_hash: store_hash )
+      return { valid: true, redirect_url: "" }
+    end
+
 end

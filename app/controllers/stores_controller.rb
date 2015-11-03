@@ -113,6 +113,7 @@ class StoresController < ApplicationController
           @store.thank_you_message_to_customer = params[:thank_you_message_to_customer] unless params[:thank_you_message_to_customer] == 'null'
           @store.inventory_warehouse_id = params[:inventory_warehouse_id] || get_default_warehouse_id
           @store.auto_update_products = params[:auto_update_products]
+          @store.update_inv = params[:update_inv]
         end
 
         if @result['status']
@@ -380,6 +381,31 @@ class StoresController < ApplicationController
               @result['status'] = false
               @result['messages'] = [e.message]
             end
+          end
+          if @store.store_type == 'BigCommerce'
+            @bigcommerce = BigCommerceCredential.find_by_store_id(@store.id)
+            begin
+              params[:shop_name] = nil if params[:shop_name] == 'null'
+              if @bigcommerce.nil?
+                @store.big_commerce_credential = BigCommerceCredential.new(
+                  shop_name: params[:shop_name])
+                new_record = true
+              else
+                @bigcommerce.update_attributes(shop_name: params[:shop_name])
+              end
+              @store.save
+            rescue ActiveRecord::RecordInvalid => e
+              @result['status'] = false
+              @result['messages'] = [@store.errors.full_messages,
+                                     @store.big_commerce_credential.errors.full_messages]
+
+            rescue ActiveRecord::StatementInvalid => e
+              @result['status'] = false
+              @result['messages'] = [e.message]
+            end
+            current_tenant = Apartment::Tenant.current
+            cookies[:tenant_name] = {:value => current_tenant , :domain => :all}
+            cookies[:store_id] = {:value => @store.id , :domain => :all}
           end
         else
           @result['status'] = false
@@ -938,6 +964,8 @@ class StoresController < ApplicationController
     if !@store.nil? then
       @result['status'] = true
       @result['store'] = @store
+      access_restrictions = AccessRestriction.last
+      @result['access_restrictions'] = access_restrictions
       @result['credentials'] = @store.get_store_credentials
       if @store.store_type == 'CSV'
         @result['mapping'] = CsvMapping.find_by_store_id(@store.id)
@@ -1273,6 +1301,14 @@ class StoresController < ApplicationController
       format.html # show.html.erb
       format.csv { send_data data, :type => 'text/csv', :filename => filename }
     end
+  end
+
+  def pull_store_inventory
+
+  end
+
+  def push_store_inventory
+    
   end
 end
 
