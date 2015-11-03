@@ -245,7 +245,7 @@ module Groovepacker
             end
             if !self.mapping['tertiary_barcode'].nil? && self.mapping['tertiary_barcode'][:position] >= 0 && !single_row[self.mapping['tertiary_barcode'][:position]].nil?
               barcode = ProductBarcode.new
-              product.barcode = single_row[self.mapping['tertiary_barcode'][:position]]
+              barcode.barcode = single_row[self.mapping['tertiary_barcode'][:position]]
               product.product_barcodes << barcode
             end
           end
