@@ -1,5 +1,5 @@
 class BigCommerceController < Devise::OmniauthCallbacksController
-  before_filter :groovepacker_authorize!, :except => [:bigcommerce, :complete]
+  before_filter :groovepacker_authorize!, :only => [:check_connection, :disconnect]
 
   def setup
   	# redirect to admin page with the big-commerce and with groove-solo plan
