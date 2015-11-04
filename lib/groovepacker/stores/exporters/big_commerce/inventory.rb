@@ -6,28 +6,43 @@ module Groovepacker
           include ProductsHelper
 
           def push_inventories
-            handler = self.get_handler
-            credential = handler[:credential]
-            client = handler[:store_handle]
-            import_item = handler[:import_item]
-            result = self.build_result
-            products = Product.where(store_id: credential.store_id)
+            @credential = handler[:credential]
+            @client = handler[:store_handle]
+            
+            products = Product.joins(:sync_option).where("sync_with_bc=true and (bc_product_id IS NOT NULL or store_product_id IS NOT NULL)")
             
             (products||[]).each do |product|
               inv_wh = product.product_inventory_warehousess.first
               attrs = {inventory_level: inv_wh.quantity_on_hand}
               
-              if product.product_type=="product"
-                response = client.update_product_inv("https://api.bigcommerce.com/#{credential.store_hash}/v2/products/#{product.store_product_id}", attrs)
-              elsif product.product_type=="variant"
-                product_skus = product.product_skus
-                (product_skus||[]).each do |sku|
-                  bc_product_sku = client.product_skus("https://api.bigcommerce.com/#{credential.store_hash}/v2/products/#{product.store_product_id}/skus?sku=#{sku.sku}").first
-                  response = client.update_product_sku_inv("https://api.bigcommerce.com/#{credential.store_hash}/v2/products/#{product.store_product_id}/skus/#{bc_product_sku["id"]}", attrs)
+              sync_optn = product.sync_option
+              bc_product_id = (sync_optn.bc_product_id rescue nil) || product.store_product_id
+              
+              update_inv_on_bc_for_sync_option(product, bc_product_id, attrs)
+            end
+          end
+
+          private
+            def update_inv_on_bc_for_sync_option(product, bc_product_id, attrs)
+              product_skus = product.product_skus.map(&:sku)
+              bc_product = @client.product(bc_product_id)
+              if bc_product["id"] && product_skus.include?(bc_product["sku"])
+                @client.update_product_inv("https://api.bigcommerce.com/#{@credential.store_hash}/v2/products/#{bc_product_id}", attrs)
+              elsif bc_product["id"] && bc_product["skus"]
+                update_product_by_bc_variants(product_skus, bc_product, attrs)
+              end
+            end
+
+
+            def update_product_by_bc_variants(product_skus, bc_product, attrs)
+              bc_product_skus = @client.product_skus(bc_product["skus"]["url"])
+              (bc_product_skus||[]).each do |bc_sku|
+                if product_skus.include?(bc_sku["sku"])
+                  response = @client.update_product_sku_inv("https://api.bigcommerce.com/#{@credential.store_hash}/v2/products/#{bc_product['id']}/skus/#{bc_sku["id"]}", attrs)
+                  break;
                 end
               end
             end
-          end
 
         end
       end

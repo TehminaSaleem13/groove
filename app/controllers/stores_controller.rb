@@ -1309,14 +1309,16 @@ class StoresController < ApplicationController
     @result = Hash.new
     @result['status'] = true
 
-    if @store && current_user.can?('update_inventories')
+    access_restriction = AccessRestriction.last
+    if access_restriction && access_restriction.allow_inv_push && @store && current_user.can?('update_inventories')
       context = Groovepacker::Stores::Context.new(
             Groovepacker::Stores::Handlers::BigCommerceHandler.new(@store))
       context.delay(:run_at => 1.seconds.from_now).pull_inventory
+      #context.pull_inventory
       @result['message'] = "Your request has beed queued"
     else
       @result['status'] = false
-      @result['message'] = "Either the store is not present or you don't have permissions to update inventories."
+      @result['message'] = "Either the the BigCommerce store is not setup properly or you don't have permissions to update inventories."
     end
 
     render json: @result
@@ -1332,6 +1334,7 @@ class StoresController < ApplicationController
       context = Groovepacker::Stores::Context.new(
             Groovepacker::Stores::Handlers::BigCommerceHandler.new(@store))
       context.delay(:run_at => 1.seconds.from_now).push_inventory
+      #context.push_inventory
       @result['message'] = "Your request has beed queued"
     else
       @result['status'] = false

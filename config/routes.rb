@@ -94,6 +94,7 @@ Groovepacks::Application.routes.draw do
       post 'set_alias'
       post 'add_product_to_kit'
       post 'remove_products_from_kit'
+      put 'sync_with'
     end
   end
 
