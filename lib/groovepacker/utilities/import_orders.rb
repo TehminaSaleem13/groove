@@ -261,7 +261,7 @@ class ImportOrders
       end
     rescue Exception => e
       if e.message.strip == "Error: 302"
-        import_item.message = "Import failed: Please use https instead of http in host URL in the store settings page"
+        import_item.message = "Connection failed: Please verify store URL is https rather than http if the store is secure"
       else
         import_item.message = "Import failed: " + e.message
       end
