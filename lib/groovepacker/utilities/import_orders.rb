@@ -260,7 +260,11 @@ class ImportOrders
         import_item.save
       end
     rescue Exception => e
-      import_item.message = "Import failed: " + e.message
+      if e.message.strip == "Error: 302"
+        import_item.message = "Import failed: Please use https instead of http in host URL in the store settings page"
+      else
+        import_item.message = "Import failed: " + e.message
+      end
       import_item.status = 'failed'
       import_item.save
       ImportMailer.failed({
