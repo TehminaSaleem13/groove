@@ -556,7 +556,12 @@ class StoresController < ApplicationController
               {value: 'customer_comments', name: 'Customer Comments'},
               {value: 'notes_internal', name: 'Internal Notes'},
               {value: 'notes_toPacker', name: 'Notes to Packer'},
-              {value: 'tracking_num', name: 'Tracking Number'}
+              {value: 'tracking_num', name: 'Tracking Number'},
+              {value: 'item_sale_price', name: 'Item Sale Price'},
+              {value: 'secondary_sku', name: 'SKU 2'},
+              {value: 'tertiary_sku', name: 'SKU 3'},
+              {value: 'secondary_barcode', name: 'Barcode 2'},
+              {value: 'tertiary_barcode', name: 'Barcode 3'}
             ]
             
             if csv_map.order_csv_map.nil?
@@ -584,7 +589,8 @@ class StoresController < ApplicationController
               {value: 'product_images', name: 'Image Absolute URL'},
               {value: 'product_weight', name: 'Weight Oz'},
               {value: 'category_name', name: 'Category'},
-              {value: 'product_instructions', name: 'Product Instructions'},
+              {value: 'product_instructions', name: 'Packing Instructions'},
+              {value: 'receiving_instructions', name: 'Receiving Instructions'},
               {value: 'secondary_sku', name: 'SKU 2'},
               {value: 'tertiary_sku', name: 'SKU 3'},
               {value: 'secondary_barcode', name: 'Barcode 2'},
