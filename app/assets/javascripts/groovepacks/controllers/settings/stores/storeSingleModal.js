@@ -43,6 +43,12 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
       });
     }
 
+    scope.disconnect_bigcommerce_connection = function () {
+      stores.big_commerce.disconnect(scope.stores.single.id).then(function (response) {
+        myscope.store_single_details(scope.stores.single.id, true);
+      });
+    }
+
     scope.import_orders = function (report_id) {
       scope.stores.import.order.status = "Import in progress";
       scope.stores.import.order.status_show = true;
@@ -180,13 +186,21 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
 
     scope.pull_store_inventory = function () {
       stores.single.pull_inventory(scope.stores.single.id).then(function (response) {
-        notification.notify("Your request has been queued", 1);
+        if(response.data.status==false){
+          notification.notify(response.data.message);
+        } else {
+          notification.notify("Your request has been queued", 1);
+        }
       });
     }
     
     scope.push_store_inventory = function () {
       stores.single.push_inventory(scope.stores.single.id).then(function (response) {
-        notification.notify("Your request has been queued", 1); 
+        if(response.data.status==false){
+          notification.notify(response.data.message);
+        } else {
+          notification.notify("Your request has been queued", 1);
+        }
       });
     }
 
@@ -441,7 +455,7 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
 
     scope.launch_big_commerce_popup = function () {
       $timeout(function () {
-        var shopify_url = $sce.trustAsResourceUrl("https://store-w9xil.mybigcommerce.com/manage/marketplace/apps/5347");
+        var shopify_url = $sce.trustAsResourceUrl("https://store-1pslcuh.mybigcommerce.com/manage/marketplace/apps/4907");
         if (shopify_url == null) {
           if (typeof scope.stores.single.shop_name == 'undefined') {
             notification.notify("Please enter your store name first.");

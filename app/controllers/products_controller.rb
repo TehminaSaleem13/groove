@@ -597,6 +597,8 @@ class ProductsController < ApplicationController
       @result['product'] = Hash.new
       @result['product']['amazon_product'] = @amazon_product
       @result['product']['store'] = @store
+      @result['product']['sync_option'] = @product.sync_option.attributes rescue nil
+      @result['product']['access_restrictions'] = AccessRestriction.last rescue nil
       @result['product']['basicinfo'] = @product.attributes
       @result['product']['basicinfo']['weight_format'] = @product.get_show_weight_format
       @result['product']['basicinfo']['contains_intangible_string'] = @product.contains_intangible_string
@@ -1450,6 +1452,22 @@ class ProductsController < ApplicationController
       format.html # show.html.erb
       format.json { render json: result }
     end
+  end
+
+  def sync_with
+    result = Hash.new
+    result['status'] = true
+    begin
+      product = Product.find_by_id(params[:id])
+      sync_option = product.sync_option || product.build_sync_option
+      sync_option.sync_with_bc = params["sync_with_bc"]
+      sync_option.bc_product_id = params["bc_product_id"].to_i!=0 ? params["bc_product_id"] : nil
+      sync_option.save
+    rescue
+      result['status'] = false
+    end
+    
+    render json: result
   end
 
   private

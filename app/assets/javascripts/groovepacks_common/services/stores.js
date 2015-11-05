@@ -544,6 +544,12 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
     );
   }
 
+  var big_commerce_disconnect = function (store_id) {
+    return $http.put('/big_commerce/' + store_id + '/disconnect.json', null).error(
+      notification.server_error
+    );
+  }
+
   var pull_store_inventory = function (store_id) {
     return $http.get('/stores/' + store_id + '/pull_store_inventory.json', null).success(
       function (data) {
@@ -627,7 +633,8 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
       disconnect: shopfiy_disconnect
     },
     big_commerce: {
-      check_connection: check_connection
+      check_connection: check_connection,
+      disconnect: big_commerce_disconnect
     }
   };
 }]);

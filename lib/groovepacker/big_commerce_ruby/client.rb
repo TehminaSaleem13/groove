@@ -49,6 +49,14 @@ module Groovepacker
         get(categories_url)
       end
 
+      def update_product_inv(product_url, attrs={})
+        put(product_url, attrs)
+      end
+
+      def update_product_sku_inv(sku_url, attrs={})
+        put(sku_url, attrs)
+      end
+
       private
         def get(url, query_opts={})
           response = HTTParty.get(url,
@@ -61,6 +69,18 @@ module Groovepacker
                                   }
                                 )
           response.parsed_response
+        end
+
+        def put(url, body={})
+          response = HTTParty.put(url,
+                                  body: body.to_json,
+                                  headers: {
+                                    "X-Auth-Token" => @access_token,
+                                    "X-Auth-Client" => client_id,
+                                    "Content-Type" => "application/json",
+                                    "Accept" => "application/json"
+                                  }
+                                )
         end
 
     end

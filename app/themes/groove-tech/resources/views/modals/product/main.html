@@ -180,6 +180,21 @@
           </div>
         </div>
       </div>
+
+      <div class="form-group" ng-if="products.single.access_restrictions.allow_inv_push">
+        <label class="control-label col-sm-2">BigCommerce Inventory Sync</label>
+
+        <div class="controls col-sm-1 col-lg-1">
+          <div toggle-switch ng-model="products.single.sync_option.sync_with_bc"
+               groov-click="update_product_sync_options()"></div>
+        </div>
+        <div class="controls col-sm-3" ng-show="products.single.sync_option.sync_with_bc">
+          <input type="text" ng-model="products.single.sync_option.bc_product_id" ng-focus="update_product_sync_options()" ng-blur="update_product_sync_options()" class="form-control input-style" placeholder="BigCommerce Product ID"/>
+        </div>
+        <div class="col-sm-4" ng-hide="products.single.sync_option.bc_product_id">
+          <small>*Without adding product ID BigCommerce inventory sync will not work. Also it should not be 0</small>
+        </div>
+      </div>
       <div class="form-group"
            ng-show="products.single.store.store_type=='Amazon' && products.single.amazon_product.show_shipping_weight_only==true">
         <label class="control-label col-sm-2">Shipping Weight</label>

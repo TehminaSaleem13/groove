@@ -55,7 +55,7 @@ class User < ActiveRecord::Base
       if self.role.make_super_admin
         #Super admin has all permissions
         return true
-      elsif ['create_edit_notes', 'change_order_status', 'import_orders'].include?(permission)
+      elsif ['create_edit_notes', 'change_order_status', 'import_orders', 'update_inventories'].include?(permission)
         #A user with add_edit_order_items permission can do anything with an order
         return (self.role.add_edit_order_items || self.role[permission])
       else

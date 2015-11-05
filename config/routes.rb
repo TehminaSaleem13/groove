@@ -17,6 +17,7 @@ Groovepacks::Application.routes.draw do
     get '/big_commerce/setup' => 'big_commerce#setup'
     get '/big_commerce/complete' => 'big_commerce#complete'
     get '/big_commerce/:store_id/check_connection' => 'big_commerce#check_connection'
+    put '/big_commerce/:store_id/disconnect' => 'big_commerce#disconnect'
   end
 
   # The priority is based upon order of creation:
@@ -93,6 +94,7 @@ Groovepacks::Application.routes.draw do
       post 'set_alias'
       post 'add_product_to_kit'
       post 'remove_products_from_kit'
+      put 'sync_with'
     end
   end
 
