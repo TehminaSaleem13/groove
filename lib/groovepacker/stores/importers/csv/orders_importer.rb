@@ -18,7 +18,7 @@ module Groovepacker
             end
 
             final_record.each_with_index do |single_row, index|
-              next if is_blank_row(single_row)
+              next if is_blank_row(single_row) || single_row[self.mapping['increment_id'][:position]].nil? || single_row[self.mapping['sku'][:position]].nil?
               if !self.mapping['increment_id'].nil? && self.mapping['increment_id'][:position] >= 0 && !single_row[self.mapping['increment_id'][:position]].blank?
                 @import_item.current_increment_id = single_row[self.mapping['increment_id'][:position]]
                 @import_item.current_order_items = -1
