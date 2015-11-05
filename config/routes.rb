@@ -11,14 +11,16 @@ Groovepacks::Application.routes.draw do
 
   get "/500", :to => "specials#error_500"
 
-  devise_for :users, :controllers => { :omniauth_callbacks => "big_commerce" }
+  devise_for :users
   
-  devise_scope :user do
-    get '/big_commerce/setup' => 'big_commerce#setup'
-    get '/big_commerce/complete' => 'big_commerce#complete'
-    get '/big_commerce/:store_id/check_connection' => 'big_commerce#check_connection'
-    put '/big_commerce/:store_id/disconnect' => 'big_commerce#disconnect'
-  end
+  get '/bigcommerce/callback' => 'big_commerce#bigcommerce'
+  get '/bigcommerce/uninstall' => 'big_commerce#uninstall'
+  get '/bigcommerce/load' => 'big_commerce#load'
+  get '/bigcommerce/remove' => 'big_commerce#remove'
+  get '/big_commerce/setup' => 'big_commerce#setup'
+  get '/big_commerce/complete' => 'big_commerce#complete'
+  get '/big_commerce/:store_id/check_connection' => 'big_commerce#check_connection'
+  put '/big_commerce/:store_id/disconnect' => 'big_commerce#disconnect'
 
   # The priority is based upon order of creation:
   # first created -> highest priority.

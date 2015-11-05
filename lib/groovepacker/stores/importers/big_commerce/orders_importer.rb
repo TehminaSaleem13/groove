@@ -136,7 +136,7 @@ module Groovepacker
                                      store_product_id: item["product_id"])
             product.product_skus.create(sku: sku)
             
-            product.create_sync_option(:bc_product_id => item["product_id"], :sync_with_bc => true)
+            product.create_sync_option(:bc_product_id => item["product_id"], :bc_product_sku => sku, :sync_with_bc => true)
 
             #get from products api
             bigcommerce_product = client.product(item["product_id"])
