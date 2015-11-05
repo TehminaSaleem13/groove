@@ -138,8 +138,8 @@ class SubscriptionsController < ApplicationController
 
     def create_BigCommerce_credential(store_id)
       bc_auth = cookies[:bc_auth]
-      access_token = bc_auth['credentials']['token'] rescue nil
-      store_hash = bc_auth['extra']['context'] rescue nil
+      access_token = bc_auth["access_token"] rescue nil
+      store_hash = bc_auth["access_token"] rescue nil
       cookies.delete(:bc_auth)
       BigCommerceCredential.create(shop_name: params[:shop_name], store_id: store_id, access_token: access_token, store_hash: store_hash )
       return { valid: true, redirect_url: "" }
