@@ -455,7 +455,7 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
 
     scope.launch_big_commerce_popup = function () {
       $timeout(function () {
-        var shopify_url = $sce.trustAsResourceUrl("https://store-w9xil.mybigcommerce.com/manage/marketplace/apps/5347");
+        var shopify_url = $sce.trustAsResourceUrl("https://store-1pslcuh.mybigcommerce.com/manage/marketplace/apps/4907");
         if (shopify_url == null) {
           if (typeof scope.stores.single.shop_name == 'undefined') {
             notification.notify("Please enter your store name first.");

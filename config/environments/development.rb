@@ -114,8 +114,8 @@ Groovepacks::Application.configure do
   ENV['SHOPIFY_SHARED_SECRET'] = "8f48a567ba58e3ac057253cdde377fc2"
   ENV["SHOPIFY_REDIRECT_HOST"] = "localpacker.com"
 
-  ENV['BC_CLIENT_ID'] = "cz0f2qcrmvvhwm4waxgxj350db8y3ea"
-  ENV['BC_CLIENT_SECRET'] = "802ppnfiyudfq77ug8e0tv6um1b1etv"
+  ENV['BC_CLIENT_ID'] = "as4fwmwmb2n3w2yolabja7yv9weumoj"
+  ENV['BC_CLIENT_SECRET'] = "15a94s1mhhczf79v2lpj79btw443u3w"
 
   # Stripe test keys
   ENV['STRIPE_API_KEY'] = "sk_test_4QS2OJ8BkMWcuzCWrHrKGlz9"
