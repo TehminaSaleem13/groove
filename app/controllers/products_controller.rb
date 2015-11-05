@@ -1462,6 +1462,7 @@ class ProductsController < ApplicationController
       sync_option = product.sync_option || product.build_sync_option
       sync_option.sync_with_bc = params["sync_with_bc"]
       sync_option.bc_product_id = params["bc_product_id"].to_i!=0 ? params["bc_product_id"] : nil
+      sync_option.bc_product_sku = params["bc_product_sku"]
       sync_option.save
     rescue
       result['status'] = false
