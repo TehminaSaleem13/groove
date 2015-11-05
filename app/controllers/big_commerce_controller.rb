@@ -1,4 +1,4 @@
-class BigCommerceController < Devise::OmniauthCallbacksController
+class BigCommerceController < ApplicationController
   before_filter :groovepacker_authorize!, :only => [:check_connection, :disconnect]
 
   def setup
@@ -10,20 +10,32 @@ class BigCommerceController < Devise::OmniauthCallbacksController
   end
 
   def bigcommerce
+    auth_hash = generate_access_token
     unless cookies[:tenant_name].blank?
-	  auth = request.env["omniauth.auth"]
-	  Apartment::Tenant.switch(cookies[:tenant_name])
-	  @bigcommerce_credentials = BigCommerceCredential.find_by_store_id(cookies[:store_id])
-	  @bigcommerce_credentials.access_token = auth['credentials']['token'].token rescue nil
-	  @bigcommerce_credentials.store_hash = auth['extra']['context'] rescue nil
-	  @bigcommerce_credentials.save
-	  cookies.delete(:tenant_name)
-	  cookies.delete(:store_id)
-	  redirect_to big_commerce_complete_path
-	else
-      cookies[:bc_auth] = {:value => auth , :domain => :all}
-	  redirect_to big_commerce_setup_path(:shop => "#{auth['extra']['context'].split("/").last}.mybigcommerce.com")
-	end
+      Apartment::Tenant.switch(cookies[:tenant_name])
+      @bigcommerce_credentials = BigCommerceCredential.find_by_store_id(cookies[:store_id])
+      @bigcommerce_credentials.access_token = auth_hash["access_token"] rescue nil
+      @bigcommerce_credentials.store_hash = auth_hash["context"] rescue nil
+      @bigcommerce_credentials.save
+      cookies.delete(:tenant_name)
+      cookies.delete(:store_id)
+      redirect_to big_commerce_complete_path
+    else
+      cookies[:bc_auth] = {:value => auth_hash , :domain => :all}
+      redirect_to big_commerce_setup_path(:shop => "#{params['context'].split("/").last}.mybigcommerce.com")
+    end
+  end
+
+  def uninstall
+    render json: {:status => 200}
+  end
+
+  def load
+    render json: {:status => 200}
+  end
+  
+  def remove
+    render json: {:status => 200}
   end
 
   def check_connection
@@ -65,5 +77,12 @@ class BigCommerceController < Devise::OmniauthCallbacksController
   private
     def get_shop_name(shop_name)
       (shop_name.split(".").length == 3) ? shop_name.split(".").first : nil
+    end
+
+    def generate_access_token
+      url = 'https://login.bigcommerce.com/oauth2/token'
+      body_attrs = { client_id: ENV['BC_CLIENT_ID'], client_secret: ENV['BC_CLIENT_SECRET'], code: params[:code], scope: params[:scope], grant_type: :authorization_code, redirect_uri: "https://6cd9df50.ngrok.com/bigcommerce/callback", context: params[:context] }
+      response = HTTParty.post('https://login.bigcommerce.com/oauth2/token', body: body_attrs.to_json, headers: { "X-Auth-Client" => ENV['BC_CLIENT_ID'], "Content-Type" => "application/json", "Accept" => "application/json" })
+      return response
     end
 end
