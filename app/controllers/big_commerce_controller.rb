@@ -11,6 +11,15 @@ class BigCommerceController < ApplicationController
 
   def bigcommerce
     auth_hash = generate_access_token
+    bc_logger = Logger.new("#{Rails.root}/log/bc_logger.log")
+    bc_logger.info("===================")
+    bc_logger.info(auth_hash.inspect)
+    bc_logger.info("===================")
+
+    puts "======================================"
+    puts auth_hash.inspect
+    puts "======================================"
+
     unless cookies[:tenant_name].blank?
       Apartment::Tenant.switch(cookies[:tenant_name])
       @bigcommerce_credentials = BigCommerceCredential.find_by_store_id(cookies[:store_id])
@@ -81,7 +90,7 @@ class BigCommerceController < ApplicationController
 
     def generate_access_token
       url = 'https://login.bigcommerce.com/oauth2/token'
-      body_attrs = { client_id: ENV['BC_CLIENT_ID'], client_secret: ENV['BC_CLIENT_SECRET'], code: params[:code], scope: params[:scope], grant_type: :authorization_code, redirect_uri: "https://6cd9df50.ngrok.com/bigcommerce/callback", context: params[:context] }
+      body_attrs = { client_id: ENV['BC_CLIENT_ID'], client_secret: ENV['BC_CLIENT_SECRET'], code: params[:code], scope: params[:scope], grant_type: :authorization_code, redirect_uri: "https://admin.barcodepacker.com/bigcommerce/callback", context: params[:context] }
       response = HTTParty.post('https://login.bigcommerce.com/oauth2/token', body: body_attrs.to_json, headers: { "X-Auth-Client" => ENV['BC_CLIENT_ID'], "Content-Type" => "application/json", "Accept" => "application/json" })
       return response
     end
