@@ -34,9 +34,11 @@ module Groovepacker
 
 
             def update_product_by_bc_variants(bc_product, attrs)
-              bc_product_sku = @client.product_skus("#{bc_product["skus"]["url"]}?sku=#{@sync_optn.bc_product_sku}").first
-              if bc_product_sku
-                response = @client.update_product_sku_inv("https://api.bigcommerce.com/#{@credential.store_hash}/v2/products/#{bc_product['id']}/skus/#{bc_product_sku["id"]}", attrs)
+              if @sync_optn.bc_product_sku and @sync_optn.bc_product_id
+                bc_product_sku = @client.product_skus("#{bc_product["skus"]["url"]}?sku=#{@sync_optn.bc_product_sku}").first
+                if bc_product_sku
+                  response = @client.update_product_sku_inv("https://api.bigcommerce.com/#{@credential.store_hash}/v2/products/#{bc_product['id']}/skus/#{bc_product_sku["id"]}", attrs)
+                end
               end
             end
         end
