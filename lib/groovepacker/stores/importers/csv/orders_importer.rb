@@ -394,8 +394,9 @@ module Groovepacker
               product.base_sku = single_row[self.mapping['sku'][:position]].strip unless single_row[self.mapping['sku'][:position]].nil?
               product.save
             else
-              product.save
-              make_product_intangible(product)
+              if product.save!
+                make_product_intangible(product)
+              end
             end
             product.update_product_status
             order_item = OrderItem.new
