@@ -125,9 +125,8 @@ class StoresController < ApplicationController
           end
           if @store.store_type == 'Magento'
             @magento = MagentoCredentials.where(:store_id => @store.id)
-
-            if @magento.nil? || @magento.length == 0
-              @magento = MagentoCredentials.new
+            if @magento.blank?
+              @magento = @store.build_magento_credentials
               new_record = true
             else
               @magento = @magento.first
@@ -140,7 +139,6 @@ class StoresController < ApplicationController
 
             @magento.import_products = params[:import_products]
             @magento.import_images = params[:import_images]
-            @store.magento_credentials = @magento
             begin
               @store.save!
               if !new_record
