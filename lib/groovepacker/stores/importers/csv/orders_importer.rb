@@ -18,8 +18,8 @@ module Groovepacker
             end
 
             final_record.each_with_index do |single_row, index|
-              next if is_blank_row(single_row) || single_row[self.mapping['increment_id'][:position]].blank? || single_row[self.mapping['sku'][:position]].blank?
-              if !self.mapping['increment_id'].nil? && self.mapping['increment_id'][:position] >= 0 && !single_row[self.mapping['increment_id'][:position]].blank?
+              next if is_blank_row(single_row)
+              if !self.mapping['increment_id'].nil? && self.mapping['increment_id'][:position] >= 0 && !single_row[self.mapping['increment_id'][:position]].blank? && !self.mapping['sku'].nil? && self.mapping['sku'][:position] >= 0 && !single_row[self.mapping['sku'][:position]].blank?
                 @import_item.current_increment_id = single_row[self.mapping['increment_id'][:position]]
                 @import_item.current_order_items = -1
                 @import_item.current_order_imported_item = -1
@@ -83,10 +83,11 @@ module Groovepacker
                 end
               else
                 #No increment id found
-                @import_item.status = 'failed'
-                @import_item.message = 'No increment id was found on current order'
-                @import_item.save
-                result[:status] = false
+                # @import_item.status = 'failed'
+                # @import_item.message = 'No increment id was found on current order'
+                # @import_item.save
+                # result[:status] = false
+                next
               end
               unless result[:status]
                 @import_item.status = 'failed'
@@ -393,8 +394,9 @@ module Groovepacker
               product.base_sku = single_row[self.mapping['sku'][:position]].strip unless single_row[self.mapping['sku'][:position]].nil?
               product.save
             else
-              product.save
-              make_product_intangible(product)
+              if product.save!
+                make_product_intangible(product)
+              end
             end
             product.update_product_status
             order_item = OrderItem.new
