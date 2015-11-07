@@ -12,8 +12,8 @@ module Groovepacker
             products = Product.joins(:sync_option).where("sync_with_bc=true and (bc_product_id IS NOT NULL or store_product_id IS NOT NULL)")
             
             (products||[]).each do |product|
-              inv_wh = product.product_inventory_warehousess.first
-              attrs = {inventory_level: inv_wh.quantity_on_hand}
+              inv_wh = product.product_inventory_warehousess.last
+              attrs = { inventory_level: inv_wh.available_inv }
               
               @sync_optn = product.sync_option
               bc_product_id = (@sync_optn.bc_product_id rescue nil) || product.store_product_id
