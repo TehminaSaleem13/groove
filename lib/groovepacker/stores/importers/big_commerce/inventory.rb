@@ -37,7 +37,7 @@ module Groovepacker
               if @sync_optn.bc_product_sku and @sync_optn.bc_product_id
                 bc_product_sku = @client.product_skus("https://api.bigcommerce.com/#{@credential.store_hash}/v2/products/#{bc_product['id']}/skus?sku=#{@sync_optn.bc_product_sku}").first
                 if bc_product_sku
-                  inv_wh.quantity_on_hand = bc_product_sku["inventory_level"]
+                  inv_wh.quantity_on_hand = bc_product_sku["inventory_level"].try(:to_i)
                   inv_wh.save!
                 end
               end
