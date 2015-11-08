@@ -180,6 +180,29 @@
           </div>
         </div>
       </div>
+
+      <div class="form-group" ng-if="products.single.access_restrictions.allow_inv_push" style="margin-bottom: 0px;">
+        <label class="control-label col-sm-2">BigCommerce Inventory Sync</label>
+
+        <div class="controls col-sm-1 col-lg-1">
+          <div toggle-switch ng-model="products.single.sync_option.sync_with_bc"
+               groov-click="update_product_sync_options()"></div>
+        </div>
+        <div class="controls col-sm-3" ng-show="products.single.sync_option.sync_with_bc">
+          <input type="text" ng-model="products.single.sync_option.bc_product_id" ng-focus="update_product_sync_options()" ng-blur="update_product_sync_options()" class="form-control input-style" placeholder="BigCommerce Product ID"/>
+        </div>
+        <div class="controls col-sm-4" ng-show="products.single.sync_option.sync_with_bc">
+          <input type="text" ng-model="products.single.sync_option.bc_product_sku" ng-focus="update_product_sync_options()" ng-blur="update_product_sync_options()" class="form-control input-style" placeholder="BigCommerce Product Sku"/>
+        </div>
+      </div>
+
+      <div class="form-group" ng-hide="products.single.sync_option.bc_product_id && products.single.sync_option.bc_product_sku">
+        <div class="control-label col-sm-3"></div>
+        <div class="col-sm-7">
+          <small>*Adding product ID and SKU is necessary for non-BigCommerce products ineventory sync.</small>
+        </div>
+      </div>
+
       <div class="form-group"
            ng-show="products.single.store.store_type=='Amazon' && products.single.amazon_product.show_shipping_weight_only==true">
         <label class="control-label col-sm-2">Shipping Weight</label>
@@ -393,12 +416,12 @@
                                                                      style="padding:10px;"><i
         class="icon-large glyphicon glyphicon-print"></i></a></h4>
 
-      <div class="form-group">
+      <div class="form-group" ng-hide="products.single.basicinfo.is_kit==1">
         <div class="controls col-xs-12">
           <div groov-data-grid="warehouseGridOptions" groov-list="products.single.inventory_warehouses"></div>
         </div>
       </div>
-      <div class="form-group">
+      <!-- <div class="form-group">
         <div class="controls col-xs-12" dropdown>
           <button class="modal-save-button dropdown-toggle" ng-show="warehouses.list.length">Add warehouse <span
             class="caret"></span></button>
@@ -408,7 +431,7 @@
               ng-click="add_warehouse(warehouse)">{{warehouse.info.name}}</a></li>
           </ul>
         </div>
-      </div>
+      </div> -->
 
       <fieldset ng-show="products.single.basicinfo.is_kit==1">
         <legend>Kit Options</legend>

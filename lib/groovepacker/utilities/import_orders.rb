@@ -213,6 +213,26 @@ class ImportOrders
           end
         end
         import_item.save
+
+      #=====================BigCommerce Orders Import======================
+      elsif store_type == 'BigCommerce'
+        import_item.status = 'in_progress'
+        import_item.save
+        context = Groovepacker::Stores::Context.new(
+          Groovepacker::Stores::Handlers::BigCommerceHandler.new(store, import_item))
+        result = context.import_orders
+        import_item.reload
+        import_item.previous_imported = result[:previous_imported]
+        import_item.success_imported = result[:success_imported]
+        if import_item.status != 'cancelled'
+          if !result[:status]
+            import_item.status = 'failed'
+          else
+            import_item.status = 'completed'
+          end
+        end
+        import_item.save
+      #=============================================================
       elsif store_type == 'CSV'
         mapping = CsvMapping.find_by_store_id(store.id)
         unless mapping.nil? || mapping.order_csv_map.nil? || store.ftp_credential.nil? || (!store.ftp_credential.connection_established)
@@ -240,7 +260,11 @@ class ImportOrders
         import_item.save
       end
     rescue Exception => e
-      import_item.message = "Import failed: " + e.message
+      if e.message.strip == "Error: 302"
+        import_item.message = "Connection failed: Please verify store URL is https rather than http if the store is secure"
+      else
+        import_item.message = "Import failed: " + e.message
+      end
       import_item.status = 'failed'
       import_item.save
       ImportMailer.failed({

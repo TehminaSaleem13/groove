@@ -258,6 +258,15 @@ groovepacks_services.factory('products', ['$http', 'notification', 'editable', '
       }
     }).error(notification.server_error);
   };
+
+  var update_sync_options = function (products) {
+    return $http.put('/products/'+products.single.basicinfo.id+'/sync_with.json', products.single.sync_option).success(function (data) {
+      if (!data.status) {
+        notification.notify(data.messages, 0);
+      }
+    }).error(notification.server_error);
+  };
+
   var update_single = function (products, auto) {
     if (typeof auto !== "boolean") {
       auto = true;
@@ -420,6 +429,7 @@ groovepacks_services.factory('products', ['$http', 'notification', 'editable', '
       get_by_barcode: get_single_product_by_barcode,
       create: create_single,
       update: update_single,
+      update_sync_options: update_sync_options,
       select: select_single,
       image_upload: add_image,
       update_image: update_image_data,

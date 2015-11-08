@@ -154,7 +154,7 @@ groovepacks_controllers.
           }
           $scope.import_groov_popover.content =
             '<table style="font-size: 12px;width:100%;">' +
-            '<tr ng-repeat="store in import_groov_popover.data" ng-hide="store.store_type==\'CSV\' && !store.status">' +
+            '<tr ng-repeat="store in import_groov_popover.data" ng-hide="!store.status">' +
             '<td width="60px;" style="white-space: nowrap;">' +
             '<a class="btn" href="#/settings/stores/{{store.id}}"><img ng-src="{{store.logo.src}}" width="60px" alt="{{store.logo.alt}}"/></a>' +
             '</td>' +

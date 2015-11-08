@@ -1,6 +1,5 @@
 Groovepacks::Application.routes.draw do
 
-
   use_doorkeeper
 
   match 'subscriptions', :to => 'subscriptions#new', :as => 'subscriptions'
@@ -13,6 +12,15 @@ Groovepacks::Application.routes.draw do
   get "/500", :to => "specials#error_500"
 
   devise_for :users
+  
+  get '/bigcommerce/callback' => 'big_commerce#bigcommerce'
+  get '/bigcommerce/uninstall' => 'big_commerce#uninstall'
+  get '/bigcommerce/load' => 'big_commerce#load'
+  get '/bigcommerce/remove' => 'big_commerce#remove'
+  get '/big_commerce/setup' => 'big_commerce#setup'
+  get '/big_commerce/complete' => 'big_commerce#complete'
+  get '/big_commerce/:store_id/check_connection' => 'big_commerce#check_connection'
+  put '/big_commerce/:store_id/disconnect' => 'big_commerce#disconnect'
 
   # The priority is based upon order of creation:
   # first created -> highest priority.
@@ -88,6 +96,7 @@ Groovepacks::Application.routes.draw do
       post 'set_alias'
       post 'add_product_to_kit'
       post 'remove_products_from_kit'
+      put 'sync_with'
     end
   end
 
@@ -132,6 +141,8 @@ Groovepacks::Application.routes.draw do
       post 'csv_product_import_cancel'
       post 'update_csv_map'
       post 'delete_csv_map'
+      get 'pull_store_inventory'
+      get 'push_store_inventory'
     end
   end
 
@@ -212,6 +223,15 @@ Groovepacks::Application.routes.draw do
       get 'help'
     end
   end
+
+  # resources :big_commerce do
+  #   member do
+  #     get 'auth_callback'
+  #   end
+  #   collection do
+  #     get 'bigcommerce'
+  #   end
+  # end
 
   resources :dashboard do
     collection do

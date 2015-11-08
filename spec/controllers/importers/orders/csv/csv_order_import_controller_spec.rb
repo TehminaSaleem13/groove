@@ -86,6 +86,25 @@ describe StoresController do
         expect(Product.all.count).to eq(21)
         expect(Product.where(:is_intangible=>true).size).to eq(2)
       end
+      it "imports item sale price for order items during CSV order import" do
+        request.accept = "application/json"
+        get :csv_import_data, {:type => 'order', :id => @store.id}
+        expect(response.status).to eq(200)
+
+        request.accept = "application/json"
+        get :create_update_store, {:store_type => 'CSV', :status=> @store.status, :name => @store.name, :inventory_warehouse_id => @store.inventory_warehouse_id, :id => @store.id, :orderfile => fixture_file_upload(Rails.root.join('/files/MT_Orders_04_price.csv'))}
+        expect(response.status).to eq(200)
+
+        doc = IO.read(Rails.root.join("spec/fixtures/files/MT_Orders_04_price_map"))
+        doc = eval(doc)
+
+        request.accept = "application/json"
+        post :csv_do_import, {:id => @store.id, :rows=>"2", :sep=>",", :other_sep=>"0", :delimiter=>"\"", :fix_width=>"0", :fixed_width=>"4", :import_action=>nil, :contains_unique_order_items=>false, :generate_barcode_from_sku=>false, :use_sku_as_product_name=>false, :order_date_time_format=>"MM/DD/YY TIME", :day_month_sequence=>"DD/MM", :map=>doc[:map][:map], :controller=>"stores", :action=>"csv_do_import", :store_id=> @store.id, :name=>doc[:name], :type=>'order', :flag=>'file_upload'}
+        expect(response.status).to eq(200)
+        expect(Order.all.count).to eq(9)
+        expect(Product.all.count).to eq(20)
+        expect(OrderItem.where(:sku => 'R.S-CS.OFF').first.price).to eq(2.0)
+      end
       describe "Generate Barcode From SKU" do
         it "Products will be imported for each order item of each order with Barcode value same as SKU" do
           request.accept = "application/json"

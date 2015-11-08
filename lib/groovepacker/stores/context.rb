@@ -33,6 +33,14 @@ module Groovepacker
         self.handler.update_all_products
       end
 
+      def pull_inventory
+        self.handler.pull_inventory
+      end
+
+      def push_inventory
+        self.handler.push_inventory
+      end
+
       attr_accessor :handler
     end
   end

@@ -119,6 +119,25 @@ describe StoresController do
       expect(response.status).to eq(200)
       expect(Product.all.count).to eq(41)
     end
+
+    it "imports receiving instructions for products from csv file" do
+      request.accept = "application/json"
+      get :csv_import_data, {:type => 'product', :id => @store.id}
+      expect(response.status).to eq(200)
+
+      request.accept = "application/json"
+      get :create_update_store, {:store_type => 'CSV', :status=> @store.status, :name => @store.name, :inventory_warehouse_id => @store.inventory_warehouse_id, :id => @store.id, :productfile => fixture_file_upload(Rails.root.join('/files/MT_Products_04.csv'))}
+      expect(response.status).to eq(200)
+
+      doc = IO.read(Rails.root.join("spec/fixtures/files/MT_Products_04_rec_ins_map"))
+      doc = eval(doc)
+      request.accept = "application/json"
+      post :csv_do_import, {:id => @store.id, :rows=>"2", :sep=>",", :other_sep=>"0", :delimiter=>"\"", :fix_width=>"0", :fixed_width=>"4", :contains_unique_order_items=>false, :generate_barcode_from_sku=>false, :use_sku_as_product_name=>false, :import_action=>doc[:map][:import_action], :map=>doc[:map][:map], :controller=>"stores", :action=>"csv_do_import", :store_id=> @store.id, :name=>doc[:name], :type=>'product', :flag=>'file_upload'}
+      expect(response.status).to eq(200)
+      expect(Product.all.count).to eq(34)
+      expect(ProductSku.where(sku: 'K.IS.M').first.product.product_receiving_instructions).to eq("Thank-you!!!")
+    end
+
     it "Delete a product during csv product import if the product name matches `[DELETE]`" do
       # import orders
       request.accept = "application/json"

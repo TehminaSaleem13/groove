@@ -124,6 +124,7 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
           stores.csv.mapping = data.mapping;
         }
         if (data.credentials.status == true) {
+          stores.single.allow_inv_push = data.access_restrictions.allow_inv_push;
           if (data.store.store_type == 'Magento') {
             stores.single.host = data.credentials.magento_credentials.host;
             stores.single.username = data.credentials.magento_credentials.username;
@@ -194,6 +195,10 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
             stores.single.shop_name = data.credentials.shopify_credentials.shop_name;
             stores.single.access_token = data.credentials.shopify_credentials.access_token;
             stores.single.shopify_permission_url = data.credentials.shopify_permission_url;
+          }else if (data.store.store_type == 'BigCommerce') {
+            stores.single.shop_name = data.credentials.big_commerce_credentials.shop_name;
+            stores.single.access_token = data.credentials.big_commerce_credentials.access_token;
+            stores.single.store_hash = data.credentials.big_commerce_credentials.store_hash;
           } else if (data.store.store_type == 'CSV') {
             stores.single.host = data.credentials.ftp_credentials.host;
             stores.single.port = data.credentials.ftp_credentials.port;
@@ -539,6 +544,32 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
     );
   }
 
+  var big_commerce_disconnect = function (store_id) {
+    return $http.put('/big_commerce/' + store_id + '/disconnect.json', null).error(
+      notification.server_error
+    );
+  }
+
+  var pull_store_inventory = function (store_id) {
+    return $http.get('/stores/' + store_id + '/pull_store_inventory.json', null).success(
+      function (data) {
+      }).error(notification.server_error);
+  }
+
+  var push_store_inventory = function (store_id) {
+    return $http.get('/stores/' + store_id + '/push_store_inventory.json', null).success(
+      function (data) {
+      }).error(notification.server_error);
+  }
+
+  var check_connection = function (store_id) {
+    return $http.get('/big_commerce/' + store_id + '/check_connection.json', null).success(
+      function (data) {
+        return data;
+      }
+    ).error(notification.server_error);
+  }
+
   //Public facing API
   return {
     model: {
@@ -558,7 +589,9 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
       validate_create: validate_create_single,
       update: create_update_single,
       update_ftp: create_update_ftp_credentials,
-      connect: connect_ftp_server
+      connect: connect_ftp_server,
+      pull_inventory: pull_store_inventory,
+      push_inventory: push_store_inventory
     },
     ebay: {
       sign_in_url: {
@@ -598,6 +631,10 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
     },
     shopify: {
       disconnect: shopfiy_disconnect
+    },
+    big_commerce: {
+      check_connection: check_connection,
+      disconnect: big_commerce_disconnect
     }
   };
 }]);

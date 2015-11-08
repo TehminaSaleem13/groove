@@ -12,7 +12,7 @@ K.SS.M,K.SS.M,"SingleScanKit, Multi-count - Inventory will 0 (was -3)",0,Pcsv-BI
 R.S-PART-A ,R.S-PART-A,Part of K.SS.M kit but not scanned -Inventory will 0 (was 6),6,Pcsv-BIN-1,,11,11,,,,,,,Pcsv-BIN-2,,,0,6
 R.S-PART-B ,R.S-PART-B,Part of K.SS.M kit but not scanned -Inventory will 0 (was 3),3,Pcsv-BIN-1,,12,12,,,,,,,Pcsv-BIN-2,,,0,3
 K.IS.S ,K.IS.S,(NOT USED),0,Pcsv-BIN-1,,13,13,,,,,,,Pcsv-BIN-2,,,,
-K.IS.M ,K.IS.M,"IndividualScanKit, Multi-count ",0,Pcsv-BIN-1,,14,14,Scan R.S-PART-C & R.S-PART-D individually ,,,,,,Pcsv-BIN-2,,,,
+K.IS.M ,K.IS.M,"IndividualScanKit, Multi-count ",0,Pcsv-BIN-1,,14,14,Scan R.S-PART-C & R.S-PART-D individually ,Thank-you!!!,,,,,Pcsv-BIN-2,,,,
 R.S-PART-C ,R.S-PART-C,Part of K.IS.M ,6,Pcsv-BIN-1,,15,15,,,,,,,Pcsv-BIN-2,,,0,
 R.S-PART-D ,R.S-PART-D,Part of K.IS.M ,3,Pcsv-BIN-1,,16,16,,,,,,,Pcsv-BIN-2,,,0,
 K.AS1.S ,K.AS1.S,(NOT USED),0,Pcsv-BIN-1,,17,17,,,,,,,Pcsv-BIN-2,,,0,

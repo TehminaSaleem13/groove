@@ -1,79 +1,48 @@
 class ApplyAccessRestrictions
-  def self.apply_access_restrictions(invoice_id)
+
+  def apply_access_restrictions(tenant_name, plan_id)
     Apartment::Tenant.switch()
-    invoice = Invoice.find(invoice_id)
-    unless Subscription.where(stripe_customer_id: invoice.customer_id, is_active: true).empty?
-      subscription = Subscription.where(stripe_customer_id: invoice.customer_id, is_active: true).first
-      unless subscription.tenant.nil? || subscription.tenant.name.nil?
-        tenant = subscription.tenant.name
-        Apartment::Tenant.switch(tenant)
+    unless Subscription.where(tenant_name: tenant_name, is_active: true).empty?
+      subscription = Subscription.where(tenant_name: tenant_name, is_active: true).first
+      unless subscription.tenant.nil?
+        Apartment::Tenant.switch(tenant_name)
         access_restriction = AccessRestriction.order("created_at").last unless AccessRestriction.order("created_at").last.nil?
         unless access_restriction.nil?
-          AccessRestriction.create(num_users: access_restriction.num_users, num_shipments: access_restriction.num_shipments, num_import_sources: access_restriction.num_import_sources).save if access_restriction
+          AccessRestriction.create(num_users: access_restriction.num_users, num_shipments: access_restriction.num_shipments, num_import_sources: access_restriction.num_import_sources).save
         else
-          if invoice.plan_id == "groove-solo"
-            AccessRestriction.create(
-              num_users: '1',
-              num_shipments: '500',
-              num_import_sources: '1',
-              total_scanned_shipments: '0')
-          elsif invoice.plan_id == 'groove-duo'
-            AccessRestriction.create(
-              num_users: '2',
-              num_shipments: '2000',
-              num_import_sources: '2',
-              total_scanned_shipments: '0')
-          elsif invoice.plan_id == 'groove-trio'
-            AccessRestriction.create(
-              num_users: '3',
-              num_shipments: '6000',
-              num_import_sources: '3',
-              total_scanned_shipments: '0')
-          elsif invoice.plan_id == 'groove-quintet'
-            AccessRestriction.create(
-              num_users: '5',
-              num_shipments: '12000',
-              num_import_sources: '5',
-              total_scanned_shipments: '0')
-          elsif invoice.plan_id == 'groove-symphony'
-            AccessRestriction.create(
-              num_users: '12',
-              num_shipments: '50000',
-              num_import_sources: '8',
-              total_scanned_shipments: '0')
-          elsif invoice.plan_id == "annual-groove-solo"
-            AccessRestriction.create(
-              num_users: '1',
-              num_shipments: '500',
-              num_import_sources: '1',
-              total_scanned_shipments: '0')
-          elsif invoice.plan_id == 'annual-groove-duo'
-            AccessRestriction.create(
-              num_users: '2',
-              num_shipments: '2000',
-              num_import_sources: '2',
-              total_scanned_shipments: '0')
-          elsif invoice.plan_id == 'annual-groove-trio'
-            AccessRestriction.create(
-              num_users: '3',
-              num_shipments: '6000',
-              num_import_sources: '3',
-              total_scanned_shipments: '0')
-          elsif invoice.plan_id == 'annual-groove-quintet'
-            AccessRestriction.create(
-              num_users: '5',
-              num_shipments: '12000',
-              num_import_sources: '5',
-              total_scanned_shipments: '0')
-          elsif invoice.plan_id == 'annual-groove-symphony'
-            AccessRestriction.create(
-              num_users: '12',
-              num_shipments: '50000',
-              num_import_sources: '8',
-              total_scanned_shipments: '0')
+          if plan_id == "groove-solo"
+            create_restriction(1, 500, 1, 0)
+          elsif plan_id == 'groove-duo'
+            create_restriction(2, 2000, 2, 0)
+          elsif plan_id == 'groove-trio'
+            create_restriction(3, 6000, 3, 0)
+          elsif plan_id == 'groove-quintet'
+            create_restriction(5, 12000, 5, 0)
+          elsif plan_id == 'groove-symphony'
+            create_restriction(12, 50000, 8, 0)
+          elsif plan_id == "annual-groove-solo"
+            create_restriction(1, 500, 1, 0)
+          elsif plan_id == 'annual-groove-duo'
+            create_restriction(2, 2000, 2, 0)
+          elsif plan_id == 'annual-groove-trio'
+            create_restriction(3, 6000, 3, 0)
+          elsif plan_id == 'annual-groove-quintet'
+            create_restriction(5, 12000, 5, 0)
+          elsif plan_id == 'annual-groove-symphony'
+            create_restriction(12, 50000, 8, 0)
           end
         end
       end
+      ApplyAccessRestrictions.new.delay(:run_at => (Time.now + 1.month).beginning_of_day, :queue => "reset_access_restrictions_#{tenant_name}").apply_access_restrictions(tenant_name, plan_id)
     end
+  end
+
+  def create_restriction(num_users, num_shipments, num_import_sources, total_scanned_shipments)
+    AccessRestriction.create(
+      num_users: num_users,
+      num_shipments: num_shipments,
+      num_import_sources: num_import_sources,
+      total_scanned_shipments: total_scanned_shipments
+    )
   end
 end

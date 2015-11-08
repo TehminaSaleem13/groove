@@ -113,6 +113,7 @@ class StoresController < ApplicationController
           @store.thank_you_message_to_customer = params[:thank_you_message_to_customer] unless params[:thank_you_message_to_customer] == 'null'
           @store.inventory_warehouse_id = params[:inventory_warehouse_id] || get_default_warehouse_id
           @store.auto_update_products = params[:auto_update_products]
+          @store.update_inv = params[:update_inv]
         end
 
         if @result['status']
@@ -124,9 +125,8 @@ class StoresController < ApplicationController
           end
           if @store.store_type == 'Magento'
             @magento = MagentoCredentials.where(:store_id => @store.id)
-
-            if @magento.nil? || @magento.length == 0
-              @magento = MagentoCredentials.new
+            if @magento.blank?
+              @magento = @store.build_magento_credentials
               new_record = true
             else
               @magento = @magento.first
@@ -139,7 +139,6 @@ class StoresController < ApplicationController
 
             @magento.import_products = params[:import_products]
             @magento.import_images = params[:import_images]
-            @store.magento_credentials = @magento
             begin
               @store.save!
               if !new_record
@@ -381,6 +380,31 @@ class StoresController < ApplicationController
               @result['messages'] = [e.message]
             end
           end
+          if @store.store_type == 'BigCommerce'
+            @bigcommerce = BigCommerceCredential.find_by_store_id(@store.id)
+            begin
+              params[:shop_name] = nil if params[:shop_name] == 'null'
+              if @bigcommerce.nil?
+                @store.big_commerce_credential = BigCommerceCredential.new(
+                  shop_name: params[:shop_name])
+                new_record = true
+              else
+                @bigcommerce.update_attributes(shop_name: params[:shop_name])
+              end
+              @store.save
+            rescue ActiveRecord::RecordInvalid => e
+              @result['status'] = false
+              @result['messages'] = [@store.errors.full_messages,
+                                     @store.big_commerce_credential.errors.full_messages]
+
+            rescue ActiveRecord::StatementInvalid => e
+              @result['status'] = false
+              @result['messages'] = [e.message]
+            end
+            current_tenant = Apartment::Tenant.current
+            cookies[:tenant_name] = {:value => current_tenant , :domain => :all}
+            cookies[:store_id] = {:value => @store.id , :domain => :all}
+          end
         else
           @result['status'] = false
           @result['messages'].push("Current user does not have permission to create or edit a store")
@@ -530,7 +554,12 @@ class StoresController < ApplicationController
               {value: 'customer_comments', name: 'Customer Comments'},
               {value: 'notes_internal', name: 'Internal Notes'},
               {value: 'notes_toPacker', name: 'Notes to Packer'},
-              {value: 'tracking_num', name: 'Tracking Number'}
+              {value: 'tracking_num', name: 'Tracking Number'},
+              {value: 'item_sale_price', name: 'Item Sale Price'},
+              {value: 'secondary_sku', name: 'SKU 2'},
+              {value: 'tertiary_sku', name: 'SKU 3'},
+              {value: 'secondary_barcode', name: 'Barcode 2'},
+              {value: 'tertiary_barcode', name: 'Barcode 3'}
             ]
             
             if csv_map.order_csv_map.nil?
@@ -558,7 +587,8 @@ class StoresController < ApplicationController
               {value: 'product_images', name: 'Image Absolute URL'},
               {value: 'product_weight', name: 'Weight Oz'},
               {value: 'category_name', name: 'Category'},
-              {value: 'product_instructions', name: 'Product Instructions'},
+              {value: 'product_instructions', name: 'Packing Instructions'},
+              {value: 'receiving_instructions', name: 'Receiving Instructions'},
               {value: 'secondary_sku', name: 'SKU 2'},
               {value: 'tertiary_sku', name: 'SKU 3'},
               {value: 'secondary_barcode', name: 'Barcode 2'},
@@ -590,7 +620,7 @@ class StoresController < ApplicationController
               {value: 'part_name', name: 'PART-NAME'},
               {value: 'part_barcode', name: 'PART-BARCODE'},
               {value: 'part_qty', name: 'PART-QTY'},
-            #{value:'kit_scan', name:'KIT-SCAN' },
+              {value: 'scan_option', name:'SCAN-OPTION' }
             ]
             if csv_map.kit_csv_map.nil?
               @result['kit']['settings'] = default_csv_map
@@ -755,7 +785,7 @@ class StoresController < ApplicationController
         if OrderImportSummary.where(status: 'in_progress').empty?
           bulk_actions = Groovepacker::Orders::BulkActions.new
           bulk_actions.delay(:run_at => 1.seconds.from_now).import_csv_orders(Apartment::Tenant.current_tenant, @store.id, data.to_s, current_user.id)
-          # bulk_actions.import_csv_orders(Apartment::Tenant.current_tenant, @store, data, current_user)
+          # bulk_actions.import_csv_orders(Apartment::Tenant.current_tenant, @store.id, data.to_s, current_user.id)
         else
           @result['status'] = false
           @result['messages'].push("Import is in progress. Try after it is complete")
@@ -938,6 +968,8 @@ class StoresController < ApplicationController
     if !@store.nil? then
       @result['status'] = true
       @result['store'] = @store
+      access_restrictions = AccessRestriction.last
+      @result['access_restrictions'] = access_restrictions
       @result['credentials'] = @store.get_store_credentials
       if @store.store_type == 'CSV'
         @result['mapping'] = CsvMapping.find_by_store_id(@store.id)
@@ -1273,6 +1305,47 @@ class StoresController < ApplicationController
       format.html # show.html.erb
       format.csv { send_data data, :type => 'text/csv', :filename => filename }
     end
+  end
+
+  def pull_store_inventory
+    @store = Store.find(params[:id])
+
+    @result = Hash.new
+    @result['status'] = true
+
+    access_restriction = AccessRestriction.last
+    if access_restriction && access_restriction.allow_inv_push && @store && current_user.can?('update_inventories')
+      context = Groovepacker::Stores::Context.new(
+            Groovepacker::Stores::Handlers::BigCommerceHandler.new(@store))
+      context.delay(:run_at => 1.seconds.from_now).pull_inventory
+      #context.pull_inventory
+      @result['message'] = "Your request has beed queued"
+    else
+      @result['status'] = false
+      @result['message'] = "Either the the BigCommerce store is not setup properly or you don't have permissions to update inventories."
+    end
+
+    render json: @result
+  end
+
+  def push_store_inventory
+    @store = Store.find(params[:id])
+
+    @result = Hash.new
+    @result['status'] = true
+
+    if @store && current_user.can?('update_inventories')
+      context = Groovepacker::Stores::Context.new(
+            Groovepacker::Stores::Handlers::BigCommerceHandler.new(@store))
+      context.delay(:run_at => 1.seconds.from_now).push_inventory
+      #context.push_inventory
+      @result['message'] = "Your request has beed queued"
+    else
+      @result['status'] = false
+      @result['message'] = "Either the store is not present or you don't have permissions to update inventories."
+    end
+
+    render json: @result
   end
 end
 

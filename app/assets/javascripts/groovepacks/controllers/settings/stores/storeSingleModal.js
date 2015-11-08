@@ -37,6 +37,18 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
       });
     }
 
+    scope.check_bigcommerce_connection = function () {
+      stores.big_commerce.check_connection(scope.stores.single.id).then(function (response) {
+        scope.stores.single.message = response["data"]["message"];
+      });
+    }
+
+    scope.disconnect_bigcommerce_connection = function () {
+      stores.big_commerce.disconnect(scope.stores.single.id).then(function (response) {
+        myscope.store_single_details(scope.stores.single.id, true);
+      });
+    }
+
     scope.import_orders = function (report_id) {
       scope.stores.import.order.status = "Import in progress";
       scope.stores.import.order.status_show = true;
@@ -171,6 +183,26 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
         });
       };
     };
+
+    scope.pull_store_inventory = function () {
+      stores.single.pull_inventory(scope.stores.single.id).then(function (response) {
+        if(response.data.status==false){
+          notification.notify(response.data.message);
+        } else {
+          notification.notify("Your request has been queued", 1);
+        }
+      });
+    }
+    
+    scope.push_store_inventory = function () {
+      stores.single.push_inventory(scope.stores.single.id).then(function (response) {
+        if(response.data.status==false){
+          notification.notify(response.data.message);
+        } else {
+          notification.notify("Your request has been queued", 1);
+        }
+      });
+    }
 
     scope.update_single_store = function (auto) {
       if (scope.edit_status || stores.single.validate_create(scope.stores)) {
@@ -421,6 +453,19 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
       }, 500);
     };
 
+    scope.launch_big_commerce_popup = function () {
+      $timeout(function () {
+        var shopify_url = $sce.trustAsResourceUrl("https://store-1pslcuh.mybigcommerce.com/manage/marketplace/apps/4907");
+        if (shopify_url == null) {
+          if (typeof scope.stores.single.shop_name == 'undefined') {
+            notification.notify("Please enter your store name first.");
+          }
+        } else {
+          myscope.open_popup(shopify_url);
+        }
+      }, 500);
+    };
+
     myscope.rollback = function () {
       if (typeof myscope.single == "undefined" || typeof myscope.single.id == "undefined") {
         if (typeof scope.stores.single['id'] != "undefined") {
@@ -540,6 +585,10 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
         Shopify: {
           name: "Shopify",
           file: "/assets/views/modals/settings/stores/shopify.html"
+        },
+        "BigCommerce": {
+          name: "BigCommerce",
+          file: "/assets/views/modals/settings/stores/big_commerce.html"
         }
       };
 
