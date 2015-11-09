@@ -414,7 +414,7 @@ module Groovepacker
           end
 
           def get_sku(single_row, unique_order_item)
-            unique_order_item ? @order_increment_sku : single_row[self.mapping['sku'][:position]].strip)
+            unique_order_item ? @order_increment_sku : single_row[self.mapping['sku'][:position]].strip
           end
 
           def get_filtered_final_record
