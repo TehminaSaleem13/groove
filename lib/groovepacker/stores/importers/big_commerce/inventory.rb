@@ -16,7 +16,7 @@ module Groovepacker
               begin
                 inv_wh = product.product_inventory_warehousess.first
                 @sync_optn = product.sync_option
-                bc_product_id = (sync_optn.bc_product_id rescue nil) || product.store_product_id
+                bc_product_id = @sync_optn.bc_product_id
                 bc_product = @client.product(bc_product_id)
                 if bc_product["id"]
                   update_product_inv_for_sync_option(product, bc_product, inv_wh)
