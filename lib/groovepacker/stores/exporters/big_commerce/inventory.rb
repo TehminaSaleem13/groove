@@ -17,7 +17,7 @@ module Groovepacker
                 attrs = { inventory_level: inv_wh.available_inv }
                 
                 @sync_optn = product.sync_option
-                bc_product_id = (@sync_optn.bc_product_id rescue nil) || product.store_product_id
+                bc_product_id = @sync_optn.bc_product_id
                 
                 update_inv_on_bc_for_sync_option(product, bc_product_id, attrs)
               rescue Exception => ex
