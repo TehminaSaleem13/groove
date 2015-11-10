@@ -39,12 +39,18 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
 
     scope.check_bigcommerce_connection = function () {
       stores.big_commerce.check_connection(scope.stores.single.id).then(function (response) {
-        scope.stores.single.message = response["data"]["message"];
+        scope.stores.single.message = response.data.message;
       });
     }
 
     scope.disconnect_bigcommerce_connection = function () {
       stores.big_commerce.disconnect(scope.stores.single.id).then(function (response) {
+        myscope.store_single_details(scope.stores.single.id, true);
+      });
+    }
+
+    scope.disconnect_magento_connection = function(){
+      stores.magento.disconnect(scope.stores.single.id).then(function (response) {
         myscope.store_single_details(scope.stores.single.id, true);
       });
     }
@@ -466,6 +472,33 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
       }, 500);
     };
 
+    scope.launch_magento_aurthorize_popup = function () {
+      var magento_authorize_url;
+      stores.magento.get_aurthorize_url(scope.stores.single.id).then(function (response) {
+        if(response.data.status==false) {
+          notification.notify(response.data.message);
+          return;
+        } else{
+          $timeout(function () {
+            var magento_url = $sce.trustAsResourceUrl(response.data.authorized_url);
+            if (magento_url == null) {
+              if (typeof response.data.authorized_url == 'undefined') {
+                notification.notify("Please enter correct URL, API Key and API Secret.");
+              }
+            } else {
+              myscope.open_popup(response.data.authorized_url);
+            }
+          }, 500);
+        }
+      })
+    };
+
+    scope.get_magento_access_token = function () {
+      stores.magento.get_access_token(scope.stores.single).then(function (response) {
+        myscope.store_single_details(scope.stores.single.id, true);
+      })
+    }
+
     myscope.rollback = function () {
       if (typeof myscope.single == "undefined" || typeof myscope.single.id == "undefined") {
         if (typeof scope.stores.single['id'] != "undefined") {
@@ -561,6 +594,10 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
         Magento: {
           name: "Magento",
           file: "/assets/views/modals/settings/stores/magento.html"
+        },
+        "Magento API 2": {
+          name: "Magento API 2",
+          file: "/assets/views/modals/settings/stores/magento_rest.html"
         },
         Ebay: {
           name: "Ebay",

@@ -11,6 +11,7 @@ class Store < ActiveRecord::Base
   has_one :shopify_credential
   has_one :ftp_credential
   has_one :big_commerce_credential
+  has_one :magento_rest_credential
 
   belongs_to :inventory_warehouse
 
@@ -50,6 +51,13 @@ class Store < ActiveRecord::Base
       @credentials = MagentoCredentials.where(:store_id => self.id)
       if !@credentials.nil? && @credentials.length > 0
         @result['magento_credentials'] = @credentials.first
+        @result['status'] =true
+      end
+    end
+    if self.store_type == 'Magento API 2'
+      @credentials = MagentoRestCredential.where(:store_id => self.id)
+      if !@credentials.nil? && @credentials.length > 0
+        @result['magento_rest_credential'] = @credentials.first
         @result['status'] =true
       end
     end

@@ -22,6 +22,10 @@ Groovepacks::Application.routes.draw do
   get '/big_commerce/:store_id/check_connection' => 'big_commerce#check_connection'
   put '/big_commerce/:store_id/disconnect' => 'big_commerce#disconnect'
 
+  get '/magento_rest/:store_id/magento_authorize_url' => 'magento_rest#magento_authorize_url'
+  get '/magento_rest/:store_id/get_access_token' => 'magento_rest#get_access_token'
+  put '/magento_rest/:store_id/disconnect' => 'magento_rest#disconnect'
+
   # The priority is based upon order of creation:
   # first created -> highest priority.
 
