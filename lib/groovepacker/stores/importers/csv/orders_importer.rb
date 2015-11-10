@@ -375,14 +375,9 @@ module Groovepacker
             # sku.sku = single_row[self.mapping['sku'][:position]].strip
             sku.sku = get_sku(single_row, unique_order_item)
             product.product_skus << sku
-            unless unique_order_item
-              import_sec_ter_sku(product, single_row)
-            end
             
             import_product_barcode(product, single_row, unique_order_item)
-            unless unique_order_item
-              import_sec_ter_barcode(product, single_row)
-            end
+            
             product.store_product_id = 0
             product.store_id = self.params[:store_id]
             product.spl_instructions_4_packer = import_product_instructions(product, single_row)
@@ -398,6 +393,13 @@ module Groovepacker
                 make_product_intangible(product)
               end
             end
+            unless unique_order_item
+              import_sec_ter_sku(product, single_row)
+            end
+            unless unique_order_item
+              import_sec_ter_barcode(product, single_row)
+            end
+            product.reload
             product.update_product_status
             order_item = OrderItem.new
             order_item.product = product
