@@ -240,27 +240,27 @@ module Groovepacker
 
           def import_sec_ter_barcode(product, single_row)
             if !self.mapping['secondary_barcode'].nil? && self.mapping['secondary_barcode'][:position] >= 0 && !single_row[self.mapping['secondary_barcode'][:position]].nil?
-              barcode = ProductBarcode.new
-              barcode.barcode = single_row[self.mapping['secondary_barcode'][:position]]
-              product.product_barcodes << barcode
+              barcode1 = ProductBarcode.new
+              barcode1.barcode = single_row[self.mapping['secondary_barcode'][:position]]
+              product.product_barcodes << barcode1
             end
             if !self.mapping['tertiary_barcode'].nil? && self.mapping['tertiary_barcode'][:position] >= 0 && !single_row[self.mapping['tertiary_barcode'][:position]].nil?
-              barcode = ProductBarcode.new
-              barcode.barcode = single_row[self.mapping['tertiary_barcode'][:position]]
-              product.product_barcodes << barcode
+              barcode2 = ProductBarcode.new
+              barcode2.barcode = single_row[self.mapping['tertiary_barcode'][:position]]
+              product.product_barcodes << barcode2
             end
           end
 
           def import_sec_ter_sku(product, single_row)
             if !self.mapping['secondary_sku'].nil? && self.mapping['secondary_sku'][:position] >= 0 && !single_row[self.mapping['secondary_sku'][:position]].nil?
-              sku = ProductSku.new
-              sku.sku = single_row[self.mapping['secondary_sku'][:position]]
-              product.product_skus << sku
+              sku1 = ProductSku.new
+              sku1.sku = single_row[self.mapping['secondary_sku'][:position]]
+              product.product_skus << sku1
             end
             if !self.mapping['tertiary_sku'].nil? && self.mapping['tertiary_sku'][:position] >= 0 && !single_row[self.mapping['tertiary_sku'][:position]].nil?
-              sku = ProductSku.new
-              sku.sku = single_row[self.mapping['tertiary_sku'][:position]]
-              product.product_skus << sku
+              sku2 = ProductSku.new
+              sku2.sku = single_row[self.mapping['tertiary_sku'][:position]]
+              product.product_skus << sku2
             end
           end
 
