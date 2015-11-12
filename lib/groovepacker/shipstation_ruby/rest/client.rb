@@ -20,7 +20,7 @@ module Groovepacker
             elsif import_date_type == "modified_at" || import_date_type == "quick_created_at"
               predicate = import_date_type == "quick_created_at" ? 
               "orderDateStart" : "modifyDateStart"
-              orderDateStart = '&' + predicate + '=' + order_placed_after.to_s.gsub(" UTC", "").gsub(" ", "%20")
+              orderDateStart = '&' + predicate + '=' + (order_placed_after + Time.zone_offset("PDT").seconds).to_s.gsub(" UTC", "").gsub(" ", "%20")
               Rails.logger.info "Getting orders " + orderDateStart.to_s
             end
           end
@@ -35,7 +35,7 @@ module Groovepacker
                                     headers: {
                                       "Authorization" => "Basic "+ Base64.encode64(@auth[:api_key] + ":" + @auth[:api_secret]).gsub(/\n/, ''),
                                       "X-Mashape-Key" => "E6cSux0BVQmshJh0VacUkqXP1sJgp1I1APKjsntC26JSOTy0pP",
-                                    })
+                                    }, debug_output: $stdout)
             handle_exceptions(response)
             combined_response["orders"] =
               combined_response["orders"] +
