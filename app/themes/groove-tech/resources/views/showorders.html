@@ -10,24 +10,30 @@
             </accordion-heading>
 
             <li ng-class="{active:orders.setup.search=='' && orders.setup.filter=='all'}"
-                ng-click="orders.setup.search=''" ui-sref="orders.filter.page({filter:'all',page:1})">Show All
+                ng-click="orders.setup.search=''" ui-sref="orders.filter.page({filter:'all',page:1})"
+                ui-sref-opts="{reload: true}">Show All
             </li>
             <li ng-class="{active:orders.setup.search=='' && orders.setup.filter=='awaiting'}"
-                ng-click="orders.setup.search=''" ui-sref="orders.filter.page({filter:'awaiting',page:1})">Awaiting
+                ng-click="orders.setup.search=''" ui-sref="orders.filter.page({filter:'awaiting',page:1})"
+                ui-sref-opts="{reload: true}">Awaiting
             </li>
             <li ng-class="{active:orders.setup.search=='' && orders.setup.filter=='onhold'}"
-                ng-click="orders.setup.search=''" ui-sref="orders.filter.page({filter:'onhold',page:1})">Action Required
+                ng-click="orders.setup.search=''" ui-sref="orders.filter.page({filter:'onhold',page:1})"
+                ui-sref-opts="{reload: true}">Action Required
               &nbsp;&nbsp;<i class="icon-warning glyphicon glyphicon-warning-sign"
                              ng-show="orders.orders_count.onhold > 0" tooltip="{{orders.orders_count.onhold}}"></i></li>
             <li ng-class="{active:orders.setup.search=='' && orders.setup.filter=='serviceissue'}"
-                ng-click="orders.setup.search=''" ui-sref="orders.filter.page({filter:'serviceissue',page:1})">Service
+                ng-click="orders.setup.search=''" ui-sref="orders.filter.page({filter:'serviceissue',page:1})"
+                ui-sref-opts="{reload: true}">Service
               Issue
             </li>
             <li ng-class="{active:orders.setup.search=='' && orders.setup.filter=='cancelled'}"
-                ng-click="orders.setup.search=''" ui-sref="orders.filter.page({filter:'cancelled',page:1})">Cancelled
+                ng-click="orders.setup.search=''" ui-sref="orders.filter.page({filter:'cancelled',page:1})"
+                ui-sref-opts="{reload: true}">Cancelled
             </li>
             <li ng-class="{active:orders.setup.search=='' && orders.setup.filter=='scanned'}"
-                ng-click="orders.setup.search=''" ui-sref="orders.filter.page({filter:'scanned',page:1})">Scanned
+                ng-click="orders.setup.search=''" ui-sref="orders.filter.page({filter:'scanned',page:1})"
+                ui-sref-opts="{reload: true}">Scanned
             </li>
           </accordion-group>
         </accordion>

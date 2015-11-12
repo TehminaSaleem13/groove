@@ -13,22 +13,26 @@
             <li
               ng-class="{active: products.setup.search=='' && products.setup.filter=='all' && products.setup.is_kit == 0}"
               ng-click="products.setup.search=''"
-              ui-sref="products.type.filter.page({type:'product',filter:'all',page:1})">Show All
+              ui-sref="products.type.filter.page({type:'product',filter:'all',page:1})"
+              ui-sref-opts="{reload: true}">Show All
             </li>
             <li
               ng-class="{active: products.setup.search=='' && products.setup.filter=='active' && products.setup.is_kit == 0}"
               ng-click="products.setup.search=''"
-              ui-sref="products.type.filter.page({type:'product',filter:'active',page:1})">Active Products
+              ui-sref="products.type.filter.page({type:'product',filter:'active',page:1})" 
+              ui-sref-opts="{reload: true}">Active Products
             </li>
             <li
               ng-class="{active: products.setup.search=='' && products.setup.filter=='inactive' && products.setup.is_kit == 0}"
               ng-click="products.setup.search=''"
-              ui-sref="products.type.filter.page({type:'product',filter:'inactive',page:1})">Inactive Products
+              ui-sref="products.type.filter.page({type:'product',filter:'inactive',page:1})"
+              ui-sref-opts="{reload: true}">Inactive Products
             </li>
             <li
               ng-class="{active: products.setup.search=='' && products.setup.filter=='new' && products.setup.is_kit == 0}"
               ng-click="products.setup.search=''"
-              ui-sref="products.type.filter.page({type:'product',filter:'new',page:1})">New <span
+              ui-sref="products.type.filter.page({type:'product',filter:'new',page:1})"
+              ui-sref-opts="{reload: true}">New <span
               class="pull-right badge badge-important"
               ng-show="products.setup.is_kit==0 && products.products_count.new>0">{{products.products_count.new}}</span>
             </li>
@@ -40,22 +44,24 @@
             </accordion-heading>
             <li
               ng-class="{active: products.setup.search=='' && products.setup.filter=='all' && products.setup.is_kit == 1}"
-              ng-click="products.setup.search=''" ui-sref="products.type.filter.page({type:'kit',filter:'all',page:1})">
+              ng-click="products.setup.search=''" ui-sref="products.type.filter.page({type:'kit',filter:'all',page:1})" ui-sref-opts="{reload: true}">
               Show All
             </li>
             <li
               ng-class="{active: products.setup.search=='' && products.setup.filter=='active' && products.setup.is_kit == 1}"
               ng-click="products.setup.search=''"
-              ui-sref="products.type.filter.page({type:'kit',filter:'active',page:1})">Active Kits
+              ui-sref="products.type.filter.page({type:'kit',filter:'active',page:1})"
+              ui-sref-opts="{reload: true}">Active Kits
             </li>
             <li
               ng-class="{active: products.setup.search=='' && products.setup.filter=='inactive' && products.setup.is_kit == 1}"
               ng-click="products.setup.search=''"
-              ui-sref="products.type.filter.page({type:'kit',filter:'inactive',page:1})">Inactive Kits
+              ui-sref="products.type.filter.page({type:'kit',filter:'inactive',page:1})"
+              ui-sref-opts="{reload: true}">Inactive Kits
             </li>
             <li
               ng-class="{active: products.setup.search=='' && products.setup.filter=='new' && products.setup.is_kit == 1}"
-              ng-click="products.setup.search=''" ui-sref="products.type.filter.page({type:'kit',filter:'new',page:1})">
+              ng-click="products.setup.search=''" ui-sref="products.type.filter.page({type:'kit',filter:'new',page:1})" ui-sref-opts="{reload: true}">
               New Kits <span class="pull-right badge badge-important"
                              ng-show="products.setup.is_kit==1 && products.products_count.new>0">{{products.products_count.new}}</span>
             </li>

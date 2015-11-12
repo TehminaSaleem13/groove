@@ -47,7 +47,7 @@
                 </a>
               </li>
               <li ng-show="current_user.can('access_products')" class="nav-li">
-                <a ng-class="{active:is_active_tab('products')}" ui-sref="products">
+                <a ng-class="{active:is_active_tab('products')}" ui-sref="products.type.filter.page({type: 'product', filter: 'active', page: '1'})">
                   Products<br/>
                   <img class="icons" src="/assets/images/db.png">
                 </a>
