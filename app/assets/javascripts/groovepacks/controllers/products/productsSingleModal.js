@@ -236,8 +236,10 @@ groovepacks_controllers.
         }, 2000);
       };
 
-      scope.update_single_product = function (post_fn, auto) {
+      scope.update_single_product = function (auto, post_fn) {
+        console.log("update_single_product");
         //console.log(scope.products.single);
+        scope.products.single.post_fn = post_fn
         products.single.update(scope.products, auto).then(function () {
           myscope.product_single_details(scope.products.single.basicinfo.id);
         });
@@ -363,6 +365,7 @@ groovepacks_controllers.
 
         scope.custom_identifier = Math.floor(Math.random() * 1000);
         scope.products = product_data;
+        scope.products.single.post_fn = null;
 
         /**
          * Public properties

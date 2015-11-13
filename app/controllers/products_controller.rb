@@ -816,275 +816,279 @@ class ProductsController < ApplicationController
         end
         #Update product status and also update the containing kit and orders
         updatelist(@product, 'status', params[:basicinfo][:status]) unless params[:basicinfo][:status].nil?
+        unless params['post_fn'].nil?
+          # if params['post_fn'] == ''
+          #   #Update product inventory warehouses
+          #   #check if a product inventory warehouse is defined.
+          #   product_inv_whs = ProductInventoryWarehouses.where(:product_id => @product.id)
 
-        #Update product inventory warehouses
-        #check if a product inventory warehouse is defined.
-        product_inv_whs = ProductInventoryWarehouses.where(:product_id => @product.id)
+          #   if product_inv_whs.length > 0
+          #     product_inv_whs.each do |inv_wh|
+          #       if UserInventoryPermission.where(
+          #         :user_id => current_user.id,
+          #         :inventory_warehouse_id => inv_wh.inventory_warehouse_id,
+          #         :edit => true
+          #       ).length > 0
+          #         found_inv_wh = false
+          #         unless params[:inventory_warehouses].nil?
+          #           params[:inventory_warehouses].each do |wh|
+          #             if wh["info"]["id"] == inv_wh.id
+          #               found_inv_wh = true
+          #             end
+          #           end
+          #         end
+          #         if found_inv_wh == false
+          #           if !inv_wh.destroy
+          #             result['status'] &= false
+          #           end
+          #         end
+          #       end
+          #     end
+          #   end
 
-        if product_inv_whs.length > 0
-          product_inv_whs.each do |inv_wh|
-            if UserInventoryPermission.where(
-              :user_id => current_user.id,
-              :inventory_warehouse_id => inv_wh.inventory_warehouse_id,
-              :edit => true
-            ).length > 0
-              found_inv_wh = false
-              unless params[:inventory_warehouses].nil?
-                params[:inventory_warehouses].each do |wh|
-                  if wh["info"]["id"] == inv_wh.id
-                    found_inv_wh = true
+          #   #Update product inventory warehouses
+          #   #check if a product category is defined.
+          #   if !params[:inventory_warehouses].nil?
+          #     general_setting = GeneralSetting.all.first
+          #     params[:inventory_warehouses].each do |wh|
+          #       if UserInventoryPermission.where(
+          #         :user_id => current_user.id,
+          #         :inventory_warehouse_id => wh['warehouse_info']['id'],
+          #         :edit => true
+          #       ).length > 0
+          #         if !wh["info"]["id"].nil?
+          #           product_inv_wh = ProductInventoryWarehouses.find(wh["info"]["id"])
+
+          #           if general_setting.low_inventory_alert_email
+          #             product_inv_wh.product_inv_alert = wh["info"]["product_inv_alert"]
+          #             product_inv_wh.product_inv_alert_level = wh["info"]["product_inv_alert_level"]
+          #           end
+          #           product_inv_wh.quantity_on_hand= wh["info"]["quantity_on_hand"]
+          #           # product_inv_wh.available_inv = wh["info"]["available_inv"]
+          #           product_inv_wh.location_primary = wh["info"]["location_primary"]
+          #           product_inv_wh.location_secondary = wh["info"]["location_secondary"]
+          #           product_inv_wh.location_tertiary = wh["info"]["location_tertiary"]
+          #           unless product_inv_wh.save
+          #             result['status'] &= false
+          #           end
+          #         elsif !wh["warehouse_info"]["id"].nil?
+          #           product_inv_wh = ProductInventoryWarehouses.new
+          #           product_inv_wh.product_id = @product.id
+          #           product_inv_wh.inventory_warehouse_id = wh["warehouse_info"]["id"]
+          #           unless product_inv_wh.save
+          #             result['status'] &= false
+          #           end
+          #         end
+          #       end
+          #     end
+          #   end
+          # end
+          
+          if params['post_fn'] == 'category'
+            #Update product categories
+            #check if a product category is defined.
+            product_cats = ProductCat.where(:product_id => @product.id)
+
+            if product_cats.length > 0
+              product_cats.each do |productcat|
+                found_cat = false
+
+                if !params[:cats].nil?
+                  params[:cats].each do |cat|
+                    if cat["id"] == productcat.id
+                      found_cat = true
+                    end
+                  end
+                end
+
+                if found_cat == false
+                  if !productcat.destroy
+                    result['status'] &= false
                   end
                 end
               end
-              if found_inv_wh == false
-                if !inv_wh.destroy
-                  result['status'] &= false
-                end
-              end
             end
-          end
-        end
-
-        #Update product inventory warehouses
-        #check if a product category is defined.
-        if !params[:inventory_warehouses].nil?
-          general_setting = GeneralSetting.all.first
-          params[:inventory_warehouses].each do |wh|
-            if UserInventoryPermission.where(
-              :user_id => current_user.id,
-              :inventory_warehouse_id => wh['warehouse_info']['id'],
-              :edit => true
-            ).length > 0
-              if !wh["info"]["id"].nil?
-                product_inv_wh = ProductInventoryWarehouses.find(wh["info"]["id"])
-
-                if general_setting.low_inventory_alert_email
-                  product_inv_wh.product_inv_alert = wh["info"]["product_inv_alert"]
-                  product_inv_wh.product_inv_alert_level = wh["info"]["product_inv_alert_level"]
-                end
-                product_inv_wh.quantity_on_hand= wh["info"]["quantity_on_hand"]
-                # product_inv_wh.available_inv = wh["info"]["available_inv"]
-                product_inv_wh.location_primary = wh["info"]["location_primary"]
-                product_inv_wh.location_secondary = wh["info"]["location_secondary"]
-                product_inv_wh.location_tertiary = wh["info"]["location_tertiary"]
-                unless product_inv_wh.save
-                  result['status'] &= false
-                end
-              elsif !wh["warehouse_info"]["id"].nil?
-                product_inv_wh = ProductInventoryWarehouses.new
-                product_inv_wh.product_id = @product.id
-                product_inv_wh.inventory_warehouse_id = wh["warehouse_info"]["id"]
-                unless product_inv_wh.save
-                  result['status'] &= false
-                end
-              end
-            end
-          end
-        end
-
-
-        #Update product categories
-        #check if a product category is defined.
-        product_cats = ProductCat.where(:product_id => @product.id)
-
-        if product_cats.length > 0
-          product_cats.each do |productcat|
-            found_cat = false
 
             if !params[:cats].nil?
-              params[:cats].each do |cat|
-                if cat["id"] == productcat.id
-                  found_cat = true
+              params[:cats].each do |category|
+                if !category["id"].nil?
+                  product_cat = ProductCat.find(category["id"])
+                  product_cat.category = category["category"]
+                  if !product_cat.save
+                    result['status'] &= false
+                  end
+                else
+                  product_cat = ProductCat.new
+                  product_cat.category = category["category"]
+                  product_cat.product_id = @product.id
+                  if !product_cat.save
+                    result['status'] &= false
+                  end
                 end
               end
             end
+          elsif params['post_fn'] == 'sku'
+            #Update product skus
+            #check if a product sku is defined.
 
-            if found_cat == false
-              if !productcat.destroy
-                result['status'] &= false
+            product_skus = ProductSku.where(:product_id => @product.id)
+
+            if product_skus.length > 0
+              product_skus.each do |productsku|
+                found_sku = false
+
+                if !params[:skus].nil?
+                  params[:skus].each do |sku|
+                    if sku["id"] == productsku.id
+                      found_sku = true
+                    end
+                  end
+                end
+                if found_sku == false
+                  if !productsku.destroy
+                    result['status'] &= false
+                  end
+                end
               end
             end
-          end
-        end
-
-        if !params[:cats].nil?
-          params[:cats].each do |category|
-            if !category["id"].nil?
-              product_cat = ProductCat.find(category["id"])
-              product_cat.category = category["category"]
-              if !product_cat.save
-                result['status'] &= false
-              end
-            else
-              product_cat = ProductCat.new
-              product_cat.category = category["category"]
-              product_cat.product_id = @product.id
-              if !product_cat.save
-                result['status'] &= false
-              end
-            end
-          end
-        end
-
-        #Update product skus
-        #check if a product sku is defined.
-
-        product_skus = ProductSku.where(:product_id => @product.id)
-
-        if product_skus.length > 0
-          product_skus.each do |productsku|
-            found_sku = false
-
             if !params[:skus].nil?
+              order = 0
               params[:skus].each do |sku|
-                if sku["id"] == productsku.id
-                  found_sku = true
+                if !sku["id"].nil?
+                  product_sku = ProductSku.find(sku["id"])
+                  product_sku.sku = sku["sku"]
+                  product_sku.purpose = sku["purpose"]
+                  product_sku.order = order
+                  if !product_sku.save
+                    result['status'] &= false
+                  end
+                else
+                  if sku["sku"]!='' && ProductSku.where(:sku => sku["sku"]).length == 0
+                    product_sku = ProductSku.new
+                    product_sku.sku = sku["sku"]
+                    product_sku.purpose = sku["purpose"]
+                    product_sku.product_id = @product.id
+                    product_sku.order = order
+                    if !product_sku.save
+                      result['status'] &= false
+                    end
+                  else
+                    result['status'] &= false
+                    result['message'] = "Sku "+sku["sku"]+" already exists"
+                  end
+
+                end
+                order = order + 1
+              end
+            end
+          elsif params['post_fn'] == 'barcode'
+            #Update product barcodes
+            #check if a product barcode is defined.
+            puts "params[:barcodes].nil?: " + params[:barcodes].nil?.to_s
+            product_barcodes = ProductBarcode.where(:product_id => @product.id)
+            product_barcodes.reload
+            if product_barcodes.length > 0
+              product_barcodes.each do |productbarcode|
+                found_barcode = false
+
+                if !params[:barcodes].nil?
+                  params[:barcodes].each do |barcode|
+                    if barcode["id"] == productbarcode.id
+                      found_barcode = true
+                    end
+                  end
+                end
+
+                if found_barcode == false
+                  if !productbarcode.destroy
+                    result['status'] &= false
+                  end
                 end
               end
             end
-            if found_sku == false
-              if !productsku.destroy
-                result['status'] &= false
-              end
-            end
-          end
-        end
-        if !params[:skus].nil?
-          order = 0
-          params[:skus].each do |sku|
-            if !sku["id"].nil?
-              product_sku = ProductSku.find(sku["id"])
-              product_sku.sku = sku["sku"]
-              product_sku.purpose = sku["purpose"]
-              product_sku.order = order
-              if !product_sku.save
-                result['status'] &= false
-              end
-            else
-              if sku["sku"]!='' && ProductSku.where(:sku => sku["sku"]).length == 0
-                product_sku = ProductSku.new
-                product_sku.sku = sku["sku"]
-                product_sku.purpose = sku["purpose"]
-                product_sku.product_id = @product.id
-                product_sku.order = order
-                if !product_sku.save
-                  result['status'] &= false
-                end
-              else
-                result['status'] &= false
-                result['message'] = "Sku "+sku["sku"]+" already exists"
-              end
 
-            end
-            order = order + 1
-          end
-        end
-
-        #Update product barcodes
-        #check if a product barcode is defined.
-        product_barcodes = ProductBarcode.where(:product_id => @product.id)
-        product_barcodes.reload
-        if product_barcodes.length > 0
-          product_barcodes.each do |productbarcode|
-            found_barcode = false
-
+            #Update product barcodes
+            #check if a product barcode is defined
             if !params[:barcodes].nil?
+              order = 0
               params[:barcodes].each do |barcode|
-                if barcode["id"] == productbarcode.id
-                  found_barcode = true
+                if !barcode["id"].nil?
+                  product_barcode = ProductBarcode.find(barcode["id"])
+                  product_barcode.barcode = barcode["barcode"]
+                  product_barcode.order = order
+                  if !product_barcode.save
+                    result['status'] &= false
+                  end
+                else
+                  if barcode["barcode"]!='' && ProductBarcode.where(:barcode => barcode["barcode"]).length == 0
+                    product_barcode = ProductBarcode.new
+                    product_barcode.barcode = barcode["barcode"]
+                    product_barcode.order = order
+                    product_barcode.product_id = @product.id
+                    if !product_barcode.save
+                      result['status'] &= false
+                    end
+                  else
+                    result['status'] &= false
+                    result['message'] = "Barcode "+barcode["barcode"]+" already exists"
+                  end
+                end
+                order = order + 1
+              end
+            end
+          elsif params['post_fn'] == 'image'
+            #Update product barcodes
+            #check if a product barcode is defined.
+            product_images = ProductImage.where(:product_id => @product.id)
+
+            if product_images.length > 0
+              product_images.each do |productimage|
+                found_image = false
+
+                if !params[:images].nil?
+                  params[:images].each do |image|
+                    if image["id"] == productimage.id
+                      found_image = true
+                    end
+                  end
+                end
+
+                if found_image == false
+                  if !productimage.destroy
+                    result['status'] &= false
+                  end
                 end
               end
             end
 
-            if found_barcode == false
-              if !productbarcode.destroy
-                result['status'] &= false
-              end
-            end
-          end
-        end
-
-        #Update product barcodes
-        #check if a product barcode is defined
-        if !params[:barcodes].nil?
-          order = 0
-          params[:barcodes].each do |barcode|
-            if !barcode["id"].nil?
-              product_barcode = ProductBarcode.find(barcode["id"])
-              product_barcode.barcode = barcode["barcode"]
-              product_barcode.order = order
-              if !product_barcode.save
-                result['status'] &= false
-              end
-            else
-              if barcode["barcode"]!='' && ProductBarcode.where(:barcode => barcode["barcode"]).length == 0
-                product_barcode = ProductBarcode.new
-                product_barcode.barcode = barcode["barcode"]
-                product_barcode.order = order
-                product_barcode.product_id = @product.id
-                if !product_barcode.save
-                  result['status'] &= false
-                end
-              else
-                result['status'] &= false
-                result['message'] = "Barcode "+barcode["barcode"]+" already exists"
-              end
-            end
-            order = order + 1
-          end
-        end
-
-        #Update product barcodes
-        #check if a product barcode is defined.
-        product_images = ProductImage.where(:product_id => @product.id)
-
-        if product_images.length > 0
-          product_images.each do |productimage|
-            found_image = false
-
+            #Update product barcodes
+            #check if a product barcode is defined
             if !params[:images].nil?
+              order = 0
               params[:images].each do |image|
-                if image["id"] == productimage.id
-                  found_image = true
+                if !image["id"].nil?
+                  product_image = ProductImage.find(image["id"])
+                  product_image.image = image["image"]
+                  product_image.caption = image["caption"]
+                  product_image.order = order
+                  if !product_image.save
+                    result['status'] &= false
+                  end
+                else
+                  product_image = ProductImage.new
+                  product_image.image = image["image"]
+                  product_image.caption = image["caption"]
+                  product_image.product_id = @product.id
+                  product_image.order = order
+                  if !product_image.save
+                    result['status'] &= false
+                  end
                 end
-              end
-            end
-
-            if found_image == false
-              if !productimage.destroy
-                result['status'] &= false
+                order = order + 1
               end
             end
           end
         end
-
-        #Update product barcodes
-        #check if a product barcode is defined
-        if !params[:images].nil?
-          order = 0
-          params[:images].each do |image|
-            if !image["id"].nil?
-              product_image = ProductImage.find(image["id"])
-              product_image.image = image["image"]
-              product_image.caption = image["caption"]
-              product_image.order = order
-              if !product_image.save
-                result['status'] &= false
-              end
-            else
-              product_image = ProductImage.new
-              product_image.image = image["image"]
-              product_image.caption = image["caption"]
-              product_image.product_id = @product.id
-              product_image.order = order
-              if !product_image.save
-                result['status'] &= false
-              end
-            end
-            order = order + 1
-          end
-        end
-
         #if product is a kit, update product_kit_skus
         if !params[:productkitskus].nil?
           params[:productkitskus].each do |kit_product|
@@ -1098,7 +1102,7 @@ class ProductsController < ApplicationController
           end
         end
 
-
+        @product.reload
         @product.update_product_status
       else
         result['status'] = false
