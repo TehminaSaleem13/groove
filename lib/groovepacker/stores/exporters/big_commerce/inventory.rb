@@ -14,7 +14,9 @@ module Groovepacker
             (products||[]).each do |product|
               begin
                 inv_wh = product.product_inventory_warehousess.last
-                attrs = { inventory_level: inv_wh.available_inv }
+                inv_level = (inv_wh.available_inv || 0) rescue 0
+                inv_lavel = (inv_level < 0) ? 0 : inv_level
+                attrs = { inventory_level: inv_lavel }
                 
                 @sync_optn = product.sync_option
                 bc_product_id = @sync_optn.bc_product_id
