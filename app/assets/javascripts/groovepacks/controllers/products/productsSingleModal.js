@@ -36,7 +36,7 @@ groovepacks_controllers.
           }
         }
 
-        products.single.get(id, scope.products).success(function (data) {
+        products.single.get(id, scope.products, new_rollback).success(function (data) {
           warehouses.list.get(scope.warehouses).success(function () {
             for (var i = 0; i < scope.products.single.inventory_warehouses.length; i++) {
               for (var j = 0; j < scope.warehouses.list.length; j++) {
