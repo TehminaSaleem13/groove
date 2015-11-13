@@ -984,7 +984,6 @@ class ProductsController < ApplicationController
           elsif params['post_fn'] == 'barcode'
             #Update product barcodes
             #check if a product barcode is defined.
-            puts "params[:barcodes].nil?: " + params[:barcodes].nil?.to_s
             product_barcodes = ProductBarcode.where(:product_id => @product.id)
             product_barcodes.reload
             if product_barcodes.length > 0
@@ -1036,59 +1035,60 @@ class ProductsController < ApplicationController
                 order = order + 1
               end
             end
-          elsif params['post_fn'] == 'image'
-            #Update product barcodes
-            #check if a product barcode is defined.
-            product_images = ProductImage.where(:product_id => @product.id)
+          end
+        end
 
-            if product_images.length > 0
-              product_images.each do |productimage|
-                found_image = false
+        #Update product barcodes
+        #check if a product barcode is defined.
+        product_images = ProductImage.where(:product_id => @product.id)
 
-                if !params[:images].nil?
-                  params[:images].each do |image|
-                    if image["id"] == productimage.id
-                      found_image = true
-                    end
-                  end
-                end
+        if product_images.length > 0
+          product_images.each do |productimage|
+            found_image = false
 
-                if found_image == false
-                  if !productimage.destroy
-                    result['status'] &= false
-                  end
+            if !params[:images].nil?
+              params[:images].each do |image|
+                if image["id"] == productimage.id
+                  found_image = true
                 end
               end
             end
 
-            #Update product barcodes
-            #check if a product barcode is defined
-            if !params[:images].nil?
-              order = 0
-              params[:images].each do |image|
-                if !image["id"].nil?
-                  product_image = ProductImage.find(image["id"])
-                  product_image.image = image["image"]
-                  product_image.caption = image["caption"]
-                  product_image.order = order
-                  if !product_image.save
-                    result['status'] &= false
-                  end
-                else
-                  product_image = ProductImage.new
-                  product_image.image = image["image"]
-                  product_image.caption = image["caption"]
-                  product_image.product_id = @product.id
-                  product_image.order = order
-                  if !product_image.save
-                    result['status'] &= false
-                  end
-                end
-                order = order + 1
+            if found_image == false
+              if !productimage.destroy
+                result['status'] &= false
               end
             end
           end
         end
+
+        #Update product barcodes
+        #check if a product barcode is defined
+        if !params[:images].nil?
+          order = 0
+          params[:images].each do |image|
+            if !image["id"].nil?
+              product_image = ProductImage.find(image["id"])
+              product_image.image = image["image"]
+              product_image.caption = image["caption"]
+              product_image.order = order
+              if !product_image.save
+                result['status'] &= false
+              end
+            else
+              product_image = ProductImage.new
+              product_image.image = image["image"]
+              product_image.caption = image["caption"]
+              product_image.product_id = @product.id
+              product_image.order = order
+              if !product_image.save
+                result['status'] &= false
+              end
+            end
+            order = order + 1
+          end
+        end
+
         #if product is a kit, update product_kit_skus
         if !params[:productkitskus].nil?
           params[:productkitskus].each do |kit_product|
