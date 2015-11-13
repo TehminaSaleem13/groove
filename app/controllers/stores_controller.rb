@@ -1353,7 +1353,7 @@ class StoresController < ApplicationController
             Groovepacker::Stores::Handlers::BigCommerceHandler.new(@store))
       context.delay(:run_at => 1.seconds.from_now).pull_inventory
       #context.pull_inventory
-      @result['message'] = "Inventory pull completed successfully"
+      @result['message'] = "Your request for innventory pull has beed queued"
     else
       @result['status'] = false
       @result['message'] = "Either the the BigCommerce store is not setup properly or you don't have permissions to update inventories."
@@ -1373,7 +1373,7 @@ class StoresController < ApplicationController
             Groovepacker::Stores::Handlers::BigCommerceHandler.new(@store))
       context.delay(:run_at => 1.seconds.from_now).push_inventory
       #context.push_inventory
-      @result['message'] = "Inventory push completed successfully"
+      @result['message'] = "Your request for innventory push has beed queued"
     else
       @result['status'] = false
       @result['message'] = "Either the store is not present or you don't have permissions to update inventories."
