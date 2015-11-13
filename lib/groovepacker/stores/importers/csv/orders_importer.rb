@@ -240,27 +240,27 @@ module Groovepacker
 
           def import_sec_ter_barcode(product, single_row)
             if !self.mapping['secondary_barcode'].nil? && self.mapping['secondary_barcode'][:position] >= 0 && !single_row[self.mapping['secondary_barcode'][:position]].nil?
-              barcode = ProductBarcode.new
-              barcode.barcode = single_row[self.mapping['secondary_barcode'][:position]]
-              product.product_barcodes << barcode
+              barcode1 = ProductBarcode.new
+              barcode1.barcode = single_row[self.mapping['secondary_barcode'][:position]]
+              product.product_barcodes << barcode1
             end
             if !self.mapping['tertiary_barcode'].nil? && self.mapping['tertiary_barcode'][:position] >= 0 && !single_row[self.mapping['tertiary_barcode'][:position]].nil?
-              barcode = ProductBarcode.new
-              barcode.barcode = single_row[self.mapping['tertiary_barcode'][:position]]
-              product.product_barcodes << barcode
+              barcode2 = ProductBarcode.new
+              barcode2.barcode = single_row[self.mapping['tertiary_barcode'][:position]]
+              product.product_barcodes << barcode2
             end
           end
 
           def import_sec_ter_sku(product, single_row)
             if !self.mapping['secondary_sku'].nil? && self.mapping['secondary_sku'][:position] >= 0 && !single_row[self.mapping['secondary_sku'][:position]].nil?
-              sku = ProductSku.new
-              sku.sku = single_row[self.mapping['secondary_sku'][:position]]
-              product.product_skus << sku
+              sku1 = ProductSku.new
+              sku1.sku = single_row[self.mapping['secondary_sku'][:position]]
+              product.product_skus << sku1
             end
             if !self.mapping['tertiary_sku'].nil? && self.mapping['tertiary_sku'][:position] >= 0 && !single_row[self.mapping['tertiary_sku'][:position]].nil?
-              sku = ProductSku.new
-              sku.sku = single_row[self.mapping['tertiary_sku'][:position]]
-              product.product_skus << sku
+              sku2 = ProductSku.new
+              sku2.sku = single_row[self.mapping['tertiary_sku'][:position]]
+              product.product_skus << sku2
             end
           end
 
@@ -375,14 +375,9 @@ module Groovepacker
             # sku.sku = single_row[self.mapping['sku'][:position]].strip
             sku.sku = get_sku(single_row, unique_order_item)
             product.product_skus << sku
-            unless unique_order_item
-              import_sec_ter_sku(product, single_row)
-            end
             
             import_product_barcode(product, single_row, unique_order_item)
-            unless unique_order_item
-              import_sec_ter_barcode(product, single_row)
-            end
+            
             product.store_product_id = 0
             product.store_id = self.params[:store_id]
             product.spl_instructions_4_packer = import_product_instructions(product, single_row)
@@ -398,6 +393,13 @@ module Groovepacker
                 make_product_intangible(product)
               end
             end
+            unless unique_order_item
+              import_sec_ter_sku(product, single_row)
+            end
+            unless unique_order_item
+              import_sec_ter_barcode(product, single_row)
+            end
+            product.reload
             product.update_product_status
             order_item = OrderItem.new
             order_item.product = product
@@ -414,7 +416,7 @@ module Groovepacker
           end
 
           def get_sku(single_row, unique_order_item)
-            unique_order_item ? @order_increment_sku : (!single_row[self.mapping['sku'][:position]].nil? ? single_row[self.mapping['sku'][:position]].strip : nil)
+            unique_order_item ? @order_increment_sku : single_row[self.mapping['sku'][:position]].strip
           end
 
           def get_filtered_final_record

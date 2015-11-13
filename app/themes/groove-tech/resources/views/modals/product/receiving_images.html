@@ -7,7 +7,7 @@
   </div>
   <div class="modal-body">
     <div class="container-fluid form-horizontal">
-      <div class="form-group">
+      <div class="form-group" ng-hide="products.single.images.lenght == 0">
         <div class="col-sm-12">
           <div class="single-image-clickable" ng-model="products.single.images" ng-class="{'primary-image': $index==0}"
                ng-repeat="image in products.single.images">
@@ -35,6 +35,12 @@
             </div>
           </div>
         </div>
+      </div>
+      <div ng-show="products.single.images.length == 0">
+        <h3 style="margin-left: 20px; margin-right: 20px;">Please upload images for this product first, 
+        then return to select the images you would like to 
+        use for receiving instructions.
+        </h3>
       </div>
     </div>
   </div>
