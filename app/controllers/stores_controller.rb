@@ -1348,10 +1348,15 @@ class StoresController < ApplicationController
     @result['status'] = true
 
     access_restriction = AccessRestriction.last
+    
+    tenant = Apartment::Tenant.current
+    import_orders_obj = ImportOrders.new
+    import_orders_obj.delay(:run_at => 1.seconds.from_now).init_import(tenant)
+
     if access_restriction && access_restriction.allow_inv_push && @store && current_user.can?('update_inventories')
       context = Groovepacker::Stores::Context.new(
             Groovepacker::Stores::Handlers::BigCommerceHandler.new(@store))
-      context.delay(:run_at => 1.seconds.from_now).pull_inventory
+      context.delay(:run_at => 2.seconds.from_now).pull_inventory
       #context.pull_inventory
       @result['message'] = "Your request for innventory pull has beed queued"
     else
@@ -1368,10 +1373,14 @@ class StoresController < ApplicationController
     @result = Hash.new
     @result['status'] = true
 
+    tenant = Apartment::Tenant.current
+    import_orders_obj = ImportOrders.new
+    import_orders_obj.delay(:run_at => 1.seconds.from_now).init_import(tenant)
+
     if @store && current_user.can?('update_inventories')
       context = Groovepacker::Stores::Context.new(
             Groovepacker::Stores::Handlers::BigCommerceHandler.new(@store))
-      context.delay(:run_at => 1.seconds.from_now).push_inventory
+      context.delay(:run_at => 2.seconds.from_now).push_inventory
       #context.push_inventory
       @result['message'] = "Your request for innventory push has beed queued"
     else
