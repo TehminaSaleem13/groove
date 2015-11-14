@@ -48,6 +48,10 @@ class ImportOrders
     result
   end
 
+  def init_import(tenant)
+    Apartment::Tenant.switch(tenant)
+  end
+
   # params should have hash of tenant, store, import_type = 'regular', user
   def import_order_by_store(params)
     result = {
