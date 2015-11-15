@@ -18,7 +18,8 @@ class Product < ActiveRecord::Base
                   :weight,
                   :add_to_any_order,
                   :is_intangible,
-                  :base_sku
+                  :base_sku,
+                  :product_receiving_instructions
 
   has_many :product_skus, :dependent => :destroy
   has_many :product_cats, :dependent => :destroy
@@ -30,6 +31,7 @@ class Product < ActiveRecord::Base
   has_many :order_items
   has_many :product_kit_activities, dependent: :destroy
   has_many :product_lots
+  has_one :sync_option
 
   after_save :check_inventory_warehouses
 

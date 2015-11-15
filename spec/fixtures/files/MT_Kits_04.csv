@@ -1,0 +1,20 @@
+KIT-SKU,KIT-NAME,KIT-BARCODE,PART-SKU,,,PART-QTY,SCAN-OPTION
+K.SS.M,"SingleScanKit, Multi-count - Inventory should 0 ",K.SS.M,R.S-PART-A ,,,2,1
+K.SS.M,"SingleScanKit, Multi-count - Inventory should 0 ",K.SS.M,R.S-PART-B ,,,1,1
+K.IS.M ,IndividualScanKit Multi-count ,K.IS.M ,R.S-PART-C ,,,2,2
+K.IS.M ,IndividualScanKit Multi-count ,K.IS.M ,R.S-PART-D ,,,1,2
+K.AS1.M ,"AutoSplitKit Scan Kit as a single item, Multi-count - Inventory will 0 - for now expect -2",K.AS1.M ,R.S-PART-E ,,,2,3
+K.AS1.M ,"AutoSplitKit Scan Kit as a single item, Multi-count - Inventory will 0 - for now expect -2",K.AS1.M ,R.S-PART-F ,,,1,3
+K.AS2.M ,AutoSplitKit Scan items individually Multi-count,K.AS2.M ,R.S-PART-G,,,2,3
+K.AS2.M ,AutoSplitKit Scan items individually Multi-count,K.AS2.M ,R.S-PART-H ,,,1,3
+K.AS2.M-ADDTEST ,"AutoSplitKit Scan items individually, Multi-count ",K.AS2.M-ADDTEST ,R.S-REMOVEPART ,,,6,3
+K.SS-MASTER ,,K.SS-MASTER ,MASTER-PARTA ,,,1,3
+K.SS-MASTER ,,K.SS-MASTER ,MASTER-PARTB ,,,2,3
+K.ADJUST.001,This Kit Contains items that need adjustments for Manual Test 1,K.ADJUST,R.M-TIC.CONF,,,1,1
+K.ADJUST.001,This Kit Contains items that need adjustments for Manual Test 1,K.ADJUST,R.M-TIC.OFF,,,1,1
+K.ADJUST.001,This Kit Contains items that need adjustments for Manual Test 1,K.ADJUST,R.S-CS.OFF,,,1,1
+K.ADJUST.001,This Kit Contains items that need adjustments for Manual Test 1,K.ADJUST,R.M-CS.CONF,,,1,1
+K.ADJUST.001,This Kit Contains items that need adjustments for Manual Test 1,K.ADJUST,R.SKIPABLE,,,1,1
+K.ADJUST.001,This Kit Contains items that need adjustments for Manual Test 1,K.ADJUST,R.ADD2ANY,,,1,1
+K.ADJUST.001,This Kit Contains items that need adjustments for Manual Test 1,K.ADJUST,K.AS2.M,,,1,1
+K.ADJUST.001,This Kit Contains items that need adjustments for Manual Test 1,K.ADJUST,R.INTANGIBLE.SWITCH ,,,1,1

@@ -154,13 +154,13 @@ groovepacks_controllers.
           }
           $scope.import_groov_popover.content =
             '<table style="font-size: 12px;width:100%;">' +
-            '<tr ng-repeat="store in import_groov_popover.data" ng-hide="store.store_type==\'CSV\' && !store.status">' +
+            '<tr ng-repeat="store in import_groov_popover.data" ng-hide="!store.status">' +
             '<td width="60px;" style="white-space: nowrap;">' +
             '<a class="btn" href="#/settings/stores/{{store.id}}"><img ng-src="{{store.logo.src}}" width="60px" alt="{{store.logo.alt}}"/></a>' +
             '</td>' +
             '<td style="white-space: nowrap;">{{store.name}}</td>' +
             '<td style="width:62%;padding:3px;">' +
-            '<progressbar type="{{store.progress.type}}" value="store.progress.value"> {{store.progress.message| limitTo: 55}}</progressbar>' +
+            '<progressbar type="{{store.progress.type}}" value="store.progress.value"> {{store.progress.message| limitTo: 75}}</progressbar>' +
             '<progressbar ng-show="store.progress_product.show" type="{{store.progress_product.type}}" value="store.progress_product.value">{{store.progress_product.message | limitTo: 56}}</progressbar>' +
             '</td>' +
             '<td style="text-align:right;width:38%;padding:3px;" ng-show="store.store_type==\'Shipstation API 2\'">' +
