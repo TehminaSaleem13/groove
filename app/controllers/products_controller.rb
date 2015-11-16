@@ -777,7 +777,6 @@ class ProductsController < ApplicationController
   end
 
   def update
-    sleep(4)
     result = {}
     @product = Product.find(params[:basicinfo][:id]) unless params.nil? && params[:basicinfo].nil?
     result['status'] = true
