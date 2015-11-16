@@ -173,7 +173,7 @@ module Groovepacker
             delete_products(current_user)
           elsif params[:action_type] == 'all'
             ActiveRecord::Base.connection.tables.each do |table|
-              ActiveRecord::Base.connection.execute("TRUNCATE #{table}")
+              ActiveRecord::Base.connection.execute("TRUNCATE #{table}") unless table == 'access_restrictions' || table == 'schema_migrations'
             end
             Groovepacker::SeedTenant.new.seed()
             users = User.where(:name => 'admin')
