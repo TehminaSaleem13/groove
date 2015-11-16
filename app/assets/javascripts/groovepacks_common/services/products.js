@@ -222,7 +222,7 @@ groovepacks_services.factory('products', ['$http', 'notification', 'editable', '
   };
 
   var basicinfo_changed = function (basicinfo, data) {
-    result = true;
+    var result = true;
     for (var key in basicinfo) {
       if (key == 'status' || key == 'created_at' || key == 'updated_at') {
         continue;
@@ -292,14 +292,14 @@ groovepacks_services.factory('products', ['$http', 'notification', 'editable', '
   };
 
   var update_single = function (products, auto) {
-    // if (typeof auto !== "boolean") {
-    //   auto = true;
-    // }
+    if (typeof auto !== "boolean") {
+      auto = true;
+    }
     return $http.put('/products/'+products.single.basicinfo.id+'.json', products.single).success(function (data) {
       if (data.status) {
-        // if (!auto) {
+        if (!auto) {
           notification.notify("Successfully Updated", 1);
-        // }
+        }
       } else {
         if (data.message) {
           notification.notify(data.message, 0);
