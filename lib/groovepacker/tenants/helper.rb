@@ -299,6 +299,20 @@ module Groovepacker
           result['error_messages'].push(e.message);
         end
       end
+
+      def update_tenant(tenant, params, result)
+        puts "params: " + params.inspect
+        puts "params['value']: " + params['value']
+        unless tenant.subscription.nil? || tenant.subscription.stripe_customer_id.nil?
+          subscription = tenant.subscription
+          customer_id = subscription.stripe_customer_id
+          if params['var'] == 'plan'
+            init = Groovepacker::Tenants::TenantInitialization.new
+            init_access = init.access_limits(params['value'])
+            update_restrictions(tenant, init_access,result)
+          end
+        end
+      end
     end
   end
 end

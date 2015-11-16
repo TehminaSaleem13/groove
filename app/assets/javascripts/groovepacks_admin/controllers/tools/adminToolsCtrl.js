@@ -232,7 +232,23 @@ groovepacks_admin_controllers.
           editable: {
             array: false,
             update: $scope.update_tenants_list,
-            elements: {},
+            elements: {
+              plan: {
+                type: 'select',
+                options: [
+                  {name: "Solo", value: 'groove-solo'},
+                  {name: "Duo", value: 'groove-duo'},
+                  {name: "Trio", value: 'groove-trio'},
+                  {name: "Quintet", value: 'groove-quintet'},
+                  {name: "Symphony", value: 'groove-symphony'},
+                  {name: "Annual Solo", value: 'annual-groove-solo'},
+                  {name: "Annual Duo", value: 'annual-groove-duo'},
+                  {name: "Annual Trio", value: 'annual-groove-trio'},
+                  {name: "Annual Quintet", value: 'annual-groove-quintet'},
+                  {name: "Annual Symphony", value: 'annual-groove-symphony'}
+                ]
+              },
+            },
             functions: {
               name: myscope.handle_click_fn,
               open: myscope.open_tenant_url,
@@ -249,7 +265,8 @@ groovepacks_admin_controllers.
             },
             plan: {
               name: "Plan",
-              editable: false
+              transclude: "<span class='label label-success'>" +
+              "{{row[field]}}</span>"
             },
             progress: {
               name: "Tenant Creation Status",
