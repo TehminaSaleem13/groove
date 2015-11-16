@@ -237,7 +237,6 @@ groovepacks_controllers.
       };
 
       scope.update_single_product = function (auto, post_fn) {
-        console.log("update_single_product");
         //console.log(scope.products.single);
         scope.products.single.post_fn = post_fn
         products.single.update(scope.products, auto).then(function () {

@@ -221,91 +221,32 @@ groovepacks_services.factory('products', ['$http', 'notification', 'editable', '
     }).error(notification.server_error);
   };
 
+  var basicinfo_changed = function (basicinfo, data) {
+    result = true;
+    for (var key in basicinfo) {
+      if (key == 'status' || key == 'created_at' || key == 'updated_at') {
+        continue;
+      } else if (basicinfo[key] != data[key]) {
+        result = false;
+        break;
+      };
+    };
+    return result;
+  };
+
   //single product related functions
   var get_single = function (id, products, auto) {
     return $http.get('/products/' + id + '.json').success(function (data) {
       if (data.product) {
         if (!auto) {
-          if (products.single['basicinfo']['add_to_any_order'] == data.product.basicinfo.add_to_any_order &&
-            products.single['basicinfo']['click_scan_enabled'] == data.product.basicinfo.click_scan_enabled &&
-            products.single['basicinfo']['contains_intangible_string'] == data.product.basicinfo.contains_intangible_string &&
-            products.single['basicinfo']['id'] == data.product.basicinfo.id &&
-            products.single['basicinfo']['is_intangible'] == data.product.basicinfo.is_intangible &&
-            products.single['basicinfo']['is_kit'] == data.product.basicinfo.is_kit &&
-            products.single['basicinfo']['is_skippable'] == data.product.basicinfo.is_skippable &&
-            products.single['basicinfo']['kit_parsing'] == data.product.basicinfo.kit_parsing &&
-            products.single['basicinfo']['name'] == data.product.basicinfo.name &&
-            products.single['basicinfo']['pack_time_adj'] == data.product.basicinfo.pack_time_adj &&
-            products.single['basicinfo']['packing_placement'] == data.product.basicinfo.packing_placement &&
-            products.single['basicinfo']['product_receiving_instructions'] == data.product.basicinfo.product_receiving_instructions &&
-            products.single['basicinfo']['shipping_weight'] == data.product.basicinfo.shipping_weight &&
-            products.single['basicinfo']['spl_instructions_4_confirmation'] == data.product.basicinfo.spl_instructions_4_confirmation &&
-            products.single['basicinfo']['spl_instructions_4_packer'] == data.product.basicinfo.spl_instructions_4_packer &&
-            products.single['basicinfo']['store_id'] == data.product.basicinfo.store_id &&
-            products.single['basicinfo']['store_product_id'] == data.product.basicinfo.store_product_id &&
-            products.single['basicinfo']['total_avail_ext'] == data.product.basicinfo.total_avail_ext &&
-            products.single['basicinfo']['type_scan_enabled'] == data.product.basicinfo.type_scan_enabled &&
-            products.single['basicinfo']['weight'] == data.product.basicinfo.weight &&
-            products.single['basicinfo']['weight_format'] == data.product.basicinfo.weight_format &&
+          if (basicinfo_changed(products.single['basicinfo'], data.product.basicinfo) &&
             products.single['barcodes'].length == data.product.barcodes.length &&
             products.single['cats'].length == data.product.cats.length &&
             products.single['inventory_warehouses'].length == data.product.inventory_warehouses.length &&
             products.single['skus'].length == data.product.skus.length) {
             products.signle = {};
             products.single = data.product;
-          } else if(products.single['barcodes'].length != data.product.barcodes.length ||
-            products.single['cats'].length != data.product.cats.length ||
-            products.single['inventory_warehouses'].length != data.product.inventory_warehouses.length ||
-            products.single['skus'].length != data.product.skus.length) {
-            var current_barcodes = products.single['barcodes'];
-            var current_inv_whs = proudcts.single['inventory_warehouses'];
-            var current_cats = proudcts.single['cats'];
-            var current_skus = proudcts.single['skus'];
-            products.signle = {};
-            products.single = data.product;
-
-            // Update barcodes.
-            for (var i = current_barcodes.length - 1; i >= 0; i--) {
-              var exists = false
-              for (var j = data.prodcut.barcodes.length - 1; j >= 0; j--) {
-                if (current_barcodes[i] == data.prodcut.barcodes[j]) {
-                  exists = true;
-                  break;
-                }
-                if (!exists) {
-                  products.single['barcodes'].push(current_barcodes[i])
-                }; 
-              };
-            };
-
-            // Update catagories.
-            for (var i = current_cats.length - 1; i >= 0; i--) {
-              var exists = false
-              for (var j = data.prodcut.cats.length - 1; j >= 0; j--) {
-                if (current_cats[i] == data.prodcut.cats[j]) {
-                  exists = true;
-                  break;
-                }
-                if (!exists) {
-                  products.single['cats'].push(current_cats[i])
-                }; 
-              };
-            };
-
-            // Update skus.
-            for (var i = current_skus.length - 1; i >= 0; i--) {
-              var exists = false
-              for (var j = data.prodcut.skus.length - 1; j >= 0; j--) {
-                if (current_skus[i] == data.prodcut.skus[j]) {
-                  exists = true;
-                  break;
-                }
-                if (!exists) {
-                  products.single['skus'].push(current_skus[i])
-                }; 
-              };
-            };
-          };
+          }
         }else {
           if (typeof products.single['basicinfo'] != "undefined" && data.product.basicinfo.id == products.single.basicinfo.id) {
             angular.extend(products.single, data.product);
