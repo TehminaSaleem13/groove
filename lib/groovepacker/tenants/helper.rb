@@ -135,8 +135,8 @@ module Groovepacker
                 subscription_result['plan'] = "duo"
               when "groove-trio"
                 subscription_result['plan'] = "trio"
-              when "groove-quinet"
-                subscription_result['plan'] = "quinet"
+              when "groove-quintet"
+                subscription_result['plan'] = "quintet"
               when "groove-symphony"
                 subscription_result['plan'] = "symphony"
               when "annual-groove-solo"
@@ -145,8 +145,8 @@ module Groovepacker
                 subscription_result['plan'] = "annual-duo"
               when "annual-groove-trio"
                 subscription_result['plan'] = "annual-trio"
-              when "annual-groove-quinet"
-                subscription_result['plan'] = "annual-quinet"
+              when "annual-groove-quintet"
+                subscription_result['plan'] = "annual-quintet"
               when "annual-groove-symphony"
                 subscription_result['plan'] = "annual-symphony"
               else
@@ -272,7 +272,7 @@ module Groovepacker
             access_restrictions[data_length - 1].num_shipments = params[:access_restrictions_info][:max_allowed]
             access_restrictions[data_length-1].num_users = params[:access_restrictions_info][:max_users]
             access_restrictions[data_length-1].num_import_sources = params[:access_restrictions_info][:max_import_sources]
-            access_restrictions[data_length-1].allow_inv_push = params[:access_restrictions_info][:allow_inv_push]
+            access_restrictions[data_length-1].allow_inv_push = params[:access_restrictions_info][:allow_inv_push] unless params[:access_restrictions_info][:allow_inv_push].nil?
             access_restrictions[data_length-1].save
           end
         rescue Exception => e
@@ -296,7 +296,27 @@ module Groovepacker
           @tenant.save
         rescue Exception => e
           result['status'] = false
-          result['error_messages'].push(e.message);
+          result['error_messages'].push(e.message)
+        end
+      end
+
+      def update_tenant(tenant, params, result)
+        begin
+          unless tenant.subscription.nil? || tenant.subscription.stripe_customer_id.nil?
+            subscription = tenant.subscription
+            if params['var'] == 'plan'
+              plan_id = get_plan_id(params['value'])
+              init = Groovepacker::Tenants::TenantInitialization.new
+              init_access = init.access_limits(plan_id)
+              update_restrictions(tenant, init_access,result)
+              update_subcription_plan(subscription, plan_id)
+              subscription.subscription_plan_id = plan_id
+              subscription.save!
+            end
+          end
+        rescue Exception => e
+          result['status'] = false
+          result['error_messages'].push(e.message)
         end
       end
     end

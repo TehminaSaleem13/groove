@@ -135,6 +135,28 @@ class TenantsController < ApplicationController
     end
   end
 
+  def update_tenant_list
+    result = {}
+    result['status'] = true
+    result['error_messages'] = []
+    result['success_messages'] = []
+
+    current_tenant = Apartment::Tenant.current_tenant
+    tenant = Tenant.find(params[:id])
+    unless tenant.nil?
+      helper = Groovepacker::Tenants::Helper.new
+      helper.update_tenant(tenant, params, result)
+    else
+      result['status'] = false
+    end
+    Apartment::Tenant.switch(current_tenant)
+
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json: result }
+    end
+  end
+
   private
 
   def get_tenants_count

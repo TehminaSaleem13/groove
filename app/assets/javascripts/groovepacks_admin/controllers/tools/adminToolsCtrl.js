@@ -232,7 +232,23 @@ groovepacks_admin_controllers.
           editable: {
             array: false,
             update: $scope.update_tenants_list,
-            elements: {},
+            elements: {
+              plan: {
+                type: 'select',
+                options: [
+                  {name: "Solo", value: 'solo'},
+                  {name: "Duo", value: 'duo'},
+                  {name: "Trio", value: 'trio'},
+                  {name: "Quintet", value: 'quintet'},
+                  {name: "Symphony", value: 'symphony'},
+                  {name: "Annual Solo", value: 'annual-solo'},
+                  {name: "Annual Duo", value: 'annual-duo'},
+                  {name: "Annual Trio", value: 'annual-trio'},
+                  {name: "Annual Quintet", value: 'annual-quintet'},
+                  {name: "Annual Symphony", value: 'annual-symphony'}
+                ]
+              }
+            },
             functions: {
               name: myscope.handle_click_fn,
               open: myscope.open_tenant_url,
@@ -249,7 +265,12 @@ groovepacks_admin_controllers.
             },
             plan: {
               name: "Plan",
-              editable: false
+              transclude: "<span class='label label-default' ng-class=\"{" +
+              "'label-success': row[field] == 'quintet' || row[field] == 'annual-quintet', " +
+              "'label-warning': row[field] == 'duo' || row[field] == 'annual-duo', " +
+              "'label-info': row[field] == 'trio' || row[field] == 'annual-trio', " +
+              "'label-danger': row[field] == 'symphony' || row[field] == 'annual-symphony' }\">" +
+              "{{row[field]}}</span>"
             },
             progress: {
               name: "Tenant Creation Status",
@@ -336,8 +357,6 @@ groovepacks_admin_controllers.
           $scope._can_load_tenants = false;
           $scope.gridOptions.selections.show_delete = myscope.show_delete();
           return tenants.list.get($scope.tenants, page).success(function (data) {
-            console.log("data");
-            console.log($scope.tenants.list);
             $scope.gridOptions.paginate.total_items = tenants.list.total_tenants($scope.tenants);
             myscope.update_selected_count();
             $scope._can_load_tenants = true;

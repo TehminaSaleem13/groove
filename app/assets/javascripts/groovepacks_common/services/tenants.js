@@ -168,11 +168,11 @@ groovepacks_services.factory('tenants', ['$http', 'notification', 'editable', '$
   }
 
   var update_list_node = function (obj) {
-    return $http.post('/tenants/updatetenantlist.json', obj).success(function (data) {
+    return $http.post('/tenants/'+ obj.id +'/update_tenant_list.json', obj).success(function (data) {
       if (data.status) {
         notification.notify("Successfully Updated", 1);
       } else {
-        notification.notify(data.error_msg, 0);
+        notification.notify(data.error_messages, 0);
       }
     }).error(notification.server_error);
   };
