@@ -141,4 +141,11 @@ module PaymentsHelper
       @result['messages'].push('Congrats! Your promotional code is valid.')
     end
   end
+
+  def update_subcription_plan(subscription, plan_id)
+    customer = Stripe::Customer.retrieve(subscription.stripe_customer_id)
+    customer_subscription = customer.subscriptions.retrieve(subscription.customer_subscription_id)
+    customer_subscription.plan = plan_id
+    customer_subscription.save
+  end
 end

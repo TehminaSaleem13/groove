@@ -172,7 +172,7 @@ groovepacks_services.factory('tenants', ['$http', 'notification', 'editable', '$
       if (data.status) {
         notification.notify("Successfully Updated", 1);
       } else {
-        notification.notify(data.error_msg, 0);
+        notification.notify(data.error_messages, 0);
       }
     }).error(notification.server_error);
   };
