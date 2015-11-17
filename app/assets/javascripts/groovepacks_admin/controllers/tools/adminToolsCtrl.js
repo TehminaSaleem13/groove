@@ -236,18 +236,18 @@ groovepacks_admin_controllers.
               plan: {
                 type: 'select',
                 options: [
-                  {name: "Solo", value: 'groove-solo'},
-                  {name: "Duo", value: 'groove-duo'},
-                  {name: "Trio", value: 'groove-trio'},
-                  {name: "Quintet", value: 'groove-quintet'},
-                  {name: "Symphony", value: 'groove-symphony'},
-                  {name: "Annual Solo", value: 'annual-groove-solo'},
-                  {name: "Annual Duo", value: 'annual-groove-duo'},
-                  {name: "Annual Trio", value: 'annual-groove-trio'},
-                  {name: "Annual Quintet", value: 'annual-groove-quintet'},
-                  {name: "Annual Symphony", value: 'annual-groove-symphony'}
+                  {name: "Solo", value: 'solo'},
+                  {name: "Duo", value: 'duo'},
+                  {name: "Trio", value: 'trio'},
+                  {name: "Quintet", value: 'quintet'},
+                  {name: "Symphony", value: 'symphony'},
+                  {name: "Annual Solo", value: 'annual-solo'},
+                  {name: "Annual Duo", value: 'annual-duo'},
+                  {name: "Annual Trio", value: 'annual-trio'},
+                  {name: "Annual Quintet", value: 'annual-quintet'},
+                  {name: "Annual Symphony", value: 'annual-symphony'}
                 ]
-              },
+              }
             },
             functions: {
               name: myscope.handle_click_fn,
@@ -265,7 +265,11 @@ groovepacks_admin_controllers.
             },
             plan: {
               name: "Plan",
-              transclude: "<span class='label label-success'>" +
+              transclude: "<span class='label label-default' ng-class=\"{" +
+              "'label-success': row[field] == 'quintet' || row[field] == 'annual-quintet', " +
+              "'label-warning': row[field] == 'duo' || row[field] == 'annual-duo', " +
+              "'label-info': row[field] == 'trio' || row[field] == 'annual-trio', " +
+              "'label-danger': row[field] == 'symphony' || row[field] == 'annual-symphony' }\">" +
               "{{row[field]}}</span>"
             },
             progress: {
