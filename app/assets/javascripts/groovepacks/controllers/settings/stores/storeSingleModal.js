@@ -585,11 +585,11 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
         Shopify: {
           name: "Shopify",
           file: "/assets/views/modals/settings/stores/shopify.html"
-        }//,
-        //"BigCommerce": {
-        //  name: "BigCommerce",
-        //  file: "/assets/views/modals/settings/stores/big_commerce.html"
-        //}
+        },
+        "BigCommerce": {
+          name: "BigCommerce",
+          file: "/assets/views/modals/settings/stores/big_commerce.html"
+        }
       };
 
 
