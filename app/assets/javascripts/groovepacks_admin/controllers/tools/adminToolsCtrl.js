@@ -354,9 +354,8 @@ groovepacks_admin_controllers.
             },
             note: {
               name: "Notes",
-              // hideable: false,
               editable: false,
-              transclude: '<button type="button" ng-click="options.editable.functions.click(row)">Note</button>'
+              transclude: '<button type="button" ng-click="options.editable.functions.click(row)" groov-popover="{{row[field]}}">Note</button>'
             },
             url: {
               name: "URL",
