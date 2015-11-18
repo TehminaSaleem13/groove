@@ -12,23 +12,20 @@ module Groovepacker
         begin
           products = list_selected_products(params)
           unless products.nil?
-            bulk_action.total = products.length
-            bulk_action.completed = 0
-            bulk_action.status = 'in_progress'
-            bulk_action.save
-            products.each do |single_product|
-              product = Product.find(single_product['id'])
+            bulk_action.update_attributes(:total => products.length, :completed => 0, :status => 'in_progress')
+            product_ids = []
+            products.each {|h| product_ids << h["id"]}
+            products = Product.where("id in (?)", product_ids)
+            (products||[]).each do |product|
+              #product = Product.find(single_product['id'])
               bulk_action.reload
               if bulk_action.cancel?
-                bulk_action.status = 'cancelled'
-                bulk_action.save
+                bulk_action.update_attributes(:status => 'cancelled')
                 return true
               end
-              bulk_action.current = product.name
-              bulk_action.save
+              bulk_action.update_attributes(:current => product.name)
               current_status = product.status
-              product.status = params[:status]
-              if product.save
+              if product.update_attributes(:status => params[:status])
                 product.reload
                 if product.status !='inactive'
                   if !product.update_product_status && params[:status] == 'active'
@@ -42,8 +39,7 @@ module Groovepacker
                                                 product.name + '. Reason: In order for a product to be Active it needs to '+
                                                 'have at least one SKU and one barcode.')
                     end
-                    product.status = current_status
-                    product.save
+                    product.update_attributes(:status => current_status)
                   end
                 else
                   product.update_due_to_inactive_product
@@ -52,21 +48,15 @@ module Groovepacker
                 result['status'] &= false
                 result['messages'].push('There was a problem changing products status for '+product.name)
               end
-              bulk_action.completed = bulk_action.completed + 1
-              bulk_action.save
+              bulk_action.update_attributes(:completed => bulk_action.completed + 1)
             end
           end
           unless bulk_action.cancel?
-            bulk_action.status = result['status'] ? 'completed' : 'failed'
-            bulk_action.messages = result['messages']
-            bulk_action.current = ''
-            bulk_action.save
+            bulk_action_status = result['status'] ? 'completed' : 'failed'
+            bulk_action.update_attributes(:status => bulk_action_status, :messages => result['messages'], :current => '')
           end
         rescue Exception => e
-          bulk_action.status = 'failed'
-          bulk_action.messages = ['Some error occurred']
-          bulk_action.current = ''
-          bulk_action.save
+          bulk_action.update_attributes(:status => 'failed', :messages => ['Some error occurred'], :current => '')
         end
       end
 
