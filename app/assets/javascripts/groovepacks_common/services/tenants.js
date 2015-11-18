@@ -213,6 +213,17 @@ groovepacks_services.factory('tenants', ['$http', 'notification', 'editable', '$
   };
 
   var update_access_restriction_data = function (tenants) {
+    return $http.post('/tenants/' + tenants.single.basicinfo.id + '/update_access_restrictions.json', tenants.single).success(function (data) {
+      if (data.status) {
+        notification.notify("Successfully Updated.", 1);
+      } else {
+        notification.notify(data.error_messages, 0);
+      }
+      ;
+    }).error(notification.server_error);
+  };
+
+  var update_tenant_data = function (tenants) {
     return $http.put('/tenants/' + tenants.single.basicinfo.id + '.json', tenants.single).success(function (data) {
       if (data.status) {
         notification.notify("Successfully Updated.", 1);
@@ -275,7 +286,8 @@ groovepacks_services.factory('tenants', ['$http', 'notification', 'editable', '$
     single: {
       get: get_sinlge,
       select: select_single,
-      update: update_access_restriction_data,
+      update: update_tenant_data,
+      update_access: update_access_restriction_data,
       delete: delete_tenant_data,
       rollback: rollback_single_tenant,
       duplicate: duplicate_tenant,

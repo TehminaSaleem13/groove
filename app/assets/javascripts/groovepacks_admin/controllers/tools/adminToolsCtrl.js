@@ -99,6 +99,31 @@ groovepacks_admin_controllers.
         return result.promise;
       };
 
+      $scope.open_notes = function(row) {
+        var result = $q.defer();
+        tenants.single.get(row.id, $scope.tenants).then(function(data){
+          myscope.tenant_obj = $modal.open({
+            templateUrl: '/assets/admin_views/modals/tenants/tenant_note.html',
+            controller: 'tenantsNoteModal',
+            size: 'md',
+            resolve: {
+              tenant_data: function () {
+                return $scope.tenants
+              }
+            }
+          });
+          $timeout(function () {
+            $('#note').focus();
+          }, 1000);
+          myscope.tenant_obj.result.finally(function () {
+            $scope.tenants.selected = [];
+            myscope.get_tenants();
+          });
+        });
+        
+        return result.promise;
+      };
+
       myscope.update_selected_count = function () {
         if ($scope.tenants.setup.inverted && $scope.gridOptions.paginate.show) {
           $scope.gridOptions.selections.selected_count = $scope.gridOptions.paginate.total_items - $scope.tenants.selected.length;
@@ -253,7 +278,8 @@ groovepacks_admin_controllers.
               name: myscope.handle_click_fn,
               open: myscope.open_tenant_url,
               show_popover: myscope.show_popover,
-              hide_popover: myscope.hide_popover
+              hide_popover: myscope.hide_popover,
+              click: $scope.open_notes
             }
 
           },
@@ -325,6 +351,12 @@ groovepacks_admin_controllers.
             import_log: {
               name: "Import Log Log",
               editable: false
+            },
+            note: {
+              name: "Notes",
+              // hideable: false,
+              editable: false,
+              transclude: '<button type="button" ng-click="options.editable.functions.click(row)">Note</button>'
             },
             url: {
               name: "URL",

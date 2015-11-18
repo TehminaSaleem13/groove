@@ -1,0 +1,23 @@
+<div>
+  <div class="modal-body modal-delete">
+    <button type="button" class="close-btn modal-delete-close" ng-click="cancel()"><i
+      class="glyphicon glyphicon-remove"></i></button>
+    <div class="modal-title" style="margin-left: 0px;">
+      <legend>
+        <span ng-show="tenants.single.note == null || tenants.single.note == ''">&nbsp;&nbsp;Create </span><span ng-show="tenants.single.note != null">&nbsp;&nbsp;Update </span><span>note for the tenant {{tenants.single.basicinfo.name}}</span>
+      </legend>
+    </div>
+    <div class="container-fluid">
+      <div class="col-sm-12 form-group">
+        <div class="controls">
+          ​<textarea id="note" rows="5" cols="70" ng-model="tenants.single.basicinfo.note"></textarea>
+        </div>
+      </div>
+    </div>
+    <legend></legend>
+    <div class="container-fluid">
+      <button ng-click="ok()" class="modal-save-button" translate>Save & close</button>
+      <button ng-click="cancel()" class="modal-cancel-button" translate>Cancel</button>
+    </div>
+  </div>
+</div>

@@ -251,6 +251,7 @@ Groovepacks::Application.routes.draw do
     member do
       post   'create_duplicate'
       post 'update_tenant_list'
+      post 'update_access_restrictions'
     end
   end
 

@@ -40,6 +40,7 @@ module Groovepacker
             tenant_hash = {}
             tenant_hash['id'] = tenant.id
             tenant_hash['name'] = tenant.name
+            tenant_hash['note'] = tenant.note
             plan_data = get_subscription_data(tenant.name)
             tenant_hash['start_day'] = plan_data['start_day']
             tenant_hash['plan'] = plan_data['plan']
@@ -281,6 +282,16 @@ module Groovepacker
         end
       end
 
+      def update_tenant(tenant, params, result)
+        begin
+          tenant.note = params[:basicinfo][:note] unless params[:basicinfo][:note].nil?
+          tenant.save!
+        rescue Exception => e
+          result['status'] = false
+          result['error_messages'].push(e.message);
+        end
+      end
+
       def duplicate(tenant, result, duplicate_name)
         begin
           current_tenant = tenant.name
@@ -300,7 +311,7 @@ module Groovepacker
         end
       end
 
-      def update_tenant(tenant, params, result)
+      def update_node(tenant, params, result)
         begin
           unless tenant.subscription.nil? || tenant.subscription.stripe_customer_id.nil?
             subscription = tenant.subscription
