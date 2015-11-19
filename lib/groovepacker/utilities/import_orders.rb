@@ -165,6 +165,20 @@ class ImportOrders
           import_item.status = 'completed'
         end
         import_item.save
+      elsif store_type == 'Magento API 2'
+        import_item.status = 'in_progress'
+        import_item.save
+        context = Groovepacker::Stores::Context.new(
+          Groovepacker::Stores::Handlers::MagentoRestHandler.new(store, import_item))
+        result = context.import_orders
+        import_item.previous_imported = result[:previous_imported]
+        import_item.success_imported = result[:success_imported]
+        if !result[:status]
+          import_item.status = 'failed'
+        else
+          import_item.status = 'completed'
+        end
+        import_item.save
       elsif store_type == 'Shipstation'
         import_item.status = 'in_progress'
         import_item.save

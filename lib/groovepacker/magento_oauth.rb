@@ -36,6 +36,7 @@ module Groovepacker
         request_token = Rails.cache.read("#{current_tenant}_magento_request_token")
         access_token = request_token.get_access_token(oauth_verifier: @oauth_varifier)
         credential.access_token = access_token.token
+        credential.oauth_token_secret = access_token.secret
         credential.save
         result['access_token'] = credential.access_token
         Rails.cache.delete("#{current_tenant}_magento_request_token")

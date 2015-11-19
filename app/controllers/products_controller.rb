@@ -25,6 +25,10 @@ class ProductsController < ApplicationController
           context = Groovepacker::Stores::Context.new(
             Groovepacker::Stores::Handlers::MagentoHandler.new(@store))
           import_result = context.import_products
+        elsif @store.store_type == 'Magento API 2'
+          context = Groovepacker::Stores::Context.new(
+            Groovepacker::Stores::Handlers::MagentoRestHandler.new(@store))
+          import_result = context.import_products
         elsif @store.store_type == 'Shipstation'
           context = Groovepacker::Stores::Context.new(
             Groovepacker::Stores::Handlers::ShipstationHandler.new(@store))

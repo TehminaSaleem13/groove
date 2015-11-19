@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20151110104353) do
+ActiveRecord::Schema.define(:version => 20151117103842) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0,     :null => false
@@ -307,9 +307,11 @@ ActiveRecord::Schema.define(:version => 20151110104353) do
     t.string   "api_secret"
     t.boolean  "import_images"
     t.boolean  "import_categories"
-    t.datetime "created_at",        :null => false
-    t.datetime "updated_at",        :null => false
+    t.datetime "created_at",         :null => false
+    t.datetime "updated_at",         :null => false
     t.string   "access_token"
+    t.string   "oauth_token_secret"
+    t.datetime "last_imported_at"
   end
 
   create_table "oauth_access_grants", :force => true do |t|
