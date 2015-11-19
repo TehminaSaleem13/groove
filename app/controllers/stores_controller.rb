@@ -1344,9 +1344,19 @@ class StoresController < ApplicationController
 
     access_restriction = AccessRestriction.last
     if access_restriction && access_restriction.allow_inv_push && @store && current_user.can?('update_inventories')
-      context = Groovepacker::Stores::Context.new(
-            Groovepacker::Stores::Handlers::BigCommerceHandler.new(@store))
-      context.delay(:run_at => 1.seconds.from_now).pull_inventory
+      
+
+      case @store.store_type
+      when "BigCommerce"
+        handler = Groovepacker::Stores::Handlers::BigCommerceHandler.new(@store)
+      when "Magento API 2"
+        handler = Groovepacker::Stores::Handlers::MagentoRestHandler.new(@store)
+      end
+      
+      context = Groovepacker::Stores::Context.new(handler)
+      #context.delay(:run_at => 1.seconds.from_now).pull_inventory
+      context.pull_inventory
+
       #context.pull_inventory
       @result['message'] = "Your request has beed queued"
     else
@@ -1364,11 +1374,16 @@ class StoresController < ApplicationController
     @result['status'] = true
 
     if @store && current_user.can?('update_inventories')
-      context = Groovepacker::Stores::Context.new(
-            Groovepacker::Stores::Handlers::BigCommerceHandler.new(@store))
+      
+      case @store.store_type
+      when "BigCommerce"
+        handler = Groovepacker::Stores::Handlers::BigCommerceHandler.new(@store)
+      when "Magento API 2"
+        handler = Groovepacker::Stores::Handlers::MagentoRestHandler.new(@store)
+      end
+      
+      context = Groovepacker::Stores::Context.new(handler)
       context.delay(:run_at => 1.seconds.from_now).push_inventory
-      #context.push_inventory
-      @result['message'] = "Your request has beed queued"
     else
       @result['status'] = false
       @result['message'] = "Either the store is not present or you don't have permissions to update inventories."

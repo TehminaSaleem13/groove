@@ -42,7 +42,7 @@ module Groovepacker
           page_index += 1
           products = products.merge(response)
           response_length = response.length rescue 0
-          break if response_length<10 || page_index==20
+          break if response_length<10 || page_index==50
         end
         return products
 
@@ -52,6 +52,7 @@ module Groovepacker
         method = 'GET'
         uri = "https://groovepacker.com/store/api/rest/products/#{product_id}"
         params = parameters
+        binding.pry
         fetch(method, uri, params, filters)
       end
 

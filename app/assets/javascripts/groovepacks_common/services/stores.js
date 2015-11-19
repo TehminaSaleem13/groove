@@ -143,6 +143,7 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
             stores.single.api_key = data.credentials.magento_rest_credential.api_key;
             stores.single.api_secret = data.credentials.magento_rest_credential.api_secret;
             stores.single.access_token = data.credentials.magento_rest_credential.access_token;
+            stores.single.oauth_token_secret = data.credentials.magento_rest_credential.oauth_token_secret;
             stores.single.import_images = data.credentials.magento_rest_credential.import_images;
             stores.single.import_categories = data.credentials.magento_rest_credential.import_categories;
 
