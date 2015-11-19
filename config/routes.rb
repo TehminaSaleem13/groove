@@ -274,6 +274,7 @@ Groovepacks::Application.routes.draw do
       get 'valid_tenant_name'
       get 'valid_email'
       get 'validate_coupon_id'
+      get 'complete'
     end
   end
 
