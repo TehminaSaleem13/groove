@@ -23,13 +23,19 @@ groovepacks_admin_controllers.
       };
 
       $scope.update_tenants_list = function (tenant, prop) {
-        tenants.list.update_node({
-          id: tenant.id,
-          var: prop,
-          value: tenant[prop]
-        }).then(function () {
-          myscope.get_tenants(1)
-        });
+        if (prop == 'plan') {
+          if (confirm("Are you sure you want to change the plan for the tenant?")) {
+            tenants.list.update_node({
+              id: tenant.id,
+              var: prop,
+              value: tenant[prop]
+            }).then(function () {
+              myscope.get_tenants();
+            });
+          } else {
+            myscope.get_tenants();
+          };
+        }; 
       };
 
       $scope.handlesort = function (predicate) {
