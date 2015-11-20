@@ -76,7 +76,12 @@ module Groovepacker
                         mapping['order_placed_time'][:position] >= 0 &&
                         !params[:order_date_time_format].nil? &&
                         params[:order_date_time_format] != 'Default'
-                      calculate_order_placed_time(single_row)
+                      begin
+                        calculate_order_placed_time(single_row)
+                      rescue
+                        result[:messages].push('Order Placed has bad parameter - ' \
+                          "#{single_row[mapping['order_placed_time'][:position]]}")
+                      end
                     elsif !params[:order_placed_at].nil?
                       require 'time'
                       time = Time.parse(params[:order_placed_at])
@@ -495,46 +500,41 @@ module Groovepacker
 
           def calculate_order_placed_time(single_row)
             require 'time'
-            begin
-              imported_order_time =
-                single_row[mapping['order_placed_time'][:position]]
-              separator = (imported_order_time.include? '/') ? '/' : '-'
-              if params[:order_date_time_format] == 'YYYY/MM/DD TIME'
-                if params[:day_month_sequence] == 'DD/MM'
-                  @order['order_placed_time'] = DateTime.strptime(
-                    imported_order_time, "%Y#{separator}%d#{separator}%m %H:%M")
-                else
-                  @order['order_placed_time'] = DateTime.strptime(
-                    imported_order_time, "%Y#{separator}%m#{separator}%d %H:%M")
-                end
-              elsif params[:order_date_time_format] == 'MM/DD/YYYY TIME'
-                if params[:day_month_sequence] == 'DD/MM'
-                  @order['order_placed_time'] = DateTime.strptime(
-                    imported_order_time, "%d#{separator}%m#{separator}%Y %H:%M")
-                else
-                  @order['order_placed_time'] = DateTime.strptime(
-                    imported_order_time, "%m#{separator}%d#{separator}%Y %H:%M")
-                end
-              elsif params[:order_date_time_format] == 'YY/MM/DD TIME'
-                if params[:day_month_sequence] == 'DD/MM'
-                  @order['order_placed_time'] = DateTime.strptime(
-                    imported_order_time, "%y#{separator}%d#{separator}%m %H:%M")
-                else
-                  @order['order_placed_time'] = DateTime.strptime(
-                    imported_order_time, "%y#{separator}%m#{separator}%d %H:%M")
-                end
-              elsif params[:order_date_time_format] == 'MM/DD/YY TIME'
-                if params[:day_month_sequence] == 'DD/MM'
-                  @order['order_placed_time'] = DateTime.strptime(
-                    imported_order_time, "%d#{separator}%m#{separator}%y %H:%M")
-                else
-                  @order['order_placed_time'] = DateTime.strptime(
-                    imported_order_time, "%m#{separator}%d#{separator}%y %H:%M")
-                end
+            imported_order_time =
+              single_row[mapping['order_placed_time'][:position]]
+            separator = (imported_order_time.include? '/') ? '/' : '-'
+            if params[:order_date_time_format] == 'YYYY/MM/DD TIME'
+              if params[:day_month_sequence] == 'DD/MM'
+                @order['order_placed_time'] = DateTime.strptime(
+                  imported_order_time, "%Y#{separator}%d#{separator}%m %H:%M")
+              else
+                @order['order_placed_time'] = DateTime.strptime(
+                  imported_order_time, "%Y#{separator}%m#{separator}%d %H:%M")
               end
-            rescue
-              result[:messages].push('Order Placed has bad parameter - ' \
-                "#{single_row[mapping['order_placed_time'][:position]]}")
+            elsif params[:order_date_time_format] == 'MM/DD/YYYY TIME'
+              if params[:day_month_sequence] == 'DD/MM'
+                @order['order_placed_time'] = DateTime.strptime(
+                  imported_order_time, "%d#{separator}%m#{separator}%Y %H:%M")
+              else
+                @order['order_placed_time'] = DateTime.strptime(
+                  imported_order_time, "%m#{separator}%d#{separator}%Y %H:%M")
+              end
+            elsif params[:order_date_time_format] == 'YY/MM/DD TIME'
+              if params[:day_month_sequence] == 'DD/MM'
+                @order['order_placed_time'] = DateTime.strptime(
+                  imported_order_time, "%y#{separator}%d#{separator}%m %H:%M")
+              else
+                @order['order_placed_time'] = DateTime.strptime(
+                  imported_order_time, "%y#{separator}%m#{separator}%d %H:%M")
+              end
+            elsif params[:order_date_time_format] == 'MM/DD/YY TIME'
+              if params[:day_month_sequence] == 'DD/MM'
+                @order['order_placed_time'] = DateTime.strptime(
+                  imported_order_time, "%d#{separator}%m#{separator}%y %H:%M")
+              else
+                @order['order_placed_time'] = DateTime.strptime(
+                  imported_order_time, "%m#{separator}%d#{separator}%y %H:%M")
+              end
             end
           end
 
