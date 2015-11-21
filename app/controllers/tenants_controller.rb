@@ -50,9 +50,30 @@ class TenantsController < ApplicationController
     result = {}
     result['status'] = true
     result['error_messages'] = []
+
+    tenant = Tenant.find(params[:id])
+    unless tenant.nil?
+      helper = Groovepacker::Tenants::Helper.new
+      helper.update_tenant(tenant, params, result)
+    else
+      result['status'] = false
+      result['error_messages'].push('Could not find tenant')
+    end
+
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json: result }
+    end
+  end
+
+  def update_access_restrictions
+    result = {}
+    result['status'] = true
+    result['error_messages'] = []
     tenant = nil
     current_tenant = Apartment::Tenant.current_tenant
     tenant = Tenant.find(params[:id])
+
     unless tenant.nil?
       helper = Groovepacker::Tenants::Helper.new
       helper.update_restrictions(tenant, params, result)
@@ -129,6 +150,28 @@ class TenantsController < ApplicationController
       result['status'] = false
       result['error_messages'].push("The tenant doesn't exist")
     end
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json: result }
+    end
+  end
+
+  def update_tenant_list
+    result = {}
+    result['status'] = true
+    result['error_messages'] = []
+    result['success_messages'] = []
+
+    current_tenant = Apartment::Tenant.current_tenant
+    tenant = Tenant.find(params[:id])
+    unless tenant.nil?
+      helper = Groovepacker::Tenants::Helper.new
+      helper.update_node(tenant, params, result)
+    else
+      result['status'] = false
+    end
+    Apartment::Tenant.switch(current_tenant)
+
     respond_to do |format|
       format.html # show.html.erb
       format.json { render json: result }

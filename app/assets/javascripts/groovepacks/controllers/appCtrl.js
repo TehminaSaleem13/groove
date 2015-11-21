@@ -71,6 +71,10 @@ groovepacks_controllers.
             Shopify: {
               alt: "CSV",
               src: "/assets/images/shopify_import.png"
+            },
+            "BigCommerce": {
+              alt: "BigCommerce",
+              src: "/assets/images/bigcommerce-logo.png"
             }
 
           };
