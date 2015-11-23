@@ -282,8 +282,7 @@ module Groovepacker
 
           def import_product_weight(product, single_row)
             product.weight = single_row[mapping['product_weight'][:position]] if
-            mapping['product_weight'] &&
-            single_row[mapping['product_weight'][:position]]
+            verify_single_item(single_row, 'product_weight')
           end
 
           def import_product_barcode(product, single_row, unique_order_item = false)
@@ -310,23 +309,17 @@ module Groovepacker
           end
 
           def import_sec_barcode(product, single_row)
-            sec_barcode_map = mapping['secondary_barcode']
-            return unless !sec_barcode_map.nil? &&
-                          sec_barcode_map[:position] >= 0 &&
-                          !single_row[sec_barcode_map[:position]].nil?
+            return unless verify_single_item(single_row, 'secondary_barcode')
             barcode1 = ProductBarcode.new
-            barcode1.barcode = single_row[sec_barcode_map[:position]]
+            barcode1.barcode = single_row[mapping['secondary_barcode'][:position]]
             product.product_barcodes << barcode1
           end
 
           def import_ter_barcode(product, single_row)
-            ter_barcode_map = mapping['tertiary_barcode']
-            return unless !ter_barcode_map.nil? &&
-                          ter_barcode_map[:position] >= 0 &&
-                          !single_row[ter_barcode_map[:position]].nil?
+            return unless verify_single_item(single_row, 'tertiary_barcode')
             barcode2 = ProductBarcode.new
             barcode2.barcode =
-              single_row[ter_barcode_map[:position]]
+              single_row[mapping['tertiary_barcode'][:position]]
             product.product_barcodes << barcode2
           end
 
@@ -336,22 +329,16 @@ module Groovepacker
           end
 
           def import_sec_sku(product, single_row)
-            sec_sku_map = mapping['secondary_sku']
-            return unless !sec_sku_map.nil? &&
-                          sec_sku_map[:position] >= 0 &&
-                          !single_row[sec_sku_map[:position]].nil?
+            return unless verify_single_item(single_row, 'secondary_sku')
             sku1 = ProductSku.new
-            sku1.sku = single_row[sec_sku_map[:position]]
+            sku1.sku = single_row[mapping['secondary_sku'][:position]]
             product.product_skus << sku1
           end
 
           def import_ter_sku(product, single_row)
-            ter_sku_map = mapping['tertiary_sku']
-            return unless !ter_sku_map.nil? &&
-                          ter_sku_map[:position] >= 0 &&
-                          !single_row[ter_sku_map[:position]].nil?
+            return unless verify_single_item(single_row, 'tertiary_sku')
             sku2 = ProductSku.new
-            sku2.sku = single_row[ter_sku_map[:position]]
+            sku2.sku = single_row[mapping['tertiary_sku'][:position]]
             product.product_skus << sku2
           end
 
@@ -364,8 +351,7 @@ module Groovepacker
 
           def import_product_instructions(single_row)
             single_row[mapping['product_instructions'][:position]] if
-              mapping['product_instructions'] &&
-              single_row[mapping['product_instructions'][:position]]
+              verify_single_item(single_row, 'product_instructions')
           end
 
           def import_order_item_qty(single_row)
@@ -387,8 +373,7 @@ module Groovepacker
           end
 
           def import_image(product, single_row, check_duplicacy = false)
-            return unless !mapping['image'].nil? &&
-                          mapping['image'][:position] >= 0
+            return unless verify_single_item(single_row, 'image')
             if check_duplicacy
               unless duplicate_image?(product, single_row)
                 import_product_image(product, single_row)
