@@ -21,17 +21,17 @@ module Groovepacker
               next if blank_row?(single_row)
               if  verify_single_item(single_row, 'increment_id') &&
                   verify_single_item(single_row, 'sku')
-                @import_item.current_increment_id = single_row[mapping['increment_id'][:position]]
+                @import_item.current_increment_id = inc_id = get_row_data(single_row, 'increment_id')
                 @import_item.current_order_items = -1
                 @import_item.current_order_imported_item = -1
                 @import_item.save
 
-                if  @imported_orders.key?(single_row[mapping['increment_id'][:position]]) ||
+                if  @imported_orders.key?(inc_id) ||
                     Order.where(
-                      increment_id: single_row[mapping['increment_id'][:position]]).length == 0 ||
+                      increment_id: inc_id).length == 0 ||
                     params[:contains_unique_order_items] == true
                   @order = Order.find_or_create_by_increment_id(
-                    single_row[mapping['increment_id'][:position]])
+                    inc_id)
                   @order.store_id = params[:store_id]
                   @order_required = %w(qty sku increment_id price)
                   order_map.each do |single_map|
@@ -44,7 +44,7 @@ module Groovepacker
                     elsif single_map == 'firstname'
                       if  mapping['lastname'].nil? ||
                           mapping['lastname'][:position] == 0
-                        arr = single_row[mapping[single_map][:position]].blank? ? [] : single_row[mapping[single_map][:position]].split(' ')
+                        arr = single_row[mapping[single_map][:position]].blank? ? [] : get_row_data(single_row, single_map).split(' ')
                         @order.firstname = arr.shift
                         @order.lastname = arr.join(' ')
                       else
@@ -57,7 +57,7 @@ module Groovepacker
                       import_for_unique_order_items(single_row)
                     else
                       @order[single_map] =
-                        single_row[mapping[single_map][:position]] if mapping[single_map]
+                        get_row_data(single_row, single_map) if mapping[single_map]
                     end
 
                     @order_required.delete(single_map) if @order_required.include? single_map
@@ -97,12 +97,6 @@ module Groovepacker
                   # Skipped because of duplicate order
                 end
               else
-                # No increment id found
-                # @import_item.status = 'failed'
-                # @import_item.message =
-                #   'No increment id was found on current order'
-                # @import_item.save
-                # result[:status] = false
                 next
               end
               next if result[:status]
@@ -126,7 +120,7 @@ module Groovepacker
             @import_item.current_order_items = 1
             @import_item.current_order_imported_item = 0
             @import_item.save
-            single_sku = single_row[mapping['sku'][:position]]
+            single_sku = get_row_data(single_row, 'sku')
             product_skus = ProductSku.where(
               sku: single_sku.strip)
             if !product_skus.empty?
@@ -157,9 +151,9 @@ module Groovepacker
             if verify_single_item(single_row, item)
               case item
               when 'qty'
-                order_item.qty = single_row[mapping[item][:position]]
+                order_item.qty = get_row_data(single_row, item)
               when 'item_sale_price'
-                order_item.price = single_row[mapping[item][:position]]
+                order_item.price = get_row_data(single_row, item)
               end
             else
               case item
@@ -192,10 +186,10 @@ module Groovepacker
               case item
               when 'qty'
                 order_item.qty =  (order_item.qty.to_i +
-                                  single_row[mapping['qty'][:position]].to_i).to_s
+                                  get_row_data(single_row, 'qty').to_i).to_s
               when 'item_sale_price'
                 order_item.price =
-                  single_row[mapping['item_sale_price'][:position]]
+                  get_row_data(single_row, 'item_sale_price')
               end
             end
             order_item
@@ -208,10 +202,10 @@ module Groovepacker
           end
 
           def import_for_unique_order_items(single_row)
-            single_inc_id = single_row[mapping['increment_id'][:position]]
+            single_inc_id = get_row_data(single_row, 'increment_id')
             @order['increment_id'] = single_inc_id
             @order_required.delete('increment_id')
-            single_sku = single_row[mapping['sku'][:position]]
+            single_sku = get_row_data(single_row, 'sku')
             @import_item.current_order_items = 1
             @import_item.current_order_imported_item = 0
             @import_item.save
@@ -274,14 +268,14 @@ module Groovepacker
             if params[:use_sku_as_product_name] == true
               product.name = single_row[mapping['sku'][:position]].strip
             elsif verify_single_item(single_row, 'product_name')
-              product.name = single_row[mapping['product_name'][:position]]
+              product.name = get_row_data(single_row, 'product_name')
             else
               product.name = 'Product created from order import'
             end
           end
 
           def import_product_weight(product, single_row)
-            product.weight = single_row[mapping['product_weight'][:position]] if
+            product.weight = get_row_data(single_row, 'product_weight') if
             verify_single_item(single_row, 'product_weight')
           end
 
@@ -289,7 +283,7 @@ module Groovepacker
             if params[:generate_barcode_from_sku] == true
               push_barcode(product, get_sku(single_row, unique_order_item))
             elsif verify_single_item(single_row, 'barcode')
-              barcode = single_row[mapping['barcode'][:position]]
+              barcode = get_row_data(single_row, 'barcode')
               if ProductBarcode.where(
                 barcode: barcode.strip).empty?
                 push_barcode(product, barcode)
@@ -303,73 +297,42 @@ module Groovepacker
             product.product_barcodes << product_barcode
           end
 
+          def import_product_info(product, single_row, prop, prop_type)
+            return unless verify_single_item(single_row, prop)
+            if prop_type == 'barcode'
+              barcode = ProductBarcode.new
+              barcode.barcode = get_row_data(single_row, prop)
+              product.product_barcodes << barcode
+            elsif prop_type == 'sku'
+              sku = ProductSku.new
+              sku.sku = get_row_data(single_row, prop)
+              product.product_skus << sku
+            elsif prop_type == 'category'
+              cat = ProductCat.new
+              cat.category = get_row_data(single_row, prop)
+              product.product_cats << cat
+            end
+          end
+
           def import_sec_ter_barcode(product, single_row)
-            import_sec_barcode(product, single_row)
-            import_ter_barcode(product, single_row)
-          end
-
-          def import_sec_barcode(product, single_row)
-            return unless verify_single_item(single_row, 'secondary_barcode')
-            barcode1 = ProductBarcode.new
-            barcode1.barcode = single_row[mapping['secondary_barcode'][:position]]
-            product.product_barcodes << barcode1
-          end
-
-          def import_ter_barcode(product, single_row)
-            return unless verify_single_item(single_row, 'tertiary_barcode')
-            barcode2 = ProductBarcode.new
-            barcode2.barcode =
-              single_row[mapping['tertiary_barcode'][:position]]
-            product.product_barcodes << barcode2
+            %w(secondary_barcode tertiary_barcode).each do |prop|
+              import_product_info(product, single_row, prop, 'barcode')
+            end
           end
 
           def import_sec_ter_sku(product, single_row)
-            import_sec_sku(product, single_row)
-            import_ter_sku(product, single_row)
-          end
-
-          def import_sec_sku(product, single_row)
-            return unless verify_single_item(single_row, 'secondary_sku')
-            sku1 = ProductSku.new
-            sku1.sku = single_row[mapping['secondary_sku'][:position]]
-            product.product_skus << sku1
-          end
-
-          def import_ter_sku(product, single_row)
-            return unless verify_single_item(single_row, 'tertiary_sku')
-            sku2 = ProductSku.new
-            sku2.sku = single_row[mapping['tertiary_sku'][:position]]
-            product.product_skus << sku2
+            %w(secondary_sku tertiary_sku).each do |prop|
+              import_product_info(product, single_row, prop, 'sku')
+            end
           end
 
           def import_product_category(product, single_row)
-            return unless verify_single_item(single_row, 'category')
-            cat = ProductCat.new
-            cat.category = single_row[mapping['category'][:position]]
-            product.product_cats << cat
+            import_product_info(product, single_row, 'category', 'category')
           end
 
           def import_product_instructions(single_row)
-            single_row[mapping['product_instructions'][:position]] if
+            get_row_data(single_row, 'product_instructions') if
               verify_single_item(single_row, 'product_instructions')
-          end
-
-          def import_order_item_qty(single_row)
-            qty = 0
-            if verify_single_item(single_row, 'qty')
-              qty = single_row[mapping['qty'][:position]]
-            end
-            @order_required.delete('qty')
-            qty
-          end
-
-          def import_item_sale_price(single_row)
-            price = 0.0
-            if verify_single_item(single_row, 'item_sale_price')
-              price = single_row[mapping['item_sale_price'][:position]]
-            end
-            @order_required.delete('price')
-            price
           end
 
           def import_image(product, single_row, check_duplicacy = false)
@@ -385,7 +348,7 @@ module Groovepacker
 
           def import_product_image(product, single_row)
             product_image = ProductImage.new
-            product_image.image = single_row[mapping['image'][:position]]
+            product_image.image = get_row_data(single_row, 'image')
             product.product_images << product_image
           end
 
@@ -400,7 +363,7 @@ module Groovepacker
             product_images = product.product_images
             product_images.each do |single_image|
               return true if
-                single_image.image == single_row[mapping['image'][:position]]
+                single_image.image == get_row_data(single_row, 'image')
             end
             false
           end
@@ -430,25 +393,7 @@ module Groovepacker
           end
 
           def set_product_info(product, single_row, unique_order_item = false)
-            import_product_name(product, single_row)
-            import_product_weight(product, single_row)
-            import_product_sku(product, single_row, unique_order_item)
-            import_product_barcode(product, single_row, unique_order_item)
-            product.store_product_id = 0
-            product.store_id = params[:store_id]
-            product.spl_instructions_4_packer =
-              import_product_instructions(single_row)
-            import_image(product, single_row)
-            import_product_category(product, single_row)
-            if unique_order_item
-              product.base_sku = single_row[mapping['sku'][:position]].strip
-              product.save
-            else
-              make_product_intangible(product) if product.save!
-            end
-            import_sec_ter_sku(product, single_row) unless unique_order_item
-            import_sec_ter_barcode(product, single_row) unless unique_order_item
-
+            import_product_data(product, single_row, unique_order_item)
             product.reload
             product.update_product_status
             order_item = import_new_order_item(
@@ -461,6 +406,27 @@ module Groovepacker
             @import_item.save
           end
 
+          def import_product_data(product, single_row, unique_order_item)
+            import_product_name(product, single_row)
+            import_product_weight(product, single_row)
+            import_product_sku(product, single_row, unique_order_item)
+            import_product_barcode(product, single_row, unique_order_item)
+            product.store_product_id = 0
+            product.store_id = params[:store_id]
+            product.spl_instructions_4_packer =
+              import_product_instructions(single_row)
+            import_image(product, single_row)
+            import_product_category(product, single_row)
+            if unique_order_item
+              product.base_sku = get_row_data(single_row, 'sku').strip
+              product.save
+            else
+              import_sec_ter_sku(product, single_row)
+              import_sec_ter_barcode(product, single_row)
+              make_product_intangible(product) if product.save!
+            end
+          end
+
           def save_order_item(order_item)
             @order_required.delete('qty')
             @order_required.delete('price')
@@ -468,7 +434,7 @@ module Groovepacker
           end
 
           def get_sku(single_row, unique_order_item)
-            unique_order_item ? @order_increment_sku : single_row[mapping['sku'][:position]].strip
+            unique_order_item ? @order_increment_sku : get_row_data(single_row, 'sku').strip
           end
 
           def build_filtered_final_record
@@ -481,7 +447,7 @@ module Groovepacker
             final_record.each do |single_row|
               next unless verify_single_item(single_row, 'increment_id')
               filtered_final_record << single_row unless
-                existing_order_numbers.include? single_row[mapping['increment_id'][:position]]
+                existing_order_numbers.include? get_row_data(single_row, 'increment_id')
             end
             filtered_final_record
           end
@@ -493,45 +459,40 @@ module Groovepacker
             true
           end
 
+          def get_row_data(single_row, prop)
+            single_row[mapping[prop][:position]]
+          end
+
           def calculate_order_placed_time(single_row)
             require 'time'
             imported_order_time =
-              single_row[mapping['order_placed_time'][:position]]
+              get_row_data(single_row, 'order_placed_time')
             separator = (imported_order_time.include? '/') ? '/' : '-'
-            case params[:order_date_time_format]
-            when 'YYYY/MM/DD TIME'
-              if params[:day_month_sequence] == 'DD/MM'
-                @order['order_placed_time'] = DateTime.strptime(
-                  imported_order_time, "%Y#{separator}%d#{separator}%m %H:%M")
-              else
-                @order['order_placed_time'] = DateTime.strptime(
-                  imported_order_time, "%Y#{separator}%m#{separator}%d %H:%M")
-              end
-            when 'MM/DD/YYYY TIME'
-              if params[:day_month_sequence] == 'DD/MM'
-                @order['order_placed_time'] = DateTime.strptime(
-                  imported_order_time, "%d#{separator}%m#{separator}%Y %H:%M")
-              else
-                @order['order_placed_time'] = DateTime.strptime(
-                  imported_order_time, "%m#{separator}%d#{separator}%Y %H:%M")
-              end
-            when 'YY/MM/DD TIME'
-              if params[:day_month_sequence] == 'DD/MM'
-                @order['order_placed_time'] = DateTime.strptime(
-                  imported_order_time, "%y#{separator}%d#{separator}%m %H:%M")
-              else
-                @order['order_placed_time'] = DateTime.strptime(
-                  imported_order_time, "%y#{separator}%m#{separator}%d %H:%M")
-              end
-            when 'MM/DD/YY TIME'
-              if params[:day_month_sequence] == 'DD/MM'
-                @order['order_placed_time'] = DateTime.strptime(
-                  imported_order_time, "%d#{separator}%m#{separator}%y %H:%M")
-              else
-                @order['order_placed_time'] = DateTime.strptime(
-                  imported_order_time, "%m#{separator}%d#{separator}%y %H:%M")
-              end
-            end
+            order_time_hash = build_order_time_hash(separator)
+            @order['order_placed_time'] = DateTime.strptime(
+              imported_order_time,
+              order_time_hash[params[:order_date_time_format]][params[:day_month_sequence]])
+          end
+
+          def build_order_time_hash(separator)
+            {
+              'YYYY/MM/DD TIME' => {
+                'DD/MM' => "%Y#{separator}%d#{separator}%m %H:%M",
+                'MM/DD' => "%Y#{separator}%m#{separator}%d %H:%M"
+              },
+              'MM/DD/YYYY TIME' => {
+                'DD/MM' => "%d#{separator}%m#{separator}%Y %H:%M",
+                'MM/DD' => "%m#{separator}%d#{separator}%Y %H:%M"
+              },
+              'YY/MM/DD TIME' => {
+                'DD/MM' => "%y#{separator}%d#{separator}%m %H:%M",
+                'MM/DD' => "%y#{separator}%m#{separator}%d %H:%M"
+              },
+              'MM/DD/YY TIME' => {
+                'DD/MM' => "%d#{separator}%m#{separator}%y %H:%M",
+                'MM/DD' => "%m#{separator}%d#{separator}%y %H:%M"
+              }
+            }
           end
 
           def update_count_error_result(result, messages)
