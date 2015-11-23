@@ -19,11 +19,8 @@ module Groovepacker
 
             final_records.each_with_index do |single_row, index|
               next if blank_row?(single_row)
-              if  !mapping['increment_id'].nil? &&
-                  mapping['increment_id'][:position] >= 0 &&
-                  !single_row[mapping['increment_id'][:position]].blank? &&
-                  !mapping['sku'].nil? && mapping['sku'][:position] >= 0 &&
-                  !single_row[mapping['sku'][:position]].blank?
+              if  verify_single_item(single_row, 'increment_id') &&
+                  verify_single_item(single_row, 'sku')
                 @import_item.current_increment_id = single_row[mapping['increment_id'][:position]]
                 @import_item.current_order_items = -1
                 @import_item.current_order_imported_item = -1
@@ -143,9 +140,6 @@ module Groovepacker
               else
                 order_item = update_order_item(single_row, product, single_sku)
               end
-              # @order_required.delete('qty')
-              # @order_required.delete('price')
-              # @order.order_items << order_item
               save_order_item(order_item)
               import_sec_ter_barcode(product, single_row)
               import_sec_ter_sku(product, single_row)
@@ -493,7 +487,8 @@ module Groovepacker
           end
 
           def build_filtered_final_record
-            existing_order_numbers = filtered_final_record = []
+            existing_order_numbers = []
+            filtered_final_record = []
             existing_orders = Order.all
             existing_orders.each do |order|
               existing_order_numbers << order.increment_id
