@@ -16,81 +16,28 @@ module Groovepacker
             else
               final_records = final_record
             end
+            iterate_and_import_rows(final_records, order_map, result)
 
+            return unless result[:status]
+            @import_item.status = 'completed'
+            @import_item.save
+          end
+
+          def iterate_and_import_rows(final_records, order_map, result)
             final_records.each_with_index do |single_row, index|
               next if blank_row?(single_row)
               if  verify_single_item(single_row, 'increment_id') &&
                   verify_single_item(single_row, 'sku')
                 @import_item.current_increment_id = inc_id = get_row_data(single_row, 'increment_id')
-                @import_item.current_order_items = -1
-                @import_item.current_order_imported_item = -1
-                @import_item.save
+                update_import_item(-1, -1)
 
-                if  @imported_orders.key?(inc_id) ||
-                    Order.where(
-                      increment_id: inc_id).length == 0 ||
-                    params[:contains_unique_order_items] == true
-                  @order = Order.find_or_create_by_increment_id(
-                    inc_id)
+                if not_imported?(inc_id)
+                  @order = Order.find_or_create_by_increment_id(inc_id)
                   @order.store_id = params[:store_id]
                   @order_required = %w(qty sku increment_id price)
-                  order_map.each do |single_map|
-                    next unless !mapping[single_map].nil? &&
-                                mapping[single_map][:position] >= 0
-                    # if sku, create order item with product id, qty
-                    if  single_map == 'sku' &&
-                        !params[:contains_unique_order_items] == true
-                      import_for_nonunique_order_items(single_row)
-                    elsif single_map == 'firstname'
-                      if  mapping['lastname'].nil? ||
-                          mapping['lastname'][:position] == 0
-                        arr = single_row[mapping[single_map][:position]].blank? ? [] : get_row_data(single_row, single_map).split(' ')
-                        @order.firstname = arr.shift
-                        @order.lastname = arr.join(' ')
-                      else
-                        @order.firstname = single_row[mapping[single_map][:position]]
-                      end
-                    elsif single_map == 'increment_id' &&
-                          params[:contains_unique_order_items] == true &&
-                          !mapping['increment_id'].nil? &&
-                          !mapping['sku'].nil?
-                      import_for_unique_order_items(single_row)
-                    else
-                      @order[single_map] =
-                        get_row_data(single_row, single_map) if mapping[single_map]
-                    end
+                  import_order_data(order_map, single_row)
 
-                    @order_required.delete(single_map) if @order_required.include? single_map
-                  end
-                  if @order_required.length > 0
-                    result[:status] = false
-                    @order_required.each do |required_element|
-                      result[:messages].push("#{required_element} is missing.")
-                    end
-                  end
-                  if result[:status]
-                    if  !mapping['order_placed_time'].nil? &&
-                        mapping['order_placed_time'][:position] >= 0 &&
-                        !params[:order_date_time_format].nil? &&
-                        params[:order_date_time_format] != 'Default'
-                      begin
-                        calculate_order_placed_time(single_row)
-                      rescue
-                        result[:messages].push('Order Placed has bad parameter - ' \
-                          "#{single_row[mapping['order_placed_time'][:position]]}")
-                      end
-                    elsif !params[:order_placed_at].nil?
-                      require 'time'
-                      time = Time.parse(params[:order_placed_at])
-                      @order['order_placed_time'] = time
-                    else
-                      result[:status] = false
-                      result[:messages].push('Order Placed is missing.')
-                    end
-                    if result[:status]
-                      result = save_order_and_update_count(result)
-                    end
-                  end
+                  update_result(result, single_row)
                 else
                   @import_item.previous_imported += 1
                   @import_item.save
@@ -99,51 +46,149 @@ module Groovepacker
               else
                 next
               end
-              next if result[:status]
-              @import_item.status = 'failed'
-              @import_item.message =  'Import halted because of ' \
-                                      'errors, the last imported row was ' +
-                                      index.to_s + 'Errors: ' +
-                                      result[:messages].join(',')
-              @import_item.save
-              break
+              import_item_failed_result(result, index) unless result[:status]
             end
+          end
 
-            if result[:status]
-              @import_item.status = 'completed'
-              @import_item.save
+          def not_imported?(inc_id)
+            @imported_orders.key?(inc_id) ||
+              Order.where(
+                increment_id: inc_id).empty? ||
+              params[:contains_unique_order_items] == true
+          end
+
+          def import_item_failed_result(result, index)
+            @import_item.status = 'failed'
+            @import_item.message =  'Import halted because of ' \
+                                    'errors, the last imported row was ' +
+                                    index.to_s + 'Errors: ' +
+                                    result[:messages].join(',')
+            @import_item.save
+          end
+
+          def update_result(result, single_row)
+            if @order_required.length > 0
+              result[:status] = false
+              @order_required.each do |required_element|
+                result[:messages].push("#{required_element} is missing.")
+              end
             end
+            return unless result[:status]
+            import_order_time(single_row, result)
+            result = save_order_and_update_count(result) if result[:status]
+          end
+
+          def import_order_time(single_row, result)
+            if order_placed_time_mapped?(single_row)
+              begin
+                calculate_order_placed_time(single_row)
+              rescue
+                result[:messages].push('Order Placed has bad parameter - ' \
+                  "#{get_row_data(single_row, 'order_placed_time')}")
+              end
+            elsif !params[:order_placed_at].nil?
+              require 'time'
+              time = Time.parse(params[:order_placed_at])
+              @order['order_placed_time'] = time
+            else
+              result[:status] = false
+              result[:messages].push('Order Placed is missing.')
+            end
+          end
+
+          def order_placed_time_mapped?(single_row)
+            verify_single_item(single_row, 'order_placed_time') &&
+              !params[:order_date_time_format].nil? &&
+              params[:order_date_time_format] != 'Default'
           end
 
           def import_for_nonunique_order_items(single_row)
             return if mapping['sku'].nil?
-            @import_item.current_order_items = 1
-            @import_item.current_order_imported_item = 0
-            @import_item.save
+            update_import_item(1, 0)
+            # @import_item.current_order_items = 1
+            # @import_item.current_order_imported_item = 0
+            # @import_item.save
             single_sku = get_row_data(single_row, 'sku')
             product_skus = ProductSku.where(
               sku: single_sku.strip)
             if !product_skus.empty?
               product = product_skus.first.product
-              order_items = OrderItem.where(
-                product_id: product.id,
-                order_id: @order.id)
-              if order_items.empty?
-                order_item = import_new_order_item(single_row, product, single_sku)
-                import_image(product, single_row, true)
-              else
-                order_item = update_order_item(single_row, product, single_sku)
-              end
-              save_order_item(order_item)
-              import_sec_ter_barcode(product, single_row)
-              import_sec_ter_sku(product, single_row)
-              product.reload
-              product.save!
+              create_update_order_item(single_row, product, single_sku)
+              update_product(product, single_row)
             else # no sku is found
               product = Product.new
               set_product_info(product, single_row)
             end
-            @import_item.current_order_imported_item = 1
+            update_import_item(nil, 1)
+            # @import_item.current_order_imported_item = 1
+            # @import_item.save
+          end
+
+          def import_order_data(order_map, single_row)
+            order_map.each do |single_map|
+              next unless verify_single_item(single_row, single_map)
+              # if sku, create order item with product id, qty
+              if import_nonunique_items?(single_map)
+                import_for_nonunique_order_items(single_row)
+              elsif single_map == 'firstname'
+                import_first_name(single_row, single_map)
+              elsif import_unique_items?(single_map)
+                import_for_unique_order_items(single_row)
+              else
+                @order[single_map] =
+                  get_row_data(single_row, single_map)
+              end
+
+              @order_required.delete(single_map) if @order_required.include? single_map
+            end
+          end
+
+          def import_first_name(single_row, single_map)
+            name = get_row_data(single_row, single_map)
+            if  mapping['lastname'].nil? ||
+                mapping['lastname'][:position] == 0
+              arr = name.blank? ? [] : name.split(' ')
+              @order.firstname = arr.shift
+              @order.lastname = arr.join(' ')
+            else
+              @order.firstname = name
+            end
+          end
+
+          def import_nonunique_items?(single_map)
+            single_map == 'sku' &&
+              !params[:contains_unique_order_items] == true
+          end
+          def import_unique_items?(single_map)
+            single_map == 'increment_id' &&
+              params[:contains_unique_order_items] == true &&
+              !mapping['increment_id'].nil? &&
+              !mapping['sku'].nil?
+          end
+
+          def update_product(product, single_row)
+            import_sec_ter_barcode(product, single_row)
+            import_sec_ter_sku(product, single_row)
+            product.reload
+            product.save!
+          end
+
+          def create_update_order_item(single_row, product, single_sku)
+            order_items = OrderItem.where(
+              product_id: product.id,
+              order_id: @order.id)
+            if order_items.empty?
+              order_item = import_new_order_item(single_row, product, single_sku)
+              import_image(product, single_row, true)
+            else
+              order_item = update_order_item(single_row, product, single_sku)
+            end
+            save_order_item(order_item)
+          end
+
+          def update_import_item(items = nil, imported_items = nil)
+            @import_item.current_order_items = items unless items.nil?
+            @import_item.current_order_imported_item = imported_items unless imported_items.nil?
             @import_item.save
           end
 
@@ -206,44 +251,55 @@ module Groovepacker
             @order['increment_id'] = single_inc_id
             @order_required.delete('increment_id')
             single_sku = get_row_data(single_row, 'sku')
-            @import_item.current_order_items = 1
-            @import_item.current_order_imported_item = 0
-            @import_item.save
+            update_import_item(1, 0)
+            # @import_item.current_order_items = 1
+            # @import_item.current_order_imported_item = 0
+            # @import_item.save
 
             @order_increment_sku = single_inc_id + '-' + single_sku.strip
-            product_skus = ProductSku.where(
-              ['sku like (?)', @order_increment_sku + '%'])
-            unless product_skus.empty?
-              product_sku = product_skus.where(sku: @order_increment_sku).first
-              if product_sku
-                product_sku.sku = @order_increment_sku + '-1'
-                if params[:generate_barcode_from_sku] == true
-                  product_sku.product.product_barcodes.last.delete
-                  product_barcode = ProductBarcode.new
-                  product_barcode.barcode = product_sku.sku
-                  product_sku.product.product_barcodes << product_barcode
-                end
-                product_sku.save
-              end
-              @order_increment_sku =  @order_increment_sku + '-' +
-                                      (product_skus.length + 1).to_s
-            end
-            base_sku = ProductSku.where(sku:
-              single_sku.strip).first unless
-              ProductSku.where(sku: single_sku.strip).empty?
-            if base_sku.nil?
-              base_product =
-                create_base_product(base_sku, single_sku, single_row)
-            else
-              base_product = update_base_product(base_sku, single_row)
-            end
-            base_product.save
-            make_product_intangible(base_product)
+            check_and_update_prod_sku
+            create_update_base_prod(single_row, single_sku)
+            
             product = Product.new
             set_product_info(product, single_row, true)
           end
 
-          def create_base_product(base_sku, single_sku, single_row)
+          def check_and_update_prod_sku
+            product_skus = ProductSku.where(
+              ['sku like (?)', @order_increment_sku + '%'])
+            return if product_skus.empty?
+            product_sku = product_skus.where(sku: @order_increment_sku).first
+            if product_sku
+              product_sku.sku = @order_increment_sku + '-1'
+              if params[:generate_barcode_from_sku] == true
+                product = product_sku.product
+                product.product_barcodes.last.delete
+                push_barcode(product, product_sku.sku)
+              end
+              product_sku.save
+            end
+            update_order_increment_sku(product_skus)
+          end
+
+          def create_update_base_prod(single_row, single_sku)
+            base_skus = ProductSku.where(sku:
+              single_sku.strip)
+            if base_skus.empty?
+              base_product =
+                create_base_product(single_sku, single_row)
+            elsif base_skus.first
+              base_product = update_base_product(base_skus.first, single_row)
+            end
+            base_product.save
+            make_product_intangible(base_product)
+          end
+
+          def update_order_increment_sku(product_skus)
+            @order_increment_sku =  @order_increment_sku + '-' +
+                                    (product_skus.length + 1).to_s
+          end
+
+          def create_base_product(single_sku, single_row)
             base_product = Product.new
             base_product.name = 'Base Product ' + single_sku.strip
             base_product.store_product_id = 0
@@ -266,7 +322,7 @@ module Groovepacker
 
           def import_product_name(product, single_row)
             if params[:use_sku_as_product_name] == true
-              product.name = single_row[mapping['sku'][:position]].strip
+              product.name = get_row_data(single_row, 'sku').strip
             elsif verify_single_item(single_row, 'product_name')
               product.name = get_row_data(single_row, 'product_name')
             else
