@@ -150,14 +150,14 @@ class Product < ActiveRecord::Base
       end
 
       #update order items status from onhold to awaiting
-      @order_items = OrderItem.where(:product_id => self.id)
+      @order_items = OrderItem.where(product_id: self.id, scanned_status: 'notscanned')
       @order_items.each do |item|
         item.order.update_order_status unless item.order.nil? or !['awaiting', 'onhold'].include?(item.order.status)
       end
       # end
     else
       #update order items status from onhold to awaiting
-      @order_items = OrderItem.where(:product_id => self.id)
+      @order_items = OrderItem.where(product_id: self.id, scanned_status: 'notscanned')
       @order_items.each do |item|
         item.order.update_order_status unless item.order.nil? or !['awaiting', 'onhold'].include?(item.order.status)
       end
@@ -173,14 +173,14 @@ class Product < ActiveRecord::Base
           if kit_product.product.status != 'inactive'
             kit_product.product.status = 'new'
             kit_product.product.save
-            order_items = OrderItem.where(:product_id => kit_product.product.id)
+            order_items = OrderItem.where(product_id: kit_product.product.id, scanned_status: 'notscanned')
             order_items.each do |item|
               item.order.update_order_status unless item.order.nil?
             end
           end
         end
       end
-      @order_items = OrderItem.where(:product_id => self.id)
+      @order_items = OrderItem.where(product_id: self.id, scanned_status: 'notscanned')
       @order_items.each do |item|
         item.order.update_order_status unless item.order.nil?
       end
