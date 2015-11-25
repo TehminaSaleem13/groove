@@ -124,74 +124,79 @@ class OrdersController < ApplicationController
     @result = Hash.new
     @result['status'] = true
     @result['messages'] = []
-    #Everyone can create notes from Packer
-    @order.notes_fromPacker = params[:order]['notes_fromPacker']
+    unless @order.status == 'scanned'
+      #Everyone can create notes from Packer
+      @order.notes_fromPacker = params[:order]['notes_fromPacker']
 
-    if current_user.can?('create_edit_notes')
-      @order.notes_internal = params[:order]['notes_internal']
-      @order.notes_toPacker = params[:order]['notes_toPacker']
-    elsif @order.notes_internal != params[:order]['notes_internal'] ||
-      @order.notes_toPacker != params[:order]['notes_toPacker']
-      @result['status'] = false
-      @result['messages'].push('You do not have the permissions to edit notes')
-    end
+      if current_user.can?('create_edit_notes')
+        @order.notes_internal = params[:order]['notes_internal']
+        @order.notes_toPacker = params[:order]['notes_toPacker']
+      elsif @order.notes_internal != params[:order]['notes_internal'] ||
+        @order.notes_toPacker != params[:order]['notes_toPacker']
+        @result['status'] = false
+        @result['messages'].push('You do not have the permissions to edit notes')
+      end
 
-    if current_user.can?('add_edit_order_items')
-      @order.firstname = params[:order]['firstname']
-      @order.lastname = params[:order]['lastname']
-      @order.company = params[:order]['company']
-      @order.address_1 = params[:order]['address_1']
-      @order.address_2 = params[:order]['address_2'] unless params[:order]['address_2'].nil?
-      @order.city = params[:order]['city']
-      @order.state = params[:order]['state']
-      @order.postcode = params[:order]['postcode']
-      @order.country = params[:order]['country']
-      @order.email = params[:order]['email']
-      @order.increment_id = params[:order]['increment_id']
-      @order.order_placed_time = params[:order]['order_placed_time']
-      @order.customer_comments = params[:order]['customer_comments']
-      @order.scanned_on = params[:order]['scanned_on']
-      @order.tracking_num = params[:order]['tracking_num']
-      @order.seller_id = params[:order]['seller_id']
-      @order.order_status_id = params[:order]['order_status_id']
-      @order.order_number = params[:order]['order_number']
-      @order.ship_name = params[:order]['ship_name']
-      @order.notes_from_buyer = params[:order]['notes_from_buyer']
-      @order.note_confirmation = params[:order]['note_confirmation']
-      @order.shipping_amount = params[:order]['shipping_amount'] unless params[:order]['shipping_amount'].nil?
-      @order.order_total = params[:order]['order_total'] unless params[:order]['order_total'].nil?
-      @order.weight_oz = params[:order]['weight_oz'] unless params[:order]['weight_oz'].nil?
-    elsif @order.firstname != params[:order]['firstname'] ||
-      @order.lastname != params[:order]['lastname'] ||
-      @order.company != params[:order]['company'] ||
-      @order.address_1 != params[:order]['address_1'] ||
-      @order.address_2 != params[:order]['address_2'] ||
-      @order.city != params[:order]['city'] ||
-      @order.state != params[:order]['state'] ||
-      @order.postcode != params[:order]['postcode'] ||
-      @order.country != params[:order]['country'] ||
-      @order.email != params[:order]['email'] ||
-      @order.increment_id != params[:order]['increment_id'] ||
-      @order.order_placed_time != params[:order]['order_placed_time'] ||
-      @order.customer_comments != params[:order]['customer_comments'] ||
-      @order.scanned_on != params[:order]['scanned_on'] ||
-      @order.tracking_num != params[:order]['tracking_num'] ||
-      @order.seller_id != params[:order]['seller_id'] ||
-      @order.order_status_id != params[:order]['order_status_id'] ||
-      @order.order_number != params[:order]['order_number'] ||
-      @order.ship_name != params[:order]['ship_name'] ||
-      @order.notes_from_buyer != params[:order]['notes_from_buyer'] ||
-      @order.shipping_amount != params[:order]['shipping_amount'] ||
-      @order.order_total != params[:order]['order_total'] ||
-      @order.weight_oz != params[:order]['weight_oz'] ||
-      @order.note_confirmation != params[:order]['note_confirmation']
-      @result['status'] = false
-      @result['messages'].push('You do not have enough permissions to edit the order')
-    end
+      if current_user.can?('add_edit_order_items')
+        @order.firstname = params[:order]['firstname']
+        @order.lastname = params[:order]['lastname']
+        @order.company = params[:order]['company']
+        @order.address_1 = params[:order]['address_1']
+        @order.address_2 = params[:order]['address_2'] unless params[:order]['address_2'].nil?
+        @order.city = params[:order]['city']
+        @order.state = params[:order]['state']
+        @order.postcode = params[:order]['postcode']
+        @order.country = params[:order]['country']
+        @order.email = params[:order]['email']
+        @order.increment_id = params[:order]['increment_id']
+        @order.order_placed_time = params[:order]['order_placed_time']
+        @order.customer_comments = params[:order]['customer_comments']
+        @order.scanned_on = params[:order]['scanned_on']
+        @order.tracking_num = params[:order]['tracking_num']
+        @order.seller_id = params[:order]['seller_id']
+        @order.order_status_id = params[:order]['order_status_id']
+        @order.order_number = params[:order]['order_number']
+        @order.ship_name = params[:order]['ship_name']
+        @order.notes_from_buyer = params[:order]['notes_from_buyer']
+        @order.note_confirmation = params[:order]['note_confirmation']
+        @order.shipping_amount = params[:order]['shipping_amount'] unless params[:order]['shipping_amount'].nil?
+        @order.order_total = params[:order]['order_total'] unless params[:order]['order_total'].nil?
+        @order.weight_oz = params[:order]['weight_oz'] unless params[:order]['weight_oz'].nil?
+      elsif @order.firstname != params[:order]['firstname'] ||
+        @order.lastname != params[:order]['lastname'] ||
+        @order.company != params[:order]['company'] ||
+        @order.address_1 != params[:order]['address_1'] ||
+        @order.address_2 != params[:order]['address_2'] ||
+        @order.city != params[:order]['city'] ||
+        @order.state != params[:order]['state'] ||
+        @order.postcode != params[:order]['postcode'] ||
+        @order.country != params[:order]['country'] ||
+        @order.email != params[:order]['email'] ||
+        @order.increment_id != params[:order]['increment_id'] ||
+        @order.order_placed_time != params[:order]['order_placed_time'] ||
+        @order.customer_comments != params[:order]['customer_comments'] ||
+        @order.scanned_on != params[:order]['scanned_on'] ||
+        @order.tracking_num != params[:order]['tracking_num'] ||
+        @order.seller_id != params[:order]['seller_id'] ||
+        @order.order_status_id != params[:order]['order_status_id'] ||
+        @order.order_number != params[:order]['order_number'] ||
+        @order.ship_name != params[:order]['ship_name'] ||
+        @order.notes_from_buyer != params[:order]['notes_from_buyer'] ||
+        @order.shipping_amount != params[:order]['shipping_amount'] ||
+        @order.order_total != params[:order]['order_total'] ||
+        @order.weight_oz != params[:order]['weight_oz'] ||
+        @order.note_confirmation != params[:order]['note_confirmation']
+        @result['status'] = false
+        @result['messages'].push('You do not have enough permissions to edit the order')
+      end
 
-    unless @order.save
+      unless @order.save
+        @result['status'] &= false
+        @result['messages'] = @order.errors.full_messages
+      end
+    else
       @result['status'] &= false
-      @result['messages'] = @order.errors.full_messages
+      @result['messages'].push('Order has already been scanned and cannot be modified')
     end
 
     respond_to do |format|
@@ -542,40 +547,46 @@ class OrdersController < ApplicationController
     @result['status'] = true
     @result['messages'] = []
     if current_user.can? 'add_edit_order_items'
-      qty = 1
-      qty = params[:qty] if !params[:qty].nil? && params[:qty].to_i > -1
       @order = Order.find(params[:id])
-      @products = Product.find(params[:productids])
-      if @products.nil?
-        @result['status'] &= false
-        @result['messages'].push("Could not find any Item")
-      else
+      unless @order.status == 'scanned'
+        @products = Product.find(params[:productids])
+        qty = 1
+        qty = params[:qty] if !params[:qty].nil? && params[:qty].to_i > -1
+        
+        if @products.nil?
+          @result['status'] &= false
+          @result['messages'].push("Could not find any Item")
+        else
 
-        @products.each do |product|
-          @orderitem = OrderItem.new
-          @orderitem.name = product.name
-          @orderitem.price = params[:price]
-          @orderitem.qty = qty.to_i
-          @orderitem.row_total = params[:price].to_f * params[:qty].to_f
-          @orderitem.product_id = product.id
-          @order.order_items << @orderitem
+          @products.each do |product|
+            @orderitem = OrderItem.new
+            @orderitem.name = product.name
+            @orderitem.price = params[:price]
+            @orderitem.qty = qty.to_i
+            @orderitem.row_total = params[:price].to_f * params[:qty].to_f
+            @orderitem.product_id = product.id
+            @order.order_items << @orderitem
 
-          if @orderitem.save
-            product_skus = product.product_skus
-            if product_skus.length > 0
-              product_sku = product_skus.first.sku
+            if @orderitem.save
+              product_skus = product.product_skus
+              if product_skus.length > 0
+                product_sku = product_skus.first.sku
+              end
+              username = current_user.name
+              @order.addactivity("Item with sku " + product_sku.to_s + " added", username)
             end
-            username = current_user.name
-            @order.addactivity("Item with sku " + product_sku.to_s + " added", username)
+          end
+
+          if !@order.save
+            @result['status'] &= false
+            @result['messages'].push("Adding item to order failed")
+          else
+            @order.update_order_status
           end
         end
-
-        if !@order.save
-          @result['status'] &= false
-          @result['messages'].push("Adding item to order failed")
-        else
-          @order.update_order_status
-        end
+      else
+        @result['status'] = false
+        @result['messages'].push('Order has already been scanned and cannot be modified')
       end
     else
       @result['status'] = false
@@ -651,24 +662,28 @@ class OrdersController < ApplicationController
         @result['status'] &= false
         @result['messages'].push("Could not find order item")
       else
-        @orderitem.each do |item|
-          product = item.product
-          if !product.nil?
-            product_skus = product.product_skus
-            if product_skus.length > 0
-              sku = product_skus.first.sku
+        unless @orderitem.first.order.status == 'scanned'
+          @orderitem.each do |item|
+            product = item.product
+            if !product.nil?
+              product_skus = product.product_skus
+              if product_skus.length > 0
+                sku = product_skus.first.sku
+              end
+            end
+
+            username = current_user.name
+            if item.remove_order_item_kit_products && item.destroy
+              item.order.update_order_status
+              item.order.addactivity("Item with sku " + sku.to_s + " removed", username)
+            else
+              @result['status'] &= false
+              @result['messages'].push("Removed items from order failed")
             end
           end
-
-          username = current_user.name
-          if item.remove_order_item_kit_products && item.destroy
-            item.order.update_order_status
-            item.order.addactivity("Item with sku " + sku.to_s + " removed", username)
-          else
-            @result['status'] &= false
-            @result['messages'].push("Removed items from order failed")
-          end
-
+        else
+          @result['status'] = false
+          @result['messages'].push('Order has already been scanned and cannot be modified')
         end
       end
     else
@@ -804,18 +819,25 @@ class OrdersController < ApplicationController
         "country" => "country"
       }
       if accepted_data.has_key?(params[:var])
-        if params[:var] == "recipient"
-          arr = params[:value].blank? ? [] : params[:value].split(' ')
-          @order.firstname = arr.shift
-          @order.lastname = arr.join(' ')
-        elsif params[:var] == 'notes_from_packer' ||
-          (params[:var] == 'notes' && current_user.can?('create_edit_notes')) ||
-          current_user.can?('add_edit_order_items')
-          key = accepted_data[params[:var]]
-          @order[key] = params[:value]
+        if params[:var] == 'status'
+          @order.status = params[:value]
+        elsif !@order.status == 'scanned'
+          if params[:var] == "recipient"
+            arr = params[:value].blank? ? [] : params[:value].split(' ')
+            @order.firstname = arr.shift
+            @order.lastname = arr.join(' ')
+          elsif params[:var] == 'notes_from_packer' ||
+            (params[:var] == 'notes' && current_user.can?('create_edit_notes')) ||
+            current_user.can?('add_edit_order_items')
+            key = accepted_data[params[:var]]
+            @order[key] = params[:value]
+          else
+            @result['status']&= false
+            @result['error_msg'] = 'Insufficient permissions'
+          end
         else
-          @result['status']&= false
-          @result['error_msg'] = 'Insufficient permissions'
+          @result['status'] &= false
+          @result['error_msg'] = 'Order has already been scanned and cannot be modified'
         end
         if @result['status']
           unless @order.save
@@ -833,7 +855,6 @@ class OrdersController < ApplicationController
       format.json { render json: @result }
     end
   end
-
 
   def generate_pick_list
     result = Hash.new
