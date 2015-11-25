@@ -112,6 +112,7 @@ Groovepacks::Application.configure do
   ENV['SHOPIFY_SHARED_SECRET'] = "23f69cf421abb3af107934410ba7c624"
   ENV["SHOPIFY_REDIRECT_HOST"] = "groovepacker.com"
 
+  ENV['BC_CALLBACK_URL'] = "admin.groovepacker.com"
   ENV['BC_CLIENT_ID'] = "hcd39v5m3dapbtpa2gpi5f4iz3syjps"
   ENV['BC_CLIENT_SECRET'] = "d8b8es9ojf0x2dyi1jx12ozvbatcqhr"
 
