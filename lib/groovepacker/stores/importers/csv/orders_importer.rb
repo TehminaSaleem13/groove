@@ -122,6 +122,7 @@ module Groovepacker
               @import_item.status = 'completed'
               @import_item.save
             end
+            result
           end
 
           def import_for_nonunique_order_items(single_row, single_map)
