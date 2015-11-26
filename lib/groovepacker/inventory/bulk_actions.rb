@@ -37,7 +37,7 @@ module Groovepacker
         begin
           Apartment::Tenant.switch(tenant)
           if inventory_tracking_enabled?
-            orders = Order.all
+            orders = Order.where("status != 'scanned'")
             check_length = check_after_every(orders.length)
             bulk_action.total = orders.length
             bulk_action.completed = 0

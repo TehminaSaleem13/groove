@@ -102,7 +102,9 @@
       </div>
       <div class="row">
         <div class="col-xs-12">
-          <div groov-data-grid="gridOptions" groov-list="orders.list"></div>
+          <fieldset ng-disabled="orders.setup.filter == 'scanned'">
+            <div groov-data-grid="gridOptions" groov-list="orders.list"></div>
+          </fieldset>
         </div>
       </div>
       <div ui-view></div>
