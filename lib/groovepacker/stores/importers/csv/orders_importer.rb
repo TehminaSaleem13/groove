@@ -18,9 +18,10 @@ module Groovepacker
             end
             iterate_and_import_rows(final_records, order_map, result)
 
-            return unless result[:status]
+            result unless result[:status]
             @import_item.status = 'completed'
             @import_item.save
+            result
           end
 
           def iterate_and_import_rows(final_records, order_map, result)
@@ -83,6 +84,7 @@ module Groovepacker
               begin
                 calculate_order_placed_time(single_row)
               rescue
+                result[:status] = false
                 result[:messages].push('Order Placed has bad parameter - ' \
                   "#{get_row_data(single_row, 'order_placed_time')}")
               end
