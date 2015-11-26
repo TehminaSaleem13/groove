@@ -996,7 +996,7 @@ class StoresController < ApplicationController
   end
 
   def show
-    @store = Store.find(params[:id])
+    @store = Store.find_by_id(params[:id])
     @result = Hash.new
 
     if !@store.nil? then
