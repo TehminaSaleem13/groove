@@ -194,9 +194,6 @@ class OrdersController < ApplicationController
         @result['status'] &= false
         @result['messages'] = @order.errors.full_messages
       end
-    else
-      @result['status'] &= false
-      @result['messages'].push('Order has already been scanned and cannot be modified')
     end
 
     respond_to do |format|
@@ -655,7 +652,12 @@ class OrdersController < ApplicationController
     @result = Hash.new
     @result['status'] = true
     @result['messages'] =[]
-    if current_user.can? 'add_edit_order_items'
+
+    if params[:orderitem].nil?
+      @result['status'] = false
+      @result['messages'].push('First select items to remove from the list.')
+    end
+    if @result['status'] && (current_user.can? 'add_edit_order_items')
       @orderitem = OrderItem.find(params[:orderitem])
 
       if @orderitem.nil?
@@ -687,8 +689,8 @@ class OrdersController < ApplicationController
         end
       end
     else
-      @result['status'] = false
-      @result['messages'].push('You can not add or edit order items')
+      @result['status'] &= false
+      @result['messages'].push('You can not add or edit order items') if @result['messages'].empty?
     end
     respond_to do |format|
       format.html # show.html.erb
@@ -821,7 +823,7 @@ class OrdersController < ApplicationController
       if accepted_data.has_key?(params[:var])
         if params[:var] == 'status'
           @order.status = params[:value]
-        elsif !@order.status == 'scanned'
+        elsif @order.status != 'scanned'
           if params[:var] == "recipient"
             arr = params[:value].blank? ? [] : params[:value].split(' ')
             @order.firstname = arr.shift
