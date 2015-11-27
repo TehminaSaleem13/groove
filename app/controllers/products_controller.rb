@@ -503,32 +503,18 @@ class ProductsController < ApplicationController
 
   def change_product_status
     #execute_groove_bulk_action(activity)
-    result = execute_groove_bulk_action('status_update')
+    execute_groove_bulk_action('status_update')
     
-    respond_to do |format|
-      format.html # show.html.erb
-      format.json { render json: result }
-    end
   end
 
   def delete_product
     #execute_groove_bulk_action(activity)
-    result = execute_groove_bulk_action('delete')
-
-    respond_to do |format|
-      format.html # show.html.erb
-      format.json { render json: result }
-    end
+    execute_groove_bulk_action('delete')
   end
 
   def duplicate_product
     #execute_groove_bulk_action(activity)
-    result = execute_groove_bulk_action('duplicate')
-
-    respond_to do |format|
-      format.html # show.html.erb
-      format.json { render json: result }
-    end
+    execute_groove_bulk_action('duplicate')
   end
 
   def show
@@ -1462,11 +1448,14 @@ class ProductsController < ApplicationController
       when 'duplicate'
         bulk_actions.delay(:run_at => 1.seconds.from_now).duplicate(Apartment::Tenant.current, params, groove_bulk_actions.id)
       end
-
     else
       result['status'] = false
       result['messages'].push('You do not have enough permissions to edit product status')
     end
-    return result
+    
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json: result }
+    end
   end
 end
