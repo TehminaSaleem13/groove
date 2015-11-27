@@ -18,6 +18,7 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout', '$http', '$sce', 
       },
       show_hide: false,
       editable: false,
+      disable_global_edit: false,
       sortable: false,
       paginate: {
         show: false,
@@ -197,7 +198,7 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout', '$http', '$sce', 
         for (var i in scope.groovDataGrid.all_fields) {
           if (scope.groovDataGrid.all_fields.hasOwnProperty(i)) {
             options.all_fields[i] = default_field_options();
-            options.all_fields[i].editable = (options.editable != false);
+            options.all_fields[i].editable = (options.disable_global_edit == false && options.editable != false);
             options.all_fields[i].draggable = (options.draggable != false);
             options.all_fields[i].sortable = (options.sortable != false);
             angular.extend(options.all_fields[i], scope.groovDataGrid.all_fields[i]);
