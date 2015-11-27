@@ -171,10 +171,10 @@ class ProductsController < ApplicationController
 
   def import_images
     @store = Store.find(params[:id])
-    result = {}
-
-    result['status'] = true
-    result['messages'] = []
+    
+    #initialize_result will initialize status and message in result hash
+    result = initialize_result
+    
     result['total_imported'] = 0
     result['success_imported'] = 0
     result['previous_imported'] = 0
@@ -339,8 +339,8 @@ class ProductsController < ApplicationController
   # if you would like to get Kits, specify params[:is_kit] to 1. it will return product kits and the corresponding skus
   #
   def index
-    result = {}
-    result[:status] = true
+    #initialize_result will initialize status and message in result hash
+    result = initialize_result
     @products = do_getproducts(params)
     result['products'] = make_products_list(@products)
     result['products_count'] = get_products_count()
@@ -350,9 +350,8 @@ class ProductsController < ApplicationController
   end
 
   def create
-    result = {}
-    result['status'] = true
-    result['messages'] = []
+    #initialize_result will initialize status and message in result hash
+    result = initialize_result
     if current_user.can?('add_edit_products')
       product = Product.new
       product.name = "New Product"
@@ -377,9 +376,8 @@ class ProductsController < ApplicationController
   end
 
   def print_receiving_label
-    result = {}
-    result['status'] = true
-    result['messages'] = []
+    #initialize_result will initialize status and message in result hash
+    result = initialize_result
     products = list_selected_products(params)
     @products = []
     unless products.nil?
@@ -414,9 +412,8 @@ class ProductsController < ApplicationController
   end
 
   def generate_barcode
-    result = {}
-    result['status'] = true
-    result['messages'] = []
+    #initialize_result will initialize status and message in result hash
+    result = initialize_result
     if current_user.can?('add_edit_products')
       @products = list_selected_products(params)
       unless @products.nil?
@@ -450,8 +447,9 @@ class ProductsController < ApplicationController
   # For search pass in parameter params[:search] and a params[:limit] and params[:offset].
   # If limit and offset are not passed, then it will be default to 10 and 0
   def search
-    result = {}
-    result['status'] = true
+    #initialize_result will initialize status and message in result hash
+    result = initialize_result
+
     if !params[:search].nil? && params[:search] != ''
 
       @products = do_search(params, false)
@@ -471,9 +469,8 @@ class ProductsController < ApplicationController
   end
 
   def scan_per_product
-    result = {}
-    result['status'] = true
-    result['messages'] = []
+    #initialize_result will initialize status and message in result hash
+    result = initialize_result
 
     if current_user.can?('add_edit_products')
       if !params[:setting].blank? && ['type_scan_enabled', 'click_scan_enabled'].include?(params[:setting])
@@ -505,9 +502,8 @@ class ProductsController < ApplicationController
   end
 
   def change_product_status
-    result = {}
-    result['status'] = true
-    result['messages'] = []
+    #initialize_result will initialize status and message in result hash
+    result = initialize_result
 
     if current_user.can?('add_edit_products')
       bulk_actions = Groovepacker::Products::BulkActions.new
@@ -530,9 +526,8 @@ class ProductsController < ApplicationController
   end
 
   def delete_product
-    result = {}
-    result['status'] = true
-    result['messages'] = []
+    #initialize_result will initialize status and message in result hash
+    result = initialize_result
 
     if current_user.can?('delete_products')
       bulk_actions = Groovepacker::Products::BulkActions.new
@@ -555,10 +550,9 @@ class ProductsController < ApplicationController
 
   def duplicate_product
 
-    result = {}
-    result['status'] = true
-    result['messages'] = []
-
+    #initialize_result will initialize status and message in result hash
+    result = initialize_result
+    
     if current_user.can?('add_edit_products')
       bulk_actions = Groovepacker::Products::BulkActions.new
       groove_bulk_actions = GrooveBulkActions.new
@@ -686,9 +680,8 @@ class ProductsController < ApplicationController
   end
 
   def add_product_to_kit
-    result = {}
-    result['status'] = true
-    result['messages'] = []
+    #initialize_result will initialize status and message in result hash
+    result = initialize_result
 
     if current_user.can?('add_edit_products')
       @kit = Product.find_by_id(params[:id])
@@ -739,9 +732,8 @@ class ProductsController < ApplicationController
   end
 
   def remove_products_from_kit
-    result = {}
-    result['status'] = true
-    result['messages'] = []
+    #initialize_result will initialize status and message in result hash
+    result = initialize_result
 
     if current_user.can?('add_edit_products')
       @kit = Product.find_by_id(params[:id])
@@ -785,10 +777,11 @@ class ProductsController < ApplicationController
   end
 
   def update
-    result = {}
+    #initialize_result will initialize status and message in result hash
+    result = initialize_result
+    
     @product = Product.find_by_id(params[:basicinfo][:id]) rescue nil
-    result['status'] = true
-    result['messages'] = []
+    
     result['params'] = params
     general_setting = GeneralSetting.all.first
 
@@ -1002,8 +995,8 @@ class ProductsController < ApplicationController
   end
 
   def update_product_list
-    result = {}
-    result['status'] = true
+    #initialize_result will initialize status and message in result hash
+    result = initialize_result
 
     if current_user.can?('add_edit_products')
       @product = Product.find_by_id(params[:id])
@@ -1036,9 +1029,8 @@ class ProductsController < ApplicationController
   #If you had a situation where the newly imported product was actually the one you wanted to keep you could
   #find the original product and make it an alias of the new product...
   def set_alias
-    result = {}
-    result['status'] = true
-    result['messages'] = []
+    #initialize_result will initialize status and message in result hash
+    result = initialize_result
 
     if current_user.can?('add_edit_products') && current_user.can?('delete_products')
       @product_orig = Product.find(params[:id])
@@ -1147,9 +1139,8 @@ class ProductsController < ApplicationController
   end
 
   def add_image
-    result = {}
-    result['status'] = true
-    result['messages'] = []
+    #initialize_result will initialize status and message in result hash
+    result = initialize_result
 
     if current_user.can?('add_edit_products')
       @product = Product.find(params[:id])
@@ -1489,5 +1480,12 @@ class ProductsController < ApplicationController
     @product.product_receiving_instructions = basic_info[:product_receiving_instructions]
     @product.is_intangible = basic_info[:is_intangible]
     @product.save ? true : false
+  end
+
+  def initialize_result
+    result = {}
+    result['status'] = true
+    result['messages'] = []
+    return result
   end
 end
