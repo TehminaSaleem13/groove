@@ -786,39 +786,18 @@ class ProductsController < ApplicationController
 
   def update
     result = {}
-    @product = Product.find(params[:basicinfo][:id]) unless params.nil? && params[:basicinfo].nil?
+    @product = Product.find_by_id(params[:basicinfo][:id]) rescue nil
     result['status'] = true
     result['messages'] = []
     result['params'] = params
     general_setting = GeneralSetting.all.first
-    if !@product.nil?
+
+    unless @product.blank?
       if current_user.can?('add_edit_products') ||
         (session[:product_edit_matched_for_current_user] && session[:product_edit_matched_for_products].include?(@product.id))
         @product.reload
+        
         #Update Basic Info
-        @product.disable_conf_req = params[:basicinfo][:disable_conf_req]
-        @product.is_kit = params[:basicinfo][:is_kit]
-        @product.is_skippable = params[:basicinfo][:is_skippable]
-        @product.record_serial= params[:basicinfo][:record_serial]
-        @product.kit_parsing = params[:basicinfo][:kit_parsing]
-        @product.name = params[:basicinfo][:name]
-        @product.pack_time_adj = params[:basicinfo][:pack_time_adj]
-        @product.packing_placement = params[:basicinfo][:packing_placement] if params[:basicinfo][:packing_placement].is_a?(Integer)
-        @product.product_type = params[:basicinfo][:product_type]
-        @product.spl_instructions_4_confirmation = params[:basicinfo][:spl_instructions_4_confirmation]
-        @product.spl_instructions_4_packer = params[:basicinfo][:spl_instructions_4_packer]
-        # @product.status = params[:basicinfo][:status]
-        @product.store_id = params[:basicinfo][:store_id]
-        @product.store_product_id = params[:basicinfo][:store_product_id]
-        @product.type_scan_enabled = params[:basicinfo][:type_scan_enabled]
-        @product.click_scan_enabled = params[:basicinfo][:click_scan_enabled]
-        @product.weight = @product.get_product_weight(params[:weight])
-        @product.shipping_weight = @product.get_product_weight(params[:shipping_weight])
-        @product.weight_format = get_weight_format(params[:basicinfo][:weight_format])
-        @product.add_to_any_order = params[:basicinfo][:add_to_any_order]
-        @product.product_receiving_instructions = params[:basicinfo][:product_receiving_instructions]
-        @product.is_intangible = params[:basicinfo][:is_intangible]
-
         product_location = @product.primary_warehouse
         if product_location.nil?
           product_location = ProductInventoryWarehouses.new
@@ -831,11 +810,13 @@ class ProductsController < ApplicationController
 
         update_inventory_info(general_setting) rescue
 
-        if !@product.save
+        unless update_product_basic_info
           result['status'] &= false
         end
+        
         #Update product status and also update the containing kit and orders
         updatelist(@product, 'status', params[:basicinfo][:status]) unless params[:basicinfo][:status].nil?
+        
         unless params['post_fn'].nil?
           # if params['post_fn'] == ''
           #   #Update product inventory warehouses
@@ -908,43 +889,11 @@ class ProductsController < ApplicationController
             #Update product categories
             #check if a product category is defined.
             product_cats = ProductCat.where(:product_id => @product.id)
-
-            if product_cats.length > 0
-              product_cats.each do |productcat|
-                found_cat = false
-
-                if !params[:cats].nil?
-                  params[:cats].each do |cat|
-                    if cat["id"] == productcat.id
-                      found_cat = true
-                    end
-                  end
-                end
-
-                if found_cat == false
-                  if !productcat.destroy
-                    result['status'] &= false
-                  end
-                end
-              end
-            end
-
-            if !params[:cats].nil?
-              params[:cats].each do |category|
-                if !category["id"].nil?
-                  product_cat = ProductCat.find(category["id"])
-                  product_cat.category = category["category"]
-                  if !product_cat.save
-                    result['status'] &= false
-                  end
-                else
-                  product_cat = ProductCat.new
-                  product_cat.category = category["category"]
-                  product_cat.product_id = @product.id
-                  if !product_cat.save
-                    result['status'] &= false
-                  end
-                end
+            result = destroy_object_if_not_defined(product_cats, params[:cats], result)
+            
+            (params[:cats]||[]).each do |category|
+              unless @product.create_or_update_productcat(category)
+                result['status'] &= false
               end
             end
           elsif params['post_fn'] == 'sku'
@@ -952,53 +901,22 @@ class ProductsController < ApplicationController
             #check if a product sku is defined.
 
             product_skus = ProductSku.where(:product_id => @product.id)
+            result = destroy_object_if_not_defined(product_skus, params[:skus], result)
 
-            if product_skus.length > 0
-              product_skus.each do |productsku|
-                found_sku = false
-
-                if !params[:skus].nil?
-                  params[:skus].each do |sku|
-                    if sku["id"] == productsku.id
-                      found_sku = true
-                    end
-                  end
-                end
-                if found_sku == false
-                  if !productsku.destroy
+            unless params[:skus].blank?
+              params[:skus].each_with_index do |sku, index|
+                if sku["id"].present?
+                  unless @product.create_or_update_productsku(sku, index)
                     result['status'] &= false
                   end
-                end
-              end
-            end
-            if !params[:skus].nil?
-              order = 0
-              params[:skus].each do |sku|
-                if !sku["id"].nil?
-                  product_sku = ProductSku.find(sku["id"])
-                  product_sku.sku = sku["sku"]
-                  product_sku.purpose = sku["purpose"]
-                  product_sku.order = order
-                  if !product_sku.save
+                elsif sku["sku"].present? && ProductSku.where(:sku => sku["sku"]).blank?
+                  unless @product.create_or_update_productsku(sku, index, 'new')
                     result['status'] &= false
                   end
-                else
-                  if sku["sku"]!='' && ProductSku.where(:sku => sku["sku"]).length == 0
-                    product_sku = ProductSku.new
-                    product_sku.sku = sku["sku"]
-                    product_sku.purpose = sku["purpose"]
-                    product_sku.product_id = @product.id
-                    product_sku.order = order
-                    if !product_sku.save
-                      result['status'] &= false
-                    end
-                  else
-                    result['status'] &= false
-                    result['message'] = "Sku "+sku["sku"]+" already exists"
-                  end
-
+                elsif sku["sku"].present?
+                  result['status'] &= false
+                  result['message'] = "Sku "+sku["sku"]+" already exists"
                 end
-                order = order + 1
               end
             end
           elsif params['post_fn'] == 'barcode'
@@ -1006,53 +924,23 @@ class ProductsController < ApplicationController
             #check if a product barcode is defined.
             product_barcodes = ProductBarcode.where(:product_id => @product.id)
             product_barcodes.reload
-            if product_barcodes.length > 0
-              product_barcodes.each do |productbarcode|
-                found_barcode = false
-
-                if !params[:barcodes].nil?
-                  params[:barcodes].each do |barcode|
-                    if barcode["id"] == productbarcode.id
-                      found_barcode = true
-                    end
-                  end
-                end
-
-                if found_barcode == false
-                  if !productbarcode.destroy
-                    result['status'] &= false
-                  end
-                end
-              end
-            end
+            result = destroy_object_if_not_defined(product_barcodes, params[:barcodes], result)
 
             #Update product barcodes
             #check if a product barcode is defined
-            if !params[:barcodes].nil?
-              order = 0
-              params[:barcodes].each do |barcode|
-                if !barcode["id"].nil?
-                  product_barcode = ProductBarcode.find(barcode["id"])
-                  product_barcode.barcode = barcode["barcode"]
-                  product_barcode.order = order
-                  if !product_barcode.save
-                    result['status'] &= false
-                  end
-                else
-                  if barcode["barcode"]!='' && ProductBarcode.where(:barcode => barcode["barcode"]).length == 0
-                    product_barcode = ProductBarcode.new
-                    product_barcode.barcode = barcode["barcode"]
-                    product_barcode.order = order
-                    product_barcode.product_id = @product.id
-                    if !product_barcode.save
-                      result['status'] &= false
-                    end
-                  else
-                    result['status'] &= false
-                    result['message'] = "Barcode "+barcode["barcode"]+" already exists"
-                  end
+              
+            (params[:barcodes]||[]).each_with_index do |barcode, index|
+              if barcode["id"].present?
+                unless @product.create_or_update_productbarcode(barcode, index)
+                  result['status'] &= false
                 end
-                order = order + 1
+              elsif barcode["barcode"].present? && ProductBarcode.where(:barcode => barcode["barcode"]).blank?
+                  unless @product.create_or_update_productbarcode(barcode, index, 'new')
+                    result['status'] &= false
+                  end
+              elsif barcode["barcode"].present?
+                result['status'] &= false
+                result['message'] = "Barcode "+barcode["barcode"]+" already exists"
               end
             end
           end
@@ -1061,65 +949,19 @@ class ProductsController < ApplicationController
         #Update product barcodes
         #check if a product barcode is defined.
         product_images = ProductImage.where(:product_id => @product.id)
-
-        if product_images.length > 0
-          product_images.each do |productimage|
-            found_image = false
-
-            if !params[:images].nil?
-              params[:images].each do |image|
-                if image["id"] == productimage.id
-                  found_image = true
-                end
-              end
-            end
-
-            if found_image == false
-              if !productimage.destroy
-                result['status'] &= false
-              end
-            end
-          end
-        end
+        result = destroy_object_if_not_defined(product_images, params[:images], result)
 
         #Update product barcodes
         #check if a product barcode is defined
-        if !params[:images].nil?
-          order = 0
-          params[:images].each do |image|
-            if !image["id"].nil?
-              product_image = ProductImage.find(image["id"])
-              product_image.image = image["image"]
-              product_image.caption = image["caption"]
-              product_image.order = order
-              if !product_image.save
-                result['status'] &= false
-              end
-            else
-              product_image = ProductImage.new
-              product_image.image = image["image"]
-              product_image.caption = image["caption"]
-              product_image.product_id = @product.id
-              product_image.order = order
-              if !product_image.save
-                result['status'] &= false
-              end
-            end
-            order = order + 1
+        (params[:images]||[]).each_with_index do |image, index|
+          unless @product.create_or_update_productimage(image, index)
+            result['status'] &= false
           end
         end
 
         #if product is a kit, update product_kit_skus
-        if !params[:productkitskus].nil?
-          params[:productkitskus].each do |kit_product|
-            actual_product = ProductKitSkus.where(:option_product_id => kit_product["option_product_id"], :product_id => @product.id)
-            if actual_product.length > 0
-              actual_product = actual_product.first
-              actual_product.qty = kit_product["qty"]
-              actual_product.packing_order = kit_product["packing_order"]
-              actual_product.save
-            end
-          end
+        (params[:productkitskus]||[]).each do |kit_product|
+          @product.create_or_update_productkitsku(kit_product)
         end
 
         @product.reload
@@ -1132,7 +974,6 @@ class ProductsController < ApplicationController
       result['status'] = false
       result['message'] = 'Cannot find product information.'
     end
-
 
     respond_to do |format|
       format.html # show.html.erb
@@ -1608,5 +1449,45 @@ class ProductsController < ApplicationController
       attr_array = attr_array + ['product_inv_alert', 'product_inv_alert_level']
     end
     attr_array
+  end
+
+  def destroy_object_if_not_defined(objects_array, obj_params, result)
+    return result if objects_array.blank?
+    
+    ids = obj_params.map {|obj| obj["id"]} rescue []
+    objects_array.each do |object|
+      found_obj = false
+      found_obj = true if ids.include?(object.id)
+      if found_obj == false && !object.destroy
+        result['status'] &= false
+      end
+    end
+    return result
+  end
+
+  def update_product_basic_info
+    basic_info = params[:basicinfo]
+    @product.disable_conf_req = basic_info[:disable_conf_req]
+    @product.is_kit = basic_info[:is_kit]
+    @product.is_skippable = basic_info[:is_skippable]
+    @product.record_serial= basic_info[:record_serial]
+    @product.kit_parsing = basic_info[:kit_parsing]
+    @product.name = basic_info[:name]
+    @product.pack_time_adj = basic_info[:pack_time_adj]
+    @product.packing_placement = basic_info[:packing_placement] if basic_info[:packing_placement].is_a?(Integer)
+    @product.product_type = basic_info[:product_type]
+    @product.spl_instructions_4_confirmation = basic_info[:spl_instructions_4_confirmation]
+    @product.spl_instructions_4_packer = basic_info[:spl_instructions_4_packer]
+    @product.store_id = basic_info[:store_id]
+    @product.store_product_id = basic_info[:store_product_id]
+    @product.type_scan_enabled = basic_info[:type_scan_enabled]
+    @product.click_scan_enabled = basic_info[:click_scan_enabled]
+    @product.weight = @product.get_product_weight(params[:weight])
+    @product.shipping_weight = @product.get_product_weight(params[:shipping_weight])
+    @product.weight_format = get_weight_format(basic_info[:weight_format])
+    @product.add_to_any_order = basic_info[:add_to_any_order]
+    @product.product_receiving_instructions = basic_info[:product_receiving_instructions]
+    @product.is_intangible = basic_info[:is_intangible]
+    @product.save ? true : false
   end
 end
