@@ -502,23 +502,9 @@ class ProductsController < ApplicationController
   end
 
   def change_product_status
-    #initialize_result will initialize status and message in result hash
-    result = initialize_result
-
-    if current_user.can?('add_edit_products')
-      bulk_actions = Groovepacker::Products::BulkActions.new
-      groove_bulk_actions = GrooveBulkActions.new
-      groove_bulk_actions.identifier = 'product'
-      groove_bulk_actions.activity = 'status_update'
-      groove_bulk_actions.save
-
-      bulk_actions.delay(:run_at => 1.seconds.from_now).status_update(Apartment::Tenant.current, params, groove_bulk_actions.id)
-
-    else
-      result['status'] = false
-      result['messages'].push('You do not have enough permissions to edit product status')
-    end
-
+    #execute_groove_bulk_action(activity)
+    result = execute_groove_bulk_action('status_update')
+    
     respond_to do |format|
       format.html # show.html.erb
       format.json { render json: result }
@@ -526,21 +512,8 @@ class ProductsController < ApplicationController
   end
 
   def delete_product
-    #initialize_result will initialize status and message in result hash
-    result = initialize_result
-
-    if current_user.can?('delete_products')
-      bulk_actions = Groovepacker::Products::BulkActions.new
-      groove_bulk_actions = GrooveBulkActions.new
-      groove_bulk_actions.identifier = 'product'
-      groove_bulk_actions.activity = 'delete'
-      groove_bulk_actions.save
-
-      bulk_actions.delay(:run_at => 1.seconds.from_now).delete(Apartment::Tenant.current, params, groove_bulk_actions.id, current_user.username)
-    else
-      result['status'] = false
-      result['messages'].push('You do not have enough permissions to delete products')
-    end
+    #execute_groove_bulk_action(activity)
+    result = execute_groove_bulk_action('delete')
 
     respond_to do |format|
       format.html # show.html.erb
@@ -549,21 +522,9 @@ class ProductsController < ApplicationController
   end
 
   def duplicate_product
+    #execute_groove_bulk_action(activity)
+    result = execute_groove_bulk_action('duplicate')
 
-    #initialize_result will initialize status and message in result hash
-    result = initialize_result
-    
-    if current_user.can?('add_edit_products')
-      bulk_actions = Groovepacker::Products::BulkActions.new
-      groove_bulk_actions = GrooveBulkActions.new
-      groove_bulk_actions.identifier = 'product'
-      groove_bulk_actions.activity = 'duplicate'
-      groove_bulk_actions.save
-      bulk_actions.delay(:run_at => 1.seconds.from_now).duplicate(Apartment::Tenant.current, params, groove_bulk_actions.id)
-    else
-      result['status'] = false
-      result['messages'].push('You do not have enough permissions to duplicate products')
-    end
     respond_to do |format|
       format.html # show.html.erb
       format.json { render json: result }
@@ -779,7 +740,7 @@ class ProductsController < ApplicationController
   def update
     #initialize_result will initialize status and message in result hash
     result = initialize_result
-    
+
     @product = Product.find_by_id(params[:basicinfo][:id]) rescue nil
     
     result['params'] = params
@@ -885,9 +846,8 @@ class ProductsController < ApplicationController
             result = destroy_object_if_not_defined(product_cats, params[:cats], result)
             
             (params[:cats]||[]).each do |category|
-              unless @product.create_or_update_productcat(category)
-                result['status'] &= false
-              end
+              status = @product.create_or_update_productcat(category)
+              result['status'] &= status
             end
           elsif params['post_fn'] == 'sku'
             #Update product skus
@@ -896,21 +856,18 @@ class ProductsController < ApplicationController
             product_skus = ProductSku.where(:product_id => @product.id)
             result = destroy_object_if_not_defined(product_skus, params[:skus], result)
 
-            unless params[:skus].blank?
-              params[:skus].each_with_index do |sku, index|
-                if sku["id"].present?
-                  unless @product.create_or_update_productsku(sku, index)
-                    result['status'] &= false
-                  end
-                elsif sku["sku"].present? && ProductSku.where(:sku => sku["sku"]).blank?
-                  unless @product.create_or_update_productsku(sku, index, 'new')
-                    result['status'] &= false
-                  end
-                elsif sku["sku"].present?
-                  result['status'] &= false
-                  result['message'] = "Sku "+sku["sku"]+" already exists"
-                end
+            (params[:skus]||[]).each_with_index do |sku, index|
+              status = true
+              if sku["id"].present?
+                status = @product.create_or_update_productsku(sku, index)
+              elsif sku["sku"].present? && ProductSku.where(:sku => sku["sku"]).blank?
+                status = @product.create_or_update_productsku(sku, index, 'new')
+              elsif sku["sku"].present?
+                result['status'] &= false
+                result['message'] = "Sku "+sku["sku"]+" already exists"
               end
+              result['status'] &= status
+
             end
           elsif params['post_fn'] == 'barcode'
             #Update product barcodes
@@ -923,18 +880,17 @@ class ProductsController < ApplicationController
             #check if a product barcode is defined
               
             (params[:barcodes]||[]).each_with_index do |barcode, index|
+              status = true
+
               if barcode["id"].present?
-                unless @product.create_or_update_productbarcode(barcode, index)
-                  result['status'] &= false
-                end
+                status = @product.create_or_update_productbarcode(barcode, index)
               elsif barcode["barcode"].present? && ProductBarcode.where(:barcode => barcode["barcode"]).blank?
-                  unless @product.create_or_update_productbarcode(barcode, index, 'new')
-                    result['status'] &= false
-                  end
+                status = @product.create_or_update_productbarcode(barcode, index, 'new')
               elsif barcode["barcode"].present?
                 result['status'] &= false
                 result['message'] = "Barcode "+barcode["barcode"]+" already exists"
               end
+              result['status'] &= status
             end
           end
         end
@@ -1486,6 +1442,31 @@ class ProductsController < ApplicationController
     result = {}
     result['status'] = true
     result['messages'] = []
+    return result
+  end
+
+  def execute_groove_bulk_action(activity)
+    result = initialize_result
+    if current_user.can?('add_edit_products')
+      bulk_actions = Groovepacker::Products::BulkActions.new
+      groove_bulk_actions = GrooveBulkActions.new
+      groove_bulk_actions.identifier = 'product'
+      groove_bulk_actions.activity = activity
+      groove_bulk_actions.save
+      
+      case activity
+      when 'status_update'
+        bulk_actions.delay(:run_at => 1.seconds.from_now).status_update(Apartment::Tenant.current, params, groove_bulk_actions.id)
+      when 'delete'
+        bulk_actions.delay(:run_at => 1.seconds.from_now).delete(Apartment::Tenant.current, params, groove_bulk_actions.id, current_user.username)
+      when 'duplicate'
+        bulk_actions.delay(:run_at => 1.seconds.from_now).duplicate(Apartment::Tenant.current, params, groove_bulk_actions.id)
+      end
+
+    else
+      result['status'] = false
+      result['messages'].push('You do not have enough permissions to edit product status')
+    end
     return result
   end
 end
