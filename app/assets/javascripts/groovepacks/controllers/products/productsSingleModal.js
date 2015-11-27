@@ -408,7 +408,8 @@ groovepacks_controllers.
             update: scope.update_single_product,
             elements: {
               available_inv: {type: 'number', min: 0},
-              product_inv_alert_level: {type: 'number', min: 0}
+              product_inv_alert_level: {type: 'number', min: 0},
+              quantity_on_hand: {type: 'number', min: 0}
             }
           },
           all_fields: {

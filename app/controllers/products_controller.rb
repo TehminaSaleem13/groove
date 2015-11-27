@@ -811,6 +811,14 @@ class ProductsController < ApplicationController
         @product.product_receiving_instructions = params[:basicinfo][:product_receiving_instructions]
         @product.is_intangible = params[:basicinfo][:is_intangible]
 
+        product_location = @product.primary_warehouse
+        if product_location.nil?
+          product_location = ProductInventoryWarehouses.new
+          product_location.product_id = @product.id
+          product_location.inventory_warehouse_id = current_user.inventory_warehouse_id
+        end
+        product_location.quantity_on_hand = params[:inventory_warehouses][0][:info][:quantity_on_hand] unless params[:inventory_warehouses].empty?
+        product_location.save
         if !@product.save
           result['status'] &= false
         end
