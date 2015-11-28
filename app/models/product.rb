@@ -462,4 +462,14 @@ class Product < ActiveRecord::Base
     response = product_barcode.save ? true : false
     return response
   end
+
+  def self.update_action_intangibleness(params)
+    action_intangible = Groovepacker::Products::ActionIntangible.new
+    scan_pack_setting = ScanPackSetting.all.first
+    intangible_setting_enabled = scan_pack_setting.intangible_setting_enabled
+    intangible_string = scan_pack_setting.intangible_string
+    action_intangible.delay(:run_at => 1.seconds.from_now).update_intangibleness(Apartment::Tenant.current, params, intangible_setting_enabled, intangible_string)
+    # action_intangible.update_intangibleness(Apartment::Tenant.current, params, intangible_setting_enabled, intangible_string)
+  end    
+
 end

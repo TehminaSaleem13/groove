@@ -1126,8 +1126,7 @@ class ProductsController < ApplicationController
   #not associated with the inventory warehouse, then it automatically associates it and
   #sets the value.
   def adjust_available_inventory
-    result = Hash.new
-    result['status'] = true
+    result = initialize_result
     result['error_messages'] = []
     result['success_messages'] = []
     result['notice_messages'] = []
@@ -1188,9 +1187,7 @@ class ProductsController < ApplicationController
 
   def generate_products_csv
     require 'csv'
-    result = Hash.new
-    result['status'] = true
-    result['messages'] = []
+    result = initialize_result
     if current_user.can? 'create_backups'
       products_list = list_selected_products(params)
       products = []
@@ -1219,17 +1216,9 @@ class ProductsController < ApplicationController
   end
 
   def update_intangibleness
-    result = Hash.new
-    result['status'] = true
+    result = initialize_result
     if current_user.can?('add_edit_products')
-      action_intangible = Groovepacker::Products::ActionIntangible.new
-
-      scan_pack_setting = ScanPackSetting.all.first
-      intangible_setting_enabled = scan_pack_setting.intangible_setting_enabled
-      intangible_string = scan_pack_setting.intangible_string
-
-      action_intangible.delay(:run_at => 1.seconds.from_now).update_intangibleness(Apartment::Tenant.current, params, intangible_setting_enabled, intangible_string)
-      # action_intangible.update_intangibleness(Apartment::Tenant.current, params, intangible_setting_enabled, intangible_string)
+      Product.update_action_intangibleness(params)
     else
       result['status'] = false
       result['messages'].push('You do not have enough permissions to edit product status')
@@ -1241,13 +1230,9 @@ class ProductsController < ApplicationController
   end
 
   def update_image
-    result = Hash.new
-    result['status'] = true
+    result = initialize_result
     begin
-      image = ProductImage.find(params[:image][:id])
-      image.added_to_receiving_instructions = params[:image][:added_to_receiving_instructions]
-      image.image_note = params[:image][:image_note]
-      image.save
+      ProductImage.update_image(params)
     rescue
       result['status'] = false
     end
@@ -1258,21 +1243,12 @@ class ProductsController < ApplicationController
   end
 
   def sync_with
-    result = Hash.new
-    result['status'] = true
+    result = initialize_result
     begin
-      product = Product.find_by_id(params[:id])
-      sync_option = product.sync_option || product.build_sync_option
-      sync_option.sync_with_bc = params["sync_with_bc"]
-      sync_option.bc_product_id = params["bc_product_id"].to_i!=0 ? params["bc_product_id"] : nil
-      sync_option.bc_product_sku = params["bc_product_sku"].try(:strip)
-      sync_option.sync_with_mg_rest = params["sync_with_mg_rest"]
-      sync_option.mg_rest_product_id = params["mg_rest_product_id"].to_i!=0 ? params["mg_rest_product_id"] : nil
-      sync_option.save
+      SyncOption.create_update_sync_option(params)
     rescue
       result['status'] = false
     end
-    
     render json: result
   end
 
@@ -1434,20 +1410,7 @@ class ProductsController < ApplicationController
   def execute_groove_bulk_action(activity)
     result = initialize_result
     if current_user.can?('add_edit_products')
-      bulk_actions = Groovepacker::Products::BulkActions.new
-      groove_bulk_actions = GrooveBulkActions.new
-      groove_bulk_actions.identifier = 'product'
-      groove_bulk_actions.activity = activity
-      groove_bulk_actions.save
-      
-      case activity
-      when 'status_update'
-        bulk_actions.delay(:run_at => 1.seconds.from_now).status_update(Apartment::Tenant.current, params, groove_bulk_actions.id)
-      when 'delete'
-        bulk_actions.delay(:run_at => 1.seconds.from_now).delete(Apartment::Tenant.current, params, groove_bulk_actions.id, current_user.username)
-      when 'duplicate'
-        bulk_actions.delay(:run_at => 1.seconds.from_now).duplicate(Apartment::Tenant.current, params, groove_bulk_actions.id)
-      end
+      GrooveBulkActions.execute_groove_bulk_action(activity, params, current_user)
     else
       result['status'] = false
       result['messages'].push('You do not have enough permissions to edit product status')
