@@ -11,7 +11,7 @@ module Groovepacker
             client = handler[:store_handle]
             import_item = handler[:import_item]
             result = self.build_result
-            response = client.orders(credential)
+            response = client.orders(credential, import_item)
             
             #========
             credential.update_attributes( :last_imported_at => Time.now )
