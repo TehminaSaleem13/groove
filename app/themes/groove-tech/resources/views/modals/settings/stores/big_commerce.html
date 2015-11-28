@@ -10,7 +10,7 @@
             1)-Please click the "Install" button below to launch the BigCommerce app store in a new tab.
           </div>
           <br/>
-          <button class="btn btn-success" ng-click="update_single_store(true);launch_big_commerce_popup()">
+          <button class="btn btn-success" ng-click="launch_big_commerce_popup()" ng-disabled="stores.single.name == null || stores.single.name == 'null'">
             Install
           </button>
         </div>
