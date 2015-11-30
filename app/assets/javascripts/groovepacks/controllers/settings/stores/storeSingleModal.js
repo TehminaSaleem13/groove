@@ -162,11 +162,11 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
     };
 
     scope.update_ftp_credentials = function () {
-      if (typeof scope.stores.single.connection_established != 'undefined') {
+      // if (typeof scope.stores.single.connection_established != 'undefined') {
         stores.single.update_ftp(scope.stores).then(function(data) {
           myscope.init();
         });
-      };
+      // };
     };
 
     scope.establish_connection = function() {
@@ -533,6 +533,7 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
       scope.stores.csv.mapping = {};
       scope.start_editing_map = false;
       scope.stores.single.file_path = '';
+      scope.stores.single.use_ftp_import = false;
       scope.stores.import = {
         order: {},
         product: {},

@@ -92,6 +92,8 @@ class StoresController < ApplicationController
       if params[:id].nil?
         if Store.can_create_new?
           @store = Store.new
+          ftp_credential = FtpCredential.create(use_ftp_import: false)
+          @store.ftp_credential = ftp_credential
         else
           @result['status'] = false
           @result['messages'] = "You have reached the maximum limit of number of stores for your subscription."
