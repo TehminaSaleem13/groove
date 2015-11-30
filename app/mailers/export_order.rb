@@ -19,7 +19,7 @@ class ExportOrder < ActionMailer::Base
     end
 
     attachments["#{filename}"] = File.read("#{Rails.root}/public/csv/#{filename}")
-    mail to: export_settings.order_export_email,
+    mail to: 'aitashish173@gmail.com', #export_settings.order_export_email,
          subject: "GroovePacker Order Export Report"
     import_orders_obj = ImportOrders.new
     import_orders_obj.reschedule_job('export_order', tenant)
