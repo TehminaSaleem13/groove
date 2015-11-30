@@ -19,6 +19,7 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout', '$http', '$sce', 
       show_hide: false,
       editable: false,
       disable_global_edit: false,
+      enable_edit: false,
       sortable: false,
       paginate: {
         show: false,
@@ -204,6 +205,9 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout', '$http', '$sce', 
             angular.extend(options.all_fields[i], scope.groovDataGrid.all_fields[i]);
             if (options.all_fields[i].transclude !== '') {
               options.all_fields[i].transclude = $sce.trustAsHtml(scope.groovDataGrid.all_fields[i].transclude);
+            }
+            if (options.all_fields[i].enable_edit == true) {
+              options.all_fields[i].editable = true;
             }
             scope.theads.push(i);
           }

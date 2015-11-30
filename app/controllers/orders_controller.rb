@@ -124,6 +124,12 @@ class OrdersController < ApplicationController
     @result = Hash.new
     @result['status'] = true
     @result['messages'] = []
+    if current_user.can?('create_edit_notes')
+      @order.notes_internal = params[:order]['notes_internal']
+    else
+      @result['status'] = false
+      @result['messages'].push('You do not have the permissions to edit notes')
+    end
     unless @order.status == 'scanned'
       #Everyone can create notes from Packer
       @order.notes_fromPacker = params[:order]['notes_fromPacker']
@@ -189,13 +195,13 @@ class OrdersController < ApplicationController
         @result['status'] = false
         @result['messages'].push('You do not have enough permissions to edit the order')
       end
-
-      unless @order.save
-        @result['status'] &= false
-        @result['messages'] = @order.errors.full_messages
-      end
     end
-
+    if @result['status']
+      @order.save
+    else
+      @result['messages'].push(@order.errors.full_messages)
+    end 
+      
     respond_to do |format|
       format.html # show.html.erb
       format.json { render json: @result }
@@ -823,13 +829,14 @@ class OrdersController < ApplicationController
       if accepted_data.has_key?(params[:var])
         if params[:var] == 'status'
           @order.status = params[:value]
+        elsif params[:var] == 'notes' && current_user.can?('create_edit_notes')
+          @order.notes_internal = params[:value]
         elsif @order.status != 'scanned'
           if params[:var] == "recipient"
             arr = params[:value].blank? ? [] : params[:value].split(' ')
             @order.firstname = arr.shift
             @order.lastname = arr.join(' ')
           elsif params[:var] == 'notes_from_packer' ||
-            (params[:var] == 'notes' && current_user.can?('create_edit_notes')) ||
             current_user.can?('add_edit_order_items')
             key = accepted_data[params[:var]]
             @order[key] = params[:value]
