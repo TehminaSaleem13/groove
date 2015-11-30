@@ -266,8 +266,8 @@ class ImportOrders
     rescue Exception => e
       if e.message.strip == "Error: 302"
         import_item.message = "Connection failed: Please verify store URL is https rather than http if the store is secure"
-      elsif e.message.strip == "undefined method `strip' for nil:NilClass"
-        import_item.message = "Unauthorized - Please click the Shopify icon and connect to your store"
+      elsif e.message == "undefined method `strip' for nil:NilClass"
+        import_item.message = "Not yet connected - Please click the Shopify icon and connect to your store"
       else
         import_item.message = "Import failed: " + e.message
       end

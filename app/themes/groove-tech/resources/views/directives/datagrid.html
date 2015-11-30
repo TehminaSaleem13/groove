@@ -55,7 +55,7 @@
           <div bo-if="options.editable == false || options.all_fields[field].editable == false">
             <span bo-if="options.all_fields[field].transclude != '' "
                   ng-bind-html="options.all_fields[field].transclude" compile-template></span>
-            <span bo-if="options.all_fields[field].transclude == '' " bo-text="row[field]"></span>
+            <span bo-if="options.all_fields[field].transclude == '' && row[field] !== null" bo-text="row[field]"></span>
           </div>
         </td>
 
