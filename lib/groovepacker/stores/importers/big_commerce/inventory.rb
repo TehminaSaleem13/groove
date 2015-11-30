@@ -6,8 +6,7 @@ module Groovepacker
           include ProductsHelper
 
           def pull_inventories
-            @credential = handler[:credential]
-            @client = handler[:store_handle]
+            init_credential_and_client(handler)
 
             #products = Product.where(store_id: credential.store_id)
             products = Product.joins(:sync_option).where("sync_with_bc=true and (bc_product_id IS NOT NULL or store_product_id IS NOT NULL)")
@@ -27,7 +26,28 @@ module Groovepacker
             end
           end
 
+          def pull_single_product_inventory(product)
+            init_credential_and_client(handler)
+            
+            begin
+              inv_wh = product.product_inventory_warehousess.first
+              @sync_optn = product.sync_option
+              bc_product_id = @sync_optn.bc_product_id
+              bc_product = @client.product(bc_product_id)
+              if eligible_for_sync(bc_product)
+                update_product_inv_for_sync_option(product, bc_product, inv_wh)
+              end
+            rescue Exception => ex
+              return ex
+            end
+          end
+
           private
+            def init_credential_and_client(handler)
+              @credential = handler[:credential]
+              @client = handler[:store_handle]
+            end
+
             def update_product_inv_for_sync_option(product, bc_product, inv_wh)
               if @sync_optn.bc_product_sku==bc_product["sku"]
                 inv_wh.quantity_on_hand = bc_product["inventory_level"]
@@ -45,6 +65,10 @@ module Groovepacker
                   inv_wh.save!
                 end
               end
+            end
+
+            def eligible_for_sync(bc_product)
+              return @sync_optn.sync_with_bc && @sync_optn.bc_product_id && @sync_optn.bc_product_sku && bc_product["id"]
             end
         end
       end

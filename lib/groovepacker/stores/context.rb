@@ -41,6 +41,10 @@ module Groovepacker
         self.handler.push_inventory
       end
 
+      def pull_single_product_inventory(product)
+        self.handler.pull_single_product_inventory(product)
+      end
+
       attr_accessor :handler
     end
   end

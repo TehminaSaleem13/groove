@@ -12,6 +12,8 @@ module Groovepacker
             import_item = handler[:import_item]
             result = self.build_result
             response = client.orders(credential, import_item)
+            orders_product_ids = []
+            inv_pull_context = init_inv_pull(credential.store)
             
             #========
             credential.update_attributes( :last_imported_at => Time.now )
@@ -47,14 +49,17 @@ module Groovepacker
                     # if sku is nil or empty
                     if product_is_nil
                     # and if item is not found by name then create the item
-                    order_item.product = create_new_product_from_order(item, credential.store, ProductSku.get_temp_sku, client)
+                    product = create_new_product_from_order(item, credential.store, ProductSku.get_temp_sku, client)
+                    order_item.product = product
                     else
                       # product exists add temp sku if it does not exist
                       products = Product.where(name: item["name"])
                       unless contains_temp_skus(products)
-                        order_item.product = create_new_product_from_order(item, credential.store, ProductSku.get_temp_sku, client)
+                        product = create_new_product_from_order(item, credential.store, ProductSku.get_temp_sku, client)
+                        order_item.product = product
                       else
-                        order_item.product = get_product_with_temp_skus(products)
+                        product = get_product_with_temp_skus(products)
+                        order_item.product = product
                       end
                     end
                   elsif ProductSku.where(sku: item["sku"]).length == 0
@@ -62,10 +67,14 @@ module Groovepacker
                     product = create_new_product_from_order(item, credential.store, item["sku"], client)
                     order_item.product = product
                   else
-                    order_item_product = ProductSku.where(sku: item["sku"]).first.product
-                    order_item.product = order_item_product
+                    product = ProductSku.where(sku: item["sku"]).first.product
+                    order_item.product = product
                   end
 
+                  unless orders_product_ids.include?(product.id)
+                    inv_pull_context.pull_single_product_inventory(product)
+                    orders_product_ids << product.id
+                  end
                   bigcommerce_order.order_items << order_item
                 end
               end
@@ -178,6 +187,12 @@ module Groovepacker
             #product.update_product_status
             product.set_product_status
             product
+          end
+
+          def init_inv_pull(store)
+            handler = Groovepacker::Stores::Handlers::BigCommerceHandler.new(store)
+            context = Groovepacker::Stores::Context.new(handler)
+            return context
           end
         end
       end
