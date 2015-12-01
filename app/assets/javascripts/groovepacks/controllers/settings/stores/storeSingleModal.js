@@ -162,22 +162,28 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
     };
 
     scope.update_ftp_credentials = function () {
-      if (scope.stores.single.connection_established != false) {
-        stores.single.update_ftp(scope.stores).then(function(data) {
+      var connection_stat = scope.stores.single.connection_established
+
+      stores.single.update_ftp(scope.stores).then(function(data) {
+        if (connection_stat === true) {
           myscope.init();
-        });
-      } else {
-        stores.single.update_ftp(scope.stores);
-      };
+        };
+      });
     };
 
+    myscope.check_empty_credentials = function (data) {
+      var credentials = ['host', 'username', 'password']
+      for (var key in data) {
+        if ($.inArray(key, credentials) > -1 && (data[key] == null || data[key] == '')) {
+          return true;
+        }
+      }
+      return false;
+    }
+
     scope.establish_connection = function() {
-      if (scope.stores.single.host == null ||
-        scope.stores.single.host == '' ||
-        scope.stores.single.username == null ||
-        scope.stores.single.username == '' ||
-        scope.stores.single.password == null ||
-        scope.stores.single.password == '') {
+      var empty_credentials = myscope.check_empty_credentials(scope.stores.single);
+      if (empty_credentials) {
         notification.notify("Please fillout all the credentials for the ftp store");
       } else{
         stores.single.update_ftp(scope.stores).then(function(data) {
