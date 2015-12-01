@@ -59,8 +59,8 @@ git checkout ${ENV}
 git pull origin ${ENV}
 
 
-RAILS_ENV=${ENV} bundle exec bundle install --deployment
-RAILS_ENV=${ENV} bundle exec script/delayed_job -n ${NUM_JOBS} start
+#RAILS_ENV=${ENV} bundle exec bundle install --deployment
+#RAILS_ENV=${ENV} bundle exec script/delayed_job -n ${NUM_JOBS} start
 
 exit
 EOF

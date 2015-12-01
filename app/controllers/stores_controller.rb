@@ -154,6 +154,40 @@ class StoresController < ApplicationController
             end
           end
 
+
+
+          if @store.store_type == "Magento API 2"
+            @magento_rest = MagentoRestCredential.where(:store_id => @store.id)
+            if @magento_rest.blank?
+              @magento_rest = @store.build_magento_rest_credential
+              new_record = true
+            else
+              @magento_rest = @magento_rest.first
+            end
+            @magento_rest.host = params[:host]
+            @magento_rest.api_key = params[:api_key]
+            @magento_rest.api_secret = params[:api_secret]
+
+            @magento_rest.import_categories = params[:import_categories]
+            @magento_rest.import_images = params[:import_images]
+            begin
+              @store.save!
+              if !new_record
+                @store.magento_rest_credential.save
+              end
+            rescue ActiveRecord::RecordInvalid => e
+              @result['status'] = false
+              @result['messages'] = [@store.errors.full_messages, @store.magento_rest_credential.errors.full_messages]
+
+            rescue ActiveRecord::StatementInvalid => e
+              @result['status'] = false
+              @result['messages'] = [e.message]
+            end
+          end
+
+
+
+
           if @store.store_type == 'Amazon'
             @amazon = AmazonCredentials.where(:store_id => @store.id)
 
@@ -1314,12 +1348,17 @@ class StoresController < ApplicationController
     @result['status'] = true
 
     access_restriction = AccessRestriction.last
+    
+    tenant = Apartment::Tenant.current
+    import_orders_obj = ImportOrders.new
+    import_orders_obj.delay(:run_at => 1.seconds.from_now).init_import(tenant)
+
     if access_restriction && access_restriction.allow_inv_push && @store && current_user.can?('update_inventories')
       context = Groovepacker::Stores::Context.new(
             Groovepacker::Stores::Handlers::BigCommerceHandler.new(@store))
-      context.delay(:run_at => 1.seconds.from_now).pull_inventory
+      context.delay(:run_at => 2.seconds.from_now).pull_inventory
       #context.pull_inventory
-      @result['message'] = "Your request has beed queued"
+      @result['message'] = "Your request for innventory pull has beed queued"
     else
       @result['status'] = false
       @result['message'] = "Either the the BigCommerce store is not setup properly or you don't have permissions to update inventories."
@@ -1334,12 +1373,16 @@ class StoresController < ApplicationController
     @result = Hash.new
     @result['status'] = true
 
+    tenant = Apartment::Tenant.current
+    import_orders_obj = ImportOrders.new
+    import_orders_obj.delay(:run_at => 1.seconds.from_now).init_import(tenant)
+
     if @store && current_user.can?('update_inventories')
       context = Groovepacker::Stores::Context.new(
             Groovepacker::Stores::Handlers::BigCommerceHandler.new(@store))
-      context.delay(:run_at => 1.seconds.from_now).push_inventory
+      context.delay(:run_at => 2.seconds.from_now).push_inventory
       #context.push_inventory
-      @result['message'] = "Your request has beed queued"
+      @result['message'] = "Your request for innventory push has beed queued"
     else
       @result['status'] = false
       @result['message'] = "Either the store is not present or you don't have permissions to update inventories."

@@ -8,7 +8,7 @@ module Groovepacker
         unless inventory_tracking_enabled?
           return true
         end
-        order_items = OrderItem.where(inv_status: OrderItem::DEFAULT_INV_STATUS)
+        order_items = OrderItem.where(inv_status: OrderItem::DEFAULT_INV_STATUS, scanned_status: 'notscanned')
         order_items.each do |single_order_item|
           if single_order_item.is_not_ghost?
             if Order::ALLOCATE_STATUSES.include?(single_order_item.order.status)
@@ -37,7 +37,7 @@ module Groovepacker
         begin
           Apartment::Tenant.switch(tenant)
           if inventory_tracking_enabled?
-            orders = Order.all
+            orders = Order.where("status != 'scanned'")
             check_length = check_after_every(orders.length)
             bulk_action.total = orders.length
             bulk_action.completed = 0

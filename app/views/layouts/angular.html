@@ -20,7 +20,6 @@
 <body class="container-well"
       ng-app="<%= (Apartment::Tenant.current == 'admintools')? 'groovepacks_admin' : 'groovepacks' %>"
       ng-controller="appCtrl">
-<%= Apartment::Tenant.current %>
 <div class="logout-box fade" ng-show="show_logout_box">
   <div class="center-message">
     <h2>Continue session?</h2>

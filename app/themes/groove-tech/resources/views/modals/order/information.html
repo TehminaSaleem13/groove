@@ -1,5 +1,5 @@
 <div class="container-fluid">
-  <fieldset>
+  <fieldset ng-disabled="orders.single.basicinfo.status == 'scanned'">
     <legend>Order Details</legend>
     <div class="row">
       <div class="col-sm-6 container-fluid">
@@ -106,7 +106,7 @@
       </div>
     </div>
   </fieldset>
-  <fieldset>
+  <fieldset ng-disabled="orders.single.basicinfo.status == 'scanned'">
     <legend>Shipping Information</legend>
     <div class="row">
       <div class="col-sm-6">

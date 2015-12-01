@@ -48,6 +48,10 @@ class ImportOrders
     result
   end
 
+  def init_import(tenant)
+    Apartment::Tenant.switch(tenant)
+  end
+
   # params should have hash of tenant, store, import_type = 'regular', user
   def import_order_by_store(params)
     result = {
@@ -262,6 +266,8 @@ class ImportOrders
     rescue Exception => e
       if e.message.strip == "Error: 302"
         import_item.message = "Connection failed: Please verify store URL is https rather than http if the store is secure"
+      elsif e.message == "undefined method `strip' for nil:NilClass"
+        import_item.message = "Not yet connected - Please click the Shopify icon and connect to your store"
       else
         import_item.message = "Import failed: " + e.message
       end

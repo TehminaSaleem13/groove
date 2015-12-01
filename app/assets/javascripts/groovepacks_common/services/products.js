@@ -221,19 +221,43 @@ groovepacks_services.factory('products', ['$http', 'notification', 'editable', '
     }).error(notification.server_error);
   };
 
+  var basicinfo_changed = function (basicinfo, data) {
+    var result = true;
+    for (var key in basicinfo) {
+      if (key == 'status' || key == 'created_at' || key == 'updated_at') {
+        continue;
+      } else if (basicinfo[key] != data[key]) {
+        result = false;
+        break;
+      };
+    };
+    return result;
+  };
+
   //single product related functions
-  var get_single = function (id, products) {
+  var get_single = function (id, products, auto) {
     return $http.get('/products/' + id + '.json').success(function (data) {
       if (data.product) {
-        if (typeof products.single['basicinfo'] != "undefined" && data.product.basicinfo.id == products.single.basicinfo.id) {
-          angular.extend(products.single, data.product);
-        } else {
-          products.single = {};
-          products.single = data.product;
-        }
+        if (!auto) {
+          if (basicinfo_changed(products.single['basicinfo'], data.product.basicinfo) &&
+            products.single['barcodes'].length == data.product.barcodes.length &&
+            products.single['cats'].length == data.product.cats.length &&
+            products.single['inventory_warehouses'].length == data.product.inventory_warehouses.length &&
+            products.single['skus'].length == data.product.skus.length) {
+            products.signle = {};
+            products.single = data.product;
+          }
+        }else {
+          if (typeof products.single['basicinfo'] != "undefined" && data.product.basicinfo.id == products.single.basicinfo.id) {
+            angular.extend(products.single, data.product);
+          }else {
+            products.single = {};
+            products.single = data.product;
+          };
+        };
       } else {
         products.single = {};
-      }
+      };
     }).error(notification.server_error).success(editable.force_exit).error(editable.force_exit);
   };
 

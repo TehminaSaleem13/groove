@@ -75,5 +75,5 @@ exit
 EOF
 #RAILS_ENV=${ENV} script/delayed_job -n ${NUM_JOBS} start
 
-sudo service nginx stop
-sudo service nginx start
+# Monitoring nginx, delayed job
+sudo monit restart all

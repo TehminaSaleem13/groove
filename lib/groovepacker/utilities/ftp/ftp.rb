@@ -158,7 +158,7 @@ module FTP
           fmtimes << connection_obj.mtime(individual_file)
         end
       end
-      unless '-imported'.in? files[fmtimes.index(fmtimes.max)]
+      unless fmtimes.index(fmtimes.max).nil? || ('-imported'.in? files[fmtimes.index(fmtimes.max)])
         index = fmtimes.index(fmtimes.max)
         files[index]
       end

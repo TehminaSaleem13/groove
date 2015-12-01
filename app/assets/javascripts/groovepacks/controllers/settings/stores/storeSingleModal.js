@@ -39,7 +39,7 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
 
     scope.check_bigcommerce_connection = function () {
       stores.big_commerce.check_connection(scope.stores.single.id).then(function (response) {
-        scope.stores.single.message = response["data"]["message"];
+        scope.stores.single.message = response.data.message;
       });
     }
 
@@ -207,6 +207,10 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
     scope.update_single_store = function (auto) {
       if (scope.edit_status || stores.single.validate_create(scope.stores)) {
         return stores.single.update(scope.stores, auto).success(function (data) {
+          if(scope.stores.single.store_type=="BigCommerce"){
+            notification.notify("This integration is currently being tested. Please refrain from depending on it in a production environment.",0);
+          }
+
           if (data.status && data.store_id) {
             if (scope.stores.single['id'] != 0) {
               myscope.store_single_details(data.store_id);
@@ -455,7 +459,7 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
 
     scope.launch_big_commerce_popup = function () {
       $timeout(function () {
-        var shopify_url = $sce.trustAsResourceUrl("https://store-1pslcuh.mybigcommerce.com/manage/marketplace/apps/4907");
+        var shopify_url = $sce.trustAsResourceUrl("https://store-1pslcuh.mybigcommerce.com/manage/marketplace/apps/5386");
         if (shopify_url == null) {
           if (typeof scope.stores.single.shop_name == 'undefined') {
             notification.notify("Please enter your store name first.");

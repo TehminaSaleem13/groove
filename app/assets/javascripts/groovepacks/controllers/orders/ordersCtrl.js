@@ -270,6 +270,10 @@ groovepacks_controllers.
         myscope.update_selected_count();
       };
 
+      var disable_global_edit = function() {
+        return ($state.params.filter == 'scanned') ? true : false;
+      }
+
       myscope.init = function () {
         //Public properties
         $scope.orders = orders.model.get();
@@ -279,6 +283,8 @@ groovepacks_controllers.
           scanned: true,
           cancelled: true
         };
+
+        $scope.disable_global_edit = disable_global_edit();
         generalsettings.single.get($scope.general_settings);
 
         //Private properties
@@ -289,6 +295,7 @@ groovepacks_controllers.
           identifier: 'orders',
           select_all: $scope.select_all_toggle,
           invert: myscope.invert,
+          disable_global_edit: $scope.disable_global_edit,
           selections: {
             show_dropdown: true,
             single_callback: myscope.select_single,
@@ -354,7 +361,8 @@ groovepacks_controllers.
               editable: false
             },
             notes: {
-              name: "Notes"
+              name: "Notes",
+              enable_edit: true
             },
             order_date: {
               name: "Order Date",

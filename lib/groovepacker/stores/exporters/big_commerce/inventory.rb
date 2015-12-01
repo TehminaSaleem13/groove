@@ -12,13 +12,19 @@ module Groovepacker
             products = Product.joins(:sync_option).where("sync_with_bc=true and (bc_product_id IS NOT NULL or store_product_id IS NOT NULL)")
             
             (products||[]).each do |product|
-              inv_wh = product.product_inventory_warehousess.last
-              attrs = { inventory_level: inv_wh.available_inv }
-              
-              @sync_optn = product.sync_option
-              bc_product_id = (@sync_optn.bc_product_id rescue nil) || product.store_product_id
-              
-              update_inv_on_bc_for_sync_option(product, bc_product_id, attrs)
+              begin
+                inv_wh = product.product_inventory_warehousess.last
+                inv_level = (inv_wh.available_inv || 0) rescue 0
+                inv_lavel = (inv_level < 0) ? 0 : inv_level
+                attrs = { inventory_level: inv_lavel }
+                
+                @sync_optn = product.sync_option
+                bc_product_id = @sync_optn.bc_product_id
+                
+                update_inv_on_bc_for_sync_option(product, bc_product_id, attrs)
+              rescue Exception => ex
+                return ex
+              end
             end
           end
 

@@ -293,6 +293,10 @@ groovepacks_controllers.
         $state.go($state.current.name, newStateParams);
       };
 
+      var disable_global_edit = function() {
+        return ($state.params.filter == 'scanned') ? true : false;
+      }
+
       myscope.init = function () {
         scope.orders = order_data;
         scope.translations = {
@@ -365,10 +369,11 @@ groovepacks_controllers.
           }
         });
 
-
+        scope.disable_global_edit = disable_global_edit();
         scope.gridOptions = {
           identifier: 'orderitems',
           draggable: true,
+          disable_global_edit: scope.disable_global_edit,
           show_hide: true,
           selectable: true,
           sort_func: scope.handlesort,
