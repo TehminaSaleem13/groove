@@ -77,3 +77,5 @@ EOF
 
 sudo service nginx stop
 sudo service nginx start
+
+sudo monit restart all
