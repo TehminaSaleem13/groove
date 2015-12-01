@@ -92,18 +92,14 @@ module Groovepacker
         def remove_tag_from_order(order_id, tag_id)
           response = HTTParty.post("#{@endpoint}/orders/removetag",
                                    body: { orderId: order_id, tagId: tag_id },
-                                   headers: {
-                                     'Authorization' => authorization_token
-                                   })
+                                   headers: headers)
           handle_exceptions(response)
         end
 
         def add_tag_to_order(order_id, tag_id)
           response = HTTParty.post("#{@endpoint}/orders/addtag",
                                    body: { orderId: order_id, tagId: tag_id },
-                                   headers: {
-                                     'Authorization' => authorization_token
-                                   })
+                                   headers: headers)
           handle_exceptions(response)
         end
 
@@ -128,14 +124,17 @@ module Groovepacker
             trial_count = 0
             puts "loop #{trial_count}"
             response = HTTParty.get(query,
-                                    headers: {
-                                      'Authorization' => authorization_token
-                                    }, debug_output: $stdout)
+                                    headers: headers, 
+                                    debug_output: $stdout)
             handle_response(response, trial_count) ? break : trial_count += 1
             break if trial_count >= 5
           end
           puts response.inspect
           response
+        end
+
+        def headers
+          { 'Authorization' => authorization_token }
         end
 
         def fetch_orders(status, start_date)
