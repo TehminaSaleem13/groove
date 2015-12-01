@@ -15,7 +15,7 @@ module Groovepacker
           Rails.logger.info 'Getting orders with status: ' + status
           start_date = order_date_start(
             date_type, ss_format(ord_placed_after)) unless ord_placed_after.nil?
-          fetch_orders(start_date)
+          fetch_orders(status, start_date)
         end
 
         def products
@@ -81,7 +81,7 @@ module Groovepacker
           orders = []
           loop do
             response = query("#{@endpoint}/orders/listbytag?orderStatus=" \
-              "#{status}&tagId= #{tag_id}&page=#{page_index}&pageSize=100")
+              "#{status}&tagId=#{tag_id}&page=#{page_index}&pageSize=100")
             orders += response['orders'] unless response['orders'].nil?
             total_pages = response.parsed_response['pages']
             page_index += 1
@@ -123,6 +123,7 @@ module Groovepacker
         end
 
         def query(query)
+          response = nil
           loop do
             trial_count = 0
             puts "loop #{trial_count}"
@@ -137,7 +138,7 @@ module Groovepacker
           response
         end
 
-        def fetch_orders(page_index, start_date)
+        def fetch_orders(status, start_date)
           combined = { 'orders' => [] }
           page_index = 1
           loop do
