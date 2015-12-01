@@ -35,16 +35,13 @@ class StoresController < ApplicationController
           ftp = FtpCredential.new
           new_record = true
         end
-        if ftp.host != params[:host] || ftp.username != params[:username] || ftp.password != params[:password] || ftp.connection_method != params[:connection_method] || ftp.use_ftp_import != params[:use_ftp_import]
-          params[:host] = nil if params[:host] == 'null'
-          ftp.host = params[:host]
-          ftp.username = params[:username]
-          ftp.password = params[:password]
-          ftp.connection_method = params[:connection_method]
-          ftp.connection_established = false
-          ftp.use_ftp_import = params[:use_ftp_import]
-        end
-
+        params[:host] = nil if params[:host] === 'null'
+        ftp.host = params[:host]
+        ftp.username = params[:username]
+        ftp.password = params[:password]
+        ftp.connection_method = params[:connection_method]
+        ftp.connection_established = false
+        ftp.use_ftp_import = params[:use_ftp_import]
         store.ftp_credential = ftp
         begin
           store.save!
