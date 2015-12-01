@@ -6,7 +6,7 @@ module Groovepacker
         attr_accessor :client, :service
 
         def initialize(api_key, api_secret)
-          @service = Groovepacker::ShipstationRuby::Rest::Client.new(api_key, api_secret)
+          @service = Groovepacker::ShipstationRuby::Rest::Service.new(api_key, api_secret)
         end
 
         def get_orders(status, ord_placed_after, date_type = 'created_at')
