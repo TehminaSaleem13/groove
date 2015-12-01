@@ -201,20 +201,26 @@ class ImportOrders
         end
         import_item.save
       elsif store_type == 'Shopify'
-        import_item.status = 'in_progress'
-        import_item.save
-        context = Groovepacker::Stores::Context.new(
-          Groovepacker::Stores::Handlers::ShopifyHandler.new(store, import_item))
-        result = context.import_orders
-        import_item.reload
-        import_item.previous_imported = result[:previous_imported]
-        import_item.success_imported = result[:success_imported]
-        if import_item.status != 'cancelled'
-          if !result[:status]
-            import_item.status = 'failed'
-          else
-            import_item.status = 'completed'
+        shopify_credential = ShopifyCredential.where(:store_id => store.id).first
+        if shopify_credential.access_token
+          import_item.status = 'in_progress'
+          import_item.save
+          context = Groovepacker::Stores::Context.new(
+            Groovepacker::Stores::Handlers::ShopifyHandler.new(store, import_item))
+          result = context.import_orders
+          import_item.reload
+          import_item.previous_imported = result[:previous_imported]
+          import_item.success_imported = result[:success_imported]
+          if import_item.status != 'cancelled'
+            if !result[:status]
+              import_item.status = 'failed'
+            else
+              import_item.status = 'completed'
+            end
           end
+        else
+          import_item.status = 'failed'
+          import_item.message = 'Not yet connected - Please click the Shopify icon and connect to your store'
         end
         import_item.save
 
@@ -266,8 +272,6 @@ class ImportOrders
     rescue Exception => e
       if e.message.strip == "Error: 302"
         import_item.message = "Connection failed: Please verify store URL is https rather than http if the store is secure"
-      elsif e.message == "undefined method `strip' for nil:NilClass"
-        import_item.message = "Not yet connected - Please click the Shopify icon and connect to your store"
       else
         import_item.message = "Import failed: " + e.message
       end
