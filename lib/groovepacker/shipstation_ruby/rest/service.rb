@@ -21,8 +21,8 @@ module Groovepacker
 
         def query(query)
           response = nil
+          trial_count = 0
           loop do
-            trial_count = 0
             puts "loop #{trial_count}"
             response = HTTParty.get("#{@endpoint}#{query}",
                                     headers: headers, 
