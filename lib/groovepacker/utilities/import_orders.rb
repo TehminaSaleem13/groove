@@ -239,7 +239,10 @@ class ImportOrders
       #=============================================================
       elsif store_type == 'CSV'
         mapping = CsvMapping.find_by_store_id(store.id)
-        unless mapping.nil? || mapping.order_csv_map.nil? || store.ftp_credential.nil? || (!store.ftp_credential.connection_established)
+        if !store.ftp_credential.use_ftp_import
+          import_item.status = 'failed'
+          import_item.message = 'FTP import for this store has not been activated'
+        elsif !mapping.nil? && !mapping.order_csv_map.nil? && !store.ftp_credential.nil? && store.ftp_credential.connection_established
           import_item.status = 'in_progress'
           import_item.save
           map = mapping.order_csv_map
