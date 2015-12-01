@@ -162,18 +162,22 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
     };
 
     scope.update_ftp_credentials = function () {
-      // if (typeof scope.stores.single.connection_established != 'undefined') {
+      if (scope.stores.single.connection_established != false) {
         stores.single.update_ftp(scope.stores).then(function(data) {
           myscope.init();
         });
-      // };
+      } else {
+        stores.single.update_ftp(scope.stores);
+      };
     };
 
     scope.establish_connection = function() {
-      if (typeof scope.stores.single.host == 'undefined' ||
-        typeof scope.stores.single.username == 'undefined' ||
-        typeof scope.stores.single.password == 'undefined' ||
-        typeof scope.stores.single.connection_method == 'undefined') {
+      if (scope.stores.single.host == null ||
+        scope.stores.single.host == '' ||
+        scope.stores.single.username == null ||
+        scope.stores.single.username == '' ||
+        scope.stores.single.password == null ||
+        scope.stores.single.password == '') {
         notification.notify("Please fillout all the credentials for the ftp store");
       } else{
         stores.single.update_ftp(scope.stores).then(function(data) {
@@ -533,7 +537,6 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
       scope.stores.csv.mapping = {};
       scope.start_editing_map = false;
       scope.stores.single.file_path = '';
-      scope.stores.single.use_ftp_import = false;
       scope.stores.import = {
         order: {},
         product: {},

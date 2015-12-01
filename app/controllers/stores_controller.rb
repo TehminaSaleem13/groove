@@ -35,12 +35,14 @@ class StoresController < ApplicationController
           ftp = FtpCredential.new
           new_record = true
         end
-        if ftp.host != params[:host] || ftp.username != params[:username] || ftp.password != params[:password] || ftp.connection_method != params[:connection_method]
+        if ftp.host != params[:host] || ftp.username != params[:username] || ftp.password != params[:password] || ftp.connection_method != params[:connection_method] || ftp.use_ftp_import != params[:use_ftp_import]
+          params[:host] = nil if params[:host] == 'null'
           ftp.host = params[:host]
           ftp.username = params[:username]
           ftp.password = params[:password]
           ftp.connection_method = params[:connection_method]
           ftp.connection_established = false
+          ftp.use_ftp_import = params[:use_ftp_import]
         end
 
         store.ftp_credential = ftp
@@ -80,6 +82,18 @@ class StoresController < ApplicationController
     end
   end
 
+  def init_update_store_data(params)
+    params[:name]=nil if params[:name]=='undefined'
+    @store.name = params[:name] || get_default_warehouse_name
+    @store.store_type = params[:store_type]
+    @store.status = params[:status]
+    @store.thank_you_message_to_customer = params[:thank_you_message_to_customer] unless params[:thank_you_message_to_customer] == 'null'
+    @store.inventory_warehouse_id = params[:inventory_warehouse_id] || get_default_warehouse_id
+    @store.auto_update_products = params[:auto_update_products]
+    @store.update_inv = params[:update_inv]
+    @store.save
+  end
+
   def create_update_store
     @result = Hash.new
 
@@ -92,30 +106,19 @@ class StoresController < ApplicationController
       if params[:id].nil?
         if Store.can_create_new?
           @store = Store.new
-          ftp_credential = FtpCredential.create(use_ftp_import: false)
-          @store.ftp_credential = ftp_credential
+          init_update_store_data(params)
+          ftp_credential = FtpCredential.create(use_ftp_import: false, store_id: @store.id) if params[:store_type] == 'CSV'
         else
           @result['status'] = false
           @result['messages'] = "You have reached the maximum limit of number of stores for your subscription."
         end
       else
         @store = Store.find(params[:id])
-      end
-
-      if @result['status']
-
         if params[:store_type].nil?
           @result['status'] = false
           @result['messages'].push('Please select a store type to create a store')
         else
-          params[:name]=nil if params[:name]=='undefined'
-          @store.name = params[:name] || get_default_warehouse_name
-          @store.store_type = params[:store_type]
-          @store.status = params[:status]
-          @store.thank_you_message_to_customer = params[:thank_you_message_to_customer] unless params[:thank_you_message_to_customer] == 'null'
-          @store.inventory_warehouse_id = params[:inventory_warehouse_id] || get_default_warehouse_id
-          @store.auto_update_products = params[:auto_update_products]
-          @store.update_inv = params[:update_inv]
+          init_update_store_data(params)
         end
 
         if @result['status']
@@ -449,7 +452,6 @@ class StoresController < ApplicationController
           @result["store_id"] = @store.id
         end
       end
-
     end
 
     respond_to do |format|
@@ -979,6 +981,8 @@ class StoresController < ApplicationController
             unless csv_mapping.nil?
               csv_mapping.destroy
             end
+            ftp_credential = FtpCredential.find_by_store_id(@store.id)
+            ftp_credential.destroy unless ftp_credential.nil?
           end
           if @store.deleteauthentications && @store.destroy
             @result['status'] = true
