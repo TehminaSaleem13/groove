@@ -68,6 +68,9 @@ module Groovepacks
     config.assets.paths << Rails.root.join("app", "assets", "fonts")
     config.assets.paths << Rails.root.join("vendor", "assets", "components")
     config.assets.precompile += %w(*.png *.jpg *.jpeg *.gif *.woff *.ttf *.svg)
+
+    config.autoload_paths += Dir[ Rails.root.join('app', 'models', "concerns", '**/') ]
+    config.autoload_paths += Dir[ Rails.root.join('app', 'controllers', "concerns", '**/') ]
   end
 end
 require Rails.root.join('config','initializers','groove_constants.rb')

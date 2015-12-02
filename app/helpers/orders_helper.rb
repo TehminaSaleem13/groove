@@ -203,4 +203,53 @@ module OrdersHelper
     end
     increment_id
   end
+
+  def init_product_attrs(product, available_inv)
+    location_primary = product.primary_warehouse.location_primary rescue ""
+    order_item = {'productinfo' => product,
+                  'available_inv' => order_item_available_inv(product),
+                  'sku' => product.primary_sku,
+                  'barcode' => product.primary_barcode,
+                  'category' => product.primary_category,
+                  'image' => product.base_product.primary_image,
+                  'spl_instructions_4_packer' => product.spl_instructions_4_packer,
+                  'qty_on_hand' => product.primary_warehouse.quantity_on_hand,
+                  'location_primary' => location_primary,
+                  'sku' => product.primary_sku,
+                  'barcode' => product.primary_barcode,
+                  'category' => product.primary_category,
+                  'image' => product.base_product.primary_image,
+                  'spl_instructions_4_packer' => product.spl_instructions_4_packer,
+                  'qty_on_hand' => product.primary_warehouse.quantity_on_hand
+                 }
+  end
+
+  def make_orders_list(orders)
+    @orders_result = []
+
+    orders.each do |order|
+      generate_order_hash(order)
+    end
+    return @orders_result
+  end
+
+  def generate_order_hash(order)
+    store_name = order.store_id ? Store.find(order.store_id).name : ""
+    @orders_result.push({ 'id' => order.id,
+                          'store_name' => store_name,
+                          'notes' => order.notes_internal,
+                          'ordernum' => order.increment_id,
+                          'order_date' => order.order_placed_time,
+                          'itemslength' => order.get_items_count,
+                          'status' => order.status,
+                          'recipient' => "#{order.firstname} #{order.lastname}",
+                          'email' => order.email,
+                          'tracking_num' => order.tracking_num,
+                          'city' => order.city,
+                          'state' => order.state,
+                          'postcode' => order.postcode,
+                          'country' => order.country,
+                          'tags' => order.order_tags
+                        })
+  end
 end

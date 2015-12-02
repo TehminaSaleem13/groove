@@ -50,7 +50,8 @@ groovepacks_services.factory('orders', ['$http', '$window', 'notification', '$q'
 
   var update_items_setup = function (items, type, value) {
     var ascending = true;
-    var i = 0, length = items.length;
+    //var i = 0, length = items.length;
+    var i = 0;
     while (i < items.length - 1) {
       if (items[i].category.toLowerCase() > items[++i].category.toLowerCase()) {
         ascending &= false;
@@ -446,6 +447,10 @@ groovepacks_services.factory('orders', ['$http', '$window', 'notification', '$q'
     }).error(notification.server_error);
   };
 
+  var select_notification = function (message) {
+    notification.notify(message, 0);
+  }
+
   return {
     model: {
       get: get_default
@@ -462,7 +467,8 @@ groovepacks_services.factory('orders', ['$http', '$window', 'notification', '$q'
       update_node: update_list_node,
       generate: generate_list,
       cancel_pdf_gen: cancel_pdf_gen,
-      update_with_option: update_list_by_option
+      update_with_option: update_list_by_option,
+      select_notification: select_notification
     },
     single: {
       get: get_single,
