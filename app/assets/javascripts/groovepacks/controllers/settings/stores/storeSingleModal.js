@@ -215,6 +215,9 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
     }
 
     scope.update_single_store = function (auto) {
+      if (scope.stores.single.store_type && !scope.stores.single.id) {
+        scope.stores.single.name= scope.stores.single.store_type+'-'+scope.stores.list.length;
+      }
       if (scope.edit_status || stores.single.validate_create(scope.stores)) {
         return stores.single.update(scope.stores, auto).success(function (data) {
           if(scope.stores.single.store_type=="BigCommerce"){
