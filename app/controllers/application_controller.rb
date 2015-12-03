@@ -52,7 +52,7 @@ class ApplicationController < ActionController::Base
   
   private
     def save_bc_auth_if_present
-      bc_auth = cookies[:bc_auth] || {}
+      bc_auth = cookies[:bc_auth]
       unless bc_auth.blank?
         bc_auth = eval(bc_auth) if bc_auth.class==String
         access_token = bc_auth["access_token"] rescue nil
