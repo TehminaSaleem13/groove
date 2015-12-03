@@ -436,8 +436,8 @@ class StoresController < ApplicationController
               @result['messages'] = [e.message]
             end
             current_tenant = Apartment::Tenant.current
-            cookies[:tenant_name] = {:value => current_tenant , :domain => :all}
-            cookies[:store_id] = {:value => @store.id , :domain => :all}
+            cookies[:tenant_name] = {:value => current_tenant , :domain => :all, :expires => Time.now+20.minutes}
+            cookies[:store_id] = {:value => @store.id , :domain => :all, :expires => Time.now+20.minutes}
           end
         else
           @result['status'] = false
