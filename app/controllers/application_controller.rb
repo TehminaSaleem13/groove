@@ -27,6 +27,7 @@ class ApplicationController < ActionController::Base
   def after_sign_in_path_for(resource_or_scope)
     #store session to redis
     if current_user
+      save_bc_auth_if_present
       # an unique MD5 key
       cookies['_validation_token_key'] = Digest::MD5.hexdigest("#{current_user.id}:#{session.to_json}:#{Apartment::Tenant.current}")
       # store session data or any authentication data you want here, generate to JSON data
@@ -48,5 +49,20 @@ class ApplicationController < ActionController::Base
     session[:redirect_uri] = nil
     super(resource_or_scope)
   end
+  
+  private
+    def save_bc_auth_if_present
+      bc_auth = cookies[:bc_auth] || {}
+      unless bc_auth.blank?
+        bc_auth = eval(bc_auth) if bc_auth.class==String
+        access_token = bc_auth["access_token"] rescue nil
+        store_hash = bc_auth["context"] rescue nil
+        @store = Store.new
+        @store = @store.create_store_with_defaults("BigCommerce")
+        BigCommerceCredential.create(store_id: @store.id, access_token: access_token, store_hash: store_hash )
+        #cookies.delete(:bc_auth)
+        cookies[:bc_auth] = {:value => nil , :domain => :all, :expires => Time.now+2.seconds}
+      end
+    end
 
 end
