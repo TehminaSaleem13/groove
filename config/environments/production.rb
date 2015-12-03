@@ -128,4 +128,6 @@ Groovepacks::Application.configure do
 
   #Feature Variables
   ENV['DASHBOARD_ENABLE'] = 'NO'
+
+  ENV["SITE_HOST"] = "groovepacker.com"
 end

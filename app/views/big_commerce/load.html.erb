@@ -13,13 +13,14 @@
       <fieldset>
         <div class="form-group">
           <input type="hidden" id="plan_id" value="<%= params[:plan_id] %>"/>
+          <input type="hidden" id="host" value="<%= ENV["SITE_HOST"] %>"/>
           <label class="control-label">Enter your site address*</label>
 
           <div class="input-group">
             <div class="input-group-addon">https://</div>
             <input type="text" id="tenant_name" class="form-control" autofocus value=""/>
 
-            <div class="input-group-addon">.groovepacker.com</div>
+            <div class="input-group-addon">.<%= ENV["SITE_HOST"] %></div>
           </div>
           <div class="form-group error" style="color: red;">
             <div id="error-tenant-block" class="help-inline"></div>
@@ -40,7 +41,7 @@
           if ($('#tenant_name').val() != null &&
             typeof($('#tenant_name').val()) != 'undefined' &&
             $('#tenant_name').val() != '') {
-            url = 'https://' + $('#tenant_name').val() + ".groovepacker.com";
+            url = 'https://' + $('#tenant_name').val() + "." + $('#host').val();
             window.location.href = url;
           }
         });
