@@ -12,9 +12,17 @@ module Groovepacker
         end
 
         def post(query, body)
-          response = HTTParty.post("#{@endpoint}#{query}",
-                                     body: body,
-                                     headers: headers)
+          response = nil
+          trial_count = 0
+          loop do
+            puts "loop #{trial_count}"
+            response = HTTParty.post("#{@endpoint}#{query}",
+                                      body: body,
+                                      headers: headers,
+                                      debug_output: $stdout)
+            handle_response(response, trial_count) ? break : trial_count += 1
+            break if trial_count >= 5
+          end
           handle_exceptions(response)
           response
         end
@@ -44,6 +52,7 @@ module Groovepacker
         def error_status_codes
           [500, 401]
         end
+
         def handle_response(response, trial_count)
           successful_response = false
           if error_status_codes.include?(response.code) ||
