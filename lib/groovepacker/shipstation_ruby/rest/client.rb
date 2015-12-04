@@ -22,7 +22,7 @@ module Groovepacker
             order_number_param = '&orderNumber=' + orderNumber.to_s
             Rails.logger.info "Getting shipment with number: #{orderNumber}"
             response = @service.query("/Shipments/List?" \
-              'page=1&pageSize=100' + URI.encode(order_number_param))
+              'page=1&pageSize=100' + URI.encode(order_number_param), nil, "get")
             tracking_number = handle_shipment_response(response, orderNumber)
           end
           tracking_number
@@ -30,11 +30,11 @@ module Groovepacker
 
         def get_order(orderId)
           Rails.logger.info 'Getting orders with orderId: ' + orderId
-          @service.query("/Orders/" + orderId)
+          @service.query("/Orders/" + orderId, nil, "get")
         end
 
         def get_tag_id(tag)
-          response = @service.query('/accounts/listtags')
+          response = @service.query('/accounts/listtags', nil, "get")
           tags = response.parsed_response
           index = tags.empty? ? nil : tags.index { |x| x['name'] == tag }
           index.nil? ? -1 : tags[index]['tagId']
@@ -58,7 +58,7 @@ module Groovepacker
           orders = []
           loop do
             response = @service.query("/orders/listbytag?orderStatus=" \
-              "#{status}&tagId=#{tag_id}&page=#{page_index}&pageSize=100")
+              "#{status}&tagId=#{tag_id}&page=#{page_index}&pageSize=100", nil, "get")
             orders += response['orders'] unless response['orders'].nil?
             total_pages = response.parsed_response['pages']
             page_index += 1
@@ -67,11 +67,11 @@ module Groovepacker
         end
 
         def remove_tag_from_order(order_id, tag_id)
-          @service.post("/orders/removetag", { orderId: order_id, tagId: tag_id })
+          @service.query("/orders/removetag", { orderId: order_id, tagId: tag_id }, "post")
         end
 
         def add_tag_to_order(order_id, tag_id)
-          @service.post("/orders/addtag", { orderId: order_id, tagId: tag_id })
+          @service.query("/orders/addtag", { orderId: order_id, tagId: tag_id }, "post")
         end
 
         def inspect
@@ -85,7 +85,7 @@ module Groovepacker
           page_index = 1
           loop do
             res = @service.query("/Orders/List?orderStatus=" \
-              "#{status}&page=#{page_index}&pageSize=500#{start_date}")
+              "#{status}&page=#{page_index}&pageSize=500#{start_date}", nil, "get")
             combined['orders'] = union(combined['orders'],
                                        res.parsed_response['orders'])
             page_index += 1

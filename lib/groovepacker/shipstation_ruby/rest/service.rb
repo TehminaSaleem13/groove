@@ -11,30 +11,18 @@ module Groovepacker
           @endpoint = 'https://ssapi.shipstation.com'
         end
 
-        def post(query, body)
+        def query(query, body, method)
           response = nil
           trial_count = 0
           loop do
             puts "loop #{trial_count}"
-            response = HTTParty.post("#{@endpoint}#{query}",
-                                      body: body,
-                                      headers: headers,
-                                      debug_output: $stdout)
-            handle_response(response, trial_count) ? break : trial_count += 1
-            break if trial_count >= 5
-          end
-          handle_exceptions(response)
-          response
-        end
-
-        def query(query)
-          response = nil
-          trial_count = 0
-          loop do
-            puts "loop #{trial_count}"
-            response = HTTParty.get("#{@endpoint}#{query}",
-                                    headers: headers, 
-                                    debug_output: $stdout)
+            begin
+              response = send(query, body, method)
+            rescue Exception => e
+              handle_request_exception(e, trial_count)
+              trial_count += 1
+              next
+            end
             handle_response(response, trial_count) ? break : trial_count += 1
             break if trial_count >= 5
           end
@@ -64,6 +52,29 @@ module Groovepacker
             successful_response = true
           end
           successful_response
+        end
+
+        def handle_request_exception(ex, socket_count)
+          if ex.message == "getaddrinfo: Name or service not known" && socket_count <= 5
+            #send email
+            sleep(5)
+          else
+            #send email
+            fail Exception, ex.message
+          end        
+        end
+
+        def send(query, body, method)
+          if method == "get"
+            HTTParty.get("#{@endpoint}#{query}",
+                          headers: headers, 
+                          debug_output: $stdout)
+          else
+            response = HTTParty.post("#{@endpoint}#{query}",
+                                      body: body,
+                                      headers: headers,
+                                      debug_output: $stdout)
+          end
         end
 
         def handle_exceptions(response)
