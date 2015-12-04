@@ -104,6 +104,7 @@ class StoresController < ApplicationController
         if Store.can_create_new?
           @store = Store.new
           init_update_store_data(params)
+          @store.relaod
           ftp_credential = FtpCredential.create(use_ftp_import: false, store_id: @store.id) if params[:store_type] == 'CSV'
           params[:id] = @store.id
         else
