@@ -46,33 +46,45 @@ module ScanPack
       end
     end
 
-    def order_scan
-      collect_orders
-      single_order = nil
-      single_order_result = Hash.new
-      single_order_result['matched_orders'] = []
+    def get_single_order_with_result
+      single_order_result = { 'matched_orders' => [] }
 
-      if @orders.length == 1
-        single_order = @orders.first
-      else
-        @orders.each do |matched_single|
-          if single_order.nil?
+      # assign single_order = first order for only one order
+      return [@orders.first, single_order_result] if @orders.length == 1
+      
+      @orders.each do |matched_single|
+        matched_single_status = matched_single.status
+        matched_single_order_placed_time = matched_single.order_placed_time
+        single_order_status = single_order.status
+        single_order_order_placed_time = single_order.order_placed_time
+        order_placed_for_single_less_than_matched_single = single_order_order_placed_time < matched_single_order_placed_time
+        
+        single_order ||= matched_single
+        unless single_order
+          case
+          when matched_single_status == 'awaiting' && (
+                single_order_status != 'awaiting' || order_placed_for_single_less_than_matched_single
+              )
             single_order = matched_single
-          elsif matched_single.status == 'awaiting' &&
-            (single_order.status != 'awaiting' || single_order.order_placed_time < matched_single.order_placed_time)
+          when matched_single_status == 'onhold' && single_order_status != 'awaiting' &&
+            (single_order_status != 'onhold' || order_placed_for_single_less_than_matched_single)
             single_order = matched_single
-          elsif matched_single.status == 'onhold' && single_order.status != 'awaiting' &&
-            (single_order.status != 'onhold' || single_order.order_placed_time < matched_single.order_placed_time)
+          when matched_single_status == 'serviceissue' && !single_order_status.in?(%w(awaiting onhold)) &&
+            (single_order_status != 'serviceissue' || order_placed_for_single_less_than_matched_single)
             single_order = matched_single
-          elsif matched_single.status == 'serviceissue' && single_order.status != 'awaiting' && single_order.status != 'onhold' &&
-            (single_order.status != 'serviceissue' || single_order.order_placed_time < matched_single.order_placed_time)
-            single_order = matched_single
-          end
-          unless ['scanned', 'cancelled'].include?(matched_single.status)
-            single_order_result['matched_orders'].push(matched_single)
           end
         end
+        unless ['scanned', 'cancelled'].include?(matched_single_status)
+          single_order_result['matched_orders'].push(matched_single)
+        end
       end
+
+      return [single_order, single_order_result]
+    end
+
+    def order_scan
+      collect_orders
+      single_order, single_order_result = get_single_order_with_result
 
       if single_order.nil?
         if @scanpack_settings.scan_by_tracking_number
