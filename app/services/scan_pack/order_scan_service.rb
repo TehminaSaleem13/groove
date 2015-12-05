@@ -47,6 +47,7 @@ module ScanPack
     end
 
     def get_single_order_with_result
+      single_order = nil
       single_order_result = { 'matched_orders' => [] }
 
       # assign single_order = first order for only one order
