@@ -38,6 +38,9 @@ class BigCommerceController < ApplicationController
   def load
     #render json: {:status => 200}
   end
+
+  def login
+  end
   
   def remove
     render json: {:status => 200}

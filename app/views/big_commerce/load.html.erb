@@ -9,43 +9,37 @@
 <div class="row bottom-well col-sm-offset-3 col-md-offset-3 col-lg-offset-3 col-md-6 col-sm-6 col-lg-6">
   <legend class="text-center"></legend>
   <div>
-    <form action="" method="POST" class="form-vertical">
-      <fieldset>
-        <div class="form-group">
-          <input type="hidden" id="plan_id" value="<%= params[:plan_id] %>"/>
-          <input type="hidden" id="host" value="<%= ENV["SITE_HOST"] %>"/>
-          <label class="control-label">Enter your site address*</label>
-
-          <div class="input-group">
-            <div class="input-group-addon">https://</div>
-            <input type="text" id="tenant_name" class="form-control" autofocus value=""/>
-
-            <div class="input-group-addon">.<%= ENV["SITE_HOST"] %></div>
+    
+    <fieldset>
+      <div class="col-md-12" style="padding: 10px;">
+        <a href="https://www.groovepacker.com/big_commerce/login" style="color: black;">
+          <div class="col-md-3"><i class="fa fa-headphones fa-5x"></i></div>
+          <div class="col-md-9">
+            <h2 style="margin-top: 0px;">Ready to Groove?</h2>
+            <h4>Visit your GroovePacker URL to log in.</h4>
           </div>
-          <div class="form-group error" style="color: red;">
-            <div id="error-tenant-block" class="help-inline"></div>
+        </a>
+      </div>
+      
+      <div class="col-md-12" style="padding: 10px;">
+        <a href="https://www.groovepacker.com/pricing" style="color: black;">
+          <div class="col-md-3"><i class="fa fa-play fa-5x"></i></div>
+          <div class="col-md-9">
+            <h2 style="margin-top: 0px;">No Account Yet?</h2>
+            <h4>Create an account on our site here.</h4>
           </div>
-        </div>
+        </a>
+      </div>
 
-        <button id="login_button" class="btn btn-primary"
-                style="margin-bottom: 15px;">
-          Continue to Login
-        </button>
-      </fieldset>
-    </form>
-
-    <script type="text/javascript">
-      $(document).on('ready page:load', function () {
-        $('#login_button').on('click', function (e) {
-          e.preventDefault();
-          if ($('#tenant_name').val() != null &&
-            typeof($('#tenant_name').val()) != 'undefined' &&
-            $('#tenant_name').val() != '') {
-            url = 'https://' + $('#tenant_name').val() + "." + $('#host').val();
-            window.location.href = url;
-          }
-        });
-      });
-    </script>
+      <div class="col-md-12" style="padding: 10px;">
+        <a href="https://www.groovepacker.com/support" style="color: black;">
+          <div class="col-md-3"><i class="fa fa-question-circle fa-5x"></i></div>
+          <div class="col-md-9">
+            <h2 style="margin-top: 0px;">Need help?</h2>
+            <h4>Visit our Support page.</h4>
+          </div>
+        </a>
+      </div>
+    </fieldset>
   </div>
 </div>

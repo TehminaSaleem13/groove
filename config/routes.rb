@@ -17,6 +17,7 @@ Groovepacks::Application.routes.draw do
   get '/bigcommerce/uninstall' => 'big_commerce#uninstall'
   get '/bigcommerce/load' => 'big_commerce#load'
   get '/bigcommerce/remove' => 'big_commerce#remove'
+  get '/big_commerce/login' => 'big_commerce#login'
   get '/big_commerce/setup' => 'big_commerce#setup'
   get '/big_commerce/complete' => 'big_commerce#complete'
   get '/big_commerce/:store_id/check_connection' => 'big_commerce#check_connection'
