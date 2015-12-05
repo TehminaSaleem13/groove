@@ -105,13 +105,15 @@ class StoresController < ApplicationController
           @store = Store.new
           init_update_store_data(params)
           ftp_credential = FtpCredential.create(use_ftp_import: false, store_id: @store.id) if params[:store_type] == 'CSV'
-          params[:id] = @store.id
+          params[:id] = @store.id  if params[:store_type] == 'BigCommerce'
         else
           @result['status'] = false
           @result['messages'] = "You have reached the maximum limit of number of stores for your subscription."
         end
-      else
-        @store = Store.find(params[:id])
+      end
+
+      unless params[:id].blank?
+        @store ||= Store.find(params[:id])
         if params[:store_type].nil?
           @result['status'] = false
           @result['messages'].push('Please select a store type to create a store')
