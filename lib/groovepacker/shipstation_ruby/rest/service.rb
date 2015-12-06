@@ -3,12 +3,16 @@ module Groovepacker
     module Rest
       # Shipstation Ruby Rest Service
       class Service
-        attr_accessor :auth, :endpoint
+        attr_accessor :auth, :endpoint, :request_exceptions
 
         def initialize(api_key, api_secret)
           fail ArgumentError unless api_key && api_secret
           @auth = { api_key: api_key, api_secret: api_secret }
           @endpoint = 'https://ssapi.shipstation.com'
+          @request_exceptions =[
+            "getaddrinfo: Name or service not known",
+            "Net::ReadTimeout"
+          ]
         end
 
         def query(query, body, method)
@@ -55,7 +59,7 @@ module Groovepacker
         end
 
         def handle_request_exception(ex, socket_count)
-          if ex.message == "getaddrinfo: Name or service not known" && socket_count <= 5
+          if @request_exceptions.include?(ex.message) && socket_count <= 5
             #send email
             sleep(5)
           else
