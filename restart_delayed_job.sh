@@ -40,13 +40,13 @@ if [ ${ENV} != 'staging' ] && [ ${ENV} != 'production' ]; then
 fi
 echo "${bold}$ENV${normal} environment selected"
 
-sudo chown groovepacker:groovepacker /home/groovepacker/groove -R
+sudo chown bamboo:bamboo /home/groovepacker/groove -R
 
 if [ ${ENV} == 'staging' ]; then
     NUM_JOBS=1
 fi
 
-sudo su groovepacker <<EOF
+sudo su bamboo <<EOF
 source /usr/local/rvm/scripts/rvm
 
 cd ~/groove
