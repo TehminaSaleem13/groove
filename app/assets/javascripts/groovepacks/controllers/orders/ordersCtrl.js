@@ -361,7 +361,8 @@ groovepacks_controllers.
               editable: false
             },
             notes: {
-              name: "Notes"
+              name: "Notes",
+              enable_edit: true
             },
             order_date: {
               name: "Order Date",

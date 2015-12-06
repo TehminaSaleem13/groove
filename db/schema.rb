@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20151118070749) do
+ActiveRecord::Schema.define(:version => 20151201041703) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0,     :null => false
@@ -164,6 +164,7 @@ ActiveRecord::Schema.define(:version => 20151118070749) do
     t.datetime "updated_at",                                :null => false
     t.string   "connection_method",      :default => "ftp"
     t.boolean  "connection_established", :default => false
+    t.boolean  "use_ftp_import",         :default => false
   end
 
   create_table "general_settings", :force => true do |t|

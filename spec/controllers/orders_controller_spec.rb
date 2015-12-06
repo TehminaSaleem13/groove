@@ -61,7 +61,8 @@ describe OrdersController do
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
       expect(result['status']).to eq(false)
-      expect(result['messages'][0]).to eq('You do not have enough permissions to edit the order')
+      expect(result['messages'][0]).to eq('You do not have the permissions to edit notes')
+      expect(result['messages'][1]).to eq('You do not have enough permissions to edit the order')
     end
 
     it "Should allow editing order data with permissions" do

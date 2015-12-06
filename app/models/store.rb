@@ -18,6 +18,8 @@ class Store < ActiveRecord::Base
   validates_uniqueness_of :name
   validates_presence_of :inventory_warehouse
 
+  include StoresHelper
+
   before_create 'Store.can_create_new?'
 
   def ensure_warehouse?
@@ -247,5 +249,17 @@ class Store < ActiveRecord::Base
     unless AccessRestriction.order("created_at").last.nil?
       self.where("store_type != 'system'").count < AccessRestriction.order("created_at").last.num_import_sources
     end
+  end
+
+  def create_store_with_defaults(store_type)
+    bc_store_count = Store.all.map(&:store_type).count(store_type)
+    self.name = "#{store_type}-#{bc_store_count+1}"
+    self.store_type = store_type
+    self.status = true
+    self.inventory_warehouse_id = get_default_warehouse_id
+    self.auto_update_products = false
+    self.update_inv = true
+    self.save
+    return self
   end
 end

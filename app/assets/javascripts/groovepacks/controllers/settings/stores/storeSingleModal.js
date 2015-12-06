@@ -162,18 +162,28 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
     };
 
     scope.update_ftp_credentials = function () {
-      if (typeof scope.stores.single.connection_established != 'undefined') {
-        stores.single.update_ftp(scope.stores).then(function(data) {
+      var connection_stat = scope.stores.single.connection_established
+
+      stores.single.update_ftp(scope.stores).then(function(data) {
+        if (connection_stat === true) {
           myscope.init();
-        });
-      };
+        };
+      });
     };
 
+    myscope.check_empty_credentials = function (data) {
+      var credentials = ['host', 'username', 'password']
+      for (var key in data) {
+        if ($.inArray(key, credentials) > -1 && (data[key] == null || data[key] == '')) {
+          return true;
+        }
+      }
+      return false;
+    }
+
     scope.establish_connection = function() {
-      if (typeof scope.stores.single.host == 'undefined' ||
-        typeof scope.stores.single.username == 'undefined' ||
-        typeof scope.stores.single.password == 'undefined' ||
-        typeof scope.stores.single.connection_method == 'undefined') {
+      var empty_credentials = myscope.check_empty_credentials(scope.stores.single);
+      if (empty_credentials) {
         notification.notify("Please fillout all the credentials for the ftp store");
       } else{
         stores.single.update_ftp(scope.stores).then(function(data) {
@@ -205,6 +215,9 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
     }
 
     scope.update_single_store = function (auto) {
+      if (scope.stores.single.store_type && !scope.stores.single.id && !scope.stores.single.name) {
+        scope.stores.single.name= scope.stores.single.store_type+'-'+scope.stores.list.length;
+      }
       if (scope.edit_status || stores.single.validate_create(scope.stores)) {
         return stores.single.update(scope.stores, auto).success(function (data) {
           if(scope.stores.single.store_type=="BigCommerce"){

@@ -196,10 +196,12 @@
         </div>
       </div>
 
-      <div class="form-group" ng-hide="products.single.sync_option.bc_product_id && products.single.sync_option.bc_product_sku">
-        <div class="control-label col-sm-3"></div>
-        <div class="col-sm-7">
-          <small>*Adding product ID and SKU is necessary for non-BigCommerce products ineventory sync.</small>
+      <div ng-show="products.single.access_restrictions.allow_inv_push && products.single.sync_option.sync_with_bc">
+        <div class="form-group" ng-hide="products.single.sync_option.bc_product_id && products.single.sync_option.bc_product_sku">
+          <div class="control-label col-sm-3"></div>
+          <div class="col-sm-7">
+            <small>*Adding product ID and SKU is necessary for non-BigCommerce products ineventory sync.</small>
+          </div>
         </div>
       </div>
 

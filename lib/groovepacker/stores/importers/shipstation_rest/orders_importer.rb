@@ -41,7 +41,6 @@ module Groovepacker
             gp_imported_tag_id = client.get_tag_id(credential.gp_imported_tag_name)
 
             unless statuses.empty? && gp_ready_tag_id == -1
-
               response = {}
               response["orders"] = nil
               statuses.each do |status|
@@ -54,7 +53,7 @@ module Groovepacker
                 if import_item.import_type == 'quick'
                   #get for created time
                   status_response["orders"] = nil
-                  status_response = client.get_orders(status, import_from.beginning_of_day, "quick_created_at")
+                  status_response = client.get_orders(status, import_from, "quick_created_at")
                   response["orders"] = response["orders"].nil? ? status_response["orders"] :
                     response["orders"] | status_response["orders"]
                 end

@@ -2,10 +2,10 @@ class BigCommerceController < ApplicationController
   before_filter :groovepacker_authorize!, :only => [:check_connection, :disconnect]
 
   def setup
-  	# redirect to admin page with the big-commerce and with groove-solo plan
+    # redirect to admin page with the big-commerce and with groove-solo plan
     # get shop name
   	@shop_name = get_shop_name(params[:shop])
-    flash[:notice] = "Store Created succefully."
+    flash[:notice] = "Please try to complete setup process in 15 minutes. Otherwise BigCommerce access-token may expire."
     #redirect_to subscriptions_path(plan_id: 'groove-solo', bigcommerce: shop_name )
   end
 
@@ -15,15 +15,18 @@ class BigCommerceController < ApplicationController
     
     unless cookies[:tenant_name].blank?
       Apartment::Tenant.switch(cookies[:tenant_name])
+      saved_tenant = cookies[:tenant_name]
       @bigcommerce_credentials = BigCommerceCredential.find_by_store_id(cookies[:store_id])
       @bigcommerce_credentials.access_token = auth_hash["access_token"] rescue nil
       @bigcommerce_credentials.store_hash = auth_hash["context"] rescue nil
       @bigcommerce_credentials.save
-      cookies.delete(:tenant_name)
-      cookies.delete(:store_id)
-      redirect_to big_commerce_complete_path
+      #cookies.delete(:tenant_name)
+      #cookies.delete(:store_id)
+      cookies[:tenant_name] = {:value => nil , :domain => :all, :expires => Time.now+2.seconds}
+      cookies[:store_id] = {:value => nil , :domain => :all, :expires => Time.now+2.seconds}
+      redirect_to big_commerce_complete_path(tenant: saved_tenant)
     else
-      cookies[:bc_auth] = {:value => auth_hash , :domain => :all}
+      cookies[:bc_auth] = {:value => auth_hash , :domain => :all, :expires => Time.now+15.minutes}
       redirect_to big_commerce_setup_path(:shop => "#{bc_store_name}.mybigcommerce.com")
     end
   end
@@ -33,7 +36,10 @@ class BigCommerceController < ApplicationController
   end
 
   def load
-    render json: {:status => 200}
+    #render json: {:status => 200}
+  end
+
+  def login
   end
   
   def remove
