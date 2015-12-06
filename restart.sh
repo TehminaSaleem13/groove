@@ -41,7 +41,7 @@ fi
 echo "${bold}$ENV${normal} environment selected"
 
 
-sudo chown groovepacker:groovepacker /home/groovepacker/groove -R
+sudo chown bamboo:bamboo /home/groovepacker/groove -R
 
 if [ ${ENV} == 'staging' ]; then
     NUM_JOBS=1
@@ -49,7 +49,7 @@ fi
 
 #RAILS_ENV=${ENV} script/delayed_job stop
 
-sudo su groovepacker <<EOF
+sudo su bamboo <<EOF
 mv public/maintainance_off.html public/maintainance_on.html
 source /usr/local/rvm/scripts/rvm
 

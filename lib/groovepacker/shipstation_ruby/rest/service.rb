@@ -55,13 +55,13 @@ module Groovepacker
         end
 
         def handle_request_exception(ex, socket_count)
-          if ex.message == "getaddrinfo: Name or service not known" && socket_count <= 5
+          if socket_count <= 5
             #send email
             sleep(5)
           else
             #send email
             fail Exception, ex.message
-          end        
+          end
         end
 
         def send(query, body, method)
