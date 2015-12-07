@@ -9,6 +9,10 @@ module Groovepacker
 
           def import
             @helper = Groovepacker::Stores::Importers::CSV::OrderImportHelper.new(params, final_record, mapping, import_action)
+            @order_item_helper = Groovepacker::Stores::Importers::CSV::OrderItemImportHelper.new(params, final_record, mapping, import_action)
+            @product_helper = Groovepacker::Stores::Importers::CSV::ProductImportHelper.new(params, final_record, mapping, import_action)
+            @order_item_helper.initiate_helper
+            @product_helper.initiate_helper
             result = build_result
             order_map = @helper.create_order_map
             @imported_orders = {}
@@ -109,7 +113,7 @@ module Groovepacker
             if !product_skus.empty?
               product = product_skus.first.product
               create_update_order_item(single_row, product, single_sku)
-              @helper.update_product(product, single_row)
+              @product_helper.update_product(product, single_row)
             else # no sku is found
               product = Product.new
               set_product_info(product, single_row)
@@ -153,8 +157,8 @@ module Groovepacker
               product_id: product.id,
               order_id: @order.id)
             if order_items.empty?
-              order_item = @helper.import_new_order_item(single_row, product, single_sku)
-              @helper.import_image(product, single_row, true)
+              order_item = @order_item_helper.import_new_order_item(single_row, product, single_sku)
+              @product_helper.import_image(product, single_row, true)
             else
               order_item = update_order_item(single_row, product, single_sku)
             end
@@ -172,7 +176,7 @@ module Groovepacker
               product_id: product.id,
               order_id: @order.id,
               sku: single_sku.strip).first
-            @helper.import_image(product, single_row, true)
+            @product_helper.import_image(product, single_row, true)
             %w(qty item_sale_price).each do |item|
               next unless @helper.verify_single_item(single_row, item)
               case item
@@ -196,7 +200,7 @@ module Groovepacker
 
             @order_increment_sku = single_inc_id + '-' + single_sku.strip
             check_and_update_prod_sku
-            @helper.create_update_base_prod(single_row, single_sku)
+            @product_helper.create_update_base_prod(single_row, single_sku)
             
             product = Product.new
             set_product_info(product, single_row, true)
@@ -212,7 +216,7 @@ module Groovepacker
               if params[:generate_barcode_from_sku] == true
                 product = product_sku.product
                 product.product_barcodes.last.delete
-                @helper.push_barcode(product, product_sku.sku)
+                @product_helper.push_barcode(product, product_sku.sku)
               end
               product_sku.save
             end
@@ -226,12 +230,12 @@ module Groovepacker
 
           def import_product_barcode(product, single_row, unique_order_item = false)
             if params[:generate_barcode_from_sku] == true
-              @helper.push_barcode(product, get_sku(single_row, unique_order_item))
+              @product_helper.push_barcode(product, get_sku(single_row, unique_order_item))
             elsif @helper.verify_single_item(single_row, 'barcode')
               barcode = @helper.get_row_data(single_row, 'barcode')
               if ProductBarcode.where(
                 barcode: barcode.strip).empty?
-                @helper.push_barcode(product, barcode)
+                @product_helper.push_barcode(product, barcode)
               end
             end
           end
@@ -247,7 +251,7 @@ module Groovepacker
             import_product_data(product, single_row, unique_order_item)
             product.reload
             product.update_product_status
-            order_item = @helper.import_new_order_item(
+            order_item = @order_item_helper.import_new_order_item(
               single_row, product,
               get_sku(single_row, unique_order_item))
             @order_required.delete('sku')
@@ -258,22 +262,22 @@ module Groovepacker
           end
 
           def import_product_data(product, single_row, unique_order_item)
-            @helper.import_product_name(product, single_row)
-            @helper.import_product_weight(product, single_row)
+            @product_helper.import_product_name(product, single_row)
+            @product_helper.import_product_weight(product, single_row)
             import_product_sku(product, single_row, unique_order_item)
             import_product_barcode(product, single_row, unique_order_item)
             product.store_product_id = 0
             product.store_id = params[:store_id]
             product.spl_instructions_4_packer =
-              @helper.import_product_instructions(single_row)
-            @helper.import_image(product, single_row)
-            @helper.import_product_category(product, single_row)
+              @product_helper.import_product_instructions(single_row)
+            @product_helper.import_image(product, single_row)
+            @product_helper.import_product_category(product, single_row)
             if unique_order_item
               product.base_sku = @helper.get_row_data(single_row, 'sku').strip
               product.save
             else
-              @helper.import_sec_ter_sku(product, single_row)
-              @helper.import_sec_ter_barcode(product, single_row)
+              @product_helper.import_sec_ter_sku(product, single_row)
+              @product_helper.import_sec_ter_barcode(product, single_row)
               make_product_intangible(product) if product.save!
             end
           end
