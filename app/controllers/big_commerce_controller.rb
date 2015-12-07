@@ -24,7 +24,7 @@ class BigCommerceController < ApplicationController
       #cookies.delete(:store_id)
       cookies[:tenant_name] = {:value => nil , :domain => :all, :expires => Time.now+2.seconds}
       cookies[:store_id] = {:value => nil , :domain => :all, :expires => Time.now+2.seconds}
-      redirect_to big_commerce_complete_path(tenant: saved_tenant)
+      redirect_to big_commerce_complete_path
     else
       cookies[:bc_auth] = {:value => auth_hash , :domain => :all, :expires => Time.now+15.minutes}
       redirect_to big_commerce_setup_path(:shop => "#{bc_store_name}.mybigcommerce.com")
