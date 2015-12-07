@@ -133,27 +133,15 @@ module Groovepacker
             single_sku = @helper.get_row_data(single_row, 'sku')
             update_import_item(1, 0)
             @order_increment_sku = single_inc_id + '-' + single_sku.strip
-            check_and_update_prod_sku
+            product_skus = ProductSku.where(
+              ['sku like (?)', @order_increment_sku + '%'])
+            if product_skus
+              @product_helper.check_and_update_prod_sku(product_skus, @order_increment_sku)
+              update_order_increment_sku(product_skus)
+            end
             @product_helper.create_update_base_prod(single_row, single_sku)
             product = Product.new
             set_product_info(product, single_row, true)
-          end
-
-          def check_and_update_prod_sku
-            product_skus = ProductSku.where(
-              ['sku like (?)', @order_increment_sku + '%'])
-            return if product_skus.empty?
-            product_sku = product_skus.where(sku: @order_increment_sku).first
-            if product_sku
-              product_sku.sku = @order_increment_sku + '-1'
-              if params[:generate_barcode_from_sku] == true
-                product = product_sku.product
-                product.product_barcodes.last.delete
-                @product_helper.push_barcode(product, product_sku.sku)
-              end
-              product_sku.save
-            end
-            update_order_increment_sku(product_skus)
           end
 
           def update_order_increment_sku(product_skus)
@@ -163,8 +151,6 @@ module Groovepacker
 
           def set_product_info(product, single_row, unique_order_item = false)
             @product_helper.import_product_data(product, single_row, @order_increment_sku, unique_order_item)
-            product.reload
-            product.update_product_status
             order_item = @order_item_helper.import_new_order_item(
               single_row, product,
               @helper.get_sku(single_row, @order_increment_sku, unique_order_item))
@@ -181,35 +167,17 @@ module Groovepacker
             @order.order_items << order_item
           end
 
-          def update_count_error_result(result, messages)
-            result[:status] = false
-            result[:messages] = messages
-            @import_item.status = 'failed'
-            @import_item.message = messages
-            @import_item.save
-            result
-          end
-
-          def update_status_and_save
-            @order.status = 'onhold'
-            @order.save!
-            @order.addactivity(
-              'Order Import CSV Import',
-              Store.find(params[:store_id]).name + ' Import')
-            @order.update_order_status
-          end
-
           def save_order_and_update_count(result)
             begin
-              update_status_and_save
+              @helper.update_status_and_save(@order)
               @imported_orders[@order.increment_id] = true
               @import_item.success_imported += 1
               @import_item.save
             rescue ActiveRecord::RecordInvalid => e
               messages = @order.errors.full_messages + e.message
-              result = update_count_error_result(result, messages)
+              result = @helper.update_count_error_result(result, messages)
             rescue ActiveRecord::StatementInvalid => e
-              result = update_count_error_result(result, e.messages)
+              result = @helper.update_count_error_result(result, e.messages)
             end
             result
           end

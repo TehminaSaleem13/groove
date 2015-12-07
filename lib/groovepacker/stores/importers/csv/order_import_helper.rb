@@ -144,6 +144,24 @@ module Groovepacker
               order.firstname = name
             end
           end
+
+          def update_status_and_save(order)
+            order.status = 'onhold'
+            order.save!
+            order.addactivity(
+              'Order Import CSV Import',
+              Store.find(params[:store_id]).name + ' Import')
+            order.update_order_status
+          end
+
+          def update_count_error_result(import_item, result, messages)
+            result[:status] = false
+            result[:messages] = messages
+            import_item.status = 'failed'
+            import_item.message = messages
+            import_item.save
+            result
+          end
         end
       end
     end

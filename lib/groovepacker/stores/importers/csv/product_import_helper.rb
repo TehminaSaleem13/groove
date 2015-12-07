@@ -135,6 +135,19 @@ module Groovepacker
             false
           end
 
+          def check_and_update_prod_sku(product_skus, order_increment_sku)
+            product_sku = product_skus.where(sku: order_increment_sku).first
+            if product_sku
+              product_sku.sku = order_increment_sku + '-1'
+              if params[:generate_barcode_from_sku] == true
+                product = product_sku.product
+                product.product_barcodes.last.delete
+                push_barcode(product, product_sku.sku)
+              end
+              product_sku.save
+            end
+          end
+
           def import_product_data(product, single_row, order_increment_sku, unique_order_item)
             import_product_name(product, single_row)
             import_product_weight(product, single_row)
@@ -154,6 +167,8 @@ module Groovepacker
               import_sec_ter_barcode(product, single_row)
               make_product_intangible(product) if product.save!
             end
+            product.reload
+            product.update_product_status
           end
 
           def import_product_barcode(product, single_row, order_increment_sku, unique_order_item = false)
