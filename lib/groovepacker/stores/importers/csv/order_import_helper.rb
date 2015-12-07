@@ -20,6 +20,14 @@ module Groovepacker
               !single_row[mapping[item][:position]].nil?
           end
 
+          def build_final_records
+            if params[:contains_unique_order_items] == true
+              build_filtered_final_record
+            else
+              final_record
+            end
+          end
+
           def build_filtered_final_record
             existing_order_numbers = []
             filtered_final_record = []

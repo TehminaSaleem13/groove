@@ -8,20 +8,12 @@ module Groovepacker
           include ProductsHelper
 
           def import
-            @helper = Groovepacker::Stores::Importers::CSV::OrderImportHelper.new(params, final_record, mapping, import_action)
-            @order_item_helper = Groovepacker::Stores::Importers::CSV::OrderItemImportHelper.new(params, final_record, mapping, import_action)
-            @product_helper = Groovepacker::Stores::Importers::CSV::ProductImportHelper.new(params, final_record, mapping, import_action)
-            @order_item_helper.initiate_helper
-            @product_helper.initiate_helper
+            initialize_helpers
             result = build_result
             order_map = @helper.create_order_map
             @imported_orders = {}
             @import_item = @helper.initialize_import_item
-            if params[:contains_unique_order_items] == true
-              final_records = @helper.build_filtered_final_record
-            else
-              final_records = final_record
-            end
+            final_records = @helper.build_final_records
             iterate_and_import_rows(final_records, order_map, result)
 
             result unless result[:status]
@@ -247,6 +239,14 @@ module Groovepacker
               result = update_count_error_result(result, e.messages)
             end
             result
+          end
+
+          def initialize_helpers
+            @helper = Groovepacker::Stores::Importers::CSV::OrderImportHelper.new(params, final_record, mapping, import_action)
+            @order_item_helper = Groovepacker::Stores::Importers::CSV::OrderItemImportHelper.new(params, final_record, mapping, import_action)
+            @product_helper = Groovepacker::Stores::Importers::CSV::ProductImportHelper.new(params, final_record, mapping, import_action)
+            @order_item_helper.initiate_helper
+            @product_helper.initiate_helper
           end
         end
       end
