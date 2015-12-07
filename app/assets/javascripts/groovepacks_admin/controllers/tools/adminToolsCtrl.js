@@ -23,13 +23,19 @@ groovepacks_admin_controllers.
       };
 
       $scope.update_tenants_list = function (tenant, prop) {
-        tenants.list.update_node({
-          id: tenant.id,
-          var: prop,
-          value: tenant[prop]
-        }).then(function () {
-          myscope.get_tenants(1)
-        });
+        if (prop == 'plan') {
+          if (confirm("Are you sure you want to change the plan for the tenant?")) {
+            tenants.list.update_node({
+              id: tenant.id,
+              var: prop,
+              value: tenant[prop]
+            }).then(function () {
+              myscope.get_tenants();
+            });
+          } else {
+            myscope.get_tenants();
+          };
+        }; 
       };
 
       $scope.handlesort = function (predicate) {
@@ -96,6 +102,31 @@ groovepacks_admin_controllers.
           notification.notify('only one tenant can be dupicated at a time.');
           result.resolve();
         };
+        return result.promise;
+      };
+
+      $scope.open_notes = function(row) {
+        var result = $q.defer();
+        tenants.single.get(row.id, $scope.tenants).then(function(data){
+          myscope.tenant_obj = $modal.open({
+            templateUrl: '/assets/admin_views/modals/tenants/tenant_note.html',
+            controller: 'tenantsNoteModal',
+            size: 'md',
+            resolve: {
+              tenant_data: function () {
+                return $scope.tenants
+              }
+            }
+          });
+          $timeout(function () {
+            $('#note').focus();
+          }, 1000);
+          myscope.tenant_obj.result.finally(function () {
+            $scope.tenants.selected = [];
+            myscope.get_tenants();
+          });
+        });
+        
         return result.promise;
       };
 
@@ -232,12 +263,29 @@ groovepacks_admin_controllers.
           editable: {
             array: false,
             update: $scope.update_tenants_list,
-            elements: {},
+            elements: {
+              plan: {
+                type: 'select',
+                options: [
+                  {name: "Solo", value: 'solo'},
+                  {name: "Duo", value: 'duo'},
+                  {name: "Trio", value: 'trio'},
+                  {name: "Quintet", value: 'quintet'},
+                  {name: "Symphony", value: 'symphony'},
+                  {name: "Annual Solo", value: 'annual-solo'},
+                  {name: "Annual Duo", value: 'annual-duo'},
+                  {name: "Annual Trio", value: 'annual-trio'},
+                  {name: "Annual Quintet", value: 'annual-quintet'},
+                  {name: "Annual Symphony", value: 'annual-symphony'}
+                ]
+              }
+            },
             functions: {
               name: myscope.handle_click_fn,
               open: myscope.open_tenant_url,
               show_popover: myscope.show_popover,
-              hide_popover: myscope.hide_popover
+              hide_popover: myscope.hide_popover,
+              click: $scope.open_notes
             }
 
           },
@@ -249,7 +297,12 @@ groovepacks_admin_controllers.
             },
             plan: {
               name: "Plan",
-              editable: false
+              transclude: "<span class='label label-default' ng-class=\"{" +
+              "'label-success': row[field] == 'quintet' || row[field] == 'annual-quintet', " +
+              "'label-warning': row[field] == 'duo' || row[field] == 'annual-duo', " +
+              "'label-info': row[field] == 'trio' || row[field] == 'annual-trio', " +
+              "'label-danger': row[field] == 'symphony' || row[field] == 'annual-symphony' }\">" +
+              "{{row[field]}}</span>"
             },
             progress: {
               name: "Tenant Creation Status",
@@ -305,6 +358,12 @@ groovepacks_admin_controllers.
               name: "Import Log Log",
               editable: false
             },
+            note: {
+              name: "Notes",
+              editable: false,
+              transclude: '<span class="label label-default" ng-show="row[field]==null || row[field]==\'\'" ng-click="options.editable.functions.click(row)">Note</span>' +
+              '<span class="label label-success" ng-hide="row[field]==null || row[field]==\'\'" ng-click="options.editable.functions.click(row)" groov-popover="{{row[field]}}">Note</span>'
+            },
             url: {
               name: "URL",
               editable: false,
@@ -336,8 +395,6 @@ groovepacks_admin_controllers.
           $scope._can_load_tenants = false;
           $scope.gridOptions.selections.show_delete = myscope.show_delete();
           return tenants.list.get($scope.tenants, page).success(function (data) {
-            console.log("data");
-            console.log($scope.tenants.list);
             $scope.gridOptions.paginate.total_items = tenants.list.total_tenants($scope.tenants);
             myscope.update_selected_count();
             $scope._can_load_tenants = true;

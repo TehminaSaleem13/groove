@@ -251,6 +251,8 @@ Groovepacks::Application.routes.draw do
     end
     member do
       post   'create_duplicate'
+      post 'update_tenant_list'
+      post 'update_access_restrictions'
     end
   end
 
@@ -273,6 +275,7 @@ Groovepacks::Application.routes.draw do
       get 'valid_tenant_name'
       get 'valid_email'
       get 'validate_coupon_id'
+      get 'complete'
     end
   end
 

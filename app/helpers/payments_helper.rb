@@ -141,4 +141,36 @@ module PaymentsHelper
       @result['messages'].push('Congrats! Your promotional code is valid.')
     end
   end
+
+  def update_subcription_plan(subscription, plan_id)
+    customer = Stripe::Customer.retrieve(subscription.stripe_customer_id)
+    customer_subscription = customer.subscriptions.retrieve(subscription.customer_subscription_id)
+    customer_subscription.plan = plan_id
+    customer_subscription.save
+  end
+
+  def get_plan_id(plan_name)
+    case plan_name
+    when 'solo'
+      return 'groove-solo'
+    when 'duo'
+      return 'groove-duo'
+    when 'trio'
+      return 'groove-trio'
+    when 'quintet'
+      return 'groove-quintet'
+    when 'symphony'
+      return 'groove-symphony'
+    when 'annual-solo'
+      return 'annual-groove-solo'
+    when 'annual-duo'
+      return 'annual-groove-duo'
+    when 'annual-trio'
+      return 'annual-groove-trio'
+    when 'annual-quintet'
+      return 'annual-groove-quintet'
+    when 'annual-symphony'
+      return 'annual-groove-symphony'
+    end
+  end
 end

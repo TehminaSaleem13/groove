@@ -25,13 +25,13 @@ groovepacks_admin_controllers.
       };
 
       $scope.update_access_restrictions = function () {
-        tenants.single.update($scope.tenants).then(function () {
+        tenants.single.update_access($scope.tenants).then(function () {
           myscope.load_item($scope.tenants.current);
         });
       };
 
       $scope.allowinventory_pull_push_all = function () {
-        tenants.single.update($scope.tenants).then(function () {
+        tenants.single.update_access($scope.tenants).then(function () {
           myscope.load_item($scope.tenants.current);
         });
       };
