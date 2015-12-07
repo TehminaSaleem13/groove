@@ -114,6 +114,7 @@ class StoresController < ApplicationController
 
       unless params[:id].blank?
         @store ||= Store.find(params[:id])
+        FtpCredential.create(use_ftp_import: false, store_id: @store.id) if params[:store_type] == 'CSV' && @store.ftp_credential.nil?
         if params[:store_type].nil?
           @result['status'] = false
           @result['messages'].push('Please select a store type to create a store')
