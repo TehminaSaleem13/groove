@@ -134,6 +134,46 @@ module Groovepacker
             end
             false
           end
+
+          def import_product_data(product, single_row, order_increment_sku, unique_order_item)
+            import_product_name(product, single_row)
+            import_product_weight(product, single_row)
+            import_product_sku(product, single_row, order_increment_sku, unique_order_item)
+            import_product_barcode(product, single_row, order_increment_sku, unique_order_item)
+            product.store_product_id = 0
+            product.store_id = params[:store_id]
+            product.spl_instructions_4_packer =
+              import_product_instructions(single_row)
+            import_image(product, single_row)
+            import_product_category(product, single_row)
+            if unique_order_item
+              product.base_sku = @helper.get_row_data(single_row, 'sku').strip
+              product.save
+            else
+              import_sec_ter_sku(product, single_row)
+              import_sec_ter_barcode(product, single_row)
+              make_product_intangible(product) if product.save!
+            end
+          end
+
+          def import_product_barcode(product, single_row, order_increment_sku, unique_order_item = false)
+            if params[:generate_barcode_from_sku] == true
+              push_barcode(product, @helper.get_sku(single_row, order_increment_sku, unique_order_item))
+            elsif @helper.verify_single_item(single_row, 'barcode')
+              barcode = @helper.get_row_data(single_row, 'barcode')
+              if ProductBarcode.where(
+                barcode: barcode.strip).empty?
+                push_barcode(product, barcode)
+              end
+            end
+          end
+
+          def import_product_sku(product, single_row, order_increment_sku, unique_order_item = false)
+            sku = ProductSku.new
+            # sku.sku = single_row[mapping['sku'][:position]].strip
+            sku.sku = @helper.get_sku(single_row, order_increment_sku, unique_order_item)
+            product.product_skus << sku
+          end
         end
       end
     end

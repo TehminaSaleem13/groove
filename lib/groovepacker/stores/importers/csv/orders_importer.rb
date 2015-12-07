@@ -88,7 +88,7 @@ module Groovepacker
           def import_order_time(single_row, result)
             if @helper.order_placed_time_mapped?(single_row)
               begin
-                calculate_order_placed_time(single_row)
+                @order['order_placed_time'] = @helper.calculate_order_placed_time(single_row)
               rescue
                 result[:status] = false
                 result[:messages].push('Order Placed has bad parameter - ' \
@@ -112,7 +112,8 @@ module Groovepacker
               sku: single_sku.strip)
             if !product_skus.empty?
               product = product_skus.first.product
-              create_update_order_item(single_row, product, single_sku)
+              order_item = @order_item_helper.create_update_order_item(single_row, product, single_sku, @order)
+              save_order_item(order_item)
               @product_helper.update_product(product, single_row)
             else # no sku is found
               product = Product.new
@@ -152,43 +153,10 @@ module Groovepacker
             end
           end
 
-          def create_update_order_item(single_row, product, single_sku)
-            order_items = OrderItem.where(
-              product_id: product.id,
-              order_id: @order.id)
-            if order_items.empty?
-              order_item = @order_item_helper.import_new_order_item(single_row, product, single_sku)
-              @product_helper.import_image(product, single_row, true)
-            else
-              order_item = update_order_item(single_row, product, single_sku)
-            end
-            save_order_item(order_item)
-          end
-
           def update_import_item(items = nil, imported_items = nil)
             @import_item.current_order_items = items unless items.nil?
             @import_item.current_order_imported_item = imported_items unless imported_items.nil?
             @import_item.save
-          end
-
-          def update_order_item(single_row, product, single_sku)
-            order_item = OrderItem.where(
-              product_id: product.id,
-              order_id: @order.id,
-              sku: single_sku.strip).first
-            @product_helper.import_image(product, single_row, true)
-            %w(qty item_sale_price).each do |item|
-              next unless @helper.verify_single_item(single_row, item)
-              case item
-              when 'qty'
-                order_item.qty =  (order_item.qty.to_i +
-                                  @helper.get_row_data(single_row, 'qty').to_i).to_s
-              when 'item_sale_price'
-                order_item.price =
-                  @helper.get_row_data(single_row, 'item_sale_price')
-              end
-            end
-            order_item
           end
 
           def import_for_unique_order_items(single_row)
@@ -228,32 +196,13 @@ module Groovepacker
                                     (product_skus.length + 1).to_s
           end
 
-          def import_product_barcode(product, single_row, unique_order_item = false)
-            if params[:generate_barcode_from_sku] == true
-              @product_helper.push_barcode(product, get_sku(single_row, unique_order_item))
-            elsif @helper.verify_single_item(single_row, 'barcode')
-              barcode = @helper.get_row_data(single_row, 'barcode')
-              if ProductBarcode.where(
-                barcode: barcode.strip).empty?
-                @product_helper.push_barcode(product, barcode)
-              end
-            end
-          end
-
-          def import_product_sku(product, single_row, unique_order_item = false)
-            sku = ProductSku.new
-            # sku.sku = single_row[mapping['sku'][:position]].strip
-            sku.sku = get_sku(single_row, unique_order_item)
-            product.product_skus << sku
-          end
-
           def set_product_info(product, single_row, unique_order_item = false)
-            import_product_data(product, single_row, unique_order_item)
+            @product_helper.import_product_data(product, single_row, @order_increment_sku, unique_order_item)
             product.reload
             product.update_product_status
             order_item = @order_item_helper.import_new_order_item(
               single_row, product,
-              get_sku(single_row, unique_order_item))
+              @helper.get_sku(single_row, @order_increment_sku, unique_order_item))
             @order_required.delete('sku')
             save_order_item(order_item)
 
@@ -261,46 +210,10 @@ module Groovepacker
             @import_item.save
           end
 
-          def import_product_data(product, single_row, unique_order_item)
-            @product_helper.import_product_name(product, single_row)
-            @product_helper.import_product_weight(product, single_row)
-            import_product_sku(product, single_row, unique_order_item)
-            import_product_barcode(product, single_row, unique_order_item)
-            product.store_product_id = 0
-            product.store_id = params[:store_id]
-            product.spl_instructions_4_packer =
-              @product_helper.import_product_instructions(single_row)
-            @product_helper.import_image(product, single_row)
-            @product_helper.import_product_category(product, single_row)
-            if unique_order_item
-              product.base_sku = @helper.get_row_data(single_row, 'sku').strip
-              product.save
-            else
-              @product_helper.import_sec_ter_sku(product, single_row)
-              @product_helper.import_sec_ter_barcode(product, single_row)
-              make_product_intangible(product) if product.save!
-            end
-          end
-
           def save_order_item(order_item)
             @order_required.delete('qty')
             @order_required.delete('price')
             @order.order_items << order_item
-          end
-
-          def get_sku(single_row, unique_order_item)
-            unique_order_item ? @order_increment_sku : @helper.get_row_data(single_row, 'sku').strip
-          end
-
-          def calculate_order_placed_time(single_row)
-            require 'time'
-            imported_order_time =
-              @helper.get_row_data(single_row, 'order_placed_time')
-            separator = (imported_order_time.include? '/') ? '/' : '-'
-            order_time_hash = @helper.build_order_time_hash(separator)
-            @order['order_placed_time'] = DateTime.strptime(
-              imported_order_time,
-              order_time_hash[params[:order_date_time_format]][params[:day_month_sequence]])
           end
 
           def update_count_error_result(result, messages)

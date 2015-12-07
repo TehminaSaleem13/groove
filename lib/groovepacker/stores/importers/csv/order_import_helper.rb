@@ -76,6 +76,21 @@ module Groovepacker
               params[:order_date_time_format] != 'Default'
           end
 
+          def calculate_order_placed_time(single_row)
+            require 'time'
+            imported_order_time =
+              get_row_data(single_row, 'order_placed_time')
+            separator = (imported_order_time.include? '/') ? '/' : '-'
+            order_time_hash = build_order_time_hash(separator)
+            return DateTime.strptime(
+              imported_order_time,
+              order_time_hash[params[:order_date_time_format]][params[:day_month_sequence]])
+          end
+
+          def get_sku(single_row, order_increment_sku, unique_order_item)
+            unique_order_item ? order_increment_sku : get_row_data(single_row, 'sku').strip
+          end
+
           def build_order_time_hash(separator)
             {
               'YYYY/MM/DD TIME' => {
