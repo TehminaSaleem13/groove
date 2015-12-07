@@ -15,7 +15,6 @@ module Groovepacker
             @import_item = @helper.initialize_import_item
             final_records = @helper.build_final_records
             iterate_and_import_rows(final_records, order_map, result)
-
             result unless result[:status]
             @import_item.status = 'completed'
             @import_item.save
@@ -24,36 +23,25 @@ module Groovepacker
 
           def iterate_and_import_rows(final_records, order_map, result)
             final_records.each_with_index do |single_row, index|
-              next if @helper.blank_row?(single_row)
-              if  @helper.verify_single_item(single_row, 'increment_id') &&
-                  @helper.verify_single_item(single_row, 'sku')
-                @import_item.current_increment_id = inc_id = @helper.get_row_data(single_row, 'increment_id')
-                update_import_item(-1, -1)
+              next if @helper.blank_or_invalid(single_row)
 
-                if not_imported?(inc_id)
-                  @order = Order.find_or_create_by_increment_id(inc_id)
-                  @order.store_id = params[:store_id]
-                  @order_required = %w(qty sku increment_id price)
-                  import_order_data(order_map, single_row)
+              @import_item.current_increment_id = inc_id = @helper.get_row_data(single_row, 'increment_id')
+              update_import_item(-1, -1)
 
-                  update_result(result, single_row)
-                else
-                  @import_item.previous_imported += 1
-                  @import_item.save
-                  # Skipped because of duplicate order
-                end
+              if @helper.not_imported?(@imported_orders, inc_id)
+                @order = Order.find_or_create_by_increment_id(inc_id)
+                @order.store_id = params[:store_id]
+                @order_required = %w(qty sku increment_id price)
+                import_order_data(order_map, single_row)
+
+                update_result(result, single_row)
+                import_item_failed_result(result, index) unless result[:status]
               else
-                next
+                @import_item.previous_imported += 1
+                @import_item.save
+                # Skipped because of duplicate order
               end
-              import_item_failed_result(result, index) unless result[:status]
             end
-          end
-
-          def not_imported?(inc_id)
-            @imported_orders.key?(inc_id) ||
-              Order.where(
-                increment_id: inc_id).empty? ||
-              params[:contains_unique_order_items] == true
           end
 
           def import_item_failed_result(result, index)
@@ -88,8 +76,7 @@ module Groovepacker
               end
             elsif !params[:order_placed_at].nil?
               require 'time'
-              time = Time.parse(params[:order_placed_at])
-              @order['order_placed_time'] = time
+              @order['order_placed_time'] = Time.parse(params[:order_placed_at])
             else
               result[:status] = false
               result[:messages].push('Order Placed is missing.')
@@ -121,7 +108,7 @@ module Groovepacker
               if @helper.import_nonunique_items?(single_map)
                 import_for_nonunique_order_items(single_row)
               elsif single_map == 'firstname'
-                import_first_name(single_row, single_map)
+                @helper.import_first_name(@order, single_row, single_map)
               elsif @helper.import_unique_items?(single_map)
                 import_for_unique_order_items(single_row)
               else
@@ -130,18 +117,6 @@ module Groovepacker
               end
 
               @order_required.delete(single_map) if @order_required.include? single_map
-            end
-          end
-
-          def import_first_name(single_row, single_map)
-            name = @helper.get_row_data(single_row, single_map)
-            if  mapping['lastname'].nil? ||
-                mapping['lastname'][:position] == 0
-              arr = name.blank? ? [] : name.split(' ')
-              @order.firstname = arr.shift
-              @order.lastname = arr.join(' ')
-            else
-              @order.firstname = name
             end
           end
 
@@ -157,11 +132,9 @@ module Groovepacker
             @order_required.delete('increment_id')
             single_sku = @helper.get_row_data(single_row, 'sku')
             update_import_item(1, 0)
-
             @order_increment_sku = single_inc_id + '-' + single_sku.strip
             check_and_update_prod_sku
             @product_helper.create_update_base_prod(single_row, single_sku)
-            
             product = Product.new
             set_product_info(product, single_row, true)
           end

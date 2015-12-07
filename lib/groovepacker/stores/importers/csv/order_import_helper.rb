@@ -20,6 +20,12 @@ module Groovepacker
               !single_row[mapping[item][:position]].nil?
           end
 
+          def blank_or_invalid(single_row)
+            blank_row?(single_row) ||
+              !verify_single_item(single_row, 'increment_id') ||
+              !verify_single_item(single_row, 'sku')
+          end
+
           def build_final_records
             if params[:contains_unique_order_items] == true
               build_filtered_final_record
@@ -41,6 +47,13 @@ module Groovepacker
                 existing_order_numbers.include? get_row_data(single_row, 'increment_id')
             end
             filtered_final_record
+          end
+
+          def not_imported?(imported_orders, inc_id)
+            imported_orders.key?(inc_id) ||
+              Order.where(
+                increment_id: inc_id).empty? ||
+              params[:contains_unique_order_items] == true
           end
 
           def import_nonunique_items?(single_map)
@@ -118,6 +131,18 @@ module Groovepacker
                 'MM/DD' => "%m#{separator}%d#{separator}%y %H:%M"
               }
             }
+          end
+
+          def import_first_name(order, single_row, single_map)
+            name = get_row_data(single_row, single_map)
+            if  mapping['lastname'].nil? ||
+                mapping['lastname'][:position] == 0
+              arr = name.blank? ? [] : name.split(' ')
+              order.firstname = arr.shift
+              order.lastname = arr.join(' ')
+            else
+              order.firstname = name
+            end
           end
         end
       end
