@@ -67,7 +67,7 @@
             <input type="hidden" id="stripe_public_key" class="input-large"
                    value="<%= ENV['STRIPE_PUBLIC_KEY'] %>"/>
             <input type="hidden" id="one_time_payment" class="input-large"
-                   value="<%= ENV['ONE_TIME_PAYMENT'] %>"/>
+                   value="<%=  one_time_payment(params) %>"/>
           </div>
         </div>
 

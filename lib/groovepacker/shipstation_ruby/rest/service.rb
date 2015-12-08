@@ -70,10 +70,10 @@ module Groovepacker
                           headers: headers, 
                           debug_output: $stdout)
           else
-            response = HTTParty.post("#{@endpoint}#{query}",
-                                      body: body,
-                                      headers: headers,
-                                      debug_output: $stdout)
+            HTTParty.post("#{@endpoint}#{query}",
+                            body: body,
+                            headers: headers,
+                            debug_output: $stdout)
           end
         end
 
