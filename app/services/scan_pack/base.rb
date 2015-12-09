@@ -13,11 +13,11 @@ module ScanPack
       true
     end
 
-    def order_details_and_next_item(single_order)
-      single_order.reload
-      data = single_order.attributes
-      data['unscanned_items'] = single_order.get_unscanned_items
-      data['scanned_items'] = single_order.get_scanned_items
+    def order_details_and_next_item
+      @single_order.reload
+      data = @single_order.attributes
+      data['unscanned_items'] = @single_order.get_unscanned_items
+      data['scanned_items'] = @single_order.get_scanned_items
       unless data['unscanned_items'].length == 0
         unless @session[:most_recent_scanned_products].nil?
           @session[:most_recent_scanned_products].reverse!.each do |scanned_product_id|
@@ -86,9 +86,9 @@ module ScanPack
       @file_name = Apartment::Tenant.current+Time.now.strftime('%d_%b_%Y_%I__%M_%p')
       orders = []
 
-      single_order = Order.find(order.id)
-      unless single_order.nil?
-        orders.push({id: single_order.id, increment_id: single_order.increment_id})
+      @single_order = Order.find(order.id)
+      unless @single_order.nil?
+        orders.push({id: @single_order.id, increment_id: @single_order.increment_id})
       end
       unless orders.empty?
         GenerateBarcode.where('updated_at < ?', 24.hours.ago).delete_all
