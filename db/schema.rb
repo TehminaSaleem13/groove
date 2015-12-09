@@ -301,6 +301,20 @@ ActiveRecord::Schema.define(:version => 20151201041703) do
     t.datetime "last_imported_at"
   end
 
+  create_table "magento_rest_credentials", :force => true do |t|
+    t.integer  "store_id"
+    t.string   "host"
+    t.string   "api_key"
+    t.string   "api_secret"
+    t.boolean  "import_images"
+    t.boolean  "import_categories"
+    t.datetime "created_at",         :null => false
+    t.datetime "updated_at",         :null => false
+    t.string   "access_token"
+    t.string   "oauth_token_secret"
+    t.datetime "last_imported_at"
+  end
+
   create_table "oauth_access_grants", :force => true do |t|
     t.integer  "resource_owner_id", :null => false
     t.integer  "application_id",    :null => false
@@ -815,11 +829,13 @@ ActiveRecord::Schema.define(:version => 20151201041703) do
 
   create_table "sync_options", :force => true do |t|
     t.integer  "product_id"
-    t.boolean  "sync_with_bc",   :default => false
+    t.boolean  "sync_with_bc",       :default => false
     t.integer  "bc_product_id"
-    t.datetime "created_at",                        :null => false
-    t.datetime "updated_at",                        :null => false
+    t.datetime "created_at",                            :null => false
+    t.datetime "updated_at",                            :null => false
     t.string   "bc_product_sku"
+    t.boolean  "sync_with_mg_rest"
+    t.integer  "mg_rest_product_id"
   end
 
   create_table "tenants", :force => true do |t|

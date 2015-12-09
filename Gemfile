@@ -97,4 +97,5 @@ gem 'intercom-rails'
 gem 's3'
 gem 'ng-rails-csrf'
 gem 'doorkeeper'
+gem 'oauth'
 gem 'rubocop', require: false

@@ -12,6 +12,7 @@ module Groovepacker
         end
         options[:status_id]=11 #11 is status id of 'Awaiting Fulfillment' in BigCommerce
         
+        return combined_response if @store_hash.blank?
         while page_index
           options[:page] = page_index
           response = get("https://api.bigcommerce.com/#{@store_hash}/v2/orders", options)
