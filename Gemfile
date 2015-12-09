@@ -50,6 +50,7 @@ group :test do
   gem 'capybara', '>= 2.0.1'
   gem 'mocha', :require => 'mocha/api'
   gem 'test-unit'
+  gem "codeclimate-test-reporter", require: nil
 end
 
 gem 'redis-session-store'
