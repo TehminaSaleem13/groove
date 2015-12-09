@@ -109,16 +109,9 @@ module ScanPack
 
     def generate_order_barcode_slip(order)
       require 'wicked_pdf'
-      GenerateBarcode.where('updated_at < ?', 24.hours.ago).delete_all
-      @generate_barcode = GenerateBarcode.new
-      @generate_barcode.user_id = @current_user.id
-      @generate_barcode.current_order_position = 0
-      @generate_barcode.total_orders = 1
-      @generate_barcode.current_increment_id = order.increment_id
-      @generate_barcode.next_order_increment_id = nil
-      @generate_barcode.status = 'in_progress'
 
-      @generate_barcode.save
+      do_remove_barcode_updated_before_24h_and_return_new_barcode_object
+      
       file_name_order = Digest::MD5.hexdigest(order.increment_id)
       reader_file_path = Rails.root.join('public', 'pdfs', "#{Apartment::Tenant.current}.#{file_name_order}.pdf")
       ActionView::Base.send(:define_method, :protect_against_forgery?) { false }
@@ -156,5 +149,18 @@ module ScanPack
       @generate_barcode.status = 'completed'
       @generate_barcode.save
     end
+
+    def do_remove_barcode_updated_before_24h_and_return_new_barcode_object
+      GenerateBarcode.where('updated_at < ?', 24.hours.ago).delete_all
+      @generate_barcode = GenerateBarcode.new(
+        user_id: @current_user.id, current_order_position: 0, total_orders: 1,
+        current_increment_id: order.increment_id,
+        next_order_increment_id: nil,
+        status: 'in_progress'
+        )
+      @generate_barcode.save
+      @generate_barcode
+    end
+  
   end
 end
