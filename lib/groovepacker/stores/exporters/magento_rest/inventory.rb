@@ -7,38 +7,25 @@ module Groovepacker
 
           def push_inventories
             @credential = handler[:credential]
-            @client = handler[:store_handle]
+            @client = handler[:store_handle][:handle]
+
+            #products = Product.where(store_id: credential.store_id)
+            products = Product.joins(:sync_option).where("sync_with_mg_rest=true and (mg_rest_product_id IS NOT NULL or store_product_id IS NOT NULL)")
             
-            products = Product.joins(:sync_option).where("sync_with_bc=true and (bc_product_id IS NOT NULL or store_product_id IS NOT NULL)")
-            
-            (products||[]).each do |product|
-              inv_wh = product.product_inventory_warehousess.last
-              attrs = { inventory_level: inv_wh.available_inv }
-              
+            products.each do |product|
+              inv_wh = product.product_inventory_warehousess.first
               @sync_optn = product.sync_option
-              bc_product_id = (@sync_optn.bc_product_id rescue nil) || product.store_product_id
-              
-              update_inv_on_bc_for_sync_option(product, bc_product_id, attrs)
+              mg_rest_product_id = (@sync_optn.mg_rest_product_id rescue nil) || product.mg_rest_product_id
+              update_mg_rest_product_inv_for_sync_option(product, mg_rest_product_id, inv_wh)
             end
           end
 
           private
-            def update_inv_on_bc_for_sync_option(product, bc_product_id, attrs)
-              bc_product = @client.product(bc_product_id)
-              if bc_product["id"] && @sync_optn.bc_product_sku==bc_product["sku"]
-                @client.update_product_inv("https://api.bigcommerce.com/#{@credential.store_hash}/v2/products/#{bc_product_id}", attrs)
-              elsif bc_product["id"] && bc_product["skus"]
-                update_product_by_bc_variants(bc_product, attrs)
-              end
-            end
-
-
-            def update_product_by_bc_variants(bc_product, attrs)
-              if @sync_optn.bc_product_sku and @sync_optn.bc_product_id
-                bc_product_sku = @client.product_skus("#{bc_product["skus"]["url"]}?sku=#{@sync_optn.bc_product_sku}").first
-                if bc_product_sku
-                  response = @client.update_product_sku_inv("https://api.bigcommerce.com/#{@credential.store_hash}/v2/products/#{bc_product['id']}/skus/#{bc_product_sku["id"]}", attrs)
-                end
+            def update_mg_rest_product_inv_for_sync_option(product, mg_rest_product_id, inv_wh)
+              if mg_rest_product_id
+                availabel_inv = inv_wh.available_inv rescue 0
+                filters_or_data = {"qty" => availabel_inv.to_s}
+                @client.update_product_inv(mg_rest_product_id, filters_or_data)
               end
             end
         end

@@ -9,6 +9,7 @@ module Groovepacker
         last_import = credential.last_imported_at.to_datetime rescue (DateTime.now - 4.days)
         options[:min_date_modified] = last_import unless last_import.blank?
         
+        return combined_response if @store_hash.blank?
         while page_index
           options[:page] = page_index
           response = get("https://api.bigcommerce.com/#{@store_hash}/v2/orders", options)

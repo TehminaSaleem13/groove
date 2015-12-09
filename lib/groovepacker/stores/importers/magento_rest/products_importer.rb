@@ -58,7 +58,8 @@ module Groovepacker
                 @productdb.product_type = product_attrs["type_id"]
                 @productdb.store = credential.store
                 @productdb.weight = product_attrs["weight"].to_f * 16 unless product_attrs["weight"].nil?
-
+                @productdb.store_id = credential.store_id
+                @productdb.save
                 # Magento product api does not provide a barcode, so all
                 # magento products should be marked with a status new as t
                 #they cannot be scanned.
@@ -92,7 +93,7 @@ module Groovepacker
                   inv_wh.inventory_warehouse_id = credential.store.inventory_warehouse_id
                   @productdb.product_inventory_warehousess << inv_wh
                 end
-
+                @productdb.create_sync_option(:mg_rest_product_id => product_attrs["entity_id"], :sync_with_mg_rest => true)
                 @productdb.save
                 make_product_intangible(@productdb)
                 @productdb.set_product_status

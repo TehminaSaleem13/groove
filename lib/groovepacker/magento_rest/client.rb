@@ -2,9 +2,9 @@ module Groovepacker
   module MagentoRest
     class Client < Base
       def orders
-        method = 'GET'
-        uri = 'https://groovepacker.com/store/api/rest/orders'
         credential = get_credential
+        method = 'GET'
+        uri = "#{host_url}/api/rest/orders"
         #last_import = credential.last_imported_at.to_datetime rescue (DateTime.now - 4.days)
         
         #from_date = (DateTime.now - 4.days).strftime("%Y-%m-%d %H:%M:%S")
@@ -13,26 +13,35 @@ module Groovepacker
         orders = {}
         page_index = 1
         while page_index
+          puts "=======================Fetching page #{page_index}======================="
           filters = {"page" => "#{page_index}", "limit" => "10"}
           response = fetch(method, uri, parameters, filters)
           page_index += 1
           orders = orders.merge(response)
           response_length = response.length rescue 0
-          break if response_length<10 || page_index==20
+          break if response_length<10 || page_index==10
         end
         return orders
       end
 
       def order(order_id, filters={})
         method = 'GET'
-        uri = "https://groovepacker.com/store/api/rest/orders/#{order_id}"
+        uri = "#{host_url}/api/rest/orders/#{order_id}"
         params = parameters
         fetch(method, uri, params, filters)
       end
 
+      def stock_item(stock_id, filters={})
+        method = 'GET'
+        uri = "#{host_url}/api/rest/stockitems/#{stock_id}"
+        params = parameters
+        fetch(method, uri, params, filters)
+      end
+
+
       def products(filters={})
         method = 'GET'
-        uri = 'https://groovepacker.com/store/api/rest/products'
+        uri = "#{host_url}/api/rest/products"
         
         products = {}
         page_index = 1
@@ -50,39 +59,57 @@ module Groovepacker
 
       def product(product_id, filters={})
         method = 'GET'
-        uri = "https://groovepacker.com/store/api/rest/products/#{product_id}"
+        uri = "#{host_url}/api/rest/products/#{product_id}"
         params = parameters
-        binding.pry
         fetch(method, uri, params, filters)
       end
 
       def product_images(product_id, filters={})
         method = 'GET'
-        uri = "https://groovepacker.com/store/api/rest/products/#{product_id}/images"
+        uri = "#{host_url}/api/rest/products/#{product_id}/images"
         params = parameters
         fetch(method, uri, params, filters)
       end
 
       def product_categories(product_id, filters={})
         method = 'GET'
-        uri = "https://groovepacker.com/store/api/rest/products/#{product_id}/categories"
+        uri = "#{host_url}/api/rest/products/#{product_id}/categories"
         params = parameters
         fetch(method, uri, params, filters)
       end
+
+      def update_product_inv(product_id, filters_or_data={})
+        method = 'PUT'
+        uri = "#{host_url}/api/rest/stockitems/#{product_id}"
+        params = parameters
+        response = fetch(method, uri, params, filters_or_data)
+      end
 			
       private
+        def host_url
+          credential = get_credential
+          host_url = credential.host
+          host_url = host_url.gsub("http", "https") unless host_url.include?("https")
+          return host_url
+        end
+
         def get_credential
           @credential ||= MagentoRestCredential.find_by_id(@credential_id)
         end
 
-        def fetch(method, uri, params, filters={})
-          filters = filters.stringify_keys
+        def fetch(method, uri, params, filters_or_data={})
+          filters_or_data = filters_or_data.stringify_keys
           params_copy = params
-          params_copy = params_copy.merge(filters)
+          params_copy = params_copy.merge(filters_or_data)
+          if method=='PUT' or method=='POST'
+            params_copy = params_copy.merge({'Accept' => 'application/json', 'Content-Type' => 'application/json'})
+          end
           signature_base_string = signature_base_string(method, uri, params_copy)
           params['oauth_signature'] = url_encode(sign(signing_key, signature_base_string))
           header_string = header(params)
-          response = request_data(header_string, uri, method, filters)
+          data = {}
+          data["filters_or_data"] = filters_or_data
+          response = request_update_data(header_string, uri, method, data)
         end
 
         def signing_key
@@ -130,18 +157,20 @@ module Groovepacker
           header.slice(0..-3) # chop off last ", "
         end
 
-        def request_data(header, base_uri, method, filters={})
+        def request_update_data(header, base_uri, method, data={})
           url = URI.parse(base_uri)
-          url.query = URI.encode_www_form(filters)
           http = Net::HTTP.new(url.host, 443)
           http.use_ssl = true
-          if method == 'POST'
-            #resp, data = http.post(url.path, post_data, { 'Authorization' => header })
-          elsif method == 'PUT'
-            #resp, data = http.put(url.path, post_data, { 'Authorization' => header })
+
+          if method == 'PUT'
+            put_data = data["filters_or_data"].to_json
+            #resp, resp_data = http.put(url.path, put_data, { 'Authorization' => header })
+            resp, resp_data = http.put(url.path, put_data, { 'Authorization' => header, 'Accept' => 'application/json', 'Content-Type' => 'application/json' })
           elsif method == 'GET'
-            resp, data = http.get(url.to_s, { 'Authorization' => header })
+            url.query = URI.encode_www_form(data["filters_or_data"]) unless data["filters_or_data"].blank?
+            resp, resp_data = http.get(url.to_s, { 'Authorization' => header })
           end
+          
           JSON.parse(resp.body) rescue nil
         end
     end

@@ -144,6 +144,14 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
       }
     };
 
+    scope.hide_mg_rest_if_production_env = function (store_type) {
+      if(store_type=="Magento API 2" && location.host.includes("groovepacker.com")) {
+        return false;
+      } else {
+        return true;
+      }
+    };
+
     scope.change_opt = function (id, value) {
       scope.stores.single[id] = value;
       scope.update_single_store(true);
