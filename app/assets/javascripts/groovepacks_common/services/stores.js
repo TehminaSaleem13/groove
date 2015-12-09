@@ -215,6 +215,7 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
             stores.single.connection_established = data.credentials.ftp_credentials.connection_established;
             stores.single.username = data.credentials.ftp_credentials.username;
             stores.single.password = data.credentials.ftp_credentials.password;
+            stores.single.use_ftp_import = data.credentials.ftp_credentials.use_ftp_import;
           }
         }
       }

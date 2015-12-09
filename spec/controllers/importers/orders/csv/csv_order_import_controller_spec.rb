@@ -33,8 +33,10 @@ describe StoresController do
         doc = eval(doc)
 
         request.accept = "application/json"
-        post :csv_do_import, {:id => @store.id, :rows=>"2", :sep=>",", :other_sep=>"0", :delimiter=>"\"", :fix_width=>"0", :fixed_width=>"4", :import_action=>nil, :contains_unique_order_items=>false, :generate_barcode_from_sku=>false, :use_sku_as_product_name=>false, :order_date_time_format=>"MM/DD/YY TIME", :day_month_sequence=>"DD/MM", :map=>doc[:map][:map], :controller=>"stores", :action=>"csv_do_import", :store_id=> @store.id, :name=>doc[:name], :type=>'order', :flag=>'file_upload'}
+        post :csv_do_import, {:id => @store.id, :rows=>"2", :sep=>",", :other_sep=>"0", :delimiter=>"\"", :fix_width=>"0", :fixed_width=>"4", :import_action=>nil, :contains_unique_order_items=>false, :generate_barcode_from_sku=>false, :use_sku_as_product_name=>false, :order_date_time_format=>"YYYY/MM/DD TIME", :day_month_sequence=>"MM/DD", :map=>doc[:map][:map], :controller=>"stores", :action=>"csv_do_import", :store_id=> @store.id, :name=>doc[:name], :type=>'order', :flag=>'file_upload'}
         expect(response.status).to eq(200)
+        import_item = ImportItem.find_by_store_id(@store.id)
+        expect(import_item.status).to eq('completed')
         expect(Order.all.count).to eq(9)
         expect(Product.all.count).to eq(21)
       end
@@ -56,8 +58,10 @@ describe StoresController do
         doc = eval(doc)
 
         request.accept = "application/json"
-        post :csv_do_import, {:id => @store.id, :rows=>"2", :sep=>",", :other_sep=>"0", :delimiter=>"\"", :fix_width=>"0", :fixed_width=>"4", :import_action=>nil, :contains_unique_order_items=>false, :generate_barcode_from_sku=>false, :use_sku_as_product_name=>false, :order_date_time_format=>"MM/DD/YY TIME", :day_month_sequence=>"DD/MM", :map=>doc[:map][:map], :controller=>"stores", :action=>"csv_do_import", :store_id=> @store.id, :name=>doc[:name], :type=>'order', :flag=>'file_upload'}
+        post :csv_do_import, {:id => @store.id, :rows=>"2", :sep=>",", :other_sep=>"0", :delimiter=>"\"", :fix_width=>"0", :fixed_width=>"4", :import_action=>nil, :contains_unique_order_items=>false, :generate_barcode_from_sku=>false, :use_sku_as_product_name=>false, :order_date_time_format=>"YYYY/MM/DD TIME", :day_month_sequence=>"MM/DD", :map=>doc[:map][:map], :controller=>"stores", :action=>"csv_do_import", :store_id=> @store.id, :name=>doc[:name], :type=>'order', :flag=>'file_upload'}
         expect(response.status).to eq(200)
+        import_item = ImportItem.find_by_store_id(@store.id)
+        expect(import_item.status).to eq('completed')
         expect(Order.all.count).to eq(9)
         expect(Product.all.count).to eq(21)
         expect(Product.where(:is_intangible=>true).size).to eq(1)
@@ -80,8 +84,10 @@ describe StoresController do
         doc = eval(doc)
 
         request.accept = "application/json"
-        post :csv_do_import, {:id => @store.id, :rows=>"2", :sep=>",", :other_sep=>"0", :delimiter=>"\"", :fix_width=>"0", :fixed_width=>"4", :import_action=>nil, :contains_unique_order_items=>false, :generate_barcode_from_sku=>false, :use_sku_as_product_name=>false, :order_date_time_format=>"MM/DD/YY TIME", :day_month_sequence=>"DD/MM", :map=>doc[:map][:map], :controller=>"stores", :action=>"csv_do_import", :store_id=> @store.id, :name=>doc[:name], :type=>'order', :flag=>'file_upload'}
+        post :csv_do_import, {:id => @store.id, :rows=>"2", :sep=>",", :other_sep=>"0", :delimiter=>"\"", :fix_width=>"0", :fixed_width=>"4", :import_action=>nil, :contains_unique_order_items=>false, :generate_barcode_from_sku=>false, :use_sku_as_product_name=>false, :order_date_time_format=>"YYYY/MM/DD TIME", :day_month_sequence=>"MM/DD", :map=>doc[:map][:map], :controller=>"stores", :action=>"csv_do_import", :store_id=> @store.id, :name=>doc[:name], :type=>'order', :flag=>'file_upload'}
         expect(response.status).to eq(200)
+        import_item = ImportItem.find_by_store_id(@store.id)
+        expect(import_item.status).to eq('completed')
         expect(Order.all.count).to eq(9)
         expect(Product.all.count).to eq(21)
         expect(Product.where(:is_intangible=>true).size).to eq(2)
@@ -99,8 +105,10 @@ describe StoresController do
         doc = eval(doc)
 
         request.accept = "application/json"
-        post :csv_do_import, {:id => @store.id, :rows=>"2", :sep=>",", :other_sep=>"0", :delimiter=>"\"", :fix_width=>"0", :fixed_width=>"4", :import_action=>nil, :contains_unique_order_items=>false, :generate_barcode_from_sku=>false, :use_sku_as_product_name=>false, :order_date_time_format=>"MM/DD/YY TIME", :day_month_sequence=>"DD/MM", :map=>doc[:map][:map], :controller=>"stores", :action=>"csv_do_import", :store_id=> @store.id, :name=>doc[:name], :type=>'order', :flag=>'file_upload'}
+        post :csv_do_import, {:id => @store.id, :rows=>"2", :sep=>",", :other_sep=>"0", :delimiter=>"\"", :fix_width=>"0", :fixed_width=>"4", :import_action=>nil, :contains_unique_order_items=>false, :generate_barcode_from_sku=>false, :use_sku_as_product_name=>false, :order_date_time_format=>"YYYY/MM/DD TIME", :day_month_sequence=>"MM/DD", :map=>doc[:map][:map], :controller=>"stores", :action=>"csv_do_import", :store_id=> @store.id, :name=>doc[:name], :type=>'order', :flag=>'file_upload'}
         expect(response.status).to eq(200)
+        import_item = ImportItem.find_by_store_id(@store.id)
+        expect(import_item.status).to eq('completed')
         expect(Order.all.count).to eq(9)
         expect(Product.all.count).to eq(20)
         expect(OrderItem.where(:sku => 'R.S-CS.OFF').first.price).to eq(2.0)
@@ -119,8 +127,10 @@ describe StoresController do
           doc = eval(doc)
 
           request.accept = "application/json"
-          post :csv_do_import, {:id => @store.id, :rows=>"2", :sep=>",", :other_sep=>"0", :delimiter=>"\"", :fix_width=>"0", :fixed_width=>"4", :import_action=>nil, :contains_unique_order_items=>false, :generate_barcode_from_sku=>true, :use_sku_as_product_name=>false, :order_date_time_format=>"MM/DD/YY TIME", :day_month_sequence=>"DD/MM", :map=>doc[:map][:map], :controller=>"stores", :action=>"csv_do_import", :store_id=> @store.id, :name=>doc[:name], :type=>'order', :flag=>'file_upload'}
+          post :csv_do_import, {:id => @store.id, :rows=>"2", :sep=>",", :other_sep=>"0", :delimiter=>"\"", :fix_width=>"0", :fixed_width=>"4", :import_action=>nil, :contains_unique_order_items=>false, :generate_barcode_from_sku=>true, :use_sku_as_product_name=>false, :order_date_time_format=>"YYYY/MM/DD TIME", :day_month_sequence=>"MM/DD", :map=>doc[:map][:map], :controller=>"stores", :action=>"csv_do_import", :store_id=> @store.id, :name=>doc[:name], :type=>'order', :flag=>'file_upload'}
           expect(response.status).to eq(200)
+          import_item = ImportItem.find_by_store_id(@store.id)
+          expect(import_item.status).to eq('completed')
           expect(Order.all.count).to eq(9)
           expect(Product.all.count).to eq(21)
           Product.all.each do |product|
@@ -145,8 +155,10 @@ describe StoresController do
           doc = eval(doc)
 
           request.accept = "application/json"
-          post :csv_do_import, {:id => @store.id, :rows=>"2", :sep=>",", :other_sep=>"0", :delimiter=>"\"", :fix_width=>"0", :fixed_width=>"4", :import_action=>nil, :contains_unique_order_items=>false, :generate_barcode_from_sku=>false, :use_sku_as_product_name=>true, :order_date_time_format=>"MM/DD/YY TIME", :day_month_sequence=>"DD/MM", :map=>doc[:map][:map], :controller=>"stores", :action=>"csv_do_import", :store_id=> @store.id, :name=>doc[:name], :type=>'order', :flag=>'file_upload'}
+          post :csv_do_import, {:id => @store.id, :rows=>"2", :sep=>",", :other_sep=>"0", :delimiter=>"\"", :fix_width=>"0", :fixed_width=>"4", :import_action=>nil, :contains_unique_order_items=>false, :generate_barcode_from_sku=>false, :use_sku_as_product_name=>true, :order_date_time_format=>"YYYY/MM/DD TIME", :day_month_sequence=>"MM/DD", :map=>doc[:map][:map], :controller=>"stores", :action=>"csv_do_import", :store_id=> @store.id, :name=>doc[:name], :type=>'order', :flag=>'file_upload'}
           expect(response.status).to eq(200)
+          import_item = ImportItem.find_by_store_id(@store.id)
+          expect(import_item.status).to eq('completed')
           expect(Order.all.count).to eq(9)
           expect(Product.all.count).to eq(21)
           Product.all.each do |product|
@@ -172,6 +184,8 @@ describe StoresController do
         request.accept = "application/json"
         post :csv_do_import, {:id => @store.id, :rows=>"2", :sep=>",", :other_sep=>"0", :delimiter=>"\"", :fix_width=>"0", :fixed_width=>"4", :import_action=>nil, :contains_unique_order_items=>true, :generate_barcode_from_sku=>false, :use_sku_as_product_name=>false, :order_date_time_format=>doc[:map][:order_date_time_format], :day_month_sequence=>"DD/MM", :map=>doc[:map][:map], :controller=>"stores", :action=>"csv_do_import", :store_id=> @store.id, :name=>doc[:name], :type=>'order', :flag=>'file_upload'}
         expect(response.status).to eq(200)
+        import_item = ImportItem.find_by_store_id(@store.id)
+        expect(import_item.status).to eq('completed')
         expect(Order.all.count).to eq(4)
         expect(Product.all.count).to eq(13)
         Product.all.each do |product|
@@ -201,6 +215,8 @@ describe StoresController do
         request.accept = "application/json"
         post :csv_do_import, {:id => @store.id, :rows=>"2", :sep=>",", :other_sep=>"0", :delimiter=>"\"", :fix_width=>"0", :fixed_width=>"4", :import_action=>nil, :contains_unique_order_items=>true, :generate_barcode_from_sku=>false, :use_sku_as_product_name=>false, :order_date_time_format=>doc[:map][:order_date_time_format], :day_month_sequence=>"DD/MM", :map=>doc[:map][:map], :controller=>"stores", :action=>"csv_do_import", :store_id=> @store.id, :name=>doc[:name], :type=>'order', :flag=>'file_upload'}
         expect(response.status).to eq(200)
+        import_item = ImportItem.find_by_store_id(@store.id)
+        expect(import_item.status).to eq('completed')
         expect(Order.all.count).to eq(4)
         expect(Product.all.count).to eq(13)
         expect(Product.where(:is_intangible=>true).size).to eq(2)
@@ -225,6 +241,8 @@ describe StoresController do
         request.accept = "application/json"
         post :csv_do_import, {:id => @store.id, :rows=>"2", :sep=>",", :other_sep=>"0", :delimiter=>"\"", :fix_width=>"0", :fixed_width=>"4", :import_action=>nil, :contains_unique_order_items=>true, :generate_barcode_from_sku=>false, :use_sku_as_product_name=>false, :order_date_time_format=>doc[:map][:order_date_time_format], :day_month_sequence=>"DD/MM", :map=>doc[:map][:map], :controller=>"stores", :action=>"csv_do_import", :store_id=> @store.id, :name=>doc[:name], :type=>'order', :flag=>'file_upload'}
         expect(response.status).to eq(200)
+        import_item = ImportItem.find_by_store_id(@store.id)
+        expect(import_item.status).to eq('completed')
         expect(Order.all.count).to eq(4)
         expect(Product.all.count).to eq(13)
         expect(Product.where(:is_intangible=>true).size).to eq(3)
@@ -245,6 +263,8 @@ describe StoresController do
           request.accept = "application/json"
           post :csv_do_import, {:id => @store.id, :rows=>"2", :sep=>",", :other_sep=>"0", :delimiter=>"\"", :fix_width=>"0", :fixed_width=>"4", :import_action=>nil, :contains_unique_order_items=>true, :generate_barcode_from_sku=>true, :use_sku_as_product_name=>false, :order_date_time_format=>doc[:map][:order_date_time_format], :day_month_sequence=>"DD/MM", :map=>doc[:map][:map], :controller=>"stores", :action=>"csv_do_import", :store_id=> @store.id, :name=>doc[:name], :type=>'order', :flag=>'file_upload'}
           expect(response.status).to eq(200)
+          import_item = ImportItem.find_by_store_id(@store.id)
+          expect(import_item.status).to eq('completed')
           expect(Order.all.count).to eq(4)
           expect(Product.all.count).to eq(13)
           products = Product.where(Product.arel_table[:base_sku].not_eq(nil))
@@ -265,6 +285,8 @@ describe StoresController do
           request.accept = "application/json"
           post :csv_do_import, {:id => @store.id, :rows=>"2", :sep=>",", :other_sep=>"0", :delimiter=>"\"", :fix_width=>"0", :fixed_width=>"4", :import_action=>nil, :contains_unique_order_items=>true, :generate_barcode_from_sku=>true, :use_sku_as_product_name=>false, :order_date_time_format=>doc[:map][:order_date_time_format], :day_month_sequence=>"DD/MM", :map=>doc[:map][:map], :controller=>"stores", :action=>"csv_do_import", :store_id=> @store.id, :name=>doc[:name], :type=>'order', :flag=>'file_upload'}
           expect(response.status).to eq(200)
+          import_item = ImportItem.find_by_store_id(@store.id)
+          expect(import_item.status).to eq('completed')
           expect(Order.all.count).to eq(4)
           expect(Product.all.count).to eq(13)
 
@@ -307,6 +329,8 @@ describe StoresController do
           request.accept = "application/json"
           post :csv_do_import, {:id => @store.id, :rows=>"2", :sep=>",", :other_sep=>"0", :delimiter=>"\"", :fix_width=>"0", :fixed_width=>"4", :import_action=>nil, :contains_unique_order_items=>true, :generate_barcode_from_sku=>true, :use_sku_as_product_name=>false, :order_date_time_format=>doc[:map][:order_date_time_format], :day_month_sequence=>"DD/MM", :map=>doc[:map][:map], :controller=>"stores", :action=>"csv_do_import", :store_id=> @store.id, :name=>doc[:name], :type=>'order', :flag=>'file_upload'}
           expect(response.status).to eq(200)
+          import_item = ImportItem.find_by_store_id(@store.id)
+          expect(import_item.status).to eq('completed')
           expect(Product.all.count).to eq(13)
           Product.all.each do |product|
             expect(product.status).to eq('active')
@@ -328,6 +352,8 @@ describe StoresController do
           request.accept = "application/json"
           post :csv_do_import, {:id => @store.id, :rows=>"2", :sep=>",", :other_sep=>"0", :delimiter=>"\"", :fix_width=>"0", :fixed_width=>"4", :import_action=>nil, :contains_unique_order_items=>true, :generate_barcode_from_sku=>true, :use_sku_as_product_name=>false, :order_date_time_format=>doc[:map][:order_date_time_format], :day_month_sequence=>"DD/MM", :map=>doc[:map][:map], :controller=>"stores", :action=>"csv_do_import", :store_id=> @store.id, :name=>doc[:name], :type=>'order', :flag=>'file_upload'}
           expect(response.status).to eq(200)
+          import_item = ImportItem.find_by_store_id(@store.id)
+          expect(import_item.status).to eq('completed')
           expect(Order.all.count).to eq(4)
           expect(Product.all.count).to eq(13)
 
@@ -353,6 +379,8 @@ describe StoresController do
           request.accept = "application/json"
           post :csv_do_import, {:id => @store.id, :rows=>"2", :sep=>",", :other_sep=>"0", :delimiter=>"\"", :fix_width=>"0", :fixed_width=>"4", :import_action=>nil, :contains_unique_order_items=>true, :generate_barcode_from_sku=>true, :use_sku_as_product_name=>false, :order_date_time_format=>doc[:map][:order_date_time_format], :day_month_sequence=>"DD/MM", :map=>doc[:map][:map], :controller=>"stores", :action=>"csv_do_import", :store_id=> @store.id, :name=>doc[:name], :type=>'order', :flag=>'file_upload'}
           expect(response.status).to eq(200)
+          import_item = ImportItem.find_by_store_id(@store.id)
+          expect(import_item.status).to eq('completed')
           expect(Product.all.count).to eq(13)
           Product.all.each do |product|
             expect(product.status).to eq('new')
@@ -378,6 +406,8 @@ describe StoresController do
           request.accept = "application/json"
           post :csv_do_import, {:id => @store.id, :rows=>"2", :sep=>",", :other_sep=>"0", :delimiter=>"\"", :fix_width=>"0", :fixed_width=>"4", :import_action=>nil, :contains_unique_order_items=>true, :generate_barcode_from_sku=>false, :use_sku_as_product_name=>true, :order_date_time_format=>doc[:map][:order_date_time_format], :day_month_sequence=>"DD/MM", :map=>doc[:map][:map], :controller=>"stores", :action=>"csv_do_import", :store_id=> @store.id, :name=>doc[:name], :type=>'order', :flag=>'file_upload'}
           expect(response.status).to eq(200)
+          import_item = ImportItem.find_by_store_id(@store.id)
+          expect(import_item.status).to eq('completed')
           expect(Order.all.count).to eq(4)
           expect(Product.all.count).to eq(13)
           products = Product.where(Product.arel_table[:base_sku].not_eq(nil))
@@ -403,6 +433,8 @@ describe StoresController do
           request.accept = "application/json"
           post :csv_do_import, {:id => @store.id, :rows=>"2", :sep=>",", :other_sep=>"0", :delimiter=>"\"", :fix_width=>"0", :fixed_width=>"4", :import_action=>nil, :contains_unique_order_items=>true, :generate_barcode_from_sku=>false, :use_sku_as_product_name=>true, :order_date_time_format=>doc[:map][:order_date_time_format], :day_month_sequence=>"DD/MM", :map=>doc[:map][:map], :controller=>"stores", :action=>"csv_do_import", :store_id=> @store.id, :name=>doc[:name], :type=>'order', :flag=>'file_upload'}
           expect(response.status).to eq(200)
+          import_item = ImportItem.find_by_store_id(@store.id)
+          expect(import_item.status).to eq('completed')
           expect(Order.all.count).to eq(4)
           expect(Product.all.count).to eq(13)
           products = Product.where(Product.arel_table[:base_sku].not_eq(nil))

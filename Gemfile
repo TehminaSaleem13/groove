@@ -31,7 +31,6 @@ group :development do
   gem 'quiet_assets', '>= 1.0.1'
   gem 'better_errors', '>= 0.2.0'
   gem 'binding_of_caller', '>= 0.6.8'
-  gem 'pry'
 end
 
 group :development,:test do
@@ -40,6 +39,7 @@ group :development,:test do
   gem 'factory_girl_rails', '>= 4.1.0'
   gem 'protractor-rails'
   gem "rubycritic", :require => false
+  gem 'pry'
 end
 
 group :test do
@@ -98,3 +98,4 @@ gem 's3'
 gem 'ng-rails-csrf'
 gem 'doorkeeper'
 gem 'oauth'
+gem 'rubocop', require: false

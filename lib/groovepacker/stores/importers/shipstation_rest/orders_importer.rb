@@ -41,7 +41,6 @@ module Groovepacker
             gp_imported_tag_id = client.get_tag_id(credential.gp_imported_tag_name)
 
             unless statuses.empty? && gp_ready_tag_id == -1
-
               response = {}
               response["orders"] = nil
               statuses.each do |status|

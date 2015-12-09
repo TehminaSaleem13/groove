@@ -176,18 +176,28 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
     };
 
     scope.update_ftp_credentials = function () {
-      if (typeof scope.stores.single.connection_established != 'undefined') {
-        stores.single.update_ftp(scope.stores).then(function(data) {
+      var connection_stat = scope.stores.single.connection_established
+
+      stores.single.update_ftp(scope.stores).then(function(data) {
+        if (connection_stat === true) {
           myscope.init();
-        });
-      };
+        };
+      });
     };
 
+    myscope.check_empty_credentials = function (data) {
+      var credentials = ['host', 'username', 'password']
+      for (var key in data) {
+        if ($.inArray(key, credentials) > -1 && (data[key] == null || data[key] == '')) {
+          return true;
+        }
+      }
+      return false;
+    }
+
     scope.establish_connection = function() {
-      if (typeof scope.stores.single.host == 'undefined' ||
-        typeof scope.stores.single.username == 'undefined' ||
-        typeof scope.stores.single.password == 'undefined' ||
-        typeof scope.stores.single.connection_method == 'undefined') {
+      var empty_credentials = myscope.check_empty_credentials(scope.stores.single);
+      if (empty_credentials) {
         notification.notify("Please fillout all the credentials for the ftp store");
       } else{
         stores.single.update_ftp(scope.stores).then(function(data) {
@@ -219,8 +229,15 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
     }
 
     scope.update_single_store = function (auto) {
+      if (scope.stores.single.store_type && !scope.stores.single.id && !scope.stores.single.name) {
+        scope.stores.single.name= scope.stores.single.store_type+'-'+scope.stores.list.length;
+      }
       if (scope.edit_status || stores.single.validate_create(scope.stores)) {
         return stores.single.update(scope.stores, auto).success(function (data) {
+          if(scope.stores.single.store_type=="BigCommerce"){
+            notification.notify("This integration is currently being tested. Please refrain from depending on it in a production environment.",0);
+          }
+
           if (data.status && data.store_id) {
             if (scope.stores.single['id'] != 0) {
               myscope.store_single_details(data.store_id);
@@ -469,7 +486,7 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
 
     scope.launch_big_commerce_popup = function () {
       $timeout(function () {
-        var shopify_url = $sce.trustAsResourceUrl("https://store-1pslcuh.mybigcommerce.com/manage/marketplace/apps/4907");
+        var shopify_url = $sce.trustAsResourceUrl("https://store-1pslcuh.mybigcommerce.com/manage/marketplace/apps/5386");
         if (shopify_url == null) {
           if (typeof scope.stores.single.shop_name == 'undefined') {
             notification.notify("Please enter your store name first.");

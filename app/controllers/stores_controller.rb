@@ -35,14 +35,13 @@ class StoresController < ApplicationController
           ftp = FtpCredential.new
           new_record = true
         end
-        if ftp.host != params[:host] || ftp.username != params[:username] || ftp.password != params[:password] || ftp.connection_method != params[:connection_method]
-          ftp.host = params[:host]
-          ftp.username = params[:username]
-          ftp.password = params[:password]
-          ftp.connection_method = params[:connection_method]
-          ftp.connection_established = false
-        end
-
+        params[:host] = nil if params[:host] === 'null'
+        ftp.host = params[:host]
+        ftp.username = params[:username]
+        ftp.password = params[:password]
+        ftp.connection_method = params[:connection_method]
+        ftp.connection_established = false
+        ftp.use_ftp_import = params[:use_ftp_import]
         store.ftp_credential = ftp
         begin
           store.save!
@@ -80,6 +79,18 @@ class StoresController < ApplicationController
     end
   end
 
+  def init_update_store_data(params)
+    params[:name]=nil if params[:name]=='undefined'
+    @store.name = params[:name] || get_default_warehouse_name
+    @store.store_type = params[:store_type]
+    @store.status = params[:status]
+    @store.thank_you_message_to_customer = params[:thank_you_message_to_customer] unless params[:thank_you_message_to_customer] == 'null'
+    @store.inventory_warehouse_id = params[:inventory_warehouse_id] || get_default_warehouse_id
+    @store.auto_update_products = params[:auto_update_products]
+    @store.update_inv = params[:update_inv]
+    @store.save
+  end
+
   def create_update_store
     @result = Hash.new
 
@@ -92,28 +103,23 @@ class StoresController < ApplicationController
       if params[:id].nil?
         if Store.can_create_new?
           @store = Store.new
+          init_update_store_data(params)
+          ftp_credential = FtpCredential.create(use_ftp_import: false, store_id: @store.id) if params[:store_type] == 'CSV'
+          params[:id] = @store.id  if params[:store_type] == 'BigCommerce'
         else
           @result['status'] = false
           @result['messages'] = "You have reached the maximum limit of number of stores for your subscription."
         end
-      else
-        @store = Store.find(params[:id])
       end
 
-      if @result['status']
-
+      unless params[:id].blank?
+        @store ||= Store.find(params[:id])
+        FtpCredential.create(use_ftp_import: false, store_id: @store.id) if params[:store_type] == 'CSV' && @store.ftp_credential.nil?
         if params[:store_type].nil?
           @result['status'] = false
           @result['messages'].push('Please select a store type to create a store')
         else
-          params[:name]=nil if params[:name]=='undefined'
-          @store.name = params[:name] || get_default_warehouse_name
-          @store.store_type = params[:store_type]
-          @store.status = params[:status]
-          @store.thank_you_message_to_customer = params[:thank_you_message_to_customer] unless params[:thank_you_message_to_customer] == 'null'
-          @store.inventory_warehouse_id = params[:inventory_warehouse_id] || get_default_warehouse_id
-          @store.auto_update_products = params[:auto_update_products]
-          @store.update_inv = params[:update_inv]
+          init_update_store_data(params)
         end
 
         if @result['status']
@@ -431,8 +437,8 @@ class StoresController < ApplicationController
               @result['messages'] = [e.message]
             end
             current_tenant = Apartment::Tenant.current
-            cookies[:tenant_name] = {:value => current_tenant , :domain => :all}
-            cookies[:store_id] = {:value => @store.id , :domain => :all}
+            cookies[:tenant_name] = {:value => current_tenant , :domain => :all, :expires => Time.now+20.minutes}
+            cookies[:store_id] = {:value => @store.id , :domain => :all, :expires => Time.now+20.minutes}
           end
         else
           @result['status'] = false
@@ -442,7 +448,6 @@ class StoresController < ApplicationController
           @result["store_id"] = @store.id
         end
       end
-
     end
 
     respond_to do |format|
@@ -972,6 +977,8 @@ class StoresController < ApplicationController
             unless csv_mapping.nil?
               csv_mapping.destroy
             end
+            ftp_credential = FtpCredential.find_by_store_id(@store.id)
+            ftp_credential.destroy unless ftp_credential.nil?
           end
           if @store.deleteauthentications && @store.destroy
             @result['status'] = true
@@ -1343,9 +1350,12 @@ class StoresController < ApplicationController
     @result['status'] = true
 
     access_restriction = AccessRestriction.last
-    if access_restriction && access_restriction.allow_inv_push && @store && current_user.can?('update_inventories')
-      
+    
+    tenant = Apartment::Tenant.current
+    import_orders_obj = ImportOrders.new
+    import_orders_obj.delay(:run_at => 1.seconds.from_now).init_import(tenant)
 
+    if access_restriction && access_restriction.allow_inv_push && @store && current_user.can?('update_inventories')
       case @store.store_type
       when "BigCommerce"
         handler = Groovepacker::Stores::Handlers::BigCommerceHandler.new(@store)
@@ -1354,11 +1364,9 @@ class StoresController < ApplicationController
       end
       
       context = Groovepacker::Stores::Context.new(handler)
-      #context.delay(:run_at => 1.seconds.from_now).pull_inventory
-      context.pull_inventory
-
+      context.delay(:run_at => 1.seconds.from_now).pull_inventory
       #context.pull_inventory
-      @result['message'] = "Your request has beed queued"
+      @result['message'] = "Your request for innventory pull has beed queued"
     else
       @result['status'] = false
       @result['message'] = "Either the the BigCommerce store is not setup properly or you don't have permissions to update inventories."
@@ -1373,8 +1381,11 @@ class StoresController < ApplicationController
     @result = Hash.new
     @result['status'] = true
 
+    tenant = Apartment::Tenant.current
+    import_orders_obj = ImportOrders.new
+    import_orders_obj.delay(:run_at => 1.seconds.from_now).init_import(tenant)
+
     if @store && current_user.can?('update_inventories')
-      
       case @store.store_type
       when "BigCommerce"
         handler = Groovepacker::Stores::Handlers::BigCommerceHandler.new(@store)
@@ -1384,6 +1395,7 @@ class StoresController < ApplicationController
       
       context = Groovepacker::Stores::Context.new(handler)
       context.delay(:run_at => 1.seconds.from_now).push_inventory
+      #context.push_inventory
     else
       @result['status'] = false
       @result['message'] = "Either the store is not present or you don't have permissions to update inventories."

@@ -24,6 +24,11 @@ module Groovepacker
           Groovepacker::Stores::Exporters::BigCommerce::Inventory.new(
             self.build_handle).push_inventories
         end
+
+        def pull_single_product_inventory(product)
+          Groovepacker::Stores::Importers::BigCommerce::Inventory.new(
+            self.build_handle).pull_single_product_inventory(product)
+        end
       end
     end
   end

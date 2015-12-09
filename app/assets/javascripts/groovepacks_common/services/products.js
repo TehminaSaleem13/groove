@@ -118,6 +118,10 @@ groovepacks_services.factory('products', ['$http', 'notification', 'editable', '
     return total_items;
   };
 
+  var select_notification = function () {
+    notification.notify("Please select atleast one product", 0);
+  }
+
   var update_list = function (action, products) {
     if (['update_status', 'delete', 'duplicate', 'barcode', 'receiving_label', 'update_per_product'].indexOf(action) != -1) {
       products.setup.productArray = [];
@@ -221,19 +225,43 @@ groovepacks_services.factory('products', ['$http', 'notification', 'editable', '
     }).error(notification.server_error);
   };
 
+  var basicinfo_changed = function (basicinfo, data) {
+    var result = true;
+    for (var key in basicinfo) {
+      if (key == 'status' || key == 'created_at' || key == 'updated_at') {
+        continue;
+      } else if (basicinfo[key] != data[key]) {
+        result = false;
+        break;
+      };
+    };
+    return result;
+  };
+
   //single product related functions
-  var get_single = function (id, products) {
+  var get_single = function (id, products, auto) {
     return $http.get('/products/' + id + '.json').success(function (data) {
       if (data.product) {
-        if (typeof products.single['basicinfo'] != "undefined" && data.product.basicinfo.id == products.single.basicinfo.id) {
-          angular.extend(products.single, data.product);
-        } else {
-          products.single = {};
-          products.single = data.product;
-        }
+        if (!auto) {
+          if (basicinfo_changed(products.single['basicinfo'], data.product.basicinfo) &&
+            products.single['barcodes'].length == data.product.barcodes.length &&
+            products.single['cats'].length == data.product.cats.length &&
+            products.single['inventory_warehouses'].length == data.product.inventory_warehouses.length &&
+            products.single['skus'].length == data.product.skus.length) {
+            products.signle = {};
+            products.single = data.product;
+          }
+        }else {
+          if (typeof products.single['basicinfo'] != "undefined" && data.product.basicinfo.id == products.single.basicinfo.id) {
+            angular.extend(products.single, data.product);
+          }else {
+            products.single = {};
+            products.single = data.product;
+          };
+        };
       } else {
         products.single = {};
-      }
+      };
     }).error(notification.server_error).success(editable.force_exit).error(editable.force_exit);
   };
 
@@ -422,7 +450,8 @@ groovepacks_services.factory('products', ['$http', 'notification', 'editable', '
       update: update_list,
       select: select_list,
       update_node: update_list_node,
-      generate: generate_csv
+      generate: generate_csv,
+      select_notification: select_notification
     },
     single: {
       get: get_single,

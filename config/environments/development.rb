@@ -124,6 +124,7 @@ Groovepacks::Application.configure do
   ENV['HOST_NAME'] = 'localpacker.com'
 
   ENV['ONE_TIME_PAYMENT'] = '50000'
+  ENV['BC_ONE_TIME_PAYMENT'] = '25'
 
   #S3 access details
   ENV['S3_ACCESS_KEY_ID'] = 'AKIAI3A7VXS372GV6EQQ'
@@ -133,4 +134,6 @@ Groovepacks::Application.configure do
 
   #Feature Variables
   ENV['DASHBOARD_ENABLE'] = 'YES'
+
+  ENV["SITE_HOST"] = "barcodepacker.com"
 end

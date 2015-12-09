@@ -159,6 +159,7 @@ class GeneralSetting < ActiveRecord::Base
     run_at_date = run_at_date.change({:hour => time.hour,
                                       :min => time.min, :sec => time.sec})
     time_diff = ((run_at_date - DateTime.now.getutc) * 24 * 60 * 60).to_i
+    time_diff += 3600 if (Time.now + time_diff).dst?
     if time_diff > 0
       tenant = Apartment::Tenant.current
       if job_type == 'low_inventory_email'

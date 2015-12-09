@@ -82,6 +82,8 @@ GEM
     angularjs-rails (1.2.18)
     arel (3.0.2)
     ast (2.1.0)
+    astrolabe (1.3.1)
+      parser (~> 2.2)
     axiom-types (0.1.1)
       descendants_tracker (~> 0.0.4)
       ice_nine (~> 0.11.0)
@@ -298,6 +300,7 @@ GEM
       rails
     polyglot (0.3.3)
     power_assert (0.2.2)
+    powerpack (0.1.1)
     prawn (1.0.0)
       pdf-core (~> 0.2.2)
       ttfunk (~> 1.1.1)
@@ -389,7 +392,14 @@ GEM
       net-ssh (~> 2.6)
       open4
       thor
+    rubocop (0.34.2)
+      astrolabe (~> 1.3)
+      parser (>= 2.2.2.5, < 3.0)
+      powerpack (~> 0.1)
+      rainbow (>= 1.99.1, < 3.0)
+      ruby-progressbar (~> 1.4)
     ruby-hmac (0.4.0)
+    ruby-progressbar (1.7.5)
     ruby-rc4 (0.1.5)
     ruby_odata (0.1.6)
       activesupport (>= 3.0.0)
@@ -547,6 +557,7 @@ DEPENDENCIES
   rspec-rails (>= 2.13.2)
   rspec_junit_formatter
   rubber
+  rubocop
   ruby-mws (~> 0.0.8)!
   ruby_odata
   rubycritic

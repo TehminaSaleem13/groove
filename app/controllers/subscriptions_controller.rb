@@ -24,8 +24,7 @@ class SubscriptionsController < ApplicationController
                                         status: "started",
                                         coupon_id: params[:coupon_id])
     if @subscription
-      if !params[:shop_name].nil? &&
-        params[:shop_name] != ''
+      unless params[:shop_name].blank?
         one_time_payment = 0
       else
         one_time_payment = ENV['ONE_TIME_PAYMENT']
@@ -33,20 +32,13 @@ class SubscriptionsController < ApplicationController
       @subscription.save_with_payment(one_time_payment)
       if @subscription.status == 'completed'
         #for shopify create the store and send for authentication
-        if !params[:shop_name].nil? &&
-          params[:shop_name] != ''
+        unless params[:shop_name].blank?
           #switch tenant
           created_tenant = Apartment::Tenant.switch(@subscription.tenant_name)
           response = create_store_and_credential
           render json: response
         else
-          @result = get_next_payment_date(@subscription)
-          render json: {valid: true,
-                        transaction_id: @subscription.stripe_transaction_identifier,
-                        notice: "Congratulations! Your GroovePacker is being deployed!",
-                        email: @subscription.email,
-                        next_date: @result['next_date']
-                 }
+          render json: response_for_successful_subscription
         end
       else
         render json: {
@@ -139,10 +131,22 @@ class SubscriptionsController < ApplicationController
     def create_BigCommerce_credential(store_id)
       bc_auth = cookies[:bc_auth]
       access_token = bc_auth["access_token"] rescue nil
-      store_hash = bc_auth["access_token"] rescue nil
-      cookies.delete(:bc_auth)
+      store_hash = bc_auth["context"] rescue nil
       BigCommerceCredential.create(shop_name: params[:shop_name], store_id: store_id, access_token: access_token, store_hash: store_hash )
-      return { valid: true, redirect_url: "" }
+      #cookies.delete(:bc_auth)
+      cookies[:bc_auth] = {:value => nil , :domain => :all, :expires => Time.now+2.seconds}
+      return response_for_successful_subscription
+
+    end
+
+    def response_for_successful_subscription
+      @result = get_next_payment_date(@subscription)
+      return {valid: true,
+              transaction_id: @subscription.stripe_transaction_identifier,
+              notice: "Congratulations! Your GroovePacker is being deployed!",
+              email: @subscription.email,
+              next_date: @result['next_date']
+            }
     end
 
 end

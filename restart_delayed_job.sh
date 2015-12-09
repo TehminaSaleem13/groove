@@ -40,13 +40,13 @@ if [ ${ENV} != 'staging' ] && [ ${ENV} != 'production' ]; then
 fi
 echo "${bold}$ENV${normal} environment selected"
 
-sudo chown groovepacker:groovepacker /home/groovepacker/groove -R
+sudo chown bamboo:bamboo /home/groovepacker/groove -R
 
 if [ ${ENV} == 'staging' ]; then
     NUM_JOBS=1
 fi
 
-sudo su groovepacker <<EOF
+sudo su bamboo <<EOF
 source /usr/local/rvm/scripts/rvm
 
 cd ~/groove
@@ -59,8 +59,8 @@ git checkout ${ENV}
 git pull origin ${ENV}
 
 
-RAILS_ENV=${ENV} bundle exec bundle install --deployment
-RAILS_ENV=${ENV} bundle exec script/delayed_job -n ${NUM_JOBS} start
+#RAILS_ENV=${ENV} bundle exec bundle install --deployment
+#RAILS_ENV=${ENV} bundle exec script/delayed_job -n ${NUM_JOBS} start
 
 exit
 EOF

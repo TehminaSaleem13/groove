@@ -17,6 +17,7 @@ Groovepacks::Application.routes.draw do
   get '/bigcommerce/uninstall' => 'big_commerce#uninstall'
   get '/bigcommerce/load' => 'big_commerce#load'
   get '/bigcommerce/remove' => 'big_commerce#remove'
+  get '/big_commerce/login' => 'big_commerce#login'
   get '/big_commerce/setup' => 'big_commerce#setup'
   get '/big_commerce/complete' => 'big_commerce#complete'
   get '/big_commerce/:store_id/check_connection' => 'big_commerce#check_connection'
@@ -254,6 +255,8 @@ Groovepacks::Application.routes.draw do
     end
     member do
       post   'create_duplicate'
+      post 'update_tenant_list'
+      post 'update_access_restrictions'
     end
   end
 
@@ -276,6 +279,7 @@ Groovepacks::Application.routes.draw do
       get 'valid_tenant_name'
       get 'valid_email'
       get 'validate_coupon_id'
+      get 'complete'
     end
   end
 

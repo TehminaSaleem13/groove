@@ -164,6 +164,7 @@ ActiveRecord::Schema.define(:version => 20151119104627) do
     t.datetime "updated_at",                                :null => false
     t.string   "connection_method",      :default => "ftp"
     t.boolean  "connection_established", :default => false
+    t.boolean  "use_ftp_import",         :default => false
   end
 
   create_table "general_settings", :force => true do |t|
@@ -643,7 +644,7 @@ ActiveRecord::Schema.define(:version => 20151119104627) do
   add_index "product_skus", ["sku"], :name => "index_product_skus_on_sku"
 
   create_table "products", :force => true do |t|
-    t.string   "store_product_id",                                                                        :null => false
+    t.string   "store_product_id"
     t.string   "name",                                                                                    :null => false
     t.string   "product_type"
     t.integer  "store_id",                                                                                :null => false
@@ -842,6 +843,7 @@ ActiveRecord::Schema.define(:version => 20151119104627) do
     t.datetime "created_at",          :null => false
     t.datetime "updated_at",          :null => false
     t.integer  "duplicate_tenant_id"
+    t.text     "note"
   end
 
   create_table "transactions", :force => true do |t|

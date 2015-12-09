@@ -1,13 +1,16 @@
 module Groovepacker
   module BigCommerceRuby
     class Client < Base
-      def orders(credential)
+      def orders(credential, import_item)
         page_index = 1
         options = {}
         combined_response = {}
         combined_response["orders"] = []
-        last_import = credential.last_imported_at.to_datetime rescue (DateTime.now - 4.days)
-        options[:min_date_modified] = last_import unless last_import.blank?
+        unless import_item.import_type=='deep'
+          last_import = credential.last_imported_at.to_datetime rescue (DateTime.now - 4.days)
+          options[:min_date_modified] = last_import unless last_import.blank?
+        end
+        options[:status_id]=11 #11 is status id of 'Awaiting Fulfillment' in BigCommerce
         
         return combined_response if @store_hash.blank?
         while page_index
