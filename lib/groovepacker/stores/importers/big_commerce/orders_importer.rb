@@ -70,11 +70,6 @@ module Groovepacker
                     product = ProductSku.where(sku: item["sku"]).first.product
                     order_item.product = product
                   end
-
-                  unless orders_product_ids.include?(product.id)
-                    inv_pull_context.pull_single_product_inventory(product)
-                    orders_product_ids << product.id
-                  end
                   bigcommerce_order.order_items << order_item
                 end
               end
@@ -82,6 +77,12 @@ module Groovepacker
               #update store
               bigcommerce_order.store = credential.store
               bigcommerce_order.save
+
+              bigcommerce_order.order_items.each do |item|
+                inv_pull_context.pull_single_product_inventory(item.product)
+              end
+
+
               bigcommerce_order.set_order_status
 
               #add order activities
