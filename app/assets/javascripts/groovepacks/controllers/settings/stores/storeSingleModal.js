@@ -264,6 +264,7 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
                   current_map.map.flag = 'file_upload';
                   if (current_map.map.type == 'order') {
                     if (current_map.map.order_date_time_format == null) {
+                      console.log('ashish testing here');
                       if(confirm("Order Date/Time foramt has not been set. Would you like to continue using the current Date/Time for each imported order? Click ok to continue the import using the current date/time for all orders or click cancel and edit map to select one.")){
                         current_map.map.order_placed_at = new Date();
                         stores.csv.do_import({current: current_map.map});
