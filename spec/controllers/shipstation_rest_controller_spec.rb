@@ -15,7 +15,12 @@ describe StoresController do
     it "creates an shipstation API 2 store" do
       request.accept = "application/json"
       @user.role.update_attribute(:add_edit_stores, true)
-      post :create_update_store, { :store_type => 'Shipstation API 2', :status => false }
+      post :create_update_store, { 
+        :store_type => 'Shipstation API 2', 
+        :status => false,
+        :api_key => "HELLO",
+        :api_secret => "SECRET",
+        :regular_import_range => 3 }
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
       expect(result['status']).to eq(true)
