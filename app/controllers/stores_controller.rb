@@ -105,7 +105,7 @@ class StoresController < ApplicationController
           @store = Store.new
           init_update_store_data(params)
           ftp_credential = FtpCredential.create(use_ftp_import: false, store_id: @store.id) if params[:store_type] == 'CSV'
-          params[:id] = @store.id  if params[:store_type] == 'BigCommerce'
+          params[:id] = @store.id
         else
           @result['status'] = false
           @result['messages'] = "You have reached the maximum limit of number of stores for your subscription."
@@ -153,6 +153,35 @@ class StoresController < ApplicationController
             rescue ActiveRecord::RecordInvalid => e
               @result['status'] = false
               @result['messages'] = [@store.errors.full_messages, @store.magento_credentials.errors.full_messages]
+
+            rescue ActiveRecord::StatementInvalid => e
+              @result['status'] = false
+              @result['messages'] = [e.message]
+            end
+          end
+          
+          if @store.store_type == "Magento API 2"
+            @magento_rest = MagentoRestCredential.where(:store_id => @store.id)
+            if @magento_rest.blank?
+              @magento_rest = @store.build_magento_rest_credential
+              new_record = true
+            else
+              @magento_rest = @magento_rest.first
+            end
+            @magento_rest.host = params[:host]
+            @magento_rest.api_key = params[:api_key]
+            @magento_rest.api_secret = params[:api_secret]
+
+            @magento_rest.import_categories = params[:import_categories]
+            @magento_rest.import_images = params[:import_images]
+            begin
+              @store.save!
+              if !new_record
+                @magento_rest.save
+              end
+            rescue ActiveRecord::RecordInvalid => e
+              @result['status'] = false
+              @result['messages'] = [@store.errors.full_messages, @store.magento_rest_credential.errors.full_messages]
 
             rescue ActiveRecord::StatementInvalid => e
               @result['status'] = false
@@ -1327,9 +1356,15 @@ class StoresController < ApplicationController
     import_orders_obj.delay(:run_at => 1.seconds.from_now).init_import(tenant)
 
     if access_restriction && access_restriction.allow_inv_push && @store && current_user.can?('update_inventories')
-      context = Groovepacker::Stores::Context.new(
-            Groovepacker::Stores::Handlers::BigCommerceHandler.new(@store))
-      context.delay(:run_at => 2.seconds.from_now).pull_inventory
+      case @store.store_type
+      when "BigCommerce"
+        handler = Groovepacker::Stores::Handlers::BigCommerceHandler.new(@store)
+      when "Magento API 2"
+        handler = Groovepacker::Stores::Handlers::MagentoRestHandler.new(@store)
+      end
+      
+      context = Groovepacker::Stores::Context.new(handler)
+      context.delay(:run_at => 1.seconds.from_now).pull_inventory
       #context.pull_inventory
       @result['message'] = "Your request for innventory pull has beed queued"
     else
@@ -1351,11 +1386,16 @@ class StoresController < ApplicationController
     import_orders_obj.delay(:run_at => 1.seconds.from_now).init_import(tenant)
 
     if @store && current_user.can?('update_inventories')
-      context = Groovepacker::Stores::Context.new(
-            Groovepacker::Stores::Handlers::BigCommerceHandler.new(@store))
-      context.delay(:run_at => 2.seconds.from_now).push_inventory
+      case @store.store_type
+      when "BigCommerce"
+        handler = Groovepacker::Stores::Handlers::BigCommerceHandler.new(@store)
+      when "Magento API 2"
+        handler = Groovepacker::Stores::Handlers::MagentoRestHandler.new(@store)
+      end
+      
+      context = Groovepacker::Stores::Context.new(handler)
+      context.delay(:run_at => 1.seconds.from_now).push_inventory
       #context.push_inventory
-      @result['message'] = "Your request for innventory push has beed queued"
     else
       @result['status'] = false
       @result['message'] = "Either the store is not present or you don't have permissions to update inventories."

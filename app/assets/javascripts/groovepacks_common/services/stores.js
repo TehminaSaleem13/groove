@@ -138,6 +138,15 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
             stores.single.import_products = data.credentials.magento_credentials.import_products;
             stores.single.import_images = data.credentials.magento_credentials.import_images;
 
+          } else if (data.store.store_type == 'Magento API 2') {
+            stores.single.host = data.credentials.magento_rest_credential.host;
+            stores.single.api_key = data.credentials.magento_rest_credential.api_key;
+            stores.single.api_secret = data.credentials.magento_rest_credential.api_secret;
+            stores.single.access_token = data.credentials.magento_rest_credential.access_token;
+            stores.single.oauth_token_secret = data.credentials.magento_rest_credential.oauth_token_secret;
+            stores.single.import_images = data.credentials.magento_rest_credential.import_images;
+            stores.single.import_categories = data.credentials.magento_rest_credential.import_categories;
+
           } else if (data.store.store_type == 'Ebay') {
             stores.single.ebay_auth_token = data.credentials.ebay_credentials.auth_token;
             stores.single.productebay_auth_token = data.credentials.ebay_credentials.productauth_token;
@@ -551,6 +560,12 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
     );
   }
 
+  var disconnect_magento = function (store_id) {
+    return $http.put('/magento_rest/' + store_id + '/disconnect.json', null).error(
+      notification.server_error
+    );
+  }
+
   var pull_store_inventory = function (store_id) {
     return $http.get('/stores/' + store_id + '/pull_store_inventory.json', null).success(
       function (data) {
@@ -559,6 +574,18 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
 
   var push_store_inventory = function (store_id) {
     return $http.get('/stores/' + store_id + '/push_store_inventory.json', null).success(
+      function (data) {
+      }).error(notification.server_error);
+  }
+
+  var get_magento_aurthorize_url = function (store_id) {
+    return $http.get('/magento_rest/' + store_id + '/magento_authorize_url.json', null).success(
+      function (data) {
+      }).error(notification.server_error);
+  }
+
+  var get_magento_access_token = function (store) {
+    return $http.get('/magento_rest/' + store.id + '/get_access_token.json?oauth_varifier='+store.oauth_varifier , null).success(
       function (data) {
       }).error(notification.server_error);
   }
@@ -636,6 +663,11 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
     big_commerce: {
       check_connection: check_connection,
       disconnect: big_commerce_disconnect
+    },
+    magento: {
+      get_aurthorize_url: get_magento_aurthorize_url,
+      get_access_token: get_magento_access_token,
+      disconnect: disconnect_magento
     }
   };
 }]);

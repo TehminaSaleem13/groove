@@ -118,6 +118,10 @@ groovepacks_services.factory('products', ['$http', 'notification', 'editable', '
     return total_items;
   };
 
+  var select_notification = function () {
+    notification.notify("Please select atleast one product", 0);
+  }
+
   var update_list = function (action, products) {
     if (['update_status', 'delete', 'duplicate', 'barcode', 'receiving_label', 'update_per_product'].indexOf(action) != -1) {
       products.setup.productArray = [];
@@ -446,7 +450,8 @@ groovepacks_services.factory('products', ['$http', 'notification', 'editable', '
       update: update_list,
       select: select_list,
       update_node: update_list_node,
-      generate: generate_csv
+      generate: generate_csv,
+      select_notification: select_notification
     },
     single: {
       get: get_single,

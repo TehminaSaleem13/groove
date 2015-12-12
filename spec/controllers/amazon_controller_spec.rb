@@ -15,7 +15,11 @@ describe StoresController do
     it "creates an amazon store" do
       request.accept = "application/json"
       @user.role.update_attribute(:add_edit_stores, true)
-      post :create_update_store, { :store_type => 'Amazon', :status => false }
+      post :create_update_store, { 
+        :store_type => 'Amazon', 
+        :status => false, 
+        :marketplace_id => 'HELLO',
+        :merchant_id => 'HAPPYMERCHANT' }
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
       expect(result['status']).to eq(true)
