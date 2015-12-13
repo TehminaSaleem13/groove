@@ -34,7 +34,7 @@ module ScanPack
     def do_if_unscanned_items_present(data)
       unless @session[:most_recent_scanned_products].nil?
         @session[:most_recent_scanned_products].reverse!.each do |scanned_product_id|
-          do_find_next_item(data)
+          do_find_next_item(data, scanned_product_id)
           break if data['next_item'].present?
         end
       end
@@ -42,7 +42,7 @@ module ScanPack
       data['next_item']['qty'] = data['next_item']['scanned_qty'] + data['next_item']['qty_remaining']
     end
 
-    def do_find_next_item(data)
+    def do_find_next_item(data, scanned_product_id)
       session_parent_order_item = @session[:parent_order_item]
 
       data['unscanned_items'].each do |unscanned_item|
