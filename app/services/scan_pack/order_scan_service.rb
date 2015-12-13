@@ -164,7 +164,6 @@ module ScanPack
     end
 
     def do_if_single_order_status_on_hold
-      message = nil
       if @single_order.has_inactive_or_new_products
         #get list of inactive_or_new_products
         @single_order_result['conf_code'] = @session[:confirmation_code]
@@ -199,7 +198,7 @@ module ScanPack
          'confirmation code with order edit permission to continue scanning '\
          'this order or scan a different order.'
       end
-      @result['notice_messages'].push(message)
+      message && @result['notice_messages'].push(message)
     end
 
     def do_if_single_order_status_serviceissue
