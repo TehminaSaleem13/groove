@@ -237,14 +237,14 @@ module ScanPack
       current_user_name = @current_user.username
 
       unless scanpack_settings_post_scanning_option == "None"
-        do_if_scanpack_settings_post_scanning_option_not_none(scanpack_settings_post_scanning_option)
+        do_if_scanpack_settings_post_scanning_option_not_none(scanpack_settings_post_scanning_option, current_user_name)
       else
         @single_order.set_order_to_scanned_state(current_user_name)
         @single_order_result['next_state'] = 'scanpack.rfo'
       end
     end
 
-    def do_if_scanpack_settings_post_scanning_option_not_none(scanpack_settings_post_scanning_option)
+    def do_if_scanpack_settings_post_scanning_option_not_none(scanpack_settings_post_scanning_option, current_user_name)
       case true
       when scanpack_settings_post_scanning_option == 'Verify'
         unless @single_order.tracking_num.present?
