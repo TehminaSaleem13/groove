@@ -49,6 +49,12 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
       });
     }
 
+    scope.disconnect_magento_connection = function(){
+      stores.magento.disconnect(scope.stores.single.id).then(function (response) {
+        myscope.store_single_details(scope.stores.single.id, true);
+      });
+    }
+
     scope.import_orders = function (report_id) {
       scope.stores.import.order.status = "Import in progress";
       scope.stores.import.order.status_show = true;
@@ -135,6 +141,14 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
           scope.stores.single.productusername = "";
           scope.stores.single.productpassword = "";
         }
+      }
+    };
+
+    scope.hide_mg_rest_if_production_env = function (store_type) {
+      if(store_type=="Magento API 2" && location.host.includes("groovepacker.com")) {
+        return false;
+      } else {
+        return true;
       }
     };
 
@@ -249,8 +263,8 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
                   current_map.map.name = current_map.name;
                   current_map.map.flag = 'file_upload';
                   if (current_map.map.type == 'order') {
-                    if (current_map.map.order_date_time_format == null || current_map.map.order_date_time_format == 'Default') {
-                      if(confirm("Order Date/Time foramt has not been set. Would you like to continue using the current Date/Time for each imported order? Click ok to continue the import using the current date/time for all orders or click cancel and edit map to select one.")){
+                    if (current_map.map.order_date_time_format == null) {
+                      if(confirm("Order Date/Time format has not been set. Would you like to continue using the current Date/Time for each imported order? Click ok to continue the import using the current date/time for all orders or click cancel and edit map to select one.")){
                         current_map.map.order_placed_at = new Date();
                         stores.csv.do_import({current: current_map.map});
                         myscope.reset_choose_file();
@@ -483,6 +497,33 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
       }, 500);
     };
 
+    scope.launch_magento_aurthorize_popup = function () {
+      var magento_authorize_url;
+      stores.magento.get_aurthorize_url(scope.stores.single.id).then(function (response) {
+        if(response.data.status==false) {
+          notification.notify(response.data.message);
+          return;
+        } else{
+          $timeout(function () {
+            var magento_url = $sce.trustAsResourceUrl(response.data.authorized_url);
+            if (magento_url == null) {
+              if (typeof response.data.authorized_url == 'undefined') {
+                notification.notify("Please enter correct URL, API Key and API Secret.");
+              }
+            } else {
+              myscope.open_popup(response.data.authorized_url);
+            }
+          }, 500);
+        }
+      })
+    };
+
+    scope.get_magento_access_token = function () {
+      stores.magento.get_access_token(scope.stores.single).then(function (response) {
+        myscope.store_single_details(scope.stores.single.id, true);
+      })
+    }
+
     myscope.rollback = function () {
       if (typeof myscope.single == "undefined" || typeof myscope.single.id == "undefined") {
         if (typeof scope.stores.single['id'] != "undefined") {
@@ -578,6 +619,10 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
         Magento: {
           name: "Magento",
           file: "/assets/views/modals/settings/stores/magento.html"
+        },
+        "Magento API 2": {
+          name: "Magento API 2",
+          file: "/assets/views/modals/settings/stores/magento_rest.html"
         },
         Ebay: {
           name: "Ebay",

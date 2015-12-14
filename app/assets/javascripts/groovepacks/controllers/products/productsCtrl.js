@@ -76,9 +76,13 @@ groovepacks_controllers.
       };
 
       $scope.product_receiving_label = function () {
-        products.list.update('receiving_label', $scope.products).then(function (data) {
-          myscope.get_products();
-        });
+        if($scope.products.selected.length>0){
+          products.list.update('receiving_label', $scope.products).then(function (data) {
+            myscope.get_products();
+          });
+        } else {
+          products.list.select_notification();
+        }
       };
 
       $scope.product_duplicate = function () {
@@ -88,15 +92,23 @@ groovepacks_controllers.
       };
 
       $scope.product_barcode = function () {
-        products.list.update('barcode', $scope.products).then(function (data) {
-          myscope.get_products();
-        });
+        if($scope.products.selected.length>0){
+          products.list.update('barcode', $scope.products).then(function (data) {
+            myscope.get_products();
+          });
+        } else {
+          products.list.select_notification();
+        }
       };
 
       $scope.backup_product_csv = function () {
-        products.list.generate($scope.products).then(function (data) {
-          myscope.get_products();
-        });
+        if($scope.products.selected.length>0){
+          products.list.generate($scope.products).then(function (data) {
+            myscope.get_products();
+          });
+        } else {
+          products.list.select_notification();
+        }
       };
 
       $scope.setup_child = function (childStateParams) {

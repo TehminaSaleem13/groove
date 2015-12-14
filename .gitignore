@@ -20,3 +20,4 @@ rspec.xml
 node_modules/
 protractor_report/
 test/
+coverage/

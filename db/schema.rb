@@ -236,13 +236,6 @@ ActiveRecord::Schema.define(:version => 20151201041703) do
     t.datetime "updated_at",                          :null => false
   end
 
-  create_table "import_exceptions", :force => true do |t|
-    t.integer  "import_item_id"
-    t.string   "error_log_url"
-    t.datetime "created_at",     :null => false
-    t.datetime "updated_at",     :null => false
-  end
-
   create_table "import_items", :force => true do |t|
     t.string   "status"
     t.integer  "store_id"
@@ -305,6 +298,20 @@ ActiveRecord::Schema.define(:version => 20151201041703) do
     t.string   "api_key",          :default => "",    :null => false
     t.boolean  "import_products",  :default => false, :null => false
     t.boolean  "import_images",    :default => false, :null => false
+    t.datetime "last_imported_at"
+  end
+
+  create_table "magento_rest_credentials", :force => true do |t|
+    t.integer  "store_id"
+    t.string   "host"
+    t.string   "api_key"
+    t.string   "api_secret"
+    t.boolean  "import_images"
+    t.boolean  "import_categories"
+    t.datetime "created_at",         :null => false
+    t.datetime "updated_at",         :null => false
+    t.string   "access_token"
+    t.string   "oauth_token_secret"
     t.datetime "last_imported_at"
   end
 
@@ -508,6 +515,7 @@ ActiveRecord::Schema.define(:version => 20151201041703) do
     t.string   "method"
     t.datetime "created_at",                                                                :null => false
     t.datetime "updated_at",                                                                :null => false
+    t.string   "store_order_id"
     t.text     "notes_internal"
     t.text     "notes_toPacker"
     t.text     "notes_fromPacker"
@@ -528,7 +536,6 @@ ActiveRecord::Schema.define(:version => 20151201041703) do
     t.integer  "weight_oz"
     t.string   "non_hyphen_increment_id"
     t.boolean  "note_confirmation",                                      :default => false
-    t.string   "store_order_id"
     t.integer  "inaccurate_scan_count",                                  :default => 0
     t.datetime "scan_start_time"
     t.boolean  "reallocate_inventory",                                   :default => false
@@ -537,19 +544,6 @@ ActiveRecord::Schema.define(:version => 20151201041703) do
     t.integer  "total_scan_count",                                       :default => 0
     t.decimal  "packing_score",           :precision => 10, :scale => 0, :default => 0
   end
-
-  create_table "orders_import_summaries", :force => true do |t|
-    t.integer  "total_retrieved"
-    t.integer  "success_imported"
-    t.integer  "previous_imported"
-    t.boolean  "status"
-    t.string   "error_message"
-    t.integer  "store_id"
-    t.datetime "created_at",        :null => false
-    t.datetime "updated_at",        :null => false
-  end
-
-  add_index "orders_import_summaries", ["store_id"], :name => "index_orders_import_summaries_on_store_id"
 
   create_table "product_barcodes", :force => true do |t|
     t.integer  "product_id"
@@ -740,9 +734,9 @@ ActiveRecord::Schema.define(:version => 20151201041703) do
     t.float    "order_complete_sound_vol",      :default => 0.75
     t.boolean  "type_scan_code_enabled",        :default => true
     t.string   "type_scan_code",                :default => "*"
+    t.string   "post_scanning_option",          :default => "None"
     t.string   "escape_string",                 :default => " - "
     t.boolean  "escape_string_enabled",         :default => false
-    t.string   "post_scanning_option",          :default => "None"
     t.boolean  "record_lot_number",             :default => false
     t.boolean  "show_customer_notes",           :default => false
     t.boolean  "show_internal_notes",           :default => false
@@ -835,11 +829,13 @@ ActiveRecord::Schema.define(:version => 20151201041703) do
 
   create_table "sync_options", :force => true do |t|
     t.integer  "product_id"
-    t.boolean  "sync_with_bc",   :default => false
+    t.boolean  "sync_with_bc",       :default => false
     t.integer  "bc_product_id"
-    t.datetime "created_at",                        :null => false
-    t.datetime "updated_at",                        :null => false
+    t.datetime "created_at",                            :null => false
+    t.datetime "updated_at",                            :null => false
     t.string   "bc_product_sku"
+    t.boolean  "sync_with_mg_rest"
+    t.integer  "mg_rest_product_id"
   end
 
   create_table "tenants", :force => true do |t|
@@ -895,13 +891,6 @@ ActiveRecord::Schema.define(:version => 20151201041703) do
   add_index "users", ["inventory_warehouse_id"], :name => "index_users_on_inventory_warehouse_id"
   add_index "users", ["reset_password_token"], :name => "index_users_on_reset_password_token", :unique => true
   add_index "users", ["role_id"], :name => "index_users_on_role_id"
-
-  create_table "users_roles", :id => false, :force => true do |t|
-    t.integer "user_id"
-    t.integer "role_id"
-  end
-
-  add_index "users_roles", ["user_id", "role_id"], :name => "index_users_roles_on_user_id_and_role_id"
 
   create_table "webhooks", :force => true do |t|
     t.binary   "event",      :limit => 16777215
