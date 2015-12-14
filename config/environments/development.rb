@@ -116,6 +116,7 @@ Groovepacks::Application.configure do
 
   ENV['BC_CLIENT_ID'] = "hcd39v5m3dapbtpa2gpi5f4iz3syjps"
   ENV['BC_CLIENT_SECRET'] = "d8b8es9ojf0x2dyi1jx12ozvbatcqhr"
+  ENV['BC_APP_URL'] = "https://store-1pslcuh.mybigcommerce.com/manage/marketplace/apps/4907"
 
   # Stripe test keys
   ENV['STRIPE_API_KEY'] = "sk_test_4QS2OJ8BkMWcuzCWrHrKGlz9"
