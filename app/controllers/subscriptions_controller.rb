@@ -97,7 +97,7 @@ class SubscriptionsController < ApplicationController
   end
 
   def validate_coupon_id
-    is_coupon_valid(params[:coupon_id])
+    calculate_discount_amount(params[:coupon_id])
     render json: @result
   end
 

@@ -285,7 +285,7 @@
             }
             else {
               coupon_id = $('#coupon_id').val();
-              one_time_payment = $('#one_time_payment').val() - (($('#one_time_payment').val() * response.percent_off) / 100);
+              one_time_payment = $('#one_time_payment').val() - response.discount_amount;
               if (show_coupon_block) {
                 $('#error-coupon-block').hide();
                 $('#success-coupon-block').show();
@@ -294,10 +294,10 @@
               ;
               $('#monthly_billing_label').hide();
               $('#monthly_discount_label').show();
-              $('#monthly_discount_label').html('The first monthly billing will be charged after 30 days. A one time initialization charge of <strike>$500</strike> $' + one_time_payment / 100 + '(' + response.percent_off + '% off) is paid today on deployment.');
+              $('#monthly_discount_label').html('The first monthly billing will be charged after 30 days. A one time initialization charge of <strike>$500</strike> $' + one_time_payment / 100 + '($' + response.discount_amount + ' off) is paid today on deployment.');
               $('#annual_billing_label').hide();
               $('#annual_discount_label').show();
-              $('#annual_discount_label').html('The first annual billing will be charged after 30 days at a 10% discount. A one time initialization charge of <strike>$500</strike> $' + one_time_payment / 100 + '(' + response.percent_off + '% off) is paid today on deployment.');
+              $('#annual_discount_label').html('The first annual billing will be charged after 30 days at a 10% discount. A one time initialization charge of <strike>$500</strike> $' + one_time_payment / 100 + '($' + response.discount_amount + ' off) is paid today on deployment.');
             }
           });
         }
