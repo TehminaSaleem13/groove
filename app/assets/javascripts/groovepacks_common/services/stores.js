@@ -199,6 +199,7 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
             stores.single.shop_name = data.credentials.big_commerce_credentials.shop_name;
             stores.single.access_token = data.credentials.big_commerce_credentials.access_token;
             stores.single.store_hash = data.credentials.big_commerce_credentials.store_hash;
+            stores.single.bigcommerce_permission_url = data.credentials.bigcommerce_permission_url;
           } else if (data.store.store_type == 'CSV') {
             stores.single.host = data.credentials.ftp_credentials.host;
             stores.single.port = data.credentials.ftp_credentials.port;

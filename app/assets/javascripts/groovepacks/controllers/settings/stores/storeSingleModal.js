@@ -422,6 +422,10 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
     myscope.open_popup = function (url) {
       var w = 1000;
       var h = 400;
+      if(scope.stores.single.store_type=="BigCommerce") {
+        w = 1300;
+        h = 600;
+      }
       var left_adjust = angular.isDefined($window.screenLeft) ? $window.screenLeft : $window.screen.left;
       var top_adjust = angular.isDefined($window.screenTop) ? $window.screenTop : $window.screen.top;
       var width = $window.innerWidth ? $window.innerWidth : $window.document.documentElement.clientWidth ? $window.document.documentElement.clientWidth : $window.screen.width;
@@ -472,13 +476,13 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
 
     scope.launch_big_commerce_popup = function () {
       $timeout(function () {
-        var shopify_url = $sce.trustAsResourceUrl("https://store-1pslcuh.mybigcommerce.com/manage/marketplace/apps/5386");
-        if (shopify_url == null) {
+        var bigcommerce_url = $sce.trustAsResourceUrl(scope.stores.single.bigcommerce_permission_url);
+        if (bigcommerce_url == null) {
           if (typeof scope.stores.single.shop_name == 'undefined') {
             notification.notify("Please enter your store name first.");
           }
         } else {
-          myscope.open_popup(shopify_url);
+          myscope.open_popup(bigcommerce_url);
         }
       }, 500);
     };
