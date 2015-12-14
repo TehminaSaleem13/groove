@@ -94,6 +94,7 @@ class Store < ActiveRecord::Base
     end
     if self.store_type == 'BigCommerce'
       @result['big_commerce_credentials'] = big_commerce_credential
+      @result['bigcommerce_permission_url'] = ENV['BC_APP_URL']
       @result['status'] =true
     end
     if self.store_type == 'CSV'
