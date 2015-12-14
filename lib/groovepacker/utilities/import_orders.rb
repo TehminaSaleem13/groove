@@ -13,16 +13,24 @@ class ImportOrders
           if order_import_summary == ordered_import_summaries.first
             order_import_summary.status = 'in_progress'
             order_import_summary.save
-            ImportItem.where('order_import_summary_id IS NOT NULL').delete_all
             # add import item for each store
             stores = Store.where("status = '1' AND store_type != 'system' AND store_type != 'Shipworks'")
             if stores.length != 0
               stores.each do |store|
-                import_item = ImportItem.new
-                import_item.store_id = store.id
-                import_item.status = 'not_started'
-                import_item.order_import_summary_id = order_import_summary.id
-                import_item.save
+                imp_items = ImportItem.where('store_id = ? AND order_import_summary_id IS NOT NULL', store.id)
+                if store.store_type == 'CSV' && !store.ftp_credential.nil? && store.ftp_credential.use_ftp_import == false
+                  if imp_items.empty?
+                    import_item = new_import_item(store.id, order_import_summary.id)
+                    import_item.status = 'failed'
+                    import_item.message = 'FTP import for this store has not been activated'
+                    import_item.save
+                  end
+                else
+                  imp_items.delete_all
+                  import_item = new_import_item(store.id, order_import_summary.id)
+                  import_item.status = 'not_started'
+                  import_item.save
+                end
               end
             end
             @order_import_summary = order_import_summary
@@ -121,6 +129,13 @@ class ImportOrders
       end
       break if job_scheduled
     end
+  end
+
+  def new_import_item(store_id, order_import_summary_id)
+    import_item = ImportItem.new
+    import_item.store_id = store_id
+    import_item.order_import_summary_id = order_import_summary_id
+    import_item
   end
 
   def import_orders_with_import_item(import_item, tenant)
@@ -257,12 +272,9 @@ class ImportOrders
         end
         import_item.save
       #=============================================================
-      elsif store_type == 'CSV'
+      elsif store_type == 'CSV' && import_item.status != 'failed'
         mapping = CsvMapping.find_by_store_id(store.id)
-        if !store.ftp_credential.use_ftp_import
-          import_item.status = 'failed'
-          import_item.message = 'FTP import for this store has not been activated'
-        elsif !mapping.nil? && !mapping.order_csv_map.nil? && !store.ftp_credential.nil? && store.ftp_credential.connection_established
+        if !mapping.nil? && !mapping.order_csv_map.nil? && !store.ftp_credential.nil? && store.ftp_credential.connection_established
           import_item.status = 'in_progress'
           import_item.save
           map = mapping.order_csv_map

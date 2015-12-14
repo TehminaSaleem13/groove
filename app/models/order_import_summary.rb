@@ -18,8 +18,9 @@ class OrderImportSummary < ActiveRecord::Base
     result = Hash.new
     result['import_info'] = self.reload
     result['import_items'] = []
-    import_items = ImportItem.where('order_import_summary_id = '+self.id.to_s+' OR order_import_summary_id is null')
-    import_items.all.each do |import_item|
+    # import_items = ImportItem.where('order_import_summary_id = '+self.id.to_s+' OR order_import_summary_id is null')
+    import_items = ImportItem.all
+    import_items.each do |import_item|
       if import_item.store.nil?
         import_item.destroy
       else
