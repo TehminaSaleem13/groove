@@ -93,7 +93,7 @@ module Groovepacker
                 # if product images are empty then import product image
                 import_pimary_image(product, bc_product)
               end
-              
+
               create_sync_option_for_product(product, bc_product, sku)
               
               make_product_intangible(product)
@@ -130,7 +130,7 @@ module Groovepacker
                 product.product_images.create(image: bc_product["primary_image"]["standard_url"])
               end
             end
-
+            
             def create_sync_option_for_product(product, bc_product, sku)
               return unless product.sync_option.nil?
               product.create_sync_option(:bc_product_id => bc_product["id"], :bc_product_sku => sku, :sync_with_bc => true)
