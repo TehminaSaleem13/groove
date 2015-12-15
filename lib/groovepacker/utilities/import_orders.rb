@@ -21,8 +21,7 @@ class ImportOrders
                 if store.store_type == 'CSV' && !store.ftp_credential.nil? && store.ftp_credential.use_ftp_import == false
                   if imp_items.empty?
                     import_item = new_import_item(store.id, order_import_summary.id)
-                    import_item.status = 'failed'
-                    import_item.message = 'FTP import for this store has not been activated'
+                    import_item.message = 'CSV Importers Ready. FTP Order Import Is Off'
                     import_item.save
                   end
                 else
@@ -280,7 +279,7 @@ class ImportOrders
         end
         import_item.save
       #=============================================================
-      elsif store_type == 'CSV' && import_item.status != 'failed'
+      elsif store_type == 'CSV' && !import_item.status.nil?
         mapping = CsvMapping.find_by_store_id(store.id)
         if !mapping.nil? && !mapping.order_csv_map.nil? && !store.ftp_credential.nil? && store.ftp_credential.connection_established
           import_item.status = 'in_progress'

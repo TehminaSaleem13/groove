@@ -156,6 +156,12 @@ groovepacks_controllers.
                 }
               } else if (import_item.import_info.status == 'cancelled') {
                 single_data.progress.value = 100;
+              } else {
+                single_data.progress.value = 100;
+                single_data.progress.type = 'completed';
+                if (import_item.import_info.message != '') {
+                  single_data.progress.message = import_item.import_info.message;
+                }
               }
               $scope.import_groov_popover.data.push(single_data);
             }
