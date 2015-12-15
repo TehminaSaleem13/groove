@@ -25,6 +25,26 @@ module Groovepacker
         combined_response
       end
 
+      def products
+        page_index = 1
+        options = {}
+        combined_response = {}
+        combined_response["products"] = []
+        
+        while page_index
+          puts = "======================Fetching Page #{page_index}======================"
+          options[:page] = page_index
+          response = get("https://api.bigcommerce.com/#{@store_hash}/v2/products", options)
+          break if response.blank?
+          page_index += 1
+          combined_response["products"] << response
+        end
+        
+        combined_response["products"] = combined_response["products"].flatten
+        combined_response
+      end
+
+
       def product(product_id)
         get("https://api.bigcommerce.com/#{@store_hash}/v2/products/#{product_id}")
       end
