@@ -59,6 +59,14 @@ RSpec.describe SubscriptionsController, :type => :controller do
       expect(result['status']).to eq(true)
     end
 
+    it "Promotion code with amount_off should be valid" do
+      request.accept = "application/json"
+      get :validate_coupon_id, {"coupon_id"=>"COUGROOVE200", "subscription"=>{}}
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['status']).to eq(true)
+    end
+
     it "Should invalidate stripe token for user subscription" do
       request.accept = "application/json"
       doc = IO.read(Rails.root.join("spec/fixtures/files/subscription_data"))

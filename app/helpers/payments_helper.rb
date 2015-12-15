@@ -133,7 +133,7 @@ module PaymentsHelper
       if coupon.id == coupon_id
         valid = true
         if coupon.percent_off
-          @result['discount_amount'] = (one_time_payment.to_i * coupon.percent_off) / 100
+          @result['discount_amount'] = (ENV['ONE_TIME_PAYMENT'].to_i * coupon.percent_off) / 100
         elsif coupon.amount_off
           @result['discount_amount'] = coupon.amount_off
         end
