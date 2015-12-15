@@ -98,7 +98,7 @@ module Groovepacker
         end
         current_tenant = Apartment::Tenant.current_tenant
         Apartment::Tenant.switch()
-        base_query = 'SELECT tenants.id as id, tenants.name as name, tenants.updated_at as updated_at, tenants.created_at as created_at, subscriptions.subscription_plan_id as plan, subscriptions.stripe_customer_id as stripe_url
+        base_query = 'SELECT tenants.id as id, tenants.name as name, tenants.note as note, tenants.updated_at as updated_at, tenants.created_at as created_at, subscriptions.subscription_plan_id as plan, subscriptions.stripe_customer_id as stripe_url
           FROM tenants LEFT JOIN subscriptions ON (subscriptions.tenant_id = tenants.id) 
             WHERE
               (
