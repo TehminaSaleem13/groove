@@ -13,7 +13,7 @@ module Groovepacker
             result = self.build_result
             response = client.orders(credential, import_item)
             orders_product_ids = []
-            inv_pull_context = init_inv_pull(credential.store)
+            bc_context = get_bc_context(credential.store)
             
             #========
             credential.update_attributes( :last_imported_at => Time.now )
@@ -44,32 +44,10 @@ module Groovepacker
                   import_item.current_order_imported_item += 1
                   import_item.save
 
-                  product_is_nil = Product.find_by_name(item["name"]).nil?
-                  if item["sku"].nil? or item["sku"] == ''
-                    # if sku is nil or empty
-                    if product_is_nil
-                    # and if item is not found by name then create the item
-                    product = create_new_product_from_order(item, credential.store, ProductSku.get_temp_sku, client)
-                    order_item.product = product
-                    else
-                      # product exists add temp sku if it does not exist
-                      products = Product.where(name: item["name"])
-                      unless contains_temp_skus(products)
-                        product = create_new_product_from_order(item, credential.store, ProductSku.get_temp_sku, client)
-                        order_item.product = product
-                      else
-                        product = get_product_with_temp_skus(products)
-                        order_item.product = product
-                      end
-                    end
-                  elsif ProductSku.where(sku: item["sku"]).length == 0
-                    # if non-nil sku is not found
-                    product = create_new_product_from_order(item, credential.store, item["sku"], client)
-                    order_item.product = product
-                  else
-                    product = ProductSku.where(sku: item["sku"]).first.product
-                    order_item.product = product
-                  end
+                  #second parameter in below method call is to tell weather to import inv or not
+                  product = bc_context.import_bc_single_product(item, false)
+                  
+                  order_item.product = product
                   bigcommerce_order.order_items << order_item
                 end
               end
@@ -79,7 +57,7 @@ module Groovepacker
               bigcommerce_order.save
 
               bigcommerce_order.order_items.each do |item|
-                inv_pull_context.pull_single_product_inventory(item.product)
+                bc_context.pull_single_product_inventory(item.product)
               end
 
 
@@ -140,57 +118,7 @@ module Groovepacker
             order_item
           end
 
-          def create_new_product_from_order(item, store, sku, client)
-            #create and import product
-            product = Product.create(name: item["name"], store: store,
-                                     store_product_id: item["product_id"])
-            product.product_skus.create(sku: sku)
-
-            #get from products api
-            bigcommerce_product = client.product(item["product_id"])
-            unless bigcommerce_product.nil?
-              barcode = bigcommerce_product["upc"].blank? ? nil : bigcommerce_product["upc"]
-              product.product_barcodes.create(barcode: barcode)
-              # get product categories
-              unless bigcommerce_product["categories"].blank?
-                tags = []
-                categories = client.product_categories("https://api.bigcommerce.com/#{client.as_json["store_hash"]}/v2/categories")
-                categories.select {|cat| tags << cat["name"] if bigcommerce_product["categories"].include?(cat["id"])}
-                tags.each do |tag|
-                  product.product_cats.create(category: tag)
-                end
-              end
-
-              unless bigcommerce_product["skus"].empty? #Product skus are variants in BigCommerce
-                product_skus = client.product_skus(bigcommerce_product["skus"]["url"]) || []
-                product_skus.each do |variant|
-                  next unless variant["sku"] == sku
-                  # create barcode
-                  barcode = variant["upc"].blank? ? nil : variant["upc"]
-                  product.product_barcodes.create(barcode: barcode)
-                  # get image based on the variant id
-                  images = client.product_images(bigcommerce_product["images"]["url"])
-                  (images||[]).each do |image|
-                    product.product_images.create(image: image["src"])
-                  end
-                end
-              end
-
-              # if product images are empty then import product image
-              if product.product_images.empty? && !bigcommerce_product["primary_image"].blank?
-                product.product_images.create(image: bigcommerce_product["primary_image"]["standard_url"])
-              end
-
-            end
-            product.create_sync_option(:bc_product_id => item["product_id"], :bc_product_sku => sku, :sync_with_bc => true)
-            product.save
-            make_product_intangible(product)
-            #product.update_product_status
-            product.set_product_status
-            product
-          end
-
-          def init_inv_pull(store)
+          def get_bc_context(store)
             handler = Groovepacker::Stores::Handlers::BigCommerceHandler.new(store)
             context = Groovepacker::Stores::Context.new(handler)
             return context

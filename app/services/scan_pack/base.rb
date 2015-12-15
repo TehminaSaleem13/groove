@@ -1,5 +1,7 @@
 module ScanPack
   class Base
+    include ScanPack::Utilities::OrderDetailsAndNextItem
+
     def can_order_be_scanned
       #result = false
       #max_shipments = AccessRestriction.order("created_at").last.num_shipments
@@ -20,71 +22,23 @@ module ScanPack
       generate_barcode
     end
 
-    ######### ORDER DETAILS AND NEXT ITEM #############
-    #-------------------------------------------------
-    def order_details_and_next_item
-      @single_order.reload
-      data = @single_order.attributes
-      data['unscanned_items'] = @single_order.get_unscanned_items
-      data['scanned_items'] = @single_order.get_scanned_items
-      do_if_unscanned_items_present(data) unless data['unscanned_items'].length == 0
-      return data
-    end
-
-    def do_if_unscanned_items_present(data)
-      unless @session[:most_recent_scanned_products].nil?
-        @session[:most_recent_scanned_products].reverse!.each do |scanned_product_id|
-          do_find_next_item(data, scanned_product_id)
-          break if data['next_item'].present?
-        end
-      end
-      do_if_next_item_still_not_present(data) if data['next_item'].nil?
-      data['next_item']['qty'] = data['next_item']['scanned_qty'] + data['next_item']['qty_remaining']
-    end
-
-    def do_find_next_item(data, scanned_product_id)
-      session_parent_order_item = @session[:parent_order_item]
-
-      data['unscanned_items'].each do |unscanned_item|
-        product_type = unscanned_item['product_type']
-        case true
-        when session_parent_order_item && session_parent_order_item == unscanned_item['order_item_id']
-          session_parent_order_item = false
-          if product_type == 'individual' && !unscanned_item['child_items'].empty?
-            data['next_item'] = unscanned_item['child_items'].first.clone
-          end
-        when (
-            product_type == 'single' &&
-            scanned_product_id == unscanned_item['product_id'] &&
-            unscanned_item['scanned_qty'] + unscanned_item['qty_remaining'] > 0
-          )
-          data['next_item'] = unscanned_item.clone
-        when product_type == 'individual'
-          unscanned_item['child_items'].each do |child_item|
-            if child_item['product_id'] == scanned_product_id
-              data['next_item'] = child_item.clone
-              break
-            end
-          end
-        end
-        break if data['next_item'].present?
-      end
-    end
-
-    def do_if_next_item_still_not_present(data)
-      unscanned_items = data['unscanned_items']
-      product_type = unscanned_items.first['product_type']
-      data['next_item'] = if product_type == 'single'
-        unscanned_items.first.clone
-      elsif product_type == 'individual'
-        unscanned_items.first['child_items'].first.clone unless unscanned_items.first['child_items'].empty?
-      end
-    end
-    #--------END of ORDER DETAILS AND NEXT ITEM-----------------------------
-
     def generate_packing_slip(order)
       result = Hash.new
       result['status'] = false
+
+      do_setup_page_properties
+
+      @file_name = Apartment::Tenant.current+Time.now.strftime('%d_%b_%Y_%I__%M_%p')
+      orders = []
+
+      @single_order = Order.find(order.id)
+      if @single_order.present?
+        orders.push({id: @single_order.id, increment_id: @single_order.increment_id})
+      end
+      do_generate_barcode_with_delayed_job(orders) unless orders.empty?
+    end
+
+    def do_setup_page_properties
       if GeneralSetting.get_packing_slip_size == '4 x 6'
         @page_height = '6'
         @page_width = '4'
@@ -105,15 +59,6 @@ module ScanPack
         @page_height = @page_height.to_s
       end
       @header = ''
-
-      @file_name = Apartment::Tenant.current+Time.now.strftime('%d_%b_%Y_%I__%M_%p')
-      orders = []
-
-      @single_order = Order.find(order.id)
-      if @single_order.present?
-        orders.push({id: @single_order.id, increment_id: @single_order.increment_id})
-      end
-      do_generate_barcode_with_delayed_job(orders) unless orders.empty?
     end
 
     def do_generate_barcode_with_delayed_job(orders)

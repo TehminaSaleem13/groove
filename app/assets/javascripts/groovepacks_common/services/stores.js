@@ -379,7 +379,8 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
 
   //Import related functions
   var import_products = function (stores, report_id) {
-    return $http.get('/products/import_products/' + stores.single.id + '.json?reportid=' + report_id).success(function (data) {
+    //return $http.get('/products/import_products/' + stores.single.id + '.json?reportid=' + report_id).success(function (data) {
+      return $http.get('/products/import_products.json?reportid=' + report_id + '&id=' + stores.single.id).success(function (data) {
       if (data.status) {
         stores.import.product.status = "Successfully imported " + data.success_imported + " of " + data.total_imported +
           " products. " + data.previous_imported + " products were previously imported";
