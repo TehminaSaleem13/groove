@@ -281,7 +281,7 @@ class ImportOrders
       #=============================================================
       elsif store_type == 'CSV' && !import_item.status.nil?
         mapping = CsvMapping.find_by_store_id(store.id)
-        if !mapping.nil? && !mapping.order_csv_map.nil? && !store.ftp_credential.nil? && store.ftp_credential.connection_established
+        if !mapping.nil? && !mapping.order_csv_map.nil? && store.ftp_credential.username && store.ftp_credential.password && store.ftp_credential.host
           import_item.status = 'in_progress'
           import_item.save
           map = mapping.order_csv_map
