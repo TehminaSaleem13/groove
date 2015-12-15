@@ -14,6 +14,11 @@ module Groovepacker
           Groovepacker::Stores::Importers::BigCommerce::OrdersImporter.new(
             self.build_handle).import
         end
+
+        def import_products
+          Groovepacker::Stores::Importers::BigCommerce::ProductsImporter.new(
+            self.build_handle).import
+        end
         
         def pull_inventory
           Groovepacker::Stores::Importers::BigCommerce::Inventory.new(
@@ -28,6 +33,11 @@ module Groovepacker
         def pull_single_product_inventory(product)
           Groovepacker::Stores::Importers::BigCommerce::Inventory.new(
             self.build_handle).pull_single_product_inventory(product)
+        end
+
+        def import_bc_single_product(product, pull_inv=true)
+          Groovepacker::Stores::Importers::BigCommerce::ProductsImporter.new(
+            self.build_handle).import_bc_single_product(product, pull_inv)
         end
       end
     end
