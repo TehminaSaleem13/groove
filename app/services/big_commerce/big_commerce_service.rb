@@ -1,5 +1,5 @@
 module BigCommerce
-  class BigCommerceService < ScanPack::Base
+  class BigCommerceService
     
     def initialize(attrs={})
       @store = attrs[:store]
