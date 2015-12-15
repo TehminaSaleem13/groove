@@ -44,7 +44,7 @@ module FTP
           
           if file.nil?
             result[:status] = false
-            result[:error_messages].push("No CSV files could be found without '-imported' in the file name")
+            result[:error_messages].push("All CSV files on the server appear to have been imported.")
           else
             result[:success_messages].push("Connection succeeded! #{file} was found.")
           end
@@ -92,7 +92,7 @@ module FTP
             result[:file_info][:ftp_file_name] = file
           else
             result[:status] = false
-            result[:error_messages].push("No CSV files could be found without '-imported' in the file name")
+            result[:error_messages].push("All CSV files on the server appear to have been imported.")
           end
         else
           result[:status] = false
@@ -103,7 +103,7 @@ module FTP
         end
       rescue Net::SFTP::StatusException
         result[:status] = false
-        result[:error_messages].push("No CSV files could be found without '-imported' in the file name")
+        result[:error_messages].push("All CSV files on the server appear to have been imported.")
       rescue Exception => e
         result[:status] = false
         result[:error_messages].push(e.message)
