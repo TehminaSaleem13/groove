@@ -74,16 +74,18 @@ module Groovepacker
             def create_new_product(bc_product, sku)
               #create and import product
               product = Product.create(name: bc_product["name"], store: @store,
-                                       store_product_id: bc_product["id"])
+                                       store_product_id: bc_product["id"],
+                                       weight: bc_product["weight"])
               product.product_skus.create(sku: sku)
 
               #get from products api
-              
+
               unless bc_product.nil?
                 barcode = bc_product["upc"].blank? ? nil : bc_product["upc"]
                 product.product_barcodes.create(barcode: barcode)
+                
                 # get product categories
-                get_product_categories(bc_product)
+                get_product_categories(product, bc_product)
                 
                 #Product skus are variants in BigCommerce
                 create_barcodes_and_images_from_variants(product, bc_product, sku)
@@ -91,7 +93,8 @@ module Groovepacker
                 # if product images are empty then import product image
                 import_pimary_image(product, bc_product)
               end
-              create_sync_option_for_product(product, bc_product)
+              
+              create_sync_option_for_product(product, bc_product, sku)
               
               make_product_intangible(product)
               #product.update_product_status
@@ -99,7 +102,7 @@ module Groovepacker
               product
             end
 
-            def get_product_categories(bc_product)
+            def get_product_categories(product, bc_product)
               return if bc_product["categories"].blank?
               tags = []
               categories = @client.product_categories("https://api.bigcommerce.com/#{@client.as_json["store_hash"]}/v2/categories")
@@ -128,7 +131,7 @@ module Groovepacker
               end
             end
 
-            def create_sync_option_for_product(product, bc_product)
+            def create_sync_option_for_product(product, bc_product, sku)
               return unless product.sync_option.nil?
               product.create_sync_option(:bc_product_id => bc_product["id"], :bc_product_sku => sku, :sync_with_bc => true)
               product.save
