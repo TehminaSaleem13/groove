@@ -79,6 +79,9 @@ module Groovepacker
               product.product_skus.create(sku: sku)
 
               #get from products api
+              #we are fetching product again here because the order_item may also
+              #be passed as bc_product in this method.
+              bc_product = @client.product(bc_product["product_id"]) if bc_product["order_id"].present?
 
               unless bc_product.nil?
                 barcode = bc_product["upc"].blank? ? nil : bc_product["upc"]
@@ -113,7 +116,7 @@ module Groovepacker
             end
 
             def create_barcodes_and_images_from_variants(product, bc_product, sku)
-              return if bc_product["skus"].empty? 
+              return if bc_product["skus"].blank? 
               product_skus = @client.product_skus(bc_product["skus"]["url"]) || []
               product_skus.each do |variant|
                 next unless variant["sku"] == sku
