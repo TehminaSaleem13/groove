@@ -18,17 +18,16 @@ class ImportOrders
             if stores.length != 0
               stores.each do |store|
                 imp_items = ImportItem.where('store_id = ? AND order_import_summary_id IS NOT NULL', store.id)
-                if store.store_type == 'CSV' && !store.ftp_credential.nil? && store.ftp_credential.use_ftp_import == false
+                if store.store_type == 'CSV' && store.ftp_credential && store.ftp_credential.use_ftp_import == false
                   if imp_items.empty?
-                    import_item = new_import_item(store.id, order_import_summary.id)
-                    import_item.message = 'CSV Importers Ready. FTP Order Import Is Off'
-                    import_item.save
+                    import_item = new_import_item(store.id, order_import_summary.id,nil,'CSV Importers Ready. FTP Order Import Is Off')
+                  elsif !imp_items.where("status = 'failed'").empty?
+                    imp_items.delete_all
+                    import_item = new_import_item(store.id, order_import_summary.id,nil, 'FTP Order Import Is Off')
                   end
                 else
                   imp_items.delete_all
-                  import_item = new_import_item(store.id, order_import_summary.id)
-                  import_item.status = 'not_started'
-                  import_item.save
+                  import_item = new_import_item(store.id, order_import_summary.id, 'not_started', nil)
                 end
               end
             end
@@ -130,11 +129,13 @@ class ImportOrders
     end
   end
 
-  def new_import_item(store_id, order_import_summary_id)
+  def new_import_item(store_id, order_import_summary_id, status = nil, message = nil)
     import_item = ImportItem.new
     import_item.store_id = store_id
     import_item.order_import_summary_id = order_import_summary_id
-    import_item
+    import_item.status = status
+    import_item.message = message
+    import_item.save!
   end
 
   def import_orders_with_import_item(import_item, tenant)
