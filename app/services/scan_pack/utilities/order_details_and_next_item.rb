@@ -19,7 +19,7 @@ module ScanPack
             break if data['next_item'].present?
           end
         end
-        do_if_next_item_still_not_present(data) if data['next_item'].nil?
+        do_if_next_item_still_not_present(data) unless data['next_item'].present?
         data['next_item']['qty'] = data['next_item']['scanned_qty'] + data['next_item']['qty_remaining']
       end
 
@@ -27,28 +27,28 @@ module ScanPack
         data['unscanned_items'].each do |unscanned_item|
           product_type = unscanned_item['product_type']
           data['next_item'] = do_get_next_item(data, scanned_product_id, unscanned_item, product_type)
-          break if data['next_item'].present?
+          return if data['next_item'].present?
         end
       end
 
       def do_get_next_item(data, scanned_product_id, unscanned_item, product_type)
         session_parent_order_item = @session[:parent_order_item]
         unscanned_item_child_items = unscanned_item['child_items']
-        
+
         case
         when session_parent_order_item && session_parent_order_item == unscanned_item['order_item_id']
           @session[:parent_order_item] = false
           if product_type == 'individual' && !unscanned_item_child_items.empty?
-            unscanned_item_child_items.first.clone
+            return unscanned_item_child_items.first.clone
           end
         when (
             product_type == 'single' &&
             scanned_product_id == unscanned_item['product_id'] &&
             unscanned_item['scanned_qty'] + unscanned_item['qty_remaining'] > 0
           )
-          unscanned_item.clone
+          return unscanned_item.clone
         when product_type == 'individual'
-          do_find_next_item_in_child_items(unscanned_item_child_items, scanned_product_id)
+          return do_find_next_item_in_child_items(unscanned_item_child_items, scanned_product_id)
         end
       end
 
@@ -58,6 +58,7 @@ module ScanPack
             return child_item.clone
           end
         end
+        return nil # to avoid returning unscanned_item_child_items
       end
 
       def do_if_next_item_still_not_present(data)
