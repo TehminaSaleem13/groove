@@ -10,37 +10,15 @@ module Groovepacker
             response = @client.orders(@credential, @import_item)
             last_imported_date = Time.now
             
-            #========
             @result[:total_imported] = response["orders"].nil? ? 0 : response["orders"].length
             @import_item.update_attributes(:current_increment_id => '', :success_imported => 0, :previous_imported => 0, :current_order_items => -1, :current_order_imported_item => -1, :to_import => @result[:total_imported])
 
             (response["orders"]||[]).each do |order|
               @import_item.update_attributes(:current_increment_id => order["id"], :current_order_items => -1, :current_order_imported_item => -1)
-              
-              #Delete if order exists so modified order can be saved with new changes
-              delete_order_if_exists(order)
-
-              #create new order
-              bigcommerce_order = Order.new(store_id: @credential.store.id)
-              import_order(bigcommerce_order, order)
-
-              #import items in an order
-              bigcommerce_order = import_order_items(bigcommerce_order, order)
-              
-              #Pull inventory for the order products
-              pull_inventory_for(bigcommerce_order)
-
-              #Setting order status
-              bigcommerce_order.set_order_status
-
-              #add order activities
-              add_order_activities(bigcommerce_order)
-              #update import count with 1 and save
-              update_success_import_count
+              import_single_order(order)
             end
-
             @credential.update_attributes( :last_imported_at => last_imported_date )
-            #========
+            
             @result
           end
 
@@ -51,6 +29,26 @@ module Groovepacker
             @client = handler[:store_handle]
             @import_item = handler[:import_item]
             @result = self.build_result
+          end
+
+          def import_single_order(order)
+            #Delete if order exists so modified order can be saved with new changes
+            delete_order_if_exists(order)
+
+            #create new order
+            bigcommerce_order = Order.new(store_id: @credential.store.id)
+            import_order(bigcommerce_order, order)
+
+            #import items in an order
+            bigcommerce_order = import_order_items(bigcommerce_order, order)
+            #Pull inventory for the order products
+            pull_inventory_for(bigcommerce_order)
+            #Setting order status
+            bigcommerce_order.set_order_status
+            #add order activities
+            add_order_activities(bigcommerce_order)
+            #increase successful import count with 1 and save
+            update_success_import_count
           end
 
           def import_order(bigcommerce_order, order)
@@ -134,10 +132,10 @@ module Groovepacker
 
           def add_order_activities(bigcommerce_order)
             bigcommerce_order.addactivity("Order Import", @credential.store.name+" Import")
-            (bigcommerce_order.order_items||[]).each do |item|
-              unless item.product.nil? || item.product.primary_sku.nil?
-                bigcommerce_order.addactivity("Item with SKU: "+item.product.primary_sku+" Added", @credential.store.name+" Import")
-              end
+            bigcommerce_order.order_items.each do |item|
+              primary_sku = item.product.primary_sku rescue nil
+              next if primary_sku.nil?
+              bigcommerce_order.addactivity("Item with SKU: "+primary_sku+" Added", @credential.store.name+" Import")
             end
           end
 
