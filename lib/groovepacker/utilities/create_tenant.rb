@@ -3,6 +3,8 @@ class CreateTenant
     Apartment::Tenant.create(subscription.tenant_name)
     tenant = Tenant.create(name: subscription.tenant_name)
     subscription.tenant = tenant
+    HTTParty.post("#{ENV["GROOV_ANALYTIC"]}/tenants",
+      query: {tenant_name: subscription.tenant_name})
     Apartment::Tenant.switch(subscription.tenant_name)
     ApplyAccessRestrictions.new.delay(:run_at => 10.minutes.from_now, :queue => "apply_access_restrictions_#{subscription.tenant_name}").apply_access_restrictions(subscription.tenant_name, subscription.subscription_plan_id)
     Groovepacker::SeedTenant.new.seed(true,
