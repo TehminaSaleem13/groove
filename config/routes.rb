@@ -26,6 +26,7 @@ Groovepacks::Application.routes.draw do
   get '/magento_rest/:store_id/magento_authorize_url' => 'magento_rest#magento_authorize_url'
   get '/magento_rest/:store_id/get_access_token' => 'magento_rest#get_access_token'
   put '/magento_rest/:store_id/disconnect' => 'magento_rest#disconnect'
+  get 'stores/export_active_products' => 'stores#export_active_products'
 
   # The priority is based upon order of creation:
   # first created -> highest priority.
