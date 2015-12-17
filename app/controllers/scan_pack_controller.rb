@@ -170,9 +170,10 @@ class ScanPackController < ApplicationController
         @result['error_messages'].push('Could not find order with id: '+params[:id].to_s)
       else
         @order.notes_fromPacker = params[:note].to_s
-        if @order.save
+        general_settings = GeneralSetting.all.first
+        email_present = general_settings.email_address_for_packer_notes.present?
+        if @order.save && email_present
           @result['success_messages'].push('Note from Packer saved successfully')
-          general_settings = GeneralSetting.all.first
           if general_settings.send_email_for_packer_notes == 'always' ||
             (general_settings.send_email_for_packer_notes == 'optional' && email)
             #send email
@@ -188,7 +189,12 @@ class ScanPackController < ApplicationController
           end
         else
           @result['status'] &= false
-          @result['error_messages'].push('There was an error saving note from packer, please try again')
+          msg = if email_present
+            'There was an error saving note from packer, please try again'
+          else
+            'Email not found for notification settings.'
+          end
+          @result['error_messages'].push(msg)
         end
       end
     end
