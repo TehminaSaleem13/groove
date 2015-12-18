@@ -121,7 +121,7 @@ Groovepacks::Application.configure do
   ENV['STRIPE_PUBLIC_KEY'] = "pk_live_4QS2iJSARAa7PmM1IG70xnJ9"
   ENV['HOST_NAME'] = 'groovepacker.com'
   ENV['ONE_TIME_PAYMENT'] = '50000'
-  ENV['BC_ONE_TIME_PAYMENT'] = '25'
+  ENV['BC_ONE_TIME_PAYMENT'] = '0'
 
   ENV['S3_ACCESS_KEY_ID'] = 'AKIAIBDKVKEM7HNZUQAA'
   ENV['S3_ACCESS_KEY_SECRET'] = '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'
