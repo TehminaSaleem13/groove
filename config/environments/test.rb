@@ -61,7 +61,7 @@ Groovepacks::Application.configure do
   ENV['STRIPE_PUBLIC_KEY'] = "pk_test_4QS2UN3famIPlHtp2Q7ykpDf"
   ENV['HOST_NAME'] = 'testpacker.com'
   ENV['ONE_TIME_PAYMENT'] = '50000'
-  ENV['BC_ONE_TIME_PAYMENT'] = '25'
+  ENV['BC_ONE_TIME_PAYMENT'] = '0'
   
 
   #S3 access details
