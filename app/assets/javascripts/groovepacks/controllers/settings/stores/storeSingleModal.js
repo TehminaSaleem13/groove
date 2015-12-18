@@ -90,6 +90,11 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
       });
     };
 
+    scope.import_bc_products = function(){
+      scope.stores.single.import_type = 'bc_products_import';
+      scope.import_products();
+    }
+
     scope.import_products = function (report_id) {
       scope.stores.import.product.status = "Import in progress";
       scope.stores.import.product.status_show = true;
@@ -341,7 +346,9 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
                   });
                 };
               } else {
-                notification.notify("Please choose a file to import first",0);
+                if(scope.stores.single.import_type != 'bc_products_import'){
+                  notification.notify("Please choose a file to import first",0);
+                }
               };
             }
           }
