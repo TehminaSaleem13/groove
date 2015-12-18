@@ -19,52 +19,30 @@ module ScanPack
         })
       @single_order = Order.where(id: @id).last
       @scanpack_settings = ScanPackSetting.all.first
-      @error_messages = []
     end
 
     def run(clicked, serial_added)
       case true
       when @id.blank? && @input.blank?
-        @error_messages.push(
-          'Please specify barcode and order id to confirm purchase code'
-          ) and set_error_messages
+        set_error_messages('Please specify barcode and order id to confirm purchase code')
       when @single_order.blank?
-        @error_messages.push('Could not find order with id:'+@id) and set_error_messages
+        set_error_messages('Could not find order with id:'+@id)
       else
         product_scan(clicked, serial_added)
       end
       @result
     end
 
-    def set_error_messages
+    def set_error_messages(error_message)
       @result['status'] &= false
-      @result['error_messages'].push(*@error_messages)
+      @result['error_messages'].push(error_message)
     end
 
     def product_scan(clicked, serial_added)
-      #check if order status is On Hold
-      if @single_order.nil?
-        @result['status'] &= false
-        @result['error_messages'].push('Could not find order with id:'+@id)
-      elsif @scanpack_settings.restart_code_enabled? && @input == @scanpack_settings.restart_code
-        if @single_order.status != 'scanned'
-          @single_order.reset_scanned_status
-          @result['data']['next_state'] = 'scanpack.rfo'
-        else
-          @result['status'] &= false
-          @result['error_messages'].push('Order with id: '+@id.to_s+' is already in scanned state')
-        end
-
+      if @scanpack_settings.restart_code_enabled? && @input == @scanpack_settings.restart_code
+        do_if_restart_code_is_enabled_and_and_eql_to_input
       elsif @scanpack_settings.service_issue_code_enabled? && @input == @scanpack_settings.service_issue_code
-        if @single_order.status !='scanned'
-          @single_order.reset_scanned_status
-          @single_order.status = 'serviceissue'
-          @result['data']['next_state'] = 'scanpack.rfo'
-          @result['data']['ask_note'] = true
-        else
-          @result['status'] &= false
-          @result['error_messages'].push('Order with id: '+@id+' is already in scanned state')
-        end
+        do_if_service_issue_code_is_enabled_and_and_eql_to_input
       else
         escape_string = ''
         if @scanpack_settings.escape_string_enabled && !@input.index(@scanpack_settings.escape_string).nil?
@@ -269,17 +247,38 @@ module ScanPack
         end
       end
 
-      unless @single_order.nil?
-        @single_order.packing_user_id = @current_user.id
-        unless @single_order.save
-          @result['status'] &= false
-          @result['error_messages'].push('Could not save order with id: '+@single_order.id)
-        end
-        @result['data']['order'] = order_details_and_next_item
-        @result['data']['scan_pack_settings'] = @scanpack_settings
-      end
+      do_if_single_order_present if @single_order.present?
 
       return @result
+    end
+
+    def do_if_service_issue_code_is_enabled_and_and_eql_to_input
+      if @single_order.status !='scanned'
+        @single_order.reset_scanned_status
+        @single_order.status = 'serviceissue'
+        @result['data']['next_state'] = 'scanpack.rfo'
+        @result['data']['ask_note'] = true
+      else
+        set_error_messages('Order with id: '+@id+' is already in scanned state')
+      end
+    end
+
+    def do_if_restart_code_is_enabled_and_and_eql_to_input
+      if @single_order.status != 'scanned'
+        @single_order.reset_scanned_status
+        @result['data']['next_state'] = 'scanpack.rfo'
+      else
+        set_error_messages('Order with id: '+@id.to_s+' is already in scanned state')
+      end
+    end
+
+    def do_if_single_order_present
+      @single_order.packing_user_id = @current_user.id
+      unless @single_order.save
+        set_error_messages('Could not save order with id: '+@single_order.id)
+      end
+      @result['data']['order'] = order_details_and_next_item
+      @result['data']['scan_pack_settings'] = @scanpack_settings
     end
     
   end # class end
