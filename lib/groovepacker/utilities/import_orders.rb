@@ -13,16 +13,22 @@ class ImportOrders
           if order_import_summary == ordered_import_summaries.first
             order_import_summary.status = 'in_progress'
             order_import_summary.save
-            ImportItem.where('order_import_summary_id IS NOT NULL').delete_all
             # add import item for each store
             stores = Store.where("status = '1' AND store_type != 'system' AND store_type != 'Shipworks'")
             if stores.length != 0
               stores.each do |store|
-                import_item = ImportItem.new
-                import_item.store_id = store.id
-                import_item.status = 'not_started'
-                import_item.order_import_summary_id = order_import_summary.id
-                import_item.save
+                imp_items = ImportItem.where('store_id = ? AND order_import_summary_id IS NOT NULL', store.id)
+                if store.store_type == 'CSV' && store.ftp_credential && store.ftp_credential.use_ftp_import == false
+                  if imp_items.empty?
+                    import_item = new_import_item(store.id, order_import_summary.id,nil,'CSV Importers Ready. FTP Order Import Is Off')
+                  elsif !imp_items.where("status = 'failed'").empty?
+                    imp_items.delete_all
+                    import_item = new_import_item(store.id, order_import_summary.id,nil, 'FTP Order Import Is Off')
+                  end
+                else
+                  imp_items.delete_all
+                  import_item = new_import_item(store.id, order_import_summary.id, 'not_started', nil)
+                end
               end
             end
             @order_import_summary = order_import_summary
@@ -121,6 +127,15 @@ class ImportOrders
       end
       break if job_scheduled
     end
+  end
+
+  def new_import_item(store_id, order_import_summary_id, status = nil, message = nil)
+    import_item = ImportItem.new
+    import_item.store_id = store_id
+    import_item.order_import_summary_id = order_import_summary_id
+    import_item.status = status
+    import_item.message = message
+    import_item.save!
   end
 
   def import_orders_with_import_item(import_item, tenant)
@@ -242,27 +257,32 @@ class ImportOrders
       elsif store_type == 'BigCommerce'
         import_item.status = 'in_progress'
         import_item.save
-        context = Groovepacker::Stores::Context.new(
-          Groovepacker::Stores::Handlers::BigCommerceHandler.new(store, import_item))
-        result = context.import_orders
-        import_item.reload
-        import_item.previous_imported = result[:previous_imported]
-        import_item.success_imported = result[:success_imported]
-        if import_item.status != 'cancelled'
-          if !result[:status]
-            import_item.status = 'failed'
-          else
-            import_item.status = 'completed'
+        bc_service = BigCommerce::BigCommerceService.new(store: store)
+        connection_response = bc_service.check_connection
+
+        if connection_response && connection_response[:status]
+          context = Groovepacker::Stores::Context.new(
+            Groovepacker::Stores::Handlers::BigCommerceHandler.new(store, import_item))
+          result = context.import_orders
+          import_item.reload
+          import_item.previous_imported = result[:previous_imported]
+          import_item.success_imported = result[:success_imported]
+          if import_item.status != 'cancelled'
+            if !result[:status]
+              import_item.status = 'failed'
+            else
+              import_item.status = 'completed'
+            end
           end
+        else
+          import_item.status = 'failed'
+          import_item.message = "Open store settings to authorize connection."
         end
         import_item.save
       #=============================================================
-      elsif store_type == 'CSV'
+      elsif store_type == 'CSV' && !import_item.status.nil?
         mapping = CsvMapping.find_by_store_id(store.id)
-        if !store.ftp_credential.use_ftp_import
-          import_item.status = 'failed'
-          import_item.message = 'FTP import for this store has not been activated'
-        elsif !mapping.nil? && !mapping.order_csv_map.nil? && !store.ftp_credential.nil? && store.ftp_credential.connection_established
+        if !mapping.nil? && !mapping.order_csv_map.nil? && store.ftp_credential.username && store.ftp_credential.password && store.ftp_credential.host
           import_item.status = 'in_progress'
           import_item.save
           map = mapping.order_csv_map

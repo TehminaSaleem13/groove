@@ -208,6 +208,7 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
             stores.single.shop_name = data.credentials.big_commerce_credentials.shop_name;
             stores.single.access_token = data.credentials.big_commerce_credentials.access_token;
             stores.single.store_hash = data.credentials.big_commerce_credentials.store_hash;
+            stores.single.bigcommerce_permission_url = data.credentials.bigcommerce_permission_url;
           } else if (data.store.store_type == 'CSV') {
             stores.single.host = data.credentials.ftp_credentials.host;
             stores.single.port = data.credentials.ftp_credentials.port;
@@ -378,7 +379,8 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
 
   //Import related functions
   var import_products = function (stores, report_id) {
-    return $http.get('/products/import_products/' + stores.single.id + '.json?reportid=' + report_id).success(function (data) {
+    //return $http.get('/products/import_products/' + stores.single.id + '.json?reportid=' + report_id).success(function (data) {
+      return $http.get('/products/import_products.json?reportid=' + report_id + '&id=' + stores.single.id).success(function (data) {
       if (data.status) {
         stores.import.product.status = "Successfully imported " + data.success_imported + " of " + data.total_imported +
           " products. " + data.previous_imported + " products were previously imported";

@@ -5,7 +5,7 @@ class Subscription < ActiveRecord::Base
                   :progress, :customer_subscription_id, :created_at, :updated_at
   belongs_to :tenant
   has_many :transactions
-
+  include PaymentsHelper
 
   def save_with_payment(one_time_payment)
     begin
@@ -28,7 +28,8 @@ class Subscription < ActiveRecord::Base
                                    times_redeemed: coupon_data.times_redeemed,
                                    is_valid: coupon_data.valid)
           end
-          one_time_payment = one_time_payment.to_i - ((one_time_payment.to_i * coupon_data.percent_off) / 100)
+          result = calculate_discount_amount(coupon_data.id)
+          one_time_payment = one_time_payment.to_i - result['discount_amount']
         end
 
         customer = Stripe::Customer.create(

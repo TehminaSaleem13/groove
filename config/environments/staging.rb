@@ -115,6 +115,7 @@ Groovepacks::Application.configure do
   ENV['BC_CALLBACK_HOST'] = "admin.barcodepacker.com"
   ENV['BC_CLIENT_ID'] = "as4fwmwmb2n3w2yolabja7yv9weumoj"
   ENV['BC_CLIENT_SECRET'] = "15a94s1mhhczf79v2lpj79btw443u3w"
+  ENV['BC_APP_URL'] = "https://store-1pslcuh.mybigcommerce.com/manage/marketplace/apps/4907"
 
   # Stripe production keys
   ENV['STRIPE_API_KEY'] = "sk_test_4QS2OJ8BkMWcuzCWrHrKGlz9"

@@ -33,7 +33,7 @@ class ImportCsv
       end
       if csv_file.nil?
         result[:status] = false
-        result[:messages].push("No file present to import #{params[:type]}")
+        result[:messages].push("No file present to import #{params[:type]}") if result[:messages].empty?
       else
         final_record = []
         if params[:fix_width] == 1

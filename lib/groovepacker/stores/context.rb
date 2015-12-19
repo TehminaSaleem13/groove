@@ -45,6 +45,10 @@ module Groovepacker
         self.handler.pull_single_product_inventory(product)
       end
 
+      def import_bc_single_product(product, pull_inv=true)
+        self.handler.import_bc_single_product(product, pull_inv)
+      end
+
       attr_accessor :handler
     end
   end

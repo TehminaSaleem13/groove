@@ -10,23 +10,14 @@ class BigCommerceController < ApplicationController
   end
 
   def bigcommerce
-    bc_store_name = params['context'].split("/").last rescue 'bcstore'
-    auth_hash = generate_access_token
+    @auth_hash = generate_access_token
     
     unless cookies[:tenant_name].blank?
       Apartment::Tenant.switch(cookies[:tenant_name])
-      saved_tenant = cookies[:tenant_name]
-      @bigcommerce_credentials = BigCommerceCredential.find_by_store_id(cookies[:store_id])
-      @bigcommerce_credentials.access_token = auth_hash["access_token"] rescue nil
-      @bigcommerce_credentials.store_hash = auth_hash["context"] rescue nil
-      @bigcommerce_credentials.save
-      #cookies.delete(:tenant_name)
-      #cookies.delete(:store_id)
-      cookies[:tenant_name] = {:value => nil , :domain => :all, :expires => Time.now+2.seconds}
-      cookies[:store_id] = {:value => nil , :domain => :all, :expires => Time.now+2.seconds}
+      update_bc_credentials
       redirect_to big_commerce_complete_path
     else
-      cookies[:bc_auth] = {:value => auth_hash , :domain => :all, :expires => Time.now+15.minutes}
+      cookies[:bc_auth] = {:value => @auth_hash , :domain => :all, :expires => Time.now+15.minutes}
       redirect_to big_commerce_setup_path(:shop => "#{bc_store_name}.mybigcommerce.com")
     end
   end
@@ -48,29 +39,10 @@ class BigCommerceController < ApplicationController
 
   def check_connection
     store = Store.find_by_id(params[:store_id])
-    bc_credential = BigCommerceCredential.find_by_store_id(store.try(:id))
-    if bc_credential.access_token && bc_credential.access_token
-      begin
-        response = HTTParty.get("https://api.bigcommerce.com/#{bc_credential.store_hash}/v2/time",
-                  headers: {
-                    "X-Auth-Token" => bc_credential.access_token,
-                    "X-Auth-Client" => ENV["BC_CLIENT_ID"],
-                    "Content-Type" => "application/json",
-                    "Accept" => "application/json"
-                  }
-              )
-        parsed_json = JSON.parse(response) rescue response
-        if parsed_json && parsed_json["error"]
-          render json: {status: false, message: parsed_json["error"]}
-        else
-          render json: {status: true, message: "Connection tested successfully"}
-        end
-      rescue Exception => ex
-        render json: {status: false, message: ex}
-      end
-    else
-      render json: {status: false, message: "Either accss token or store hash doesn't exist, Please go through the installation again"}
-    end
+    bc_service = BigCommerce::BigCommerceService.new(store: store)
+    response = bc_service.check_connection
+
+    render json: response
   end
 
   def complete
@@ -87,6 +59,10 @@ class BigCommerceController < ApplicationController
   end
 
   private
+    def bc_store_name
+      params['context'].split("/").last rescue 'bcstore'
+    end
+
     def get_shop_name(shop_name)
       (shop_name.split(".").length == 3) ? shop_name.split(".").first : nil
     end
@@ -100,5 +76,16 @@ class BigCommerceController < ApplicationController
       rescue Exception => ex
         return false
       end
+    end
+
+    def update_bc_credentials
+      @bigcommerce_credentials = BigCommerceCredential.find_by_store_id(cookies[:store_id])
+      @bigcommerce_credentials.access_token = @auth_hash["access_token"] rescue nil
+      @bigcommerce_credentials.store_hash = @auth_hash["context"] rescue nil
+      @bigcommerce_credentials.save
+      #cookies.delete(:tenant_name)
+      #cookies.delete(:store_id)
+      cookies[:tenant_name] = {:value => nil , :domain => :all, :expires => Time.now+2.seconds}
+      cookies[:store_id] = {:value => nil , :domain => :all, :expires => Time.now+2.seconds}
     end
 end

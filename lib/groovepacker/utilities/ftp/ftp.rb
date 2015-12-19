@@ -44,7 +44,7 @@ module FTP
           connection_obj.close()
           if file.nil?
             result[:status] = false
-            result[:error_messages].push("No CSV files could be found without '-imported' in the file name")
+            result[:error_messages].push("All CSV files on the server appear to have been imported.")
           else
             result[:success_messages].push("Connection succeeded! #{file} was found.")
           end
@@ -94,7 +94,7 @@ module FTP
             connection_obj.close()
           else
             result[:status] = false
-            result[:error_messages].push("No CSV files could be found without '-imported' in the file name")
+            result[:error_messages].push("All CSV files on the server appear to have been imported.")
           end
         else
           result[:status] = false

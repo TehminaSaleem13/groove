@@ -123,15 +123,21 @@ module PaymentsHelper
     @result
   end
 
-  def is_coupon_valid(coupon_id)
+  def calculate_discount_amount(coupon_id)
     create_result_hash
     @result['percent_off'] = 0
     coupons = Stripe::Coupon.all(limit: 30)
     valid = false
+    @result['discount_amount'] = 0
     coupons.each do |coupon|
       if coupon.id == coupon_id
         valid = true
-        @result['percent_off'] = coupon.percent_off
+        if coupon.percent_off
+          @result['discount_amount'] = (ENV['ONE_TIME_PAYMENT'].to_i * coupon.percent_off) / 100
+        elsif coupon.amount_off
+          @result['discount_amount'] = coupon.amount_off
+        end
+        break
       end
     end
     unless valid
@@ -140,6 +146,7 @@ module PaymentsHelper
     else
       @result['messages'].push('Congrats! Your promotional code is valid.')
     end
+    @result
   end
 
   def update_subcription_plan(subscription, plan_id)

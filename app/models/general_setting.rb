@@ -7,6 +7,8 @@ class GeneralSetting < ActiveRecord::Base
                   :import_orders_on_tue, :import_orders_on_wed, :import_orders_on_thurs, :import_orders_on_fri, :import_orders_on_sat,
                   :import_orders_on_sun
 
+  validates_format_of :email_address_for_packer_notes, with: Devise.email_regexp, allow_blank: true
+
   after_save :send_low_inventory_alert_email
   after_save :scheduled_import
   after_update :inventory_state_change_check
