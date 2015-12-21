@@ -26,12 +26,12 @@ module ScanPack
     end
 
     def run
-      check_validity? ? order_scan : (return @result)
+      order_scan if valid_input?
       @result
     end
 
-    def check_validity?
-      validity = @input && @input != ""
+    def valid_input?
+      validity = @input.present?
       unless validity
         @result['status'] &= false
         @result['error_messages'].push("Please specify a barcode to scan the order")
