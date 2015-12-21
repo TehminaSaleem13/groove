@@ -790,7 +790,7 @@ class ProductsController < ApplicationController
     result['status'] = true
     result['messages'] = []
     result['params'] = params
-
+    general_setting = GeneralSetting.all.first
     if !@product.nil?
       if current_user.can?('add_edit_products') ||
         (session[:product_edit_matched_for_current_user] && session[:product_edit_matched_for_products].include?(@product.id))
@@ -825,7 +825,19 @@ class ProductsController < ApplicationController
           product_location.product_id = @product.id
           product_location.inventory_warehouse_id = current_user.inventory_warehouse_id
         end
-        product_location.quantity_on_hand = params[:inventory_warehouses][0][:info][:quantity_on_hand] unless params[:inventory_warehouses].empty?
+
+        unless params[:inventory_warehouses].empty?
+          werehouse_info = params[:inventory_warehouses][0][:info]
+          if general_setting.low_inventory_alert_email
+            product_location.product_inv_alert = werehouse_info[:product_inv_alert]
+            product_location.product_inv_alert_level = werehouse_info[:product_inv_alert_level]
+          end
+          product_location.quantity_on_hand = werehouse_info[:quantity_on_hand]
+          product_location.available_inv = werehouse_info[:available_inv]
+          product_location.location_primary = werehouse_info[:location_primary]
+          product_location.location_secondary = werehouse_info[:location_secondary]
+          product_location.location_tertiary = werehouse_info[:location_tertiary]
+        end
         product_location.save
         if !@product.save
           result['status'] &= false
