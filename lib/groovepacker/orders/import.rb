@@ -32,9 +32,9 @@ module Groovepacker
           credential = ShipworksCredential.find_by_auth_token(auth_token)
           status = create_or_update_item(credential, status)
         rescue Exception => e
-          import_item.status = 'failed'
-          import_item.message = e.message
-          import_item.save
+          @import_item.status = 'failed'
+          @import_item.message = e.message
+          @import_item.save
           status = 401
         end
         return status
@@ -52,18 +52,17 @@ module Groovepacker
 
         def create_or_update_item(credential, status)
           return 401 unless !(credential.nil? || !credential.store.status)
-          
-          import_item = ImportItem.find_by_store_id(credential.store.id)
-          import_item = ImportItem.create_or_update(import_item, credential)
-          shipwork_handler = Groovepacker::Stores::Handlers::ShipworksHandler.new(credential.store, import_item)
+          @import_item = ImportItem.find_by_store_id(credential.store.id)
+          @import_item = ImportItem.create_or_update(@import_item, credential)
+          shipwork_handler = Groovepacker::Stores::Handlers::ShipworksHandler.new(credential.store, @import_item)
           Groovepacker::Stores::Context.new(shipwork_handler).import_order(@params["ShipWorks"]["Customer"]["Order"])
-          change_status_if_not_failed(import_item)
+          change_status_if_not_failed
           return status
         end
         
-        def change_status_if_not_failed(import_item)
-          return unless import_item.status != 'failed'
-          import_itemupdate_attributes(:status => 'completed')
+        def change_status_if_not_failed
+          return unless @import_item.status != 'failed'
+          @import_item.update_attributes(:status => 'completed')
         end
     end
   end

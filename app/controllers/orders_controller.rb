@@ -26,9 +26,9 @@ class OrdersController < ApplicationController
 
   def import_shipworks
     #find store by using the auth_token
-    status = 401
+    status = 200
     unless params[:auth_token].nil? || request.headers["HTTP_USER_AGENT"] != 'shipworks'
-      status = gp_orders_import.import_shipworks(params[:auth_token])
+      status = gp_orders_import.import_shipworks(params[:auth_token], status)
     end
     if status == 401
       render status: 401, nothing: true

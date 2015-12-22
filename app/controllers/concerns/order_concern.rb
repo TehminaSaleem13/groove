@@ -66,6 +66,7 @@ module OrderConcern
     def list_of_orders_by_sort_order(sort_by_order_number = false)
       result = Order.where(:id => params[:order_ids])
       result = result.order(:increment_id) if sort_by_order_number
+      result
     end
 
     def create_results_row(result)
