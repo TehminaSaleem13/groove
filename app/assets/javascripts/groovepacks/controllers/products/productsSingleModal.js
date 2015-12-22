@@ -3,7 +3,6 @@ groovepacks_controllers.
     function (scope, auth, product_data, load_page, product_id, hotkeys, $state, $stateParams, $modalInstance, $timeout, $modal, $q, groov_translator, products, warehouses, generalsettings, scanPack) {
       var myscope = {};
 
-
       /**
        * Public methods
        */
@@ -21,7 +20,9 @@ groovepacks_controllers.
         if (reason == "cancel-button-click") {
           myscope.rollback();
         } else {
-          scope.update_single_product(false);
+          if (!scope.alias_added) {
+            scope.update_single_product(false);
+          }
         }
       };
 
@@ -122,6 +123,7 @@ groovepacks_controllers.
         });
         alias_modal.result.then(function (data) {
           myscope.add_alias_product(type, data);
+          scope.alias_added = true;
         });
       };
       scope.add_image_for_receiving_instructions = function () {
