@@ -32,8 +32,8 @@ module Groovepacker
           end
 
           def import_single_order(order)
-            #Delete if order exists so modified order can be saved with new changes
-            delete_order_if_exists(order)
+            #Delete if order exists and is not scanned so modified order can be saved with new changes
+            return unless delete_order_if_exists(order)
 
             #create new order
             bigcommerce_order = Order.new(store_id: @credential.store.id)
@@ -147,7 +147,12 @@ module Groovepacker
 
           def delete_order_if_exists(order)
             existing_order = Order.find_by_increment_id(order["id"])
-            existing_order.destroy if existing_order
+            if existing_order && existing_order.status!="scanned"
+              existing_order.destroy
+              return true
+            else
+              return false
+            end
           end
 
         end
