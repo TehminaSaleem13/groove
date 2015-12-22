@@ -826,19 +826,11 @@ class ProductsController < ApplicationController
           product_location.inventory_warehouse_id = current_user.inventory_warehouse_id
         end
 
-        unless params[:inventory_warehouses].empty?
-          werehouse_info = params[:inventory_warehouses][0][:info]
-          if general_setting.low_inventory_alert_email
-            product_location.product_inv_alert = werehouse_info[:product_inv_alert]
-            product_location.product_inv_alert_level = werehouse_info[:product_inv_alert_level]
-          end
-          product_location.quantity_on_hand = werehouse_info[:quantity_on_hand]
-          product_location.available_inv = werehouse_info[:available_inv]
-          product_location.location_primary = werehouse_info[:location_primary]
-          product_location.location_secondary = werehouse_info[:location_secondary]
-          product_location.location_tertiary = werehouse_info[:location_tertiary]
-        end
+        product_location.quantity_on_hand = params[:inventory_warehouses][0][:info][:quantity_on_hand] unless params[:inventory_warehouses].empty?
         product_location.save
+
+        update_inventory_info(general_setting) rescue
+
         if !@product.save
           result['status'] &= false
         end
@@ -1586,5 +1578,30 @@ class ProductsController < ApplicationController
     count['all'] = all
     count['search'] = 0
     count
+  end
+
+  def update_inventory_info(general_setting)
+    return if params[:inventory_warehouses].empty?
+    attr_array = get_inv_update_attributes(general_setting)
+    
+    params[:inventory_warehouses].each_with_index do |inv_wh|
+      update_single_warehouse_info(inv_wh, attr_array)
+    end
+  end
+
+  def update_single_warehouse_info(inv_wh, attr_array)
+    product_location = @product.product_inventory_warehousess.find_by_id(inv_wh["info"]["id"])
+    attr_array.each do |attr|
+      product_location[attr] = inv_wh[:info][attr]
+    end
+    product_location.save
+  end
+
+  def get_inv_update_attributes(general_setting)
+    attr_array = ['quantity_on_hand', 'available_inv', 'location_primary', 'location_secondary', 'location_tertiary']
+    if general_setting.low_inventory_alert_email
+      attr_array = attr_array + ['product_inv_alert', 'product_inv_alert_level']
+    end
+    attr_array
   end
 end
