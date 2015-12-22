@@ -92,9 +92,14 @@ groovepacks_controllers.
             ids.push(scope.orders.single.items[i].iteminfo.id);
           }
         }
-        orders.single.item.remove(ids).then(function () {
-          myscope.order_single_details(scope.orders.single.basicinfo.id);
-        });
+
+        if(ids.length >0){
+          orders.single.item.remove(ids).then(function () {
+            myscope.order_single_details(scope.orders.single.basicinfo.id);
+          });
+        } else {
+          orders.list.select_notification("First select items to remove from the list.");
+        }
       };
 
       scope.update_order_exception = function () {
