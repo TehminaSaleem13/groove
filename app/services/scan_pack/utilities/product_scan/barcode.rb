@@ -1,4 +1,4 @@
-module ScanPack::Utilities::Barcode
+module ScanPack::Utilities::ProductScan::Barcode
   def do_if_barcode_not_found(clean_input, serial_added, clicked)
     product_barcodes = ProductBarcode.where(barcode: clean_input)
     unless product_barcodes.empty?
@@ -67,24 +67,18 @@ module ScanPack::Utilities::Barcode
     elsif scanpack_settings_post_scanning_option == "Record"
       @result['data']['next_state'] = 'scanpack.rfp.recording'
     elsif scanpack_settings_post_scanning_option == "PackingSlip"
-      do_generate_packing_slip
+      do_set_order_scanned_state_and_result_data
+      generate_packing_slip(@single_order)
     else
-      do_generate_barcode_slip
+      do_set_order_scanned_state_and_result_data
+      generate_order_barcode_slip(@single_order)
     end
   end
 
-  def do_generate_packing_slip
+  def do_set_order_scanned_state_and_result_data
     @single_order.set_order_to_scanned_state(@current_user.username)
     @result['data']['order_complete'] = true
     @result['data']['next_state'] = 'scanpack.rfo'
-    generate_packing_slip(@single_order)
-  end
-
-  def do_generate_barcode_slip
-    @single_order.set_order_to_scanned_state(@current_user.username)
-    @result['data']['order_complete'] = true
-    @result['data']['next_state'] = 'scanpack.rfo'
-    generate_order_barcode_slip(@single_order)
   end
 
 end#module

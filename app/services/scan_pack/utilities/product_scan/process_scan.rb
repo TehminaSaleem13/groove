@@ -1,4 +1,4 @@
-module ScanPack::Utilities::ProcessScan
+module ScanPack::Utilities::ProductScan::ProcessScan
   def process_scan(clicked, order_item, serial_added)
     do_if_order_item_present(clicked, order_item, serial_added) if order_item.present?
     @result

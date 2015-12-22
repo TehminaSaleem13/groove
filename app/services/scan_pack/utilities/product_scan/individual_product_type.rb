@@ -1,4 +1,4 @@
-module ScanPack::Utilities::IndividualProductType
+module ScanPack::Utilities::ProductScan::IndividualProductType
   def do_if_product_type_is_individual(params)
     item, clean_input, serial_added, clicked, barcode_found = params
     if item['child_items'].length > 0

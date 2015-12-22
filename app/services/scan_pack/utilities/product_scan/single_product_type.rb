@@ -1,4 +1,4 @@
-module ScanPack::Utilities::SingleProductType
+module ScanPack::Utilities::ProductScan::SingleProductType
   def do_if_product_type_is_single(params)
     item, clean_input, serial_added, clicked, barcode_found = params
     item['barcodes'].each do |barcode|
