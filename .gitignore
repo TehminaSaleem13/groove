@@ -21,3 +21,4 @@ node_modules/
 protractor_report/
 test/
 coverage/
+pids/

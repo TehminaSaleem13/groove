@@ -1,10 +1,10 @@
 module ScanPack
   class ProductScanService < ScanPack::Base
-    include ScanPack::Utilities::LotNumber
-    include ScanPack::Utilities::ProcessScan
-    include ScanPack::Utilities::Barcode
-    include ScanPack::Utilities::IndividualProductType
-    include ScanPack::Utilities::SingleProductType
+    include ScanPack::Utilities::ProductScan::LotNumber
+    include ScanPack::Utilities::ProductScan::ProcessScan
+    include ScanPack::Utilities::ProductScan::Barcode
+    include ScanPack::Utilities::ProductScan::IndividualProductType
+    include ScanPack::Utilities::ProductScan::SingleProductType
     
     def initialize(service_params)
       @current_user, @session, @input, @state, @id = service_params
