@@ -1592,13 +1592,13 @@ class ProductsController < ApplicationController
   def update_single_warehouse_info(inv_wh, attr_array)
     product_location = @product.product_inventory_warehousess.find_by_id(inv_wh["info"]["id"])
     attr_array.each do |attr|
-      product_location[attr] = inv_wh[:info][attr]
+      product_location.send("#{attr}=", inv_wh[:info][attr])
     end
     product_location.save
   end
 
   def get_inv_update_attributes(general_setting)
-    attr_array = ['quantity_on_hand', 'available_inv', 'location_primary', 'location_secondary', 'location_tertiary']
+    attr_array = ['quantity_on_hand', 'location_primary', 'location_secondary', 'location_tertiary']
     if general_setting.low_inventory_alert_email
       attr_array = attr_array + ['product_inv_alert', 'product_inv_alert_level']
     end
