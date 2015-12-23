@@ -12,6 +12,7 @@ class Store < ActiveRecord::Base
   has_one :ftp_credential
   has_one :big_commerce_credential
   has_one :magento_rest_credential
+  has_one :shipping_easy_credential
 
   belongs_to :inventory_warehouse
 
@@ -76,6 +77,13 @@ class Store < ActiveRecord::Base
         @result['shipstation_rest_credentials'] = @credentials.first
         @result['shipstation_rest_credentials']['gp_ready_tag_name'] = @credentials.first.gp_ready_tag_name
         @result['shipstation_rest_credentials']['gp_imported_tag_name'] = @credentials.first.gp_imported_tag_name
+        @result['status'] =true
+      end
+    end
+    if self.store_type == 'ShippingEasy'
+      @credentials = self.shipping_easy_credential
+      unless @credentials.nil?
+        @result['shipping_easy_credentials'] = @credentials
         @result['status'] =true
       end
     end

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20151201041703) do
+ActiveRecord::Schema.define(:version => 20151223095650) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0,     :null => false
@@ -743,6 +743,17 @@ ActiveRecord::Schema.define(:version => 20151201041703) do
     t.boolean  "scan_by_tracking_number",       :default => false
     t.boolean  "intangible_setting_enabled",    :default => false
     t.string   "intangible_string",             :default => ""
+  end
+
+  create_table "shipping_easy_credentials", :force => true do |t|
+    t.integer  "store_id"
+    t.string   "api_key"
+    t.string   "api_secret"
+    t.boolean  "import_ready_for_shipment", :default => false
+    t.boolean  "import_shipped",            :default => false
+    t.boolean  "gen_barcode_from_sku"
+    t.datetime "created_at",                                   :null => false
+    t.datetime "updated_at",                                   :null => false
   end
 
   create_table "shipstation_credentials", :force => true do |t|
