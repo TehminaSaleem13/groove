@@ -174,15 +174,15 @@ groovepacks_controllers.
           if (type == 'kit') {
             products.single.kit.add(scope.products, args.selected).then(function (response) {
               //console.log(response.data);
-              myscope.product_single_details(scope.products.single.basicinfo.id);
+              myscope.product_single_details(scope.products.single.basicinfo.id, true);
             });
           } else if (type == 'master_alias') {
             products.single.master_alias(scope.products, args.selected).then(function () {
-              myscope.product_single_details(scope.products.single.basicinfo.id);
+              myscope.product_single_details(scope.products.single.basicinfo.id, true);
             });
           } else {
             products.single.alias(scope.products, args.selected).then(function () {
-              myscope.product_single_details(args.selected[0]);
+              myscope.product_single_details(args.selected[0], true);
             });
           }
         }
