@@ -1170,7 +1170,12 @@ class ProductsController < ApplicationController
         result['status'] = false
         result['error_msg'] ="Cannot find Product"
       else
-        updatelist(@product, params[:var], params[:value])
+        response = updatelist(@product, params[:var], params[:value])
+        errors = response.errors.full_messages rescue nil
+        if errors
+          result['status'] = false
+          result['error_msg'] = errors
+        end
       end
     else
       result['status'] = false
