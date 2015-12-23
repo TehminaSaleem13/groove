@@ -662,6 +662,10 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
         "BigCommerce": {
           name: "BigCommerce",
           file: "/assets/views/modals/settings/stores/big_commerce.html"
+        },
+        "ShippingEasy": {
+          name: "Shipping Easy",
+          file: "/assets/views/modals/settings/stores/shipping_easy.html"
         }
       };
 
