@@ -525,12 +525,12 @@ module ScanPackHelper
   #   @generate_barcode.save
   # end
 
-  # Remove those order_items that are skippable when the scanned barcode
-  # is SKIP entered as the barcode.
-  def remove_skippable_product item
-    order_item = OrderItem.find(item['order_item_id'])
-    order = order_item.order
-    order.order_items.delete(order_item)
-    order.save
-  end
+  # # Remove those order_items that are skippable when the scanned barcode
+  # # is SKIP entered as the barcode.
+  # def remove_skippable_product item
+  #   order_item = OrderItem.find(item['order_item_id'])
+  #   order = order_item.order
+  #   order.order_items.delete(order_item)
+  #   order.save
+  # end
 end
