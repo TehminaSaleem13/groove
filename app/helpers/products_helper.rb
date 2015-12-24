@@ -81,6 +81,7 @@ module ProductsHelper
         end
       elsif var == 'sku'
         product.primary_sku = value
+        return product if product.errors.any?
       elsif var == 'category'
         product.primary_category = value
       elsif var == 'barcode'
