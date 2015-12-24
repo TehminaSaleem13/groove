@@ -7,25 +7,28 @@ module ScanPack::Utilities::ProductScan::SingleProductType
         #process product barcode scan
         order_item = OrderItem.find(item['order_item_id'])
 
-        unless serial_added
-          @result['data']['serial']['order_item_id'] = order_item.id
-          if @scanpack_settings.record_lot_number
-            lot_number = calculate_lot_number
-            product = order_item.product unless order_item.product.nil?
-            unless lot_number.nil?
-              if product.product_lots.where(lot_number: lot_number).empty?
-                product.product_lots.create(lot_number: lot_number)
-              end
-              product_lot = product.product_lots.where(lot_number: lot_number).first
-              OrderItemOrderSerialProductLot.create(order_item_id: order_item.id, product_lot_id: product_lot.id, qty: 1)
-              @result['data']['serial']['product_lot_id'] = product_lot.id
-            else
-              @result['data']['serial']['product_lot_id'] = nil
-            end
-          else
-            @result['data']['serial']['product_lot_id'] = nil
-          end
-        end
+        # from LotNumber Module
+        store_lot_number(order_item, serial_added)
+
+        # unless serial_added
+        #   @result['data']['serial']['order_item_id'] = order_item.id
+        #   if @scanpack_settings.record_lot_number
+        #     lot_number = calculate_lot_number
+        #     product = order_item.product unless order_item.product.nil?
+        #     unless lot_number.nil?
+        #       if product.product_lots.where(lot_number: lot_number).empty?
+        #         product.product_lots.create(lot_number: lot_number)
+        #       end
+        #       product_lot = product.product_lots.where(lot_number: lot_number).first
+        #       OrderItemOrderSerialProductLot.create(order_item_id: order_item.id, product_lot_id: product_lot.id, qty: 1)
+        #       @result['data']['serial']['product_lot_id'] = product_lot.id
+        #     else
+        #       @result['data']['serial']['product_lot_id'] = nil
+        #     end
+        #   else
+        #     @result['data']['serial']['product_lot_id'] = nil
+        #   end
+        # end
 
         process_scan(clicked, order_item, serial_added)
         # If the product was skippable and CODE is SKIP
