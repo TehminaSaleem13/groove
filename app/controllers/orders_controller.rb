@@ -165,7 +165,7 @@ class OrdersController < ApplicationController
     if params[:single].nil?
       set_status_and_message(false, "Order can not be nil", ['&', 'push'])
     else
-      rollaback_order_changes
+      rollback_order_changes
     end
     render json: @result
   end
