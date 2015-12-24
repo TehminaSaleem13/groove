@@ -232,13 +232,13 @@ module OrderConcern
       return available_inv
     end
 
-    def rollaback_order_changes
+    def rollback_order_changes
       order = Order.find_by_id(params[:single]['basicinfo']['id'])
       if order.nil?
         set_status_and_message(false, "Wrong order id", ['&', 'push'])
         return
       end
-      @result = gp_orders_module.add_edit_order_items(order)
+      @result = gp_orders_exception.add_edit_order_items(order)
       @result = gp_orders_exception.edit_packing_execptions(order)
     end
 

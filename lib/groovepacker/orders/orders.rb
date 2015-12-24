@@ -22,25 +22,7 @@ module Groovepacker
         end
         return @result
       end
-
-      def add_edit_order_items(order)
-        unless @current_user.can? 'add_edit_order_items'
-          set_status_and_message(false, 'Couldn\'t rollback because you can not add or edit order items', ['push'])
-          return @result
-        end
-
-        #Items
-        destroy_object_if_not_defined(order.order_items, @params[:single]['items'], 'items')
-        
-        add_update_order_item(@params)
-        
-        #activity
-        #As activities only get added, no updating or adding required
-        activities = OrderActivity.where(:order_id => @params[:single]['basicinfo']['id'])
-        destroy_object_if_not_defined(activities, @params[:single]['activities'], 'activities')
-        return @result
-      end
-
+      
       def generate_pick_list(orders)
         @orders, @pick_list, @depends_pick_list = orders, [], []
         
@@ -136,51 +118,6 @@ module Groovepacker
             set_status_and_message(false, 'Insufficient permissions', ['&', 'error_msg'])
           end
           return order
-        end
-
-        def destroy_object_if_not_defined(objects_array, obj_params, type)
-          return if objects_array.blank?
-          ids = get_ids_array_from_params(obj_params, type)
-          
-          objects_array.each do |object|
-            found_obj = false
-            found_obj = true if ids.include?(object.id)
-            object.destroy if found_obj
-          end
-        end
-
-        def get_ids_array_from_params(obj_params, type=nil)
-          if type=='items'
-            ids = obj_params.map {|obj| obj['iteminfo']['id']} rescue []
-          else
-            ids = obj_params.map {|obj| obj["id"]} rescue []
-          end
-          return ids
-        end
-
-        def add_update_order_item(params)
-          return if params[:single]['items'].blank?
-          
-          params[:single]['items'].each do |current_item|
-            single_item = OrderItem.find_or_create_by_order_id_and_product_id(order.id, current_item['iteminfo']['product_id'])
-            single_item = assign_values_to(single_item, current_item, 'item')
-            update_product_list(current_item)
-          end
-        end
-
-        def update_product_list(current_item)
-          begin
-            current_product = Product.find(current_item['iteminfo']['product_id'])
-            values_to_update = { name: current_item['productinfo']['name'], is_skippable: current_item['productinfo']['is_skippable'], location: current_item['location'], sku: current_item['sku']}
-            update_list(current_product, values_to_update)
-          rescue Exception => e
-          end
-        end
-
-        def update_list(current_product, values_to_update)
-          values_to_update.each do |key, value|
-            updatelist(current_product, "#{key.to_s}", value)
-          end
         end
 
         def update_orderitem_quantity
