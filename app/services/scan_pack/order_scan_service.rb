@@ -60,13 +60,12 @@ module ScanPack
       return [@orders.first, @single_order_result] if @orders.length == 1
       
       @orders.each do |matched_single|
+        @single_order ||= matched_single
         matched_single_status = matched_single.status
         matched_single_order_placed_time = matched_single.order_placed_time
         single_order_status = @single_order.status
         single_order_order_placed_time = @single_order.order_placed_time
         order_placed_for_single_before_than_matched_single = single_order_order_placed_time < matched_single_order_placed_time
-        
-        @single_order ||= matched_single
 
         do_check_order_status_for_single_and_matched(
           single_order_status, matched_single_status, order_placed_for_single_before_than_matched_single
