@@ -183,11 +183,11 @@ module Groovepacker
             end
 
             def add_order_activity(shiping_easy_order)
-              shiping_easy_order.addactivity("Order Import", @credential.store.name+" Import")
+              shiping_easy_order.addactivity("Order Import", "#{@credential.store.name} Import")
               shiping_easy_order.order_items.each do |item|
-                unless item.product.nil? || item.product.primary_sku.nil?
-                  shiping_easy_order.addactivity("Item with SKU: "+item.product.primary_sku+" Added", @credential.store.name+" Import")
-                end
+                primary_sku = item.product.try(:primary_sku)
+                next if primary_sku.nil?
+                shiping_easy_order.addactivity("Item with SKU: #{primary_sku} Added", "#{@credential.store.name} Import")
               end
             end
         end
