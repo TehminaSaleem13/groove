@@ -151,7 +151,8 @@ module Groovepacker
               existing_order.destroy
               return true
             else
-              return false
+              return_val = existing_order ? false : true
+              return return_val
             end
           end
 
