@@ -2,6 +2,11 @@ module ScanPack
   class Base
     include ScanPack::Utilities::OrderDetailsAndNextItem
 
+    def set_error_messages(error_message)
+      @result['status'] &= false
+      @result['error_messages'].push(error_message)
+    end
+
     def can_order_be_scanned
       #result = false
       #max_shipments = AccessRestriction.order("created_at").last.num_shipments

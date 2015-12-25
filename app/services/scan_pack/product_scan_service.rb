@@ -36,11 +36,6 @@ module ScanPack
       @result
     end
 
-    def set_error_messages(error_message)
-      @result['status'] &= false
-      @result['error_messages'].push(error_message)
-    end
-
     def product_scan(clicked, serial_added)
       case
       when @scanpack_settings.restart_code_enabled? && @input == @scanpack_settings.restart_code
