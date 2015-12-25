@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20151223095650) do
+ActiveRecord::Schema.define(:version => 20151225114212) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0,     :null => false
@@ -754,6 +754,7 @@ ActiveRecord::Schema.define(:version => 20151223095650) do
     t.boolean  "gen_barcode_from_sku"
     t.datetime "created_at",                                   :null => false
     t.datetime "updated_at",                                   :null => false
+    t.datetime "last_imported_at"
   end
 
   create_table "shipstation_credentials", :force => true do |t|
