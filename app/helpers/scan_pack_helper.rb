@@ -10,18 +10,18 @@ module ScanPackHelper
     order_scan_object.run
   end
 
-  def can_order_be_scanned
-    #result = false
-    #max_shipments = AccessRestriction.order("created_at").last.num_shipments
-    #total_shipments = AccessRestriction.order("created_at").last.total_scanned_shipments
-    #if total_shipments < max_shipments
-    #  result = true
-    #else
-    #  result = false
-    #end
-    #result
-    true
-  end
+  # def can_order_be_scanned
+  #   #result = false
+  #   #max_shipments = AccessRestriction.order("created_at").last.num_shipments
+  #   #total_shipments = AccessRestriction.order("created_at").last.total_scanned_shipments
+  #   #if total_shipments < max_shipments
+  #   #  result = true
+  #   #else
+  #   #  result = false
+  #   #end
+  #   #result
+  #   true
+  # end
 
   def product_scan(input, state, id, clicked=false, serial_added=false)
     product_scan_object = ScanPack::ProductScanService.new(
@@ -56,11 +56,11 @@ module ScanPackHelper
   #   result
   # end
 
-  def calculate_lot_number(scanpack_settings, input)
-    if scanpack_settings.escape_string_enabled && !input.index(scanpack_settings.escape_string).nil?
-      return input.slice((input.index(scanpack_settings.escape_string)+scanpack_settings.escape_string.length)..(input.length-1))
-    end
-  end
+  # def calculate_lot_number(scanpack_settings, input)
+  #   if scanpack_settings.escape_string_enabled && !input.index(scanpack_settings.escape_string).nil?
+  #     return input.slice((input.index(scanpack_settings.escape_string)+scanpack_settings.escape_string.length)..(input.length-1))
+  #   end
+  # end
 
   def scan_recording(input, state, id)
     result = Hash.new
@@ -214,50 +214,10 @@ module ScanPackHelper
   end
 
   def order_edit_conf(input, state, id)
-    result = Hash.new
-    result['status'] = true
-    result['matched'] = false
-    result['error_messages'] = []
-    result['success_messages'] = []
-    result['notice_messages'] = []
-    result['data'] = Hash.new
-
-    if !id.nil? || !input.nil?
-      #check if order status is On Hold
-      single_order = Order.find(id)
-      if single_order.nil?
-        result['status'] &= false
-        result['error_messages'].push("Could not find order with id: "+id.to_s)
-      else
-        result['data']['order_num'] = single_order.increment_id
-        if single_order.status == "onhold" && !single_order.has_inactive_or_new_products
-          if User.where(:confirmation_code => input).length > 0
-            result['matched'] = true
-            single_order.status = 'awaiting'
-            single_order.addactivity("Status changed from onhold to awaiting",
-                                     User.where(:confirmation_code => input).first.username)
-            single_order.save
-            result['data']['scanned_on'] = single_order.scanned_on
-            result['data']['next_state'] = 'scanpack.rfp.default'
-            session[:order_edit_matched_for_current_user] = true
-          else
-            result['data']['next_state'] = 'scanpack.rfo'
-          end
-        else
-          result['status'] &= false
-          result['error_messages'].push("Only orders with status On Hold and has inactive or new products "+
-                                          "can use edit confirmation code.")
-        end
-        result['data']['order'] = order_details_and_next_item(single_order)
-      end
-
-      #check if current user edit confirmation code is same as that entered
-    else
-      result['status'] &= false
-      result['error_messages'].push("Please specify confirmation code and order id to confirm purchase code")
-    end
-
-    return result
+    order_edit_conf_object = ScanPack::OrderEditConfService.new(
+      [session, input, state, id]
+      )
+    order_edit_conf_object.run
   end
 
   def cos_conf(input, state, id)

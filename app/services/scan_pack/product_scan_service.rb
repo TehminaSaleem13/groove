@@ -6,8 +6,8 @@ module ScanPack
     include ScanPack::Utilities::ProductScan::IndividualProductType
     include ScanPack::Utilities::ProductScan::SingleProductType
     
-    def initialize(service_params)
-      @current_user, @session, @input, @state, @id = service_params
+    def initialize(args)
+      @current_user, @session, @input, @state, @id = args
       @result = {
         "status"=>true, "matched"=>true, "error_messages"=>[],
         "success_messages"=>[], "notice_messages"=>[], 
