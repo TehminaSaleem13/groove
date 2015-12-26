@@ -1,6 +1,7 @@
 class ScanPack::ProductEditConfService < ScanPack::Base
   def initialize(args)
     @session, @input, @state, @id = args
+    @single_order = Order.where(id: @id).last
     @result = {
       "status"=>true,
       "matched"=>false,
@@ -9,12 +10,11 @@ class ScanPack::ProductEditConfService < ScanPack::Base
       "notice_messages"=>[],
       "data"=>{}
     }
-    @single_order = Order.where(id: @id).last
   end
   
   def run
     case true
-    when @id.blank? || @input.blank?
+    when @input.blank? || @id.blank?
       set_error_messages("Please specify confirmation code and order id to confirm purchase code")
     when @single_order.blank?
       set_error_messages("Could not find order with id: "+@id.to_s)
