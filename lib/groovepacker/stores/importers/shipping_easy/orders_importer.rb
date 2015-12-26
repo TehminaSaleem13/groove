@@ -73,11 +73,11 @@ module Groovepacker
               shiping_easy_order.set_order_status
             end
 
-            def import_order_item(order_item, item)
-              order_item.qty = item["quantity"]
-              order_item.price = item["unit_price"]
-              order_item.row_total = item["unit_price"].to_f * item["quantity"].to_f
-              order_item
+            def import_order_item(ordr_item, item)
+              ordr_item.assign_attributes( qty: item["quantity"],
+                                            price: item["unit_price"],
+                                            row_total: item["unit_price"].to_f * item["quantity"].to_f
+                                          )
             end
 
             def import_single_order_product(order_item, item)
