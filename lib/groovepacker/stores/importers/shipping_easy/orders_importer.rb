@@ -34,6 +34,7 @@ module Groovepacker
               shiping_easy_order ||= Order.new
 
               return if shiping_easy_order.persisted?
+              shiping_easy_order.store_id = @credential.store_id
 
               import_order(shiping_easy_order, order)
               shiping_easy_order.tracking_num = order["shipments"][0]["tracking_number"] rescue nil
@@ -44,8 +45,7 @@ module Groovepacker
             def import_order(shiping_easy_order, order)
               total_weight = order["recipients"][0]["original_order"]["total_weight_in_ounces"] rescue 0
 
-              shiping_easy_order.assign_attributes( store_id: @credential.store_id,
-                                                    increment_id: order["external_order_identifier"],
+              shiping_easy_order.assign_attributes( increment_id: order["external_order_identifier"],
                                                     store_order_id: order["id"],
                                                     order_placed_time: order["ordered_at"].to_datetime,
                                                     email: order["billing_email"],
