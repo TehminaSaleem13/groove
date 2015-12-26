@@ -4,6 +4,8 @@ module Groovepacker
       module ShippingEasy
         class OrdersImporter < Groovepacker::Stores::Importers::Importer
           include ProductsHelper
+          #include Groovepacker::Stores::Importers::ShippingEasy::ProductsImporter
+          include ProductsImporter
 
           def import
             init_common_objects
@@ -64,30 +66,9 @@ module Groovepacker
                 order["recipients"][0]["line_items"].each do |item|
                   order_item = shiping_easy_order.order_items.build
                   import_order_item(order_item, item)
-
-                  if item["sku"].blank?
-                    # if sku is nil or empty
-                    if Product.find_by_name(item["item_name"]).nil?
-                      # if item is not found by name then create the item
-                      order_item.product = create_new_product_from_order(item, @credential.store, ProductSku.get_temp_sku)
-                    else
-                      # product exists add temp sku if it does not exist
-                      products = Product.where(name: item["item_name"])
-                      unless contains_temp_skus(products)
-                        order_item.product = create_new_product_from_order(item, @credential.store, ProductSku.get_temp_sku)
-                      else
-                        order_item.product = get_product_with_temp_skus(products)
-                      end
-                    end
-                  elsif ProductSku.where(sku: item["sku"]).length == 0
-                    # if non-nil sku is not found
-                    product = create_new_product_from_order(item, @credential.store, item["sku"])
-                    order_item.product = product
-                  else
-                    order_item_product = ProductSku.where(sku: item["sku"]).first.product
-                    #order_item_product.save
-                    order_item.product = order_item_product
-                  end
+                  #find_or_create_order_item_product is defined in products importer module
+                  order_item_product = find_or_create_order_item_product(item, @credential.store)
+                  order_item.product = order_item_product
                   make_product_intangible(order_item.product)
                   @import_item.current_order_imported_item = @import_item.current_order_imported_item + 1
                   @import_item.save
@@ -105,20 +86,6 @@ module Groovepacker
               order_item.price = item["unit_price"]
               order_item.row_total = item["unit_price"].to_f * item["quantity"].to_f
               order_item
-            end
-
-            def create_new_product_from_order(item, store, sku)
-              product = Product.create(name: item["item_name"], store: store,
-                                       store_product_id: item["ext_line_item_id"],
-                                       weight: item["weight_in_ounces"])
-              
-              product.product_skus.create(sku: sku)
-
-              if @credential.gen_barcode_from_sku && ProductBarcode.where(barcode: sku).empty?
-                product.product_barcodes.create(barcode: sku)
-              end
-              product.set_product_status
-              product
             end
 
             def init_common_objects
