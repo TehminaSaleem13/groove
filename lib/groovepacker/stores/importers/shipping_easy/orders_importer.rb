@@ -40,6 +40,7 @@ module Groovepacker
               shiping_easy_order.tracking_num = order["shipments"][0]["tracking_number"] rescue nil
               
               import_order_items_and_create_products(shiping_easy_order, order)
+              update_success_import_count
             end
 
             def import_order(shiping_easy_order, order)
@@ -165,6 +166,12 @@ module Groovepacker
                 next if primary_sku.nil?
                 shiping_easy_order.addactivity("Item with SKU: #{primary_sku} Added", "#{@credential.store.name} Import")
               end
+            end
+
+            def update_success_import_count
+              @import_item.success_imported += 1
+              @import_item.save
+              @result[:success_imported] += 1
             end
         end
       end
