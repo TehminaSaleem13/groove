@@ -79,6 +79,10 @@ groovepacks_controllers.
             "BigCommerce": {
               alt: "BigCommerce",
               src: "/assets/images/bigcommerce-logo.png"
+            },
+            "ShippingEasy": {
+              alt: "ShippingEasy",
+              src: "/assets/images/shipping_easy.png"
             }
 
           };
