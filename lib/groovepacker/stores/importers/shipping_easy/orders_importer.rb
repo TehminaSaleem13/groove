@@ -4,14 +4,13 @@ module Groovepacker
       module ShippingEasy
         class OrdersImporter < Groovepacker::Stores::Importers::Importer
           include ProductsHelper
-          #include Groovepacker::Stores::Importers::ShippingEasy::ProductsImporter
           include ProductsImporter
 
           def import
             init_common_objects
             return @result if import_statuses_are_empty
             importing_time = Time.now
-            response = @client.orders(@statuses)
+            response = @client.orders(@statuses, importing_time)
             return @result if response["orders"].nil?
             @result[:total_imported] = response["orders"].length
             update_import_item_obj_values
@@ -25,7 +24,6 @@ module Groovepacker
             @result
           end
 
-          #===================================
           private
             def import_single_order(order)
               @import_item.reload
@@ -45,7 +43,7 @@ module Groovepacker
 
             def import_order(shiping_easy_order, order)
               total_weight = order["recipients"][0]["original_order"]["total_weight_in_ounces"] rescue 0
-
+              
               shiping_easy_order.assign_attributes( increment_id: order["external_order_identifier"],
                                                     store_order_id: order["id"],
                                                     order_placed_time: order["ordered_at"].to_datetime,
@@ -66,12 +64,8 @@ module Groovepacker
                 order["recipients"][0]["line_items"].each do |item|
                   order_item = shiping_easy_order.order_items.build
                   import_order_item(order_item, item)
-                  #find_or_create_order_item_product is defined in products importer module
-                  order_item_product = find_or_create_order_item_product(item, @credential.store)
-                  order_item.product = order_item_product
-                  make_product_intangible(order_item.product)
-                  @import_item.current_order_imported_item = @import_item.current_order_imported_item + 1
-                  @import_item.save
+                  import_single_order_product(order_item, item)
+                  increase_import_item_count
                 end
               end
               
@@ -86,6 +80,18 @@ module Groovepacker
               order_item.price = item["unit_price"]
               order_item.row_total = item["unit_price"].to_f * item["quantity"].to_f
               order_item
+            end
+
+            def import_single_order_product(order_item, item)
+              #find_or_create_order_item_product is defined in products importer module
+              order_item_product = find_or_create_order_item_product(item, @credential.store)
+              order_item.product = order_item_product
+              make_product_intangible(order_item.product)
+            end
+
+            def increase_import_item_count
+              @import_item.current_order_imported_item = @import_item.current_order_imported_item + 1
+              @import_item.save
             end
 
             def init_common_objects
