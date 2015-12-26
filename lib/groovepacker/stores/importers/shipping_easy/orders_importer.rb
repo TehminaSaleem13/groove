@@ -31,7 +31,7 @@ module Groovepacker
               update_current_import_item(order)
               
               shiping_easy_order = Order.find_by_increment_id(order["external_order_identifier"])
-              shiping_easy_order ||= Order.new(store_id: @credential.store_id)
+              shiping_easy_order ||= Order.new
 
               return if shiping_easy_order.persisted?
 
@@ -43,8 +43,9 @@ module Groovepacker
 
             def import_order(shiping_easy_order, order)
               total_weight = order["recipients"][0]["original_order"]["total_weight_in_ounces"] rescue 0
-              
-              shiping_easy_order.assign_attributes( increment_id: order["external_order_identifier"],
+
+              shiping_easy_order.assign_attributes( store_id: @credential.store_id,
+                                                    increment_id: order["external_order_identifier"],
                                                     store_order_id: order["id"],
                                                     order_placed_time: order["ordered_at"].to_datetime,
                                                     email: order["billing_email"],
@@ -58,21 +59,18 @@ module Groovepacker
 
             def import_order_items_and_create_products(shiping_easy_order, order)
               unless order["recipients"].blank?
-                @import_item.current_order_items = order["recipients"][0]["line_items"].length
-                @import_item.current_order_imported_item = 0
-                @import_item.save
+                import_item_count(order)
                 order["recipients"][0]["line_items"].each do |item|
                   order_item = shiping_easy_order.order_items.build
                   import_order_item(order_item, item)
                   import_single_order_product(order_item, item)
-                  increase_import_item_count
+                  import_item_count
                 end
               end
               
-              if shiping_easy_order.save
-                add_order_activity(shiping_easy_order)
-                shiping_easy_order.set_order_status
-              end
+              return unless shiping_easy_order.save
+              add_order_activity(shiping_easy_order)
+              shiping_easy_order.set_order_status
             end
 
             def import_order_item(order_item, item)
@@ -89,8 +87,13 @@ module Groovepacker
               make_product_intangible(order_item.product)
             end
 
-            def increase_import_item_count
-              @import_item.current_order_imported_item = @import_item.current_order_imported_item + 1
+            def import_item_count(order=nil)
+              unless order.blank?
+                @import_item.current_order_items = order["recipients"][0]["line_items"].length
+                @import_item.current_order_imported_item = 0
+              else
+                @import_item.current_order_imported_item = @import_item.current_order_imported_item + 1
+              end
               @import_item.save
             end
 
