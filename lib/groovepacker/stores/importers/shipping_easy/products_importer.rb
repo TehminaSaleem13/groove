@@ -6,28 +6,33 @@ module Groovepacker
           include ProductsHelper
 
           def find_or_create_order_item_product(item, store)
-            if item["sku"].blank?
-              # if sku is nil or empty
-              if Product.find_by_name(item["item_name"]).nil?
-                # if item is not found by name then create the item
-                order_item_product = create_new_product_from_order(item, store, ProductSku.get_temp_sku)
-              else
-                # product exists add temp sku if it does not exist
-                products = Product.where(name: item["item_name"])
-                unless contains_temp_skus(products)
-                  order_item_product = create_new_product_from_order(item, store, ProductSku.get_temp_sku)
-                else
-                  #get_product_with_temp_skus is defined in Importer class which is derived in Orders Importer
-                  order_item_product = get_product_with_temp_skus(products)
-                end
-              end
-            elsif ProductSku.where(sku: item["sku"]).length == 0
-              # if non-nil sku is not found
-              order_item_product = create_new_product_from_order(item, store, item["sku"])
-            else
-              order_item_product = ProductSku.where(sku: item["sku"]).first.product
+            product_skus = ProductSku.where(sku: item["sku"])
+            order_item_product =  if item["sku"].blank?
+                                    find_by_name_or_create(item, store)
+                                  elsif product_skus.length==0
+                                    # if non-nil sku is not found
+                                    create_new_product_from_order(item, store, item["sku"])
+                                  else
+                                    product_skus.first.product
+                                  end
+          end
+
+          def find_by_name_or_create(item, store)
+            # if sku is nil or empty
+            products = Product.where(name: item["item_name"])
+            if products.nil?
+              # if item is not found by name then create the item
+              order_item_product = create_new_product_from_order(item, store, ProductSku.get_temp_sku)
+              return order_item_product
             end
-            order_item_product
+            
+            # product exists add temp sku if it does not exist
+            order_item_product =  unless contains_temp_skus(products)
+                                    create_new_product_from_order(item, store, ProductSku.get_temp_sku)
+                                  else
+                                    #get_product_with_temp_skus is defined in Importer class which is derived in Orders Importer
+                                    get_product_with_temp_skus(products)
+                                  end
           end
 
           def create_new_product_from_order(item, store, sku)
