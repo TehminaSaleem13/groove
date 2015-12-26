@@ -10,13 +10,12 @@ module Groovepacker
         @last_imported_at = @credential.last_imported_at
       end
 
-      def orders(statuses)
+      def orders(statuses, importing_time)
         page_index = 1
         combined_response = {}
         combined_response["orders"] = []
-        last_import = @credential.last_imported_at rescue (Time.now - 4.days)
-        #filters = {page: page_index, per_page: 100, status: statuses, last_updated_at: last_import.to_s}
-        filters = {page: page_index, per_page: 100, status: statuses}
+        last_import = @credential.last_imported_at rescue (importing_time - 4.days)
+        filters = {page: page_index, per_page: 100, status: statuses, last_updated_at: last_import.to_s}
         filters = filters.merge(api_key_and_secret)
         
 
