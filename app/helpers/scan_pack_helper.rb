@@ -217,7 +217,7 @@ module ScanPackHelper
     order_edit_conf_object = ScanPack::OrderEditConfService.new(
       [session, input, state, id]
       )
-    order_edit_conf_object.run
+    order_edit_conf_object.run('order_edit_conf')
   end
 
   def cos_conf(input, state, id)
@@ -279,7 +279,7 @@ module ScanPackHelper
     product_edit_conf_object = ScanPack::ProductEditConfService.new(
       [session, input, state, id]
       )
-    product_edit_conf_object.run
+    product_edit_conf_object.run('product_edit_conf')
   end
 
   def order_details_and_next_item(single_order)

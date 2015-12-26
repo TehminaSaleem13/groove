@@ -1,28 +1,6 @@
 class ScanPack::ProductEditConfService < ScanPack::Base
-  def initialize(args)
-    @session, @input, @state, @id = args
-    @single_order = Order.where(id: @id).last
-    @result = {
-      "status"=>true,
-      "matched"=>false,
-      "error_messages"=>[],
-      "success_messages"=>[],
-      "notice_messages"=>[],
-      "data"=>{}
-    }
-  end
-  
-  def run
-    case true
-    when @input.blank? || @id.blank?
-      set_error_messages("Please specify confirmation code and order id to confirm purchase code")
-    when @single_order.blank?
-      set_error_messages("Could not find order with id: "+@id.to_s)
-    else
-      product_edit_conf
-    end
-    @result
-  end
+  # For initialisation and run functionality
+  include ScanPack::Utilities::OrderProductEditConfCommon
 
   def product_edit_conf
     if @single_order.status == "onhold" && @single_order.has_inactive_or_new_products
