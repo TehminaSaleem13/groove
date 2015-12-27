@@ -1,4 +1,4 @@
-module ScanPack::Utilities::OrderProductEditConfCommon
+module ScanPack::Utilities::ConfCommon
   def initialize(args)
     @session, @input, @state, @id = args
     @result = {

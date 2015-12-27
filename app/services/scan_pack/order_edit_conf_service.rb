@@ -1,6 +1,6 @@
 class ScanPack::OrderEditConfService < ScanPack::Base
   # For initialisation and run functionality
-  include ScanPack::Utilities::OrderProductEditConfCommon
+  include ScanPack::Utilities::ConfCommon
   
   def order_edit_conf
     @result['data']['order_num'] = @single_order.increment_id

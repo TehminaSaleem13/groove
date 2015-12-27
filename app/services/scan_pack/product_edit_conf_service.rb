@@ -1,6 +1,6 @@
 class ScanPack::ProductEditConfService < ScanPack::Base
   # For initialisation and run functionality
-  include ScanPack::Utilities::OrderProductEditConfCommon
+  include ScanPack::Utilities::ConfCommon
 
   def product_edit_conf
     if @single_order.status == "onhold" && @single_order.has_inactive_or_new_products

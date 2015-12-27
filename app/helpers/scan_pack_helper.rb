@@ -221,58 +221,10 @@ module ScanPackHelper
   end
 
   def cos_conf(input, state, id)
-    result = Hash.new
-    result['status'] = true
-    result['matched'] = false
-    result['error_messages'] = []
-    result['success_messages'] = []
-    result['notice_messages'] = []
-    result['data'] = Hash.new
-
-    if !id.nil? || !input.nil?
-      #check if order status is On Hold
-      single_order = Order.find(id)
-      if single_order.nil?
-        result['status'] &= false
-        result['error_messages'].push("Could not find order with id: "+id.to_s)
-      else
-        result['data']['order_num'] = single_order.increment_id
-        if single_order.status == "serviceissue"
-          if User.where(:confirmation_code => input).length > 0
-            user = User.where(:confirmation_code => input).first
-
-            if user.can?('change_order_status')
-              #set order state to awaiting scannus
-              single_order.status = 'awaiting'
-              single_order.save
-              single_order.update_order_status
-              result['matched'] = true
-              #set next state
-              result['data']['next_state'] = 'scanpack.rfp.default'
-            else
-              result['matched'] = true
-              result['data']['next_state'] = 'scanpack.rfp.confirmation.cos'
-              result['error_messages'].push("User with confirmation code: "+ input+ " does not have permission to change order status")
-            end
-          else
-            result['data']['next_state'] = 'scanpack.rfp.confirmation.cos'
-            result['error_messages'].push("Could not find any user with confirmation code")
-          end
-        else
-          result['status'] &= false
-          result['error_messages'].push("Only orders with status Service issue"+
-                                          "can use change of status confirmation code")
-        end
-        result['data']['order'] = order_details_and_next_item(single_order)
-      end
-
-      #check if current user edit confirmation code is same as that entered
-    else
-      result['status'] &= false
-      result['error_messages'].push("Please specify confirmation code and order id to change order status")
-    end
-
-    return result
+    cos_conf_object = ScanPack::CosConfService.new(
+      [session, input, state, id]
+      )
+    cos_conf_object.run('cos_conf')
   end
 
   def product_edit_conf(input, state, id)
