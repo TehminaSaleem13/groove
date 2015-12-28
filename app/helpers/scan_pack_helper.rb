@@ -63,84 +63,17 @@ module ScanPackHelper
   # end
 
   def scan_recording(input, state, id)
-    result = Hash.new
-    result['status'] = true
-    result['matched'] = true
-    result['error_messages'] = []
-    result['success_messages'] = []
-    result['notice_messages'] = []
-    result['data'] = Hash.new
-    result['data']['next_state'] = 'scanpack.rfp.recording'
-
-    order = Order.find(id)
-
-    if order.nil?
-      result['status'] &= false
-      result['error_messages'].push("Could not find order with id: "+id)
-    else
-      if order.status == 'awaiting'
-        if input.nil?
-          result['status'] &= false
-          result['error_messages'].push("No tracking number is provided")
-        else
-          #allow tracking id to be saved without special permissions
-          order.tracking_num = input
-          order.set_order_to_scanned_state(current_user.username)
-          result['data']['order_complete'] = true
-          result['data']['next_state'] = 'scanpack.rfo'
-          #update inventory when inventory warehouses is implemented.
-          order.save
-        end
-      else
-        result['status'] &= false
-        result['error_messages'].push("The order is not in awaiting state. Cannot scan the tracking number")
-      end
-    end
-    return result
+    scan_recording_object = ScanPack::ScanRecordingService.new(
+      [current_user, input, state, id]
+      )
+    scan_recording_object.run
   end
 
   def scan_verifying(input, state, id)
-    result = Hash.new
-    result['status'] = true
-    result['matched'] = true
-    result['error_messages'] = []
-    result['success_messages'] = []
-    result['notice_messages'] = []
-    result['data'] = Hash.new
-    result['data']['next_state'] = 'scanpack.rfp.verifying'
-
-    order = Order.find(id)
-
-    if order.nil?
-      result['status'] &= false
-      result['error_messages'].push("Could not find order with id: "+id)
-    else
-      if order.status == 'awaiting'
-        unless input.nil?
-          if order.tracking_num === input || order.tracking_num === input.last(22)
-            order.set_order_to_scanned_state(current_user.username)
-            result['data']['order_complete'] = true
-            result['data']['next_state'] = 'scanpack.rfo'
-            order.addactivity("Shipping Label Verified: #{input}", current_user.username)
-            order.save
-          elsif input == current_user.confirmation_code
-            result['matched'] = false
-            order.set_order_to_scanned_state(current_user.username)
-            result['data']['order_complete'] = true
-            result['data']['next_state'] = 'scanpack.rfo'
-            order.save
-          else
-            result['status'] &= false
-            result['error_messages'].push("Tracking number does not match.")
-            result['data']['next_state'] = 'scanpack.rfp.no_match'
-          end
-        end
-      else
-        result['status'] &= false
-        result['error_messages'].push("The order is not in awaiting state. Cannot scan the tracking number")
-      end
-    end
-    return result
+    scan_verifying_object = ScanPack::ScanVeryfingService.new(
+      [current_user, input, state, id]
+      )
+    scan_verifying_object.run
   end
 
   def render_order_scan(input, state, id)
@@ -234,51 +167,51 @@ module ScanPackHelper
     product_edit_conf_object.run('product_edit_conf')
   end
 
-  def order_details_and_next_item(single_order)
-    single_order.reload
-    data = single_order.attributes
-    data['unscanned_items'] = single_order.get_unscanned_items
-    data['scanned_items'] = single_order.get_scanned_items
-    unless data['unscanned_items'].length == 0
-      unless session[:most_recent_scanned_products].nil?
-        session[:most_recent_scanned_products].reverse!.each do |scanned_product_id|
-          data['unscanned_items'].each do |unscanned_item|
-            if session[:parent_order_item] && session[:parent_order_item] == unscanned_item['order_item_id']
-              session[:parent_order_item] = false
-              if unscanned_item['product_type'] == 'individual' && !unscanned_item['child_items'].empty?
-                data['next_item'] = unscanned_item['child_items'].first.clone
-                break
-              end
-            elsif unscanned_item['product_type'] == 'single' &&
-              scanned_product_id == unscanned_item['product_id'] &&
-              unscanned_item['scanned_qty'] + unscanned_item['qty_remaining'] > 0
-              data['next_item'] = unscanned_item.clone
-              break
-            elsif unscanned_item['product_type'] == 'individual'
-              unscanned_item['child_items'].each do |child_item|
-                if child_item['product_id'] == scanned_product_id
-                  data['next_item'] = child_item.clone
-                  break
-                end
-              end
-              break if !data['next_item'].nil?
-            end
-          end
-          break if !data['next_item'].nil?
-        end
-      end
-      if data['next_item'].nil?
-        if data['unscanned_items'].first['product_type'] == 'single'
-          data['next_item'] = data['unscanned_items'].first.clone
-        elsif data['unscanned_items'].first['product_type'] == 'individual'
-          data['next_item'] = data['unscanned_items'].first['child_items'].first.clone unless data['unscanned_items'].first['child_items'].empty?
-        end
-      end
-      data['next_item']['qty'] = data['next_item']['scanned_qty'] + data['next_item']['qty_remaining']
-    end
+  # def order_details_and_next_item(single_order)
+  #   single_order.reload
+  #   data = single_order.attributes
+  #   data['unscanned_items'] = single_order.get_unscanned_items
+  #   data['scanned_items'] = single_order.get_scanned_items
+  #   unless data['unscanned_items'].length == 0
+  #     unless session[:most_recent_scanned_products].nil?
+  #       session[:most_recent_scanned_products].reverse!.each do |scanned_product_id|
+  #         data['unscanned_items'].each do |unscanned_item|
+  #           if session[:parent_order_item] && session[:parent_order_item] == unscanned_item['order_item_id']
+  #             session[:parent_order_item] = false
+  #             if unscanned_item['product_type'] == 'individual' && !unscanned_item['child_items'].empty?
+  #               data['next_item'] = unscanned_item['child_items'].first.clone
+  #               break
+  #             end
+  #           elsif unscanned_item['product_type'] == 'single' &&
+  #             scanned_product_id == unscanned_item['product_id'] &&
+  #             unscanned_item['scanned_qty'] + unscanned_item['qty_remaining'] > 0
+  #             data['next_item'] = unscanned_item.clone
+  #             break
+  #           elsif unscanned_item['product_type'] == 'individual'
+  #             unscanned_item['child_items'].each do |child_item|
+  #               if child_item['product_id'] == scanned_product_id
+  #                 data['next_item'] = child_item.clone
+  #                 break
+  #               end
+  #             end
+  #             break if !data['next_item'].nil?
+  #           end
+  #         end
+  #         break if !data['next_item'].nil?
+  #       end
+  #     end
+  #     if data['next_item'].nil?
+  #       if data['unscanned_items'].first['product_type'] == 'single'
+  #         data['next_item'] = data['unscanned_items'].first.clone
+  #       elsif data['unscanned_items'].first['product_type'] == 'individual'
+  #         data['next_item'] = data['unscanned_items'].first['child_items'].first.clone unless data['unscanned_items'].first['child_items'].empty?
+  #       end
+  #     end
+  #     data['next_item']['qty'] = data['next_item']['scanned_qty'] + data['next_item']['qty_remaining']
+  #   end
 
-    return data
-  end
+  #   return data
+  # end
 
   def barcode_found_or_special_code(barcode)
     confirmation_code = User.find_by_confirmation_code(barcode)
