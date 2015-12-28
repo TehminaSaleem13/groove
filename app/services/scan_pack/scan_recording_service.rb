@@ -1,4 +1,4 @@
-class ScanPack::ScanRecordingService
+class ScanPack::ScanRecordingService < ScanPack::Base
   def initialize(args)
     @current_user, @input, @state, @id = args
     @result = {

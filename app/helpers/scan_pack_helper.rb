@@ -70,47 +70,10 @@ module ScanPackHelper
   end
 
   def scan_verifying(input, state, id)
-    result = Hash.new
-    result['status'] = true
-    result['matched'] = true
-    result['error_messages'] = []
-    result['success_messages'] = []
-    result['notice_messages'] = []
-    result['data'] = Hash.new
-    result['data']['next_state'] = 'scanpack.rfp.verifying'
-
-    order = Order.find(id)
-
-    if order.nil?
-      result['status'] &= false
-      result['error_messages'].push("Could not find order with id: "+id)
-    else
-      if order.status == 'awaiting'
-        unless input.nil?
-          if order.tracking_num === input || order.tracking_num === input.last(22)
-            order.set_order_to_scanned_state(current_user.username)
-            result['data']['order_complete'] = true
-            result['data']['next_state'] = 'scanpack.rfo'
-            order.addactivity("Shipping Label Verified: #{input}", current_user.username)
-            order.save
-          elsif input == current_user.confirmation_code
-            result['matched'] = false
-            order.set_order_to_scanned_state(current_user.username)
-            result['data']['order_complete'] = true
-            result['data']['next_state'] = 'scanpack.rfo'
-            order.save
-          else
-            result['status'] &= false
-            result['error_messages'].push("Tracking number does not match.")
-            result['data']['next_state'] = 'scanpack.rfp.no_match'
-          end
-        end
-      else
-        result['status'] &= false
-        result['error_messages'].push("The order is not in awaiting state. Cannot scan the tracking number")
-      end
-    end
-    return result
+    scan_verifying_object = ScanPack::ScanVeryfingService.new(
+      [current_user, input, state, id]
+      )
+    scan_verifying_object.run
   end
 
   def render_order_scan(input, state, id)
