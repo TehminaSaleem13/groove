@@ -320,8 +320,12 @@ module OrderConcern
 
     def change_status_to_cancel(order_summary)
       order_summary.import_items.each do |import_item|
-        next unless import_item.store_id == params[:store_id]
-        import_item.update_attributes(status: 'cancelled')
+        if params[:store_id].present?
+          next unless import_item.store_id == params[:store_id]
+          import_item.update_attributes(status: 'cancelled')
+        else
+          import_item.update_attributes(status: 'cancelled')
+        end
       end
     end
 
