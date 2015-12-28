@@ -10,7 +10,7 @@ module Groovepacker
             init_common_objects
             return @result if import_statuses_are_empty
             importing_time = Time.now
-            response = @client.orders(@statuses, importing_time)
+            response = @client.orders(@statuses, importing_time, @import_item)
             return @result if response["orders"].nil?
             @result[:total_imported] = response["orders"].length
             update_import_item_obj_values
