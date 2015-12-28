@@ -48,6 +48,8 @@ module Groovepacker
                   import_item.save
 
                   response.body[:sales_order_list_response][:result][:item].each do |item|
+                    import_item.reload
+                    next if import_item.status == 'cancelled'
                     import_item.current_increment_id = item[:increment_id]
                     import_item.current_order_items = -1
                     import_item.current_order_imported_item = -1
