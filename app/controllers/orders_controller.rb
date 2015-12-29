@@ -242,7 +242,7 @@ class OrdersController < ApplicationController
   end
 
   def import
-    if order_summary
+    if order_summary.nil?
       initiate_import_for_single_store
     else
       set_status_and_message(false, "Import is in progress", ['push', 'error_messages'])
