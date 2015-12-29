@@ -19,7 +19,7 @@ class ScanPack::ScanRecordingService < ScanPack::Base
     when @input.blank?
       set_error_messages("No tracking number is provided")
     when @order.blank?
-      set_error_messages("Could not find order with id: "+id)
+      set_error_messages("Could not find order with id: "+@id)
     else
       scan_recording
     end

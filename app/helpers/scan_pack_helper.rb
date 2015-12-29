@@ -71,79 +71,23 @@ module ScanPackHelper
 
   def scan_verifying(input, state, id)
     scan_verifying_object = ScanPack::ScanVeryfingService.new(
-      [current_user, input, state, id]
+      [current_user, input, id]
       )
     scan_verifying_object.run
   end
 
   def render_order_scan(input, state, id)
-    result = Hash.new
-    result['status'] = true
-    result['matched'] = true
-    result['error_messages'] = []
-    result['success_messages'] = []
-    result['notice_messages'] = []
-    result['data'] = Hash.new
-    result['data']['next_state'] = 'scanpack.rfp.no_tracking_info'
-    unless id.nil?
-      order = Order.find(id)
-      if state == "scanpack.rfp.no_tracking_info" && (input == current_user.confirmation_code || input == "")
-        result['status'] = true
-        result['matched'] = false
-        order.set_order_to_scanned_state(current_user.username)
-        result['data']['order_complete'] = true
-        result['data']['next_state'] = 'scanpack.rfo'
-        order.save
-      else
-        result['status'] = false
-        result['matched'] = false
-        result['data']['next_state'] = 'scanpack.rfp.no_tracking_info'
-      end
-    end
-    result
+    render_order_scan_object = ScanPack::RenderOrderScanService.new(
+      [current_user, input, state, id]
+      )
+    render_order_scan_object.run
   end
 
   def scan_again_or_render_order_scan(input, state, id)
-    result = Hash.new
-    result['status'] = true
-    result['matched'] = true
-    result['error_messages'] = []
-    result['success_messages'] = []
-    result['notice_messages'] = []
-    result['data'] = Hash.new
-    result['data']['next_state'] = 'scanpack.rfp.no_match'
-    unless id.nil?
-      order = Order.find(id)
-      unless order.nil?
-        if state == "scanpack.rfp.no_match" && input == current_user.confirmation_code
-          result['status'] = true
-          result['matched'] = false
-          order.set_order_to_scanned_state(current_user.username)
-          result['data']['order_complete'] = true
-          order.addactivity("The correct shipping label was not verified at the time of packing. Confirmation code for user #{current_user.username} was scanned", current_user.username)
-          result['data']['next_state'] = 'scanpack.rfo'
-          order.save
-        elsif state == "scanpack.rfp.no_match" && (input === order.tracking_num || input.last(22) === order.tracking_num)
-          result['status'] = true
-          result['matched'] = true
-          order.set_order_to_scanned_state(current_user.username)
-          result['data']['order_complete'] = true
-          result['data']['next_state'] = 'scanpack.rfo'
-          order.save
-        elsif state == "scanpack.rfp.no_match" && input == "" && GeneralSetting.all.first.strict_cc == false
-          result['status'] = true
-          result['matched'] = false
-          order.set_order_to_scanned_state(current_user.username)
-          result['data']['order_complete'] = true
-          result['data']['next_state'] = 'scanpack.rfo'
-        else
-          result['status'] = false
-          result['matched'] = false
-          result['data']['next_state'] = 'scanpack.rfp.no_match'
-        end
-      end
-    end
-    result
+    scan_again_or_render_order_scan_object = ScanPack::ScanAginOrRenderOrderScanService.new(
+      [current_user, input, state, id]
+      )
+    scan_again_or_render_order_scan_object.run
   end
 
   def order_edit_conf(input, state, id)
