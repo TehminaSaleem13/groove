@@ -37,10 +37,12 @@ module Groovepacker
 
             #create new order
             bigcommerce_order = Order.new(store_id: @credential.store.id)
-            import_order(bigcommerce_order, order)
+            bigcommerce_order = import_order(bigcommerce_order, order)
 
             #import items in an order
             bigcommerce_order = import_order_items(bigcommerce_order, order)
+            bigcommerce_order.save
+            bigcommerce_order.reload
             #Pull inventory for the order products
             pull_inventory_for(bigcommerce_order)
             #Setting order status
@@ -62,10 +64,11 @@ module Groovepacker
             
             bigcommerce_order.customer_comments = order["customer_message"]
             bigcommerce_order.qty = order["items_total"]
+            return bigcommerce_order
           end
 
           def import_order_items(bigcommerce_order, order)
-            return if order["products"].nil?
+            return bigcommerce_order if order["products"].nil?
             
             order["products"] = @client.order_products(order["products"]["url"])
             @import_item.update_attributes(:current_order_items => order["products"].length, :current_order_imported_item => 0 )
