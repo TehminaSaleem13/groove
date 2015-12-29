@@ -1,15 +1,13 @@
 class ScanPack::ScanRecordingService < ScanPack::Base
   def initialize(args)
-    @current_user, @input, @state, @id = args
+    @current_user, @input, @id = args
     @result = {
       "status"=>true,
       "matched"=>false,
       "error_messages"=>[],
       "success_messages"=>[],
       "notice_messages"=>[],
-      "data"=>{
-        'next_state' => 'scanpack.rfp.recording'
-      }
+      "data"=>{}
     }
     @order = Order.where(id: @id).last
   end
@@ -27,6 +25,7 @@ class ScanPack::ScanRecordingService < ScanPack::Base
   end
 
   def scan_recording
+    @result['data']['next_state'] = 'scanpack.rfp.recording'
     if @order.status == 'awaiting'
       #allow tracking id to be saved without special permissions
       @order.tracking_num = @input

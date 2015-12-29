@@ -64,7 +64,7 @@ module ScanPackHelper
 
   def scan_recording(input, state, id)
     scan_recording_object = ScanPack::ScanRecordingService.new(
-      [current_user, input, state, id]
+      [current_user, input, id]
       )
     scan_recording_object.run
   end
