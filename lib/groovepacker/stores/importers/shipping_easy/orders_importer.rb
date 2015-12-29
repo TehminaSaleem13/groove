@@ -16,11 +16,13 @@ module Groovepacker
             update_import_item_obj_values
             
             response["orders"].each do |order|
+              @import_item.reload
+              break if @import_item.status == 'cancelled'
               import_single_order(order)
               increase_import_count
             end
             
-            @credential.update_attributes(last_imported_at: importing_time) if @result[:status]
+            @credential.update_attributes(last_imported_at: importing_time) if @result[:status] && @import_item.status == 'cancelled'
             @result
           end
 
