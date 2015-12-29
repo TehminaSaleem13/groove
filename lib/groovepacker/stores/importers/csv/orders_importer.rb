@@ -24,7 +24,7 @@ module Groovepacker
           def iterate_and_import_rows(final_records, order_map, result)
             final_records.each_with_index do |single_row, index|
               @import_item.reload
-              next if @import_item.status == 'cancelled'
+              break if @import_item.status == 'cancelled'
               next if @helper.blank_or_invalid(single_row)
 
               @import_item.current_increment_id = inc_id = @helper.get_row_data(single_row, 'increment_id')
