@@ -20,9 +20,7 @@ groovepacks_controllers.
         if (reason == "cancel-button-click") {
           myscope.rollback();
         } else {
-          if (!scope.alias_added) {
-            scope.update_single_product(false);
-          }
+          scope.update_single_product(false);
         }
       };
 
@@ -123,7 +121,6 @@ groovepacks_controllers.
         });
         alias_modal.result.then(function (data) {
           myscope.add_alias_product(type, data);
-          scope.alias_added = true;
         });
       };
       scope.add_image_for_receiving_instructions = function () {
