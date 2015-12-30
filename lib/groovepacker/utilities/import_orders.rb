@@ -42,6 +42,8 @@ class ImportOrders
       if !@order_import_summary.nil? && !@order_import_summary.id.nil?
         import_items = @order_import_summary.import_items
         import_items.each do |import_item|
+          import_item.reload
+          next if import_item.status=="cancelled"
           import_orders_with_import_item(import_item, tenant)
         end
         @order_import_summary.reload
