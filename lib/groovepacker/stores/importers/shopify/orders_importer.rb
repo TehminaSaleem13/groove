@@ -28,7 +28,7 @@ module Groovepacker
             unless response["orders"].nil?
               response["orders"].each do |order|
                 import_item.reload
-                next if import_item.status == 'cancelled'
+                break if import_item.status == 'cancelled'
                 import_item.current_increment_id = order["id"]
                 import_item.current_order_items = -1
                 import_item.current_order_imported_item = -1
