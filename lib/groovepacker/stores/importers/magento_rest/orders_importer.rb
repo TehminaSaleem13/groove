@@ -9,11 +9,8 @@ module Groovepacker
             client = handler[:store_handle][:handle]
             import_item = handler[:import_item]
             result = self.build_result
+            import_time = DateTime.now
             
-            #==============
-
-            credential.last_imported_at = DateTime.now
-            credential.save
             begin
               orders = client.orders
               unless orders.blank?
@@ -120,6 +117,12 @@ module Groovepacker
               import_item.message = e.message
               import_item.save
             end
+            import_item.reload
+            if import_item.status != 'cancelled'
+              credential.last_imported_at = import_time
+              credential.save
+            end
+
             result
           end
 
