@@ -61,7 +61,7 @@ module ScanPack::Utilities::ProductScan::IndividualProductType
     item, child_item, serial_added, clicked, order_item_kit_product = params
     child_item_product_id = child_item['product_id']
     if child_item['record_serial']
-      do_if_child_item_record_serial(params)
+      do_if_child_item_record_serial(params.push(child_item_product_id))
     else
       order_item_kit_product.process_item(clicked, @current_user.username)
       (@session[:most_recent_scanned_products] ||= []) << child_item_product_id
@@ -70,7 +70,7 @@ module ScanPack::Utilities::ProductScan::IndividualProductType
   end
 
   def do_if_child_item_record_serial(params)
-    item, child_item, serial_added, clicked, order_item_kit_product = params
+    item, child_item, serial_added, clicked, order_item_kit_product, child_item_product_id = params
     if serial_added
       order_item_kit_product.process_item(clicked, @current_user.username)
       (@session[:most_recent_scanned_products] ||= []) << child_item_product_id
