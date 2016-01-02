@@ -6,27 +6,15 @@ module OrderConcern
     prepend_before_filter :initialize_result_obj, only: [:index, :importorders, :clear_exception, :record_exception, :import_all, :order_items_export, :update_order_list, :cancel_packing_slip, :duplicate_orders, :delete_orders, :change_orders_status, :generate_pick_list, :update, :show, :update_item_in_order, :rollback, :remove_item_from_order, :add_item_to_order, :search, :import, :cancel_import, :generate_packing_slip]
     before_filter :find_order, only: [:update, :show, :record_exception, :clear_exception, :update_order_list]
     before_filter :check_order_edit_permissions, only: [:add_item_to_order, :update_item_in_order, :remove_item_from_order]
+    require 'csv'
+    include OrdersHelper
+    include ProductsHelper
+    include SettingsHelper
+    include ApplicationHelper
     include Groovepacker::Orders::ResponseMessage
   end
   
   private
-    def settings_to_generate_packing_slip
-      if GeneralSetting.get_packing_slip_size == '4 x 6'
-        @page_height, @page_width = '6', '4'
-      else
-        @page_height, @page_width = '11', '8.5'
-      end
-      
-      @size = GeneralSetting.get_packing_slip_size
-      @orientation = GeneralSetting.get_packing_slip_orientation
-      @result = {'data' => { 'packing_slip_file_paths' => [] }}
-
-      @page_height = (@page_height.to_f/2).to_s if @orientation == 'landscape'
-      
-      @header = ''
-      @file_name = current_tenant+Time.now.strftime('%d_%b_%Y_%I__%M_%p')
-    end
-
     def list_selected_orders(sort_by_order_number = false)
       result = get_orders_list_for_selected(sort_by_order_number)
       result_rows = create_results_row(result)
@@ -36,12 +24,13 @@ module OrderConcern
     end
 
     def get_orders_list_for_selected(sort_by_order_number = false)
-      result =  if params[:select_all] || params[:inverted]
+      @params = params
+      result =  if @params[:select_all] or @params[:inverted]
                   list_of_all_selected_or_inverted(sort_by_order_number)
-                elsif params[:orderArray].present?
+                elsif @params[:orderArray].present?
                   list_of_orders_from_orderArray(sort_by_order_number)
-                elsif params[:id].present?
-                  Order.find(params[:id])
+                elsif @params[:id].present?
+                  Order.find(@params[:id])
                 else
                   list_of_orders_by_sort_order(sort_by_order_number)
                 end
@@ -49,22 +38,21 @@ module OrderConcern
 
     def list_of_all_selected_or_inverted(sort_by_order_number = false)
       if sort_by_order_number
-        params[:sort] = 'ordernum'
-        params[:order] = 'ASC'
+        @params = @params.merge({:sort => 'ordernum', :order => 'ASC' })
       end
-      result = params[:search].blank? ? gp_orders_search.do_search : gp_orders_module.do_getorders
+      result = @params[:search].blank? ? gp_orders_search.do_search : gp_orders_module.do_getorders
     end
 
     def list_of_orders_from_orderArray(sort_by_order_number = false)
-      result = params[:orderArray]
+      result = @params[:orderArray]
       if sort_by_order_number
-        result = Order.where(:id => params[:orderArray].map(&:values).flatten).order(:increment_id)
+        result = Order.where(:id => @params[:orderArray].map(&:values).flatten).order(:increment_id)
       end
       result
     end
 
     def list_of_orders_by_sort_order(sort_by_order_number = false)
-      result = Order.where(:id => params[:order_ids])
+      result = Order.where(:id => @params[:order_ids])
       result = result.order(:increment_id) if sort_by_order_number
       result
     end
@@ -188,7 +176,7 @@ module OrderConcern
       #Retrieve order items
       @result['order']['items'] = []
       @order.order_items.each do |orderitem|
-        @result['order']['items'].push(retrieve_order_item(orderitem))  
+        @result['order']['items'].push(retrieve_order_item(orderitem))
       end
       @result['order']['storeinfo'] = @order.store
 
@@ -214,9 +202,9 @@ module OrderConcern
     end
 
     def set_user_permissions
-      @result['order']['add_items_permitted'] = current_user.can? 'add_edit_order_items'
-      @result['order']['remove_items_permitted'] = current_user.can? 'add_edit_order_items'
-      @result['order']['activities'] = @order.order_activities
+      @result['order'] = @result['order'].merge({ 'add_items_permitted' => current_user.can?('add_edit_order_items'),
+                                                  'remove_items_permitted' => current_user.can?('add_edit_order_items'),
+                                                  'activities' => @order.order_activities })
     end
 
     def set_unacknowledged_activities
@@ -252,22 +240,15 @@ module OrderConcern
     end
 
     def add_a_nobody_user
-      @result['order']['users'] = User.all
-
       #add a user with name of nobody to display in the list
       dummy_user = User.new
       dummy_user.name = 'Nobody'
       dummy_user.id = 0
+      @result['order']['users'] = User.all
       @result['order']['users'].unshift(dummy_user)
 
-      #add packing_slip_size and packing_slip_orientation
-      # @result['order']['packing_slip_size'] = GeneralSetting.get_packing_slip_size
-      # @result['order']['packing_slip_orientation'] = GeneralSetting.get_packing_slip_orientation
-      return unless @order.packing_user_id
-
-      @result['order']['users'].each do |user|
-        user.name = "#{user.name} (Packing User)" if user.id == @order.packing_user_id
-      end
+      user = @result['order']['users'].select {|user| user.id == @order.packing_user_id }.first
+      user.name = "#{user.name} (Packing User)" if user
     end
 
     def find_order
@@ -309,22 +290,17 @@ module OrderConcern
       ImportOrders.new.import_order_by_store(import_params)
     end
 
-    def current_tenant
-      Apartment::Tenant.current
-    end
-
     def permitted_to_status_change(order)
       (Order::SOLD_STATUSES.include?(order.status) && Order::UNALLOCATE_STATUSES.include?(params[:status])) ||
         (Order::UNALLOCATE_STATUSES.include?(order.status) && Order::SOLD_STATUSES.include?(params[:status]))
     end
 
-    def change_status_to_cancel(order_summary)
+    def change_status_to_cancel(import_summary)
       if params[:store_id].present?
-        import_item = order_summary.import_items.find_by_store_id(params[:store_id])
-        import_item.update_attributes(status: 'cancelled')
+         import_summary.import_items.find_by_store_id(params[:store_id]).update_attributes(status: 'cancelled')
       else
-        order_summary.import_items.update_all(status: 'cancelled')
-        order_summary.update_attributes(status: 'completed')
+        import_summary.import_items.update_all(status: 'cancelled')
+        import_summary.update_attributes(status: 'completed')
       end
     end
 

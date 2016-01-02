@@ -1,40 +1,19 @@
 class OrdersController < ApplicationController
   include OrderConcern
-  require 'csv'
-  include OrdersHelper
-  include ProductsHelper
-  include SettingsHelper
-  include ApplicationHelper
-
+  
   # Import orders from store based on store id
   def importorders
-    store = Store.find(params[:id])
-    @result.merge({ 'total_imported' => 0, 'success_imported' => 0,
-                    'previous_imported' => 0, 'activestoreindex' => 0 })
-
-    unless params[:activestoreindex].blank?
-      @result['activestoreindex'] = params[:activestoreindex]
-    end
-
     if check_user_permissions('import_orders')
-      @result, @import_result = gp_orders_import.execute_import(store)
+      @result, @import_result = gp_orders_import.execute_import
       import_result_messages(@import_result) unless @import_result.blank?
     end
-    
     render json: @result
   end
 
   def import_shipworks
-    #find store by using the auth_token
-    status = 200
-    unless params[:auth_token].nil? || request.headers["HTTP_USER_AGENT"] != 'shipworks'
-      status = gp_orders_import.import_shipworks(params[:auth_token], status)
-    end
-    if status == 401
-      render status: 401, nothing: true
-    else
-      render nothing: true
-    end
+    status = gp_orders_import.import_shipworks(params[:auth_token], request)
+    
+    render status: status, nothing: true
   end
 
   def update
@@ -191,7 +170,7 @@ class OrdersController < ApplicationController
       format.html {}
       format.pdf {}
       format.json {
-        render_pdf(file_name)
+        render_pdf(file_name) #defined in application helper
         render json: @result
       }
     end
@@ -242,7 +221,7 @@ class OrdersController < ApplicationController
   end
 
   def import
-    if order_summary.nil?
+    if order_summary.nil?   #order_summary defined in application helper
       initiate_import_for_single_store
     else
       set_status_and_message(false, "Import is in progress", ['push', 'error_messages'])
@@ -251,10 +230,10 @@ class OrdersController < ApplicationController
   end
 
   def cancel_import
-    if order_summary.nil?
+    if order_summary.nil?   #order_summary defined in application helper
       set_status_and_message(false, "No imports are in progress", ['push', 'error_messages'])
     else
-      change_status_to_cancel(order_summary)
+      change_status_to_cancel
     end
     render json: @result
   end
@@ -267,24 +246,5 @@ class OrdersController < ApplicationController
   #   render 'match'
   # end
 
-  private
-  def render_pdf(file_name)
-    render :pdf => file_name,
-           :template => 'orders/generate_pick_list',
-           :orientation => 'portrait',
-           :page_height => '8in',
-           :save_only => true,
-           :page_width => '11.5in',
-           :margin => {:top => '20', :bottom => '20', :left => '10', :right => '10'},
-           :header => {:spacing => 5, :right => '[page] of [topage]'},
-           :footer => {:spacing => 1},
-           :handlers => [:erb],
-           :formats => [:html],
-           :save_to_file => Rails.root.join('public', 'pdfs', "#{file_name}.pdf")
-  end
-
-  def order_summary
-    OrderImportSummary.where(status: 'in_progress').first
-  end
 end
 
