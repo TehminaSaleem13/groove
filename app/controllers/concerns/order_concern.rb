@@ -16,18 +16,12 @@ module OrderConcern
   
   private
     def settings_to_generate_packing_slip
-      if GeneralSetting.get_packing_slip_size == '4 x 6'
-        @page_height, @page_width = '6', '4'
-      else
-        @page_height, @page_width = '11', '8.5'
-      end
-      
+      @page_height, @page_width = '11', '8.5'
+      @page_height, @page_width = '6', '4' if GeneralSetting.get_packing_slip_size == '4 x 6'
       @size = GeneralSetting.get_packing_slip_size
       @orientation = GeneralSetting.get_packing_slip_orientation
       @result = {'data' => { 'packing_slip_file_paths' => [] }}
-
       @page_height = (@page_height.to_f/2).to_s if @orientation == 'landscape'
-      
       @header = ''
       @file_name = current_tenant+Time.now.strftime('%d_%b_%Y_%I__%M_%p')
     end
@@ -54,8 +48,7 @@ module OrderConcern
 
     def list_of_all_selected_or_inverted(sort_by_order_number = false)
       if sort_by_order_number
-        params[:sort] = 'ordernum'
-        params[:order] = 'ASC'
+        params = params.merge({:sort => 'ordernum', :order => 'ASC' })
       end
       result = params[:search].blank? ? gp_orders_search.do_search : gp_orders_module.do_getorders
     end
@@ -219,9 +212,9 @@ module OrderConcern
     end
 
     def set_user_permissions
-      @result['order']['add_items_permitted'] = current_user.can? 'add_edit_order_items'
-      @result['order']['remove_items_permitted'] = current_user.can? 'add_edit_order_items'
-      @result['order']['activities'] = @order.order_activities
+      @result['order'].merge ({ 'add_items_permitted' => current_user.can?('add_edit_order_items'),
+                                'remove_items_permitted' => current_user.can?('add_edit_order_items'),
+                                'activities' => @order.order_activities })
     end
 
     def set_unacknowledged_activities
@@ -265,14 +258,8 @@ module OrderConcern
       dummy_user.id = 0
       @result['order']['users'].unshift(dummy_user)
 
-      #add packing_slip_size and packing_slip_orientation
-      # @result['order']['packing_slip_size'] = GeneralSetting.get_packing_slip_size
-      # @result['order']['packing_slip_orientation'] = GeneralSetting.get_packing_slip_orientation
-      return unless @order.packing_user_id
-
-      @result['order']['users'].each do |user|
-        user.name = "#{user.name} (Packing User)" if user.id == @order.packing_user_id
-      end
+      user = @result['order']['users'].select {|user| user.id == @order.packing_user_id }.first
+      user.name = "#{user.name} (Packing User)" if user
     end
 
     def find_order
@@ -325,8 +312,7 @@ module OrderConcern
 
     def change_status_to_cancel(order_summary)
       if params[:store_id].present?
-        import_item = order_summary.import_items.find_by_store_id(params[:store_id])
-        import_item.update_attributes(status: 'cancelled')
+         order_summary.import_items.find_by_store_id(params[:store_id]).update_attributes(status: 'cancelled')
       else
         order_summary.import_items.update_all(status: 'cancelled')
         order_summary.update_attributes(status: 'completed')
