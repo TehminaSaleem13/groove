@@ -2,7 +2,11 @@ module Groovepacker
   module Orders
     class Import < Groovepacker::Orders::Base
 
-      def execute_import(store)
+      def execute_import
+        store = Store.find(@params[:id])
+        @result = @result.merge(import_status_hash)
+        @result['activestoreindex'] = @params[:activestoreindex] unless @params[:activestoreindex].blank?
+
         begin
           #import if magento products
           import_result = get_context(store).import_orders
@@ -27,8 +31,11 @@ module Groovepacker
         return @result
       end
 
-      def import_shipworks(auth_token, status = nil)
+      def import_shipworks(auth_token, request, status = 200)
+        return status if @params[:auth_token].nil? || request.headers["HTTP_USER_AGENT"] != 'shipworks'
+
         begin
+          #find store/credential by using the auth_token
           credential = ShipworksCredential.find_by_auth_token(auth_token)
           status = create_or_update_item(credential, status)
         rescue Exception => e
@@ -64,6 +71,14 @@ module Groovepacker
         def change_status_if_not_failed(import_item)
           return unless import_item.status != 'failed'
           import_itemupdate_attributes(:status => 'completed')
+        end
+
+        def import_status_hash
+          return {  'total_imported' => 0,
+                    'success_imported' => 0,
+                    'previous_imported' => 0,
+                    'activestoreindex' => 0
+                  }
         end
     end
   end

@@ -6,6 +6,11 @@ module OrderConcern
     prepend_before_filter :initialize_result_obj, only: [:index, :importorders, :clear_exception, :record_exception, :import_all, :order_items_export, :update_order_list, :cancel_packing_slip, :duplicate_orders, :delete_orders, :change_orders_status, :generate_pick_list, :update, :show, :update_item_in_order, :rollback, :remove_item_from_order, :add_item_to_order, :search, :import, :cancel_import, :generate_packing_slip]
     before_filter :find_order, only: [:update, :show, :record_exception, :clear_exception, :update_order_list]
     before_filter :check_order_edit_permissions, only: [:add_item_to_order, :update_item_in_order, :remove_item_from_order]
+    require 'csv'
+    include OrdersHelper
+    include ProductsHelper
+    include SettingsHelper
+    include ApplicationHelper
     include Groovepacker::Orders::ResponseMessage
   end
   
@@ -328,5 +333,24 @@ module OrderConcern
       orders.each do |order|
         set_status_and_message(false, order.errors.full_messages, ['&']) unless order.destroy
       end
+    end
+
+    def render_pdf(file_name)
+      render :pdf => file_name,
+             :template => 'orders/generate_pick_list',
+             :orientation => 'portrait',
+             :page_height => '8in',
+             :save_only => true,
+             :page_width => '11.5in',
+             :margin => {:top => '20', :bottom => '20', :left => '10', :right => '10'},
+             :header => {:spacing => 5, :right => '[page] of [topage]'},
+             :footer => {:spacing => 1},
+             :handlers => [:erb],
+             :formats => [:html],
+             :save_to_file => Rails.root.join('public', 'pdfs', "#{file_name}.pdf")
+    end
+
+    def order_summary
+      OrderImportSummary.where(status: 'in_progress').first
     end
 end
