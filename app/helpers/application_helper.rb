@@ -49,4 +49,27 @@ module ApplicationHelper
       ENV['ONE_TIME_PAYMENT']
     end
   end
+
+  def render_pdf(file_name)
+    render :pdf => file_name,
+           :template => 'orders/generate_pick_list',
+           :orientation => 'portrait',
+           :page_height => '8in',
+           :save_only => true,
+           :page_width => '11.5in',
+           :margin => {:top => '20', :bottom => '20', :left => '10', :right => '10'},
+           :header => {:spacing => 5, :right => '[page] of [topage]'},
+           :footer => {:spacing => 1},
+           :handlers => [:erb],
+           :formats => [:html],
+           :save_to_file => Rails.root.join('public', 'pdfs', "#{file_name}.pdf")
+  end
+
+  def current_tenant
+    Apartment::Tenant.current
+  end
+
+  def order_summary
+    OrderImportSummary.where(status: 'in_progress').first
+  end
 end

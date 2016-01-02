@@ -36,24 +36,24 @@ module OrderConcern
 
     def get_orders_list_for_selected(sort_by_order_number = false)
       result =  if params[:select_all] || params[:inverted]
-                  list_of_all_selected_or_inverted(sort_by_order_number)
+                  list_of_all_selected_or_inverted(params, sort_by_order_number)
                 elsif params[:orderArray].present?
-                  list_of_orders_from_orderArray(sort_by_order_number)
+                  list_of_orders_from_orderArray(params, sort_by_order_number)
                 elsif params[:id].present?
                   Order.find(params[:id])
                 else
-                  list_of_orders_by_sort_order(sort_by_order_number)
+                  list_of_orders_by_sort_order(params, sort_by_order_number)
                 end
     end
 
-    def list_of_all_selected_or_inverted(sort_by_order_number = false)
+    def list_of_all_selected_or_inverted(params, sort_by_order_number = false)
       if sort_by_order_number
         params = params.merge({:sort => 'ordernum', :order => 'ASC' })
       end
       result = params[:search].blank? ? gp_orders_search.do_search : gp_orders_module.do_getorders
     end
 
-    def list_of_orders_from_orderArray(sort_by_order_number = false)
+    def list_of_orders_from_orderArray(params, sort_by_order_number = false)
       result = params[:orderArray]
       if sort_by_order_number
         result = Order.where(:id => params[:orderArray].map(&:values).flatten).order(:increment_id)
@@ -61,7 +61,7 @@ module OrderConcern
       result
     end
 
-    def list_of_orders_by_sort_order(sort_by_order_number = false)
+    def list_of_orders_by_sort_order(params, sort_by_order_number = false)
       result = Order.where(:id => params[:order_ids])
       result = result.order(:increment_id) if sort_by_order_number
       result
@@ -186,7 +186,7 @@ module OrderConcern
       #Retrieve order items
       @result['order']['items'] = []
       @order.order_items.each do |orderitem|
-        @result['order']['items'].push(retrieve_order_item(orderitem))  
+        @result['order']['items'].push(retrieve_order_item(orderitem))
       end
       @result['order']['storeinfo'] = @order.store
 
@@ -212,9 +212,9 @@ module OrderConcern
     end
 
     def set_user_permissions
-      @result['order'].merge ({ 'add_items_permitted' => current_user.can?('add_edit_order_items'),
-                                'remove_items_permitted' => current_user.can?('add_edit_order_items'),
-                                'activities' => @order.order_activities })
+      @result['order'] = @result['order'].merge({ 'add_items_permitted' => current_user.can?('add_edit_order_items'),
+                                                  'remove_items_permitted' => current_user.can?('add_edit_order_items'),
+                                                  'activities' => @order.order_activities })
     end
 
     def set_unacknowledged_activities
@@ -250,12 +250,11 @@ module OrderConcern
     end
 
     def add_a_nobody_user
-      @result['order']['users'] = User.all
-
       #add a user with name of nobody to display in the list
       dummy_user = User.new
       dummy_user.name = 'Nobody'
       dummy_user.id = 0
+      @result['order']['users'] = User.all
       @result['order']['users'].unshift(dummy_user)
 
       user = @result['order']['users'].select {|user| user.id == @order.packing_user_id }.first
@@ -301,21 +300,17 @@ module OrderConcern
       ImportOrders.new.import_order_by_store(import_params)
     end
 
-    def current_tenant
-      Apartment::Tenant.current
-    end
-
     def permitted_to_status_change(order)
       (Order::SOLD_STATUSES.include?(order.status) && Order::UNALLOCATE_STATUSES.include?(params[:status])) ||
         (Order::UNALLOCATE_STATUSES.include?(order.status) && Order::SOLD_STATUSES.include?(params[:status]))
     end
 
-    def change_status_to_cancel(order_summary)
+    def change_status_to_cancel(import_summary)
       if params[:store_id].present?
-         order_summary.import_items.find_by_store_id(params[:store_id]).update_attributes(status: 'cancelled')
+         import_summary.import_items.find_by_store_id(params[:store_id]).update_attributes(status: 'cancelled')
       else
-        order_summary.import_items.update_all(status: 'cancelled')
-        order_summary.update_attributes(status: 'completed')
+        import_summary.import_items.update_all(status: 'cancelled')
+        import_summary.update_attributes(status: 'completed')
       end
     end
 
@@ -323,24 +318,5 @@ module OrderConcern
       orders.each do |order|
         set_status_and_message(false, order.errors.full_messages, ['&']) unless order.destroy
       end
-    end
-
-    def render_pdf(file_name)
-      render :pdf => file_name,
-             :template => 'orders/generate_pick_list',
-             :orientation => 'portrait',
-             :page_height => '8in',
-             :save_only => true,
-             :page_width => '11.5in',
-             :margin => {:top => '20', :bottom => '20', :left => '10', :right => '10'},
-             :header => {:spacing => 5, :right => '[page] of [topage]'},
-             :footer => {:spacing => 1},
-             :handlers => [:erb],
-             :formats => [:html],
-             :save_to_file => Rails.root.join('public', 'pdfs', "#{file_name}.pdf")
-    end
-
-    def order_summary
-      OrderImportSummary.where(status: 'in_progress').first
     end
 end

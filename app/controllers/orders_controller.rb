@@ -170,7 +170,7 @@ class OrdersController < ApplicationController
       format.html {}
       format.pdf {}
       format.json {
-        render_pdf(file_name)
+        render_pdf(file_name) #defined in application helper
         render json: @result
       }
     end
@@ -221,7 +221,7 @@ class OrdersController < ApplicationController
   end
 
   def import
-    if order_summary.nil?
+    if order_summary.nil?   #order_summary defined in application helper
       initiate_import_for_single_store
     else
       set_status_and_message(false, "Import is in progress", ['push', 'error_messages'])
@@ -230,10 +230,10 @@ class OrdersController < ApplicationController
   end
 
   def cancel_import
-    if order_summary.nil?
+    if order_summary.nil?   #order_summary defined in application helper
       set_status_and_message(false, "No imports are in progress", ['push', 'error_messages'])
     else
-      change_status_to_cancel(order_summary)
+      change_status_to_cancel
     end
     render json: @result
   end
