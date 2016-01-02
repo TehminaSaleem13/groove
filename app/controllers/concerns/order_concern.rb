@@ -71,6 +71,7 @@ module OrderConcern
     def list_of_orders_by_sort_order(sort_by_order_number = false)
       result = Order.where(:id => params[:order_ids])
       result = result.order(:increment_id) if sort_by_order_number
+      result
     end
 
     def create_results_row(result)
@@ -323,9 +324,12 @@ module OrderConcern
     end
 
     def change_status_to_cancel(order_summary)
-      order_summary.import_items.each do |import_item|
-        next unless import_item.store_id == params[:store_id]
+      if params[:store_id].present?
+        import_item = order_summary.import_items.find_by_store_id(params[:store_id])
         import_item.update_attributes(status: 'cancelled')
+      else
+        order_summary.import_items.update_all(status: 'cancelled')
+        order_summary.update_attributes(status: 'completed')
       end
     end
 

@@ -64,9 +64,21 @@
                   <img class="icons" src="/assets/images/box.png">
                 </a>
               </li>
-              <li class="nav-li" groov-popover="{{import_groov_popover.content}}" popover-title="{{import_groov_popover.title}}" popover-placement="bottom">
+              <!--<li class="nav-li" groov-popover="{{import_groov_popover.content}}" popover-title="{{import_groov_popover.title}}" popover-placement="bottom">
                 <a href="" ng-click='import_all_orders()'><i ng-show="import_summary.import_info.status =='in_progress'" class="glyphicon glyphicon-refresh groov-refresh-spin"></i>
                   Import Orders<br/>
+                  <img class="icons" src="/assets/images/cloud.png">
+                </a>
+              </li>-->
+
+              <li class="nav-li" groov-popover="{{import_groov_popover.content}}" popover-title="{{import_groov_popover.title}}" popover-placement="bottom">
+                <a href="" ng-click='import_all_orders()' ng-show="import_summary.import_info.status !='in_progress'">
+                  Import Orders<br/>
+                  <img class="icons" src="/assets/images/cloud.png">
+                </a>
+                <a href="" ng-click='cancel_import()' ng-show="import_summary.import_info.status =='in_progress'">
+                  <i class="glyphicon glyphicon-refresh groov-refresh-spin"></i>
+                  Cancel Import<br/>
                   <img class="icons" src="/assets/images/cloud.png">
                 </a>
               </li>

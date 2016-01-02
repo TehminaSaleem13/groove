@@ -1,4 +1,4 @@
-module ScanPack::Utilities::LotNumber
+module ScanPack::Utilities::ProductScan::LotNumber
   def calculate_lot_number
     escape_string = @scanpack_settings.escape_string_enabled && @scanpack_settings.escape_string
     if escape_string && !@input.index(escape_string).nil?

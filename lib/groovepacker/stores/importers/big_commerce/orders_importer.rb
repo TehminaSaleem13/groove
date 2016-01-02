@@ -14,10 +14,12 @@ module Groovepacker
             @import_item.update_attributes(:current_increment_id => '', :success_imported => 0, :previous_imported => 0, :current_order_items => -1, :current_order_imported_item => -1, :to_import => @result[:total_imported])
 
             (response["orders"]||[]).each do |order|
+              @import_item.reload
+              break if @import_item.status == 'cancelled'
               @import_item.update_attributes(:current_increment_id => order["id"], :current_order_items => -1, :current_order_imported_item => -1)
               import_single_order(order)
             end
-            @credential.update_attributes( :last_imported_at => last_imported_date )
+            @credential.update_attributes( :last_imported_at => last_imported_date ) if @import_item.status != 'cancelled'
             
             @result
           end
@@ -32,15 +34,17 @@ module Groovepacker
           end
 
           def import_single_order(order)
-            #Delete if order exists so modified order can be saved with new changes
-            delete_order_if_exists(order)
+            #Delete if order exists and is not scanned so modified order can be saved with new changes
+            return unless delete_order_if_exists(order)
 
             #create new order
             bigcommerce_order = Order.new(store_id: @credential.store.id)
-            import_order(bigcommerce_order, order)
+            bigcommerce_order = import_order(bigcommerce_order, order)
 
             #import items in an order
             bigcommerce_order = import_order_items(bigcommerce_order, order)
+            bigcommerce_order.save
+            bigcommerce_order.reload
             #Pull inventory for the order products
             pull_inventory_for(bigcommerce_order)
             #Setting order status
@@ -62,10 +66,11 @@ module Groovepacker
             
             bigcommerce_order.customer_comments = order["customer_message"]
             bigcommerce_order.qty = order["items_total"]
+            return bigcommerce_order
           end
 
           def import_order_items(bigcommerce_order, order)
-            return if order["products"].nil?
+            return bigcommerce_order if order["products"].nil?
             
             order["products"] = @client.order_products(order["products"]["url"])
             @import_item.update_attributes(:current_order_items => order["products"].length, :current_order_imported_item => 0 )
@@ -147,7 +152,13 @@ module Groovepacker
 
           def delete_order_if_exists(order)
             existing_order = Order.find_by_increment_id(order["id"])
-            existing_order.destroy if existing_order
+            if existing_order && existing_order.status!="scanned"
+              existing_order.destroy
+              return true
+            else
+              return_val = existing_order ? false : true
+              return return_val
+            end
           end
 
         end

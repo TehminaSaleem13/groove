@@ -790,7 +790,7 @@ class ProductsController < ApplicationController
     result['status'] = true
     result['messages'] = []
     result['params'] = params
-
+    general_setting = GeneralSetting.all.first
     if !@product.nil?
       if current_user.can?('add_edit_products') ||
         (session[:product_edit_matched_for_current_user] && session[:product_edit_matched_for_products].include?(@product.id))
@@ -825,8 +825,12 @@ class ProductsController < ApplicationController
           product_location.product_id = @product.id
           product_location.inventory_warehouse_id = current_user.inventory_warehouse_id
         end
+
         product_location.quantity_on_hand = params[:inventory_warehouses][0][:info][:quantity_on_hand] unless params[:inventory_warehouses].empty?
         product_location.save
+
+        update_inventory_info(general_setting) rescue
+
         if !@product.save
           result['status'] &= false
         end
@@ -1166,7 +1170,12 @@ class ProductsController < ApplicationController
         result['status'] = false
         result['error_msg'] ="Cannot find Product"
       else
-        updatelist(@product, params[:var], params[:value])
+        response = updatelist(@product, params[:var], params[:value])
+        errors = response.errors.full_messages rescue nil
+        if errors
+          result['status'] = false
+          result['error_msg'] = errors
+        end
       end
     else
       result['status'] = false
@@ -1574,5 +1583,30 @@ class ProductsController < ApplicationController
     count['all'] = all
     count['search'] = 0
     count
+  end
+
+  def update_inventory_info(general_setting)
+    return if params[:inventory_warehouses].empty?
+    attr_array = get_inv_update_attributes(general_setting)
+    
+    params[:inventory_warehouses].each_with_index do |inv_wh|
+      update_single_warehouse_info(inv_wh, attr_array)
+    end
+  end
+
+  def update_single_warehouse_info(inv_wh, attr_array)
+    product_location = @product.product_inventory_warehousess.find_by_id(inv_wh["info"]["id"])
+    attr_array.each do |attr|
+      product_location.send("#{attr}=", inv_wh[:info][attr])
+    end
+    product_location.save
+  end
+
+  def get_inv_update_attributes(general_setting)
+    attr_array = ['quantity_on_hand', 'location_primary', 'location_secondary', 'location_tertiary']
+    if general_setting.low_inventory_alert_email
+      attr_array = attr_array + ['product_inv_alert', 'product_inv_alert_level']
+    end
+    attr_array
   end
 end
