@@ -15,17 +15,6 @@ module OrderConcern
   end
   
   private
-    def settings_to_generate_packing_slip
-      @page_height, @page_width = '11', '8.5'
-      @page_height, @page_width = '6', '4' if GeneralSetting.get_packing_slip_size == '4 x 6'
-      @size = GeneralSetting.get_packing_slip_size
-      @orientation = GeneralSetting.get_packing_slip_orientation
-      @result = {'data' => { 'packing_slip_file_paths' => [] }}
-      @page_height = (@page_height.to_f/2).to_s if @orientation == 'landscape'
-      @header = ''
-      @file_name = current_tenant+Time.now.strftime('%d_%b_%Y_%I__%M_%p')
-    end
-
     def list_selected_orders(sort_by_order_number = false)
       result = get_orders_list_for_selected(sort_by_order_number)
       result_rows = create_results_row(result)
