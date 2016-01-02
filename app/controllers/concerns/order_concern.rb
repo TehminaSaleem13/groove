@@ -35,34 +35,35 @@ module OrderConcern
     end
 
     def get_orders_list_for_selected(sort_by_order_number = false)
-      result =  if params[:select_all] || params[:inverted]
-                  list_of_all_selected_or_inverted(params, sort_by_order_number)
-                elsif params[:orderArray].present?
-                  list_of_orders_from_orderArray(params, sort_by_order_number)
-                elsif params[:id].present?
-                  Order.find(params[:id])
+      @params = params
+      result =  if @params[:select_all] or @params[:inverted]
+                  list_of_all_selected_or_inverted(sort_by_order_number)
+                elsif @params[:orderArray].present?
+                  list_of_orders_from_orderArray(sort_by_order_number)
+                elsif @params[:id].present?
+                  Order.find(@params[:id])
                 else
-                  list_of_orders_by_sort_order(params, sort_by_order_number)
+                  list_of_orders_by_sort_order(sort_by_order_number)
                 end
     end
 
-    def list_of_all_selected_or_inverted(params, sort_by_order_number = false)
+    def list_of_all_selected_or_inverted(sort_by_order_number = false)
       if sort_by_order_number
-        params = params.merge({:sort => 'ordernum', :order => 'ASC' })
+        @params = @params.merge({:sort => 'ordernum', :order => 'ASC' })
       end
-      result = params[:search].blank? ? gp_orders_search.do_search : gp_orders_module.do_getorders
+      result = @params[:search].blank? ? gp_orders_search.do_search : gp_orders_module.do_getorders
     end
 
-    def list_of_orders_from_orderArray(params, sort_by_order_number = false)
-      result = params[:orderArray]
+    def list_of_orders_from_orderArray(sort_by_order_number = false)
+      result = @params[:orderArray]
       if sort_by_order_number
-        result = Order.where(:id => params[:orderArray].map(&:values).flatten).order(:increment_id)
+        result = Order.where(:id => @params[:orderArray].map(&:values).flatten).order(:increment_id)
       end
       result
     end
 
-    def list_of_orders_by_sort_order(params, sort_by_order_number = false)
-      result = Order.where(:id => params[:order_ids])
+    def list_of_orders_by_sort_order(sort_by_order_number = false)
+      result = Order.where(:id => @params[:order_ids])
       result = result.order(:increment_id) if sort_by_order_number
       result
     end
