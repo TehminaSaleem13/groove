@@ -32,8 +32,8 @@ module Groovepacker
         default_location = InventoryWarehouse.create(:name => 'Default Warehouse', :location => 'Default Warehouse', :status => 'active', :is_default => true)
       end
 
-      if Store.where(:store_type => 'system').length == 0
-        system_store = Store.create(:name => 'GroovePacker', :store_type => 'system',
+      if ::Store.where(:store_type => 'system').length == 0
+        system_store = ::Store.create(:name => 'GroovePacker', :store_type => 'system',
                                     :status => true, inventory_warehouse: InventoryWarehouse.first)
       end
 
