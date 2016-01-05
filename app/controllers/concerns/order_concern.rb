@@ -181,7 +181,7 @@ module OrderConcern
     end
 
     def order_update_attrs
-      ["firstname", "lastname", "company", "address_1", "address_2", "city", "state", "postcode", "country", "email", "increment_id", "order_placed_time", "customer_comments", "scanned_on", "tracking_num", "seller_id", "order_status_id", "order_number", "ship_name", "notes_from_buyer", "shipping_amount", "order_total", "weight_oz", "note_confirmation"]
+      ["firstname", "lastname", "company", "address_1", "address_2", "city", "state", "postcode", "country", "email", "increment_id", "order_placed_time", "customer_comments", "scanned_on", "tracking_num", "seller_id", "order_status_id", "order_number", "ship_name", "notes_from_buyer", "shipping_amount", "order_total", "weight_oz", "note_confirmation", "custom_field_one", "custom_field_two"]
     end
 
     def retrieve_order_items
