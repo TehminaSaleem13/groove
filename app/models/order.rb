@@ -5,7 +5,8 @@ class Order < ActiveRecord::Base
                   :increment_id, :lastname,
                   :method, :order_placed_time, :postcode, :price, :qty, :sku, :state, :store_id, :notes_internal,
                   :notes_toPacker, :notes_fromPacker, :tracking_processed, :scanned_on, :tracking_num, :company,
-                  :packing_user_id, :status_reason, :non_hyphen_increment_id, :shipping_amount, :weight_oz
+                  :packing_user_id, :status_reason, :non_hyphen_increment_id, :shipping_amount, :weight_oz,
+                  :custom_field_one, :custom_field_two
 
   has_many :order_items, :dependent => :destroy
   has_one :order_shipping, :dependent => :destroy

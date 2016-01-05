@@ -249,7 +249,9 @@ module OrdersHelper
                           'state' => order.state,
                           'postcode' => order.postcode,
                           'country' => order.country,
-                          'tags' => order.order_tags
+                          'tags' => order.order_tags,
+                          'custom_field_one' => order.custom_field_one,
+                          'custom_field_two' => order.custom_field_two
                         })
   end
 end
