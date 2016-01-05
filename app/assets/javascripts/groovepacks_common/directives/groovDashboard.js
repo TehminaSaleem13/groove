@@ -1,7 +1,7 @@
 groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sce',
-  '$timeout', '$interval', 'groovIO', 'orders', 'stores', 'notification', 'dashboard', 'users',
+  '$timeout', '$interval', 'groovIO', 'orders', 'stores', 'notification', 'dashboard', 'dashboard_calculator', 'users',
   function ($window, $document, $sce, $timeout, $interval, groovIO, orders, stores,
-            notification, dashboard, users) {
+            notification, dashboard, dashboard_calculator, users) {
     return {
       restrict: "A",
       templateUrl: "/assets/views/directives/dashboard.html",
@@ -37,6 +37,8 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
         scope.init = function () {
           scope.charts.type = 'packing_stats';
           scope.dashboard = dashboard.model.get();
+          // scope.leader_board = {},
+          scope.leader_board.list = [],
           scope.exceptions.init_all();
         }
 
@@ -51,6 +53,26 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
             scope.leader_board.retrieve.leader_board();
           }
         }
+
+        groovIO.on('dashboard_update', function (message) {
+          console.log("message");
+          console.log(message);
+          console.log(scope.charts.days_filters[scope.charts.current_filter_idx].days);
+          // console.log("main_summary");
+          // scope.dashboard.main_summary = message.data;
+          // console.log(scope.dashboard.main_summary);
+          if (message.type == 'main_summary') {
+            days = scope.charts.days_filters[scope.charts.current_filter_idx].days
+            dashboard_calculator.stats.main_summary(message, scope.dashboard.main_summary, days)
+            console.log(scope.dashboard.main_summary);
+          } else if(message.type == 'leader_info') {
+            console.log(scope.leader_board.list);
+            dashboard_calculator.stats.leader_board(message).then(function(response) {
+              scope.leader_board.list = response;
+            });
+            console.log(scope.leader_board.list);
+          };
+        });
 
         scope.charts = {
           type: 'packing_stats',
@@ -144,6 +166,7 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
             leader_board: function () {
               dashboard.stats.leader_board().then(
                 function (response) {
+                  console.log(response);
                   scope.leader_board.list = response.data;
                 });
             }

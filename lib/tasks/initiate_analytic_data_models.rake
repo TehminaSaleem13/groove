@@ -3,13 +3,13 @@ namespace :cssa do
 
   task :initiate_data_model => :environment do
     tenants = Tenant.all
-    # tenants.each do |tenant|
+    tenants.each do |tenant|
       begin
         HTTParty.get("#{ENV["GROOV_ANALYTIC"]}/dashboard/update_data_model",
-          query: {tenant_name: 'groovelytics_development'})
+          query: {tenant_name: tenant.name})
       rescue Exception => e
         puts e.message
       end
-    # end
+    end
   end
 end
