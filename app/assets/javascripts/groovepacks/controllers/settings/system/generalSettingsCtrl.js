@@ -36,7 +36,9 @@ groovepacks_controllers.
             "portrait": "",
             "landscape": "",
             "packing_slip_message_to_customer": "",
-            "inventory_auto_allocation": ""
+            "inventory_auto_allocation": "",
+            "custom_field_one": "Custom Field One",
+            "custom_field_two": "Custom Field Two"
           },
           "tooltips": {
             "inventory_tracking": "",
@@ -88,6 +90,7 @@ groovepacks_controllers.
       $scope.update_settings = function () {
         $scope.show_button = false;
         generalsettings.single.update($scope.general_settings).then(myscope.reload_settings);
+        custom_fields = [$scope.general_settings.single.custom_field_one, $scope.general_settings.single.custom_field_two];
       };
 
       myscope.init();

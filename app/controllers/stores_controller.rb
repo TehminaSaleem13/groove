@@ -539,6 +539,7 @@ class StoresController < ApplicationController
     @result = Hash.new
     @result["status"] = true
     @result["messages"] = []
+    general_settings = GeneralSetting.all.first
 
     if !params[:id].nil?
       @store = Store.find(params[:id])
@@ -614,7 +615,9 @@ class StoresController < ApplicationController
               {value: 'secondary_sku', name: 'SKU 2'},
               {value: 'tertiary_sku', name: 'SKU 3'},
               {value: 'secondary_barcode', name: 'Barcode 2'},
-              {value: 'tertiary_barcode', name: 'Barcode 3'}
+              {value: 'tertiary_barcode', name: 'Barcode 3'},
+              {value: 'custom_field_one', name: general_settings.custom_field_one},
+              {value: 'custom_field_two', name: general_settings.custom_field_two}
             ]
             
             if csv_map.order_csv_map.nil?
