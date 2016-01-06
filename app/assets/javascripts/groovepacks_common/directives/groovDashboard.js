@@ -37,8 +37,6 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
         scope.init = function () {
           scope.charts.type = 'packing_stats';
           scope.dashboard = dashboard.model.get();
-          // scope.leader_board = {},
-          scope.leader_board.list = [],
           scope.exceptions.init_all();
         }
 
@@ -58,20 +56,64 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
           console.log("message");
           console.log(message);
           console.log(scope.charts.days_filters[scope.charts.current_filter_idx].days);
-          // console.log("main_summary");
-          // scope.dashboard.main_summary = message.data;
-          // console.log(scope.dashboard.main_summary);
-          if (message.type == 'main_summary') {
-            days = scope.charts.days_filters[scope.charts.current_filter_idx].days
-            dashboard_calculator.stats.main_summary(message, scope.dashboard.main_summary, days)
-            console.log(scope.dashboard.main_summary);
-          } else if(message.type == 'leader_info') {
+          days = scope.charts.days_filters[scope.charts.current_filter_idx].days
+          if(message.type == 'leader_info') {
             console.log(scope.leader_board.list);
-            dashboard_calculator.stats.leader_board(message).then(function(response) {
-              scope.leader_board.list = response;
-            });
+            scope.leader_board.list = message.data;
             console.log(scope.leader_board.list);
+          } else {
+            for (var i = message.data.length - 1; i >= 0; i--) {
+              console.log(message.data[i]);
+              if (parseInt(message.data[i].duration, 10) == days) {
+                if (message.type == 'main_summary') {
+                  scope.dashboard.main_summary = message.data[i];
+                } else if (message.type == 'daily_stat') {
+                  scope.dashboard.packing_stats = message.data[i].packing_stats.daily_stats;
+                  scope.dashboard.packed_item_stats = message.data[i].packed_item_stats;
+                  scope.dashboard.packing_speed_stats = message.data[i].packing_speed_stats.daily_stats;
+                } else if (message.type == 'user_avg_stat') {
+                  scope.dashboard.avg_packing_accuracy_stats = message.data[i].packing_stats.avg_stats;
+                  scope.dashboard.avg_packing_speed_stats = message.data[i].packing_speed_stats.avg_stats;
+                };
+              };
+            };
           };
+          console.log(scope.dashboard);
+          console.log(scope.leader_board.list);
+          // if (message.type == 'main_summary') {
+          //   for (var i = message.data.length - 1; i >= 0; i--) {
+          //     console.log(message.data[i]);
+          //     if (parseInt(message.data[i].duration, 10) == days) {
+          //       scope.dashboard.main_summary = message.data[i];
+          //     };
+          //   };
+          //   console.log(scope.dashboard.main_summary);
+          // } else if(message.type == 'leader_info') {
+          //   console.log(scope.leader_board.list);
+          //   scope.leader_board.list = message.data;
+          //   console.log(scope.leader_board.list);
+          // } else if(message.type == 'daily_stat') {
+          //   console.log(message.data);
+          //   for (var i = message.data.length - 1; i >= 0; i--) {
+          //     console.log(message.data[i]);
+          //     if (parseInt(message.data[i].duration, 10) == days) {
+          //       scope.dashboard.packing_stats = message.data[i].packing_stats.daily_stats;
+          //       scope.dashboard.packed_item_stats = message.data[i].packed_item_stats;
+          //       scope.dashboard.packing_speed_stats = message.data[i].packing_speed_stats.daily_stats;
+          //     };
+          //   };
+          //   console.log(scope.dashboard);
+          // } else if(message.type == 'user_avg_stat'){
+          //   console.log(message.data);
+          //   for (var i = message.data.length - 1; i >= 0; i--) {
+          //     console.log(message.data[i]);
+          //     if (parseInt(message.data[i].duration, 10) == days) {
+          //       scope.dashboard.avg_packing_accuracy_stats = message.data[i].packing_stats.avg_stats;
+          //       scope.dashboard.avg_packing_speed_stats = message.data[i].packing_speed_stats.avg_stats;
+          //     };
+          //   };
+          //   console.log(scope.dashboard);
+          // };
         });
 
         scope.charts = {
@@ -105,6 +147,8 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
           retrieve: {
             main_summary: function (days) {
               dashboard.stats.main_summary(days).then(function (response) {
+                console.log("response");
+                console.log(response);
                 scope.dashboard.main_summary = response.data;
               });
             },
@@ -118,6 +162,8 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
             packed_item_stats: function (days) {
               dashboard.stats.packed_item_stats(days).then(
                 function (response) {
+                  console.log("response");
+                  console.log(response);
                   scope.dashboard.packed_item_stats = response.data;
                 });
             },
