@@ -26,6 +26,7 @@ module Groovepacker
         return combined_response if @api_key.blank? || @api_secret.blank?
         while page_index
           response = ::ShippingEasy::Resources::Order.find_all(filters)
+          response["orders"] = response["orders"].select {|order| order["order_status"]!="drop_shipped" }
           combined_response["orders"] += response["orders"]
           break if response["orders"].length < 100
           page_index += 1
