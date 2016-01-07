@@ -62,7 +62,7 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
             scope.leader_board.list = message.data;
             console.log(scope.leader_board.list);
           } else {
-            for (var i = message.data.length - 1; i >= 0; i--) {
+            for (var i = 0; i <= message.data.length - 1; i++) {
               console.log(message.data[i]);
               if (parseInt(message.data[i].duration, 10) == days) {
                 if (message.type == 'main_summary') {
@@ -131,18 +131,20 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
             this.init();
           },
           init: function () {
-            if (this.type == 'packed_item_stats') {
-              this.retrieve.packed_item_stats(
-                this.days_filters[this.current_filter_idx].days);
-            } else if (this.type == 'packing_stats') {
-              this.retrieve.packing_stats(
-                this.days_filters[this.current_filter_idx].days)
-            } else if (this.type == 'packing_speed_stats') {
-              this.retrieve.packing_speed_stats(
-                this.days_filters[this.current_filter_idx].days)
-            }
-            this.retrieve.main_summary(
-              this.days_filters[this.current_filter_idx].days);
+            console.log('in init....');
+            // dashboard.stats.get_dashboard_data();
+            // if (this.type == 'packed_item_stats') {
+            //   this.retrieve.packed_item_stats(
+            //     this.days_filters[this.current_filter_idx].days);
+            // } else if (this.type == 'packing_stats') {
+            //   this.retrieve.packing_stats(
+            //     this.days_filters[this.current_filter_idx].days)
+            // } else if (this.type == 'packing_speed_stats') {
+            //   this.retrieve.packing_speed_stats(
+            //     this.days_filters[this.current_filter_idx].days)
+            // }
+            // this.retrieve.main_summary(
+            //   this.days_filters[this.current_filter_idx].days);
           },
           retrieve: {
             main_summary: function (days) {
