@@ -13,7 +13,7 @@ module Groovepacker
             
             begin
               orders = client.orders
-              unless orders.blank?
+              if orders.present? && orders["messages"].blank?
                 result[:total_imported] = orders.length
                 import_item.current_increment_id = ''
                 import_item.success_imported = 0
@@ -109,7 +109,13 @@ module Groovepacker
                   end
                 end
               else
-
+                response_error = orders["messages"]["error"].first rescue nil
+                if response_error
+                  result[:status] &= false
+                  result[:messages].push(response_error["message"])
+                  import_item.message = response_error["message"]
+                  import_item.save
+                end
               end
             rescue Exception => e
               result[:status] &= false
