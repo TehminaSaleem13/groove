@@ -11,6 +11,8 @@ module Groovepacker
             return @result if import_statuses_are_empty
             importing_time = Time.now
             response = @client.orders(@statuses, importing_time, @import_item)
+            update_error_msg_if_any(response)
+            destroy_cleared_orders(response)
             return @result if response["orders"].nil?
             @result[:total_imported] = response["orders"].length
             update_import_item_obj_values
@@ -110,7 +112,7 @@ module Groovepacker
             end
 
             def get_statuses
-              status = []
+              status = ["cleared"]
               status << "ready_for_shipment" if @credential.import_ready_for_shipment
               status << "shipped" if @credential.import_shipped
               status
@@ -174,6 +176,19 @@ module Groovepacker
               @import_item.success_imported += 1
               @import_item.save
               @result[:success_imported] += 1
+            end
+
+            def destroy_cleared_orders(response)
+              orders_to_clear = Order.where("store_id=? and status!=? and increment_id in (?)", @credential.store_id, "scanned", response["cleared_orders_ids"])
+              orders_to_clear.destroy_all
+            end
+
+            def update_error_msg_if_any(response)
+              return if response["error"].blank?
+              @result[:status] &= false
+              @result[:messages].push(response["error"]["message"])
+              @import_item.message = response["error"]["message"]
+              @import_item.save
             end
         end
       end
