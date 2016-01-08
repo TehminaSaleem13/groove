@@ -42,10 +42,6 @@
           validate_email();
           if (valid.email) {
             var valid_host = '<%=ENV["HOST_NAME"]%>';
-            if(window.location.host.includes("groove-packer.com")) {
-              valid_host = '<%=ENV["REFACTORING_HOST_NAME"]%>';  
-            }
-            
             url = 'https://admin.' + valid_host + '/subscriptions/select_plan?email=' + encodeURIComponent($('#tenant_email').val()) + '&shop_name=<%=@shop_name%>&shop_type=BigCommerce';
             window.location.href = url;
           }
