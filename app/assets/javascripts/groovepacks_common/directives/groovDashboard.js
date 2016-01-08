@@ -37,19 +37,20 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
         scope.init = function () {
           scope.charts.type = 'packing_stats';
           scope.dashboard = dashboard.model.get();
+          scope.dash_data = {};
           scope.exceptions.init_all();
         }
 
         scope.switch_tab = function (tab) {
-          if (tab.heading == "Most Recent Exceptions") {
-            scope.exceptions.type = "most_recent";
-            scope.exceptions.retrieve.most_recent_exceptions();
-          } else if (tab.heading == "Exceptions by Frequency") {
-            scope.exceptions.type = "by_frequency";
-            scope.exceptions.retrieve.exceptions_by_frequency();
-          } else if (tab.heading == "Leader Board") {
-            scope.leader_board.retrieve.leader_board();
-          }
+          // if (tab.heading == "Most Recent Exceptions") {
+          //   scope.exceptions.type = "most_recent";
+          //   scope.exceptions.retrieve.most_recent_exceptions();
+          // } else if (tab.heading == "Exceptions by Frequency") {
+          //   scope.exceptions.type = "by_frequency";
+          //   scope.exceptions.retrieve.exceptions_by_frequency();
+          // } else if (tab.heading == "Leader Board") {
+          //   scope.leader_board.retrieve.leader_board();
+          // }
         }
 
         groovIO.on('dashboard_update', function (message) {
@@ -57,27 +58,31 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
           console.log(message);
           console.log(scope.charts.days_filters[scope.charts.current_filter_idx].days);
           days = scope.charts.days_filters[scope.charts.current_filter_idx].days
-          if(message.type == 'leader_info') {
-            console.log(scope.leader_board.list);
-            scope.leader_board.list = message.data;
-            console.log(scope.leader_board.list);
-          } else {
-            for (var i = 0; i <= message.data.length - 1; i++) {
-              console.log(message.data[i]);
-              if (parseInt(message.data[i].duration, 10) == days) {
-                if (message.type == 'main_summary') {
-                  scope.dashboard.main_summary = message.data[i];
-                } else if (message.type == 'daily_stat') {
-                  scope.dashboard.packing_stats = message.data[i].packing_stats.daily_stats;
-                  scope.dashboard.packed_item_stats = message.data[i].packed_item_stats;
-                  scope.dashboard.packing_speed_stats = message.data[i].packing_speed_stats.daily_stats;
-                } else if (message.type == 'user_avg_stat') {
-                  scope.dashboard.avg_packing_accuracy_stats = message.data[i].packing_stats.avg_stats;
-                  scope.dashboard.avg_packing_speed_stats = message.data[i].packing_speed_stats.avg_stats;
-                };
-              };
-            };
-          };
+          scope.dash_data = message.data
+          console.log("dash_data");
+          console.log(scope.dash_data);
+          scope.build_dash_data()
+          // if(message.type == 'leader_info') {
+          //   console.log(scope.leader_board.list);
+          //   scope.leader_board.list = message.data;
+          //   console.log(scope.leader_board.list);
+          // } else {
+          //   for (var i = 0; i <= message.data.length - 1; i++) {
+          //     console.log(message.data[i]);
+          //     if (parseInt(message.data[i].duration, 10) == days) {
+          //       if (message.type == 'main_summary') {
+          //         scope.dashboard.main_summary = message.data[i];
+          //       } else if (message.type == 'daily_stat') {
+          //         scope.dashboard.packing_stats = message.data[i].packing_stats.daily_stats;
+          //         scope.dashboard.packed_item_stats = message.data[i].packed_item_stats;
+          //         scope.dashboard.packing_speed_stats = message.data[i].packing_speed_stats.daily_stats;
+          //       } else if (message.type == 'user_avg_stat') {
+          //         scope.dashboard.avg_packing_accuracy_stats = message.data[i].packing_stats.avg_stats;
+          //         scope.dashboard.avg_packing_speed_stats = message.data[i].packing_speed_stats.avg_stats;
+          //       };
+          //     };
+          //   };
+          // };
           console.log(scope.dashboard);
           console.log(scope.leader_board.list);
           // if (message.type == 'main_summary') {
@@ -132,6 +137,7 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
           },
           init: function () {
             console.log('in init....');
+            scope.build_dash_data()
             // dashboard.stats.get_dashboard_data();
             // if (this.type == 'packed_item_stats') {
             //   this.retrieve.packed_item_stats(
@@ -331,13 +337,20 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
           }
         }
         scope.legendColorFunction = function () {
+          console.log('in legendColorFunction');
           return function (d) {
+            console.log(d);
             return d.color;
           }
         };
         scope.toolTipContentFunction = function () {
           return function (key, x, y, e, graph) {
             var tooltipText = '';
+            console.log(key);
+            console.log(x);
+            console.log(y);
+            console.log(e);
+            console.log(graph);
             if (scope.charts.type == 'packing_stats') {
 
               var average_packing_accuracy = "-";
@@ -383,6 +396,21 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
             }
 
           }
+        }
+
+        scope.build_dash_data = function() {
+          days = scope.charts.days_filters[scope.charts.current_filter_idx].days;
+          scope.leader_board.list = scope.dash_data.leader_board.list
+          for (var i = 0; i <= scope.dash_data.dashboard.length - 1; i++) {
+            if (parseInt(scope.dash_data.dashboard[i].duration, 10) == days) {
+              scope.dashboard.main_summary = scope.dash_data.dashboard[i].main_summary;
+              scope.dashboard.packing_stats = scope.dash_data.dashboard[i].daily_user_data.packing_stats.daily_stats;
+              scope.dashboard.packed_item_stats = scope.dash_data.dashboard[i].daily_user_data.packed_item_stats;
+              scope.dashboard.packing_speed_stats = scope.dash_data.dashboard[i].daily_user_data.packing_speed_stats.daily_stats;
+              scope.dashboard.avg_packing_accuracy_stats = scope.dash_data.dashboard[i].avg_user_data.packing_stats.avg_stats;
+              scope.dashboard.avg_packing_speed_stats = scope.dash_data.dashboard[i].avg_user_data.packing_speed_stats.avg_stats;
+            };
+          };
         }
 
         scope.init();
