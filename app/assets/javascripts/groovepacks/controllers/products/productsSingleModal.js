@@ -240,7 +240,7 @@ groovepacks_controllers.
 
       scope.update_single_product = function (auto, post_fn) {
         //console.log(scope.products.single);
-        scope.products.single.post_fn = post_fn
+        scope.products.single.post_fn = post_fn;
         products.single.update(scope.products, auto).then(function () {
           myscope.product_single_details(scope.products.single.basicinfo.id);
         });
@@ -388,12 +388,18 @@ groovepacks_controllers.
          * private properties
          */
         scope._product_obj = null;
+        scope.arraySkuEditableOptions = {
+          array: true,
+          sortableOptions: {
+            update: function() { scope.update_single_product(true, "sku") },
+            axis: 'x'
+          }
+        };
+
         scope.arrayEditableOptions = {
           array: true,
-          update: scope.update_single_product,
-          class: '',
           sortableOptions: {
-            update: scope.update_single_product,
+            update: function() { scope.update_single_product(true, "barcode") },
             axis: 'x'
           }
         };
