@@ -1289,7 +1289,7 @@ class ProductsController < ApplicationController
             result['messages'].push('Error deleting the product alias id:'+product_alias.id)
           end
         end
-        @product_orig.set_product_status
+        @product_orig.update_product_status
       else
         result['status'] = false
         result['messages'].push('No products found to alias')
