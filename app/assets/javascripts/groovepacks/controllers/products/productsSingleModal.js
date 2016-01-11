@@ -390,6 +390,8 @@ groovepacks_controllers.
         scope._product_obj = null;
         scope.arraySkuEditableOptions = {
           array: true,
+          update: function() { scope.update_single_product(true, "sku") },
+          class: '',
           sortableOptions: {
             update: function() { scope.update_single_product(true, "sku") },
             axis: 'x'
@@ -398,6 +400,8 @@ groovepacks_controllers.
 
         scope.arrayEditableOptions = {
           array: true,
+          update: function() { scope.update_single_product(true, "barcode") },
+          class: '',
           sortableOptions: {
             update: function() { scope.update_single_product(true, "barcode") },
             axis: 'x'
