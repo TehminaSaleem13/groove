@@ -407,14 +407,6 @@ groovepacks_controllers.
             country: {
               name: "Country",
               hidden: true
-            },
-            custom_field_one: {
-              name: custom_fields[0],
-              hidden: true
-            },
-            custom_field_two: {
-              name: custom_fields[1],
-              hidden: true
             }
           }
         };
