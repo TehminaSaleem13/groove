@@ -205,8 +205,8 @@ ActiveRecord::Schema.define(:version => 20160104050833) do
     t.string   "conf_code_product_instruction",     :default => "optional"
     t.string   "admin_email"
     t.string   "export_items",                      :default => "disabled"
-    t.string   "custom_field_one"
-    t.string   "custom_field_two"
+    t.string   "custom_field_one",                  :default => "Custom 1"
+    t.string   "custom_field_two",                  :default => "Custom 2"
   end
 
   create_table "generate_barcodes", :force => true do |t|
