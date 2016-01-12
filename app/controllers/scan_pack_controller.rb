@@ -170,9 +170,10 @@ class ScanPackController < ApplicationController
         @result['error_messages'].push('Could not find order with id: '+params[:id].to_s)
       else
         @order.notes_fromPacker = params[:note].to_s
-        if @order.save
+        general_settings = GeneralSetting.all.first
+        email_present = general_settings.email_address_for_packer_notes.present?
+        if @order.save && email_present
           @result['success_messages'].push('Note from Packer saved successfully')
-          general_settings = GeneralSetting.all.first
           if general_settings.send_email_for_packer_notes == 'always' ||
             (general_settings.send_email_for_packer_notes == 'optional' && email)
             #send email
@@ -188,7 +189,12 @@ class ScanPackController < ApplicationController
           end
         else
           @result['status'] &= false
-          @result['error_messages'].push('There was an error saving note from packer, please try again')
+          msg = if email_present
+            'There was an error saving note from packer, please try again'
+          else
+            'Email not found for notification settings.'
+          end
+          @result['error_messages'].push(msg)
         end
       end
     end
@@ -252,7 +258,7 @@ class ScanPackController < ApplicationController
     @result['success_messages'] = []
     @result['notice_messages'] = []
     @result['data'] = Hash.new
-    if params[:id].nil? || params[:count].nil? || params[:next_item].nil?
+    if params[:id].nil? || params[:count].to_i < 1 || params[:next_item].nil?
       @result['status'] &= false
       @result['error_messages'].push('Order id, Item id and Type-in count are required')
     else
@@ -276,9 +282,9 @@ class ScanPackController < ApplicationController
           @result['status'] &= false
           @result['error_messages'].push('Item doesnt belong to current order')
         else
-          if params[:count] == params[:next_item][:qty]
+          if params[:count] <= params[:next_item][:qty]
             unless params[:next_item][:barcodes].blank? || params[:next_item][:barcodes][0].blank? || params[:next_item][:barcodes][0][:barcode].blank?
-              (1..params[:next_item][:qty_remaining]).each do
+              (1..params[:count]).each do
                 @result['data'] = product_scan(params[:next_item][:barcodes][0][:barcode], 'scanpack.rfp.default', params[:id], false)
               end
               @order.addactivity('Type-In count Scanned for product'+params[:next_item][:sku].to_s, current_user.username)

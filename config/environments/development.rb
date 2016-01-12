@@ -123,15 +123,16 @@ Groovepacks::Application.configure do
   ENV['STRIPE_PUBLIC_KEY'] = "pk_test_4QS2UN3famIPlHtp2Q7ykpDf"
 
   ENV['HOST_NAME'] = 'localpacker.com'
+  ENV['REFACTORING_HOST_NAME'] = 'groove-packer.com'
 
   ENV['ONE_TIME_PAYMENT'] = '50000'
-  ENV['BC_ONE_TIME_PAYMENT'] = '25'
+  ENV['BC_ONE_TIME_PAYMENT'] = '0'
 
   #S3 access details
-  ENV['S3_ACCESS_KEY_ID'] = 'AKIAI3A7VXS372GV6EQQ'
-  ENV['S3_ACCESS_KEY_SECRET'] = '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'
+  ENV['S3_ACCESS_KEY_ID'] = 'AKIAIBDKVKEM7HNZUQAA'
+  ENV['S3_ACCESS_KEY_SECRET'] = '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'
   ENV['S3_BUCKET_NAME'] = 'groove-dev'
-  ENV['S3_BASE_URL'] = 'https://s3-ap-southeast-1.amazonaws.com/groove-dev'
+  ENV['S3_BASE_URL'] = 'https://s3.amazonaws.com/groove-dev'
 
   #Feature Variables
   ENV['DASHBOARD_ENABLE'] = 'YES'

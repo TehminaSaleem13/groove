@@ -5,7 +5,8 @@ class Order < ActiveRecord::Base
                   :increment_id, :lastname,
                   :method, :order_placed_time, :postcode, :price, :qty, :sku, :state, :store_id, :notes_internal,
                   :notes_toPacker, :notes_fromPacker, :tracking_processed, :scanned_on, :tracking_num, :company,
-                  :packing_user_id, :status_reason, :non_hyphen_increment_id
+                  :packing_user_id, :status_reason, :non_hyphen_increment_id, :shipping_amount, :weight_oz,
+                  :custom_field_one, :custom_field_two
 
   has_many :order_items, :dependent => :destroy
   has_one :order_shipping, :dependent => :destroy
@@ -674,5 +675,64 @@ class Order < ActiveRecord::Base
     order_item.order = self
     order_item.save
     self.update_order_status
+  end
+
+  def destroy_exceptions(result, current_user)
+    if order_exception.destroy
+      addactivity("Order Exception Cleared", current_user.name)
+    else
+      result['status'] &= false
+      result['messages'].push('Error clearing exceptions')
+    end
+    return result
+  end
+
+  def self.duplicate_selected_orders(orders, current_user, result)
+    orders.each do |order|
+      neworder = order.duplicate_single_order(current_user, result)
+      
+      unless neworder.persisted?
+        result['status'] = false
+        result['error_messages'] = neworder.errors.full_messages
+      else
+        #add activity
+        Order.add_activity_to_new_order(neworder, order.order_items, current_user)
+      end
+    end
+    return result
+  end
+
+  def self.add_activity_to_new_order(neworder, order_items, current_user)
+    order_items.each do |order_item|
+      Order.create_new_order_item(neworder, order_item)
+    end
+    username = current_user.name
+    neworder.addactivity("Order duplicated", username)
+  end
+
+  def self.create_new_order_item(neworder, order_item)
+    neworder_item = OrderItem.new
+    neworder_item.order_id = neworder.id
+    neworder_item.product_id = order_item.product_id
+    neworder_item.qty = order_item.qty
+    neworder_item.name = order_item.name
+    neworder_item.price = order_item.price
+    neworder_item.row_total = order_item.row_total
+    neworder_item.save
+  end
+
+  def duplicate_single_order(current_user, result)
+    neworder = self.dup
+    index = 0
+    temp_increment_id = ''
+
+    begin
+      temp_increment_id = self.increment_id + "(duplicate"+index.to_s+ ")"
+      neworder.increment_id = temp_increment_id
+      orderslist = Order.where(:increment_id => temp_increment_id)
+      index = index + 1
+    end while orderslist.present?
+    neworder.save(:validate => false)
+    return neworder
   end
 end

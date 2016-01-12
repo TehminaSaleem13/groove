@@ -100,4 +100,4 @@ gem 'ng-rails-csrf'
 gem 'doorkeeper'
 gem 'oauth'
 gem 'rubocop', require: false
-gem 'httparty', '~> 0.13.7'
+gem 'shipping_easy'

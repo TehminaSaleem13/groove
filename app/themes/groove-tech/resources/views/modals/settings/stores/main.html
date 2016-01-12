@@ -103,7 +103,7 @@
               </button>
               <ul class="dropdown-menu" role="menu">
                 <li ng-repeat="(id ,store) in stores.types">
-                  <a class="dropdown-toggle" ng-if="hide_mg_rest_if_production_env(store.name)" ng-click="change_opt('store_type',id)">{{store.name}}</a>
+                  <a class="dropdown-toggle" ng-if="hide_if_mg_rest(store.name)" ng-click="change_opt('store_type',id)">{{store.name}}</a>
 
                 </li>
               </ul>

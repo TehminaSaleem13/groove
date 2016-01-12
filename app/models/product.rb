@@ -278,7 +278,9 @@ class Product < ActiveRecord::Base
     end
     primary.order = 0
     primary.sku = value
-    primary.save
+    unless primary.save
+      self.errors.add(:base, "Sku #{primary.sku} already exists")
+    end
   end
 
   # provides primary image if exists
@@ -317,7 +319,10 @@ class Product < ActiveRecord::Base
     end
     primary.order = 0
     primary.barcode = value
-    primary.save
+    unless primary.save
+      self.errors.add(:base, "Barcode #{primary.barcode} already exists")
+    end
+
   end
 
   # provides primary category if exists

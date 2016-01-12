@@ -120,8 +120,9 @@ Groovepacks::Application.configure do
   ENV['STRIPE_API_KEY'] = "sk_test_4QS2OJ8BkMWcuzCWrHrKGlz9"
   ENV['STRIPE_PUBLIC_KEY'] = "pk_test_4QS2UN3famIPlHtp2Q7ykpDf"
   ENV['HOST_NAME'] = 'barcodepacker.com'
+  ENV['REFACTORING_HOST_NAME'] = 'groove-packer.com'
   ENV['ONE_TIME_PAYMENT'] = '50000'
-  ENV['BC_ONE_TIME_PAYMENT'] = '25'
+  ENV['BC_ONE_TIME_PAYMENT'] = '0'
 
   ENV['S3_ACCESS_KEY_ID'] = 'AKIAIBDKVKEM7HNZUQAA'
   ENV['S3_ACCESS_KEY_SECRET'] = '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'
