@@ -108,7 +108,7 @@ class Order < ActiveRecord::Base
       Groovepacker::Dashboard::Stats::AnalyticStatStream.new()
     stat_stream = stat_stream_obj.build_stream(self)
     HTTParty.post("#{ENV["GROOV_ANALYTIC"]}/dashboard",
-      query: {tenant_name: tenant.name},
+      query: {tenant_name: Apartment::Tenant.current},
       body: stat_stream)
   end
 
