@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20160104050833) do
+ActiveRecord::Schema.define(:version => 20151201041703) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0,     :null => false
@@ -205,8 +205,6 @@ ActiveRecord::Schema.define(:version => 20160104050833) do
     t.string   "conf_code_product_instruction",     :default => "optional"
     t.string   "admin_email"
     t.string   "export_items",                      :default => "disabled"
-    t.string   "custom_field_one"
-    t.string   "custom_field_two"
   end
 
   create_table "generate_barcodes", :force => true do |t|
@@ -545,8 +543,6 @@ ActiveRecord::Schema.define(:version => 20160104050833) do
     t.integer  "total_scan_time",                                        :default => 0
     t.integer  "total_scan_count",                                       :default => 0
     t.decimal  "packing_score",           :precision => 10, :scale => 0, :default => 0
-    t.string   "custom_field_one"
-    t.string   "custom_field_two"
   end
 
   create_table "product_barcodes", :force => true do |t|
@@ -747,18 +743,6 @@ ActiveRecord::Schema.define(:version => 20160104050833) do
     t.boolean  "scan_by_tracking_number",       :default => false
     t.boolean  "intangible_setting_enabled",    :default => false
     t.string   "intangible_string",             :default => ""
-  end
-
-  create_table "shipping_easy_credentials", :force => true do |t|
-    t.integer  "store_id"
-    t.string   "api_key"
-    t.string   "api_secret"
-    t.boolean  "import_ready_for_shipment", :default => false
-    t.boolean  "import_shipped",            :default => false
-    t.boolean  "gen_barcode_from_sku"
-    t.datetime "created_at",                                   :null => false
-    t.datetime "updated_at",                                   :null => false
-    t.datetime "last_imported_at"
   end
 
   create_table "shipstation_credentials", :force => true do |t|

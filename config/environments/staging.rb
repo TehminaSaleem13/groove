@@ -133,4 +133,7 @@ Groovepacks::Application.configure do
   ENV['DASHBOARD_ENABLE'] = 'YES'
 
   ENV["SITE_HOST"] = "barcodepacker.com"
+
+  # analytic server
+  ENV["GROOV_ANALYTIC"] = "http://159.203.92.158"
 end

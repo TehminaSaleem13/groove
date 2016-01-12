@@ -59,6 +59,15 @@ groovepacks_services.factory('dashboard', ['$http', 'notification', function ($h
     );
   }
 
+  // var get_dashboard_data = function() {
+  //   console.log('get_dashboard_data');
+  //   return (
+  //     $http.post('http://dhhq_stat.locallytics.com:4000/dashboard/calculate').error(function(response){
+  //       notification.notify("Failed to load dashboard data", 0);
+  //     })
+  //   )
+  // }
+
   return {
     model: {
       get: get_default
