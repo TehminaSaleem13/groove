@@ -6,16 +6,17 @@ module Groovepacker
         method = 'GET'
         uri = "#{host_url}/api/rest/orders"
         #last_import = credential.last_imported_at.to_datetime rescue (DateTime.now - 4.days)
-        
+        filters = {}
         #from_date = (DateTime.now - 4.days).strftime("%Y-%m-%d %H:%M:%S")
         #to_date = DateTime.now.strftime("%Y-%m-%d %H:%M:%S")
-        #filters = {"filter[1][attribute]" => "created_at", "filter[1][from]" => from_date, "filter[1][to]" => to_date}
+        #filters = {"filter[1]['attribute']" => "created_at", "filter[1]['from']" => from_date, "filter[1]['to']" => to_date}
         orders = {}
         page_index = 1
         while page_index
           puts "=======================Fetching page #{page_index}======================="
-          filters = {"page" => "#{page_index}", "limit" => "10"}
+          filters = {"page" => "#{page_index}", "limit" => "10"}.merge(filters)
           response = fetch(method, uri, parameters, filters)
+          
           page_index += 1
           orders = orders.merge(response)
           response_length = response.length rescue 0
@@ -101,9 +102,6 @@ module Groovepacker
           filters_or_data = filters_or_data.stringify_keys
           params_copy = params
           params_copy = params_copy.merge(filters_or_data)
-          if method=='PUT' or method=='POST'
-            params_copy = params_copy.merge({'Accept' => 'application/json', 'Content-Type' => 'application/json'})
-          end
           signature_base_string = signature_base_string(method, uri, params_copy)
           params['oauth_signature'] = url_encode(sign(signing_key, signature_base_string))
           header_string = header(params)
@@ -161,14 +159,14 @@ module Groovepacker
           url = URI.parse(base_uri)
           http = Net::HTTP.new(url.host, 443)
           http.use_ssl = true
-
+          data_params = data["filters_or_data"] || {}
           if method == 'PUT'
-            put_data = data["filters_or_data"].to_json
-            #resp, resp_data = http.put(url.path, put_data, { 'Authorization' => header })
-            resp, resp_data = http.put(url.path, put_data, { 'Authorization' => header, 'Accept' => 'application/json', 'Content-Type' => 'application/json' })
+            response = HTTParty.put(url.to_s, body: data_params, headers: { "Authorization" => header, "Content-Type" => "application/json", "Accept" => "application/json" })
+            #resp, resp_data = http.put(url.path, put_data, { 'Authorization' => header, 'Accept' => 'application/json', 'Content-Type' => 'application/json' })
           elsif method == 'GET'
-            url.query = URI.encode_www_form(data["filters_or_data"]) unless data["filters_or_data"].blank?
-            resp, resp_data = http.get(url.to_s, { 'Authorization' => header })
+            response = HTTParty.get(url.to_s, query: data_params, headers: { "Authorization" => header, "Content-Type" => "application/json", "Accept" => "application/json" })
+            #url.query = URI.encode_www_form(data["filters_or_data"]) unless data["filters_or_data"].blank?
+            #resp, resp_data = http.get(url.to_s, { 'Authorization' => header })
           end
           
           JSON.parse(resp.body) rescue nil

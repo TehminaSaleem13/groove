@@ -24,7 +24,8 @@ module Groovepacker
             def update_mg_rest_product_inv_for_sync_option(product, mg_rest_product_id, inv_wh)
               if mg_rest_product_id
                 availabel_inv = inv_wh.available_inv rescue 0
-                filters_or_data = {"qty" => availabel_inv.to_s}
+                availabel_inv = 0 if availabel_inv.to_i < 0
+                filters_or_data = {:qty => availabel_inv.to_s}
                 @client.update_product_inv(mg_rest_product_id, filters_or_data)
               end
             end
