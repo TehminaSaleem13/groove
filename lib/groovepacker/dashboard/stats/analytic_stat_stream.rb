@@ -10,9 +10,11 @@ module Groovepacker
           begin
             stat_stream = []
             Apartment::Tenant.switch(tenant_name)
-            
+            puts "switched tenant."
             orders = Order.where(status: 'scanned')
+            puts "found all orders with scanned status"
             return if orders.empty?
+            puts "iterate over the orders"
             orders.each do |order|
               # result = build_result
               # exception = order.order_exception
@@ -31,7 +33,7 @@ module Groovepacker
               #   result[:exception_description] = exception.description
               #   result[:exception_reason] = exception.reason
               # end
-              result = build_stream(order)
+              result = build_stream(order.id)
               stat_stream.push(result)
             end
           rescue Exception => e
@@ -40,11 +42,15 @@ module Groovepacker
           stat_stream
         end
 
-        def build_stream(order)
-          result = {}
+        def build_stream(order_id)
+          result = build_result
+          order = Order.find(order_id)
+          puts "find exception for the order"
           exception = order.order_exception
+          puts "find user"
           users = User.where(id: order.packing_user_id)
           unless users.empty?
+            puts "calculate the result"
             user = users.first
             result[:order_increment_id] = order.increment_id
             result[:item_count] = order.order_items.count
@@ -62,20 +68,20 @@ module Groovepacker
           result
         end
 
-        # def build_result
-        #   {
-        #     order_increment_id: '',
-        #     item_count: 0,
-        #     scanned_on: nil,
-        #     packing_user_id: 0,
-        #     packing_user_name: '',
-        #     inaccurate_scan_count: 0,
-        #     packing_time: 0,
-        #     scanned_item_count: 0,
-        #     exception_description: nil,
-        #     exception_reason: nil
-        #   }
-        # end
+        def build_result
+          {
+            order_increment_id: '',
+            item_count: 0,
+            scanned_on: nil,
+            packing_user_id: 0,
+            packing_user_name: '',
+            inaccurate_scan_count: 0,
+            packing_time: 0,
+            scanned_item_count: 0,
+            exception_description: nil,
+            exception_reason: nil
+          }
+        end
       end
     end
   end
