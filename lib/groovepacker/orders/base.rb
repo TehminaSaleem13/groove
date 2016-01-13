@@ -110,7 +110,9 @@ module Groovepacker
             "city" => "city",
             "state" => "state",
             "postcode" => "postcode",
-            "country" => "country"
+            "country" => "country",
+            "custom_field_one" => "custom_field_one",
+            "custom_field_two" => "custom_field_two"
           }
         end
     end

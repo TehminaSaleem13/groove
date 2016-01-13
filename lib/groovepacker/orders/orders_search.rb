@@ -20,7 +20,7 @@ module Groovepacker
       private
       def get_base_query(search, sort_key, sort_order)
         #todo: include sku and storename in search as well in future.
-        base_query = "Select orders.*, sum(order_items.qty) AS itemslength from orders LEFT JOIN stores ON (orders.store_id = stores.id) LEFT JOIN order_items ON (order_items.order_id = orders.id) WHERE increment_id like #{search} OR non_hyphen_increment_id like #{search} OR email like #{search} OR CONCAT(IFNULL(firstname,''),' ',IFNULL(lastname,'')) like #{search} OR postcode like #{search} GROUP BY orders.id Order BY #{sort_key} #{sort_order}"
+        base_query = "Select orders.*, sum(order_items.qty) AS itemslength from orders LEFT JOIN stores ON (orders.store_id = stores.id) LEFT JOIN order_items ON (order_items.order_id = orders.id) WHERE increment_id like #{search} OR non_hyphen_increment_id like #{search} OR email like #{search} OR CONCAT(IFNULL(firstname,''),' ',IFNULL(lastname,'')) like #{search} OR postcode like #{search} OR custom_field_one like #{search} OR custom_field_two like #{search} GROUP BY orders.id Order BY #{sort_key} #{sort_order}"
       end
 
       def get_search_result(results_only, result_rows, base_query)

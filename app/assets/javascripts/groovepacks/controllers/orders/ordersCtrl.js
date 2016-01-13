@@ -415,13 +415,15 @@ groovepacks_controllers.
           if(custom_fields[0] && custom_fields[0].match(/\w+/)){
             $scope.gridOptions.all_fields.custom_field_one = {
               name: custom_fields[0],
-              hidden: true
+              hidden: true,
+              enable_edit: true
             }
           }
           if(custom_fields[1] && custom_fields[1].match(/\w+/)){
             $scope.gridOptions.all_fields.custom_field_two = {
               name: custom_fields[1],
-              hidden: true
+              hidden: true,
+              enable_edit: true
             }
           }
         }
