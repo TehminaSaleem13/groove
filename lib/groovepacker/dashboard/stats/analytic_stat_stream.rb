@@ -13,7 +13,7 @@ module Groovepacker
             puts "switched tenant."
             orders = Order.where(status: 'scanned')
             puts "found all orders with scanned status"
-            return if orders.empty?
+            return stat_stream if orders.empty?
             puts "iterate over the orders"
             orders.each do |order|
               # result = build_result
