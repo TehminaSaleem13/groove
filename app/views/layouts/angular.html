@@ -46,7 +46,7 @@
 <div id="dashboard" groov-dashboard></div>
 <% end %>
 <script type="text/javascript">
-  window.custom_fields = <%= raw GeneralSetting.get_custom_fields %>;
+  window.custom_fields = <%= raw GeneralSetting.try(:get_custom_fields) %>;
 </script>
 <script type="text/javascript" src="https://s3.amazonaws.com/assets.freshdesk.com/widget/freshwidget.js"></script>
 <script type="text/javascript">
