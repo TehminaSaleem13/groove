@@ -35,7 +35,8 @@ module Groovepacker
               shiping_easy_order = Order.find_by_increment_id(order["external_order_identifier"])
               shiping_easy_order ||= Order.new
 
-              return if shiping_easy_order.persisted?
+              return if shiping_easy_order.persisted? and shiping_easy_order.status=="scanned"
+              shiping_easy_order.order_items.destroy_all
               shiping_easy_order.store_id = @credential.store_id
 
               import_order(shiping_easy_order, order)
