@@ -1,6 +1,5 @@
 class ProductsController < ApplicationController
-  before_filter :groovepacker_authorize!
-  include ProductsHelper
+  include ProductConcern
 
   def import_products
     @store = Store.find(params[:id])
@@ -724,12 +723,8 @@ class ProductsController < ApplicationController
   end
 
   def update
-    #initialize_result will initialize status and message in result hash
-    result = initialize_result
-
     @product = Product.find_by_id(params[:basicinfo][:id]) rescue nil
-    
-    result['params'] = params
+    @result['params'] = params
     general_setting = GeneralSetting.all.first
 
     unless @product.blank?
@@ -748,10 +743,11 @@ class ProductsController < ApplicationController
         product_location.quantity_on_hand = params[:inventory_warehouses][0][:info][:quantity_on_hand] unless params[:inventory_warehouses].empty?
         product_location.save
 
+        info_saved = update_product_basic_info
         update_inventory_info(general_setting) rescue
 
-        unless update_product_basic_info
-          result['status'] &= false
+        unless info_saved
+          @result['status'] &= false
         end
         
         #Update product status and also update the containing kit and orders
@@ -780,7 +776,7 @@ class ProductsController < ApplicationController
           #         end
           #         if found_inv_wh == false
           #           if !inv_wh.destroy
-          #             result['status'] &= false
+          #             @result['status'] &= false
           #           end
           #         end
           #       end
@@ -810,14 +806,14 @@ class ProductsController < ApplicationController
           #           product_inv_wh.location_secondary = wh["info"]["location_secondary"]
           #           product_inv_wh.location_tertiary = wh["info"]["location_tertiary"]
           #           unless product_inv_wh.save
-          #             result['status'] &= false
+          #             @result['status'] &= false
           #           end
           #         elsif !wh["warehouse_info"]["id"].nil?
           #           product_inv_wh = ProductInventoryWarehouses.new
           #           product_inv_wh.product_id = @product.id
           #           product_inv_wh.inventory_warehouse_id = wh["warehouse_info"]["id"]
           #           unless product_inv_wh.save
-          #             result['status'] &= false
+          #             @result['status'] &= false
           #           end
           #         end
           #       end
@@ -829,18 +825,18 @@ class ProductsController < ApplicationController
             #Update product categories
             #check if a product category is defined.
             product_cats = ProductCat.where(:product_id => @product.id)
-            result = destroy_object_if_not_defined(product_cats, params[:cats], result)
+            @result = destroy_object_if_not_defined(product_cats, params[:cats], @result)
             
             (params[:cats]||[]).each do |category|
               status = @product.create_or_update_productcat(category)
-              result['status'] &= status
+              @result['status'] &= status
             end
           elsif params['post_fn'] == 'sku'
             #Update product skus
             #check if a product sku is defined.
 
             product_skus = ProductSku.where(:product_id => @product.id)
-            result = destroy_object_if_not_defined(product_skus, params[:skus], result)
+            @result = destroy_object_if_not_defined(product_skus, params[:skus], @result)
 
             (params[:skus]||[]).each_with_index do |sku, index|
               status = true
@@ -849,10 +845,10 @@ class ProductsController < ApplicationController
               elsif sku["sku"].present? && ProductSku.where(:sku => sku["sku"]).blank?
                 status = @product.create_or_update_productsku(sku, index, 'new')
               elsif sku["sku"].present?
-                result['status'] &= false
-                result['message'] = "Sku "+sku["sku"]+" already exists"
+                @result['status'] &= false
+                @result['message'] = "Sku "+sku["sku"]+" already exists"
               end
-              result['status'] &= status
+              @result['status'] &= status
 
             end
           elsif params['post_fn'] == 'barcode'
@@ -860,7 +856,7 @@ class ProductsController < ApplicationController
             #check if a product barcode is defined.
             product_barcodes = ProductBarcode.where(:product_id => @product.id)
             product_barcodes.reload
-            result = destroy_object_if_not_defined(product_barcodes, params[:barcodes], result)
+            @result = destroy_object_if_not_defined(product_barcodes, params[:barcodes], @result)
 
             #Update product barcodes
             #check if a product barcode is defined
@@ -873,10 +869,10 @@ class ProductsController < ApplicationController
               elsif barcode["barcode"].present? && ProductBarcode.where(:barcode => barcode["barcode"]).blank?
                 status = @product.create_or_update_productbarcode(barcode, index, 'new')
               elsif barcode["barcode"].present?
-                result['status'] &= false
-                result['message'] = "Barcode "+barcode["barcode"]+" already exists"
+                @result['status'] &= false
+                @result['message'] = "Barcode "+barcode["barcode"]+" already exists"
               end
-              result['status'] &= status
+              @result['status'] &= status
             end
           end
         end
@@ -884,13 +880,13 @@ class ProductsController < ApplicationController
         #Update product barcodes
         #check if a product barcode is defined.
         product_images = ProductImage.where(:product_id => @product.id)
-        result = destroy_object_if_not_defined(product_images, params[:images], result)
+        @result = destroy_object_if_not_defined(product_images, params[:images], @result)
 
         #Update product barcodes
         #check if a product barcode is defined
         (params[:images]||[]).each_with_index do |image, index|
           unless @product.create_or_update_productimage(image, index)
-            result['status'] &= false
+            @result['status'] &= false
           end
         end
 
@@ -902,17 +898,17 @@ class ProductsController < ApplicationController
         @product.reload
         @product.update_product_status
       else
-        result['status'] = false
-        result['message'] = 'You do not have enough permissions to update a product'
+        @result['status'] = false
+        @result['message'] = 'You do not have enough permissions to update a product'
       end
     else
-      result['status'] = false
-      result['message'] = 'Cannot find product information.'
+      @result['status'] = false
+      @result['message'] = 'Cannot find product information.'
     end
 
     respond_to do |format|
       format.html # show.html.erb
-      format.json { render json: result }
+      format.json { render json: @result }
     end
   end
 
@@ -1333,71 +1329,6 @@ class ProductsController < ApplicationController
     count['all'] = all
     count['search'] = 0
     count
-  end
-
-  def update_inventory_info(general_setting)
-    return if params[:inventory_warehouses].empty?
-    attr_array = get_inv_update_attributes(general_setting)
-    
-    params[:inventory_warehouses].each_with_index do |inv_wh|
-      update_single_warehouse_info(inv_wh, attr_array)
-    end
-  end
-
-  def update_single_warehouse_info(inv_wh, attr_array)
-    product_location = @product.product_inventory_warehousess.find_by_id(inv_wh["info"]["id"])
-    attr_array.each do |attr|
-      product_location.send("#{attr}=", inv_wh[:info][attr])
-    end
-    product_location.save
-  end
-
-  def get_inv_update_attributes(general_setting)
-    attr_array = ['quantity_on_hand', 'location_primary', 'location_secondary', 'location_tertiary']
-    if general_setting.low_inventory_alert_email
-      attr_array = attr_array + ['product_inv_alert', 'product_inv_alert_level']
-    end
-    attr_array
-  end
-
-  def destroy_object_if_not_defined(objects_array, obj_params, result)
-    return result if objects_array.blank?
-    
-    ids = obj_params.map {|obj| obj["id"]} rescue []
-    objects_array.each do |object|
-      found_obj = false
-      found_obj = true if ids.include?(object.id)
-      if found_obj == false && !object.destroy
-        result['status'] &= false
-      end
-    end
-    return result
-  end
-
-  def update_product_basic_info
-    basic_info = params[:basicinfo]
-    @product.disable_conf_req = basic_info[:disable_conf_req]
-    @product.is_kit = basic_info[:is_kit]
-    @product.is_skippable = basic_info[:is_skippable]
-    @product.record_serial= basic_info[:record_serial]
-    @product.kit_parsing = basic_info[:kit_parsing]
-    @product.name = basic_info[:name]
-    @product.pack_time_adj = basic_info[:pack_time_adj]
-    @product.packing_placement = basic_info[:packing_placement] if basic_info[:packing_placement].is_a?(Integer)
-    @product.product_type = basic_info[:product_type]
-    @product.spl_instructions_4_confirmation = basic_info[:spl_instructions_4_confirmation]
-    @product.spl_instructions_4_packer = basic_info[:spl_instructions_4_packer]
-    @product.store_id = basic_info[:store_id]
-    @product.store_product_id = basic_info[:store_product_id]
-    @product.type_scan_enabled = basic_info[:type_scan_enabled]
-    @product.click_scan_enabled = basic_info[:click_scan_enabled]
-    @product.weight = @product.get_product_weight(params[:weight])
-    @product.shipping_weight = @product.get_product_weight(params[:shipping_weight])
-    @product.weight_format = get_weight_format(basic_info[:weight_format])
-    @product.add_to_any_order = basic_info[:add_to_any_order]
-    @product.product_receiving_instructions = basic_info[:product_receiving_instructions]
-    @product.is_intangible = basic_info[:is_intangible]
-    @product.save ? true : false
   end
 
   def initialize_result
