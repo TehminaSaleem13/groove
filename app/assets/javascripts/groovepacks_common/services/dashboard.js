@@ -63,8 +63,10 @@ groovepacks_services.factory('dashboard', ['$http', 'notification', function ($h
     console.log('get_dashboard_data');
     tenant = document.getElementById('current_tenant').value
     console.log(tenant);
+    domain = document.getElementById('domain').value
+    console.log(domain)
     return (
-      $http.get('http://' + tenant + 'stat.lockpeppa.com/dashboard/calculate').error(function(response){
+      $http.get('http://' + tenant + 'stat.' + domain +'/dashboard/calculate').error(function(response){
         notification.notify("Failed to load dashboard data", 0);
       })
     )

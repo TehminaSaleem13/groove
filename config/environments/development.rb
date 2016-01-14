@@ -140,5 +140,5 @@ Groovepacks::Application.configure do
   ENV["SITE_HOST"] = "barcodepacker.com"
 
   # analytic server
-  ENV["GROOV_ANALYTIC"] = "http://localhost:4000"
+  ENV["GROOV_ANALYTIC"] = "localhost:4000"
 end
