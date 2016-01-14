@@ -1,7 +1,7 @@
 groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sce',
-  '$timeout', '$interval', 'groovIO', 'orders', 'stores', 'notification', 'dashboard', 'users',
+  '$timeout', '$interval', 'groovIO', 'orders', 'stores', 'notification', 'dashboard', 'dashboard_calculator', 'users',
   function ($window, $document, $sce, $timeout, $interval, groovIO, orders, stores,
-            notification, dashboard, users) {
+            notification, dashboard, dashboard_calculator, users) {
     return {
       restrict: "A",
       templateUrl: "/assets/views/directives/dashboard.html",
@@ -37,7 +37,9 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
         scope.init = function () {
           scope.charts.type = 'packing_stats';
           scope.dashboard = dashboard.model.get();
+          scope.dash_data = {};
           scope.exceptions.init_all();
+          // dashboard.stats.dashboard_stat();
         }
 
         scope.switch_tab = function (tab) {
@@ -47,10 +49,20 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
           } else if (tab.heading == "Exceptions by Frequency") {
             scope.exceptions.type = "by_frequency";
             scope.exceptions.retrieve.exceptions_by_frequency();
-          } else if (tab.heading == "Leader Board") {
-            scope.leader_board.retrieve.leader_board();
           }
+          // } else if (tab.heading == "Leader Board") {
+          //   scope.leader_board.retrieve.leader_board();
+          // }
         }
+
+        groovIO.on('dashboard_update', function (message) {
+          console.log("message");
+          console.log(message);
+          console.log(scope.charts.days_filters[scope.charts.current_filter_idx].days);
+          days = scope.charts.days_filters[scope.charts.current_filter_idx].days
+          scope.dash_data = message.data
+          scope.build_dash_data()
+        });
 
         scope.charts = {
           type: 'packing_stats',
@@ -67,22 +79,14 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
             this.init();
           },
           init: function () {
-            if (this.type == 'packed_item_stats') {
-              this.retrieve.packed_item_stats(
-                this.days_filters[this.current_filter_idx].days);
-            } else if (this.type == 'packing_stats') {
-              this.retrieve.packing_stats(
-                this.days_filters[this.current_filter_idx].days)
-            } else if (this.type == 'packing_speed_stats') {
-              this.retrieve.packing_speed_stats(
-                this.days_filters[this.current_filter_idx].days)
-            }
-            this.retrieve.main_summary(
-              this.days_filters[this.current_filter_idx].days);
+            // scope.build_dash_data()
+            dashboard.stats.dashboard_stat();
           },
           retrieve: {
             main_summary: function (days) {
               dashboard.stats.main_summary(days).then(function (response) {
+                console.log("response");
+                console.log(response);
                 scope.dashboard.main_summary = response.data;
               });
             },
@@ -96,6 +100,8 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
             packed_item_stats: function (days) {
               dashboard.stats.packed_item_stats(days).then(
                 function (response) {
+                  console.log("response");
+                  console.log(response);
                   scope.dashboard.packed_item_stats = response.data;
                 });
             },
@@ -144,6 +150,7 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
             leader_board: function () {
               dashboard.stats.leader_board().then(
                 function (response) {
+                  console.log(response);
                   scope.leader_board.list = response.data;
                 });
             }
@@ -260,13 +267,20 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
           }
         }
         scope.legendColorFunction = function () {
+          console.log('in legendColorFunction');
           return function (d) {
+            console.log(d);
             return d.color;
           }
         };
         scope.toolTipContentFunction = function () {
           return function (key, x, y, e, graph) {
             var tooltipText = '';
+            console.log(key);
+            console.log(x);
+            console.log(y);
+            console.log(e);
+            console.log(graph);
             if (scope.charts.type == 'packing_stats') {
 
               var average_packing_accuracy = "-";
@@ -312,6 +326,23 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
             }
 
           }
+        }
+
+        scope.build_dash_data = function() {
+          console.log("dash_data: ");
+          console.log(scope.dash_data);
+          days = scope.charts.days_filters[scope.charts.current_filter_idx].days;
+          scope.leader_board.list = scope.dash_data.leader_board.list
+          for (var i = 0; i <= scope.dash_data.dashboard.length - 1; i++) {
+            if (parseInt(scope.dash_data.dashboard[i].duration, 10) == days) {
+              scope.dashboard.main_summary = scope.dash_data.dashboard[i].main_summary;
+              scope.dashboard.packing_stats = scope.dash_data.dashboard[i].daily_user_data.packing_stats;
+              scope.dashboard.packed_item_stats = scope.dash_data.dashboard[i].daily_user_data.packed_item_stats;
+              scope.dashboard.packing_speed_stats = scope.dash_data.dashboard[i].daily_user_data.packing_speed_stats;
+              scope.dashboard.avg_packing_accuracy_stats = scope.dash_data.dashboard[i].avg_user_data.packing_stats;
+              scope.dashboard.avg_packing_speed_stats = scope.dash_data.dashboard[i].avg_user_data.packing_speed_stats;
+            };
+          };
         }
 
         scope.init();

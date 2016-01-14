@@ -140,4 +140,9 @@ Groovepacks::Application.configure do
 
   #Feature Variables
   ENV['DASHBOARD_ENABLE'] = 'YES'
+
+  ENV["SITE_HOST"] = "barcodepacker.com"
+
+  # analytic server
+  ENV["GROOV_ANALYTIC"] = "lockpeppa.com"
 end
