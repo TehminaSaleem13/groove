@@ -135,5 +135,5 @@ Groovepacks::Application.configure do
   ENV["SITE_HOST"] = "barcodepacker.com"
 
   # analytic server
-  ENV["GROOV_ANALYTIC"] = "groovelytics_staging.lockpeppa.com"
+  ENV["GROOV_ANALYTIC"] = "lockpeppa.com"
 end

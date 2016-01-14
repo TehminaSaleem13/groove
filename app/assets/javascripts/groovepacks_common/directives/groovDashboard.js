@@ -39,15 +39,17 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
           scope.dashboard = dashboard.model.get();
           scope.dash_data = {};
           scope.exceptions.init_all();
+          // dashboard.stats.dashboard_stat();
         }
 
         scope.switch_tab = function (tab) {
-          // if (tab.heading == "Most Recent Exceptions") {
-          //   scope.exceptions.type = "most_recent";
-          //   scope.exceptions.retrieve.most_recent_exceptions();
-          // } else if (tab.heading == "Exceptions by Frequency") {
-          //   scope.exceptions.type = "by_frequency";
-          //   scope.exceptions.retrieve.exceptions_by_frequency();
+          if (tab.heading == "Most Recent Exceptions") {
+            scope.exceptions.type = "most_recent";
+            scope.exceptions.retrieve.most_recent_exceptions();
+          } else if (tab.heading == "Exceptions by Frequency") {
+            scope.exceptions.type = "by_frequency";
+            scope.exceptions.retrieve.exceptions_by_frequency();
+          }
           // } else if (tab.heading == "Leader Board") {
           //   scope.leader_board.retrieve.leader_board();
           // }
@@ -77,7 +79,8 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
             this.init();
           },
           init: function () {
-            scope.build_dash_data()
+            // scope.build_dash_data()
+            dashboard.stats.dashboard_stat();
           },
           retrieve: {
             main_summary: function (days) {

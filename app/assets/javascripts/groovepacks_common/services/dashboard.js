@@ -59,14 +59,16 @@ groovepacks_services.factory('dashboard', ['$http', 'notification', function ($h
     );
   }
 
-  // var get_dashboard_data = function() {
-  //   console.log('get_dashboard_data');
-  //   return (
-  //     $http.post('http://dhhq_stat.locallytics.com:4000/dashboard/calculate').error(function(response){
-  //       notification.notify("Failed to load dashboard data", 0);
-  //     })
-  //   )
-  // }
+  var get_dashboard_data = function() {
+    console.log('get_dashboard_data');
+    tenant = document.getElementById('current_tenant').value
+    console.log(tenant);
+    return (
+      $http.get('http://' + tenant + 'stat.lockpeppa.com/dashboard/calculate').error(function(response){
+        notification.notify("Failed to load dashboard data", 0);
+      })
+    )
+  }
 
   return {
     model: {
@@ -78,7 +80,8 @@ groovepacks_services.factory('dashboard', ['$http', 'notification', function ($h
       packing_speed_stats: packing_speed_stats,
       main_summary: main_summary,
       exceptions: exceptions,
-      leader_board: leader_board
+      leader_board: leader_board,
+      dashboard_stat: get_dashboard_data
     }
   };
 }]);

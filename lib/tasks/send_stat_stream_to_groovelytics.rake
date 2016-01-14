@@ -15,8 +15,9 @@ namespace :cssa do
           puts "send each stat_stream_hash"
           puts "stat_stream: " + stat_stream.inspect
           stat_stream.each do |stat_stream_hash|
-            HTTParty.post("http://#{tenant.name}_stat.#{ENV["GROOV_ANALYTIC"]}/dashboard",
+            HTTParty.post("http://#{tenant.name}stat.#{ENV["GROOV_ANALYTIC"]}/dashboard",
               query: {tenant_name: tenant.name},
+              debug_output: $stdout,
               body: stat_stream_hash)
           end
         end
