@@ -15,7 +15,11 @@ class GeneralSetting < ActiveRecord::Base
   @@all_tenants_settings = {}
 
   def self.get_custom_fields
-    GeneralSetting.all.first.as_json(only: [:custom_field_one, :custom_field_two]).values.compact
+    GeneralSetting.all.first.as_json(
+      only: [
+        :custom_field_one, :custom_field_two
+        ]
+    ).try(:values).try(:compact)
   end
 
   def self.setting
