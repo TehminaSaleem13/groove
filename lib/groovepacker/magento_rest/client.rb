@@ -156,20 +156,19 @@ module Groovepacker
         end
 
         def request_update_data(header, base_uri, method, data={})
-          url = URI.parse(base_uri)
-          http = Net::HTTP.new(url.host, 443)
-          http.use_ssl = true
+          #url = URI.parse(base_uri)
+          #http = Net::HTTP.new(url.host, 443)
+          #http.use_ssl = true
           data_params = data["filters_or_data"] || {}
           if method == 'PUT'
-            response = HTTParty.put(url.to_s, body: data_params, headers: { "Authorization" => header, "Content-Type" => "application/json", "Accept" => "application/json" })
+            response = HTTParty.put(base_uri, body: data_params, headers: { "Authorization" => header, "Content-Type" => "application/json", "Accept" => "application/json" })
             #resp, resp_data = http.put(url.path, put_data, { 'Authorization' => header, 'Accept' => 'application/json', 'Content-Type' => 'application/json' })
           elsif method == 'GET'
-            response = HTTParty.get(url.to_s, query: data_params, headers: { "Authorization" => header, "Content-Type" => "application/json", "Accept" => "application/json" })
+            response = HTTParty.get(base_uri, query: data_params, headers: { "Authorization" => header, "Content-Type" => "application/json", "Accept" => "application/json" })
             #url.query = URI.encode_www_form(data["filters_or_data"]) unless data["filters_or_data"].blank?
             #resp, resp_data = http.get(url.to_s, { 'Authorization' => header })
           end
-          
-          JSON.parse(resp.body) rescue nil
+          response rescue nil
         end
     end
   end

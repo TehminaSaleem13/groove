@@ -17,7 +17,7 @@ module Groovepacker
               @sync_optn = product.sync_option
               mg_rest_product_id = (@sync_optn.mg_rest_product_id rescue nil) || product.mg_rest_product_id
               mg_rest_product = @client.product(mg_rest_product_id)
-              if mg_rest_product["entity_id"]
+              unless mg_rest_product["entity_id"].blank?
                 update_product_inv_for_sync_option(product, mg_rest_product, inv_wh)
               end
             end
