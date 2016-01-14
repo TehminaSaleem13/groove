@@ -13,7 +13,7 @@ namespace :cssa do
         unless stat_stream.empty?
           puts "send each stat_stream_hash"
           stat_stream.each do |stat_stream_hash|
-            HTTParty.post("#{ENV["GROOV_ANALYTIC"]}/dashboard",
+            HTTParty.post("http://#{tenant.name}_stat.#{ENV["GROOV_ANALYTIC"]}/dashboard",
               query: {tenant_name: tenant.name},
               body: stat_stream_hash)
           end

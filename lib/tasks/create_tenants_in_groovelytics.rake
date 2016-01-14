@@ -5,7 +5,7 @@ namespace :cta do
     tenants = Tenant.all
     tenants.each do |tenant|
       begin
-        HTTParty.post("#{ENV["GROOV_ANALYTIC"]}/tenants",
+        HTTParty.post("http://#{ENV["GROOV_ANALYTIC"]}/tenants",
           query: {tenant_name: tenant.name})
       rescue Exception => e
         puts e.message
