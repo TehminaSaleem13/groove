@@ -69,7 +69,7 @@ module Groovepacker
         end
 
         def edit_order_exceptions(order)
-          if @params[:single]['exception'].nil? && order.order_exception.nil?
+          if @params[:single]['exception'].nil? && order.order_exception.present?
               order.order_exception.destroy
           elsif @params[:single]['exception'].present?
             exception = OrderException.find_or_create_by_order_id(order.id)
