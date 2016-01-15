@@ -18,16 +18,14 @@ groovepacks_controllers.controller('scanPackRfpTypeScan', ['$scope', '$modalInst
 
     $scope.update = function (reason) {
       if (reason == 'ok-enter-key') {
-        qty_given = $scope.code.count == $scope.order.next_item.qty;
         if (
           typeof($scope.code.count) != 'number' || $scope.code.count < 1 ||
-          (!qty_given && $scope.code.count > $scope.order.next_item.qty_remaining)
+          ($scope.code.count > ($scope.order.next_item.qty_remaining + 1))
           ) {
           notification.notify("Wrong count has been entered. Please try again.");
           $modalInstance.dismiss("wrong-count");
         } else {
-          if (qty_given) {$scope.code.count = $scope.order.next_item.qty_remaining};
-          scanPack.type_scan($scope.order.id, $scope.order.next_item, $scope.code.count).success(function (data) {
+          scanPack.type_scan($scope.order.id, $scope.order.next_item, ($scope.code.count - 1) || 1).success(function (data) {
             $scope.code.count = 0;
             $timeout($scope.focus_search, 200);
             if (data.status) {
