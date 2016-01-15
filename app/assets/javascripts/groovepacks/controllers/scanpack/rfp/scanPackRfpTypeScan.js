@@ -18,7 +18,10 @@ groovepacks_controllers.controller('scanPackRfpTypeScan', ['$scope', '$modalInst
 
     $scope.update = function (reason) {
       if (reason == 'ok-enter-key') {
-        if (typeof($scope.code.count) != 'number' && $scope.code.count < 1 && $scope.code.count > $scope.order.next_item.qty) {
+        if (
+          typeof($scope.code.count) != 'number' || $scope.code.count < 1 ||
+          $scope.code.count > $scope.order.next_item.qty_remaining
+          ) {
           notification.notify("Wrong count has been entered. Please try again.");
           $modalInstance.dismiss("wrong-count");
         } else {
