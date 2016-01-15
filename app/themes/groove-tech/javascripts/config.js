@@ -1,5 +1,5 @@
-groovepacks.config(['$stateProvider', '$urlRouterProvider', 'hotkeysProvider', 'cfpLoadingBarProvider', '$translateProvider', '$urlMatcherFactoryProvider', 'ngClipProvider',
-  function ($stateProvider, $urlRouterProvider, hotkeysProvider, cfpLoadingBarProvider, $translateProvider, $urlMatcherFactoryProvider, ngClipProvider) {
+groovepacks.config(['$stateProvider', '$urlRouterProvider', '$httpProvider', 'hotkeysProvider', 'cfpLoadingBarProvider', '$translateProvider', '$urlMatcherFactoryProvider', 'ngClipProvider',
+  function ($stateProvider, $urlRouterProvider, $httpProvider, hotkeysProvider, cfpLoadingBarProvider, $translateProvider, $urlMatcherFactoryProvider, ngClipProvider) {
 
     ngClipProvider.setPath("/swf/ZeroClipboard.swf");
 
@@ -9,6 +9,11 @@ groovepacks.config(['$stateProvider', '$urlRouterProvider', 'hotkeysProvider', '
     $urlRouterProvider.when('/settings/system', '/settings/system/general');
 
     $urlMatcherFactoryProvider.strictMode(false);
+    $httpProvider.defaults.useXDomain = true;
+    $httpProvider.defaults.withCredentials = true;
+    delete $httpProvider.defaults.headers.common["X-Requested-With"];
+    $httpProvider.defaults.headers.common["Accept"] = "application/json";
+    $httpProvider.defaults.headers.common["Content-Type"] = "application/json";
     $stateProvider
       .state('home', {url: '/home'})
       .state('orders', {url: '/orders', templateUrl: '/assets/views/showorders.html', controller: 'ordersCtrl'})

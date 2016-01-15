@@ -43,7 +43,7 @@ groovepacks_controllers.
           var barcode_found = false;
           if ($scope.data.order.next_item.barcodes.length) {
             for (var i = 0; i < $scope.data.order.next_item.barcodes.length; i++) {
-              if ($scope.get_last_scanned() == $scope.data.order.next_item.barcodes[i].barcode) {
+              if (myscope.last_scanned_barcode == $scope.data.order.next_item.barcodes[i].barcode || $scope.get_last_scanned() == $scope.data.order.next_item.barcodes[i].barcode) {
                 barcode_found = true;
               }
             }
@@ -86,6 +86,7 @@ groovepacks_controllers.
       };
 
       myscope.do_autoscan = function () {
+        myscope.last_scanned_barcode = $scope.data.order.next_item.barcodes[0].barcode;
         scanPack.click_scan($scope.data.order.next_item.barcodes[0].barcode, $scope.data.order.id).success($scope.handle_scan_return);
       };
 

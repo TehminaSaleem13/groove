@@ -132,4 +132,7 @@ Groovepacks::Application.configure do
   ENV['DASHBOARD_ENABLE'] = 'NO'
 
   ENV["SITE_HOST"] = "groovepacker.com"
+
+  # analytic server
+  ENV["GROOV_ANALYTIC"] = "http://159.203.92.158"
 end
