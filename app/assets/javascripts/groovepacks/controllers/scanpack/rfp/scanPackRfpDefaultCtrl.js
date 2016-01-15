@@ -316,8 +316,8 @@ groovepacks_controllers.
           };
         };
         first_item = $scope.data.order.unscanned_items[0];
+        $scope.data.order.unscanned_items[0] = $scope.data.order.unscanned_items[next_item_index];
         $scope.data.order.unscanned_items[next_item_index] = first_item;
-        $scope.data.order.unscanned_items[0] = $scope.data.order.next_item;
       }
 
       myscope.handle_known_codes = function () {
