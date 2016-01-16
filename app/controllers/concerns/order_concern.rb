@@ -40,7 +40,7 @@ module OrderConcern
       if sort_by_order_number
         @params = @params.merge({:sort => 'ordernum', :order => 'ASC' })
       end
-      result = @params[:search].blank? ? gp_orders_search.do_search : gp_orders_module.do_getorders
+      result = @params[:search].blank? ? gp_orders_module.do_getorders : gp_orders_search.do_search
     end
 
     def list_of_orders_from_orderArray(sort_by_order_number = false)
