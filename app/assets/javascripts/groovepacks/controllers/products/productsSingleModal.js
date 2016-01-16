@@ -395,6 +395,16 @@ groovepacks_controllers.
           }
         };
 
+        scope.arrayCatEditableOptions = {
+          array: true,
+          update: function() { scope.update_single_product(true, "category") },
+          class: '',
+          sortableOptions: {
+            update: function() { scope.update_single_product(true, "category") },
+            axis: 'x'
+          }
+        };
+
         scope.arrayEditableOptions = {
           array: true,
           update: function() { scope.update_single_product(true, "barcode") },
