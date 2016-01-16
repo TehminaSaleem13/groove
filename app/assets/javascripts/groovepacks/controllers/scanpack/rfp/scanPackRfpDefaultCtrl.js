@@ -77,20 +77,20 @@ groovepacks_controllers.
             confirm: function () {
               return $scope.handle_scan_return;
             },
-            click_scan_happend: function(){
-              return $scope.click_scan_happend;
+            scan_happend: function(){
+              return myscope.click_scan_happend || scanPack.input_scan_happend;
             }
           }
         });
         myscope.type_scan_obj.result.finally(function () {
           $scope.set('input', '');
-          $scope.click_scan_happend = false;
+          myscope.click_scan_happend = scanPack.input_scan_happend = false;
           $timeout($scope.focus_search, 500);
         });
       };
 
       myscope.do_autoscan = function () {
-        $scope.click_scan_happend = true;
+        myscope.click_scan_happend = true;
         myscope.last_scanned_barcode = $scope.data.order.next_item.barcodes[0].barcode;
         scanPack.click_scan($scope.data.order.next_item.barcodes[0].barcode, $scope.data.order.id).success($scope.handle_scan_return);
       };

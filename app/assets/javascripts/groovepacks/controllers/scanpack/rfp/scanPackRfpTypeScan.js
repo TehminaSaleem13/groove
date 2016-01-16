@@ -1,10 +1,10 @@
-groovepacks_controllers.controller('scanPackRfpTypeScan', ['$scope', '$modalInstance', '$timeout', 'order_data', 'confirm', 'click_scan_happend', 'scanPack', 'notification',
-  function ($scope, $modalInstance, $timeout, order_data, confirm, click_scan_happend, scanPack, notification) {
+groovepacks_controllers.controller('scanPackRfpTypeScan', ['$scope', '$modalInstance', '$timeout', 'order_data', 'confirm', 'scan_happend', 'scanPack', 'notification',
+  function ($scope, $modalInstance, $timeout, order_data, confirm, scan_happend, scanPack, notification) {
     var myscope = {};
 
     myscope.init = function () {
       $scope.order = order_data;
-      $scope.click_scan_happend = click_scan_happend;
+      $scope.scan_happend = scan_happend;
       $timeout(function () {
         $scope.focus_search().select();
       }, 200);
@@ -21,12 +21,12 @@ groovepacks_controllers.controller('scanPackRfpTypeScan', ['$scope', '$modalInst
       if (reason == 'ok-enter-key') {
         if (
           typeof($scope.code.count) != 'number' || $scope.code.count < 1 ||
-          ($scope.code.count > ($scope.order.next_item.qty_remaining + ($scope.click_scan_happend ? 1 : 0)))
+          ($scope.code.count > ($scope.order.next_item.qty_remaining + ($scope.scan_happend ? 1 : 0)))
           ) {
           notification.notify("Wrong count has been entered. Please try again.");
           $modalInstance.dismiss("wrong-count");
         } else {
-          scanPack.type_scan($scope.order.id, $scope.order.next_item, ($scope.code.count - ($scope.click_scan_happend ? 1 : 0)) || 1).success(function (data) {
+          scanPack.type_scan($scope.order.id, $scope.order.next_item, ($scope.code.count - ($scope.scan_happend ? 1 : 0)) || 1).success(function (data) {
             $scope.code.count = 0;
             $timeout($scope.focus_search, 200);
             if (data.status) {
