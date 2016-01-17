@@ -100,4 +100,8 @@ gem 'ng-rails-csrf'
 gem 'doorkeeper'
 gem 'oauth'
 gem 'rubocop', require: false
+<<<<<<< HEAD
 gem 'shipping_easy'
+=======
+gem 'shipping_easy'
+>>>>>>> origin/production

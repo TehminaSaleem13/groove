@@ -20,7 +20,9 @@ groovepacks_controllers.
         if (reason == "cancel-button-click") {
           myscope.rollback();
         } else {
-          scope.update_single_product(false);
+          if (!scope.alias_added) {
+            scope.update_single_product(false);
+          }
         }
       };
 
@@ -121,6 +123,7 @@ groovepacks_controllers.
         });
         alias_modal.result.then(function (data) {
           myscope.add_alias_product(type, data);
+          scope.alias_added = true;
         });
       };
       scope.add_image_for_receiving_instructions = function () {
@@ -395,6 +398,7 @@ groovepacks_controllers.
           }
         };
 
+<<<<<<< HEAD
         scope.arrayCatEditableOptions = {
           array: true,
           update: function() { scope.update_single_product(true, "category") },
@@ -405,6 +409,8 @@ groovepacks_controllers.
           }
         };
 
+=======
+>>>>>>> origin/production
         scope.arrayEditableOptions = {
           array: true,
           update: function() { scope.update_single_product(true, "barcode") },
