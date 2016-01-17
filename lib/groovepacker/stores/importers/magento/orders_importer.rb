@@ -30,8 +30,8 @@ module Groovepacker
               @filters1['complex_filter'] = @filter1
               @filters_array = @filters_array.merge(@filters1)
             end
-            credential.last_imported_at = DateTime.now
-            credential.save
+            import_time = DateTime.now
+            
             begin
               response = client.call(:sales_order_list, message:
                                                         {sessionId: session, filters: @filters_array})
@@ -48,6 +48,8 @@ module Groovepacker
                   import_item.save
 
                   response.body[:sales_order_list_response][:result][:item].each do |item|
+                    import_item.reload
+                    break if import_item.status == 'cancelled'
                     import_item.current_increment_id = item[:increment_id]
                     import_item.current_order_items = -1
                     import_item.current_order_imported_item = -1
@@ -166,6 +168,11 @@ module Groovepacker
               result[:messages].push(e.message)
               import_item.message = e.message
               import_item.save
+            end
+            import_item.reload
+            if import_item.status != 'cancelled'
+              credential.last_imported_at = import_time
+              credential.save
             end
             result
           end

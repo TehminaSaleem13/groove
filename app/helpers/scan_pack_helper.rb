@@ -10,18 +10,18 @@ module ScanPackHelper
     order_scan_object.run
   end
 
-  def can_order_be_scanned
-    #result = false
-    #max_shipments = AccessRestriction.order("created_at").last.num_shipments
-    #total_shipments = AccessRestriction.order("created_at").last.total_scanned_shipments
-    #if total_shipments < max_shipments
-    #  result = true
-    #else
-    #  result = false
-    #end
-    #result
-    true
-  end
+  # def can_order_be_scanned
+  #   #result = false
+  #   #max_shipments = AccessRestriction.order("created_at").last.num_shipments
+  #   #total_shipments = AccessRestriction.order("created_at").last.total_scanned_shipments
+  #   #if total_shipments < max_shipments
+  #   #  result = true
+  #   #else
+  #   #  result = false
+  #   #end
+  #   #result
+  #   true
+  # end
 
   def product_scan(input, state, id, clicked=false, serial_added=false)
     product_scan_object = ScanPack::ProductScanService.new(
@@ -56,364 +56,106 @@ module ScanPackHelper
   #   result
   # end
 
-  def calculate_lot_number(scanpack_settings, input)
-    if scanpack_settings.escape_string_enabled && !input.index(scanpack_settings.escape_string).nil?
-      return input.slice((input.index(scanpack_settings.escape_string)+scanpack_settings.escape_string.length)..(input.length-1))
-    end
-  end
+  # def calculate_lot_number(scanpack_settings, input)
+  #   if scanpack_settings.escape_string_enabled && !input.index(scanpack_settings.escape_string).nil?
+  #     return input.slice((input.index(scanpack_settings.escape_string)+scanpack_settings.escape_string.length)..(input.length-1))
+  #   end
+  # end
 
   def scan_recording(input, state, id)
-    result = Hash.new
-    result['status'] = true
-    result['matched'] = true
-    result['error_messages'] = []
-    result['success_messages'] = []
-    result['notice_messages'] = []
-    result['data'] = Hash.new
-    result['data']['next_state'] = 'scanpack.rfp.recording'
-
-    order = Order.find(id)
-
-    if order.nil?
-      result['status'] &= false
-      result['error_messages'].push("Could not find order with id: "+id)
-    else
-      if order.status == 'awaiting'
-        if input.nil?
-          result['status'] &= false
-          result['error_messages'].push("No tracking number is provided")
-        else
-          #allow tracking id to be saved without special permissions
-          order.tracking_num = input
-          order.set_order_to_scanned_state(current_user.username)
-          result['data']['order_complete'] = true
-          result['data']['next_state'] = 'scanpack.rfo'
-          #update inventory when inventory warehouses is implemented.
-          order.save
-        end
-      else
-        result['status'] &= false
-        result['error_messages'].push("The order is not in awaiting state. Cannot scan the tracking number")
-      end
-    end
-    return result
+    scan_recording_object = ScanPack::ScanRecordingService.new(
+      [current_user, input, id]
+      )
+    scan_recording_object.run
   end
 
   def scan_verifying(input, state, id)
-    result = Hash.new
-    result['status'] = true
-    result['matched'] = true
-    result['error_messages'] = []
-    result['success_messages'] = []
-    result['notice_messages'] = []
-    result['data'] = Hash.new
-    result['data']['next_state'] = 'scanpack.rfp.verifying'
-
-    order = Order.find(id)
-
-    if order.nil?
-      result['status'] &= false
-      result['error_messages'].push("Could not find order with id: "+id)
-    else
-      if order.status == 'awaiting'
-        unless input.nil?
-          if order.tracking_num === input || order.tracking_num === input.last(22)
-            order.set_order_to_scanned_state(current_user.username)
-            result['data']['order_complete'] = true
-            result['data']['next_state'] = 'scanpack.rfo'
-            order.addactivity("Shipping Label Verified: #{input}", current_user.username)
-            order.save
-          elsif input == current_user.confirmation_code
-            result['matched'] = false
-            order.set_order_to_scanned_state(current_user.username)
-            result['data']['order_complete'] = true
-            result['data']['next_state'] = 'scanpack.rfo'
-            order.save
-          else
-            result['status'] &= false
-            result['error_messages'].push("Tracking number does not match.")
-            result['data']['next_state'] = 'scanpack.rfp.no_match'
-          end
-        end
-      else
-        result['status'] &= false
-        result['error_messages'].push("The order is not in awaiting state. Cannot scan the tracking number")
-      end
-    end
-    return result
+    scan_verifying_object = ScanPack::ScanVeryfingService.new(
+      [current_user, input, id]
+      )
+    scan_verifying_object.run
   end
 
   def render_order_scan(input, state, id)
-    result = Hash.new
-    result['status'] = true
-    result['matched'] = true
-    result['error_messages'] = []
-    result['success_messages'] = []
-    result['notice_messages'] = []
-    result['data'] = Hash.new
-    result['data']['next_state'] = 'scanpack.rfp.no_tracking_info'
-    unless id.nil?
-      order = Order.find(id)
-      if state == "scanpack.rfp.no_tracking_info" && (input == current_user.confirmation_code || input == "")
-        result['status'] = true
-        result['matched'] = false
-        order.set_order_to_scanned_state(current_user.username)
-        result['data']['order_complete'] = true
-        result['data']['next_state'] = 'scanpack.rfo'
-        order.save
-      else
-        result['status'] = false
-        result['matched'] = false
-        result['data']['next_state'] = 'scanpack.rfp.no_tracking_info'
-      end
-    end
-    result
+    render_order_scan_object = ScanPack::RenderOrderScanService.new(
+      [current_user, input, state, id]
+      )
+    render_order_scan_object.run
   end
 
   def scan_again_or_render_order_scan(input, state, id)
-    result = Hash.new
-    result['status'] = true
-    result['matched'] = true
-    result['error_messages'] = []
-    result['success_messages'] = []
-    result['notice_messages'] = []
-    result['data'] = Hash.new
-    result['data']['next_state'] = 'scanpack.rfp.no_match'
-    unless id.nil?
-      order = Order.find(id)
-      unless order.nil?
-        if state == "scanpack.rfp.no_match" && input == current_user.confirmation_code
-          result['status'] = true
-          result['matched'] = false
-          order.set_order_to_scanned_state(current_user.username)
-          result['data']['order_complete'] = true
-          order.addactivity("The correct shipping label was not verified at the time of packing. Confirmation code for user #{current_user.username} was scanned", current_user.username)
-          result['data']['next_state'] = 'scanpack.rfo'
-          order.save
-        elsif state == "scanpack.rfp.no_match" && (input === order.tracking_num || input.last(22) === order.tracking_num)
-          result['status'] = true
-          result['matched'] = true
-          order.set_order_to_scanned_state(current_user.username)
-          result['data']['order_complete'] = true
-          result['data']['next_state'] = 'scanpack.rfo'
-          order.save
-        elsif state == "scanpack.rfp.no_match" && input == "" && GeneralSetting.all.first.strict_cc == false
-          result['status'] = true
-          result['matched'] = false
-          order.set_order_to_scanned_state(current_user.username)
-          result['data']['order_complete'] = true
-          result['data']['next_state'] = 'scanpack.rfo'
-        else
-          result['status'] = false
-          result['matched'] = false
-          result['data']['next_state'] = 'scanpack.rfp.no_match'
-        end
-      end
-    end
-    result
+    scan_again_or_render_order_scan_object = ScanPack::ScanAginOrRenderOrderScanService.new(
+      [current_user, input, state, id]
+      )
+    scan_again_or_render_order_scan_object.run
   end
 
   def order_edit_conf(input, state, id)
-    result = Hash.new
-    result['status'] = true
-    result['matched'] = false
-    result['error_messages'] = []
-    result['success_messages'] = []
-    result['notice_messages'] = []
-    result['data'] = Hash.new
-
-    if !id.nil? || !input.nil?
-      #check if order status is On Hold
-      single_order = Order.find(id)
-      if single_order.nil?
-        result['status'] &= false
-        result['error_messages'].push("Could not find order with id: "+id.to_s)
-      else
-        result['data']['order_num'] = single_order.increment_id
-        if single_order.status == "onhold" && !single_order.has_inactive_or_new_products
-          if User.where(:confirmation_code => input).length > 0
-            result['matched'] = true
-            single_order.status = 'awaiting'
-            single_order.addactivity("Status changed from onhold to awaiting",
-                                     User.where(:confirmation_code => input).first.username)
-            single_order.save
-            result['data']['scanned_on'] = single_order.scanned_on
-            result['data']['next_state'] = 'scanpack.rfp.default'
-            session[:order_edit_matched_for_current_user] = true
-          else
-            result['data']['next_state'] = 'scanpack.rfo'
-          end
-        else
-          result['status'] &= false
-          result['error_messages'].push("Only orders with status On Hold and has inactive or new products "+
-                                          "can use edit confirmation code.")
-        end
-        result['data']['order'] = order_details_and_next_item(single_order)
-      end
-
-      #check if current user edit confirmation code is same as that entered
-    else
-      result['status'] &= false
-      result['error_messages'].push("Please specify confirmation code and order id to confirm purchase code")
-    end
-
-    return result
+    order_edit_conf_object = ScanPack::OrderEditConfService.new(
+      [session, input, state, id]
+      )
+    order_edit_conf_object.run('order_edit_conf')
   end
 
   def cos_conf(input, state, id)
-    result = Hash.new
-    result['status'] = true
-    result['matched'] = false
-    result['error_messages'] = []
-    result['success_messages'] = []
-    result['notice_messages'] = []
-    result['data'] = Hash.new
-
-    if !id.nil? || !input.nil?
-      #check if order status is On Hold
-      single_order = Order.find(id)
-      if single_order.nil?
-        result['status'] &= false
-        result['error_messages'].push("Could not find order with id: "+id.to_s)
-      else
-        result['data']['order_num'] = single_order.increment_id
-        if single_order.status == "serviceissue"
-          if User.where(:confirmation_code => input).length > 0
-            user = User.where(:confirmation_code => input).first
-
-            if user.can?('change_order_status')
-              #set order state to awaiting scannus
-              single_order.status = 'awaiting'
-              single_order.save
-              single_order.update_order_status
-              result['matched'] = true
-              #set next state
-              result['data']['next_state'] = 'scanpack.rfp.default'
-            else
-              result['matched'] = true
-              result['data']['next_state'] = 'scanpack.rfp.confirmation.cos'
-              result['error_messages'].push("User with confirmation code: "+ input+ " does not have permission to change order status")
-            end
-          else
-            result['data']['next_state'] = 'scanpack.rfp.confirmation.cos'
-            result['error_messages'].push("Could not find any user with confirmation code")
-          end
-        else
-          result['status'] &= false
-          result['error_messages'].push("Only orders with status Service issue"+
-                                          "can use change of status confirmation code")
-        end
-        result['data']['order'] = order_details_and_next_item(single_order)
-      end
-
-      #check if current user edit confirmation code is same as that entered
-    else
-      result['status'] &= false
-      result['error_messages'].push("Please specify confirmation code and order id to change order status")
-    end
-
-    return result
+    cos_conf_object = ScanPack::CosConfService.new(
+      [session, input, state, id]
+      )
+    cos_conf_object.run('cos_conf')
   end
 
   def product_edit_conf(input, state, id)
-    result = Hash.new
-    result['status'] = true
-    result['matched'] = false
-    result['error_messages'] = []
-    result['success_messages'] = []
-    result['notice_messages'] = []
-    result['data'] = Hash.new
-
-    if !id.nil? || !input.nil?
-      #check if order status is On Hold
-      single_order = Order.find(id)
-      if single_order.nil?
-        result['status'] &= false
-        result['error_messages'].push("Could not find order with id: "+id.to_s)
-      else
-        if single_order.status == "onhold" && single_order.has_inactive_or_new_products
-          if User.where(:confirmation_code => input).length > 0
-            user = User.where(:confirmation_code => input).first
-            if user.can? 'add_edit_products'
-              result['matched'] = true
-              result['data']['inactive_or_new_products'] = single_order.get_inactive_or_new_products
-              result['data']['next_state'] = 'scanpack.rfp.product_edit'
-              session[:product_edit_matched_for_current_user] = true
-              session[:product_edit_matched_for_products] = []
-              result['data']['inactive_or_new_products'].each do |inactive_new_product|
-                session[:product_edit_matched_for_products].push(inactive_new_product.id)
-              end
-              session[:product_edit_matched_for_order] = single_order.id
-            else
-              result['data']['next_state'] = 'scanpack.rfp.confirmation.product_edit'
-              result['matched'] = true
-              result['error_messages'].push("User with confirmation code "+ input +
-                                              " does not have permission for editing products.")
-            end
-          else
-            result['data']['next_state'] = 'scanpack.rfo'
-          end
-        else
-          result['status'] &= false
-          result['error_messages'].push("Only orders with status On Hold and has inactive or new products "+
-                                          "can use edit confirmation code.")
-        end
-        result['data']['order'] = order_details_and_next_item(single_order)
-      end
-
-      #check if current user edit confirmation code is same as that entered
-    else
-      result['status'] &= false
-      result['error_messages'].push("Please specify confirmation code and order id to confirm purchase code")
-    end
-    return result
+    product_edit_conf_object = ScanPack::ProductEditConfService.new(
+      [session, input, state, id]
+      )
+    product_edit_conf_object.run('product_edit_conf')
   end
 
-  def order_details_and_next_item(single_order)
-    single_order.reload
-    data = single_order.attributes
-    data['unscanned_items'] = single_order.get_unscanned_items
-    data['scanned_items'] = single_order.get_scanned_items
-    unless data['unscanned_items'].length == 0
-      unless session[:most_recent_scanned_products].nil?
-        session[:most_recent_scanned_products].reverse!.each do |scanned_product_id|
-          data['unscanned_items'].each do |unscanned_item|
-            if session[:parent_order_item] && session[:parent_order_item] == unscanned_item['order_item_id']
-              session[:parent_order_item] = false
-              if unscanned_item['product_type'] == 'individual' && !unscanned_item['child_items'].empty?
-                data['next_item'] = unscanned_item['child_items'].first.clone
-                break
-              end
-            elsif unscanned_item['product_type'] == 'single' &&
-              scanned_product_id == unscanned_item['product_id'] &&
-              unscanned_item['scanned_qty'] + unscanned_item['qty_remaining'] > 0
-              data['next_item'] = unscanned_item.clone
-              break
-            elsif unscanned_item['product_type'] == 'individual'
-              unscanned_item['child_items'].each do |child_item|
-                if child_item['product_id'] == scanned_product_id
-                  data['next_item'] = child_item.clone
-                  break
-                end
-              end
-              break if !data['next_item'].nil?
-            end
-          end
-          break if !data['next_item'].nil?
-        end
-      end
-      if data['next_item'].nil?
-        if data['unscanned_items'].first['product_type'] == 'single'
-          data['next_item'] = data['unscanned_items'].first.clone
-        elsif data['unscanned_items'].first['product_type'] == 'individual'
-          data['next_item'] = data['unscanned_items'].first['child_items'].first.clone unless data['unscanned_items'].first['child_items'].empty?
-        end
-      end
-      data['next_item']['qty'] = data['next_item']['scanned_qty'] + data['next_item']['qty_remaining']
-    end
+  # def order_details_and_next_item(single_order)
+  #   single_order.reload
+  #   data = single_order.attributes
+  #   data['unscanned_items'] = single_order.get_unscanned_items
+  #   data['scanned_items'] = single_order.get_scanned_items
+  #   unless data['unscanned_items'].length == 0
+  #     unless session[:most_recent_scanned_products].nil?
+  #       session[:most_recent_scanned_products].reverse!.each do |scanned_product_id|
+  #         data['unscanned_items'].each do |unscanned_item|
+  #           if session[:parent_order_item] && session[:parent_order_item] == unscanned_item['order_item_id']
+  #             session[:parent_order_item] = false
+  #             if unscanned_item['product_type'] == 'individual' && !unscanned_item['child_items'].empty?
+  #               data['next_item'] = unscanned_item['child_items'].first.clone
+  #               break
+  #             end
+  #           elsif unscanned_item['product_type'] == 'single' &&
+  #             scanned_product_id == unscanned_item['product_id'] &&
+  #             unscanned_item['scanned_qty'] + unscanned_item['qty_remaining'] > 0
+  #             data['next_item'] = unscanned_item.clone
+  #             break
+  #           elsif unscanned_item['product_type'] == 'individual'
+  #             unscanned_item['child_items'].each do |child_item|
+  #               if child_item['product_id'] == scanned_product_id
+  #                 data['next_item'] = child_item.clone
+  #                 break
+  #               end
+  #             end
+  #             break if !data['next_item'].nil?
+  #           end
+  #         end
+  #         break if !data['next_item'].nil?
+  #       end
+  #     end
+  #     if data['next_item'].nil?
+  #       if data['unscanned_items'].first['product_type'] == 'single'
+  #         data['next_item'] = data['unscanned_items'].first.clone
+  #       elsif data['unscanned_items'].first['product_type'] == 'individual'
+  #         data['next_item'] = data['unscanned_items'].first['child_items'].first.clone unless data['unscanned_items'].first['child_items'].empty?
+  #       end
+  #     end
+  #     data['next_item']['qty'] = data['next_item']['scanned_qty'] + data['next_item']['qty_remaining']
+  #   end
 
-    return data
-  end
+  #   return data
+  # end
 
   def barcode_found_or_special_code(barcode)
     confirmation_code = User.find_by_confirmation_code(barcode)
@@ -525,12 +267,12 @@ module ScanPackHelper
   #   @generate_barcode.save
   # end
 
-  # Remove those order_items that are skippable when the scanned barcode
-  # is SKIP entered as the barcode.
-  def remove_skippable_product item
-    order_item = OrderItem.find(item['order_item_id'])
-    order = order_item.order
-    order.order_items.delete(order_item)
-    order.save
-  end
+  # # Remove those order_items that are skippable when the scanned barcode
+  # # is SKIP entered as the barcode.
+  # def remove_skippable_product item
+  #   order_item = OrderItem.find(item['order_item_id'])
+  #   order = order_item.order
+  #   order.order_items.delete(order_item)
+  #   order.save
+  # end
 end

@@ -41,7 +41,8 @@
           e.preventDefault();
           validate_email();
           if (valid.email) {
-            url = 'http://admin.' + '<%=ENV["HOST_NAME"]%>' + '/subscriptions/select_plan?email=' +
+            var valid_host = '<%=ENV["HOST_NAME"]%>';
+            url = 'http://admin.' + valid_host + '/subscriptions/select_plan?email=' +
               $('#tenant_email').val() + '&shop_name=<%=@shop_name%>&shop_type=Shopify';
             window.location.href = url;
           }

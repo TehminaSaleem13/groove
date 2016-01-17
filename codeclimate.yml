@@ -1,0 +1,18 @@
+languages:
+  Ruby: true
+  JavaScript: true
+  PHP: true
+  Python: true
+exclude_paths:
+- "app/assets/javascripts/lib/textAngular-rangy.min.js"
+- "app/assets/javascripts/lib/ct-ui-router-extras.js"
+- "app/assets/javascripts/lib/angular-translate.js"
+- "app/assets/javascripts/lib/angular-hammer.js"
+- "app/assets/javascripts/lib/ZeroClipboard.js"
+- "app/assets/javascripts/groovepacks_common/moment.js"
+- "app/assets/javascripts/lib/textAngular.js"
+- "app/assets/javascripts/lib/textAngularSetup.js"
+- "app/assets/javascripts/lib/ui-router.js"
+- "app/assets/javascripts/lib/dragtable.js"
+- "app/assets/javascripts/lib/hotkeys.js"
+- "app/assets/javascripts/lib/textAngular-sanitize.js"

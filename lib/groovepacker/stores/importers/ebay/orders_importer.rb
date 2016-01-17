@@ -31,6 +31,8 @@ module Groovepacker
                 @ordercnt = 0
 
                 order_or_transactionArray.each do |order_transaction|
+                  import_item.reload
+                  break if import_item.status == 'cancelled'
                   #single line item order transaction
                   if !order_transaction.transaction.nil?
                     transactionID = order_transaction.transaction.transactionID

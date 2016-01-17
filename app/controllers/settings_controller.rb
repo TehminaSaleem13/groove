@@ -582,6 +582,9 @@ class SettingsController < ApplicationController
         general_setting.tracking_error_order_not_found = params[:tracking_error_order_not_found]
         general_setting.tracking_error_info_not_found = params[:tracking_error_info_not_found]
 
+        general_setting.custom_field_one = params[:custom_field_one]
+        general_setting.custom_field_two = params[:custom_field_two]
+
         if general_setting.save
           @result['success_messages'].push('Settings updated successfully.')
         else

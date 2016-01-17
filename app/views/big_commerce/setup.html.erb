@@ -41,7 +41,8 @@
           e.preventDefault();
           validate_email();
           if (valid.email) {
-            url = 'https://admin.' + '<%=ENV["HOST_NAME"]%>' + '/subscriptions/select_plan?email=' + encodeURIComponent($('#tenant_email').val()) + '&shop_name=<%=@shop_name%>&shop_type=BigCommerce';
+            var valid_host = '<%=ENV["HOST_NAME"]%>';
+            url = 'https://admin.' + valid_host + '/subscriptions/select_plan?email=' + encodeURIComponent($('#tenant_email').val()) + '&shop_name=<%=@shop_name%>&shop_type=BigCommerce';
             window.location.href = url;
           }
         });

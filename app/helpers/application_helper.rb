@@ -49,4 +49,40 @@ module ApplicationHelper
       ENV['ONE_TIME_PAYMENT']
     end
   end
+
+  def render_pdf(file_name)
+    render :pdf => file_name,
+           :template => 'orders/generate_pick_list',
+           :orientation => 'portrait',
+           :page_height => '8in',
+           :save_only => true,
+           :page_width => '11.5in',
+           :margin => {:top => '20', :bottom => '20', :left => '10', :right => '10'},
+           :header => {:spacing => 5, :right => '[page] of [topage]'},
+           :footer => {:spacing => 1},
+           :handlers => [:erb],
+           :formats => [:html],
+           :save_to_file => Rails.root.join('public', 'pdfs', "#{file_name}.pdf")
+  end
+
+  def current_tenant
+    Apartment::Tenant.current
+  end
+
+  def order_summary
+    OrderImportSummary.where(status: 'in_progress').first
+  end
+
+  def settings_to_generate_packing_slip
+    @page_height, @page_width = '11', '8.5'
+    
+    @page_height, @page_width = '6', '4' if GeneralSetting.get_packing_slip_size == '4 x 6'
+    
+    @size = GeneralSetting.get_packing_slip_size
+    @orientation = GeneralSetting.get_packing_slip_orientation
+    @result['data'] = { 'packing_slip_file_paths' => [] }
+    @page_height = (@page_height.to_f/2).to_s if @orientation == 'landscape'
+    @header = ''
+    @file_name = current_tenant+Time.now.strftime('%d_%b_%Y_%I__%M_%p')
+  end
 end

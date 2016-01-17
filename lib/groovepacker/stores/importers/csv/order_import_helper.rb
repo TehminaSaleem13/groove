@@ -71,7 +71,8 @@ module Groovepacker
           def create_order_map
             %w( address_1 address_2 city country customer_comments
                 notes_internal notes_toPacker email firstname increment_id
-                lastname method postcode sku state price tracking_num qty)
+                lastname method postcode sku state price tracking_num qty
+                custom_field_one custom_field_two)
           end
 
           def initialize_import_item

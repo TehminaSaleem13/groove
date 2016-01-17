@@ -13,7 +13,6 @@ module Groovepacker
             result = self.build_result
 
             response = client.orders
-
             result[:total_imported] =
               response["orders"].nil? ? 0 : response["orders"].length
 
@@ -27,7 +26,9 @@ module Groovepacker
 
             unless response["orders"].nil?
               response["orders"].each do |order|
-                import_item.current_increment_id = order["name"]
+                import_item.reload
+                break if import_item.status == 'cancelled'
+                import_item.current_increment_id = order["id"]
                 import_item.current_order_items = -1
                 import_item.current_order_imported_item = -1
                 import_item.save

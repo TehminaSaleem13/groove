@@ -3,7 +3,6 @@ groovepacks_controllers.
     function (scope, auth, product_data, load_page, product_id, hotkeys, $state, $stateParams, $modalInstance, $timeout, $modal, $q, groov_translator, products, warehouses, generalsettings, scanPack) {
       var myscope = {};
 
-
       /**
        * Public methods
        */
@@ -172,15 +171,15 @@ groovepacks_controllers.
           if (type == 'kit') {
             products.single.kit.add(scope.products, args.selected).then(function (response) {
               //console.log(response.data);
-              myscope.product_single_details(scope.products.single.basicinfo.id);
+              myscope.product_single_details(scope.products.single.basicinfo.id, true);
             });
           } else if (type == 'master_alias') {
             products.single.master_alias(scope.products, args.selected).then(function () {
-              myscope.product_single_details(scope.products.single.basicinfo.id);
+              myscope.product_single_details(scope.products.single.basicinfo.id, true);
             });
           } else {
             products.single.alias(scope.products, args.selected).then(function () {
-              myscope.product_single_details(args.selected[0]);
+              myscope.product_single_details(args.selected[0], true);
             });
           }
         }
@@ -238,7 +237,7 @@ groovepacks_controllers.
 
       scope.update_single_product = function (auto, post_fn) {
         //console.log(scope.products.single);
-        scope.products.single.post_fn = post_fn
+        scope.products.single.post_fn = post_fn;
         products.single.update(scope.products, auto).then(function () {
           myscope.product_single_details(scope.products.single.basicinfo.id);
         });
@@ -386,12 +385,32 @@ groovepacks_controllers.
          * private properties
          */
         scope._product_obj = null;
-        scope.arrayEditableOptions = {
+        scope.arraySkuEditableOptions = {
           array: true,
-          update: scope.update_single_product,
+          update: function() { scope.update_single_product(true, "sku") },
           class: '',
           sortableOptions: {
-            update: scope.update_single_product,
+            update: function() { scope.update_single_product(true, "sku") },
+            axis: 'x'
+          }
+        };
+
+        scope.arrayCatEditableOptions = {
+          array: true,
+          update: function() { scope.update_single_product(true, "category") },
+          class: '',
+          sortableOptions: {
+            update: function() { scope.update_single_product(true, "category") },
+            axis: 'x'
+          }
+        };
+
+        scope.arrayEditableOptions = {
+          array: true,
+          update: function() { scope.update_single_product(true, "barcode") },
+          class: '',
+          sortableOptions: {
+            update: function() { scope.update_single_product(true, "barcode") },
             axis: 'x'
           }
         };

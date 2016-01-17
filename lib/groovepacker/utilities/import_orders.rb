@@ -42,6 +42,8 @@ class ImportOrders
       if !@order_import_summary.nil? && !@order_import_summary.id.nil?
         import_items = @order_import_summary.import_items
         import_items.each do |import_item|
+          import_item.reload
+          next if import_item.status=="cancelled"
           import_orders_with_import_item(import_item, tenant)
         end
         @order_import_summary.reload
@@ -148,9 +150,10 @@ class ImportOrders
         context = Groovepacker::Stores::Context.new(
           Groovepacker::Stores::Handlers::AmazonHandler.new(store, import_item))
         result = context.import_orders
+        import_item.reload
         import_item.previous_imported = result[:previous_imported]
         import_item.success_imported = result[:success_imported]
-        if !result[:status]
+        if !result[:status] && import_item.status != 'cancelled'
           import_item.status = 'failed'
         else
           import_item.status = 'completed'
@@ -162,9 +165,10 @@ class ImportOrders
         context = Groovepacker::Stores::Context.new(
           Groovepacker::Stores::Handlers::EbayHandler.new(store, import_item))
         result = context.import_orders
+        import_item.reload
         import_item.previous_imported = result[:previous_imported]
         import_item.success_imported = result[:success_imported]
-        if !result[:status]
+        if !result[:status] && import_item.status != 'cancelled'
           import_item.status = 'failed'
         else
           import_item.status = 'completed'
@@ -176,9 +180,10 @@ class ImportOrders
         context = Groovepacker::Stores::Context.new(
           Groovepacker::Stores::Handlers::MagentoHandler.new(store, import_item))
         result = context.import_orders
+        import_item.reload
         import_item.previous_imported = result[:previous_imported]
         import_item.success_imported = result[:success_imported]
-        if !result[:status]
+        if !result[:status] && import_item.status != 'cancelled'
           import_item.status = 'failed'
         else
           import_item.status = 'completed'
@@ -190,9 +195,10 @@ class ImportOrders
         context = Groovepacker::Stores::Context.new(
           Groovepacker::Stores::Handlers::MagentoRestHandler.new(store, import_item))
         result = context.import_orders
+        import_item.reload
         import_item.previous_imported = result[:previous_imported]
         import_item.success_imported = result[:success_imported]
-        if !result[:status]
+        if !result[:status] && import_item.status != 'cancelled'
           import_item.status = 'failed'
         else
           import_item.status = 'completed'
@@ -204,9 +210,10 @@ class ImportOrders
         context = Groovepacker::Stores::Context.new(
           Groovepacker::Stores::Handlers::ShipstationHandler.new(store, import_item))
         result = context.import_orders
+        import_item.reload
         import_item.previous_imported = result[:previous_imported]
         import_item.success_imported = result[:success_imported]
-        if !result[:status]
+        if !result[:status] && import_item.status != 'cancelled'
           import_item.status = 'failed'
         else
           import_item.status = 'completed'
@@ -217,6 +224,23 @@ class ImportOrders
         import_item.save
         context = Groovepacker::Stores::Context.new(
           Groovepacker::Stores::Handlers::ShipstationRestHandler.new(store, import_item))
+        result = context.import_orders
+        import_item.reload
+        import_item.previous_imported = result[:previous_imported]
+        import_item.success_imported = result[:success_imported]
+        if import_item.status != 'cancelled'
+          if !result[:status] && import_item.status != 'cancelled'
+            import_item.status = 'failed'
+          else
+            import_item.status = 'completed'
+          end
+        end
+        import_item.save
+      elsif store_type == 'ShippingEasy'
+        import_item.status = 'in_progress'
+        import_item.save
+        context = Groovepacker::Stores::Context.new(
+          Groovepacker::Stores::Handlers::ShippingEasyHandler.new(store, import_item))
         result = context.import_orders
         import_item.reload
         import_item.previous_imported = result[:previous_imported]
@@ -241,7 +265,7 @@ class ImportOrders
           import_item.previous_imported = result[:previous_imported]
           import_item.success_imported = result[:success_imported]
           if import_item.status != 'cancelled'
-            if !result[:status]
+            if !result[:status] && import_item.status != 'cancelled'
               import_item.status = 'failed'
             else
               import_item.status = 'completed'

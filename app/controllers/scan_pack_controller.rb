@@ -258,7 +258,7 @@ class ScanPackController < ApplicationController
     @result['success_messages'] = []
     @result['notice_messages'] = []
     @result['data'] = Hash.new
-    if params[:id].nil? || params[:count].nil? || params[:next_item].nil?
+    if params[:id].nil? || params[:count].to_i < 1 || params[:next_item].nil?
       @result['status'] &= false
       @result['error_messages'].push('Order id, Item id and Type-in count are required')
     else
@@ -282,9 +282,9 @@ class ScanPackController < ApplicationController
           @result['status'] &= false
           @result['error_messages'].push('Item doesnt belong to current order')
         else
-          if params[:count] == params[:next_item][:qty]
+          if params[:count] <= params[:next_item][:qty]
             unless params[:next_item][:barcodes].blank? || params[:next_item][:barcodes][0].blank? || params[:next_item][:barcodes][0][:barcode].blank?
-              (1..params[:next_item][:qty_remaining]).each do
+              (1..params[:count]).each do
                 @result['data'] = product_scan(params[:next_item][:barcodes][0][:barcode], 'scanpack.rfp.default', params[:id], false)
               end
               @order.addactivity('Type-In count Scanned for product'+params[:next_item][:sku].to_s, current_user.username)

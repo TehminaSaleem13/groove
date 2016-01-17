@@ -329,6 +329,27 @@
                         class="span8" rows="4"></textarea>
             </div>
           </div>
+
+          <div class="form-group">
+            <label class="control-label col-sm-3">{{translations.labels.custom_field_one}}</label>
+
+            <div class="controls col-sm-7">
+              <input type="text" class="form-control input-style"
+                     ng-model="general_settings.single.custom_field_one"
+                     placeholder="{{translations.labels.custom_field_one}}" ng-blur="update_settings()"/>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="control-label col-sm-3">{{translations.labels.custom_field_two}}</label>
+
+            <div class="controls col-sm-7">
+              <input type="text" class="form-control input-style"
+                     ng-model="general_settings.single.custom_field_two"
+                     placeholder="{{translations.labels.custom_field_two}}" ng-blur="update_settings()"/>
+            </div>
+          </div>
+
           <div class="form-group">
             <label class="control-label col-sm-3">Product Weight Units: </label>
 

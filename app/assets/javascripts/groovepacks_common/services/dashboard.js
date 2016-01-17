@@ -59,6 +59,19 @@ groovepacks_services.factory('dashboard', ['$http', 'notification', function ($h
     );
   }
 
+  var get_dashboard_data = function() {
+    console.log('get_dashboard_data');
+    tenant = document.getElementById('current_tenant').value
+    console.log(tenant);
+    domain = document.getElementById('domain').value
+    console.log(domain)
+    return (
+      $http.get('http://' + tenant + 'stat.' + domain +'/dashboard/calculate').error(function(response){
+        notification.notify("Failed to load dashboard data", 0);
+      })
+    )
+  }
+
   return {
     model: {
       get: get_default
@@ -69,7 +82,8 @@ groovepacks_services.factory('dashboard', ['$http', 'notification', function ($h
       packing_speed_stats: packing_speed_stats,
       main_summary: main_summary,
       exceptions: exceptions,
-      leader_board: leader_board
+      leader_board: leader_board,
+      dashboard_stat: get_dashboard_data
     }
   };
 }]);

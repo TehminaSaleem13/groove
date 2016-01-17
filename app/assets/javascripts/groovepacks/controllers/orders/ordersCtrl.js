@@ -411,6 +411,23 @@ groovepacks_controllers.
           }
         };
 
+        if(custom_fields.length >= 1){
+          if(custom_fields[0] && custom_fields[0].match(/\w+/)){
+            $scope.gridOptions.all_fields.custom_field_one = {
+              name: custom_fields[0],
+              hidden: true,
+              enable_edit: true
+            }
+          }
+          if(custom_fields[1] && custom_fields[1].match(/\w+/)){
+            $scope.gridOptions.all_fields.custom_field_two = {
+              name: custom_fields[1],
+              hidden: true,
+              enable_edit: true
+            }
+          }
+        }
+
 
         $scope.$watch('orders.setup.search', function () {
           if ($scope.orders.setup.select_all) {

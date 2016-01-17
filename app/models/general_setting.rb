@@ -5,7 +5,7 @@ class GeneralSetting < ActiveRecord::Base
                   :scheduled_order_import, :tracking_error_order_not_found, :tracking_error_info_not_found, :product_weight_format,
                   :packing_slip_size, :packing_slip_orientation, :time_to_import_orders, :time_to_send_email, :import_orders_on_mon,
                   :import_orders_on_tue, :import_orders_on_wed, :import_orders_on_thurs, :import_orders_on_fri, :import_orders_on_sat,
-                  :import_orders_on_sun
+                  :import_orders_on_sun, :custom_field_one, :custom_field_two
 
   validates_format_of :email_address_for_packer_notes, with: Devise.email_regexp, allow_blank: true
 
@@ -13,6 +13,14 @@ class GeneralSetting < ActiveRecord::Base
   after_save :scheduled_import
   after_update :inventory_state_change_check
   @@all_tenants_settings = {}
+
+  def self.get_custom_fields
+    GeneralSetting.all.first.as_json(
+      only: [
+        :custom_field_one, :custom_field_two
+        ]
+    ).try(:values).try(:compact)
+  end
 
   def self.setting
     if @@all_tenants_settings.nil?

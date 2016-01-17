@@ -16,14 +16,14 @@ module Groovepacker
           fetch_orders(status, start_date)
         end
 
-        def get_tracking_number(orderNumber)
+        def get_tracking_number(orderId)
           tracking_number = nil
-          unless orderNumber.nil?
-            order_number_param = '&orderNumber=' + orderNumber.to_s
-            Rails.logger.info "Getting shipment with number: #{orderNumber}"
+          unless orderId.nil?
+            order_number_param = '&orderId=' + orderId.to_s
+            Rails.logger.info "Getting shipment with order Id: #{orderId}"
             response = @service.query("/Shipments/List?" \
               'page=1&pageSize=100' + URI.encode(order_number_param), nil, "get")
-            tracking_number = handle_shipment_response(response, orderNumber)
+            tracking_number = handle_shipment_response(response, orderId)
           end
           tracking_number
         end
@@ -93,16 +93,15 @@ module Groovepacker
           end
         end
 
-        def handle_shipment_response(response, order_num)
+        def handle_shipment_response(response, orderId)
           tracking_number = nil
-          unless response.parsed_response['shipments'].nil? ||
-                 response.parsed_response['shipments'].empty?
-            response.parsed_response['shipments'].each do |s|
-              next if s['trackingNumber'].nil? || s['orderNumber'] != order_num
-              tracking_number = s['trackingNumber']
-              break
-            end
+          return tracking_number if response.parsed_response['shipments'].blank?
+          response.parsed_response['shipments'].each do |s|
+            next if s['orderId'].nil? || s['orderId'] != orderId
+            tracking_number = s['trackingNumber']
+            break
           end
+          
           tracking_number
         end
 

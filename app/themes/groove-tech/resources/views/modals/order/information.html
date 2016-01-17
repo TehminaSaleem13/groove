@@ -43,6 +43,12 @@
           <input class="form-control input-style" type="text" ng-model="orders.single.basicinfo.state"
                  ng-blur="update_single_order()"/>
         </div>
+        <div class="form-group col-sm-12"
+              ng-show="general_settings.single.custom_field_one">
+          <label class="control-label">{{general_settings.single.custom_field_one}}</label>
+          <input class="form-control input-style" type="text" ng-model="orders.single.basicinfo.custom_field_one"
+                 ng-blur="update_single_order()"/>
+        </div>
 
       </div>
       <div class="col-sm-6 container-fluid">
@@ -101,6 +107,13 @@
           <label class="control-label">Country</label>
           <input class="form-control input-style" type="text"
                  ng-model="orders.single.basicinfo.country"
+                 ng-blur="update_single_order()"/>
+        </div>
+        <div class="form-group col-sm-12" 
+              ng-show="general_settings.single.custom_field_two">
+          <label class="control-label">{{general_settings.single.custom_field_two}}</label>
+          <input class="form-control input-style" type="text"
+                 ng-model="orders.single.basicinfo.custom_field_two"
                  ng-blur="update_single_order()"/>
         </div>
       </div>

@@ -359,6 +359,27 @@ class StoresController < ApplicationController
               @result['messages'] = [e.message]
             end
           end
+          if @store.store_type == 'ShippingEasy'
+            @shippingeasy = @store.shipping_easy_credential || @store.create_shipping_easy_credential
+            new_record = true unless @shippingeasy.persisted?
+
+            @shippingeasy.attributes = {  api_key: params[:api_key],
+                                          api_secret: params[:api_secret],
+                                          import_ready_for_shipment: params[:import_ready_for_shipment],
+                                          import_shipped: params[:import_shipped],
+                                          gen_barcode_from_sku: params[:gen_barcode_from_sku]
+                                        }
+            @shippingeasy.save
+            begin
+              @store.save!
+            rescue ActiveRecord::RecordInvalid => e
+              @result['status'] = false
+              @result['messages'] = [@store.errors.full_messages, @store.shipping_easy_credential.errors.full_messages]
+            rescue ActiveRecord::StatementInvalid => e
+              @result['status'] = false
+              @result['messages'] = [e.message]
+            end
+          end
 
           if @store.store_type == 'Shipworks'
             @shipworks = ShipworksCredential.find_by_store_id(@store.id)
@@ -518,6 +539,7 @@ class StoresController < ApplicationController
     @result = Hash.new
     @result["status"] = true
     @result["messages"] = []
+    general_settings = GeneralSetting.all.first
 
     if !params[:id].nil?
       @store = Store.find(params[:id])
@@ -593,7 +615,9 @@ class StoresController < ApplicationController
               {value: 'secondary_sku', name: 'SKU 2'},
               {value: 'tertiary_sku', name: 'SKU 3'},
               {value: 'secondary_barcode', name: 'Barcode 2'},
-              {value: 'tertiary_barcode', name: 'Barcode 3'}
+              {value: 'tertiary_barcode', name: 'Barcode 3'},
+              {value: 'custom_field_one', name: general_settings.custom_field_one},
+              {value: 'custom_field_two', name: general_settings.custom_field_two}
             ]
             
             if csv_map.order_csv_map.nil?

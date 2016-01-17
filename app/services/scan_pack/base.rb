@@ -2,6 +2,11 @@ module ScanPack
   class Base
     include ScanPack::Utilities::OrderDetailsAndNextItem
 
+    def set_error_messages(error_message)
+      @result['status'] &= false
+      @result['error_messages'].push(error_message)
+    end
+
     def can_order_be_scanned
       #result = false
       #max_shipments = AccessRestriction.order("created_at").last.num_shipments
@@ -23,8 +28,7 @@ module ScanPack
     end
 
     def generate_packing_slip(order)
-      result = Hash.new
-      result['status'] = false
+      @result['status'] = false
 
       do_setup_page_properties
 
@@ -35,7 +39,11 @@ module ScanPack
       if @single_order.present?
         orders.push({id: @single_order.id, increment_id: @single_order.increment_id})
       end
-      do_generate_barcode_with_delayed_job(orders) unless orders.empty?
+      unless orders.empty?
+        do_generate_barcode_with_delayed_job(orders, result)
+      else
+        @result['notice_messages'].push('No Orders Found')
+      end
     end
 
     def do_setup_page_properties
@@ -72,7 +80,7 @@ module ScanPack
       delayed_job = GeneratePackingSlipPdf.delay(:run_at => 1.seconds.from_now).generate_packing_slip_pdf(orders, Apartment::Tenant.current, @slip_data_hash, @page_height, @page_width, @orientation, @file_name, @size, @header, generate_barcode.id)
       generate_barcode.delayed_job_id = delayed_job.id
       generate_barcode.save
-      result['status'] = true
+      @result['status'] = true
     end
     #---------------- Bar Code slip Ends here ---------------
 
