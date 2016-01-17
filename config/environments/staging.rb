@@ -113,10 +113,6 @@ Groovepacks::Application.configure do
 
   if Socket.gethostname=="Refactoring-Test-server-GP"
     ENV["SHOPIFY_REDIRECT_HOST"] = "groove-packer.com"
-<<<<<<< HEAD
-=======
-    ENV['BC_CALLBACK_HOST'] = "admin.groove-packer.com"
->>>>>>> origin/production
     ENV['BC_CLIENT_ID'] = "aglrh9kae1bmr4ycwy922ag8z8h6lde"
     ENV['BC_CLIENT_SECRET'] = "s58qbf72e6jpd2lqr4vvmcnu4s10xdi"
     ENV['BC_APP_URL'] = "https://store-1pslcuh.mybigcommerce.com/manage/marketplace/apps/5736"
@@ -124,10 +120,6 @@ Groovepacks::Application.configure do
     ENV["SITE_HOST"] = "groove-packer.com"
   else
     ENV["SHOPIFY_REDIRECT_HOST"] = "barcodepacker.com"
-<<<<<<< HEAD
-=======
-    ENV['BC_CALLBACK_HOST'] = "admin.barcodepacker.com"
->>>>>>> origin/production
     ENV['BC_CLIENT_ID'] = "as4fwmwmb2n3w2yolabja7yv9weumoj"
     ENV['BC_CLIENT_SECRET'] = "15a94s1mhhczf79v2lpj79btw443u3w"
     ENV['BC_APP_URL'] = "https://store-1pslcuh.mybigcommerce.com/manage/marketplace/apps/4907"
@@ -148,12 +140,8 @@ Groovepacks::Application.configure do
 
   #Feature Variables
   ENV['DASHBOARD_ENABLE'] = 'YES'
-<<<<<<< HEAD
-
   ENV["SITE_HOST"] = "barcodepacker.com"
-
   # analytic server
   ENV["GROOV_ANALYTIC"] = "lockpeppa.com"
-=======
->>>>>>> origin/production
+
 end

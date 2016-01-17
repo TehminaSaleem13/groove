@@ -397,8 +397,6 @@ groovepacks_controllers.
             axis: 'x'
           }
         };
-
-<<<<<<< HEAD
         scope.arrayCatEditableOptions = {
           array: true,
           update: function() { scope.update_single_product(true, "category") },
@@ -408,9 +406,6 @@ groovepacks_controllers.
             axis: 'x'
           }
         };
-
-=======
->>>>>>> origin/production
         scope.arrayEditableOptions = {
           array: true,
           update: function() { scope.update_single_product(true, "barcode") },

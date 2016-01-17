@@ -18,20 +18,13 @@ module Groovepacker
             update_import_item_obj_values
             
             response["orders"].each do |order|
-<<<<<<< HEAD
               @import_item.reload
               break if @import_item.status == 'cancelled'
-=======
->>>>>>> origin/production
               import_single_order(order)
               increase_import_count
             end
-            
-<<<<<<< HEAD
+
             @credential.update_attributes(last_imported_at: importing_time) if @result[:status] && @import_item.status != 'cancelled'
-=======
-            @credential.update_attributes(last_imported_at: importing_time) if @result[:status]
->>>>>>> origin/production
             @result
           end
 
@@ -44,12 +37,8 @@ module Groovepacker
               shiping_easy_order = Order.find_by_increment_id(order["external_order_identifier"])
               shiping_easy_order ||= Order.new
 
-<<<<<<< HEAD
               return if shiping_easy_order.persisted? and shiping_easy_order.status=="scanned"
               shiping_easy_order.order_items.destroy_all
-=======
-              return if shiping_easy_order.persisted?
->>>>>>> origin/production
               shiping_easy_order.store_id = @credential.store_id
 
               import_order(shiping_easy_order, order)
