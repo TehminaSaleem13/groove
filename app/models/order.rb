@@ -105,14 +105,16 @@ class Order < ActiveRecord::Base
     # Groovepacker::Dashboard::Stats::LeaderBoardStats.new.
     #   compute_leader_board_for_order_item_count(
     #     self.order_items.count)
-    # unless ENV['RAILS_ENV'] == 'test'
-    #   stat_stream_obj =
-    #    Groovepacker::Dashboard::Stats::AnalyticStatStream.new()
-    #  stat_stream = stat_stream_obj.build_stream(self)
-    #  HTTParty.post("#{ENV["GROOV_ANALYTIC"]}/dashboard",
-    #    query: {tenant_name: Apartment::Tenant.current},
-    #    body: stat_stream)
-    # end
+    unless ENV['RAILS_ENV'] == 'test'
+    stat_stream_obj =
+       Groovepacker::Dashboard::Stats::AnalyticStatStream.new()
+     stat_stream = stat_stream_obj.build_stream(self)
+     tenant = Apartment::Tenant.current
+     HTTParty.post("http://#{tenant}stat.#{ENV["GROOV_ANALYTIC"]}/dashboard",
+       query: {tenant_name: tenant},
+       body: stat_stream.to_json,
+       headers: { 'Content-Type' => 'application/json' })
+    end
   end
 
   def has_inactive_or_new_products
