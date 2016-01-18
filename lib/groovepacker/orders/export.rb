@@ -47,7 +47,7 @@ module Groovepacker
 
         def add_item_in_items_list(order, single_item, item, type=nil)
           @product = type=="kit_item" ? item.option_product : item
-          @item_quantity = type=="kit_item" ? kit_item.qty*single_item.qty : single_item.qty
+          @item_quantity = type=="kit_item" ? item.qty*single_item.qty : single_item.qty
 
           product_sku = @product.product_skus.order("product_skus.order ASC").first
           return if product_sku.nil?
@@ -59,7 +59,7 @@ module Groovepacker
             @items_list[product_sku.sku][:quantity] = @items_list[product_sku.sku][:quantity] + @item_quantity
           else
             single_row_list = fetch_single_row(order, product_sku)
-            push_item_row(single_row_list)
+            push_item_row(single_row_list, product_sku)
           end
         end
 
@@ -100,7 +100,7 @@ module Groovepacker
           single_row_list
         end
 
-        def push_item_row(single_row_list)
+        def push_item_row(single_row_list, product_sku)
           if @general_settings.export_items == 'by_sku'
             @items_list[product_sku.sku] = single_row_list
           else
