@@ -70,7 +70,7 @@ module ScanPackHelper
   end
 
   def scan_verifying(input, state, id)
-    scan_verifying_object = ScanPack::ScanVeryfingService.new(
+    scan_verifying_object = ScanPack::ScanVerifyingService.new(
       [current_user, input, id]
       )
     scan_verifying_object.run
