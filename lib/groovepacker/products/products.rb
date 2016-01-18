@@ -16,23 +16,7 @@ module Groovepacker
 	      return @result
 	    end
 	    @product.reload
-	    
-	    #Update Location
-	    update_product_location
-	    #Update Basic Info
-	    update_product_basic_info
-	    #Update Inventory Info
-	    update_inventory_info rescue
-	    #Update product status and also update the containing kit and orders
-	    updatelist(@product, 'status', @params[:basicinfo][:status]) unless @params[:basicinfo][:status].nil?
-	    #Update product category, sku and barcode
-	    update_category_sku_barcode
-	    #Update or update product images
-	    create_or_update_product_images
-	    #if product is a kit, update product_kit_skus
-	    update_product_kit_skus
-	    
-	    @product.reload
+	    @result = update_product_and_associated_info
 	    @product.update_product_status
 	    return @result
       end
@@ -41,6 +25,17 @@ module Groovepacker
         def general_setting
           @general_settings ||= GeneralSetting.all.first
         end
+
+        def update_product_and_associated_info
+	      update_product_basic_info #Update Basic Info
+	      update_product_location #Update Location
+	      update_inventory_info rescue #Update Inventory Info
+	      updatelist(@product, 'status', @params[:basicinfo][:status]) unless @params[:basicinfo][:status].nil? #Update product status and also update the containing kit and orders
+	      update_category_sku_barcode #Update product category, sku and barcode
+	      create_or_update_product_images #Update or update product images
+	      update_product_kit_skus #if product is a kit, update product_kit_skus
+	      @product.reload
+	    end
 
         def update_category_sku_barcode
 	      return if @params['post_fn'].blank?
@@ -136,37 +131,45 @@ module Groovepacker
           #check if a product sku is defined.
           product_skus = ProductSku.where(:product_id => @product.id)
           @result = destroy_object_if_not_defined(product_skus, @params[:skus])
-
           (@params[:skus]||[]).each_with_index do |sku, index|
-            if sku["id"].present?
-              status = @product.create_or_update_productsku(sku, index)
-            elsif sku["sku"].present? && ProductSku.where(:sku => sku["sku"]).blank?
-              status = @product.create_or_update_productsku(sku, index, 'new')
-            elsif sku["sku"].present?
-              @result['status'] &= false
-              @result['message'] = "Sku "+sku["sku"]+" already exists"
-            end
+            status = create_or_update_single_sku(sku, index, true)
             @result['status'] &= status
           end
         end
+
+        def create_or_update_single_sku(sku, index, status)
+	      if sku["id"].present?
+            status = @product.create_or_update_productsku(sku, index)
+          elsif sku["sku"].present? && ProductSku.where(:sku => sku["sku"]).blank?
+            status = @product.create_or_update_productsku(sku, index, 'new')
+          elsif sku["sku"].present?
+            @result['status'] &= false
+            @result['message'] = "Sku "+sku["sku"]+" already exists"
+          end
+	      return status
+	    end
         
-        def create_or_update_product_barcode(status = true)
+        def create_or_update_product_barcode
           #Update product barcodes
 	      #check if a product barcode is defined.
 	      product_barcodes = ProductBarcode.where(:product_id => @product.id)
 	      @result = destroy_object_if_not_defined(product_barcodes, @params[:barcodes])
-	      
 	      (@params[:barcodes]||[]).each_with_index do |barcode, index|
-            if barcode["id"].present?
-	          status = @product.create_or_update_productbarcode(barcode, index)
-	        elsif barcode["barcode"].present? && ProductBarcode.where(:barcode => barcode["barcode"]).blank?
-	          status = @product.create_or_update_productbarcode(barcode, index, 'new')
-	        elsif barcode["barcode"].present?
-	          @result['status'] &= false
-	          @result['message'] = "Barcode "+barcode["barcode"]+" already exists"
-	        end
+            status = create_or_update_single_barcode(barcode, index, true)
 	        @result['status'] &= status
 	      end
+	    end
+
+	    def create_or_update_single_barcode(barcode, index, status)
+	      if barcode["id"].present?
+	        status = @product.create_or_update_productbarcode(barcode, index)
+	      elsif barcode["barcode"].present? && ProductBarcode.where(:barcode => barcode["barcode"]).blank?
+	        status = @product.create_or_update_productbarcode(barcode, index, 'new')
+	      elsif barcode["barcode"].present?
+	        @result['status'] &= false
+	        @result['message'] = "Barcode "+barcode["barcode"]+" already exists"
+	      end
+	      return status
 	    end
 
 	    def create_or_update_product_images
