@@ -33,8 +33,10 @@ module Groovepacker
               #   result[:exception_description] = exception.description
               #   result[:exception_reason] = exception.reason
               # end
-              result = build_stream(order.id)
-              stat_stream.push(result)
+              if !order.order_increment_id.nil? && !order.scanned_on.nil?
+                result = build_stream(order.id)
+                stat_stream.push(result)
+              end
             end
           rescue Exception => e
             puts e.message

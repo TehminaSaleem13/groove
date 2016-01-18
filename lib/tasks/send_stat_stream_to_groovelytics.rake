@@ -18,7 +18,8 @@ namespace :cssa do
             HTTParty.post("http://#{tenant.name}stat.#{ENV["GROOV_ANALYTIC"]}/dashboard",
               query: {tenant_name: tenant.name},
               debug_output: $stdout,
-              body: stat_stream_hash)
+              body: stat_stream_hash.to_json,
+              headers: { 'Content-Type' => 'application/json' })
           end
         end
       rescue Exception => e
