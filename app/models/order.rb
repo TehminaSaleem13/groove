@@ -108,7 +108,7 @@ class Order < ActiveRecord::Base
     unless ENV['RAILS_ENV'] == 'test'
     stat_stream_obj =
        Groovepacker::Dashboard::Stats::AnalyticStatStream.new()
-     stat_stream = stat_stream_obj.build_stream(self)
+     stat_stream = stat_stream_obj.build_stream(self.id)
      tenant = Apartment::Tenant.current
      HTTParty.post("http://#{tenant}stat.#{ENV["GROOV_ANALYTIC"]}/dashboard",
        query: {tenant_name: tenant},
