@@ -16,7 +16,7 @@ module Groovepacker
           return @result
         end
         @product.reload
-        @result = update_product_and_associated_info
+        @product = update_product_and_associated_info
         @product.update_product_status
         return @result
       end
@@ -144,7 +144,7 @@ module Groovepacker
           elsif sku["sku"].present? && ProductSku.where(:sku => sku["sku"]).blank?
             status = @product.create_or_update_productsku(sku, index, 'new')
           elsif sku["sku"].present?
-            @result['status'] &= false
+            @result['status'] = false
             @result['message'] = "Sku "+sku["sku"]+" already exists"
           end
           return status
@@ -160,13 +160,15 @@ module Groovepacker
         end
 
         def create_or_update_single_barcode(barcode, index, status)
-          if barcode["id"].present?
+          case true
+          when barcode["id"].present?
             status = @product.create_or_update_productbarcode(barcode, index)
-          elsif barcode["barcode"].present? && ProductBarcode.where(:barcode => barcode["barcode"]).blank?
+          when barcode["barcode"].present? && ProductBarcode.where(:barcode => barcode["barcode"]).blank?
             status = @product.create_or_update_productbarcode(barcode, index, 'new')
-          elsif barcode["barcode"].present?
-            @result['status'] &= false
-            @result['message'] = "Barcode "+barcode["barcode"]+" already exists"
+          when barcode["barcode"].present?
+            @result['status'] = false
+            @result['message'] = "Barcode #{barcode['barcode']} already exists"
+            status = false
           end
           return status
         end
