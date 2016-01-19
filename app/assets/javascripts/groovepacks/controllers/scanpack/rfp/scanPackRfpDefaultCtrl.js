@@ -76,16 +76,21 @@ groovepacks_controllers.
             },
             confirm: function () {
               return $scope.handle_scan_return;
+            },
+            scan_happend: function(){
+              return myscope.click_scan_happend || scanPack.input_scan_happend;
             }
           }
         });
         myscope.type_scan_obj.result.finally(function () {
           $scope.set('input', '');
+          myscope.click_scan_happend = scanPack.input_scan_happend = false;
           $timeout($scope.focus_search, 500);
         });
       };
 
       myscope.do_autoscan = function () {
+        myscope.click_scan_happend = true;
         myscope.last_scanned_barcode = $scope.data.order.next_item.barcodes[0].barcode;
         scanPack.click_scan($scope.data.order.next_item.barcodes[0].barcode, $scope.data.order.id).success($scope.handle_scan_return);
       };
@@ -304,7 +309,21 @@ groovepacks_controllers.
           }
         }
 
+        myscope.arrange_unscanned_items();
+
       };
+
+      myscope.arrange_unscanned_items = function () {
+        next_item_index = 0;
+        for (var i = $scope.data.order.unscanned_items.length - 1; i >= 0; i--) {
+          if($scope.data.order.unscanned_items[i].sku == $scope.data.order.next_item.sku){
+            next_item_index = i;
+          };
+        };
+        first_item = $scope.data.order.unscanned_items[0];
+        $scope.data.order.unscanned_items[0] = $scope.data.order.unscanned_items[next_item_index];
+        $scope.data.order.unscanned_items[next_item_index] = first_item;
+      }
 
       myscope.handle_known_codes = function () {
         if ($scope.scan_pack.settings.note_from_packer_code_enabled && $scope.data.input == $scope.scan_pack.settings.note_from_packer_code) {
