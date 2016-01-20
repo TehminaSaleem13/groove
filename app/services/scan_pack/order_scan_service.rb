@@ -47,7 +47,9 @@ module ScanPack
     end
 
     def collect_orders
-      @orders = Order.where(['increment_id = ? or non_hyphen_increment_id =?', @input, @input])
+      @orders = Order.where(
+        "increment_id LIKE '#{@input}%' or non_hyphen_increment_id LIKE '#{@input}%'"
+        )
       if @orders.length == 0 && @scanpack_settings.scan_by_tracking_number
         @orders = Order.where(
           'tracking_num = ? or ? LIKE CONCAT("%",tracking_num,"%") ',
