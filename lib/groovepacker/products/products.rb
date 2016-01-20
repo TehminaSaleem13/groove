@@ -29,7 +29,7 @@ module Groovepacker
         def update_product_and_associated_info
           update_product_basic_info #Update Basic Info
           update_product_location #Update Location
-          update_inventory_info rescue #Update Inventory Info
+          update_inventory_info rescue nil#Update Inventory Info
           updatelist(@product, 'status', @params[:basicinfo][:status]) unless @params[:basicinfo][:status].nil? #Update product status and also update the containing kit and orders
           update_category_sku_barcode #Update product category, sku and barcode
           create_or_update_product_images #Update or update product images
