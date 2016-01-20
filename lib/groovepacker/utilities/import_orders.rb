@@ -1,4 +1,4 @@
-class ImportOrders < Base
+class ImportOrders < Groovepacker::Utilities::Base
   include Connection
   
   def import_orders(tenant)
