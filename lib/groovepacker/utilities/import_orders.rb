@@ -1,389 +1,186 @@
-class ImportOrders
+class ImportOrders < Base
+  include Connection
+  
   def import_orders(tenant)
     Apartment::Tenant.switch(tenant)
-    result = Hash.new
     # we will remove all the jobs pertaining to import which are not started
-
     # we will also remove all the import summary which are not started.
-    if OrderImportSummary.where(status: 'in_progress').empty?
-      order_import_summaries = OrderImportSummary.where(status: 'not_started')
-      if !order_import_summaries.empty?
-        ordered_import_summaries = order_import_summaries.order('updated_at' + ' ' + 'desc')
-        ordered_import_summaries.each do |order_import_summary|
-          if order_import_summary == ordered_import_summaries.first
-            order_import_summary.status = 'in_progress'
-            order_import_summary.save
-            # add import item for each store
-            stores = Store.where("status = '1' AND store_type != 'system' AND store_type != 'Shipworks'")
-            if stores.length != 0
-              stores.each do |store|
-                imp_items = ImportItem.where('store_id = ? AND order_import_summary_id IS NOT NULL', store.id)
-                if store.store_type == 'CSV' && store.ftp_credential && store.ftp_credential.use_ftp_import == false
-                  if imp_items.empty?
-                    import_item = new_import_item(store.id, order_import_summary.id,nil,'CSV Importers Ready. FTP Order Import Is Off')
-                  elsif !imp_items.where("status = 'failed'").empty?
-                    imp_items.delete_all
-                    import_item = new_import_item(store.id, order_import_summary.id,nil, 'FTP Order Import Is Off')
-                  end
-                else
-                  imp_items.delete_all
-                  import_item = new_import_item(store.id, order_import_summary.id, 'not_started', nil)
-                end
-              end
-            end
-            @order_import_summary = order_import_summary
-          elsif order_import_summary.status != 'in_progress'
-            order_import_summary.delete
-          end
-        end
-      end
-      OrderImportSummary.where(status: 'completed').delete_all
-      OrderImportSummary.where(status: 'cancelled').delete_all
-      if !@order_import_summary.nil? && !@order_import_summary.id.nil?
-        import_items = @order_import_summary.import_items
-        import_items.each do |import_item|
-          import_item.reload
-          next if import_item.status=="cancelled"
-          import_orders_with_import_item(import_item, tenant)
-        end
-        @order_import_summary.reload
-        if @order_import_summary.status != 'cancelled'
-          @order_import_summary.status = 'completed'
-          @order_import_summary.save
-        end
-      end
-    end
-    result
+    @order_import_summary = get_order_import_summary
+    return if @order_import_summary.nil?
+    # add import item for each store
+    stores = Store.where("status = '1' AND store_type != 'system' AND store_type != 'Shipworks'")
+    stores.each { |store| add_import_item_for_active_stores(store) } unless stores.blank?
+    order_import_summaries.where("status!='in_progress' and id!=?", @order_import_summary.id).destroy_all
+    initiate_import(tenant)
   end
 
-  def init_import(tenant)
-    Apartment::Tenant.switch(tenant)
+  def add_import_item_for_active_stores(store)
+    imp_items = ImportItem.where('store_id = ? AND order_import_summary_id IS NOT NULL', store.id)
+    unless store.store_type == 'CSV' && store.ftp_credential && store.ftp_credential.use_ftp_import == false
+      imp_items.delete_all
+      new_import_item(store.id, nil, 'not_started')
+      return
+    end
+    if imp_items.empty?
+      new_import_item(store.id, 'CSV Importers Ready. FTP Order Import Is Off')
+    elsif imp_items.where("status = 'failed'").present?
+      imp_items.delete_all
+      new_import_item(store.id, 'FTP Order Import Is Off')
+    end
+  end
+
+  def initiate_import(tenant)
+    #delete existing completed and cancelled order import summaries
+    delete_existing_order_import_summaries
+    return if @order_import_summary.nil? || @order_import_summary.id.nil?
+    @order_import_summary.import_items.each do |import_item|
+      import_item.reload
+      next if import_item.status=="cancelled"
+      import_orders_with_import_item(import_item, tenant)
+    end
+    update_import_summary
+  end
+
+  def update_import_summary
+    @order_import_summary.reload
+    return if @order_import_summary.status == 'cancelled'
+    @order_import_summary.update_attributes(status: 'completed')
   end
 
   # params should have hash of tenant, store, import_type = 'regular', user
-  def import_order_by_store(params)
-    result = {
-      status: true,
-      messages: []
-    }
-    tenant = params[:tenant]
-    store = params[:store]
-    import_type = params[:import_type]
-    user = params[:user]
-    Apartment::Tenant.switch(tenant)
+  def import_order_by_store(params, result = {})
+    Apartment::Tenant.switch(params[:tenant])
     if OrderImportSummary.where(status: 'in_progress').empty?
-      #delete existing order import summary
-      OrderImportSummary.where(status: 'completed').delete_all
-      OrderImportSummary.where(status: 'cancelled').delete_all
+      #delete existing completed and cancelled order import summaries
+      delete_existing_order_import_summaries
       #add a new import summary
-      import_summary = OrderImportSummary.create(
-        user: user,
-        status: 'not_started'
-      )
-
+      import_summary = OrderImportSummary.create( user: params[:user], status: 'not_started' )
       #add import item for the store
-      import_summary.import_items.create(
-        store: store,
-        import_type: import_type
-      )
-
-      #start importing using delayed job
-      Delayed::Job.enqueue ImportJob.new(tenant, import_summary.id), :queue => 'importing_orders_'+ tenant
+      import_summary.import_items.create( store: params[:store], import_type: params[:import_type] )
+      #start importing using delayed job (ImportJob is defined in base class)
+      Delayed::Job.enqueue ImportJob.new(params[:tenant], import_summary.id), :queue => 'importing_orders_'+ tenant
     else
       #import is already running. back off from importing
-      result[:status] = false
-      result[:messages] << "An import is already running."
+      result.merge({:status => false, :messages => "An import is already running."})
     end
     result
   end
 
   def reschedule_job(type, tenant)
     Apartment::Tenant.switch(tenant)
-    date = DateTime.now
-    date = date + 1.day
+    date = DateTime.now + 1.day
     job_scheduled = false
     general_settings = GeneralSetting.all.first
     export_settings = ExportSetting.all.first
     for i in 0..6
-      should_schedule_job = false
-      if type=='import_orders'
-        should_schedule_job = general_settings.should_import_orders(date)
-        time = general_settings.time_to_import_orders
-      elsif type=='low_inventory_email'
-        if general_settings.low_inventory_alert_email? && !general_settings.low_inventory_email_address.blank?
-          should_schedule_job = general_settings.should_send_email(date)
-          time = general_settings.time_to_send_email
-        end
-      elsif type == 'export_order'
-        if export_settings.auto_email_export? && !export_settings.order_export_email.blank?
-          should_schedule_job = export_settings.should_export_orders(date)
-          time = export_settings.time_to_send_export_email
-        end
-      end
-
-      if should_schedule_job
-        job_scheduled = general_settings.schedule_job(date,
-                                                      time, type)
-      else
-        date = date + 1.day
-      end
+      job_scheduled, date = schedule_a_job(type, date, job_scheduled, general_settings, export_settings)
       break if job_scheduled
     end
   end
 
-  def new_import_item(store_id, order_import_summary_id, status = nil, message = nil)
-    import_item = ImportItem.new
-    import_item.store_id = store_id
-    import_item.order_import_summary_id = order_import_summary_id
-    import_item.status = status
-    import_item.message = message
-    import_item.save!
+  def schedule_a_job(type, date, job_scheduled, general_settings, export_settings)
+    should_schedule_job = false
+    case type
+    when 'import_orders'
+      should_schedule_job, time = schedule_import_orders(general_settings, date)
+    when 'low_inventory_email'
+      should_schedule_job, time = schedule_low_inventory_email(general_settings, date, should_schedule_job)
+    when 'export_order'
+      should_schedule_job, time = schedule_export_order(export_settings, date, should_schedule_job)
+    end
+    job_scheduled, date = get_scheduled_job(should_schedule_job, general_settings, job_scheduled, date, time, type)
+
+    return job_scheduled, date
+  end
+
+  def get_scheduled_job(should_schedule_job, general_settings, job_scheduled, date, time, type)
+    if should_schedule_job
+      job_scheduled = general_settings.schedule_job(date, time, type)
+    else
+      date = date + 1.day
+    end
+    return job_scheduled, date
+  end
+
+  def schedule_import_orders(general_settings, date)
+    should_schedule_job = general_settings.should_import_orders(date)
+    time = general_settings.time_to_import_orders
+    return should_schedule_job, time
+  end
+
+  def schedule_low_inventory_email(general_settings, date, should_schedule_job, time=nil)
+    if general_settings.low_inventory_alert_email? && general_settings.low_inventory_email_address.present?
+      should_schedule_job = general_settings.should_send_email(date)
+      time = general_settings.time_to_send_email
+    end
+    return should_schedule_job, time
+  end
+
+  def schedule_export_order(export_settings, date, should_schedule_job, time=nil)
+    unless export_settings.auto_email_export? && export_settings.order_export_email.present?
+      return should_schedule_job, time
+    end
+    should_schedule_job = export_settings.should_export_orders(date)
+    time = export_settings.time_to_send_export_email
+    return should_schedule_job, time
   end
 
   def import_orders_with_import_item(import_item, tenant)
     begin
       store_type = import_item.store.store_type
       store = import_item.store
-      if store_type == 'Amazon'
-        import_item.status = 'in_progress'
-        import_item.save
-        context = Groovepacker::Stores::Context.new(
-          Groovepacker::Stores::Handlers::AmazonHandler.new(store, import_item))
-        result = context.import_orders
-        import_item.reload
-        import_item.previous_imported = result[:previous_imported]
-        import_item.success_imported = result[:success_imported]
-        if !result[:status] && import_item.status != 'cancelled'
-          import_item.status = 'failed'
-        else
-          import_item.status = 'completed'
-        end
-        import_item.save
-      elsif store_type == 'Ebay'
-        import_item.status = 'in_progress'
-        import_item.save
-        context = Groovepacker::Stores::Context.new(
-          Groovepacker::Stores::Handlers::EbayHandler.new(store, import_item))
-        result = context.import_orders
-        import_item.reload
-        import_item.previous_imported = result[:previous_imported]
-        import_item.success_imported = result[:success_imported]
-        if !result[:status] && import_item.status != 'cancelled'
-          import_item.status = 'failed'
-        else
-          import_item.status = 'completed'
-        end
-        import_item.save
-      elsif store_type == 'Magento'
-        import_item.status = 'in_progress'
-        import_item.save
-        context = Groovepacker::Stores::Context.new(
-          Groovepacker::Stores::Handlers::MagentoHandler.new(store, import_item))
-        result = context.import_orders
-        import_item.reload
-        import_item.previous_imported = result[:previous_imported]
-        import_item.success_imported = result[:success_imported]
-        if !result[:status] && import_item.status != 'cancelled'
-          import_item.status = 'failed'
-        else
-          import_item.status = 'completed'
-        end
-        import_item.save
-      elsif store_type == 'Magento API 2'
-        import_item.status = 'in_progress'
-        import_item.save
-        context = Groovepacker::Stores::Context.new(
-          Groovepacker::Stores::Handlers::MagentoRestHandler.new(store, import_item))
-        result = context.import_orders
-        import_item.reload
-        import_item.previous_imported = result[:previous_imported]
-        import_item.success_imported = result[:success_imported]
-        if !result[:status] && import_item.status != 'cancelled'
-          import_item.status = 'failed'
-        else
-          import_item.status = 'completed'
-        end
-        import_item.save
-      elsif store_type == 'Shipstation'
-        import_item.status = 'in_progress'
-        import_item.save
-        context = Groovepacker::Stores::Context.new(
-          Groovepacker::Stores::Handlers::ShipstationHandler.new(store, import_item))
-        result = context.import_orders
-        import_item.reload
-        import_item.previous_imported = result[:previous_imported]
-        import_item.success_imported = result[:success_imported]
-        if !result[:status] && import_item.status != 'cancelled'
-          import_item.status = 'failed'
-        else
-          import_item.status = 'completed'
-        end
-        import_item.save
-      elsif store_type == 'Shipstation API 2'
-        import_item.status = 'in_progress'
-        import_item.save
-        context = Groovepacker::Stores::Context.new(
-          Groovepacker::Stores::Handlers::ShipstationRestHandler.new(store, import_item))
-        result = context.import_orders
-        import_item.reload
-        import_item.previous_imported = result[:previous_imported]
-        import_item.success_imported = result[:success_imported]
-        if import_item.status != 'cancelled'
-          if !result[:status] && import_item.status != 'cancelled'
-            import_item.status = 'failed'
-          else
-            import_item.status = 'completed'
-          end
-        end
-        import_item.save
-      elsif store_type == 'ShippingEasy'
-        import_item.status = 'in_progress'
-        import_item.save
-        context = Groovepacker::Stores::Context.new(
-          Groovepacker::Stores::Handlers::ShippingEasyHandler.new(store, import_item))
-        result = context.import_orders
-        import_item.reload
-        import_item.previous_imported = result[:previous_imported]
-        import_item.success_imported = result[:success_imported]
-        if import_item.status != 'cancelled'
-          if !result[:status]
-            import_item.status = 'failed'
-          else
-            import_item.status = 'completed'
-          end
-        end
-        import_item.save
-      elsif store_type == 'Shopify'
-        shopify_credential = ShopifyCredential.where(:store_id => store.id).first
-        if shopify_credential.access_token
-          import_item.status = 'in_progress'
-          import_item.save
-          context = Groovepacker::Stores::Context.new(
-            Groovepacker::Stores::Handlers::ShopifyHandler.new(store, import_item))
-          result = context.import_orders
-          import_item.reload
-          import_item.previous_imported = result[:previous_imported]
-          import_item.success_imported = result[:success_imported]
-          if import_item.status != 'cancelled'
-            if !result[:status] && import_item.status != 'cancelled'
-              import_item.status = 'failed'
-            else
-              import_item.status = 'completed'
-            end
-          end
-        else
-          import_item.status = 'failed'
-          import_item.message = 'Not yet connected - Please click the Shopify icon and connect to your store'
-        end
-        import_item.save
-
-      #=====================BigCommerce Orders Import======================
-      elsif store_type == 'BigCommerce'
-        import_item.status = 'in_progress'
-        import_item.save
-        bc_service = BigCommerce::BigCommerceService.new(store: store)
-        connection_response = bc_service.check_connection
-
-        if connection_response && connection_response[:status]
-          context = Groovepacker::Stores::Context.new(
-            Groovepacker::Stores::Handlers::BigCommerceHandler.new(store, import_item))
-          result = context.import_orders
-          import_item.reload
-          import_item.previous_imported = result[:previous_imported]
-          import_item.success_imported = result[:success_imported]
-          if import_item.status != 'cancelled'
-            if !result[:status]
-              import_item.status = 'failed'
-            else
-              import_item.status = 'completed'
-            end
-          end
-        else
-          import_item.status = 'failed'
-          import_item.message = "Open store settings to authorize connection."
-        end
-        import_item.save
-      #=============================================================
-      elsif store_type == 'CSV' && !import_item.status.nil?
-        mapping = CsvMapping.find_by_store_id(store.id)
-        if !mapping.nil? && !mapping.order_csv_map.nil? && store.ftp_credential.username && store.ftp_credential.password && store.ftp_credential.host
-          import_item.status = 'in_progress'
-          import_item.save
-          map = mapping.order_csv_map
-          data = build_data(map,store)
-          
-          import_csv = ImportCsv.new
-          result = import_csv.import(tenant, data.to_s)
-
-          import_item.reload
-          if import_item.status != 'cancelled'
-            if !result[:status]
-              import_item.status = 'failed'
-              import_item.message = result[:messages]
-            else
-              import_item.status = 'completed'
-            end
-          end
-        else
-          import_item.status = 'failed'
-          import_item.message = "connection not established or no maps selected for the csv store"
-        end
-        import_item.save
+      if store_type == 'CSV' && !import_item.status.nil?
+        initiate_csv_import(tenant, store_type, store, import_item)
+      else
+        handler = get_handler(store_type, store, import_item)
+        connection_successful = check_connection_for_shopify_or_bc(store, store_type, import_item)
+        return unless connection_successful
+        initiate_import_for(store, import_item, handler)
       end
     rescue Exception => e
-      if e.message.strip == "Error: 302"
-        import_item.message = "Connection failed: Please verify store URL is https rather than http if the store is secure"
-      else
-        import_item.message = "Import failed: " + e.message
-      end
-      import_item.status = 'failed'
-      import_item.save
-      ImportMailer.failed({
-        tenant: tenant, 
-        import_item: import_item, 
-        exception: e
-      }).deliver
+      update_import_item_and_send_mail(e, import_item, tenant)
     end
+  end
+  
+  def initiate_csv_import(tenant, store_type, store, import_item)
+    mapping = CsvMapping.find_by_store_id(store.id)
+    return unless check_connection_for_csv_import(mapping, store, import_item)
+    import_item.update_attributes(status: 'in_progress')
+    map = mapping.order_csv_map
+    data = build_data(map,store)
+    import_csv = ImportCsv.new
+    result = import_csv.import(tenant, data.to_s)
+    import_item.reload
+    update_status(import_item, result)
+    import_item.update_attributes(message: result[:messages]) unless result[:status]
+  end
+
+  def initiate_import_for(store, import_item, handler)
+    import_item.update_attributes(status: 'in_progress')
+    context = Groovepacker::Stores::Context.new(handler)
+    result = context.import_orders
+    import_item.reload
+    import_item.previous_imported = result[:previous_imported]
+    import_item.success_imported = result[:success_imported]
+    update_status(import_item, result)
+  end
+
+  def update_status(import_item, result)
+    return if import_item.status == 'cancelled'
+    status = result[:status] ? 'completed' : 'failed' 
+    import_item.update_attributes(status: status)
+  end
+
+  def update_import_item_and_send_mail(e, import_item, tenant)
+    import_item_message = "Connection failed: Please verify store URL is https rather than http if the store is secure"
+    import_item_message = "Import failed: #{e.message}" if e.message.strip != "Error: 302"
+    import_item.update_attributes(status: 'failed', message: import_item_message)
+    ImportMailer.failed({ tenant: tenant, import_item: import_item, exception: e }).deliver
   end
 
   def build_data(map,store)
-    data = {}
-    data[:flag] = "ftp_download"
-    data[:type] = "order"
-    data[:fix_width] = map[:map][:fix_width]
-    data[:fixed_width] = map[:map][:fixed_width]
-    data[:sep] = map[:map][:sep]
-    data[:delimiter] = map[:map][:delimiter]
-    data[:rows] = map[:map][:rows]
-    data[:map] = map[:map][:map]
-    data[:store_id] = store.id
-    data[:import_action] = map[:map][:import_action]
-    data[:contains_unique_order_items] = map[:map][:contains_unique_order_items]
-    data[:generate_barcode_from_sku] = map[:map][:generate_barcode_from_sku]
-    data[:use_sku_as_product_name] = map[:map][:use_sku_as_product_name]
-    data[:order_placed_at] = map[:map][:order_placed_at]
-    data[:order_date_time_format] = map[:map][:order_date_time_format]
-    data[:day_month_sequence] = map[:map][:day_month_sequence]
-      
+    data = {:flag => "ftp_download", :type => "order", :store_id => store.id}
+    common_data_attributes.each { |attr| data[attr.to_sym] = map[:map][attr.to_sym] }
     return data
-  end
-
-  ImportJob = Struct.new(:tenant, :order_import_summary_id) do
-    def perform
-      Apartment::Tenant.switch(tenant)
-
-      order_import_summary = OrderImportSummary.find(order_import_summary_id)
-      order_import_summary.status = 'in_progress'
-      order_import_summary.save
-
-      order_import_summary.import_items.each do |import_item|
-        ImportOrders.new.import_orders_with_import_item(import_item, tenant)
-      end
-      order_import_summary.reload
-      if order_import_summary.status != 'cancelled'
-        order_import_summary.status = 'completed'
-        order_import_summary.save
-      end
-    end
   end
 end

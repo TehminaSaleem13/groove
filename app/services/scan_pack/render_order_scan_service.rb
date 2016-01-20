@@ -14,7 +14,7 @@ class ScanPack::RenderOrderScanService < ScanPack::Base
   end
   
   def run
-    render_order_scan if id.present?
+    render_order_scan if @id.present?
     @result
   end
 

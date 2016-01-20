@@ -89,6 +89,7 @@ module Groovepacker
         end
         #todo status filters to be implemented
         orders = get_sorted_orders(sort_key, sort_order, limit, offset, query_add, status_filter_text, status_filter)
+        return orders
       end
 
       private
@@ -104,6 +105,7 @@ module Groovepacker
             orders = orders.where(:status => status_filter) unless status_filter == "all"
             orders = orders.limit(limit).offset(offset) unless @params[:select_all] || @params[:inverted]
           end
+          return orders
         end
 
         def update_list_for_not_scanned(order)
