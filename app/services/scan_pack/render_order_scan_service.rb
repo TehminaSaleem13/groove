@@ -20,7 +20,7 @@ class ScanPack::RenderOrderScanService < ScanPack::Base
 
   def render_order_scan
     order = Order.where(id: @id).last
-    if @state == "scanpack.rfp.no_tracking_info" && (input == @current_user.confirmation_code || input == "")
+    if @state == "scanpack.rfp.no_tracking_info" && (@input == @current_user.confirmation_code || @input == "")
       @result['status'] = true
       @result['matched'] = false
       order.set_order_to_scanned_state(@current_user.username)
