@@ -296,7 +296,7 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
               '">' + key + '</h4>' +
               '<span><strong>Date: </strong>' + x + '</span><br/>' +
               '<span><strong>Accuracy: </strong>' + e.point[1] + '% </span><br/>' +
-              '<span><strong>Period Accuracy: </strong>' + average_packing_accuracy + '% </span><br/>' +
+              '<span><strong>Period Accuracy: </strong>' + e.point[5] + '% </span><br/>' +
               '<span><strong>' + e.point[2] + ' Orders Scanned</strong></span><br/>' +
               '<span><strong>' + e.point[3] + ' Items Packed </strong></span><br/>' +
               '<span><strong>' + e.point[4] + ' Exceptions Recorded</strong></span>' +
@@ -313,10 +313,10 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
               }
               return ('<div><h4 style="text-transform: capitalize; color:' + e.series.color +
               '">' + key + '</h4>' +
-              '<span><strong>Period Speed Score: </strong>' + avg_period_score + '% </span><br/>' +
+              '<span><strong>Period Speed Score: </strong>' + e.point[2] + '% </span><br/>' +
               '<span><strong>Date: </strong>' + x + '</span><br/>' +
               '<span><strong>Daily Speed Score: </strong>' + y + '% </span><br/>' +
-              '<span><strong>Avg. Time/Item: </strong>' + (100 - y) + '</span>' +
+              '<span><strong>Avg. Time/Item: </strong>' + e.point[3] + '</span>' +
               '</div>')
             } else if (scope.charts.type == 'packed_item_stats') {
               tooltipText = y + ' items packed on ' + x
