@@ -13,7 +13,7 @@ groovepacks_controllers.
             && typeof $scope.data.raw.data.matched_orders != "undefined"
             && $scope.data.raw.data.matched_orders.length > 0) {
             $scope.alternate_orders = $scope.data.raw.data.matched_orders;
-
+            window.alternate_orders = $scope.alternate_orders;
           }
         });
         if (typeof $scope.data.order != 'undefined' && typeof $scope.data.order.status != 'undefined') {
