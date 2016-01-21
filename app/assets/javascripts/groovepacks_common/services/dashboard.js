@@ -67,6 +67,7 @@ groovepacks_services.factory('dashboard', ['$http', 'notification', function ($h
     console.log(domain)
     return (
       $http.get('http://' + tenant + 'stat.' + domain +'/dashboard/calculate').error(function(response){
+      // $http.get('http://' + domain +'/dashboard/calculate').error(function(response){
         notification.notify("Failed to load dashboard data", 0);
       })
     )
