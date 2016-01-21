@@ -91,6 +91,7 @@ module Groovepacker
         end
 
         def do_allocate(product_warehouse, qty)
+          qty = 0 if qty.nil?
           unless inventory_tracking_enabled?
             return false
           end
