@@ -168,8 +168,11 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
           },
           init: {
             users: function () {
+              scope.exceptions.users.push({id: '-1', username: 'All User'});
               users.list.get(null).then(function (response) {
-                scope.exceptions.users = response.data;
+                response.data.forEach(function(element) {
+                  scope.exceptions.users.push(element);
+                });
               })
             },
             exception_by_frequency: function () {
