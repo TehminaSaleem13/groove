@@ -10,8 +10,8 @@ groovepacks_services.factory("importOrders", ['$http', 'notification', function 
         }).error(notification.server_error);
       },
 
-      issue_import: function (store_id, import_type) {
-        $http.get('/orders/import.json?store_id=' + store_id + "&import_type=" + import_type,
+      issue_import: function (store_id, no_of_days, import_type) {
+        $http.get("/orders/import.json?store_id=" + store_id + "&days="+ no_of_days +"&import_type=" + import_type,
           {ignoreLoadingBar: true}).success(function (data) {
             if (data.status) {
               notification.notify(data.success_messages, 1);
