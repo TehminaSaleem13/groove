@@ -58,7 +58,7 @@ class ImportOrders < Groovepacker::Utilities::Base
       #add import item for the store
       import_summary.import_items.create( store: params[:store], import_type: params[:import_type] )
       #start importing using delayed job (ImportJob is defined in base class)
-      Delayed::Job.enqueue ImportJob.new(params[:tenant], import_summary.id), :queue => 'importing_orders_'+ tenant
+      Delayed::Job.enqueue ImportJob.new(params[:tenant], import_summary.id), :queue => 'importing_orders_'+ params[:tenant]
     else
       #import is already running. back off from importing
       result.merge({:status => false, :messages => "An import is already running."})
