@@ -608,7 +608,8 @@ class Order < ActiveRecord::Base
   end
 
   def perform_pre_save_checks
-    self.non_hyphen_increment_id = non_hyphenated_string(self.increment_id.to_s)
+    self.non_hyphen_increment_id = non_hyphenated_string(self.increment_id.to_s).squish
+    self.increment_id = self.increment_id.to_s.squish!
     if self.status.nil?
       self.status = 'onhold'
     end

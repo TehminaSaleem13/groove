@@ -191,6 +191,30 @@ RSpec.describe ScanPackController, :type => :controller do
       expect(result["error_messages"][0]).to eq("Please specify a barcode to scan the order")
     end
 
+    it "should process order scan by both hypenated and non hyphenated barcode plus including # symbol" do
+      request.accept = "application/json"
+
+      order2 = FactoryGirl.create(:order, :increment_id=>'123-456')
+
+      get :scan_barcode, { :state => "scanpack.rfo", :input => '#123-456' }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["data"]["order"].present?).to eq true
+      expect(result["data"]["order"]["increment_id"]).to eq order2.increment_id
+
+      get :scan_barcode, { :state => "scanpack.rfo", :input => '#123456' }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["data"]["order"].present?).to eq true
+      expect(result["data"]["order"]["increment_id"]).to eq order2.increment_id
+
+      get :scan_barcode, { :state => "scanpack.rfo", :input => '123-456' }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["data"]["order"].present?).to eq true
+      expect(result["data"]["order"]["increment_id"]).to eq order2.increment_id
+    end
+
     it "should process order scan by both tracking number and order number if scan_by_tracking_number is enabled" do
       request.accept = "application/json"
 
