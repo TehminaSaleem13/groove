@@ -13,7 +13,7 @@ module Groovepacker
 
           if @user_id.nil?
             exceptions = OrderException.where("reason IN (?)",
-                                              @exceptions_considered).order(created_at: :desc).all
+                                              @exceptions_considered).order(created_at: :desc)
           else
             exceptions = OrderException.where(
               user_id: @user_id).where("reason IN (?)",
