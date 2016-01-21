@@ -205,8 +205,8 @@ groovepacks_controllers.
 
       $scope.issue_import = function (store_id, days, import_type) {
         //console.log(importOrders);
-        alert(store_id + ", "+ days + "," + import_type);
-        //importOrders.issue_import(store_id, days, import_type)
+        //alert(store_id + ", "+ days + "," + import_type);
+        importOrders.issue_import(store_id, days, import_type)
       };
 
       $scope.cancel_import = function (store_id) {
