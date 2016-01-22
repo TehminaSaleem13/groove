@@ -222,7 +222,7 @@ groovepacks_controllers.
       $scope.issue_import = function (store_id, days, import_type) {
         //console.log(importOrders);
         //alert(store_id + ", "+ days + "," + import_type);
-        $('.groove-button.dropdown-toggle.days_select').click();
+        //$('.groove-button.dropdown-toggle.days_select').click();
         $(".place_select").css('display', 'none');
         $scope.import_store_id = null;
         importOrders.issue_import(store_id, days, import_type);
