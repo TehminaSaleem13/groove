@@ -319,7 +319,7 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
               '<span><strong>Period Speed Score: </strong>' + e.point[2] + '% </span><br/>' +
               '<span><strong>Date: </strong>' + x + '</span><br/>' +
               '<span><strong>Daily Speed Score: </strong>' + y + '% </span><br/>' +
-              '<span><strong>Avg. Time/Item: </strong>' + e.point[3] + '</span>' +
+              '<span><strong>Avg. Time/Item: </strong>' + e.point[2] + '</span>' +
               '</div>')
             } else if (scope.charts.type == 'packed_item_stats') {
               tooltipText = y + ' items packed on ' + x

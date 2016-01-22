@@ -1,6 +1,7 @@
 groovepacks_controllers.
   controller('appCtrl', ['$rootScope', '$scope', '$timeout', '$modalStack', '$state', '$filter', '$document', '$window', 'hotkeys', 'auth', 'notification', 'importOrders', 'groovIO', 'editable', 'stores',
     function ($rootScope, $scope, $timeout, $modalStack, $state, $filter, $document, $window, hotkeys, auth, notification, importOrders, groovIO, editable, stores) {
+      $scope.import_store_id = null;
 
       $scope.$on("user-data-reloaded", function () {
         $scope.current_user = auth;
@@ -172,6 +173,22 @@ groovepacks_controllers.
           }
           $scope.import_groov_popover.content =
             '<table style="font-size: 12px;width:100%;">' +
+              '<tr>' +
+                '<td>' +
+                  '<span class="place_select" style="display: none;">' +
+                    '<div class="col-lg-2 col-md-2" style="position: absolute; top: 5px; right: 0px;" dropdown>' +
+                      '<button type="button" class="groove-button dropdown-toggle" data-toggle="dropdown" style="float:rifght;">' +
+                        'Days <span class="caret"></span>' +
+                      '</button>' +
+                      '<ul class="dropdown-menu" role="menu">' +
+                        '<li ng-repeat="day in [1,2,3,4,5,6,7,8,9,10]">' +
+                          '<a ng-click="issue_import(import_store_id, day, \'deep\')">{{day}}</a>' +
+                        '</li>' +
+                      '</ul>' +
+                    '</div>' +
+                  '</span>' +
+                '</td>' +
+              '</tr>' +
               '<tr ng-repeat="store in import_groov_popover.data" ng-hide="!store.status">' +
                 '<td width="60px;" style="white-space: nowrap;">' +
                   '<a class="btn" href="#/settings/stores/{{store.id}}"><img ng-src="{{store.logo.src}}" width="60px" alt="{{store.logo.alt}}"/></a>' +
@@ -184,15 +201,15 @@ groovepacks_controllers.
                 '<td style="text-align:right;width:38%;padding:3px;">' +
                   '<div class="btn-group">' +
                     '<span ng-show="store.store_type==\'BigCommerce\'">' +
-                      '<a class="btn" ng-hide="import_summary.import_info.status==\'in_progress\'" title="Deep Import" ng-click="issue_import(store.id, \'deep\')"><img class="icons" src="/assets/images/deep_import.png"></img></a>' +
+                      '<a class="btn BigCommerce" ng-hide="import_summary.import_info.status==\'in_progress\'" title="Deep Import" ng-click="issue_import(store.id, 4, \'deep\')"><img class="icons" src="/assets/images/deep_import.png"></img></a>' +
                     '</span>' +
                     '<span ng-show="store.store_type==\'ShippingEasy\'">' +
-                      '<a class="btn" ng-hide="import_summary.import_info.status==\'in_progress\'" title="Deep Import" ng-click="issue_import(store.id, \'deep\')"><img class="icons" src="/assets/images/deep_import.png"></img></a>' +
+                      '<a class="btn ShippingEasy" ng-hide="import_summary.import_info.status==\'in_progress\'" title="Deep Import" ng-click="open_popup(store.id, \'ShippingEasy\')"><img class="icons" src="/assets/images/deep_import.png"></img></a>' +
                     '</span>' +
                     '<span ng-show="store.store_type==\'Shipstation API 2\'">' +
-                      '<a class="btn" ng-hide="import_summary.import_info.status==\'in_progress\'" title="Quick Import" ng-click="issue_import(store.id, \'quick\')"><img class="icons" src="/assets/images/quick_import.png"></img></a>' +
-                      '<a class="btn" ng-hide="import_summary.import_info.status==\'in_progress\'" title="Regular Import" ng-click="issue_import(store.id, \'regular\')"><img class="icons" src="/assets/images/reg_import.png"></img></a>' +
-                      '<a class="btn" ng-hide="import_summary.import_info.status==\'in_progress\'" title="Deep Import" ng-click="issue_import(store.id, \'deep\')"><img class="icons" src="/assets/images/deep_import.png"></img></a>' +
+                      '<a class="btn" ng-hide="import_summary.import_info.status==\'in_progress\'" title="Quick Import" ng-click="issue_import(store.id, 7, \'quick\')"><img class="icons" src="/assets/images/quick_import.png"></img></a>' +
+                      '<a class="btn" ng-hide="import_summary.import_info.status==\'in_progress\'" title="Regular Import" ng-click="issue_import(store.id, 7, \'regular\')"><img class="icons" src="/assets/images/reg_import.png"></img></a>' +
+                      '<a class="btn ShipstationAPI2" ng-hide="import_summary.import_info.status==\'in_progress\'" title="Deep Import" ng-click="issue_import(store.id, 7, \'deep\')"><img class="icons" src="/assets/images/deep_import.png"></img></a>' +
                     '</span>' +
                     '<a class="btn" ng-show="import_summary.import_info.status==\'in_progress\' && import_summary.import_info.import_summary_type != \'update_locations\'" title="Cancel Import" ng-click="cancel_import(store.id)"><img class="icons" src="/assets/images/cancel_import.png"></img></a>' +
                   '</div>' +
@@ -202,18 +219,29 @@ groovepacks_controllers.
         }
       });
 
-      $scope.issue_import = function (store_id, import_type) {
+      $scope.issue_import = function (store_id, days, import_type) {
         //console.log(importOrders);
-        importOrders.issue_import(store_id, import_type)
-      }
+        //alert(store_id + ", "+ days + "," + import_type);
+        importOrders.issue_import(store_id, days, import_type)
+      };
 
       $scope.cancel_import = function (store_id) {
         //alert("cancel import" + store_id)
         importOrders.cancel_import(store_id);
-      }
+      };
 
       $scope.issue_update = function (store_id) {
         stores.shipstation.update_all_locations(store_id);
+      };
+
+      $scope.open_popup = function (store_id, span_class) {
+        if($scope.import_store_id==store_id){
+          $(".place_select").css('display', 'none');
+          $scope.import_store_id=null;
+        } else {
+          $scope.import_store_id = store_id;
+          $(".place_select").css('display', 'block');
+        }
       };
 
       $scope.show_logout_box = false;

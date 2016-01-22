@@ -47,8 +47,10 @@ module ScanPack
     end
 
     def collect_orders
+      input_without_special_char = @input.gsub(/(^\#+)|(\-+)/, '')
       @orders = Order.where(
-        "increment_id LIKE '#{@input}%' or non_hyphen_increment_id LIKE '#{@input}%'"
+        "increment_id = ? or non_hyphen_increment_id = ?",
+        @input.squish, input_without_special_char
         )
       if @orders.length == 0 && @scanpack_settings.scan_by_tracking_number
         @orders = Order.where(
@@ -70,7 +72,7 @@ module ScanPack
         do_check_order_status_for_single_and_matched(
           matched_single, single_order_status, matched_single_status,
           order_placed_for_single_before_than_matched_single
-          ) if single_order.present?
+          ) if @single_order.present?
 
         unless ['scanned', 'cancelled'].include?(matched_single_status)
           @single_order_result['matched_orders'].push(matched_single)
@@ -170,7 +172,7 @@ module ScanPack
     def do_if_single_order_present_and_under_max_limit_of_shipment
       unless @single_order.save
         @result['status'] &= false
-        @result['error_messages'].push("Could not save order with id: "+@single_order.id)
+        @result['error_messages'].push("Could not save order with id: "+@single_order.id.to_s)
       end
       @single_order_result['order'] = order_details_and_next_item
     end
