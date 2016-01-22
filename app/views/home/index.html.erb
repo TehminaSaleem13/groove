@@ -81,21 +81,6 @@
                   Cancel Import<br/>
                   <img class="icons" src="/assets/images/cloud.png">
                 </a>
-                <span class="place_select">
-                  <div class="popover left fade in deep_import_popup" style="position: fixed; display: none; width: 125px; max-width: 125px; min-width: 125px;">
-                    <div class="arrow"></div>
-                    <div class="col-lg-2 col-md-2" style="margin: 7px;" dropdown>
-                      <button type="button" class="groove-button dropdown-toggle" data-toggle="dropdown">
-                        Days <span class="caret"></span>
-                      </button>
-                      <ul class="dropdown-menu" role="menu">
-                        <li ng-repeat="day in [1,2,3,4,5,6,7,8,9,10]">
-                          <a ng-click="issue_import(import_store_id, day, 'deep')">{{day}}</a>
-                        </li>
-                      </ul>
-                    </div>
-                  </div>
-                </span>
               </li>
             </ul>
           </div>

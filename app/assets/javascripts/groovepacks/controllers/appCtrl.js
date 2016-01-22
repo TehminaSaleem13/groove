@@ -173,6 +173,22 @@ groovepacks_controllers.
           }
           $scope.import_groov_popover.content =
             '<table style="font-size: 12px;width:100%;">' +
+              '<tr>' +
+                '<td>' +
+                  '<span class="place_select" style="display: none;">' +
+                    '<div class="col-lg-2 col-md-2" style="position: absolute; top: 5px; right: 0px;" dropdown>' +
+                      '<button type="button" class="groove-button dropdown-toggle days_select" data-toggle="dropdown" style="float:rifght;">' +
+                        'Days <span class="caret"></span>' +
+                      '</button>' +
+                      '<ul class="dropdown-menu" role="menu">' +
+                        '<li ng-repeat="day in [1,2,3,4,5,6,7,8,9,10]">' +
+                          '<a ng-click="issue_import(import_store_id, day, \'deep\')">{{day}}</a>' +
+                        '</li>' +
+                      '</ul>' +
+                    '</div>' +
+                  '</span>' +
+                '</td>' +
+              '</tr>' +
               '<tr ng-repeat="store in import_groov_popover.data" ng-hide="!store.status">' +
                 '<td width="60px;" style="white-space: nowrap;">' +
                   '<a class="btn" href="#/settings/stores/{{store.id}}"><img ng-src="{{store.logo.src}}" width="60px" alt="{{store.logo.alt}}"/></a>' +
@@ -206,7 +222,10 @@ groovepacks_controllers.
       $scope.issue_import = function (store_id, days, import_type) {
         //console.log(importOrders);
         //alert(store_id + ", "+ days + "," + import_type);
-        importOrders.issue_import(store_id, days, import_type)
+        $('.groove-button.dropdown-toggle.days_select').click();
+        $(".place_select").css('display', 'none');
+        $scope.import_store_id = null;
+        importOrders.issue_import(store_id, days, import_type);
       };
 
       $scope.cancel_import = function (store_id) {
@@ -219,17 +238,13 @@ groovepacks_controllers.
       };
 
       $scope.open_popup = function (store_id, span_class) {
+        $(".place_select").css('display', 'block');
         if($scope.import_store_id==store_id){
-          $(".deep_import_popup").css('display', 'none');
+          $(".place_select").css('display', 'none');
           $scope.import_store_id=null;
         } else {
           $scope.import_store_id = store_id;
-          var clicked_element = $("."+span_class);
-          var span_position = clicked_element.position();
-          var place_left = span_position['left']-35;
-          $(".deep_import_popup").css('left', place_left);
-          $(".deep_import_popup").css('top', span_position['top']+25);
-          $(".deep_import_popup").css('display', 'block');
+          $(".place_select").css('display', 'block');
         }
       };
 
