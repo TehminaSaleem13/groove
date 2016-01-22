@@ -13,39 +13,61 @@ groovepacks_controllers.
 
 
       $scope.store_change_status = function (status) {
-        $scope.stores.setup.status = status;
-        return stores.list.update('update_status', $scope.stores).then(function (data) {
-          $scope.stores.setup.status = "";
-          myscope.get_stores();
-        });
+        if($scope.check_if_not_selected()) {
+          $scope.stores.setup.status = status;
+          return stores.list.update('update_status', $scope.stores).then(function (data) {
+            $scope.stores.setup.status = "";
+            myscope.get_stores();
+          });
+        } else {
+           stores.list.select_notification();
+        }
       };
 
-      $scope.store_delete = function () {
-        $scope.stores.selected = 0;
-        var result = $q.defer();
+      $scope.check_if_not_selected = function () {
+        var selected = false;
         for (var i = 0; i < $scope.stores.list.length; i++) {
-          if ($scope.stores.list[i].checked) {
-            $scope.stores.selected += 1;
+          if ($scope.stores.list[i].checked == true) {
+            selected = true;
+            break;
           }
         }
-        if ($scope.stores.selected == 0) {
-          notification.notify('select a store to delete');
-          result.resolve();
-        } else if (confirm("Are you sure you want to delete the store" + (($scope.stores.selected == 1) ? "?" : "s?"))) {
-          stores.list.update('delete', $scope.stores).then(function (data) {
-            myscope.get_stores();
-          }).then(result.resolve);
+        return selected;
+      }
+
+      $scope.store_delete = function () {
+        if($scope.check_if_not_selected()) {
+          $scope.stores.selected = 0;
+          var result = $q.defer();
+          for (var i = 0; i < $scope.stores.list.length; i++) {
+            if ($scope.stores.list[i].checked) {
+              $scope.stores.selected += 1;
+            }
+          }
+          if ($scope.stores.selected == 0) {
+            notification.notify('select a store to delete');
+            result.resolve();
+          } else if (confirm("Are you sure you want to delete the store" + (($scope.stores.selected == 1) ? "?" : "s?"))) {
+            stores.list.update('delete', $scope.stores).then(function (data) {
+              myscope.get_stores();
+            }).then(result.resolve);
+          } else {
+            result.resolve();
+          }
+          return result.promise;
         } else {
-          result.resolve();
+           stores.list.select_notification();
         }
-        return result.promise;
       };
 
       $scope.store_duplicate = function () {
-        return stores.list.update('duplicate', $scope.stores).then(function (data) {
-          myscope.get_stores();
-        });
-
+        if($scope.check_if_not_selected()) {
+          return stores.list.update('duplicate', $scope.stores).then(function (data) {
+            myscope.get_stores();
+          });
+        } else {
+           stores.list.select_notification();
+        }
       };
 
 
