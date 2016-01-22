@@ -1,6 +1,6 @@
 groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sce',
-  '$timeout', '$interval', 'groovIO', 'orders', 'stores', 'notification', 'dashboard', 'dashboard_calculator', 'users',
-  function ($window, $document, $sce, $timeout, $interval, groovIO, orders, stores,
+  '$timeout', '$interval', '$state', 'groovIO', 'orders', 'stores', 'notification', 'dashboard', 'dashboard_calculator', 'users',
+  function ($window, $document, $sce, $timeout, $interval, $state, groovIO, orders, stores,
             notification, dashboard, dashboard_calculator, users) {
     return {
       restrict: "A",
@@ -53,6 +53,26 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
           // } else if (tab.heading == "Leader Board") {
           //   scope.leader_board.retrieve.leader_board();
           // }
+        }
+
+        scope.handle_click_fn = function (row, event) {
+          console.log("handle_click_fn");
+          console.log(row['increment_id']);
+          if (typeof event != 'undefined') {
+            event.stopPropagation();
+          }
+          var toState = 'orders.filter.page.single';
+          var toParams = {};
+          for (var key in $state.params) {
+            if (['filter', 'page'].indexOf(key) != -1) {
+              toParams[key] = $state.params[key];
+            }
+          }
+          orders.single.get_id(row['increment_id']).then(function(response) {
+            toParams.order_id = response.data;
+            scope.toggle_dashboard_detail();
+            $state.go(toState, toParams);
+          });
         }
 
         groovIO.on('dashboard_update', function (message) {
@@ -122,6 +142,9 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
         scope.leader_board = {
           list: [],
           options: {
+            functions: {
+              ordernum: scope.handle_click_fn
+            },
             all_fields: {
               order_items_count: {
                 name: "Order Items",
@@ -138,7 +161,8 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
               },
               increment_id: {
                 name: "Order Number",
-                editable: false
+                editable: false,
+                transclude: '<a href="" ng-click="options.functions.ordernum(row,$event)" >{{row[field]}}</a>'
               },
               packing_time: {
                 name: "Packing Time",
@@ -179,6 +203,9 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
               scope.exceptions_by_frequency = {
                 list: [],
                 options: {
+                  functions: {
+                    ordernum: scope.handle_click_fn
+                  },
                   all_fields: {
                     created_at: {
                       name: "Date Recorded",
@@ -191,7 +218,8 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
                     },
                     increment_id: {
                       name: "Order Number",
-                      editable: false
+                      editable: false,
+                      transclude: '<a href="" ng-click="options.functions.ordernum(row,$event)" >{{row[field]}}</a>'
                     },
                     frequency: {
                       name: "Frequency",
@@ -206,6 +234,9 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
               scope.most_recent_exceptions = {
                 list: [],
                 options: {
+                  functions: {
+                    ordernum: scope.handle_click_fn
+                  }, 
                   all_fields: {
                     created_at: {
                       name: "Date Recorded",
@@ -218,7 +249,8 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
                     },
                     increment_id: {
                       name: "Order Number",
-                      editable: false
+                      editable: false,
+                      transclude: '<a href="" ng-click="options.functions.ordernum(row,$event)" >{{row[field]}}</a>'
                     },
                     frequency: {
                       name: "Frequency",
