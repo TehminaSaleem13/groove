@@ -177,7 +177,7 @@ groovepacks_controllers.
                 '<td>' +
                   '<span class="place_select" style="display: none;">' +
                     '<div class="col-lg-2 col-md-2" style="position: absolute; top: 5px; right: 0px;" dropdown>' +
-                      '<button type="button" class="groove-button dropdown-toggle" data-toggle="dropdown" style="float:rifght;">' +
+                      '<button type="button" class="groove-button dropdown-toggle days_select" data-toggle="dropdown" style="float:rifght;">' +
                         'Days <span class="caret"></span>' +
                       '</button>' +
                       '<ul class="dropdown-menu" role="menu">' +
@@ -222,6 +222,9 @@ groovepacks_controllers.
       $scope.issue_import = function (store_id, days, import_type) {
         //console.log(importOrders);
         //alert(store_id + ", "+ days + "," + import_type);
+        $('.groove-button.dropdown-toggle.days_select').click();
+        $(".place_select").css('display', 'none');
+        $scope.import_store_id = null
         importOrders.issue_import(store_id, days, import_type)
       };
 
@@ -235,6 +238,7 @@ groovepacks_controllers.
       };
 
       $scope.open_popup = function (store_id, span_class) {
+        $(".place_select").css('display', 'block');
         if($scope.import_store_id==store_id){
           $(".place_select").css('display', 'none');
           $scope.import_store_id=null;
