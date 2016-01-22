@@ -57,19 +57,17 @@ module ScanPack
           'tracking_num = ? or ? LIKE CONCAT("%",tracking_num,"%") ',
           @input, @input)
       end
+      @single_order = @orders.first
     end
 
     def get_single_order_with_result
       # assign @single_order = first order for only one order
       return [@orders.first, @single_order_result] if @orders.length == 1
-      
+
       @orders.each do |matched_single|
-        @single_order ||= matched_single
-        matched_single_status = matched_single.status
-        matched_single_order_placed_time = matched_single.order_placed_time || Time.zone.now
-        single_order_status = @single_order.status
-        single_order_order_placed_time = @single_order.order_placed_time || Time.zone.now
-        order_placed_for_single_before_than_matched_single = single_order_order_placed_time < matched_single_order_placed_time
+        matched_single_status, matched_single_order_placed_time,
+        single_order_status, single_order_order_placed_time,
+        order_placed_for_single_before_than_matched_single = do_set_check_variables(matched_single)
 
         do_check_order_status_for_single_and_matched(
           matched_single, single_order_status, matched_single_status,
@@ -82,6 +80,24 @@ module ScanPack
       end
 
       return [@single_order, @single_order_result]
+    end
+
+    def do_set_check_variables(matched_single)
+      do_check_increment_id(matched_single)
+      matched_single_status = matched_single.status
+      matched_single_order_placed_time = matched_single.order_placed_time || Time.zone.now
+      single_order_status = @single_order.status
+      single_order_order_placed_time = @single_order.order_placed_time || Time.zone.now
+      order_placed_for_single_before_than_matched_single = single_order_order_placed_time < matched_single_order_placed_time
+      
+      return [
+        matched_single_status, matched_single_order_placed_time, single_order_status,
+        single_order_order_placed_time, order_placed_for_single_before_than_matched_single
+      ]
+    end
+
+    def do_check_increment_id(matched_single)
+      @single_order = matched_single if matched_single.increment_id.eql?(@input.squish)
     end
 
     def do_check_order_status_for_single_and_matched(
