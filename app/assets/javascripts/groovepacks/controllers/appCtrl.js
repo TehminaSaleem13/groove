@@ -188,7 +188,7 @@ groovepacks_controllers.
                       '<a class="btn BigCommerce" ng-hide="import_summary.import_info.status==\'in_progress\'" title="Deep Import" ng-click="issue_import(store.id, 4, \'deep\')"><img class="icons" src="/assets/images/deep_import.png"></img></a>' +
                     '</span>' +
                     '<span ng-show="store.store_type==\'ShippingEasy\'">' +
-                      '<a class="btn ShippingEasy" ng-hide="import_summary.import_info.status==\'in_progress\'" title="Deep Import" ng-click="issue_import(store.id, 4, \'deep\'))"><img class="icons" src="/assets/images/deep_import.png"></img></a>' +
+                      '<a class="btn ShippingEasy" ng-hide="import_summary.import_info.status==\'in_progress\'" title="Deep Import" ng-click="issue_import(store.id, 4, \'deep\')"><img class="icons" src="/assets/images/deep_import.png"></img></a>' +
                     '</span>' +
                     '<span ng-show="store.store_type==\'Shipstation API 2\'">' +
                       '<a class="btn" ng-hide="import_summary.import_info.status==\'in_progress\'" title="Quick Import" ng-click="issue_import(store.id, 7, \'quick\')"><img class="icons" src="/assets/images/quick_import.png"></img></a>' +
