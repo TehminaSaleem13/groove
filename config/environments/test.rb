@@ -41,12 +41,13 @@ Groovepacks::Application.configure do
   $redis = Redis.new(:host => 'localhost', :port=> 6379)
 
   config.action_mailer.smtp_settings = {
-    :address => "smtp.gmail.com",
+    :address => "smtp.mandrillapp.com",
     :port => 587,  
     :authentication => "plain",
     :enable_starttls_auto => true,
-    :user_name => 'liquorexam@gmail.com',
-    :password => 'alaskatap',
+    :domain => 'groovepacker.com',
+    :user_name => 'groovepacker@gmail.com',
+    :password => 'ckWnOifHhLOJRiqZQ-ZRKA',
     :openssl_verify_mode  => 'none'
   }
   # Raise exception on mass assignment protection for Active Record models
