@@ -78,12 +78,14 @@ class Subscription < ActiveRecord::Base
       self.status = 'failed'
       self.transaction_errors = e.message
       self.save
+      TransactionEmail.failed_subscription(self, e).deliver
       logger.error "There was an error with Stripe: #{e.message}"
       false
     rescue Stripe::InvalidRequestError => e
       self.status = 'failed'
       self.transaction_errors = e.message
       self.save
+      TransactionEmail.failed_subscription(self, e).deliver
       logger.error "Stripe error while creating customer: #{e.message}"
       errors.add :base, "There was a problem with your credit card."
       false
@@ -91,6 +93,7 @@ class Subscription < ActiveRecord::Base
       self.status = 'failed'
       self.transaction_errors = e.message
       self.save
+      TransactionEmail.failed_subscription(self, e).deliver
       logger.error "There was a problem with subscription process #{e.message}"
       false
     end
