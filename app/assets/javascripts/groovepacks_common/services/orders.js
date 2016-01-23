@@ -451,6 +451,12 @@ groovepacks_services.factory('orders', ['$http', '$window', 'notification', '$q'
     notification.notify(message, 0);
   }
 
+  var get_order_id = function (increment_id) {
+    return $http.post('/orders/get_id.json',{increment_id: increment_id}).success(function(response) {
+      return response;
+    }).error(notification.server_error);
+  }
+
   return {
     model: {
       get: get_default
@@ -475,6 +481,7 @@ groovepacks_services.factory('orders', ['$http', '$window', 'notification', '$q'
       update: update_single,
       select: select_single,
       rollback: rollback_single,
+      get_id: get_order_id,
       item: {
         add: single_add_item,
         remove: single_remove_item,

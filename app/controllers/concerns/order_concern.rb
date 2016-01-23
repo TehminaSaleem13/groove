@@ -286,7 +286,7 @@ module OrderConcern
     def initiate_import_for_single_store
       store = Store.find_by_id(params[:store_id])
       Delayed::Job.where(queue: "importing_orders_"+current_tenant).destroy_all
-      import_params = {tenant: current_tenant, store: store, import_type: params[:import_type], user: current_user}
+      import_params = {tenant: current_tenant, store: store, import_type: params[:import_type], user: current_user, days: params[:days]}
       ImportOrders.new.import_order_by_store(import_params)
     end
 

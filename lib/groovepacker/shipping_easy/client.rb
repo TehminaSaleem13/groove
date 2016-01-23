@@ -17,7 +17,8 @@ module Groovepacker
         filters = filters.merge(api_key_and_secret)
 
         unless import_item.import_type=='deep'
-          last_import = @credential.last_imported_at rescue (importing_time - 4.days)
+          days_back_to_import = import_item.days.to_i.days rescue 4.days
+          last_import = @credential.last_imported_at rescue (importing_time - days_back_to_import)
           filters[:last_updated_at] = last_import.to_s
         end
 

@@ -191,6 +191,56 @@ RSpec.describe ScanPackController, :type => :controller do
       expect(result["error_messages"][0]).to eq("Please specify a barcode to scan the order")
     end
 
+    it "should process order scan by both hypenated and non hyphenated barcode plus including # symbol" do
+      request.accept = "application/json"
+
+      order2 = FactoryGirl.create(:order, :increment_id=>'123-456')
+
+      get :scan_barcode, { :state => "scanpack.rfo", :input => '#123-456' }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["data"]["order"].present?).to eq true
+      expect(result["data"]["order"]["increment_id"]).to eq order2.increment_id
+
+      get :scan_barcode, { :state => "scanpack.rfo", :input => '#123456' }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["data"]["order"].present?).to eq true
+      expect(result["data"]["order"]["increment_id"]).to eq order2.increment_id
+
+      get :scan_barcode, { :state => "scanpack.rfo", :input => '123-456' }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["data"]["order"].present?).to eq true
+      expect(result["data"]["order"]["increment_id"]).to eq order2.increment_id
+    end
+
+    it "should process order scan for the matched input first and add other founded orders to cue" do
+      request.accept = "application/json"
+      increment_ids = ['MT3004', '#MT3004', 'MT3-004', '#MT3-004']
+
+      orders = increment_ids.each_with_index.reduce([]) do |arr, (increment_id, index)|
+        arr[index] = FactoryGirl.create(:order, increment_id: increment_id)
+        arr
+      end
+
+      orders.each do |order|
+        get :scan_barcode, { :state => "scanpack.rfo", :input => order.increment_id }
+        expect(response.status).to eq(200)
+        result = JSON.parse(response.body)
+        expect(result["data"]["order"].present?).to eq true
+        expect(result["data"]["order"]["increment_id"]).to eq order.increment_id
+        expect(result["data"]["matched_orders"].count).to eq 4
+        expect(
+          result["data"]["matched_orders"].map{|e| e['increment_id']} - 
+          [
+            orders[0].increment_id, orders[1].increment_id,
+            orders[2].increment_id, orders[3].increment_id
+          ]
+          ).to eq []
+      end
+    end
+
     it "should process order scan by both tracking number and order number if scan_by_tracking_number is enabled" do
       request.accept = "application/json"
 
@@ -203,11 +253,15 @@ RSpec.describe ScanPackController, :type => :controller do
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
       expect(result["status"]).to eq(true)
+      expect(result["data"]["order"].present?).to eq true
+      expect(result["data"]["order"]["increment_id"]).to eq order1.increment_id
 
       get :scan_barcode, { :state => "scanpack.rfo", :input => 1234567890123 }
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
       expect(result["status"]).to eq(true)
+      expect(result["data"]["order"].present?).to eq true
+      expect(result["data"]["order"]["increment_id"]).to eq order2.increment_id
     end
 
    	it "should process order scan for orders having a status of Awaiting Scanning" do

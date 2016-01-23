@@ -238,6 +238,12 @@ class OrdersController < ApplicationController
     render json: @result
   end
 
+  def get_id
+    orders = Order.where(increment_id: params['increment_id'])
+    @order_id = orders.first.id unless orders.empty?
+
+    render json: @order_id
+  end
   # def match
   #   @matching_orders = Order.where('postcode LIKE ?', "#{params['confirm']['postcode']}%")
   #   unless @matching_orders.nil?
