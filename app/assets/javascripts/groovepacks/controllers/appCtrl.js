@@ -187,9 +187,9 @@ groovepacks_controllers.
                     '<span ng-show="store.store_type==\'BigCommerce\'">' +
                       '<a class="btn BigCommerce" ng-hide="import_summary.import_info.status==\'in_progress\'" title="Deep Import" ng-click="issue_import(store.id, 4, \'deep\')"><img class="icons" src="/assets/images/deep_import.png"></img></a>' +
                     '</span>' +
-                    '<span ng-show="store.store_type==\'ShippingEasy\'" ng-mouseover="show_days_select(store, import_summary.import_info.id, true)" ng-mouseleave="show_days_select(store, import_summary.import_info.id, false)">' +
+                    '<span ng-show="store.store_type==\'ShippingEasy\'" ng-mouseover="show_days_select(store, import_summary.import_info.id, true)" ng-mouseleave="show_days_select(store, import_summary.import_info.id, false)" style="display: flex;">' +
                       '<a class="btn" ng-hide="import_summary.import_info.status==\'in_progress\'" title="Deep Import" ng-click="issue_import(store.id, store.days, \'deep\')"><img class="icons" src="/assets/images/deep_import.png"></img></a>' +
-                      '<select ng-model="store.days" data-import="{{import_summary.import_info.id}}" ng-options="day for day in [2,3,4,5,6,7,8,9,10]" style="display: none;"></select>' +
+                      '<select ng-model="store.days" data-import="{{import_summary.import_info.id}}" ng-options="day for day in [1,2,3,4,5,6,7,8,9,10]" style="display: none;font-size: 15px;height: 30px;"></select>' +
                     '</span>' +
                     '<span ng-show="store.store_type==\'Shipstation API 2\'">' +
                       '<a class="btn" ng-hide="import_summary.import_info.status==\'in_progress\'" title="Quick Import" ng-click="issue_import(store.id, 7, \'quick\')"><img class="icons" src="/assets/images/quick_import.png"></img></a>' +
