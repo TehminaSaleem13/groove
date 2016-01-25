@@ -927,7 +927,29 @@ li {
 
     .tab-col {
       padding-left: 0px;
-      padding-right: 5px;
+      padding-right: 15px;
+
+      .tab-col-row {
+        .row {
+          margin-left: 0px;
+          margin-right: 0px;
+        }
+      }
+      .tab-white {
+        background-color: white;
+        height: 20px;
+        margin-bottom: 0px;
+        margin-right: 0px;
+        margin-left: 0px;
+        border-bottom-left-radius: 15px;
+        border-bottom-right-radius: 15px;
+        &.tab-pill-active {
+          height: 25px;
+          border-bottom-left-radius: 0px;
+          border-bottom-right-radius: 0px;
+          margin-bottom: 0px;
+        }
+      }
 
       .tab-pill {
         height: 150px;
@@ -937,40 +959,28 @@ li {
 
         &.tab-red {
           background-color: red;
-          opacity: 0.4;
+          border-bottom-left-radius: 0px;
+          border-bottom-right-radius: 0px;
           &.tab-pill-active {
-          opacity: 1;
-            height: 155px;
-            border-bottom-left-radius: 0px;
-            border-bottom-right-radius: 0px;
             margin-bottom: 0px;
-            border: 2px solid #eee;
           }
         }
 
         &.tab-green {
           background-color: green;
-          opacity: 0.4;
+          border-bottom-left-radius: 0px;
+          border-bottom-right-radius: 0px;
           &.tab-pill-active {
-            opacity: 1;
-            height: 155px;
-            border-bottom-left-radius: 0px;
-            border-bottom-right-radius: 0px;
             margin-bottom: 0px;
-            border: 2px solid #eee;
           }
         }
 
         &.tab-violet {
           background-color: #0573CF;
-          opacity: 0.4;
+          border-bottom-left-radius: 0px;
+          border-bottom-right-radius: 0px;
           &.tab-pill-active {
-            opacity: 1;
-            height: 155px;
-            border-bottom-left-radius: 0px;
-            border-bottom-right-radius: 0px;
             margin-bottom: 0px;
-            border: 2px solid #eee;
           }
         }
 
@@ -1003,6 +1013,7 @@ li {
             color: black;
             padding-top: 2px;
             padding-bottom: 0px;
+            border: 0px;
             .fa-pill-col {
               font-size: 35px;
             }
@@ -1025,6 +1036,7 @@ li {
             border-top-left-radius: 8px;
             border-top-right-radius: 8px;
             color: black;
+            border: 0px;
             .fa-pill-col {
               font-size: 40px;
             }
