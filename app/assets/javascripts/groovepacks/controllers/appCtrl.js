@@ -173,22 +173,6 @@ groovepacks_controllers.
           }
           $scope.import_groov_popover.content =
             '<table style="font-size: 12px;width:100%;">' +
-              '<tr>' +
-                '<td>' +
-                  '<span class="place_select" style="display: none;">' +
-                    '<div class="col-lg-2 col-md-2" style="position: absolute; top: 5px; right: 0px;" dropdown>' +
-                      '<button type="button" class="groove-button dropdown-toggle days_select" data-toggle="dropdown" style="float:rifght;">' +
-                        'Days <span class="caret"></span>' +
-                      '</button>' +
-                      '<ul class="dropdown-menu" role="menu">' +
-                        '<li ng-repeat="day in [1,2,3,4,5,6,7,8,9,10]">' +
-                          '<a ng-click="issue_import(import_store_id, day, \'deep\')">{{day}}</a>' +
-                        '</li>' +
-                      '</ul>' +
-                    '</div>' +
-                  '</span>' +
-                '</td>' +
-              '</tr>' +
               '<tr ng-repeat="store in import_groov_popover.data" ng-hide="!store.status">' +
                 '<td width="60px;" style="white-space: nowrap;">' +
                   '<a class="btn" href="#/settings/stores/{{store.id}}"><img ng-src="{{store.logo.src}}" width="60px" alt="{{store.logo.alt}}"/></a>' +
@@ -203,8 +187,9 @@ groovepacks_controllers.
                     '<span ng-show="store.store_type==\'BigCommerce\'">' +
                       '<a class="btn BigCommerce" ng-hide="import_summary.import_info.status==\'in_progress\'" title="Deep Import" ng-click="issue_import(store.id, 4, \'deep\')"><img class="icons" src="/assets/images/deep_import.png"></img></a>' +
                     '</span>' +
-                    '<span ng-show="store.store_type==\'ShippingEasy\'">' +
-                      '<a class="btn ShippingEasy" ng-hide="import_summary.import_info.status==\'in_progress\'" title="Deep Import" ng-click="open_popup(store.id, \'ShippingEasy\')"><img class="icons" src="/assets/images/deep_import.png"></img></a>' +
+                    '<span ng-show="store.store_type==\'ShippingEasy\'" ng-mouseover="show_days_select(store, import_summary.import_info.id, true)" ng-mouseleave="show_days_select(store, import_summary.import_info.id, false)" style="display: flex;">' +
+                      '<a class="btn" ng-hide="import_summary.import_info.status==\'in_progress\'" title="Deep Import" ng-click="issue_import(store.id, store.days, \'deep\')"><img class="icons" src="/assets/images/deep_import.png"></img></a>' +
+                      '<select ng-model="store.days" data-import="{{import_summary.import_info.id}}" ng-options="day for day in [1,2,3,4,5,6,7,8,9,10]" style="display: none;font-size: 15px;height: 30px;"></select>' +
                     '</span>' +
                     '<span ng-show="store.store_type==\'Shipstation API 2\'">' +
                       '<a class="btn" ng-hide="import_summary.import_info.status==\'in_progress\'" title="Quick Import" ng-click="issue_import(store.id, 7, \'quick\')"><img class="icons" src="/assets/images/quick_import.png"></img></a>' +
@@ -221,10 +206,6 @@ groovepacks_controllers.
 
       $scope.issue_import = function (store_id, days, import_type) {
         //console.log(importOrders);
-        //alert(store_id + ", "+ days + "," + import_type);
-        //$('.groove-button.dropdown-toggle.days_select').click();
-        $(".place_select").css('display', 'none');
-        $scope.import_store_id = null;
         importOrders.issue_import(store_id, days, import_type);
       };
 
@@ -237,14 +218,14 @@ groovepacks_controllers.
         stores.shipstation.update_all_locations(store_id);
       };
 
-      $scope.open_popup = function (store_id, span_class) {
-        $(".place_select").css('display', 'block');
-        if($scope.import_store_id==store_id){
-          $(".place_select").css('display', 'none');
-          $scope.import_store_id=null;
+      $scope.show_days_select = function (store, import_item_id, show) {
+        if(store.days ==undefined) {
+          store.days=1;
+        }
+        if(show==true) {
+          $('[data-import='+import_item_id+']').css('display', 'block');
         } else {
-          $scope.import_store_id = store_id;
-          $(".place_select").css('display', 'block');
+          $('[data-import='+import_item_id+']').css('display', 'none');
         }
       };
 

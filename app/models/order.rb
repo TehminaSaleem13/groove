@@ -110,11 +110,15 @@ class Order < ActiveRecord::Base
        Groovepacker::Dashboard::Stats::AnalyticStatStream.new()
       stat_stream = stat_stream_obj.build_stream(self.id)
       puts "stat_stream: " + stat_stream.inspect
-      tenant = Apartment::Tenant.current
-      HTTParty.post("http://#{tenant}stat.#{ENV["GROOV_ANALYTIC"]}/dashboard",
-        query: {tenant_name: tenant},
-        body: stat_stream.to_json,
-        headers: { 'Content-Type' => 'application/json' })
+      begin 
+        tenant = Apartment::Tenant.current
+        HTTParty.post("http://#{tenant}stat.#{ENV["GROOV_ANALYTIC"]}/dashboard",
+          query: {tenant_name: tenant},
+          body: stat_stream.to_json,
+          headers: { 'Content-Type' => 'application/json' })
+      rescue Exception => e
+        Rails.logger.error e.backtrace.join("\n")
+      end
     end
   end
 

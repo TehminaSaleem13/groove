@@ -48,10 +48,12 @@ module ScanPack
 
     def collect_orders
       input_without_special_char = @input.gsub(/(^\#+)|(\-+)/, '')
+      
       @orders = Order.where(
-        "increment_id = ? or non_hyphen_increment_id = ?",
-        @input.squish, input_without_special_char
+        "increment_id REGEXP ? or non_hyphen_increment_id REGEXP ?",
+        "\#*#{@input.squish}$", "\#*#{input_without_special_char}$"
         )
+      
       if @orders.length == 0 && @scanpack_settings.scan_by_tracking_number
         @orders = Order.where(
           'tracking_num = ? or ? LIKE CONCAT("%",tracking_num,"%") ',
@@ -68,7 +70,7 @@ module ScanPack
         matched_single_status, matched_single_order_placed_time,
         single_order_status, single_order_order_placed_time,
         order_placed_for_single_before_than_matched_single = do_set_check_variables(matched_single)
-
+        
         do_check_order_status_for_single_and_matched(
           matched_single, single_order_status, matched_single_status,
           order_placed_for_single_before_than_matched_single
@@ -97,7 +99,7 @@ module ScanPack
     end
 
     def do_check_increment_id(matched_single)
-      @single_order = matched_single if matched_single.increment_id.eql?(@input.squish)
+      @single_order = matched_single if matched_single.increment_id.downcase.eql?(@input.squish.downcase)
     end
 
     def do_check_order_status_for_single_and_matched(
