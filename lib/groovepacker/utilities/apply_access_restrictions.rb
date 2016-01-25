@@ -13,9 +13,9 @@ class ApplyAccessRestrictions
 
   def apply(plan_id)
     access_restrictions = AccessRestriction.order('created_at')
-    access_restriction = access_restrictions.last if access_restrictions.last
-    if access_restriction
-      AccessRestriction.create(num_users: access_restriction.num_users, num_shipments: access_restriction.num_shipments, num_import_sources: access_restriction.num_import_sources).save
+    @access_restriction = access_restrictions.last if access_restrictions.last
+    if @access_restriction
+      AccessRestriction.create(num_users: @access_restriction.num_users, num_shipments: @access_restriction.num_shipments, num_import_sources: @access_restriction.num_import_sources).save
     else
       init = Groovepacker::Tenants::TenantInitialization.new
       init_access = init.access_limits(plan_id)
