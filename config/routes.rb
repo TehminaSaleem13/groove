@@ -12,6 +12,12 @@ Groovepacks::Application.routes.draw do
   get "/500", :to => "specials#error_500"
 
   devise_for :users
+
+  authenticate :user do
+    constraints(:host => /localpacker.com/) do
+      match "/dash_board" => redirect {|params, req| "http://localhost:4000"}
+    end
+  end
   
   get '/bigcommerce/callback' => 'big_commerce#bigcommerce'
   get '/bigcommerce/uninstall' => 'big_commerce#uninstall'
