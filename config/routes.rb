@@ -15,8 +15,8 @@ Groovepacks::Application.routes.draw do
 
   authenticate :user do
     constraints(:host => /localpacker.com/) do
-      match "/dashboard/calculate" => redirect {|params, req| "http://#{ENV['GROOV_ANALYTIC']}/dashboard/calculate"}
-      # match "/dashboard/calculate" => redirect {|params, req| "http://#{req[:tenant]}stat.#{ENV['GROOV_ANALYTIC']}/dashboard/calculate"}
+      # match "/dashboard/calculate" => redirect {|params, req| "http://#{ENV['GROOV_ANALYTIC']}/dashboard/calculate"}
+      match "/dashboard/calculate" => redirect {|params, req| "http://#{req[:tenant]}stat.#{ENV['GROOV_ANALYTIC']}/dashboard/calculate"}
     end
   end
   
