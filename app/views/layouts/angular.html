@@ -42,7 +42,7 @@
   </div>
 </div>
 <div groov-notification></div>
-<% if !current_user.nil? && current_user.username == 'gpadmin' %>
+<% if !current_user.nil? && (current_user.view_dashboard || current_user.username == 'gpadmin') %>
 <div id="dashboard" groov-dashboard></div>
 <% end %>
 <script type="text/javascript">

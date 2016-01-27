@@ -47,7 +47,9 @@ class UsersController < ApplicationController
         else
           @user.name = params[:name]
         end
-
+        unless params[:view_dashboard].nil?
+          @user.view_dashboard = params[:view_dashboard]
+        end
 
         @user.confirmation_code = params[:confirmation_code]
 
