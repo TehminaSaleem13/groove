@@ -935,6 +935,7 @@ li {
           margin-right: 0px;
         }
       }
+
       .tab-white {
         background-color: white;
         height: 20px;
@@ -944,7 +945,7 @@ li {
         border-bottom-left-radius: 15px;
         border-bottom-right-radius: 15px;
         &.tab-pill-active {
-          height: 25px;
+          height: 20px;
           border-bottom-left-radius: 0px;
           border-bottom-right-radius: 0px;
           margin-bottom: 0px;
@@ -1047,6 +1048,28 @@ li {
 
     .tab-col-last {
       padding-right: 0px;
+    }
+
+    .tab-col-next {
+      padding-right: 0px;
+      padding-left: 0px;
+      .curve-left {
+        &.tab-pill-active {
+          height:15px;
+          background: asset-url('images/left_curve.png') bottom right no-repeat, asset-url('images/white_back.png') bottom left repeat;
+        }           
+      }
+      .curve-right {
+        &.tab-pill-active {
+          height:15px;
+          background: asset-url('images/right_curve.png') bottom right no-repeat;
+        }
+      }.no-curve {
+        &.tab-pill-active {
+          height:15px;
+          background: asset-url('images/white_back.png') bottom left repeat;
+        }
+      }
     }
   }
 

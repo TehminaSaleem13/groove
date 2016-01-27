@@ -128,6 +128,24 @@
     </div>
   </div>
   <div class="row">
+    <div class="col-md-4 tab-col-next">
+      <div class="col-md-12 col-lg-12 curve-left tab-pill-active" ng-class="{'tab-pill-active': charts.type=='packing_stats'}" ng-show="charts.type == 'packing_stats'">
+      </div>
+      <div class="col-md-12 col-lg-12 curve-right" ng-class="{'tab-pill-active': charts.type=='packing_speed_stats'}" ng-show="charts.type == 'packing_speed_stats'">
+      </div>
+    </div>
+    <div class="col-md-4 tab-col-next">
+      <div class="col-md-12 col-lg-12 curve-left" ng-class="{'tab-pill-active': charts.type=='packing_speed_stats'}" ng-show="charts.type == 'packing_speed_stats'">
+      </div>
+      <div class="col-md-12 col-lg-12 curve-right" ng-class="{'tab-pill-active': charts.type=='packed_item_stats'}" ng-show="charts.type == 'packed_item_stats'">
+      </div>
+    </div>
+    <div class="col-md-4 tab-col-next">
+      <div class="col-md-12 col-lg-12 no-curve" ng-class="{'tab-pill-active': charts.type=='packed_item_stats'}" ng-show="charts.type == 'packed_item_stats'">
+      </div>
+    </div>
+  </div>
+  <div class="row">
     <div class="col-md-12 col-lg-12 dash-home-container">
       <nvd3-line-chart
         data="dashboard.packing_stats"
