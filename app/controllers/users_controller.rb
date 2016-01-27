@@ -92,6 +92,7 @@ class UsersController < ApplicationController
         if @user.save
           result['user'] = @user.attributes
           result['user']['role'] = @user.role.attributes
+          result['user']['current_user'] = current_user
         else
           result['status'] = false
           result['messages'] = @user.errors.full_messages
@@ -112,7 +113,7 @@ class UsersController < ApplicationController
     result = {}
     result['status'] = true
     result['messages'] = []
-    result['roles'] = Role.where(:display => true);
+    result['roles'] = Role.where(:display => true)
 
     respond_to do |format|
       format.html # show.html.erb
@@ -328,6 +329,7 @@ class UsersController < ApplicationController
       result['status'] = true
       result['user'] = @user
       result['user']['role'] = @user.role
+      result['user']['current_user'] = current_user
     else
       result['status'] = false
     end
