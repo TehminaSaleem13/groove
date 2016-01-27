@@ -13,7 +13,7 @@ module ScanPack::Utilities::ProductScan::IndividualProductType
   def do_if_child_item_has_barcodes(params, child_item)
     item, clean_input, serial_added, clicked, barcode_found = params
     child_item['barcodes'].each do |barcode|
-      if barcode.barcode.strip.downcase == clean_input.downcase || (
+      if barcode.barcode.strip.downcase == clean_input.strip.downcase || (
         @scanpack_settings.skip_code_enabled? && clean_input == @scanpack_settings.skip_code && child_item['skippable']
         )
         barcode_found = true
