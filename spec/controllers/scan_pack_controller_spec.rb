@@ -194,25 +194,37 @@ RSpec.describe ScanPackController, :type => :controller do
     it "should process order scan by both hypenated and non hyphenated barcode plus including # symbol" do
       request.accept = "application/json"
 
-      order2 = FactoryGirl.create(:order, :increment_id=>'123-456')
+      order = FactoryGirl.create(:order, :increment_id=>'123-456')
 
       get :scan_barcode, { :state => "scanpack.rfo", :input => '#123-456' }
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
       expect(result["data"]["order"].present?).to eq true
-      expect(result["data"]["order"]["increment_id"]).to eq order2.increment_id
+      expect(result["data"]["order"]["increment_id"]).to eq order.increment_id
 
       get :scan_barcode, { :state => "scanpack.rfo", :input => '#123456' }
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
       expect(result["data"]["order"].present?).to eq true
-      expect(result["data"]["order"]["increment_id"]).to eq order2.increment_id
+      expect(result["data"]["order"]["increment_id"]).to eq order.increment_id
 
       get :scan_barcode, { :state => "scanpack.rfo", :input => '123-456' }
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
       expect(result["data"]["order"].present?).to eq true
-      expect(result["data"]["order"]["increment_id"]).to eq order2.increment_id
+      expect(result["data"]["order"]["increment_id"]).to eq order.increment_id
+    end
+
+    it "should process order scan with multiple regexp keywords present in input" do
+      request.accept = "application/json"
+
+      order = FactoryGirl.create(:order, :increment_id=>'++-..123--++456')
+
+      get :scan_barcode, { :state => "scanpack.rfo", :input => '#++-..123--++456' }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["data"]["order"].present?).to eq true
+      expect(result["data"]["order"]["increment_id"]).to eq order.increment_id
     end
 
     it "should process order scan for the matched input first and add other founded orders to cue" do
