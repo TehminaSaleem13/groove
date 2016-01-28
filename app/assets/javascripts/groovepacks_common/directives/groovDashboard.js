@@ -195,7 +195,11 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
               scope.exceptions.users.push({id: '-1', username: 'All User'});
               users.list.get(null).then(function (response) {
                 response.data.forEach(function(element) {
-                  scope.exceptions.users.push(element);
+                  if (element.active) {
+                    scope.exceptions.users.push(element);
+                  } else{
+                    return;
+                  };
                 });
               })
             },
