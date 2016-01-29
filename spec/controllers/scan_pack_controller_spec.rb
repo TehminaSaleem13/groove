@@ -227,6 +227,21 @@ RSpec.describe ScanPackController, :type => :controller do
       expect(result["data"]["order"]["increment_id"]).to eq order.increment_id
     end
 
+    it "should process order scan with barcode slip generation " do
+      request.accept = "application/json"
+      @scanpacksetting.post_scanning_option = "PackingSlip"
+      @scanpacksetting.save!
+
+      order = FactoryGirl.create(:order, :increment_id=>'123-456')
+
+      get :scan_barcode, { :state => "scanpack.rfo", :input => '#123-456' }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["data"]["order"].present?).to eq true
+      expect(result["data"]["order"]["increment_id"]).to eq order.increment_id
+      expect(GenerateBarcode.first.current_increment_id).to eq order.increment_id
+    end
+
     it "should process order scan for the matched input first and add other founded orders to cue" do
       request.accept = "application/json"
       increment_ids = ['MT3004', '#MT3004', 'MT3-004', '#MT3-004']

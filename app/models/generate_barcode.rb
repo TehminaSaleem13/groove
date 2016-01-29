@@ -1,5 +1,6 @@
 class GenerateBarcode < ActiveRecord::Base
-  attr_accessible :status, :url
+  attr_accessible :status, :url, :user_id, :current_order_position, :total_orders,
+                  :next_order_increment_id, :status, :current_increment_id
   after_save :emit_data_to_user
 
   def emit_data_to_user

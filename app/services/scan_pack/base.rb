@@ -40,7 +40,7 @@ module ScanPack
         orders.push({id: @single_order.id, increment_id: @single_order.increment_id})
       end
       unless orders.empty?
-        do_generate_barcode_with_delayed_job(orders, result)
+        do_generate_barcode_with_delayed_job(orders)
       else
         @result['notice_messages'].push('No Orders Found')
       end
