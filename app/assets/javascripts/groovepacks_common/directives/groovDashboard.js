@@ -98,7 +98,8 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
           ],
           change_days_filter: function (index) {
             this.current_filter_idx = index;
-            this.init();
+            scope.build_dash_data()
+            // this.init();
           },
           init: function () {
             // scope.build_dash_data()
@@ -137,7 +138,7 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
           },
           set_type: function (chart_mode) {
             scope.charts.type = chart_mode;
-            this.init();
+            // this.init();
           }
         }
 
