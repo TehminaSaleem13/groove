@@ -32,6 +32,11 @@ class GroovS3
       end
     end
 
+    def create_order_backup(tenant, file_name, data)
+      object = self.create(tenant, "deleted_orders/#{file_name}", 'application/json', :private)
+      self.save(object, data)
+    end
+
     def create_pdf(tenant, file_name, data)
       object = self.create(tenant, "pdf/#{file_name}", 'application/pdf', :public_read)
       self.save(object, data)
