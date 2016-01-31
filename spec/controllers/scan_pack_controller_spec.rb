@@ -313,7 +313,81 @@ RSpec.describe ScanPackController, :type => :controller do
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
       expect(result["status"]).to eq(true)
+      expect(result["data"]["order_complete"]).to eq true
+    end
+
+    it "should process order scan for no_tracking_info" do
+      request.accept = "application/json"
+
+      @user.confirmation_code = '123456'
+      @user.save!
+
+      order = FactoryGirl.create(:order, increment_id: '123-456')
+      order2 = FactoryGirl.create(:order, increment_id: '#123-456')
+
+      get :scan_barcode, { id: order.id, :state => "scanpack.rfp.no_tracking_info", input: ''}
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["status"]).to eq(true)
+      expect(result["data"]["order_complete"]).to eq true
+      expect(result["data"]["next_state"]).to eq("scanpack.rfo")
+
+      get :scan_barcode, { id: order2.id, :state => "scanpack.rfp.no_tracking_info", :input => '123456342' }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["status"]).to eq(false)
+      expect(result["data"]["next_state"]).to eq("scanpack.rfp.no_tracking_info")
+    end
+
+    it "should process order scan for no match" do
+      request.accept = "application/json"
+
+      @scanpacksetting.scan_by_tracking_number = true
+      @scanpacksetting.save!
+
+      @generalsetting.strict_cc = false
+      @generalsetting.save!
+
+      @user.confirmation_code = '123456'
+      @user.save!
+
+      order = FactoryGirl.create(:order, increment_id: '123-456')
+      order2 = FactoryGirl.create(:order, tracking_num: '11223344556677889900', increment_id: '#123-456')
+      order3 = FactoryGirl.create(:order, increment_id: '#113-456')
+      order4 = FactoryGirl.create(:order, increment_id: '#111-456')
+
+      get :scan_barcode, { id: order.id, :state => "scanpack.rfp.no_match", input: '123456'}
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["status"]).to eq(true)
       expect(result["data"]["order_complete"].present?).to eq true
+      expect(result["data"]["next_state"]).to eq("scanpack.rfo")
+      expect(order.order_activities.pluck :action).to include("The correct shipping label was not verified at the time of packing."\
+      " Confirmation code for user #{@user.username} was scanned")
+
+      get :scan_barcode, { id: order2.id, :state => "scanpack.rfp.no_match", :input => '11223344556677889900' }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["status"]).to eq(true)
+      expect(result["data"]["order_complete"]).to eq true
+      expect(result["data"]["next_state"]).to eq("scanpack.rfo")
+
+      get :scan_barcode, { id: order3.id, :state => "scanpack.rfp.no_match", :input => '' }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["status"]).to eq(true)
+      expect(result["matched"]).to eq(false)
+      expect(result["data"]["order_complete"]).to eq true
+      expect(result["data"]["next_state"]).to eq("scanpack.rfo")
+
+      @generalsetting.strict_cc = true
+      @generalsetting.save!
+      get :scan_barcode, { id: order4.id, :state => "scanpack.rfp.no_match", :input => '' }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["status"]).to eq(false)
+      expect(result["matched"]).to eq(false)
+      expect(result["data"]["next_state"]).to eq("scanpack.rfp.no_match")
     end
 
    	it "should process order scan for orders having a status of Awaiting Scanning" do
