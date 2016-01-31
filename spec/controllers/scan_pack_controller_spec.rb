@@ -191,6 +191,84 @@ RSpec.describe ScanPackController, :type => :controller do
       expect(result["error_messages"][0]).to eq("Please specify a barcode to scan the order")
     end
 
+    it "should process order scan with post_scanning_option set" do
+      request.accept = "application/json"
+
+
+      order = FactoryGirl.create(:order, increment_id: '123-456', tracking_num: nil)
+
+      # FOR Verify
+      @scanpacksetting.post_scanning_option = 'Verify'
+      @scanpacksetting.save!
+      get :scan_barcode, { :state => "scanpack.rfo", :input => '#123-456' }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["data"]["order"].present?).to eq true
+      expect(result["data"]["order"]["increment_id"]).to eq order.increment_id
+      expect(result['data']['next_state']).to eq 'scanpack.rfp.no_tracking_info'
+      expect(order.order_activities.pluck :action).to include("Tracking information was not imported with this order so the shipping label could not be verified ")
+      expect(order.status).to eq 'awaiting'
+
+      # FOR Verify with Tracking number
+      order1 = FactoryGirl.create(:order, increment_id: '#1111', tracking_num: '1234')
+      @scanpacksetting.post_scanning_option = 'Verify'
+      @scanpacksetting.save!
+      get :scan_barcode, { :state => "scanpack.rfo", :input => '#1111' }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["data"]["order"].present?).to eq true
+      expect(result["data"]["order"]["increment_id"]).to eq order1.increment_id
+      expect(result['data']['next_state']).to eq 'scanpack.rfp.verifying'
+      expect(order.status).to eq 'awaiting'
+
+      # FOR Record
+      @scanpacksetting.post_scanning_option = 'Record'
+      @scanpacksetting.save!
+      get :scan_barcode, { :state => "scanpack.rfo", :input => '#123456' }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["data"]["order"].present?).to eq true
+      expect(result['data']['next_state']).to eq 'scanpack.rfp.recording'
+      expect(result["data"]["order"]["increment_id"]).to eq order.increment_id
+      expect(order.status).to eq 'awaiting'
+
+      # For PackingSlip
+      @scanpacksetting.post_scanning_option = 'PackingSlip'
+      @scanpacksetting.save!
+      get :scan_barcode, { :state => "scanpack.rfo", :input => '123-456' }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["data"]["order"].present?).to eq true
+      expect(result["data"]["order"]["increment_id"]).to eq order.increment_id
+      expect(result['data']['next_state']).to eq 'scanpack.rfo'
+      expect(GenerateBarcode.first.current_increment_id).to eq order.increment_id
+      expect(order.status).to eq 'awaiting'
+
+      # For Any Other
+      order1 = FactoryGirl.create(:order, increment_id: '#2222')
+      @scanpacksetting.post_scanning_option = 'any'
+      @scanpacksetting.save!
+      get :scan_barcode, { :state => "scanpack.rfo", :input => '2222' }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["data"]["order"].present?).to eq true
+      expect(result["data"]["order"]["increment_id"]).to eq order1.increment_id
+      expect(result['data']['next_state']).to eq 'scanpack.rfo'
+      expect(GenerateBarcode.last.current_increment_id).to eq order1.increment_id
+      
+      # For NONE
+      check_none = FactoryGirl.create(:order, increment_id: '#none')
+      @scanpacksetting.post_scanning_option = 'None'
+      @scanpacksetting.save!
+      get :scan_barcode, { :state => "scanpack.rfo", :input => 'none' }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["data"]["order"].present?).to eq true
+      expect(result["data"]["order"]["increment_id"]).to eq check_none.increment_id
+      expect(result['data']['next_state']).to eq 'scanpack.rfo'
+      expect(order.reload.status).to eq 'scanned'
+    end
+
     it "should process order scan by both hypenated and non hyphenated barcode plus including # symbol" do
       request.accept = "application/json"
 
