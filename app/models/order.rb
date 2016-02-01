@@ -213,7 +213,7 @@ class Order < ActiveRecord::Base
     result = false
     self.reload
     self.order_items.each do |order_item|
-      unless order_item.product.is_intangible
+      unless order_item.product.try(:is_intangible)
         if order_item.scanned_status != 'scanned'
           result |= true
           break
