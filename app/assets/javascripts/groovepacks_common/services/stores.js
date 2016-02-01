@@ -49,6 +49,11 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
       }
     };
   };
+
+   var select_notification = function () {
+    notification.notify("Please select atleast one Store", 0);
+  }
+
   //Setup related function
   var update_setup = function (setup, type, value) {
     if (type == 'sort') {
@@ -617,7 +622,8 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
     },
     list: {
       get: get_list,
-      update: update_list
+      update: update_list,
+      select_notification: select_notification
     },
     single: {
       get: get_single,

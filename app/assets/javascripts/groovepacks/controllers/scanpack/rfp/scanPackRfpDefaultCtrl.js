@@ -320,9 +320,29 @@ groovepacks_controllers.
             next_item_index = i;
           };
         };
+        
         first_item = $scope.data.order.unscanned_items[0];
         $scope.data.order.unscanned_items[0] = $scope.data.order.unscanned_items[next_item_index];
         $scope.data.order.unscanned_items[next_item_index] = first_item;
+
+        //Check for child items
+        child_items = $scope.data.order.unscanned_items[0].child_items
+        if(child_items && child_items.length){
+          myscope.arrange_child_items();
+        }
+
+      }
+
+      myscope.arrange_child_items = function () {
+        next_item_index = 0;
+        for (var i = $scope.data.order.unscanned_items[0].child_items.length - 1; i >= 0; i--) {
+          if($scope.data.order.unscanned_items[0].child_items[i].sku == $scope.data.order.next_item.sku){
+            next_item_index = i;
+          };
+        };
+        first_item = $scope.data.order.unscanned_items[0].child_items[0];
+        $scope.data.order.unscanned_items[0].child_items[0] = $scope.data.order.unscanned_items[0].child_items[next_item_index];
+        $scope.data.order.unscanned_items[0].child_items[next_item_index] = first_item;
       }
 
       myscope.handle_known_codes = function () {

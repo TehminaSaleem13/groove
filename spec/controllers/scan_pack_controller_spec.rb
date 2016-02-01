@@ -191,6 +191,161 @@ RSpec.describe ScanPackController, :type => :controller do
       expect(result["error_messages"][0]).to eq("Please specify a barcode to scan the order")
     end
 
+    it "should process order scan with post_scanning_option set" do
+      request.accept = "application/json"
+
+
+      order = FactoryGirl.create(:order, increment_id: '123-456', tracking_num: nil)
+
+      # FOR Verify
+      @scanpacksetting.post_scanning_option = 'Verify'
+      @scanpacksetting.save!
+      get :scan_barcode, { :state => "scanpack.rfo", :input => '#123-456' }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["data"]["order"].present?).to eq true
+      expect(result["data"]["order"]["increment_id"]).to eq order.increment_id
+      expect(result['data']['next_state']).to eq 'scanpack.rfp.no_tracking_info'
+      expect(order.order_activities.pluck :action).to include("Tracking information was not imported with this order so the shipping label could not be verified ")
+      expect(order.status).to eq 'awaiting'
+
+      # FOR Verify with Tracking number
+      order1 = FactoryGirl.create(:order, increment_id: '#1111', tracking_num: '1234')
+      @scanpacksetting.post_scanning_option = 'Verify'
+      @scanpacksetting.save!
+      get :scan_barcode, { :state => "scanpack.rfo", :input => '#1111' }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["data"]["order"].present?).to eq true
+      expect(result["data"]["order"]["increment_id"]).to eq order1.increment_id
+      expect(result['data']['next_state']).to eq 'scanpack.rfp.verifying'
+      expect(order.status).to eq 'awaiting'
+
+      # FOR Record
+      @scanpacksetting.post_scanning_option = 'Record'
+      @scanpacksetting.save!
+      get :scan_barcode, { :state => "scanpack.rfo", :input => '#123456' }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["data"]["order"].present?).to eq true
+      expect(result['data']['next_state']).to eq 'scanpack.rfp.recording'
+      expect(result["data"]["order"]["increment_id"]).to eq order.increment_id
+      expect(order.status).to eq 'awaiting'
+
+      # For PackingSlip
+      @scanpacksetting.post_scanning_option = 'PackingSlip'
+      @scanpacksetting.save!
+      get :scan_barcode, { :state => "scanpack.rfo", :input => '123-456' }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["data"]["order"].present?).to eq true
+      expect(result["data"]["order"]["increment_id"]).to eq order.increment_id
+      expect(result['data']['next_state']).to eq 'scanpack.rfo'
+      expect(GenerateBarcode.first.current_increment_id).to eq order.increment_id
+      expect(order.status).to eq 'awaiting'
+
+      # For Any Other
+      order1 = FactoryGirl.create(:order, increment_id: '#2222')
+      @scanpacksetting.post_scanning_option = 'any'
+      @scanpacksetting.save!
+      get :scan_barcode, { :state => "scanpack.rfo", :input => '2222' }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["data"]["order"].present?).to eq true
+      expect(result["data"]["order"]["increment_id"]).to eq order1.increment_id
+      expect(result['data']['next_state']).to eq 'scanpack.rfo'
+      expect(GenerateBarcode.last.current_increment_id).to eq order1.increment_id
+      
+      # For NONE
+      check_none = FactoryGirl.create(:order, increment_id: '#none')
+      @scanpacksetting.post_scanning_option = 'None'
+      @scanpacksetting.save!
+      get :scan_barcode, { :state => "scanpack.rfo", :input => 'none' }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["data"]["order"].present?).to eq true
+      expect(result["data"]["order"]["increment_id"]).to eq check_none.increment_id
+      expect(result['data']['next_state']).to eq 'scanpack.rfo'
+      expect(order.reload.status).to eq 'scanned'
+    end
+
+    it "should process order scan by both hypenated and non hyphenated barcode plus including # symbol" do
+      request.accept = "application/json"
+
+      order = FactoryGirl.create(:order, :increment_id=>'123-456')
+
+      get :scan_barcode, { :state => "scanpack.rfo", :input => '#123-456' }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["data"]["order"].present?).to eq true
+      expect(result["data"]["order"]["increment_id"]).to eq order.increment_id
+
+      get :scan_barcode, { :state => "scanpack.rfo", :input => '#123456' }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["data"]["order"].present?).to eq true
+      expect(result["data"]["order"]["increment_id"]).to eq order.increment_id
+
+      get :scan_barcode, { :state => "scanpack.rfo", :input => '123-456' }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["data"]["order"].present?).to eq true
+      expect(result["data"]["order"]["increment_id"]).to eq order.increment_id
+    end
+
+    it "should process order scan with multiple regexp keywords present in input" do
+      request.accept = "application/json"
+
+      order = FactoryGirl.create(:order, :increment_id=>'++-..123--++456')
+
+      get :scan_barcode, { :state => "scanpack.rfo", :input => '#++-..123--++456' }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["data"]["order"].present?).to eq true
+      expect(result["data"]["order"]["increment_id"]).to eq order.increment_id
+    end
+
+    it "should process order scan with barcode slip generation " do
+      request.accept = "application/json"
+      @scanpacksetting.post_scanning_option = "PackingSlip"
+      @scanpacksetting.save!
+
+      order = FactoryGirl.create(:order, :increment_id=>'123-456')
+
+      get :scan_barcode, { :state => "scanpack.rfo", :input => '#123-456' }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["data"]["order"].present?).to eq true
+      expect(result["data"]["order"]["increment_id"]).to eq order.increment_id
+      expect(GenerateBarcode.first.current_increment_id).to eq order.increment_id
+    end
+
+    it "should process order scan for the matched input first and add other founded orders to cue" do
+      request.accept = "application/json"
+      increment_ids = ['MT3004', '#MT3004', 'MT3-004', '#MT3-004']
+
+      orders = increment_ids.each_with_index.reduce([]) do |arr, (increment_id, index)|
+        arr[index] = FactoryGirl.create(:order, increment_id: increment_id)
+        arr
+      end
+
+      orders.each do |order|
+        get :scan_barcode, { :state => "scanpack.rfo", :input => order.increment_id }
+        expect(response.status).to eq(200)
+        result = JSON.parse(response.body)
+        expect(result["data"]["order"].present?).to eq true
+        expect(result["data"]["order"]["increment_id"]).to eq order.increment_id
+        expect(result["data"]["matched_orders"].count).to eq 4
+        expect(
+          result["data"]["matched_orders"].map{|e| e['increment_id']} - 
+          [
+            orders[0].increment_id, orders[1].increment_id,
+            orders[2].increment_id, orders[3].increment_id
+          ]
+          ).to eq []
+      end
+    end
+
     it "should process order scan by both tracking number and order number if scan_by_tracking_number is enabled" do
       request.accept = "application/json"
 
@@ -203,11 +358,114 @@ RSpec.describe ScanPackController, :type => :controller do
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
       expect(result["status"]).to eq(true)
+      expect(result["data"]["order"].present?).to eq true
+      expect(result["data"]["order"]["increment_id"]).to eq order1.increment_id
 
       get :scan_barcode, { :state => "scanpack.rfo", :input => 1234567890123 }
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
       expect(result["status"]).to eq(true)
+      expect(result["data"]["order"].present?).to eq true
+      expect(result["data"]["order"]["increment_id"]).to eq order2.increment_id
+    end
+
+    it "should process order scan by scan verifying with tracking_number or confirmation_code" do
+      request.accept = "application/json"
+
+      @scanpacksetting.scan_by_tracking_number = true
+      @scanpacksetting.save
+
+      @user.confirmation_code = '123456'
+      @user.save!
+
+      order = FactoryGirl.create(:order, tracking_num: '11223344556677889900', increment_id: '123-456')
+      order2 = FactoryGirl.create(:order, increment_id: '#123-456')
+
+      get :scan_barcode, { id: order.id, :state => "scanpack.rfp.verifying", :input => '11223344556677889900' }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["status"]).to eq(true)
+      expect(order.order_activities.pluck :action).to include("Shipping Label Verified: 11223344556677889900")
+
+      get :scan_barcode, { id: order2.id, :state => "scanpack.rfp.verifying", :input => '123456' }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["status"]).to eq(true)
+      expect(result["data"]["order_complete"]).to eq true
+    end
+
+    it "should process order scan for no_tracking_info" do
+      request.accept = "application/json"
+
+      @user.confirmation_code = '123456'
+      @user.save!
+
+      order = FactoryGirl.create(:order, increment_id: '123-456')
+      order2 = FactoryGirl.create(:order, increment_id: '#123-456')
+
+      get :scan_barcode, { id: order.id, :state => "scanpack.rfp.no_tracking_info", input: ''}
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["status"]).to eq(true)
+      expect(result["data"]["order_complete"]).to eq true
+      expect(result["data"]["next_state"]).to eq("scanpack.rfo")
+
+      get :scan_barcode, { id: order2.id, :state => "scanpack.rfp.no_tracking_info", :input => '123456342' }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["status"]).to eq(false)
+      expect(result["data"]["next_state"]).to eq("scanpack.rfp.no_tracking_info")
+    end
+
+    it "should process order scan for no match" do
+      request.accept = "application/json"
+
+      @scanpacksetting.scan_by_tracking_number = true
+      @scanpacksetting.save!
+
+      @generalsetting.strict_cc = false
+      @generalsetting.save!
+
+      @user.confirmation_code = '123456'
+      @user.save!
+
+      order = FactoryGirl.create(:order, increment_id: '123-456')
+      order2 = FactoryGirl.create(:order, tracking_num: '11223344556677889900', increment_id: '#123-456')
+      order3 = FactoryGirl.create(:order, increment_id: '#113-456')
+      order4 = FactoryGirl.create(:order, increment_id: '#111-456')
+
+      get :scan_barcode, { id: order.id, :state => "scanpack.rfp.no_match", input: '123456'}
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["status"]).to eq(true)
+      expect(result["data"]["order_complete"].present?).to eq true
+      expect(result["data"]["next_state"]).to eq("scanpack.rfo")
+      expect(order.order_activities.pluck :action).to include("The correct shipping label was not verified at the time of packing."\
+      " Confirmation code for user #{@user.username} was scanned")
+
+      get :scan_barcode, { id: order2.id, :state => "scanpack.rfp.no_match", :input => '11223344556677889900' }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["status"]).to eq(true)
+      expect(result["data"]["order_complete"]).to eq true
+      expect(result["data"]["next_state"]).to eq("scanpack.rfo")
+
+      get :scan_barcode, { id: order3.id, :state => "scanpack.rfp.no_match", :input => '' }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["status"]).to eq(true)
+      expect(result["matched"]).to eq(false)
+      expect(result["data"]["order_complete"]).to eq true
+      expect(result["data"]["next_state"]).to eq("scanpack.rfo")
+
+      @generalsetting.strict_cc = true
+      @generalsetting.save!
+      get :scan_barcode, { id: order4.id, :state => "scanpack.rfp.no_match", :input => '' }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["status"]).to eq(false)
+      expect(result["matched"]).to eq(false)
+      expect(result["data"]["next_state"]).to eq("scanpack.rfp.no_match")
     end
 
    	it "should process order scan for orders having a status of Awaiting Scanning" do
@@ -857,6 +1115,120 @@ RSpec.describe ScanPackController, :type => :controller do
       # order_item.reload
       # expect(order_item.scanned_qty).to eq(1)
       # expect(order_item.scanned_status).to eq("scanned")
+    end
+
+    it "should scan product by lot number and record serial number for kit" do
+      request.accept = "application/json"
+      @scanpacksetting.escape_string_enabled = true
+      @scanpacksetting.record_lot_number = true
+      @scanpacksetting.escape_string = ' .. '
+      @scanpacksetting.save!
+
+      inv_wh = FactoryGirl.create(:inventory_warehouse)
+
+      store = FactoryGirl.create(:store, :inventory_warehouse_id => inv_wh.id)
+      order = FactoryGirl.create(:order, :status=>'awaiting', :store=>store)
+
+      product_kit = FactoryGirl.create(:product, :is_kit => 1, :name=>'iPhone Protection Kit',
+                        :kit_parsing=>'individual', :packing_placement=>50)
+      product_kit_sku = FactoryGirl.create(:product_sku, :product=> product_kit, :sku=> 'IPROTO')
+      product_kit_barcode = FactoryGirl.create(:product_barcode, :product=> product_kit, :barcode => 'IPROTOBAR')
+      order_item_kit = FactoryGirl.create(:order_item, :product_id=>product_kit.id,
+                    :qty=>2, :price=>"10", :row_total=>"10", :order=>order, :name=>product_kit.name)
+
+      kit_product = FactoryGirl.create(:product, :name=>'IPROTO1',:packing_placement=>50, record_serial: true)
+      kit_product_sku = FactoryGirl.create(:product_sku, :product=> kit_product, :sku=> 'IPROTO1')
+      kit_product_barcode = FactoryGirl.create(:product_barcode, :product=> kit_product, :barcode => 'KITITEM1')
+
+      kit_product_kit_sku = FactoryGirl.create(:product_kit_sku, :product => product_kit, :option_product_id=>kit_product.id)
+
+      kit_product2 = FactoryGirl.create(:product, :name=>'IPROTO2', :packing_placement=>50, record_serial: true)
+      kit_product2_sku = FactoryGirl.create(:product_sku, :product=> kit_product2, :sku=> 'IPROTO2')
+      kit_product2_barcode = FactoryGirl.create(:product_barcode, :product=> kit_product2, :barcode => 'KITITEM2')
+
+      product_kit_sku2 = FactoryGirl.create(:product_kit_sku, :product => product_kit, :option_product_id=>kit_product2.id)
+
+      kit_product3 = FactoryGirl.create(:product, :name=>'IPROTO3', :packing_placement=>50, record_serial: true)
+      kit_product3_sku = FactoryGirl.create(:product_sku, :product=> kit_product3, :sku=> 'IPROTO3')
+      kit_product3_barcode = FactoryGirl.create(:product_barcode, :product=> kit_product3, :barcode => 'KITITEM3')
+
+      product_kit_sku3 = FactoryGirl.create(:product_kit_sku, :product => product_kit, :option_product_id=>kit_product3.id)
+
+      get :scan_barcode, {:state=>'scanpack.rfp.default', :input => 'KITITEM1 .. ITEM1LOT', :id => order.id }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['status']).to eq(true)
+      expect(result['data']['order']['unscanned_items'].length).to eq(1)
+      expect(result['data']['order']['unscanned_items'].first['child_items'].length).to eq(3)
+      expect(result['data']['order']['unscanned_items'].first['child_items'].first['name']).to eq('IPROTO1')
+      expect(product_kit.product_lots.count).to eq(1)
+      expect(product_kit.product_lots.pluck :lot_number).to include('ITEM1LOT')
+
+      get :scan_barcode, {:state=>'scanpack.rfp.default', :input => 'KITITEM2 .. ITEM2LOT', :id => order.id }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['status']).to eq(true)
+      expect(result['data']['order']['unscanned_items'].length).to eq(1)
+      expect(result['data']['order']['unscanned_items'].first['child_items'].length).to eq(3)
+      expect(result['data']['order']['unscanned_items'].first['child_items'].first['name']).to eq('IPROTO1')
+      expect(product_kit.product_lots.count).to eq(2)
+      expect(product_kit.product_lots.pluck :lot_number).to include('ITEM2LOT')
+
+      get :serial_scan, {barcode: 'KITITEM3', clicked: true, :order_id => order.id, product_id: product_kit.id, serial: 4}
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['status']).to eq(true)
+      expect(result['data']['order']['unscanned_items'].length).to eq(1)
+      expect(result['data']['order']['unscanned_items'].first['child_items'].length).to eq(3)
+      expect(result['data']['order']['unscanned_items'].first['child_items'].first['name']).to eq('IPROTO1')
+      expect(product_kit.product_lots.count).to eq(2)
+      expect(product_kit.order_serial.pluck :serial).to include('4')
+    end
+
+    it "should not scan product by serial number if barcode found or special code or user confirmation code or scanpacksetting action codes" do
+      request.accept = "application/json"
+      @scanpacksetting.escape_string_enabled = true
+      @scanpacksetting.record_lot_number = true
+      @scanpacksetting.escape_string = ' .. '
+      @scanpacksetting.save!
+
+      inv_wh = FactoryGirl.create(:inventory_warehouse)
+
+      store = FactoryGirl.create(:store, :inventory_warehouse_id => inv_wh.id)
+      order = FactoryGirl.create(:order, :status=>'awaiting', :store=>store)
+
+      product_kit = FactoryGirl.create(:product, :is_kit => 1, :name=>'iPhone Protection Kit',
+                        :kit_parsing=>'individual', :packing_placement=>50)
+      product_kit_sku = FactoryGirl.create(:product_sku, :product=> product_kit, :sku=> 'IPROTO')
+      product_kit_barcode = FactoryGirl.create(:product_barcode, :product=> product_kit, :barcode => 'IPROTOBAR')
+      order_item_kit = FactoryGirl.create(:order_item, :product_id=>product_kit.id,
+                    :qty=>2, :price=>"10", :row_total=>"10", :order=>order, :name=>product_kit.name)
+
+      kit_product = FactoryGirl.create(:product, :name=>'IPROTO1',:packing_placement=>50, record_serial: true)
+      kit_product_sku = FactoryGirl.create(:product_sku, :product=> kit_product, :sku=> 'IPROTO1')
+      kit_product_barcode = FactoryGirl.create(:product_barcode, :product=> kit_product, :barcode => 'KITITEM1')
+
+      kit_product_kit_sku = FactoryGirl.create(:product_kit_sku, :product => product_kit, :option_product_id=>kit_product.id)
+
+      get :serial_scan, {barcode: 'KITITEM1', clicked: true, :order_id => order.id, product_id: product_kit.id, serial: 'KITITEM1'}
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['status']).to eq(false)
+      expect(result['error_messages']).to include('Product Serial number: "KITITEM1" can not be the same as a confirmation code, one of the action codes or any product barcode')
+
+      get :serial_scan, {barcode: 'KITITEM1', clicked: true, :order_id => order.id, product_id: product_kit.id, serial: 'SKIP'}
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['status']).to eq(false)
+      expect(result['error_messages']).to include('Product Serial number: "SKIP" can not be the same as a confirmation code, one of the action codes or any product barcode')
+
+      @user.confirmation_code = '123456'
+      @user.save!
+      get :serial_scan, {barcode: 'KITITEM1', clicked: true, :order_id => order.id, product_id: product_kit.id, serial: '123456'}
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['status']).to eq(false)
+      expect(result['error_messages']).to include('Product Serial number: "123456" can not be the same as a confirmation code, one of the action codes or any product barcode')
     end
 
     it "should split and scan kits" do

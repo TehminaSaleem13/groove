@@ -76,6 +76,13 @@
         </div>
       </div>
 
+      <div class="form-group" ng-show="users.single.current_user.name == 'gpadmin'">
+        <label class="control-label col-md-4">View Dashboard</label>
+
+        <div class="controls col-md-2">
+          <div toggle-switch ng-model="users.single.view_dashboard" groov-click="update_single_user()"></div>
+        </div>
+      </div>
 
     </div>
     <div class="col-md-6">

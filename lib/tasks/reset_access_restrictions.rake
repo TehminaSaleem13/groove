@@ -9,15 +9,16 @@ namespace :schedule do
           subscription = Subscription.where(tenant_name: tenant.name, is_active: true).first
           unless subscription.tenant.nil?
             Apartment::Tenant.switch(tenant_name)
-            access_restriction = AccessRestriction.order("created_at").last unless AccessRestriction.order("created_at").empty?
-            unless access_restriction.nil?
-              if access_restriction.created_at < Time.now - 1.month
-                ApplyAccessRestrictions.new.delay(:run_at => (access_restriction.created_at + 1.month).beginning_of_day, :queue => "reset_access_restrictions_#{tenant_name}").apply_access_restrictions(tenant.name, tenant.plan_id)
+            @access_restriction = AccessRestriction.order("created_at").last unless AccessRestriction.order("created_at").empty?
+            unless @access_restriction.nil?
+              last_created = @access_restriction.created_at
+              if last_created > Time.now - 1.month
+                ApplyAccessRestrictions.new.delay(:run_at => (last_created + 1.month).beginning_of_day, :queue => "reset_access_restrictions_#{tenant_name}").apply_access_restrictions(tenant.name, tenant.plan_id)
               else
-                while access_restriction.created_at < 1.month
-                  access_restriction.created_at += 1.month
+                while last_created < Time.now - 1.month
+                  last_created += 1.month
                 end
-                ApplyAccessRestrictions.new.delay(:run_at => (access_restriction.created_at).beginning_of_day, :queue => "reset_access_restrictions_#{tenant_name}").apply_access_restrictions(tenant.name, tenant.plan_id)
+                ApplyAccessRestrictions.new.delay(:run_at => (last_created + 1.month).beginning_of_day, :queue => "reset_access_restrictions_#{tenant_name}").apply_access_restrictions(tenant.name, tenant.plan_id)
               end
             else
               ApplyAccessRestrictions.new.delay(:run_at => 10.minutes.from_now, :queue => "apply_access_restrictions_#{subscription.tenant_name}").apply_access_restrictions(subscription.tenant_name, subscription.subscription_plan_id)

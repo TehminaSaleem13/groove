@@ -70,6 +70,7 @@ Groovepacks::Application.routes.draw do
       post 'import_shipworks'
       get 'import'
       put 'cancel_import'
+      post 'get_id'
     end
     member do
       post 'add_item_to_order'
@@ -240,17 +241,6 @@ Groovepacks::Application.routes.draw do
   #   end
   # end
 
-  resources :dashboard do
-    collection do
-      get 'packing_stats'
-      get 'packed_item_stats'
-      get 'packing_speed'
-      get 'main_summary'
-      get 'exceptions'
-      get 'leader_board'
-    end
-  end
-
   resources :tenants do
     collection do
       post 'delete_tenant'
@@ -288,6 +278,29 @@ Groovepacks::Application.routes.draw do
   resources :stripe do
     collection do
       post 'webhook'
+    end
+  end
+
+  authenticate :user do
+    constraints(:host => /groovepacker.com/) do
+      match "/dashboard/calculate" => redirect {|params, req| "http://#{req[:tenant]}stat.#{ENV['GROOV_ANALYTIC']}/dashboard/calculate"}
+    end
+    constraints(:host => /barcodepacker.com/) do
+      match "/dashboard/calculate" => redirect {|params, req| "http://#{req[:tenant]}stat.#{ENV['GROOV_ANALYTIC']}/dashboard/calculate"}
+    end
+    constraints(:host => /localpacker.com/) do
+      match "/dashboard/calculate" => redirect {|params, req| "http://#{ENV['GROOV_ANALYTIC']}/dashboard/calculate"}
+    end
+  end
+
+  resources :dashboard do
+    collection do
+      get 'packing_stats'
+      get 'packed_item_stats'
+      get 'packing_speed'
+      get 'main_summary'
+      get 'exceptions'
+      get 'leader_board'
     end
   end
   

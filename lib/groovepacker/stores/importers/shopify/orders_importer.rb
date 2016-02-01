@@ -13,7 +13,6 @@ module Groovepacker
             result = self.build_result
 
             response = client.orders
-
             result[:total_imported] =
               response["orders"].nil? ? 0 : response["orders"].length
 
@@ -34,7 +33,7 @@ module Groovepacker
                 import_item.current_order_imported_item = -1
                 import_item.save
                 shipstation_order = nil
-                if Order.where(increment_id: order["id"]).empty?
+                if Order.where(increment_id: order["name"]).empty?
 
                   #create order
                   shopify_order = Order.new
@@ -109,7 +108,7 @@ module Groovepacker
           end
 
           def import_order(shopify_order, order)
-            shopify_order.increment_id = order["order_number"] 
+            shopify_order.increment_id = order["name"] 
             shopify_order.store_order_id = order["id"].to_s
             shopify_order.order_placed_time = order["created_at"]
 

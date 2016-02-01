@@ -61,9 +61,17 @@ git stash
 git checkout ${ENV}
 git pull origin ${ENV}
 
+git submodule init
+git submodule update --recursive
+
+cd ~/groove/nodeserver/socket-server
+npm install
+
+cd ~/groove/nodeserver/oauth-server
+npm install
 
 rm vendor/assets/components/**/*.js.{gzip,map}
-RAILS_ENV=${ENV} bundle exec bundle install --deployment
+RAILS_ENV=${ENV} bundle install --deployment
 RAILS_ENV=${ENV} bundle exec rake db:migrate
 RAILS_ENV=${ENV} bundle exec rake db:seed
 RAILS_ENV=${ENV} bundle exec rake assets:clean

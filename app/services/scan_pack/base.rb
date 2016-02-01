@@ -40,7 +40,7 @@ module ScanPack
         orders.push({id: @single_order.id, increment_id: @single_order.increment_id})
       end
       unless orders.empty?
-        do_generate_barcode_with_delayed_job(orders, result)
+        do_generate_barcode_with_delayed_job(orders)
       else
         @result['notice_messages'].push('No Orders Found')
       end
@@ -112,7 +112,7 @@ module ScanPack
       @tenant_name = Apartment::Tenant.current
       file_name = @tenant_name + Time.now.strftime('%d_%b_%Y_%I__%M_%p')
       pdf_path = Rails.root.join('public', 'pdfs', "#{file_name}_order_number.pdf")
-      pdf_html = action_view.render :template => '@orders/generate_order_barcode_slip.html.erb', :layout => nil, :locals => {:@order => order}
+      pdf_html = action_view.render :template => 'orders/generate_order_barcode_slip.html.erb', :layout => nil, :locals => {:@order => order}
       doc_pdf = WickedPdf.new.pdf_from_string(
         pdf_html,
         :inline => true,

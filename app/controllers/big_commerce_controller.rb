@@ -69,7 +69,7 @@ class BigCommerceController < ApplicationController
 
     def generate_access_token
       url = 'https://login.bigcommerce.com/oauth2/token'
-      body_attrs = { client_id: ENV['BC_CLIENT_ID'], client_secret: ENV['BC_CLIENT_SECRET'], code: params[:code], scope: params[:scope], grant_type: :authorization_code, redirect_uri: "https://admin.barcodepacker.com/bigcommerce/callback", context: params[:context] }
+      body_attrs = { client_id: ENV['BC_CLIENT_ID'], client_secret: ENV['BC_CLIENT_SECRET'], code: params[:code], scope: params[:scope], grant_type: :authorization_code, redirect_uri: "https://#{ENV['BC_CALLBACK_HOST']}/bigcommerce/callback", context: params[:context] }
        begin
         response = HTTParty.post('https://login.bigcommerce.com/oauth2/token', body: body_attrs.to_json, headers: { "X-Auth-Client" => ENV['BC_CLIENT_ID'], "Content-Type" => "application/json", "Accept" => "application/json" })
         return response

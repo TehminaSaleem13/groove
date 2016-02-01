@@ -1,6 +1,6 @@
 groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sce',
-  '$timeout', '$interval', 'groovIO', 'orders', 'stores', 'notification', 'dashboard', 'dashboard_calculator', 'users',
-  function ($window, $document, $sce, $timeout, $interval, groovIO, orders, stores,
+  '$timeout', '$interval', '$state', 'groovIO', 'orders', 'stores', 'notification', 'dashboard', 'dashboard_calculator', 'users',
+  function ($window, $document, $sce, $timeout, $interval, $state, groovIO, orders, stores,
             notification, dashboard, dashboard_calculator, users) {
     return {
       restrict: "A",
@@ -39,7 +39,9 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
           scope.dashboard = dashboard.model.get();
           scope.dash_data = {};
           scope.exceptions.init_all();
-          // dashboard.stats.dashboard_stat();
+          setTimeout(function(){
+            dashboard.stats.dashboard_stat();
+          }, 200);
         }
 
         scope.switch_tab = function (tab) {
@@ -53,6 +55,26 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
           // } else if (tab.heading == "Leader Board") {
           //   scope.leader_board.retrieve.leader_board();
           // }
+        }
+
+        scope.handle_click_fn = function (row, event) {
+          console.log("handle_click_fn");
+          console.log(row['increment_id']);
+          if (typeof event != 'undefined') {
+            event.stopPropagation();
+          }
+          var toState = 'orders.filter.page.single';
+          var toParams = {};
+          for (var key in $state.params) {
+            if (['filter', 'page'].indexOf(key) != -1) {
+              toParams[key] = $state.params[key];
+            }
+          }
+          orders.single.get_id(row['increment_id']).then(function(response) {
+            toParams.order_id = response.data;
+            scope.toggle_dashboard_detail();
+            $state.go(toState, toParams);
+          });
         }
 
         groovIO.on('dashboard_update', function (message) {
@@ -76,7 +98,8 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
           ],
           change_days_filter: function (index) {
             this.current_filter_idx = index;
-            this.init();
+            scope.build_dash_data()
+            // this.init();
           },
           init: function () {
             // scope.build_dash_data()
@@ -115,13 +138,16 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
           },
           set_type: function (chart_mode) {
             scope.charts.type = chart_mode;
-            this.init();
+            // this.init();
           }
         }
 
         scope.leader_board = {
           list: [],
           options: {
+            functions: {
+              ordernum: scope.handle_click_fn
+            },
             all_fields: {
               order_items_count: {
                 name: "Order Items",
@@ -138,7 +164,8 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
               },
               increment_id: {
                 name: "Order Number",
-                editable: false
+                editable: false,
+                transclude: '<a href="" ng-click="options.functions.ordernum(row,$event)" >{{row[field]}}</a>'
               },
               packing_time: {
                 name: "Packing Time",
@@ -168,14 +195,24 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
           },
           init: {
             users: function () {
+              scope.exceptions.users.push({id: '-1', username: 'All User'});
               users.list.get(null).then(function (response) {
-                scope.exceptions.users = response.data;
+                response.data.forEach(function(element) {
+                  if (element.active) {
+                    scope.exceptions.users.push(element);
+                  } else{
+                    return;
+                  };
+                });
               })
             },
             exception_by_frequency: function () {
               scope.exceptions_by_frequency = {
                 list: [],
                 options: {
+                  functions: {
+                    ordernum: scope.handle_click_fn
+                  },
                   all_fields: {
                     created_at: {
                       name: "Date Recorded",
@@ -188,7 +225,8 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
                     },
                     increment_id: {
                       name: "Order Number",
-                      editable: false
+                      editable: false,
+                      transclude: '<a href="" ng-click="options.functions.ordernum(row,$event)" >{{row[field]}}</a>'
                     },
                     frequency: {
                       name: "Frequency",
@@ -203,6 +241,9 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
               scope.most_recent_exceptions = {
                 list: [],
                 options: {
+                  functions: {
+                    ordernum: scope.handle_click_fn
+                  }, 
                   all_fields: {
                     created_at: {
                       name: "Date Recorded",
@@ -215,7 +256,8 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
                     },
                     increment_id: {
                       name: "Order Number",
-                      editable: false
+                      editable: false,
+                      transclude: '<a href="" ng-click="options.functions.ordernum(row,$event)" >{{row[field]}}</a>'
                     },
                     frequency: {
                       name: "Frequency",
@@ -296,7 +338,7 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
               '">' + key + '</h4>' +
               '<span><strong>Date: </strong>' + x + '</span><br/>' +
               '<span><strong>Accuracy: </strong>' + e.point[1] + '% </span><br/>' +
-              '<span><strong>Period Accuracy: </strong>' + e.point[5] + '% </span><br/>' +
+              '<span><strong>Period Accuracy: </strong>' + average_packing_accuracy + '% </span><br/>' +
               '<span><strong>' + e.point[2] + ' Orders Scanned</strong></span><br/>' +
               '<span><strong>' + e.point[3] + ' Items Packed </strong></span><br/>' +
               '<span><strong>' + e.point[4] + ' Exceptions Recorded</strong></span>' +
@@ -313,10 +355,10 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
               }
               return ('<div><h4 style="text-transform: capitalize; color:' + e.series.color +
               '">' + key + '</h4>' +
-              '<span><strong>Period Speed Score: </strong>' + e.point[2] + '% </span><br/>' +
+              '<span><strong>Period Speed Score: </strong>' + avg_period_score + '% </span><br/>' +
               '<span><strong>Date: </strong>' + x + '</span><br/>' +
               '<span><strong>Daily Speed Score: </strong>' + y + '% </span><br/>' +
-              '<span><strong>Avg. Time/Item: </strong>' + e.point[3] + '</span>' +
+              '<span><strong>Avg. Time/Item: </strong>' + e.point[2] + ' sec</span>' +
               '</div>')
             } else if (scope.charts.type == 'packed_item_stats') {
               tooltipText = y + ' items packed on ' + x

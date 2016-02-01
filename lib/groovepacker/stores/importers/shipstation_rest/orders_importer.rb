@@ -22,9 +22,11 @@ module Groovepacker
               credential.shall_import_pending_fulfillment?
 
             if import_item.import_type == 'deep'
-              import_from =
-                credential.last_imported_at.nil? ? Date.today - 2.weeks : 
-                  credential.last_imported_at - 7.days
+              days_back_to_import = import_item.days.to_i.days rescue 7.days
+              import_from = Date.today - days_back_to_import
+              # import_from =
+              #   credential.last_imported_at.nil? ? Date.today - 2.weeks : 
+              #     credential.last_imported_at - 7.days
               import_date_type = "created_at"
             elsif import_item.import_type == 'quick'
               import_from =

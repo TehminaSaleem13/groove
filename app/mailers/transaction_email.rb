@@ -20,4 +20,15 @@ class TransactionEmail < ActionMailer::Base
     mail to: subscription.email,
          subject: "GroovePacker Access Information"
   end
+
+  def failed_subscription(subscription, exception)
+    @exception = exception
+    @subscription = subscription
+    if @exception.nil?
+      subject = "Subscription failed"
+    else
+      subject = "[#{subscription.tenant_name}] [#{Rails.env}] Subscription failed"
+    end
+    mail to: "svisamsetty@navaratan.com, groovepacker+importfail@gmail.com ", subject: subject
+  end
 end

@@ -2,6 +2,7 @@ require File.expand_path('../boot', __FILE__)
 
 require 'rails/all'
 require 'apartment/elevators/subdomain'
+
 if defined?(Bundler)
   # If you precompile assets before deploying to production, use this line
   Bundler.require(*Rails.groups(:assets => %w(development test)))
@@ -64,7 +65,7 @@ module Groovepacks
     
     # Autoload lib/ folder including all subdirectories
     config.autoload_paths += Dir["#{config.root}/lib/**/"]
-    config.middleware.use 'Apartment::Elevators::Subdomain'
+    config.middleware.use 'TenantMiddleware'
     config.assets.paths << Rails.root.join("app", "assets", "fonts")
     config.assets.paths << Rails.root.join("vendor", "assets", "components")
     config.assets.precompile += %w(*.png *.jpg *.jpeg *.gif *.woff *.ttf *.svg)

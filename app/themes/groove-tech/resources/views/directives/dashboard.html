@@ -13,7 +13,25 @@
     </div>
   </div>
 
-  <div class="under-bar" ng-click="toggle_dashboard_detail()" ng-class="{glow:bar_glow}"><i class="glyphicon"
-                                                                                            ng-class="{'glyphicon-chevron-up':!dashbord_detail_open,'glyphicon-top glyphicon-chevron-down':dashbord_detail_open}"></i>
+  <div class="under-bar" ng-click="toggle_dashboard_detail()" ng-class="{glow:bar_glow}"><i class="glyphicon" ng-class="{'glyphicon-chevron-up':!dashbord_detail_open,'glyphicon-top glyphicon-chevron-down':dashbord_detail_open}"></i>
+    <div class="row pull-bar-up">
+      <div class="col-md-2"></div>
+      <div class="col-md-8">
+        <div class="col-md-4">
+          <div class="col-md-6"></div>
+          <div class="col-md-6 stat-pill">Accuracy: {{dashboard.main_summary.packing_accuracy_summary.current_period}}%</div>
+        </div>
+        <div class="col-md-4">
+          <div class="col-md-3"></div>
+          <div class="col-md-6 stat-pill">Speed: {{dashboard.main_summary.packing_speed_summary.current_period}}%</div>
+          <div class="col-md-3"></div>
+        </div>
+        <div class="col-md-4">
+          <div class="col-md-6 stat-pill">Packed: {{dashboard.main_summary.packed_items_summary.current_period}}</div>
+          <div class="col-md-6"></div>
+        </div>
+      </div>
+      <div class="col-md-2"></div>
+    </div>
   </div>
 </div>

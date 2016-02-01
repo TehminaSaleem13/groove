@@ -927,7 +927,30 @@ li {
 
     .tab-col {
       padding-left: 0px;
-      padding-right: 5px;
+      padding-right: 15px;
+
+      .tab-col-row {
+        .row {
+          margin-left: 0px;
+          margin-right: 0px;
+        }
+      }
+
+      .tab-white {
+        background-color: white;
+        height: 20px;
+        margin-bottom: 0px;
+        margin-right: 0px;
+        margin-left: 0px;
+        border-bottom-left-radius: 15px;
+        border-bottom-right-radius: 15px;
+        &.tab-pill-active {
+          height: 20px;
+          border-bottom-left-radius: 0px;
+          border-bottom-right-radius: 0px;
+          margin-bottom: 0px;
+        }
+      }
 
       .tab-pill {
         height: 150px;
@@ -937,22 +960,28 @@ li {
 
         &.tab-red {
           background-color: red;
+          border-bottom-left-radius: 0px;
+          border-bottom-right-radius: 0px;
           &.tab-pill-active {
-            border: 1px solid #eee;
+            margin-bottom: 0px;
           }
         }
 
         &.tab-green {
           background-color: green;
+          border-bottom-left-radius: 0px;
+          border-bottom-right-radius: 0px;
           &.tab-pill-active {
-            border: 1px solid #eee;
+            margin-bottom: 0px;
           }
         }
 
         &.tab-violet {
           background-color: #0573CF;
+          border-bottom-left-radius: 0px;
+          border-bottom-right-radius: 0px;
           &.tab-pill-active {
-            border: 1px solid #eee;
+            margin-bottom: 0px;
           }
         }
 
@@ -985,6 +1014,7 @@ li {
             color: black;
             padding-top: 2px;
             padding-bottom: 0px;
+            border: 0px;
             .fa-pill-col {
               font-size: 35px;
             }
@@ -1007,6 +1037,7 @@ li {
             border-top-left-radius: 8px;
             border-top-right-radius: 8px;
             color: black;
+            border: 0px;
             .fa-pill-col {
               font-size: 40px;
             }
@@ -1017,6 +1048,28 @@ li {
 
     .tab-col-last {
       padding-right: 0px;
+    }
+
+    .tab-col-next {
+      padding-right: 0px;
+      padding-left: 0px;
+      .curve-left {
+        &.tab-pill-active {
+          height:15px;
+          background: asset-url('images/left_curve.png') bottom right no-repeat, asset-url('images/white_back.png') bottom left repeat;
+        }           
+      }
+      .curve-right {
+        &.tab-pill-active {
+          height:15px;
+          background: asset-url('images/right_curve.png') bottom right no-repeat;
+        }
+      }.no-curve {
+        &.tab-pill-active {
+          height:15px;
+          background: asset-url('images/white_back.png') bottom left repeat;
+        }
+      }
     }
   }
 
@@ -2476,6 +2529,19 @@ label.control-label {
   font-weight: 600;
   vertical-align: super;
   font-family: monospace;
+}
+
+.pull-bar-up {
+  margin-top: -13px;
+}
+
+.stat-pill {
+  color: rgba(221, 221, 221, 0.87);
+  text-align: center;
+  border-right: 1px solid black;
+  border-left: 1px solid black;
+  background: #333333;
+  padding-top: 3px;
 }
 
 @-moz-keyframes spin {
