@@ -82,6 +82,7 @@ class ImportOrders
       )
 
       #add import item for the store
+      ImportItem.where(store_id: store.id).destroy_all
       import_summary.import_items.create(
         store: store,
         import_type: import_type
