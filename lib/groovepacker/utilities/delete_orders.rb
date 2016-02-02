@@ -58,6 +58,7 @@ class DeleteOrders
     build_shipping_hash(order)
     build_activity_hash(order)
     build_serial_hash(order)
+    
     @order_items = order.order_items
     build_order_item_hash(@order_items)
 

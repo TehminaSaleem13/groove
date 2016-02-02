@@ -6,8 +6,9 @@ class ApplyAccessRestrictions
       if subscription.tenant
         Apartment::Tenant.switch(tenant_name)
         apply(plan_id)
+        Delayed::Job.where(queue: 'reset_access_restrictions_#{tenant_name}').destroy_all
+        ApplyAccessRestrictions.new.delay(:run_at => (Time.now + 1.month).beginning_of_day, :queue => "reset_access_restrictions_#{tenant_name}").apply_access_restrictions(tenant_name, plan_id)
       end
-      ApplyAccessRestrictions.new.delay(:run_at => (Time.now + 1.month).beginning_of_day, :queue => "reset_access_restrictions_#{tenant_name}").apply_access_restrictions(tenant_name, plan_id)
     end
   end
 
