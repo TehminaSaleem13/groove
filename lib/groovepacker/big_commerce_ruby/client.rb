@@ -6,10 +6,7 @@ module Groovepacker
         options = {}
         combined_response = {}
         combined_response["orders"] = []
-        unless import_item.import_type=='deep'
-          last_import = credential.last_imported_at.to_datetime rescue (DateTime.now - 4.days)
-          options[:min_date_modified] = last_import unless last_import.blank?
-        end
+        options[:min_date_modified] = get_min_date_modified(import_item)
         options[:status_id]=11 #11 is status id of 'Awaiting Fulfillment' in BigCommerce
         
         return combined_response if @store_hash.blank?
@@ -105,6 +102,16 @@ module Groovepacker
                                     "Accept" => "application/json"
                                   }
                                 )
+        end
+
+        def get_min_date_modified(import_item)
+          if import_item.import_type=='deep'
+            days_back_to_import = import_item.days.to_i.days rescue 4.days
+            last_import =  DateTime.now - days_back_to_import
+          else
+            last_import = credential.last_imported_at.to_datetime rescue (DateTime.now - 4.days)
+          end
+          return last_import
         end
 
     end

@@ -184,17 +184,21 @@ groovepacks_controllers.
                 '</td>' +
                 '<td style="text-align:right;width:38%;padding:3px;">' +
                   '<div class="btn-group">' +
-                    '<span ng-show="store.store_type==\'BigCommerce\'">' +
-                      '<a class="btn BigCommerce" ng-hide="import_summary.import_info.status==\'in_progress\'" title="Deep Import" ng-click="issue_import(store.id, 4, \'deep\')"><img class="icons" src="/assets/images/deep_import.png"></img></a>' +
-                    '</span>' +
-                    '<span ng-show="store.store_type==\'ShippingEasy\'" ng-mouseover="show_days_select(store, import_summary.import_info.id, true)" ng-mouseleave="show_days_select(store, import_summary.import_info.id, false)" style="display: flex;">' +
+                    '<span ng-show="store.store_type==\'BigCommerce\'" ng-mouseover="show_days_select(store, true)" ng-mouseleave="show_days_select(store, false)" style="display: flex;">' +
                       '<a class="btn" ng-hide="import_summary.import_info.status==\'in_progress\'" title="Deep Import" ng-click="issue_import(store.id, store.days, \'deep\')"><img class="icons" src="/assets/images/deep_import.png"></img></a>' +
-                      '<select ng-model="store.days" data-import="{{import_summary.import_info.id}}" ng-options="day for day in [1,2,3,4,5,6,7,8,9,10]" style="display: none;font-size: 15px;height: 30px;"></select>' +
+                      '<select ng-model="store.days" data-import="{{store.id}}" ng-options="day for day in [1,4,8,12]" style="display: none;font-size: 15px;height: 30px;"></select>' +
                     '</span>' +
-                    '<span ng-show="store.store_type==\'Shipstation API 2\'">' +
+                    '<span ng-show="store.store_type==\'ShippingEasy\'" ng-mouseover="show_days_select(store, true)" ng-mouseleave="show_days_select(store, false)" style="display: flex;">' +
+                      '<a class="btn" ng-hide="import_summary.import_info.status==\'in_progress\'" title="Deep Import" ng-click="issue_import(store.id, store.days, \'deep\')"><img class="icons" src="/assets/images/deep_import.png"></img></a>' +
+                      '<select ng-model="store.days" data-import="{{store.id}}" ng-options="day for day in [1,4,8,12]" style="display: none;font-size: 15px;height: 30px;"></select>' +
+                    '</span>' +
+                    '<span ng-show="store.store_type==\'Shipstation API 2\'" style="display: flex;">' +
                       '<a class="btn" ng-hide="import_summary.import_info.status==\'in_progress\'" title="Quick Import" ng-click="issue_import(store.id, 7, \'quick\')"><img class="icons" src="/assets/images/quick_import.png"></img></a>' +
                       '<a class="btn" ng-hide="import_summary.import_info.status==\'in_progress\'" title="Regular Import" ng-click="issue_import(store.id, 7, \'regular\')"><img class="icons" src="/assets/images/reg_import.png"></img></a>' +
-                      '<a class="btn ShipstationAPI2" ng-hide="import_summary.import_info.status==\'in_progress\'" title="Deep Import" ng-click="issue_import(store.id, 7, \'deep\')"><img class="icons" src="/assets/images/deep_import.png"></img></a>' +
+                      '<span ng-mouseover="show_days_select(store, true)" ng-mouseleave="show_days_select(store, false)" style="display: flex;">' +
+                        '<a class="btn" ng-hide="import_summary.import_info.status==\'in_progress\'" title="Deep Import" ng-click="issue_import(store.id, store.days, \'deep\')"><img class="icons" src="/assets/images/deep_import.png"></img></a>' +
+                        '<select ng-model="store.days" data-import="{{store.id}}" ng-options="day for day in [1,4,8,12]" style="display: none;font-size: 15px;height: 30px;"></select>' +
+                      '</span>' +
                     '</span>' +
                     '<a class="btn" ng-show="import_summary.import_info.status==\'in_progress\' && import_summary.import_info.import_summary_type != \'update_locations\'" title="Cancel Import" ng-click="cancel_import(store.id)"><img class="icons" src="/assets/images/cancel_import.png"></img></a>' +
                   '</div>' +
@@ -218,14 +222,14 @@ groovepacks_controllers.
         stores.shipstation.update_all_locations(store_id);
       };
 
-      $scope.show_days_select = function (store, import_item_id, show) {
+      $scope.show_days_select = function (store, show) {
         if(store.days ==undefined) {
           store.days=1;
         }
         if(show==true) {
-          $('[data-import='+import_item_id+']').css('display', 'block');
+          $('[data-import='+store.id+']').css('display', 'block');
         } else {
-          $('[data-import='+import_item_id+']').css('display', 'none');
+          $('[data-import='+store.id+']').css('display', 'none');
         }
       };
 
