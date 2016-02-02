@@ -5,7 +5,7 @@ class ScanPack::OrderEditConfService < ScanPack::Base
   def order_edit_conf
     @result['data']['order_num'] = @single_order.increment_id
     if @single_order.status == "onhold" && !@single_order.has_inactive_or_new_products
-      if User.where(:confirmation_code => @input).length > 0
+      if User.where(:confirmation_code => @input).any?
         @result['matched'] = true
         @single_order.status = 'awaiting'
         @single_order.addactivity("Status changed from onhold to awaiting",

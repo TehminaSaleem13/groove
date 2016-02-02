@@ -137,12 +137,12 @@ module ScanPack
 
       if can_order_be_scanned
         do_if_under_max_limit_of_shipments
-      else
-        @result['status'] &= false
-        @result['error_messages'].push(
-          "You have reached the maximum limit of number of shipments for your subscription."
-          )
-        @single_order_result['next_state'] = 'scanpack.rfo'
+      # else
+      #   @result['status'] &= false
+      #   @result['error_messages'].push(
+      #     "You have reached the maximum limit of number of shipments for your subscription."
+      #     )
+      #   @single_order_result['next_state'] = 'scanpack.rfo'
       end
       @result['data'] = @single_order_result
       @result['data']['scan_pack_settings'] = @scanpack_settings

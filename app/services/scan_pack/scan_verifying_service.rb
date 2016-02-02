@@ -27,10 +27,10 @@ class ScanPack::ScanVerifyingService < ScanPack::Base
   end
 
   def scan_verifying
-    case @input.present?
-    when @order.tracking_num == @input || @order.tracking_num == @input.last(22)
+    case true
+    when @input.present? && (@order.tracking_num == @input || @order.tracking_num == @input.last(22))
       do_if_tracking_number_eql_input
-    when @input == @current_user.confirmation_code
+    when @input.present? && (@input == @current_user.confirmation_code)
       do_if_input_eql_confirmation_code
     else
       set_error_messages("Tracking number does not match.")
