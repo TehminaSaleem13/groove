@@ -36,6 +36,7 @@ class ScanPackController < ApplicationController
         @result['notice_messages'] = @result['notice_messages'] + output['notice_messages']
         @result['status'] = output['status']
         @result['data'] = output['data']
+        @result['matched'] = output['matched']
         break if output["matched"]
       end
     end

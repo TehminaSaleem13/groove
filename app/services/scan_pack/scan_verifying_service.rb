@@ -17,7 +17,7 @@ class ScanPack::ScanVerifyingService < ScanPack::Base
   def run
     case true
     when @order.blank?
-      set_error_messages("Could not find order with id: "+@id)
+      set_error_messages("Could not find order with id: "+ @id.to_s)
     when @order.status != 'awaiting'
       set_error_messages("The order is not in awaiting state. Cannot scan the tracking number")
     else

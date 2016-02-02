@@ -47,11 +47,12 @@ module ScanPack
     end
 
     def collect_orders
-      input_without_special_char = @input.gsub(/(^\#+)|(\-+)/, '')
+      input_without_special_char = @input.gsub(/^(\#*)|(\-*)/, '').try{|a| a.gsub(/(\W)/){|c| "\\#{c}"}}
+      input_with_special_char = @input.gsub(/^(\#*)/, '').try{|a| a.gsub(/(\W)/){|c| "\\#{c}"}}
       
       @orders = Order.where(
         "increment_id REGEXP ? or non_hyphen_increment_id REGEXP ?",
-        "\#*#{@input.squish}$", "\#*#{input_without_special_char}$"
+        "^\#*#{input_with_special_char}$|\#*#{input_with_special_char}", "^\#*#{input_without_special_char}$|\#*#{input_without_special_char}"
         )
       
       if @orders.length == 0 && @scanpack_settings.scan_by_tracking_number
