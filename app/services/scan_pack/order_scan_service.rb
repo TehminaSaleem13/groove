@@ -52,7 +52,7 @@ module ScanPack
       
       @orders = Order.where(
         "increment_id REGEXP ? or non_hyphen_increment_id REGEXP ?",
-        "^\#*#{input_with_special_char}$|\#*#{input_with_special_char}", "^\#*#{input_without_special_char}$|\#*#{input_without_special_char}"
+        "^\#*#{input_with_special_char}$", "^\#*#{input_without_special_char}$"
         )
       
       if @orders.length == 0 && @scanpack_settings.scan_by_tracking_number
