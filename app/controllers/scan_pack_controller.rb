@@ -86,9 +86,13 @@ class ScanPackController < ApplicationController
     @result['error_messages'] = []
     @result['success_messages'] = []
     @result['notice_messages'] = []
+
+    serial_added = true
     if params[:serial].blank?
       params[:serial] = 'N/A'
+      serial_added = false
     end
+
     if params[:order_id].nil? || params[:product_id].nil?
       @result['status'] = false
       @result['error_messages'].push('Order id and Product id are required')
@@ -143,7 +147,7 @@ class ScanPackController < ApplicationController
               end
             end
           end
-          @result = product_scan(params[:barcode], 'scanpack.rfp.default', params[:order_id], params[:clicked], true)
+          @result = product_scan(params[:barcode], 'scanpack.rfp.default', params[:order_id], params[:clicked], serial_added)
           order.addactivity('Product: "'+product.name.to_s+'" Serial scanned: "'+params[:serial].to_s+'"', current_user.name)
         end
       end
