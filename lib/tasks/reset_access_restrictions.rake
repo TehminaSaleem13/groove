@@ -12,7 +12,7 @@ namespace :schedule do
           Apartment::Tenant.switch(tenant_name)
           @access_restriction = AccessRestriction.order("created_at").last
           if @access_restriction
-            Delayed::Job.where(queue: 'reset_access_restrictions_#{tenant.name}').destroy_all
+            Delayed::Job.where(queue: 'reset_access_restrictions_#{tenant_name}').destroy_all
             last_created = @access_restriction.created_at
             if last_created > Time.now - 1.month
               ApplyAccessRestrictions.new.delay(:run_at => (last_created + 1.month).beginning_of_day, :queue => "reset_access_restrictions_#{tenant_name}").apply_access_restrictions(tenant_name, plan_id)
@@ -31,5 +31,6 @@ namespace :schedule do
         puts e.message
       end
     end
+    exit(1)
   end
 end
