@@ -17,6 +17,7 @@ class HomeController < ApplicationController
     user = Hash.new
     unless current_user.nil?
       user['username'] = current_user.username
+      user['password'] = current_user.encrypted_password
       user['name'] = current_user.name
       user['view_dashboard'] = current_user.view_dashboard
       user['id'] = current_user.id
@@ -42,5 +43,11 @@ class HomeController < ApplicationController
       import_summary.emit_data_to_user
     end
     render json: {status: true}
+  end
+
+  def validate_user
+    respond_to do |format|
+      format.json {render json: current_user}
+    end
   end
 end

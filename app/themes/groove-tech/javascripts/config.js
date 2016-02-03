@@ -187,7 +187,7 @@ groovepacks.config(['$stateProvider', '$urlRouterProvider', '$httpProvider', 'ho
             allowIn: ['INPUT', 'SELECT', 'TEXTAREA'],
             callback: function (event, hotkey) {
               event.preventDefault();
-              var current_user = auth.get()
+              var current_user = auth.get();
               if (current_user != null &&
                 typeof(current_user) != {} &&
                 current_user.role.name == "Super Super Admin") {

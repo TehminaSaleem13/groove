@@ -11,7 +11,7 @@ Groovepacks::Application.routes.draw do
 
   get "/500", :to => "specials#error_500"
 
-  devise_for :users
+  devise_for :users, controllers: {sessions: "sessions"}
   
   get '/bigcommerce/callback' => 'big_commerce#bigcommerce'
   get '/bigcommerce/uninstall' => 'big_commerce#uninstall'
@@ -48,6 +48,7 @@ Groovepacks::Application.routes.draw do
     collection do
       get 'userinfo'
       get 'request_socket_notifs'
+      get 'validate_user'
     end
   end
 

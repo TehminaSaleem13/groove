@@ -1,4 +1,4 @@
-groovepacks_services.factory('dashboard', ['$http', 'notification', function ($http, notification) {
+groovepacks_services.factory('dashboard', ['$http', 'notification', 'auth', function ($http, notification, auth) {
   var get_default = function () {
     return {
       packing_stats: [],
@@ -65,8 +65,13 @@ groovepacks_services.factory('dashboard', ['$http', 'notification', function ($h
     console.log(tenant);
     domain = document.getElementById('domain').value
     console.log(domain)
+    current_user = auth.get();
+    access_token = localStorage.getItem('access_token');
+    console.log(access_token);
     return (
-      $http.get('/dashboard/calculate?tenant=' + tenant).error(function(response){
+      // $http.get('/dashboard/calculate?tenant=' + tenant + '&validation_token=' + current_user.validation_token).error(function(response){
+      // $http.get('http://' + tenant + 'stat.' + domain +'/dashboard/calculate').error(function(response){
+      $http.get('http://' + domain +'/dashboard/calculate?tenant=' + tenant + '&access_token=' + access_token).error(function(response){
         notification.notify("Failed to load dashboard data", 0);
       })
     )

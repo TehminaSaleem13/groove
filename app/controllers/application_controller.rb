@@ -9,7 +9,9 @@ class ApplicationController < ActionController::Base
     if auth_header.nil?
       authenticate_user!
     elsif auth_header.include?("Bearer")
+      puts "doorkeeper_token: " + doorkeeper_token.inspect
       doorkeeper_authorize!
+      puts "User::: " + User.find(doorkeeper_token.resource_owner_id).inspect
       @current_user = User.find(doorkeeper_token.resource_owner_id) if doorkeeper_token
     else
       render status: 401
@@ -27,9 +29,25 @@ class ApplicationController < ActionController::Base
   def after_sign_in_path_for(resource_or_scope)
     #store session to redis
     if current_user
+       # response = HTTParty.post(
+       #  'http://localtest16.localpacker.com/auth/v1/login', 
+       #  headers: { 
+       #    "Content-Type"=>"application/x-www-form-urlencoded; charset=UTF-8" 
+       #  }, 
+       #  body: "username=gpadmin&password=iioo8899IIOO**((", 
+       #  debug_output: $stdout)
+      # response = HTTParty.post(
+      #   "http://localtest16.localpacker.com/auth/v1/login", 
+      #   headers: { 
+      #     "Content-type": "application/x-www-form-urlencoded; charset=UTF-8"
+      #   })
+      # puts "response: " + response.inspect
       save_bc_auth_if_present
       # an unique MD5 key
       cookies['_validation_token_key'] = Digest::MD5.hexdigest("#{current_user.id}:#{session.to_json}:#{Apartment::Tenant.current}")
+      # response = HTTParty.post('http://localtest16.localpacker.com/oauth/authorize', headers: { "Content-type" => "application/x-www-form-urlencoded; charset=UTF-8" }, body: {"response_type" => "code", "client_id" => current_user.id, "client_secret" => cookies['_validation_token_key'], "redirect_uri" => nil,  "username" => current_user.username})
+      # puts "response::::::" + response.inspect
+      current_user[:validation_token] = cookies['_validation_token_key']
       # store session data or any authentication data you want here, generate to JSON data
       stored_session = JSON.generate({'tenant' => Apartment::Tenant.current, 'user_id' => current_user.id, 'username' => current_user.username})
       $redis.hset('groovehacks:session', cookies['_validation_token_key'], stored_session)
