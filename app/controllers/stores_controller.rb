@@ -27,7 +27,7 @@ class StoresController < ApplicationController
     result['status'] = true
     result['messages'] =[]
     result['has_credentials'] = false
-    store = Store.find(params[:id])
+    store = Store.find_by_id(params[:id])
     unless store.nil?
       if store.store_type == 'CSV'
         ftp = store.ftp_credential
