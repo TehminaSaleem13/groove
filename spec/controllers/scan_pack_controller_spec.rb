@@ -244,6 +244,22 @@ RSpec.describe ScanPackController, :type => :controller do
       expect(GenerateBarcode.first.current_increment_id).to eq order.increment_id
       expect(order.status).to eq 'awaiting'
 
+      # For PackingSlip with packing size 4x6 and orientation landscape
+      order4 = FactoryGirl.create(:order, increment_id: '#432432432', tracking_num: '3424324')
+      @generalsetting.packing_slip_size = '4 x 6'
+      @generalsetting.packing_slip_orientation = 'landscape'
+      @generalsetting.save!
+      @scanpacksetting.post_scanning_option = 'PackingSlip'
+      @scanpacksetting.save!
+      get :scan_barcode, { :state => "scanpack.rfo", :input => '#432432432' }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["data"]["order"].present?).to eq true
+      expect(result["data"]["order"]["increment_id"]).to eq order4.increment_id
+      expect(result['data']['next_state']).to eq 'scanpack.rfo'
+      expect(GenerateBarcode.last.next_order_increment_id).to eq order4.increment_id
+      expect(order4.status).to eq 'awaiting'
+
       # For Any Other
       #Commenting due to build failure on bamboo
       # order1 = FactoryGirl.create(:order, increment_id: '#2222')
@@ -381,6 +397,7 @@ RSpec.describe ScanPackController, :type => :controller do
 
       order = FactoryGirl.create(:order, tracking_num: '11223344556677889900', increment_id: '123-456')
       order2 = FactoryGirl.create(:order, increment_id: '#123-456')
+      order3 = FactoryGirl.create(:order, increment_id: '#111-456')
 
       get :scan_barcode, { id: order.id, :state => "scanpack.rfp.verifying", :input => '11223344556677889900' }
       expect(response.status).to eq(200)
@@ -393,6 +410,27 @@ RSpec.describe ScanPackController, :type => :controller do
       result = JSON.parse(response.body)
       expect(result["status"]).to eq(true)
       expect(result["data"]["order_complete"]).to eq true
+
+      # IF already scanned
+      get :scan_barcode, { id: order2.id, :state => "scanpack.rfp.verifying", :input => '123456' }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["status"]).to eq(false)
+      expect(result["data"]["order_complete"]).to eq nil
+
+      # If input not present
+      get :scan_barcode, { id: order3.id, :state => "scanpack.rfp.verifying", :input => nil }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['error_messages']).to include "Tracking number does not match."
+      expect(result["data"]['next_state']).to eq 'scanpack.rfp.no_match'
+
+      # If id nil
+      get :scan_barcode, { id: nil, :state => "scanpack.rfp.verifying", :input => 'invalid' }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["status"]).to eq(false)
+      expect(result['error_messages']).to include("Could not find order with id: "+ nil.to_s)
     end
 
     it "should process order scan for no_tracking_info" do
@@ -616,7 +654,7 @@ RSpec.describe ScanPackController, :type => :controller do
       # @other_user.confirmation_code = '12345678902'
       @other_user.save
 
-      @order = FactoryGirl.create(:order, :status=>'onhold')
+      @order = FactoryGirl.create(:order, :status=>'onhold', increment_id: '1234')
 
       get :scan_barcode, {:state=>'scanpack.rfp.confirmation.order_edit', :input => '12345678902', :id => @order.id }
 
@@ -629,6 +667,15 @@ RSpec.describe ScanPackController, :type => :controller do
       expect(@order.order_activities.last.action).to eq("Status changed from onhold to awaiting")
       expect(@order.order_activities.last.username).to eq(@other_user.username)
       expect(session[:order_edit_matched_for_current_user]).to eq(true)
+
+      # IF confimation code does not match
+      order2 = FactoryGirl.create(:order, :status=>'onhold', increment_id: '4567')
+      get :scan_barcode, {:state=>'scanpack.rfp.confirmation.order_edit', :input => 'invalid', :id => order2.id }
+
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["status"]).to eq(true)
+      expect(result["data"]["next_state"]).to eq("scanpack.rfo")
   end
 
   it "should not check for confirmation code when order status is not on hold" do
@@ -742,6 +789,29 @@ RSpec.describe ScanPackController, :type => :controller do
       expect(session[:product_edit_matched_for_current_user]).to eq(nil)
   end
 
+  it "should not set session variable when user does not have enough permissions" do
+      request.accept = "application/json"
+
+      @other_user = FactoryGirl.create(:user, 
+        :username=>'test_user', :role => Role.find_by_name('Scan & Pack User'), :confirmation_code => '12345678902')
+
+      @other_user.confirmation_code = '12345678902'
+      @other_user.role.add_edit_products = false
+      @other_user.role.save
+      @other_user.save
+
+      @order = FactoryGirl.create(:order, :status=>'onhold', store: Store.first)
+      @orderitem = FactoryGirl.create(:order_item, :order=>@order)
+      @order.addnewitems
+
+      get :scan_barcode, {:state=>'scanpack.rfp.confirmation.product_edit', :input => '12345678902', :id => @order.id }
+
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["status"]).to eq(true)
+      expect(result["data"]["next_state"]).to eq("scanpack.rfp.confirmation.product_edit")
+      expect(session[:product_edit_matched_for_current_user]).to eq(nil)
+  end
 
   it "should scan product by barcode and order status should be in scanned status when all items are scanned" do
       request.accept = "application/json"
@@ -1462,15 +1532,35 @@ RSpec.describe ScanPackController, :type => :controller do
     it "should scan tracking number of an order" do
       request.accept = "application/json"
       order = FactoryGirl.create(:order, :status=>'awaiting')
+      order2 = FactoryGirl.create(:order, :status=>'awaiting', increment_id: '432432')
 
       put :scan_barcode, {:state => 'scanpack.rfp.recording', :id => order.id, :input=>'1234567890' }
-
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
       expect(result['status']).to eq(true)
       order.reload
       expect(order.status).to eq('scanned')
-      #expect()
+
+      #If already scanned
+      put :scan_barcode, {:state => 'scanpack.rfp.recording', :id => order.id, :input=>'1234567890' }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['status']).to eq(false)
+      expect(result['error_messages']).to include("The order is not in awaiting state. Cannot scan the tracking number")
+      
+      #IF id nil
+      put :scan_barcode, {:state => 'scanpack.rfp.recording', :id => nil, :input=>'1234567890' }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['status']).to eq(false)
+      expect(result['error_messages']).to include("Could not find order with id: "+ nil.to_s)
+
+      #IF input blank
+      put :scan_barcode, {:state => 'scanpack.rfp.recording', :id => order2.id, :input=>'' }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['status']).to eq(false)
+      expect(result['error_messages']).to include("No tracking number is provided")
     end
 
     # it "should scan orders with multiple kit products 1" do

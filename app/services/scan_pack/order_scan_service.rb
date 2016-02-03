@@ -52,7 +52,7 @@ module ScanPack
       
       @orders = Order.where(
         "increment_id REGEXP ? or non_hyphen_increment_id REGEXP ?",
-        "^\#*#{input_with_special_char}$|\#*#{input_with_special_char}", "^\#*#{input_without_special_char}$|\#*#{input_without_special_char}"
+        "^\#*#{input_with_special_char}$", "^\#*#{input_without_special_char}$"
         )
       
       if @orders.length == 0 && @scanpack_settings.scan_by_tracking_number
@@ -137,12 +137,12 @@ module ScanPack
 
       if can_order_be_scanned
         do_if_under_max_limit_of_shipments
-      else
-        @result['status'] &= false
-        @result['error_messages'].push(
-          "You have reached the maximum limit of number of shipments for your subscription."
-          )
-        @single_order_result['next_state'] = 'scanpack.rfo'
+      # else
+      #   @result['status'] &= false
+      #   @result['error_messages'].push(
+      #     "You have reached the maximum limit of number of shipments for your subscription."
+      #     )
+      #   @single_order_result['next_state'] = 'scanpack.rfo'
       end
       @result['data'] = @single_order_result
       @result['data']['scan_pack_settings'] = @scanpack_settings
