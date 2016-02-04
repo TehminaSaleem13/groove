@@ -94,35 +94,35 @@ describe StoresController do
     end
   end
   
-  describe "GET 'getactivestores'" do
-    it "Should not return any active stores" do
-      @inv_wh = FactoryGirl.create(:inventory_warehouse, :name=>'big_commerce_inventory_warehouse1')
-      @store = FactoryGirl.create(:store, :name=>'big_commerce_store1', :inventory_warehouse=>@inv_wh)
-      @big_commerce_credential = FactoryGirl.create(:big_commerce_credential, :store_id=>@store.id)
-      request.accept = "application/json"
-      get :getactivestores, {}
-      expect(response.status).to eq(200)
-      result = JSON.parse(response.body)
-      expect(result['status']).to eq(true)
-      expect(result['stores']).to be_blank
-    end
+  # describe "GET 'getactivestores'" do
+  #   it "Should not return any active stores" do
+  #     @inv_wh = FactoryGirl.create(:inventory_warehouse, :name=>'big_commerce_inventory_warehouse1')
+  #     @store = FactoryGirl.create(:store, :name=>'big_commerce_store1', :inventory_warehouse=>@inv_wh)
+  #     @big_commerce_credential = FactoryGirl.create(:big_commerce_credential, :store_id=>@store.id)
+  #     request.accept = "application/json"
+  #     get :getactivestores, {}
+  #     expect(response.status).to eq(200)
+  #     result = JSON.parse(response.body)
+  #     expect(result['status']).to eq(true)
+  #     expect(result['stores']).to be_blank
+  #   end
     
-    it "Should return all active stores" do
-      @inv_wh = FactoryGirl.create(:inventory_warehouse, :name=>'big_commerce_inventory_warehouse2')
-      @store = FactoryGirl.create(:store, :name=>'big_commerce_store2', :store_type => 'BigCommerce', :inventory_warehouse=>@inv_wh, :status => true)
-      @big_commerce_credential = FactoryGirl.create(:big_commerce_credential, :store_id=>@store.id)
+  #   it "Should return all active stores" do
+  #     @inv_wh = FactoryGirl.create(:inventory_warehouse, :name=>'big_commerce_inventory_warehouse2')
+  #     @store = FactoryGirl.create(:store, :name=>'big_commerce_store2', :store_type => 'BigCommerce', :inventory_warehouse=>@inv_wh, :status => true)
+  #     @big_commerce_credential = FactoryGirl.create(:big_commerce_credential, :store_id=>@store.id)
       
-      @inv_wh = FactoryGirl.create(:inventory_warehouse, :name=>'amazon_inventory_warehouse')
-      @store = FactoryGirl.create(:store, :name=>'amazon_store', :store_type => 'Amazon', :inventory_warehouse=>@inv_wh, :status => true)
-      @amazon_credentials = FactoryGirl.create(:amazon_credential, :store_id=>@store.id)
-      request.accept = "application/json"
-      post :getactivestores, {}
-      expect(response.status).to eq(200)
-      result = JSON.parse(response.body)
-      expect(result['status']).to eq(true)
-      expect(result['stores'].length).to eq(2)
-    end
-  end
+  #     @inv_wh = FactoryGirl.create(:inventory_warehouse, :name=>'amazon_inventory_warehouse')
+  #     @store = FactoryGirl.create(:store, :name=>'amazon_store', :store_type => 'Amazon', :inventory_warehouse=>@inv_wh, :status => true)
+  #     @amazon_credentials = FactoryGirl.create(:amazon_credential, :store_id=>@store.id)
+  #     request.accept = "application/json"
+  #     post :getactivestores, {}
+  #     expect(response.status).to eq(200)
+  #     result = JSON.parse(response.body)
+  #     expect(result['status']).to eq(true)
+  #     expect(result['stores'].length).to eq(2)
+  #   end
+  # end
   
   describe "POST 'create_update_ftp_credentials'" do
     it "Should not create or update ftp credentials for CSV type store" do
