@@ -1379,7 +1379,7 @@ class StoresController < ApplicationController
     import_orders_obj = ImportOrders.new
     import_orders_obj.delay(:run_at => 1.seconds.from_now).init_import(tenant)
 
-    if access_restriction && access_restriction.allow_inv_push && @store && current_user.can?('update_inventories')
+    if @store && current_user.can?('update_inventories')
       case @store.store_type
       when "BigCommerce"
         handler = Groovepacker::Stores::Handlers::BigCommerceHandler.new(@store)

@@ -273,7 +273,8 @@ module Groovepacker
             access_restrictions[data_length - 1].num_shipments = params[:access_restrictions_info][:max_allowed]
             access_restrictions[data_length-1].num_users = params[:access_restrictions_info][:max_users]
             access_restrictions[data_length-1].num_import_sources = params[:access_restrictions_info][:max_import_sources]
-            access_restrictions[data_length-1].allow_inv_push = params[:access_restrictions_info][:allow_inv_push] unless params[:access_restrictions_info][:allow_inv_push].nil?
+            access_restrictions[data_length-1].allow_bc_inv_push = params[:access_restrictions_info][:allow_bc_inv_push] unless params[:access_restrictions_info][:allow_bc_inv_push].nil?
+            access_restrictions[data_length-1].allow_mg_rest_inv_push = params[:access_restrictions_info][:allow_mg_rest_inv_push] unless params[:access_restrictions_info][:allow_mg_rest_inv_push].nil?
             access_restrictions[data_length-1].save
           end
         rescue Exception => e

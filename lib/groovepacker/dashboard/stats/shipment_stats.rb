@@ -24,7 +24,8 @@ module Groovepacker
                 shipping_result['max_allowed'] = @access_restrictions[data_length - 1].num_shipments
                 shipping_result['max_users'] = @access_restrictions[data_length-1].num_users
                 shipping_result['max_import_sources'] = @access_restrictions[data_length-1].num_import_sources
-                shipping_result['allow_inv_push'] = @access_restrictions[data_length-1].allow_inv_push
+                shipping_result['allow_bc_inv_push'] = @access_restrictions[data_length-1].allow_bc_inv_push
+                shipping_result['allow_mg_rest_inv_push'] = @access_restrictions[data_length-1].allow_mg_rest_inv_push
                 if avg_data
                   shipping_result['average_shipped'] = get_avg_shipped('current')
                   shipping_result['average_shipped_last'] = get_avg_shipped('last')
