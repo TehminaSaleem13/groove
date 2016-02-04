@@ -25,14 +25,14 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
             "heading": "Leader Board",
             "templateUrl": "/assets/views/directives/dashboard/leader_board.html"
           }
-        ]
+        ];
         scope.toggle_dashboard_detail = function () {
           $('#dashboard').toggleClass('pdash-open');
           scope.dashbord_detail_open = !scope.dashbord_detail_open;
           if (scope.dashbord_detail_open) {
             scope.charts.init();
           }
-        }
+        };
 
         scope.init = function () {
           scope.charts.type = 'packing_stats';
@@ -42,26 +42,26 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
           setTimeout(function(){
             dashboard.stats.dashboard_stat();
           }, 200);
-        }
+        };
 
         scope.switch_tab = function (tab) {
-          if (tab.heading == "Most Recent Exceptions") {
+          if (tab.heading === "Most Recent Exceptions") {
             scope.exceptions.type = "most_recent";
             scope.exceptions.retrieve.most_recent_exceptions();
-          } else if (tab.heading == "Exceptions by Frequency") {
+          } else if (tab.heading === "Exceptions by Frequency") {
             scope.exceptions.type = "by_frequency";
             scope.exceptions.retrieve.exceptions_by_frequency();
           }
         }
 
         scope.handle_click_fn = function (row, event) {
-          if (typeof event != 'undefined') {
+          if (typeof event !== 'undefined') {
             event.stopPropagation();
           }
           var toState = 'orders.filter.page.single';
           var toParams = {};
           for (var key in $state.params) {
-            if (['filter', 'page'].indexOf(key) != -1) {
+            if (['filter', 'page'].indexOf(key) !== -1) {
               toParams[key] = $state.params[key];
             }
           }
@@ -70,12 +70,12 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
             scope.toggle_dashboard_detail();
             $state.go(toState, toParams);
           });
-        }
+        };
 
         groovIO.on('dashboard_update', function (message) {
-          days = scope.charts.days_filters[scope.charts.current_filter_idx].days
-          scope.dash_data = message.data
-          scope.build_dash_data()
+          days = scope.charts.days_filters[scope.charts.current_filter_idx].days;
+          scope.dash_data = message.data;
+          scope.build_dash_data();
         });
 
         scope.charts = {
@@ -90,7 +90,7 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
           ],
           change_days_filter: function (index) {
             this.current_filter_idx = index;
-            scope.build_dash_data()
+            scope.build_dash_data();
           },
           init: function () {
             dashboard.stats.dashboard_stat();
@@ -98,7 +98,7 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
           set_type: function (chart_mode) {
             scope.charts.type = chart_mode;
           }
-        }
+        };
 
         scope.leader_board = {
           list: [],
@@ -131,7 +131,7 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
               }
             }
           }
-        }
+        };
 
         scope.exceptions = {
           type: 'most_recent',
@@ -151,9 +151,9 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
                     scope.exceptions.users.push(element);
                   } else{
                     return;
-                  };
+                  }
                 });
-              })
+              });
             },
             exception_by_frequency: function () {
               scope.exceptions_by_frequency = {
@@ -184,7 +184,7 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
                     }
                   }
                 }
-              }
+              };
             },
             most_recent_exceptions: function () {
               scope.most_recent_exceptions = {
@@ -215,14 +215,14 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
                     }
                   }
                 }
-              }
+              };
             }
           },
           change_user: function (user_idx) {
-            this.current_user_idx = user_idx
-            if (scope.exceptions.type == "most_recent") {
+            this.current_user_idx = user_idx;
+            if (scope.exceptions.type === "most_recent") {
               scope.exceptions.retrieve.most_recent_exceptions();
-            } else if (scope.exceptions.type == "by_frequency") {
+            } else if (scope.exceptions.type === "by_frequency") {
               scope.exceptions.retrieve.exceptions_by_frequency();
             }
           },
@@ -244,33 +244,34 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
                 });
             }
           }
-        }
+        };
 
         scope.xAxisTickFormatFunction = function () {
           return function (d) {
             return d3.time.format('%b %e, %Y')(moment.unix(d).toDate());
-          }
-        }
+          };
+        };
 
         scope.yAxisTickFormatFunction = function () {
           return function (d) {
             return d;
-          }
-        }
+          };
+        };
         scope.legendColorFunction = function () {
           return function (d) {
             return d.color;
-          }
+          };
         };
         scope.toolTipContentFunction = function () {
           return function (key, x, y, e, graph) {
+            console.log('toolTipContentFunction');
             var tooltipText = '';
-            if (scope.charts.type == 'packing_stats') {
+            if (scope.charts.type === 'packing_stats') {
 
               var average_packing_accuracy = "-";
               for (idx = 0; idx < scope.dashboard.avg_packing_accuracy_stats.length;
                    idx++) {
-                if (scope.dashboard.avg_packing_accuracy_stats[idx].key == key) {
+                if (scope.dashboard.avg_packing_accuracy_stats[idx].key === key) {
                   average_packing_accuracy = scope.dashboard.avg_packing_accuracy_stats[idx].
                     avg_packing_accuracy;
                   break;
@@ -284,12 +285,12 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
               '<span><strong>' + e.point[2] + ' Orders Scanned</strong></span><br/>' +
               '<span><strong>' + e.point[3] + ' Items Packed </strong></span><br/>' +
               '<span><strong>' + e.point[4] + ' Exceptions Recorded</strong></span>' +
-              '</div>')
-            } else if (scope.charts.type == 'packing_speed_stats') {
-              avg_period_score = "-"
+              '</div>');
+            } else if (scope.charts.type === 'packing_speed_stats') {
+              avg_period_score = "-";
               for (idx = 0; idx < scope.dashboard.avg_packing_speed_stats.length;
                    idx++) {
-                if (scope.dashboard.avg_packing_speed_stats[idx].key == key) {
+                if (scope.dashboard.avg_packing_speed_stats[idx].key === key) {
                   avg_period_score = scope.dashboard.avg_packing_speed_stats[idx].
                     avg_period_score;
                   break;
@@ -301,33 +302,34 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
               '<span><strong>Date: </strong>' + x + '</span><br/>' +
               '<span><strong>Daily Speed Score: </strong>' + y + '% </span><br/>' +
               '<span><strong>Avg. Time/Item: </strong>' + e.point[2] + ' sec</span>' +
-              '</div>')
-            } else if (scope.charts.type == 'packed_item_stats') {
-              tooltipText = y + ' items packed on ' + x
+              '</div>');
+            } else if (scope.charts.type === 'packed_item_stats') {
+              tooltipText = y + ' items packed on ' + x;
               return ('<div><h4 style="text-transform: capitalize; color:' + e.series.color +
               '">' + key + '</h4>' +
-              '<span>' + tooltipText + '</span></div>')
+              '<span>' + tooltipText + '</span></div>');
             }
 
-          }
-        }
+          };
+        };
 
         scope.build_dash_data = function() {
+          console.log(scope.dash_data);
           days = scope.charts.days_filters[scope.charts.current_filter_idx].days;
-          scope.leader_board.list = scope.dash_data.leader_board.list
+          scope.leader_board.list = scope.dash_data.leader_board.list;
           for (var i = 0; i <= scope.dash_data.dashboard.length - 1; i++) {
-            if (parseInt(scope.dash_data.dashboard[i].duration, 10) == days) {
+            if (parseInt(scope.dash_data.dashboard[i].duration, 10) === parseInt(days)) {
               scope.dashboard.main_summary = scope.dash_data.dashboard[i].main_summary;
               scope.dashboard.packing_stats = scope.dash_data.dashboard[i].daily_user_data.packing_stats;
               scope.dashboard.packed_item_stats = scope.dash_data.dashboard[i].daily_user_data.packed_item_stats;
               scope.dashboard.packing_speed_stats = scope.dash_data.dashboard[i].daily_user_data.packing_speed_stats;
               scope.dashboard.avg_packing_accuracy_stats = scope.dash_data.dashboard[i].avg_user_data.packing_stats;
               scope.dashboard.avg_packing_speed_stats = scope.dash_data.dashboard[i].avg_user_data.packing_speed_stats;
-            };
-          };
-        }
+            }
+          }
+        };
         scope.init();
       }
-    }
+    };
   }]);
 
