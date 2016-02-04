@@ -1,4 +1,4 @@
-groovepacks_services.factory('dashboard', ['$http', 'notification', function ($http, notification) {
+groovepacks_services.factory('dashboard', ['$http', 'notification', 'auth', function ($http, notification, auth) {
   var get_default = function () {
     return {
       packing_stats: [],
@@ -10,39 +10,6 @@ groovepacks_services.factory('dashboard', ['$http', 'notification', function ($h
     };
   };
 
-
-  var packing_stats = function (duration) {
-    return (
-      $http.get('/dashboard/packing_stats?duration=' + duration).error(function (response) {
-        notification.notify("Failed to load packing statistics", 0);
-      })
-    );
-  }
-
-  var packing_speed_stats = function (duration) {
-    return (
-      $http.get('/dashboard/packing_speed?duration=' + duration).error(function (response) {
-        notification.notify("Failed to load packing speed statistics", 0);
-      })
-    );
-  }
-
-  var packed_item_stats = function (duration) {
-    return (
-      $http.get('/dashboard/packed_item_stats?duration=' + duration).error(function (response) {
-        notification.notify("Failed to load packed item statistics", 0);
-      })
-    );
-  }
-
-  var main_summary = function (duration) {
-    return (
-      $http.get('/dashboard/main_summary?duration=' + duration).error(function (response) {
-        notification.notify("Failed to load main summary statistics", 0);
-      })
-    );
-  }
-
   var exceptions = function (user_id, type) {
     return (
       $http.get('/dashboard/exceptions?user_id=' + user_id + '&exception_type=' + type).error(function (response) {
@@ -51,22 +18,17 @@ groovepacks_services.factory('dashboard', ['$http', 'notification', function ($h
     );
   }
 
-  var leader_board = function () {
-    return (
-      $http.get('/dashboard/leader_board').error(function (response) {
-        notification.notify("Failed to load leader board", 0);
-      })
-    );
-  }
-
   var get_dashboard_data = function() {
-    console.log('get_dashboard_data');
     tenant = document.getElementById('current_tenant').value
-    console.log(tenant);
     domain = document.getElementById('domain').value
-    console.log(domain)
+    site_host = document.getElementById('site_host').value
+    access_token = localStorage.getItem('access_token');
     return (
-      $http.get('/dashboard/calculate?tenant=' + tenant).error(function(response){
+      $http.get(
+        'http://' + domain +'/dashboard/calculate',
+        // 'http://' + tenant + 'stat.' + domain +'/dashboard/calculate',
+        {headers: {'tenant': tenant, 'access_token': access_token, 'domain': site_host}}
+        ).error(function(response){
         notification.notify("Failed to load dashboard data", 0);
       })
     )
@@ -77,12 +39,7 @@ groovepacks_services.factory('dashboard', ['$http', 'notification', function ($h
       get: get_default
     },
     stats: {
-      packing_stats: packing_stats,
-      packed_item_stats: packed_item_stats,
-      packing_speed_stats: packing_speed_stats,
-      main_summary: main_summary,
       exceptions: exceptions,
-      leader_board: leader_board,
       dashboard_stat: get_dashboard_data
     }
   };

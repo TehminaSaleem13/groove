@@ -14,8 +14,8 @@
 
     <%= simple_form_for(resource, :as => resource_name, :url => session_path(resource_name)) do |f| %>
       <div class="form-group">
-        <%= f.input :username, :required => false, :autofocus => true %>
-        <%= f.input :password, :required => false %>
+        <%= f.input :username, :input_html => { :id => "username" }, :required => false, :autofocus => true %>
+        <%= f.input :password, :input_html => { :id => "password" }, :required => false %>
       </div>
       <br/>
 
@@ -23,7 +23,36 @@
         <%= f.button :submit, "Login", :id => 'login_button', :class => "btn btn-success col-lg-12 col-md-12 col-sm-12 col-xs-12" %>
       </div>
     <% end %>
-
+    <script type="text/javascript">
+      $('#login_button').click(function(event){
+        var t = event.target;
+        event.preventDefault();
+        event.stopPropagation();
+        var username = $('#username').val();
+        var password = $('#password').val();
+        var url = document.URL.split('/');
+        var target_url = url[0] + '//' + url[2] + '/auth/v1/login';
+        fetch(target_url, {  
+          method: 'post',  
+          headers: {  
+            "Content-type": "application/x-www-form-urlencoded; charset=UTF-8"  
+          },  
+          body: "username=" + username + "&password=" + password
+        })
+        .then((response) => {
+          if(response.status == 200){
+            response.json().then((data) => {
+              access_token = data.access_token;
+              localStorage.removeItem('access_token');
+              localStorage.setItem('access_token', access_token);
+              $(this).unbind('click').click();
+            })
+          } else {
+            $(this).unbind('click').click();
+          }
+        })
+      })
+    </script>
   </div>
 </div>
 

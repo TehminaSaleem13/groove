@@ -281,18 +281,6 @@ Groovepacks::Application.routes.draw do
     end
   end
 
-  authenticate :user do
-    constraints(:host => /groovepacker.com/) do
-      match "/dashboard/calculate" => redirect {|params, req| "http://#{req[:tenant]}stat.#{ENV['GROOV_ANALYTIC']}/dashboard/calculate"}
-    end
-    constraints(:host => /barcodepacker.com/) do
-      match "/dashboard/calculate" => redirect {|params, req| "http://#{req[:tenant]}stat.#{ENV['GROOV_ANALYTIC']}/dashboard/calculate"}
-    end
-    constraints(:host => /localpacker.com/) do
-      match "/dashboard/calculate" => redirect {|params, req| "http://#{ENV['GROOV_ANALYTIC']}/dashboard/calculate"}
-    end
-  end
-
   resources :dashboard do
     collection do
       get 'packing_stats'

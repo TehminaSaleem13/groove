@@ -37,7 +37,7 @@ Groovepacks::Application.configure do
   config.assets.debug = true
 
   #Default URL options for mailers
-  # config.action_mailer.default_url_options = { :host => 'localhost:3000' }
+  config.action_mailer.default_url_options = { :host => 'localhost:3000' }
   # # config.action_mailer.delivery_method = :smtp
   # # config.action_mailer.smtp_settings = {
   # #   :address => "mail.groovepacker.com",
@@ -137,7 +137,7 @@ Groovepacks::Application.configure do
   #Feature Variables
   ENV['DASHBOARD_ENABLE'] = 'YES'
 
-  ENV["SITE_HOST"] = "barcodepacker.com"
+  ENV["SITE_HOST"] = "localpacker.com"
 
   # analytic server
   ENV["GROOV_ANALYTIC"] = "localhost:4000"
