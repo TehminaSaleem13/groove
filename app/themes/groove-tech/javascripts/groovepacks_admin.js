@@ -8,9 +8,9 @@ var groovepacks_admin_controllers = angular.module('groovepacks_admin.controller
 String.prototype.chunk = function (size) {
   return [].concat.apply([],
     this.split('').map(function (x, i) {
-      return i % size ? [] : this.slice(i, i + size)
+      return i % size ? [] : this.slice(i, i + size);
     }, this)
-  )
+  );
 };
 
 String.prototype.trimmer = function (chr) {

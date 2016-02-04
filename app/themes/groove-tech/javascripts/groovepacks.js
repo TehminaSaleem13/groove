@@ -11,9 +11,9 @@ var groovepacks_directives = angular.module('groovepacks.directives', ['nvd3Char
 String.prototype.chunk = function (size) {
   return [].concat.apply([],
     this.split('').map(function (x, i) {
-      return i % size ? [] : this.slice(i, i + size)
+      return i % size ? [] : this.slice(i, i + size);
     }, this)
-  )
+  );
 };
 
 String.prototype.trimmer = function (chr) {

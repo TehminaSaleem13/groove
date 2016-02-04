@@ -25,8 +25,8 @@ groovepacks_services.factory('dashboard', ['$http', 'notification', 'auth', func
     access_token = localStorage.getItem('access_token');
     return (
       $http.get(
-        'http://' + domain +'/dashboard/calculate',
-        // 'http://' + tenant + 'stat.' + domain +'/dashboard/calculate',
+        // 'http://' + domain +'/dashboard/calculate',
+        'http://' + tenant + 'stat.' + domain +'/dashboard/calculate',
         {headers: {'tenant': tenant, 'access_token': access_token, 'domain': site_host}}
         ).error(function(response){
         notification.notify("Failed to load dashboard data", 0);
