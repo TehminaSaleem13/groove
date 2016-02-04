@@ -48,7 +48,6 @@ Groovepacks::Application.routes.draw do
     collection do
       get 'userinfo'
       get 'request_socket_notifs'
-      get 'validate_user'
     end
   end
 
@@ -279,18 +278,6 @@ Groovepacks::Application.routes.draw do
   resources :stripe do
     collection do
       post 'webhook'
-    end
-  end
-
-  authenticate :user do
-    constraints(:host => /groovepacker.com/) do
-      match "/dashboard/calculate" => redirect {|params, req| "http://#{req[:tenant]}stat.#{ENV['GROOV_ANALYTIC']}/dashboard/calculate"}
-    end
-    constraints(:host => /barcodepacker.com/) do
-      match "/dashboard/calculate" => redirect {|params, req| "http://#{req[:tenant]}stat.#{ENV['GROOV_ANALYTIC']}/dashboard/calculate"}
-    end
-    constraints(:host => /localpacker.com/) do
-      match "/dashboard/calculate" => redirect {|params, req| "http://#{ENV['GROOV_ANALYTIC']}/dashboard/calculate"}
     end
   end
 

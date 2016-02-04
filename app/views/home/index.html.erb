@@ -111,6 +111,7 @@
     </div>
     <input type="hidden" id="current_tenant" value="{{current_user.get().current_tenant}}"/>
     <input type="hidden" id="domain" value="<%= ENV['GROOV_ANALYTIC']%>"/>
+    <input type="hidden" id="site_host" value="<%= ENV['SITE_HOST']%>"/>
     <div class="container-fluid">
 
       <div ui-view></div>

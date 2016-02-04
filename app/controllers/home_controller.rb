@@ -44,10 +44,4 @@ class HomeController < ApplicationController
     end
     render json: {status: true}
   end
-
-  def validate_user
-    respond_to do |format|
-      format.json {render json: current_user}
-    end
-  end
 end
