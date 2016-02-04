@@ -11,7 +11,7 @@ Groovepacks::Application.routes.draw do
 
   get "/500", :to => "specials#error_500"
 
-  devise_for :users, controllers: {sessions: "sessions"}
+  devise_for :users
   
   get '/bigcommerce/callback' => 'big_commerce#bigcommerce'
   get '/bigcommerce/uninstall' => 'big_commerce#uninstall'
