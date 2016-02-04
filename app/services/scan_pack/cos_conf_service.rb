@@ -3,10 +3,9 @@ class ScanPack::CosConfService < ScanPack::Base
 
   def cos_conf
     @result['data']['order_num'] = @single_order.increment_id
+    user = User.where(:confirmation_code => @input).first
     if @single_order.status == "serviceissue"
-      if User.where(:confirmation_code => @input).length > 0
-        user = User.where(:confirmation_code => @input).first
-
+      if user
         if user.can?('change_order_status')
           #set order state to awaiting scannus
           @single_order.status = 'awaiting'

@@ -655,6 +655,7 @@ RSpec.describe ScanPackController, :type => :controller do
       @other_user.save
 
       @order = FactoryGirl.create(:order, :status=>'onhold', increment_id: '1234')
+      order2 = FactoryGirl.create(:order, :status=>'onhold', increment_id: '4567')
 
       get :scan_barcode, {:state=>'scanpack.rfp.confirmation.order_edit', :input => '12345678902', :id => @order.id }
 
@@ -669,13 +670,24 @@ RSpec.describe ScanPackController, :type => :controller do
       expect(session[:order_edit_matched_for_current_user]).to eq(true)
 
       # IF confimation code does not match
-      order2 = FactoryGirl.create(:order, :status=>'onhold', increment_id: '4567')
       get :scan_barcode, {:state=>'scanpack.rfp.confirmation.order_edit', :input => 'invalid', :id => order2.id }
-
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
       expect(result["status"]).to eq(true)
       expect(result["data"]["next_state"]).to eq("scanpack.rfo")
+
+      # IF input is not present
+      get :scan_barcode, {:state=>'scanpack.rfp.confirmation.order_edit', :input => '', :id => order2.id }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["status"]).to eq(false)
+      expect(result["error_messages"]).to include("Please specify confirmation code and order id to confirm purchase code")
+
+      # IF order not found is not present
+      get :scan_barcode, {:state=>'scanpack.rfp.confirmation.order_edit', :input => '12345678902', :id => 'any' }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["error_messages"]).to include("Could not find order with id: any")
   end
 
   it "should not check for confirmation code when order status is not on hold" do
@@ -1010,9 +1022,8 @@ RSpec.describe ScanPackController, :type => :controller do
     it "should process confirmation code for change of order status " do
       request.accept = "application/json"
 
-      order = FactoryGirl.create(:order, :status=>'serviceissue')
-      change_order_status = @user.role.change_order_status
-      @user.role.update_attribute(:change_order_status, true)
+      order = FactoryGirl.create(:order, :status=>'awaiting')
+      @user.role.update_attribute(:change_order_status, false)
 
       product = FactoryGirl.create(:product)
       product_sku = FactoryGirl.create(:product_sku, :product=> product)
@@ -1021,15 +1032,33 @@ RSpec.describe ScanPackController, :type => :controller do
       order_item = FactoryGirl.create(:order_item, :product_id=>product.id,
                     :qty=>3, :price=>"10", :row_total=>"10", :order=>order, :name=>product.name)
 
+      # If not in serviceissue
       post :scan_barcode, {:state=>'scanpack.rfp.confirmation.cos', :input => '1234567890', :id => order.id }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['error_messages']).to include(
+        "Only orders with status Service issue"\
+        "can use change of status confirmation code"
+      )
 
+      # If cannot change order status
+      order.update_attribute(:status, 'serviceissue')
+      post :scan_barcode, {:state=>'scanpack.rfp.confirmation.cos', :input => '1234567890', :id => order.id }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["data"]["next_state"]).to eq("scanpack.rfp.confirmation.cos")
+      expect(order.status).to eq("serviceissue")
+      expect(result['error_messages']).to include("User with confirmation code: 1234567890 does not have permission to change order status")
+
+      # If can change order status
+      @user.role.update_attribute(:change_order_status, true)
+      post :scan_barcode, {:state=>'scanpack.rfp.confirmation.cos', :input => '1234567890', :id => order.id }
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
       expect(result["status"]).to eq(true)
       expect(result["data"]["next_state"]).to eq("scanpack.rfp.default")
       order.reload
       expect(order.status).to eq("awaiting")
-      @user.role.update_attribute(:change_order_status, change_order_status)
 
     end
 
@@ -1149,7 +1178,7 @@ RSpec.describe ScanPackController, :type => :controller do
       order_item_kit = FactoryGirl.create(:order_item, :product_id=>product_kit.id,
                     :qty=>2, :price=>"10", :row_total=>"10", :order=>order, :name=>product_kit.name)
 
-      kit_product = FactoryGirl.create(:product, :name=>'IPROTO1',:packing_placement=>50)
+      kit_product = FactoryGirl.create(:product, :name=>'IPROTO1',:packing_placement=>50, add_to_any_order: true)
       kit_product_sku = FactoryGirl.create(:product_sku, :product=> kit_product, :sku=> 'IPROTO1')
       kit_product_barcode = FactoryGirl.create(:product_barcode, :product=> kit_product, :barcode => 'KITITEM1')
 
@@ -1209,8 +1238,12 @@ RSpec.describe ScanPackController, :type => :controller do
       expect(result['data']['order']['unscanned_items'].first['child_items'].first['qty_remaining']).to eq(1)
       expect(result['data']['next_state']).to eq('scanpack.rfp.default')
 
-      get :scan_barcode, {:state=>'scanpack.rfp.default', :input => 'KITITEM2', :id => order.id }
+      # IF product barcode not found
+      get :scan_barcode, {:state=>'scanpack.rfp.default', :input => 'KITITEM1', :id => order.id }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
 
+      get :scan_barcode, {:state=>'scanpack.rfp.default', :input => 'KITITEM2', :id => order.id }
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
       expect(result["status"]).to eq(true)
