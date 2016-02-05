@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20160204070409) do
+ActiveRecord::Schema.define(:version => 20160205095947) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0,     :null => false
@@ -22,6 +22,7 @@ ActiveRecord::Schema.define(:version => 20160204070409) do
     t.integer  "total_scanned_shipments", :default => 0,     :null => false
     t.boolean  "allow_bc_inv_push",       :default => false
     t.boolean  "allow_mg_rest_inv_push",  :default => false
+    t.boolean  "allow_shopify_inv_push",  :default => false
   end
 
   create_table "amazon_credentials", :force => true do |t|
