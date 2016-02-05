@@ -289,9 +289,7 @@ class ScanPackController < ApplicationController
         else
           if params[:count] <= params[:next_item][:qty]
             unless params[:next_item][:barcodes].blank? || params[:next_item][:barcodes][0].blank? || params[:next_item][:barcodes][0][:barcode].blank?
-              (1..params[:count]).each do
-                @result['data'] = product_scan(params[:next_item][:barcodes][0][:barcode], 'scanpack.rfp.default', params[:id], false)
-              end
+              @result['data'] = product_scan(params[:next_item][:barcodes][0][:barcode], 'scanpack.rfp.default', params[:id], false, false, params[:count].to_i)
               @order.addactivity('Type-In count Scanned for product'+params[:next_item][:sku].to_s, current_user.username)
             end
           else

@@ -8,7 +8,7 @@ class OrderItemKitProduct < ActiveRecord::Base
   UNSCANNED_STATUS = 'unscanned'
   PARTIALLY_SCANNED_STATUS = 'partially_scanned'
 
-  def process_item(clicked, username)
+  def process_item(clicked, username, typein_count=1)
     order_item_unscanned = false
     order_unscanned = false
 
@@ -19,9 +19,9 @@ class OrderItemKitProduct < ActiveRecord::Base
     end
 
     if self.scanned_qty < total_qty * self.product_kit_skus.qty
-      self.scanned_qty = self.scanned_qty + 1
+      self.scanned_qty = self.scanned_qty + typein_count
       if clicked
-        self.clicked_qty = self.clicked_qty + 1
+        self.clicked_qty = self.clicked_qty + typein_count
         self.order_item.order.addactivity("Item with SKU: " +
                                             self.product_kit_skus.option_product.primary_sku + " has been click scanned", username)
       end

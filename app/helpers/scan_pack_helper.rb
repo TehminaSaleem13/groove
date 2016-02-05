@@ -23,9 +23,9 @@ module ScanPackHelper
   #   true
   # end
 
-  def product_scan(input, state, id, clicked=false, serial_added=false)
+  def product_scan(input, state, id, clicked=false, serial_added=false, typein_count= 1)
     product_scan_object = ScanPack::ProductScanService.new(
-      [current_user, session, input, state, id]
+      [current_user, session, input, state, id, typein_count]
       )
     product_scan_object.run(clicked, serial_added)
   end
