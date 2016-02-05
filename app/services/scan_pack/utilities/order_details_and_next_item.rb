@@ -6,6 +6,7 @@ module ScanPack
       def order_details_and_next_item
         @single_order.reload
         data = @single_order.attributes
+        data['next_item'] = {}
         data['unscanned_items'] = @single_order.get_unscanned_items
         data['scanned_items'] = @single_order.get_scanned_items
         do_if_unscanned_items_present(data) unless data['unscanned_items'].length == 0
