@@ -41,6 +41,18 @@ module Groovepacker
         end
         response
       end
+      
+      def update_inventory(sync_option, attrs)
+				
+				response = HTTParty.put("https://#{shopify_credential.shop_name}.myshopify.com/admin/variants/#{sync_option.shopify_product_id}", 
+                                body: attrs.to_json,
+                                headers: { 
+                                  "X-Shopify-Access-Token" => shopify_credential.access_token, 
+                                  "Content-Type" => "application/json", 
+                                  "Accept" => "application/json" 
+                                })
+      end
+      
     end
   end
 end
