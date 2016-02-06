@@ -1385,6 +1385,8 @@ class StoresController < ApplicationController
         handler = Groovepacker::Stores::Handlers::BigCommerceHandler.new(@store)
       when "Magento API 2"
         handler = Groovepacker::Stores::Handlers::MagentoRestHandler.new(@store)
+      when "Shopify"
+        handler = Groovepacker::Stores::Handlers::ShopifyHandler.new(@store)
       end
       
       context = Groovepacker::Stores::Context.new(handler)
@@ -1415,6 +1417,8 @@ class StoresController < ApplicationController
         handler = Groovepacker::Stores::Handlers::BigCommerceHandler.new(@store)
       when "Magento API 2"
         handler = Groovepacker::Stores::Handlers::MagentoRestHandler.new(@store)
+      when "Shopify"
+        handler = Groovepacker::Stores::Handlers::ShopifyHandler.new(@store)
       end
       
       context = Groovepacker::Stores::Context.new(handler)
