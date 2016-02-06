@@ -27,6 +27,20 @@ module Groovepacker
                                 })
         response
       end
+
+      def get_variants(product_id, sku)
+        response = HTTParty.get("https://#{shopify_credential.shop_name}.myshopify.com/admin/products/#{product_id}/variants", 
+                                headers: { 
+                                  "X-Shopify-Access-Token" => shopify_credential.access_token, 
+                                  "Content-Type" => "application/json", 
+                                  "Accept" => "application/json" 
+                                })
+        unless sku.blank?
+          response["variants"] = response["variants"].select {|variant| variant["sku"]==sku} rescue {}
+          response = response["variants"].first || {}
+        end
+        response
+      end
     end
   end
 end

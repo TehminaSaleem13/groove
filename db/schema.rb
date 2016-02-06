@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20160205095947) do
+ActiveRecord::Schema.define(:version => 20160206113159) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0,     :null => false
@@ -847,13 +847,16 @@ ActiveRecord::Schema.define(:version => 20160205095947) do
 
   create_table "sync_options", :force => true do |t|
     t.integer  "product_id"
-    t.boolean  "sync_with_bc",       :default => false
+    t.boolean  "sync_with_bc",        :default => false
     t.integer  "bc_product_id"
-    t.datetime "created_at",                            :null => false
-    t.datetime "updated_at",                            :null => false
+    t.datetime "created_at",                             :null => false
+    t.datetime "updated_at",                             :null => false
     t.string   "bc_product_sku"
     t.boolean  "sync_with_mg_rest"
     t.integer  "mg_rest_product_id"
+    t.boolean  "sync_with_shopify",   :default => false
+    t.integer  "shopify_product_id"
+    t.string   "shopify_product_sku"
   end
 
   create_table "tenants", :force => true do |t|

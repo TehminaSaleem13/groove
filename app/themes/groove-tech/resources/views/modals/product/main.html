@@ -229,6 +229,31 @@
         </div>
       </div>
 
+      <div ng-if="products.single.access_restrictions.allow_shopify_inv_push">
+        <div class="form-group" style="margin-bottom: 0px;">
+          <label class="control-label col-sm-2">Shopify Inventory Sync</label>
+
+          <div class="controls col-sm-1 col-lg-1">
+            <div toggle-switch ng-model="products.single.sync_option.sync_with_shopify"
+                 groov-click="update_product_sync_options()"></div>
+          </div>
+          <div class="controls col-sm-3" ng-show="products.single.sync_option.sync_with_shopify">
+            <input type="text" ng-model="products.single.sync_option.shopify_product_id" ng-focus="update_product_sync_options()" ng-blur="update_product_sync_options()" class="form-control input-style" placeholder="Shopify Product ID"/>
+          </div>
+          <div class="controls col-sm-4" ng-show="products.single.sync_option.sync_with_shopify">
+            <input type="text" ng-model="products.single.sync_option.shopify_product_sku" ng-focus="update_product_sync_options()" ng-blur="update_product_sync_options()" class="form-control input-style" placeholder="Shopify Product Sku"/>
+          </div>
+        </div>
+        <div ng-show="products.single.sync_option.sync_with_shopify">
+          <div class="form-group" ng-hide="products.single.sync_option.shopify_product_id && products.single.sync_option.shopify_product_sku">
+            <div class="control-label col-sm-3"></div>
+            <div class="col-sm-7">
+              <small>*Adding product ID and SKU is necessary for non-Shopify products ineventory sync.</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="form-group"
            ng-show="products.single.store.store_type=='Amazon' && products.single.amazon_product.show_shipping_weight_only==true">
         <label class="control-label col-sm-2">Shipping Weight</label>
