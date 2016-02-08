@@ -279,4 +279,13 @@ class Store < ActiveRecord::Base
     self.save
     return self
   end
+
+  def self.get_sucure_random_token
+    random_token = ""
+    begin
+       random_token = SecureRandom.base64(16)
+       includes_plus_sign = random_token.include?("+")
+    end while includes_plus_sign
+    return random_token
+  end
 end
