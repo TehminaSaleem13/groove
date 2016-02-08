@@ -41,7 +41,7 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
           scope.exceptions.init_all();
           setTimeout(function(){
             dashboard.stats.dashboard_stat();
-          }, 200);
+          }, 300);
         };
 
         scope.switch_tab = function (tab) {
