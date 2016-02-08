@@ -922,7 +922,18 @@ li {
 
     .dash-home-container {
       background-color: white;
-      border-radius: 4px;
+      border-top-right-radius: 15px;
+      border-top-left-radius: 15px;
+    }
+
+    .dash-home-container-left {
+      background-color: white;
+      border-top-right-radius: 15px;
+    }
+
+    .dash-home-container-right {
+      background-color: white;
+      border-top-left-radius: 15px;
     }
 
     .tab-col {
@@ -954,12 +965,12 @@ li {
 
       .tab-pill {
         height: 150px;
-        border-radius: 8px;
+        border-radius: 15px;
         margin-bottom: 5px;
         color: white;
 
         &.tab-red {
-          background-color: red;
+          background-color: #d33939;
           border-bottom-left-radius: 0px;
           border-bottom-right-radius: 0px;
           &.tab-pill-active {
@@ -968,7 +979,7 @@ li {
         }
 
         &.tab-green {
-          background-color: green;
+          background-color: #86d709;
           border-bottom-left-radius: 0px;
           border-bottom-right-radius: 0px;
           &.tab-pill-active {
@@ -977,7 +988,7 @@ li {
         }
 
         &.tab-violet {
-          background-color: #0573CF;
+          background-color: #3335c2;
           border-bottom-left-radius: 0px;
           border-bottom-right-radius: 0px;
           &.tab-pill-active {
@@ -1006,7 +1017,7 @@ li {
           padding-right: 10px;
           .well {
             height: 105px;
-            margin-top: 45px;
+            margin-top: 19px;
             margin-bottom: 0px;
             border-radius: 0px;
             border-top-left-radius: 8px;
@@ -1017,6 +1028,29 @@ li {
             border: 0px;
             .fa-pill-col {
               font-size: 35px;
+            }
+          }
+
+          .row{
+            .button-pill {
+              margin-top: 10px;
+              padding-left: 0px;
+              margin-left: 5px;
+              height: 16px;
+              width: 16px;
+              border-radius: 8px;
+              border: 0px;
+              background-color: #a5a5a5;
+            }
+            .button-pill-active {
+              margin-top: 10px;
+              padding-left: 0px;
+              margin-left: 5px;
+              height: 16px;
+              width: 16px;
+              border-radius: 8px;
+              border: 0px;
+              background-color: white;
             }
           }
         }
@@ -1030,8 +1064,57 @@ li {
             padding-right: 0px;
             padding-top: 0px;
             text-align: center;
-            height: 135px;
-            margin-top: 15px;
+            font-size: 12px;
+            height: 105px;
+            margin-top: 45px;
+            margin-bottom: 0px;
+            border-radius: 0px;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            color: black;
+            border: 0px;
+            .fa-pill-col {
+              font-size: 40px;
+            }
+          }
+        }
+
+        .pill-col-last-tall {
+          padding-left: 0px;
+          padding-right: 0px;
+          margin-left: -4px;
+          .well{
+            height: 120px;
+            margin-top: 30px;
+            padding-left: 0px;
+            padding-right: 0px;
+            padding-top: 0px;
+            text-align: center;
+            font-size: 12px;
+            margin-bottom: 0px;
+            border-radius: 0px;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            color: black;
+            border: 0px;
+            .fa-pill-col {
+              font-size: 40px;
+            }
+          }
+        }
+
+        .pill-col-last-short {
+          padding-left: 0px;
+          padding-right: 0px;
+          margin-left: -4px;
+          .well{
+            height: 90px;
+            margin-top: 60px;
+            padding-left: 0px;
+            padding-right: 0px;
+            padding-top: 0px;
+            text-align: center;
+            font-size: 12px;
             margin-bottom: 0px;
             border-radius: 0px;
             border-top-left-radius: 8px;

@@ -96,6 +96,17 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
             dashboard.stats.dashboard_stat();
           },
           set_type: function (chart_mode) {
+            console.log('set_type');
+            if ((scope.charts.type == 'packing_error' && chart_mode == 'packing_stats') ||
+              (scope.charts.type == 'packing_time_stats' && chart_mode == 'packing_speed_stats') ||
+              (scope.charts.type == 'packed_order_stats' && chart_mode == 'packed_item_stats')) {
+              return 0;
+            } else {
+              scope.charts.type = chart_mode;
+            }
+          },
+          alter_type: function (chart_mode) {
+            console.log('alter_type');
             scope.charts.type = chart_mode;
           }
         };
@@ -266,7 +277,8 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
           return function (key, x, y, e, graph) {
             console.log('toolTipContentFunction');
             var tooltipText = '';
-            if (scope.charts.type === 'packing_stats') {
+            console.log(scope.charts.type);
+            if (scope.charts.type === 'packing_stats' || scope.charts.type === 'packing_error') {
 
               var average_packing_accuracy = "-";
               for (idx = 0; idx < scope.dashboard.avg_packing_accuracy_stats.length;
@@ -286,7 +298,7 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
               '<span><strong>' + e.point[3] + ' Items Packed </strong></span><br/>' +
               '<span><strong>' + e.point[4] + ' Exceptions Recorded</strong></span>' +
               '</div>');
-            } else if (scope.charts.type === 'packing_speed_stats') {
+            } else if (scope.charts.type === 'packing_speed_stats' || scope.charts.type === 'packing_time_stats') {
               avg_period_score = "-";
               for (idx = 0; idx < scope.dashboard.avg_packing_speed_stats.length;
                    idx++) {
@@ -303,7 +315,7 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
               '<span><strong>Daily Speed Score: </strong>' + y + '% </span><br/>' +
               '<span><strong>Avg. Time/Item: </strong>' + e.point[2] + ' sec</span>' +
               '</div>');
-            } else if (scope.charts.type === 'packed_item_stats') {
+            } else if (scope.charts.type === 'packed_item_stats' || scope.charts.type === 'packed_order_stats') {
               tooltipText = y + ' items packed on ' + x;
               return ('<div><h4 style="text-transform: capitalize; color:' + e.series.color +
               '">' + key + '</h4>' +
