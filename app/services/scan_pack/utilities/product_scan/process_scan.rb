@@ -8,7 +8,7 @@ module ScanPack::Utilities::ProductScan::ProcessScan
     if order_item.product.record_serial
       do_if_record_serial_is_set(clicked, order_item, serial_added)
     else
-      order_item.process_item(clicked, @current_user.username)
+      order_item.process_item(clicked, @current_user.username, @typein_count)
       (@session[:most_recent_scanned_products] ||= []) << order_item.product_id
       @session[:parent_order_item] = order_item.product.is_kit != 1 ? false : order_item.id
     end
@@ -16,7 +16,7 @@ module ScanPack::Utilities::ProductScan::ProcessScan
 
   def do_if_record_serial_is_set(clicked, order_item, serial_added)
     if serial_added
-      order_item.process_item(clicked, @current_user.username)
+      order_item.process_item(clicked, @current_user.username, @typein_count)
       (@session[:most_recent_scanned_products] ||= []) << order_item.product_id
       @session[:parent_order_item] = false
       if order_item.product.is_kit == 1

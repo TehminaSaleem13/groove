@@ -7,7 +7,7 @@ module ScanPack
     include ScanPack::Utilities::ProductScan::SingleProductType
     
     def initialize(args)
-      @current_user, @session, @input, @state, @id = args
+      @current_user, @session, @input, @state, @id, @typein_count = args
       @result = {
         "status"=>true, "matched"=>true, "error_messages"=>[],
         "success_messages"=>[], "notice_messages"=>[], 

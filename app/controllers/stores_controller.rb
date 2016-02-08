@@ -386,7 +386,7 @@ class StoresController < ApplicationController
             begin
               if @shipworks.nil?
                 @store.shipworks_credential = ShipworksCredential.new(
-                  auth_token: SecureRandom.base64(16),
+                  auth_token: Store.get_sucure_random_token,
                   import_store_order_number: params[:import_store_order_number],
                   shall_import_in_process: params[:shall_import_in_process],
                   shall_import_new_order: params[:shall_import_new_order],
@@ -1385,6 +1385,8 @@ class StoresController < ApplicationController
         handler = Groovepacker::Stores::Handlers::BigCommerceHandler.new(@store)
       when "Magento API 2"
         handler = Groovepacker::Stores::Handlers::MagentoRestHandler.new(@store)
+      when "Shopify"
+        handler = Groovepacker::Stores::Handlers::ShopifyHandler.new(@store)
       end
       
       context = Groovepacker::Stores::Context.new(handler)
@@ -1415,6 +1417,8 @@ class StoresController < ApplicationController
         handler = Groovepacker::Stores::Handlers::BigCommerceHandler.new(@store)
       when "Magento API 2"
         handler = Groovepacker::Stores::Handlers::MagentoRestHandler.new(@store)
+      when "Shopify"
+        handler = Groovepacker::Stores::Handlers::ShopifyHandler.new(@store)
       end
       
       context = Groovepacker::Stores::Context.new(handler)

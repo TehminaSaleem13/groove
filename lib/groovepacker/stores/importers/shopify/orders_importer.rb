@@ -203,9 +203,20 @@ module Groovepacker
 
             end
             product.save
+            product.reload
+            create_sync_option_for_product(product, item, sku)
             make_product_intangible(product)
             product.update_product_status
             product
+          end
+
+          def create_sync_option_for_product(product, item, sku)
+            product_sync_option = product.sync_option
+            if product_sync_option.nil?
+              product.create_sync_option(:shopify_product_id => item["variant_id"], :shopify_product_sku => sku, :sync_with_shopify => true)
+            else
+              product_sync_option.update_attributes(:shopify_product_id => item["variant_id"], :shopify_product_sku => sku, :sync_with_shopify => true)
+            end
           end
         end
       end

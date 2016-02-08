@@ -31,6 +31,7 @@ module ScanPack::Utilities::ProductScan::SingleProductType
         # end
 
         process_scan(clicked, order_item, serial_added)
+
         # If the product was skippable and CODE is SKIP
         # then we can remove that order_item from the order
         if @scanpack_settings.skip_code_enabled? && clean_input == @scanpack_settings.skip_code && item['skippable']

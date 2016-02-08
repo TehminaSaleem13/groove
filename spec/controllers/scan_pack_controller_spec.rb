@@ -886,6 +886,37 @@ RSpec.describe ScanPackController, :type => :controller do
       expect(result["status"]).to eq(true)
   end
 
+  it "should scan product with typein count" do
+      request.accept = "application/json"
+
+      order = FactoryGirl.create(:order, :status=>'awaiting', store: Store.first)
+
+      product = FactoryGirl.create(:product)
+      product_sku = FactoryGirl.create(:product_sku, :product=> product)
+      product_barcode = FactoryGirl.create(:product_barcode, :product=> product, :barcode=>"987654321")
+      order_item = FactoryGirl.create(:order_item, :product_id=>product.id,
+                    :qty=>30000, :price=>"10", :row_total=>"10", :order=>order, :name=>product.name)
+
+      t1 = Time.now
+      get :scan_barcode, {:state=>'scanpack.rfp.default', :input => '987654321', :id => order.id }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["status"]).to eq(true)
+      t2 = Time.now - t1
+
+      t1 = Time.now
+      get :type_scan, {
+        :state=>'scanpack.rfp.default', :input => '987654321', :id => order.id ,
+        next_item: result['data']['order']['next_item'], count: 20000
+      }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["status"]).to eq(true)
+      expect(order_item.reload.scanned_qty).to eq(20001)
+      #should take at max 10times more time than single count scan
+      expect(0..(10*t2)).to cover(Time.now - t1)
+  end
+
   it "should scan product by barcode and order status should still be in awaiting status when there are unscanned items" do
       request.accept = "application/json"
 

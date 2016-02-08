@@ -16,6 +16,17 @@ module Groovepacker
           Groovepacker::Stores::Importers::Shopify::OrdersImporter.new(
             self.build_handle).import
         end
+        
+        def pull_inventory
+          Groovepacker::Stores::Importers::Shopify::Inventory.new(
+            self.build_handle).pull_inventories
+        end
+
+        def push_inventory
+          Groovepacker::Stores::Exporters::Shopify::Inventory.new(
+            self.build_handle).push_inventories
+        end
+        
       end
     end
   end

@@ -15,12 +15,13 @@ module Groovepacker
         combined_response = {"orders" => []}
         filters = { page: page_index, per_page: 100, status: statuses, last_updated_at: @last_imported_at }
         filters = filters.merge(api_key_and_secret)
+        last_import = @credential.last_imported_at rescue 4.days
 
-        unless import_item.import_type=='deep'
+        if import_item.import_type=='deep'
           days_back_to_import = import_item.days.to_i.days rescue 4.days
-          last_import = @credential.last_imported_at rescue (importing_time - days_back_to_import)
-          filters[:last_updated_at] = last_import.to_s
+          last_import = importing_time - days_back_to_import
         end
+        filters[:last_updated_at] = last_import.to_s
 
         return combined_response if @api_key.blank? || @api_secret.blank?
         while page_index

@@ -198,18 +198,18 @@ class OrderItem < ActiveRecord::Base
   end
 
 
-  def process_item(clicked, username)
+  def process_item(clicked, username, typein_count=1)
     order_unscanned = false
 
     if self.scanned_qty < self.qty
       total_qty = 0
       if self.product.kit_parsing == 'depends'
-        self.single_scanned_qty = self.single_scanned_qty + 1
+        self.single_scanned_qty = self.single_scanned_qty + typein_count
         set_clicked_quantity(clicked, self.product.primary_sku, username)
         self.scanned_qty = self.single_scanned_qty + self.kit_split_scanned_qty
         total_qty = self.qty - self.kit_split_qty
       else
-        self.scanned_qty = self.scanned_qty + 1
+        self.scanned_qty = self.scanned_qty + typein_count
         set_clicked_quantity(clicked, self.product.primary_sku, username)
         total_qty = self.qty - self.kit_split_qty
       end
@@ -218,7 +218,7 @@ class OrderItem < ActiveRecord::Base
         scan_end: DateTime.now)
       self.order.total_scan_time = self.order.total_scan_time +
         (scan_time.scan_end - scan_time.scan_start).to_i
-      self.order.total_scan_count = self.order.total_scan_count + 1
+      self.order.total_scan_count = self.order.total_scan_count + typein_count
       self.order.save
       if self.scanned_qty == self.qty
         self.scanned_status = SCANNED_STATUS

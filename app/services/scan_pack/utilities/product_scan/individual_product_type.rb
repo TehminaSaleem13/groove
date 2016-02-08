@@ -78,7 +78,7 @@ module ScanPack::Utilities::ProductScan::IndividualProductType
   end
 
   def do_process_item(clicked, child_item_product_id, order_item_kit_product, item)
-    order_item_kit_product.process_item(clicked, @current_user.username)
+    order_item_kit_product.process_item(clicked, @current_user.username, @typein_count)
     (@session[:most_recent_scanned_products] ||= []) << child_item_product_id
     @session[:parent_order_item] = item['order_item_id']
   end
