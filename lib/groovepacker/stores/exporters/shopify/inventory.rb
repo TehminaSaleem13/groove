@@ -9,7 +9,7 @@ module Groovepacker
             @credential = handler[:credential]
             @client = handler[:store_handle]
             
-            products = Product.joins(:sync_option).where("sync_with_shopify=true and (shopify_product_id IS NOT NULL or store_product_id IS NOT NULL)")
+            products = Product.joins(:sync_option).where("sync_with_shopify=true and (shopify_product_variant_id IS NOT NULL or store_product_id IS NOT NULL)")
             
             (products||[]).each do |product|
               begin
@@ -21,7 +21,7 @@ module Groovepacker
 												}
 												
                 @sync_optn = product.sync_option
-                next if @sync_optn.shopify_product_id.blank? || @sync_optn.shopify_product_sku.blank?
+                next if @sync_optn.shopify_product_variant_id.blank?
                 
                 update_inv_on_shopify_for_sync_option(product, @sync_optn, attrs)
               rescue Exception => ex

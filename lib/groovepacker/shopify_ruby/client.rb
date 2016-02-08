@@ -28,23 +28,23 @@ module Groovepacker
         response
       end
 
-      def get_variants(product_id, sku)
-        response = HTTParty.get("https://#{shopify_credential.shop_name}.myshopify.com/admin/products/#{product_id}/variants", 
+      def get_variant(product_variant_id)
+        response = HTTParty.get("https://#{shopify_credential.shop_name}.myshopify.com/admin/variants/#{product_variant_id}", 
                                 headers: { 
                                   "X-Shopify-Access-Token" => shopify_credential.access_token, 
                                   "Content-Type" => "application/json", 
                                   "Accept" => "application/json" 
                                 })
-        unless sku.blank?
-          response["variants"] = response["variants"].select {|variant| variant["sku"]==sku} rescue {}
-          response = response["variants"].first || {}
-        end
-        response
+        #unless sku.blank?
+        #  response["variants"] = response["variants"].select {|variant| variant["sku"]==sku} rescue {}
+        #  response = response["variants"].first || {}
+        #end
+        return response["variant"] || {}
       end
       
       def update_inventory(sync_option, attrs)
 				
-				response = HTTParty.put("https://#{shopify_credential.shop_name}.myshopify.com/admin/variants/#{sync_option.shopify_product_id}", 
+				response = HTTParty.put("https://#{shopify_credential.shop_name}.myshopify.com/admin/variants/#{sync_option.shopify_product_variant_id}", 
                                 body: attrs.to_json,
                                 headers: { 
                                   "X-Shopify-Access-Token" => shopify_credential.access_token, 
