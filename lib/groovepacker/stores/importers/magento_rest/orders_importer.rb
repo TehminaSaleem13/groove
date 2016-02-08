@@ -27,15 +27,14 @@ module Groovepacker
                   import_item.reload
                   break if import_item.status == 'cancelled'
                   order = order.last
-                  import_item.current_increment_id = order["entity_id"]
+                  import_item.current_increment_id = order["increment_id"]
                   import_item.current_order_items = -1
                   import_item.current_order_imported_item = -1
                   import_item.save
                   
-                  
-                  if Order.where(:increment_id => order["entity_id"]).length == 0
+                  if Order.where(:increment_id => order["increment_id"]).length == 0
                     @order = Order.new
-                    @order.increment_id = order["entity_id"]
+                    @order.increment_id = order["increment_id"]
                     @order.status = 'awaiting'
                     @order.order_placed_time = order["created_at"].to_datetime
                     @order.store = credential.store
