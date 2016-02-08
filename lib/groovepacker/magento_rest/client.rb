@@ -101,7 +101,7 @@ module Groovepacker
         def fetch(method, uri, params, filters_or_data={})
           filters_or_data = filters_or_data.stringify_keys
           params_copy = params
-          params_copy = params_copy.merge(filters_or_data)
+          params_copy = params_copy.merge(filters_or_data) if method=="GET"
           signature_base_string = signature_base_string(method, uri, params_copy)
           params['oauth_signature'] = url_encode(sign(signing_key, signature_base_string))
           header_string = header(params)
@@ -161,7 +161,7 @@ module Groovepacker
           #http.use_ssl = true
           data_params = data["filters_or_data"] || {}
           if method == 'PUT'
-            response = HTTParty.put(base_uri, body: data_params, headers: { "Authorization" => header, "Content-Type" => "application/json", "Accept" => "application/json" })
+            response = HTTParty.put(base_uri, body: data_params.to_json, headers: { "Authorization" => header, "Content-Type" => "application/json", "Accept" => "application/json" })
             #resp, resp_data = http.put(url.path, put_data, { 'Authorization' => header, 'Accept' => 'application/json', 'Content-Type' => 'application/json' })
           elsif method == 'GET'
             response = HTTParty.get(base_uri, query: data_params, headers: { "Authorization" => header, "Content-Type" => "application/json", "Accept" => "application/json" })
