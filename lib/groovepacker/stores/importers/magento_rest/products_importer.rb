@@ -97,12 +97,21 @@ module Groovepacker
                 @productdb.save
                 make_product_intangible(@productdb)
                 @productdb.set_product_status
+                update_product_inventory(@productdb, product_attrs)
                 result_product_id = @productdb.id
               end
             rescue Exception => e
               Rails.logger.info(e)
             end
             result_product_id
+          end
+
+
+          def update_product_inventory(product, shopify_product_attrs)
+            inv_wh = product.product_inventory_warehousess.first
+            inv_wh = product.product_inventory_warehousess.new if inv_wh.blank?
+            inv_wh.quantity_on_hand = shopify_product_attrs["stock_data"]["qty"].try(:to_i) + inv_wh.allocated_inv.to_i
+            inv_wh.save
           end
         end
       end

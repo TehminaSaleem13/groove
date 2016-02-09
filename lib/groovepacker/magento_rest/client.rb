@@ -17,7 +17,6 @@ module Groovepacker
           filters = {"page" => "#{page_index}", "limit" => "10"}.merge(filters)
           response = fetch(method, uri, parameters, filters)
           
-          page_index += 1
           orders = orders.merge(response)
           response_length = response.length rescue 0
           break if response_length<10 || page_index==10
