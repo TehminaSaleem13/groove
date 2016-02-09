@@ -25,7 +25,7 @@ groovepacks_services.factory('dashboard', ['$http', 'notification', 'auth', func
     var access_token = localStorage.getItem('access_token');
     var created_at = localStorage.getItem('created_at');
     d = new Date();
-    if (created_at > d.getTime() - 5400) {
+    if (created_at > parseInt(d.getTime() / 1000) - 5400) {
       refresh_access_token().then(function(response){
         access_token = response;
         request_analytic_server(tenant, domain, site_host, access_token);
