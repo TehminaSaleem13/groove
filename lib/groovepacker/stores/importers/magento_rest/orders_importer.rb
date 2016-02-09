@@ -112,6 +112,7 @@ module Groovepacker
                 if response_error
                   result[:status] &= false
                   result[:messages].push(response_error["message"])
+                  import_item.status="failed"
                   import_item.message = response_error["message"]
                   import_item.save
                 end
@@ -119,11 +120,12 @@ module Groovepacker
             rescue Exception => e
               result[:status] &= false
               result[:messages].push(e.message)
+              import_item.status = "failed"
               import_item.message = e.message
               import_item.save
             end
             import_item.reload
-            if import_item.status != 'cancelled'
+            if import_item.status != 'cancelled' and import_item.status!="failed"
               credential.last_imported_at = import_time
               credential.save
             end
