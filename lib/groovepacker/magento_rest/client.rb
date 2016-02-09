@@ -5,21 +5,23 @@ module Groovepacker
         credential = get_credential
         method = 'GET'
         uri = "#{host_url}/api/rest/orders"
-        #last_import = credential.last_imported_at.to_datetime rescue (DateTime.now - 4.days)
-        filters = {}
+        last_import = credential.last_imported_at.to_datetime rescue (DateTime.now - 4.days)
+        #filters = {}
         #from_date = (DateTime.now - 4.days).strftime("%Y-%m-%d %H:%M:%S")
         #to_date = DateTime.now.strftime("%Y-%m-%d %H:%M:%S")
-        #filters = {"filter[1]['attribute']" => "created_at", "filter[1]['from']" => from_date, "filter[1]['to']" => to_date}
+        #filters = {"filter[1][attribute]" => "created_at", "filter[1][from]" => from_date, "filter[1][to]" => to_date}
+        #filters = {"order" => "created_at", "dir" => "dsc"}
         orders = {}
         page_index = 1
         while page_index
           puts "=======================Fetching page #{page_index}======================="
-          filters = {"page" => "#{page_index}", "limit" => "10"}.merge(filters)
+          filters = {"page" => "#{page_index}", "limit" => "10", "order" => "created_at", "dir" => "dsc"}
           response = fetch(method, uri, parameters, filters)
+          response = filter_resp_orders_for_last_imported_at(response, last_import)
           
           orders = orders.merge(response)
           response_length = response.length rescue 0
-          break if response_length<10 || page_index==10
+          break if response_length<10
           page_index += 1
         end
         return orders
@@ -169,6 +171,14 @@ module Groovepacker
             #resp, resp_data = http.get(url.to_s, { 'Authorization' => header })
           end
           response rescue nil
+        end
+
+        def filter_resp_orders_for_last_imported_at(response, last_import)
+          orders_to_return = {}
+          return response if response["messages"].present?
+
+          response.each { |key, value| orders_to_return[key] = value if value["created_at"].to_datetime > last_import }
+          return orders_to_return
         end
     end
   end
