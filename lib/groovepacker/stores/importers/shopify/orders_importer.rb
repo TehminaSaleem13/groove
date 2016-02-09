@@ -191,6 +191,11 @@ module Groovepacker
                       product.weight = variant["weight"]
                     end
                   end
+
+                  inv_wh = product.product_inventory_warehousess.first
+                  inv_wh = product.product_inventory_warehousess.new if inv_wh.blank?
+                  inv_wh.quantity_on_hand = variant["inventory_quantity"].try(:to_i) + inv_wh.allocated_inv.to_i
+                  inv_wh.save
                 end
               end
 
