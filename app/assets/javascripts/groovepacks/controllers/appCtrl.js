@@ -1,6 +1,6 @@
 groovepacks_controllers.
-  controller('appCtrl', ['$rootScope', '$scope', '$timeout', '$modalStack', '$state', '$filter', '$document', '$window', 'hotkeys', 'auth', 'notification', 'importOrders', 'groovIO', 'editable', 'stores',
-    function ($rootScope, $scope, $timeout, $modalStack, $state, $filter, $document, $window, hotkeys, auth, notification, importOrders, groovIO, editable, stores) {
+  controller('appCtrl', ['$http', '$rootScope', '$scope', '$timeout', '$modalStack', '$state', '$filter', '$document', '$window', 'hotkeys', 'auth', 'notification', 'importOrders', 'groovIO', 'editable', 'stores',
+    function ($http, $rootScope, $scope, $timeout, $modalStack, $state, $filter, $document, $window, hotkeys, auth, notification, importOrders, groovIO, editable, stores) {
       $scope.import_store_id = null;
 
       $scope.$on("user-data-reloaded", function () {
@@ -222,6 +222,16 @@ groovepacks_controllers.
       $scope.cancel_import = function (store_id) {
         //alert("cancel import" + store_id)
         importOrders.cancel_import(store_id);
+      };
+
+      $scope.sign_out = function () {
+        console.log('sign_out');
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        localStorage.removeItem('created_at');
+        $http.delete('/users/sign_out.json').then(function (data) {
+          $window.location.href = '/users/sign_in';
+        });
       };
 
       $scope.issue_update = function (store_id) {
