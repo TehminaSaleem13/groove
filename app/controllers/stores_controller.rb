@@ -174,6 +174,7 @@ class StoresController < ApplicationController
 
             @magento_rest.import_categories = params[:import_categories]
             @magento_rest.import_images = params[:import_images]
+            @magento_rest.gen_barcode_from_sku = params[:gen_barcode_from_sku]
             begin
               @store.save!
               if !new_record

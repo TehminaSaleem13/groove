@@ -87,6 +87,10 @@ module Groovepacker
                   end
                 end
 
+                if credential.gen_barcode_from_sku && ProductBarcode.where(barcode: product_attrs["sku"]).empty?
+                  @productdb.product_barcodes.create(barcode: product_attrs["sku"])
+                end
+
                 #add inventory warehouse
                 unless credential.store.nil? && credential.store.inventory_warehouse_id.nil?
                   inv_wh = ProductInventoryWarehouses.new
