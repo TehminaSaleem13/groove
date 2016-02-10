@@ -257,6 +257,33 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
           }
         };
 
+        scope.xAxisTickValuesFunction = function () {
+          return function(d){
+            var tickVals = [];
+            dates = [];
+            for (var i = length - 1; i >= 0; i--) {
+              ilen = d[i].values.length;
+              console.log('ilen: ', ilen);
+              for (var j = ilen - 1; j >= 0; j--) {
+                if (d[i].disabled) {
+                  break;
+                } else {
+                  dates.push(d[i].values[j][0]);
+                }
+              };
+            };
+            var max = Math.max.apply(Math,dates)
+            var min = Math.min.apply(Math,dates)
+            tickVals.push(min);
+            if (parseInt((min + max) / 2) > (min + 86400)) {
+              tickVals.push(parseInt(min + max) / 2);
+            }
+            tickVals.push(max);
+
+            return tickVals;
+          };
+        };
+
         scope.xAxisTickFormatFunction = function () {
           return function (d) {
             return d3.time.format('%b %e, %Y')(moment.unix(d).toDate());
