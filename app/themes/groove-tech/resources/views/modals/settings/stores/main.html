@@ -26,7 +26,7 @@
             <div class="controls col-md-2">
               <div toggle-switch ng-model="stores.single.status" groov-click="update_single_store(true)"></div>
             </div>
-            <div class="col-sm-2" ng-if="stores.single.store_type=='BigCommerce'">
+            <div class="col-sm-2" ng-if="stores.single.store_type=='BigCommerce' || stores.single.store_type=='Magento API 2'">
               <button ng-click="import_bc_products()" class="groove-button label label-default label-danger" translate>Import Product Catalog
               </button>
             </div>
