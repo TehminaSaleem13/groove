@@ -25,7 +25,7 @@ module Groovepacker
         result['authorized_url'] = authorized_url
       rescue Exception => ex
         result['status'] = false
-        result['message'] = ex
+        result['message'] = "Something went wrong. Please make sure that the credentials you entered are correct"
       end
       return result
     end
