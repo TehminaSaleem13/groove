@@ -132,7 +132,7 @@ module Groovepacker
         end
 
         def shipment_date_start(import_date_type, shipment_after)
-          "&createDateStart=#{shipment_after}"
+          "&createDateStart=#{shipment_after}&createDateEnd=#{Date.today}"
         end
 
         def ss_format(start_date)

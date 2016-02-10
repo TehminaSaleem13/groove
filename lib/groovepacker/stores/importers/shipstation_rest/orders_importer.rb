@@ -69,6 +69,7 @@ module Groovepacker
               end
 
               shipments_response = client.get_shipments(import_from-2.days)
+
               unless response["orders"].nil?
                 result[:total_imported] = response["orders"].length
                 import_item.current_increment_id = ''
@@ -103,7 +104,7 @@ module Groovepacker
                     import_order(shipstation_order, order, credential)
                     
                     tracking_number = shipments_response.select {|shipment| shipment["orderId"]==order["orderId"]}.first["trackingNumber"] rescue nil
-                    tracking_number = client.get_tracking_number(order["orderId"]) if tracking_number.blank?
+                    #tracking_number = client.get_tracking_number(order["orderId"]) if tracking_number.blank?
                     shipstation_order.tracking_num = tracking_number
                     unless order["items"].nil?
                       import_item.current_order_items = order["items"].length
