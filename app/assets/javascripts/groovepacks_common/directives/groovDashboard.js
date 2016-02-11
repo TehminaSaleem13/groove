@@ -96,7 +96,6 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
             dashboard.stats.dashboard_stat();
           },
           set_type: function (chart_mode) {
-            console.log('set_type');
             if ((scope.charts.type == 'packing_error' && chart_mode == 'packing_stats') ||
               (scope.charts.type == 'packing_time_stats' && chart_mode == 'packing_speed_stats') ||
               (scope.charts.type == 'packed_order_stats' && chart_mode == 'packed_item_stats')) {
@@ -106,7 +105,6 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
             }
           },
           alter_type: function (chart_mode) {
-            console.log('alter_type');
             scope.charts.type = chart_mode;
           }
         };
@@ -302,9 +300,7 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
         };
         scope.toolTipContentFunction = function () {
           return function (key, x, y, e, graph) {
-            console.log('toolTipContentFunction');
             var tooltipText = '';
-            console.log(scope.charts.type);
             if (scope.charts.type === 'packing_stats' || scope.charts.type === 'packing_error') {
 
               var average_packing_accuracy = "-";
