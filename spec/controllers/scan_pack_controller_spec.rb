@@ -677,6 +677,49 @@ RSpec.describe ScanPackController, :type => :controller do
 
   end
 
+  it "should scan product instruction" do
+    request.accept = "application/json"
+
+    @generalsetting.update_attribute(:email_address_for_packer_notes, 'groovetest123456@gmail.com')
+    @user.update_attribute(:confirmation_code, 'Hello')
+    
+    inv_wh = FactoryGirl.create(:inventory_warehouse)
+    store = FactoryGirl.create(:store, :inventory_warehouse_id => inv_wh.id)
+    order = FactoryGirl.create(:order, :status=>'awaiting', store: store)
+    product = FactoryGirl.create(:product)
+    product_sku = FactoryGirl.create(:product_sku, :product=> product)
+    product_barcode = FactoryGirl.create(:product_barcode, :product=> product)
+    product_inventory_warehouse = FactoryGirl.create(:product_inventory_warehouse, :product=> product,
+                 :inventory_warehouse_id =>inv_wh.id, :available_inv => 25)
+    order_item = FactoryGirl.create(:order_item, :product_id=>product.id,
+                  :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>product.name)
+
+    get :product_instruction, {:id => order.id, code: 'Hello', next_item: {order_item_id: order_item.id, name: 'Test'}}
+    expect(response.status).to eq(200)
+    result = JSON.parse(response.body)
+    expect(order.order_activities.pluck :action).to include "Item instruction scanned for product - Test"
+
+    # # If both id and note is nil
+    # get :add_note, {:id => nil, note: nil}
+    # expect(response.status).to eq(200)
+    # result = JSON.parse(response.body)
+    # expect(result['error_messages']).to include 'Order id and note from packer required'
+
+    # # If only id is invalid
+    # get :add_note, {:id => 'invalid_id', note: 'Hello'}
+    # expect(response.status).to eq(200)
+    # result = JSON.parse(response.body)
+    # expect(result['error_messages']).to include "Could not find order with id: invalid_id"
+    
+    # # If Email not present
+    # @generalsetting.update_attribute(:email_address_for_packer_notes, nil)
+    # get :add_note, {:id => order.id, note: 'Hello'}
+    # expect(response.status).to eq(200)
+    # result = JSON.parse(response.body)
+    # expect(result['error_messages']).to include 'Email not found for notification settings.'
+
+  end
+
   it "should check for confirmation code when order status is on hold" do
       request.accept = "application/json"
 
