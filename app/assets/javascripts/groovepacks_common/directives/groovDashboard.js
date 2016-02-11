@@ -261,9 +261,9 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
           return function(d){
             var tickVals = [];
             dates = [];
-            for (var i = length - 1; i >= 0; i--) {
+            dlen = d.length;
+            for (var i = dlen - 1; i >= 0; i--) {
               ilen = d[i].values.length;
-              console.log('ilen: ', ilen);
               for (var j = ilen - 1; j >= 0; j--) {
                 if (d[i].disabled) {
                   break;
