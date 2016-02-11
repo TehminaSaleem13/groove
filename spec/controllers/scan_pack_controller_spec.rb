@@ -645,6 +645,38 @@ RSpec.describe ScanPackController, :type => :controller do
 
    end
 
+  it "should ADD note" do
+    request.accept = "application/json"
+
+    @generalsetting.update_attribute(:email_address_for_packer_notes, 'groovetest123456@gmail.com')
+    order = FactoryGirl.create(:order, :increment_id=>'123-456')
+
+    get :add_note, {:id => order.id, note: 'Hello'}
+    expect(response.status).to eq(200)
+    result = JSON.parse(response.body)
+    expect(result['success_messages']).to include 'Note from Packer saved successfully'
+
+    # If both id and note is nil
+    get :add_note, {:id => nil, note: nil}
+    expect(response.status).to eq(200)
+    result = JSON.parse(response.body)
+    expect(result['error_messages']).to include 'Order id and note from packer required'
+
+    # If only id is invalid
+    get :add_note, {:id => 'invalid_id', note: 'Hello'}
+    expect(response.status).to eq(200)
+    result = JSON.parse(response.body)
+    expect(result['error_messages']).to include "Could not find order with id: invalid_id"
+    
+    # If Email not present
+    @generalsetting.update_attribute(:email_address_for_packer_notes, nil)
+    get :add_note, {:id => order.id, note: 'Hello'}
+    expect(response.status).to eq(200)
+    result = JSON.parse(response.body)
+    expect(result['error_messages']).to include 'Email not found for notification settings.'
+
+  end
+
   it "should check for confirmation code when order status is on hold" do
       request.accept = "application/json"
 

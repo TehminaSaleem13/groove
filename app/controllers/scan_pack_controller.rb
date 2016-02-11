@@ -169,7 +169,7 @@ class ScanPackController < ApplicationController
       @result['status'] &= false
       @result['error_messages'].push('Order id and note from packer required')
     else
-      @order = Order.find(params[:id])
+      @order = Order.where(id: params[:id]).first
       if @order.nil?
         @result['status'] &= false
         @result['error_messages'].push('Could not find order with id: '+params[:id].to_s)
