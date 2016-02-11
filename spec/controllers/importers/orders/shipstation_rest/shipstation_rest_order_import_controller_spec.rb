@@ -16,7 +16,7 @@ describe OrdersController do
 																																	 :api_key => "test", 
 																																	 :api_secret => "test",
 																																	 :shall_import_awaiting_shipment => true, 
-																																	 :last_imported_at => Time.now-2.hours,
+																																	 :last_imported_at => Time.now-30.minutes,
 																																	 :shall_import_shipped => true, 
 																																	 :warehouse_location_update => false, 
 																																	 :shall_import_customer_notes => false, 

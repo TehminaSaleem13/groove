@@ -15,7 +15,7 @@ module Groovepacker
           response = nil
           trial_count = 0
           loop do
-            puts "loop #{trial_count}"
+            puts "loop #{trial_count}" unless Rails.env=="test"
             begin
               response = send(query, body, method)
             rescue Exception => e
@@ -65,15 +65,16 @@ module Groovepacker
         end
 
         def send(query, body, method)
+          debug_output = Rails.env=="test" ? false : $stdout
           if method == "get"
             HTTParty.get("#{@endpoint}#{query}",
                           headers: headers, 
-                          debug_output: $stdout)
+                          debug_output: debug_output)
           else
             HTTParty.post("#{@endpoint}#{query}",
                             body: body,
                             headers: headers,
-                            debug_output: $stdout)
+                            debug_output: debug_output)
           end
         end
 
