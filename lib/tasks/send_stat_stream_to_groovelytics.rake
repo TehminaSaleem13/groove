@@ -19,6 +19,9 @@ namespace :cssa do
               debug_output: $stdout,
               body: stat_stream_hash.to_json,
               headers: { 'Content-Type' => 'application/json' })
+            if (index / 500 == 0)
+              sleep 5
+            end
           end
         end
       rescue Exception => e
