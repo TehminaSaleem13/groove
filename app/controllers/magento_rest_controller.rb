@@ -45,6 +45,6 @@ class MagentoRestController < ApplicationController
     end
 
     def initialize_magento_oauth
-      @oauth ||= Groovepacker::MagentoOauth.new(:host => @credential.host, :api_key => @credential.api_key, :api_secret => @credential.api_secret, :oauth_varifier => params[:oauth_varifier] )
+      @oauth ||= Groovepacker::MagentoOauth.new(:host => @credential.host, :store_admin_url => @credential.store_admin_url, :api_key => @credential.api_key, :api_secret => @credential.api_secret, :oauth_varifier => params[:oauth_varifier] )
     end
 end
