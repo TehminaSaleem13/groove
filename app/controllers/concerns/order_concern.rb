@@ -298,7 +298,8 @@ module OrderConcern
     def change_status_to_cancel(order_summary)
       if params[:store_id].present?
         import_item = order_summary.import_items.find_by_store_id(params[:store_id])
-        import_item.update_attributes(status: 'cancelled')
+        import_item = ImportItem.where(store_id: params[:store_id]).last if import_item.blank?
+        import_item.update_attributes(status: 'cancelled') rescue nil
       else
         order_summary.import_items.update_all(status: 'cancelled')
         order_summary.update_attributes(status: 'completed')
