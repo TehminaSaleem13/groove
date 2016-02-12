@@ -211,34 +211,34 @@ class ScanPackController < ApplicationController
   end
 
   def order_instruction
-    @result = Hash.new
-    @result['status'] = true
-    @result['error_messages'] = []
-    @result['success_messages'] = []
-    @result['notice_messages'] = []
-    @result['data'] = Hash.new
+    # @result = Hash.new
+    # @result['status'] = true
+    # @result['error_messages'] = []
+    # @result['success_messages'] = []
+    # @result['notice_messages'] = []
+    # @result['data'] = Hash.new
 
-    if params[:id].nil? || params[:code].nil?
-      @result['status'] &= false
-      @result['error_messages'].push('Order id and confirmation code required')
-    else
-      general_setting = GeneralSetting.all.first
-      @order = Order.find(params[:id])
-      if @order.nil?
-        @result['status'] &= false
-        @result['error_messages'].push('Could not find order with id: '+params[:id].to_s)
-      elsif !general_setting.strict_cc || current_user.confirmation_code == params[:code]
-        @order.addactivity('Order instructions confirmed', current_user.username)
-      else
-        @result['status'] &= false
-        @result['error_messages'].push('Confirmation code doesn\'t match')
-      end
-    end
+    # if params[:id].nil? || params[:code].nil?
+    #   @result['status'] &= false
+    #   @result['error_messages'].push('Order id and confirmation code required')
+    # else
+    #   general_setting = GeneralSetting.all.first
+    #   @order = Order.find(params[:id])
+    #   if @order.nil?
+    #     @result['status'] &= false
+    #     @result['error_messages'].push('Could not find order with id: '+params[:id].to_s)
+    #   elsif !general_setting.strict_cc || current_user.confirmation_code == params[:code]
+    #     @order.addactivity('Order instructions confirmed', current_user.username)
+    #   else
+    #     @result['status'] &= false
+    #     @result['error_messages'].push('Confirmation code doesn\'t match')
+    #   end
+    # end
 
-    respond_to do |format|
-      format.html # show.html.erb
-      format.json { render json: @result }
-    end
+    # respond_to do |format|
+    #   format.html # show.html.erb
+    #   format.json { render json: @result }
+    # end
   end
 
   def click_scan
