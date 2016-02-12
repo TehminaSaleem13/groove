@@ -147,6 +147,7 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
 
           } else if (data.store.store_type == 'Magento API 2') {
             stores.single.host = data.credentials.magento_rest_credential.host;
+            stores.single.store_admin_url = data.credentials.magento_rest_credential.store_admin_url;
             stores.single.api_key = data.credentials.magento_rest_credential.api_key;
             stores.single.api_secret = data.credentials.magento_rest_credential.api_secret;
             stores.single.access_token = data.credentials.magento_rest_credential.access_token;

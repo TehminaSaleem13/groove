@@ -168,7 +168,10 @@ class StoresController < ApplicationController
             else
               @magento_rest = @magento_rest.first
             end
-            @magento_rest.host = params[:host]
+            not_to_save = ["undefined", "null"]
+            @magento_rest.host = not_to_save.include?(params[:host]) ? nil : params[:host]
+            store_admin_url = params[:store_admin_url].sub(/(\/)+$/,'') rescue nil
+            @magento_rest.store_admin_url = not_to_save.include?(store_admin_url) ? nil : store_admin_url
             @magento_rest.api_key = params[:api_key]
             @magento_rest.api_secret = params[:api_secret]
 
