@@ -373,6 +373,9 @@ groovepacks_controllers.
       myscope.check_reload_compute = function () {
         $scope.rfpinit().then(function () {
           $scope.set('title', "Ready for Product Scan");
+          $timeout(function () {
+            $('#ready_product_scan').focus();
+          }, 500);
           if (typeof $scope.data.raw.data.serial != 'undefined' && $scope.data.raw.data.serial.ask) {
             myscope.ask_serial($scope.data.raw.data.serial);
           }
