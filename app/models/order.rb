@@ -102,24 +102,15 @@ class Order < ActiveRecord::Base
       restriction.total_scanned_shipments += 1
       restriction.save
     end
-    # Groovepacker::Dashboard::Stats::LeaderBoardStats.new.
-    #   compute_leader_board_for_order_item_count(
-    #     self.order_items.count)
-    # unless ENV['RAILS_ENV'] == 'test'
-    #   stat_stream_obj =
-    #    Groovepacker::Dashboard::Stats::AnalyticStatStream.new()
-    #   stat_stream = stat_stream_obj.build_stream(self.id)
-    #   puts "stat_stream: " + stat_stream.inspect
-    #   begin 
-    #     tenant = Apartment::Tenant.current
-    #     HTTParty.post("http://#{tenant}stat.#{ENV["GROOV_ANALYTIC"]}/dashboard",
-    #       query: {tenant_name: tenant},
-    #       body: stat_stream.to_json,
-    #       headers: { 'Content-Type' => 'application/json' })
-    #   rescue Exception => e
-    #     Rails.logger.error e.backtrace.join("\n")
-    #   end
-    # end
+
+    unless Rails.env.test?
+      tenant = Apartment::Tenant.current
+      if tenant == 'wagaboutit' || !Rails.env.production?
+        stat_stream_obj = SendStatStream.new()
+        # stat_stream_obj.send(tenant, self.id)
+        stat_stream_obj.delay(:run_at => 1.seconds.from_now).send(tenant, self.id)
+      end
+    end
   end
 
   def has_inactive_or_new_products
