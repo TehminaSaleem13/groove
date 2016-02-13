@@ -318,16 +318,16 @@ class ScanPackController < ApplicationController
       @result['status'] &= false
       @result['error_messages'].push('Order id, Item id and confirmation code required')
     else
-      @order = Order.find(params[:id])
+      @order = Order.where(id: params[:id]).first
       general_setting = GeneralSetting.all.first
 
       if @order.nil?
         @result['status'] &= false
         @result['error_messages'].push('Could not find order with id: '+params[:id].to_s)
       elsif !general_setting.strict_cc || current_user.confirmation_code == params[:code]
-        @order_item = OrderItem.find(params[:next_item]['order_item_id'])
+        @order_item = OrderItem.where(id: params[:next_item]['order_item_id']).first
         unless params[:next_item]['kit_product_id'].nil?
-          @order_kit_product = OrderItemKitProduct.find(params[:next_item]['kit_product_id'])
+          @order_kit_product = OrderItemKitProduct.where(id: params[:next_item]['kit_product_id']).first
         end
         if @order_item.nil?
           @result['status'] &= false

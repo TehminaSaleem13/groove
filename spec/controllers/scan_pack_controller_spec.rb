@@ -699,25 +699,46 @@ RSpec.describe ScanPackController, :type => :controller do
     result = JSON.parse(response.body)
     expect(order.order_activities.pluck :action).to include "Item instruction scanned for product - Test"
 
-    # # If both id and note is nil
-    # get :add_note, {:id => nil, note: nil}
-    # expect(response.status).to eq(200)
-    # result = JSON.parse(response.body)
-    # expect(result['error_messages']).to include 'Order id and note from packer required'
+    # If both id and note is nil
+    get :product_instruction, {:id => nil, code: 'Hello', next_item: {order_item_id: order_item.id, name: 'Test'}}
+    expect(response.status).to eq(200)
+    result = JSON.parse(response.body)
+    expect(result['error_messages']).to include 'Order id, Item id and confirmation code required'
 
-    # # If only id is invalid
-    # get :add_note, {:id => 'invalid_id', note: 'Hello'}
-    # expect(response.status).to eq(200)
-    # result = JSON.parse(response.body)
-    # expect(result['error_messages']).to include "Could not find order with id: invalid_id"
+    # If only id is invalid
+    get :product_instruction, {:id => 'invalid_id', code: 'Hello', next_item: {order_item_id: order_item.id, name: 'Test'}}
+    expect(response.status).to eq(200)
+    result = JSON.parse(response.body)
+    expect(result['error_messages']).to include "Could not find order with id: invalid_id"
     
-    # # If Email not present
-    # @generalsetting.update_attribute(:email_address_for_packer_notes, nil)
-    # get :add_note, {:id => order.id, note: 'Hello'}
-    # expect(response.status).to eq(200)
-    # result = JSON.parse(response.body)
-    # expect(result['error_messages']).to include 'Email not found for notification settings.'
+    # If only order_item_id is invalid
+    get :product_instruction, {:id => order.id, code: 'Hello', next_item: {order_item_id: 23232, name: 'Test'}}
+    expect(response.status).to eq(200)
+    result = JSON.parse(response.body)
+    expect(result['error_messages']).to include 'Couldnt find order item'
 
+    # If order item does not belong to order
+    inv_order_item = FactoryGirl.create(:order_item, :product_id=>product.id,
+                  :qty=>1, :price=>"10", :row_total=>"10", :order=>nil, :name=>product.name)
+    get :product_instruction, {:id => order.id, code: 'Hello', next_item: {order_item_id: inv_order_item.id, name: 'Test'}}
+    expect(response.status).to eq(200)
+    result = JSON.parse(response.body)
+    expect(result['error_messages']).to include 'Item doesnt belong to current order'
+
+    # If order item does not belong to order
+    inv_order_item = FactoryGirl.create(:order_item, :product_id=>product.id,
+                  :qty=>1, :price=>"10", :row_total=>"10", :order=>nil, :name=>product.name)
+    get :product_instruction, {:id => order.id, code: 'Hello', next_item: {order_item_id: order_item.id, name: 'Test', kit_product_id: 1245}}
+    expect(response.status).to eq(200)
+    result = JSON.parse(response.body)
+    expect(result['error_messages']).to include 'Couldnt find child item'
+
+    # If confirmation code does not match
+    @generalsetting.update_attribute(:strict_cc, true)
+    get :product_instruction, {:id => order.id, code: 'check', next_item: {order_item_id: order_item.id, name: 'Test'}}
+    expect(response.status).to eq(200)
+    result = JSON.parse(response.body)
+    expect(result['error_messages']).to include 'Confirmation code doesn\'t match'
   end
 
   it "should check for confirmation code when order status is on hold" do
