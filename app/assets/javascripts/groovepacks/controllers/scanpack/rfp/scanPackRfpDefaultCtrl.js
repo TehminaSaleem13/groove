@@ -375,7 +375,7 @@ groovepacks_controllers.
           $scope.set('title', "Ready for Product Scan");
           $timeout(function () {
             $('#ready_product_scan').focus();
-          }, 500);
+          }, 1000);
           if (typeof $scope.data.raw.data.serial != 'undefined' && $scope.data.raw.data.serial.ask) {
             myscope.ask_serial($scope.data.raw.data.serial);
           }
