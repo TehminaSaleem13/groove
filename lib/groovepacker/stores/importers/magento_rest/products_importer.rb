@@ -92,11 +92,11 @@ module Groovepacker
                 end
 
                 #add inventory warehouse
-                unless credential.store.nil? && credential.store.inventory_warehouse_id.nil?
-                  inv_wh = ProductInventoryWarehouses.new
-                  inv_wh.inventory_warehouse_id = credential.store.inventory_warehouse_id
-                  @productdb.product_inventory_warehousess << inv_wh
-                end
+                #unless credential.store.nil? && credential.store.inventory_warehouse_id.nil?
+                #  inv_wh = ProductInventoryWarehouses.new
+                #  inv_wh.inventory_warehouse_id = credential.store.inventory_warehouse_id
+                #  @productdb.product_inventory_warehousess << inv_wh
+                #end
                 @productdb.create_sync_option(:mg_rest_product_id => product_attrs["entity_id"], :sync_with_mg_rest => true)
                 @productdb.save
                 make_product_intangible(@productdb)
