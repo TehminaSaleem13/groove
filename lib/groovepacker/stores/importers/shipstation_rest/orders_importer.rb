@@ -48,17 +48,13 @@ module Groovepacker
               statuses.each do |status|
                 status_response = {}
                 status_response["orders"] = nil
-                status_response = client.get_orders(status, import_from, import_date_type)
-                response["orders"] = response["orders"].nil? ? status_response["orders"] :
-                  response["orders"] | status_response["orders"]
-
                 if import_item.import_type == 'quick'
                   #get for created time
-                  status_response["orders"] = nil
                   status_response = client.get_orders(status, import_from, "quick_created_at")
-                  response["orders"] = response["orders"].nil? ? status_response["orders"] :
-                    response["orders"] | status_response["orders"]
+                else
+                  status_response = client.get_orders(status, import_from, import_date_type)
                 end
+                response["orders"] = response["orders"].nil? ? status_response["orders"] : (response["orders"] | status_response["orders"])
               end
 
 
@@ -71,6 +67,8 @@ module Groovepacker
                 response["orders"] = response["orders"].nil? ? tagged_response["orders"] :
                   response["orders"] | tagged_response["orders"]
               end
+
+              shipments_response = client.get_shipments(import_from-2.days)
 
               unless response["orders"].nil?
                 result[:total_imported] = response["orders"].length
@@ -104,7 +102,10 @@ module Groovepacker
                   unless shipstation_order.nil?
                     ship_to = order["shipTo"]["name"].split(" ")
                     import_order(shipstation_order, order, credential)
-                    shipstation_order.tracking_num = client.get_tracking_number(order["orderId"])
+                    
+                    tracking_number = shipments_response.select {|shipment| shipment["orderId"]==order["orderId"]}.first["trackingNumber"] rescue nil
+                    #tracking_number = client.get_tracking_number(order["orderId"]) if tracking_number.blank?
+                    shipstation_order.tracking_num = tracking_number
                     unless order["items"].nil?
                       import_item.current_order_items = order["items"].length
                       import_item.current_order_imported_item = 0

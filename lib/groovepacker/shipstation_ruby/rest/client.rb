@@ -16,6 +16,19 @@ module Groovepacker
           fetch_orders(status, start_date)
         end
 
+        def get_shipments(import_from, date_type = 'created_at')
+          shipments_after_last_import = []
+          start_date = shipment_date_start(date_type, ss_format(import_from))
+          page_index=1
+          while page_index
+            response = @service.query("/shipments?page=#{page_index}&pageSize=100#{start_date}", nil, "get")
+            shipments_after_last_import = shipments_after_last_import.push(response["shipments"]).flatten
+            break if response["shipments"].count<100
+            page_index +=1
+          end
+          return shipments_after_last_import
+        end
+
         def get_tracking_number(orderId)
           tracking_number = nil
           unless orderId.nil?
@@ -116,6 +129,10 @@ module Groovepacker
             end
             "&#{predicate}=#{order_placed_after}"
           end
+        end
+
+        def shipment_date_start(import_date_type, shipment_after)
+          "&createDateStart=#{shipment_after}&createDateEnd=#{Date.today}"
         end
 
         def ss_format(start_date)

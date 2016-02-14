@@ -96,7 +96,6 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
             dashboard.stats.dashboard_stat();
           },
           set_type: function (chart_mode) {
-            console.log('set_type');
             if ((scope.charts.type == 'packing_error' && chart_mode == 'packing_stats') ||
               (scope.charts.type == 'packing_time_stats' && chart_mode == 'packing_speed_stats') ||
               (scope.charts.type == 'packed_order_stats' && chart_mode == 'packed_item_stats')) {
@@ -106,7 +105,6 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
             }
           },
           alter_type: function (chart_mode) {
-            console.log('alter_type');
             scope.charts.type = chart_mode;
           }
         };
@@ -257,6 +255,33 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
           }
         };
 
+        scope.xAxisTickValuesFunction = function () {
+          return function(d){
+            var tickVals = [];
+            dates = [];
+            dlen = d.length;
+            for (var i = dlen - 1; i >= 0; i--) {
+              ilen = d[i].values.length;
+              for (var j = ilen - 1; j >= 0; j--) {
+                if (d[i].disabled) {
+                  break;
+                } else {
+                  dates.push(d[i].values[j][0]);
+                }
+              };
+            };
+            var max = Math.max.apply(Math,dates)
+            var min = Math.min.apply(Math,dates)
+            tickVals.push(min);
+            if (parseInt((min + max) / 2) > (min + 86400)) {
+              tickVals.push(parseInt(min + max) / 2);
+            }
+            tickVals.push(max);
+
+            return tickVals;
+          };
+        };
+
         scope.xAxisTickFormatFunction = function () {
           return function (d) {
             return d3.time.format('%b %e, %Y')(moment.unix(d).toDate());
@@ -275,9 +300,7 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
         };
         scope.toolTipContentFunction = function () {
           return function (key, x, y, e, graph) {
-            console.log('toolTipContentFunction');
             var tooltipText = '';
-            console.log(scope.charts.type);
             if (scope.charts.type === 'packing_stats' || scope.charts.type === 'packing_error') {
 
               var average_packing_accuracy = "-";

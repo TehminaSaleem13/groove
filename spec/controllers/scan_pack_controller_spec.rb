@@ -1016,17 +1016,17 @@ RSpec.describe ScanPackController, :type => :controller do
       result = JSON.parse(response.body)
       expect(result["status"]).to eq(true)
 
-      # Any Other than None
-      @scanpacksetting.update_attribute(:post_scanning_option, 'Any')
-      product6 = FactoryGirl.create(:product)
-      product_sku6 = FactoryGirl.create(:product_sku, :product=> product6, sku: 'ps4')
-      product_barcode6 = FactoryGirl.create(:product_barcode, :product=> product6, :barcode=>"ps4")
-      order_item6 = FactoryGirl.create(:order_item, :product_id=>product6.id,
-                    :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>product6.name)
-      get :scan_barcode, {:state=>'scanpack.rfp.default', :input => 'ps4', :id => order.id }
-      expect(response.status).to eq(200)
-      result = JSON.parse(response.body)
-      expect(result["status"]).to eq(true)
+      # # Any Other than None
+      # @scanpacksetting.update_attribute(:post_scanning_option, 'Any')
+      # product6 = FactoryGirl.create(:product)
+      # product_sku6 = FactoryGirl.create(:product_sku, :product=> product6, sku: 'ps4')
+      # product_barcode6 = FactoryGirl.create(:product_barcode, :product=> product6, :barcode=>"ps4")
+      # order_item6 = FactoryGirl.create(:order_item, :product_id=>product6.id,
+      #               :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>product6.name)
+      # get :scan_barcode, {:state=>'scanpack.rfp.default', :input => 'ps4', :id => order.id }
+      # expect(response.status).to eq(200)
+      # result = JSON.parse(response.body)
+      # expect(result["status"]).to eq(true)
 
       # Verify with Tracking number
       order.update_attribute(:tracking_num, '1232121')

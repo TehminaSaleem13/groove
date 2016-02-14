@@ -19,9 +19,9 @@ groovepacks_services.factory('dashboard', ['$http', 'notification', 'auth', func
   }
 
   var get_dashboard_data = function() {
-    var tenant = document.getElementById('current_tenant').value
-    var domain = document.getElementById('domain').value
-    var site_host = document.getElementById('site_host').value
+    var tenant = document.getElementById('current_tenant').value;
+    var domain = document.getElementById('domain').value;
+    var site_host = document.getElementById('site_host').value;
     var access_token = localStorage.getItem('access_token');
     var created_at = localStorage.getItem('created_at');
     d = new Date();

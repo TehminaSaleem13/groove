@@ -70,4 +70,8 @@ Groovepacks::Application.configure do
   ENV['S3_ACCESS_KEY_SECRET'] = 'yQnVtHPGT8PH79S7n7tnxeW6CRH3s6xkOVUKbc7e'
   ENV['S3_BUCKET_NAME'] = 'groove-dev'
   ENV['S3_BASE_URL'] = 'https://s3-ap-southeast-1.amazonaws.com/groove-dev'
+  
+  #Shipstation rest API test api_key and api_secret
+  ENV['SHIPSTATION_REST_API_KEY'] = "45893449eae24f2e8bc7992904016ca6"
+  ENV['SHIPSTATION_REST_API_SECRET'] = "ddefa497b0fc48c0b162a533920ce990"
 end

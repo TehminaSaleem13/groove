@@ -3,6 +3,7 @@ module Groovepacker
     
     def initialize(attrs={})
       @host = attrs[:host]
+      @store_admin_url = attrs[:store_admin_url]
       @consumer_api_key = attrs[:api_key]
       @consumer_api_secret = attrs[:api_secret]
       @oauth_varifier = attrs[:oauth_varifier]
@@ -17,7 +18,7 @@ module Groovepacker
           site: @host
         })
         request_token = consumer.get_request_token
-        authorized_url = request_token.authorize_url
+        authorized_url = "#{@store_admin_url}/oauth_authorize?oauth_token=#{request_token.token}"
         current_tenant = Apartment::Tenant.current
         Rails.cache.write("#{current_tenant}_magento_request_token", request_token, timeToLive: 600.seconds)
 
@@ -25,7 +26,7 @@ module Groovepacker
         result['authorized_url'] = authorized_url
       rescue Exception => ex
         result['status'] = false
-        result['message'] = ex
+        result['message'] = "Something went wrong. Please make sure that the credentials you entered are correct"
       end
       return result
     end

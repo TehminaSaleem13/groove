@@ -55,6 +55,7 @@ module Groovepacker
           import_orders_obj = ImportOrders.new
           Delayed::Job.where(queue: "importing_orders_#{tenant}").destroy_all
           import_orders_obj.delay(:run_at => 1.seconds.from_now, :queue => "importing_orders_#{tenant}").import_orders tenant
+          #import_orders_obj.import_orders tenant
         end
 
         def create_or_update_item(credential, status)

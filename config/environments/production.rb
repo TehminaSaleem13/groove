@@ -135,5 +135,5 @@ Groovepacks::Application.configure do
   ENV["SITE_HOST"] = "groovepacker.com"
 
   # analytic server
-  ENV["GROOV_ANALYTIC"] = "http://159.203.92.158"
+  ENV["GROOV_ANALYTIC"] = "orderpacker.com"
 end
