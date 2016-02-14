@@ -136,7 +136,7 @@ class ScanPackController < ApplicationController
             unless order_item_serial_lots.empty?
               existing_serials = order_item_serial_lots.where(order_serial_id: order_serial.id)
               if existing_serials.empty?
-                new_serial = order_item_serial_lots.create(order_serial_id: nil)
+                new_serial = order_item_serial_lots.where(order_serial_id: nil).first || order_item_serial_lots.create(order_serial_id: nil)
                 new_serial.order_serial = order_serial
                 new_serial.save
               else
