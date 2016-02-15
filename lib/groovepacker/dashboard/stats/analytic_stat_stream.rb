@@ -16,23 +16,6 @@ module Groovepacker
             return stat_stream if orders.empty?
             puts "iterate over the orders"
             orders.each do |order|
-              # result = build_result
-              # exception = order.order_exception
-              # users = User.where(id: order.packing_user_id)
-              # next if users.empty?
-              # user = users.first
-              # result[:order_increment_id] = order.increment_id
-              # result[:item_count] = order.order_items.count
-              # result[:scanned_on] = order.scanned_on
-              # result[:packing_user_id] = order.packing_user_id
-              # result[:packing_user_name] = user.username
-              # result[:inaccurate_scan_count] = order.inaccurate_scan_count
-              # result[:packing_time] = order.total_scan_time
-              # result[:scanned_item_count] = order.total_scan_count
-              # if exception
-              #   result[:exception_description] = exception.description
-              #   result[:exception_reason] = exception.reason
-              # end
               if !order.increment_id.nil? && !order.scanned_on.nil?
                 result = build_stream(order.id)
                 stat_stream.push(result)
@@ -47,12 +30,9 @@ module Groovepacker
         def build_stream(order_id)
           result = build_result
           order = Order.find(order_id)
-          puts "find exception for the order"
           exception = order.order_exception
-          puts "find user"
           users = User.where(id: order.packing_user_id)
           unless users.empty?
-            puts "calculate the result"
             user = users.first
             result[:order_increment_id] = order.increment_id
             result[:item_count] = order.order_items.count
@@ -68,6 +48,11 @@ module Groovepacker
             end
           end
           result
+        end
+
+        def get_order_stream(tenant, order_id)
+          Apartment::Tenant.switch(tenant)
+          build_stream(order_id)
         end
 
         def build_result
