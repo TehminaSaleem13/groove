@@ -107,8 +107,8 @@ class Order < ActiveRecord::Base
       tenant = Apartment::Tenant.current
       if tenant == 'wagaboutit' || !Rails.env.production?
         stat_stream_obj = SendStatStream.new()
-        # stat_stream_obj.send(tenant, self.id)
-        stat_stream_obj.delay(:run_at => 1.seconds.from_now).send(tenant, self.id)
+        # stat_stream_obj.build_send_stream(tenant, self.id)
+        stat_stream_obj.delay(:run_at => 1.seconds.from_now).build_send_stream(tenant, self.id)
       end
     end
   end

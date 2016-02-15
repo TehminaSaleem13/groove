@@ -1,6 +1,6 @@
 class SendStatStream
 
-  def send(tenant, order_id)
+  def build_send_stream(tenant, order_id)
     stat_stream = build_stream(order_id)
     send_stream(tenant, stat_stream)
   end
@@ -12,7 +12,7 @@ class SendStatStream
   end
 
   def send_stream(tenant, stat_stream)
-    begin 
+    begin
       HTTParty.post("http://#{tenant}stat.#{ENV["GROOV_ANALYTIC"]}/dashboard",
         query: {tenant_name: tenant},
         body: stat_stream.to_json,
