@@ -288,6 +288,7 @@ RSpec.describe ScanPackController, :type => :controller do
 
     it "should process order scan by both hypenated and non hyphenated barcode plus including # symbol" do
       request.accept = "application/json"
+      increment_ids = ['MT3004', '#MT3004', 'MT3-004', '#MT3-004']
 
       order = FactoryGirl.create(:order, :increment_id=>'123-456')
 

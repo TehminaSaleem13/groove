@@ -415,4 +415,61 @@ class Product < ActiveRecord::Base
       return GeneralSetting.get_product_weight_format
     end
   end
+
+  def create_or_update_productcat(category)
+    product_cat = ProductCat.find_or_initialize_by_id(category["id"])
+    product_cat.category = category["category"]
+    product_cat.product_id = self.id unless product_cat.persisted?
+    response = product_cat.save ? true : false
+    return response
+  end
+
+  def create_or_update_productimage(image, order)
+    product_image = ProductImage.find_or_initialize_by_id(image["id"])
+    product_image.image = image["image"]
+    product_image.caption = image["caption"]
+    product_image.product_id = self.id unless product_image.persisted?
+    product_image.order = order
+    response = product_image.save ? true : false
+    return response
+  end
+
+  def create_or_update_productkitsku(kit_product)
+    actual_product = ProductKitSkus.find_by_option_product_id_and_product_ide(kit_product["option_product_id"], self.id)
+    return unless actual_product  
+    actual_product.qty = kit_product["qty"]
+    actual_product.packing_order = kit_product["packing_order"]
+    actual_product.save
+  end
+
+  def create_or_update_productsku(sku, order, status=nil)
+    product_sku = status=='new' ? ProductSku.new : ProductSku.find(sku["id"])
+
+    product_sku.sku = sku["sku"]
+    product_sku.purpose = sku["purpose"]
+    product_sku.product_id = self.id unless product_sku.persisted?
+    product_sku.order = order
+    response = product_sku.save ? true : false
+    return response
+  end
+
+  def create_or_update_productbarcode(barcode, order, status=nil)
+    product_barcode = status=='new' ? ProductBarcode.new : ProductBarcode.find(barcode["id"])
+    
+    product_barcode.barcode = barcode["barcode"]
+    product_barcode.product_id = self.id unless product_barcode.persisted?
+    product_barcode.order = order
+    response = product_barcode.save ? true : false
+    return response
+  end
+
+  def self.update_action_intangibleness(params)
+    action_intangible = Groovepacker::Products::ActionIntangible.new
+    scan_pack_setting = ScanPackSetting.all.first
+    intangible_setting_enabled = scan_pack_setting.intangible_setting_enabled
+    intangible_string = scan_pack_setting.intangible_string
+    action_intangible.delay(:run_at => 1.seconds.from_now).update_intangibleness(Apartment::Tenant.current, params, intangible_setting_enabled, intangible_string)
+    # action_intangible.update_intangibleness(Apartment::Tenant.current, params, intangible_setting_enabled, intangible_string)
+  end    
+
 end
