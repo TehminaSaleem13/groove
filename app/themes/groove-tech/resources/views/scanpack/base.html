@@ -1,5 +1,5 @@
 <div class="container-fluid">
-  <div class="row scan_pack_input" ng-if="!data.order.next_item || (current_state == 'scanpack.rfp.confirmation.cos')">
+  <div class="row scan_pack_input" ng-if="!data.order.next_item || current_state != 'scanpack.rfp.default' ">
     <div class="col-xs-12 scan_pack_title">
       {{data.title}}
     </div>
