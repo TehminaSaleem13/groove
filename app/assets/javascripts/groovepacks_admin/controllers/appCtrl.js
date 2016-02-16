@@ -1,6 +1,6 @@
 groovepacks_admin_controllers.
-  controller('appCtrl', ['$rootScope', '$scope', '$timeout', '$modalStack', '$state', '$filter', '$document', '$window', 'hotkeys', 'auth', 'notification', 'importOrders', 'groovIO', 'editable', 'stores',
-    function ($rootScope, $scope, $timeout, $modalStack, $state, $filter, $document, $window, hotkeys, auth, notification, importOrders, groovIO, editable, stores) {
+  controller('appCtrl', ['$http', '$rootScope', '$scope', '$timeout', '$modalStack', '$state', '$filter', '$document', '$window', 'hotkeys', 'auth', 'notification', 'importOrders', 'groovIO', 'editable', 'stores',
+    function ($http, $rootScope, $scope, $timeout, $modalStack, $state, $filter, $document, $window, hotkeys, auth, notification, importOrders, groovIO, editable, stores) {
 
       $scope.$on("user-data-reloaded", function () {
         $scope.current_user = auth;
@@ -24,6 +24,16 @@ groovepacks_admin_controllers.
       $rootScope.$on("editing-a-var", function (event, data) {
         $scope.currently_editing = (data.ident !== false);
       });
+
+      $scope.sign_out = function () {
+        console.log('sign_out');
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        localStorage.removeItem('created_at');
+        $http.delete('/users/sign_out.json').then(function (data) {
+          $window.location.href = '/users/sign_in';
+        });
+      };
 
       $scope.log_out = function (who) {
         if (who === 'me') {
