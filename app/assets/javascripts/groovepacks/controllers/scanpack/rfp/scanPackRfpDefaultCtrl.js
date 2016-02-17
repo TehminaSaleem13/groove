@@ -285,7 +285,6 @@ groovepacks_controllers.
           $timeout(myscope.show_order_instructions);
         }
         if (typeof $scope.data.order['next_item'] !== 'undefined' && ($scope.general_settings.single.conf_code_product_instruction === "always" || ($scope.general_settings.single.conf_code_product_instruction === "optional" && $scope.data.order.next_item.confirmation)) && (myscope.product_instruction_confirmed_id !== $scope.data.order.next_item.product_id) && $scope.data.order['next_item'].instruction!=undefined && $scope.data.order['next_item'].instruction.length>0) {
-          debugger
           $timeout(myscope.show_product_instructions);
         }
 
