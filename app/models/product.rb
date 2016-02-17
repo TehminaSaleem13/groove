@@ -470,6 +470,51 @@ class Product < ActiveRecord::Base
     intangible_string = scan_pack_setting.intangible_string
     action_intangible.delay(:run_at => 1.seconds.from_now).update_intangibleness(Apartment::Tenant.current, params, intangible_setting_enabled, intangible_string)
     # action_intangible.update_intangibleness(Apartment::Tenant.current, params, intangible_setting_enabled, intangible_string)
-  end    
+  end
+
+  def self.create_new_product(result, current_user)
+    if current_user.can?('add_edit_products')
+      product = Product.new
+      product.name = "New Product"
+      product.store_id = Store.where(:store_type => 'system').first.id
+      product.save
+      product.store_product_id = product.id
+      product.save
+      result['product'] = product
+    else
+      result['status'] = false
+      result['messages'].push('You do not have enough permissions to create a product')
+    end
+    return result
+  end
+
+  def self.get_count(params)
+    is_kit = 0
+    supported_kit_params = ['0', '1', '-1']
+    is_kit = params[:is_kit] if supported_kit_params.include?(params[:is_kit])
+    conditions = {:status => ['active', 'inactive', 'new']}
+    conditions[:is_kit] = is_kit.to_s unless is_kit == '-1'
+    counts = Product.select('status,count(*) as count').where(conditions).group(:status)
+    return counts
+  end
+
+  def generate_barcode(result)
+    return result unless product_barcodes.blank?
+    sku = product_skus.first
+    return result if sku.nil?
+    barcode = generate_barcode_from_sku(sku)
+    unless barcode.errors.blank?
+      result['status'] &= false
+      result['messages'].push(barcode.errors.full_messages)
+    end
+    update_product_status
+    return result
+  end
+
+  def generate_barcode_from_sku(sku)
+    barcode = product_barcodes.new(:barcode => sku.sku)
+    barcode.save
+    return barcode
+  end
 
 end

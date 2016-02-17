@@ -351,24 +351,8 @@ class ProductsController < ApplicationController
   def create
     #initialize_result will initialize status and message in result hash
     result = initialize_result
-    if current_user.can?('add_edit_products')
-      product = Product.new
-      product.name = "New Product"
-      product.store_id = Store.where(:store_type => 'system').first.id
-      product.store_product_id = 0
-      product_inv_wh = ProductInventoryWarehouses.new
-      product_inv_wh.inventory_warehouse_id = InventoryWarehouse.where(:is_default => true).first.id
-      product.product_inventory_warehousess << product_inv_wh
-      product.save
-
-      product.store_product_id = product.id
-      product.save
-      result['product'] = product
-    else
-      result['status'] = false
-      result['messages'].push('You do not have enough permissions to create a product')
-    end
-
+    result = Product.create_new_product(result, current_user)
+    
     respond_to do |format|
       format.json { render json: result }
     end
@@ -377,14 +361,8 @@ class ProductsController < ApplicationController
   def print_receiving_label
     #initialize_result will initialize status and message in result hash
     result = initialize_result
-    products = list_selected_products(params)
-    @products = []
-    unless products.nil?
-      products.each do |product|
-        list_product = Product.find(product['id'])
-        @products << list_product
-      end
-    end
+    @products = list_selected_products(params)
+    
     respond_to do |format|
       format.html # show.html.erb
       format.json {
@@ -415,23 +393,7 @@ class ProductsController < ApplicationController
     result = initialize_result
     if current_user.can?('add_edit_products')
       @products = list_selected_products(params)
-      unless @products.nil?
-        @products.each do |product|
-          @product = Product.find(product["id"])
-          if @product.product_barcodes.first.nil?
-            sku = @product.product_skus.first
-            unless sku.nil?
-              barcode = @product.product_barcodes.new
-              barcode.barcode = sku.sku
-              unless barcode.save
-                result['status'] &= false
-                result['messages'].push(barcode.errors.full_messages)
-              end
-            end
-          end
-          @product.update_product_status
-        end
-      end
+      @products.each { |product| result = product.generate_barcode(result) }
     else
       result['status'] = false
       result['messages'].push('You do not have enough permissions to generate barcodes')
@@ -1001,28 +963,14 @@ class ProductsController < ApplicationController
   end
 
   def generate_products_csv
-    require 'csv'
     result = initialize_result
     if current_user.can? 'create_backups'
-      products_list = list_selected_products(params)
-      products = []
-      products_list.each do |product|
-        products.push(Product.find(product['id']))
-      end
-      result['filename'] = 'products-'+Time.now.to_s+'.csv'
-      CSV.open("#{Rails.root}/public/csv/#{result['filename']}", "w") do |csv|
-        ProductsHelper.products_csv(products, csv)
-      end
+      result = generate_csv(result)
     else
       result['status'] = false
       result['messages'].push('You do not have enough permissions to create backup csv')
     end
-    unless result['status']
-      result['filename'] = 'error.csv'
-      CSV.open("#{Rails.root}/public/csv/#{result['filename']}", "w") do |csv|
-        csv << result['messages']
-      end
-    end
+    result = generate_error_csv(result) unless result['status']
 
     respond_to do |format|
       format.html # show.html.erb
@@ -1120,19 +1068,9 @@ class ProductsController < ApplicationController
     return @products_result
   end
 
-
   def get_products_count
-    count = Hash.new
-    is_kit = 0
-    supported_kit_params = ['0', '1', '-1']
-    is_kit = params[:is_kit] if !params[:is_kit].nil? &&
-      supported_kit_params.include?(params[:is_kit])
-    if is_kit == '-1'
-      counts = Product.select('status,count(*) as count').where(:status => ['active', 'inactive', 'new']).group(:status)
-    else
-      counts = Product.select('status,count(*) as count').where(:is_kit => is_kit.to_s, :status => ['active', 'inactive', 'new']).group(:status)
-    end
-    all = 0
+    count, all = {}, 0
+    counts = Product.get_count(params)
     counts.each do |single|
       count[single.status] = single.count
       all += single.count
@@ -1140,13 +1078,6 @@ class ProductsController < ApplicationController
     count['all'] = all
     count['search'] = 0
     count
-  end
-
-  def initialize_result
-    result = {}
-    result['status'] = true
-    result['messages'] = []
-    return result
   end
 
   def execute_groove_bulk_action(activity)

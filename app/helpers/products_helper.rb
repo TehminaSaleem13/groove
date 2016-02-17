@@ -220,12 +220,14 @@ module ProductsHelper
         end
       end
     else
-      result.each do |single_product|
+      (result||[]).each do |single_product|
         result_rows.push({'id' => single_product['id']})
       end
     end
-
-    return result_rows
+    
+    result_rows = result_rows.blank? ? [] : result_rows
+    p_ids = result_rows.map {|p| p["id"]}
+    products = Product.where("id IN (?)", p_ids)
   end
 
   def do_getproducts(params)
