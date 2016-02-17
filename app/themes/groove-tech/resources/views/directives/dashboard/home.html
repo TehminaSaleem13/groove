@@ -86,6 +86,7 @@
 
             <h3 ng-hide="charts.type=='packing_time_stats'">PACKING SPEED</h3>
             <h3 ng-show="charts.type=='packing_time_stats'">PACKING TIME</h3>
+            <span style="padding: 0px;"><span class="col-md-8" style="padding: 0px; margin-left: -10px; padding-top: 2px;"><h6>Max Time/Item</h6></span><span class="col-md-3" style="padding: 0px; margin-top: -2px;"><input type="text" class="col-md-12" style="height: 20px; padding: 0px; color: black;" ng-model="dashboard.max_time_per_item" ng-blur="update_max()"></span><span class="col-md-1" style="padding: 0px; padding-top: 2px;"><h6>&nbsp;Sec.</h6></span></span>
           </div>
           <div class="col-md-4 col-lg-4 pill-col">
             <div class="row">

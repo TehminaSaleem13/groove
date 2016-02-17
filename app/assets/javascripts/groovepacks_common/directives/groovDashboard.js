@@ -54,6 +54,12 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
           }
         }
 
+        scope.update_max = function () {
+          dashboard.model.update_max(scope.dashboard.max_time_per_item).then(function(){
+            scope.build_dash_data();
+          });
+        }
+
         scope.handle_click_fn = function (row, event) {
           if (typeof event !== 'undefined') {
             event.stopPropagation();
@@ -348,20 +354,40 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
           };
         };
 
+        scope.get_speed = function(time, items) {
+          var speed = scope.dashboard.max_time_per_item - (parseInt(time) / parseFloat(items));
+          if (speed < 0) {
+            return (100 + speed).toFixed(2);
+          } else {
+            return 100;
+          }
+        };
+
         scope.build_dash_data = function() {
           console.log(scope.dash_data);
-          days = scope.charts.days_filters[scope.charts.current_filter_idx].days;
-          scope.leader_board.list = scope.dash_data.leader_board.list;
-          for (var i = 0; i <= scope.dash_data.dashboard.length - 1; i++) {
-            if (parseInt(scope.dash_data.dashboard[i].duration, 10) === parseInt(days)) {
-              scope.dashboard.main_summary = scope.dash_data.dashboard[i].main_summary;
-              scope.dashboard.packing_stats = scope.dash_data.dashboard[i].daily_user_data.packing_stats;
-              scope.dashboard.packed_item_stats = scope.dash_data.dashboard[i].daily_user_data.packed_item_stats;
-              scope.dashboard.packing_speed_stats = scope.dash_data.dashboard[i].daily_user_data.packing_speed_stats;
-              scope.dashboard.avg_packing_accuracy_stats = scope.dash_data.dashboard[i].avg_user_data.packing_stats;
-              scope.dashboard.avg_packing_speed_stats = scope.dash_data.dashboard[i].avg_user_data.packing_speed_stats;
+          scope.dashboard.max_time_per_item = 0;
+          dashboard.model.get_max(scope.dashboard).then(function(response) {
+            console.log('max: ',scope.dashboard.max_time_per_item);
+            days = scope.charts.days_filters[scope.charts.current_filter_idx].days;
+            scope.leader_board.list = scope.dash_data.leader_board.list;
+            for (var i = 0; i <= scope.dash_data.dashboard.length - 1; i++) {
+              if (parseInt(scope.dash_data.dashboard[i].duration, 10) === parseInt(days)) {
+                scope.dashboard.main_summary = scope.dash_data.dashboard[i].main_summary;
+                scope.dashboard.packing_stats = scope.dash_data.dashboard[i].daily_user_data.packing_stats;
+                scope.dashboard.packed_item_stats = scope.dash_data.dashboard[i].daily_user_data.packed_item_stats;
+                scope.dashboard.packing_speed_stats = scope.dash_data.dashboard[i].daily_user_data.packing_speed_stats;
+                scope.dashboard.avg_packing_accuracy_stats = scope.dash_data.dashboard[i].avg_user_data.packing_stats;
+                scope.dashboard.avg_packing_speed_stats = scope.dash_data.dashboard[i].avg_user_data.packing_speed_stats;
+                scope.dashboard.main_summary.packing_speed_summary.current_period =
+                  scope.get_speed(scope.dashboard.main_summary.packing_time_summary.current_period, scope.dashboard.main_summary.packed_items_summary.current_period);
+                scope.dashboard.main_summary.packing_speed_summary.previous_period =
+                  scope.get_speed(scope.dashboard.main_summary.packing_time_summary.previous_period, scope.dashboard.main_summary.packed_items_summary.previous_period);
+                scope.dashboard.main_summary.packing_speed_summary.delta =
+                  (scope.dashboard.main_summary.packing_speed_summary.current_period - scope.dashboard.main_summary.packing_speed_summary.previous_period).toFixed(2);
+                console.log(scope.dashboard.main_summary);
+              }
             }
-          }
+          })
         };
         scope.init();
       }
