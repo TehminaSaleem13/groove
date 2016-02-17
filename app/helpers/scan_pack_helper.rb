@@ -11,8 +11,10 @@ module ScanPackHelper
   end
 
   def do_serial_scan
-    serial_scan_obj = ScanPack::SerialScanService.new
-    serial_scan_obj.run(current_user, session, params)
+    serial_scan_obj = ScanPack::SerialScanService.new(
+      current_user, session, params
+    )
+    serial_scan_obj.run()
   end
 
   def order_scan(input, state, id, options={})
