@@ -2,6 +2,16 @@ module ScanPack
   class Base
     include ScanPack::Utilities::OrderDetailsAndNextItem
 
+    def set_scan_pack_action_instances(current_user, session, params)
+      @current_user = current_user
+      @params = params
+      @session = session
+      @result = {
+        "status" => true, "error_messages" => [], "success_messages" => [],
+        "notice_messages" => [], 'data' => {}
+      } 
+    end
+
     def set_error_messages(error_message)
       @result['status'] &= false
       @result['error_messages'].push(error_message)

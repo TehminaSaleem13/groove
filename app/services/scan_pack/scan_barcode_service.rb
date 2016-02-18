@@ -1,13 +1,9 @@
 module ScanPack
-  class ScanBarcodeService
+  class ScanBarcodeService < ScanPack::Base
     include ScanPackHelper
     
-    def initialize(*args)
-      @params, @current_user, @session = *args
-      @result = {
-        "status" => true, "error_messages" => [], "success_messages" => [],
-        "notice_messages" => [], 'data' => {}
-      }
+    def initialize(current_user, session, params)
+      set_scan_pack_action_instances(current_user, session, params)
     end
 
     def run

@@ -3,13 +3,7 @@ module ScanPack
     include ScanPackHelper
     
     def initialize(current_user, session, params)
-      @current_user = current_user
-      @params = params
-      @session = session
-      @result = {
-        "status" => true, "error_messages" => [], "success_messages" => [],
-        "notice_messages" => [], 'data' => {}
-      }
+      set_scan_pack_action_instances(current_user, session, params)
       @order = Order.where(id: params[:order_id]).first
       @product = Product.where(id: params[:product_id]).first
     end

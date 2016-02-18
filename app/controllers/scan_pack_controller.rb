@@ -10,7 +10,10 @@ class ScanPackController < ApplicationController
   end
 
   def scan_barcode
-    @result = do_scan_barcode
+    scan_barcode_obj = ScanPack::ScanBarcodeService.new(
+      current_user, session, params
+    )
+    @result = scan_barcode_obj.run
     render json: @result
   end
 
@@ -23,19 +26,22 @@ class ScanPackController < ApplicationController
         @order.reset_scanned_status
         @result['data']['next_state'] = 'scanpack.rfo'
       else
-        @result['status'] &= false
-        @result['error_messages'].push("Order with id: "+params[:order_id].to_s+" is already in scanned state")
+        @result['status'] = false
+        @result['error_messages'].push("Order with id: #{params[:order_id]} is already in scanned state")
       end
     else
-      @result['status'] &= false
-      @result['error_messages'].push("Could not find order with id: "+params[:order_id].to_s)
+      @result['status'] = false
+      @result['error_messages'].push("Could not find order with id: #{params[:order_id]}")
     end
 
     render json: @result
   end
 
   def serial_scan
-    @result = do_serial_scan
+    serial_scan_obj = ScanPack::SerialScanService.new(
+      current_user, session, params
+    )
+    @result = serial_scan_obj.run
     render json: @result
   end
 
@@ -127,53 +133,11 @@ class ScanPackController < ApplicationController
   end
 
   def type_scan
-
-    if params[:id].nil? || params[:count].to_i < 1 || params[:next_item].nil?
-      @result['status'] &= false
-      @result['error_messages'].push('Order id, Item id and Type-in count are required')
-    else
-      @order = Order.where(id: params[:id]).first
-      if @order.nil?
-        @result['status'] &= false
-        @result['error_messages'].push('Could not find order with id: '+params[:id].to_s)
-      else
-        @order_item = OrderItem.where(id: params[:next_item]['order_item_id']).first
-        unless params[:next_item]['kit_product_id'].nil?
-          @order_kit_product = OrderItemKitProduct.where(id: params[:next_item]['kit_product_id']).first
-        end
-        if @order_item.nil?
-          @result['status'] &= false
-          @result['error_messages'].push('Couldnt find order item')
-        elsif !params[:next_item]['kit_product_id'].nil? && (@order_kit_product.nil? ||
-          @order_kit_product.order_item_id != @order_item.id)
-          @result['status'] &= false
-          @result['error_messages'].push('Couldnt find child item')
-        elsif @order_item.order_id != @order.id
-          @result['status'] &= false
-          @result['error_messages'].push('Item doesnt belong to current order')
-        else
-          if params[:count] <= params[:next_item][:qty]
-            unless params[:next_item][:barcodes].blank? || params[:next_item][:barcodes][0].blank? || params[:next_item][:barcodes][0][:barcode].blank?
-              @result['data'] = product_scan(
-                  params[:next_item][:barcodes][0][:barcode], 'scanpack.rfp.default', params[:id],
-                  { 
-                    clicked: false, serial_added: false, typein_count: params[:count].to_i,
-                    current_user: current_user, session: session
-                  }
-                )
-              @order.addactivity('Type-In count Scanned for product'+params[:next_item][:sku].to_s, current_user.username)
-            end
-          else
-            @result['status'] &= false
-            @result['error_messages'].push('Wrong count has been entered. Please try again')
-          end
-        end
-      end
-
-    end
-    
+    type_scan_obj = ScanPack::TypeScanService.new(
+      current_user, session, params
+    )
+    @result = type_scan_obj.run
     render json: @result
-
   end
 
   def product_instruction

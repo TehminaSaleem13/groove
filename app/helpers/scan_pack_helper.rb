@@ -2,21 +2,7 @@ module ScanPackHelper
 
   include OrdersHelper
   include ScanPack
-
-  def do_scan_barcode
-    scan_barcode_obj = ScanPack::ScanBarcodeService.new(
-      params, current_user, session
-    )
-    scan_barcode_obj.run
-  end
-
-  def do_serial_scan
-    serial_scan_obj = ScanPack::SerialScanService.new(
-      current_user, session, params
-    )
-    serial_scan_obj.run()
-  end
-
+  
   def order_scan(input, state, id, options={})
     order_scan_object = ScanPack::OrderScanService.new(
       options[:current_user], options[:session], input, state, id
