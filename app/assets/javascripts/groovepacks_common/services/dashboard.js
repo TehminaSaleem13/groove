@@ -6,9 +6,30 @@ groovepacks_services.factory('dashboard', ['$http', 'notification', 'auth', func
       packing_speed_stats: [],
       avg_packing_speed_stats: [],
       avg_packing_accuracy_stats: [],
-      main_summary: {}
+      main_summary: {},
+      max_time_per_item: 0,
+      packing_time_summary: {},
+      packing_speed_summary: {}
     };
   };
+
+  var get_max_time = function(dashboard) {
+    return(
+      $http.get('/settings/get_settings').success(function(response){
+        if (response.status==true) {
+          dashboard.max_time_per_item = response.data.settings.max_time_per_item;
+        }
+      })
+    );
+  };
+
+  var update_max_time = function(max_time_per_item) {
+    return(
+      $http.put('/settings/update_settings?max_time_per_item=' + max_time_per_item).error(function(){
+        notification.notify("Failed to update maximum expected time/item", 0);
+      })
+    );
+  }
 
   var exceptions = function (user_id, type) {
     return (
@@ -74,7 +95,9 @@ groovepacks_services.factory('dashboard', ['$http', 'notification', 'auth', func
 
   return {
     model: {
-      get: get_default
+      get: get_default,
+      get_max: get_max_time,
+      update_max: update_max_time
     },
     stats: {
       exceptions: exceptions,
