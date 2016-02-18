@@ -284,7 +284,7 @@ groovepacks_controllers.
           || ($scope.data.order.customer_comments && $scope.scan_pack.settings.show_customer_notes))) {
           $timeout(myscope.show_order_instructions);
         }
-        if (typeof $scope.data.order['next_item'] !== 'undefined' && ($scope.general_settings.single.conf_code_product_instruction === "always" || ($scope.general_settings.single.conf_code_product_instruction === "optional" && $scope.data.order.next_item.confirmation)) && myscope.product_instruction_confirmed_id !== $scope.data.order.next_item.product_id) {
+        if (typeof $scope.data.order['next_item'] !== 'undefined' && ($scope.general_settings.single.conf_code_product_instruction === "always" || ($scope.general_settings.single.conf_code_product_instruction === "optional" && $scope.data.order.next_item.confirmation)) && (myscope.product_instruction_confirmed_id !== $scope.data.order.next_item.product_id) && $scope.data.order['next_item'].instruction!=undefined && $scope.data.order['next_item'].instruction.length>0) {
           $timeout(myscope.show_product_instructions);
         }
 
@@ -373,9 +373,6 @@ groovepacks_controllers.
       myscope.check_reload_compute = function () {
         $scope.rfpinit().then(function () {
           $scope.set('title', "Ready for Product Scan");
-          $timeout(function () {
-            $('#ready_product_scan').focus();
-          }, 1000);
           if (typeof $scope.data.raw.data.serial != 'undefined' && $scope.data.raw.data.serial.ask) {
             myscope.ask_serial($scope.data.raw.data.serial);
           }
