@@ -7,7 +7,9 @@ groovepacks_services.factory('dashboard', ['$http', 'notification', 'auth', func
       avg_packing_speed_stats: [],
       avg_packing_accuracy_stats: [],
       main_summary: {},
-      max_time_per_item: 0
+      max_time_per_item: 0,
+      packing_time_summary: {},
+      packing_speed_summary: {}
     };
   };
 
