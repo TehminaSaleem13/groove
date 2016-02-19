@@ -141,43 +141,10 @@ class ScanPackController < ApplicationController
   end
 
   def product_instruction
-
-    if params[:id].nil? || params[:code].nil? || params[:next_item].nil?
-      @result['status'] &= false
-      @result['error_messages'].push('Order id, Item id and confirmation code required')
-    else
-      @order = Order.where(id: params[:id]).first
-      general_setting = GeneralSetting.all.first
-
-      if @order.nil?
-        @result['status'] &= false
-        @result['error_messages'].push('Could not find order with id: '+params[:id].to_s)
-      elsif !general_setting.strict_cc || current_user.confirmation_code == params[:code]
-        @order_item = OrderItem.where(id: params[:next_item]['order_item_id']).first
-        unless params[:next_item]['kit_product_id'].nil?
-          @order_kit_product = OrderItemKitProduct.where(id: params[:next_item]['kit_product_id']).first
-        end
-        if @order_item.nil?
-          @result['status'] &= false
-          @result['error_messages'].push('Couldnt find order item')
-        elsif !params[:next_item]['kit_product_id'].nil? && (@order_kit_product.nil? ||
-          @order_kit_product.order_item_id != @order_item.id)
-          @result['status'] &= false
-          @result['error_messages'].push('Couldnt find child item')
-        elsif @order_item.order_id != @order.id
-          @result['status'] &= false
-          @result['error_messages'].push('Item doesnt belong to current order')
-        else
-          @order.addactivity("Item instruction scanned for product - #{params[:next_item]['name']}", current_user.username)
-        end
-
-      else
-        @result['status'] &= false
-        @result['error_messages'].push('Confirmation code doesn\'t match')
-      end
-    end
-
+    product_instruction_obj = ScanPack::ProductInstructionService.new(
+      current_user, session, params
+    )
+    @result = product_instruction_obj.run
     render json: @result
-
   end
 end
