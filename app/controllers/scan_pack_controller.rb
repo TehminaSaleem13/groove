@@ -13,25 +13,25 @@ class ScanPackController < ApplicationController
     scan_barcode_obj = ScanPack::ScanBarcodeService.new(
       current_user, session, params
     )
-    @result = scan_barcode_obj.run
-    render json: @result
+    render json: scan_barcode_obj.run
   end
 
   # takes order_id as input and resets scan status if it is partially scanned.
   def reset_order_scan
     @order = Order.where(id: params[:order_id]).first
+    order_id = params[:order_id]
 
-    if !@order.nil?
+    if !@order.blank?
       if @order.status != 'scanned'
         @order.reset_scanned_status
         @result['data']['next_state'] = 'scanpack.rfo'
       else
         @result['status'] = false
-        @result['error_messages'].push("Order with id: #{params[:order_id]} is already in scanned state")
+        @result['error_messages'].push("Order with id: #{order_id} is already in scanned state")
       end
     else
       @result['status'] = false
-      @result['error_messages'].push("Could not find order with id: #{params[:order_id]}")
+      @result['error_messages'].push("Could not find order with id: #{order_id}")
     end
 
     render json: @result
@@ -41,53 +41,14 @@ class ScanPackController < ApplicationController
     serial_scan_obj = ScanPack::SerialScanService.new(
       current_user, session, params
     )
-    @result = serial_scan_obj.run
-    render json: @result
+    render json: serial_scan_obj.run
   end
 
   def add_note
-    email = !params[:email].blank?
-    
-    if params[:id].nil? || params[:note].nil?
-      @result['status'] &= false
-      @result['error_messages'].push('Order id and note from packer required')
-    else
-      @order = Order.where(id: params[:id]).first
-      if @order.nil?
-        @result['status'] &= false
-        @result['error_messages'].push('Could not find order with id: '+params[:id].to_s)
-      else
-        @order.notes_fromPacker = params[:note].to_s
-        general_settings = GeneralSetting.all.first
-        email_present = general_settings.email_address_for_packer_notes.present?
-        if @order.save && email_present
-          @result['success_messages'].push('Note from Packer saved successfully')
-          if general_settings.send_email_for_packer_notes == 'always' ||
-            (general_settings.send_email_for_packer_notes == 'optional' && email)
-            #send email
-            mail_settings = Hash.new
-            mail_settings['email'] = general_settings.email_address_for_packer_notes
-            mail_settings['sender'] = current_user.name + ' ('+current_user.username+')'
-            mail_settings['tenant_name'] = Apartment::Tenant.current
-            mail_settings['order_number'] = @order.increment_id
-            mail_settings['order_id'] = @order.id
-            mail_settings['note_from_packer'] = @order.notes_fromPacker
-
-            NotesFromPacker.send_email(mail_settings).deliver
-          end
-        else
-          @result['status'] &= false
-          msg = if email_present
-            'There was an error saving note from packer, please try again'
-          else
-            'Email not found for notification settings.'
-          end
-          @result['error_messages'].push(msg)
-        end
-      end
-    end
-    
-    render json: @result
+    add_note_obj = ScanPack::AddNoteService.new(
+      current_user, session, params
+    )
+    render json: add_note_obj.run
   end
 
   def order_instruction
@@ -98,13 +59,13 @@ class ScanPackController < ApplicationController
     # @result['notice_messages'] = []
     # @result['data'] = Hash.new
 
-    # if params[:id].nil? || params[:code].nil?
+    # if params[:id].blank? || params[:code].blank?
     #   @result['status'] &= false
     #   @result['error_messages'].push('Order id and confirmation code required')
     # else
     #   general_setting = GeneralSetting.all.first
     #   @order = Order.find(params[:id])
-    #   if @order.nil?
+    #   if @order.blank?
     #     @result['status'] &= false
     #     @result['error_messages'].push('Could not find order with id: '+params[:id].to_s)
     #   elsif !general_setting.strict_cc || current_user.confirmation_code == params[:code]
@@ -136,15 +97,13 @@ class ScanPackController < ApplicationController
     type_scan_obj = ScanPack::TypeScanService.new(
       current_user, session, params
     )
-    @result = type_scan_obj.run
-    render json: @result
+    render json: type_scan_obj.run
   end
 
   def product_instruction
     product_instruction_obj = ScanPack::ProductInstructionService.new(
       current_user, session, params
     )
-    @result = product_instruction_obj.run
-    render json: @result
+    render json: product_instruction_obj.run
   end
 end
