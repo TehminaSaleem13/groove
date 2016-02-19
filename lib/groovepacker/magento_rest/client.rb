@@ -50,11 +50,11 @@ module Groovepacker
         page_index = 1
         while page_index
           puts "=======================Fetching page #{page_index}======================="
-          filters = {"page" => "#{page_index}", "limit" => "20", "order" => "entity_id", "dir" => "dsc"}
+          filters = {"page" => "#{page_index}", "limit" => "100", "order" => "entity_id", "dir" => "dsc"}
           response = fetch(method, uri, parameters, filters)
           products = products.merge(response)
           response_length = response.length rescue 0
-          break if response_length<20 || page_index==25
+          break if response_length<100
           page_index += 1
         end
         return products
