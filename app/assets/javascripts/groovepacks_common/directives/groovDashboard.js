@@ -345,7 +345,7 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
               '<span><strong>Avg. Time/Item: </strong>' + e.point[2] + ' sec</span>' +
               '</div>');
             } else if (scope.charts.type === 'packed_item_stats' || scope.charts.type === 'packed_order_stats') {
-              tooltipText = y + ' items packed on ' + x;
+              tooltipText = y + ' items packed for ' + e.point[2] + ' orders on ' + x;
               return ('<div><h4 style="text-transform: capitalize; color:' + e.series.color +
               '">' + key + '</h4>' +
               '<span>' + tooltipText + '</span></div>');
