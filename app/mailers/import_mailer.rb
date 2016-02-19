@@ -10,4 +10,12 @@ class ImportMailer < ActionMailer::Base
     end
     mail to: "svisamsetty@navaratan.com, groovepacker+importfail@gmail.com ", subject: subject
   end
+
+  def send_products_import_email(products_count, credential)
+    @products_count = products_count
+    @credential = credential
+    @current_tenant = Apartment::Tenant.current
+    subject = "[#{@current_tenant}] [#{Rails.env}] initiated products import for #{@products_count} products"
+    mail to: "svisamsetty@navaratan.com, kcpatel006@gmail.com, service.groovepacker@gmail.com", subject: subject
+  end
 end

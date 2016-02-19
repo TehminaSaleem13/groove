@@ -6,6 +6,8 @@ RSpec.describe ProductsController, :type => :controller do
     sup_ad = FactoryGirl.create(:role,:name=>'super_admin1',:make_super_admin=>true)
     @user = FactoryGirl.create(:user,:username=>"new_admin1", :role=>sup_ad)
     sign_in @user
+
+    Delayed::Worker.delay_jobs = false
   end
   
   describe "inventory warehouse count" do
@@ -265,4 +267,79 @@ RSpec.describe ProductsController, :type => :controller do
       File.delete(File.dirname(__FILE__) + '/../../public/csv/'+result['filename'])
     end
   end
+
+
+  it "Should create a new product" do
+    request.accept = "application/json"
+    access_restriction = FactoryGirl.create(:access_restriction)
+    inv_wh = FactoryGirl.create(:inventory_warehouse, :is_default => true, :name=>'default_inventory_warehouse')
+    store = FactoryGirl.create(:store, :name=>'Default Store', :store_type=>'system', :inventory_warehouse=>inv_wh, :status => true)
+    general_setting = FactoryGirl.create(:general_setting, :inventory_tracking=>true, :hold_orders_due_to_inventory=>true)
+    post :create
+    expect(response.status).to eq(200)
+    expect(Product.all.count).to eq(1)
+  end
+
+  it "Should update existing product" do
+    request.accept = "application/json"
+    access_restriction = FactoryGirl.create(:access_restriction)
+    inv_wh = FactoryGirl.create(:inventory_warehouse, :is_default => true, :name=>'default_inventory_warehouse')
+    store = FactoryGirl.create(:store, :name=>'Default Store', :store_type=>'system', :inventory_warehouse=>inv_wh, :status => true)
+    general_setting = FactoryGirl.create(:general_setting, :inventory_tracking=>true, :hold_orders_due_to_inventory=>true)
+    post :create
+    expect(response.status).to eq(200)
+    expect(Product.all.count).to eq(1)
+    product = Product.all.first
+    #Product params need to be passes everytime otherwise blank info will be saved for product like name, store_product_id etc.
+    product_params = {id: product.id, store_product_id: 0, name: "Dread Wax", store_id: store.id, status: "active", is_skippable: false, is_kit: 0}
+    put :update, {id: product.id, basicinfo: product_params}
+    product.reload
+    expect(response.status).to eq(200)
+    expect(product.status).to eq("new")
+    expect(product.name).to eq("Dread Wax")
+    expect(product.is_skippable).to eq(false)
+    expect(product.is_kit).to eq(0)
+    expect(product.product_skus.count).to eq(0)
+    expect(product.product_barcodes.count).to eq(0)
+    expect(product.product_cats.count).to eq(0)
+
+    put :update, {id: product.id, basicinfo: product_params, post_fn: 'sku', skus: [{product_id: product.id, purpose: nil, sku: "P-WAX"}]}
+    product.reload
+    expect(response.status).to eq(200)
+    expect(product.status).to eq("new")
+    expect(product.product_skus.count).to eq(1)
+    expect(product.product_barcodes.count).to eq(0)
+    expect(product.product_cats.count).to eq(0)
+
+    put :update, {id: product.id, basicinfo: product_params, post_fn: 'barcode', barcodes: [{product_id: product.id, barcode: "P-WAX"}]}
+    product.reload
+    expect(response.status).to eq(200)
+    expect(product.status).to eq("active")
+    expect(product.product_skus.count).to eq(1)
+    expect(product.product_barcodes.count).to eq(1)
+    expect(product.product_cats.count).to eq(0)
+    expect(product.status).to eq("active")
+
+    put :update, {id: product.id, basicinfo: product_params, post_fn: 'category', cats: [{product_id: product.id, category: "TEST"}]}
+    product.reload
+    expect(response.status).to eq(200)
+    expect(product.status).to eq("active")
+    expect(product.product_skus.count).to eq(1)
+    expect(product.product_barcodes.count).to eq(1)
+    expect(product.product_cats.count).to eq(1)
+    expect(product.status).to eq("active")
+  end
+
+  # describe "Import Products" do
+  #   it "It should import products from magento store" do
+  #   request.accept = "application/json"
+  #   access_restriction = FactoryGirl.create(:access_restriction)
+  #   inv_wh = FactoryGirl.create(:inventory_warehouse, :is_default => true, :name=>'default_inventory_warehouse')
+  #   store = FactoryGirl.create(:store, :name=>'Magento Store', :store_type=>'Magento', :inventory_warehouse=>inv_wh, :status => true)
+  #   credentials = FactoryGirl.create(:magento_credential, :host=>"http://www.groovepacker.com/store", :username => "gpacker", :api_key => "gpacker.jonnyclean@xoxy.net", :store_id => store.id, import_products: true, last_imported_at: Time.now-10.days)
+  #   general_setting = FactoryGirl.create(:general_setting, :inventory_tracking=>true, :hold_orders_due_to_inventory=>true)
+  #   get :import_products,{:id => store.id}
+  #   expect(response.status).to eq(200)
+  #   end
+  # end
 end
