@@ -45,20 +45,20 @@ groovepacks_services.factory('dashboard', ['$http', 'notification', 'auth', func
     var site_host = document.getElementById('site_host').value;
     var access_token = localStorage.getItem('access_token');
     var created_at = localStorage.getItem('created_at');
+    var url = document.URL.split('/');
     d = new Date();
     if (created_at > parseInt(d.getTime() / 1000) - 5400) {
-      refresh_access_token().then(function(response){
+      refresh_access_token(url).then(function(response){
         access_token = response;
-        request_analytic_server(tenant, domain, site_host, access_token);
+        request_analytic_server(tenant, domain, site_host, access_token, url[0]);
       });
     } else {
-      request_analytic_server(tenant, domain, site_host, access_token);
+      request_analytic_server(tenant, domain, site_host, access_token,url[0]);
     }
   };
 
-  var refresh_access_token = function() {
+  var refresh_access_token = function(url) {
     var refresh_token = localStorage.getItem('refresh_token');
-    var url = document.URL.split('/');
     var target_url = url[0] + '//' + url[2] + '/auth/v1/getToken';
     return $http.get(target_url, {headers: {
       "Content-type": "application/x-www-form-urlencoded; charset=UTF-8",
@@ -83,10 +83,10 @@ groovepacks_services.factory('dashboard', ['$http', 'notification', 'auth', func
     });
   };
 
-  var request_analytic_server = function(tenant, domain, site_host, access_token) {
+  var request_analytic_server = function(tenant, domain, site_host, access_token, protocol) {
     $http.get(
-      // 'http://' + domain +'/dashboard/calculate',
-      'http://' + tenant + 'stat.' + domain +'/dashboard/calculate',
+      // protocol + '//' + domain +'/dashboard/calculate',
+      protocol + '//' + tenant + 'stat.' + domain +'/dashboard/calculate',
       {headers: {'Authorization':'Bearer ' + access_token, 'domain':site_host, 'tenant':tenant}}
       ).error(function(response){
       notification.notify("Failed to load dashboard data", 0);
