@@ -16,7 +16,7 @@ class ImportMailer < ActionMailer::Base
     @credential = credential
     @current_tenant = Apartment::Tenant.current
     subject = "[#{@current_tenant}] [#{Rails.env}] initiated products import for #{@products_count} products"
-    mail to: "svisamsetty@navaratan.com, kcpatel006@gmail.com, service.groovepacker@gmail.com", subject: subject
+    mail to: "svisamsetty@navaratan.com, kcpatel006@gmail.com, groovepacker@gmail.com", subject: subject
   end
 
   def send_products_import_complete_email(products_count, result, credential)

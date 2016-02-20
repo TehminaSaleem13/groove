@@ -19,4 +19,4 @@
 <p>
   <strong>New products: </strong><%= @result[:success_imported] rescue 0 %>
 </p>
-<strong>Import Date/Time: </strong><%=DateTime.now.to_s%></p>
+<strong>Import Date/Time: </strong><%=Time.now.utc.strftime("%b %dth %Y %I:%M%p %Z")%></p>
