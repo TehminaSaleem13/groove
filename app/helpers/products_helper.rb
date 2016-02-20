@@ -509,4 +509,12 @@ module ProductsHelper
       end
     end
   end
+
+  def get_weight_format(weight_format)
+    unless weight_format.nil?
+      return weight_format
+    else
+      return GeneralSetting.get_product_weight_format
+    end
+  end
 end

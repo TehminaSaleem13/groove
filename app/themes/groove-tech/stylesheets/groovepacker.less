@@ -875,6 +875,7 @@ li {
 
 .nav-tabs {
   color: #504f4f;
+  border-bottom: 1px #4D545A;
   > li {
     float: left;
     // Make the list-items overlay the bottom border
@@ -913,28 +914,31 @@ li {
 }
 
 .dashboard-nav {
-  margin-top: 15px;
+  margin-top: 10px;
 
   .tab-content {
-    background-color: rgba(220, 219, 219, 0.9);
+    background-color: #4D545A;
     border: 1px solid rgb(165, 165, 165);
-    border-radius: 4px;
-    height: 550px;
+    border-radius: 14px;
+    height: 600px;
 
     .dash-home-container {
       background-color: white;
       border-top-right-radius: 15px;
       border-top-left-radius: 15px;
+      box-shadow: 0px 25px 60px 6px #999;
     }
 
     .dash-home-container-left {
       background-color: white;
       border-top-right-radius: 15px;
+      box-shadow: 0px 30px 60px 6px #999;
     }
 
     .dash-home-container-right {
       background-color: white;
       border-top-left-radius: 15px;
+      box-shadow: 0px 30px 60px 6px #999;
     }
 
     .tab-col {
@@ -956,11 +960,13 @@ li {
         margin-left: 0px;
         border-bottom-left-radius: 15px;
         border-bottom-right-radius: 15px;
+        box-shadow: 0px 30px 60px 6px #999;
         &.tab-pill-active {
           height: 20px;
           border-bottom-left-radius: 0px;
           border-bottom-right-radius: 0px;
           margin-bottom: 0px;
+          box-shadow: none;
         }
       }
 
@@ -968,6 +974,7 @@ li {
         height: 150px;
         border-radius: 15px;
         margin-bottom: 5px;
+        box-shadow: 0px 0px 60px #999;
         color: white;
 
         &.tab-red {
@@ -1873,6 +1880,27 @@ div.input-style {
 
 .row.bottom-well {
   margin-top: 10px;
+}
+
+.dashboard-input {
+  height: 20px;
+  color: black;
+}
+
+.no-padding {
+  padding: 0px;
+}
+
+.top-pad-2p {
+  padding-top: 2px;
+}
+
+.top-margin-2p {
+  margin-top: -2px;
+}
+
+.remove-margin-left{
+  margin-left: -10px;
 }
 
 @media (max-width: 767px) {

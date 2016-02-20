@@ -288,6 +288,7 @@ RSpec.describe ScanPackController, :type => :controller do
 
     it "should process order scan by both hypenated and non hyphenated barcode plus including # symbol" do
       request.accept = "application/json"
+      increment_ids = ['MT3004', '#MT3004', 'MT3-004', '#MT3-004']
 
       order = FactoryGirl.create(:order, :increment_id=>'123-456')
 
@@ -699,25 +700,46 @@ RSpec.describe ScanPackController, :type => :controller do
     result = JSON.parse(response.body)
     expect(order.order_activities.pluck :action).to include "Item instruction scanned for product - Test"
 
-    # # If both id and note is nil
-    # get :add_note, {:id => nil, note: nil}
-    # expect(response.status).to eq(200)
-    # result = JSON.parse(response.body)
-    # expect(result['error_messages']).to include 'Order id and note from packer required'
+    # If both id and note is nil
+    get :product_instruction, {:id => nil, code: 'Hello', next_item: {order_item_id: order_item.id, name: 'Test'}}
+    expect(response.status).to eq(200)
+    result = JSON.parse(response.body)
+    expect(result['error_messages']).to include 'Order id, Item id and confirmation code required'
 
-    # # If only id is invalid
-    # get :add_note, {:id => 'invalid_id', note: 'Hello'}
-    # expect(response.status).to eq(200)
-    # result = JSON.parse(response.body)
-    # expect(result['error_messages']).to include "Could not find order with id: invalid_id"
+    # If only id is invalid
+    get :product_instruction, {:id => 'invalid_id', code: 'Hello', next_item: {order_item_id: order_item.id, name: 'Test'}}
+    expect(response.status).to eq(200)
+    result = JSON.parse(response.body)
+    expect(result['error_messages']).to include "Could not find order with id: invalid_id"
     
-    # # If Email not present
-    # @generalsetting.update_attribute(:email_address_for_packer_notes, nil)
-    # get :add_note, {:id => order.id, note: 'Hello'}
-    # expect(response.status).to eq(200)
-    # result = JSON.parse(response.body)
-    # expect(result['error_messages']).to include 'Email not found for notification settings.'
+    # If only order_item_id is invalid
+    get :product_instruction, {:id => order.id, code: 'Hello', next_item: {order_item_id: 23232, name: 'Test'}}
+    expect(response.status).to eq(200)
+    result = JSON.parse(response.body)
+    expect(result['error_messages']).to include 'Couldnt find order item'
 
+    # If order item does not belong to order
+    inv_order_item = FactoryGirl.create(:order_item, :product_id=>product.id,
+                  :qty=>1, :price=>"10", :row_total=>"10", :order=>nil, :name=>product.name)
+    get :product_instruction, {:id => order.id, code: 'Hello', next_item: {order_item_id: inv_order_item.id, name: 'Test'}}
+    expect(response.status).to eq(200)
+    result = JSON.parse(response.body)
+    expect(result['error_messages']).to include 'Item doesnt belong to current order'
+
+    # If order item does not belong to order
+    inv_order_item = FactoryGirl.create(:order_item, :product_id=>product.id,
+                  :qty=>1, :price=>"10", :row_total=>"10", :order=>nil, :name=>product.name)
+    get :product_instruction, {:id => order.id, code: 'Hello', next_item: {order_item_id: order_item.id, name: 'Test', kit_product_id: 1245}}
+    expect(response.status).to eq(200)
+    result = JSON.parse(response.body)
+    expect(result['error_messages']).to include 'Couldnt find child item'
+
+    # If confirmation code does not match
+    @generalsetting.update_attribute(:strict_cc, true)
+    get :product_instruction, {:id => order.id, code: 'check', next_item: {order_item_id: order_item.id, name: 'Test'}}
+    expect(response.status).to eq(200)
+    result = JSON.parse(response.body)
+    expect(result['error_messages']).to include 'Confirmation code doesn\'t match'
   end
 
   it "should check for confirmation code when order status is on hold" do
@@ -1051,6 +1073,56 @@ RSpec.describe ScanPackController, :type => :controller do
       expect(order_item.reload.scanned_qty).to eq(20001)
       #should take at max 10times more time than single count scan
       expect(0..(10*t2)).to cover(Time.now - t1)
+
+      # IF count nil
+      get :type_scan, {:state=>'scanpack.rfp.default', :input => '987654321', :id => order.id }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["status"]).to eq(false)
+      expect(result['error_messages']).to include('Order id, Item id and Type-in count are required')
+
+      # IF count invalid
+      get :scan_barcode, {:state=>'scanpack.rfp.default', :input => '987654321', :id => order.id }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      get :type_scan, {:state=>'scanpack.rfp.default', :input => '987654321', :id => order.id, next_item: result['data']['order']['next_item'], count: 99999999}
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["status"]).to eq(false)
+      expect(result['error_messages']).to include('Wrong count has been entered. Please try again')
+
+      # IF order id  nil
+      get :scan_barcode, {:state=>'scanpack.rfp.default', :input => '987654321', :id => order.id }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      get :type_scan, {
+        :state=>'scanpack.rfp.default', :input => '987654321', :id => 2132132 ,
+        next_item: result['data']['order']['next_item'], count: 20000
+      }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["status"]).to eq(false)
+      expect(result['error_messages']).to include('Could not find order with id: 2132132')
+
+      # If order_item nil
+      get :type_scan, {:state=>'scanpack.rfp.default', :input => '987654321', :id => order.id, next_item: {order_item_id: 12321}, count: 1}
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['error_messages']).to include 'Couldnt find order item'
+
+      # If order_item not in order
+      get :type_scan, {:state=>'scanpack.rfp.default', :input => '987654321', :id => order.id, next_item: {order_item_id: order_item.id, name: 'Test', kit_product_id: 1245}, count: 1}
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['error_messages']).to include 'Couldnt find child item'
+
+      # If order_item not in order
+      inv_order_item = FactoryGirl.create(:order_item, :product_id=>product.id,
+                    :qty=>1, :price=>"10", :row_total=>"10", :order=>nil, :name=>product.name)
+      get :type_scan, {:state=>'scanpack.rfp.default', :input => '987654321', :id => order.id, next_item: {order_item_id: inv_order_item.id, name: 'Test'}, count: 1}
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['error_messages']).to include 'Item doesnt belong to current order'
   end
 
   it "should scan product by barcode and order status should still be in awaiting status when there are unscanned items" do
@@ -1522,7 +1594,7 @@ RSpec.describe ScanPackController, :type => :controller do
       product_kit_sku = FactoryGirl.create(:product_sku, :product=> product_kit, :sku=> 'IPROTO')
       product_kit_barcode = FactoryGirl.create(:product_barcode, :product=> product_kit, :barcode => 'IPROTOBAR')
       order_item_kit = FactoryGirl.create(:order_item, :product_id=>product_kit.id,
-                    :qty=>2, :price=>"10", :row_total=>"10", :order=>order, :name=>product_kit.name)
+                    :qty=>10, :price=>"10", :row_total=>"10", :order=>order, :name=>product_kit.name)
 
       kit_product = FactoryGirl.create(:product, :name=>'IPROTO1',:packing_placement=>50, record_serial: true)
       kit_product_sku = FactoryGirl.create(:product_sku, :product=> kit_product, :sku=> 'IPROTO1')
@@ -1554,6 +1626,30 @@ RSpec.describe ScanPackController, :type => :controller do
       result = JSON.parse(response.body)
       expect(result['status']).to eq(true)
       expect(product_kit.order_serial.pluck :serial).to include('4')
+
+      # If OrderItemOrderSerialProductLot is present
+      get :serial_scan, {barcode: 'IPROTOBAR', clicked: true, :order_id => order.id, product_id: product_kit.id, serial: '4'}
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['status']).to eq(true)
+      expect(product_kit.order_serial.pluck :serial).to include('4')
+
+      # If OrderItemOrderSerialProductLot with Product Lot is present
+      product_lot = product_kit.product_lots.create
+      order_item_serial_lot = OrderItemOrderSerialProductLot.create(order_item_id: order_item_kit.id, product_lot_id: product_lot.id)
+      get :serial_scan, {barcode: 'IPROTOBAR', clicked: true, :order_id => order.id, product_id: product_kit.id, product_lot_id: product_lot.id, serial: '4', order_item_id: order_item_kit.id}
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['status']).to eq(true)
+      expect(product_kit.order_serial.pluck :serial).to include('4')
+
+      # If OrderItemOrderSerialProductLot with invalid serial id
+      order_item_serial_lot.update_attribute(:order_serial_id, 'Invalid')
+      get :serial_scan, {barcode: 'IPROTOBAR', clicked: true, :order_id => order.id, product_id: product_kit.id, product_lot_id: product_lot.id, serial: '4', order_item_id: order_item_kit.id}
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['status']).to eq(true)
+      expect(product_kit.order_serial.pluck :serial).to include('4')
     end
 
     it "should not scan product by serial number if barcode found or special code or user confirmation code or scanpacksetting action codes" do
@@ -1573,13 +1669,34 @@ RSpec.describe ScanPackController, :type => :controller do
       product_kit_sku = FactoryGirl.create(:product_sku, :product=> product_kit, :sku=> 'IPROTO')
       product_kit_barcode = FactoryGirl.create(:product_barcode, :product=> product_kit, :barcode => 'IPROTOBAR')
       order_item_kit = FactoryGirl.create(:order_item, :product_id=>product_kit.id,
-                    :qty=>2, :price=>"10", :row_total=>"10", :order=>order, :name=>product_kit.name)
+                    :qty=>10, :price=>"10", :row_total=>"10", :order=>order, :name=>product_kit.name)
 
       kit_product = FactoryGirl.create(:product, :name=>'IPROTO1',:packing_placement=>50, record_serial: true)
       kit_product_sku = FactoryGirl.create(:product_sku, :product=> kit_product, :sku=> 'IPROTO1')
       kit_product_barcode = FactoryGirl.create(:product_barcode, :product=> kit_product, :barcode => 'KITITEM1')
 
       kit_product_kit_sku = FactoryGirl.create(:product_kit_sku, :product => product_kit, :option_product_id=>kit_product.id)
+
+      #IF order_id nil
+      get :serial_scan, {barcode: 'KITITEM1', clicked: true, :order_id => nil, product_id: product_kit.id, serial: 'KITITEM1'}
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['status']).to eq(false)
+      expect(result['error_messages']).to include('Order id and Product id are required')
+
+      #IF order not found
+      get :serial_scan, {barcode: 'KITITEM1', clicked: true, :order_id => 12345, product_id: product_kit.id, serial: 'KITITEM1'}
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['status']).to eq(false)
+      expect(result['error_messages']).to include('Could not find order with id: 12345')
+
+      #IF product not found
+      get :serial_scan, {barcode: 'KITITEM1', clicked: true, :order_id => order.id, product_id: 12345, serial: 'KITITEM1'}
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['status']).to eq(false)
+      expect(result['error_messages']).to include('Could not find product with id: 12345')
 
       get :serial_scan, {barcode: 'KITITEM1', clicked: true, :order_id => order.id, product_id: product_kit.id, serial: 'KITITEM1'}
       expect(response.status).to eq(200)
@@ -1600,6 +1717,39 @@ RSpec.describe ScanPackController, :type => :controller do
       result = JSON.parse(response.body)
       expect(result['status']).to eq(false)
       expect(result['error_messages']).to include('Product Serial number: "123456" can not be the same as a confirmation code, one of the action codes or any product barcode')
+    end
+
+    it "should scan by click" do
+      request.accept = "application/json"
+      @scanpacksetting.escape_string_enabled = true
+      @scanpacksetting.record_lot_number = true
+      @scanpacksetting.escape_string = ' .. '
+      @scanpacksetting.save!
+
+      inv_wh = FactoryGirl.create(:inventory_warehouse)
+
+      store = FactoryGirl.create(:store, :inventory_warehouse_id => inv_wh.id)
+      order = FactoryGirl.create(:order, :status=>'awaiting', :store=>store)
+
+      product = FactoryGirl.create(:product, :is_kit => 0, :name=>'iPhone Protection',
+                        :kit_parsing=>'individual', :packing_placement=>50)
+      product_sku = FactoryGirl.create(:product_sku, :product=> product, :sku=> 'IPROTO')
+      product_barcode = FactoryGirl.create(:product_barcode, :product=> product, :barcode => 'CLICKSCAN')
+      order_item_kit = FactoryGirl.create(:order_item, :product_id=>product.id,
+                    :qty=>2, :price=>"10", :row_total=>"10", :order=>order, :name=>product.name)
+
+      get :click_scan, {barcode: 'CLICKSCAN', id: order.id}
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['status']).to eq(true)
+    end
+
+    it 'should check for confirmation code' do
+      request.accept = "application/json"
+
+      get :confirmation_code, {code: @user.confirmation_code}
+      result = JSON.parse(response.body)
+      expect(result['confirmed']).to eq true
     end
 
     it "should split and scan kits" do
@@ -1756,6 +1906,10 @@ RSpec.describe ScanPackController, :type => :controller do
       order_item2 = FactoryGirl.create(:order_item, :product_id=>kit_product2.id,
                :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>kit_product2.name,
                :scanned_status=>'scanned', :scanned_qty => 1)
+      # If order not found
+      put :reset_order_scan, {:order_id => 1232132 }
+      result = JSON.parse(response.body)
+      expect(result['error_messages']).to include("Could not find order with id: 1232132")
 
       put :reset_order_scan, {:order_id => order.id }
 

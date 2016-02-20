@@ -1033,6 +1033,9 @@ class StoresController < ApplicationController
       @result['status'] = true
       @result['store'] = @store
       access_restrictions = AccessRestriction.last
+      @result['general_settings'] = GeneralSetting.first
+      @result['current_tenant'] = Apartment::Tenant.current
+      @result['general_settings_page_url'] = get_settings_page_url
       @result['access_restrictions'] = access_restrictions
       @result['credentials'] = @store.get_store_credentials
       if @store.store_type == 'CSV'

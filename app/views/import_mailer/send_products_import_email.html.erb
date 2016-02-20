@@ -1,0 +1,14 @@
+<h3>Products import initiated:</h3>
+
+<p><strong>Tenant Name: </strong><%= @current_tenant %></p>
+<p>
+  <strong>Store id: </strong><%=@credential.store.id %>
+</p>
+<p>
+  <strong>Store type: </strong><%=@credential.store.store_type %>
+</p>
+<p>
+  <strong>Products to import: </strong><%= @products_count %>
+<p>
+<strong>Import Date/Time: </strong><%=Time.now.utc.strftime("%b %dth %Y %I:%M%p %Z")%></p>
+

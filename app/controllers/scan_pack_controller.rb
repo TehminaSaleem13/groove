@@ -59,7 +59,7 @@ class ScanPackController < ApplicationController
     @result['notice_messages'] = []
     @result['data'] = Hash.new
 
-    @order = Order.find(params[:order_id])
+    @order = Order.where(id: params[:order_id]).first
 
     if !@order.nil?
       if @order.status != 'scanned'
@@ -97,8 +97,8 @@ class ScanPackController < ApplicationController
       @result['status'] = false
       @result['error_messages'].push('Order id and Product id are required')
     else
-      order = Order.find(params[:order_id])
-      product = Product.find(params[:product_id])
+      order = Order.where(id: params[:order_id]).first
+      product = Product.where(id: params[:product_id]).first
 
       if order.nil?
         @result['status'] &= false
@@ -136,11 +136,11 @@ class ScanPackController < ApplicationController
             unless order_item_serial_lots.empty?
               existing_serials = order_item_serial_lots.where(order_serial_id: order_serial.id)
               if existing_serials.empty?
-                new_serial = order_item_serial_lots.where(order_serial_id: nil).first
+                new_serial = order_item_serial_lots.where(order_serial_id: nil).first || order_item_serial_lots.create(order_serial_id: nil)
                 new_serial.order_serial = order_serial
                 new_serial.save
               else
-                order_item_serial_lots.where(order_serial_id: nil).first.destroy
+                order_item_serial_lots.where(order_serial_id: nil).first.try :destroy
                 existing_serial = existing_serials.first
                 existing_serial.qty += 1
                 existing_serial.save
@@ -267,14 +267,14 @@ class ScanPackController < ApplicationController
       @result['status'] &= false
       @result['error_messages'].push('Order id, Item id and Type-in count are required')
     else
-      @order = Order.find(params[:id])
+      @order = Order.where(id: params[:id]).first
       if @order.nil?
         @result['status'] &= false
         @result['error_messages'].push('Could not find order with id: '+params[:id].to_s)
       else
-        @order_item = OrderItem.find(params[:next_item]['order_item_id'])
+        @order_item = OrderItem.where(id: params[:next_item]['order_item_id']).first
         unless params[:next_item]['kit_product_id'].nil?
-          @order_kit_product = OrderItemKitProduct.find(params[:next_item]['kit_product_id'])
+          @order_kit_product = OrderItemKitProduct.where(id: params[:next_item]['kit_product_id']).first
         end
         if @order_item.nil?
           @result['status'] &= false
@@ -318,16 +318,16 @@ class ScanPackController < ApplicationController
       @result['status'] &= false
       @result['error_messages'].push('Order id, Item id and confirmation code required')
     else
-      @order = Order.find(params[:id])
+      @order = Order.where(id: params[:id]).first
       general_setting = GeneralSetting.all.first
 
       if @order.nil?
         @result['status'] &= false
         @result['error_messages'].push('Could not find order with id: '+params[:id].to_s)
       elsif !general_setting.strict_cc || current_user.confirmation_code == params[:code]
-        @order_item = OrderItem.find(params[:next_item]['order_item_id'])
+        @order_item = OrderItem.where(id: params[:next_item]['order_item_id']).first
         unless params[:next_item]['kit_product_id'].nil?
-          @order_kit_product = OrderItemKitProduct.find(params[:next_item]['kit_product_id'])
+          @order_kit_product = OrderItemKitProduct.where(id: params[:next_item]['kit_product_id']).first
         end
         if @order_item.nil?
           @result['status'] &= false

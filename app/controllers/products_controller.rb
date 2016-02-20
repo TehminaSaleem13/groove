@@ -1,6 +1,5 @@
 class ProductsController < ApplicationController
-  before_filter :groovepacker_authorize!
-  include ProductsHelper
+  include ProductConcern
 
   def import_products
     @store = Store.find(params[:id])
@@ -11,6 +10,8 @@ class ProductsController < ApplicationController
     @result['total_imported'] = 0
     @result['success_imported'] = 0
     @result['previous_imported'] = 0
+    current_tenant = Apartment::Tenant.current
+    handler = nil
 
     import_result = nil
 
@@ -18,29 +19,17 @@ class ProductsController < ApplicationController
       begin
         #import if magento products
         if @store.store_type == 'Ebay'
-          context = Groovepacker::Stores::Context.new(
-            Groovepacker::Stores::Handlers::EbayHandler.new(@store))
-          import_result = context.import_products
+          handler = Groovepacker::Stores::Handlers::EbayHandler.new(@store)
         elsif @store.store_type == 'Magento'
-          context = Groovepacker::Stores::Context.new(
-            Groovepacker::Stores::Handlers::MagentoHandler.new(@store))
-          import_result = context.import_products
+          handler = Groovepacker::Stores::Handlers::MagentoHandler.new(@store)
         elsif @store.store_type == 'Magento API 2'
-          context = Groovepacker::Stores::Context.new(
-            Groovepacker::Stores::Handlers::MagentoRestHandler.new(@store))
-          import_result = context.import_products
+          handler = Groovepacker::Stores::Handlers::MagentoRestHandler.new(@store)
         elsif @store.store_type == 'Shipstation'
-          context = Groovepacker::Stores::Context.new(
-            Groovepacker::Stores::Handlers::ShipstationHandler.new(@store))
-          import_result = context.import_products
+          handler = Groovepacker::Stores::Handlers::ShipstationHandler.new(@store)
         elsif @store.store_type == 'Shipstation API 2'
-          context = Groovepacker::Stores::Context.new(
-            Groovepacker::Stores::Handlers::ShipstationRestHandler.new(@store))
-          import_result = context.import_products
+          handler = Groovepacker::Stores::Handlers::ShipstationRestHandler.new(@store)
         elsif @store.store_type == 'BigCommerce'
-          context = Groovepacker::Stores::Context.new(
-            Groovepacker::Stores::Handlers::BigCommerceHandler.new(@store))
-          import_result = context.import_products
+          handler = Groovepacker::Stores::Handlers::BigCommerceHandler.new(@store)
         elsif @store.store_type == 'Amazon'
           @amazon_credentials = AmazonCredentials.where(:store_id => @store.id)
 
@@ -146,6 +135,14 @@ class ProductsController < ApplicationController
             end
           end
         end
+
+        if @store.store_type != 'Amazon'
+          context = Groovepacker::Stores::Context.new(handler)
+          import_orders_obj = ImportOrders.new
+          import_orders_obj.delay(:run_at => 1.seconds.from_now).init_import(current_tenant)
+          import_result = context.delay(:run_at => 1.seconds.from_now).import_products
+          #import_result = context.import_products
+        end
       rescue Exception => e
         @result['status'] = false
         @result['messages'].push(e.message)
@@ -154,14 +151,14 @@ class ProductsController < ApplicationController
       @result['status'] = false
       @result['messages'].push('You can not import products')
     end
-    if !import_result.nil?
-      import_result[:messages].each do |message|
-        @result['messages'].push(message)
-      end
-      @result['total_imported'] = import_result[:total_imported]
-      @result['success_imported'] = import_result[:success_imported]
-      @result['previous_imported'] = import_result[:previous_imported]
-    end
+    # if !import_result.nil?
+    #   import_result[:messages].each do |message|
+    #     @result['messages'].push(message)
+    #   end
+    #   @result['total_imported'] = import_result[:total_imported]
+    #   @result['success_imported'] = import_result[:success_imported]
+    #   @result['previous_imported'] = import_result[:previous_imported]
+    # end
 
     respond_to do |format|
       format.json { render json: @result }
@@ -171,10 +168,10 @@ class ProductsController < ApplicationController
 
   def import_images
     @store = Store.find(params[:id])
-    result = {}
-
-    result['status'] = true
-    result['messages'] = []
+    
+    #initialize_result will initialize status and message in result hash
+    result = initialize_result
+    
     result['total_imported'] = 0
     result['success_imported'] = 0
     result['previous_imported'] = 0
@@ -339,8 +336,8 @@ class ProductsController < ApplicationController
   # if you would like to get Kits, specify params[:is_kit] to 1. it will return product kits and the corresponding skus
   #
   def index
-    result = {}
-    result[:status] = true
+    #initialize_result will initialize status and message in result hash
+    result = initialize_result
     @products = do_getproducts(params)
     result['products'] = make_products_list(@products)
     result['products_count'] = get_products_count()
@@ -350,9 +347,8 @@ class ProductsController < ApplicationController
   end
 
   def create
-    result = {}
-    result['status'] = true
-    result['messages'] = []
+    #initialize_result will initialize status and message in result hash
+    result = initialize_result
     if current_user.can?('add_edit_products')
       product = Product.new
       product.name = "New Product"
@@ -377,9 +373,8 @@ class ProductsController < ApplicationController
   end
 
   def print_receiving_label
-    result = {}
-    result['status'] = true
-    result['messages'] = []
+    #initialize_result will initialize status and message in result hash
+    result = initialize_result
     products = list_selected_products(params)
     @products = []
     unless products.nil?
@@ -414,9 +409,8 @@ class ProductsController < ApplicationController
   end
 
   def generate_barcode
-    result = {}
-    result['status'] = true
-    result['messages'] = []
+    #initialize_result will initialize status and message in result hash
+    result = initialize_result
     if current_user.can?('add_edit_products')
       @products = list_selected_products(params)
       unless @products.nil?
@@ -450,8 +444,9 @@ class ProductsController < ApplicationController
   # For search pass in parameter params[:search] and a params[:limit] and params[:offset].
   # If limit and offset are not passed, then it will be default to 10 and 0
   def search
-    result = {}
-    result['status'] = true
+    #initialize_result will initialize status and message in result hash
+    result = initialize_result
+
     if !params[:search].nil? && params[:search] != ''
 
       @products = do_search(params, false)
@@ -471,9 +466,8 @@ class ProductsController < ApplicationController
   end
 
   def scan_per_product
-    result = {}
-    result['status'] = true
-    result['messages'] = []
+    #initialize_result will initialize status and message in result hash
+    result = initialize_result
 
     if current_user.can?('add_edit_products')
       if !params[:setting].blank? && ['type_scan_enabled', 'click_scan_enabled'].include?(params[:setting])
@@ -505,75 +499,19 @@ class ProductsController < ApplicationController
   end
 
   def change_product_status
-    result = {}
-    result['status'] = true
-    result['messages'] = []
-
-    if current_user.can?('add_edit_products')
-      bulk_actions = Groovepacker::Products::BulkActions.new
-      groove_bulk_actions = GrooveBulkActions.new
-      groove_bulk_actions.identifier = 'product'
-      groove_bulk_actions.activity = 'status_update'
-      groove_bulk_actions.save
-
-      bulk_actions.delay(:run_at => 1.seconds.from_now).status_update(Apartment::Tenant.current, params, groove_bulk_actions.id)
-
-    else
-      result['status'] = false
-      result['messages'].push('You do not have enough permissions to edit product status')
-    end
-
-    respond_to do |format|
-      format.html # show.html.erb
-      format.json { render json: result }
-    end
+    #execute_groove_bulk_action(activity)
+    execute_groove_bulk_action('status_update')
+    
   end
 
   def delete_product
-    result = {}
-    result['status'] = true
-    result['messages'] = []
-
-    if current_user.can?('delete_products')
-      bulk_actions = Groovepacker::Products::BulkActions.new
-      groove_bulk_actions = GrooveBulkActions.new
-      groove_bulk_actions.identifier = 'product'
-      groove_bulk_actions.activity = 'delete'
-      groove_bulk_actions.save
-
-      bulk_actions.delay(:run_at => 1.seconds.from_now).delete(Apartment::Tenant.current, params, groove_bulk_actions.id, current_user.username)
-    else
-      result['status'] = false
-      result['messages'].push('You do not have enough permissions to delete products')
-    end
-
-    respond_to do |format|
-      format.html # show.html.erb
-      format.json { render json: result }
-    end
+    #execute_groove_bulk_action(activity)
+    execute_groove_bulk_action('delete')
   end
 
   def duplicate_product
-
-    result = {}
-    result['status'] = true
-    result['messages'] = []
-
-    if current_user.can?('add_edit_products')
-      bulk_actions = Groovepacker::Products::BulkActions.new
-      groove_bulk_actions = GrooveBulkActions.new
-      groove_bulk_actions.identifier = 'product'
-      groove_bulk_actions.activity = 'duplicate'
-      groove_bulk_actions.save
-      bulk_actions.delay(:run_at => 1.seconds.from_now).duplicate(Apartment::Tenant.current, params, groove_bulk_actions.id)
-    else
-      result['status'] = false
-      result['messages'].push('You do not have enough permissions to duplicate products')
-    end
-    respond_to do |format|
-      format.html # show.html.erb
-      format.json { render json: result }
-    end
+    #execute_groove_bulk_action(activity)
+    execute_groove_bulk_action('duplicate')
   end
 
   def show
@@ -686,9 +624,8 @@ class ProductsController < ApplicationController
   end
 
   def add_product_to_kit
-    result = {}
-    result['status'] = true
-    result['messages'] = []
+    #initialize_result will initialize status and message in result hash
+    result = initialize_result
 
     if current_user.can?('add_edit_products')
       @kit = Product.find_by_id(params[:id])
@@ -739,9 +676,8 @@ class ProductsController < ApplicationController
   end
 
   def remove_products_from_kit
-    result = {}
-    result['status'] = true
-    result['messages'] = []
+    #initialize_result will initialize status and message in result hash
+    result = initialize_result
 
     if current_user.can?('add_edit_products')
       @kit = Product.find_by_id(params[:id])
@@ -785,358 +721,11 @@ class ProductsController < ApplicationController
   end
 
   def update
-    result = {}
-    @product = Product.find(params[:basicinfo][:id]) unless params.nil? && params[:basicinfo].nil?
-    result['status'] = true
-    result['messages'] = []
-    result['params'] = params
-    general_setting = GeneralSetting.all.first
-    if !@product.nil?
-      if current_user.can?('add_edit_products') ||
-        (session[:product_edit_matched_for_current_user] && session[:product_edit_matched_for_products].include?(@product.id))
-        @product.reload
-        #Update Basic Info
-        @product.disable_conf_req = params[:basicinfo][:disable_conf_req]
-        @product.is_kit = params[:basicinfo][:is_kit]
-        @product.is_skippable = params[:basicinfo][:is_skippable]
-        @product.record_serial= params[:basicinfo][:record_serial]
-        @product.kit_parsing = params[:basicinfo][:kit_parsing]
-        @product.name = params[:basicinfo][:name]
-        @product.pack_time_adj = params[:basicinfo][:pack_time_adj]
-        @product.packing_placement = params[:basicinfo][:packing_placement] if params[:basicinfo][:packing_placement].is_a?(Integer)
-        @product.product_type = params[:basicinfo][:product_type]
-        @product.spl_instructions_4_confirmation = params[:basicinfo][:spl_instructions_4_confirmation]
-        @product.spl_instructions_4_packer = params[:basicinfo][:spl_instructions_4_packer]
-        # @product.status = params[:basicinfo][:status]
-        @product.store_id = params[:basicinfo][:store_id]
-        @product.store_product_id = params[:basicinfo][:store_product_id]
-        @product.type_scan_enabled = params[:basicinfo][:type_scan_enabled]
-        @product.click_scan_enabled = params[:basicinfo][:click_scan_enabled]
-        @product.weight = @product.get_product_weight(params[:weight])
-        @product.shipping_weight = @product.get_product_weight(params[:shipping_weight])
-        @product.weight_format = get_weight_format(params[:basicinfo][:weight_format])
-        @product.add_to_any_order = params[:basicinfo][:add_to_any_order]
-        @product.product_receiving_instructions = params[:basicinfo][:product_receiving_instructions]
-        @product.is_intangible = params[:basicinfo][:is_intangible]
-
-        product_location = @product.primary_warehouse
-        if product_location.nil?
-          product_location = ProductInventoryWarehouses.new
-          product_location.product_id = @product.id
-          product_location.inventory_warehouse_id = current_user.inventory_warehouse_id
-        end
-
-        product_location.quantity_on_hand = params[:inventory_warehouses][0][:info][:quantity_on_hand] unless params[:inventory_warehouses].empty?
-        product_location.save
-
-        update_inventory_info(general_setting) rescue
-
-        if !@product.save
-          result['status'] &= false
-        end
-        #Update product status and also update the containing kit and orders
-        updatelist(@product, 'status', params[:basicinfo][:status]) unless params[:basicinfo][:status].nil?
-        unless params['post_fn'].nil?
-          # if params['post_fn'] == ''
-          #   #Update product inventory warehouses
-          #   #check if a product inventory warehouse is defined.
-          #   product_inv_whs = ProductInventoryWarehouses.where(:product_id => @product.id)
-
-          #   if product_inv_whs.length > 0
-          #     product_inv_whs.each do |inv_wh|
-          #       if UserInventoryPermission.where(
-          #         :user_id => current_user.id,
-          #         :inventory_warehouse_id => inv_wh.inventory_warehouse_id,
-          #         :edit => true
-          #       ).length > 0
-          #         found_inv_wh = false
-          #         unless params[:inventory_warehouses].nil?
-          #           params[:inventory_warehouses].each do |wh|
-          #             if wh["info"]["id"] == inv_wh.id
-          #               found_inv_wh = true
-          #             end
-          #           end
-          #         end
-          #         if found_inv_wh == false
-          #           if !inv_wh.destroy
-          #             result['status'] &= false
-          #           end
-          #         end
-          #       end
-          #     end
-          #   end
-
-          #   #Update product inventory warehouses
-          #   #check if a product category is defined.
-          #   if !params[:inventory_warehouses].nil?
-          #     general_setting = GeneralSetting.all.first
-          #     params[:inventory_warehouses].each do |wh|
-          #       if UserInventoryPermission.where(
-          #         :user_id => current_user.id,
-          #         :inventory_warehouse_id => wh['warehouse_info']['id'],
-          #         :edit => true
-          #       ).length > 0
-          #         if !wh["info"]["id"].nil?
-          #           product_inv_wh = ProductInventoryWarehouses.find(wh["info"]["id"])
-
-          #           if general_setting.low_inventory_alert_email
-          #             product_inv_wh.product_inv_alert = wh["info"]["product_inv_alert"]
-          #             product_inv_wh.product_inv_alert_level = wh["info"]["product_inv_alert_level"]
-          #           end
-          #           product_inv_wh.quantity_on_hand= wh["info"]["quantity_on_hand"]
-          #           # product_inv_wh.available_inv = wh["info"]["available_inv"]
-          #           product_inv_wh.location_primary = wh["info"]["location_primary"]
-          #           product_inv_wh.location_secondary = wh["info"]["location_secondary"]
-          #           product_inv_wh.location_tertiary = wh["info"]["location_tertiary"]
-          #           unless product_inv_wh.save
-          #             result['status'] &= false
-          #           end
-          #         elsif !wh["warehouse_info"]["id"].nil?
-          #           product_inv_wh = ProductInventoryWarehouses.new
-          #           product_inv_wh.product_id = @product.id
-          #           product_inv_wh.inventory_warehouse_id = wh["warehouse_info"]["id"]
-          #           unless product_inv_wh.save
-          #             result['status'] &= false
-          #           end
-          #         end
-          #       end
-          #     end
-          #   end
-          # end
-          
-          if params['post_fn'] == 'category'
-            #Update product categories
-            #check if a product category is defined.
-            product_cats = ProductCat.where(:product_id => @product.id)
-
-            if product_cats.length > 0
-              product_cats.each do |productcat|
-                found_cat = false
-
-                if !params[:cats].nil?
-                  params[:cats].each do |cat|
-                    if cat["id"] == productcat.id
-                      found_cat = true
-                    end
-                  end
-                end
-
-                if found_cat == false
-                  if !productcat.destroy
-                    result['status'] &= false
-                  end
-                end
-              end
-            end
-
-            if !params[:cats].nil?
-              params[:cats].each do |category|
-                if !category["id"].nil?
-                  product_cat = ProductCat.find(category["id"])
-                  product_cat.category = category["category"]
-                  if !product_cat.save
-                    result['status'] &= false
-                  end
-                else
-                  product_cat = ProductCat.new
-                  product_cat.category = category["category"]
-                  product_cat.product_id = @product.id
-                  if !product_cat.save
-                    result['status'] &= false
-                  end
-                end
-              end
-            end
-          elsif params['post_fn'] == 'sku'
-            #Update product skus
-            #check if a product sku is defined.
-
-            product_skus = ProductSku.where(:product_id => @product.id)
-
-            if product_skus.length > 0
-              product_skus.each do |productsku|
-                found_sku = false
-
-                if !params[:skus].nil?
-                  params[:skus].each do |sku|
-                    if sku["id"] == productsku.id
-                      found_sku = true
-                    end
-                  end
-                end
-                if found_sku == false
-                  if !productsku.destroy
-                    result['status'] &= false
-                  end
-                end
-              end
-            end
-            if !params[:skus].nil?
-              order = 0
-              params[:skus].each do |sku|
-                if !sku["id"].nil?
-                  product_sku = ProductSku.find(sku["id"])
-                  product_sku.sku = sku["sku"]
-                  product_sku.purpose = sku["purpose"]
-                  product_sku.order = order
-                  if !product_sku.save
-                    result['status'] &= false
-                  end
-                else
-                  if sku["sku"]!='' && ProductSku.where(:sku => sku["sku"]).length == 0
-                    product_sku = ProductSku.new
-                    product_sku.sku = sku["sku"]
-                    product_sku.purpose = sku["purpose"]
-                    product_sku.product_id = @product.id
-                    product_sku.order = order
-                    if !product_sku.save
-                      result['status'] &= false
-                    end
-                  else
-                    result['status'] &= false
-                    result['message'] = "Sku "+sku["sku"]+" already exists"
-                  end
-
-                end
-                order = order + 1
-              end
-            end
-          elsif params['post_fn'] == 'barcode'
-            #Update product barcodes
-            #check if a product barcode is defined.
-            product_barcodes = ProductBarcode.where(:product_id => @product.id)
-            product_barcodes.reload
-            if product_barcodes.length > 0
-              product_barcodes.each do |productbarcode|
-                found_barcode = false
-
-                if !params[:barcodes].nil?
-                  params[:barcodes].each do |barcode|
-                    if barcode["id"] == productbarcode.id
-                      found_barcode = true
-                    end
-                  end
-                end
-
-                if found_barcode == false
-                  if !productbarcode.destroy
-                    result['status'] &= false
-                  end
-                end
-              end
-            end
-
-            #Update product barcodes
-            #check if a product barcode is defined
-            if !params[:barcodes].nil?
-              order = 0
-              params[:barcodes].each do |barcode|
-                if !barcode["id"].nil?
-                  product_barcode = ProductBarcode.find(barcode["id"])
-                  product_barcode.barcode = barcode["barcode"]
-                  product_barcode.order = order
-                  if !product_barcode.save
-                    result['status'] &= false
-                  end
-                else
-                  if barcode["barcode"]!='' && ProductBarcode.where(:barcode => barcode["barcode"]).length == 0
-                    product_barcode = ProductBarcode.new
-                    product_barcode.barcode = barcode["barcode"]
-                    product_barcode.order = order
-                    product_barcode.product_id = @product.id
-                    if !product_barcode.save
-                      result['status'] &= false
-                    end
-                  else
-                    result['status'] &= false
-                    result['message'] = "Barcode "+barcode["barcode"]+" already exists"
-                  end
-                end
-                order = order + 1
-              end
-            end
-          end
-        end
-
-        #Update product barcodes
-        #check if a product barcode is defined.
-        product_images = ProductImage.where(:product_id => @product.id)
-
-        if product_images.length > 0
-          product_images.each do |productimage|
-            found_image = false
-
-            if !params[:images].nil?
-              params[:images].each do |image|
-                if image["id"] == productimage.id
-                  found_image = true
-                end
-              end
-            end
-
-            if found_image == false
-              if !productimage.destroy
-                result['status'] &= false
-              end
-            end
-          end
-        end
-
-        #Update product barcodes
-        #check if a product barcode is defined
-        if !params[:images].nil?
-          order = 0
-          params[:images].each do |image|
-            if !image["id"].nil?
-              product_image = ProductImage.find(image["id"])
-              product_image.image = image["image"]
-              product_image.caption = image["caption"]
-              product_image.order = order
-              if !product_image.save
-                result['status'] &= false
-              end
-            else
-              product_image = ProductImage.new
-              product_image.image = image["image"]
-              product_image.caption = image["caption"]
-              product_image.product_id = @product.id
-              product_image.order = order
-              if !product_image.save
-                result['status'] &= false
-              end
-            end
-            order = order + 1
-          end
-        end
-
-        #if product is a kit, update product_kit_skus
-        if !params[:productkitskus].nil?
-          params[:productkitskus].each do |kit_product|
-            actual_product = ProductKitSkus.where(:option_product_id => kit_product["option_product_id"], :product_id => @product.id)
-            if actual_product.length > 0
-              actual_product = actual_product.first
-              actual_product.qty = kit_product["qty"]
-              actual_product.packing_order = kit_product["packing_order"]
-              actual_product.save
-            end
-          end
-        end
-
-        @product.reload
-        @product.update_product_status
-      else
-        result['status'] = false
-        result['message'] = 'You do not have enough permissions to update a product'
-      end
-    else
-      result['status'] = false
-      result['message'] = 'Cannot find product information.'
-    end
-
+    @result = gp_products_module.update_product_attributes
 
     respond_to do |format|
       format.html # show.html.erb
-      format.json { render json: result }
+      format.json { render json: @result }
     end
   end
 
@@ -1161,8 +750,8 @@ class ProductsController < ApplicationController
   end
 
   def update_product_list
-    result = {}
-    result['status'] = true
+    #initialize_result will initialize status and message in result hash
+    result = initialize_result
 
     if current_user.can?('add_edit_products')
       @product = Product.find_by_id(params[:id])
@@ -1195,9 +784,8 @@ class ProductsController < ApplicationController
   #If you had a situation where the newly imported product was actually the one you wanted to keep you could
   #find the original product and make it an alias of the new product...
   def set_alias
-    result = {}
-    result['status'] = true
-    result['messages'] = []
+    #initialize_result will initialize status and message in result hash
+    result = initialize_result
 
     if current_user.can?('add_edit_products') && current_user.can?('delete_products')
       @product_orig = Product.find(params[:id])
@@ -1306,9 +894,8 @@ class ProductsController < ApplicationController
   end
 
   def add_image
-    result = {}
-    result['status'] = true
-    result['messages'] = []
+    #initialize_result will initialize status and message in result hash
+    result = initialize_result
 
     if current_user.can?('add_edit_products')
       @product = Product.find(params[:id])
@@ -1352,8 +939,7 @@ class ProductsController < ApplicationController
   #not associated with the inventory warehouse, then it automatically associates it and
   #sets the value.
   def adjust_available_inventory
-    result = Hash.new
-    result['status'] = true
+    result = initialize_result
     result['error_messages'] = []
     result['success_messages'] = []
     result['notice_messages'] = []
@@ -1414,9 +1000,7 @@ class ProductsController < ApplicationController
 
   def generate_products_csv
     require 'csv'
-    result = Hash.new
-    result['status'] = true
-    result['messages'] = []
+    result = initialize_result
     if current_user.can? 'create_backups'
       products_list = list_selected_products(params)
       products = []
@@ -1445,17 +1029,9 @@ class ProductsController < ApplicationController
   end
 
   def update_intangibleness
-    result = Hash.new
-    result['status'] = true
+    result = initialize_result
     if current_user.can?('add_edit_products')
-      action_intangible = Groovepacker::Products::ActionIntangible.new
-
-      scan_pack_setting = ScanPackSetting.all.first
-      intangible_setting_enabled = scan_pack_setting.intangible_setting_enabled
-      intangible_string = scan_pack_setting.intangible_string
-
-      action_intangible.delay(:run_at => 1.seconds.from_now).update_intangibleness(Apartment::Tenant.current, params, intangible_setting_enabled, intangible_string)
-      # action_intangible.update_intangibleness(Apartment::Tenant.current, params, intangible_setting_enabled, intangible_string)
+      Product.update_action_intangibleness(params)
     else
       result['status'] = false
       result['messages'].push('You do not have enough permissions to edit product status')
@@ -1467,13 +1043,9 @@ class ProductsController < ApplicationController
   end
 
   def update_image
-    result = Hash.new
-    result['status'] = true
+    result = initialize_result
     begin
-      image = ProductImage.find(params[:image][:id])
-      image.added_to_receiving_instructions = params[:image][:added_to_receiving_instructions]
-      image.image_note = params[:image][:image_note]
-      image.save
+      ProductImage.update_image(params)
     rescue
       result['status'] = false
     end
@@ -1484,37 +1056,16 @@ class ProductsController < ApplicationController
   end
 
   def sync_with
-    result = Hash.new
-    result['status'] = true
+    result = initialize_result
     begin
-      product = Product.find_by_id(params[:id])
-      sync_option = product.sync_option || product.build_sync_option
-      sync_option.sync_with_bc = params["sync_with_bc"]
-      sync_option.bc_product_id = params["bc_product_id"].to_i!=0 ? params["bc_product_id"] : nil
-      sync_option.bc_product_sku = params["bc_product_sku"].try(:strip)
-
-      sync_option.sync_with_shopify = params["sync_with_shopify"]
-      sync_option.shopify_product_variant_id = params["shopify_product_variant_id"].to_i!=0 ? params["shopify_product_variant_id"] : nil
-
-      sync_option.sync_with_mg_rest = params["sync_with_mg_rest"]
-      sync_option.mg_rest_product_id = params["mg_rest_product_id"].to_i!=0 ? params["mg_rest_product_id"] : nil
-      sync_option.save
+      SyncOption.create_update_sync_option(params)
     rescue
       result['status'] = false
     end
-    
     render json: result
   end
 
   private
-
-  def get_weight_format(weight_format)
-    unless weight_format.nil?
-      return weight_format
-    else
-      return GeneralSetting.get_product_weight_format
-    end
-  end
 
   def make_products_list(products)
     @products_result = []
@@ -1589,28 +1140,25 @@ class ProductsController < ApplicationController
     count
   end
 
-  def update_inventory_info(general_setting)
-    return if params[:inventory_warehouses].empty?
-    attr_array = get_inv_update_attributes(general_setting)
+  def initialize_result
+    result = {}
+    result['status'] = true
+    result['messages'] = []
+    return result
+  end
+
+  def execute_groove_bulk_action(activity)
+    result = initialize_result
+    if current_user.can?('add_edit_products')
+      GrooveBulkActions.execute_groove_bulk_action(activity, params, current_user)
+    else
+      result['status'] = false
+      result['messages'].push('You do not have enough permissions to edit product status')
+    end
     
-    params[:inventory_warehouses].each_with_index do |inv_wh|
-      update_single_warehouse_info(inv_wh, attr_array)
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json: result }
     end
-  end
-
-  def update_single_warehouse_info(inv_wh, attr_array)
-    product_location = @product.product_inventory_warehousess.find_by_id(inv_wh["info"]["id"])
-    attr_array.each do |attr|
-      product_location.send("#{attr}=", inv_wh[:info][attr])
-    end
-    product_location.save
-  end
-
-  def get_inv_update_attributes(general_setting)
-    attr_array = ['quantity_on_hand', 'location_primary', 'location_secondary', 'location_tertiary']
-    if general_setting.low_inventory_alert_email
-      attr_array = attr_array + ['product_inv_alert', 'product_inv_alert_level']
-    end
-    attr_array
   end
 end

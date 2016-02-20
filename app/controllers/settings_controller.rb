@@ -558,7 +558,7 @@ class SettingsController < ApplicationController
 
 
         general_setting.export_items = params[:export_items]
-
+        general_setting.max_time_per_item = params[:max_time_per_item]
 
         general_setting.time_to_send_email = params[:time_to_send_email]
         general_setting.send_email_on_mon = params[:send_email_on_mon]

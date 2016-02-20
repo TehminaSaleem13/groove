@@ -4,8 +4,7 @@ class ImportItem < ActiveRecord::Base
   attr_accessible :status, :store_id, :previous_imported,
                   :success_imported, :import_type, :store,
                   :current_increment_id, :current_order_items,
-                  :current_order_imported_item, :to_import,
-                  :success_imported
+                  :current_order_imported_item, :to_import, :message
   after_save :emit_data_to_user
 
 

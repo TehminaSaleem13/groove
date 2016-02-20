@@ -132,6 +132,9 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
           stores.single.allow_bc_inv_push = data.access_restrictions.allow_bc_inv_push;
           stores.single.allow_mg_rest_inv_push = data.access_restrictions.allow_mg_rest_inv_push;
           stores.single.allow_shopify_inv_push = data.access_restrictions.allow_shopify_inv_push;
+          stores.general_settings = data.general_settings;
+          stores.current_tenant = data.current_tenant;
+          stores.general_settings_page_url = data.general_settings_page_url;
           if (data.store.store_type == 'Magento') {
             stores.single.host = data.credentials.magento_credentials.host;
             stores.single.username = data.credentials.magento_credentials.username;
@@ -400,6 +403,11 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
       if (data.status) {
         stores.import.product.status = "Successfully imported " + data.success_imported + " of " + data.total_imported +
           " products. " + data.previous_imported + " products were previously imported";
+        if(stores.general_settings.email_address_for_packer_notes!=undefined && stores.general_settings.email_address_for_packer_notes!=0) {
+          notification.notify("Your request has been queued. you will receive an email when products import is complete", 1);
+        } else {
+          notification.notify("Your request has been queued.", 1);
+        }
       } else {
         stores.import.product.status = "";
         for (var j = 0; j < data.messages.length; j++) {
