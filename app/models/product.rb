@@ -435,7 +435,7 @@ class Product < ActiveRecord::Base
   end
 
   def create_or_update_productkitsku(kit_product)
-    actual_product = ProductKitSkus.find_by_option_product_id_and_product_ide(kit_product["option_product_id"], self.id)
+    actual_product = ProductKitSkus.find_by_option_product_id_and_product_id(kit_product["option_product_id"], self.id)
     return unless actual_product  
     actual_product.qty = kit_product["qty"]
     actual_product.packing_order = kit_product["packing_order"]
