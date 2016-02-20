@@ -64,4 +64,17 @@ class ApplicationController < ActionController::Base
       end
     end
 
+    def get_settings_page_url
+      url = ""
+      current_tenant = Apartment::Tenant.current
+      if Rails.env=="producttion"
+        url = "https://#{current_tenant}.groovepacker.com/#/settings/system/general"
+      elsif Rails.env=="staging"
+        url = "http://#{current_tenant}.barcodepacker.com/#/settings/system/general"
+      else
+        url = "http://#{current_tenant}.barcodepacker.com:3000/#/settings/system/general"
+      end
+      return url
+    end
+
 end

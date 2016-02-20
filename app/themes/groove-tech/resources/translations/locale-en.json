@@ -87,6 +87,7 @@
           "packing_slip_orientation": "Packing Slip Orientation:",
           "portrait": "Portrait",
           "landscape": "Landscape",
+          "system_notifications": "System Notifications",
           "packing_slip_message_to_customer": "Custom Packing-Slip Message-All Stores"
         },
         "tooltips": {

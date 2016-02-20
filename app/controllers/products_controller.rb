@@ -141,8 +141,7 @@ class ProductsController < ApplicationController
           import_orders_obj = ImportOrders.new
           import_orders_obj.delay(:run_at => 1.seconds.from_now).init_import(current_tenant)
           import_result = context.delay(:run_at => 1.seconds.from_now).import_products
-          @result['messages'].push('Your request has been queued. you will receive an email when products import is complete')
-          #import_result = context.import_products(current_tenant)
+          #import_result = context.import_products
         end
       rescue Exception => e
         @result['status'] = false

@@ -27,8 +27,14 @@
               <div toggle-switch ng-model="stores.single.status" groov-click="update_single_store(true)"></div>
             </div>
             <div class="col-sm-2" ng-if="stores.single.store_type=='BigCommerce' || stores.single.store_type=='Magento API 2'">
-              <button ng-click="import_bc_products()" class="groove-button label label-default label-danger" translate>Import Product Catalog
+              <button ng-click="import_product_catalog()" class="groove-button label label-default label-danger" translate>Import Product Catalog
               </button>
+            </div>
+          </div>
+          <div class="form-group" ng-if="stores.general_settings.email_address_for_packer_notes==null || stores.general_settings.email_address_for_packer_notes=='null' || stores.general_settings.email_address_for_packer_notes.length<1">
+            <label class="control-label col-md-3">Note*</label>
+            <div class="col-md-9">
+              To receive an email notification when the import completes, please add an address for 'system notifications' in general settings.</a>
             </div>
           </div>
 
@@ -103,7 +109,8 @@
               </button>
               <ul class="dropdown-menu" role="menu">
                 <li ng-repeat="(id ,store) in stores.types">
-                  <a class="dropdown-toggle" ng-if="hide_if_mg_rest(store.name)" ng-click="change_opt('store_type',id)">{{store.name}}</a>
+                  <!-- <a class="dropdown-toggle" ng-if="hide_if_mg_rest(store.name)" ng-click="change_opt('store_type',id)">{{store.name}}</a> -->
+                  <a class="dropdown-toggle" ng-click="change_opt('store_type',id)">{{store.name}}</a>
 
                 </li>
               </ul>

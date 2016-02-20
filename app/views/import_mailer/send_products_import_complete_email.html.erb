@@ -1,0 +1,22 @@
+<% if @result[:status]==false %>
+  <h3><%= result[:messages] %></h3>
+<% else %>
+  <h3>Products import completed successfully</h3>
+<% end %>
+
+<p>
+  <strong>Tenant Name: </strong><%= @current_tenant %>
+</p>
+<p>
+  <strong>Store name: </strong><%=@credential.store.name %>
+</p>
+<p>
+  <strong>Store type: </strong><%=@credential.store.store_type %>
+</p>
+<p>
+  <strong>Total products in store: </strong><%= @products_count rescue 0 %>
+</p>
+<p>
+  <strong>New products: </strong><%= @result[:success_imported] rescue 0 %>
+</p>
+<strong>Import Date/Time: </strong><%=DateTime.now.to_s%></p>

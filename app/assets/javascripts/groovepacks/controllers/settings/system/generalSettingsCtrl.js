@@ -31,6 +31,7 @@ groovepacks_controllers.
             "conf_req_on_notes_to_packer": "",
             "send_email_for_packer_notes": "",
             "email_address": "",
+            "system_notifications": "System Notifications",
             "packing_slip_size": "",
             "packing_slip_orientation": "",
             "portrait": "",

@@ -28,13 +28,16 @@ module Groovepacker
                     result[:previous_imported] = result[:previous_imported] + 1
                   end
                 end
+                send_products_import_complete_email(@products.count, result, credential)
               else
                 result[:status] &= false
-                result[:messages].push('Problem retrieving products list')
+                result[:messages] = 'Problem retrieving products list'
+                send_products_import_complete_email(0, result, credential)
               end
             rescue Exception => e
               result[:status] &= false
-              result[:messages].push(e)
+              result[:messages] = e
+              send_products_import_complete_email(0, result, credential)
             end
             result
           end
@@ -123,6 +126,10 @@ module Groovepacker
 
           def send_products_import_email(products_count, credential)
             ImportMailer.send_products_import_email(products_count, credential).deliver rescue nil
+          end
+
+          def send_products_import_complete_email(products_count, result, credential)
+            ImportMailer.send_products_import_complete_email(products_count, result, credential).deliver rescue nil
           end
         end
       end

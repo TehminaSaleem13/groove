@@ -90,7 +90,7 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
       });
     };
 
-    scope.import_bc_products = function(){
+    scope.import_product_catalog = function(){
       scope.stores.single.import_type = 'bc_products_import';
       scope.import_products();
     }
