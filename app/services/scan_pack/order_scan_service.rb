@@ -42,7 +42,7 @@ module ScanPack
     def order_scan
       collect_orders
       @single_order, @single_order_result = get_single_order_with_result
-      do_if_single_order_not_present and return unless @single_order.present?
+      do_if_single_order_not_present and return unless @single_order
       do_if_single_order_present
     end
 
@@ -75,7 +75,7 @@ module ScanPack
         do_check_order_status_for_single_and_matched(
           matched_single, single_order_status, matched_single_status,
           order_placed_for_single_before_than_matched_single
-          ) if @single_order.present?
+          ) if @single_order
 
         unless ['scanned', 'cancelled'].include?(matched_single_status)
           @single_order_result['matched_orders'].push(matched_single)
@@ -169,7 +169,7 @@ module ScanPack
       do_if_single_order_status_awaiting if single_order_status.eql?('awaiting')
       #----------------------------
 
-      do_if_single_order_present_and_under_max_limit_of_shipment if @single_order.present?
+      do_if_single_order_present_and_under_max_limit_of_shipment if @single_order
     end
 
     def do_if_single_order_present_and_under_max_limit_of_shipment

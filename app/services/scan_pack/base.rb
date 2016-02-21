@@ -32,9 +32,7 @@ module ScanPack
 
     def do_remove_barcode_updated_before_24h_and_return_new_barcode_object(generate_barcode_hash)
       GenerateBarcode.where('updated_at < ?', 24.hours.ago).delete_all
-      generate_barcode = GenerateBarcode.new(generate_barcode_hash)
-      generate_barcode.save
-      generate_barcode
+      GenerateBarcode.create(generate_barcode_hash)
     end
 
     def generate_packing_slip(order)
