@@ -22,11 +22,11 @@ class SendStatStream
         order = Order.find(order_id)
         order.set_traced_in_dashboard
       else
-        GroovelyticsMailer.groovelytics_request_failed(tenant).deliver
+        GroovelyticsMailer.groovelytics_request_failed(tenant).deliver if !Rails.env.production?
       end
     rescue Exception => e
       Rails.logger.error e.backtrace.join("\n")
-      GroovelyticsMailer.groovelytics_request_failed(tenant).deliver
+      GroovelyticsMailer.groovelytics_request_failed(tenant).deliver if !Rails.env.production?
     end
   end
 end
