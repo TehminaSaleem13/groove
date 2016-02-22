@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20160217113924) do
+ActiveRecord::Schema.define(:version => 20160222062558) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0,     :null => false
@@ -556,6 +556,7 @@ ActiveRecord::Schema.define(:version => 20160217113924) do
     t.decimal  "packing_score",           :precision => 10, :scale => 0, :default => 0
     t.string   "custom_field_one"
     t.string   "custom_field_two"
+    t.boolean  "traced_in_dashboard",                                    :default => false
   end
 
   create_table "product_barcodes", :force => true do |t|
