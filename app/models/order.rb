@@ -106,11 +106,11 @@ class Order < ActiveRecord::Base
     unless Rails.env.test?
       tenant = Apartment::Tenant.current
       if tenant == 'wagaboutit' || !Rails.env.production?
-        stat_stream_obj.build_send_stream(tenant, self.id)
-        # if Delayed::Job.where(queue: "export_stat_stream_scheduled_#{tenant}").empty?
-        #   stat_stream_obj = SendStatStream.new()
-        #   stat_stream_obj.delay(:run_at => 1.seconds.from_now, :queue => 'export_stat_stream_scheduled_#{tenant}').build_send_stream(tenant, self.id)
-        # end
+        # stat_stream_obj.build_send_stream(tenant, self.id)
+        if Delayed::Job.where(queue: "export_stat_stream_scheduled_#{tenant}").empty?
+          stat_stream_obj = SendStatStream.new()
+          stat_stream_obj.delay(:run_at => 1.seconds.from_now, :queue => 'export_stat_stream_scheduled_#{tenant}').build_send_stream(tenant, self.id)
+        end
       end
     end
   end
