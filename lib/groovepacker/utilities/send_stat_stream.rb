@@ -12,13 +12,21 @@ class SendStatStream
   end
 
   def send_stream(tenant, stat_stream)
+    puts "send_stream.................."
     begin
-      HTTParty.post("http://#{tenant}stat.#{ENV["GROOV_ANALYTIC"]}/dashboard",
+      # response = HTTParty.post("http://#{ENV["GROOV_ANALYTIC"]}/dashboard",
+      response = HTTParty.post("http://#{tenant}stat.#{ENV["GROOV_ANALYTIC"]}/dashboard",
         query: {tenant_name: tenant},
         body: stat_stream.to_json,
         headers: { 'Content-Type' => 'application/json' })
+      if response.response.code == '200'
+        puts "response code 200..."
+      else
+        GroovelyticsMailer.groovelytics_request_failed(tenant).deliver
+      end
     rescue Exception => e
       Rails.logger.error e.backtrace.join("\n")
+      GroovelyticsMailer.groovelytics_request_failed(tenant).deliver
     end
   end
 end
