@@ -32,6 +32,26 @@ class GroovS3
       end
     end
 
+    def create_export_csv(tenant, file_name, data)
+      object = self.create(tenant,"export_csv/#{file_name}",'text/csv', :public_read)
+      self.save(object, data)
+      object
+    end
+
+    def find_export_csv(tenant, file_name)
+      require 'aws-sdk'
+      begin
+        creds = Aws::Credentials.new(ENV['S3_ACCESS_KEY_ID'], ENV['S3_ACCESS_KEY_SECRET'])
+        s3 = Aws::S3::Resource.new(region:'us-west-2', credentials: creds)
+        object = s3.bucket(ENV['S3_BUCKET_NAME']).object(tenant+"/export_csv/#{file_name}")
+        # object = self.bucket.objects.find(tenant+"/export_csv/#{file_name}")
+        put_url = object.presigned_url(:put, acl: 'public-read', expires_in: 3600 * 24)
+        return object.public_url
+      rescue S3::Error::NoSuchKey => e
+        return nil
+      end
+    end
+
     def create_order_backup(tenant, file_name, data)
       object = self.create(tenant, "deleted_orders/#{file_name}", 'application/json', :private)
       self.save(object, data)

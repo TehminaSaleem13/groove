@@ -102,3 +102,5 @@ gem 'oauth'
 gem 'rubocop', require: false
 gem 'shipping_easy'
 gem 'delayed_job_recurring'
+gem 'aws_cf_signer'
+gem 'aws-sdk', '~> 2'

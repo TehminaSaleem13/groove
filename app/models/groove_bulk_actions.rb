@@ -21,6 +21,8 @@ class GrooveBulkActions < ActiveRecord::Base
       bulk_actions.delay(:run_at => 1.seconds.from_now).delete(Apartment::Tenant.current, params, groove_bulk_actions.id, current_user.username)
     when 'duplicate'
       bulk_actions.delay(:run_at => 1.seconds.from_now).duplicate(Apartment::Tenant.current, params, groove_bulk_actions.id)
+    when 'export'
+      bulk_actions.delay(:run_at => 1.seconds.from_now).export(Apartment::Tenant.current, params, groove_bulk_actions.id, current_user)
     end
   end
 

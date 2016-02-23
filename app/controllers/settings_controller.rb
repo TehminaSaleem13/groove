@@ -276,26 +276,34 @@ class SettingsController < ApplicationController
   end
 
   def export_csv
+    # if data
+    #   respond_to do |format|
+    #     format.html # show.html.erb
+    #     format.zip { send_data data, :type => 'application/zip', :filename => filename }
+    #   end
+    # else
+      execute_in_bulk_action('export')
+      render :nothing => true, :status => 200
+    # end
+    # if current_user.can? 'create_backups'
+    #   dir = Dir.mktmpdir([current_user.username+'groov-export-', Time.now.to_s])
+    #   filename = 'groove-export-'+Time.now.to_s+'.zip'
+    #   begin
+    #     data = zip_to_files(filename, Product.to_csv(dir))
 
-    if current_user.can? 'create_backups'
-      dir = Dir.mktmpdir([current_user.username+'groov-export-', Time.now.to_s])
-      filename = 'groove-export-'+Time.now.to_s+'.zip'
-      begin
-        data = zip_to_files(filename, Product.to_csv(dir))
+    #   ensure
+    #     FileUtils.remove_entry_secure dir
+    #   end
+    # else
+    #   #prevent a fail and send empty zip
+    #   filename = 'insufficient_permissions.zip'
+    #   data = zip_to_files(filename, {})
+    # end
 
-      ensure
-        FileUtils.remove_entry_secure dir
-      end
-    else
-      #prevent a fail and send empty zip
-      filename = 'insufficient_permissions.zip'
-      data = zip_to_files(filename, {})
-    end
-
-    respond_to do |format|
-      format.html # show.html.erb
-      format.zip { send_data data, :type => 'application/zip', :filename => filename }
-    end
+    # respond_to do |format|
+    #   format.html # show.html.erb
+    #   format.zip { send_data data, :type => 'application/zip', :filename => filename }
+    # end
   end
 
   def order_exceptions
@@ -758,6 +766,23 @@ class SettingsController < ApplicationController
   def send_test_mail
     LowInventoryLevel.notify(GeneralSetting.all.first, Apartment::Tenant.current).deliver
     render json: "ok"
+  end
+
+  def execute_in_bulk_action(activity)
+    result = {}
+    result['status'] = true
+    result['messages'] = []
+    if current_user.can?('create_backups')
+      GrooveBulkActions.execute_groove_bulk_action(activity, params, current_user)
+    else
+      result['status'] = false
+      result['messages'].push('You do not have enough permissions to backup and restore')
+    end
+    result
+    # respond_to do |format|
+    #   format.html # show.html.erb
+    #   format.json { render json: result }
+    # end
   end
 
 end
