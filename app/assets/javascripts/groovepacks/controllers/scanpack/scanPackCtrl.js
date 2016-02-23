@@ -82,9 +82,9 @@ groovepacks_controllers.
           id = $scope.data.order.id;
         }
         if ($scope.current_state == 'scanpack.rfp.default') {
-          myscope.last_scanned_barcode = $scope.data.input;
           scanPack.input_scan_happend = true
         }
+        myscope.last_scanned_barcode = $scope.data.input;
         scanPack.input($scope.data.input, $scope.current_state, id).success($scope.handle_scan_return);
       };
 
