@@ -172,6 +172,8 @@ class StoresController < ApplicationController
             @magento_rest.host = not_to_save.include?(params[:host]) ? nil : params[:host]
             store_admin_url = params[:store_admin_url].sub(/(\/)+$/,'') rescue nil
             @magento_rest.store_admin_url = not_to_save.include?(store_admin_url) ? nil : store_admin_url
+            @magento_rest.store_version = params[:store_version]
+            @magento_rest.store_token = Store.get_sucure_random_token if @magento_rest.store_token.blank?
             @magento_rest.api_key = params[:api_key]
             @magento_rest.api_secret = params[:api_secret]
 
@@ -1035,7 +1037,7 @@ class StoresController < ApplicationController
       access_restrictions = AccessRestriction.last
       @result['general_settings'] = GeneralSetting.first
       @result['current_tenant'] = Apartment::Tenant.current
-      @result['general_settings_page_url'] = get_settings_page_url
+      @result['host_url'] = get_host_url
       @result['access_restrictions'] = access_restrictions
       @result['credentials'] = @store.get_store_credentials
       if @store.store_type == 'CSV'

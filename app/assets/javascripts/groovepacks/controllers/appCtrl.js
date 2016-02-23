@@ -55,7 +55,7 @@ groovepacks_controllers.
             },
             Magento2: {
               alt: "Magento API 2",
-              src: "https://s3.amazonaws.com/groovepacker/MagentoLogo.jpg"
+              src: "/assets/images/MagentoLogo.jpg"
             },
             Shipstation: {
               alt: "ShipStation",

@@ -1,86 +1,205 @@
 <div class="row">
-  <div class="col-md-6">
-    <legend>Magento REST Credentials</legend>
-    <div class="form-group">
-      <label class="control-label col-md-4">Store URL</label>
-
-      <div class="controls col-md-8">
-        <input name="host" ng-blur="update_single_store(true)" ng-model="stores.single.host"
-               class="form-control input-style" placeholder="http://www.domain.com" type="text" value=""
-               required/><span>Please use https if the store is hosted at a secure URL.</span>
-      </div>
-    </div>
-    
-    <div class="form-group">
-			<label class="control-label col-md-4">Store Admin URL</label>
-
-      <div class="controls col-md-8">
-        <input name="host" ng-blur="update_single_store(true)" ng-model="stores.single.store_admin_url"
-               class="form-control input-style" placeholder="http://www.domain.com/admin" type="text" value=""
-               required/><span>Please use https if the store is hosted at a secure URL.</span>
-      </div>
-		</div>
-
-    <div class="form-group">
-      <label class="control-label col-md-4">API Key</label>
-
-      <div class="controls col-md-8">
-        <input name="apikey" ng-blur="update_single_store(true)" ng-model="stores.single.api_key" class="form-control input-style" type="text" value="" placeholder="Consumer Api Key" required/>
-      </div>
-    </div>
-    <div class="form-group">
-      <label class="control-label col-md-4">API Secret</label>
-
-      <div class="controls col-md-8">
-        <input name="apisecret" ng-blur="update_single_store(true)" ng-model="stores.single.api_secret" class="form-control input-style" type="text" value="" placeholder="Consumer Api Secret" required/>
-      </div>
-    </div>
-    <div class="form-group" ng-if="!stores.single.access_token">
-      <label class="control-label col-md-4"></label>
-      <div class="controls col-md-8">
-        <button ng-disabled="(!stores.single.store_admin_url || stores.single.store_admin_url==null || stores.single.store_admin_url=='null') || (stores.single.host==null || stores.single.host=='null') || (stores.single.api_key==null || stores.single.api_key=='null') || (stores.single.api_secret==null || stores.single.api_secret=='null')" class="btn btn-success" ng-click="launch_magento_aurthorize_popup()">
-          Aurthorize
-        </button>
-      </div>
-    </div>
-
-    
-    <div ng-if="!stores.single.access_token">
+  <div class="col-md-12">
+    <div class="col-md-8">
+      <legend>Magento REST Credentials</legend>
       <div class="form-group">
-        <label class="control-label col-md-4">Oauth Varifier</label>
+        <label class="control-label col-md-3">Store URL</label>
 
-        <div class="controls col-md-8">
-          <input name="oauthvarifier" ng-model="stores.single.oauth_varifier" class="form-control input-style" type="text" value="" placeholder="Oauth Varifier" required/>
-          <span>You will get 'Oauth Varifier' on 'Aurthorization'. Provide it here to get access to store.</span>
+        <div class="controls col-md-9">
+          <input name="host" ng-blur="update_single_store(true)" ng-model="stores.single.host"
+                 class="form-control input-style" placeholder="http://www.domain.com" type="text" value=""
+                 required/><span>Please use https if the store is hosted at a secure URL.</span>
         </div>
       </div>
+
       <div class="form-group">
-        <label class="control-label col-md-4"></label>
-        <div class="controls col-md-8">
-          <button class="btn btn-success" ng-click="get_magento_access_token()">
-            Get Access Token
-          </button>
+        <label class="control-label col-md-3">Store Version</label>
+
+        <div class="controls col-md-9">
+          <div class="controls col-md-9" dropdown>
+            <button class="dropdown-toggle groove-button">
+              <span>{{stores.single.store_version}}</span>
+              <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu" role="menu">
+              <li ng-repeat=" version in ['1.x','2.x']">
+                <a class="dropdown-toggle" ng-click="change_magento_store_version(version)">{{version}}</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      
+      <div ng-show="stores.single.store_version=='1.x'">
+        <div class="form-group">
+    			<label class="control-label col-md-3">Store Admin URL</label>
+
+          <div class="controls col-md-9">
+            <input name="host" ng-blur="update_single_store(true)" ng-model="stores.single.store_admin_url"
+                   class="form-control input-style" placeholder="http://www.domain.com/admin" type="text" value=""
+                   required/><span>Please use https if the store is hosted at a secure URL.</span>
+          </div>
+    		</div>
+
+        <div class="form-group">
+          <label class="control-label col-md-3">API Key</label>
+
+          <div class="controls col-md-9">
+            <input name="apikey" ng-blur="update_single_store(true)" ng-model="stores.single.api_key" class="form-control input-style" type="text" value="" placeholder="Consumer Api Key" required/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="control-label col-md-3">API Secret</label>
+
+          <div class="controls col-md-9">
+            <input name="apisecret" ng-blur="update_single_store(true)" ng-model="stores.single.api_secret" class="form-control input-style" type="text" value="" placeholder="Consumer Api Secret" required/>
+          </div>
+        </div>
+        <div class="form-group" ng-if="!stores.single.access_token">
+          <label class="control-label col-md-3"></label>
+          <div class="controls col-md-9">
+            <button ng-disabled="(!stores.single.store_admin_url || stores.single.store_admin_url==null || stores.single.store_admin_url=='null') || (stores.single.host==null || stores.single.host=='null') || (stores.single.api_key==null || stores.single.api_key=='null') || (stores.single.api_secret==null || stores.single.api_secret=='null')" class="btn btn-success" ng-click="launch_magento_aurthorize_popup()">
+              Aurthorize
+            </button>
+          </div>
+        </div>
+
+        
+        <div ng-if="!stores.single.access_token">
+          <div class="form-group">
+            <label class="control-label col-md-3">Oauth Varifier</label>
+
+            <div class="controls col-md-9">
+              <input name="oauthvarifier" ng-model="stores.single.oauth_varifier" class="form-control input-style" type="text" value="" placeholder="Oauth Varifier" required/>
+              <span>You will get 'Oauth Varifier' on 'Aurthorization'. Provide it here to get access to store.</span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="control-label col-md-3"></label>
+            <div class="controls col-md-9">
+              <button class="btn btn-success" ng-click="get_magento_access_token()">
+                Get Access Token
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
-    <div ng-if="stores.single.access_token">
-      <div class="form-group">
-        <label class="control-label col-md-4">Access token</label>
-        <div class="controls col-md-8">
-          <p class="form-control-static">Available</p>
+    <div ng-show="stores.single.store_version=='2.x' && !stores.single.access_token">
+      <!-- <div class="col-md-12 no-padding">
+        <div class="col-md-8">
+          <legend></legend>
+        </div>
+      </div> -->
+      <div class="col-md-11">
+        <label class="control-label col-md-2">Magento-2 Integration Setup</label>
+        <div class="col-md-7">
+          <ol class="list-group">
+            <li class="list-group-item">
+              <p class="list-group-item-text">
+                1. Login into in magento-2 store backend as admin.
+              </p>
+            </li>
+
+            <li class="list-group-item">
+              <p class="list-group-item-text">
+                2. Create a new consumer/integration, click <strong>System > Integration > Add New Integration</strong>. Be sure to restrict the resources that the consumer/integration can access. 
+                <a href='' ng-click="show_hide_images('step-1-2', 'step-1-2-link');"><b>images </b><i class="groove-fa fa fa-caret-down step-1-2-link"></i></a>
+                <div class="step-1-2" style="display: none;">
+                  <div style="margin: 10px 0px;" >
+                    <img class="icons" src="/assets/images/magento-2-1.jpg" style="width: 100%; margin: 0px;border: 1px solid #d4d4d4;">
+                  </div>
+                  <div style="margin: 10px 0px;">
+                    <img class="icons" src="/assets/images/magento-2-2.jpg" style="width: 100%; margin: 0px;border: 1px solid #d4d4d4;">
+                  </div>
+                </div>
+
+                <strong>Note: </strong>Make sure the consumer you created is not expired (consumer credentials get expired if not activated in 3 minutes). You must use these consumer credentials to get an access token in fewer than three minutes. Expiry time can be changed from backend by the administrator.
+              </p>
+            </li>
+
+            <li class="list-group-item">
+              <p class="list-group-item-text">
+                3. Callback URL: 
+                <strong ng-show="edit_status">{{stores.host_url}}/magento_rest/callback?store_token={{stores.single.store_token}}</strong>
+              </p>
+              <p class="list-group-item-text" ng-show="edit_status">You'll paste it into consumer integration info as callback URL. (see image - 1 of step-1)</p>
+            </li>
+
+            <li class="list-group-item">
+              <p class="list-group-item-text">
+                4. Redirect URL: 
+                <strong ng-show="edit_status">{{stores.host_url}}/magento_rest/success</strong>
+              </p>
+              <p class="list-group-item-text" ng-show="edit_status">You'll paste it into consumer settings as redirect URL. (see image - 1 of step-1)</p>
+            </li>
+
+            <li class="list-group-item">
+              <p class="list-group-item-text">
+                5. Save the consumer/integration when you are done with entries. You will be redirected to Consumers/Integration list page.
+                <a href='' ng-click="show_hide_images('step-5-1', 'step-5-1-link');"><b>images </b><i class="groove-fa fa fa-caret-down step-5-1-link"></i></a>
+                <div class="step-5-1" style="display: none;">
+                  <div style="margin: 10px 0px;" >
+                    <img class="icons" src="/assets/images/magento-2-3.jpg" style="width: 100%; margin: 0px;border: 1px solid #d4d4d4;">
+                  </div>
+                </div>
+            </li>
+
+            <li class="list-group-item">
+              <p class="list-group-item-text">
+                6. Click on 'Activate' link of that consumer. It will ask your permissions to allow the access on resources. On clicking 'Allow', after a few seconds you will get a popup window with a message that you have completed the process successfully.
+                <a href='' ng-click="show_hide_images('step-6-1', 'step-6-1-link');"><b>images </b><i class="groove-fa fa fa-caret-down step-6-1-link"></i></a>
+                <div class="step-6-1" style="display: none;">
+                  <div style="margin: 10px 0px;" >
+                    <img class="icons" src="/assets/images/magento-2-5.png" style="width: 100%; margin: 0px;border: 1px solid #d4d4d4;">
+                  </div>
+                </div>
+
+            </li>
+
+            <li class="list-group-item">
+              <p class="list-group-item-text">
+                7. close that popup window. And on Groovepacker re-open your store, you will see "Accees token: Available" in palce of these instructions.
+            </li>
+
+            <li class="list-group-item">
+              <p class="list-group-item-text">
+                7. Now your store is ready to import and process the orders/products.
+            </li>
+            
+          </ol>
         </div>
       </div>
-      <div class="form-group">
-        <label class="control-label col-md-4"></label>
-        <div class="controls col-md-8">
-          <button class="btn btn-success" ng-click="check_magento_connection()">
-            Check Connection
-          </button>
+    </div>
 
-          <button confirm-click="Are you sure?" class="btn btn-success" ng-click="disconnect_magento_connection()">
-            Disconnect
-          </button>
+    <div class="col-md-8">
+      <div ng-if="stores.single.access_token">
+        <div class="form-group">
+          <label class="control-label col-md-3">Access token</label>
+          <div class="controls col-md-9">
+            <p class="form-control-static">Available</p>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="control-label col-md-3"></label>
+          <div class="controls col-md-9">
+            <button class="btn btn-success" ng-click="check_magento_connection()">
+              Check Connection
+            </button>
+
+            <button confirm-click="Are you sure?" class="btn btn-success" ng-click="disconnect_magento_connection()">
+              Disconnect
+            </button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="control-label col-md-3"></label>
+          <div class="controls col-md-9">
+            <!--Connection message will display here on clicking 'Check Connection'-->
+            {{stores.single.message}}
+          </div>
         </div>
       </div>
     </div>

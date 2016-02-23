@@ -1,5 +1,5 @@
 class SyncOption < ActiveRecord::Base
-  attr_accessible :bc_product_id, :product_id, :bc_product_sku, :sync_with_bc, :mg_rest_product_id, :sync_with_mg_rest,
+  attr_accessible :bc_product_id, :product_id, :bc_product_sku, :sync_with_bc, :mg_rest_product_id, :mg_rest_product_sku, :sync_with_mg_rest,
                   :sync_with_shopify, :shopify_product_variant_id
   belongs_to :product
 
@@ -12,6 +12,7 @@ class SyncOption < ActiveRecord::Base
     sync_option.sync_with_shopify = params["sync_with_shopify"]
     sync_option.shopify_product_variant_id = params["shopify_product_variant_id"].to_i!=0 ? params["shopify_product_variant_id"] : nil
     sync_option.sync_with_mg_rest = params["sync_with_mg_rest"]
+    sync_option.mg_rest_product_sku = params["mg_rest_product_sku"].try(:strip)
     sync_option.mg_rest_product_id = params["mg_rest_product_id"].to_i!=0 ? params["mg_rest_product_id"] : nil
     sync_option.save
   end

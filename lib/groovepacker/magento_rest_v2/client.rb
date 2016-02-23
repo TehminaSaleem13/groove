@@ -1,12 +1,13 @@
 module Groovepacker
-  module MagentoRest
+  module MagentoRestV2
     class Client < Base
-      include Groovepacker::MagentoRest::MagentoRestCommon
+      include Groovepacker::MagentoRestV2::MagentoRestCommon
 
       def orders
         credential = get_credential
         method = 'GET'
-        uri = "#{host_url}/api/rest/orders"
+        
+        uri = "#{api_base_url}/orders"
         last_import = credential.last_imported_at.to_datetime rescue (DateTime.now - 4.days)
         #filters = {}
         #from_date = (DateTime.now - 4.days).strftime("%Y-%m-%d %H:%M:%S")
@@ -17,7 +18,11 @@ module Groovepacker
         page_index = 1
         while page_index
           puts "=======================Fetching page #{page_index}======================="
-          filters = {"page" => "#{page_index}", "limit" => "10", "order" => "created_at", "dir" => "dsc"}
+          #filter_groups = { "0" => {  "filters" => { "0" => { "field" => "created_at", "value" => last_import, "condition_type" => "gt" } } } }
+          #filters = { 'search_criteria' => { 'current_page' => page_index, 'page_size' => 10, 'filter_groups' => filter_groups }}
+          #filters = {"search_criteria" =>  { "current_page" => page_index, "page_size" => 10, "sort_orders" => [{"field" => "created_at", "direction" => "DESC" }] }}
+          #filters = {"searchCriteria" => '', "page" => "#{page_index}", "limit" => "10", "order" => "created_at", "dir" => "dsc"}
+          filters = {"searchCriteria" => ''}
           response = fetch(method, uri, parameters, filters)
           response = filter_resp_orders_for_last_imported_at(response, last_import)
           
@@ -31,14 +36,14 @@ module Groovepacker
 
       def order(order_id, filters={})
         method = 'GET'
-        uri = "#{host_url}/api/rest/orders/#{order_id}"
+        uri = "#{api_base_url}/orders/#{order_id}"
         params = parameters
         fetch(method, uri, params, filters)
       end
 
-      def stock_item(stock_id, filters={})
+      def stock_item(sku, filters={})
         method = 'GET'
-        uri = "#{host_url}/api/rest/stockitems/#{stock_id}"
+        uri = "#{api_base_url}/stockItems/#{sku}"
         params = parameters
         fetch(method, uri, params, filters)
       end
@@ -46,15 +51,17 @@ module Groovepacker
 
       def products(filters={})
         method = 'GET'
-        uri = "#{host_url}/api/rest/products"
+        uri = "#{api_base_url}/products"
         
         products = {}
         page_index = 1
         while page_index
           puts "=======================Fetching page #{page_index}======================="
-          filters = {"page" => "#{page_index}", "limit" => "100", "order" => "entity_id", "dir" => "dsc"}
+          filters = {"search_criteria" =>  { "current_page" => page_index, "page_size" => 100 }}
           response = fetch(method, uri, parameters, filters)
-          products = products.merge(response)
+          unless response["items"].blank?
+            response["items"].each {|product| products[product["id"]]=product}
+          end
           response_length = response.length rescue 0
           break if response_length<100
           page_index += 1
@@ -65,46 +72,50 @@ module Groovepacker
 
       def product(product_id, filters={})
         method = 'GET'
-        uri = "#{host_url}/api/rest/products/#{product_id}"
+        uri = "#{api_base_url}/products/#{product_id}"
         params = parameters
         fetch(method, uri, params, filters)
       end
 
       def product_images(product_id, filters={})
         method = 'GET'
-        uri = "#{host_url}/api/rest/products/#{product_id}/images"
+        uri = "#{api_base_url}/products/#{product_id}/images"
         params = parameters
         fetch(method, uri, params, filters)
       end
 
       def product_categories(product_id, filters={})
         method = 'GET'
-        uri = "#{host_url}/api/rest/products/#{product_id}/categories"
+        uri = "#{api_base_url}/products/#{product_id}/categories"
         params = parameters
         fetch(method, uri, params, filters)
       end
 
-      def update_product_inv(product_id, filters_or_data={})
+      def update_product_inv(sync_optn, filters_or_data={})
         method = 'PUT'
-        uri = "#{host_url}/api/rest/stockitems/#{product_id}"
+        uri = "#{api_base_url}/products/#{sync_optn.mg_rest_product_sku}/stockItems/#{sync_optn.mg_rest_product_id}"
         params = parameters
         response = fetch(method, uri, params, filters_or_data)
       end
 
       def check_connection(filters={})
         method = 'GET'
-        uri = "#{host_url}/products"
-        filters = {"limit" => "1"}
+        uri = "#{api_base_url}/products"
+        #filters = { 'search_criteria' => { 'current_page' => 1, 'page_size' => 2, 'sort_orders' => { '0' => {'field' => 'created_at', 'direction' => 'ASC' } } }}
+        #filter_groups = { "0" => {  "filters" => { "0" => { "field" => "price", "value" => "45", "condition_type" => "gt" } } } }
+        #filters = { 'search_criteria' => { 'current_page' => 1, 'page_size' => 2, 'filter_groups' => filter_groups }}
+        filters = { 'search_criteria' => { 'current_page' => 1, 'page_size' => 1 }}
         response = fetch(method, uri, parameters, filters)
         return response
       end
 			
       private
-        def host_url
+        def api_base_url
           credential = get_credential
           host_url = credential.host
-          host_url = host_url.gsub("http", "https") unless host_url.include?("https")
-          return host_url
+          #host_url = host_url.gsub("http", "https") unless host_url.include?("https")
+          api_url = credential.store_version=="2.x" ? "#{host_url}/rest/V1" : "#{host_url}/api/rest"
+          return api_url
         end
 
         def get_credential
@@ -126,8 +137,9 @@ module Groovepacker
         def filter_resp_orders_for_last_imported_at(response, last_import)
           orders_to_return = {}
           return response if response["messages"].present?
+          return orders_to_return if response["items"].blank?
 
-          response.each { |key, value| orders_to_return[key] = value if value["created_at"].to_datetime > last_import }
+          response["items"].each { |order| orders_to_return[order["increment_id"]] = order if order["created_at"].to_datetime > last_import }
           return orders_to_return
         end
     end
