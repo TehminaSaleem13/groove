@@ -29,7 +29,7 @@ module ScanPack
       when @id.blank? || @input.blank?
         set_error_messages('Please specify barcode and order id to confirm purchase code')
       when @single_order.blank?
-        set_error_messages('Could not find order with id:'+@id)
+        set_error_messages("Could not find order with id:#{@id}")
       else
         product_scan(clicked, serial_added)
       end
