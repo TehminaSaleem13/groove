@@ -38,7 +38,7 @@
               <span>Current Period</span>
             </div>
           </div>
-          <div class="col-md-2 col-lg-2" ng-class="
+          <div class="col-md-2 col-lg-2 pill-col-last" ng-class="
           {'pill-col-last':dashboard.main_summary.packing_accuracy_summary.delta == 0,
           'pill-col-last-tall':dashboard.main_summary.packing_accuracy_summary.delta > 0,
           'pill-col-last-short':dashboard.main_summary.packing_accuracy_summary.delta < 0}" ng-hide="charts.type=='packing_error'">
@@ -54,7 +54,7 @@
                 {{charts.days_filters[charts.current_filter_idx].name}}</p>
             </div>
           </div>
-          <div class="col-md-2 col-lg-2" ng-class="
+          <div class="col-md-2 col-lg-2 pill-col-last" ng-class="
           {'pill-col-last':dashboard.main_summary.packing_error_summary.delta == 0,
           'pill-col-last-tall':dashboard.main_summary.packing_error_summary.delta > 0,
           'pill-col-last-short':dashboard.main_summary.packing_error_summary.delta < 0}" ng-show="charts.type=='packing_error'">
@@ -101,7 +101,7 @@
               <span>Current Period</span>
             </div>
           </div>
-          <div class="col-md-2 col-lg-2" ng-class="
+          <div class="col-md-2 col-lg-2 pill-col-last" ng-class="
           {'pill-col-last':dashboard.packing_speed_summary.delta == 0,
           'pill-col-last-tall':dashboard.packing_speed_summary.delta > 0,
           'pill-col-last-short':dashboard.packing_speed_summary.delta < 0}" ng-hide="charts.type=='packing_time_stats'">
@@ -117,7 +117,7 @@
                 {{charts.days_filters[charts.current_filter_idx].name}}</p>
             </div>
           </div>
-          <div class="col-md-2 col-lg-2" ng-class="
+          <div class="col-md-2 col-lg-2 pill-col-last" ng-class="
           {'pill-col-last':dashboard.packing_time_summary.delta == 0,
           'pill-col-last-tall':dashboard.packing_time_summary.delta > 0,
           'pill-col-last-short':dashboard.packing_time_summary.delta < 0}" ng-show="charts.type=='packing_time_stats'">
@@ -164,7 +164,7 @@
               <span>Current Period</span>
             </div>
           </div>
-          <div class="col-md-2 col-lg-2" ng-class="
+          <div class="col-md-2 col-lg-2 pill-col-last" ng-class="
           {'pill-col-last':dashboard.main_summary.packed_items_summary.delta == 0,
           'pill-col-last-tall':dashboard.main_summary.packed_items_summary.delta > 0,
           'pill-col-last-short':dashboard.main_summary.packed_items_summary.delta < 0}" ng-hide="charts.type=='packed_order_stats'">
@@ -182,7 +182,7 @@
               </p>
             </div>
           </div>
-          <div class="col-md-2 col-lg-2" ng-class="
+          <div class="col-md-2 col-lg-2 pill-col-last" ng-class="
           {'pill-col-last':dashboard.main_summary.packed_orders_summary.delta == 0,
           'pill-col-last-tall':dashboard.main_summary.packed_orders_summary.delta > 0,
           'pill-col-last-short':dashboard.main_summary.packed_orders_summary.delta < 0}" ng-show="charts.type=='packed_order_stats'">
