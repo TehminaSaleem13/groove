@@ -1,6 +1,6 @@
 groovepacks_controllers.
-  controller('showBackupCtrl', ['$scope', 'backup',
-    function ($scope, backup) {
+  controller('showBackupCtrl', ['$scope', '$timeout', 'backup',
+    function ($scope, $timeout, backup) {
       var myscope = {};
 
       myscope.init = function () {
@@ -14,7 +14,11 @@ groovepacks_controllers.
               $scope.backup_restore.data.file = args.file;
               $("input[type='file']").val('');
             });
-            backup.restore($scope.backup_restore.data);
+            backup.restore($scope.backup_restore.data).then(function(response){
+              setTimeout(function(){
+                myscope.init();
+              }, 300);
+            });
           }
         });
 

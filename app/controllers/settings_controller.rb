@@ -9,36 +9,36 @@ class SettingsController < ApplicationController
     if current_user.can? 'restore_backups'
       # Every entry on mapping[current_mapping][:map] should be in the format
       # csv_header => db_table_header
-      if params[:method] == 'del_import_old'
-        product_map = {
-          'id' => 'id',
-          'store_product_id' => 'store_product_id',
-          'name' => 'name',
-          'product_type' => 'product_type',
-          'store_id' => 'store_id',
-          'created_at' => 'created_at',
-          'updated_at' => 'updated_at',
-          'inv_wh1' => 'inv_wh1',
-          'status' => 'status',
-          'spl_instructions_4_packer' => 'spl_instructions_4_packer',
-          'spl_instructions_4_confirmation' => 'spl_instructions_4_confirmation',
-          'barcode' => 'barcode',
-          'is_skippable' => 'is_skippable',
-          'packing_placement' => 'packing_placement',
-          'pack_time_adj' => 'pack_time_adj',
-          'kit_parsing' => 'kit_parsing',
-          'is_kit' => 'is_kit',
-          'disable_conf_req' => 'disable_conf_req',
-          'total_avail_ext' => 'total_avail_ext',
-          'weight' => 'weight',
-          'shipping_weight' => 'shipping_weight'
-        }
-        default_warehouse_map = {
-          'default_wh_avbl' => 'available_inv',
-          'default_wh_loc_primary' => 'location_primary',
-          'default_wh_loc_secondary' => 'location_secondary'
-        }
-      else
+      # if params[:method] == 'del_import_old'
+      #   product_map = {
+      #     'id' => 'id',
+      #     'store_product_id' => 'store_product_id',
+      #     'name' => 'name',
+      #     'product_type' => 'product_type',
+      #     'store_id' => 'store_id',
+      #     'created_at' => 'created_at',
+      #     'updated_at' => 'updated_at',
+      #     'inv_wh1' => 'inv_wh1',
+      #     'status' => 'status',
+      #     'spl_instructions_4_packer' => 'spl_instructions_4_packer',
+      #     'spl_instructions_4_confirmation' => 'spl_instructions_4_confirmation',
+      #     'barcode' => 'barcode',
+      #     'is_skippable' => 'is_skippable',
+      #     'packing_placement' => 'packing_placement',
+      #     'pack_time_adj' => 'pack_time_adj',
+      #     'kit_parsing' => 'kit_parsing',
+      #     'is_kit' => 'is_kit',
+      #     'disable_conf_req' => 'disable_conf_req',
+      #     'total_avail_ext' => 'total_avail_ext',
+      #     'weight' => 'weight',
+      #     'shipping_weight' => 'shipping_weight'
+      #   }
+      #   default_warehouse_map = {
+      #     'default_wh_avbl' => 'available_inv',
+      #     'default_wh_loc_primary' => 'location_primary',
+      #     'default_wh_loc_secondary' => 'location_secondary'
+      #   }
+      # else
         product_map = {
           'ID' => 'id',
           'Name' => 'name',
@@ -67,7 +67,7 @@ class SettingsController < ApplicationController
           'BinLocation 1' => 'location_primary',
           'BinLocation 2' => 'location_secondary'
         }
-      end
+      # end
       mapping = {
         'products' => {
           model: Product,
@@ -151,12 +151,12 @@ class SettingsController < ApplicationController
         }
       }
 
-      if params[:method].nil? || !['del_import_old', 'del_import_new'].include?(params[:method])
+      if params[:method].nil? || !['del_import'].include?(params[:method])
         @result['status'] = false
-        @result.messages.push("No action selected")
+        @result['messages'].push("No action selected")
       elsif params[:file].nil?
         @result['status'] = false
-        @result.messages.push("No file selected")
+        @result['messages'].push("No file selected")
       else
         require 'zip'
         require 'csv'
