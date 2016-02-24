@@ -319,23 +319,17 @@ module Groovepacker
           end
           GroovS3.create_export_csv(tenant, filename, data)
           url = GroovS3.find_export_csv(tenant, filename)
-          # url = object.url_for(:read, :secure => true, :expires => 30.minutes).to_s
-          puts "object_url: " + url.to_s
-          FileUtils.remove_entry_secure dir
-          # CsvRenderer.new.download_file(data, filename)
-          # ApplicationController.new.render_to_string do |format|
-          #   format.zip { send_data data, :type => 'application/zip', :filename => filename }
-          # end
-
+          puts "url: " + url.to_s
+          CsvExportMailer.send_s3_object_url(filename, url, tenant).deliver
+          puts "mail sent...."
         rescue Exception => e
           puts "message: " + e.message + e.backtrace.join('\n')
           bulk_action.status = 'failed'
           bulk_action.messages = ['Some error occurred']
           bulk_action.current = ''
           bulk_action.save
-        # ensure
-        #   puts "dir: " + dir.inspect
-        #   FileUtils.remove_entry_secure dir
+        ensure
+          FileUtils.remove_entry_secure dir
         end
       end
     end
