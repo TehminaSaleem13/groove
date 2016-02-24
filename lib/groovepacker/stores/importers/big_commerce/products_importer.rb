@@ -7,16 +7,17 @@ module Groovepacker
 
           def import
             initialize_objects
-            result = self.build_result
+            @result = self.build_result
             response = @client.products
             
-            result[:total_imported] = response["products"].nil? ? 0 : response["products"].length
-
+            import_products_count = response["products"].nil? ? 0 : response["products"].length
+            send_products_import_email(import_products_count) if import_products_count>20000
             response["products"].each do |bc_product|
+              @result[:total_imported] = @result[:total_imported] + 1
               create_single_product(bc_product)
             end
-            
-            result
+            send_products_import_complete_email(import_products_count)
+            @result
           end
 
           def import_bc_single_product(bc_product, import_inv = true)
@@ -102,6 +103,7 @@ module Groovepacker
               make_product_intangible(product)
               #product.update_product_status
               product.set_product_status
+              @result[:success_imported] = @result[:success_imported] + 1
               product
             end
 
@@ -151,6 +153,14 @@ module Groovepacker
               handler = Groovepacker::Stores::Handlers::BigCommerceHandler.new(@store)
               context = Groovepacker::Stores::Context.new(handler)
               return context
+            end
+
+            def send_products_import_email(products_count)
+              ImportMailer.send_products_import_email(products_count, @credential).deliver rescue nil
+            end
+
+            def send_products_import_complete_email(products_count)
+              ImportMailer.send_products_import_complete_email(products_count, @result, @credential).deliver rescue nil
             end
         end
       end

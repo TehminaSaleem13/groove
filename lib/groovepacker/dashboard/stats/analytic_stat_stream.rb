@@ -6,12 +6,12 @@ module Groovepacker
           
         end
 
-        def stream_detail(tenant_name)
+        def stream_detail(tenant_name, trace_untraced = false)
           begin
             stat_stream = []
             Apartment::Tenant.switch(tenant_name)
             puts "switched tenant."
-            orders = Order.where(status: 'scanned')
+            orders = get_list(trace_untraced)
             puts "found all orders with scanned status"
             return stat_stream if orders.empty?
             puts "iterate over the orders"
@@ -48,6 +48,11 @@ module Groovepacker
             end
           end
           result
+        end
+
+        def get_list(trace_untraced)
+          return Order.where(status: 'scanned').where(traced_in_dashboard: false) if trace_untraced
+          Order.where(status: 'scanned')
         end
 
         def get_order_stream(tenant, order_id)

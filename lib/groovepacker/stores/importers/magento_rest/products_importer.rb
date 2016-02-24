@@ -16,6 +16,7 @@ module Groovepacker
               unless response.blank?
                 #listing found products
                 @products = response
+                send_products_import_email(@products.count, credential) if @products.count>20000
                 @products.each do |product|
                   product = product.last
                   result[:total_imported] = result[:total_imported] + 1
@@ -27,13 +28,16 @@ module Groovepacker
                     result[:previous_imported] = result[:previous_imported] + 1
                   end
                 end
+                send_products_import_complete_email(@products.count, result, credential)
               else
                 result[:status] &= false
-                result[:messages].push('Problem retrieving products list')
+                result[:messages] = 'Problem retrieving products list'
+                send_products_import_complete_email(0, result, credential)
               end
             rescue Exception => e
               result[:status] &= false
-              result[:messages].push(e)
+              result[:messages] = e
+              send_products_import_complete_email(0, result, credential)
             end
             result
           end
@@ -118,6 +122,14 @@ module Groovepacker
             stock_data = client.stock_item(magento_product_attrs["entity_id"]) if stock_data.blank?
             inv_wh.quantity_on_hand = stock_data["qty"].try(:to_i) + inv_wh.allocated_inv.to_i
             inv_wh.save
+          end
+
+          def send_products_import_email(products_count, credential)
+            ImportMailer.send_products_import_email(products_count, credential).deliver rescue nil
+          end
+
+          def send_products_import_complete_email(products_count, result, credential)
+            ImportMailer.send_products_import_complete_email(products_count, result, credential).deliver rescue nil
           end
         end
       end

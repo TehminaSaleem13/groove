@@ -190,7 +190,7 @@ module Groovepacker
         end
 
         def update_inventory_info
-          return if @params[:inventory_warehouses].empty?
+          return if @params[:inventory_warehouses].blank?
           attr_array = get_inv_update_attributes
 
           @params[:inventory_warehouses].each_with_index do |inv_wh|
@@ -254,7 +254,7 @@ module Groovepacker
             product_location.inventory_warehouse_id = @current_user.inventory_warehouse_id
           end
 
-          product_location.quantity_on_hand = @params[:inventory_warehouses][0][:info][:quantity_on_hand] unless @params[:inventory_warehouses].empty?
+          product_location.quantity_on_hand = @params[:inventory_warehouses][0][:info][:quantity_on_hand] unless @params[:inventory_warehouses].blank?
           product_location.save
         end
 
