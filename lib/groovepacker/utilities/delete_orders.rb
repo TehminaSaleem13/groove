@@ -29,7 +29,7 @@ class DeleteOrders
     end
     puts back_hash.inspect
     file_name = Time.now.strftime('%d_%b_%Y_%I__%M_%p')
-    GroovS3.create_order_backup(tenant, file_name, back_hash.to_json)
+    GroovS3.create_order_backup(tenant, file_name, back_hash.to_s)
   end
 
   def delete_orders
@@ -86,7 +86,7 @@ class DeleteOrders
 
   def build_single_hash(column_names, record, hash_key)
     column_names.each do |name|
-      @record_hash[hash_key][name] = record[name]
+      @record_hash[hash_key][name] = record[name].to_s
     end
   end
 
@@ -151,7 +151,7 @@ class DeleteOrders
     items.each do |item|
       result = {}
       column_names.each do |name|
-        result[name] = item[name]
+        result[name] = item[name].to_s
       end
       @record_hash[hash_key].push(result)
     end
@@ -159,15 +159,15 @@ class DeleteOrders
 
   def build_record_hash
     {
-      "order"=> {},
-      "order_activities"=> [],
-      "order_exception"=> {},
-      "order_shipping"=> {},
-      "order_serials"=> [],
-      "order_items"=> [],
-      "order_item_kit_products"=> [],
-      "order_item_order_serial_product_lots"=> [],
-      "order_item_scan_times"=> []
+      "order" => {},
+      "order_activities" => [],
+      "order_exception" => {},
+      "order_shipping" => {},
+      "order_serials" => [],
+      "order_items" => [],
+      "order_item_kit_products" => [],
+      "order_item_order_serial_product_lots" => [],
+      "order_item_scan_times" => []
     }
   end
 end
