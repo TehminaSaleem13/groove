@@ -1,6 +1,6 @@
 groovepacks_controllers.
-  controller('scanPackRfpDefaultCtrl', ['$scope', '$http', '$timeout', '$stateParams', '$location', '$state', '$cookies', '$modal', 'products', 'orders', 'scanPack', 'notification',
-    function ($scope, $http, $timeout, $stateParams, $location, $state, $cookies, $modal, products, orders, scanPack, notification) {
+  controller('scanPackRfpDefaultCtrl', ['$scope', '$http', '$timeout', '$stateParams', '$location', '$state', '$cookies', '$modal', 'products', 'orders', 'scanPack', 'notification', '$window',
+    function ($scope, $http, $timeout, $stateParams, $location, $state, $cookies, $modal, products, orders, scanPack, notification, $window) {
       var myscope = {};
 
       $scope.reset_order = function () {
@@ -92,6 +92,7 @@ groovepacks_controllers.
       myscope.do_autoscan = function () {
         myscope.click_scan_happend = true;
         myscope.last_scanned_barcode = $scope.data.order.next_item.barcodes[0].barcode;
+        $window.increment_id = $scope.data.order.increment_id;
         scanPack.click_scan($scope.data.order.next_item.barcodes[0].barcode, $scope.data.order.id).success($scope.handle_scan_return);
       };
 

@@ -112,7 +112,13 @@ groovepacks_directives.directive('groovPersistNotification', ['$window', '$docum
           groovIO.emit('delete_pnotif', hash);
           if (message['status'] == "completed") {
             notif_message += "Complete!";
-            $window.open(message.url);
+            $window.message = message;
+            if(
+                typeof $window.order_scanned != 'undefined' &&
+                $window.order_scanned.indexOf(message[current_increment_id]) > -1
+              ){
+              $window.open(message.url);
+            }
           } else if (message['status'] == "cancelled") {
             notif_message += "Cancelled";
           }
