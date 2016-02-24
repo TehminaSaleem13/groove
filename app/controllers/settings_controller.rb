@@ -276,15 +276,16 @@ class SettingsController < ApplicationController
   end
 
   def export_csv
-    # if data
-    #   respond_to do |format|
-    #     format.html # show.html.erb
-    #     format.zip { send_data data, :type => 'application/zip', :filename => filename }
-    #   end
-    # else
-      execute_in_bulk_action('export')
-      render :nothing => true, :status => 200
-    # end
+    puts "export_csv"
+    @result = {}
+    @result['status'] = true
+    @result['messages'] = []
+    if current_user.can?('create_backups')
+      GrooveBulkActions.execute_groove_bulk_action('export', params, current_user)
+    else
+      @result['status'] = false
+      @result['messages'].push('You do not have enough permissions to backup and restore')
+    end
     # if current_user.can? 'create_backups'
     #   dir = Dir.mktmpdir([current_user.username+'groov-export-', Time.now.to_s])
     #   filename = 'groove-export-'+Time.now.to_s+'.zip'
@@ -299,11 +300,12 @@ class SettingsController < ApplicationController
     #   filename = 'insufficient_permissions.zip'
     #   data = zip_to_files(filename, {})
     # end
+    puts '@result: ' + @result.inspect
 
-    # respond_to do |format|
-    #   format.html # show.html.erb
-    #   format.zip { send_data data, :type => 'application/zip', :filename => filename }
-    # end
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json { render :json => @result }
+    end
   end
 
   def order_exceptions

@@ -21,7 +21,13 @@ groovepacks_controllers.
             });
           }
         });
+      };
 
+      $scope.export_csv = function() {
+        console.log('export_csv.....')
+        backup.back_up().then(function(){
+          myscope.init();
+        });
       };
       myscope.init();
     }]);

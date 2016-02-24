@@ -32,10 +32,23 @@ groovepacks_services.factory('backup', ['$http', 'notification', function ($http
     }).error(notification.server_error);
   };
 
+  var export_csv = function() {
+    console.log('backup export_csv');
+    return $http.get('/settings/export_csv.json').success(function(data) {
+      console.log('data', data);
+      if (data.status) {
+        notification.notify("Backup queued", 1);
+      } else{
+        notification.notify(data.messages, 0);
+      };
+    })
+  };
+
   return {
     model: {
       get: get_default
     },
-    restore: restore_backup
+    restore: restore_backup,
+    back_up: export_csv
   };
 }]);
