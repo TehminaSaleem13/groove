@@ -1,29 +1,28 @@
 <div class="col-lg-10 col-md-10">
   <h3>Backup and Restore</h3>
 
-  <div class="row  info">
-    <div class="col-md-2">Backup</div>
-    <!-- <div class="col-md-8"><a href="/settings/export_csv">Download Backup</a></div> -->
-    <div class="col-md-8" ng-click="export_csv()"><a href="">Start Backup</a></div>
+  <div>
+    <div class="row  info">
+      <div class="col-md-2">Receiving Email</div>
+
+      <div class="controls col-md-5">
+        <input type="text" class="form-control input-style"
+               ng-model="backup_restore.settings.single.export_csv_email" ng-blur="update_export_email()" placeholder="Email address"/>
+      </div>
+      <div class="info col-sm-2">
+        <i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter"
+          groov-popover="Specify email address to send the backup link. Email will be sent to all the emails specified in the text field along with super-admin user email. If no email address is specified, then the email will sent only to the admin user email."></i>
+      </div>
+    </div>
+    <div class="row  info">
+      <div class="col-md-2">Backup</div>
+      <div class="col-md-8" ng-click="export_csv()"><a href="">Start Backup</a></div>
+    </div>
   </div>
   <div class="row  info">
     <div class="col-md-2">Restore Action</div>
     <div class="controls col-md-10 form-inline">
-      <!-- <div class="radio col-md-5"> -->
-        <input type="checkbox" ng-model="backup_restore.data.method" value="del_import" ng-checked="backup_restore.data.method == 'del_import'" /> Delete All and Import
-        <!-- <div class="radio col-md-5">
-          <input type="radio" ng-model="backup_restore.data.method" value="del_import_old"/> Delete All and Import Old
-          file
-        </div>
-
-        <div class="radio col-md-5">
-          <input type="radio" ng-model="backup_restore.data.method" value="del_import_new"/> Delete All and Import New
-          file
-        </div> -->
-        <!-- <div class="col-md-2"><i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter"
-                                 groov-popover="The backup & restore functionality has been changed. New columns(ID, Name, SKU1, Bin Location1, Quantity etc.) have been added to the product export. If your product.csv contains the above columns, you can use 'Delete All and Import New file'. If your exported file is old then you can use 'Delete All and Import Old file'. "></i>
-        </div> -->
-      <!-- </div> -->
+      <input type="checkbox" ng-model="backup_restore.data.method" value="del_import" ng-checked="backup_restore.data.method == 'del_import'" /> Delete All and Import
     </div>
     <div class="form-group">
       <div class="col-md-offset-2 col-md-10 col-xs-12">

@@ -594,6 +594,7 @@ class SettingsController < ApplicationController
 
         general_setting.custom_field_one = params[:custom_field_one]
         general_setting.custom_field_two = params[:custom_field_two]
+        general_setting.export_csv_email = params[:export_csv_email]
 
         if general_setting.save
           @result['success_messages'].push('Settings updated successfully.')

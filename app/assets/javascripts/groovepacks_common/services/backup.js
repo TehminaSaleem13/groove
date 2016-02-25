@@ -4,6 +4,9 @@ groovepacks_services.factory('backup', ['$http', 'notification', function ($http
       data: {
         method: 'del_import',
         file: null
+      },
+      settings: {
+        single: {}
       }
     };
   };
@@ -35,7 +38,6 @@ groovepacks_services.factory('backup', ['$http', 'notification', function ($http
   var export_csv = function() {
     console.log('backup export_csv');
     return $http.get('/settings/export_csv.json').success(function(data) {
-      console.log('data', data);
       if (data.status) {
         notification.notify("Backup queued", 1);
       } else{

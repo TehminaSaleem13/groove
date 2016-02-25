@@ -1,12 +1,12 @@
 groovepacks_controllers.
-  controller('showBackupCtrl', ['$scope', '$timeout', 'backup',
-    function ($scope, $timeout, backup) {
+  controller('showBackupCtrl', ['$scope', '$timeout', 'backup', 'generalsettings',
+    function ($scope, $timeout, backup, generalsettings) {
       var myscope = {};
 
       myscope.init = function () {
         $scope.setup_page('backup_restore', 'backup');
         $scope.backup_restore = backup.model.get();
-
+        generalsettings.single.get($scope.backup_restore.settings);
 
         $scope.$on("fileSelected", function (event, args) {
           if (args.name == "importbackupfile") {
@@ -21,6 +21,10 @@ groovepacks_controllers.
             });
           }
         });
+      };
+
+      $scope.update_export_email = function() {
+        generalsettings.single.update($scope.backup_restore.settings);
       };
 
       $scope.export_csv = function() {
