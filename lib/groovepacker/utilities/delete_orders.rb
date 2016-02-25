@@ -24,6 +24,8 @@ class DeleteOrders
 
   def take_backup(tenant)
     back_hash = []
+    back_hash.push(build_store_user_hash('stores'))
+    back_hash.push(build_store_user_hash('users'))
     @orders.each do |order|
       back_hash.push(build_hash(order.id))
     end
@@ -59,6 +61,28 @@ class DeleteOrders
     end
   end
 
+  def build_store_user_hash(key)
+    result = {}
+    result[key] = []
+    if key == 'stores'
+      columns = Store.column_names
+      items = Store.all
+    elsif key == 'users'
+      columns = User.column_names
+      items = User.all
+    end
+    
+    items.each do |item|
+      item_hash = {}
+      columns.each do |column|
+        item_hash[column] = item[column].to_s
+      end
+      result[key].push(item_hash)
+    end    
+    
+    result
+  end
+
   def build_hash(id)
     @record_hash = build_record_hash
     order = Order.find(id)
@@ -70,7 +94,7 @@ class DeleteOrders
     
     @order_items = order.order_items
     build_order_item_hash(@order_items)
-
+    build_product_hash(@order_items)
     @order_items.each do |item|
       build_oikp_hash(item)
       build_oiospl_hash(item)
@@ -87,6 +111,21 @@ class DeleteOrders
   def build_single_hash(column_names, record, hash_key)
     column_names.each do |name|
       @record_hash[hash_key][name] = record[name].to_s
+    end
+  end
+
+  def build_product_hash(items)
+    product_columns = Product.column_names
+
+    items.each do |item|
+      @product = item.product
+      if @product
+        result = {}
+        product_columns.each do |column|
+          result[column] = @product[column].to_s
+        end
+        @record_hash['products'].push(result)
+      end
     end
   end
 
@@ -167,7 +206,8 @@ class DeleteOrders
       "order_items" => [],
       "order_item_kit_products" => [],
       "order_item_order_serial_product_lots" => [],
-      "order_item_scan_times" => []
+      "order_item_scan_times" => [],
+      "products" => []
     }
   end
 end
