@@ -1,4 +1,25 @@
-groovepacks_services.factory('scanPack', ['$http', 'notification', '$state', function ($http, notification, $state) {
+groovepacks_services.factory('scanPack', ['$http', 'notification', '$state', '$window', function ($http, notification, $state, $window) {
+
+  if(typeof $window.order_scanned == 'undefined'){
+    $window.order_scanned = [];
+    window.order_scanned = $window.order_scanned;
+  }
+
+  // Used to store temp array of order ids which are scanned in the current tab.
+  var set_order_scanned = function(action){
+    increment_id = $window.increment_id;
+    index = $window.order_scanned.indexOf(increment_id);
+    if(action == 'push'){
+      if(increment_id != null && index == -1){
+        $window.order_scanned.push(increment_id);
+      }
+    }
+    else{
+      if(index > -1){
+        $window.order_scanned.splice(index, 1);
+      }
+    }
+  }
 
   var get_state = function () {
     return {
@@ -26,11 +47,15 @@ groovepacks_services.factory('scanPack', ['$http', 'notification', '$state', fun
   };
 
   var input = function (input, state, id) {
+    set_order_scanned('push');
     return $http.post('/scan_pack/scan_barcode.json', {input: input, state: state, id: id}).success(function (data) {
       notification.notify(data.notice_messages, 2);
       notification.notify(data.success_messages, 1);
       notification.notify(data.error_messages, 0);
-    }).error(notification.server_error);
+    }).error(function(){
+      notification.server_error;
+      set_order_scanned('pop');
+    });
   };
 
   var reset = function (id) {
@@ -126,11 +151,15 @@ groovepacks_services.factory('scanPack', ['$http', 'notification', '$state', fun
   };
 
   var click_scan = function (barcode, id) {
+    set_order_scanned('push');
     return $http.post('/scan_pack/click_scan.json', {barcode: barcode, id: id}).success(function (data) {
       notification.notify(data.notice_messages, 2);
       notification.notify(data.success_messages, 1);
       notification.notify(data.error_messages, 0);
-    }).error(notification.server_error);
+    }).error(function(){
+      notification.server_error;
+      set_order_scanned('pop');
+    });
   };
 
   var serial_scan = function (serial) {

@@ -1,6 +1,6 @@
 groovepacks_controllers.
-  controller('scanPackCtrl', ['$scope', '$http', '$timeout', '$stateParams', '$location', '$state', '$cookies', 'scanPack', 'generalsettings', 'groov_audio',
-    function ($scope, $http, $timeout, $stateParams, $location, $state, $cookies, scanPack, generalsettings, groov_audio) {
+  controller('scanPackCtrl', ['$scope', '$http', '$timeout', '$stateParams', '$location', '$state', '$cookies', 'scanPack', 'generalsettings', 'groov_audio', '$window',
+    function ($scope, $http, $timeout, $stateParams, $location, $state, $cookies, scanPack, generalsettings, groov_audio, $window) {
       var myscope = {
         gen_setting_loaded: 0,
         scanpack_setting_loaded: 0
@@ -82,9 +82,10 @@ groovepacks_controllers.
           id = $scope.data.order.id;
         }
         if ($scope.current_state == 'scanpack.rfp.default') {
-          myscope.last_scanned_barcode = $scope.data.input;
           scanPack.input_scan_happend = true
         }
+        myscope.last_scanned_barcode = $scope.data.input;
+        $window.increment_id = $scope.data.order.increment_id;
         scanPack.input($scope.data.input, $scope.current_state, id).success($scope.handle_scan_return);
       };
 
