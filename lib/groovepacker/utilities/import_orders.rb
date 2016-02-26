@@ -130,8 +130,8 @@ class ImportOrders < Groovepacker::Utilities::Base
     begin
       store_type = import_item.store.store_type
       store = import_item.store
-      if store_type == 'CSV' && !import_item.status.nil?
-        initiate_csv_import(tenant, store_type, store, import_item)
+      if store_type == 'CSV'
+        initiate_csv_import(tenant, store_type, store, import_item) if import_item.status.present?
       else
         handler = get_handler(store_type, store, import_item)
         connection_successful = check_connection_for_shopify_or_bc(store, store_type, import_item)
