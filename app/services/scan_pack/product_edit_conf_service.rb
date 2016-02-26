@@ -35,7 +35,7 @@ class ScanPack::ProductEditConfService < ScanPack::Base
     @session[:product_edit_matched_for_current_user] = true
     @session[:product_edit_matched_for_products] = []
     @result['data']['inactive_or_new_products'].each do |inactive_new_product|
-      @session[:product_edit_matched_for_products].push(inactive_new_product.id)
+      @session[:product_edit_matched_for_products].push(inactive_new_product['id'])
     end
     @session[:product_edit_matched_for_order] = @single_order.id
   end
