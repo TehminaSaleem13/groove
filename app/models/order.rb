@@ -137,7 +137,16 @@ class Order < ActiveRecord::Base
       product = Product.find_by_id(order_item.product_id)
       unless product.nil?
         if product.status == "new" or product.status == "inactive"
-          products_list << product
+          products_list << product.as_json(
+              include: {
+                product_images: {
+                  only: [:image]
+                }
+              }
+            ).merge({
+              sku: product.primary_sku,
+              barcode: product.primary_barcode
+            })
         end
       end
     end
