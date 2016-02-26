@@ -59,7 +59,8 @@ groovepacks_controllers.
             },
             name: {
               name: "Item Name",
-              transclude: '<a ui-sref="scanpack.rfp.product_edit.single({order_num: options.data.order_num, product_id: row.id })" >{{row[field]}}</a>'
+              transclude: '<a ui-sref="scanpack.rfp.product_edit.single({order_num: options.data.order_num, product_id: row.id })" >{{row[field]}}</a>',
+              editable: false
             },
             status: {
               name: "Status"
@@ -68,7 +69,7 @@ groovepacks_controllers.
               name: "SKU"
             },
             barcode: {
-              name: "SKU"
+              name: "Barcode"
             }
           }
         };
