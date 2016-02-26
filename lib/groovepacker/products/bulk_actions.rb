@@ -258,7 +258,7 @@ module Groovepacker
         end
       end
 
-      def export(tenant, params, bulk_actions_id, current_user)
+      def export(tenant, params, bulk_actions_id, user)
         require 'csv'
 
         Apartment::Tenant.switch(tenant)
@@ -267,11 +267,8 @@ module Groovepacker
         result['status'] = true
         bulk_action = GrooveBulkActions.find(bulk_actions_id)
         begin
-          puts "in begin.........."
-          puts "current_user: " + current_user.inspect
-          dir = Dir.mktmpdir([current_user.username+'groov-export-', Time.now.to_s])
+          dir = Dir.mktmpdir([user+'groov-export-', Time.now.to_s])
           filename = 'groove-export-'+Time.now.to_s+'.zip'
-          puts "filename: " + filename.inspect
           response = {}
           tables = {
             products: Product,
@@ -286,9 +283,7 @@ module Groovepacker
           bulk_action.completed = 0
           bulk_action.status = 'in_progress'
           bulk_action.save
-          puts "tables: " + tables.inspect
           tables.each do |ident, model|
-            puts "model: " + ident.inspect
             CSV.open("#{dir}/#{ident}.csv", 'w') do |csv|
               headers= []
               if ident == :products
@@ -319,11 +314,8 @@ module Groovepacker
           end
           GroovS3.create_export_csv(tenant, filename, data)
           url = GroovS3.find_export_csv(tenant, filename)
-          puts "url: " + url.to_s
           CsvExportMailer.send_s3_object_url(filename, url, tenant).deliver
-          puts "mail sent...."
         rescue Exception => e
-          puts "message: " + e.message + e.backtrace.join('\n')
           bulk_action.status = 'failed'
           bulk_action.messages = ['Some error occurred']
           bulk_action.current = ''
