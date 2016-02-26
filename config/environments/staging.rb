@@ -128,6 +128,7 @@ Groovepacks::Application.configure do
     ENV['HOST_NAME'] = 'barcodepacker.com'
     ENV["SITE_HOST"] = "barcodepacker.com"
   end
+  ENV['SHOPIFY_ONE_TIME_PAYMENT'] = '0'
 
   # Stripe production keys
   ENV['STRIPE_API_KEY'] = "sk_test_4QS2OJ8BkMWcuzCWrHrKGlz9"
