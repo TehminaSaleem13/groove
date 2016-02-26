@@ -132,6 +132,7 @@ Groovepacks::Application.configure do
   ENV['S3_ACCESS_KEY_ID'] = 'AKIAIBDKVKEM7HNZUQAA'
   ENV['S3_ACCESS_KEY_SECRET'] = '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'
   ENV['S3_BUCKET_NAME'] = 'groove-dev'
+  ENV['S3_BUCKET_REGION'] = 'us-east-1'
   ENV['S3_BASE_URL'] = 'https://s3.amazonaws.com/groove-dev'
 
   #Feature Variables

@@ -153,6 +153,8 @@ groovepacks_directives.directive('groovPersistNotification', ['$window', '$docum
             notif_message = '<b>Product Delete:</b> ';
           } else if (message['activity'] == 'duplicate') {
             notif_message = '<b>Product Duplicate:</b> ';
+          } else if (message['activity'] == 'export') {
+            notif_message = '<b>Backup:</b> ';
           }
 
         } else if (message['identifier'] == 'inventory') {
