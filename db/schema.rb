@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20160222062558) do
+ActiveRecord::Schema.define(:version => 20160225050018) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0,     :null => false
@@ -214,6 +214,7 @@ ActiveRecord::Schema.define(:version => 20160222062558) do
     t.string   "custom_field_one",                  :default => "Custom 1"
     t.string   "custom_field_two",                  :default => "Custom 2"
     t.integer  "max_time_per_item",                 :default => 10
+    t.string   "export_csv_email"
   end
 
   create_table "generate_barcodes", :force => true do |t|
