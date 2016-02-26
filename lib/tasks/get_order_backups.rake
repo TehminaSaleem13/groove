@@ -4,18 +4,16 @@ namespace :gob do
   task :get_order_backups, [:arg1, :arg2] => :environment do |t, args|
     args.each do |arg|
       begin
-        puts "arg: " + arg.inspect
         Apartment::Tenant.switch(arg[1])
         tenant = Apartment::Tenant.current
         bucket = GroovS3.get_bucket
         count = bucket.objects(prefix: tenant + '/deleted_orders/').count
         bucket.objects(prefix: tenant + '/deleted_orders/').each do |obj|
-          puts obj.key
           file = GroovS3.get_file(obj.key)
-          puts "file: " + file.inspect
           data = file.content
           data = eval(data)
           import_obj = ImportDeletedData.new
+          next if data.nil?
           data.each do |d|
             d.each do |ordo|
               next if ordo[1].empty?
@@ -24,6 +22,8 @@ namespace :gob do
                 import_obj.import_users(ordo)
               when 'stores'
                 import_obj.import_stores(ordo)
+              when 'products'
+                import_obj.import_products(ordo)
               when 'order'
                 import_obj.import_orders(ordo)
               when 'order_activities'
@@ -49,6 +49,7 @@ namespace :gob do
       rescue Exception => e
         puts "Exception occurred."
         puts e.message
+        puts e.backtrace.inspect
       end
     end
     exit(1)

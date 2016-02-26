@@ -3,6 +3,7 @@ class ImportDeletedData
 		ordo[1].each do |ou|
 			next unless User.where(id: ou['id'].to_i).empty?
       user = User.new
+      user.id = ou['id'].to_i
       user.encrypted_password = ou['encrypted_password']
       user.reset_password_token = ou['reset_password_token']
       user.reset_password_sent_at = ou['reset_password_sent_at'].to_datetime
@@ -34,6 +35,7 @@ class ImportDeletedData
 		ordo[1].each do |os|
 			next unless Store.where(id: os['id'].to_i).empty?
       store = Store.new
+      store.id = store['id'].to_i
       store.name = os['name']
       store.status = os['status'].to_b
       store.store_type = os['store_type']
@@ -105,10 +107,46 @@ class ImportDeletedData
     order.save
 	end
 
+  def import_products(ordo)
+    ordo[1].each do |item|
+      next unless Product.where(id: item['id'].to_i).empty?
+      product = Product.new
+      product.id = item['id'].to_i
+      product.store_product_id = item['store_product_id']
+      product.name = item['name']
+      product.product_type = item['product_type']
+      product.store_id = item['store_id'].to_i
+      product.created_at = item['created_at'].to_datetime
+      product.updated_at = item['updated_at'].to_datetime
+      product.status = item['status']
+      product.spl_instructions_4_packer = item['spl_instructions_4_packer']
+      product.spl_instructions_4_confirmation = item['spl_instructions_4_confirmation'].to_b
+      product.is_skippable = item['is_skippable'].to_b
+      product.packing_placement = item['packing_placement'].to_i
+      product.pack_time_adj = item['pack_time_adj'].to_i
+      product.kit_parsing = item['kit_parsing']
+      product.disable_conf_req = item['disable_conf_req'].to_b
+      product.total_avail_ext = item['total_avail_ext'].to_i
+      product.weight = item['weight'].to_f
+      product.shipping_weight = item['shipping_weight'].to_f
+      product.record_serial = item['record_serial'].to_b
+      product.type_scan_enabled = item['type_scan_enabled']
+      product.click_scan_enabled = item['click_scan_enabled']
+      product.weight_format = item['weight_format']
+      product.add_to_any_order = item['add_to_any_order'].to_b
+      product.base_sku = item['base_sku']
+      product.is_intangible = item['is_intangible'].to_b
+      product.is_kit = item['is_kit'].to_i
+      product.product_receiving_instructions = item['product_receiving_instructions']
+      product.save
+    end
+  end
+
 	def import_order_activities(ordo)
 		ordo[1].each do |oa|
 			next unless OrderActivity.where(id: oa['id'].to_i).empty?
       order_activity = OrderActivity.new
+      order_activity.id = oa['id'].to_i
       order_activity.activitytime = oa['activitytime'].to_datetime
       order_activity.order_id = oa['order_id'].to_i
       order_activity.user_id = oa['user_id'].to_i
@@ -125,6 +163,7 @@ class ImportDeletedData
 	def import_order_exception(ordo)
 		return unless OrderException.where(id: ordo[1]['id'].to_i).empty?
 		order_exception = OrderException.new
+    order_exception.id = ordo[1]['id'].to_i
     order_exception.reason = ordo[1]['reason']
     order_exception.description = ordo[1]['description']
     order_exception.user_id = ordo[1]['user_id'].to_i
@@ -137,6 +176,7 @@ class ImportDeletedData
 	def import_order_shipping(ordo)
 		return unless OrderShipping.where(id: ordo[1]['id'].to_i).empty?
 		order_shipping = OrderShipping.new
+    order_shipping.id = ordo[1]['id'].to_i
     order_shipping.firstname = ordo[1]['firstname']
     order_shipping.lastname = ordo[1]['lastname']
     order_shipping.email = ordo[1]['email']
@@ -157,6 +197,7 @@ class ImportDeletedData
 		ordo[1].each do |os|
 			next unless OrderSerail.where(id: os['id'].to_i).empty?
       order_serial = OrderSerail.new
+      order_serial.id = os['id'].to_i
       order_serial.order_id = os['order_id'].to_i
       order_serial.product_id = os['product_id'].to_i
       order_serial.serail = os['serail']
@@ -170,6 +211,7 @@ class ImportDeletedData
 		ordo[1].each do |oi|
 			next unless OrderItem.where(id: oi['id'].to_i).empty?
       order_item = OrderItem.new
+      order_item.id = oi['id'].to_i
       order_item.sku = oi['sku']
       order_item.qty = oi['qty'].to_i
       order_item.price = oi['price'].to_f
@@ -197,6 +239,7 @@ class ImportDeletedData
 		ordo[1].each do |oitp|
 			next unless OrderItemKitProduct.where(id: oitp['id'].to_i).empty?
       item_kit_prod = OrderItemKitProduct.new
+      item_kit_prod.id = oitp['id'].to_i
       item_kit_prod.order_item_id = oitp['order_item_id'].to_i
       item_kit_prod.product_kit_skus_id = oitp['product_kit_skus_id'].to_i
       item_kit_prod.scanned_status = oitp['scanned_status']
@@ -212,6 +255,7 @@ class ImportDeletedData
 		ordo[1].each do |item|
 			next unless OrderItemOrderSerialProductLot.where(id: item['id'].to_i).empty?
 	    oiosp = OrderItemOrderSerialProductLot.new
+      oiosp.id = item['id'].to_i
 	    oiosp.order_item_id = item['order_item_id'].to_i
 	    oiosp.product_lot_id = item['product_lot_id'].to_i
 	    oiosp.order_serial_id = item['order_serial_id'].to_i
@@ -226,6 +270,7 @@ class ImportDeletedData
 		ordo[1].each do |item|
 			next unless OrderItemScanTime.where(id: item['id'].to_i).empty?
       oist = OrderItemScanTime.new
+      oist.id = item['id'].to_i
       oist.scan_start = item['scan_start'].to_datetime
       oist.scan_end = item['scan_end'].to_datetime
       oist.order_item_id = item['order_item_id'].to_i
