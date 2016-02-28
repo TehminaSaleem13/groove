@@ -62,7 +62,11 @@ groovepacks_controllers.
               transclude: '<a ui-sref="scanpack.rfp.product_edit.single({order_num: options.data.order_num, product_id: row.id })" style="text-decoration: none">{{row[field]}}</a>'
             },
             status: {
-              name: "Status"
+              name: "Status",
+              transclude: "<span class='label label-default' ng-class=\"{" +
+                "'label-success': row[field] == 'active', " +
+                "'label-info': row[field] == 'new' }\">" +
+                "{{row[field]}}</span>"
             },
             sku: {
               name: "SKU"
