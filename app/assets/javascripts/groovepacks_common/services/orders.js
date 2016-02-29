@@ -133,11 +133,12 @@ groovepacks_services.factory('orders', ['$http', '$window', 'notification', '$q'
   };
 
   var generate_list = function (action, orders) {
-
+    if(typeof $window.order_modified == 'undefined'){$window.order_modified = []};
     orders.setup.orderArray = [];
     for (var i = 0; i < orders.list.length; i++) {
       if (orders.list[i].checked == true) {
         orders.setup.orderArray.push({id: orders.list[i].id});
+        $window.order_modified.push(orders.list[i].ordernum);
       }
     }
     var url = '';
