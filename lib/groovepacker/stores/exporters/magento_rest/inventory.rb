@@ -7,14 +7,19 @@ module Groovepacker
 
           def push_inventories
             handler = self.get_handler
-            credential = handler[:credential]
-            if credential.store_version=='2.x'
-              result = Groovepacker::Stores::Exporters::MagentoRest::V2::Inventory.new(handler).push_inventories
-            else
-              result = Groovepacker::Stores::Exporters::MagentoRest::V1::Inventory.new(handler).push_inventories
-            end
-            result
+            result = get_inv_exporter(handler).push_inventories
           end
+
+          private
+            def get_inv_exporter(handler)
+              creds = handler[:credential]
+              if creds.store_version=='1.x'
+                exporter = Groovepacker::Stores::Exporters::MagentoRest::V1::Inventory.new(handler)
+                return exporter
+              end
+              exporter = Groovepacker::Stores::Exporters::MagentoRest::V2::Inventory.new(handler)
+            end
+
         end
       end
     end
