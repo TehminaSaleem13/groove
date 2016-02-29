@@ -38,7 +38,13 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
     }
 
     scope.check_bigcommerce_connection = function () {
-      stores.big_commerce.check_connection(scope.stores.single.id).then(function (response) {
+      stores.big_commerce.check_connection(scope.stores.single.store_type, scope.stores.single.id).then(function (response) {
+        scope.stores.single.message = response.data.message;
+      });
+    }
+
+    scope.check_magento_connection = function () {
+      stores.magento.check_connection(scope.stores.single.store_type, scope.stores.single.id).then(function (response) {
         scope.stores.single.message = response.data.message;
       });
     }
@@ -53,6 +59,17 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
       stores.magento.disconnect(scope.stores.single.id).then(function (response) {
         myscope.store_single_details(scope.stores.single.id, true);
       });
+    }
+
+    scope.show_hide_images = function(element_class, link_class) {
+      $('.'+element_class).toggle('slow');
+      if($('.'+link_class).hasClass('fa-caret-down')) {
+        $('.'+link_class).removeClass('fa-caret-down');
+        $('.'+link_class).addClass('fa-caret-up');
+      } else {
+        $('.'+link_class).removeClass('fa-caret-up');
+        $('.'+link_class).addClass('fa-caret-down');
+      }
     }
 
     scope.import_orders = function (report_id) {
@@ -159,6 +176,11 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
 
     scope.change_opt = function (id, value) {
       scope.stores.single[id] = value;
+      scope.update_single_store(true);
+    };
+
+    scope.change_magento_store_version = function (value) {
+      scope.stores.single.store_version = value;
       scope.update_single_store(true);
     };
 
@@ -628,11 +650,11 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
 
       scope.stores.types = {
         Magento: {
-          name: "Magento",
+          name: "Magento SOAP",
           file: "/assets/views/modals/settings/stores/magento.html"
         },
         "Magento API 2": {
-          name: "Magento API 2",
+          name: "Magento REST",
           file: "/assets/views/modals/settings/stores/magento_rest.html"
         },
         Ebay: {

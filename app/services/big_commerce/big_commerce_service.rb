@@ -7,7 +7,7 @@ module BigCommerce
     end
 
     def check_connection
-      unless @credential.access_token && @credential.access_token
+      unless @credential.access_token && @credential.store_hash
         return {status: false, message: "Either access token or store hash doesn't exist, Please go through the installation again"}
       end
       

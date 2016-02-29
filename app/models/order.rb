@@ -102,7 +102,7 @@ class Order < ActiveRecord::Base
       restriction.total_scanned_shipments += 1
       restriction.save
     end
-    
+
     unless Rails.env.test?
       tenant = Apartment::Tenant.current
       if tenant == 'wagaboutit' || !Rails.env.production?
