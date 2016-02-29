@@ -422,8 +422,8 @@ module ProductsHelper
     return result
   end
 
-  def self.products_csv(products, csv, bulk_actions_id)
-    bulk_action = GrooveBulkActions.find(bulk_actions_id)
+  def self.products_csv(products, csv, bulk_actions_id = nil)
+    @bulk_action = GrooveBulkActions.find(bulk_actions_id) if bulk_actions_id
     headers = []
     headers.push('ID', 'Name', 'SKU 1', 'Barcode 1', 'BinLocation 1', 'QOH', 'Primary Image', 'Weight', 'Primary Category',
                  'SKU 2', 'SKU 3', 'Barcode 2', 'Barcode 3', 'BinLocation 2', 'BinLocation 3')
@@ -489,8 +489,10 @@ module ProductsHelper
           data.push(item.attributes.values_at(title).first) unless item.attributes.values_at(title).empty?
         end
       end
-      bulk_action.completed += 1
-      bulk_action.save
+      if @bulk_action
+        @bulk_action.completed += 1
+        @bulk_action.save
+      end
       csv << data
     end
     csv
