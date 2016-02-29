@@ -114,8 +114,8 @@ groovepacks_directives.directive('groovPersistNotification', ['$window', '$docum
             notif_message += "Complete!";
             $window.message = message;
             if(
-                typeof $window.order_scanned != 'undefined' &&
-                $window.order_scanned.indexOf(message['current_increment_id']) > -1
+                typeof $window.order_modified != 'undefined' &&
+                $window.order_modified.indexOf(message['id']) > -1
               ){
               $window.open(message.url);
             }

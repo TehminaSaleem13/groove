@@ -1,22 +1,21 @@
 groovepacks_services.factory('scanPack', ['$http', 'notification', '$state', '$window', function ($http, notification, $state, $window) {
 
-  if(typeof $window.order_scanned == 'undefined'){
-    $window.order_scanned = [];
-    window.order_scanned = $window.order_scanned;
+  if(typeof $window.order_modified == 'undefined'){
+    $window.order_modified = [];
+    window.order_modified = $window.order_modified;
   }
 
   // Used to store temp array of order ids which are scanned in the current tab.
-  var set_order_scanned = function(action){
-    increment_id = $window.increment_id;
-    index = $window.order_scanned.indexOf(increment_id);
+  var set_order_scanned = function(action, id){
+    index = $window.order_modified.indexOf(id);
     if(action == 'push'){
-      if(increment_id != null && index == -1){
-        $window.order_scanned.push(increment_id);
+      if(id != null && index == -1){
+        $window.order_modified.push(id);
       }
     }
     else{
       if(index > -1){
-        $window.order_scanned.splice(index, 1);
+        $window.order_modified.splice(index, 1);
       }
     }
   }
@@ -47,14 +46,14 @@ groovepacks_services.factory('scanPack', ['$http', 'notification', '$state', '$w
   };
 
   var input = function (input, state, id) {
-    set_order_scanned('push');
+    set_order_scanned('push', id);
     return $http.post('/scan_pack/scan_barcode.json', {input: input, state: state, id: id}).success(function (data) {
       notification.notify(data.notice_messages, 2);
       notification.notify(data.success_messages, 1);
       notification.notify(data.error_messages, 0);
     }).error(function(){
       notification.server_error;
-      set_order_scanned('pop');
+      set_order_scanned('pop', id);
     });
   };
 
@@ -151,14 +150,14 @@ groovepacks_services.factory('scanPack', ['$http', 'notification', '$state', '$w
   };
 
   var click_scan = function (barcode, id) {
-    set_order_scanned('push');
+    set_order_scanned('push', id);
     return $http.post('/scan_pack/click_scan.json', {barcode: barcode, id: id}).success(function (data) {
       notification.notify(data.notice_messages, 2);
       notification.notify(data.success_messages, 1);
       notification.notify(data.error_messages, 0);
     }).error(function(){
       notification.server_error;
-      set_order_scanned('pop');
+      set_order_scanned('pop', id);
     });
   };
 
