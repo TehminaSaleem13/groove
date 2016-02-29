@@ -50,17 +50,9 @@ class MagentoRestController < ApplicationController
       @store_base_url = params[:store_base_url]
       @oauth_token_secret = ''
       @oauth_token = nil
-      response = fetch("POST", "#{@store_base_url}oauth/token/request", parameters)
-      tokens_hash = get_tokens_from_response(response)
-      @oauth_token = tokens_hash["oauth_token"]
-      @oauth_token_secret = tokens_hash["oauth_token_secret"]
-      resp = fetch("POST", "#{@store_base_url}oauth/token/access", parameters)
-      permanent_tokens = get_tokens_from_response(resp)
-      @credential.api_key = @consumer_key
-      @credential.api_secret = @consumer_secret
-      @credential.access_token = permanent_tokens["oauth_token"]
-      @credential.oauth_token_secret = permanent_tokens["oauth_token_secret"]
-      @credential.save
+      fetch_request_token
+      fetch_oauth_token_secret_and_access_token
+      
       render json: {status: 200, massage: "Authenticated Successfully"}
     rescue Exception => ex
       render json: {status: 400, massage: "Sorry, something went wrong"}
@@ -91,6 +83,23 @@ class MagentoRestController < ApplicationController
       params['oauth_signature'] = url_encode(sign(signing_key, signature_base_string))
       header_string = header(params)
       response = request_update_data(header_string, uri, method)
+    end
+
+    def fetch_request_token
+      response = fetch("POST", "#{@store_base_url}oauth/token/request", parameters)
+      tokens_hash = get_tokens_from_response(response)
+      @oauth_token = tokens_hash["oauth_token"]
+      @oauth_token_secret = tokens_hash["oauth_token_secret"]
+    end
+
+    def fetch_oauth_token_secret_and_access_token
+      resp = fetch("POST", "#{@store_base_url}oauth/token/access", parameters)
+      permanent_tokens = get_tokens_from_response(resp)
+      @credential.api_key = @consumer_key
+      @credential.api_secret = @consumer_secret
+      @credential.access_token = permanent_tokens["oauth_token"]
+      @credential.oauth_token_secret = permanent_tokens["oauth_token_secret"]
+      @credential.save
     end
 
     def get_tokens_from_response(response)
