@@ -6,11 +6,13 @@ groovepacks_services.factory('scanPack', ['$http', 'notification', '$state', '$w
   }
 
   // Used to store temp array of order ids which are scanned in the current tab.
-  var set_order_scanned = function(action, id){
-    index = $window.order_modified.indexOf(id);
+
+  var set_order_scanned = function(action){
+    increment_id = $window.increment_id;
+    index = $window.order_modified.indexOf(increment_id);
     if(action == 'push'){
-      if(id != null && index == -1){
-        $window.order_modified.push(id);
+      if(increment_id != null && index == -1){
+        $window.order_modified.push(increment_id);
       }
     }
     else{
@@ -46,14 +48,14 @@ groovepacks_services.factory('scanPack', ['$http', 'notification', '$state', '$w
   };
 
   var input = function (input, state, id) {
-    set_order_scanned('push', id);
+    set_order_scanned('push');
     return $http.post('/scan_pack/scan_barcode.json', {input: input, state: state, id: id}).success(function (data) {
       notification.notify(data.notice_messages, 2);
       notification.notify(data.success_messages, 1);
       notification.notify(data.error_messages, 0);
     }).error(function(){
       notification.server_error;
-      set_order_scanned('pop', id);
+      set_order_scanned('pop');
     });
   };
 
@@ -150,14 +152,14 @@ groovepacks_services.factory('scanPack', ['$http', 'notification', '$state', '$w
   };
 
   var click_scan = function (barcode, id) {
-    set_order_scanned('push', id);
+    set_order_scanned('push');
     return $http.post('/scan_pack/click_scan.json', {barcode: barcode, id: id}).success(function (data) {
       notification.notify(data.notice_messages, 2);
       notification.notify(data.success_messages, 1);
       notification.notify(data.error_messages, 0);
     }).error(function(){
       notification.server_error;
-      set_order_scanned('pop', id);
+      set_order_scanned('pop');
     });
   };
 
