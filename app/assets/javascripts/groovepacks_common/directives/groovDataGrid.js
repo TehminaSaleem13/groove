@@ -1,4 +1,4 @@
-groovepacks_directives.directive('groovDataGrid', ['$timeout', '$http', '$sce', 'settings', 'hotkeys', function ($timeout, $http, $sce, settings, hotkeys) {
+groovepacks_directives.directive('groovDataGrid', ['$timeout', '$http', '$sce', 'settings', 'hotkeys' , 'editable', function ($timeout, $http, $sce, settings, hotkeys, editable) {
   var default_options = function () {
     return {
       identifier: 'datagrid',
@@ -47,6 +47,7 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout', '$http', '$sce', 
       model: 'row'
     }
   };
+
   return {
     restrict: "A",
     scope: {
@@ -56,6 +57,7 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout', '$http', '$sce', 
     templateUrl: "/assets/views/directives/datagrid.html",
     link: function (scope, el, attrs) {
       var myscope = {};
+      scope.editable_modal = editable;
       scope.context_menu_event = function (event) {
         if (scope.options.show_hide) {
           if (typeof event == 'undefined' || typeof event['pointerType'] == 'undefined') {
@@ -78,6 +80,9 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout', '$http', '$sce', 
       };
 
       scope.check_uncheck = function (row, index, event) {
+        //If target is a link
+        if(event.target.tagName == 'A'){return};
+
         if (scope.options.selectable) {
           scope.options.setup.select_all = false;
           row.checked = !row.checked;
@@ -137,15 +142,16 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout', '$http', '$sce', 
         if (typeof scope.editable[field] == "undefined") {
           scope.editable[field] = {};
         }
+
         if (typeof scope.editable[field][ind] == "undefined") {
           scope.editable[field][ind] = $sce.trustAsHtml(
-            '<div class="grid-editable-field" ' + 
+            '<div ng-class="{\'grid-editable-field\': !editable_modal.status()}" ' + 
                 'ng-mouseover="row.show_pencil ? (row.show_pencil[field]=true) : (row.show_pencil={})"' +
                 'ng-mouseleave="row.show_pencil ? (row.show_pencil[field]=false) : (row.show_pencil={})" ' + 
                 'groov-editable="options.editable" prop="{{field}}" ng-model="' +
                 scope.options.all_fields[field].model + '" identifier="' +
                 scope.options.identifier + '_list-' + field + '-' + ind + '">' +
-              '<a class="pull-right fa fa-pencil grid-pencil" ng-show="row.show_pencil[field]" ng-click="scope.compile($parent.$parent.$index,field)"></a>' +
+              '<a class="pull-right fa fa-pencil pointer" ng-show="row.show_pencil[field]" ng-click="scope.compile($parent.$parent.$index,field)"></a>' +
               scope.options.all_fields[field].transclude +
             '</div>'
           );

@@ -1,12 +1,12 @@
 .grid-editable-field{
-  padding: 3px;
-  -webkit-transition: 1000; /* Safari */
-  transition: 1000;
+  padding: 0.8rem 0.3rem;
+  min-height: 3rem;
   &:hover{
-    background-color: rgba(white, 0.5);
+    background-color: rgb(230, 228, 228);
+    border-color: #C5C4C4;
+    border-style: solid;
+    border-width: thin;
+    border-radius: 3px;
+    min-width: 15rem;
   }
-}
-
-.grid-pencil{
-  cursor: pointer;
 }
