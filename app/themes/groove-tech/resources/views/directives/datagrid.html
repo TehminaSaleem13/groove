@@ -43,14 +43,16 @@
           <div style="display:inline-block; width:100%;height:100%;"
                bo-if="options.editable != false && options.all_fields[field].editable == true"
                hm-press="compile($parent.$parent.$index,field)" groov-rt-click="compile($parent.$parent.$index,field)">
-            <div class='pencil' ng-hide="editable[field][$parent.$parent.$index]">
+            <div class="grid-editable-field" ng-hide="editable[field][$parent.$parent.$index]"
+                ng-mouseover="row.show_pencil ? (row.show_pencil[field]=true) : (row.show_pencil={})" ng-mouseleave="row.show_pencil ? (row.show_pencil[field]=false) : (show_pencil={})">
+              <a class='fa fa-pencil grid-pencil pull-right' ng-show="row.show_pencil[field]" ng-click="compile($parent.$parent.$index,field)"></a>
               <span bo-if="options.all_fields[field].transclude == '' && row[field] !== null"
                     bo-text="row[field]"></span>
               <span bo-if="options.all_fields[field].transclude == '' && row[field] == null"> &nbsp;</span>
               <span bo-if="options.all_fields[field].transclude != ''"
                     ng-bind-html="options.all_fields[field].transclude" compile-template></span>
             </div>
-            <div class='pencil' ng-bind-html="editable[field][$parent.$parent.$index]" compile-template></div>
+            <div ng-bind-html="editable[field][$parent.$parent.$index]" compile-template></div>
           </div>
           <div bo-if="options.editable == false || options.all_fields[field].editable == false">
             <span bo-if="options.all_fields[field].transclude != '' "

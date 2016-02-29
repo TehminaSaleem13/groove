@@ -1,0 +1,12 @@
+.grid-editable-field{
+  padding: 3px;
+  -webkit-transition: 1000; /* Safari */
+  transition: 1000;
+  &:hover{
+    background-color: rgba(white, 0.5);
+  }
+}
+
+.grid-pencil{
+  cursor: pointer;
+}

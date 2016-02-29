@@ -36,6 +36,7 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout', '$http', '$sce', 
       all_fields: {}
     }
   };
+
   var default_field_options = function () {
     return {
       name: "field",
@@ -137,7 +138,17 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout', '$http', '$sce', 
           scope.editable[field] = {};
         }
         if (typeof scope.editable[field][ind] == "undefined") {
-          scope.editable[field][ind] = $sce.trustAsHtml('<div groov-editable="options.editable" prop="{{field}}" ng-model="' + scope.options.all_fields[field].model + '" identifier="' + scope.options.identifier + '_list-' + field + '-' + ind + '">' + scope.options.all_fields[field].transclude + '</div>');
+          scope.editable[field][ind] = $sce.trustAsHtml(
+            '<div class="grid-editable-field" ' + 
+                'ng-mouseover="row.show_pencil ? (row.show_pencil[field]=true) : (row.show_pencil={})"' +
+                'ng-mouseleave="row.show_pencil ? (row.show_pencil[field]=false) : (row.show_pencil={})" ' + 
+                'groov-editable="options.editable" prop="{{field}}" ng-model="' +
+                scope.options.all_fields[field].model + '" identifier="' +
+                scope.options.identifier + '_list-' + field + '-' + ind + '">' +
+              '<a class="pull-right fa fa-pencil grid-pencil" ng-show="row.show_pencil[field]" ng-click="scope.compile($parent.$parent.$index,field)"></a>' +
+              scope.options.all_fields[field].transclude +
+            '</div>'
+          );
         }
 
         $timeout(function () {
