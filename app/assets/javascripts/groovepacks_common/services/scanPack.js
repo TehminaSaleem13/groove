@@ -6,7 +6,6 @@ groovepacks_services.factory('scanPack', ['$http', 'notification', '$state', '$w
   }
 
   // Used to store temp array of order ids which are scanned in the current tab.
-
   var set_order_scanned = function(action){
     increment_id = $window.increment_id;
     index = $window.order_modified.indexOf(increment_id);
