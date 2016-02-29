@@ -12,6 +12,7 @@ class GrooveBulkActions < ActiveRecord::Base
     groove_bulk_actions = GrooveBulkActions.new
     groove_bulk_actions.identifier = 'product'
     groove_bulk_actions.activity = activity
+    groove_bulk_actions.current = ''
     groove_bulk_actions.save
 
     case activity

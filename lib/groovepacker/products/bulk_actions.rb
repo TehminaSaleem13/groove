@@ -279,21 +279,29 @@ module Groovepacker
             product_kit_skus: ProductKitSkus,
             product_inventory_warehouses: ProductInventoryWarehouses
           }
-          bulk_action.total = tables.length
+          bulk_action.total = 0
           bulk_action.completed = 0
-          bulk_action.status = 'in_progress'
+          bulk_action.status = 'not_started'
           bulk_action.save
           tables.each do |ident, model|
+            bulk_action.total = model.all.count
+            bulk_action.status = 'in_progress'
+            bulk_action.current = ident.to_s.camelize
+            bulk_action.completed = 0
+            bulk_action.save!
+            sleep(1)
             CSV.open("#{dir}/#{ident}.csv", 'w') do |csv|
               headers= []
               if ident == :products
-                ProductsHelper.products_csv(model.all, csv)
+                ProductsHelper.products_csv(model.all, csv, bulk_actions_id)
               else
                 headers= model.column_names.dup
 
                 csv << headers
 
                 model.all.each do |item|
+                  bulk_action.completed = bulk_action.completed + 1
+                  bulk_action.save
                   data = []
                   data = item.attributes.values_at(*model.column_names).dup
 
@@ -302,8 +310,6 @@ module Groovepacker
               end
               response[ident] = "#{dir}/#{ident}.csv"
             end
-            bulk_action.completed = bulk_action.completed + 1
-            bulk_action.save
           end
           data = zip_to_files(filename, response)
           unless bulk_action.cancel?
@@ -316,9 +322,10 @@ module Groovepacker
           url = GroovS3.find_export_csv(tenant, filename)
           CsvExportMailer.send_s3_object_url(filename, url, tenant).deliver
         rescue Exception => e
+          puts e.message
+          puts e.backtrace
           bulk_action.status = 'failed'
           bulk_action.messages = ['Some error occurred']
-          bulk_action.current = ''
           bulk_action.save
         ensure
           FileUtils.remove_entry_secure dir
