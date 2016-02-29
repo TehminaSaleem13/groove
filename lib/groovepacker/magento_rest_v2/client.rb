@@ -24,7 +24,7 @@ module Groovepacker
                       "searchCriteria%5Bfilter_groups%5D%5B0%5D%5Bfilters%5D%5B0%5D%5Bvalue%5D" => "#{(last_import-10.day).strftime("%Y-%m-%d")}",
                       "searchCriteria%5Bfilter_groups%5D%5B0%5D%5Bfilters%5D%5B0%5D%5Bcondition_type%5D" => "gt",
                       "searchCriteria%5Bcurrent_page%5D" => page_index,
-                      "searchCriteria%5Bpage_size%5D" => 1
+                      "searchCriteria%5Bpage_size%5D" => 100
                     }
           
           mg_response = fetch(method, uri, parameters, filters)
@@ -36,7 +36,7 @@ module Groovepacker
           orders = orders.push(mg_response["items"]).flatten
           response_length = mg_response["items"].length rescue 0
           previous_response = mg_response["items"]
-          break if response_length<1
+          break if response_length<100
           page_index += 1
         end
         orders = filter_resp_orders_for_last_imported_at(orders, last_import)
@@ -145,9 +145,10 @@ module Groovepacker
 
         def filter_resp_orders_for_last_imported_at(response, last_import)
           orders_to_return = {}
-          return response if response["messages"].present? || response["message"].present?
-          return orders_to_return if response["items"].blank?
-
+          if response.class==Hash
+            return response if response["messages"].present? || response["message"].present?
+          end
+          return orders_to_return if response.blank?
           response.each { |order| orders_to_return[order["increment_id"]] = order if order["created_at"].to_datetime > last_import }
           return orders_to_return
         end
