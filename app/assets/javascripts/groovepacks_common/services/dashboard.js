@@ -85,8 +85,8 @@ groovepacks_services.factory('dashboard', ['$http', 'notification', 'auth', func
 
   var request_analytic_server = function(tenant, domain, site_host, access_token, protocol) {
     $http.get(
-      // protocol + '//' + domain +'/dashboard/calculate',
-      protocol + '//' + tenant + 'stat.' + domain +'/dashboard/calculate',
+      // 'http://' + domain +'/dashboard/calculate',
+      'http://' + tenant + 'stat.' + domain +'/dashboard/calculate',
       {headers: {'Authorization':'Bearer ' + access_token, 'domain':site_host, 'tenant':tenant}}
       ).error(function(response){
       notification.notify("Failed to load dashboard data", 0);
