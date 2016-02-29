@@ -1,22 +1,22 @@
 groovepacks_services.factory('scanPack', ['$http', 'notification', '$state', '$window', function ($http, notification, $state, $window) {
 
-  if(typeof $window.order_scanned == 'undefined'){
-    $window.order_scanned = [];
-    window.order_scanned = $window.order_scanned;
+  if(typeof $window.order_modified == 'undefined'){
+    $window.order_modified = [];
+    window.order_modified = $window.order_modified;
   }
 
   // Used to store temp array of order ids which are scanned in the current tab.
   var set_order_scanned = function(action){
     increment_id = $window.increment_id;
-    index = $window.order_scanned.indexOf(increment_id);
+    index = $window.order_modified.indexOf(increment_id);
     if(action == 'push'){
       if(increment_id != null && index == -1){
-        $window.order_scanned.push(increment_id);
+        $window.order_modified.push(increment_id);
       }
     }
     else{
       if(index > -1){
-        $window.order_scanned.splice(index, 1);
+        $window.order_modified.splice(index, 1);
       }
     }
   }
