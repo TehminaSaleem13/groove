@@ -6,31 +6,40 @@ module Groovepacker
       def orders
         credential = get_credential
         method = 'GET'
-        
         uri = "#{api_base_url}/orders"
         last_import = credential.last_imported_at.to_datetime rescue (DateTime.now - 4.days)
-        #filters = {}
-        #from_date = (DateTime.now - 4.days).strftime("%Y-%m-%d %H:%M:%S")
-        #to_date = DateTime.now.strftime("%Y-%m-%d %H:%M:%S")
-        #filters = {"filter[1][attribute]" => "created_at", "filter[1][from]" => from_date, "filter[1][to]" => to_date}
-        #filters = {"order" => "created_at", "dir" => "dsc"}
-        orders = {}
+        orders = []
         page_index = 1
+        previous_response = []
         while page_index
           puts "=======================Fetching page #{page_index}======================="
           #filter_groups = { "0" => {  "filters" => { "0" => { "field" => "created_at", "value" => last_import, "condition_type" => "gt" } } } }
           #filters = { 'search_criteria' => { 'current_page' => page_index, 'page_size' => 10, 'filter_groups' => filter_groups }}
           #filters = {"search_criteria" =>  { "current_page" => page_index, "page_size" => 10, "sort_orders" => [{"field" => "created_at", "direction" => "DESC" }] }}
           #filters = {"searchCriteria" => '', "page" => "#{page_index}", "limit" => "10", "order" => "created_at", "dir" => "dsc"}
-          filters = {"searchCriteria" => ''}
-          response = fetch(method, uri, parameters, filters)
-          response = filter_resp_orders_for_last_imported_at(response, last_import)
+          #filters = {"searchCriteria" => ''}
+
+          filters = {
+                      "searchCriteria%5Bfilter_groups%5D%5B0%5D%5Bfilters%5D%5B0%5D%5Bfield%5D" => "created_at",
+                      "searchCriteria%5Bfilter_groups%5D%5B0%5D%5Bfilters%5D%5B0%5D%5Bvalue%5D" => "#{(last_import-10.day).strftime("%Y-%m-%d")}",
+                      "searchCriteria%5Bfilter_groups%5D%5B0%5D%5Bfilters%5D%5B0%5D%5Bcondition_type%5D" => "gt",
+                      "searchCriteria%5Bcurrent_page%5D" => page_index,
+                      "searchCriteria%5Bpage_size%5D" => 1
+                    }
           
-          orders = orders.merge(response)
-          response_length = response.length rescue 0
-          break if response_length<10
+          mg_response = fetch(method, uri, parameters, filters)
+          if mg_response["message"].present? || mg_response["messages"].present?
+            orders = mg_response
+            break
+          end
+          mg_response = {"items"=>[]} if previous_response == mg_response["items"]
+          orders = orders.push(mg_response["items"]).flatten
+          response_length = mg_response["items"].length rescue 0
+          previous_response = mg_response["items"]
+          break if response_length<1
           page_index += 1
         end
+        orders = filter_resp_orders_for_last_imported_at(orders, last_import)
         return orders
       end
 
@@ -136,10 +145,10 @@ module Groovepacker
 
         def filter_resp_orders_for_last_imported_at(response, last_import)
           orders_to_return = {}
-          return response if response["messages"].present?
+          return response if response["messages"].present? || response["message"].present?
           return orders_to_return if response["items"].blank?
 
-          response["items"].each { |order| orders_to_return[order["increment_id"]] = order if order["created_at"].to_datetime > last_import }
+          response.each { |order| orders_to_return[order["increment_id"]] = order if order["created_at"].to_datetime > last_import }
           return orders_to_return
         end
     end
