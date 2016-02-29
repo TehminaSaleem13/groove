@@ -14,7 +14,7 @@ module Groovepacker
                 response = client.products
                 result = self.build_result
                 #fetching all products
-                unless response.blank?
+                if response.present? and response["messages"].blank?
                   #listing found products
                   @products = response
                   send_products_import_email(@products.count, credential) if @products.count>20000

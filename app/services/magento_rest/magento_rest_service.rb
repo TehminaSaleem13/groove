@@ -13,8 +13,11 @@ module MagentoRest
       
       begin
         response = check_availability
-        if response && response["message"]
-          return {status: false, message: response["message"]}
+        err_msg = response["messages"]["error"].first["message"] rescue nil
+        if err_msg
+          return { status: false, message: err_msg }
+        elsif response && (response["messages"].try(:class)==String || response["message"].try(:class)==String)
+          return {status: false, message: response["messages"] || response["message"]}
         end
         return {status: true, message: "Connection tested successfully"}
       rescue Exception => ex

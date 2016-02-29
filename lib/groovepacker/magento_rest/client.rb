@@ -93,7 +93,7 @@ module Groovepacker
 
       def check_connection(filters={})
         method = 'GET'
-        uri = "#{host_url}/products"
+        uri = "#{host_url}/api/rest/products"
         filters = {"limit" => "1"}
         response = fetch(method, uri, parameters, filters)
         return response

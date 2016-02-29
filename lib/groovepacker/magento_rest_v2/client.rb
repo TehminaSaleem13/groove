@@ -100,11 +100,11 @@ module Groovepacker
 
       def check_connection(filters={})
         method = 'GET'
-        uri = "#{api_base_url}/products"
+        uri = "#{api_base_url}/orders"
         #filters = { 'search_criteria' => { 'current_page' => 1, 'page_size' => 2, 'sort_orders' => { '0' => {'field' => 'created_at', 'direction' => 'ASC' } } }}
         #filter_groups = { "0" => {  "filters" => { "0" => { "field" => "price", "value" => "45", "condition_type" => "gt" } } } }
         #filters = { 'search_criteria' => { 'current_page' => 1, 'page_size' => 2, 'filter_groups' => filter_groups }}
-        filters = { 'search_criteria' => { 'current_page' => 1, 'page_size' => 1 }}
+        filters = { 'search_criteria' => ''}
         response = fetch(method, uri, parameters, filters)
         return response
       end
