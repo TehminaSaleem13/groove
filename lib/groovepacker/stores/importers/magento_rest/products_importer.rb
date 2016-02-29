@@ -6,7 +6,6 @@ module Groovepacker
           include ProductsHelper
 
           def import
-            binding.pry
             result = get_importer.import
           end
 

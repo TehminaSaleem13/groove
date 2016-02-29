@@ -1,7 +1,7 @@
 module Groovepacker
   module MagentoRestV2
-    class Client < Base
-      include Groovepacker::MagentoRestV2::MagentoRestCommon
+    class Client < Groovepacker::MagentoRest::Base
+      include Groovepacker::MagentoRest::MagentoRestCommon
 
       def orders
         credential = get_credential
