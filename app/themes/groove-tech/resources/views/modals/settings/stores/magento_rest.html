@@ -98,74 +98,74 @@
           <ol class="list-group">
             <li class="list-group-item">
               <p class="list-group-item-text">
-                1. Login into in magento-2 store backend as admin.
+                1. Login into your Magento 2.X store backend as an admin.
               </p>
             </li>
 
             <li class="list-group-item">
               <p class="list-group-item-text">
-                2. Create a new consumer/integration, click <strong>System > Integration > Add New Integration</strong>. Be sure to restrict the resources that the consumer/integration can access. 
-                <a href='' ng-click="show_hide_images('step-1-2', 'step-1-2-link');"><b>images </b><i class="groove-fa fa fa-caret-down step-1-2-link"></i></a>
-                <div class="step-1-2" style="display: none;">
+                2. Create a new consumer/integration by clicking <strong>System > Integration > Add New Integration</strong>.
+                <div class="step-1-2" style="display: block;">
                   <div style="margin: 10px 0px;" >
-                    <img class="icons" src="/assets/images/magento-2-1.jpg" style="width: 100%; margin: 0px;border: 1px solid #d4d4d4;">
+                    <img class="icons" src="/assets/images/magento-2-1.png" style="width: 100%; margin: 0px;border: 1px solid #d4d4d4;">
                   </div>
                   <div style="margin: 10px 0px;">
-                    <img class="icons" src="/assets/images/magento-2-2.jpg" style="width: 100%; margin: 0px;border: 1px solid #d4d4d4;">
+                    <img class="icons" src="/assets/images/magento-2-2.png" style="width: 100%; margin: 0px;border: 1px solid #d4d4d4;">
                   </div>
                 </div>
-
-                <strong>Note: </strong>Make sure the consumer you created is not expired (consumer credentials get expired if not activated in 3 minutes). You must use these consumer credentials to get an access token in fewer than three minutes. Expiry time can be changed from backend by the administrator.
+                <p style="text-align: center;">
+                  <a class="btn" href="" ng-click="show_hide_images('step-1-2', 'step-1-2-link');" style="border-radius: 20px;"><b>images </b><i class="groove-fa fa fa-caret-up step-1-2-link"></i></a>
+                </p>
+                <strong>Note: </strong>By default, after creating a new integration in Magento, you have 3 minutes to activate it. If 3 minutes elapses before activation please remove the first and create and activate another another integration.
               </p>
             </li>
 
             <li class="list-group-item">
+              <p class="list-group-item-text" style="margin-bottom: 5px;">
+                3. Copy and Paste the following Callback and Identity Link URLs into the respective text fields in Magento. See image 1
+              </p>
               <p class="list-group-item-text">
-                3. Callback URL: 
+                Callback URL:
                 <strong ng-show="edit_status">{{stores.host_url}}/magento_rest/callback?store_token={{stores.single.store_token}}</strong>
               </p>
-              <p class="list-group-item-text" ng-show="edit_status">You'll paste it into consumer integration info as callback URL. (see image - 1 of step-1)</p>
-            </li>
+              <p class="list-group-item-text" ng-show="edit_status">
+                <button class="groove-button" ng-class="copy_text.mgcb_class"
+                        clip-copy="stores.host_url+'/magento_rest/callback?store_token='+stores.single.store_token" clip-click="copy_callback_url()">
+                  {{copy_text.mgcb_text}}
+                </button>
+              </p>
 
-            <li class="list-group-item">
+
               <p class="list-group-item-text">
-                4. Redirect URL: 
+                Redirect URL: 
                 <strong ng-show="edit_status">{{stores.host_url}}/magento_rest/success</strong>
               </p>
-              <p class="list-group-item-text" ng-show="edit_status">You'll paste it into consumer settings as redirect URL. (see image - 1 of step-1)</p>
+              <p class="list-group-item-text" ng-show="edit_status">
+                <button class="groove-button" ng-class="copy_text.mgsc_class"
+                        clip-copy="stores.host_url+'/magento_rest/success'" clip-click="copy_success_url()">
+                  {{copy_text.mgsc_text}}
+                </button>
+              </p>
             </li>
 
             <li class="list-group-item">
               <p class="list-group-item-text">
-                5. Save the consumer/integration when you are done with entries. You will be redirected to Consumers/Integration list page.
-                <a href='' ng-click="show_hide_images('step-5-1', 'step-5-1-link');"><b>images </b><i class="groove-fa fa fa-caret-down step-5-1-link"></i></a>
-                <div class="step-5-1" style="display: none;">
-                  <div style="margin: 10px 0px;" >
-                    <img class="icons" src="/assets/images/magento-2-3.jpg" style="width: 100%; margin: 0px;border: 1px solid #d4d4d4;">
-                  </div>
-                </div>
+                4. On the left under basic settings Click API and Choose "All" from the Resource Access Dropdown. See image 2
             </li>
 
             <li class="list-group-item">
               <p class="list-group-item-text">
-                6. Click on 'Activate' link of that consumer. It will ask your permissions to allow the access on resources. On clicking 'Allow', after a few seconds you will get a popup window with a message that you have completed the process successfully.
-                <a href='' ng-click="show_hide_images('step-6-1', 'step-6-1-link');"><b>images </b><i class="groove-fa fa fa-caret-down step-6-1-link"></i></a>
-                <div class="step-6-1" style="display: none;">
-                  <div style="margin: 10px 0px;" >
-                    <img class="icons" src="/assets/images/magento-2-5.png" style="width: 100%; margin: 0px;border: 1px solid #d4d4d4;">
-                  </div>
-                </div>
-
+                5. Click the arrow on the Save button in the top right and choose "Save and Activate".
             </li>
 
             <li class="list-group-item">
               <p class="list-group-item-text">
-                7. close that popup window. And on Groovepacker re-open your store, you will see "Accees token: Available" in palce of these instructions.
+                6. Click "Allow" to confirm All resources and OK to complete the integration.
             </li>
 
             <li class="list-group-item">
               <p class="list-group-item-text">
-                7. Now your store is ready to import and process the orders/products.
+                You can verify the connection in GroovePacker by clicking the Save & Close button at the bottom of this window. Re-open the new store by clicking it in the stores list and click the "Check Connection" button.
             </li>
             
           </ol>

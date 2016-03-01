@@ -90,6 +90,24 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
       }, 2000);
     };
 
+    scope.copy_callback_url = function () {
+      scope.copy_text.mgcb_text = 'Copied to clipboard';
+      scope.copy_text.mgcb_class = 'label label-success';
+      $timeout(function () {
+        scope.copy_text.mgcb_text = 'Click Here to copy to clipboard';
+        scope.copy_text.mgcb_class = '';
+      }, 2000);
+    };
+
+    scope.copy_success_url = function () {
+      scope.copy_text.mgsc_text = 'Copied to clipboard';
+      scope.copy_text.mgsc_class = 'label label-success';
+      $timeout(function () {
+        scope.copy_text.mgsc_text = 'Click Here to copy to clipboard';
+        scope.copy_text.mgsc_class = '';
+      }, 2000);
+    };
+
     scope.import_images = function (report_id) {
       scope.stores.import.image.status = "Import in progress";
       scope.stores.import.image.status_show = true;
@@ -628,7 +646,11 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
 
       scope.copy_text = {
         text: 'Click Here to copy to clipboard',
-        class: ''
+        class: '',
+        mgcb_text: 'Click Here to copy to clipboard',
+        mgcb_class: '',
+        mgsc_text: 'Click Here to copy to clipboard',
+        mgsc_class: ''
       };
 
       scope.stores.types = {};

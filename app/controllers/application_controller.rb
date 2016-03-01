@@ -72,7 +72,7 @@ class ApplicationController < ActionController::Base
       elsif Rails.env=="staging"
         url = "https://#{current_tenant}.barcodepacker.com"
       else
-        url = "http://#{request.host}"
+        url = "https://#{request.host}"
       end
       return url
     end
