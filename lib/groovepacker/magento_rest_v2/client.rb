@@ -29,7 +29,7 @@ module Groovepacker
           
           mg_response = fetch(method, uri, parameters, filters)
           if mg_response["message"].present? || mg_response["messages"].present?
-            orders = mg_response
+            orders = mg_response.as_json
             break
           end
           mg_response = {"items"=>[]} if previous_response == mg_response["items"]
