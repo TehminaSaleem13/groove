@@ -22,7 +22,7 @@ module Groovepacker
 										product = product.last
 										result[:total_imported] = result[:total_imported] + 1
 
-										if Product.where(:store_product_id => product["id"]).length == 0
+										if Product.where(store_id: credential.store_id, :store_product_id => product["id"]).length == 0
 											product = client.product(product["sku"])
 											result_product_id = self.import_single(product)
 											result[:success_imported] = result[:success_imported] + 1 unless result_product_id == 0
