@@ -21,7 +21,7 @@
                 max-size="options.paginate.max_size" items-per-page="options.paginate.items_per_page"
                 class="pagination-sm" rotate="false"></pagination>
   </div>
-  <div class="col-md-12">
+  <div class="col-md-12 table-parent">
     <table groov-dragtable="dragOptions" groov-enabled="options.draggable" groov-model="theads"
            id="{{custom_identifier}}" class="well table-well table table-striped table-hover table-alt">
       <thead groov-rt-click="context_menu_event($event)" hm-press="context_menu_event($event)">
@@ -46,7 +46,7 @@
             <div ng-class='{"grid-editable-field": !editable[field][$parent.$parent.$index]}' ng-hide="editable[field][$parent.$parent.$index]" ng-mouseover="row.show_pencil ? (row.show_pencil[field]=true) : (row.show_pencil={})" ng-mouseleave="row.show_pencil ? (row.show_pencil[field]=false) : (show_pencil={})">
               <a class='fa fa-pencil pointer pull-right' ng-show="row.show_pencil[field] && !editable[field][$parent.$parent.$index]" groov-click="compile($parent.$parent.$index,field)"></a>
               <span bo-if="options.all_fields[field].transclude == '' && row[field] !== null && row[field].length"
-                    bo-text="row[field]" ng-show='!editable[field][$parent.$parent.$index]'></span>
+                    bo-text="row[field].chunk(10).join(' ') | cut:false:20" ng-show='!editable[field][$parent.$parent.$index]' tooltip='{{row[field].chunk(10).join(" ")}}'></span>
               <span bo-if="options.all_fields[field].transclude == '' && (row[field] == null || !row[field].length)"> &nbsp;</span>
               <span bo-if="options.all_fields[field].transclude != ''"
                     ng-bind-html="options.all_fields[field].transclude" compile-template>&nbsp;</span>
@@ -56,7 +56,7 @@
           <div bo-if="options.editable == false || options.all_fields[field].editable == false">
             <span bo-if="options.all_fields[field].transclude != '' "
                   ng-bind-html="options.all_fields[field].transclude" compile-template></span>
-            <span bo-if="options.all_fields[field].transclude == '' && row[field] !== null" bo-text="row[field]"></span>
+            <span bo-if="options.all_fields[field].transclude == '' && row[field] !== null" bo-text="row[field] | cut:false:10:' ...'"  tooltip='{{row[field].chunk(10).join(" ")}}'></span>
           </div>
         </td>
 

@@ -8,6 +8,9 @@
     border-width: thin;
     border-radius: 3px;
     min-width: 15rem;
-    position: absolute;
   }
+}
+
+.table-parent{
+  overflow-x: scroll;
 }
