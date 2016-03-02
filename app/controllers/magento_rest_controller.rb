@@ -43,7 +43,8 @@ class MagentoRestController < ApplicationController
 
   def callback
     begin
-      @credential = MagentoRestCredential.find_by_store_token(params[:store_token])
+      @credential = MagentoRestCredential.find_by_store_token_and_store_version(params[:store_token], '2.x')
+      render json: {status: 400, massage: "Something went wrong."} and return if @credential.nil?
       @consumer_key = params[:oauth_consumer_key]
       @consumer_secret = params[:oauth_consumer_secret]
       @oauth_verifier = params[:oauth_verifier]
@@ -59,7 +60,13 @@ class MagentoRestController < ApplicationController
     end
   end
 
-  def success
+  def redirect
+    @credential = MagentoRestCredential.find_by_store_token_and_store_version(params[:store_token], '2.x')
+    if @credential.present? && @credential.access_token!=nil && @credential.oauth_token_secret!=nil
+      render 'success_redirect'
+    else
+      render 'failure_redirect'
+    end
   end
   
   private

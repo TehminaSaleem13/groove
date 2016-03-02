@@ -28,7 +28,7 @@ Groovepacks::Application.routes.draw do
   get '/magento_rest/:store_id/check_connection' => 'magento_rest#check_connection'
   put '/magento_rest/:store_id/disconnect' => 'magento_rest#disconnect'
   post "magento_rest/callback" => "magento_rest#callback"
-  get "magento_rest/success" => "magento_rest#success"
+  get "magento_rest/redirect" => "magento_rest#redirect"
   get 'stores/export_active_products' => 'stores#export_active_products'
   get '/settings/print_action_barcode/:id' => 'settings#print_action_barcode'
 

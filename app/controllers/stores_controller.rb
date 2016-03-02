@@ -172,6 +172,10 @@ class StoresController < ApplicationController
             @magento_rest.host = not_to_save.include?(params[:host]) ? nil : params[:host]
             store_admin_url = params[:store_admin_url].sub(/(\/)+$/,'') rescue nil
             @magento_rest.store_admin_url = not_to_save.include?(store_admin_url) ? nil : store_admin_url
+            if @magento_rest.store_version != params[:store_version]
+              @magento_rest.access_token=nil
+              @magento_rest.oauth_token_secret=nil
+            end
             @magento_rest.store_version = params[:store_version]
             @magento_rest.store_token = Store.get_sucure_random_token if @magento_rest.store_token.blank?
             @magento_rest.api_key = params[:api_key]
