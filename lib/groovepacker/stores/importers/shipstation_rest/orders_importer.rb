@@ -51,6 +51,7 @@ module Groovepacker
                 if import_item.import_type == 'quick'
                   #get for created time
                   status_response = client.get_orders(status, import_from, "quick_created_at")
+                  status_response = filter_quick_import_orders(status_response, import_from)
                 else
                   status_response = client.get_orders(status, import_from, import_date_type)
                 end
@@ -278,6 +279,13 @@ module Groovepacker
             product.set_product_status
 
             product
+          end
+
+          def filter_quick_import_orders(status_response, import_from)
+            return status_response if status_response["orders"].blank?
+            orders_hash = {"orders" => []}
+            status_response["orders"].each { |order| orders_hash["orders"].push(order) if order["modifyDate"].to_datetime.utc >= import_from }
+            return orders_hash
           end
         end
       end
