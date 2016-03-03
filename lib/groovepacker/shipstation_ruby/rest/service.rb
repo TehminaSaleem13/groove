@@ -65,7 +65,7 @@ module Groovepacker
         end
 
         def send(query, body, method)
-          debug_output = Rails.env=="production" ? $stdout : false
+          debug_output = Rails.env=="development" ? $stdout : false
           if method == "get"
             HTTParty.get("#{@endpoint}#{query}", headers: headers, debug_output: debug_output)
           else
