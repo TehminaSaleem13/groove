@@ -21,9 +21,9 @@ module Groovepacker
           start_date = shipment_date_start(date_type, ss_format(import_from))
           page_index=1
           while page_index
-            response = @service.query("/shipments?page=#{page_index}&pageSize=100#{start_date}", nil, "get")
+            response = @service.query("/shipments?page=#{page_index}&pageSize=200#{start_date}", nil, "get")
             shipments_after_last_import = shipments_after_last_import.push(response["shipments"]).flatten
-            break if response["shipments"].count<100
+            break if response["shipments"].count<200
             page_index +=1
           end
           return shipments_after_last_import
@@ -46,6 +46,16 @@ module Groovepacker
           @service.query("/Orders/" + orderId, nil, "get")
         end
 
+        def get_tags_list
+          tagslist_by_name = {}
+          response = @service.query('/accounts/listtags', nil, "get")
+          tags = response.parsed_response
+          unless tags.blank?
+            tags.each {|tag| tagslist_by_name[tag["name"]] = tag["tagId"]} rescue nil
+          end
+          return tagslist_by_name
+        end
+
         def get_tag_id(tag)
           response = @service.query('/accounts/listtags', nil, "get")
           tags = response.parsed_response
@@ -53,13 +63,12 @@ module Groovepacker
           index.nil? ? -1 : tags[index]['tagId']
         end
 
-        def get_orders_by_tag(tag)
-          tag_id = get_tag_id(tag)
+        def get_orders_by_tag(tagId)
           response = { 'orders' => [] }
-          unless tag_id == -1
+          unless tagId == -1
             %w(awaiting_payment awaiting_shipment shipped
                on_hold cancelled).each do |status|
-              res = find_orders_by_tag_and_status(tag_id, status)
+              res = find_orders_by_tag_and_status(tagId, status)
               response['orders'] = response['orders'] + res unless res.nil?
             end
           end
@@ -70,8 +79,7 @@ module Groovepacker
           page_index = 1
           orders = []
           loop do
-            response = @service.query("/orders/listbytag?orderStatus=" \
-              "#{status}&tagId=#{tag_id}&page=#{page_index}&pageSize=100", nil, "get")
+            response = @service.query("/orders/listbytag?orderStatus=#{status}&tagId=#{tag_id}&page=#{page_index}&pageSize=100", nil, "get")
             orders += response['orders'] unless response['orders'].nil?
             total_pages = response.parsed_response['pages']
             page_index += 1
@@ -102,7 +110,7 @@ module Groovepacker
             combined['orders'] = union(combined['orders'],
                                        res.parsed_response['orders'])
             page_index += 1
-            return combined if res.parsed_response['orders'].length == 0
+            return combined if res.parsed_response['orders'].length<500
           end
         end
 
