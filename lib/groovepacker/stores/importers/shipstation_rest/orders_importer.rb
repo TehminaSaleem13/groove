@@ -23,18 +23,18 @@ module Groovepacker
 
             if import_item.import_type == 'deep'
               days_back_to_import = import_item.days.to_i.days rescue 7.days
-              import_from = Date.today - days_back_to_import
+              import_from = DateTime.now - days_back_to_import
               # import_from =
               #   credential.last_imported_at.nil? ? Date.today - 2.weeks : 
               #     credential.last_imported_at - 7.days
               import_date_type = "created_at"
             elsif import_item.import_type == 'quick'
               import_from =
-                credential.quick_import_last_modified.blank? ? Date.today - 3.days : 
+                credential.quick_import_last_modified.blank? ? DateTime.now - 3.days : 
                   credential.quick_import_last_modified
               import_date_type = "modified_at"
             else
-              import_from = credential.last_imported_at.blank? ? Date.today - 2.weeks : 
+              import_from = credential.last_imported_at.blank? ? DateTime.now - 2.weeks : 
                   credential.last_imported_at - credential.regular_import_range.days
               import_date_type = "created_at"
             end
@@ -50,7 +50,7 @@ module Groovepacker
                 status_response["orders"] = nil
                 if import_item.import_type == 'quick'
                   #get for created time
-                  status_response = client.get_orders(status, import_from, "quick_created_at")
+                  status_response = client.get_orders(status, import_from, import_date_type)
                 else
                   status_response = client.get_orders(status, import_from, import_date_type)
                 end
@@ -58,7 +58,7 @@ module Groovepacker
               end
 
 
-              importing_time = Date.today - 1.day
+              importing_time = DateTime.now - 1.day
               quick_importing_time = DateTime.now
               unless gp_ready_tag_id == -1
                 tagged_response = client.get_orders_by_tag(gp_ready_tag_id)
