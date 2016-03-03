@@ -26,6 +26,7 @@ groovepacks_controllers.
       };
 
       $scope.update_product_list = function (product, prop) {
+        if(!product[prop] /*if null*/){return}
         products.list.update_node({
           id: product.id,
           var: prop,
