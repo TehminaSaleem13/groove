@@ -24,7 +24,7 @@ module Groovepacker
               next
             end
             handle_response(response, trial_count) ? break : trial_count += 1
-            break if trial_count >= 5
+            break if trial_count >= 3
           end
           handle_exceptions(response)
           response
@@ -65,16 +65,11 @@ module Groovepacker
         end
 
         def send(query, body, method)
-          debug_output = Rails.env=="test" ? false : $stdout
+          debug_output = Rails.env=="production" ? $stdout : false
           if method == "get"
-            HTTParty.get("#{@endpoint}#{query}",
-                          headers: headers, 
-                          debug_output: debug_output)
+            HTTParty.get("#{@endpoint}#{query}", headers: headers, debug_output: debug_output)
           else
-            HTTParty.post("#{@endpoint}#{query}",
-                            body: body,
-                            headers: headers,
-                            debug_output: debug_output)
+            HTTParty.post("#{@endpoint}#{query}", body: body, headers: headers, debug_output: debug_output)
           end
         end
 

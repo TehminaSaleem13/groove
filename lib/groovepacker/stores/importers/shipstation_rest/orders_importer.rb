@@ -30,19 +30,19 @@ module Groovepacker
               import_date_type = "created_at"
             elsif import_item.import_type == 'quick'
               import_from =
-                credential.quick_import_last_modified.nil? ? Date.today - 3.days : 
+                credential.quick_import_last_modified.blank? ? Date.today - 3.days : 
                   credential.quick_import_last_modified
               import_date_type = "modified_at"
             else
-              import_from = credential.last_imported_at.nil? ? Date.today - 2.weeks : 
+              import_from = credential.last_imported_at.blank? ? Date.today - 2.weeks : 
                   credential.last_imported_at - credential.regular_import_range.days
               import_date_type = "created_at"
             end
+            ss_tags_list = client.get_tags_list
+            gp_ready_tag_id = ss_tags_list[credential.gp_ready_tag_name] || -1
+            gp_imported_tag_id = ss_tags_list[credential.gp_imported_tag_name] || -1
 
-            gp_ready_tag_id = client.get_tag_id(credential.gp_ready_tag_name)
-            gp_imported_tag_id = client.get_tag_id(credential.gp_imported_tag_name)
-
-            unless statuses.empty? && gp_ready_tag_id == -1
+            if statuses.present? && gp_ready_tag_id != -1
               response = {}
               response["orders"] = nil
               statuses.each do |status|
@@ -51,27 +51,26 @@ module Groovepacker
                 if import_item.import_type == 'quick'
                   #get for created time
                   status_response = client.get_orders(status, import_from, "quick_created_at")
-                  status_response = filter_quick_import_orders(status_response, import_from)
+                  #status_response = filter_quick_import_orders(status_response, import_from)
                 else
                   status_response = client.get_orders(status, import_from, import_date_type)
                 end
-                response["orders"] = response["orders"].nil? ? status_response["orders"] : (response["orders"] | status_response["orders"])
+                response["orders"] = response["orders"].blank? ? status_response["orders"] : (response["orders"] | status_response["orders"])
               end
 
 
               importing_time = Date.today - 1.day
               quick_importing_time = DateTime.now
               unless gp_ready_tag_id == -1
-                tagged_response = client.get_orders_by_tag(credential.gp_ready_tag_name)
+                tagged_response = client.get_orders_by_tag(gp_ready_tag_id)
 
                 #perform union of orders
-                response["orders"] = response["orders"].nil? ? tagged_response["orders"] :
+                response["orders"] = response["orders"].blank? ? tagged_response["orders"] :
                   response["orders"] | tagged_response["orders"]
               end
 
-              shipments_response = client.get_shipments(import_from-2.days)
-
-              unless response["orders"].nil?
+              unless response["orders"].blank?
+                shipments_response = client.get_shipments(import_from-1.days)
                 result[:total_imported] = response["orders"].length
                 import_item.current_increment_id = ''
                 import_item.success_imported = 0
