@@ -144,8 +144,10 @@ module Groovepacker
         end
 
         def ss_format(start_date)
-          (start_date.beginning_of_day + Time.zone_offset('PDT').seconds).to_s
-            .gsub(' UTC', '').gsub(' ', '%20')
+          #(start_date.beginning_of_day + Time.zone_offset('PDT').seconds).to_s
+          #  .gsub(' UTC', '').gsub(' ', '%20')
+          zone = ActiveSupport::TimeZone.new("Pacific Time (US & Canada)")
+          time = start_date.to_datetime.in_time_zone(zone).strftime("%Y-%m-%d %H:%M:%S").gsub(" ", "%20")
         end
 
         def union(orders, second_set)
