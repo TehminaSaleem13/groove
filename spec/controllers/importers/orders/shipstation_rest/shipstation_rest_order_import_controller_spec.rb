@@ -16,7 +16,7 @@ describe OrdersController do
 																																	 :api_key => "test", 
 																																	 :api_secret => "test",
 																																	 :shall_import_awaiting_shipment => true, 
-																																	 :last_imported_at => Time.now-30.minutes,
+																																	 :last_imported_at => Time.now-5.minutes,
 																																	 :shall_import_shipped => true, 
 																																	 :warehouse_location_update => false, 
 																																	 :shall_import_customer_notes => false, 
@@ -30,20 +30,20 @@ describe OrdersController do
     Delayed::Job.destroy_all
   end
 
-  describe "GET 'import_all'" do    
-		it "Import from Shipstation should fail for 'Shipstation API 2' store type" do
-			request.accept = "application/json"
-			get :import_all, {}
-			expect(response.status).to eq(200)
-			result = JSON.parse(response.body)
-			order_import_summary = OrderImportSummary.last
-			import_items = order_import_summary.import_items
-			expect(import_items.count).to eq(1)
-			import_item = import_items.first
-			expect(import_item.status).to eq("failed")
-			expect(import_item.import_type).to eq("regular")
-		end
-  end
+  # describe "GET 'import_all'" do    
+		# it "Import from Shipstation should fail for 'Shipstation API 2' store type" do
+		# 	request.accept = "application/json"
+		# 	get :import_all, {}
+		# 	expect(response.status).to eq(200)
+		# 	result = JSON.parse(response.body)
+		# 	order_import_summary = OrderImportSummary.last
+		# 	import_items = order_import_summary.import_items
+		# 	expect(import_items.count).to eq(1)
+		# 	import_item = import_items.first
+		# 	expect(import_item.status).to eq("failed")
+		# 	expect(import_item.import_type).to eq("regular")
+		# end
+  # end
   
   describe "GET 'import_all'" do    
 		it "Import from Shipstation should import orders for 'Shipstation API 2' store type" do
