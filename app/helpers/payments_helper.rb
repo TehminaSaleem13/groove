@@ -175,7 +175,19 @@ module PaymentsHelper
       'annual-duo' => 'annual-groove-duo',
       'annual-trio' => 'annual-groove-trio',
       'annual-quintet' => 'annual-groove-quintet',
-      'annual-symphony' => 'annual-groove-symphony'
+      'annual-symphony' => 'annual-groove-symphony',
+      'duo-60' => 'groove-duo-60',
+      'trio-90' => 'groove-trio-90',
+      'quintet-120' => 'groove-quintet-120',
+      'quartet-150' => 'groove-quartet-150',
+      'bigband-210' => 'groove-bigband-210',
+      'symphony-300' => 'groove-symphony-300',
+      'an-duo' => 'an-groove-duo',
+      'an-trio' => 'an-groove-trio',
+      'an-quintet' => 'an-groove-quintet',
+      'an-quartet' => 'an-groove-quartet',
+      'an-bigband' => 'an-groove-bigband',
+      'an-symphony' => 'an-groove-symphony'
     }
   end
 end
