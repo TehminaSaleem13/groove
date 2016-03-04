@@ -32,6 +32,8 @@ Groovepacks::Application.routes.draw do
   get 'stores/export_active_products' => 'stores#export_active_products'
   get '/settings/print_action_barcode/:id' => 'settings#print_action_barcode'
 
+  get '/store_settings/handle_ebay_redirect' => 'stores#handle_ebay_redirect'
+
   # The priority is based upon order of creation:
   # first created -> highest priority.
 
@@ -146,7 +148,7 @@ Groovepacks::Application.routes.draw do
       get 'connect_and_retrieve'
       post 'create_update_ftp_credentials'
       post 'delete_ebay_token'
-      post 'update_ebay_user_token'
+      get 'update_ebay_user_token'
       post 'csv_import_data'
       post 'csv_do_import'
       post 'csv_product_import_cancel'
