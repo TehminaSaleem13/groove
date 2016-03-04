@@ -279,14 +279,14 @@ groovepacks_admin_controllers.
                   {name: "Annual Symphony", value: 'annual-symphony'},
                   {name: "Duo 60", value: 'duo-60'},
                   {name: "Trio 90", value: 'trio-90'},
-                  {name: "Quintet 120", value: 'quintet-120'},
-                  {name: "Quartet 150", value: 'quartet-150'},
+                  {name: "Quartet 120", value: 'quartet-120'},
+                  {name: "Quintet 150", value: 'quintet-150'},
                   {name: "Bigband 210", value: 'bigband-210'},
                   {name: "Symphony 300", value: 'symphony-300'},
                   {name: "An Duo", value: 'an-duo'},
                   {name: "An Trio", value: 'an-trio'},
-                  {name: "An Quintet", value: 'an-quintet'},
                   {name: "An Quartet", value: 'an-quartet'},
+                  {name: "An Quintet", value: 'an-quintet'},
                   {name: "An Bigband", value: 'an-bigband'},
                   {name: "An Symphony", value: 'an-symphony'}
                 ]
@@ -310,9 +310,9 @@ groovepacks_admin_controllers.
             plan: {
               name: "Plan",
               transclude: "<span class='label label-default' ng-class=\"{" +
-              "'label-success': row[field] == 'quintet' || row[field] == 'annual-quintet' || row[field] == 'an-quartet' || row[field] == 'quartet-150', " +
+              "'label-success': row[field] == 'quintet' || row[field] == 'annual-quintet' || row[field] == 'an-quintet' || row[field] == 'quintet-150', " +
               "'label-warning': row[field] == 'duo' || row[field] == 'annual-duo' || row[field] == 'an-trio' || row[field] == 'trio-90', " +
-              "'label-info': row[field] == 'trio' || row[field] == 'annual-trio' || row[field] == 'an-quintet' || row[field] == 'quintet-120', " +
+              "'label-info': row[field] == 'trio' || row[field] == 'annual-trio' || row[field] == 'an-quartet' || row[field] == 'quartet-120', " +
               "'label-danger': row[field] == 'symphony' || row[field] == 'annual-symphony' || row[field] == 'an-bigband' || row[field] == 'bigband-210' || row[field] == 'an-symphony' || row[field] == 'symphony-300' }\">" +
               "{{row[field]}}</span>"
             },
