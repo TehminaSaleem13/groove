@@ -143,4 +143,8 @@ Groovepacks::Application.configure do
 
   # analytic server
   ENV["GROOV_ANALYTIC"] = "localhost:4000"
+
+  ENV["FAILED_IMPORT_NOTIFICATION_EMAILS"] = ""
+  ENV["PRODUCTS_IMPORT_EMAILS"] = ""
+  ENV["PRODUCTS_IMPORT_COMPLETE_EMAILS"] = ""
 end

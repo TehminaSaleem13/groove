@@ -8,7 +8,7 @@ class ImportMailer < ActionMailer::Base
     else
       subject = "[#{@import_exception[:tenant]}] [#{Rails.env}] Import failed"
     end
-    mail to: "svisamsetty@navaratan.com, groovepacker+importfail@gmail.com ", subject: subject
+    mail to: ENV["FAILED_IMPORT_NOTIFICATION_EMAILS"], subject: subject
   end
 
   def send_products_import_email(products_count, credential)
@@ -16,7 +16,7 @@ class ImportMailer < ActionMailer::Base
     @credential = credential
     @current_tenant = Apartment::Tenant.current
     subject = "[#{@current_tenant}] [#{Rails.env}] initiated products import for #{@products_count} products"
-    mail to: "svisamsetty@navaratan.com, kcpatel006@gmail.com, groovepacker@gmail.com", subject: subject
+    mail to: ENV["PRODUCTS_IMPORT_EMAILS"], subject: subject
   end
 
   def send_products_import_complete_email(products_count, result, credential)
@@ -26,6 +26,6 @@ class ImportMailer < ActionMailer::Base
     @result = result
     @current_tenant = Apartment::Tenant.current
     subject = "[#{@current_tenant}] [#{Rails.env}] products import for Store: #{@credential.store.name} is complete"
-    mail to: "#{system_notifications_email}", bcc: "kcpatel006@gmail.com", subject: subject
+    mail to: "#{system_notifications_email}", bcc: ENV["PRODUCTS_IMPORT_COMPLETE_EMAILS"], subject: subject
   end
 end
