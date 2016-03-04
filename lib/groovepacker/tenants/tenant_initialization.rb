@@ -2,20 +2,6 @@ module Groovepacker
   module Tenants
     class TenantInitialization
       def access_limits(plan)
-        # result = {}
-        # case plan
-        # when 'groove-solo', 'annual-groove-solo'
-        #   result = build_access_hash(500, 1, 1)
-        # when 'groove-duo', 'annual-groove-duo'
-        #   result = build_access_hash(2000, 2, 2)
-        # when 'groove-trio', 'annual-groove-trio'
-        #   result = build_access_hash(6000, 3, 3)
-        # when 'groove-quintet', 'annual-groove-quintet'
-        #   result = build_access_hash(12000, 5, 5)
-        # when 'groove-symphony', 'annual-groove-symphony'
-        #   result = build_access_hash(50000, 12, 8)
-        # end
-        # result
         build_access_hash(plan_hash[plan])
       end
 
