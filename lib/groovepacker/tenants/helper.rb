@@ -129,30 +129,7 @@ module Groovepacker
           subscription_result['transaction_errors'] = ''
           unless tenant.subscription.nil?
             subscription = tenant.subscription
-            case subscription.subscription_plan_id
-              when "groove-solo"
-                subscription_result['plan'] = "solo"
-              when "groove-duo"
-                subscription_result['plan'] = "duo"
-              when "groove-trio"
-                subscription_result['plan'] = "trio"
-              when "groove-quintet"
-                subscription_result['plan'] = "quintet"
-              when "groove-symphony"
-                subscription_result['plan'] = "symphony"
-              when "annual-groove-solo"
-                subscription_result['plan'] = "annual-solo"
-              when "annual-groove-duo"
-                subscription_result['plan'] = "annual-duo"
-              when "annual-groove-trio"
-                subscription_result['plan'] = "annual-trio"
-              when "annual-groove-quintet"
-                subscription_result['plan'] = "annual-quintet"
-              when "annual-groove-symphony"
-                subscription_result['plan'] = "annual-symphony"
-              else
-                subscription_result['plan'] = ""
-            end
+            subscription_result['plan'] = construct_plan_hash.key(subscription.subscription_plan_id)
             subscription_result['start_day'] = subscription.created_at.strftime("%d %b") unless subscription.created_at.nil?
             subscription_result['customer_id'] = subscription.stripe_customer_id unless subscription.stripe_customer_id.nil?
             subscription_result['progress'] = subscription.progress unless subscription.progress.nil?
