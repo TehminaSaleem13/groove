@@ -169,7 +169,8 @@ class StoresController < ApplicationController
               @magento_rest = @magento_rest.first
             end
             not_to_save = ["undefined", "null"]
-            @magento_rest.host = not_to_save.include?(params[:host]) ? nil : params[:host]
+            host_url = params[:host].sub(/(\/)+$/,'') rescue nil
+            @magento_rest.host = not_to_save.include?(params[:host]) ? nil : host_url
             store_admin_url = params[:store_admin_url].sub(/(\/)+$/,'') rescue nil
             @magento_rest.store_admin_url = not_to_save.include?(store_admin_url) ? nil : store_admin_url
             if @magento_rest.store_version != params[:store_version]
