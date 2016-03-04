@@ -305,6 +305,7 @@ groovepacks_controllers.
             show: myscope.show_selected
           },
           draggable: true,
+          dynamic_width: true,
           sortable: true,
           selectable: true,
           sort_func: $scope.handlesort,
@@ -363,6 +364,7 @@ groovepacks_controllers.
             },
             notes: {
               name: "Notes",
+              col_length: 25,
               enable_edit: true
             },
             order_date: {
@@ -379,6 +381,7 @@ groovepacks_controllers.
             },
             status: {
               name: "Status",
+              col_length: 10,
               transclude: "<span class='label label-default' ng-hide=\"row[field] == 'onhold'\" ng-class=\"{" +
               "'label-success': row[field] == 'awaiting', " +
               "'label-danger': row[field] == 'serviceissue' }\">" +
@@ -388,10 +391,12 @@ groovepacks_controllers.
             },
             email: {
               name: "Email",
+              col_length: 25,
               hidden: true
             },
             tracking_num: {
               name: "Tracking Id",
+              col_length: 25,
               hidden: true
             },
             city: {

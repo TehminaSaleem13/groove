@@ -16,6 +16,7 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout', '$http', '$sce', 
         show: function () {
         }
       },
+      dynamic_width: false,
       show_hide: false,
       editable: false,
       disable_global_edit: false,
@@ -162,6 +163,26 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout', '$http', '$sce', 
           scope.$broadcast(scope.options.identifier + '_list-' + field + '-' + ind);
         }, 30);
       };
+
+      // scope.add_style = function(field, ind) {
+      //   style =  $sce.trustAsHtml(
+      //     '<style>
+      //       .grid-editable-field-' + field + $parent.$parent.$index + '{
+      //         padding: 0.8rem 0.3rem;
+      //         min-height: 3rem;
+      //         &:hover{
+      //           background-color: rgb(230, 228, 228);
+      //           border-color: #C5C4C4;
+      //           border-style: solid;
+      //           border-width: thin;
+      //           border-radius: 3px;
+      //           position: absolute;
+      //           width: ' + scope.options.all_fields[field].col_length + 3 + 'rem;
+      //         }
+      //       }
+      //     </style>
+      //   ')
+      // }
 
       myscope.make_theads = function (theads) {
         var shown = [];

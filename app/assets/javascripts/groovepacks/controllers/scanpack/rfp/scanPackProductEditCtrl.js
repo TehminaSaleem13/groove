@@ -34,6 +34,7 @@ groovepacks_controllers.
       $scope.editinit = function () {
         $scope.products = products.model.get();
         $scope.gridOptions = {
+          dynamic_width: true,
           identifier: 'scanpackinactiveornew',
           setup: $scope.products.setup,
           data: {order_num: $stateParams.order_num},

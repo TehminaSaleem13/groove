@@ -21,7 +21,8 @@
                 max-size="options.paginate.max_size" items-per-page="options.paginate.items_per_page"
                 class="pagination-sm" rotate="false"></pagination>
   </div>
-  <div class="col-md-12 table-parent">
+  <div class="{{options.dynamic_width ? 'container-fluid' : 'col-md-12'}} table-parent"
+        style="{{'display: ' + (options.dynamic_width ? 'table-caption' : 'table')}}">
     <table groov-dragtable="dragOptions" groov-enabled="options.draggable" groov-model="theads"
            id="{{custom_identifier}}" class="well table-well table table-striped table-hover table-alt">
       <thead groov-rt-click="context_menu_event($event)" hm-press="context_menu_event($event)">
@@ -45,10 +46,13 @@
                hm-press="compile($parent.$parent.$index,field)" groov-rt-click="compile($parent.$parent.$index,field)">
             <div ng-class='{"grid-editable-field": !editable[field][$parent.$parent.$index]}'
               ng-hide="editable[field][$parent.$parent.$index]" ng-mouseover="row.show_pencil ? (row.show_pencil[field]=true) : (row.show_pencil={})" ng-mouseleave="row.show_pencil ? (row.show_pencil[field]=false) : (show_pencil={})"
-              style="{{'min-width:' + options.all_fields[field].col_length + 'rem'}}">
+              style="width:{{options.all_fields[field].col_length}}rem">
               <a class='fa fa-pencil datagrid-pencil pull-right' ng-show="row.show_pencil[field] && !editable[field][$parent.$parent.$index]" groov-click="compile($parent.$parent.$index,field)"></a>
               <span bo-if="options.all_fields[field].transclude == '' && row[field] !== null && row[field].length"
-                    bo-text="row[field].chunk(25).join(' ') | cut:false:25" ng-show='!editable[field][$parent.$parent.$index]' tooltip='{{row[field].chunk(25).join(" ")}}'></span>
+                    bo-text="row[field].chunk(25).join(' ') | cut:false:25"
+                    tooltip='{{row[field].length ? row[field].chunk(25).join(" ") : ("Edit" + field)}}'
+                    style="{{'width:' + options.all_fields[field].col_length + 'rem'}}">
+              </span>
               <span bo-if="options.all_fields[field].transclude == '' && (row[field] == null || !row[field].length)"> &nbsp;</span>
               <span bo-if="options.all_fields[field].transclude != ''"
                     ng-bind-html="options.all_fields[field].transclude" compile-template>&nbsp;</span>
