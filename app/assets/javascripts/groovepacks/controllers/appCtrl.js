@@ -199,6 +199,7 @@ groovepacks_controllers.
                       '</div>' +
                     '</div>' +
                     '<div ng-show="store.store_type==\'Shipstation API 2\'" style="display: flex;">' +
+                      '<a class="btn" ng-hide="import_summary.import_info.status==\'in_progress\'" title="Tagged Import" ng-click="issue_import(store.id, 7, \'tagged\')"><img class="icons" src="/assets/images/tagged_import.png"></img></a>' +
                       '<a class="btn" ng-hide="import_summary.import_info.status==\'in_progress\'" title="Quick Import" ng-click="issue_import(store.id, 7, \'quick\')"><img class="icons" src="/assets/images/quick_import.png"></img></a>' +
                       '<a class="btn" ng-hide="import_summary.import_info.status==\'in_progress\'" title="Regular Import" ng-click="issue_import(store.id, 7, \'regular\')"><img class="icons" src="/assets/images/reg_import.png"></img></a>' +
                       '<div ng-hide="import_summary.import_info.status==\'in_progress\'" ng-mouseover="show_days_select(store, true)" ng-mouseleave="show_days_select(store, false)" style="width: 120px;">' +

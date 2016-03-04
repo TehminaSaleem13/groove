@@ -45,20 +45,21 @@ module Groovepacker
             if statuses.present? && gp_ready_tag_id != -1
               response = {}
               response["orders"] = nil
-              
-              statuses.each do |status|
-                status_response = {}
-                status_response["orders"] = nil
-                if import_item.import_type == 'quick'
-                  #get for created time
-                  status_response = client.get_orders(status, import_from, import_date_type)
-                else
-                  status_response = client.get_orders(status, import_from, import_date_type)
+              if import_item.import_type != 'tagged'
+                statuses.each do |status|
+                  status_response = {}
+                  status_response["orders"] = nil
+                  if import_item.import_type == 'quick'
+                    #get for created time
+                    status_response = client.get_orders(status, import_from, import_date_type)
+                  else
+                    status_response = client.get_orders(status, import_from, import_date_type)
+                  end
+                  response["orders"] = response["orders"].blank? ? status_response["orders"] : (response["orders"] | status_response["orders"])
                 end
-                response["orders"] = response["orders"].blank? ? status_response["orders"] : (response["orders"] | status_response["orders"])
+                importing_time = DateTime.now - 1.day
+                quick_importing_time = DateTime.now
               end
-              importing_time = DateTime.now - 1.day
-              quick_importing_time = DateTime.now
 
               if import_item.import_type != 'quick' && gp_ready_tag_id != -1
                 tagged_response = client.get_orders_by_tag(gp_ready_tag_id)
@@ -92,7 +93,7 @@ module Groovepacker
                     shipstation_order.destroy
                     shipstation_order = nil
                   end
-
+                  
                   if shipstation_order.blank?
                     shipstation_order = Order.new
                   elsif order["tagIds"].present? && order["tagIds"].include?(gp_ready_tag_id)
