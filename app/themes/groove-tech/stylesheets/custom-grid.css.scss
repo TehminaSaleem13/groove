@@ -7,10 +7,16 @@
     border-style: solid;
     border-width: thin;
     border-radius: 3px;
-    min-width: 15rem;
+    min-width: 25rem;
   }
 }
 
 .table-parent{
-  overflow-x: scroll;
+  display: table;
+}
+
+.datagrid-pencil{
+  cursor: pointer;
+  font-size: 2rem;
+  vertical-align: text-top;
 }

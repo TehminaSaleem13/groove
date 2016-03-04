@@ -164,8 +164,9 @@ body {
 }
 
 .main-body {
-  margin: 28px 25px 25px 25px;
+  margin: 4vh auto;
   width: auto;
+  max-width: 98vw;
 }
 
 .gradient-well {
@@ -173,6 +174,9 @@ body {
   padding: 0px;
   border-radius: @border-radius-base + 15;
   .box-shadow(~"1px 1px 10px rgba(0,0,1,.86)");
+  display: table;
+  margin: 0 auto;
+  min-width: 900px;
 }
 
 .gradient-well-inner {
@@ -184,6 +188,7 @@ body {
   .box-shadow(~"inset 1px 1px 4px rgba(140,140,145,.75)");
   background: asset-url('images/brush_metal_bkg_large.png') no-repeat center center fixed;
   background-size: cover;
+  min-width: 600px;
 }
 
 .box-outer {

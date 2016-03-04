@@ -138,7 +138,6 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout', '$http', '$sce', 
       };
 
       scope.compile = function (ind, field) {
-
         if (typeof scope.editable[field] == "undefined") {
           scope.editable[field] = {};
         }
@@ -151,7 +150,9 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout', '$http', '$sce', 
                 'groov-editable="options.editable" prop="{{field}}" ng-model="' +
                 scope.options.all_fields[field].model + '" identifier="' +
                 scope.options.identifier + '_list-' + field + '-' + ind + '">' +
-              '<a class="pull-right fa fa-pencil pointer" ng-show="row.show_pencil[field]" ng-click="scope.compile($parent.$parent.$index,field)"></a>' +
+              '<a class="pull-right fa datagrid-pencil fa-pencil pointer" ' +
+                'ng-show="row.show_pencil[field]" groov-click="compile(' + ind + ',\'' +field+ '\')">' +
+              '</a>' +
               scope.options.all_fields[field].transclude +
             '</div>'
           );
