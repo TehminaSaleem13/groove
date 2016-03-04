@@ -1,6 +1,6 @@
 groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', '$window', '$sce', '$interval', '$state', '$stateParams', '$modal',
-  '$modalInstance', '$timeout', 'hotkeys', 'stores', 'warehouses', 'notification', '$q', 'groov_translator',
-  function (scope, store_data, $window, $sce, $interval, $state, $stateParams, $modal, $modalInstance, $timeout, hotkeys, stores, warehouses, notification, $q, groov_translator) {
+  '$modalInstance', '$timeout', 'hotkeys', 'stores', 'warehouses', 'notification', '$q', 'groov_translator', 'Lightbox',
+  function (scope, store_data, $window, $sce, $interval, $state, $stateParams, $modal, $modalInstance, $timeout, hotkeys, stores, warehouses, notification, $q, groov_translator, Lightbox) {
     var myscope = {};
 
     /**
@@ -23,6 +23,21 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
         // scope.update_single_store(false);
         scope.update_single_store(true);
       }
+    };
+
+    scope.lightbox_images = [
+      {
+        'url': '/assets/images/magento-2-1.png',
+        'caption': 'Image-1'
+      },
+      {
+        'url': '/assets/images/magento-2-2.png',
+        'caption': 'Image-2'
+      }
+    ];
+
+    scope.openLightboxModal = function (index) {
+      Lightbox.openModal(scope.lightbox_images, index);
     };
 
     scope.disconnect_ebay_seller = function () {
