@@ -12,11 +12,21 @@
           'overflow-x': 'scroll',
           'overflow-y':'hidden'
         },
-        cols: 10
+        cols: 10,
+        remove: false
       },    
       _create : function() {
+        
+        if(this.options.remove){
+          $('.suwala-doubleScroll-scroll-wrapper').remove();
+          return;
+        }
+
         var self = this;
         var contentElement;
+
+        //Clear if already present;
+        $('.suwala-doubleScroll-scroll-wrapper').remove();
 
         // add div that will act as an upper scroll
         var topScrollBar = $($(self.options.topScrollBarMarkup));
@@ -44,7 +54,6 @@
         topScrollBar.css(self.options.scrollCss);
         self.element.css(self.options.contentCss);
 
-        console.log(self.options.cols)
         // set the width of the wrappers
         $(self.options.topScrollBarInnerSelector).width(self.options.cols * 25 + 'rem');
         topScrollBar.width(self.element.innerWidth());

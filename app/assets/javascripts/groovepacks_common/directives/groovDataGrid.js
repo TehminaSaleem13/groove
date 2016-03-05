@@ -136,6 +136,7 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout', '$http', '$sce', 
       scope.update = function () {
         myscope.make_theads(scope.theads);
         settings.column_preferences.save(scope.options.identifier, scope.theads);
+        myscope.add_double_scrollbar();
       };
 
       scope.compile = function (ind, field) {
@@ -229,6 +230,19 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout', '$http', '$sce', 
           scope.dropdown.show = false
         }, 500);
       };
+
+      myscope.add_double_scrollbar = function () {
+        if(scope.theads.length > 5){ 
+          jQuery('.table-parent').doubleScroll({
+            cols: scope.theads.length/2
+          });
+        }
+        else{
+          jQuery('.table-parent').removeData();
+          $('.suwala-doubleScroll-scroll-wrapper').remove();
+        }
+      }
+
       myscope.init = function () {
         scope.theads = [];
         myscope.last_clicked = null;
@@ -287,6 +301,7 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout', '$http', '$sce', 
               }
             }
             myscope.make_theads(theads);
+            myscope.add_double_scrollbar();
           }
         });
         if (scope.options.selectable && !scope.options.selections.unbind) {
@@ -302,11 +317,7 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout', '$http', '$sce', 
         if (typeof scope.groovDataGrid['selections'] != "undefined" && scope.groovDataGrid.selections.show_dropdown) {
           scope.$watch('groovDataGrid.selections', myscope.update_selections, true);
         }
-        if(Object.keys(scope.groovDataGrid.all_fields).length > 5){ 
-          jQuery('.table-parent').doubleScroll({cols: Object.keys(scope.groovDataGrid.all_fields).length/2});
-        }
       };
-
       myscope.init();
     }
   };
