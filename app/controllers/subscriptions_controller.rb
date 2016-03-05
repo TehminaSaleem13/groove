@@ -6,7 +6,8 @@ class SubscriptionsController < ApplicationController
   def new
     @subscription = Subscription.new
     @monthly_amount = Stripe::Plan.retrieve(params[:plan_id]).amount
-    @annually_amount = Stripe::Plan.retrieve('annual-' + params[:plan_id]).amount
+    position = params[:plan_id].length - params[:plan_id].split('-').pop().length - 1
+    @annually_amount = Stripe::Plan.retrieve('an-' + params[:plan_id][0..position-1]).amount
   end
 
   def select_plan

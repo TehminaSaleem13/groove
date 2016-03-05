@@ -56,6 +56,7 @@ class ImportOrders < Groovepacker::Utilities::Base
       #add a new import summary
       import_summary = OrderImportSummary.create( user: params[:user], status: 'not_started' )
       #add import item for the store
+      ImportItem.where(store_id: params[:store].id).destroy_all
       import_summary.import_items.create( store: params[:store], import_type: params[:import_type] )
       #start importing using delayed job (ImportJob is defined in base class)
       Delayed::Job.enqueue ImportJob.new(params[:tenant], import_summary.id), :queue => 'importing_orders_'+ params[:tenant]
@@ -129,8 +130,8 @@ class ImportOrders < Groovepacker::Utilities::Base
     begin
       store_type = import_item.store.store_type
       store = import_item.store
-      if store_type == 'CSV' && !import_item.status.nil?
-        initiate_csv_import(tenant, store_type, store, import_item)
+      if store_type == 'CSV'
+        initiate_csv_import(tenant, store_type, store, import_item) if import_item.status.present?
       else
         handler = get_handler(store_type, store, import_item)
         connection_successful = check_connection_for_shopify_or_bc(store, store_type, import_item)

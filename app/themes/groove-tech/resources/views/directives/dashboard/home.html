@@ -16,7 +16,7 @@
     </div>
   </div>
   <div class="row">
-    <div class="col-md-4 tab-col" ng-click="charts.set_type('packing_stats')">        
+    <div class="col-md-4 col-lg-4 tab-col" ng-click="charts.set_type('packing_stats')">        
       <div class="tab-pill tab-red tab-pill-active" ng-class="{'tab-pill-active': charts.type=='packing_error' || charts.type=='packing_stats'}">
         <div class="tab-col-row">
           <div class="col-md-6 col-lg-6">
@@ -27,9 +27,9 @@
           </div>
           <div class="col-md-4 col-lg-4 pill-col">
             <div class="row">
-              <div class="col-md-6"></div>
-              <div class="button-pill col-md-offset-6 col-md-1 button-pill-active" ng-class="{'button-pill-active': charts.type!='packing_error'}" ng-click="charts.alter_type('packing_stats')"></div>
-              <div class="col-md-1 button-pill" ng-class="{'button-pill-active': charts.type=='packing_error'}" ng-click="charts.alter_type('packing_error')"></div>
+              <!-- <div class="col-md-6 col-lg-6"></div> -->
+              <div class="button-pill col-md-offset-6 col-lg-offset-6 col-md-1 col-lg-1 button-pill-active" ng-class="{'button-pill-active': charts.type!='packing_error'}" ng-click="charts.alter_type('packing_stats')"></div>
+              <div class="col-md-1 col-lg-1 button-pill" ng-class="{'button-pill-active': charts.type=='packing_error'}" ng-click="charts.alter_type('packing_error')"></div>
             </div>
             <div class="well">
               <h4 ng-hide="charts.type=='packing_error'">{{dashboard.main_summary.packing_accuracy_summary.current_period}}%</h4>
@@ -38,7 +38,7 @@
               <span>Current Period</span>
             </div>
           </div>
-          <div class="col-md-2 col-lg-2" ng-class="
+          <div class="col-md-2 col-lg-2 pill-col-last" ng-class="
           {'pill-col-last':dashboard.main_summary.packing_accuracy_summary.delta == 0,
           'pill-col-last-tall':dashboard.main_summary.packing_accuracy_summary.delta > 0,
           'pill-col-last-short':dashboard.main_summary.packing_accuracy_summary.delta < 0}" ng-hide="charts.type=='packing_error'">
@@ -54,7 +54,7 @@
                 {{charts.days_filters[charts.current_filter_idx].name}}</p>
             </div>
           </div>
-          <div class="col-md-2 col-lg-2" ng-class="
+          <div class="col-md-2 col-lg-2 pill-col-last" ng-class="
           {'pill-col-last':dashboard.main_summary.packing_error_summary.delta == 0,
           'pill-col-last-tall':dashboard.main_summary.packing_error_summary.delta > 0,
           'pill-col-last-short':dashboard.main_summary.packing_error_summary.delta < 0}" ng-show="charts.type=='packing_error'">
@@ -78,7 +78,7 @@
       </div>
     </div>
 
-    <div class="col-md-4 tab-col" ng-click="charts.set_type('packing_speed_stats')">
+    <div class="col-md-4 col-lg-4 tab-col" ng-click="charts.set_type('packing_speed_stats')">
       <div class=" tab-pill tab-green" ng-class="{'tab-pill-active': charts.type=='packing_speed_stats' || charts.type=='packing_time_stats'}">
         <div class="tab-col-row">
           <div class="col-md-6 col-lg-6">
@@ -86,49 +86,50 @@
 
             <h3 ng-hide="charts.type=='packing_time_stats'">PACKING SPEED</h3>
             <h3 ng-show="charts.type=='packing_time_stats'">PACKING TIME</h3>
+            <span class="no-padding font-12"><span class="col-md-3 col-lg-3 no-padding remove-margin-left">Max</span><span class="col-md-4 col-lg-4 no-padding top-margin-2p"><input type="number" class="col-md-12 col-lg-12 no-padding dashboard-input" ng-model="dashboard.max_time_per_item" ng-blur="update_max()"></span><span class="col-md-5 col-lg-5 no-padding">Sec/Item</span></span>
           </div>
           <div class="col-md-4 col-lg-4 pill-col">
             <div class="row">
-              <div class="col-md-6"></div>
-              <div class="button-pill col-md-offset-6 col-md-1" ng-class="{'button-pill-active': charts.type!='packing_time_stats'}" ng-click="charts.alter_type('packing_speed_stats')"></div>
-              <div class="col-md-1 button-pill" ng-class="{'button-pill-active': charts.type=='packing_time_stats'}" ng-click="charts.alter_type('packing_time_stats')"></div>
+              <!-- <div class="col-md-6 col-lg-6"></div> -->
+              <div class="button-pill col-md-offset-6 col-lg-offset-6 col-md-1 col-lg-1" ng-class="{'button-pill-active': charts.type!='packing_time_stats'}" ng-click="charts.alter_type('packing_speed_stats')"></div>
+              <div class="col-md-1 col-lg-1 button-pill" ng-class="{'button-pill-active': charts.type=='packing_time_stats'}" ng-click="charts.alter_type('packing_time_stats')"></div>
             </div>
             <div class="well">
-              <h4 ng-hide="charts.type=='packing_time_stats'">{{dashboard.main_summary.packing_speed_summary.current_period}}</h4>
-              <h4 ng-show="charts.type=='packing_time_stats'">{{dashboard.main_summary.packing_time_summary.current_period}}</h4>
+              <h4 ng-hide="charts.type=='packing_time_stats'">{{dashboard.packing_speed_summary.current_period}}%</h4>
+              <h4 ng-show="charts.type=='packing_time_stats'">{{dashboard.packing_time_summary.current_period}}sec</h4>
               <span class="fa fa-calendar fa-pill-col"></span>
               <span>Current Period</span>
             </div>
           </div>
-          <div class="col-md-2 col-lg-2" ng-class="
-          {'pill-col-last':dashboard.main_summary.packing_speed_summary.delta == 0,
-          'pill-col-last-tall':dashboard.main_summary.packing_speed_summary.delta > 0,
-          'pill-col-last-short':dashboard.main_summary.packing_speed_summary.delta < 0}" ng-hide="charts.type=='packing_time_stats'">
+          <div class="col-md-2 col-lg-2 pill-col-last" ng-class="
+          {'pill-col-last':dashboard.packing_speed_summary.delta == 0,
+          'pill-col-last-tall':dashboard.packing_speed_summary.delta > 0,
+          'pill-col-last-short':dashboard.packing_speed_summary.delta < 0}" ng-hide="charts.type=='packing_time_stats'">
             <div class="well">
               <span class="fa fa-arrow-circle-up fa-pill-col fa-green"
-                    ng-show="dashboard.main_summary.packing_speed_summary.delta > 0"></span>
+                    ng-show="dashboard.packing_speed_summary.delta > 0"></span>
               <span class="fa fa-arrow-circle-down fa-pill-col fa-green"
-                    ng-show="dashboard.main_summary.packing_speed_summary.delta < 0"></span>
+                    ng-show="dashboard.packing_speed_summary.delta < 0"></span>
               <span class="fa fa-minus-circle fa-pill-col fa-green"
-                    ng-show="dashboard.main_summary.packing_speed_summary.delta == '-' || dashboard.main_summary.packing_speed_summary.delta == 0"></span>
+                    ng-show="dashboard.packing_speed_summary.delta == '-' || dashboard.packing_speed_summary.delta == 0"></span>
 
-              <p>{{dashboard.main_summary.packing_speed_summary.delta}} From Prev
+              <p>{{dashboard.packing_speed_summary.delta}}% From Prev
                 {{charts.days_filters[charts.current_filter_idx].name}}</p>
             </div>
           </div>
-          <div class="col-md-2 col-lg-2" ng-class="
-          {'pill-col-last':dashboard.main_summary.packing_time_summary.delta == 0,
-          'pill-col-last-tall':dashboard.main_summary.packing_time_summary.delta > 0,
-          'pill-col-last-short':dashboard.main_summary.packing_time_summary.delta < 0}" ng-show="charts.type=='packing_time_stats'">
+          <div class="col-md-2 col-lg-2 pill-col-last" ng-class="
+          {'pill-col-last':dashboard.packing_time_summary.delta == 0,
+          'pill-col-last-tall':dashboard.packing_time_summary.delta > 0,
+          'pill-col-last-short':dashboard.packing_time_summary.delta < 0}" ng-show="charts.type=='packing_time_stats'">
             <div class="well">
               <span class="fa fa-arrow-circle-up fa-pill-col fa-green"
-                    ng-show="dashboard.main_summary.packing_time_summary.delta > 0"></span>
+                    ng-show="dashboard.packing_time_summary.delta > 0"></span>
               <span class="fa fa-arrow-circle-down fa-pill-col fa-green"
-                    ng-show="dashboard.main_summary.packing_time_summary.delta < 0"></span>
+                    ng-show="dashboard.packing_time_summary.delta < 0"></span>
               <span class="fa fa-minus-circle fa-pill-col fa-green"
-                    ng-show="dashboard.main_summary.packing_time_summary.delta == '-' || dashboard.main_summary.packing_time_summary.delta == 0"></span>
+                    ng-show="dashboard.packing_time_summary.delta == '-' || dashboard.packing_time_summary.delta == 0"></span>
 
-              <p>{{dashboard.main_summary.packing_time_summary.delta}} From Prev
+              <p>{{dashboard.packing_time_summary.delta}}sec From Prev
                 {{charts.days_filters[charts.current_filter_idx].name}}</p>
             </div>
           </div>
@@ -140,7 +141,7 @@
       </div>
     </div>
 
-    <div class="col-md-4 tab-col tab-col-last"
+    <div class="col-md-4 col-lg-4 tab-col tab-col-last"
          ng-click="charts.set_type('packed_item_stats')">
       <div class="tab-pill tab-violet" ng-class="{'tab-pill-active': charts.type=='packed_order_stats' || charts.type=='packed_item_stats'}">
         <div class="tab-col-row">
@@ -152,9 +153,9 @@
           </div>
           <div class="col-md-4 col-lg-4 pill-col">
             <div class="row">
-              <div class="col-md-6"></div>
-              <div class="button-pill col-md-offset-6 col-md-1" ng-class="{'button-pill-active': charts.type!='packed_order_stats'}" ng-click="charts.alter_type('packed_item_stats')"></div>
-              <div class="col-md-1 button-pill" ng-class="{'button-pill-active': charts.type=='packed_order_stats'}" ng-click="charts.alter_type('packed_order_stats')"></div>
+              <!-- <div class="col-md-6 col-lg-6"></div> -->
+              <div class="button-pill col-md-offset-6 col-lg-offset-6 col-md-1 col-lg-1" ng-class="{'button-pill-active': charts.type!='packed_order_stats'}" ng-click="charts.alter_type('packed_item_stats')"></div>
+              <div class="col-md-1 col-lg-1 button-pill" ng-class="{'button-pill-active': charts.type=='packed_order_stats'}" ng-click="charts.alter_type('packed_order_stats')"></div>
             </div>
             <div class="well">
               <h4 ng-hide="charts.type=='packed_order_stats'">{{dashboard.main_summary.packed_items_summary.current_period}}</h4>
@@ -163,7 +164,7 @@
               <span>Current Period</span>
             </div>
           </div>
-          <div class="col-md-2 col-lg-2" ng-class="
+          <div class="col-md-2 col-lg-2 pill-col-last" ng-class="
           {'pill-col-last':dashboard.main_summary.packed_items_summary.delta == 0,
           'pill-col-last-tall':dashboard.main_summary.packed_items_summary.delta > 0,
           'pill-col-last-short':dashboard.main_summary.packed_items_summary.delta < 0}" ng-hide="charts.type=='packed_order_stats'">
@@ -181,7 +182,7 @@
               </p>
             </div>
           </div>
-          <div class="col-md-2 col-lg-2" ng-class="
+          <div class="col-md-2 col-lg-2 pill-col-last" ng-class="
           {'pill-col-last':dashboard.main_summary.packed_orders_summary.delta == 0,
           'pill-col-last-tall':dashboard.main_summary.packed_orders_summary.delta > 0,
           'pill-col-last-short':dashboard.main_summary.packed_orders_summary.delta < 0}" ng-show="charts.type=='packed_order_stats'">
@@ -208,19 +209,19 @@
     </div>
   </div>
   <div class="row">
-    <div class="col-md-4 tab-col-next">
+    <div class="col-md-4 col-lg-4 tab-col-next">
       <div class="col-md-12 col-lg-12 curve-left tab-pill-active" ng-class="{'tab-pill-active': charts.type=='packing_stats' || charts.type=='packing_error'}" ng-show="charts.type == 'packing_stats' || charts.type=='packing_error'">
       </div>
       <div class="col-md-12 col-lg-12 curve-right" ng-class="{'tab-pill-active': charts.type=='packing_speed_stats' || charts.type=='packing_time_stats'}" ng-show="charts.type == 'packing_speed_stats' || charts.type=='packing_time_stats'">
       </div>
     </div>
-    <div class="col-md-4 tab-col-next">
+    <div class="col-md-4 col-lg-4 tab-col-next">
       <div class="col-md-12 col-lg-12 curve-left" ng-class="{'tab-pill-active': charts.type=='packing_speed_stats' || charts.type=='packing_time_stats'}" ng-show="charts.type == 'packing_speed_stats' || charts.type=='packing_time_stats'">
       </div>
       <div class="col-md-12 col-lg-12 curve-right" ng-class="{'tab-pill-active': charts.type=='packed_item_stats' || charts.type=='packed_order_stats'}" ng-show="charts.type == 'packed_item_stats' || charts.type=='packed_order_stats'">
       </div>
     </div>
-    <div class="col-md-4 tab-col-next">
+    <div class="col-md-4 col-lg-4 tab-col-next">
       <div class="col-md-12 col-lg-12 no-curve" ng-class="{'tab-pill-active': charts.type=='packed_item_stats' || charts.type=='packed_order_stats'}" ng-show="charts.type == 'packed_item_stats' || charts.type=='packed_order_stats'">
       </div>
     </div>

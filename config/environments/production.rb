@@ -111,6 +111,7 @@ Groovepacks::Application.configure do
   ENV['SHOPIFY_API_KEY'] = "368d134ea37fffb3dbe4d67c22dbd733"
   ENV['SHOPIFY_SHARED_SECRET'] = "23f69cf421abb3af107934410ba7c624"
   ENV["SHOPIFY_REDIRECT_HOST"] = "groovepacker.com"
+  ENV['SHOPIFY_ONE_TIME_PAYMENT'] = '0'
 
   ENV['BC_CALLBACK_HOST'] = "admin.groovepacker.com"
   ENV['BC_CLIENT_ID'] = "hcd39v5m3dapbtpa2gpi5f4iz3syjps"
@@ -127,6 +128,7 @@ Groovepacks::Application.configure do
   ENV['S3_ACCESS_KEY_ID'] = 'AKIAIBDKVKEM7HNZUQAA'
   ENV['S3_ACCESS_KEY_SECRET'] = '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'
   ENV['S3_BUCKET_NAME'] = 'groove-prod'
+  ENV['S3_BUCKET_REGION'] = 'us-west-2'
   ENV['S3_BASE_URL'] = 'https://s3-us-west-2.amazonaws.com/groove-prod'
 
   #Feature Variables
@@ -136,4 +138,8 @@ Groovepacks::Application.configure do
 
   # analytic server
   ENV["GROOV_ANALYTIC"] = "orderpacker.com"
+
+  ENV["FAILED_IMPORT_NOTIFICATION_EMAILS"] = "svisamsetty@navaratan.com, groovepacker+importfail@gmail.com, kcpatel006@gmail.com"
+  ENV["PRODUCTS_IMPORT_EMAILS"] = "svisamsetty@navaratan.com, kcpatel006@gmail.com, groovepacker@gmail.com"
+  ENV["PRODUCTS_IMPORT_COMPLETE_EMAILS"] = "kcpatel006@gmail.com"
 end

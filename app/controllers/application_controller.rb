@@ -64,4 +64,17 @@ class ApplicationController < ActionController::Base
       end
     end
 
+    def get_host_url
+      url = ""
+      current_tenant = Apartment::Tenant.current
+      if Rails.env=="producttion"
+        url = "https://#{current_tenant}.groovepacker.com"
+      elsif Rails.env=="staging"
+        url = "https://#{current_tenant}.barcodepacker.com"
+      else
+        url = "https://#{request.host}"
+      end
+      return url
+    end
+
 end

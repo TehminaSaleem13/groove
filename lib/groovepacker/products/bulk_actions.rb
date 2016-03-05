@@ -2,6 +2,7 @@ module Groovepacker
   module Products
     class BulkActions
       include ProductsHelper
+      include SettingsHelper
 
       def status_update(tenant, params, bulk_actions_id)
         Apartment::Tenant.switch(tenant)
@@ -244,6 +245,80 @@ module Groovepacker
           bulk_action.messages = ['Some error occurred']
           bulk_action.current = ''
           bulk_action.save
+        end
+      end
+
+      def export(tenant, params, bulk_actions_id, user)
+        require 'csv'
+
+        Apartment::Tenant.switch(tenant)
+        result = Hash.new
+        result['messages'] =[]
+        result['status'] = true
+        bulk_action = GrooveBulkActions.find(bulk_actions_id)
+        begin
+          dir = Dir.mktmpdir([user+'groov-export-', Time.now.to_s])
+          filename = 'groove-export-'+Time.now.to_s+'.zip'
+          response = {}
+          tables = {
+            products: Product,
+            product_barcodes: ProductBarcode,
+            product_images: ProductImage,
+            product_skus: ProductSku,
+            product_cats: ProductCat,
+            product_kit_skus: ProductKitSkus,
+            product_inventory_warehouses: ProductInventoryWarehouses
+          }
+          bulk_action.total = 0
+          bulk_action.completed = 0
+          bulk_action.status = 'not_started'
+          bulk_action.save
+          tables.each do |ident, model|
+            bulk_action.total = model.all.count
+            bulk_action.status = 'in_progress'
+            bulk_action.current = ident.to_s.camelize
+            bulk_action.completed = 0
+            bulk_action.save!
+            sleep(1)
+            CSV.open("#{dir}/#{ident}.csv", 'w') do |csv|
+              headers= []
+              if ident == :products
+                ProductsHelper.products_csv(model.all, csv, bulk_actions_id)
+              else
+                headers= model.column_names.dup
+
+                csv << headers
+
+                model.all.each do |item|
+                  bulk_action.completed = bulk_action.completed + 1
+                  bulk_action.save
+                  data = []
+                  data = item.attributes.values_at(*model.column_names).dup
+
+                  csv << data
+                end
+              end
+              response[ident] = "#{dir}/#{ident}.csv"
+            end
+          end
+          data = zip_to_files(filename, response)
+          unless bulk_action.cancel?
+            bulk_action.status = result['status'] ? 'completed' : 'failed'
+            bulk_action.messages = result['messages']
+            bulk_action.current = ''
+            bulk_action.save
+          end
+          GroovS3.create_export_csv(tenant, filename, data)
+          url = GroovS3.find_export_csv(tenant, filename)
+          CsvExportMailer.send_s3_object_url(filename, url, tenant).deliver
+        rescue Exception => e
+          puts e.message
+          puts e.backtrace
+          bulk_action.status = 'failed'
+          bulk_action.messages = ['Some error occurred']
+          bulk_action.save
+        ensure
+          FileUtils.remove_entry_secure dir
         end
       end
     end

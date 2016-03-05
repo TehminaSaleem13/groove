@@ -9,7 +9,11 @@ module Groovepacker
           session = nil
 
           if !magento_rest_credential.blank?
-            client = Groovepacker::MagentoRest::Client.new(magento_rest_credential)
+            if magento_rest_credential.store_version=="2.x"
+              client = Groovepacker::MagentoRestV2::Client.new(magento_rest_credential)
+            else
+              client = Groovepacker::MagentoRest::Client.new(magento_rest_credential)
+            end
           end
 
           self.make_handle(magento_rest_credential, {handle: client})

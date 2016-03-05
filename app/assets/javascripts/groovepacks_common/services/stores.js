@@ -132,6 +132,9 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
           stores.single.allow_bc_inv_push = data.access_restrictions.allow_bc_inv_push;
           stores.single.allow_mg_rest_inv_push = data.access_restrictions.allow_mg_rest_inv_push;
           stores.single.allow_shopify_inv_push = data.access_restrictions.allow_shopify_inv_push;
+          stores.general_settings = data.general_settings;
+          stores.current_tenant = data.current_tenant;
+          stores.host_url = data.host_url;
           if (data.store.store_type == 'Magento') {
             stores.single.host = data.credentials.magento_credentials.host;
             stores.single.username = data.credentials.magento_credentials.username;
@@ -146,6 +149,8 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
             stores.single.import_images = data.credentials.magento_credentials.import_images;
 
           } else if (data.store.store_type == 'Magento API 2') {
+            stores.single.store_version = data.credentials.magento_rest_credential.store_version;
+            stores.single.store_token = data.credentials.magento_rest_credential.store_token;
             stores.single.host = data.credentials.magento_rest_credential.host;
             stores.single.store_admin_url = data.credentials.magento_rest_credential.store_admin_url;
             stores.single.api_key = data.credentials.magento_rest_credential.api_key;
@@ -400,6 +405,11 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
       if (data.status) {
         stores.import.product.status = "Successfully imported " + data.success_imported + " of " + data.total_imported +
           " products. " + data.previous_imported + " products were previously imported";
+        if(stores.general_settings.email_address_for_packer_notes!=undefined && stores.general_settings.email_address_for_packer_notes!=0) {
+          notification.notify("Your request has been queued. you will receive an email when products import is complete", 1);
+        } else {
+          notification.notify("Your request has been queued.", 1);
+        }
       } else {
         stores.import.product.status = "";
         for (var j = 0; j < data.messages.length; j++) {
@@ -608,8 +618,14 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
       }).error(notification.server_error);
   }
 
-  var check_connection = function (store_id) {
-    return $http.get('/big_commerce/' + store_id + '/check_connection.json', null).success(
+  var check_connection = function (store_type, store_id) {
+    var url = "";
+    if (store_type=="BigCommerce") {
+      url = '/big_commerce/' + store_id + '/check_connection.json';
+    } else if (store_type=="Magento API 2"){
+      url = '/magento_rest/' + store_id + '/check_connection.json';
+    }
+    return $http.get(url, null).success(
       function (data) {
         return data;
       }
@@ -686,7 +702,8 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
     magento: {
       get_aurthorize_url: get_magento_aurthorize_url,
       get_access_token: get_magento_access_token,
-      disconnect: disconnect_magento
+      disconnect: disconnect_magento,
+      check_connection: check_connection,
     }
   };
 }]);

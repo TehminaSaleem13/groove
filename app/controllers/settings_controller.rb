@@ -9,36 +9,36 @@ class SettingsController < ApplicationController
     if current_user.can? 'restore_backups'
       # Every entry on mapping[current_mapping][:map] should be in the format
       # csv_header => db_table_header
-      if params[:method] == 'del_import_old'
-        product_map = {
-          'id' => 'id',
-          'store_product_id' => 'store_product_id',
-          'name' => 'name',
-          'product_type' => 'product_type',
-          'store_id' => 'store_id',
-          'created_at' => 'created_at',
-          'updated_at' => 'updated_at',
-          'inv_wh1' => 'inv_wh1',
-          'status' => 'status',
-          'spl_instructions_4_packer' => 'spl_instructions_4_packer',
-          'spl_instructions_4_confirmation' => 'spl_instructions_4_confirmation',
-          'barcode' => 'barcode',
-          'is_skippable' => 'is_skippable',
-          'packing_placement' => 'packing_placement',
-          'pack_time_adj' => 'pack_time_adj',
-          'kit_parsing' => 'kit_parsing',
-          'is_kit' => 'is_kit',
-          'disable_conf_req' => 'disable_conf_req',
-          'total_avail_ext' => 'total_avail_ext',
-          'weight' => 'weight',
-          'shipping_weight' => 'shipping_weight'
-        }
-        default_warehouse_map = {
-          'default_wh_avbl' => 'available_inv',
-          'default_wh_loc_primary' => 'location_primary',
-          'default_wh_loc_secondary' => 'location_secondary'
-        }
-      else
+      # if params[:method] == 'del_import_old'
+      #   product_map = {
+      #     'id' => 'id',
+      #     'store_product_id' => 'store_product_id',
+      #     'name' => 'name',
+      #     'product_type' => 'product_type',
+      #     'store_id' => 'store_id',
+      #     'created_at' => 'created_at',
+      #     'updated_at' => 'updated_at',
+      #     'inv_wh1' => 'inv_wh1',
+      #     'status' => 'status',
+      #     'spl_instructions_4_packer' => 'spl_instructions_4_packer',
+      #     'spl_instructions_4_confirmation' => 'spl_instructions_4_confirmation',
+      #     'barcode' => 'barcode',
+      #     'is_skippable' => 'is_skippable',
+      #     'packing_placement' => 'packing_placement',
+      #     'pack_time_adj' => 'pack_time_adj',
+      #     'kit_parsing' => 'kit_parsing',
+      #     'is_kit' => 'is_kit',
+      #     'disable_conf_req' => 'disable_conf_req',
+      #     'total_avail_ext' => 'total_avail_ext',
+      #     'weight' => 'weight',
+      #     'shipping_weight' => 'shipping_weight'
+      #   }
+      #   default_warehouse_map = {
+      #     'default_wh_avbl' => 'available_inv',
+      #     'default_wh_loc_primary' => 'location_primary',
+      #     'default_wh_loc_secondary' => 'location_secondary'
+      #   }
+      # else
         product_map = {
           'ID' => 'id',
           'Name' => 'name',
@@ -67,7 +67,7 @@ class SettingsController < ApplicationController
           'BinLocation 1' => 'location_primary',
           'BinLocation 2' => 'location_secondary'
         }
-      end
+      # end
       mapping = {
         'products' => {
           model: Product,
@@ -151,12 +151,12 @@ class SettingsController < ApplicationController
         }
       }
 
-      if params[:method].nil? || !['del_import_old', 'del_import_new'].include?(params[:method])
+      if params[:method].nil? || !['del_import'].include?(params[:method])
         @result['status'] = false
-        @result.messages.push("No action selected")
+        @result['messages'].push("No action selected")
       elsif params[:file].nil?
         @result['status'] = false
-        @result.messages.push("No file selected")
+        @result['messages'].push("No file selected")
       else
         require 'zip'
         require 'csv'
@@ -276,25 +276,35 @@ class SettingsController < ApplicationController
   end
 
   def export_csv
-
-    if current_user.can? 'create_backups'
-      dir = Dir.mktmpdir([current_user.username+'groov-export-', Time.now.to_s])
-      filename = 'groove-export-'+Time.now.to_s+'.zip'
-      begin
-        data = zip_to_files(filename, Product.to_csv(dir))
-
-      ensure
-        FileUtils.remove_entry_secure dir
-      end
+    puts "export_csv"
+    @result = {}
+    @result['status'] = true
+    @result['messages'] = []
+    if current_user.can?('create_backups')
+      GrooveBulkActions.execute_groove_bulk_action('export', params, current_user)
     else
-      #prevent a fail and send empty zip
-      filename = 'insufficient_permissions.zip'
-      data = zip_to_files(filename, {})
+      @result['status'] = false
+      @result['messages'].push('You do not have enough permissions to backup and restore')
     end
+    # if current_user.can? 'create_backups'
+    #   dir = Dir.mktmpdir([current_user.username+'groov-export-', Time.now.to_s])
+    #   filename = 'groove-export-'+Time.now.to_s+'.zip'
+    #   begin
+    #     data = zip_to_files(filename, Product.to_csv(dir))
+
+    #   ensure
+    #     FileUtils.remove_entry_secure dir
+    #   end
+    # else
+    #   #prevent a fail and send empty zip
+    #   filename = 'insufficient_permissions.zip'
+    #   data = zip_to_files(filename, {})
+    # end
+    puts '@result: ' + @result.inspect
 
     respond_to do |format|
       format.html # show.html.erb
-      format.zip { send_data data, :type => 'application/zip', :filename => filename }
+      format.json { render :json => @result }
     end
   end
 
@@ -558,7 +568,7 @@ class SettingsController < ApplicationController
 
 
         general_setting.export_items = params[:export_items]
-
+        general_setting.max_time_per_item = params[:max_time_per_item]
 
         general_setting.time_to_send_email = params[:time_to_send_email]
         general_setting.send_email_on_mon = params[:send_email_on_mon]
@@ -584,6 +594,7 @@ class SettingsController < ApplicationController
 
         general_setting.custom_field_one = params[:custom_field_one]
         general_setting.custom_field_two = params[:custom_field_two]
+        general_setting.export_csv_email = params[:export_csv_email]
 
         if general_setting.save
           @result['success_messages'].push('Settings updated successfully.')
@@ -758,6 +769,23 @@ class SettingsController < ApplicationController
   def send_test_mail
     LowInventoryLevel.notify(GeneralSetting.all.first, Apartment::Tenant.current).deliver
     render json: "ok"
+  end
+
+  def execute_in_bulk_action(activity)
+    result = {}
+    result['status'] = true
+    result['messages'] = []
+    if current_user.can?('create_backups')
+      GrooveBulkActions.execute_groove_bulk_action(activity, params, current_user)
+    else
+      result['status'] = false
+      result['messages'].push('You do not have enough permissions to backup and restore')
+    end
+    result
+    # respond_to do |format|
+    #   format.html # show.html.erb
+    #   format.json { render json: result }
+    # end
   end
 
 end

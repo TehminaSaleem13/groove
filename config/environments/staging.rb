@@ -128,6 +128,7 @@ Groovepacks::Application.configure do
     ENV['HOST_NAME'] = 'barcodepacker.com'
     ENV["SITE_HOST"] = "barcodepacker.com"
   end
+  ENV['SHOPIFY_ONE_TIME_PAYMENT'] = '0'
 
   # Stripe production keys
   ENV['STRIPE_API_KEY'] = "sk_test_4QS2OJ8BkMWcuzCWrHrKGlz9"
@@ -138,6 +139,7 @@ Groovepacks::Application.configure do
   ENV['S3_ACCESS_KEY_ID'] = 'AKIAIBDKVKEM7HNZUQAA'
   ENV['S3_ACCESS_KEY_SECRET'] = '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'
   ENV['S3_BUCKET_NAME'] = 'groove-staging'
+  ENV['S3_BUCKET_REGION'] = 'us-west-2'
   ENV['S3_BASE_URL'] = 'https://s3-us-west-2.amazonaws.com/groove-staging'
 
   #Feature Variables
@@ -146,4 +148,7 @@ Groovepacks::Application.configure do
   # analytic server
   ENV["GROOV_ANALYTIC"] = "lockpeppa.com"
 
+  ENV["FAILED_IMPORT_NOTIFICATION_EMAILS"] = "svisamsetty@navaratan.com, groovepacker+importfail@gmail.com, kcpatel006@gmail.com"
+  ENV["PRODUCTS_IMPORT_EMAILS"] = "svisamsetty@navaratan.com, kcpatel006@gmail.com, groovepacker@gmail.com"
+  ENV["PRODUCTS_IMPORT_COMPLETE_EMAILS"] = "kcpatel006@gmail.com"
 end

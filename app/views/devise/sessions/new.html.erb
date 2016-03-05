@@ -25,37 +25,20 @@
     <% end %>
     <script type="text/javascript">
       $('#login_button').click(function(event){
-        var t = event.target;
         event.preventDefault();
         event.stopPropagation();
         var username = $('#username').val();
         var password = $('#password').val();
         var url = document.URL.split('/');
         var target_url = url[0] + '//' + url[2] + '/auth/v1/login';
-        fetch(target_url, {  
-          method: 'post',  
-          headers: {  
-            "Content-type": "application/x-www-form-urlencoded; charset=UTF-8"  
-          },  
-          body: "username=" + username + "&password=" + password
-        }).then((response) => {
-          if(response.status == 200){
-            response.json().then((data) => {
-              access_token = data.access_token;
-              refresh_token = data.refresh_token;
-              created_at = data.created_at;
-              localStorage.removeItem('access_token');
-              localStorage.setItem('access_token', access_token);
-              localStorage.removeItem('refresh_token');
-              localStorage.setItem('refresh_token', refresh_token);
-              localStorage.removeItem('created_at');
-              localStorage.setItem('created_at', created_at);
-              $(this).unbind('click').click();
-            })
-          } else {
-            $(this).unbind('click').click();
-          }
-        })
+        $.post(target_url, {username: username, password: password}).done(function(response){
+            localStorage.setItem('access_token', response.access_token);
+            localStorage.setItem('refresh_token', response.refresh_token);
+            localStorage.setItem('created_at', response.created_at);
+            $('#login_button').unbind('click').click();
+        }).fail(function() {
+          $('#login_button').unbind('click').click();
+        });
       })
     </script>
   </div>

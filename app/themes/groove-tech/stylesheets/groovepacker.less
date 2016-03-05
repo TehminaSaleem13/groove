@@ -164,7 +164,9 @@ body {
 }
 
 .main-body {
-  margin-top: 28px;
+  margin: 4vh auto;
+  width: auto;
+  max-width: 98vw;
 }
 
 .gradient-well {
@@ -172,6 +174,9 @@ body {
   padding: 0px;
   border-radius: @border-radius-base + 15;
   .box-shadow(~"1px 1px 10px rgba(0,0,1,.86)");
+  margin: 0 auto;
+  min-width: 900px;
+  display: table;
 }
 
 .gradient-well-inner {
@@ -182,6 +187,9 @@ body {
   padding-bottom: 10px;
   .box-shadow(~"inset 1px 1px 4px rgba(140,140,145,.75)");
   background: asset-url('images/brush_metal_bkg_large.png') no-repeat center center fixed;
+  background-size: cover;
+  min-width: 600px;
+  max-width: 94vw;
 }
 
 .box-outer {
@@ -875,6 +883,7 @@ li {
 
 .nav-tabs {
   color: #504f4f;
+  border-bottom: 1px #4D545A;
   > li {
     float: left;
     // Make the list-items overlay the bottom border
@@ -913,28 +922,31 @@ li {
 }
 
 .dashboard-nav {
-  margin-top: 15px;
+  margin-top: 10px;
 
   .tab-content {
-    background-color: rgba(220, 219, 219, 0.9);
+    background-color: #4D545A;
     border: 1px solid rgb(165, 165, 165);
-    border-radius: 4px;
-    height: 550px;
+    border-radius: 14px;
+    height: 600px;
 
     .dash-home-container {
       background-color: white;
       border-top-right-radius: 15px;
       border-top-left-radius: 15px;
+      box-shadow: 0px 25px 60px 6px #999;
     }
 
     .dash-home-container-left {
       background-color: white;
       border-top-right-radius: 15px;
+      box-shadow: 0px 30px 60px 6px #999;
     }
 
     .dash-home-container-right {
       background-color: white;
       border-top-left-radius: 15px;
+      box-shadow: 0px 30px 60px 6px #999;
     }
 
     .tab-col {
@@ -956,11 +968,13 @@ li {
         margin-left: 0px;
         border-bottom-left-radius: 15px;
         border-bottom-right-radius: 15px;
+        box-shadow: 0px 30px 60px 6px #999;
         &.tab-pill-active {
           height: 20px;
           border-bottom-left-radius: 0px;
           border-bottom-right-radius: 0px;
           margin-bottom: 0px;
+          box-shadow: none;
         }
       }
 
@@ -968,6 +982,7 @@ li {
         height: 150px;
         border-radius: 15px;
         margin-bottom: 5px;
+        box-shadow: 0px 0px 60px #999;
         color: white;
 
         &.tab-red {
@@ -1665,6 +1680,10 @@ div.input-style {
   border: none;
   outline: none;
   width: 100%;
+  &:focus {
+    border-color: none;
+    box-shadow: none;
+  }
 }
 
 .indicator {
@@ -1869,6 +1888,31 @@ div.input-style {
 
 .row.bottom-well {
   margin-top: 10px;
+}
+
+.dashboard-input {
+  height: 20px;
+  color: black;
+}
+
+.no-padding {
+  padding: 0px;
+}
+
+.font-12 {
+  font-size: 12px;
+}
+
+.top-pad-2p {
+  padding-top: 2px;
+}
+
+.top-margin-2p {
+  margin-top: -2px;
+}
+
+.remove-margin-left{
+  margin-left: -10px;
 }
 
 @media (max-width: 767px) {

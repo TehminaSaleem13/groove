@@ -10,6 +10,8 @@ class ProductsController < ApplicationController
     @result['total_imported'] = 0
     @result['success_imported'] = 0
     @result['previous_imported'] = 0
+    current_tenant = Apartment::Tenant.current
+    handler = nil
 
     import_result = nil
 
@@ -17,29 +19,17 @@ class ProductsController < ApplicationController
       begin
         #import if magento products
         if @store.store_type == 'Ebay'
-          context = Groovepacker::Stores::Context.new(
-            Groovepacker::Stores::Handlers::EbayHandler.new(@store))
-          import_result = context.import_products
+          handler = Groovepacker::Stores::Handlers::EbayHandler.new(@store)
         elsif @store.store_type == 'Magento'
-          context = Groovepacker::Stores::Context.new(
-            Groovepacker::Stores::Handlers::MagentoHandler.new(@store))
-          import_result = context.import_products
+          handler = Groovepacker::Stores::Handlers::MagentoHandler.new(@store)
         elsif @store.store_type == 'Magento API 2'
-          context = Groovepacker::Stores::Context.new(
-            Groovepacker::Stores::Handlers::MagentoRestHandler.new(@store))
-          import_result = context.import_products
+          handler = Groovepacker::Stores::Handlers::MagentoRestHandler.new(@store)
         elsif @store.store_type == 'Shipstation'
-          context = Groovepacker::Stores::Context.new(
-            Groovepacker::Stores::Handlers::ShipstationHandler.new(@store))
-          import_result = context.import_products
+          handler = Groovepacker::Stores::Handlers::ShipstationHandler.new(@store)
         elsif @store.store_type == 'Shipstation API 2'
-          context = Groovepacker::Stores::Context.new(
-            Groovepacker::Stores::Handlers::ShipstationRestHandler.new(@store))
-          import_result = context.import_products
+          handler = Groovepacker::Stores::Handlers::ShipstationRestHandler.new(@store)
         elsif @store.store_type == 'BigCommerce'
-          context = Groovepacker::Stores::Context.new(
-            Groovepacker::Stores::Handlers::BigCommerceHandler.new(@store))
-          import_result = context.import_products
+          handler = Groovepacker::Stores::Handlers::BigCommerceHandler.new(@store)
         elsif @store.store_type == 'Amazon'
           @amazon_credentials = AmazonCredentials.where(:store_id => @store.id)
 
@@ -145,6 +135,14 @@ class ProductsController < ApplicationController
             end
           end
         end
+
+        if @store.store_type != 'Amazon'
+          context = Groovepacker::Stores::Context.new(handler)
+          import_orders_obj = ImportOrders.new
+          import_orders_obj.delay(:run_at => 1.seconds.from_now).init_import(current_tenant)
+          import_result = context.delay(:run_at => 1.seconds.from_now).import_products
+          #import_result = context.import_products
+        end
       rescue Exception => e
         @result['status'] = false
         @result['messages'].push(e.message)
@@ -153,14 +151,14 @@ class ProductsController < ApplicationController
       @result['status'] = false
       @result['messages'].push('You can not import products')
     end
-    if !import_result.nil?
-      import_result[:messages].each do |message|
-        @result['messages'].push(message)
-      end
-      @result['total_imported'] = import_result[:total_imported]
-      @result['success_imported'] = import_result[:success_imported]
-      @result['previous_imported'] = import_result[:previous_imported]
-    end
+    # if !import_result.nil?
+    #   import_result[:messages].each do |message|
+    #     @result['messages'].push(message)
+    #   end
+    #   @result['total_imported'] = import_result[:total_imported]
+    #   @result['success_imported'] = import_result[:success_imported]
+    #   @result['previous_imported'] = import_result[:previous_imported]
+    # end
 
     respond_to do |format|
       format.json { render json: @result }

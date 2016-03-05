@@ -6,29 +6,18 @@ module Groovepacker
           include ProductsHelper
 
           def pull_inventories
-            @credential = handler[:credential]
-            @client = handler[:store_handle][:handle]
-
-            #products = Product.where(store_id: credential.store_id)
-            products = Product.joins(:sync_option).where("sync_with_mg_rest=true and (mg_rest_product_id IS NOT NULL or store_product_id IS NOT NULL)")
-            
-            products.each do |product|
-              inv_wh = product.product_inventory_warehousess.first
-              @sync_optn = product.sync_option
-              mg_rest_product_id = (@sync_optn.mg_rest_product_id rescue nil) || product.mg_rest_product_id
-              mg_rest_product = @client.product(mg_rest_product_id)
-              unless mg_rest_product["entity_id"].blank?
-                update_product_inv_for_sync_option(product, mg_rest_product, inv_wh)
-              end
-            end
+            handler = self.get_handler
+            result = get_inventory_importer(handler).pull_inventories            
           end
 
           private
-            def update_product_inv_for_sync_option(product, mg_rest_product, inv_wh)
-              if @sync_optn.mg_rest_product_id==mg_rest_product["entity_id"].to_i
-                inv_wh.quantity_on_hand = mg_rest_product["stock_data"]["qty"].to_i
-                inv_wh.save!
+            def get_inventory_importer(handler)
+              credential = handler[:credential]
+              if credential.store_version=='2.x'
+                importer = Groovepacker::Stores::Importers::MagentoRest::V2::Inventory.new(handler)
+                return importer
               end
+              importer = Groovepacker::Stores::Importers::MagentoRest::V1::Inventory.new(handler)
             end
         end
       end

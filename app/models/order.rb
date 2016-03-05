@@ -6,7 +6,7 @@ class Order < ActiveRecord::Base
                   :method, :order_placed_time, :postcode, :price, :qty, :sku, :state, :store_id, :notes_internal,
                   :notes_toPacker, :notes_fromPacker, :tracking_processed, :scanned_on, :tracking_num, :company,
                   :packing_user_id, :status_reason, :non_hyphen_increment_id, :shipping_amount, :weight_oz,
-                  :custom_field_one, :custom_field_two
+                  :custom_field_one, :custom_field_two, :traced_in_dashboard
 
   has_many :order_items, :dependent => :destroy
   has_one :order_shipping, :dependent => :destroy
@@ -102,13 +102,15 @@ class Order < ActiveRecord::Base
       restriction.total_scanned_shipments += 1
       restriction.save
     end
-    
+
     unless Rails.env.test?
       tenant = Apartment::Tenant.current
       if tenant == 'wagaboutit' || !Rails.env.production?
-        stat_stream_obj = SendStatStream.new()
-        # stat_stream_obj.build_send_stream(tenant, self.id)
-        stat_stream_obj.delay(:run_at => 1.seconds.from_now).build_send_stream(tenant, self.id)
+        # stat_stream_obj = SendStatStream.new()
+        # # stat_stream_obj.build_send_stream(tenant, self.id)
+        # if Delayed::Job.where(queue: "export_stat_stream_scheduled_#{tenant}").empty?
+        #   stat_stream_obj.delay(:run_at => 1.seconds.from_now, :queue => 'export_stat_stream_scheduled_#{tenant}').build_send_stream(tenant, self.id)
+        # end
       end
     end
   end
@@ -135,7 +137,16 @@ class Order < ActiveRecord::Base
       product = Product.find_by_id(order_item.product_id)
       unless product.nil?
         if product.status == "new" or product.status == "inactive"
-          products_list << product
+          products_list << product.as_json(
+              include: {
+                product_images: {
+                  only: [:image]
+                }
+              }
+            ).merge({
+              sku: product.primary_sku,
+              barcode: product.primary_barcode
+            })
         end
       end
     end
@@ -735,5 +746,10 @@ class Order < ActiveRecord::Base
     end while orderslist.present?
     neworder.save(:validate => false)
     return neworder
+  end
+
+  def set_traced_in_dashboard
+    self.traced_in_dashboard = true
+    self.save!
   end
 end

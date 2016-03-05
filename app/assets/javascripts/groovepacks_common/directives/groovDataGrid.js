@@ -1,4 +1,4 @@
-groovepacks_directives.directive('groovDataGrid', ['$timeout', '$http', '$sce', 'settings', 'hotkeys', function ($timeout, $http, $sce, settings, hotkeys) {
+groovepacks_directives.directive('groovDataGrid', ['$timeout', '$http', '$sce', 'settings', 'hotkeys' , 'editable', function ($timeout, $http, $sce, settings, hotkeys, editable) {
   var default_options = function () {
     return {
       identifier: 'datagrid',
@@ -16,6 +16,7 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout', '$http', '$sce', 
         show: function () {
         }
       },
+      dynamic_width: false,
       show_hide: false,
       editable: false,
       disable_global_edit: false,
@@ -36,6 +37,7 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout', '$http', '$sce', 
       all_fields: {}
     }
   };
+
   var default_field_options = function () {
     return {
       name: "field",
@@ -46,6 +48,7 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout', '$http', '$sce', 
       model: 'row'
     }
   };
+
   return {
     restrict: "A",
     scope: {
@@ -55,6 +58,7 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout', '$http', '$sce', 
     templateUrl: "/assets/views/directives/datagrid.html",
     link: function (scope, el, attrs) {
       var myscope = {};
+      scope.editable_modal = editable;
       scope.context_menu_event = function (event) {
         if (scope.options.show_hide) {
           if (typeof event == 'undefined' || typeof event['pointerType'] == 'undefined') {
@@ -77,6 +81,9 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout', '$http', '$sce', 
       };
 
       scope.check_uncheck = function (row, index, event) {
+        //If target is a link
+        if(event.target.tagName == 'A'){return};
+
         if (scope.options.selectable) {
           scope.options.setup.select_all = false;
           row.checked = !row.checked;
@@ -132,18 +139,51 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout', '$http', '$sce', 
       };
 
       scope.compile = function (ind, field) {
-
         if (typeof scope.editable[field] == "undefined") {
           scope.editable[field] = {};
         }
+
         if (typeof scope.editable[field][ind] == "undefined") {
-          scope.editable[field][ind] = $sce.trustAsHtml('<div groov-editable="options.editable" prop="{{field}}" ng-model="' + scope.options.all_fields[field].model + '" identifier="' + scope.options.identifier + '_list-' + field + '-' + ind + '">' + scope.options.all_fields[field].transclude + '</div>');
+          scope.editable[field][ind] = $sce.trustAsHtml(
+            '<div ng-class="{\'grid-editable-field\': !editable_modal.status()}" ' + 
+                'style="width:' + scope.options.all_fields[field].col_length + 'rem"' + 
+                'ng-mouseover="row.show_pencil ? (row.show_pencil[field]=true) : (row.show_pencil={})"' +
+                'ng-mouseleave="row.show_pencil ? (row.show_pencil[field]=false) : (row.show_pencil={})" ' + 
+                'groov-editable="options.editable" prop="{{field}}" ng-model="' +
+                scope.options.all_fields[field].model + '" identifier="' +
+                scope.options.identifier + '_list-' + field + '-' + ind + '">' +
+              '<a class="pull-right fa datagrid-pencil fa-pencil pointer" ' +
+                'ng-show="row.show_pencil[field]" groov-click="compile(' + ind + ',\'' +field+ '\')">' +
+              '</a>' +
+              scope.options.all_fields[field].transclude +
+            '</div>'
+          );
         }
 
         $timeout(function () {
           scope.$broadcast(scope.options.identifier + '_list-' + field + '-' + ind);
         }, 30);
       };
+
+      // scope.add_style = function(field, ind) {
+      //   style =  $sce.trustAsHtml(
+      //     '<style>
+      //       .grid-editable-field-' + field + $parent.$parent.$index + '{
+      //         padding: 0.8rem 0.3rem;
+      //         min-height: 3rem;
+      //         &:hover{
+      //           background-color: rgb(230, 228, 228);
+      //           border-color: #C5C4C4;
+      //           border-style: solid;
+      //           border-width: thin;
+      //           border-radius: 3px;
+      //           position: absolute;
+      //           width: ' + scope.options.all_fields[field].col_length + 3 + 'rem;
+      //         }
+      //       }
+      //     </style>
+      //   ')
+      // }
 
       myscope.make_theads = function (theads) {
         var shown = [];
@@ -261,6 +301,9 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout', '$http', '$sce', 
         }
         if (typeof scope.groovDataGrid['selections'] != "undefined" && scope.groovDataGrid.selections.show_dropdown) {
           scope.$watch('groovDataGrid.selections', myscope.update_selections, true);
+        }
+        if(Object.keys(scope.groovDataGrid.all_fields).length > 5){ 
+          jQuery('.table-parent').doubleScroll({cols: Object.keys(scope.groovDataGrid.all_fields).length/2});
         }
       };
 

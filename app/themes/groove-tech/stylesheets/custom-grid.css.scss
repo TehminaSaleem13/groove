@@ -1,0 +1,25 @@
+.grid-editable-field{
+  padding: 0.8rem 0.3rem;
+  min-height: 3rem;
+  &:hover{
+    background-color: rgb(230, 228, 228);
+    border-color: #C5C4C4;
+    border-style: solid;
+    border-width: thin;
+    border-radius: 3px;
+    min-width: 5rem;
+  }
+}
+
+.table-parent{
+  display: table-caption;
+  td{
+    vertical-align: middle !important;
+  }
+}
+
+.datagrid-pencil{
+  cursor: pointer;
+  font-size: 2rem;
+  vertical-align: text-top;
+}

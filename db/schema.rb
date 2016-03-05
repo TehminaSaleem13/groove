@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20160212072117) do
+ActiveRecord::Schema.define(:version => 20160225135033) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0,     :null => false
@@ -209,6 +209,8 @@ ActiveRecord::Schema.define(:version => 20160212072117) do
     t.string   "export_items",                      :default => "disabled"
     t.string   "custom_field_one",                  :default => "Custom 1"
     t.string   "custom_field_two",                  :default => "Custom 2"
+    t.integer  "max_time_per_item",                 :default => 10
+    t.string   "export_csv_email"
   end
 
   create_table "generate_barcodes", :force => true do |t|
@@ -319,6 +321,8 @@ ActiveRecord::Schema.define(:version => 20160212072117) do
     t.datetime "last_imported_at"
     t.boolean  "gen_barcode_from_sku", :default => false
     t.string   "store_admin_url"
+    t.string   "store_version"
+    t.string   "store_token"
   end
 
   create_table "oauth_access_grants", :force => true do |t|
@@ -551,6 +555,7 @@ ActiveRecord::Schema.define(:version => 20160212072117) do
     t.decimal  "packing_score",           :precision => 10, :scale => 0, :default => 0
     t.string   "custom_field_one"
     t.string   "custom_field_two"
+    t.boolean  "traced_in_dashboard",                                    :default => false
   end
 
   create_table "product_barcodes", :force => true do |t|
@@ -858,6 +863,7 @@ ActiveRecord::Schema.define(:version => 20160212072117) do
     t.integer  "mg_rest_product_id"
     t.boolean  "sync_with_shopify",          :default => false
     t.string   "shopify_product_variant_id"
+    t.string   "mg_rest_product_sku"
   end
 
   create_table "tenants", :force => true do |t|
