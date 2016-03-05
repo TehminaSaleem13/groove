@@ -75,7 +75,9 @@ module Groovepacker
                       #if product does not exist import product using product.info
                       (order["addresses"]||[]).each do |address|
                       	next unless address["address_type"]=="billing"
-                      	@order.address_1 = address["street"]
+                        street_address = address["street"].split("\n") rescue []
+                        @order.address_1 = street_address[0]
+                        @order.address_2 = street_address[1]
                       	@order.city = address["city"]
                       	@order.country = address["country_id"]
                       	@order.postcode = address["postcode"]
