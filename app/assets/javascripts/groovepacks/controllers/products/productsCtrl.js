@@ -319,7 +319,7 @@ groovepacks_controllers.
             },
             status: {
               name: "Status",
-              col_length: 5,
+              col_length: 10,
               transclude: "<span class='label label-default' ng-class=\"{" +
               "'label-success': row[field] == 'active', " +
               "'label-info': row[field] == 'new' }\">" +
