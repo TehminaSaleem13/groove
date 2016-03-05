@@ -37,6 +37,7 @@ groovepacks_controllers.
           dynamic_width: true,
           identifier: 'scanpackinactiveornew',
           setup: $scope.products.setup,
+          scrollbar: false,
           data: {order_num: $stateParams.order_num},
           editable: {
             array: false,
@@ -60,20 +61,24 @@ groovepacks_controllers.
             },
             name: {
               name: "Item Name",
+              col_length: 30,
               transclude: '<a ui-sref="scanpack.rfp.product_edit.single({order_num: options.data.order_num, product_id: row.id })" style="text-decoration: none">{{row[field]}}</a>'
             },
             status: {
               name: "Status",
+              col_length: 8,
               transclude: "<span class='label label-default' ng-class=\"{" +
                 "'label-success': row[field] == 'active', " +
                 "'label-info': row[field] == 'new' }\">" +
                 "{{row[field]}}</span>"
             },
             sku: {
-              name: "SKU"
+              name: "SKU",
+              col_length: 30
             },
             barcode: {
-              name: "Barcode"
+              name: "Barcode",
+              col_length: 30
             }
           }
         };

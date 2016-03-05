@@ -259,6 +259,7 @@ groovepacks_controllers.
           invert: myscope.invert,
           sort_func: $scope.handlesort,
           setup: $scope.products.setup,
+          scrollbar: true,
           selections: {
             show_dropdown: true,
             single_callback: myscope.select_single,

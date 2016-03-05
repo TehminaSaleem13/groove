@@ -306,6 +306,7 @@ groovepacks_controllers.
           },
           draggable: true,
           dynamic_width: true,
+          scrollbar: true,
           sortable: true,
           selectable: true,
           sort_func: $scope.handlesort,
@@ -423,6 +424,7 @@ groovepacks_controllers.
             $scope.gridOptions.all_fields.custom_field_one = {
               name: custom_fields[0],
               hidden: true,
+              col_length: 25,
               enable_edit: true
             }
           }
@@ -430,6 +432,7 @@ groovepacks_controllers.
             $scope.gridOptions.all_fields.custom_field_two = {
               name: custom_fields[1],
               hidden: true,
+              col_length: 25,
               enable_edit: true
             }
           }

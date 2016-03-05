@@ -33,7 +33,7 @@
   </div>
 </div>
 <div ng-if="!editable.array" class="text-center">
-  <div ng-show="editing != 1 || disabled == true"><span ng-transclude></span> <span ng-hide="is_transcluded">{{ngModel[prop]}}</span>
+  <div ng-show="editing != 1 || disabled == true"><span ng-transclude></span> <span ng-hide="is_transcluded">{{ngModel[prop] | cut:false:25:' ...'}}</span>
     &nbsp;</div>
   <div ng-show="editing == 1 && disabled == false" ng-class="tag_class">
            <span bindonce="input" bo-switch="input.type">

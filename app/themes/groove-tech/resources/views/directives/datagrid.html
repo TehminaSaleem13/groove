@@ -40,12 +40,13 @@
         <tbody>
         <tr ng-click="check_uncheck(row,$index,$event)" ng-repeat="row in rows"
             ng-class="{selected: row.checked, inverted:options.setup.inverted}">
-          <td ng-repeat="field in theads">
+          <td ng-repeat="field in theads" ng-mouseover="row.show_pencil ? (row.show_pencil[field]=true) : (row.show_pencil={})" ng-mouseleave="row.show_pencil ? (row.show_pencil[field]=false) : (show_pencil={})">
             <div style="display:inline-block; min-height:4rem;"
                  bo-if="options.editable != false && options.all_fields[field].editable == true"
-                 hm-press="compile($parent.$parent.$index,field)" groov-rt-click="compile($parent.$parent.$index,field)">
+                 hm-press="compile($parent.$parent.$index,field)" groov-rt-click="compile($parent.$parent.$index,field)"
+                 >
               <div ng-class='{"grid-editable-field": !editable[field][$parent.$parent.$index]}'
-                ng-hide="editable[field][$parent.$parent.$index]" ng-mouseover="row.show_pencil ? (row.show_pencil[field]=true) : (row.show_pencil={})" ng-mouseleave="row.show_pencil ? (row.show_pencil[field]=false) : (show_pencil={})"
+                ng-hide="editable[field][$parent.$parent.$index]"
                 style="min-width:{{options.all_fields[field].col_length}}rem">
                 <a class='fa fa-pencil datagrid-pencil pull-right'
                   ng-show="row.show_pencil[field] && !editable[field][$parent.$parent.$index]" groov-click="compile($parent.$parent.$index,field)"></a>
