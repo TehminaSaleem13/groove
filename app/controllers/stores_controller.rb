@@ -137,7 +137,8 @@ class StoresController < ApplicationController
             else
               @magento = @magento.first
             end
-            @magento.host = params[:host]
+            host_url = params[:host].sub(/(\/)+$/,'') rescue nil
+            @magento.host = host_url
             @magento.username = params[:username]
             # We do not need password GROOV-168
             #@magento.password = params[:password]
@@ -147,9 +148,7 @@ class StoresController < ApplicationController
             @magento.import_images = params[:import_images]
             begin
               @store.save!
-              if !new_record
-                @store.magento_credentials.save
-              end
+              @magento.save if !new_record
             rescue ActiveRecord::RecordInvalid => e
               @result['status'] = false
               @result['messages'] = [@store.errors.full_messages, @store.magento_credentials.errors.full_messages]
@@ -219,7 +218,7 @@ class StoresController < ApplicationController
             begin
               @store.save!
               if !new_record
-                @store.amazon_credentials.save
+                @amazon.save
               end
             rescue ActiveRecord::RecordInvalid => e
               @result['status'] = false
@@ -251,7 +250,7 @@ class StoresController < ApplicationController
             begin
               @store.save!
               if !new_record
-                @store.ebay_credentials.save
+                @ebay.save
               end
             rescue ActiveRecord::RecordInvalid => e
               @result['status'] = false
@@ -323,7 +322,7 @@ class StoresController < ApplicationController
             begin
               @store.save!
               if !new_record
-                @store.shipstation_credential.save
+                @shipstation.save
               end
             rescue ActiveRecord::RecordInvalid => e
               @result['status'] = false
@@ -359,7 +358,7 @@ class StoresController < ApplicationController
             begin
               @store.save!
               if !new_record
-                @store.shipstation_rest_credential.save
+                @shipstation.save
               end
             rescue ActiveRecord::RecordInvalid => e
               @result['status'] = false
