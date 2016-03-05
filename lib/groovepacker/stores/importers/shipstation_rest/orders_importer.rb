@@ -86,7 +86,6 @@ module Groovepacker
                   import_item.current_order_items = -1
                   import_item.current_order_imported_item = -1
                   import_item.save
-                  shipstation_order = nil
 
                   shipstation_order = Order.find_by_store_id_and_increment_id(credential.store_id, order["orderNumber"])
                   if import_item.import_type == 'quick' && shipstation_order && shipstation_order.status!="scanned"
@@ -104,7 +103,7 @@ module Groovepacker
                     shipstation_order = Order.new
                   end
 
-                  unless shipstation_order.nil?
+                  if shipstation_order.present? && !shipstation_order.persisted?
                     ship_to = order["shipTo"]["name"].split(" ")
                     import_order(shipstation_order, order, credential)
                     
