@@ -1,4 +1,4 @@
-<div bindonce="options" class="binder">
+<div bindonce="options" class="binder row">
   <div bo-if="options.select_all !== false" class="select_all_box col-md-2 col-lg-2" dropdown
        ng-mouseenter="show_dropdown()" ng-mouseleave="start_dropdown_timer()" is-open="dropdown.show">
     <button ng-click="options.select_all(!options.setup.select_all)" type="button" class="btn groove-button"
@@ -16,77 +16,81 @@
         class="badge badge-important">{{options.selections.selected_count}}</span></a></li>
     </ul>
   </div>
-  <div class="col-md-12 text-center" ng-show="options.paginate.show">
+  <div class="col-md-12 text-center" ng-show="options.paginate.show && options.paginate.total_items > options.paginate.items_per_page">
     <pagination total-items="options.paginate.total_items" ng-model="options.paginate.current_page"
                 max-size="options.paginate.max_size" items-per-page="options.paginate.items_per_page"
                 class="pagination-sm" rotate="false"></pagination>
   </div>
-  <div class="{{options.dynamic_width ? 'container-fluid' : 'col-md-12'}} table-parent"
-        style="{{'display: ' + (options.dynamic_width ? 'table-caption' : 'table')}}">
-    <table groov-dragtable="dragOptions" groov-enabled="options.draggable" groov-model="theads"
-           id="{{custom_identifier}}" class="well table-well table table-striped table-hover table-alt">
-      <thead groov-rt-click="context_menu_event($event)" hm-press="context_menu_event($event)">
-      <tr>
-        <th ng-repeat="field in theads" class="{{options.all_fields[field].class}}"
-            groov-draggable="{{options.all_fields[field].draggable}}" ng-class="{active: options.setup.sort == field}">
-          <div bo-if="options.all_fields[field].sortable"
-               ng-click="options.sort_func(field); $event.preventDefault(); $event.stopPropagation();"
-               bo-text="options.all_fields[field].name" ng-class="options.setup.order"></div>
-          <div bo-if="!options.all_fields[field].sortable" bo-text="options.all_fields[field].name"></div>
-          <span class="holder" ng-show="!$last"></span>
-        </th>
-      </tr>
-      </thead>
-      <tbody>
-      <tr ng-click="check_uncheck(row,$index,$event)" ng-repeat="row in rows"
-          ng-class="{selected: row.checked, inverted:options.setup.inverted}">
-        <td ng-repeat="field in theads">
-          <div style="display:inline-block; min-height:4rem;"
-               bo-if="options.editable != false && options.all_fields[field].editable == true"
-               hm-press="compile($parent.$parent.$index,field)" groov-rt-click="compile($parent.$parent.$index,field)">
-            <div ng-class='{"grid-editable-field": !editable[field][$parent.$parent.$index]}'
-              ng-hide="editable[field][$parent.$parent.$index]" ng-mouseover="row.show_pencil ? (row.show_pencil[field]=true) : (row.show_pencil={})" ng-mouseleave="row.show_pencil ? (row.show_pencil[field]=false) : (show_pencil={})"
-              style="width:{{options.all_fields[field].col_length}}rem">
-              <a class='fa fa-pencil datagrid-pencil pull-right' ng-show="row.show_pencil[field] && !editable[field][$parent.$parent.$index]" groov-click="compile($parent.$parent.$index,field)"></a>
-              <span bo-if="options.all_fields[field].transclude == '' && row[field] !== null && row[field].length"
-                    bo-text="row[field].chunk(25).join(' ') | cut:false:25"
-                    tooltip='{{row[field].length ? row[field].chunk(25).join(" ") : ("Edit" + field)}}'
-                    style="{{'width:' + options.all_fields[field].col_length + 'rem'}}">
-              </span>
-              <span bo-if="options.all_fields[field].transclude == '' && (row[field] == null || !row[field].length)"> &nbsp;</span>
-              <span bo-if="options.all_fields[field].transclude != ''"
-                    ng-bind-html="options.all_fields[field].transclude" compile-template>&nbsp;</span>
+  <div class="container-fluid">
+    <div class="table-parent col-xs-12">
+      <table groov-dragtable="dragOptions" groov-enabled="options.draggable" groov-model="theads"
+             id="{{custom_identifier}}" class="well table-well table table-striped table-hover table-alt">
+        <thead groov-rt-click="context_menu_event($event)" hm-press="context_menu_event($event)">
+        <tr>
+          <th ng-repeat="field in theads" class="{{options.all_fields[field].class}}"
+              groov-draggable="{{options.all_fields[field].draggable}}" ng-class="{active: options.setup.sort == field}">
+            <div bo-if="options.all_fields[field].sortable"
+                 ng-click="options.sort_func(field); $event.preventDefault(); $event.stopPropagation();"
+                 bo-text="options.all_fields[field].name" ng-class="options.setup.order"></div>
+            <div bo-if="!options.all_fields[field].sortable" bo-text="options.all_fields[field].name"></div>
+            <span class="holder" ng-show="!$last"></span>
+          </th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr ng-click="check_uncheck(row,$index,$event)" ng-repeat="row in rows"
+            ng-class="{selected: row.checked, inverted:options.setup.inverted}">
+          <td ng-repeat="field in theads">
+            <div style="display:inline-block; min-height:4rem;"
+                 bo-if="options.editable != false && options.all_fields[field].editable == true"
+                 hm-press="compile($parent.$parent.$index,field)" groov-rt-click="compile($parent.$parent.$index,field)">
+              <div ng-class='{"grid-editable-field": !editable[field][$parent.$parent.$index]}'
+                ng-hide="editable[field][$parent.$parent.$index]" ng-mouseover="row.show_pencil ? (row.show_pencil[field]=true) : (row.show_pencil={})" ng-mouseleave="row.show_pencil ? (row.show_pencil[field]=false) : (show_pencil={})"
+                style="min-width:{{options.all_fields[field].col_length}}rem">
+                <a class='fa fa-pencil datagrid-pencil pull-right'
+                  ng-show="row.show_pencil[field] && !editable[field][$parent.$parent.$index]" groov-click="compile($parent.$parent.$index,field)"></a>
+                <span bo-if="options.all_fields[field].transclude == '' && row[field] !== null && row[field].length"
+                      bo-text="row[field].chunk(25).join(' ') | cut:false:25"
+                      tooltip='{{row[field].length ? row[field].chunk(25).join(" ") : ("Edit" + field)}}'
+                      style="{{'min-  width:' + options.all_fields[field].col_length + 'rem'}}">
+                </span>
+                <span bo-if="options.all_fields[field].transclude == '' && (row[field] == null || !row[field].length)">
+                  &nbsp;{{row[field]}}</span>
+                <span bo-if="options.all_fields[field].transclude != ''"
+                      ng-bind-html="options.all_fields[field].transclude" compile-template>&nbsp;</span>
+              </div>
+              <div ng-bind-html="editable[field][$parent.$parent.$index]" compile-template></div>
             </div>
-            <div ng-bind-html="editable[field][$parent.$parent.$index]" compile-template></div>
-          </div>
-          <div bo-if="options.editable == false || options.all_fields[field].editable == false">
-            <span bo-if="options.all_fields[field].transclude != '' "
-                  ng-bind-html="options.all_fields[field].transclude" compile-template></span>
-            <span bo-if="options.all_fields[field].transclude == '' && row[field] !== null" bo-text="row[field] | cut:false:25:' ...'"  tooltip='{{row[field].chunk(25).join(" ")}}'></span>
-          </div>
-        </td>
+            <div bo-if="options.editable == false || options.all_fields[field].editable == false">
+              <span bo-if="options.all_fields[field].transclude != '' "
+                    ng-bind-html="options.all_fields[field].transclude" compile-template></span>
+              <span bo-if="options.all_fields[field].transclude == '' && row[field] !== null" bo-text="row[field] | cut:false:25:' ...'"  tooltip='{{row[field].chunk(25).join(" ")}}'></span>
+            </div>
+          </td>
 
-      </tr>
-      </tbody>
-    </table>
-  </div>
-  <div class="col-md-12 text-center" ng-show="options.paginate.show">
-    <pagination total-items="options.paginate.total_items" ng-model="options.paginate.current_page"
-                max-size="options.paginate.max_size" items-per-page="options.paginate.items_per_page"
-                class="pagination-sm" rotate="false"></pagination>
-  </div>
-  <div bo-if="options.show_hide">
-    <div class="clearfix" ng-click="context_menu_event()" groov-rt-click="context_menu_event()" dropdown
-         is-open="context_menu.shown">
-      <ul class="dropdown-menu" ng-style="context_menu.style" role="menu">
-        <li ng-repeat="field in options.all_fields" ng-show="field.hideable">
+        </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="col-md-12 text-center" ng-show="options.paginate.show && options.paginate.total_items > options.paginate.items_per_page">
+      <pagination total-items="options.paginate.total_items" ng-model="options.paginate.current_page"
+                  max-size="options.paginate.max_size" items-per-page="options.paginate.items_per_page"
+                  class="pagination-sm" rotate="false"></pagination>
+    </div>
+    <div bo-if="options.show_hide">
+      <div class="clearfix" ng-click="context_menu_event()" groov-rt-click="context_menu_event()" dropdown
+           is-open="context_menu.shown">
+        <ul class="dropdown-menu" ng-style="context_menu.style" role="menu">
+          <li ng-repeat="field in options.all_fields" ng-show="field.hideable">
 
-          <a href="" ng-click="show_hide(field); $event.stopPropagation();"
-             groov-rt-click="show_hide(field); $event.stopPropagation();"> <i class="glyphicon pull-left"
-                                                                              ng-class="{'glyphicon-ok':!field.hidden, 'glyphicon-remove':field.hidden}"></i>
-            <span bo-text="field.name"></span></a>
-        </li>
-      </ul>
+            <a href="" ng-click="show_hide(field); $event.stopPropagation();"
+               groov-rt-click="show_hide(field); $event.stopPropagation();"> <i class="glyphicon pull-left"
+                                                                                ng-class="{'glyphicon-ok':!field.hidden, 'glyphicon-remove':field.hidden}"></i>
+              <span bo-text="field.name"></span></a>
+          </li>
+        </ul>
+      </div>
     </div>
   </div>
+  
 </div>

@@ -146,6 +146,7 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout', '$http', '$sce', 
         if (typeof scope.editable[field][ind] == "undefined") {
           scope.editable[field][ind] = $sce.trustAsHtml(
             '<div ng-class="{\'grid-editable-field\': !editable_modal.status()}" ' + 
+                'style="width:' + scope.options.all_fields[field].col_length + 'rem"' + 
                 'ng-mouseover="row.show_pencil ? (row.show_pencil[field]=true) : (row.show_pencil={})"' +
                 'ng-mouseleave="row.show_pencil ? (row.show_pencil[field]=false) : (row.show_pencil={})" ' + 
                 'groov-editable="options.editable" prop="{{field}}" ng-model="' +
@@ -300,6 +301,9 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout', '$http', '$sce', 
         }
         if (typeof scope.groovDataGrid['selections'] != "undefined" && scope.groovDataGrid.selections.show_dropdown) {
           scope.$watch('groovDataGrid.selections', myscope.update_selections, true);
+        }
+        if(Object.keys(scope.groovDataGrid.all_fields).length > 5){ 
+          jQuery('.table-parent').doubleScroll({cols: Object.keys(scope.groovDataGrid.all_fields).length/2});
         }
       };
 

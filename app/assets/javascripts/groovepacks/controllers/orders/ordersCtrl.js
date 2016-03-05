@@ -370,7 +370,7 @@ groovepacks_controllers.
             order_date: {
               name: "Order Date",
               col_length: 25,
-              transclude: "<span>{{row[field] | date:'EEEE MM/dd/yyyy hh:mm:ss a'}}</span>"
+              transclude: "<span>{{row[field] | date:'EEE MM/dd/yyyy hh:mm:ss a'}}</span>"
             },
             itemslength: {
               name: "Items",
