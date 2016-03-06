@@ -44,9 +44,14 @@
                </span>
                <span bo-switch-when="select">
                    <select bo-id="single_editable_id" class="span3" ng-change="save_node()" ng-model="ngModel[prop]"
-                           ng-focus="focus_event()" ng-blur="blur_event()"
+                           ng-focus="focus_event()" ng-blur="blur_event()" ng-click="open_picker($event,exports.start)"
                            ng-options="item.value as item.name for item in input.options">
                    </select>
+               </span>
+               <span bo-switch-when='datetime'>
+                  <input bo-id="single_editable_id" class='span3' ng-model="ngModel[prop]" ng-focus="focus_event()"
+                    ng-keydown="handle_key_event($event)" type="text" datepicker-popup="dd-MMMM-yyyy hh:mm a "
+                    placeholder="Edit..." ng-blur="blur_event()"/>
                </span>
                <span bo-switch-default>
                     <input bo-id="single_editable_id" class="span3" ng-model="ngModel[prop]" ng-focus="focus_event()"

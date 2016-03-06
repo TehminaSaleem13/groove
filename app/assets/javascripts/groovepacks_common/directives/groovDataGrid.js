@@ -6,6 +6,7 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout', '$http', '$sce', 
       invert: false,
       selectable: false,
       scrollbar: false,
+      col_length: 25,
       selections: {
         single_callback: function () {
         },

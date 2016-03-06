@@ -332,6 +332,10 @@ groovepacks_controllers.
                   {name: "Cancelled", value: 'cancelled'},
                   {name: "Scanned", value: 'scanned'}
                 ]
+              },
+              order_date: {
+                type: 'datetime',
+                min: 0
               }
             },
             functions: {
@@ -410,6 +414,7 @@ groovepacks_controllers.
             },
             postcode: {
               name: "Zip",
+              col_length: 8,
               hidden: true
             },
             country: {

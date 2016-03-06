@@ -469,6 +469,7 @@ groovepacks_controllers.
             is_skippable: {
               name: "Is Skippable",
               model: "row.productinfo",
+              editable: false,
               transclude: '<div toggle-switch ng-model="row.productinfo.is_skippable" groov-click="options.editable.update(row.productinfo,\'is_skippable\')"></div>',
               hidden: true
             },

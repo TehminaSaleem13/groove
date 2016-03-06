@@ -47,7 +47,7 @@
                  >
               <div ng-class='{"grid-editable-field": !editable[field][$parent.$parent.$index]}'
                 ng-hide="editable[field][$parent.$parent.$index]"
-                style="min-width:{{options.all_fields[field].col_length}}rem">
+                style="min-width:{{options.all_fields[field].col_length || options.col_length}}rem">
                 <a class='fa fa-pencil datagrid-pencil pull-right'
                   ng-show="row.show_pencil[field] && !editable[field][$parent.$parent.$index]" groov-click="compile($parent.$parent.$index,field)"></a>
                 <span bo-if="options.all_fields[field].transclude == '' && row[field] !== null && row[field].length"
