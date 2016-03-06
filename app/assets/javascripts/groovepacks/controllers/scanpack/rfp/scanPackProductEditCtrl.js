@@ -62,7 +62,7 @@ groovepacks_controllers.
             name: {
               name: "Item Name",
               col_length: 30,
-              transclude: '<a ui-sref="scanpack.rfp.product_edit.single({order_num: options.data.order_num, product_id: row.id })" style="text-decoration: none">{{row[field]}}</a>'
+              transclude: '<a ui-sref="scanpack.rfp.product_edit.single({order_num: options.data.order_num, product_id: row.id })" style="text-decoration: none" tooltip=\'{{row[field].length ? row[field].chunk(25).join(" ") : ("Edit" + field)}}\'>{{row[field] | cut:false:25:" ..."}}</a>'
             },
             status: {
               name: "Status",

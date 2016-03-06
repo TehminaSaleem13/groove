@@ -419,6 +419,7 @@ groovepacks_controllers.
         scope.warehouseGridOptions = {
           identifier: 'warehousesgrid',
           selectable: true,
+          scrollbar: true,
           setup: {
             enable_inv_alert: function () {
               return scope.general_settings.single.low_inventory_alert_email;

@@ -52,8 +52,7 @@
                   ng-show="row.show_pencil[field] && !editable[field][$parent.$parent.$index]" groov-click="compile($parent.$parent.$index,field)"></a>
                 <span bo-if="options.all_fields[field].transclude == '' && row[field] !== null && row[field].length"
                       bo-text="row[field].chunk(25).join(' ') | cut:false:25"
-                      tooltip='{{row[field].length ? row[field].chunk(25).join(" ") : ("Edit" + field)}}'
-                      style="{{'min-  width:' + options.all_fields[field].col_length + 'rem'}}">
+                      tooltip='{{row[field].length ? row[field].chunk(25).join(" ") : ("Edit" + field)}}'>
                 </span>
                 <span bo-if="options.all_fields[field].transclude == '' && (row[field] == null || !row[field].length)">
                   &nbsp;{{row[field]}}</span>
