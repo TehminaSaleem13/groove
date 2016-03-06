@@ -23,6 +23,12 @@
   }
 }
 
+.table-parent .tooltip-inner{
+  width: auto;
+  min-width: 30rem;
+  max-width: 50rem;
+}
+
 .datagrid-pencil{
   cursor: pointer;
   font-size: 2rem;
