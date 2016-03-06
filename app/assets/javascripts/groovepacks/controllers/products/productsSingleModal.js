@@ -474,16 +474,19 @@ groovepacks_controllers.
             },
             location_primary: {
               name: 'Primary Location',
+              col_length: 14,
               model: 'row.info',
               transclude: '<span>{{row.info.location_primary}}</span>'
             },
             location_secondary: {
               name: 'Secondary Location',
+              col_length: 14,
               model: 'row.info',
               transclude: '<span>{{row.info.location_secondary}}</span>'
             },
             location_tertiary: {
               name: 'Tertiary Location',
+              col_length: 14,
               model: 'row.info',
               transclude: '<span>{{row.info.location_tertiary}}</span>'
             },
