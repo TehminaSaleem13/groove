@@ -386,7 +386,7 @@ groovepacks_controllers.
             },
             status: {
               name: "Status",
-              col_length: 10,
+              col_length: 13,
               transclude: "<span class='label label-default' ng-hide=\"row[field] == 'onhold'\" ng-class=\"{" +
               "'label-success': row[field] == 'awaiting', " +
               "'label-danger': row[field] == 'serviceissue' }\">" +

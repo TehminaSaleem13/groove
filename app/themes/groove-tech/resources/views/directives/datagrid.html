@@ -50,11 +50,15 @@
                 style="min-width:{{options.all_fields[field].col_length || options.col_length}}rem">
                 <a class='fa fa-pencil datagrid-pencil pull-right'
                   ng-show="row.show_pencil[field] && !editable[field][$parent.$parent.$index]" groov-click="compile($parent.$parent.$index,field)"></a>
-                <span bo-if="options.all_fields[field].transclude == '' && row[field] !== null && row[field].length"
+                <span bo-if="options.all_fields[field].transclude == '' && row[field] !== null && row[field].length > 25"
                       bo-text="row[field].chunk(25).join(' ') | cut:false:25"
-                      tooltip='{{row[field].length ? row[field].chunk(25).join(" ") : ("Edit" + field)}}'>
+                      tooltip='{{row[field].chunk(25).join(" ")}}'>
                 </span>
-                <span bo-if="options.all_fields[field].transclude == '' && (row[field] == null || !row[field].length)">
+                <span bo-if="options.all_fields[field].transclude == '' && row[field] !== null && row[field].length < 25"
+                      bo-text="row[field].chunk(25).join(' ') | cut:false:25">
+                </span>
+                <span bo-if="options.all_fields[field].transclude == '' && (row[field] == null || !row[field].length)"
+                    tooltip="{{'Edit ' + field}}">
                   &nbsp;{{row[field]}}</span>
                 <span bo-if="options.all_fields[field].transclude != ''"
                       ng-bind-html="options.all_fields[field].transclude" compile-template>&nbsp;</span>

@@ -55,7 +55,7 @@
         self.element.css(self.options.contentCss);
 
         // set the width of the wrappers
-        $(self.options.topScrollBarInnerSelector).width(self.options.width + 'px');
+        $(self.options.topScrollBarInnerSelector).width(self.options.width + 25 + 'px');
         topScrollBar.width(self.element.width());
       }
     }
