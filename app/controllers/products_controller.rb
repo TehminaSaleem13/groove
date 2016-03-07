@@ -171,122 +171,122 @@ class ProductsController < ApplicationController
 
   # PS:Where is this used?
   def import_product_details
-    if current_user.can?('import_products')
-      @store = Store.find(params[:store_id])
-      @amazon_credentials = AmazonCredentials.where(:store_id => @store.id)
+    # if current_user.can?('import_products')
+    #   @store = Store.find(params[:store_id])
+    #   @amazon_credentials = AmazonCredentials.where(:store_id => @store.id)
 
-      if @amazon_credentials.length > 0
-        @credential = @amazon_credentials.first
+    #   if @amazon_credentials.length > 0
+    #     @credential = @amazon_credentials.first
 
-        require 'mws-connect'
+    #     require 'mws-connect'
 
-        mws = Mws.connect(
-          merchant: @credential.merchant_id,
-          access: ENV['AMAZON_MWS_ACCESS_KEY_ID'],
-          secret: ENV['AMAZON_MWS_SECRET_ACCESS_KEY']
-        )
-        products_api = mws.products.get_matching_products_for_id(:marketplace_id => @credential.marketplace_id,
-                                                                 :id_type => 'SellerSKU', :id_list => ['T-TOOL'])
-        require 'active_support/core_ext/hash/conversions'
-        product_hash = Hash.from_xml(products_api.to_s)
-        # product_hash = from_xml(products_api)
-        raise
-        # response = mws.orders.get_matching_product_for_id :id_type=>'SellerSKU', :seller_sku => ["12345678"],
-        #   :marketplace_id => @credential.marketplace_id
-        # # response = mws.orders.list_orders :last_updated_after => 2.months.ago,
-        # #   :order_status => ['Unshipped', 'PartiallyShipped']
-        # response.products
-        @products = Product.where(:store_id => params[:store_id])
-        @products.each do |product|
-          #import_amazon_product_details(mws, @credential, product.id)
-        end
-      end
+    #     mws = Mws.connect(
+    #       merchant: @credential.merchant_id,
+    #       access: ENV['AMAZON_MWS_ACCESS_KEY_ID'],
+    #       secret: ENV['AMAZON_MWS_SECRET_ACCESS_KEY']
+    #     )
+    #     products_api = mws.products.get_matching_products_for_id(:marketplace_id => @credential.marketplace_id,
+    #                                                              :id_type => 'SellerSKU', :id_list => ['T-TOOL'])
+    #     require 'active_support/core_ext/hash/conversions'
+    #     product_hash = Hash.from_xml(products_api.to_s)
+    #     # product_hash = from_xml(products_api)
+    #     raise
+    #     # response = mws.orders.get_matching_product_for_id :id_type=>'SellerSKU', :seller_sku => ["12345678"],
+    #     #   :marketplace_id => @credential.marketplace_id
+    #     # # response = mws.orders.list_orders :last_updated_after => 2.months.ago,
+    #     # #   :order_status => ['Unshipped', 'PartiallyShipped']
+    #     # response.products
+    #     @products = Product.where(:store_id => params[:store_id])
+    #     @products.each do |product|
+    #       #import_amazon_product_details(mws, @credential, product.id)
+    #     end
+    #   end
 
-    end
+    # end
   end
 
-  def requestamazonreport
-    @amazon_credentials = AmazonCredentials.where(:store_id => params[:id])
-    @result = Hash.new
-    @result['status'] = false
-    if @amazon_credentials.length > 0
+  # def requestamazonreport
+  #   @amazon_credentials = AmazonCredentials.where(:store_id => params[:id])
+  #   @result = Hash.new
+  #   @result['status'] = false
+  #   if @amazon_credentials.length > 0
 
-      @credential = @amazon_credentials.first
+  #     @credential = @amazon_credentials.first
 
-      mws = MWS.new(:aws_access_key_id => ENV['AMAZON_MWS_ACCESS_KEY_ID'],
-                    :secret_access_key => ENV['AMAZON_MWS_SECRET_ACCESS_KEY'],
-                    :seller_id => @credential.merchant_id,
-                    :marketplace_id => @credential.marketplace_id)
+  #     mws = MWS.new(:aws_access_key_id => ENV['AMAZON_MWS_ACCESS_KEY_ID'],
+  #                   :secret_access_key => ENV['AMAZON_MWS_SECRET_ACCESS_KEY'],
+  #                   :seller_id => @credential.merchant_id,
+  #                   :marketplace_id => @credential.marketplace_id)
 
-      response = mws.reports.request_report :report_type => '_GET_MERCHANT_LISTINGS_DATA_'
-      @credential.productreport_id = response.report_request_info.report_request_id
-      @credential.productgenerated_report_id = nil
+  #     response = mws.reports.request_report :report_type => '_GET_MERCHANT_LISTINGS_DATA_'
+  #     @credential.productreport_id = response.report_request_info.report_request_id
+  #     @credential.productgenerated_report_id = nil
 
-      if @credential.save
-        @result['status'] = true
-        @result['requestedreport_id'] = @credential.productreport_id
-      end
+  #     if @credential.save
+  #       @result['status'] = true
+  #       @result['requestedreport_id'] = @credential.productreport_id
+  #     end
 
-    end
+  #   end
 
-    respond_to do |format|
-      format.json { render json: @result }
-    end
-  end
+  #   respond_to do |format|
+  #     format.json { render json: @result }
+  #   end
+  # end
 
-  def checkamazonreportstatus
-    @amazon_credentials = AmazonCredentials.where(:store_id => params[:id])
-    @result = Hash.new
-    @result['status'] = false
-    report_found = false
-    if @amazon_credentials.length > 0
+  # def checkamazonreportstatus
+  #   @amazon_credentials = AmazonCredentials.where(:store_id => params[:id])
+  #   @result = Hash.new
+  #   @result['status'] = false
+  #   report_found = false
+  #   if @amazon_credentials.length > 0
 
-      @credential = @amazon_credentials.first
+  #     @credential = @amazon_credentials.first
 
-      mws = MWS.new(:aws_access_key_id => ENV['AMAZON_MWS_ACCESS_KEY_ID'],
-                    :secret_access_key => ENV['AMAZON_MWS_SECRET_ACCESS_KEY'],
-                    :seller_id => @credential.merchant_id,
-                    :marketplace_id => @credential.marketplace_id)
+  #     mws = MWS.new(:aws_access_key_id => ENV['AMAZON_MWS_ACCESS_KEY_ID'],
+  #                   :secret_access_key => ENV['AMAZON_MWS_SECRET_ACCESS_KEY'],
+  #                   :seller_id => @credential.merchant_id,
+  #                   :marketplace_id => @credential.marketplace_id)
 
-      @report_list = mws.reports.get_report_request_list
-      @report_list.report_request_info.each do |report_request|
-        if report_request.report_request_id == @credential.productreport_id
-          report_found = true
-          if report_request.report_processing_status == '_SUBMITTED_'
-            @result['status'] = true
-            @result['report_status'] = 'Report has been submitted successfully. '+
-              'It is still being generated by the server.'
-          elsif report_request.report_processing_status == '_DONE_'
-            @result['report_status'] = 'Report is generated successfully.'
+  #     @report_list = mws.reports.get_report_request_list
+  #     @report_list.report_request_info.each do |report_request|
+  #       if report_request.report_request_id == @credential.productreport_id
+  #         report_found = true
+  #         if report_request.report_processing_status == '_SUBMITTED_'
+  #           @result['status'] = true
+  #           @result['report_status'] = 'Report has been submitted successfully. '+
+  #             'It is still being generated by the server.'
+  #         elsif report_request.report_processing_status == '_DONE_'
+  #           @result['report_status'] = 'Report is generated successfully.'
 
-            @credential.productgenerated_report_id = report_request.generated_report_id
-            @credential.productgenerated_report_date = report_request.completed_date
-            if @credential.save
-              @result['status'] = true
-              @result['requestedreport_id'] = @credential.productreport_id
-              @result['generated_report_id'] = report_request.generated_report_id
-              @result['generated_report_date'] = report_request.completed_date
-            end
-          elsif report_request.report_processing_status == '_INPROGRESS_'
-            @result['status'] = true
-            @result['report_status'] = 'Report is in progress. It will be ready in few moments.'
-          else
-            @result['response'] = report_request
-            #store generated report id
-          end
-        end
-      end
+  #           @credential.productgenerated_report_id = report_request.generated_report_id
+  #           @credential.productgenerated_report_date = report_request.completed_date
+  #           if @credential.save
+  #             @result['status'] = true
+  #             @result['requestedreport_id'] = @credential.productreport_id
+  #             @result['generated_report_id'] = report_request.generated_report_id
+  #             @result['generated_report_date'] = report_request.completed_date
+  #           end
+  #         elsif report_request.report_processing_status == '_INPROGRESS_'
+  #           @result['status'] = true
+  #           @result['report_status'] = 'Report is in progress. It will be ready in few moments.'
+  #         else
+  #           @result['response'] = report_request
+  #           #store generated report id
+  #         end
+  #       end
+  #     end
 
-      if !report_found
-        @result['status'] = true
-        @result['report_status'] = 'Report is not found. Please check back in few moments.'
-      end
-    end
+  #     if !report_found
+  #       @result['status'] = true
+  #       @result['report_status'] = 'Report is not found. Please check back in few moments.'
+  #     end
+  #   end
 
-    respond_to do |format|
-      format.json { render json: @result }
-    end
-  end
+  #   respond_to do |format|
+  #     format.json { render json: @result }
+  #   end
+  # end
 
   # Get list of products based on limit and offset. It is by default sorted by updated_at field
   # If sort parameter is passed in then the corresponding sort filter will be used to sort the list
