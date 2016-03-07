@@ -1,15 +1,9 @@
 class ProductsController < ApplicationController
+  #before_filter :init_result_object, only: [:print_receiving_label, :generate_barcode, :search, :change_product_status, :delete_product, :duplicate_product, :scan_per_product, :import_products, :import_images]
   include ProductConcern
 
   def import_products
     @store = Store.find(params[:id])
-    @result = Hash.new
-
-    @result['status'] = true
-    @result['messages'] = []
-    @result['total_imported'] = 0
-    @result['success_imported'] = 0
-    @result['previous_imported'] = 0
     current_tenant = Apartment::Tenant.current
     handler = nil
 
@@ -140,8 +134,8 @@ class ProductsController < ApplicationController
           context = Groovepacker::Stores::Context.new(handler)
           import_orders_obj = ImportOrders.new
           import_orders_obj.delay(:run_at => 1.seconds.from_now).init_import(current_tenant)
-          import_result = context.delay(:run_at => 1.seconds.from_now).import_products
-          #import_result = context.import_products
+          #import_result = context.delay(:run_at => 1.seconds.from_now).import_products
+          import_result = context.import_products
         end
       rescue Exception => e
         @result['status'] = false
@@ -168,41 +162,10 @@ class ProductsController < ApplicationController
 
   def import_images
     @store = Store.find(params[:id])
-    
-    #initialize_result will initialize status and message in result hash
-    result = initialize_result
-    
-    result['total_imported'] = 0
-    result['success_imported'] = 0
-    result['previous_imported'] = 0
-
-    import_result = nil
-    if current_user.can?('import_products')
-      begin
-        if @store.store_type == 'Shipstation'
-          context = Groovepacker::Stores::Context.new(
-            Groovepacker::Stores::Handlers::ShipstationHandler.new(@store))
-          import_result = context.import_images
-        end
-      rescue Exception => e
-        result['status'] = false
-        result['messages'].push(e.message)
-      end
-    else
-      result['status'] = false
-      result['messages'].push('You can not import images')
-    end
-    if !import_result.nil?
-      import_result[:messages].each do |message|
-        result['messages'].push(message)
-      end
-      result['total_imported'] = import_result[:total_imported]
-      result['success_imported'] = import_result[:success_imported]
-      result['previous_imported'] = import_result[:previous_imported]
-    end
+    @result = @product_service.import_images(@store)
 
     respond_to do |format|
-      format.json { render json: result }
+      format.json { render json: @result }
     end
   end
 
@@ -336,29 +299,23 @@ class ProductsController < ApplicationController
   # if you would like to get Kits, specify params[:is_kit] to 1. it will return product kits and the corresponding skus
   #
   def index
-    #initialize_result will initialize status and message in result hash
-    result = initialize_result
     @products = do_getproducts(params)
-    result['products'] = make_products_list(@products)
-    result['products_count'] = get_products_count()
+    @result['products'] = make_products_list(@products)
+    @result['products_count'] = get_products_count()
     respond_to do |format|
-      format.json { render json: result }
+      format.json { render json: @result }
     end
   end
 
   def create
-    #initialize_result will initialize status and message in result hash
-    result = initialize_result
-    result = Product.create_new_product(result, current_user)
+    @result = Product.create_new_product(@result, current_user)
     
     respond_to do |format|
-      format.json { render json: result }
+      format.json { render json: @result }
     end
   end
 
   def print_receiving_label
-    #initialize_result will initialize status and message in result hash
-    result = initialize_result
     @products = list_selected_products(params)
     
     respond_to do |format|
@@ -366,7 +323,7 @@ class ProductsController < ApplicationController
       format.json {
         time = Time.now
         file_name = 'receiving_label_'+time.strftime('%d_%b_%Y')
-        result['receiving_label_path'] = '/pdfs/'+ file_name + '.pdf'
+        @result['receiving_label_path'] = '/pdfs/'+ file_name + '.pdf'
         render :pdf => file_name,
                :template => 'products/print_receiving_label',
                :orientation => 'portrait',
@@ -381,56 +338,47 @@ class ProductsController < ApplicationController
                :formats => [:html],
                :save_to_file => Rails.root.join('public', 'pdfs', "#{file_name}.pdf")
 
-        render json: result
+        render json: @result
       }
     end
   end
 
   def generate_barcode
-    #initialize_result will initialize status and message in result hash
-    result = initialize_result
     if current_user.can?('add_edit_products')
       @products = list_selected_products(params)
-      @products.each { |product| result = product.generate_barcode(result) }
+      @products.each { |product| @result = product.generate_barcode(@result) }
     else
-      result['status'] = false
-      result['messages'].push('You do not have enough permissions to generate barcodes')
+      @result['status'] = false
+      @result['messages'].push('You do not have enough permissions to generate barcodes')
     end
 
     respond_to do |format|
       format.html # show.html.erb
-      format.json { render json: result }
+      format.json { render json: @result }
     end
   end
 
   # For search pass in parameter params[:search] and a params[:limit] and params[:offset].
   # If limit and offset are not passed, then it will be default to 10 and 0
   def search
-    #initialize_result will initialize status and message in result hash
-    result = initialize_result
-
     if !params[:search].nil? && params[:search] != ''
-
       @products = do_search(params, false)
-      result['products'] = make_products_list(@products['products'])
-      result['products_count'] = get_products_count
-      result['products_count']['search'] = @products['count']
+      @result['products'] = make_products_list(@products['products'])
+      @result['products_count'] = get_products_count
+      @result['products_count']['search'] = @products['count']
     else
-      result['status'] = false
-      result['message'] = 'Improper search string'
+      @result['status'] = false
+      @result['message'] = 'Improper search string'
     end
 
 
     respond_to do |format|
       format.html # show.html.erb
-      format.json { render json: result }
+      format.json { render json: @result }
     end
   end
 
   def scan_per_product
-    #initialize_result will initialize status and message in result hash
-    result = initialize_result
-
     if current_user.can?('add_edit_products')
       if !params[:setting].blank? && ['type_scan_enabled', 'click_scan_enabled'].include?(params[:setting])
         @products = list_selected_products(params)
@@ -439,24 +387,24 @@ class ProductsController < ApplicationController
             @product = Product.find(product['id'])
             @product[params[:setting]] = params[:status]
             unless @product.save
-              result['status'] &= false
-              result['messages'].push('There was a problem updating '+@product.name)
+              @result['status'] &= false
+              @result['messages'].push('There was a problem updating '+@product.name)
             end
           end
         end
       else
-        result['status'] = false
-        result['messages'].push('No action specified for updating')
+        @result['status'] = false
+        @result['messages'].push('No action specified for updating')
       end
 
     else
-      result['status'] = false
-      result['messages'].push('You do not have enough permissions to edit this product')
+      @result['status'] = false
+      @result['messages'].push('You do not have enough permissions to edit this product')
     end
 
     respond_to do |format|
       format.html # show.html.erb
-      format.json { render json: result }
+      format.json { render json: @result }
     end
   end
 
@@ -477,7 +425,6 @@ class ProductsController < ApplicationController
   end
 
   def show
-    @result = Hash.new
     @product = nil
     params[:id] = nil if params[:id]=="null"
     if !params[:id].nil?
@@ -586,25 +533,22 @@ class ProductsController < ApplicationController
   end
 
   def add_product_to_kit
-    #initialize_result will initialize status and message in result hash
-    result = initialize_result
-
     if current_user.can?('add_edit_products')
       @kit = Product.find_by_id(params[:id])
 
       if !@kit.is_kit
-        result['messages'].push("Product with id="+@kit.id+"is not a kit")
-        result['status'] &= false
+        @result['messages'].push("Product with id="+@kit.id+"is not a kit")
+        @result['status'] &= false
       else
         if params[:product_ids].nil?
-          result['messages'].push("No item sent in the request")
-          result['status'] &= false
+          @result['messages'].push("No item sent in the request")
+          @result['status'] &= false
         else
           items = Product.find(params[:product_ids])
           items.each do |item|
             if item.nil?
-              result['messages'].push("Item does not exist")
-              result['status'] &= false
+              @result['messages'].push("Item does not exist")
+              @result['status'] &= false
             else
               product_kit_sku = ProductKitSkus.find_by_option_product_id_and_product_id(item.id, @kit.id)
               if product_kit_sku.nil?
@@ -613,12 +557,12 @@ class ProductsController < ApplicationController
                 @productkitsku.qty = 1
                 @kit.product_kit_skuss << @productkitsku
                 unless @kit.save
-                  result['messages'].push("Could not save kit with sku: "+@product_skus.first.sku)
-                  result['status'] &= false
+                  @result['messages'].push("Could not save kit with sku: "+@product_skus.first.sku)
+                  @result['status'] &= false
                 end
               else
-                result['messages'].push("The product with id #{item.id} has already been added to the kit")
-                result['status'] &= false
+                @result['messages'].push("The product with id #{item.id} has already been added to the kit")
+                @result['status'] &= false
               end
               item.update_product_status
             end
@@ -627,58 +571,55 @@ class ProductsController < ApplicationController
 
       end
     else
-      result['status'] = false
-      result['messages'].push('You do not have enough permissions to add a product to a kit')
+      @result['status'] = false
+      @result['messages'].push('You do not have enough permissions to add a product to a kit')
     end
 
     respond_to do |format|
       format.html # show.html.erb
-      format.json { render json: result }
+      format.json { render json: @result }
     end
   end
 
   def remove_products_from_kit
-    #initialize_result will initialize status and message in result hash
-    result = initialize_result
-
     if current_user.can?('add_edit_products')
       @kit = Product.find_by_id(params[:id])
 
       if @kit.is_kit
         if params[:kit_products].nil?
-          result['messages'].push("No sku sent in the request")
-          result['status'] &= false
+          @result['messages'].push("No sku sent in the request")
+          @result['status'] &= false
         else
           params[:kit_products].reject! { |a| a=="" }
           params[:kit_products].each do |kit_product|
             product_kit_sku = ProductKitSkus.find_by_option_product_id_and_product_id(kit_product, @kit.id)
 
             if product_kit_sku.nil?
-              result['messages'].push("Product #{kit_product} not found in item")
-              result['status'] &= false
+              @result['messages'].push("Product #{kit_product} not found in item")
+              @result['status'] &= false
             else
               product_kit_sku.qty = 0
               product_kit_sku.save
               unless product_kit_sku.destroy
-                result['messages'].push("Product #{kit_product} could not be removed fronm kit")
-                result['status'] &= false
+                @result['messages'].push("Product #{kit_product} could not be removed fronm kit")
+                @result['status'] &= false
               end
             end
           end
         end
         @kit.update_product_status
       else
-        result['messages'].push("Product with id="+@kit.id+"is not a kit")
-        result['status'] &= false
+        @result['messages'].push("Product with id="+@kit.id+"is not a kit")
+        @result['status'] &= false
       end
     else
-      result['status'] = false
-      result['messages'].push('You do not have enough permissions to remove products from kits')
+      @result['status'] = false
+      @result['messages'].push('You do not have enough permissions to remove products from kits')
     end
 
     respond_to do |format|
       format.html # show.html.erb
-      format.json { render json: result }
+      format.json { render json: @result }
     end
   end
 
@@ -712,30 +653,27 @@ class ProductsController < ApplicationController
   end
 
   def update_product_list
-    #initialize_result will initialize status and message in result hash
-    result = initialize_result
-
     if current_user.can?('add_edit_products')
       @product = Product.find_by_id(params[:id])
       if @product.nil?
-        result['status'] = false
-        result['error_msg'] ="Cannot find Product"
+        @result['status'] = false
+        @result['error_msg'] ="Cannot find Product"
       else
         response = updatelist(@product, params[:var], params[:value])
         errors = response.errors.full_messages rescue nil
         if errors
-          result['status'] = false
-          result['error_msg'] = errors
+          @result['status'] = false
+          @result['error_msg'] = errors
         end
       end
     else
-      result['status'] = false
-      result['error_msg'] = 'You do not have enough permissions to edit product list'
+      @result['status'] = false
+      @result['error_msg'] = 'You do not have enough permissions to edit product list'
     end
 
     respond_to do |format|
       format.html # show.html.erb
-      format.json { render json: result }
+      format.json { render json: @result }
     end
   end
 
@@ -746,9 +684,6 @@ class ProductsController < ApplicationController
   #If you had a situation where the newly imported product was actually the one you wanted to keep you could
   #find the original product and make it an alias of the new product...
   def set_alias
-    #initialize_result will initialize status and message in result hash
-    result = initialize_result
-
     if current_user.can?('add_edit_products') && current_user.can?('delete_products')
       @product_orig = Product.find(params[:id])
       skus_len = @product_orig.product_skus.all.length
@@ -763,8 +698,8 @@ class ProductsController < ApplicationController
             alias_sku.order = skus_len
             skus_len+=1
             if !alias_sku.save
-              result['status'] &= false
-              result['messages'].push('Error saving Sku for sku id'+alias_sku.id.to_s)
+              @result['status'] &= false
+              @result['messages'].push('Error saving Sku for sku id'+alias_sku.id.to_s)
             end
           end
 
@@ -774,8 +709,8 @@ class ProductsController < ApplicationController
             alias_barcode.order = barcodes_len
             barcodes_len+=1
             if !alias_barcode.save
-              result['status'] &= false
-              result['messages'].push('Error saving Barcode for barcode id'+alias_barcode.id)
+              @result['status'] &= false
+              @result['messages'].push('Error saving Barcode for barcode id'+alias_barcode.id)
             end
           end
 
@@ -784,8 +719,8 @@ class ProductsController < ApplicationController
           @order_items.each do |order_item|
             order_item.product_id = @product_orig.id
             if !order_item.save
-              result['status'] &= false
-              result['messages'].push('Error saving order item with id'+order_item.id)
+              @result['status'] &= false
+              @result['messages'].push('Error saving order item with id'+order_item.id)
             end
           end
 
@@ -794,8 +729,8 @@ class ProductsController < ApplicationController
           product_kit_skus.each do |product_kit_sku|
             product_kit_sku.option_product_id = @product_orig.id
             unless product_kit_sku.save
-              result['status'] &= false
-              result['messages'].push('Error replacing aliased product in the kits')
+              @result['status'] &= false
+              @result['messages'].push('Error replacing aliased product in the kits')
             end
           end
 
@@ -835,30 +770,27 @@ class ProductsController < ApplicationController
 
           #destroy the aliased object
           if !product_alias.destroy
-            result['status'] &= false
-            result['messages'].push('Error deleting the product alias id:'+product_alias.id)
+            @result['status'] &= false
+            @result['messages'].push('Error deleting the product alias id:'+product_alias.id)
           end
         end
         @product_orig.update_product_status
       else
-        result['status'] = false
-        result['messages'].push('No products found to alias')
+        @result['status'] = false
+        @result['messages'].push('No products found to alias')
       end
     else
-      result['status'] = false
-      result['messages'].push('You do not have enough permissions to set product alias')
+      @result['status'] = false
+      @result['messages'].push('You do not have enough permissions to set product alias')
     end
 
     respond_to do |format|
       format.html # show.html.erb
-      format.json { render json: result }
+      format.json { render json: @result }
     end
   end
 
   def add_image
-    #initialize_result will initialize status and message in result hash
-    result = initialize_result
-
     if current_user.can?('add_edit_products')
       @product = Product.find(params[:id])
       if !@product.nil? && !params[:product_image].nil?
@@ -874,21 +806,21 @@ class ProductsController < ApplicationController
         @image.caption = params[:caption] if !params[:caption].nil?
         @product.product_images << @image
         if !@product.save
-          result['status'] = false
-          result['messages'].push("Adding image failed")
+          @result['status'] = false
+          @result['messages'].push("Adding image failed")
         end
       else
-        result['status'] = false
-        result['messages'].push("Invalid data sent to the server")
+        @result['status'] = false
+        @result['messages'].push("Invalid data sent to the server")
       end
     else
-      result['status'] = false
-      result['messages'].push('You do not have enough permissions to add image to a product')
+      @result['status'] = false
+      @result['messages'].push('You do not have enough permissions to add image to a product')
     end
 
     respond_to do |format|
       format.html # show.html.erb
-      format.json { render json: result }
+      format.json { render json: @result }
     end
 
   end
@@ -901,10 +833,9 @@ class ProductsController < ApplicationController
   #not associated with the inventory warehouse, then it automatically associates it and
   #sets the value.
   def adjust_available_inventory
-    result = initialize_result
-    result['error_messages'] = []
-    result['success_messages'] = []
-    result['notice_messages'] = []
+    @result['error_messages'] = []
+    @result['success_messages'] = []
+    @result['notice_messages'] = []
 
     unless params[:id].nil? || params[:inv_wh_id].nil? ||
       params[:method].nil?
@@ -928,8 +859,8 @@ class ProductsController < ApplicationController
             product_inv_whs.first.available_inv =
               product_inv_whs.first.available_inv + (params[:inventory_count].to_i)
           else
-            result['status'] &= false
-            result['error_messages'].push("Invalid method passed in parameter.
+            @result['status'] &= false
+            @result['error_messages'].push("Invalid method passed in parameter.
           Only 'receive' and 'recount' are valid. Passed in parameter: "+params[:method])
           end
         end
@@ -945,72 +876,68 @@ class ProductsController < ApplicationController
         product_inv_whs.first.save
 
       else
-        result['status'] &= false
-        result['error_messages'].push('Cannot find product with id: ' +params[:id])
+        @result['status'] &= false
+        @result['error_messages'].push('Cannot find product with id: ' +params[:id])
       end
     else
-      result['status'] &= false
-      result['error_messages'].push('Cannot recount inventory without product id and
+      @result['status'] &= false
+      @result['error_messages'].push('Cannot recount inventory without product id and
           inventory_warehouse_id')
     end
 
     respond_to do |format|
       format.html # show.html.erb
-      format.json { render json: result }
+      format.json { render json: @result }
     end
   end
 
   def generate_products_csv
-    result = initialize_result
     if current_user.can? 'create_backups'
-      result = generate_csv(result)
+      @result = generate_csv(@result)
     else
-      result['status'] = false
-      result['messages'].push('You do not have enough permissions to create backup csv')
+      @result['status'] = false
+      @result['messages'].push('You do not have enough permissions to create backup csv')
     end
-    result = generate_error_csv(result) unless result['status']
+    @result = generate_error_csv(@result) unless @result['status']
 
     respond_to do |format|
       format.html # show.html.erb
-      format.json { render json: result }
+      format.json { render json: @result }
     end
   end
 
   def update_intangibleness
-    result = initialize_result
     if current_user.can?('add_edit_products')
       Product.update_action_intangibleness(params)
     else
-      result['status'] = false
-      result['messages'].push('You do not have enough permissions to edit product status')
+      @result['status'] = false
+      @result['messages'].push('You do not have enough permissions to edit product status')
     end
     respond_to do |format|
       format.html # show.html.erb
-      format.json { render json: result }
+      format.json { render json: @result }
     end
   end
 
   def update_image
-    result = initialize_result
     begin
       ProductImage.update_image(params)
     rescue
-      result['status'] = false
+      @result['status'] = false
     end
     respond_to do |format|
       format.html # show.html.erb
-      format.json { render json: result }
+      format.json { render json: @result }
     end
   end
 
   def sync_with
-    result = initialize_result
     begin
       SyncOption.create_update_sync_option(params)
     rescue
-      result['status'] = false
+      @result['status'] = false
     end
-    render json: result
+    render json: @result
   end
 
   private
@@ -1079,17 +1006,16 @@ class ProductsController < ApplicationController
   end
 
   def execute_groove_bulk_action(activity)
-    result = initialize_result
     if current_user.can?('add_edit_products')
       GrooveBulkActions.execute_groove_bulk_action(activity, params, current_user)
     else
-      result['status'] = false
-      result['messages'].push('You do not have enough permissions to edit product status')
+      @result['status'] = false
+      @result['messages'].push('You do not have enough permissions to edit product status')
     end
     
     respond_to do |format|
       format.html # show.html.erb
-      format.json { render json: result }
+      format.json { render json: @result }
     end
   end
 end

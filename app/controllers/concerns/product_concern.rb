@@ -3,7 +3,7 @@ module ProductConcern
   
   included do
     before_filter :groovepacker_authorize!
-    before_filter :init_result_obj, only: [:update]
+    before_filter :init_result_object
     include ProductsHelper
     include Groovepacker::Orders::ResponseMessage
   end
@@ -13,15 +13,13 @@ module ProductConcern
       Groovepacker::Products::Products.new(result: @result, params_attrs: params, current_user: current_user)
     end
 
-    def init_result_obj
-      @result = { 'status' => true, 'messages' => [] }
-    end
-
-    def initialize_result
-      result = {}
-      result['status'] = true
-      result['messages'] = []
-      return result
+    def init_result_object
+      @result = { 'status' => true,
+        'messages' => [], 
+        'total_imported' => 0, 
+        'success_imported' => 0, 
+        'previous_imported' => 0
+      }
     end
 
     def generate_csv(result)
