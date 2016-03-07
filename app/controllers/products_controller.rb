@@ -945,50 +945,8 @@ class ProductsController < ApplicationController
   def make_products_list(products)
     @products_result = []
     products.each do |product|
-      @product_hash = Hash.new
-      @product_hash['id'] = product.id
-      @product_hash['name'] = product.name
-      @product_hash['status'] = product.status
-      @product_hash['location_primary'] = ''
-      @product_hash['location_secondary'] = ''
-      @product_hash['location_tertiary'] = ''
-      @product_hash['location_name'] = 'not_available'
-      @product_hash['type_scan_enabled'] = product.type_scan_enabled
-      @product_hash['click_scan_enabled'] = product.click_scan_enabled
-      @product_hash['qty'] = 0
-      @product_hash['barcode'] = ''
-      @product_hash['sku'] = ''
-      @product_hash['cat'] = ''
-      @product_hash['image'] = ''
-
-      @product_location = product.primary_warehouse
-      unless @product_location.nil?
-        @product_hash['location_primary'] = @product_location.location_primary
-        @product_hash['location_secondary'] = @product_location.location_secondary
-        @product_hash['location_tertiary'] = @product_location.location_tertiary
-        @product_hash['available_inv'] = @product_location.available_inv
-        @product_hash['qty_on_hand'] = @product_location.quantity_on_hand
-        if !@product_location.inventory_warehouse.nil?
-          @product_hash['location_name'] = @product_location.inventory_warehouse.name
-        end
-      end
-      @product_hash['barcode'] = product.primary_barcode
-      @product_hash['sku'] = product.primary_sku
-      @product_hash['cat'] = product.primary_category
-      @product_hash['image'] = product.base_product.primary_image
-      unless product.store.nil?
-        @product_hash['store_name'] = product.store.name
-      end
-
-      @product_kit_skus = ProductKitSkus.where(:product_id => product.id)
-      if @product_kit_skus.length > 0
-        @product_hash['productkitskus'] = []
-        @product_kit_skus.each do |kitsku|
-          @product_hash['productkitskus'].push(kitsku.id)
-        end
-      end
-
-      @products_result.push(@product_hash)
+      product_hash = get_single_product_info(product)
+      @products_result.push(product_hash)
     end
     return @products_result
   end
