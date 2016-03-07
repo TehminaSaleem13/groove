@@ -517,4 +517,18 @@ class Product < ActiveRecord::Base
     return barcode
   end
 
+  def add_new_image(params)
+    image = self.product_images.build
+    #image_directory = "public/images"
+    current_tenant = Apartment::Tenant.current
+    file_name = Time.now.strftime('%d_%b_%Y_%I__%M_%p')+self.id.to_s+params[:product_image].original_filename
+    GroovS3.create_image(current_tenant, file_name, params[:product_image].read, params[:product_image].content_type)
+    #path = File.join(image_directory, file_name )
+    #File.open(path, "wb") { |f| f.write(params[:product_image].read) }
+    image.image = ENV['S3_BASE_URL']+'/'+current_tenant+'/image/'+file_name
+    image.caption = params[:caption]  unless params[:caption].blank?
+    response = image.save ? true : false
+    return response
+  end
+
 end

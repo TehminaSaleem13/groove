@@ -792,37 +792,13 @@ class ProductsController < ApplicationController
 
   def add_image
     if current_user.can?('add_edit_products')
-      @product = Product.find(params[:id])
-      if !@product.nil? && !params[:product_image].nil?
-        @image = ProductImage.new
-
-        #image_directory = "public/images"
-        current_tenant = Apartment::Tenant.current
-        file_name = Time.now.strftime('%d_%b_%Y_%I__%M_%p')+@product.id.to_s+params[:product_image].original_filename
-        GroovS3.create_image(current_tenant, file_name, params[:product_image].read, params[:product_image].content_type)
-        #path = File.join(image_directory, file_name )
-        #File.open(path, "wb") { |f| f.write(params[:product_image].read) }
-        @image.image = ENV['S3_BASE_URL']+'/'+current_tenant+'/image/'+file_name
-        @image.caption = params[:caption] if !params[:caption].nil?
-        @product.product_images << @image
-        if !@product.save
-          @result['status'] = false
-          @result['messages'].push("Adding image failed")
-        end
-      else
-        @result['status'] = false
-        @result['messages'].push("Invalid data sent to the server")
-      end
+      add_new_image
     else
       @result['status'] = false
       @result['messages'].push('You do not have enough permissions to add image to a product')
     end
-
-    respond_to do |format|
-      format.html # show.html.erb
-      format.json { render json: @result }
-    end
-
+    
+    render json: @result
   end
 
   #input params[:id] gives product id params[:inv_wh_id] gives inventory warehouse id
@@ -920,11 +896,8 @@ class ProductsController < ApplicationController
   end
 
   def update_image
-    begin
-      ProductImage.update_image(params)
-    rescue
-      @result['status'] = false
-    end
+    @result['status'] = ProductImage.update_image(params)
+
     respond_to do |format|
       format.html # show.html.erb
       format.json { render json: @result }
@@ -932,11 +905,8 @@ class ProductsController < ApplicationController
   end
 
   def sync_with
-    begin
-      SyncOption.create_update_sync_option(params)
-    rescue
-      @result['status'] = false
-    end
+    @result['status'] = SyncOption.create_update_sync_option(params)
+    
     render json: @result
   end
 

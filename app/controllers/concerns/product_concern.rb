@@ -88,4 +88,16 @@ module ProductConcern
       @product_hash['productkitskus'] = []
       product_kit_skus.each { |kitsku| @product_hash['productkitskus'].push(kitsku.id) }
     end
+
+    def add_new_image
+      product = Product.find(params[:id])
+      unless product.blank? && params[:product_image].blank?
+        return product.add_new_image(params)
+        @result['status'] = false
+        @result['messages'].push("Adding image failed")
+      else
+        @result['status'] = false
+        @result['messages'].push("Invalid data sent to the server")
+      end
+    end
 end
