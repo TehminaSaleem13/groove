@@ -17,6 +17,13 @@ class SubscriptionsController < ApplicationController
 
   def select_plan
     @plan ||= ''
+    @plans_info = [{'plan_name' => 'Duo', 'plan_id' => 'groove-duo-60', 'plan_amount' => '60', 'users' => '2', 'stores' => '2', 'shipments' => '2,200'},
+                    {'plan_name' => 'Trio', 'plan_id' => 'groove-trio-90', 'plan_amount' => '90', 'users' => '3', 'stores' => '3', 'shipments' => '4,500'},
+                    {'plan_name' => 'Quartet', 'plan_id' => 'groove-quartet-120', 'plan_amount' => '120', 'users' => '4', 'stores' => '4', 'shipments' => '6,700'},
+                    {'plan_name' => 'Quintet', 'plan_id' => 'groove-quintet-150', 'plan_amount' => '150', 'users' => '5', 'stores' => '5', 'shipments' => '9,000'},
+                    {'plan_name' => 'Big Band', 'plan_id' => 'groove-bigband-210', 'plan_amount' => '210', 'users' => '7', 'stores' => '7', 'shipments' => '14,000'},
+                    {'plan_name' => 'Symphony', 'plan_id' => 'groove-symphony-300', 'plan_amount' => '300', 'users' => '10', 'stores' => 'Unlimited', 'shipments' => '20,000'}
+                  ]
   end
 
   def confirm_payment

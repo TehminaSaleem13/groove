@@ -50,7 +50,9 @@
 }
 
 .col-md-2.price-column {
-  width: 16.6%;
+  width: 16.66666667%;
+  padding-left: 0px;
+  padding-right: 0px;
 }
 
 .well-header p {
