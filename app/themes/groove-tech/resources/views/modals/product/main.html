@@ -208,7 +208,7 @@
       
       <div ng-if="products.single.access_restrictions.allow_mg_rest_inv_push">
         <div class="form-group" style="margin-bottom: 0px;">
-          <label class="control-label col-sm-2">Magento 2 Inventory Sync</label>
+          <label class="control-label col-sm-2">Magento Inventory Sync</label>
 
           <div class="controls col-sm-1 col-lg-1">
             <div toggle-switch ng-model="products.single.sync_option.sync_with_mg_rest"
@@ -217,13 +217,16 @@
           <div class="controls col-sm-3" ng-show="products.single.sync_option.sync_with_mg_rest">
             <input type="text" ng-model="products.single.sync_option.mg_rest_product_id" ng-focus="update_product_sync_options()" ng-blur="update_product_sync_options()" class="form-control input-style" placeholder="Magento 2 Product ID"/>
           </div>
+          <div class="controls col-sm-4" ng-show="products.single.sync_option.sync_with_mg_rest">
+            <input type="text" ng-model="products.single.sync_option.mg_rest_product_sku" ng-focus="update_product_sync_options()" ng-blur="update_product_sync_options()" class="form-control input-style" placeholder="Magento Product Sku"/>
+          </div>
         </div>
 
         <div ng-show="products.single.sync_option.sync_with_mg_rest">
-          <div class="form-group" ng-hide="products.single.sync_option.mg_rest_product_id">
+          <div class="form-group" ng-hide="products.single.sync_option.mg_rest_product_id && products.single.sync_option.mg_rest_product_sku">
             <div class="control-label col-sm-3"></div>
             <div class="col-sm-7">
-              <small>*Magento product ID is required for products inventory sync.</small>
+              <small>*Adding product ID and SKU is necessary for for magento products inventory sync.</small>
             </div>
           </div>
         </div>

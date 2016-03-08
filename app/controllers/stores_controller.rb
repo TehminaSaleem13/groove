@@ -137,7 +137,8 @@ class StoresController < ApplicationController
             else
               @magento = @magento.first
             end
-            @magento.host = params[:host]
+            host_url = params[:host].sub(/(\/)+$/,'') rescue nil
+            @magento.host = host_url
             @magento.username = params[:username]
             # We do not need password GROOV-168
             #@magento.password = params[:password]
@@ -147,9 +148,7 @@ class StoresController < ApplicationController
             @magento.import_images = params[:import_images]
             begin
               @store.save!
-              if !new_record
-                @store.magento_credentials.save
-              end
+              @magento.save if !new_record
             rescue ActiveRecord::RecordInvalid => e
               @result['status'] = false
               @result['messages'] = [@store.errors.full_messages, @store.magento_credentials.errors.full_messages]
@@ -169,9 +168,16 @@ class StoresController < ApplicationController
               @magento_rest = @magento_rest.first
             end
             not_to_save = ["undefined", "null"]
-            @magento_rest.host = not_to_save.include?(params[:host]) ? nil : params[:host]
+            host_url = params[:host].sub(/(\/)+$/,'') rescue nil
+            @magento_rest.host = not_to_save.include?(params[:host]) ? nil : host_url
             store_admin_url = params[:store_admin_url].sub(/(\/)+$/,'') rescue nil
             @magento_rest.store_admin_url = not_to_save.include?(store_admin_url) ? nil : store_admin_url
+            if @magento_rest.store_version != params[:store_version]
+              @magento_rest.access_token=nil
+              @magento_rest.oauth_token_secret=nil
+            end
+            @magento_rest.store_version = params[:store_version]
+            @magento_rest.store_token = Store.get_sucure_random_token if @magento_rest.store_token.blank?
             @magento_rest.api_key = params[:api_key]
             @magento_rest.api_secret = params[:api_secret]
 
@@ -212,7 +218,7 @@ class StoresController < ApplicationController
             begin
               @store.save!
               if !new_record
-                @store.amazon_credentials.save
+                @amazon.save
               end
             rescue ActiveRecord::RecordInvalid => e
               @result['status'] = false
@@ -244,7 +250,7 @@ class StoresController < ApplicationController
             begin
               @store.save!
               if !new_record
-                @store.ebay_credentials.save
+                @ebay.save
               end
             rescue ActiveRecord::RecordInvalid => e
               @result['status'] = false
@@ -316,7 +322,7 @@ class StoresController < ApplicationController
             begin
               @store.save!
               if !new_record
-                @store.shipstation_credential.save
+                @shipstation.save
               end
             rescue ActiveRecord::RecordInvalid => e
               @result['status'] = false
@@ -352,7 +358,7 @@ class StoresController < ApplicationController
             begin
               @store.save!
               if !new_record
-                @store.shipstation_rest_credential.save
+                @shipstation.save
               end
             rescue ActiveRecord::RecordInvalid => e
               @result['status'] = false
@@ -1035,7 +1041,7 @@ class StoresController < ApplicationController
       access_restrictions = AccessRestriction.last
       @result['general_settings'] = GeneralSetting.first
       @result['current_tenant'] = Apartment::Tenant.current
-      @result['general_settings_page_url'] = get_settings_page_url
+      @result['host_url'] = get_host_url
       @result['access_restrictions'] = access_restrictions
       @result['credentials'] = @store.get_store_credentials
       if @store.store_type == 'CSV'
@@ -1233,7 +1239,7 @@ class StoresController < ApplicationController
     tenant_name = params['tenantname']
 
     # redirect_to (URI::encode("https://#{tenant_name}.groovepacker.com:3001//") + "#" + URI::encode("/settings/showstores/ebay?ebaytkn=#{ebaytkn}&tknexp=#{tknexp}&username=#{username}&redirect=#{redirect}&editstatus=#{editstatus}&name=#{name}&status=#{status}&storetype=#{storetype}&storeid=#{storeid}&inventorywarehouseid=#{inventorywarehouseid}&importimages=#{importimages}&importproducts=#{importproducts}&messagetocustomer=#{messagetocustomer}&tenantname=#{tenant_name}") )
-    redirect_to (URI::encode("https://#{tenant_name}.#{ENV['HOST_NAME']}/") + URI::encode("stores/update_ebay_user_token?id=#{storeid}"))
+    redirect_to (URI::encode("https://#{tenant_name}.#{ENV['HOST_NAME']}/") + URI::encode("stores/#{storeid}/update_ebay_user_token"))
   end
 
   def let_store_be_created

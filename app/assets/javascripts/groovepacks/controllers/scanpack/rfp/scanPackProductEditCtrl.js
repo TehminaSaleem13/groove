@@ -34,8 +34,10 @@ groovepacks_controllers.
       $scope.editinit = function () {
         $scope.products = products.model.get();
         $scope.gridOptions = {
+          dynamic_width: true,
           identifier: 'scanpackinactiveornew',
           setup: $scope.products.setup,
+          scrollbar: false,
           data: {order_num: $stateParams.order_num},
           editable: {
             array: false,
@@ -59,16 +61,24 @@ groovepacks_controllers.
             },
             name: {
               name: "Item Name",
-              transclude: '<a ui-sref="scanpack.rfp.product_edit.single({order_num: options.data.order_num, product_id: row.id })" >{{row[field]}}</a>'
+              col_length: 30,
+              transclude: '<a ui-sref="scanpack.rfp.product_edit.single({order_num: options.data.order_num, product_id: row.id })" style="text-decoration: none" tooltip=\'{{row[field].length ? row[field].chunk(25).join(" ") : ("Edit" + field)}}\'>{{row[field] | cut:false:25:" ..."}}</a>'
             },
             status: {
-              name: "Status"
+              name: "Status",
+              col_length: 8,
+              transclude: "<span class='label label-default' ng-class=\"{" +
+                "'label-success': row[field] == 'active', " +
+                "'label-info': row[field] == 'new' }\">" +
+                "{{row[field]}}</span>"
             },
             sku: {
-              name: "SKU"
+              name: "SKU",
+              col_length: 30
             },
             barcode: {
-              name: "SKU"
+              name: "Barcode",
+              col_length: 30
             }
           }
         };

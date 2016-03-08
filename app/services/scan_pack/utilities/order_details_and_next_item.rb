@@ -67,8 +67,10 @@ module ScanPack
         product_type = unscanned_items.first['product_type']
         data['next_item'] = if product_type == 'single'
           unscanned_items.first.clone
-        elsif product_type == 'individual'
-          unscanned_items.first['child_items'].first.clone unless unscanned_items.first['child_items'].empty?
+        elsif product_type == 'individual' && unscanned_items.first['child_items'].present?
+          unscanned_items.first['child_items'].first.clone
+        else
+          {'qty' => 0, 'scanned_qty' => 0, 'qty_remaining' => 0 }
         end
       end
       #--------END of ORDER DETAILS AND NEXT ITEM-----------------------------

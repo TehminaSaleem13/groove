@@ -1,6 +1,6 @@
 groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', '$window', '$sce', '$interval', '$state', '$stateParams', '$modal',
-  '$modalInstance', '$timeout', 'hotkeys', 'stores', 'warehouses', 'notification', '$q', 'groov_translator',
-  function (scope, store_data, $window, $sce, $interval, $state, $stateParams, $modal, $modalInstance, $timeout, hotkeys, stores, warehouses, notification, $q, groov_translator) {
+  '$modalInstance', '$timeout', 'hotkeys', 'stores', 'warehouses', 'notification', '$q', 'groov_translator', 'Lightbox',
+  function (scope, store_data, $window, $sce, $interval, $state, $stateParams, $modal, $modalInstance, $timeout, hotkeys, stores, warehouses, notification, $q, groov_translator, Lightbox) {
     var myscope = {};
 
     /**
@@ -25,6 +25,21 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
       }
     };
 
+    scope.lightbox_images = [
+      {
+        'url': '/assets/images/magento-2-1.png',
+        'caption': 'Image-1'
+      },
+      {
+        'url': '/assets/images/magento-2-2.png',
+        'caption': 'Image-2'
+      }
+    ];
+
+    scope.openLightboxModal = function (index) {
+      Lightbox.openModal(scope.lightbox_images, index);
+    };
+
     scope.disconnect_ebay_seller = function () {
       stores.ebay.user_token.delete(scope.stores).then(function () {
         myscope.store_single_details(scope.stores.single.id, true);
@@ -38,7 +53,13 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
     }
 
     scope.check_bigcommerce_connection = function () {
-      stores.big_commerce.check_connection(scope.stores.single.id).then(function (response) {
+      stores.big_commerce.check_connection(scope.stores.single.store_type, scope.stores.single.id).then(function (response) {
+        scope.stores.single.message = response.data.message;
+      });
+    }
+
+    scope.check_magento_connection = function () {
+      stores.magento.check_connection(scope.stores.single.store_type, scope.stores.single.id).then(function (response) {
         scope.stores.single.message = response.data.message;
       });
     }
@@ -53,6 +74,17 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
       stores.magento.disconnect(scope.stores.single.id).then(function (response) {
         myscope.store_single_details(scope.stores.single.id, true);
       });
+    }
+
+    scope.show_hide_images = function(element_class, link_class) {
+      $('.'+element_class).toggle('slow');
+      if($('.'+link_class).hasClass('fa-caret-down')) {
+        $('.'+link_class).removeClass('fa-caret-down');
+        $('.'+link_class).addClass('fa-caret-up');
+      } else {
+        $('.'+link_class).removeClass('fa-caret-up');
+        $('.'+link_class).addClass('fa-caret-down');
+      }
     }
 
     scope.import_orders = function (report_id) {
@@ -70,6 +102,24 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
       $timeout(function () {
         scope.copy_text.text = 'Click Here to copy to clipboard';
         scope.copy_text.class = '';
+      }, 2000);
+    };
+
+    scope.copy_callback_url = function () {
+      scope.copy_text.mgcb_text = 'Copied to clipboard';
+      scope.copy_text.mgcb_class = 'label label-success';
+      $timeout(function () {
+        scope.copy_text.mgcb_text = 'Click Here to copy to clipboard';
+        scope.copy_text.mgcb_class = '';
+      }, 2000);
+    };
+
+    scope.copy_success_url = function () {
+      scope.copy_text.mgsc_text = 'Copied to clipboard';
+      scope.copy_text.mgsc_class = 'label label-success';
+      $timeout(function () {
+        scope.copy_text.mgsc_text = 'Click Here to copy to clipboard';
+        scope.copy_text.mgsc_class = '';
       }, 2000);
     };
 
@@ -159,6 +209,11 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
 
     scope.change_opt = function (id, value) {
       scope.stores.single[id] = value;
+      scope.update_single_store(true);
+    };
+
+    scope.change_magento_store_version = function (value) {
+      scope.stores.single.store_version = value;
       scope.update_single_store(true);
     };
 
@@ -606,7 +661,11 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
 
       scope.copy_text = {
         text: 'Click Here to copy to clipboard',
-        class: ''
+        class: '',
+        mgcb_text: 'Click Here to copy to clipboard',
+        mgcb_class: '',
+        mgsc_text: 'Click Here to copy to clipboard',
+        mgsc_class: ''
       };
 
       scope.stores.types = {};
@@ -628,11 +687,11 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
 
       scope.stores.types = {
         Magento: {
-          name: "Magento",
+          name: "Magento SOAP",
           file: "/assets/views/modals/settings/stores/magento.html"
         },
         "Magento API 2": {
-          name: "Magento API 2",
+          name: "Magento REST",
           file: "/assets/views/modals/settings/stores/magento_rest.html"
         },
         Ebay: {

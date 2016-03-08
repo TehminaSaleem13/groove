@@ -25,9 +25,14 @@ Groovepacks::Application.routes.draw do
 
   get '/magento_rest/:store_id/magento_authorize_url' => 'magento_rest#magento_authorize_url'
   get '/magento_rest/:store_id/get_access_token' => 'magento_rest#get_access_token'
+  get '/magento_rest/:store_id/check_connection' => 'magento_rest#check_connection'
   put '/magento_rest/:store_id/disconnect' => 'magento_rest#disconnect'
+  post "magento_rest/callback" => "magento_rest#callback"
+  get "magento_rest/redirect" => "magento_rest#redirect"
   get 'stores/export_active_products' => 'stores#export_active_products'
   get '/settings/print_action_barcode/:id' => 'settings#print_action_barcode'
+
+  get '/store_settings/handle_ebay_redirect' => 'stores#handle_ebay_redirect'
 
   # The priority is based upon order of creation:
   # first created -> highest priority.
@@ -143,7 +148,7 @@ Groovepacks::Application.routes.draw do
       get 'connect_and_retrieve'
       post 'create_update_ftp_credentials'
       post 'delete_ebay_token'
-      post 'update_ebay_user_token'
+      get 'update_ebay_user_token'
       post 'csv_import_data'
       post 'csv_do_import'
       post 'csv_product_import_cancel'

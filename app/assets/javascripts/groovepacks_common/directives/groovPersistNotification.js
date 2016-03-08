@@ -114,8 +114,8 @@ groovepacks_directives.directive('groovPersistNotification', ['$window', '$docum
             notif_message += "Complete!";
             $window.message = message;
             if(
-                typeof $window.order_scanned != 'undefined' &&
-                $window.order_scanned.indexOf(message['current_increment_id']) > -1
+                typeof $window.order_modified != 'undefined' &&
+                $window.order_modified.indexOf(message['current_increment_id']) > -1
               ){
               $window.open(message.url);
             }
@@ -154,7 +154,7 @@ groovepacks_directives.directive('groovPersistNotification', ['$window', '$docum
           } else if (message['activity'] == 'duplicate') {
             notif_message = '<b>Product Duplicate:</b> ';
           } else if (message['activity'] == 'export') {
-            notif_message = '<b>Backup:</b> ';
+            notif_message = '<b>Taking Backup: ' + message['current'] + '</b> ';
           }
 
         } else if (message['identifier'] == 'inventory') {

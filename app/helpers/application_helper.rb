@@ -45,6 +45,8 @@ module ApplicationHelper
   def one_time_payment(attrs)
     if attrs[:shop_name].present? && attrs["shop_type"]=="BigCommerce"
       ENV['BC_ONE_TIME_PAYMENT']
+    elsif attrs[:shop_name].present? && attrs["shop_type"]=="Shopify"
+      ENV['SHOPIFY_ONE_TIME_PAYMENT']
     else
       ENV['ONE_TIME_PAYMENT']
     end

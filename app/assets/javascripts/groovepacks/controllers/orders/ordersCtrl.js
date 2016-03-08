@@ -31,6 +31,7 @@ groovepacks_controllers.
         }
       };
       $scope.update_order_list = function (order, prop) {
+        if(!order[prop] /*if null*/){return}
         orders.list.update_node({
           id: order.id,
           var: prop,
@@ -304,6 +305,8 @@ groovepacks_controllers.
             show: myscope.show_selected
           },
           draggable: true,
+          dynamic_width: true,
+          scrollbar: true,
           sortable: true,
           selectable: true,
           sort_func: $scope.handlesort,
@@ -329,6 +332,10 @@ groovepacks_controllers.
                   {name: "Cancelled", value: 'cancelled'},
                   {name: "Scanned", value: 'scanned'}
                 ]
+              },
+              order_date: {
+                type: 'datetime',
+                min: 0
               }
             },
             functions: {
@@ -362,11 +369,13 @@ groovepacks_controllers.
             },
             notes: {
               name: "Notes",
+              col_length: 25,
               enable_edit: true
             },
             order_date: {
               name: "Order Date",
-              transclude: "<span>{{row[field] | date:'EEEE MM/dd/yyyy hh:mm:ss a'}}</span>"
+              col_length: 25,
+              transclude: "<span>{{row[field] | date:'EEE MM/dd/yyyy hh:mm:ss a'}}</span>"
             },
             itemslength: {
               name: "Items",
@@ -377,6 +386,7 @@ groovepacks_controllers.
             },
             status: {
               name: "Status",
+              col_length: 13,
               transclude: "<span class='label label-default' ng-hide=\"row[field] == 'onhold'\" ng-class=\"{" +
               "'label-success': row[field] == 'awaiting', " +
               "'label-danger': row[field] == 'serviceissue' }\">" +
@@ -386,10 +396,12 @@ groovepacks_controllers.
             },
             email: {
               name: "Email",
+              col_length: 25,
               hidden: true
             },
             tracking_num: {
               name: "Tracking Id",
+              col_length: 25,
               hidden: true
             },
             city: {
@@ -402,6 +414,7 @@ groovepacks_controllers.
             },
             postcode: {
               name: "Zip",
+              col_length: 8,
               hidden: true
             },
             country: {
@@ -416,6 +429,7 @@ groovepacks_controllers.
             $scope.gridOptions.all_fields.custom_field_one = {
               name: custom_fields[0],
               hidden: true,
+              col_length: 25,
               enable_edit: true
             }
           }
@@ -423,6 +437,7 @@ groovepacks_controllers.
             $scope.gridOptions.all_fields.custom_field_two = {
               name: custom_fields[1],
               hidden: true,
+              col_length: 25,
               enable_edit: true
             }
           }

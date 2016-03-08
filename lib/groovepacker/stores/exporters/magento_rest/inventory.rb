@@ -6,29 +6,16 @@ module Groovepacker
           include ProductsHelper
 
           def push_inventories
-            @credential = handler[:credential]
-            @client = handler[:store_handle][:handle]
-
-            #products = Product.where(store_id: credential.store_id)
-            products = Product.joins(:sync_option).where("sync_with_mg_rest=true and (mg_rest_product_id IS NOT NULL or store_product_id IS NOT NULL)")
-            
-            products.each do |product|
-              inv_wh = product.product_inventory_warehousess.first
-              @sync_optn = product.sync_option
-              mg_rest_product_id = (@sync_optn.mg_rest_product_id rescue nil) || product.mg_rest_product_id
-              update_mg_rest_product_inv_for_sync_option(product, mg_rest_product_id, inv_wh)
+            handler = self.get_handler
+            creds = handler[:credential]
+            if creds.store_version=='1.x'
+              exporter = Groovepacker::Stores::Exporters::MagentoRest::V1::Inventory.new(handler)
+            else
+              exporter = Groovepacker::Stores::Exporters::MagentoRest::V2::Inventory.new(handler)
             end
+            result = exporter.push_inventories
           end
-
-          private
-            def update_mg_rest_product_inv_for_sync_option(product, mg_rest_product_id, inv_wh)
-              if mg_rest_product_id
-                availabel_inv = inv_wh.available_inv rescue 0
-                availabel_inv = 0 if availabel_inv.to_i < 0
-                filters_or_data = {:qty => availabel_inv.to_s}
-                @client.update_product_inv(mg_rest_product_id, filters_or_data)
-              end
-            end
+          
         end
       end
     end

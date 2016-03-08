@@ -23,54 +23,54 @@ module Groovepacker
 
             if import_item.import_type == 'deep'
               days_back_to_import = import_item.days.to_i.days rescue 7.days
-              import_from = Date.today - days_back_to_import
+              import_from = DateTime.now - days_back_to_import
               # import_from =
               #   credential.last_imported_at.nil? ? Date.today - 2.weeks : 
               #     credential.last_imported_at - 7.days
               import_date_type = "created_at"
             elsif import_item.import_type == 'quick'
               import_from =
-                credential.quick_import_last_modified.nil? ? Date.today - 3.days : 
+                credential.quick_import_last_modified.blank? ? DateTime.now - 3.days : 
                   credential.quick_import_last_modified
               import_date_type = "modified_at"
             else
-              import_from = credential.last_imported_at.nil? ? Date.today - 2.weeks : 
+              import_from = credential.last_imported_at.blank? ? DateTime.now - 2.weeks : 
                   credential.last_imported_at - credential.regular_import_range.days
               import_date_type = "created_at"
             end
+            ss_tags_list = client.get_tags_list
+            gp_ready_tag_id = ss_tags_list[credential.gp_ready_tag_name] || -1
+            gp_imported_tag_id = ss_tags_list[credential.gp_imported_tag_name] || -1
 
-            gp_ready_tag_id = client.get_tag_id(credential.gp_ready_tag_name)
-            gp_imported_tag_id = client.get_tag_id(credential.gp_imported_tag_name)
-
-            unless statuses.empty? && gp_ready_tag_id == -1
+            if statuses.present? && gp_ready_tag_id != -1
               response = {}
               response["orders"] = nil
-              statuses.each do |status|
-                status_response = {}
-                status_response["orders"] = nil
-                if import_item.import_type == 'quick'
-                  #get for created time
-                  status_response = client.get_orders(status, import_from, "quick_created_at")
-                else
-                  status_response = client.get_orders(status, import_from, import_date_type)
+              if import_item.import_type != 'tagged'
+                statuses.each do |status|
+                  status_response = {}
+                  status_response["orders"] = nil
+                  if import_item.import_type == 'quick'
+                    #get for created time
+                    status_response = client.get_orders(status, import_from, import_date_type)
+                  else
+                    status_response = client.get_orders(status, import_from, import_date_type)
+                  end
+                  response["orders"] = response["orders"].blank? ? status_response["orders"] : (response["orders"] | status_response["orders"])
                 end
-                response["orders"] = response["orders"].nil? ? status_response["orders"] : (response["orders"] | status_response["orders"])
+                importing_time = DateTime.now - 1.day
+                quick_importing_time = DateTime.now
               end
 
-
-              importing_time = Date.today - 1.day
-              quick_importing_time = DateTime.now
-              unless gp_ready_tag_id == -1
-                tagged_response = client.get_orders_by_tag(credential.gp_ready_tag_name)
+              if import_item.import_type != 'quick' && gp_ready_tag_id != -1
+                tagged_response = client.get_orders_by_tag(gp_ready_tag_id)
 
                 #perform union of orders
-                response["orders"] = response["orders"].nil? ? tagged_response["orders"] :
+                response["orders"] = response["orders"].blank? ? tagged_response["orders"] :
                   response["orders"] | tagged_response["orders"]
               end
 
-              shipments_response = client.get_shipments(import_from-2.days)
-
-              unless response["orders"].nil?
+              unless response["orders"].blank?
+                shipments_response = client.get_shipments(import_from-1.days)
                 result[:total_imported] = response["orders"].length
                 import_item.current_increment_id = ''
                 import_item.success_imported = 0
@@ -86,12 +86,16 @@ module Groovepacker
                   import_item.current_order_items = -1
                   import_item.current_order_imported_item = -1
                   import_item.save
-                  shipstation_order = nil
 
-                  if Order.where(increment_id: order["orderNumber"]).length == 0
+                  shipstation_order = Order.find_by_store_id_and_increment_id(credential.store_id, order["orderNumber"])
+                  if import_item.import_type == 'quick' && shipstation_order && shipstation_order.status!="scanned"
+                    shipstation_order.destroy
+                    shipstation_order = nil
+                  end
+                  
+                  if shipstation_order.blank?
                     shipstation_order = Order.new
-                  elsif !order["tagIds"].nil? && order["tagIds"].include?(gp_ready_tag_id)
-                    shipstation_order = Order.where(increment_id: order["orderNumber"]).first
+                  elsif order["tagIds"].present? && order["tagIds"].include?(gp_ready_tag_id)
                     # in order to adjust inventory on deletion of order assign order status as 'cancelled'
                     shipstation_order.status = 'cancelled'
                     shipstation_order.save
@@ -99,7 +103,7 @@ module Groovepacker
                     shipstation_order = Order.new
                   end
 
-                  unless shipstation_order.nil?
+                  if shipstation_order.present? && !shipstation_order.persisted?
                     ship_to = order["shipTo"]["name"].split(" ")
                     import_order(shipstation_order, order, credential)
                     
@@ -188,7 +192,7 @@ module Groovepacker
               import_item.message = 'All import statuses disabled and no GP Ready tags found. Import skipped.'
               import_item.save
             end
-            if result[:status]
+            if result[:status] && import_item.import_type != 'tagged'
               credential.last_imported_at = importing_time
               credential.quick_import_last_modified = quick_importing_time
               credential.save
@@ -278,6 +282,13 @@ module Groovepacker
             product.set_product_status
 
             product
+          end
+
+          def filter_quick_import_orders(status_response, import_from)
+            return status_response if status_response["orders"].blank?
+            orders_hash = {"orders" => []}
+            status_response["orders"].each { |order| orders_hash["orders"].push(order) if order["modifyDate"].to_datetime.utc >= import_from }
+            return orders_hash
           end
         end
       end

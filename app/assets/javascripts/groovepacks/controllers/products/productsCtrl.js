@@ -26,6 +26,7 @@ groovepacks_controllers.
       };
 
       $scope.update_product_list = function (product, prop) {
+        if(!product[prop] /*if null*/){return}
         products.list.update_node({
           id: product.id,
           var: prop,
@@ -253,10 +254,12 @@ groovepacks_controllers.
         $scope._can_load_products = true;
         $scope.gridOptions = {
           identifier: 'products',
+          dynamic_width: true,
           select_all: $scope.select_all_toggle,
           invert: myscope.invert,
           sort_func: $scope.handlesort,
           setup: $scope.products.setup,
+          scrollbar: true,
           selections: {
             show_dropdown: true,
             single_callback: myscope.select_single,
@@ -308,53 +311,65 @@ groovepacks_controllers.
             name: {
               name: "Item Name",
               hideable: false,
-              transclude: '<a href="" ng-click="options.editable.functions.name(row,$event)" >{{row[field]}}</a>'
+              col_length: 25,
+              transclude: '<a href="" ng-click="options.editable.functions.name(row,$event)" tooltip="{{row[field]}}">{{row[field] | cut:true:25:" ..."}}</a>'
             },
             sku: {
-              name: "SKU"
+              name: "SKU",
+              col_length: 25
             },
             status: {
               name: "Status",
+              col_length: 10,
               transclude: "<span class='label label-default' ng-class=\"{" +
               "'label-success': row[field] == 'active', " +
               "'label-info': row[field] == 'new' }\">" +
               "{{row[field]}}</span>"
             },
             barcode: {
+              col_length: 25,
               name: "Barcode"
             },
             location_primary: {
               name: "Primary Location",
+              col_length: 25,
               class: "span3"
             },
             store_name: {
               name: "Store",
+              col_length: 25,
               editable: false
             },
             qty_on_hand: {
               name: "QoH",
+              col_length: 10,
               sortable: false
             },
             available_inv: {
               name: "Avbl Inv",
+              col_length: 5,
               editable: false
             },
             cat: {
               name: "Category",
+              col_length: 15,
               hidden: true
             },
             location_secondary: {
               name: "Secondary Location",
+              col_length: 25,
               class: "span3",
               hidden: true
             },
             location_tertiary: {
               name: "Tertiary Location",
+              col_length: 25,
               class: "span3",
               hidden: true
             },
             location_name: {
               name: "Warehouse Name",
+              col_length: 25,
               class: "span3",
               editable: false,
               hidden: true

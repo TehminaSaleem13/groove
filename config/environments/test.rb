@@ -74,4 +74,8 @@ Groovepacks::Application.configure do
   #Shipstation rest API test api_key and api_secret
   ENV['SHIPSTATION_REST_API_KEY'] = "45893449eae24f2e8bc7992904016ca6"
   ENV['SHIPSTATION_REST_API_SECRET'] = "ddefa497b0fc48c0b162a533920ce990"
+
+  ENV["FAILED_IMPORT_NOTIFICATION_EMAILS"] = "svisamsetty@navaratan.com, groovepacker+importfail@gmail.com, kcpatel006@gmail.com"
+  ENV["PRODUCTS_IMPORT_EMAILS"] = "svisamsetty@navaratan.com, kcpatel006@gmail.com, groovepacker@gmail.com"
+  ENV["PRODUCTS_IMPORT_COMPLETE_EMAILS"] = "kcpatel006@gmail.com"
 end

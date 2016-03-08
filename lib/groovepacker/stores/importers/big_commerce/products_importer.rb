@@ -14,7 +14,7 @@ module Groovepacker
             send_products_import_email(import_products_count) if import_products_count>20000
             response["products"].each do |bc_product|
               @result[:total_imported] = @result[:total_imported] + 1
-              create_single_product(bc_product)
+              create_single_product(bc_product) rescue nil
             end
             send_products_import_complete_email(import_products_count)
             @result

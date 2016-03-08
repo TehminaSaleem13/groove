@@ -113,6 +113,7 @@ Groovepacks::Application.configure do
   ENV['SHOPIFY_API_KEY'] = "1177da0ae0ee723ad479792561c4c480"
   ENV['SHOPIFY_SHARED_SECRET'] = "8f48a567ba58e3ac057253cdde377fc2"
   ENV["SHOPIFY_REDIRECT_HOST"] = "localpacker.com"
+  ENV['SHOPIFY_ONE_TIME_PAYMENT'] = '0'
 
   ENV['BC_CALLBACK_HOST'] = "admin.barcodepacker.com"
   ENV['BC_CLIENT_ID'] = "hcd39v5m3dapbtpa2gpi5f4iz3syjps"
@@ -142,4 +143,8 @@ Groovepacks::Application.configure do
 
   # analytic server
   ENV["GROOV_ANALYTIC"] = "localhost:4000"
+
+  ENV["FAILED_IMPORT_NOTIFICATION_EMAILS"] = ""
+  ENV["PRODUCTS_IMPORT_EMAILS"] = ""
+  ENV["PRODUCTS_IMPORT_COMPLETE_EMAILS"] = ""
 end
