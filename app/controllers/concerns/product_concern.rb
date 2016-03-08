@@ -2,8 +2,9 @@ module ProductConcern
   extend ActiveSupport::Concern
   
   included do
-    before_filter :groovepacker_authorize!
-    before_filter :init_result_object
+    prepend_before_filter :groovepacker_authorize!
+    prepend_before_filter :init_result_object
+    before_filter :init_products_service, only: [:import_images]
     include ProductsHelper
     include Groovepacker::Orders::ResponseMessage
   end
@@ -11,6 +12,14 @@ module ProductConcern
   private
     def gp_products_module
       Groovepacker::Products::Products.new(result: @result, params_attrs: params, current_user: current_user)
+    end
+
+    def init_products_service
+      @product_service = ProductService::ProductService.new(result: @result, params: params, current_user: current_user)
+    end
+
+    def init_products_import_service(store)
+      Groovepacker::Products::Import.new(result: @result, params: params, current_user: current_user, store: store)
     end
 
     def init_result_object
@@ -99,5 +108,26 @@ module ProductConcern
         @result['status'] = false
         @result['messages'].push("Invalid data sent to the server")
       end
+    end
+
+    def make_products_list(products)
+      @products_result = []
+      products.each do |product|
+        product_hash = get_single_product_info(product)
+        @products_result.push(product_hash)
+      end
+      return @products_result
+    end
+
+    def get_products_count
+      count, all = {}, 0
+      counts = Product.get_count(params)
+      counts.each do |single|
+        count[single.status] = single.count
+        all += single.count
+      end
+      count['all'] = all
+      count['search'] = 0
+      count
     end
 end
