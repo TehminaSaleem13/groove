@@ -499,13 +499,16 @@ class Product < ActiveRecord::Base
   end
 
   def generate_barcode(result)
-    return result unless product_barcodes.blank?
-    sku = product_skus.first
-    return result if sku.nil?
-    barcode = generate_barcode_from_sku(sku)
-    unless barcode.errors.blank?
-      result['status'] &= false
-      result['messages'].push(barcode.errors.full_messages)
+    if product_barcodes.blank?
+      sku = product_skus.first
+      unless sku.nil?
+        barcode = product_barcodes.new
+        barcode.barcode = sku.sku
+        unless barcode.save
+          result['status'] &= false
+          result['messages'].push(barcode.errors.full_messages)
+        end
+      end
     end
     update_product_status
     return result
