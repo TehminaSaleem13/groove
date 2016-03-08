@@ -61,6 +61,16 @@
   border-radius: 18px;
 }
 
+.well-footer p {
+  background-color: #ffcccc;
+  color: #ff0000;
+  margin-top: 10px;
+  min-height: 0px;
+  font-size: 18px;
+  border-radius: 18px;
+  padding: 10px;
+}
+
 .well.well-notes {
   border: 1px solid #B6B2B2;
   border-radius: 15px;
