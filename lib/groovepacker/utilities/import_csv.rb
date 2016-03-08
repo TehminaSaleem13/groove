@@ -22,14 +22,14 @@ class ImportCsv
         response = groove_ftp.download(tenant)
         if response[:status]
           file_path = response[:file_info][:file_path]
-          csv_file = File.read(file_path).encode(Encoding.find('ASCII'), encoding_options)
+          csv_file = File.read(file_path).encode(Encoding.find('ASCII'), encoding_options) rescue nil
         else
           result[:status] = false
           result[:messages].push(response[:error_messages])
         end
       else
         file = GroovS3.find_csv(tenant, params[:type], params[:store_id])
-        csv_file = file.content.encode(Encoding.find('ASCII'), encoding_options)
+        csv_file = file.content.encode(Encoding.find('ASCII'), encoding_options) rescue nil
       end
       if csv_file.nil?
         result[:status] = false
