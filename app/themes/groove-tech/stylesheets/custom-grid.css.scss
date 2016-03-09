@@ -10,11 +10,12 @@
     &:hover{
       .grid-editable-field{
         background-color: rgb(230, 228, 228);
-        border-color: #C5C4C4;
+        border-color: #8AC007;
         border-style: solid;
         border-width: thin;
-        border-radius: 3px;
+        border-radius: 3px 0 0 3px;
         min-width: 5rem;
+        box-shadow: 3px 3px 5px #aaa;
       }
     }
   }
@@ -31,8 +32,16 @@
 
 .datagrid-pencil{
   cursor: pointer;
+  color: #8AC007 - 50;
   font-size: 2rem;
   vertical-align: text-top;
+  border: 1px solid #8AC007;
+  padding: 0.5rem 0.8rem;
+  margin-top: -0.9rem;
+  margin-right: -3.8rem !important;
+  background-color: #8AC007 + 15;
+  border-radius: 0 3px 3px 0;
+  box-shadow: 3px 3px 5px #aaa;
 }
 
 .table-parent::-webkit-scrollbar, .suwala-doubleScroll-scroll-wrapper::-webkit-scrollbar {
