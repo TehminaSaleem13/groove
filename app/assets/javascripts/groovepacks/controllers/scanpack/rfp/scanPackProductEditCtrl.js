@@ -20,7 +20,7 @@ groovepacks_controllers.
       };
 
       $scope.update_product_list = function (product, prop) {
-        if(!product[prop] /*if null*/){return}
+        if(prop == 'barcode' && !product[prop] && product['status'] != 'active' /*if null*/){return}
         products.list.update_node({
           id: product.id,
           var: prop,
@@ -38,6 +38,7 @@ groovepacks_controllers.
           identifier: 'scanpackinactiveornew',
           setup: $scope.products.setup,
           scrollbar: false,
+          no_of_lines: 3,
           data: {order_num: $stateParams.order_num},
           editable: {
             array: false,
@@ -62,7 +63,7 @@ groovepacks_controllers.
             name: {
               name: "Item Name",
               col_length: 30,
-              transclude: '<a ui-sref="scanpack.rfp.product_edit.single({order_num: options.data.order_num, product_id: row.id })" style="text-decoration: none" tooltip=\'{{row[field].length ? row[field].chunk(25).join(" ") : ("Edit" + field)}}\'>{{row[field] | cut:false:25:" ..."}}</a>'
+              transclude: '<a ui-sref="scanpack.rfp.product_edit.single({order_num: options.data.order_num, product_id: row.id })" style="text-decoration: none" tooltip=\'{{row[field].length ? row[field].chunk(25).join(" ") : ("Edit" + field)}}\'>{{row[field] | cut:false:(25*options.no_of_lines)}}</a>'
             },
             status: {
               name: "Status",
