@@ -31,7 +31,6 @@ groovepacks_controllers.
         }
       };
       $scope.update_order_list = function (order, prop) {
-        if(!order[prop] /*if null*/){return}
         orders.list.update_node({
           id: order.id,
           var: prop,

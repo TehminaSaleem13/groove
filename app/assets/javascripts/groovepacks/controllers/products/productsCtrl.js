@@ -26,7 +26,7 @@ groovepacks_controllers.
       };
 
       $scope.update_product_list = function (product, prop) {
-        if(!product[prop] /*if null*/){return}
+        if(prop == 'barcode' && !product[prop] && product['status'] != 'active' /*if null*/){return}
         products.list.update_node({
           id: product.id,
           var: prop,
@@ -313,7 +313,7 @@ groovepacks_controllers.
               name: "Item Name",
               hideable: false,
               col_length: 20,
-              transclude: '<a href="" ng-click="options.editable.functions.name(row,$event)" tooltip="{{row[field]}}">{{row[field].chunk(25).join(" ") | cut:true:50:" ..."}}</a>'
+              transclude: '<a href="" ng-click="options.editable.functions.name(row,$event)" tooltip="{{row[field]}}">{{row[field].chunk(25).join(" ") | cut:true:(25*options.no_of_lines)}}</a>'
             },
             sku: {
               name: "SKU",
