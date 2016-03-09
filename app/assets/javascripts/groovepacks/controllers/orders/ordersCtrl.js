@@ -369,7 +369,7 @@ groovepacks_controllers.
             },
             notes: {
               name: "Notes",
-              col_length: 25,
+              col_length: 20,
               enable_edit: true
             },
             order_date: {
@@ -396,12 +396,12 @@ groovepacks_controllers.
             },
             email: {
               name: "Email",
-              col_length: 25,
+              col_length: 20,
               hidden: true
             },
             tracking_num: {
               name: "Tracking Id",
-              col_length: 25,
+              col_length: 20,
               hidden: true
             },
             city: {
@@ -429,7 +429,7 @@ groovepacks_controllers.
             $scope.gridOptions.all_fields.custom_field_one = {
               name: custom_fields[0],
               hidden: true,
-              col_length: 25,
+              col_length: 20,
               enable_edit: true
             }
           }
@@ -437,7 +437,7 @@ groovepacks_controllers.
             $scope.gridOptions.all_fields.custom_field_two = {
               name: custom_fields[1],
               hidden: true,
-              col_length: 25,
+              col_length: 20,
               enable_edit: true
             }
           }
