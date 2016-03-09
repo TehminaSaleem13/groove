@@ -1,5 +1,5 @@
 class MagentoRestController < ApplicationController
-  before_filter :groovepacker_authorize!, :except => [:callback, :success]
+  before_filter :groovepacker_authorize!, :except => [:callback, :redirect]
   before_filter :initialize_response_hash
   before_filter :find_store_credential, :only => [:magento_authorize_url, :get_access_token, :disconnect]
   include Groovepacker::MagentoRest::MagentoRestCommon

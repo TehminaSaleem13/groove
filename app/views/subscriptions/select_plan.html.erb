@@ -14,108 +14,47 @@
       <p>Choose Your Free Trial Account Type</p>
     </div>
   </div>
-  <div class="col-md-2 price-column">
-    <div class="col-box-primary">
-      Duo<br>$60<br> /Month
-    </div>
-    <div class="col-box">
-      2,200 Shipments<br/> <i class="fa fa-dropbox" style="font-size: 26px;"></i>
-    </div>
-    <div class="col-box">
-      2 Users<br/> <i class="fa fa-user" style="font-size: 32px; margin-top: 5px;"></i>
-    </div>
-    <br/>
+  <% for i in 0..@plans_info.length-1 %>
+    <div class="col-md-2 price-column">
+      <div class="col-box-primary">
+        <%= @plans_info[i]['plan_name'] %><br>$<%= @plans_info[i]['plan_amount'] %><br> /Month
+      </div>
+      <div class="col-box">
+        <%= @plans_info[i]['shipments'] %></br> Shipments<br/> <i class="fa fa-dropbox" style="font-size: 40px;"></i>
+      </div>
+      <div class="col-box">
+        <%= @plans_info[i]['users'] %> Users<br/>
+        <% for j in 1..@plans_info[i]['users'].to_i %>
+          <% if @plans_info[i]['users'].to_i > 4 %>
+            <i class="fa fa-user" style="font-size: 20px; margin-top: 5px;"></i>
+          <% else %>
+            <i class="fa fa-user" style="font-size: 40px; margin-top: 5px;"></i>
+          <% end %>
+        <% end %>
+      </div>
+      <div class="col-box">
+        <%= @plans_info[i]['stores'] %><br/>&nbsp;Import&nbsp;Sources&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/> <i class="fa fa-cloud-download" style="font-size: 40px; margin-top: 0px;"></i>
+      </div>
+      <br/>
 
-    <div class="text-center">
-      <%= link_to 'Get Started', {action: 'new', controller: 'subscriptions', plan_id: 'groove-duo-60', shop_name: params[:shop_name], shop_type: params[:shop_type], email: params[:email]}, class: "btn btn-success" %>
+      <div class="text-center">
+        <%= link_to 'Get Started', {action: 'new', controller: 'subscriptions', plan_id: @plans_info[i]['plan_id'], shop_name: params[:shop_name], shop_type: params[:shop_type], email: params[:email]}, class: "btn btn-success" %>
+      </div>
     </div>
+  <% end %>
+  <div class="row">
+    <% if @plan != '' %>
+      <div class="col-md-offset-3 col-md-6 well-footer text-center">
+        <p><%=@plan%></p>
+      </div>
+    <% end %>
   </div>
-
-  <div class="col-md-2 price-column">
-    <div class="col-box-primary">
-      Trio<br>$90<br> /Month
-    </div>
-    <div class="col-box">
-      4,500 Shipments<br/> <i class="fa fa-dropbox" style="font-size: 26px;"></i>
-    </div>
-    <div class="col-box">
-      3 Users<br/> <i class="fa fa-user" style="font-size: 32px; margin-top: 5px;"></i>
-    </div>
-    <br/>
-
-    <div class="text-center">
-      <%= link_to 'Get Started', {action: 'new', controller: 'subscriptions', plan_id: 'groove-trio-90', shop_name: params[:shop_name], shop_type: params[:shop_type], email: params[:email]}, class: "btn btn-success" %>
-    </div>
-  </div>
-
-  <div class="col-md-2 price-column">
-    <div class="col-box-primary">
-      Quartet<br>$120<br> /Month
-    </div>
-    <div class="col-box">
-      6,700 Shipments<br/> <i class="fa fa-dropbox" style="font-size: 26px;"></i>
-    </div>
-    <div class="col-box">
-      4 Users<br/> <i class="fa fa-user" style="font-size: 32px; margin-top: 5px;"></i>
-    </div>
-    <br/>
-
-    <div class="text-center">
-      <%= link_to 'Get Started', {action: 'new', controller: 'subscriptions', plan_id: 'groove-quartet-120', shop_name: params[:shop_name], shop_type: params[:shop_type], email: params[:email]}, class: "btn btn-success" %>
-    </div>
-  </div>
-
-  <div class="col-md-2 price-column">
-    <div class="col-box-primary">
-      Quintet<br>$150<br> /Month
-    </div>
-    <div class="col-box">
-      9,000 Shipments<br/> <i class="fa fa-dropbox" style="font-size: 26px;"></i>
-    </div>
-    <div class="col-box">
-      5 Users<br/> <i class="fa fa-user" style="font-size: 32px; margin-top: 5px;"></i>
-    </div>
-    <br/>
-
-    <div class="text-center">
-      <%= link_to 'Get Started', {action: 'new', controller: 'subscriptions', plan_id: 'groove-quintet-150', shop_name: params[:shop_name], shop_type: params[:shop_type], email: params[:email]}, class: "btn btn-success" %>
-    </div>
-  </div>
-
-
-  <div class="col-md-2 price-column">
-    <div class="col-box-primary">
-      Big Band<br>$210<br> /Month
-    </div>
-    <div class="col-box">
-      14,000 Shipments<br/> <i class="fa fa-dropbox" style="font-size: 26px;"></i>
-    </div>
-    <div class="col-box">
-      7 Users<br/> <i class="fa fa-user" style="font-size: 32px; margin-top: 5px;"></i>
-    </div>
-    <br/>
-
-    <div class="text-center">
-      <%= link_to 'Get Started', {action: 'new', controller: 'subscriptions', plan_id: 'groove-bigband-210', shop_name: params[:shop_name], shop_type: params[:shop_type], email: params[:email]}, class: "btn btn-success" %>
-    </div>
-  </div>
-
-
-  <div class="col-md-2 price-column">
-    <div class="col-box-primary">
-      Symphony<br>$300<br> /Month
-    </div>
-    <div class="col-box">
-      20,000 Shipments<br/> <i class="fa fa-dropbox" style="font-size: 26px;"></i>
-    </div>
-    <div class="col-box">
-      10 Users<br/> <i class="fa fa-user" style="font-size: 32px; margin-top: 5px;"></i>
-    </div>
-    <br/>
-
-    <div class="text-center">
-      <%= link_to 'Get Started', {action: 'new', controller: 'subscriptions', plan_id: 'groove-symphony-300', shop_name: params[:shop_name], shop_type: params[:shop_type], email: params[:email]}, class: "btn btn-success" %>
-    </div>
+  <div class="row">
+    <% if @plan != '' %>
+      <div class="col-md-offset-3 col-md-6 well-footer text-center">
+        <p><%=@plan%></p>
+      </div>
+    <% end %>
   </div>
 </div>
 
