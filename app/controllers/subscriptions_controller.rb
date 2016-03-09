@@ -10,7 +10,7 @@ class SubscriptionsController < ApplicationController
       position = params[:plan_id].length - params[:plan_id].split('-').pop().length - 1
       @annually_amount = Stripe::Plan.retrieve('an-' + params[:plan_id][0..position-1]).amount
     rescue Stripe::InvalidRequestError => e
-      @plan = 'Select A Plan From The List'
+      @plan = 'Please Select A Plan From The List'
       render :select_plan
     end
   end
