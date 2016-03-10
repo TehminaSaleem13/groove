@@ -25,6 +25,7 @@ class SendStatStream
         GroovelyticsMailer.groovelytics_request_failed(tenant).deliver if !Rails.env.production?
       end
     rescue Exception => e
+      Rails.logger.error e.message
       Rails.logger.error e.backtrace.join("\n")
       GroovelyticsMailer.groovelytics_request_failed(tenant).deliver if !Rails.env.production?
     end
