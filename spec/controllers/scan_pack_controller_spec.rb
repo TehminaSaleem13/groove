@@ -400,7 +400,7 @@ RSpec.describe ScanPackController, :type => :controller do
       order2 = FactoryGirl.create(:order, increment_id: '#123-456')
       order3 = FactoryGirl.create(:order, increment_id: '#111-456')
 
-      get :scan_barcode, { id: order.id, :state => "scanpack.rfp.verifying", :input => '11223344556677889900' }
+      get :scan_barcode, { id: order.id, :state => "scanpack.rfp.verifying", :input => '123-456..11223344556677889900' }
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
       expect(result["status"]).to eq(true)
@@ -483,7 +483,7 @@ RSpec.describe ScanPackController, :type => :controller do
       expect(order.order_activities.pluck :action).to include("The correct shipping label was not verified at the time of packing."\
       " Confirmation code for user #{@user.username} was scanned")
 
-      get :scan_barcode, { id: order2.id, :state => "scanpack.rfp.no_match", :input => '11223344556677889900' }
+      get :scan_barcode, { id: order2.id, :state => "scanpack.rfp.no_match", :input => '#123-456-track-11223344556677889900' }
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
       expect(result["status"]).to eq(true)
