@@ -48,27 +48,33 @@
               <div ng-class='{"grid-editable-field": !editable[field][$parent.$parent.$index]}'
                 ng-hide="editable[field][$parent.$parent.$index]"
                 style="min-width:{{options.all_fields[field].col_length || options.col_length}}rem">
-                <a class='fa fa-pencil datagrid-pencil pull-right'
-                  ng-show="row.show_pencil[field] && !editable[field][$parent.$parent.$index]" groov-click="compile($parent.$parent.$index,field)"></a>
+                <span class='fa fa-pencil datagrid-pencil pull-right'
+                    ng-show="row.show_pencil[field] && !editable[field][$parent.$parent.$index]" groov-click="compile($parent.$parent.$index,field)"></span>
                 <span bo-if="options.all_fields[field].transclude == '' && row[field] !== null && row[field].length > 25"
-                      bo-text="row[field].chunk(25).join(' ') | cut:false:25"
-                      tooltip='{{row[field].chunk(25).join(" ")}}'>
+                      bo-text="row[field].chunk(25).join(' ') | cut:false:(25*options.no_of_lines)"
+                      tooltip='{{row[field].chunk(25).join(" ")}}'
+                      class="grid-text">
                 </span>
                 <span bo-if="options.all_fields[field].transclude == '' && row[field] !== null && row[field].length < 25"
-                      bo-text="row[field].chunk(25).join(' ') | cut:false:25">
+                      bo-text="row[field].chunk(25).join(' ') | cut:false:(25*options.no_of_lines)" class="grid-text">
                 </span>
                 <span bo-if="options.all_fields[field].transclude == '' && (row[field] == null || !row[field].length)"
-                    tooltip="{{'Edit ' + field}}">
+                    tooltip="{{'Edit ' + field}}" class="grid-text">
                   &nbsp;{{row[field]}}</span>
                 <span bo-if="options.all_fields[field].transclude != ''"
-                      ng-bind-html="options.all_fields[field].transclude" compile-template>&nbsp;</span>
+                      ng-bind-html="options.all_fields[field].transclude" class="grid-text" compile-template>&nbsp;</span>
               </div>
               <div ng-bind-html="editable[field][$parent.$parent.$index]" compile-template></div>
             </div>
             <div bo-if="options.editable == false || options.all_fields[field].editable == false">
               <span bo-if="options.all_fields[field].transclude != '' "
                     ng-bind-html="options.all_fields[field].transclude" compile-template></span>
-              <span bo-if="options.all_fields[field].transclude == '' && row[field] !== null" bo-text="row[field] | cut:false:25:' ...'"  tooltip='{{row[field].chunk(25).join(" ")}}'></span>
+              <span bo-if="options.all_fields[field].transclude == '' && row[field] !== null && row[field].length < 25"
+                    bo-text="row[field].chunk(25).join(' ') | cut:false:(25*options.no_of_lines)" class="grid-text">
+              </span>
+              <span bo-if="options.all_fields[field].transclude == '' && (row[field] == null || !row[field].length)"
+                  tooltip="{{'Edit ' + field}}" class="grid-text">
+                &nbsp;{{row[field]}}</span>
             </div>
           </td>
 
