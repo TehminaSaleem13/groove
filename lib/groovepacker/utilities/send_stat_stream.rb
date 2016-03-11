@@ -14,7 +14,7 @@ class SendStatStream
   def send_stream(tenant, stat_stream, order_id)
     begin
       # response = HTTParty.post("http://#{ENV["GROOV_ANALYTIC"]}/dashboard",
-      response = HTTParty.post("http://#{tenant}stat.#{ENV["GROOV_ANALYTIC"]}/dashboard",
+      response = HTTParty.post("https://#{tenant}stat.#{ENV["GROOV_ANALYTIC"]}/dashboard",
         query: {tenant_name: tenant},
         body: stat_stream.to_json,
         headers: { 'Content-Type' => 'application/json' })
@@ -25,6 +25,7 @@ class SendStatStream
         GroovelyticsMailer.groovelytics_request_failed(tenant).deliver if !Rails.env.production?
       end
     rescue Exception => e
+      Rails.logger.error e.message
       Rails.logger.error e.backtrace.join("\n")
       GroovelyticsMailer.groovelytics_request_failed(tenant).deliver if !Rails.env.production?
     end

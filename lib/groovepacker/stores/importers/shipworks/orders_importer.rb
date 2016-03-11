@@ -150,9 +150,10 @@ module Groovepacker
           end
 
           def import_product(item, store)
+            item_name = item["Name"].blank? ? "Product Created by Shipworks Import" : item["Name"]
             product = Product.create(
               store: store,
-              name: item["Name"],
+              name: item_name,
               weight: item["Weight"],
               store_product_id: item["ID"]
             )
