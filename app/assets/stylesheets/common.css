@@ -27,7 +27,7 @@
   background: #73AE0C;
   color: #ffffff;
   border: 1px solid #dddddd;
-  height: 90px;
+  height: 100px;
   font-size: 18px;
   font-family: Play, sans-serif;
   letter-spacing: 1.7px;
@@ -41,7 +41,7 @@
   background: #ffffff;
   color: #494949;
   border: 1px solid #dddddd;
-  height: 90px;
+  height: 100px;
   font-size: 18px;
   font-family: Play, sans-serif;
   letter-spacing: 1.2px;
@@ -50,7 +50,9 @@
 }
 
 .col-md-2.price-column {
-  width: 16.6%;
+  width: 16.66666667%;
+  padding-left: 0px;
+  padding-right: 0px;
 }
 
 .well-header p {
@@ -59,6 +61,16 @@
   padding: 10px;
   font-size: 18px;
   border-radius: 18px;
+}
+
+.well-footer p {
+  background-color: #ffcccc;
+  color: #ff0000;
+  margin-top: 10px;
+  min-height: 0px;
+  font-size: 18px;
+  border-radius: 18px;
+  padding: 10px;
 }
 
 .well.well-notes {
