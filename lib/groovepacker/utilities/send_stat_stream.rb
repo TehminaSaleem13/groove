@@ -13,6 +13,7 @@ class SendStatStream
 
   def send_stream(tenant, stat_stream, order_id)
     begin
+      HTTParty::Basement.default_options.update(verify: false)
       # response = HTTParty.post("http://#{ENV["GROOV_ANALYTIC"]}/dashboard",
       response = HTTParty.post("https://#{tenant}stat.#{ENV["GROOV_ANALYTIC"]}/dashboard",
         query: {tenant_name: tenant},
@@ -28,6 +29,8 @@ class SendStatStream
       Rails.logger.error e.message
       Rails.logger.error e.backtrace.join("\n")
       GroovelyticsMailer.groovelytics_request_failed(tenant).deliver if !Rails.env.production?
+    ensure
+      HTTParty::Basement.default_options.update(verify: true)
     end
   end
 end
