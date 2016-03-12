@@ -307,6 +307,7 @@ groovepacks_controllers.
             image: {
               name: "Image",
               editable: false,
+              col_length: 15,
               transclude: '<div ng-click="options.editable.functions.name(row,$event)" class="pointer single-image"><img class="img-responsive" ng-src="{{row.image}}" /></div>'
             },
             name: {
