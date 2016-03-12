@@ -339,7 +339,6 @@ groovepacks_controllers.
             },
             store_name: {
               name: "Store",
-              col_length: 20,
               editable: false
             },
             qty_on_hand: {
@@ -349,7 +348,6 @@ groovepacks_controllers.
             },
             available_inv: {
               name: "Avbl Inv",
-              col_length: 7,
               editable: false
             },
             cat: {
@@ -371,7 +369,6 @@ groovepacks_controllers.
             },
             location_name: {
               name: "Warehouse Name",
-              col_length: 20,
               class: "span3",
               editable: false,
               hidden: true
