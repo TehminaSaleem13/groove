@@ -1,4 +1,4 @@
-groovepacks_directives.directive('groovDataGrid', ['$timeout', '$http', '$sce', 'settings', 'hotkeys' , 'editable', function ($timeout, $http, $sce, settings, hotkeys, editable) {
+groovepacks_directives.directive('groovDataGrid', ['$timeout', '$http', '$sce', 'settings', 'hotkeys' , 'editable', 'notification', function ($timeout, $http, $sce, settings, hotkeys, editable, notification) {
   var default_options = function () {
     return {
       identifier: 'datagrid',
@@ -8,6 +8,7 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout', '$http', '$sce', 
       scrollbar: false,
       col_length: 25,
       no_of_lines: 1,
+      copyable: false,
       selections: {
         single_callback: function () {
         },
@@ -136,6 +137,10 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout', '$http', '$sce', 
         }
       };
 
+      scope.copied = function(msg){
+        notification.notify('copied ' + msg + ' to clipboard', 1);
+      }
+
       scope.update = function () {
         myscope.make_theads(scope.theads);
         settings.column_preferences.save(scope.options.identifier, scope.theads);
@@ -150,13 +155,13 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout', '$http', '$sce', 
           scope.editable[field][ind] = $sce.trustAsHtml(
             '<div ng-class="{\'grid-editable-field\': !editable_modal.status()}" ' + 
                 'style="width:' + (scope.options.all_fields[field].col_length || scope.options.col_length) + 'rem" ' + 
-                //'ng-mouseover="row.show_pencil ? (row.show_pencil[field]=true) : (row.show_pencil={})"' +
-                //'ng-mouseleave="row.show_pencil ? (row.show_pencil[field]=false) : (row.show_pencil={})" ' + 
+                //'ng-mouseover="row.show_action_icon ? (row.show_action_icon[field]=true) : (row.show_action_icon={})"' +
+                //'ng-mouseleave="row.show_action_icon ? (row.show_action_icon[field]=false) : (row.show_action_icon={})" ' + 
                 'groov-editable="options.editable" prop="{{field}}" ng-model="' +
                 scope.options.all_fields[field].model + '" identifier="' +
                 scope.options.identifier + '_list-' + field + '-' + ind + '">' +
               '<span class="pull-right fa datagrid-pencil fa-pencil pointer" ' +
-                'ng-show="row.show_pencil[field]" groov-click="compile(' + ind + ',\'' +field+ '\')">' +
+                'ng-show="row.show_action_icon[field]" groov-click="compile(' + ind + ',\'' +field+ '\')">' +
               '</span>' +
               scope.options.all_fields[field].transclude +
             '</div>'
