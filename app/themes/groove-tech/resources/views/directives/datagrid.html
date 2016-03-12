@@ -41,7 +41,7 @@
         <tr ng-click="check_uncheck(row,$index,$event)" ng-repeat="row in rows"
             ng-class="{selected: row.checked, inverted:options.setup.inverted}">
           <td ng-repeat="field in theads" ng-mouseover="row.show_action_icon ? (row.show_action_icon[field]=true) : (row.show_action_icon={})" ng-mouseleave="row.show_action_icon ? (row.show_action_icon[field]=false) : (show_action_icon={})">
-            <div style="display:inline-block; min-height:4rem;"
+            <div style="display:inline-block;"
               bo-if="options.editable != false && options.all_fields[field].editable == true"
               hm-press="compile($parent.$parent.$index,field)" groov-rt-click="compile($parent.$parent.$index,field)"
               >
@@ -66,7 +66,7 @@
               </div>
               <div ng-bind-html="editable[field][$parent.$parent.$index]" compile-template></div>
             </div>
-            <div style="display:inline-block; min-height:4rem;"
+            <div style="display:inline-block;"
               bo-if="options.editable == false || options.all_fields[field].editable == false"
               >
               <div ng-class='{"grid-editable-field": options.all_fields[field].copyable}'
