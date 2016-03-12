@@ -22,7 +22,9 @@ SimpleCov.start 'rails' do
   add_filter '/config/'
 
   add_group 'Controllers', 'app/controllers'
+  add_group 'Controllers Concern', 'app/controllers/concerns'
   add_group 'Models', 'app/models'
+  add_group 'Models Concern', 'app/models/concerns'
   add_group 'Helpers', 'app/helpers'
   add_group 'Mailers', 'app/mailers'
   add_group 'Views', 'app/views'

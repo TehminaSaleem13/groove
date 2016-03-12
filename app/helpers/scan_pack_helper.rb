@@ -2,10 +2,10 @@ module ScanPackHelper
 
   include OrdersHelper
   include ScanPack
-
-  def order_scan(input, state, id)
+  
+  def order_scan(input, state, id, options={})
     order_scan_object = ScanPack::OrderScanService.new(
-      current_user, session, input, state, id
+      options[:current_user], options[:session], input, state, id
     )
     order_scan_object.run
   end
@@ -23,11 +23,14 @@ module ScanPackHelper
   #   true
   # end
 
-  def product_scan(input, state, id, clicked=false, serial_added=false, typein_count= 1)
+  def product_scan(input, state, id, options={})
     product_scan_object = ScanPack::ProductScanService.new(
-      [current_user, session, input, state, id, typein_count]
-      )
-    product_scan_object.run(clicked, serial_added)
+      [
+        options[:current_user], options[:session],
+        input, state, id, options[:typein_count] || 1
+      ]
+    )
+    product_scan_object.run(options[:clicked], options[:serial_added])
   end
 
   # def process_scan(clicked, order_item, serial_added, result)
@@ -62,51 +65,51 @@ module ScanPackHelper
   #   end
   # end
 
-  def scan_recording(input, state, id)
+  def scan_recording(input, state, id, options={})
     scan_recording_object = ScanPack::ScanRecordingService.new(
-      [current_user, input, id]
+      [options[:current_user], input, id]
       )
     scan_recording_object.run
   end
 
-  def scan_verifying(input, state, id)
+  def scan_verifying(input, state, id, options={})
     scan_verifying_object = ScanPack::ScanVerifyingService.new(
-      [current_user, input, id]
+      [options[:current_user], input, id]
       )
     scan_verifying_object.run
   end
 
-  def render_order_scan(input, state, id)
+  def render_order_scan(input, state, id, options={})
     render_order_scan_object = ScanPack::RenderOrderScanService.new(
-      [current_user, input, state, id]
+      [options[:current_user], input, state, id]
       )
     render_order_scan_object.run
   end
 
-  def scan_again_or_render_order_scan(input, state, id)
+  def scan_again_or_render_order_scan(input, state, id, options={})
     scan_again_or_render_order_scan_object = ScanPack::ScanAginOrRenderOrderScanService.new(
-      [current_user, input, state, id]
+      [options[:current_user], input, state, id]
       )
     scan_again_or_render_order_scan_object.run
   end
 
-  def order_edit_conf(input, state, id)
+  def order_edit_conf(input, state, id, options={})
     order_edit_conf_object = ScanPack::OrderEditConfService.new(
-      [session, input, state, id]
+      [options[:session], input, state, id]
       )
     order_edit_conf_object.run('order_edit_conf')
   end
 
-  def cos_conf(input, state, id)
+  def cos_conf(input, state, id, options={})
     cos_conf_object = ScanPack::CosConfService.new(
-      [session, input, state, id]
+      [options[:session], input, state, id]
       )
     cos_conf_object.run('cos_conf')
   end
 
-  def product_edit_conf(input, state, id)
+  def product_edit_conf(input, state, id, options={})
     product_edit_conf_object = ScanPack::ProductEditConfService.new(
-      [session, input, state, id]
+      [options[:session], input, state, id]
       )
     product_edit_conf_object.run('product_edit_conf')
   end

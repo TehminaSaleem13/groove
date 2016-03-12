@@ -27,8 +27,9 @@ class ScanPack::ScanVerifyingService < ScanPack::Base
   end
 
   def scan_verifying
+    tracking_num = @order.tracking_num.try(:gsub, /^(\#*)/, '').try{|a| a.gsub(/(\W)/){|c| "\\#{c}"}}
     case true
-    when @input.present? && (@order.tracking_num == @input || @order.tracking_num == @input.last(22))
+    when @input.present? && tracking_num && @input.match(/#{tracking_num}/).present?
       do_if_tracking_number_eql_input
     when @input.present? && (@input == @current_user.confirmation_code)
       do_if_input_eql_confirmation_code
@@ -44,7 +45,7 @@ class ScanPack::ScanVerifyingService < ScanPack::Base
       'order_complete'=> true,
       'next_state'=> 'scanpack.rfo'
       })
-    @order.addactivity("Shipping Label Verified: #{@input}", @current_user.username)
+    @order.addactivity("Shipping Label Verified: #{@order.tracking_num}", @current_user.username)
     @order.save
   end
 

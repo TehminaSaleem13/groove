@@ -20,13 +20,14 @@ class ScanPack::ScanAginOrRenderOrderScanService < ScanPack::Base
   end
 
   def scan_again_or_render_order_scan
-    tracking_num = @order.tracking_num
-    case @state == "scanpack.rfp.no_match"
-    when @input == @current_user.confirmation_code
+    tracking_num = @order.tracking_num.try(:gsub, /^(\#*)/, '').try{|a| a.gsub(/(\W)/){|c| "\\#{c}"}}
+    no_match_state = @state == "scanpack.rfp.no_match"
+    case true
+    when no_match_state && @input == @current_user.confirmation_code
       do_if_confirmation_code_eql_input
-    when (@input == tracking_num || @input.last(22) == tracking_num)
+    when no_match_state && tracking_num && @input.match(/#{tracking_num}/).present?
       do_if_input_eql_tracking_num
-    when @input == "" && GeneralSetting.all.first.strict_cc == false
+    when no_match_state && @input == "" && GeneralSetting.all.first.strict_cc == false
       do_if_input_is_empty_and_strict_cc_false
     else
       @result['status'] = false
