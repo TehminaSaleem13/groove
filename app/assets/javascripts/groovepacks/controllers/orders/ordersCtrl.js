@@ -346,7 +346,6 @@ groovepacks_controllers.
             ordernum: {
               name: "Order #",
               hideable: false,
-              col_length: 5,
               editable: false,
               copyable: true,
               //transclude:'<a href="" ng-click="function(ngModel.id,false,0,true)">{{ngModel.ordernum}}</a>',
@@ -380,8 +379,7 @@ groovepacks_controllers.
             },
             itemslength: {
               name: "Items",
-              editable: false,
-              col_length: 5
+              editable: false
             },
             recipient: {
               name: "Recipient"
