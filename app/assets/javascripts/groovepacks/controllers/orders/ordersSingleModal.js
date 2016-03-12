@@ -412,6 +412,7 @@ groovepacks_controllers.
           all_fields: {
             image: {
               name: "Primary Image",
+              col_length: 15,
               editable: false,
               transclude: "<div ng-show=\"row.productinfo.is_intangible == false\" " +
               "ng-click=\"options.editable.functions.name(row,$event)\"" +
@@ -433,7 +434,7 @@ groovepacks_controllers.
             },
             status: {
               name: "Status",
-              col_length: 10,
+              col_length: 8,
               model: "row.productinfo",
               transclude: "<span class='label label-default' ng-class=\"{" +
               "'label-success': row.productinfo.status == 'active', " +
