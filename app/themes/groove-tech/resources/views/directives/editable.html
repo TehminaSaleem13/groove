@@ -33,12 +33,15 @@
   </div>
 </div>
 <div ng-if="!editable.array" class="text-center">
-  <div ng-show="editing != 1 || disabled == true"><span ng-transclude></span> <span ng-hide="is_transcluded" class="grid-text" tooltip="{{ngModel[prop]}}">{{ngModel[prop].chunk(10).join(' ') | cut:false:(25*options.no_of_lines)}}</span>
-    &nbsp;</div>
+  <div ng-show="editing != 1 || disabled == true">
+    <span ng-transclude></span>
+    <span ng-hide="is_transcluded" class="grid-text" tooltip="{{ngModel[prop]}}" bo-text="{{ngModel[prop].toString().chunk(10).join(' ') | cut:false:(25*options.no_of_lines)}}"></span>
+    &nbsp;
+  </div>
   <div ng-show="editing == 1 && disabled == false" ng-class="tag_class">
            <span bindonce="input" bo-switch="input.type">
-               <span bo-switch-when="number">
-                   <input bo-id="single_editable_id" class="col-lg-12" ng-model="ngModel[prop]" ng-focus="focus_event()"
+               <span bo-switch-when="number" class='form-group'>
+                   <input bo-id="single_editable_id" class="form-control col-xs-12" ng-model="ngModel[prop]" ng-focus="focus_event()"
                           ng-blur="blur_event()" ng-keydown="handle_key_event($event)" type="number" min="{{input.min}}"
                           max="{{input.max}}" placeholder="Edit..."/>
                </span>
