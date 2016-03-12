@@ -401,7 +401,7 @@ groovepacks_controllers.
             },
             tracking_num: {
               name: "Tracking Id",
-              col_length: 20,
+              col_length: 25,
               hidden: true
             },
             city: {
