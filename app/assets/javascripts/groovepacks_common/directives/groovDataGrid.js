@@ -154,7 +154,7 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout', '$http', '$sce', 
         if (typeof scope.editable[field][ind] == "undefined") {
           scope.editable[field][ind] = $sce.trustAsHtml(
             '<div ng-class="{\'grid-editable-field\': !editable_modal.status()}" ' + 
-                'style="width:' + (scope.options.all_fields[field].col_length || scope.options.col_length) + 'rem" ' + 
+                'style="width:' + (row[field].length > (options.all_fields[field].col_length || options.col_length) ? ((options.all_fields[field].col_length || options.col_length) + 1) : (row[field].length || 5) + 1) + 'rem" ' + 
                 //'ng-mouseover="row.show_action_icon ? (row.show_action_icon[field]=true) : (row.show_action_icon={})"' +
                 //'ng-mouseleave="row.show_action_icon ? (row.show_action_icon[field]=false) : (row.show_action_icon={})" ' + 
                 'groov-editable="options.editable" prop="{{field}}" ng-model="' +
