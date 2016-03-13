@@ -307,6 +307,7 @@ groovepacks_controllers.
             image: {
               name: "Image",
               editable: false,
+              col_length: 15,
               transclude: '<div ng-click="options.editable.functions.name(row,$event)" class="pointer single-image"><img class="img-responsive" ng-src="{{row.image}}" /></div>'
             },
             name: {
@@ -338,17 +339,15 @@ groovepacks_controllers.
             },
             store_name: {
               name: "Store",
-              col_length: 20,
               editable: false
             },
             qty_on_hand: {
               name: "QoH",
-              col_length: 5,
+              col_length: 7,
               sortable: false
             },
             available_inv: {
               name: "Avbl Inv",
-              col_length: 5,
               editable: false
             },
             cat: {
@@ -370,7 +369,6 @@ groovepacks_controllers.
             },
             location_name: {
               name: "Warehouse Name",
-              col_length: 20,
               class: "span3",
               editable: false,
               hidden: true

@@ -400,7 +400,7 @@ RSpec.describe ScanPackController, :type => :controller do
       order2 = FactoryGirl.create(:order, increment_id: '#123-456')
       order3 = FactoryGirl.create(:order, increment_id: '#111-456')
 
-      get :scan_barcode, { id: order.id, :state => "scanpack.rfp.verifying", :input => '11223344556677889900' }
+      get :scan_barcode, { id: order.id, :state => "scanpack.rfp.verifying", :input => '123-456..11223344556677889900' }
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
       expect(result["status"]).to eq(true)
@@ -483,7 +483,7 @@ RSpec.describe ScanPackController, :type => :controller do
       expect(order.order_activities.pluck :action).to include("The correct shipping label was not verified at the time of packing."\
       " Confirmation code for user #{@user.username} was scanned")
 
-      get :scan_barcode, { id: order2.id, :state => "scanpack.rfp.no_match", :input => '11223344556677889900' }
+      get :scan_barcode, { id: order2.id, :state => "scanpack.rfp.no_match", :input => '#123-456-track-11223344556677889900' }
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
       expect(result["status"]).to eq(true)
@@ -1702,13 +1702,13 @@ RSpec.describe ScanPackController, :type => :controller do
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
       expect(result['status']).to eq(false)
-      expect(result['error_messages']).to include('Product Serial number: "KITITEM1" can not be the same as a confirmation code, one of the action codes or any product barcode')
+      expect(result['error_messages']).to include("Product Serial number: KITITEM1 can not be the same as a confirmation code, one of the action codes or any product barcode")
 
       get :serial_scan, {barcode: 'KITITEM1', clicked: true, :order_id => order.id, product_id: product_kit.id, serial: 'SKIP'}
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
       expect(result['status']).to eq(false)
-      expect(result['error_messages']).to include('Product Serial number: "SKIP" can not be the same as a confirmation code, one of the action codes or any product barcode')
+      expect(result['error_messages']).to include("Product Serial number: SKIP can not be the same as a confirmation code, one of the action codes or any product barcode")
 
       @user.confirmation_code = '123456'
       @user.save!
@@ -1716,7 +1716,7 @@ RSpec.describe ScanPackController, :type => :controller do
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
       expect(result['status']).to eq(false)
-      expect(result['error_messages']).to include('Product Serial number: "123456" can not be the same as a confirmation code, one of the action codes or any product barcode')
+      expect(result['error_messages']).to include("Product Serial number: 123456 can not be the same as a confirmation code, one of the action codes or any product barcode")
     end
 
     it "should scan by click" do

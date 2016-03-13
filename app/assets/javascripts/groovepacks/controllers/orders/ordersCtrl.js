@@ -347,6 +347,7 @@ groovepacks_controllers.
               name: "Order #",
               hideable: false,
               editable: false,
+              copyable: true,
               //transclude:'<a href="" ng-click="function(ngModel.id,false,0,true)">{{ngModel.ordernum}}</a>',
               transclude: '<a href="" ng-click="options.editable.functions.ordernum(row,$event)" >{{row[field]}}</a>'
             },
@@ -400,7 +401,7 @@ groovepacks_controllers.
             },
             tracking_num: {
               name: "Tracking Id",
-              col_length: 20,
+              col_length: 25,
               hidden: true
             },
             city: {

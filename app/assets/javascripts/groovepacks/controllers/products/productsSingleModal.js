@@ -463,7 +463,7 @@ groovepacks_controllers.
             quantity_on_hand: {
               name: 'QoH',
               model: 'row.info',
-              col_length: 10,
+              col_length: 5,
               transclude: '<span>{{row.info.quantity_on_hand}}</span>'
             },
             sold_inv: {
