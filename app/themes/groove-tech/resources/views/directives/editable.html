@@ -35,7 +35,7 @@
 <div ng-if="!editable.array" class="text-center">
   <div ng-show="editing != 1 || disabled == true">
     <span ng-transclude></span>
-    <span ng-hide="is_transcluded" class="grid-text" tooltip="{{ngModel[prop]}}">{{ngModel[prop].toString().chunk(25).join(' ') | cut:false:(25*options.no_of_lines)}}</span>
+    <span ng-hide="is_transcluded" class="grid-text" tooltip="{{ngModel[prop]}}" ng-bind="ngModel[prop].toString().chunk(25).join(' ') | cut:false:(25*options.no_of_lines)"></span>
     &nbsp;
   </div>
   <div ng-show="editing == 1 && disabled == false" ng-class="tag_class">
