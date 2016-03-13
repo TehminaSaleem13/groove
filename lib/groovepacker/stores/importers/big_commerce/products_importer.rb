@@ -103,6 +103,7 @@ module Groovepacker
               make_product_intangible(product)
               #product.update_product_status
               product.set_product_status
+              @result = self.build_result unless @result
               @result[:success_imported] = @result[:success_imported] + 1
               product
             end
