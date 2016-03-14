@@ -5,8 +5,9 @@ Groovepacks::Application.config.session_store :redis_session_store, {
     redis: {
         expire_after: 12.hours,
         key_prefix: 'groovepacks:session:',
-        host:'localhost',
-        port:6379
+        host: ENV['REDIS_HOST'],
+        port: 7743,
+        password: ENV['REDIS_PASSWORD']
         #client: $redis
     }
 }

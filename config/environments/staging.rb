@@ -93,8 +93,10 @@ Groovepacks::Application.configure do
     :password => 'ckWnOifHhLOJRiqZQ-ZRKA',
     :openssl_verify_mode  => 'none'
   }
-  $redis = Redis.new(:host => 'groovelytics-redis', :port=> 7743,
-    password: 'WmHE1h2oRJqIW76AtsC1Eg_ZJXe$S7w*UpOpJ1OT_yBKoFQYR1r938Oc!2Ahv2wr')
+  ENV['REDIS_HOST'] = 'groovelytics-redis'
+  ENV['REDIS_PASSWORD'] = 'WmHE1h2oRJqIW76AtsC1Eg_ZJXe$S7w*UpOpJ1OT_yBKoFQYR1r938Oc!2Ahv2wr'
+  $redis = Redis.new(:host => ENV['REDIS_HOST'], :port=> 7743,
+    password: ENV['REDIS_PASSWORD'])
   # Log the query plan for queries taking more than this (works
   # with SQLite, MySQL, and PostgreSQL)
   ENV['AMAZON_MWS_ACCESS_KEY_ID'] = "AKIAJ4VZ2GY7HZUL277Q"
