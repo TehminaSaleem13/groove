@@ -633,9 +633,12 @@ class StoresController < ApplicationController
             if csv_map.order_csv_map.nil?
               @result['order']['settings'] = default_csv_map
             else
+              temp_mapping = csv_map.order_csv_map[:map]
+              new_map = temp_mapping[:map].inject({}){|hash, (k, v)| hash.merge!(k => (v['value'].in?(%w(custom_field_one custom_field_two)) ? v.merge('name' => general_settings[v['value']]) : v)); hash}
+              csv_map.order_csv_map.update_attributes(map: temp_mapping.merge(map: new_map))
               @result['order']['settings'] = csv_map.order_csv_map
             end
-
+            
             order_file_path = File.join(csv_directory, "#{current_tenant}.#{@store.id}.order.csv")
             if File.exists? order_file_path
               # read 4 kb data
