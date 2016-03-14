@@ -93,7 +93,7 @@ Groovepacks::Application.configure do
     :password => 'ckWnOifHhLOJRiqZQ-ZRKA',
     :openssl_verify_mode  => 'none'
   }
-  $redis = Redis.new(:host => 'groove-staging-redis', :port=> 7743,
+  $redis = Redis.new(:host => 'groovelytics-redis', :port=> 7743,
     password: 'WmHE1h2oRJqIW76AtsC1Eg_ZJXe$S7w*UpOpJ1OT_yBKoFQYR1r938Oc!2Ahv2wr')
   # Log the query plan for queries taking more than this (works
   # with SQLite, MySQL, and PostgreSQL)
