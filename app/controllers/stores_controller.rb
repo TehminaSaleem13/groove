@@ -483,6 +483,15 @@ class StoresController < ApplicationController
             @teapplix.account_name = params[:account_name]
             @teapplix.username = params[:username]
             @teapplix.password = params[:password]
+            
+            if @teapplix.import_shipped!=params[:import_shipped].to_b
+              @teapplix.import_shipped = params[:import_shipped]
+              @teapplix.import_open_orders = false
+            elsif @teapplix.import_open_orders!=params[:import_open_orders].to_b
+              @teapplix.import_open_orders = params[:import_open_orders]
+              @teapplix.import_shipped = false
+            end
+
             begin
               @store.save!
               @teapplix.save if !new_record

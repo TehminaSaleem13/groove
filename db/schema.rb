@@ -871,8 +871,11 @@ ActiveRecord::Schema.define(:version => 20160315092505) do
     t.string   "account_name"
     t.string   "username"
     t.string   "password"
-    t.datetime "created_at",   :null => false
-    t.datetime "updated_at",   :null => false
+    t.boolean  "import_shipped",     :default => false
+    t.boolean  "import_open_orders", :default => false
+    t.datetime "last_imported_at"
+    t.datetime "created_at",                            :null => false
+    t.datetime "updated_at",                            :null => false
   end
 
   create_table "tenants", :force => true do |t|
