@@ -373,6 +373,7 @@ groovepacks_admin_controllers.
             note: {
               name: "Notes",
               editable: false,
+              col_length: 5,
               transclude: '<span class="label label-default" ng-show="row[field]==null || row[field]==\'\'" ng-click="options.editable.functions.click(row)">Note</span>' +
               '<span class="label label-success" ng-hide="row[field]==null || row[field]==\'\'" ng-click="options.editable.functions.click(row)" groov-popover="{{row[field]}}">Note</span>'
             },
