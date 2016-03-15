@@ -17,6 +17,10 @@
   <strong>Total products in store: </strong><%= @products_count rescue 0 %>
 </p>
 <p>
-  <strong>New products: </strong><%= @result[:success_imported] rescue 0 %>
+  <% unless @credential.store.store_type=="Teapplix" %>
+		<strong>New products: </strong><%= @result[:success_imported] rescue 0 %>
+	<% else %>
+		<strong>New/Updated products: </strong><%= @result[:success_imported] rescue 0 %>
+	<% end %>
 </p>
 <strong>Import Date/Time: </strong><%=Time.now.utc.strftime("%b %dth %Y %I:%M%p %Z")%></p>
