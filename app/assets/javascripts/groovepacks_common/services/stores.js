@@ -230,6 +230,10 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
             stores.single.access_token = data.credentials.big_commerce_credentials.access_token;
             stores.single.store_hash = data.credentials.big_commerce_credentials.store_hash;
             stores.single.bigcommerce_permission_url = data.credentials.bigcommerce_permission_url;
+          }else if (data.store.store_type == 'Teapplix') {
+            stores.single.account_name = data.credentials.teapplix_credential.account_name;
+            stores.single.username = data.credentials.teapplix_credential.username;
+            stores.single.password = data.credentials.teapplix_credential.password;
           } else if (data.store.store_type == 'CSV') {
             stores.single.host = data.credentials.ftp_credentials.host;
             stores.single.port = data.credentials.ftp_credentials.port;

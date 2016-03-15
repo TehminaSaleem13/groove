@@ -84,6 +84,10 @@ groovepacks_controllers.
             "ShippingEasy": {
               alt: "ShippingEasy",
               src: "/assets/images/shipping_easy.png"
+            },
+            "Teapplix": {
+              alt: "Teapplix",
+              src: "/assets/images/teapplix-logo.png"
             }
 
           };

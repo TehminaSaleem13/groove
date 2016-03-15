@@ -471,6 +471,29 @@ class StoresController < ApplicationController
             cookies[:tenant_name] = {:value => current_tenant , :domain => :all, :expires => Time.now+20.minutes}
             cookies[:store_id] = {:value => @store.id , :domain => :all, :expires => Time.now+20.minutes}
           end
+
+          if @store.store_type == 'Teapplix'
+            @teapplix = TeapplixCredential.where(:store_id => @store.id)
+            if @teapplix.blank?
+              @teapplix = @store.build_teapplix_credential
+              new_record = true
+            else
+              @teapplix = @teapplix.first
+            end
+            @teapplix.account_name = params[:account_name]
+            @teapplix.username = params[:username]
+            @teapplix.password = params[:password]
+            begin
+              @store.save!
+              @teapplix.save if !new_record
+            rescue ActiveRecord::RecordInvalid => e
+              @result['status'] = false
+              @result['messages'] = [@store.errors.full_messages, @store.teapplix_credential.errors.full_messages]
+            rescue ActiveRecord::StatementInvalid => e
+              @result['status'] = false
+              @result['messages'] = [e.message]
+            end
+          end
         else
           @result['status'] = false
           @result['messages'].push("Current user does not have permission to create or edit a store")
