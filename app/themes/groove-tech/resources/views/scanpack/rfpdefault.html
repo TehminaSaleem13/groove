@@ -60,7 +60,7 @@
 
             <div class="media-body">
               <span class="item-count pull-right">X {{unscanned_item.qty_remaining}}</span>
-								    <span class="media-heading pack_link" ng-click="product_details(unscanned_item.product_id)" tooltip="{{unscanned_item.name}}">{{ unscanned_item.name | cut:false:(30) }}<br/>
+								    <span class="media-heading pack_link" ng-click="product_details(unscanned_item.product_id)" tooltip="{{unscanned_item.name}}">{{ unscanned_item.name | cut:false:(50) }}<br/>
 									      {{ unscanned_item.sku }}</span>
             </div>
           </div>
@@ -100,7 +100,7 @@
         <div class="text-left">
           <h5>
             &nbsp;
-            <span class="pull-left"><strong tooltip="{{data.order.next_item.name}}">{{data.order.next_item.name | cut:false:30 | cut:false:30}}</strong></span>
+            <span class="pull-left"><strong tooltip="{{data.order.next_item.name}}">{{data.order.next_item.name | cut:false:180}}</strong></span>
             <span class="pull-right" ng-class="{pointer: scan_pack.settings.enable_click_sku}"
                   ng-click="autoscan_barcode()"><strong>{{data.order.next_item.sku}}</strong></span>
           </h5>
@@ -184,7 +184,7 @@
 
             <div class="media-body">
               <span class="item-count pull-right">X {{scanned_item.scanned_qty}}</span>
-								    <span class="media-heading pack_link" ng-click="product_details(scanned_item.product_id)" tooltip="{{scanned_item.name}}">{{ scanned_item.name | cut:false:30 }}<br>
+								    <span class="media-heading pack_link" ng-click="product_details(scanned_item.product_id)" tooltip="{{scanned_item.name}}">{{ scanned_item.name | cut:false:50 }}<br>
 									      {{ scanned_item.sku }}</span>
             </div>
           </div>
