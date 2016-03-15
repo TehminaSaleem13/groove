@@ -260,6 +260,7 @@ groovepacks_admin_controllers.
           selectable: true,
           draggable: true,
           sortable: true,
+          scrollbar: true,
           editable: {
             array: false,
             update: $scope.update_tenants_list,

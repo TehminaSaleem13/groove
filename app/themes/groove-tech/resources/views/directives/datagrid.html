@@ -70,7 +70,7 @@
               bo-if="options.editable == false || options.all_fields[field].editable == false"
               >
               <div ng-class='{"grid-editable-field": options.all_fields[field].copyable}'
-                style="min-width:{{options.all_fields[field].col_length ? options.all_fields[field].col_length : row[field].length + (options.all_fields[field].copyable ? 3 : 0)}}rem">
+                ng-style="{'min-width': options.all_fields[field].col_length ? options.all_fields[field].col_length : row[field].length + (options.all_fields[field].copyable ? 3 : 0) + 'rem'}">
                 <span class='fa fa-copy datagrid-copy pull-right'
                       ng-show="row.show_action_icon[field] && options.all_fields[field].copyable"
                       clip-copy="row[field]" groov-click="copied(row[field])"></span>
