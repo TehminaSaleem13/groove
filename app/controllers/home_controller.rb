@@ -10,7 +10,7 @@ class HomeController < ApplicationController
     else
       @groovepacks_admin = (Apartment::Tenant.current == 'admintools')
     end
-
+    @current_tenant = Apartment::Tenant.current 
   end
 
   def userinfo
