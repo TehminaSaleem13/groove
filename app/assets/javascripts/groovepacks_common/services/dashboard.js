@@ -40,20 +40,29 @@ groovepacks_services.factory('dashboard', ['$http', 'notification', 'auth', func
   }
 
   var get_dashboard_data = function() {
-    var tenant = document.getElementById('current_tenant').value;
-    var domain = document.getElementById('domain').value;
-    var site_host = document.getElementById('site_host').value;
-    var access_token = localStorage.getItem('access_token');
-    var created_at = localStorage.getItem('created_at');
-    var url = document.URL.split('/');
-    d = new Date();
-    if (created_at > parseInt(d.getTime() / 1000) - 5400) {
-      refresh_access_token(url).then(function(response){
-        access_token = response;
-        request_analytic_server(tenant, domain, site_host, access_token, url[0]);
-      });
-    } else {
-      request_analytic_server(tenant, domain, site_host, access_token,url[0]);
+    try{
+      var tenant = document.getElementById('current_tenant').value
+    }
+    catch(e){
+      tenant=null;
+    }
+    
+    if(tenant)
+    {
+      var domain = document.getElementById('domain').value;
+      var site_host = document.getElementById('site_host').value;
+      var access_token = localStorage.getItem('access_token');
+      var created_at = localStorage.getItem('created_at');
+      var url = document.URL.split('/');
+      d = new Date();
+      if (created_at > parseInt(d.getTime() / 1000) - 5400) {
+        refresh_access_token(url).then(function(response){
+          access_token = response;
+          request_analytic_server(tenant, domain, site_host, access_token, url[0]);
+        });
+      } else {
+        request_analytic_server(tenant, domain, site_host, access_token,url[0]);
+      }
     }
   };
 
