@@ -120,6 +120,11 @@ module OrderConcern
       end
       order.status = params[:status]
       order.reallocate_inventory = params[:reallocate_inventory]
+      if params[:status] == 'scanned'
+        order.scanned_on = current_time_from_proper_timezone
+        order.packing_user_id = current_user
+        order.addactivity('Order Manually Moved To Scanned Status', current_user)
+      end
       return if order.save
       set_status_and_message(false, order.errors.full_messages)
     end
