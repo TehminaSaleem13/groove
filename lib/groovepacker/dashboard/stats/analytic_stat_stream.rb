@@ -27,21 +27,22 @@ module Groovepacker
         end
 
         def build_stream(order)
-          result = {}
+          result = build_result
           @user = User.where(id: order.packing_user_id).first
           # uncomment the following line when is_deleted field is added to users table.
           # return result if @user && @user.is_deleted
-          if @user
-            result = build_result
+          if @user && !@user.is_deleted
             result[:packing_user_name] = @user.username
-            bind_order_data(order, result)
-            bind_exception(order, result)
+          else
+            result[:packing_user_name] = 'deleted_user'
           end
+          bind_order_data(order, result)
+          bind_exception(order, result)
           result
         end
 
         def bind_order_data(order, result)
-          result[:packing_user_id] = order.packing_user_id
+          result[:packing_user_id] = order.packing_user_id ||= 420
           result[:order_increment_id] = order.increment_id
           result[:item_count] = order.order_items.count
           # use updated_at value if scanned_on is nil

@@ -3,7 +3,7 @@ class UsersController < ApplicationController
   include UsersHelper
 
   def index
-    @users = User.where('username != ?', 'gpadmin')
+    @users = User.where('username != ? and is_deleted = ?', 'gpadmin', false)
 
     respond_to do |format|
       format.html # show.html.erb
@@ -305,9 +305,9 @@ class UsersController < ApplicationController
       params['_json'].each do |user|
         unless user['id'] == current_user.id
           @user = User.find(user['id'])
-          if !@user.destroy
-            result['status'] = false
-          end
+          @user.username += '-' + Random.rand(10000000..99999999).to_s
+          @user.is_deleted = true
+          @user.save
         end
       end
     else

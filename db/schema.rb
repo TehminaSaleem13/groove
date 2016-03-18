@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20160318050249) do
+ActiveRecord::Schema.define(:version => 20160318090059) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0,     :null => false
@@ -923,6 +923,7 @@ ActiveRecord::Schema.define(:version => 20160318050249) do
     t.string   "order_edit_confirmation_code",   :default => ""
     t.string   "product_edit_confirmation_code", :default => ""
     t.boolean  "view_dashboard",                 :default => false
+    t.boolean  "is_deleted",                     :default => false
   end
 
   add_index "users", ["inventory_warehouse_id"], :name => "index_users_on_inventory_warehouse_id"
