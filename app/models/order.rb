@@ -6,7 +6,7 @@ class Order < ActiveRecord::Base
                   :method, :order_placed_time, :postcode, :price, :qty, :sku, :state, :store_id, :notes_internal,
                   :notes_toPacker, :notes_fromPacker, :tracking_processed, :scanned_on, :tracking_num, :company,
                   :packing_user_id, :status_reason, :non_hyphen_increment_id, :shipping_amount, :weight_oz,
-                  :custom_field_one, :custom_field_two, :traced_in_dashboard
+                  :custom_field_one, :custom_field_two, :traced_in_dashboard, :scanned_by_status_change
 
   has_many :order_items, :dependent => :destroy
   has_one :order_shipping, :dependent => :destroy
