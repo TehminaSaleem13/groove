@@ -307,6 +307,7 @@ class UsersController < ApplicationController
           @user = User.find(user['id'])
           @user.username += '-' + Random.rand(10000000..99999999).to_s
           @user.is_deleted = true
+          @user.active = false
           @user.save
         end
       end
