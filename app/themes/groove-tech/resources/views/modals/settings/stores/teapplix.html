@@ -51,3 +51,20 @@
     </div>
   </div>
 </div>
+
+<div class="row">
+
+  <div class="col-md-8">
+    <legend>Store Settings</legend>
+    
+    <div class="form-group">
+      <label class="control-label col-md-3">Generate Barcode from SKU</label>
+
+      <div class="controls col-md-2">
+        <div toggle-switch ng-model="stores.single.gen_barcode_from_sku" groov-click="update_single_store(true)"></div>
+        <i class="pull-right icon-large glyphicon glyphicon-info-sign"  style="margin-top: 10px;" popover-trigger="mouseenter" groov-popover="If your Barcodes match your SKU, you can enable this option to have GroovePacker automatically generate Barcodes when new products are found during order imports."/>
+      </div>
+    </div>
+  </div>
+  <br/>
+</div>

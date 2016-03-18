@@ -483,6 +483,7 @@ class StoresController < ApplicationController
             @teapplix.account_name = params[:account_name]
             @teapplix.username = params[:username]
             @teapplix.password = params[:password]
+            @teapplix.gen_barcode_from_sku = params[:gen_barcode_from_sku]
             
             if @teapplix.import_shipped!=params[:import_shipped].to_b
               @teapplix.import_shipped = params[:import_shipped]

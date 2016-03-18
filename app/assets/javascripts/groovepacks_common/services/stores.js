@@ -234,6 +234,7 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
             stores.single.account_name = data.credentials.teapplix_credential.account_name;
             stores.single.username = data.credentials.teapplix_credential.username;
             stores.single.password = data.credentials.teapplix_credential.password;
+            stores.single.gen_barcode_from_sku = data.credentials.teapplix_credential.gen_barcode_from_sku;
             stores.single.import_shipped = data.credentials.teapplix_credential.import_shipped;
             stores.single.import_open_orders = data.credentials.teapplix_credential.import_open_orders;
           } else if (data.store.store_type == 'CSV') {
