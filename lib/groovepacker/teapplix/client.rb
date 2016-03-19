@@ -63,7 +63,7 @@ module Groovepacker
         end
         
         def csv_to_json(response_body, get_formatted=true)
-          csv = CSV.new(response_body, :headers => true, :header_converters => :symbol, :converters => :all)
+          csv = CSV.new(response_body, :headers => true, :header_converters => :symbol)
           json_response = csv.to_a.map {|row| row.to_hash}
           json_response = json_response - [{}]
           json_response = get_formatted_orders(json_response) if get_formatted
