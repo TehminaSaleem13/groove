@@ -5,7 +5,8 @@ class TeapplixCredential < ActiveRecord::Base
 
   private
     def check_if_null_or_undefined
-      self.username = nil if self.username=="null" or self.username=="undefined"
-      self.password = nil if self.password=="null" or self.password=="undefined"
+      arr = ["null", "undefined"]
+      self.username = nil if arr.include?(self.username)
+      self.password = nil if arr.include?(self.password)
     end
 end
