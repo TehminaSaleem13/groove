@@ -13,6 +13,7 @@ class Store < ActiveRecord::Base
   has_one :big_commerce_credential
   has_one :magento_rest_credential
   has_one :shipping_easy_credential
+  has_one :teapplix_credential
 
   belongs_to :inventory_warehouse
 
@@ -54,6 +55,13 @@ class Store < ActiveRecord::Base
       @credentials = MagentoCredentials.where(:store_id => self.id)
       if !@credentials.nil? && @credentials.length > 0
         @result['magento_credentials'] = @credentials.first
+        @result['status'] =true
+      end
+    end
+    if self.store_type == 'Teapplix'
+      @credential = TeapplixCredential.find_by_store_id(self.id)
+      if @credential
+        @result['teapplix_credential'] = @credential
         @result['status'] =true
       end
     end
