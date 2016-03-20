@@ -506,13 +506,58 @@ groovepacks_controllers.
         };
 
         scope.kitEditableOptions = {
-          update: scope.update_single_product,
-          elements: {
-            qty: {type: 'number', min: 0},
-            packing_order: {type: 'number', min: 0}
+          scrollbar: true,
+          no_of_lines: 1,
+          selectable: true,
+          editable:{
+            update: scope.update_single_product,
+            elements: {
+              qty: {type: 'number', min: 0},
+              packing_order: {type: 'number', min: 0}
+            },
+            functions: {
+              name: scope.load_kit
+            }
           },
-          functions: {
-            name: scope.load_kit
+          all_fields: {
+            name: {
+              name: "Item Name",
+              col_length: 15,
+              editable: false,
+              transclude: '<a href="" ng-click="options.editable.functions.name(row, event)" tooltip="{{row.name}}">{{row.name | cut:false:(50*no_of_lines)}}</a>'
+            },
+            sku: {
+              name: "Item SKU",
+              col_length: 15,
+              editable: false
+            },
+            qty: {
+              name: "Quantity in Kit",
+              col_length: 5
+            },
+            available_inv: {
+              name: "Available Inv",
+              editable: false,
+              col_length: 5
+            },
+            qty_on_hand: {
+              name: "QTY On Hand",
+              col_length: 5,
+              editable: false
+            },
+            status: {
+              name: "Status",
+              col_length: 5,
+              transclude: "<span class='label label-default' ng-class=\"{" +
+              "'label-success': row.product_status == 'active', " +
+              "'label-info': row.product_status == 'new' }\">" +
+              "{{row.product_status}}</span>",
+              editable: false
+            },
+            packing_order: {
+              name: "Packing Order",
+              col_length: 5
+            },
           }
         };
         myscope.add_hotkeys();
