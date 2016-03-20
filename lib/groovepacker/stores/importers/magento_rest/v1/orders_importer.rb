@@ -46,28 +46,34 @@ module Groovepacker
                       import_item.current_order_imported_item = 0
                       import_item.save
                       line_items.each do |line_item|
-                        line_item_product = client.product(line_item["sku"])
-                        if line_item_product["type_id"] == 'simple'
-                          @order_item = OrderItem.new
-                          @order_item.price = line_item["price"]
-                          @order_item.qty = line_item["qty_ordered"]
-                          @order_item.row_total= line_item["row_total"]
-                          @order_item.name = line_item["name"]
-                          @order_item.sku = line_item["sku"]
+                        product_id=nil
+                        @order_item = OrderItem.new
+                        @order_item.price = line_item["price"]
+                        @order_item.qty = line_item["qty_ordered"]
+                        @order_item.row_total= line_item["row_total"]
+                        @order_item.name = line_item["name"]
+                        @order_item.sku = line_item["sku"]
 
-                          if ProductSku.where(:sku => @order_item.sku).length == 0
+                        product_sku = ProductSku.find_by_sku(line_item["sku"])
+                        #if line_item_product["type_id"] == 'simple'
+                          if product_sku.blank?
+                            filters = {
+                              "filter%5B0%5D%5Battribute%5D" => "sku",
+                              "filter%5B0%5D%5Bin%5D%5B0%5D" => line_item["sku"]
+                            }
+                            line_item_product = client.order_item_product(filters).first.last rescue {}
                             product_id = Groovepacker::Stores::Importers::MagentoRest::
                             ProductsImporter.new(handler).import_single(line_item_product)
                           else
-                          	product_id = ProductSku.where(:sku => @order_item.sku).first.product_id
+                          	product_id = product_sku.product_id
                           end
-                          @order_item.product_id = product_id
-                          @order.order_items << @order_item
-                        else
-                          if ProductSku.where(:sku => line_item[:sku]).length == 0
-                          	Groovepacker::Stores::Importers::Magento::ProductsImporter.new(handler).import_single({sku: line_item[:sku]})
-                          end
-                        end
+                        #else
+                        #  if product_sku.blank?
+                        #  	product_id = Groovepacker::Stores::Importers::MagentoRest::ProductsImporter.new(handler).import_single(line_item_product)
+                        #  end
+                        #end
+                        @order_item.product_id = product_id
+                        @order.order_items << @order_item
                         import_item.current_order_imported_item = import_item.current_order_imported_item + 1
                         import_item.save
                       end

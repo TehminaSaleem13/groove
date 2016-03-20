@@ -70,6 +70,13 @@ module Groovepacker
         fetch(method, uri, params, filters)
       end
 
+      def order_item_product(filters={})
+        method = 'GET'
+        uri = "#{host_url}/api/rest/products"
+        params = parameters
+        fetch(method, uri, params, filters)
+      end
+
       def product_images(product_id, filters={})
         method = 'GET'
         uri = "#{host_url}/api/rest/products/#{product_id}/images"

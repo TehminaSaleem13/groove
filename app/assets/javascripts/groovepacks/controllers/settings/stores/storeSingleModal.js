@@ -725,6 +725,10 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
         "ShippingEasy": {
           name: "Shipping Easy",
           file: "/assets/views/modals/settings/stores/shipping_easy.html"
+        },
+        "Teapplix": {
+          name: "Teapplix",
+          file: "/assets/views/modals/settings/stores/teapplix.html"
         }
       };
 
