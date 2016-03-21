@@ -49,6 +49,10 @@ module Groovepacker
         self.handler.import_bc_single_product(product, pull_inv)
       end
 
+      def import_teapplix_single_product(product)
+        self.handler.import_teapplix_single_product(product)
+      end
+
       attr_accessor :handler
     end
   end

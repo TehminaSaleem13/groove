@@ -19,14 +19,16 @@ module Groovepacker
         })
         request_token = consumer.get_request_token
         authorized_url = "#{@store_admin_url}/oauth_authorize?oauth_token=#{request_token.token}"
+        HTTParty.get(authorized_url)
         current_tenant = Apartment::Tenant.current
         Rails.cache.write("#{current_tenant}_magento_request_token", request_token, timeToLive: 600.seconds)
 
         $redis.set("#{current_tenant}_magento_request_token", request_token)
+        raise "301 \"Moved Permanently\"" unless authorized_url.include?(@host)
         result['authorized_url'] = authorized_url
       rescue Exception => ex
         result['status'] = false
-        result['message'] = "Something went wrong. Please make sure that the credentials you entered are correct"
+        result['message'] = get_formatted_error(ex)
       end
       return result
     end
@@ -47,6 +49,18 @@ module Groovepacker
       end
       return result
     end
+
+    private
+      def get_formatted_error(ex)
+        if ex.message=="401 Unauthorized"
+          msg = "Authorization failed, apparently due to an incorrect key or secret."
+        elsif ex.message=="getaddrinfo: Name or service not known" || ex.message=="301 \"Moved Permanently\""
+          msg = "Invalid store url or store admin url"
+        else
+          msg = "Something went wrong. Please make sure that the credentials you entered are correct"
+        end
+        return msg
+      end
 
   end
 end
