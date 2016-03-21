@@ -1,0 +1,4 @@
+Connecting to database specified by database.yml
+  [1m[36m (0.1ms)[0m  [1muse groovepacks_development[0m
+      invoke  active_record
+      create    db/migrate/20160318050228_add_scanned_by_status_change_to_orders.rb
