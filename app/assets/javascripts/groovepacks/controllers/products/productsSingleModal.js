@@ -419,6 +419,7 @@ groovepacks_controllers.
         scope.warehouseGridOptions = {
           identifier: 'warehousesgrid',
           selectable: true,
+          scrollbar: true,
           setup: {
             enable_inv_alert: function () {
               return scope.general_settings.single.low_inventory_alert_email;
@@ -462,6 +463,7 @@ groovepacks_controllers.
             quantity_on_hand: {
               name: 'QoH',
               model: 'row.info',
+              col_length: 5,
               transclude: '<span>{{row.info.quantity_on_hand}}</span>'
             },
             sold_inv: {
@@ -472,16 +474,19 @@ groovepacks_controllers.
             },
             location_primary: {
               name: 'Primary Location',
+              col_length: 14,
               model: 'row.info',
               transclude: '<span>{{row.info.location_primary}}</span>'
             },
             location_secondary: {
               name: 'Secondary Location',
+              col_length: 14,
               model: 'row.info',
               transclude: '<span>{{row.info.location_secondary}}</span>'
             },
             location_tertiary: {
               name: 'Tertiary Location',
+              col_length: 14,
               model: 'row.info',
               transclude: '<span>{{row.info.location_tertiary}}</span>'
             },

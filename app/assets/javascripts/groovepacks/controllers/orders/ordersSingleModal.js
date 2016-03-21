@@ -382,6 +382,8 @@ groovepacks_controllers.
           show_hide: true,
           selectable: true,
           sort_func: scope.handlesort,
+          scrollbar: true,
+          no_of_lines: 3,
           editable: {
             update: scope.save_item,
             print_status: scope.update_print_status,
@@ -410,6 +412,7 @@ groovepacks_controllers.
           all_fields: {
             image: {
               name: "Primary Image",
+              col_length: 15,
               editable: false,
               transclude: "<div ng-show=\"row.productinfo.is_intangible == false\" " +
               "ng-click=\"options.editable.functions.name(row,$event)\"" +
@@ -421,14 +424,17 @@ groovepacks_controllers.
             name: {
               name: "Product",
               hideable: false,
+              col_length: 15,
               model: "row.productinfo",
-              transclude: '<a href="" ng-click="options.editable.functions.name(row,event)" >{{row.productinfo.name}}</a>'
+              transclude: '<a href="" ng-click="options.editable.functions.name(row,event)" tooltip="{{row.productinfo.name}}">{{row.productinfo.name | cut:false:(50*no_of_lines)}}</a>'
             },
             sku: {
-              name: "Primary SKU"
+              name: "Primary SKU",
+              col_length: 15
             },
             status: {
               name: "Status",
+              col_length: 8,
               model: "row.productinfo",
               transclude: "<span class='label label-default' ng-class=\"{" +
               "'label-success': row.productinfo.status == 'active', " +
@@ -437,29 +443,35 @@ groovepacks_controllers.
 
             },
             barcode: {
-              name: "Primary Barcode"
+              name: "Primary Barcode",
+              col_length: 15
             },
             qty: {
               name: "Qty Ordered",
               model: "row.iteminfo",
+              col_length: 7,
               transclude: '<span>{{row.iteminfo.qty}}</span>'
             },
             qty_on_hand: {
               name: "QOH",
+              col_length: 7,
               editable: false,
               hidden: true
             },
             location_primary: {
-              name: "Primary Location"
+              name: "Primary Location",
+              col_length: 20
             },
             available_inv: {
               name: "Available Inv",
               editable: false,
+              col_length: 7,
               hidden: true
             },
             is_skippable: {
               name: "Is Skippable",
               model: "row.productinfo",
+              editable: false,
               transclude: '<div toggle-switch ng-model="row.productinfo.is_skippable" groov-click="options.editable.update(row.productinfo,\'is_skippable\')"></div>',
               hidden: true
             },
@@ -467,6 +479,7 @@ groovepacks_controllers.
               name: "Print Barcode",
               editable: false,
               hidden: true,
+              col_length: 20,
               model: "row.iteminfo",
               transclude: "<a class='groove-button label label-default' ng-class=\"{" +
               "'label-success': row.iteminfo.is_barcode_printed == false, " +
@@ -477,10 +490,12 @@ groovepacks_controllers.
             category: {
               name: "Category",
               sortable: true,
+              col_length: 20,
               hidden: true
             },
             spl_instructions_4_packer: {
               name: "Product Instructions",
+              col_length: 20,
               hidden: true
             }
           }

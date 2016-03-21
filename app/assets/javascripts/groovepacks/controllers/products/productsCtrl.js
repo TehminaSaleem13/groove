@@ -26,7 +26,7 @@ groovepacks_controllers.
       };
 
       $scope.update_product_list = function (product, prop) {
-        if(!product[prop] /*if null*/){return}
+        if(prop == 'barcode' && !product[prop] && product['status'] != 'active' /*if null*/){return}
         products.list.update_node({
           id: product.id,
           var: prop,
@@ -259,6 +259,8 @@ groovepacks_controllers.
           invert: myscope.invert,
           sort_func: $scope.handlesort,
           setup: $scope.products.setup,
+          scrollbar: true,
+          no_of_lines: 3,
           selections: {
             show_dropdown: true,
             single_callback: myscope.select_single,
@@ -305,17 +307,18 @@ groovepacks_controllers.
             image: {
               name: "Image",
               editable: false,
+              col_length: 15,
               transclude: '<div ng-click="options.editable.functions.name(row,$event)" class="pointer single-image"><img class="img-responsive" ng-src="{{row.image}}" /></div>'
             },
             name: {
               name: "Item Name",
               hideable: false,
-              col_length: 25,
-              transclude: '<a href="" ng-click="options.editable.functions.name(row,$event)" tooltip="{{row[field]}}">{{row[field] | cut:true:25:" ..."}}</a>'
+              col_length: 20,
+              transclude: '<a href="" ng-click="options.editable.functions.name(row,$event)" tooltip="{{row[field]}}">{{row[field].chunk(25).join(" ") | cut:true:(25*options.no_of_lines)}}</a>'
             },
             sku: {
               name: "SKU",
-              col_length: 25
+              col_length: 20
             },
             status: {
               name: "Status",
@@ -326,27 +329,25 @@ groovepacks_controllers.
               "{{row[field]}}</span>"
             },
             barcode: {
-              col_length: 25,
+              col_length: 20,
               name: "Barcode"
             },
             location_primary: {
               name: "Primary Location",
-              col_length: 25,
+              col_length: 20,
               class: "span3"
             },
             store_name: {
               name: "Store",
-              col_length: 25,
               editable: false
             },
             qty_on_hand: {
               name: "QoH",
-              col_length: 10,
+              col_length: 7,
               sortable: false
             },
             available_inv: {
               name: "Avbl Inv",
-              col_length: 5,
               editable: false
             },
             cat: {
@@ -356,19 +357,18 @@ groovepacks_controllers.
             },
             location_secondary: {
               name: "Secondary Location",
-              col_length: 25,
+              col_length: 20,
               class: "span3",
               hidden: true
             },
             location_tertiary: {
               name: "Tertiary Location",
-              col_length: 25,
+              col_length: 20,
               class: "span3",
               hidden: true
             },
             location_name: {
               name: "Warehouse Name",
-              col_length: 25,
               class: "span3",
               editable: false,
               hidden: true

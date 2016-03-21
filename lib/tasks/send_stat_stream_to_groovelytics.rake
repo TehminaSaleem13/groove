@@ -4,6 +4,7 @@ namespace :cssa do
   task :send_stat_stream, [:arg1, :arg2] => :environment do |t, args|
     args.each do |arg|
       begin
+        HTTParty::Basement.default_options.update(verify: false)
         stat_stream_obj =
           Groovepacker::Dashboard::Stats::AnalyticStatStream.new()
         puts "calculate stat_stream"
@@ -12,7 +13,7 @@ namespace :cssa do
           stream_count = stat_stream.size
           puts "send each stat_stream_hash"
           stat_stream.each_with_index do |stat_stream_hash, index|
-            HTTParty.post("http://#{arg[1]}stat.#{ENV["GROOV_ANALYTIC"]}/dashboard",
+            HTTParty.post("https://#{arg[1]}stat.#{ENV["GROOV_ANALYTIC"]}/dashboard",
               query: {tenant_name: arg[1], bulk_create: true, index: index, total: stream_count},
               debug_output: $stdout,
               body: stat_stream_hash.to_json,
@@ -26,6 +27,8 @@ namespace :cssa do
         puts "Exception occurred."
         puts e.message
         break
+      ensure
+        HTTParty::Basement.default_options.update(verify: true)
       end
     end
     exit(1)

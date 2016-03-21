@@ -1,71 +1,59 @@
 class StripeController < ApplicationController
-  protect_from_forgery :except => :webhook
+  protect_from_forgery except: :webhook
 
   def webhook
     event_json = JSON.parse(request.body.read)
     # Webhook.create(event: event_json)
     # Verify the event by fetching it from Stripe
-    event = Stripe::Event.retrieve(event_json["id"])
-    Apartment::Tenant.switch()
-    if Webhook.create(event: event)
-      logger.info("event saved as blob")
-    end
-    # Do something with event
-    if event.type == 'invoice.created'
-      logger.info("in event type invoice.created")
-    elsif event.type == 'charge.succeeded'
-      logger.info("in event type charge.succeeded")
-    elsif event.type == 'charge.failed'
-      logger.info("in event type charge.failed")
-    elsif event.type == 'invoice.payment_succeeded'
-      logger.info("in event type invoice.payment_succeeded")
+    event = Stripe::Event.retrieve(event_json['id'])
+    Apartment::Tenant.switch
+    Webhook.create(event: event)
+    type = event.type
+    if ['invoice.payment_succeeded', 'invoice.payment_failed'].include? type
       @invoice = get_invoice(event)
-      if @invoice.save
-        logger.info("saved the invoice for event invoice.created")
+      case type
+      when 'invoice.payment_succeeded'
         StripeInvoiceEmail.send_success_invoice(@invoice).deliver
-      end
-    elsif event.type == 'invoice.payment_failed'
-      logger.info("in event type invoice.payment_failed")
-      @invoice = get_invoice(event)
-      if @invoice.save
-        logger.info("saved the invoice for event invoice.created")
+      when 'invoice.payment_failed'
         StripeInvoiceEmail.send_failure_invoice(@invoice).deliver
       end
-    elsif event.type == 'customer.created'
-      logger.info("in event type customer.created")
-    elsif event.type == 'customer.subscription.trial_will_end'
-      #occurs three days before the trial period of a subscription is scheduled to end.
-
-    elsif event.type == 'customer.subscription.updated'
-      #customer updates the subscription
-    elsif event.type == 'customer.subscription.created'
-      logger.info("in event type customer.subscription.created")
     end
-    render :status => 200, :nothing => true
+    render status: 200, nothing: true
   end
 
   def get_invoice(event)
     invoice = Invoice.new
-    invoice.date = Time.at(event.data.object.date).utc
-    invoice.invoice_id = event.data.object.id
-    invoice.subscription_id = event.data.object.subscription
-    invoice.customer_id = event.data.object.customer
-    invoice.charge_id = event.data.object.charge
-    invoice.attempted = event.data.object.attempted
-    invoice.closed = event.data.object.closed
-    invoice.forgiven = event.data.object.forgiven
-    invoice.paid = event.data.object.paid
-    unless event.data.object.lines.data.first.nil?
-      invoice.plan_id = event.data.object.lines.data.first.plan.id unless event.data.object.lines.data.first.plan.nil? || event.data.object.lines.data.first.plan.id.nil?
-      invoice.period_start = Time.at(event.data.object.lines.data.first.period.start).utc
-      invoice.period_end = Time.at(event.data.object.lines.data.first.period.end).utc
-      if event.data.object.starting_balance == 0
-        invoice.amount = event.data.object.lines.data.first.amount.to_f/100
+    object = event.data.object
+    invoice.date = time_utc(object.date)
+    invoice.invoice_id = object.id
+    invoice.subscription_id = object.subscription
+    invoice.customer_id = object.customer
+    invoice.charge_id = object.charge
+    invoice.attempted = object.attempted
+    invoice.closed = object.closed
+    invoice.forgiven = object.forgiven
+    invoice.paid = object.paid
+    @line_data = object.lines.data.first
+    if @line_data
+      @plan = @line_data.plan
+      invoice.plan_id = @plan.id if @plan && @plan.id
+      @period = @line_data.period
+      invoice.period_start = time_utc(@period.start)
+      invoice.period_end = time_utc(@period.end)
+      if object.starting_balance == 0
+        invoice.amount = @line_data.amount.to_f / 100
       else
-        invoice.amount = event.data.object.starting_balance.to_f/100
+        invoice.amount = object.starting_balance.to_f / 100
       end
-      invoice.quantity = event.data.object.lines.data.first.quantity unless event.data.object.lines.data.first.quantity.nil?
+      invoice.quantity = @line_data.quantity if @line_data.quantity
     end
+    invoice.save!
     invoice
+  end
+
+  private
+
+  def time_utc(time)
+    Time.at(time).utc
   end
 end

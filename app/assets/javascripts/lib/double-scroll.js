@@ -2,7 +2,7 @@
     $.widget("suwala.doubleScroll", {
       options: {
         contentElement: undefined, // Widest element, if not specified first child element will be used
-        topScrollBarMarkup: '<div class="suwala-doubleScroll-scroll-wrapper container-fluid" style="height: 20px;"><div class="suwala-doubleScroll-scroll col-xs-12" style="height: 20px;"></div></div>',
+        topScrollBarMarkup: '<div class="suwala-doubleScroll-scroll-wrapper container-fluid" style="height: 20px;"><div class="suwala-doubleScroll-scroll" style="height: 20px;"></div></div>',
         topScrollBarInnerSelector: '.suwala-doubleScroll-scroll',     
         scrollCss: {                
           'overflow-x': 'scroll',
@@ -12,11 +12,21 @@
           'overflow-x': 'scroll',
           'overflow-y':'hidden'
         },
-        cols: 10
+        width: 0,
+        remove: false
       },    
       _create : function() {
+        
+        if(this.options.remove){
+          $('.suwala-doubleScroll-scroll-wrapper').remove();
+          return;
+        }
+
         var self = this;
         var contentElement;
+
+        //Clear if already present;
+        $(self.element).parents('.container-fluid').find('.suwala-doubleScroll-scroll-wrapper').remove();
 
         // add div that will act as an upper scroll
         var topScrollBar = $($(self.options.topScrollBarMarkup));
@@ -44,10 +54,9 @@
         topScrollBar.css(self.options.scrollCss);
         self.element.css(self.options.contentCss);
 
-        console.log(self.options.cols)
         // set the width of the wrappers
-        $(self.options.topScrollBarInnerSelector).width(self.options.cols * 25 + 'rem');
-        topScrollBar.width(self.element.innerWidth());
+        $(self.options.topScrollBarInnerSelector).width(self.options.width + 25 + 'px');
+        topScrollBar.width(self.element.width());
       }
     }
   );

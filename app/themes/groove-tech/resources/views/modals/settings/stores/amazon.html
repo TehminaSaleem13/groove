@@ -2,8 +2,35 @@
   <div class="col-md-6">
     <legend>Amazon Credentials</legend>
     <div ng-show="stores.import.order.type=='apiimport'">
+
       <div class="form-group">
-        <label class="control-label col-md-3">Merchant ID</label>
+        <div class="col-xs-12">
+          <p><a href="https://developer.amazonservices.com/" target="_blank">Click here</a> to grant GroovePacker access
+            to your Amazon Seller account.</p>
+
+          <p>Sign Up for MWS and Choose Option 2: Use an application to access my Amazon Seller Account. Provide the
+            following details of Groovepacker</p>
+        </div>
+      </div>
+
+       <div class="form-group">
+        <label class="col-md-5 text-right">Application Name</label>
+
+        <div class="controls col-md-7">
+          <p>GroovePacker</p>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="col-md-5 text-right">Developer Account Number</label>
+
+        <div class="controls col-md-7">
+          <p>1512-6494-8396</p>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="control-label col-md-3">Seller ID</label>
 
         <div class="controls col-md-9">
           <input ng-blur="update_single_store(true)" name="merchant_id" ng-model="stores.single.merchant_id"
@@ -17,31 +44,6 @@
         <div class="controls col-md-9">
           <input ng-blur="update_single_store(true)" name="marketplace_id" ng-model="stores.single.marketplace_id"
                  class="form-control input-style" type="text" value="" required/>
-        </div>
-      </div>
-      <div class="form-group">
-        <div class="col-xs-12">
-          <p><a href="https://developer.amazonservices.com/" target="_blank">Click here</a> to grant GroovePacker access
-            to your Amazon Seller account.</p>
-
-          <p>Sign Up for MWS and Choose Option 2: Use an application to access my Amazon Seller Account. Provide the
-            following details of Groovepacker</p>
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label class="control-label col-md-5">Developer Account Number</label>
-
-        <div class="controls col-md-7">
-          <p>1512-6494-8396</p>
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label class="control-label col-md-5">Application Name</label>
-
-        <div class="controls col-md-7">
-          <p>GroovePacker</p>
         </div>
       </div>
 

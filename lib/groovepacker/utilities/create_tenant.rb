@@ -20,10 +20,13 @@ class CreateTenant
 
   def create_groovelytics_tenant(tenant_name)
     begin
-      HTTParty.post("#{ENV["GROOV_ANALYTIC"]}/tenants",
+      HTTParty::Basement.default_options.update(verify: false)
+      HTTParty.post("https://#{ENV["GROOV_ANALYTIC"]}/tenants",
         query: { tenant_name: tenant_name })
     rescue Exception => e
       Rails.logger.error e.backtrace.join("\n")
+    ensure
+      HTTParty::Basement.default_options.update(verify: true)
     end
   end
 end

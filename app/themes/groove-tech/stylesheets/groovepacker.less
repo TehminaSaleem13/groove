@@ -188,8 +188,8 @@ body {
   .box-shadow(~"inset 1px 1px 4px rgba(140,140,145,.75)");
   background: asset-url('images/brush_metal_bkg_large.png') no-repeat center center fixed;
   background-size: cover;
-  min-width: 600px;
   max-width: 94vw;
+  /*min-width: 80vw;*/
 }
 
 .box-outer {
@@ -424,7 +424,8 @@ body {
   font-family: 'Play', sans-serif;
   color: @btn-default-bg;
   border-bottom: 2px solid #8AC007;
-  background-color: #7c7e7b;
+  /*background-color: #7c7e7b;*/
+  background-color: black;
   padding: 0px;
   .box-shadow(~"inset 1px 2px 49px rgba(0,0,1,.96)");
   border-right: 2px solid #8AC007;
@@ -1479,7 +1480,6 @@ div.input-style {
 /* ScanPack*/
 .scanpack-well {
   .bottom-well;
-  width: 120%;
   margin-left: 0px;
   background-color: #fff;
   color: #383938;
@@ -1487,8 +1487,6 @@ div.input-style {
   font-size: 14px;
   font-weight: 600;
   min-height: 400px;
-  min-width: 250px;
-  max-width: 150px;
 }
 
 .right-well-heading {
@@ -1500,7 +1498,7 @@ div.input-style {
 
 .scanpack-image-well {
   .bottom-well;
-  width: 100%;
+  width: auto;
   margin-left: 0px;
   text-align: center;
   background-color: #fff;
@@ -1756,7 +1754,7 @@ div.input-style {
 .packing-well {
   .bottom-well;
   background: asset-url('images/packing-well.png');
-  background-size: 470px;
+  background-size: cover;
   background-repeat: no-repeat;
   border: 4px solid rgba(235, 233, 233, 0.69);
   border-radius: 10px;
@@ -1782,11 +1780,6 @@ div.input-style {
   div {
     cursor: pointer;
   }
-}
-
-.middle-items {
-  margin-left: 1.6%;
-  width: 47%;
 }
 
 .time-display {
@@ -1873,7 +1866,6 @@ div.input-style {
     .form-control
   }
   .bottom-well {
-
     margin-bottom: 30px;
   }
   h2 {
@@ -1888,6 +1880,10 @@ div.input-style {
 
 .row.bottom-well {
   margin-top: 10px;
+}
+
+.scanpack-bottom-well{
+  max-width: 1200px;
 }
 
 .dashboard-input {

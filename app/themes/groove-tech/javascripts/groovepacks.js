@@ -2,7 +2,7 @@ var groovepacks = angular.module('groovepacks', ['groovepacks.filters', 'groovep
   'groovepacks.directives', 'groovepacks.controllers', 'ui.sortable', 'pasvaz.bindonce', 'ngCookies',
   'ct.ui.router.extras', 'ngAnimate', 'ui.bootstrap', 'cfp.hotkeys',
   'angular-loading-bar', 'pascalprecht.translate', 'toggle-switch', 'ngTouch',
-  'hmTouchEvents', 'btford.socket-io', 'textAngular', 'ngClipboard', 'nvd3ChartDirectives', 'ng-rails-csrf', 'bootstrapLightbox', 'logger']);
+  'hmTouchEvents', 'btford.socket-io', 'textAngular', 'ngClipboard', 'nvd3ChartDirectives', 'ng-rails-csrf', 'bootstrapLightbox', 'logger', 'ngClipboard']);
 var groovepacks_controllers = angular.module('groovepacks.controllers', []);
 var groovepacks_filters = angular.module('groovepacks.filters', []);
 var groovepacks_services = angular.module('groovepacks.services', []);

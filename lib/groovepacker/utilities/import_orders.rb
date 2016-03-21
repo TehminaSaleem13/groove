@@ -57,7 +57,7 @@ class ImportOrders < Groovepacker::Utilities::Base
       import_summary = OrderImportSummary.create( user: params[:user], status: 'not_started' )
       #add import item for the store
       ImportItem.where(store_id: params[:store].id).destroy_all
-      import_summary.import_items.create( store: params[:store], import_type: params[:import_type] )
+      import_summary.import_items.create( store: params[:store], import_type: params[:import_type], days: params[:days])
       #start importing using delayed job (ImportJob is defined in base class)
       Delayed::Job.enqueue ImportJob.new(params[:tenant], import_summary.id), :queue => 'importing_orders_'+ params[:tenant]
     else

@@ -59,6 +59,8 @@ module Groovepacker
             handler = Groovepacker::Stores::Handlers::ShipstationRestHandler.new(@store)
           when 'BigCommerce'
             handler = Groovepacker::Stores::Handlers::BigCommerceHandler.new(@store)
+          when 'Teapplix'
+            handler = Groovepacker::Stores::Handlers::TeapplixHandler.new(@store)
           end
           return handler
         end

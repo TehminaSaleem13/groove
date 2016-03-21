@@ -42,7 +42,7 @@ module Groovepacker
             gp_ready_tag_id = ss_tags_list[credential.gp_ready_tag_name] || -1
             gp_imported_tag_id = ss_tags_list[credential.gp_imported_tag_name] || -1
 
-            if statuses.present? && gp_ready_tag_id != -1
+            unless statuses.empty? && gp_ready_tag_id == -1
               response = {}
               response["orders"] = nil
               if import_item.import_type != 'tagged'

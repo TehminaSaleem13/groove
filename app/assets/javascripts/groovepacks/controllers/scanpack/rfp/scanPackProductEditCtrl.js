@@ -20,7 +20,7 @@ groovepacks_controllers.
       };
 
       $scope.update_product_list = function (product, prop) {
-        if(!product[prop] /*if null*/){return}
+        if(prop == 'barcode' && !product[prop] && product['status'] != 'active' /*if null*/){return}
         products.list.update_node({
           id: product.id,
           var: prop,
@@ -37,6 +37,8 @@ groovepacks_controllers.
           dynamic_width: true,
           identifier: 'scanpackinactiveornew',
           setup: $scope.products.setup,
+          scrollbar: false,
+          no_of_lines: 3,
           data: {order_num: $stateParams.order_num},
           editable: {
             array: false,
@@ -60,20 +62,24 @@ groovepacks_controllers.
             },
             name: {
               name: "Item Name",
-              transclude: '<a ui-sref="scanpack.rfp.product_edit.single({order_num: options.data.order_num, product_id: row.id })" style="text-decoration: none">{{row[field]}}</a>'
+              col_length: 30,
+              transclude: '<a ui-sref="scanpack.rfp.product_edit.single({order_num: options.data.order_num, product_id: row.id })" style="text-decoration: none" tooltip=\'{{row[field].length ? row[field].chunk(25).join(" ") : ("Edit" + field)}}\'>{{row[field] | cut:false:(25*options.no_of_lines)}}</a>'
             },
             status: {
               name: "Status",
+              col_length: 8,
               transclude: "<span class='label label-default' ng-class=\"{" +
                 "'label-success': row[field] == 'active', " +
                 "'label-info': row[field] == 'new' }\">" +
                 "{{row[field]}}</span>"
             },
             sku: {
-              name: "SKU"
+              name: "SKU",
+              col_length: 30
             },
             barcode: {
-              name: "Barcode"
+              name: "Barcode",
+              col_length: 30
             }
           }
         };
