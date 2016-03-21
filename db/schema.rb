@@ -131,6 +131,9 @@ ActiveRecord::Schema.define(:version => 20160318140645) do
     t.boolean  "import_products",      :default => false, :null => false
     t.boolean  "import_images",        :default => false, :null => false
     t.date     "ebay_auth_expiration"
+    t.string   "productdev_id",        :default => "",    :null => false
+    t.string   "productapp_id",        :default => "",    :null => false
+    t.string   "productcert_id",       :default => "",    :null => false
     t.text     "productauth_token"
     t.text     "auth_token"
   end
@@ -157,7 +160,7 @@ ActiveRecord::Schema.define(:version => 20160318140645) do
   end
 
   create_table "ftp_credentials", :force => true do |t|
-    t.string   "host"
+    t.string   "host",                   :default => ""
     t.integer  "port",                   :default => 21
     t.string   "username",               :default => ""
     t.string   "password",               :default => ""
@@ -207,6 +210,7 @@ ActiveRecord::Schema.define(:version => 20160318140645) do
     t.string   "conf_code_product_instruction",     :default => "optional"
     t.string   "admin_email"
     t.string   "export_items",                      :default => "disabled"
+    t.boolean  "inventory_auto_allocation",         :default => false
     t.string   "custom_field_one",                  :default => "Custom 1"
     t.string   "custom_field_two",                  :default => "Custom 2"
     t.integer  "max_time_per_item",                 :default => 10
@@ -524,9 +528,8 @@ ActiveRecord::Schema.define(:version => 20160318140645) do
     t.string   "postcode"
     t.string   "country"
     t.string   "method"
-    t.datetime "created_at",                                                                :null => false
-    t.datetime "updated_at",                                                                :null => false
-    t.string   "store_order_id"
+    t.datetime "created_at",                                                                 :null => false
+    t.datetime "updated_at",                                                                 :null => false
     t.text     "notes_internal"
     t.text     "notes_toPacker"
     t.text     "notes_fromPacker"
@@ -541,22 +544,24 @@ ActiveRecord::Schema.define(:version => 20160318140645) do
     t.integer  "seller_id"
     t.integer  "order_status_id"
     t.string   "ship_name"
-    t.decimal  "shipping_amount",         :precision => 9,  :scale => 2, :default => 0.0
-    t.decimal  "order_total",             :precision => 9,  :scale => 2, :default => 0.0
+    t.decimal  "shipping_amount",          :precision => 9,  :scale => 2, :default => 0.0
+    t.decimal  "order_total",              :precision => 9,  :scale => 2, :default => 0.0
     t.string   "notes_from_buyer"
     t.integer  "weight_oz"
     t.string   "non_hyphen_increment_id"
-    t.boolean  "note_confirmation",                                      :default => false
-    t.integer  "inaccurate_scan_count",                                  :default => 0
+    t.boolean  "note_confirmation",                                       :default => false
+    t.string   "store_order_id"
+    t.integer  "inaccurate_scan_count",                                   :default => 0
     t.datetime "scan_start_time"
-    t.boolean  "reallocate_inventory",                                   :default => false
+    t.boolean  "reallocate_inventory",                                    :default => false
     t.datetime "last_suggested_at"
-    t.integer  "total_scan_time",                                        :default => 0
-    t.integer  "total_scan_count",                                       :default => 0
-    t.decimal  "packing_score",           :precision => 10, :scale => 0, :default => 0
+    t.integer  "total_scan_time",                                         :default => 0
+    t.integer  "total_scan_count",                                        :default => 0
+    t.decimal  "packing_score",            :precision => 10, :scale => 0, :default => 0
     t.string   "custom_field_one"
     t.string   "custom_field_two"
-    t.boolean  "traced_in_dashboard",                                    :default => false
+    t.boolean  "traced_in_dashboard",                                     :default => false
+    t.boolean  "scanned_by_status_change",                                :default => false
   end
 
   create_table "product_barcodes", :force => true do |t|
@@ -599,7 +604,6 @@ ActiveRecord::Schema.define(:version => 20160318140645) do
     t.integer  "product_id"
     t.datetime "created_at",                                               :null => false
     t.datetime "updated_at",                                               :null => false
-    t.string   "alert"
     t.string   "location_primary",        :limit => 50
     t.string   "location_secondary",      :limit => 50
     t.string   "name"
@@ -671,7 +675,6 @@ ActiveRecord::Schema.define(:version => 20160318140645) do
     t.integer  "packing_placement",                                             :default => 50
     t.integer  "pack_time_adj"
     t.string   "kit_parsing",                                                   :default => "individual"
-    t.integer  "is_kit",                                                        :default => 0
     t.boolean  "disable_conf_req",                                              :default => false
     t.integer  "total_avail_ext",                                               :default => 0,            :null => false
     t.decimal  "weight",                          :precision => 8, :scale => 2, :default => 0.0,          :null => false
@@ -683,6 +686,7 @@ ActiveRecord::Schema.define(:version => 20160318140645) do
     t.boolean  "add_to_any_order",                                              :default => false
     t.string   "base_sku"
     t.boolean  "is_intangible",                                                 :default => false
+    t.integer  "is_kit",                                                        :default => 0
     t.text     "product_receiving_instructions"
   end
 
@@ -910,25 +914,30 @@ ActiveRecord::Schema.define(:version => 20160318140645) do
   add_index "user_inventory_permissions", ["user_id", "inventory_warehouse_id"], :name => "index_user_inventory_permissions_user_inventory", :unique => true
 
   create_table "users", :force => true do |t|
-    t.string   "encrypted_password",     :default => "",    :null => false
+    t.string   "encrypted_password",             :default => "",    :null => false
     t.string   "reset_password_token"
     t.datetime "reset_password_sent_at"
     t.datetime "remember_created_at"
-    t.integer  "sign_in_count",          :default => 0
+    t.integer  "sign_in_count",                  :default => 0
     t.datetime "current_sign_in_at"
     t.datetime "last_sign_in_at"
     t.string   "current_sign_in_ip"
     t.string   "last_sign_in_ip"
-    t.datetime "created_at",                                :null => false
-    t.datetime "updated_at",                                :null => false
-    t.string   "username",               :default => "",    :null => false
-    t.boolean  "active",                 :default => false, :null => false
+    t.datetime "created_at",                                        :null => false
+    t.datetime "updated_at",                                        :null => false
+    t.string   "username",                       :default => "",    :null => false
+    t.boolean  "active",                         :default => false, :null => false
     t.string   "other"
     t.string   "name"
-    t.string   "confirmation_code",      :default => "",    :null => false
+    t.string   "confirmation_code",              :default => "",    :null => false
     t.integer  "inventory_warehouse_id"
     t.integer  "role_id"
-    t.boolean  "view_dashboard",         :default => false
+    t.boolean  "edit_user_status",               :default => false, :null => false
+    t.boolean  "add_order_items_ALL",            :default => false, :null => false
+    t.string   "order_edit_confirmation_code",   :default => ""
+    t.string   "product_edit_confirmation_code", :default => ""
+    t.boolean  "view_dashboard",                 :default => false
+    t.boolean  "is_deleted",                     :default => false
   end
 
   add_index "users", ["inventory_warehouse_id"], :name => "index_users_on_inventory_warehouse_id"
