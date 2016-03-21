@@ -10,7 +10,7 @@ module ProductConcern
   
   private
     def gp_products_module
-      Groovepacker::Products::Products.new(result: @result, params_attrs: params, current_user: current_user)
+      Groovepacker::Products::Products.new(result: @result, params_attrs: params, current_user: current_user, session: session)
     end
 
     def init_result_obj
