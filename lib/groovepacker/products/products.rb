@@ -11,7 +11,7 @@ module Groovepacker
           return @result
         end
         
-        unless @current_user.can?('add_edit_products') || (session[:product_edit_matched_for_current_user] && session[:product_edit_matched_for_products].include?(@product.id))
+        unless @current_user.can?('add_edit_products') || (@session[:product_edit_matched_for_current_user] && @session[:product_edit_matched_for_products].include?(@product.id))
           @result.merge({ 'status' => false, 'message' => 'You do not have enough permissions to update a product' })
           return @result
         end
