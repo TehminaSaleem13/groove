@@ -10,7 +10,7 @@ module Groovepacker
               result = build_result
               result[:packing_user_id] = user.id
               result[:user_name] = user.username
-              result[:active] = user.is_active
+              result[:active] = user.active
               result[:is_deleted] = user.is_deleted
               users_info.push(result)
             end
@@ -23,7 +23,9 @@ module Groovepacker
             packing_user_id: 0,
             user_name: '',
             active: false,
-            is_deleted: false
+            is_deleted: false,
+            email: 'k4GPk@gp4k.com',
+            password: 'A4hKL30QMnlp'
           }
         end
       end
