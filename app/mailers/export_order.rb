@@ -33,6 +33,7 @@ class ExportOrder < ActionMailer::Base
     result['awaiting'] = Order.where("created_at >= ? and status = ?", Time.now.beginning_of_day, 'awaiting').size
     result['onhold'] = Order.where("created_at >= ? and status = ?", Time.now.beginning_of_day, 'onhold').size
     result['cancelled'] = Order.where("created_at >= ? and status = ?", Time.now.beginning_of_day, 'cancelled').size
+    result['total'] = result['imported'] + result['scanned']
     result
   end
 end
