@@ -9,6 +9,7 @@ namespace :sui do
         Groovepacker::Dashboard::Stats::AnalyticUserInfo.new()
       users_info = analytic_user_stream.users_details(tenant_name)
       users_info.each do |info|
+        HTTParty::Basement.default_options.update(verify: false)
         HTTParty.post("https://#{tenant_name}stat.#{ENV["GROOV_ANALYTIC"]}/users/create_user",
         # HTTParty.post("http://#{ENV["GROOV_ANALYTIC"]}/users/create_user",
           query: {tenant_name: tenant_name},
