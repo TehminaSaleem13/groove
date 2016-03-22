@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20160321134210) do
+ActiveRecord::Schema.define(:version => 20160322074348) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0,     :null => false
@@ -866,6 +866,8 @@ ActiveRecord::Schema.define(:version => 20160321134210) do
     t.boolean  "sync_with_shopify",          :default => false
     t.string   "shopify_product_variant_id"
     t.string   "mg_rest_product_sku"
+    t.boolean  "sync_with_teapplix",         :default => false
+    t.string   "teapplix_product_sku"
   end
 
   create_table "teapplix_credentials", :force => true do |t|

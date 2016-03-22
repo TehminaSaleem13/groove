@@ -132,6 +132,7 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
           stores.single.allow_bc_inv_push = data.access_restrictions.allow_bc_inv_push;
           stores.single.allow_mg_rest_inv_push = data.access_restrictions.allow_mg_rest_inv_push;
           stores.single.allow_shopify_inv_push = data.access_restrictions.allow_shopify_inv_push;
+          stores.single.allow_teapplix_inv_push = data.access_restrictions.allow_teapplix_inv_push;
           stores.general_settings = data.general_settings;
           stores.current_tenant = data.current_tenant;
           stores.host_url = data.host_url;

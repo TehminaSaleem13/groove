@@ -84,8 +84,8 @@ module Groovepacker
               create_barcode_for_product(product, teapplix_product)
               get_product_categories(product, teapplix_product)
               import_pimary_image(product, teapplix_product)
-              
               make_product_intangible(product)
+              create_sync_option_for_product(product, teapplix_product, sku)
               #product.update_product_status
               product.set_product_status
               @result = self.build_result unless @result
@@ -127,6 +127,12 @@ module Groovepacker
               if product.product_images.empty? && !teapplix_product[:image_small].blank?
                 product.product_images.create(image: teapplix_product[:image_small])
               end
+            end
+
+            def create_sync_option_for_product(product, teapplix_product, sku)
+              return unless product.sync_option.nil?
+              product.create_sync_option(:teapplix_product_sku => sku, :sync_with_teapplix => true)
+              product.save
             end
 
             def send_products_import_email(products_count)
