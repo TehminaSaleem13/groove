@@ -522,9 +522,9 @@ groovepacks_controllers.
           all_fields: {
             name: {
               name: "Item Name",
-              col_length: 15,
+              col_length: 25,
               editable: false,
-              transclude: '<a href="" ng-click="options.editable.functions.name(row, event)" tooltip="{{row.name}}">{{row.name | cut:false:(50*no_of_lines)}}</a>'
+              transclude: '<a href="" ng-click="options.editable.functions.name(row, event)" tooltip="{{row.name}}">{{row.name | cut:false:25}}</a>'
             },
             sku: {
               name: "Item SKU",
