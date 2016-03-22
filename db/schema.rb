@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20160318140645) do
+ActiveRecord::Schema.define(:version => 20160322054822) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0,     :null => false
@@ -189,7 +189,7 @@ ActiveRecord::Schema.define(:version => 20160318140645) do
     t.boolean  "send_email_on_sun",                 :default => false
     t.datetime "time_to_send_email",                :default => '2000-01-01 00:00:00'
     t.string   "product_weight_format"
-    t.string   "packing_slip_size"
+    t.string   "packing_slip_size",                 :default => "4 x 6"
     t.string   "packing_slip_orientation"
     t.text     "packing_slip_message_to_customer"
     t.boolean  "import_orders_on_mon",              :default => false
@@ -207,8 +207,8 @@ ActiveRecord::Schema.define(:version => 20160318140645) do
     t.string   "conf_code_product_instruction",     :default => "optional"
     t.string   "admin_email"
     t.string   "export_items",                      :default => "disabled"
-    t.string   "custom_field_one",                  :default => "Custom 1"
-    t.string   "custom_field_two",                  :default => "Custom 2"
+    t.string   "custom_field_one"
+    t.string   "custom_field_two"
     t.integer  "max_time_per_item",                 :default => 10
     t.string   "export_csv_email"
   end
@@ -526,7 +526,6 @@ ActiveRecord::Schema.define(:version => 20160318140645) do
     t.string   "method"
     t.datetime "created_at",                                                                :null => false
     t.datetime "updated_at",                                                                :null => false
-    t.string   "store_order_id"
     t.text     "notes_internal"
     t.text     "notes_toPacker"
     t.text     "notes_fromPacker"
@@ -547,6 +546,7 @@ ActiveRecord::Schema.define(:version => 20160318140645) do
     t.integer  "weight_oz"
     t.string   "non_hyphen_increment_id"
     t.boolean  "note_confirmation",                                      :default => false
+    t.string   "store_order_id"
     t.integer  "inaccurate_scan_count",                                  :default => 0
     t.datetime "scan_start_time"
     t.boolean  "reallocate_inventory",                                   :default => false
@@ -748,9 +748,9 @@ ActiveRecord::Schema.define(:version => 20160318140645) do
     t.float    "order_complete_sound_vol",      :default => 0.75
     t.boolean  "type_scan_code_enabled",        :default => true
     t.string   "type_scan_code",                :default => "*"
-    t.string   "post_scanning_option",          :default => "None"
     t.string   "escape_string",                 :default => " - "
     t.boolean  "escape_string_enabled",         :default => false
+    t.string   "post_scanning_option",          :default => "None"
     t.boolean  "record_lot_number",             :default => false
     t.boolean  "show_customer_notes",           :default => false
     t.boolean  "show_internal_notes",           :default => false
