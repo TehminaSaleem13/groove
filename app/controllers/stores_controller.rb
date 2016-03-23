@@ -1435,6 +1435,8 @@ class StoresController < ApplicationController
         handler = Groovepacker::Stores::Handlers::MagentoRestHandler.new(@store)
       when "Shopify"
         handler = Groovepacker::Stores::Handlers::ShopifyHandler.new(@store)
+      when "Teapplix"
+        handler = Groovepacker::Stores::Handlers::TeapplixHandler.new(@store)
       end
       
       context = Groovepacker::Stores::Context.new(handler)
@@ -1467,6 +1469,8 @@ class StoresController < ApplicationController
         handler = Groovepacker::Stores::Handlers::MagentoRestHandler.new(@store)
       when "Shopify"
         handler = Groovepacker::Stores::Handlers::ShopifyHandler.new(@store)
+      when "Teapplix"
+        handler = Groovepacker::Stores::Handlers::TeapplixHandler.new(@store)
       end
       
       context = Groovepacker::Stores::Context.new(handler)

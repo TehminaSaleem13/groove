@@ -1,6 +1,6 @@
 class SyncOption < ActiveRecord::Base
   attr_accessible :bc_product_id, :product_id, :bc_product_sku, :sync_with_bc, :mg_rest_product_id, :mg_rest_product_sku, :sync_with_mg_rest,
-                  :sync_with_shopify, :shopify_product_variant_id
+                  :sync_with_shopify, :shopify_product_variant_id, :sync_with_teapplix, :teapplix_product_sku
   belongs_to :product
 
   def self.create_update_sync_option(params)
@@ -14,6 +14,8 @@ class SyncOption < ActiveRecord::Base
     sync_option.sync_with_mg_rest = params["sync_with_mg_rest"]
     sync_option.mg_rest_product_sku = params["mg_rest_product_sku"].try(:strip)
     sync_option.mg_rest_product_id = params["mg_rest_product_id"].to_i!=0 ? params["mg_rest_product_id"] : nil
+    sync_option.sync_with_teapplix = params["sync_with_teapplix"]
+    sync_option.teapplix_product_sku = params["teapplix_product_sku"].try(:strip)
     sync_option.save
   end
 end

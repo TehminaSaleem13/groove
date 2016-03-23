@@ -253,6 +253,7 @@ module Groovepacker
             access_restrictions[data_length-1].allow_bc_inv_push = params[:access_restrictions_info][:allow_bc_inv_push] unless params[:access_restrictions_info][:allow_bc_inv_push].nil?
             access_restrictions[data_length-1].allow_mg_rest_inv_push = params[:access_restrictions_info][:allow_mg_rest_inv_push] unless params[:access_restrictions_info][:allow_mg_rest_inv_push].nil?
             access_restrictions[data_length-1].allow_shopify_inv_push = params[:access_restrictions_info][:allow_shopify_inv_push] unless params[:access_restrictions_info][:allow_shopify_inv_push].nil?
+            access_restrictions[data_length-1].allow_teapplix_inv_push = params[:access_restrictions_info][:allow_teapplix_inv_push] unless params[:access_restrictions_info][:allow_teapplix_inv_push].nil?
             access_restrictions[data_length-1].save
           end
         rescue Exception => e

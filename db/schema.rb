@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20160318140645) do
+ActiveRecord::Schema.define(:version => 20160322074348) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0,     :null => false
@@ -23,6 +23,7 @@ ActiveRecord::Schema.define(:version => 20160318140645) do
     t.boolean  "allow_bc_inv_push",       :default => false
     t.boolean  "allow_mg_rest_inv_push",  :default => false
     t.boolean  "allow_shopify_inv_push",  :default => false
+    t.boolean  "allow_teapplix_inv_push", :default => false
   end
 
   create_table "amazon_credentials", :force => true do |t|
@@ -869,6 +870,21 @@ ActiveRecord::Schema.define(:version => 20160318140645) do
     t.boolean  "sync_with_shopify",          :default => false
     t.string   "shopify_product_variant_id"
     t.string   "mg_rest_product_sku"
+    t.boolean  "sync_with_teapplix",         :default => false
+    t.string   "teapplix_product_sku"
+  end
+
+  create_table "teapplix_credentials", :force => true do |t|
+    t.integer  "store_id"
+    t.string   "account_name"
+    t.string   "username"
+    t.string   "password"
+    t.boolean  "import_shipped",       :default => false
+    t.boolean  "import_open_orders",   :default => false
+    t.datetime "last_imported_at"
+    t.datetime "created_at",                              :null => false
+    t.datetime "updated_at",                              :null => false
+    t.boolean  "gen_barcode_from_sku", :default => false
   end
 
   create_table "teapplix_credentials", :force => true do |t|
