@@ -23,6 +23,20 @@ class GroovS3
       self.save(object, data)
     end
 
+    def create_teapplix_csv(dir, name, data, privacy = :public_read)
+      object = self.create(dir, "#{name}.csv", 'text/csv', privacy)
+      self.save(object, data)
+    end
+
+    def find_teapplix_csv(dir, name)
+      begin
+        object = self.bucket.objects.find(dir+"/#{name}.csv")
+        return object
+      rescue S3::Error::NoSuchKey => e
+        return nil
+      end
+    end
+
     def find_csv(tenant, type, store_id)
       begin
         object = self.bucket.objects.find(tenant+"/csv/#{type}.#{store_id}.csv")

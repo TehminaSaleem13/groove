@@ -36,6 +36,12 @@ module Groovepacker
         combined_response["inventories"] = response
         combined_response
       end
+
+      def update_inventory_qty_on_teapplix(csv_url)
+        return combined_response if @account_name.blank? || @username.blank? || @password.blank?
+        url = "https://www.teapplix.com/h/#{@account_name}/ea/admin.php?User=#{@username}&Passwd=#{@password}&Action=Upload&Subaction=Inventory&upload=#{csv_url}"
+        response = post(url, false)
+      end
       
       private
         def get(url, get_formatted)
@@ -49,6 +55,16 @@ module Groovepacker
 
         def put(url, body={})
           response = HTTParty.put(url,
+                                  body: body.to_json,
+                                  headers: {
+                                    "Content-Type" => "application/json",
+                                    "Accept" => "application/json"
+                                  }
+                                )
+        end
+
+        def post(url, body={})
+          response = HTTParty.post(url,
                                   body: body.to_json,
                                   headers: {
                                     "Content-Type" => "application/json",

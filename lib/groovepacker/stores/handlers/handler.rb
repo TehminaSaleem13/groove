@@ -8,6 +8,8 @@ module Groovepacker
             import_item = Groovepacker::Stores::Handlers::MockImportItem.new
           end
           self.import_item = import_item
+          self.current_tenant = Apartment::Tenant.current
+
         end
 
         def build_handle
@@ -35,13 +37,14 @@ module Groovepacker
         end
 
         protected
-        attr_accessor :store, :import_item
+        attr_accessor :store, :import_item, :current_tenant
 
         def make_handle(credential, store_handle)
           {
             credential: credential,
             store_handle: store_handle,
-            import_item: self.import_item
+            import_item: self.import_item,
+            current_tenant: self.current_tenant
           }
         end
       end
