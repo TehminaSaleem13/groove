@@ -769,8 +769,10 @@ class StoresController < ApplicationController
     end
 
     unless @store.status
-      @result['status'] = false
-      @result['messages'].push('Store is not active')
+      if params["flag"]=="ftp_download"
+        @result['status'] = false
+        @result['messages'].push('Store is not active')
+      end
     end
 
     if params[:type].nil? || !['order', 'product', 'kit'].include?(params[:type])
