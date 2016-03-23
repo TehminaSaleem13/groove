@@ -103,7 +103,7 @@ class OrdersController < ApplicationController
   def record_exception
     unless params[:reason].blank?
       #Finiding @order in concern
-      @result = gp_orders_exception.record_exception(@order)
+      @result = gp_orders_exception.record_exception(@order, Apartment::Tenant.current)
     else
       set_status_and_message(false, 'Cannot record exception without a reason', ['&', 'push'])
     end
@@ -115,7 +115,7 @@ class OrdersController < ApplicationController
     if @order.order_exception.nil?
       set_status_and_message(false, 'Order does not have exception to clear', ['&', 'push'])
     elsif current_user.can? 'edit_packing_ex'
-      @result = @order.destroy_exceptions(@result, current_user)
+      @result = @order.destroy_exceptions(@result, current_user, Apartment::Tenant.current)
     else
       set_status_and_message(false, 'You can not edit exceptions', ['&', 'push'])
     end
