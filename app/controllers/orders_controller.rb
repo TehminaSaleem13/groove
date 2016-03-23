@@ -103,7 +103,7 @@ class OrdersController < ApplicationController
   def record_exception
     unless params[:reason].blank?
       #Finiding @order in concern
-      @result = gp_orders_exception.record_exception(@order)
+      @result = gp_orders_exception.record_exception(@order, Apartment::Tenant.current)
     else
       set_status_and_message(false, 'Cannot record exception without a reason', ['&', 'push'])
     end

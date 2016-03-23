@@ -2,8 +2,9 @@ module Groovepacker
   module Orders
     class OrdersException < Groovepacker::Orders::Base
 
-      def record_exception(order)
+      def record_exception(order, tenant)
         @order = order
+        @tenant = tenant
         if (@current_user.can?('create_packing_ex') && @order.order_exception.nil?) ||
           (@current_user.can?('edit_packing_ex') && !@order.order_exception.nil?)
           create_or_update_exception
@@ -51,6 +52,8 @@ module Groovepacker
           if @exception.save
             username = @params[:assoc][:name] rescue ""
             @order.addactivity("Order Exception Associated with #{username} - Recorded", @current_user.name)
+            stat_stream_obj = SendStatStream.new()
+            stat_stream_obj.delay(:run_at => 1.seconds.from_now, :queue => 'send_order_exception_#{@order.id}').send_order_exception(@order.id, @tenant)
           else
             set_status_and_message(false, 'Could not save order with exception', ['&', ['push']])
           end
