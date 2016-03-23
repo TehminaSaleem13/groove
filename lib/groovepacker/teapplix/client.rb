@@ -57,8 +57,8 @@ module Groovepacker
           response = HTTParty.put(url,
                                   body: body.to_json,
                                   headers: {
-                                    "Content-Type" => "application/json",
-                                    "Accept" => "application/json"
+                                    "Content-Type" => "text/csv",
+                                    "Accept" => "text/csv"
                                   }
                                 )
         end
@@ -67,8 +67,8 @@ module Groovepacker
           response = HTTParty.post(url,
                                   body: body.to_json,
                                   headers: {
-                                    "Content-Type" => "application/json",
-                                    "Accept" => "application/json"
+                                    "Content-Type" => "text/csv",
+                                    "Accept" => "text/csv"
                                   }
                                 )
         end
