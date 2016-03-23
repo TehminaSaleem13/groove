@@ -239,7 +239,7 @@ module OrderConcern
         return
       end
       @result = gp_orders_exception.add_edit_order_items(order)
-      @result = gp_orders_exception.edit_packing_execptions(order)
+      @result = gp_orders_exception.edit_packing_execptions(order, Apartment::Tenant.current)
     end
 
     def generate_barcode_for_packingslip
