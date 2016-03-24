@@ -72,7 +72,7 @@ class ExportsettingsController < ApplicationController
           end_time: Time.parse(params[:end]),
           manual_export: true
         )
-        filename = "#{Rails.root}/public/csv/#{export_setting.export_data}"
+        filename = "#{Rails.root}/public/csv/" + export_setting.export_data
         export_setting.update_attributes(manual_export: false)
       else
         update_false_status(result, 'We need a start and an end time')
