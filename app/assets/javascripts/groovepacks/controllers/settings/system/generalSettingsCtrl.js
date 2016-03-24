@@ -50,7 +50,8 @@ groovepacks_controllers.
             "conf_code_product_instruction": "",
             "send_email_for_packer_notes": "",
             "packing_slip_size": "",
-            "packing_slip_message_to_customer": ""
+            "packing_slip_message_to_customer": "",
+            "order_item_export_message": ""
           }
         };
         groov_translator.translate('settings.system.general', $scope.translations);
