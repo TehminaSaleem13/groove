@@ -106,6 +106,7 @@ class ExportSetting < ActiveRecord::Base
         row_map = {
           :order_date => '',
           :order_number => '',
+          :scanned_by_status_change => '',
           :scan_order => '',
           :barcode_with_lot => '',
           :barcode => '',
@@ -128,15 +129,16 @@ class ExportSetting < ActiveRecord::Base
           :warehouse_name => ''
         }
         order_hash_array = []
-        order_hash = {:order_date => "order_date", :order_number => "order_number",
-                      :scan_order => "scan_order", :barcode_with_lot => "barcode_with_lot", 
-                      :barcode => "barcode", :lot_number => "lot_number", :primary_sku => "primary_sku",
-                      :part_sku =>  "part_sku", :serial_number => "serial_number", 
-                      :product_name => "product_name", :packing_user => "packing_user", 
-                      :order_item_count => "order_item_count", :scanned_date => "scanned_date", 
-                      :warehouse_name => "warehouse_name", :item_sale_price => "item_sale_price", 
-                      :kit_name => "kit_name", :customer_name => "customer_name", :address1 => "address1", 
-                      :address2 => "address2", :city => "city", :state => "state", :zip => "zip"}
+        order_hash = { :order_date => "order_date", :order_number => "order_number",
+          :scanned_by_status_change => "scanned_by_status_change",
+          :scan_order => "scan_order", :barcode_with_lot => "barcode_with_lot", 
+          :barcode => "barcode", :lot_number => "lot_number", :primary_sku => "primary_sku",
+          :part_sku =>  "part_sku", :serial_number => "serial_number", 
+          :product_name => "product_name", :packing_user => "packing_user", 
+          :order_item_count => "order_item_count", :scanned_date => "scanned_date", 
+          :warehouse_name => "warehouse_name", :item_sale_price => "item_sale_price", 
+          :kit_name => "kit_name", :customer_name => "customer_name", :address1 => "address1", 
+          :address2 => "address2", :city => "city", :state => "state", :zip => "zip" }
         order_hash_array.push(order_hash)
         orders.each do |order|
           order_items = order.order_items
@@ -185,16 +187,17 @@ class ExportSetting < ActiveRecord::Base
                         end
                         
                         order_hash = {:order_date => single_row[:order_date], :order_number => single_row[:order_number],
-                                      :barcode_with_lot => single_row[:barcode_with_lot], :barcode => single_row[:barcode],
-                                      :lot_number => single_row[:lot_number], :primary_sku => single_row[:primary_sku],
-                                      :part_sku => single_row[:part_sku], :serial_number => single_row[:serial_number], 
-                                      :product_name => single_row[:product_name], :packing_user => single_row[:packing_user], 
-                                      :order_item_count => single_row[:order_item_count], :scanned_date => single_row[:scanned_date], 
-                                      :warehouse_name => single_row[:warehouse_name], :item_sale_price => single_row[:item_sale_price], 
-                                      :scan_order => single_row[:scan_order], :kit_name => single_row[:kit_name], 
-                                      :customer_name => single_row[:customer_name], :address1 => single_row[:address1], 
-                                      :address2 => single_row[:address2], :city => single_row[:city], 
-                                      :state => single_row[:state], :zip => single_row[:zip]}
+                          :scanned_by_status_change => single_row[:scanned_by_status_change],
+                          :barcode_with_lot => single_row[:barcode_with_lot], :barcode => single_row[:barcode],
+                          :lot_number => single_row[:lot_number], :primary_sku => single_row[:primary_sku],
+                          :part_sku => single_row[:part_sku], :serial_number => single_row[:serial_number], 
+                          :product_name => single_row[:product_name], :packing_user => single_row[:packing_user], 
+                          :order_item_count => single_row[:order_item_count], :scanned_date => single_row[:scanned_date], 
+                          :warehouse_name => single_row[:warehouse_name], :item_sale_price => single_row[:item_sale_price], 
+                          :scan_order => single_row[:scan_order], :kit_name => single_row[:kit_name], 
+                          :customer_name => single_row[:customer_name], :address1 => single_row[:address1], 
+                          :address2 => single_row[:address2], :city => single_row[:city], 
+                          :state => single_row[:state], :zip => single_row[:zip]}
                         order_hash_item_array.push(order_hash)
                       end
                     else
@@ -244,16 +247,17 @@ class ExportSetting < ActiveRecord::Base
                     end
                     
                     order_hash = {:order_date => single_row[:order_date], :order_number => single_row[:order_number],
-                                  :barcode_with_lot => single_row[:barcode_with_lot], :barcode => single_row[:barcode],
-                                  :lot_number => single_row[:lot_number], :primary_sku => single_row[:primary_sku],
-                                  :part_sku => single_row[:part_sku], :serial_number => single_row[:serial_number], 
-                                  :product_name => single_row[:product_name], :packing_user => single_row[:packing_user], 
-                                  :order_item_count => single_row[:order_item_count], :scanned_date => single_row[:scanned_date], 
-                                  :warehouse_name => single_row[:warehouse_name], :item_sale_price => single_row[:item_sale_price], 
-                                  :scan_order => single_row[:scan_order], :kit_name => single_row[:kit_name], 
-                                  :customer_name => single_row[:customer_name], :address1 => single_row[:address1], 
-                                  :address2 => single_row[:address2], :city => single_row[:city], 
-                                  :state => single_row[:state], :zip => single_row[:zip]}
+                      :scanned_by_status_change => single_row[:scanned_by_status_change],
+                      :barcode_with_lot => single_row[:barcode_with_lot], :barcode => single_row[:barcode],
+                      :lot_number => single_row[:lot_number], :primary_sku => single_row[:primary_sku],
+                      :part_sku => single_row[:part_sku], :serial_number => single_row[:serial_number], 
+                      :product_name => single_row[:product_name], :packing_user => single_row[:packing_user], 
+                      :order_item_count => single_row[:order_item_count], :scanned_date => single_row[:scanned_date], 
+                      :warehouse_name => single_row[:warehouse_name], :item_sale_price => single_row[:item_sale_price], 
+                      :scan_order => single_row[:scan_order], :kit_name => single_row[:kit_name], 
+                      :customer_name => single_row[:customer_name], :address1 => single_row[:address1], 
+                      :address2 => single_row[:address2], :city => single_row[:city], 
+                      :state => single_row[:state], :zip => single_row[:zip]}
                     order_hash_item_array.push(order_hash)
                   end
                   if order_item.qty > qty_with_lot_serial
@@ -265,16 +269,17 @@ class ExportSetting < ActiveRecord::Base
                     single_row[:serial_number] = ''
                     single_row[:scan_order] = ''
                     order_hash = {:order_date => single_row[:order_date], :order_number => single_row[:order_number],
-                                  :barcode_with_lot => single_row[:barcode_with_lot], :barcode => single_row[:barcode],
-                                  :lot_number => single_row[:lot_number], :primary_sku => single_row[:primary_sku], 
-                                  :part_sku => single_row[:part_sku], :serial_number => single_row[:serial_number], 
-                                  :product_name => single_row[:product_name], :packing_user => single_row[:packing_user], 
-                                  :order_item_count => single_row[:order_item_count], :scanned_date => single_row[:scanned_date], 
-                                  :warehouse_name => single_row[:warehouse_name], :item_sale_price => single_row[:item_sale_price], 
-                                  :scan_order => single_row[:scan_order], :kit_name => single_row[:kit_name], 
-                                  :customer_name => single_row[:customer_name], :address1 => single_row[:address1], 
-                                  :address2 => single_row[:address2], :city => single_row[:city], 
-                                  :state => single_row[:state], :zip => single_row[:zip]}
+                      :scanned_by_status_change => single_row[:scanned_by_status_change],
+                      :barcode_with_lot => single_row[:barcode_with_lot], :barcode => single_row[:barcode],
+                      :lot_number => single_row[:lot_number], :primary_sku => single_row[:primary_sku], 
+                      :part_sku => single_row[:part_sku], :serial_number => single_row[:serial_number], 
+                      :product_name => single_row[:product_name], :packing_user => single_row[:packing_user], 
+                      :order_item_count => single_row[:order_item_count], :scanned_date => single_row[:scanned_date], 
+                      :warehouse_name => single_row[:warehouse_name], :item_sale_price => single_row[:item_sale_price], 
+                      :scan_order => single_row[:scan_order], :kit_name => single_row[:kit_name], 
+                      :customer_name => single_row[:customer_name], :address1 => single_row[:address1], 
+                      :address2 => single_row[:address2], :city => single_row[:city], 
+                      :state => single_row[:state], :zip => single_row[:zip]}
                     order_hash_item_array.push(order_hash)
                   end
                 else
@@ -286,16 +291,17 @@ class ExportSetting < ActiveRecord::Base
                   single_row[:serial_number] = ''
                   single_row[:scan_order] = ''
                   order_hash = {:order_date => single_row[:order_date], :order_number => single_row[:order_number],
-                                :barcode_with_lot => single_row[:barcode_with_lot], :barcode => single_row[:barcode],
-                                :lot_number => single_row[:lot_number], :primary_sku => single_row[:primary_sku], 
-                                :part_sku => single_row[:part_sku], :serial_number => single_row[:serial_number], 
-                                :scan_order => single_row[:scan_order], :product_name => single_row[:product_name], 
-                                :packing_user => single_row[:packing_user], :order_item_count => single_row[:order_item_count], 
-                                :scanned_date => single_row[:scanned_date], :warehouse_name => single_row[:warehouse_name], 
-                                :item_sale_price => single_row[:item_sale_price], :kit_name => single_row[:kit_name], 
-                                :customer_name => single_row[:customer_name], :address1 => single_row[:address1], 
-                                :address2 => single_row[:address2], :city => single_row[:city], 
-                                :state => single_row[:state], :zip => single_row[:zip]}
+                    :scanned_by_status_change => single_row[:scanned_by_status_change],
+                    :barcode_with_lot => single_row[:barcode_with_lot], :barcode => single_row[:barcode],
+                    :lot_number => single_row[:lot_number], :primary_sku => single_row[:primary_sku], 
+                    :part_sku => single_row[:part_sku], :serial_number => single_row[:serial_number], 
+                    :scan_order => single_row[:scan_order], :product_name => single_row[:product_name], 
+                    :packing_user => single_row[:packing_user], :order_item_count => single_row[:order_item_count], 
+                    :scanned_date => single_row[:scanned_date], :warehouse_name => single_row[:warehouse_name], 
+                    :item_sale_price => single_row[:item_sale_price], :kit_name => single_row[:kit_name], 
+                    :customer_name => single_row[:customer_name], :address1 => single_row[:address1], 
+                    :address2 => single_row[:address2], :city => single_row[:city], 
+                    :state => single_row[:state], :zip => single_row[:zip]}
                   order_hash_item_array.push(order_hash)
                 end
               end
@@ -328,6 +334,7 @@ class ExportSetting < ActiveRecord::Base
             csv_row_map = {
               :order_date => '',
               :order_number => '',
+              :scanned_by_status_change => '',
               :barcode => '',
               :primary_sku => '',
               :product_name => '',
@@ -348,6 +355,7 @@ class ExportSetting < ActiveRecord::Base
             csv_row_map = {
               :order_date => '',
               :order_number => '',
+              :scanned_by_status_change => '',
               :barcode_with_lot => '',
               :barcode => '',
               :lot_number => '',
@@ -371,6 +379,7 @@ class ExportSetting < ActiveRecord::Base
             csv_row_map = {
               :order_date => '',
               :order_number => '',
+              :scanned_by_status_change => '',
               :scan_order => '',
               :barcode => '',
               :primary_sku => '',
@@ -394,6 +403,7 @@ class ExportSetting < ActiveRecord::Base
             csv_row_map = {
               :order_date => '',
               :order_number => '',
+              :scanned_by_status_change => '',
               :scan_order => '',
               :barcode_with_lot => '',
               :barcode => '',
@@ -429,6 +439,7 @@ class ExportSetting < ActiveRecord::Base
         row_map = {
           :order_date => '',
           :order_number => '',
+          :scanned_by_status_change => '',
           :scanned_qty => '',
           :packing_user => '',
           :scanned_date => '',
@@ -439,6 +450,7 @@ class ExportSetting < ActiveRecord::Base
           orders.each do |order|
             single_row = row_map.dup
             single_row[:order_number] = order.increment_id
+            single_row[:scanned_by_status_change] = order.scanned_by_status_change
             single_row[:scanned_qty] = order.scanned_items_count
             single_row[:order_date] = order.order_placed_time
             single_row[:scanned_date] = order.scanned_on
@@ -472,6 +484,7 @@ class ExportSetting < ActiveRecord::Base
   def calculate_row_data(single_row, order_item)
     single_row[:order_number] = order_item.order.increment_id
     single_row[:order_date] = order_item.order.order_placed_time
+    single_row[:scanned_by_status_change] = order_item.order.scanned_by_status_change
     single_row[:scanned_date] = order_item.order.scanned_on
     single_row[:address1] = order_item.order.address_1
     single_row[:address2] = order_item.order.address_2

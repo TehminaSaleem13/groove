@@ -34,6 +34,12 @@
                 <td>
                   <a href="https://<%= @tenant_name %>.groovepacker.com/#/orders/scanned/1/<%= order.id %>" style="font-weight:bold; color:#66A909;"><%= td %></a>
                 </td>
+              <% elsif td_index == @scanned_by_status_change %>
+                <% if td == 'true' %>
+                  <td style="font-weight:bold; color: #cc0000"><%= td %></td>
+                <% else %>
+                  <td><%= td %></td>
+                <% end %>
               <% else %>
                 <% if i == (@csv_data.size - 1) %>
                   <% if td_index == 0 %>
@@ -58,6 +64,8 @@
       <p>Order imported today: <%= @counts['imported'] %></p>
 
       <p>Order scanned today: <%= @counts['scanned'] %></p>
+
+      <p>Order scanned by manual status change today: <%= @counts['scanned_manually'] %></p>
       <% if @counts['imported'] > 0 %>
         <p>Today's Order Remaining Awaiting: <%= @counts['awaiting'] %></p>
 

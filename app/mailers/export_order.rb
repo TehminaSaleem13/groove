@@ -15,6 +15,8 @@ class ExportOrder < ActionMailer::Base
     @csv_data.first.each_with_index do |value, index|
       if value == 'order_number'
         @order_number = index
+      elsif value == 'scanned_by_status_change'
+        @scanned_by_status_change = index
       end
     end
 
@@ -30,6 +32,7 @@ class ExportOrder < ActionMailer::Base
     result = Hash.new
     result['imported'] = Order.where("created_at >= ?", Time.now.beginning_of_day).size
     result['scanned'] = Order.where("scanned_on >= ?", Time.now.beginning_of_day).size
+    result['scanned_manually'] = Order.where("scanned_on >= ? and scanned_by_status_change = ?", Time.now.beginning_of_day, true).size
     result['awaiting'] = Order.where("created_at >= ? and status = ?", Time.now.beginning_of_day, 'awaiting').size
     result['onhold'] = Order.where("created_at >= ? and status = ?", Time.now.beginning_of_day, 'onhold').size
     result['cancelled'] = Order.where("created_at >= ? and status = ?", Time.now.beginning_of_day, 'cancelled').size
