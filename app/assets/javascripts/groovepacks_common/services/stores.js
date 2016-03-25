@@ -111,6 +111,16 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
     }
   };
 
+  var update_list_node = function (obj) {
+    return $http.post('/stores/update_store_list.json', obj).success(function (data) {
+      if (data.status) {
+        notification.notify("Successfully Updated", 1);
+      } else {
+        notification.notify(data.error_msg, 0);
+      }
+    }).error(notification.server_error);
+  };
+
 
   //single store related functions
   var get_single = function (id, stores) {
@@ -359,7 +369,7 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
       data: stores.single
     }).success(function(data) {
       if(data.status) {
-        notification.notify("Successfully Updated", 1);        
+        notification.notify("Successfully Updated", 1);
       } else {
         notification.notify(data.messages, 0);
       }
@@ -650,6 +660,7 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
     list: {
       get: get_list,
       update: update_list,
+      update_node: update_list_node,
       select_notification: select_notification
     },
     single: {
