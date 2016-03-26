@@ -8,21 +8,20 @@ module Groovepacker
           def import
             initialize_import_objects
             response = @client.products
-            return @result if response["products"].blank?
+            return if response["products"].blank?
             response["products"].each do |product|
-              product = create_single_product(product)
+              create_single_product(product)
             end
-            
-            result
           end
 
-          # def import_single_product(item)
-          #   handler = self.get_handler
-          #   credential = handler[:credential]
-          #   client = handler[:store_handle]
-          #   product = create_single_product(item, client, credential)
-          #   return product
-          # end
+          def import_single_product(item)
+            initialize_import_objects
+            shopify_product = @client.product(item["product_id"])
+            shopify_product = shopify_product["product"]
+            variant = shopify_product["variants"].select {|variant| variant["id"]==item["variant_id"]}.first
+            product = create_product_from_variant(variant, shopify_product)
+            return product
+          end
 
           private
             
@@ -31,8 +30,6 @@ module Groovepacker
               @credential = handler[:credential]
               @store = @credential.store
               @client = handler[:store_handle]
-              #@import_item = handler[:import_item]
-              @result = self.build_result
             end
 
             def create_single_product(shopify_product)
@@ -44,25 +41,31 @@ module Groovepacker
             
             def create_product_from_variant(variant, shopify_product)
               if variant["sku"].blank?
-                create_product_with_temp_sku(variant, shopify_product)
+                product = create_product_with_temp_sku(variant, shopify_product)
               elsif ProductSku.where(sku: variant["sku"]).length == 0
                 # if non-nil sku is not found
-                create_new_product_from_order(variant, variant["sku"], shopify_product)
+                product = create_new_product_from_order(variant, variant["sku"], shopify_product)
+              else
+                  product = ProductSku.where(sku: variant["sku"]).first.product
               end
+              return product
             end
 
             def create_product_with_temp_sku(variant, shopify_product)
               # if sku is nil or empty
               products = Product.where(name: variant["title"])
               if products.blank?
-                # if item is not found by name then create the variant
-                create_new_product_from_order(variant, ProductSku.get_temp_sku, shopify_product)
+                # if product is not found by name then create the variant
+                product = create_new_product_from_order(variant, ProductSku.get_temp_sku, shopify_product)
               else
                 # product exists add temp sku if it does not exist
                 unless contains_temp_skus(products)
-                  create_new_product_from_order(variant, ProductSku.get_temp_sku, shopify_product)
+                  product = create_new_product_from_order(variant, ProductSku.get_temp_sku, shopify_product)
+                else
+                  product = get_product_with_temp_skus(products)
                 end
               end
+              return product
             end
 
             def create_new_product_from_order(variant, sku, shopify_product)
@@ -85,6 +88,7 @@ module Groovepacker
               create_sync_option_for_product(product, variant)
               make_product_intangible(product)
               product.update_product_status
+              return product
             end
 
             def create_sync_option_for_product(product, variant)
