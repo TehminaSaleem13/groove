@@ -207,8 +207,8 @@ ActiveRecord::Schema.define(:version => 20160322054822) do
     t.string   "conf_code_product_instruction",     :default => "optional"
     t.string   "admin_email"
     t.string   "export_items",                      :default => "disabled"
-    t.string   "custom_field_one"
-    t.string   "custom_field_two"
+    t.string   "custom_field_one",                  :default => "Custom 1"
+    t.string   "custom_field_two",                  :default => "Custom 2"
     t.integer  "max_time_per_item",                 :default => 10
     t.string   "export_csv_email"
   end
@@ -524,8 +524,9 @@ ActiveRecord::Schema.define(:version => 20160322054822) do
     t.string   "postcode"
     t.string   "country"
     t.string   "method"
-    t.datetime "created_at",                                                                :null => false
-    t.datetime "updated_at",                                                                :null => false
+    t.datetime "created_at",                                                                 :null => false
+    t.datetime "updated_at",                                                                 :null => false
+    t.string   "store_order_id"
     t.text     "notes_internal"
     t.text     "notes_toPacker"
     t.text     "notes_fromPacker"
@@ -545,9 +546,8 @@ ActiveRecord::Schema.define(:version => 20160322054822) do
     t.string   "notes_from_buyer"
     t.integer  "weight_oz"
     t.string   "non_hyphen_increment_id"
-    t.boolean  "note_confirmation",                                      :default => false
-    t.string   "store_order_id"
-    t.integer  "inaccurate_scan_count",                                  :default => 0
+    t.boolean  "note_confirmation",                                       :default => false
+    t.integer  "inaccurate_scan_count",                                   :default => 0
     t.datetime "scan_start_time"
     t.boolean  "reallocate_inventory",                                   :default => false
     t.datetime "last_suggested_at"
@@ -867,19 +867,6 @@ ActiveRecord::Schema.define(:version => 20160322054822) do
     t.string   "mg_rest_product_sku"
   end
 
-  create_table "teapplix_credentials", :force => true do |t|
-    t.integer  "store_id"
-    t.string   "account_name"
-    t.string   "username"
-    t.string   "password"
-    t.boolean  "import_shipped",       :default => false
-    t.boolean  "import_open_orders",   :default => false
-    t.datetime "last_imported_at"
-    t.datetime "created_at",                              :null => false
-    t.datetime "updated_at",                              :null => false
-    t.boolean  "gen_barcode_from_sku", :default => false
-  end
-
   create_table "tenants", :force => true do |t|
     t.string   "name"
     t.datetime "created_at",          :null => false
@@ -929,8 +916,8 @@ ActiveRecord::Schema.define(:version => 20160322054822) do
     t.integer  "inventory_warehouse_id"
     t.integer  "role_id"
     t.boolean  "view_dashboard",         :default => false
+    t.boolean  "is_deleted",             :default => false
   end
-
   add_index "users", ["inventory_warehouse_id"], :name => "index_users_on_inventory_warehouse_id"
   add_index "users", ["reset_password_token"], :name => "index_users_on_reset_password_token", :unique => true
   add_index "users", ["role_id"], :name => "index_users_on_role_id"
