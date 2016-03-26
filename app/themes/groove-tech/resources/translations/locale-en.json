@@ -99,7 +99,8 @@
           "strict_cc": "When Strict Confirmation Codes are disabled a user can just use the enter key to acknowledge that they've seen a packing or order notification. When enabled a user must scan or enter their own confirmation code to proceed. About Packing notifications: There are two types of packing notifications. The first, \"Notes to Packer\" may be added to an order. It will appear when the order is packed. The second, \"Special Instructions to Packer\" can be added to a product. This notification will appear each time that product is packed. The user's Confirmation Code can be requested for either of these notifications. The strict confirmation code setting controls how the user is required to confirm.",
           "conf_code_product_instruction": "Special instructions to Packer can be added for any product from the product detail window. If a confirmation is required the Packer will be prompted to scan their unique confirmation code to proceed when the instructions are shown. If you want to ensure that confirmations are always required or never required for this type of notification you can do that here. Leaving it optional allows this setting to be controlled on a per product basis.",
           "packing_slip_size": "Choose the paper size you use for printing packing slips 4x6 is usually used for thermal printers. Standard 8.5x11 will print two packing slips per page.",
-          "packing_slip_message_to_customer": "This is usually used for a thank you message and possibly instructions for receiving support. A store specific message can be set on the store setup page which will override this general message. Leave Blank to disable this general packing slip message"
+          "packing_slip_message_to_customer": "This is usually used for a thank you message and possibly instructions for receiving support. A store specific message can be set on the store setup page which will override this general message. Leave Blank to disable this general packing slip message",
+          "order_item_export_message": "The Order Item Export allows you to select orders from the orders list and export them  to a CSV file. When this option is enabled, you'll find the export option in the Orders list Edit drop down. Depending on the option selected here the order items will either be grouped together by item (like a pick list) or the items required for each order will be grouped together by order, as they are on a packing slip."
         }
       },
       "scan_pack": {
@@ -126,7 +127,7 @@
           "service_issue_code": "Give current order service issue status",
           "restart_code": "Restart current Order",
           "type_scan_code": "Type-In Counts",
-          "escape_string": "Escape String",
+          "escape_string": "Barcode suffix removal",
           "lot_number": "Record Lot Number",
           "show_customer_notes": "Show Customer Notes",
           "show_internal_notes": "Show Internal Notes",
