@@ -14,6 +14,7 @@ module Groovepacker
             import_products_count = response["products"].nil? ? 0 : response["products"].length
             send_products_import_email(import_products_count) if import_products_count>20000
             response["products"].each do |teapplix_product|
+              teapplix_product = get_reformatted_json(teapplix_product)
               @result[:total_imported] = @result[:total_imported] + 1
               teapplix_product[:item_title] = teapplix_product[:sku] if teapplix_product[:item_title].blank?
               create_single_product(teapplix_product) rescue nil
@@ -141,6 +142,16 @@ module Groovepacker
 
             def send_products_import_complete_email(products_count)
               ImportMailer.send_products_import_complete_email(products_count, @result, @credential).deliver rescue nil
+            end
+
+            def get_reformatted_json(teapplix_product)
+              tpx_product = {}
+              tpx_product[:item_title] = teapplix_product[:item_title] || teapplix_product["Item Title"]
+              tpx_product[:sku] = teapplix_product[:sku] || teapplix_product["SKU"]
+              tpx_product[:upc] = teapplix_product[:upc] || teapplix_product["UPC"]
+              tpx_product[:category] = teapplix_product[:category] || teapplix_product["Category"]
+              tpx_product[:image_small] = teapplix_product[:image_small] || teapplix_product["Image Small"]
+              return tpx_product
             end
         end
       end
