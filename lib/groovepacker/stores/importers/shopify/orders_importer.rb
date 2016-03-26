@@ -50,30 +50,8 @@ module Groovepacker
                       import_order_item(order_item, item)
                       import_item.current_order_imported_item = import_item.current_order_imported_item + 1
                       import_item.save
-                      if item["sku"].nil? or item["sku"] == ''
-                        # if sku is nil or empty
-                        if Product.find_by_name(item["name"]).nil?
-                          # if item is not found by name then create the item
-                          order_item.product = create_new_product_from_order(item, credential.store, ProductSku.get_temp_sku, client)
-                        else
-                          # product exists add temp sku if it does not exist
-                          products = Product.where(name: item["name"])
-                          unless contains_temp_skus(products)
-                            order_item.product = create_new_product_from_order(item, credential.store, ProductSku.get_temp_sku, client)
-                          else
-                            order_item.product = get_product_with_temp_skus(products)
-                          end
-                        end
-                      elsif ProductSku.where(sku: item["sku"]).length == 0
-                        # if non-nil sku is not found
-                        product = create_new_product_from_order(item, credential.store, item["sku"], client)
-                        order_item.product = product
-                      else
-                        order_item_product = ProductSku.where(sku: item["sku"]).
-                          first.product
-                        order_item.product = order_item_product
-                      end
-
+                      product = shopify_context(credential.store).import_shopify_single_product(item)
+                      order_item.product = product
                       shopify_order.order_items << order_item
                     end
                   end
@@ -146,83 +124,12 @@ module Groovepacker
             order_item
           end
 
-          def create_new_product_from_order(item, store, sku, client)
-            #create and import product
-            product = Product.create(name: item["name"], store: store,
-                                     store_product_id: item["product_id"])
-            product.product_skus.create(sku: sku)
-
-            #get from products api
-            response = client.product(item["product_id"])
-
-            shopify_product = response["product"]
-            unless shopify_product.nil?
-              # get product categories
-              unless shopify_product["tags"].nil? ||
-                shopify_product["tags"] == ""
-                tags = shopify_product["tags"].split(", ")
-                tags.each do |tag|
-                  product.product_cats.create(category: tag)
-                end
-              end
-
-              unless shopify_product["variants"].empty?
-                # get variant id based on the sku
-                variant_id = nil
-                shopify_product["variants"].each do |variant|
-                  if variant["sku"] == sku
-                    # create barcode
-                    product.product_barcodes.create(barcode: variant["barcode"])
-                    # get image based on the variant id
-                    shopify_product["images"].each do |image|
-                      if image["variant_ids"].include?(variant["if"])
-                        product.product_images.create(image: image["src"])
-                      end
-                    end
-
-                    # get weight
-                    if variant["weight_unit"] == 'lb'
-                      product.weight = variant["weight"] * 16
-                    elsif variant["weight_unit"] == 'kg'
-                      product.weight = variant["weight"] * 35.274
-                    elsif variant["weight_unit"] == 'g'
-                      product.weight = variant["weight"] * 0.035274
-                    elsif variant["weight_unit"] == 'oz'
-                      product.weight = variant["weight"]
-                    end
-                  end
-
-                  inv_wh = product.product_inventory_warehousess.first
-                  inv_wh = product.product_inventory_warehousess.new if inv_wh.blank?
-                  inv_wh.quantity_on_hand = variant["inventory_quantity"].try(:to_i) + inv_wh.allocated_inv.to_i
-                  inv_wh.save
-                end
-              end
-
-              # if product images are empty then import product image
-              if product.product_images.empty? &&
-                !shopify_product["image"].nil? &&
-                shopify_product["image"] != ''
-                product.product_images.create(image: shopify_product["image"]["src"])
-              end
-
-            end
-            product.save
-            product.reload
-            create_sync_option_for_product(product, item)
-            make_product_intangible(product)
-            product.update_product_status
-            product
+          def shopify_context(store)
+            handler = Groovepacker::Stores::Handlers::ShopifyHandler.new(store)
+            context = Groovepacker::Stores::Context.new(handler)
+            return context
           end
 
-          def create_sync_option_for_product(product, item)
-            product_sync_option = product.sync_option
-            if product_sync_option.nil?
-              product.create_sync_option(:shopify_product_variant_id => item["variant_id"], :sync_with_shopify => true)
-            else
-              product_sync_option.update_attributes(:shopify_product_variant_id => item["variant_id"], :sync_with_shopify => true)
-            end
-          end
         end
       end
     end
