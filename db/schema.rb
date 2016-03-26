@@ -900,6 +900,19 @@ ActiveRecord::Schema.define(:version => 20160322074348) do
     t.boolean  "gen_barcode_from_sku", :default => false
   end
 
+  create_table "teapplix_credentials", :force => true do |t|
+    t.integer  "store_id"
+    t.string   "account_name"
+    t.string   "username"
+    t.string   "password"
+    t.boolean  "import_shipped",       :default => false
+    t.boolean  "import_open_orders",   :default => false
+    t.datetime "last_imported_at"
+    t.datetime "created_at",                              :null => false
+    t.datetime "updated_at",                              :null => false
+    t.boolean  "gen_barcode_from_sku", :default => false
+  end
+
   create_table "tenants", :force => true do |t|
     t.string   "name"
     t.datetime "created_at",          :null => false

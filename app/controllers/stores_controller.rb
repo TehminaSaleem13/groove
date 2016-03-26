@@ -177,7 +177,7 @@ class StoresController < ApplicationController
               @magento_rest.oauth_token_secret=nil
             end
             @magento_rest.store_version = params[:store_version]
-            @magento_rest.store_token = Store.get_sucure_random_token if @magento_rest.store_token.blank?
+            @magento_rest.store_token = Store.get_sucure_random_token(20).gsub("=","").gsub("/","") if @magento_rest.store_token.blank?
             @magento_rest.api_key = params[:api_key]
             @magento_rest.api_secret = params[:api_secret]
 
