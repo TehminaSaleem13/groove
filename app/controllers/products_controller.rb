@@ -32,6 +32,8 @@ class ProductsController < ApplicationController
           handler = Groovepacker::Stores::Handlers::BigCommerceHandler.new(@store)
         elsif @store.store_type == 'Teapplix'
           handler = Groovepacker::Stores::Handlers::TeapplixHandler.new(@store)
+        elsif @store.store_type == 'Shopify'
+          handler = Groovepacker::Stores::Handlers::ShopifyHandler.new(@store)
         elsif @store.store_type == 'Amazon'
           @amazon_credentials = AmazonCredentials.where(:store_id => @store.id)
 
