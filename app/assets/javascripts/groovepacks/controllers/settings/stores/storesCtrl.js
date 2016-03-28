@@ -27,13 +27,13 @@ groovepacks_controllers.
       $scope.check_if_not_selected = function () {
         var selected = false;
         for (var i = 0; i < $scope.stores.list.length; i++) {
-          if ($scope.stores.list[i].checked == true) {
+          if ($scope.stores.list[i].checked === true) {
             selected = true;
             break;
           }
         }
         return selected;
-      }
+      };
 
       $scope.store_delete = function () {
         if($scope.check_if_not_selected()) {
@@ -44,7 +44,7 @@ groovepacks_controllers.
               $scope.stores.selected += 1;
             }
           }
-          if ($scope.stores.selected == 0) {
+          if ($scope.stores.selected === 0) {
             notification.notify('select a store to delete');
             result.resolve();
           } else if (confirm("Are you sure you want to delete the store" + (($scope.stores.selected == 1) ? "?" : "s?"))) {
@@ -68,6 +68,18 @@ groovepacks_controllers.
         } else {
            stores.list.select_notification();
         }
+      };
+
+      $scope.update_store_list = function (store, prop) {
+        stores.list.update_node({
+          id: store.id,
+          var: prop,
+          value: store[prop]
+        }).then(function () {
+          $scope.stores.setup.status = "";
+          myscope.get_stores();
+        });
+
       };
 
 
@@ -99,10 +111,24 @@ groovepacks_controllers.
           selectable: true,
           sort_func: myscope.handlesort,
           setup: $scope.stores.setup,
+          editable: {
+            array: false,
+            update: $scope.update_store_list,
+            elements: {
+              status: {
+                type: 'select',
+                options: [
+                  {name: "Active", value: true},
+                  {name: "Inactive", value: false}
+                ]
+              }
+            }
+          },
           all_fields: {
             name: {
               name: "Name",
-              class: ''
+              class: '',
+              editable: false
             },
             status: {
               name: "Status",
@@ -114,12 +140,13 @@ groovepacks_controllers.
             },
             store_type: {
               name: "Type",
-              class: ''
+              class: '',
+              editable: false
             }
 
           }
         };
-        if (typeof $scope.current_user['can'] != 'undefined' && $scope.current_user.can('add_edit_stores')) {
+        if (typeof $scope.current_user.can != 'undefined' && $scope.current_user.can('add_edit_stores')) {
           $scope.gridOptions.all_fields.name.transclude = '<a ui-sref="settings.stores.single({storeid:row.id})"' +
             ' ng-click="$event.stopPropagation();">{{row[field]}}</a>';
         }
