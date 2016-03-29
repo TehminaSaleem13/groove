@@ -88,19 +88,20 @@ module Groovepacker
           csv = CSV.new(response_body, :headers => true)
           json_response = csv.to_a.map {|row| row.to_hash}
           json_response = json_response - [{}]
+          json_response = json_response.as_json rescue {}
           json_response = get_formatted_orders(json_response) if get_formatted
           return json_response
         end
         
         def get_formatted_orders(json_response)
           response_orders = []
-          txn_ids = json_response.each.map {|order| order[:txn_id]}.compact.uniq
+          txn_ids = json_response.each.map {|order| order["txn_id"]}.compact.uniq
           txn_ids.each do |txn_id|
-						orders_group = json_response.select {|order| order[:txn_id] == txn_id }
-						order = orders_group.first.except(:item_name, :item_number, :item_sku, :location, :xref3, :quantity, :subtotal, :item_description)
-						order[:items] = []
+						orders_group = json_response.select {|order| order["txn_id"] == txn_id }
+						order = orders_group.first.except("item_name", "item_number", "item_sku", "location", "xref3", "quantity", "subtotal", "item_description")
+						order["items"] = []
 						orders_group.each do |single_order|
-							order[:items] << single_order.slice(:item_name, :item_number, :item_sku, :location, :xref3, :quantity, :subtotal, :item_description)
+							order["items"] << single_order.slice("item_name", "item_number", "item_sku", "location", "xref3", "quantity", "subtotal", "item_description")
 						end
 						response_orders << order
 					end
