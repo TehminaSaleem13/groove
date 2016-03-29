@@ -193,7 +193,7 @@ ActiveRecord::Schema.define(:version => 20160322074348) do
     t.boolean  "send_email_on_sun",                 :default => false
     t.datetime "time_to_send_email",                :default => '2000-01-01 00:00:00'
     t.string   "product_weight_format"
-    t.string   "packing_slip_size"
+    t.string   "packing_slip_size",                 :default => "4 x 6"
     t.string   "packing_slip_orientation"
     t.text     "packing_slip_message_to_customer"
     t.boolean  "import_orders_on_mon",              :default => false
@@ -753,9 +753,9 @@ ActiveRecord::Schema.define(:version => 20160322074348) do
     t.float    "order_complete_sound_vol",      :default => 0.75
     t.boolean  "type_scan_code_enabled",        :default => true
     t.string   "type_scan_code",                :default => "*"
-    t.string   "post_scanning_option",          :default => "None"
     t.string   "escape_string",                 :default => " - "
     t.boolean  "escape_string_enabled",         :default => false
+    t.string   "post_scanning_option",          :default => "None"
     t.boolean  "record_lot_number",             :default => false
     t.boolean  "show_customer_notes",           :default => false
     t.boolean  "show_internal_notes",           :default => false
