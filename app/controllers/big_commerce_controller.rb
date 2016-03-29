@@ -4,7 +4,8 @@ class BigCommerceController < ApplicationController
   def setup
     # redirect to admin page with the big-commerce and with groove-solo plan
     # get shop name
-  	@shop_name = get_shop_name(params[:shop])
+    @store_user_email = cookies[:store_user_email] rescue ""
+    @shop_name = get_shop_name(params[:shop])
     flash[:notice] = "Please try to complete setup process in 15 minutes. Otherwise BigCommerce access-token may expire."
     #redirect_to subscriptions_path(plan_id: 'groove-solo', bigcommerce: shop_name )
   end
@@ -17,6 +18,8 @@ class BigCommerceController < ApplicationController
       update_bc_credentials
       redirect_to big_commerce_complete_path
     else
+      store_user_email = @auth_hash['user']['email'] rescue ""  
+      cookies[:store_user_email] = {:value => store_user_email , :domain => :all, :expires => Time.now+15.minutes}
       cookies[:bc_auth] = {:value => @auth_hash , :domain => :all, :expires => Time.now+15.minutes}
       redirect_to big_commerce_setup_path(:shop => "#{bc_store_name}.mybigcommerce.com")
     end
