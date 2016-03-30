@@ -445,6 +445,9 @@ class StoresController < ApplicationController
               @result['status'] = false
               @result['messages'] = [e.message]
             end
+            current_tenant = Apartment::Tenant.current
+            cookies[:tenant_name] = {:value => current_tenant , :domain => :all, :expires => Time.now+10.minutes}
+            cookies[:store_id] = {:value => @store.id , :domain => :all, :expires => Time.now+10.minutes}
           end
           if @store.store_type == 'BigCommerce'
             @bigcommerce = BigCommerceCredential.find_by_store_id(@store.id)

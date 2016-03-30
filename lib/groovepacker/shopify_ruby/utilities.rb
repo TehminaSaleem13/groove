@@ -12,12 +12,16 @@ module Groovepacker
             "read_products",
             "write_products"
           ]
-          permission_url = session.create_permission_url(scope,
-                                                         "http://admin." + ENV["SHOPIFY_REDIRECT_HOST"] +
-                                                           auth_shopify_path(id: shopify_credential.store, tenant_name:
-                                                                                                           tenant_name + "&" + is_admin.to_s)
-          )
+          permission_url = session.create_permission_url(scope, redirect_url)
           permission_url
+        end
+      end
+
+      def redirect_url
+        if Rails.env=="development"
+          return "http://admin.#{ENV["SHOPIFY_REDIRECT_HOST"]}/shopify/auth"
+        else
+          return "https://admin.#{ENV["SHOPIFY_REDIRECT_HOST"]}/shopify/auth"
         end
       end
     end
