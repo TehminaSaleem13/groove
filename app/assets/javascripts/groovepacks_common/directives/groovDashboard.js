@@ -288,7 +288,7 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
           };
         };
 
-        scope.yAxisTickValuesFunction = function () {
+        scope.yAxisTickValuesFunction = function (floating) {
           return function(d){
             var tickVals = [];
             var vals = [];
@@ -311,7 +311,7 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
             temp = min;
             while (temp + div_range < max) {
               temp += div_range;
-              if (temp.toFixed(2) % 1 == '0.00') {
+              if (temp.toFixed(2) % 1 == '0.00' || !floating) {
                 tickVals.push(Math.round( temp ));
               } else{
                 tickVals.push(temp.toFixed(2));
@@ -339,7 +339,13 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
           };
         };
         scope.toolTipContentFunction = function () {
+          console.log('toolTipContentFunction...');
           return function (key, x, y, e, graph) {
+            console.log('key',key);
+            console.log('x',x);
+            console.log('y',y);
+            console.log('e',e);
+            console.log('graph',graph);
             var tooltipText = '';
             if (scope.charts.type === 'packing_stats' || scope.charts.type === 'packing_error') {
 
