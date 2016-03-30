@@ -225,12 +225,12 @@ Groovepacks::Application.routes.draw do
 
   resources :shopify do
     member do
-      get 'auth'
       put 'disconnect'
       get 'complete'
     end
 
     collection do
+      get 'auth'
       get 'callback'
       get 'preferences'
       get 'help'
