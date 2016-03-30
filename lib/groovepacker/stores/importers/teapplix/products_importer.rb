@@ -26,8 +26,8 @@ module Groovepacker
           def import_teapplix_single_product(teapplix_product)
             initialize_objects
             @bulk_import = false
-            teapplix_product[:item_title] = teapplix_product.delete(:item_name)
-            teapplix_product[:sku] = teapplix_product.delete(:item_sku)
+            teapplix_product["item_title"] = teapplix_product.delete("item_name")
+            teapplix_product["sku"] = teapplix_product.delete("item_sku")
             product = create_single_product(teapplix_product)
             return product
           end
@@ -42,20 +42,20 @@ module Groovepacker
             end
 
             def create_single_product(teapplix_product)
-              if teapplix_product[:sku].blank?
+              if teapplix_product["sku"].blank?
                 # if sku is nil or empty
                 product = create_product_with_temp_sku(teapplix_product)
-              elsif @bulk_import || (ProductSku.where(sku: teapplix_product[:sku]).length == 0)
+              elsif @bulk_import || (ProductSku.where(sku: teapplix_product["sku"]).length == 0)
                 # if non-nil sku is not found
-                product = create_new_product(teapplix_product, teapplix_product[:sku])
+                product = create_new_product(teapplix_product, teapplix_product["sku"])
               else
-                product = ProductSku.where(sku: teapplix_product[:sku]).first.product
+                product = ProductSku.where(sku: teapplix_product["sku"]).first.product
               end
               return product
             end
 
             def create_product_with_temp_sku(teapplix_product)
-              product_is_nil = Product.find_by_name(teapplix_product[:item_title]).nil?
+              product_is_nil = Product.find_by_name(teapplix_product["item_title"]).nil?
               # if sku is nil or empty
               if product_is_nil
                 # and if product is not found by name then create the product
@@ -68,7 +68,7 @@ module Groovepacker
             end
 
             def add_sku_for_existing_product(teapplix_product)
-              products = Product.where(name: teapplix_product[:item_title])
+              products = Product.where(name: teapplix_product["item_title"])
               unless contains_temp_skus(products)
                 product = create_new_product(teapplix_product, ProductSku.get_temp_sku)
               else
@@ -80,7 +80,7 @@ module Groovepacker
             def create_new_product(teapplix_product, sku)
               product = find_or_init_new_product(teapplix_product)
               product.product_skus.create(sku: sku)
-              return product if teapplix_product[:sku].blank?
+              return product if teapplix_product["sku"].blank?
               
               create_barcode_for_product(product, teapplix_product)
               get_product_categories(product, teapplix_product)
@@ -96,37 +96,37 @@ module Groovepacker
 
             def find_or_init_new_product(teapplix_product)
               product = nil
-              if teapplix_product[:sku].present?
-                product = ProductSku.find_by_sku(teapplix_product[:sku]).try(:product)
-              elsif teapplix_product[:item_title].present?
-                product = Product.find_by_name(teapplix_product[:item_title])
+              if teapplix_product["sku"].present?
+                product = ProductSku.find_by_sku(teapplix_product["sku"]).try(:product)
+              elsif teapplix_product["item_title"].present?
+                product = Product.find_by_name(teapplix_product["item_title"])
               end
               
               if product.blank?
-                product = Product.create(name: teapplix_product[:item_title], store: @store)
+                product = Product.create(name: teapplix_product["item_title"], store: @store)
               end
               return  product
             end
 
             def create_barcode_for_product(product, teapplix_product)
-              if @credential.gen_barcode_from_sku && ProductBarcode.where(barcode: teapplix_product[:sku]).empty?
-                product.product_barcodes.create(barcode: teapplix_product[:sku])
+              if @credential.gen_barcode_from_sku && ProductBarcode.where(barcode: teapplix_product["sku"]).empty?
+                product.product_barcodes.create(barcode: teapplix_product["sku"])
               else
-                barcode = teapplix_product[:upc].blank? ? nil : teapplix_product[:upc]
+                barcode = teapplix_product["upc"].blank? ? nil : teapplix_product["upc"]
                 product.product_barcodes.create(barcode: barcode)
               end
             end
 
             def get_product_categories(product, teapplix_product)
-              return if teapplix_product[:category].blank?
+              return if teapplix_product["category"].blank?
               product_cats = product.product_cats
               product_cats.destroy_all
-              product_cats.create(category: teapplix_product[:category])
+              product_cats.create(category: teapplix_product["category"])
             end
 
             def import_pimary_image(product, teapplix_product)
-              if product.product_images.empty? && !teapplix_product[:image_small].blank?
-                product.product_images.create(image: teapplix_product[:image_small])
+              if product.product_images.empty? && !teapplix_product["image_small"].blank?
+                product.product_images.create(image: teapplix_product["image_small"])
               end
             end
 
