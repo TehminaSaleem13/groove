@@ -14,7 +14,6 @@ module Groovepacker
             response["orders"].each do |order|
               @import_item.reload
               break if @import_item.status == 'cancelled'
-              @import_item.update_attributes(:current_increment_id => order["id"], :current_order_items => -1, :current_order_imported_item => -1)
               import_single_order(order)
             end
             @result
@@ -31,6 +30,7 @@ module Groovepacker
             end
 
             def import_single_order(order)
+              @import_item.update_attributes(:current_increment_id => order["id"], :current_order_items => -1, :current_order_imported_item => -1)
               if Order.find_by_increment_id(order["name"])
                 #mark previously imported
                 update_import_count() and return
@@ -69,10 +69,8 @@ module Groovepacker
               @import_item.save
 
               order["line_items"].each do |item|
-                order_item = OrderItem.new
-                import_order_item(order_item, item)
-                @import_item.current_order_imported_item = @import_item.current_order_imported_item + 1
-                @import_item.save
+                order_item = import_order_item(order_item, item)
+                @import_item.update_attributes(:current_order_imported_item => @import_item.current_order_imported_item+1)
                 product = shopify_context.import_shopify_single_product(item)
                 order_item.product = product
                 shopify_order.order_items << order_item
@@ -82,10 +80,10 @@ module Groovepacker
             end
 
             def import_order_item(order_item, line_item)
-              order_item.qty = line_item["quantity"]
-              order_item.price = line_item["price"]
-              order_item.row_total = line_item["price"].to_f * line_item["quantity"].to_f
-              order_item
+              row_total = line_item["price"].to_f * line_item["quantity"].to_f
+              order_item = OrderItem.new( :qty => line_item["quantity"],
+                                          :price => line_item["price"],
+                                          :row_total => row_total )
             end
 
             def add_customer_info(shopify_order, order)
