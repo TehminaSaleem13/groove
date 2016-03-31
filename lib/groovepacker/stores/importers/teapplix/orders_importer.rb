@@ -11,8 +11,9 @@ module Groovepacker
             last_imported_date = Time.now
             
             @result[:total_imported] = response["orders"].nil? ? 0 : response["orders"].length
-            @import_item.update_attributes(:current_increment_id => '', :success_imported => 0, :previous_imported => 0, :current_order_items => -1, :current_order_imported_item => -1, :to_import => @result[:total_imported])
+            @import_item.update_attributes(:current_increment_id => '', :success_imported => 0, :previous_imported => 0, :updated_orders_import => 0, :current_order_items => -1, :current_order_imported_item => -1, :to_import => @result[:total_imported])
             (response["orders"]||[]).each do |order|
+              @order_to_update = false
               @import_item.reload
               break if @import_item.status == 'cancelled'
               @import_item.update_attributes(:current_increment_id => order[:txn_id], :current_order_items => -1, :current_order_imported_item => -1)
@@ -145,8 +146,13 @@ module Groovepacker
           end
 
           def update_success_import_count
-            @import_item.success_imported += 1
-            @import_item.save
+            if @order_to_update
+              @import_item.updated_orders_import += 1
+              @import_item.save
+            else
+              @import_item.success_imported += 1
+              @import_item.save
+            end
             @result[:success_imported] += 1
           end
 
@@ -154,6 +160,7 @@ module Groovepacker
             existing_order = Order.find_by_increment_id(order["txn_id"])
             if existing_order && existing_order.status!="scanned"
               existing_order.destroy
+              @order_to_update = true
               return true
             else
               return_val = existing_order ? false : true
