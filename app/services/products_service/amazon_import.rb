@@ -1,4 +1,4 @@
-module Products
+module ProductsService
   class AmazonImport < ProductsService::ServiceInit
 
     def initialize(*args)
