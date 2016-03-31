@@ -152,8 +152,8 @@ module Groovepacker
             else
               @import_item.success_imported += 1
               @import_item.save
+              @result[:success_imported] += 1
             end
-            @result[:success_imported] += 1
           end
 
           def delete_order_if_exists(order)
