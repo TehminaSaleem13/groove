@@ -106,7 +106,6 @@ Groovepacks::Application.configure do
   ENV['EBAY_APP_ID'] = "DSO698331-163d-4ffd-be1a-0eceb5ae5be"
   ENV['EBAY_CERT_ID'] = "a5b0c5cb-7863-4ade-92f0-1331997def8c"
   ENV['EBAY_DEV_ID'] = "353bd404-651b-4431-955d-25e0a0c8140f"
-  ENV['EBAY_RU_NAME'] = "DSO-DSO698331-163d--otkbuvijt"
   ENV['EBAY_SANDBOX_MODE'] = "NO"
 
   ENV['SHIPSTATION_USERNAME'] = "dreadhead"
@@ -116,6 +115,7 @@ Groovepacks::Application.configure do
   ENV['SHOPIFY_SHARED_SECRET'] = "d0b33de5f8fadb93ff392505f449402c"
 
   if Socket.gethostname=="Refactoring-Test-server-GP"
+    ENV['EBAY_RU_NAME'] = "DSO-DSO698331-163d--xnsxkuc"
     ENV["SHOPIFY_REDIRECT_HOST"] = "groove-packer.com"
     ENV['BC_CLIENT_ID'] = "aglrh9kae1bmr4ycwy922ag8z8h6lde"
     ENV['BC_CLIENT_SECRET'] = "s58qbf72e6jpd2lqr4vvmcnu4s10xdi"
@@ -124,6 +124,7 @@ Groovepacks::Application.configure do
     ENV['HOST_NAME'] = 'groove-packer.com'
     ENV["SITE_HOST"] = "groove-packer.com"
   else
+    ENV['EBAY_RU_NAME'] = "DSO-DSO698331-163d--otkbuvijt"
     ENV["SHOPIFY_REDIRECT_HOST"] = "barcodepacker.com"
     ENV['BC_CLIENT_ID'] = "as4fwmwmb2n3w2yolabja7yv9weumoj"
     ENV['BC_CLIENT_SECRET'] = "15a94s1mhhczf79v2lpj79btw443u3w"
@@ -148,7 +149,6 @@ Groovepacks::Application.configure do
 
   #Feature Variables
   ENV['DASHBOARD_ENABLE'] = 'YES'
-  ENV["SITE_HOST"] = "barcodepacker.com"
   # analytic server
   ENV["GROOV_ANALYTIC"] = "lockpeppa.com"
 
