@@ -7,7 +7,7 @@ module ProductsHelper
   require 'mws-connect'
   #requires a product is created with appropriate seller sku
   def import_amazon_product_details(store_id, product_sku, product_id)
-    Products::AmazonImport.call(store_id, product_sku, product_id)
+    ProductsService::AmazonImport.call(store_id, product_sku, product_id)
     # begin
     #   @store = Store.find(store_id)
     #   @amazon_credentials = AmazonCredentials.where(:store_id => store_id)
@@ -69,49 +69,50 @@ module ProductsHelper
   end
 
   def updatelist(product, var, value)
-    begin
-      if ['name', 'status', 'is_skippable', 'type_scan_enabled', 'click_scan_enabled', 'spl_instructions_4_packer'].include?(var)
-        product[var] = value
-        product.save
-        if var == 'status'
-          if value == 'inactive'
-            product.update_due_to_inactive_product
-          else
-            product.update_product_status
-          end
-        end
-      elsif var == 'sku'
-        product.primary_sku = value
-        return product if product.errors.any?
-      elsif var == 'category'
-        product.primary_category = value
-      elsif var == 'barcode'
-        product.primary_barcode = value
-        return product if product.errors.any?
-      elsif ['location_primary', 'location_secondary', 'location_tertiary', 'location_name', 'qty_on_hand'].include?(var)
-        product_location = product.primary_warehouse
-        if product_location.nil?
-          product_location = ProductInventoryWarehouses.new
-          product_location.product_id = product.id
-          product_location.inventory_warehouse_id = current_user.inventory_warehouse_id
-        end
-        if var == 'location_primary'
-          product_location.location_primary = value
-        elsif var == 'location_secondary'
-          product_location.location_secondary = value
-        elsif var == 'location_tertiary'
-          product_location.location_tertiary = value
-        elsif var == 'location_name'
-          product_location.name = value
-        elsif var == 'qty_on_hand'
-          product_location.quantity_on_hand= value
-        end
-        product_location.save
-      end
-      product.update_product_status
-    rescue Exception => e
-      puts e.inspect
-    end
+    ProductsService::UpdateList.call(product, var, value)
+    #begin
+    #   if ['name', 'status', 'is_skippable', 'type_scan_enabled', 'click_scan_enabled', 'spl_instructions_4_packer'].include?(var)
+    #     product[var] = value
+    #     product.save
+    #     if var == 'status'
+    #       if value == 'inactive'
+    #         product.update_due_to_inactive_product
+    #       else
+    #         product.update_product_status
+    #       end
+    #     end
+    #   elsif var == 'sku'
+    #     product.primary_sku = value
+    #     return product if product.errors.any?
+    #   elsif var == 'category'
+    #     product.primary_category = value
+    #   elsif var == 'barcode'
+    #     product.primary_barcode = value
+    #     return product if product.errors.any?
+    #   elsif ['location_primary', 'location_secondary', 'location_tertiary', 'location_name', 'qty_on_hand'].include?(var)
+    #     product_location = product.primary_warehouse
+    #     if product_location.nil?
+    #       product_location = ProductInventoryWarehouses.new
+    #       product_location.product_id = product.id
+    #       product_location.inventory_warehouse_id = current_user.inventory_warehouse_id
+    #     end
+    #     if var == 'location_primary'
+    #       product_location.location_primary = value
+    #     elsif var == 'location_secondary'
+    #       product_location.location_secondary = value
+    #     elsif var == 'location_tertiary'
+    #       product_location.location_tertiary = value
+    #     elsif var == 'location_name'
+    #       product_location.name = value
+    #     elsif var == 'qty_on_hand'
+    #       product_location.quantity_on_hand= value
+    #     end
+    #     product_location.save
+    #   end
+    #   product.update_product_status
+    # rescue Exception => e
+    #   puts e.inspect
+    # end
   end
 
   #gets called from orders helper

@@ -1,5 +1,5 @@
 module Products
-  class AmazonImport < Products::ServiceInit
+  class AmazonImport < ProductsService::ServiceInit
 
     def initialize(*args)
       @store_id, @product_sku, @product_id = args
