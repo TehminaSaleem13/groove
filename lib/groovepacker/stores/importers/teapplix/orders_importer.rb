@@ -16,7 +16,7 @@ module Groovepacker
               @order_to_update = false
               @import_item.reload
               break if @import_item.status == 'cancelled'
-              @import_item.update_attributes(:current_increment_id => order[:txn_id], :current_order_items => -1, :current_order_imported_item => -1)
+              @import_item.update_attributes(:current_increment_id => order["txn_id"], :current_order_items => -1, :current_order_imported_item => -1)
               import_single_order(order)
             end
             @credential.update_attributes( :last_imported_at => last_imported_date ) if @import_item.status != 'cancelled'
