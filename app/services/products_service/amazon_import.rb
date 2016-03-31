@@ -9,13 +9,19 @@ module ProductsService
     end
 
     def call
-      return if @amazon_credentials.blank?
+      return if amazon_credentials_blank?
       begin
         product_hash = do_get_matching_products
         do_find_update_product(product_hash)
       rescue Exception => e
         puts e.inspect
       end
+    end
+
+    private
+
+    def amazon_credentials_blank?
+      @amazon_credentials.blank?
     end
 
     def do_get_matching_products
