@@ -115,12 +115,17 @@ groovepacks_controllers.
                 } else if (import_item.import_info.success_imported <= 0) {
                   if ($scope.import_summary.import_info.import_summary_type == 'update_locations') {
                     single_data.progress.message += ' No updates made. Locations are upto date.';
+                  } else if(import_item.import_info.updated_orders_import > 0){
+                    single_data.progress.message += import_item.import_info.updated_orders_import + ' Orders were updated.'
                   } else {
                     single_data.progress.message += ' No new orders found.';
                   }
                 } else {
                   if ($scope.import_summary.import_info.import_summary_type == 'update_locations') {
                     single_data.progress.message += import_item.import_info.success_imported + ' Orders were updated.'
+                  } else if(import_item.import_info.updated_orders_import > 0){
+                    single_data.progress.message += import_item.import_info.success_imported + ' New Orders Imported and ';
+                    single_data.progress.message += import_item.import_info.updated_orders_import + ' Orders were updated.'
                   } else {
                     single_data.progress.message += import_item.import_info.success_imported + ' New Orders Imported.';
                   }

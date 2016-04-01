@@ -10,9 +10,11 @@ class ShopifyController < ApplicationController
   #  "id"=>"1" 
   # }
   def auth
-    @tenant_name, @is_admin = params[:tenant_name].split('&')
+    #@tenant_name, @is_admin = params[:tenant_name].split('&')
+    @tenant_name = cookies[:tenant_name]
+    @store_id = cookies[:store_id]
     Apartment::Tenant.switch(@tenant_name)
-    store = Store.find(params[:id])
+    store = Store.find(@store_id)
     @shopify_credential = store.shopify_credential
     session = ShopifyAPI::Session.new(@shopify_credential.shop_name + ".myshopify.com")
     @result = false
@@ -21,6 +23,7 @@ class ShopifyController < ApplicationController
       @result = true if @shopify_credential.update_attributes({
                                                                 access_token: session.request_token(params.except(:id))
                                                               })
+      destroy_cookies
     rescue Exception => ex
       @result = false
     end
@@ -67,4 +70,10 @@ class ShopifyController < ApplicationController
   def get_shop_name(shop_name)
     (shop_name.split(".").length == 3) ? shop_name.split(".").first : nil
   end
+
+  def destroy_cookies
+    cookies[:tenant_name] = {:value => nil , :domain => :all, :expires => Time.now+2.seconds}
+    cookies[:store_id] = {:value => nil , :domain => :all, :expires => Time.now+2.seconds}
+  end
+
 end

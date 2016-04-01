@@ -12,8 +12,9 @@ module Groovepacker
 
       private
       	def supported_sort_keys
-          [ 'updated_at', 'notes', 'ordernum', 'order_date', 'itemslength', 'recipient', 
-            'status', 'email', 'tracking_num', 'city', 'state', 'postcode', 'country']
+          [ 'updated_at', 'notes', 'ordernum', 'order_date', 'itemslength', 'recipient',
+            'status', 'email', 'tracking_num', 'city', 'state', 'postcode', 'country',
+            'custom_field_one', 'custom_field_two']
         end
 
         def supported_order_keys
@@ -28,7 +29,7 @@ module Groovepacker
           return_val = nil
           hash = {'sort_key' => 'sort', 'sort_order' => 'order', 'status_filter' => 'filter'}
           supported = {'sort_keys' => supported_sort_keys, 'sort_orders' => supported_order_keys, 'status_filters' => supported_status_filters}
-          
+
           if @params[hash[attribute]].present? && supported[attribute.pluralize].include?(@params[hash[attribute]])
             return_val = @params[hash[attribute]]
           end
