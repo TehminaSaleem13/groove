@@ -53,6 +53,10 @@ module Groovepacker
         self.handler.import_teapplix_single_product(product)
       end
 
+      def import_shopify_single_product(product)
+        self.handler.import_single_product(product)
+      end
+
       attr_accessor :handler
     end
   end
