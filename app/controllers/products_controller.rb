@@ -415,20 +415,13 @@ class ProductsController < ApplicationController
       @result['status'] &= false
     end
     
-
-    respond_to do |format|
-      format.html # show.html.erb
-      format.json { render json: @result }
-    end
+    render json: @result
   end
 
   def update
     @result = gp_products_module.update_product_attributes
-
-    respond_to do |format|
-      format.html # show.html.erb
-      format.json { render json: @result }
-    end
+    
+    render json: @result
   end
 
   #params[:id]
