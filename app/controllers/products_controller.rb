@@ -592,11 +592,11 @@ class ProductsController < ApplicationController
   end
 
   def add_image
-    if current_user.can?('add_edit_products')
-      add_new_image
-    else
+    unless current_user.can?('add_edit_products')
       @result['status'] = false
       @result['messages'].push('You do not have enough permissions to add image to a product')
+    else
+      add_new_image
     end
     
     render json: @result
