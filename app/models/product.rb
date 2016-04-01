@@ -534,4 +534,16 @@ class Product < ActiveRecord::Base
     return response
   end
 
+  def self.update_product_list(params, result)
+    product = Product.find_by_id(params[:id])
+    if product.nil?
+      result = result.merge({'status' => false, 'error_msg' => "Cannot find Product"})
+    else
+      response = product.updatelist(product, params[:var], params[:value])
+      errors = response.errors.full_messages rescue nil
+      result = result.merge({'status' => false, 'error_msg' => errors}) if errors
+    end
+    return result
+  end
+
 end

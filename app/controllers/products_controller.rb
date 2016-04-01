@@ -14,9 +14,7 @@ class ProductsController < ApplicationController
     @store = Store.find(params[:id])
     @result = @product_service.import_images(@store)
 
-    respond_to do |format|
-      format.json { render json: @result }
-    end
+    render json: @result
   end
 
   # PS:Where is this used?
@@ -152,17 +150,14 @@ class ProductsController < ApplicationController
     @products = do_getproducts(params)
     @result['products'] = make_products_list(@products)
     @result['products_count'] = get_products_count()
-    respond_to do |format|
-      format.json { render json: @result }
-    end
+
+    render json: @result
   end
 
   def create
     @result = Product.create_new_product(@result, current_user)
     
-    respond_to do |format|
-      format.json { render json: @result }
-    end
+    render json: @result
   end
 
   def print_receiving_label
@@ -202,16 +197,13 @@ class ProductsController < ApplicationController
       @result['messages'].push('You do not have enough permissions to generate barcodes')
     end
 
-    respond_to do |format|
-      format.html # show.html.erb
-      format.json { render json: @result }
-    end
+    render json: @result
   end
 
   # For search pass in parameter params[:search] and a params[:limit] and params[:offset].
   # If limit and offset are not passed, then it will be default to 10 and 0
   def search
-    if !params[:search].nil? && params[:search] != ''
+    unless params[:search].blank?
       @products = do_search(params, false)
       @result['products'] = make_products_list(@products['products'])
       @result['products_count'] = get_products_count
@@ -221,47 +213,23 @@ class ProductsController < ApplicationController
       @result['message'] = 'Improper search string'
     end
 
-
-    respond_to do |format|
-      format.html # show.html.erb
-      format.json { render json: @result }
-    end
+    render json: @result
   end
 
   def scan_per_product
     if current_user.can?('add_edit_products')
-      if !params[:setting].blank? && ['type_scan_enabled', 'click_scan_enabled'].include?(params[:setting])
-        @products = list_selected_products(params)
-        unless @products.nil?
-          @products.each do |product|
-            @product = Product.find(product['id'])
-            @product[params[:setting]] = params[:status]
-            unless @product.save
-              @result['status'] &= false
-              @result['messages'].push('There was a problem updating '+@product.name)
-            end
-          end
-        end
-      else
-        @result['status'] = false
-        @result['messages'].push('No action specified for updating')
-      end
-
+      execute_scan_per_product
     else
       @result['status'] = false
       @result['messages'].push('You do not have enough permissions to edit this product')
     end
 
-    respond_to do |format|
-      format.html # show.html.erb
-      format.json { render json: @result }
-    end
+    render json: @result
   end
 
   def change_product_status
     #execute_groove_bulk_action(activity)
     execute_groove_bulk_action('status_update')
-    
   end
 
   def delete_product
@@ -501,27 +469,13 @@ class ProductsController < ApplicationController
 
   def update_product_list
     if current_user.can?('add_edit_products')
-      @product = Product.find_by_id(params[:id])
-      if @product.nil?
-        @result['status'] = false
-        @result['error_msg'] ="Cannot find Product"
-      else
-        response = updatelist(@product, params[:var], params[:value])
-        errors = response.errors.full_messages rescue nil
-        if errors
-          @result['status'] = false
-          @result['error_msg'] = errors
-        end
-      end
+      result = Product.update_product_list(params, @result)
     else
       @result['status'] = false
       @result['error_msg'] = 'You do not have enough permissions to edit product list'
     end
 
-    respond_to do |format|
-      format.html # show.html.erb
-      format.json { render json: @result }
-    end
+    render json: @result
   end
 
   #This action will remove the entry for this product (the Alias) and the SKU of this new
@@ -722,11 +676,8 @@ class ProductsController < ApplicationController
       @result['messages'].push('You do not have enough permissions to create backup csv')
     end
     @result = generate_error_csv(@result) unless @result['status']
-
-    respond_to do |format|
-      format.html # show.html.erb
-      format.json { render json: @result }
-    end
+    
+    render json: @result
   end
 
   def update_intangibleness
@@ -736,24 +687,17 @@ class ProductsController < ApplicationController
       @result['status'] = false
       @result['messages'].push('You do not have enough permissions to edit product status')
     end
-    respond_to do |format|
-      format.html # show.html.erb
-      format.json { render json: @result }
-    end
+
+    render json: @result
   end
 
   def update_image
     @result['status'] = ProductImage.update_image(params)
-
-    respond_to do |format|
-      format.html # show.html.erb
-      format.json { render json: @result }
-    end
+    render json: @result
   end
 
   def sync_with
     @result['status'] = SyncOption.create_update_sync_option(params)
-    
     render json: @result
   end
 
@@ -767,9 +711,6 @@ class ProductsController < ApplicationController
       @result['messages'].push('You do not have enough permissions to edit product status')
     end
     
-    respond_to do |format|
-      format.html # show.html.erb
-      format.json { render json: @result }
-    end
+    render json: @result
   end
 end
