@@ -557,7 +557,7 @@ class SettingsController < ApplicationController
         general_setting.conf_req_on_notes_to_packer = params[:conf_req_on_notes_to_packer]
         general_setting.email_address_for_packer_notes = params[:email_address_for_packer_notes]
         general_setting.hold_orders_due_to_inventory = params[:hold_orders_due_to_inventory]
-        general_setting.inventory_tracking = params[:inventory_tracking]
+        general_setting.inventory_tracking = params[:inventory_tracking] if params[:inventory_tracking]
         general_setting.low_inventory_alert_email = params[:low_inventory_alert_email]
         general_setting.low_inventory_email_address = params[:low_inventory_email_address]
         general_setting.send_email_for_packer_notes = params[:send_email_for_packer_notes]
@@ -568,9 +568,9 @@ class SettingsController < ApplicationController
 
 
         general_setting.export_items = params[:export_items]
-        general_setting.max_time_per_item = params[:max_time_per_item]
+        general_setting.max_time_per_item = params[:max_time_per_item] if params[:max_time_per_item]
 
-        general_setting.time_to_send_email = params[:time_to_send_email]
+        general_setting.time_to_send_email = params[:time_to_send_email] if params[:time_to_send_email]
         general_setting.send_email_on_mon = params[:send_email_on_mon]
         general_setting.send_email_on_tue = params[:send_email_on_tue]
         general_setting.send_email_on_wed = params[:send_email_on_wed]
@@ -580,7 +580,7 @@ class SettingsController < ApplicationController
         general_setting.send_email_on_sun = params[:send_email_on_sun]
 
         general_setting.scheduled_order_import = params[:scheduled_order_import]
-        general_setting.time_to_import_orders = params[:time_to_import_orders]
+        general_setting.time_to_import_orders = params[:time_to_import_orders] if params[:time_to_import_orders]
         general_setting.import_orders_on_mon = params[:import_orders_on_mon]
         general_setting.import_orders_on_tue = params[:import_orders_on_tue]
         general_setting.import_orders_on_wed = params[:import_orders_on_wed]
