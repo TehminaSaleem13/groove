@@ -189,13 +189,8 @@ class ProductsController < ApplicationController
   end
 
   def generate_barcode
-    if current_user.can?('add_edit_products')
-      @products = list_selected_products(params)
-      @products.each { |product| @result = product.generate_barcode(@result) }
-    else
-      @result['status'] = false
-      @result['messages'].push('You do not have enough permissions to generate barcodes')
-    end
+    @products = list_selected_products(params)
+    @products.each { |product| @result = product.generate_barcode(@result) }
 
     render json: @result
   end
@@ -217,12 +212,7 @@ class ProductsController < ApplicationController
   end
 
   def scan_per_product
-    if current_user.can?('add_edit_products')
-      execute_scan_per_product
-    else
-      @result['status'] = false
-      @result['messages'].push('You do not have enough permissions to edit this product')
-    end
+    execute_scan_per_product
 
     render json: @result
   end
@@ -351,46 +341,41 @@ class ProductsController < ApplicationController
   end
 
   def add_product_to_kit
-    if current_user.can?('add_edit_products')
-      @kit = Product.find_by_id(params[:id])
+    @kit = Product.find_by_id(params[:id])
 
-      if !@kit.is_kit
-        @result['messages'].push("Product with id="+@kit.id+"is not a kit")
+    if !@kit.is_kit
+      @result['messages'].push("Product with id="+@kit.id+"is not a kit")
+      @result['status'] &= false
+    else
+      if params[:product_ids].nil?
+        @result['messages'].push("No item sent in the request")
         @result['status'] &= false
       else
-        if params[:product_ids].nil?
-          @result['messages'].push("No item sent in the request")
-          @result['status'] &= false
-        else
-          items = Product.find(params[:product_ids])
-          items.each do |item|
-            if item.nil?
-              @result['messages'].push("Item does not exist")
-              @result['status'] &= false
-            else
-              product_kit_sku = ProductKitSkus.find_by_option_product_id_and_product_id(item.id, @kit.id)
-              if product_kit_sku.nil?
-                @productkitsku = ProductKitSkus.new
-                @productkitsku.option_product_id = item.id
-                @productkitsku.qty = 1
-                @kit.product_kit_skuss << @productkitsku
-                unless @kit.save
-                  @result['messages'].push("Could not save kit with sku: "+@product_skus.first.sku)
-                  @result['status'] &= false
-                end
-              else
-                @result['messages'].push("The product with id #{item.id} has already been added to the kit")
+        items = Product.find(params[:product_ids])
+        items.each do |item|
+          if item.nil?
+            @result['messages'].push("Item does not exist")
+            @result['status'] &= false
+          else
+            product_kit_sku = ProductKitSkus.find_by_option_product_id_and_product_id(item.id, @kit.id)
+            if product_kit_sku.nil?
+              @productkitsku = ProductKitSkus.new
+              @productkitsku.option_product_id = item.id
+              @productkitsku.qty = 1
+              @kit.product_kit_skuss << @productkitsku
+              unless @kit.save
+                @result['messages'].push("Could not save kit with sku: "+@product_skus.first.sku)
                 @result['status'] &= false
               end
-              item.update_product_status
+            else
+              @result['messages'].push("The product with id #{item.id} has already been added to the kit")
+              @result['status'] &= false
             end
+            item.update_product_status
           end
         end
-
       end
-    else
-      @result['status'] = false
-      @result['messages'].push('You do not have enough permissions to add a product to a kit')
+
     end
 
     respond_to do |format|
@@ -400,40 +385,36 @@ class ProductsController < ApplicationController
   end
 
   def remove_products_from_kit
-    if current_user.can?('add_edit_products')
-      @kit = Product.find_by_id(params[:id])
+    @kit = Product.find_by_id(params[:id])
 
-      if @kit.is_kit
-        if params[:kit_products].nil?
-          @result['messages'].push("No sku sent in the request")
-          @result['status'] &= false
-        else
-          params[:kit_products].reject! { |a| a=="" }
-          params[:kit_products].each do |kit_product|
-            product_kit_sku = ProductKitSkus.find_by_option_product_id_and_product_id(kit_product, @kit.id)
+    if @kit.is_kit
+      if params[:kit_products].nil?
+        @result['messages'].push("No sku sent in the request")
+        @result['status'] &= false
+      else
+        params[:kit_products].reject! { |a| a=="" }
+        params[:kit_products].each do |kit_product|
+          product_kit_sku = ProductKitSkus.find_by_option_product_id_and_product_id(kit_product, @kit.id)
 
-            if product_kit_sku.nil?
-              @result['messages'].push("Product #{kit_product} not found in item")
+          if product_kit_sku.nil?
+            @result['messages'].push("Product #{kit_product} not found in item")
+            @result['status'] &= false
+          else
+            product_kit_sku.qty = 0
+            product_kit_sku.save
+            unless product_kit_sku.destroy
+              @result['messages'].push("Product #{kit_product} could not be removed fronm kit")
               @result['status'] &= false
-            else
-              product_kit_sku.qty = 0
-              product_kit_sku.save
-              unless product_kit_sku.destroy
-                @result['messages'].push("Product #{kit_product} could not be removed fronm kit")
-                @result['status'] &= false
-              end
             end
           end
         end
-        @kit.update_product_status
-      else
-        @result['messages'].push("Product with id="+@kit.id+"is not a kit")
-        @result['status'] &= false
       end
+      @kit.update_product_status
     else
-      @result['status'] = false
-      @result['messages'].push('You do not have enough permissions to remove products from kits')
+      @result['messages'].push("Product with id="+@kit.id+"is not a kit")
+      @result['status'] &= false
     end
+    
 
     respond_to do |format|
       format.html # show.html.erb
@@ -468,12 +449,7 @@ class ProductsController < ApplicationController
   end
 
   def update_product_list
-    if current_user.can?('add_edit_products')
-      result = Product.update_product_list(params, @result)
-    else
-      @result['status'] = false
-      @result['error_msg'] = 'You do not have enough permissions to edit product list'
-    end
+    result = Product.update_product_list(params, @result)
 
     render json: @result
   end
@@ -485,119 +461,14 @@ class ProductsController < ApplicationController
   #If you had a situation where the newly imported product was actually the one you wanted to keep you could
   #find the original product and make it an alias of the new product...
   def set_alias
-    if current_user.can?('add_edit_products') && current_user.can?('delete_products')
-      @product_orig = Product.find(params[:id])
-      skus_len = @product_orig.product_skus.all.length
-      barcodes_len = @product_orig.product_barcodes.all.length
-      @product_aliases = Product.find_all_by_id(params[:product_alias_ids])
-      if @product_aliases.length > 0
-        @product_aliases.each do |product_alias|
-          #all SKUs of the alias will be copied. dont use product_alias.product_skus
-          @product_skus = ProductSku.where(:product_id => product_alias.id)
-          @product_skus.each do |alias_sku|
-            alias_sku.product_id = @product_orig.id
-            alias_sku.order = skus_len
-            skus_len+=1
-            if !alias_sku.save
-              @result['status'] &= false
-              @result['messages'].push('Error saving Sku for sku id'+alias_sku.id.to_s)
-            end
-          end
+    product_aliasing.set_alias
 
-          @product_barcodes = ProductBarcode.where(:product_id => product_alias.id)
-          @product_barcodes.each do |alias_barcode|
-            alias_barcode.product_id = @product_orig.id
-            alias_barcode.order = barcodes_len
-            barcodes_len+=1
-            if !alias_barcode.save
-              @result['status'] &= false
-              @result['messages'].push('Error saving Barcode for barcode id'+alias_barcode.id)
-            end
-          end
-
-          #update order items of aliased products to original products
-          @order_items = OrderItem.where(:product_id => product_alias.id)
-          @order_items.each do |order_item|
-            order_item.product_id = @product_orig.id
-            if !order_item.save
-              @result['status'] &= false
-              @result['messages'].push('Error saving order item with id'+order_item.id)
-            end
-          end
-
-          #update kit. Replace the alias product with original product
-          product_kit_skus = ProductKitSkus.where(option_product_id: product_alias.id)
-          product_kit_skus.each do |product_kit_sku|
-            product_kit_sku.option_product_id = @product_orig.id
-            unless product_kit_sku.save
-              @result['status'] &= false
-              @result['messages'].push('Error replacing aliased product in the kits')
-            end
-          end
-
-          #Ensure all inventory data is copied over
-          #The code has been modified keeping in mind that we use only one warehouse per product as of now.
-          orig_product_inv_wh = @product_orig.primary_warehouse
-          aliased_inventory = product_alias.primary_warehouse
-          if orig_product_inv_wh.nil?
-            orig_product_inv_wh = ProductInventoryWarehouses.new
-            orig_product_inv_wh.inventory_warehouse_id = aliased_inventory.inventory_warehouse_id
-            orig_product_inv_wh.product_id = @product_orig.id
-            orig_product_inv_wh.quantity_on_hand = aliased_inventory.quantity_on_hand
-            orig_product_inv_wh.save
-          end
-          if orig_product_inv_wh.product.is_kit == 0
-            #copy over the qoh of original as QOH of original should not change in aliasing
-            orig_product_qoh = orig_product_inv_wh.quantity_on_hand
-            orig_product_inv_wh.allocated_inv = orig_product_inv_wh.allocated_inv + aliased_inventory.allocated_inv
-            
-            orig_product_inv_wh.sold_inv = orig_product_inv_wh.sold_inv + aliased_inventory.sold_inv
-            orig_product_inv_wh.quantity_on_hand = orig_product_qoh
-            orig_product_inv_wh.save
-          else
-            orig_product_inv_wh.product.product_kit_skuss.each do |kit_sku|
-              kit_option_product_wh = kit_sku.option_product.primary_warehouse
-              unless kit_option_product_wh.nil?
-                orig_kit_product_qoh = kit_option_product_wh.quantity_on_hand
-                kit_option_product_wh.allocated_inv = kit_option_product_wh.allocated_inv + (kit_sku.qty * aliased_inventory.allocated_inv)
-          
-                kit_option_product_wh.sold_inv = kit_option_product_wh.sold_inv + (kit_sku.qty * aliased_inventory.sold_inv)
-                kit_option_product_wh.quantity_on_hand = orig_kit_product_qoh
-                kit_option_product_wh.save
-              end 
-            end
-          end
-          aliased_inventory.reload
-
-          #destroy the aliased object
-          if !product_alias.destroy
-            @result['status'] &= false
-            @result['messages'].push('Error deleting the product alias id:'+product_alias.id)
-          end
-        end
-        @product_orig.update_product_status
-      else
-        @result['status'] = false
-        @result['messages'].push('No products found to alias')
-      end
-    else
-      @result['status'] = false
-      @result['messages'].push('You do not have enough permissions to set product alias')
-    end
-
-    respond_to do |format|
-      format.html # show.html.erb
-      format.json { render json: @result }
-    end
+    render json: @result
   end
 
   def add_image
-    unless current_user.can?('add_edit_products')
-      @result['status'] = false
-      @result['messages'].push('You do not have enough permissions to add image to a product')
-    else
-      add_new_image
-    end
+    product = Product.find(params[:id])
+    add_new_image(product)
     
     render json: @result
   end
@@ -610,10 +481,6 @@ class ProductsController < ApplicationController
   #not associated with the inventory warehouse, then it automatically associates it and
   #sets the value.
   def adjust_available_inventory
-    @result['error_messages'] = []
-    @result['success_messages'] = []
-    @result['notice_messages'] = []
-
     unless params[:id].nil? || params[:inv_wh_id].nil? ||
       params[:method].nil?
       product = Product.find(params[:id])
@@ -681,12 +548,7 @@ class ProductsController < ApplicationController
   end
 
   def update_intangibleness
-    if current_user.can?('add_edit_products')
-      Product.update_action_intangibleness(params)
-    else
-      @result['status'] = false
-      @result['messages'].push('You do not have enough permissions to edit product status')
-    end
+    Product.update_action_intangibleness(params)
 
     render json: @result
   end
@@ -702,14 +564,8 @@ class ProductsController < ApplicationController
   end
 
   private
-
   def execute_groove_bulk_action(activity)
-    if current_user.can?('add_edit_products')
-      GrooveBulkActions.execute_groove_bulk_action(activity, params, current_user)
-    else
-      @result['status'] = false
-      @result['messages'].push('You do not have enough permissions to edit product status')
-    end
+    GrooveBulkActions.execute_groove_bulk_action(activity, params, current_user)
     
     render json: @result
   end
