@@ -19,6 +19,7 @@ module Groovepacker
             shopify_product = @client.product(item["product_id"])
             shopify_product = shopify_product["product"]
             variant = shopify_product["variants"].select {|variant| variant["id"]==item["variant_id"]}.first
+            variant["title"] = "#{shopify_product["title"]} - #{variant["title"]}"
             product = create_product_from_variant(variant, shopify_product)
             return product
           end
