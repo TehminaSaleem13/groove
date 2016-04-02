@@ -147,9 +147,9 @@ class ProductsController < ApplicationController
   #
   def index
     @products = do_getproducts(params)
-    @result['products'] = make_products_list(@products)
-    @result['products_count'] = get_products_count()
-
+    @result = @result.merge({ 'products' => make_products_list(@products),
+                              'products_count' => get_products_count()
+                            })
     render json: @result
   end
 
@@ -199,8 +199,9 @@ class ProductsController < ApplicationController
   def search
     unless params[:search].blank?
       @products = do_search(params, false)
-      @result['products'] = make_products_list(@products['products'])
-      @result['products_count'] = get_products_count
+      @result = @result.merge({ 'products' => make_products_list(@products['products']),
+                                'products_count' => get_products_count
+                              })
       @result['products_count']['search'] = @products['count']
     else
       @result['status'] = false
