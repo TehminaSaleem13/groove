@@ -150,15 +150,19 @@ module ProductConcern
       if params[:setting].present? && ['type_scan_enabled', 'click_scan_enabled'].include?(params[:setting])
         products = list_selected_products(params)
         products.each do |product|
-          product[params[:setting]] = params[:status]
-          next if product.save
-          @result['status'] &= false
-          @result['messages'].push('There was a problem updating '+product.name)
+          update_product_status(product)
         end
       else
         @result['status'] = false
         @result['messages'].push('No action specified for updating')
       end
+    end
+
+    def update_product_status(product)
+      product[params[:setting]] = params[:status]
+      return if product.save
+      @result['status'] &= false
+      @result['messages'].push('There was a problem updating '+product.name)
     end
 
     def add_error_message
