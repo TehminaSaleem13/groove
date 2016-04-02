@@ -12,7 +12,7 @@ Groovepacks::Application.routes.draw do
   get "/500", :to => "specials#error_500"
 
   devise_for :users
-  
+
   get '/bigcommerce/callback' => 'big_commerce#bigcommerce'
   get '/bigcommerce/uninstall' => 'big_commerce#uninstall'
   get '/bigcommerce/load' => 'big_commerce#load'
@@ -140,7 +140,7 @@ Groovepacks::Application.routes.draw do
       post 'duplicate_store'
       post 'change_store_status'
       post 'create_update_store'
-
+      post 'update_store_list'
     end
     member do
       get 'verify_tags'
@@ -296,7 +296,7 @@ Groovepacks::Application.routes.draw do
       get 'leader_board'
     end
   end
-  
+
   # Sample resource route with options:
   #   resources :products do
   #     member do

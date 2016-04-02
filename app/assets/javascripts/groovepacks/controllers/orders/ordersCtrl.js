@@ -374,8 +374,8 @@ groovepacks_controllers.
             },
             order_date: {
               name: "Order Date",
-              col_length: 25,
-              transclude: "<span>{{row[field] | date:'EEE MM/dd/yyyy hh:mm:ss a'}}</span>"
+              col_length: 12,
+              transclude: '<span tooltip="{{row[field] | date:\'EEE MM/dd/yyyy hh:mm:ss a\'}}">{{row[field] | date:"EEE MM/dd/yyyy"}}</span>'
             },
             itemslength: {
               name: "Items",

@@ -73,7 +73,7 @@ class StoresController < ApplicationController
       store.ftp_credential.connection_established = true
       store.ftp_credential.save!
     end
-    
+
     respond_to do |format|
       format.json { render json: result }
     end
@@ -158,7 +158,7 @@ class StoresController < ApplicationController
               @result['messages'] = [e.message]
             end
           end
-          
+
           if @store.store_type == "Magento API 2"
             @magento_rest = MagentoRestCredential.where(:store_id => @store.id)
             if @magento_rest.blank?
@@ -487,7 +487,7 @@ class StoresController < ApplicationController
             @teapplix.username = params[:username]
             @teapplix.password = params[:password]
             @teapplix.gen_barcode_from_sku = params[:gen_barcode_from_sku]
-            
+
             if @teapplix.import_shipped!=params[:import_shipped].to_b
               @teapplix.import_shipped = params[:import_shipped]
               @teapplix.import_open_orders = false
@@ -665,10 +665,13 @@ class StoresController < ApplicationController
               {value: 'custom_field_one', name: general_settings.custom_field_one},
               {value: 'custom_field_two', name: general_settings.custom_field_two}
             ]
-            
+
             if csv_map.order_csv_map.nil?
               @result['order']['settings'] = default_csv_map
             else
+              temp_mapping = csv_map.order_csv_map[:map]
+              new_map = temp_mapping[:map].inject({}){|hash, (k, v)| hash.merge!(k => (v['value'].in?(%w(custom_field_one custom_field_two)) ? v.merge('name' => general_settings[v['value']]) : v)); hash}
+              csv_map.order_csv_map.update_attributes(map: temp_mapping.merge(map: new_map))
               @result['order']['settings'] = csv_map.order_csv_map
             end
 
@@ -698,7 +701,7 @@ class StoresController < ApplicationController
               {value: 'secondary_barcode', name: 'Barcode 2'},
               {value: 'tertiary_barcode', name: 'Barcode 3'},
               {value: 'location_secondary', name: 'Bin Location 2'},
-              {value: 'location_tertiary', name: 'Bin Location 3'}         
+              {value: 'location_tertiary', name: 'Bin Location 3'}
             ]
 
             if csv_map.product_csv_map.nil?
@@ -896,7 +899,7 @@ class StoresController < ApplicationController
           @result['status'] = false
           @result['messages'].push("Import is in progress. Try after it is complete")
         end
-        
+
       elsif params[:type] == 'kit'
         groove_bulk_actions = GrooveBulkActions.new
         groove_bulk_actions.identifier = 'csv_import'
@@ -1425,7 +1428,7 @@ class StoresController < ApplicationController
     @result['status'] = true
 
     access_restriction = AccessRestriction.last
-    
+
     tenant = Apartment::Tenant.current
     import_orders_obj = ImportOrders.new
     import_orders_obj.delay(:run_at => 1.seconds.from_now).init_import(tenant)
@@ -1441,7 +1444,7 @@ class StoresController < ApplicationController
       when "Teapplix"
         handler = Groovepacker::Stores::Handlers::TeapplixHandler.new(@store)
       end
-      
+
       context = Groovepacker::Stores::Context.new(handler)
       context.delay(:run_at => 1.seconds.from_now).pull_inventory
       #context.pull_inventory
@@ -1475,7 +1478,7 @@ class StoresController < ApplicationController
       when "Teapplix"
         handler = Groovepacker::Stores::Handlers::TeapplixHandler.new(@store)
       end
-      
+
       context = Groovepacker::Stores::Context.new(handler)
       context.delay(:run_at => 1.seconds.from_now).push_inventory
       #context.push_inventory
@@ -1486,6 +1489,31 @@ class StoresController < ApplicationController
 
     render json: @result
   end
+
+  def update_store_list
+    @result = Hash.new
+    @result['status'] = true
+    @store = Store.find(params[:id])
+
+    if @store.nil?
+      @result['status'] = false
+      @result['message'] = "Either the store is not present or you don't have permissions to update"
+    else
+      unless params[:var].eql?('status')
+        @result['status'] = false
+        @result['message'] = "Unkown Field"
+        return @result
+      end
+
+      @store.status = params[:value] if params[:var] == 'status'
+
+      if @result['status'] && !@store.save
+        @result['status'] = false
+        @result['message'] = "Could not save store info"
+      end
+    end
+
+    render json: @result
+  end
+
 end
-
-

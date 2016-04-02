@@ -288,6 +288,40 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
           };
         };
 
+        scope.yAxisTickValuesFunction = function (floating) {
+          return function(d){
+            var tickVals = [];
+            var vals = [];
+            dlen = d.length;
+            for (var i = dlen - 1; i >= 0; i--) {
+              ilen = d[i].values.length;
+              for (var j = ilen - 1; j >= 0; j--) {
+                if (d[i].disabled) {
+                  break;
+                } else {
+                  vals.push(d[i].values[j][1]);
+                }
+              };
+            };
+            vals.sort();
+            max = Math.max.apply(Math,vals);
+            min = Math.min.apply(Math,vals);
+            div_range = (max - min) / 5;
+            tickVals.push(min);
+            temp = min;
+            while (temp + div_range < max) {
+              temp += div_range;
+              if (temp.toFixed(2) % 1 == '0.00' || !floating) {
+                tickVals.push(Math.round( temp ));
+              } else{
+                tickVals.push(temp.toFixed(2));
+              };
+            };
+            tickVals.push(max);
+            return tickVals;
+          };
+        };
+
         scope.xAxisTickFormatFunction = function () {
           return function (d) {
             return d3.time.format('%b %e, %Y')(moment.unix(d).toDate());
@@ -305,7 +339,13 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
           };
         };
         scope.toolTipContentFunction = function () {
+          console.log('toolTipContentFunction...');
           return function (key, x, y, e, graph) {
+            console.log('key',key);
+            console.log('x',x);
+            console.log('y',y);
+            console.log('e',e);
+            console.log('graph',graph);
             var tooltipText = '';
             if (scope.charts.type === 'packing_stats' || scope.charts.type === 'packing_error') {
 

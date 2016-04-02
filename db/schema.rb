@@ -190,7 +190,7 @@ ActiveRecord::Schema.define(:version => 20160331060021) do
     t.boolean  "send_email_on_sun",                 :default => false
     t.datetime "time_to_send_email",                :default => '2000-01-01 00:00:00'
     t.string   "product_weight_format"
-    t.string   "packing_slip_size"
+    t.string   "packing_slip_size",                 :default => "4 x 6"
     t.string   "packing_slip_orientation"
     t.text     "packing_slip_message_to_customer"
     t.boolean  "import_orders_on_mon",              :default => false

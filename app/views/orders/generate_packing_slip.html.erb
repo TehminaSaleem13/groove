@@ -6323,7 +6323,7 @@
         <br/><br/>
         <span style="width:100%;font-size: 160px; margin-left:60px; text-align:center;"><%= order_count %></span>
       </div>
-      <div class="span8">
+      <div class="span8" style="margin-top: -60px;">
         <% barcode_string = generate_order_barcode(@order.increment_id) %>
         <div style="margin-top: 30px;margin-bottom: 0px; margin-left: 10px; padding-bottom: 0px; position:relative; height:150px; width:550px; overflow:hidden;">
           <div style="position:absolute; top:0; left:0;"><%= pdf_image_tag(barcode_string+".png", {:width => 550}) %></div>
@@ -6415,5 +6415,3 @@
 </div>
 </body>
 </html>
-
-

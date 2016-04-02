@@ -302,6 +302,7 @@
                 <span ng-show="general_settings.single.export_items =='by_sku'">Display one total for each sku</span>
                 <span class="caret"></span>
               </button>
+
               <ul class="dropdown-menu" role="menu">
                 <li><a class="dropdown-toggle" ng-click="change_opt('export_items','disabled')">Disabled</a></li>
                 <li><a class="dropdown-toggle" ng-click="change_opt('export_items','by_order')">Display sku total order
@@ -310,6 +311,12 @@
                   sku</a></li>
               </ul>
             </div>
+
+            <div class="info col-sm-2">
+              <i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter"
+                groov-popover="{{translations.tooltips.order_item_export_message}}"></i>
+            </div>
+
           </div>
           <div class="form-group">
             <label class="control-label col-sm-3">Order Tracking Web Page Response: No Order Found</label>
@@ -428,5 +435,3 @@
     </div>
   </div>
 </div>
-
-

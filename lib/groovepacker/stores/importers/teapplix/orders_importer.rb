@@ -11,7 +11,7 @@ module Groovepacker
             last_imported_date = Time.now
             
             @result[:total_imported] = response["orders"].nil? ? 0 : response["orders"].length
-            @import_item.update_attributes(:current_increment_id => '', :success_imported => 0, :previous_imported => 0, :updated_orders_import => 0, :current_order_items => -1, :current_order_imported_item => -1, :to_import => @result[:total_imported])
+            initialize_import_item
             (response["orders"]||[]).each do |order|
               @order_to_update = false
               @import_item.reload
