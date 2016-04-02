@@ -23,13 +23,13 @@ module Groovepacker
       private
         def do_aliasing(product_alias, skus_len, barcodes_len)
           #all SKUs of the alias will be copied. dont use product_alias.product_skus
-          @result = copy_skus_of_alias(product_alias, skus_len)
+          copy_skus_of_alias(product_alias, skus_len)
           #all Borcodes of the alias will be copied. dont use product_alias.product_skus
-          @result = copy_barcodes_of_alias(product_alias, barcodes_len)
+          copy_barcodes_of_alias(product_alias, barcodes_len)
           #update order items of aliased products to original products
-          @result = update_order_items_of_aliased_products(product_alias)
+          update_order_items_of_aliased_products(product_alias)
           #update kit. Replace the alias product with original product
-          @result = update_productkitsku_to_orig_product(product_alias)
+          update_productkitsku_to_orig_product(product_alias)
           
           #Ensure all inventory data is copied over
           #The code has been modified keeping in mind that we use only one warehouse per product as of now.
@@ -44,24 +44,21 @@ module Groovepacker
 
         def copy_skus_of_alias(product_alias, skus_len)
           @product_skus = ProductSku.where(:product_id => product_alias.id)
-          @product_skus.each do |alias_sku|
-            alias_sku.product_id = @product_orig.id
-            alias_sku.order = skus_len
-            skus_len+=1
-            set_status_and_msg('Sku', alias_sku) unless alias_sku.save
-          end
-          return @result
+          copy_sku_or_barocdes_of_aliased_product(@product_skus, skus_len)
         end
 
         def copy_barcodes_of_alias(product_alias, barcodes_len)
           @product_barcodes = ProductBarcode.where(:product_id => product_alias.id)
-          @product_barcodes.each do |alias_barcode|
-            alias_barcode.product_id = @product_orig.id
-            alias_barcode.order = barcodes_len
-            barcodes_len+=1
-            set_status_and_msg('Barcode', alias_barcode) unless alias_barcode.save
+          copy_sku_or_barocdes_of_aliased_product(@product_barcodes, barcodes_len)
+        end
+
+        def copy_sku_or_barocdes_of_aliased_product(objects, objects_len)
+          objects.each do |object|
+            object.product_id = @product_orig.id
+            object.order = objects_len
+            objects_len+=1
+            set_status_and_msg('Barcode', object) unless object.save
           end
-          return @result
         end
 
         def update_order_items_of_aliased_products(product_alias)
@@ -70,7 +67,6 @@ module Groovepacker
             order_item.product_id = @product_orig.id
             set_status_and_msg('order item', order_item) unless order_item.save
           end
-          return @result
         end
 
         def update_productkitsku_to_orig_product(product_alias)
@@ -82,7 +78,6 @@ module Groovepacker
               @result['messages'].push('Error replacing aliased product in the kits')
             end
           end
-          return @result
         end
 
         def set_status_and_msg(obj_class, alias_obj)
