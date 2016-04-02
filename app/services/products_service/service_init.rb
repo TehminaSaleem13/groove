@@ -4,7 +4,7 @@ class ProductsService::ServiceInit
   require 'barby/outputter/png_outputter'
   require 'mws-connect'
 
-  def call(*args)
+  def call(*_args)
     self
   end
 

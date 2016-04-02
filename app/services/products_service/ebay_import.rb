@@ -3,17 +3,17 @@ module ProductsService
     def initialize(*args)
       @itemID, @sku, @ebay, @credential = args
       @product_id = 0
-      @product_sku = ProductSku.where(:sku => @sku).first
+      @product_sku = ProductSku.where(sku: @sku).first
     end
 
     def call
-      @product_id = unless @product_sku.present?
-        import_ebay_product
-        @productdb.set_product_status
-        @productdb.id
-      else
-        @product_sku.product_id
-      end
+      @product_id = if @product_sku.present?
+                      @product_sku.product_id
+                    else
+                      import_ebay_product
+                      @productdb.set_product_status
+                      @productdb.id
+                    end
 
       @product_id
     end
@@ -21,18 +21,18 @@ module ProductsService
     private
 
     def import_ebay_product
-      get_item
+      item_from_ebay
       create_new_db_product
       set_product_sku
       add_sku_to_db_product
-      get_product_images
-      get_product_categories
+      product_images
+      product_categories
       add_inventory_warehouse
       @productdb.save
     end
 
-    def get_item
-      @item = ebay.getItem(:ItemID => @itemID).item
+    def item_from_ebay
+      @item = ebay.getItem(ItemID: @itemID).item
     end
 
     def create_new_db_product
@@ -54,26 +54,25 @@ module ProductsService
     def set_product_sku
       @productdbsku = ProductSku.new
       @productdbsku.sku = item_sku
-      #@item.productListingType.uPC
+      # @item.productListingType.uPC
       @productdbsku.purpose = 'primary'
     end
 
     def item_sku
-      @item.sKU || "not_available"
+      @item.sKU || 'not_available'
     end
 
-    #publish the sku to the product record
+    # publish the sku to the product record
     def add_sku_to_db_product
       @productdb.product_skus << @productdbsku
     end
 
-    def get_product_images
-      if can_import_images?
-        @productimage = ProductImage.new
-        @productimage.image = "http://i.ebayimg.com" +
-          @item.pictureDetails.pictureURL.first.request_uri()
-        add_product_images
-      end
+    def product_images
+      return unless can_import_images?
+      @productimage = ProductImage.new
+      @productimage.image = 'http://i.ebayimg.com' +
+        @item.pictureDetails.pictureURL.first.request_uri
+      add_product_images
     end
 
     def can_import_images?
@@ -88,18 +87,16 @@ module ProductsService
       @productdb.product_images << @productimage
     end
 
-    def get_product_categories
-      if credential.import_products
-        %w(primary secondary).each{|type| create_category(type)}
-      end
+    def product_categories
+      return unless credential.import_products
+      %w(primary secondary).each { |type| create_category(type) }
     end
 
     def create_category(type)
-      if @item.send("#{type}Category").present?
-        @product_cat = ProductCat.new
-        @product_cat.category = @item.send("#{type}Category").categoryName
-        add_product_category
-      end
+      return unless @item.send("#{type}Category").present?
+      @product_cat = ProductCat.new
+      @product_cat.category = @item.send("#{type}Category").categoryName
+      add_product_category
     end
 
     def add_product_category
@@ -111,6 +108,5 @@ module ProductsService
       inv_wh.inventory_warehouse_id = @store.inventory_warehouse_id
       @productdb.product_inventory_warehousess << inv_wh
     end
-
   end
 end

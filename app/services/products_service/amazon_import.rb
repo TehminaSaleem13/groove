@@ -10,12 +10,10 @@ module ProductsService
 
     def call
       return if amazon_credentials_blank?
-      begin
-        product_hash = do_get_matching_products
-        do_find_update_product(product_hash)
-      rescue Exception => e
-        puts e.inspect
-      end
+      product_hash = do_get_matching_products
+      do_find_update_product(product_hash)
+    rescue => e
+      puts e.inspect
     end
 
     private
@@ -30,10 +28,11 @@ module ProductsService
         access: ENV['AMAZON_MWS_ACCESS_KEY_ID'],
         secret: ENV['AMAZON_MWS_SECRET_ACCESS_KEY']
       )
+
       #send request to amazon mws get matching product API
       products_xml = mws.products.get_matching_products_for_id(
-        :marketplace_id => @credential.marketplace_id,
-        :id_type => 'SellerSKU', :id_list => [@product_sku]
+        marketplace_id: @credential.marketplace_id,
+        id_type: 'SellerSKU', id_list: [@product_sku]
       )
 
       require 'active_support/core_ext/hash/conversions'
@@ -66,7 +65,7 @@ module ProductsService
     end
 
     def add_inventory_warehouse(product)
-      #add inventory warehouse
+      # add inventory warehouse
       inv_wh = ProductInventoryWarehouses.new
       inv_wh.inventory_warehouse_id = @store.inventory_warehouse_id
       product.product_inventory_warehousess << inv_wh
