@@ -5,7 +5,7 @@ module ProductsHelper
   require 'barby/outputter/png_outputter'
 
   require 'mws-connect'
-  #requires a product is created with appropriate seller sku
+  # requires a product is created with appropriate seller sku
   def import_amazon_product_details(store_id, product_sku, product_id)
     ProductsService::AmazonImport.call(store_id, product_sku, product_id)
     # begin
@@ -115,8 +115,9 @@ module ProductsHelper
     # end
   end
 
-  #gets called from orders helper
+  # gets called from orders helper
   def import_ebay_product(itemID, sku, ebay, credential)
+    ProductsService::EbayImport.call(itemID, sku, ebay, credential)
     # product_id = 0
     # if ProductSku.where(:sku => sku).length == 0
     #   @item = ebay.getItem(:ItemID => itemID).item
@@ -190,7 +191,7 @@ module ProductsHelper
     barcode = Barby::Code128B.new(barcode_string)
     outputter = Barby::PngOutputter.new(barcode)
     outputter.margin = 0
-    blob = outputter.to_png #Raw PNG data
+    blob = outputter.to_png # Raw PNG data
     image_name = Digest::MD5.hexdigest(barcode_string)
     File.open("#{Rails.root}/public/images/#{image_name}.png",
               'w') do |f|
@@ -200,36 +201,35 @@ module ProductsHelper
   end
 
   def list_selected_products(params)
-    if params[:select_all] || params[:inverted]
-      if !params[:search].nil? && params[:search] != ''
-        result = do_search(params)
-      else
-        result = do_getproducts(params)
-      end
-    else
-      result = params[:productArray]
-    end
-
-    result_rows = []
-    if params[:inverted] && !params[:productArray].blank?
-      not_in = []
-      params[:productArray].each do |product|
-        not_in.push(product['id'])
-      end
-      result.each do |single_product|
-        unless not_in.include? single_product['id']
-          result_rows.push({'id' => single_product['id']})
-        end
-      end
-    else
-      (result||[]).each do |single_product|
-        result_rows.push({'id' => single_product['id']})
-      end
-    end
-    
-    result_rows = result_rows.blank? ? [] : result_rows
-    p_ids = result_rows.map {|p| p["id"]}
-    products = Product.where("id IN (?)", p_ids)
+    ProductsService::ListSelectedProducts.call(params)
+    # if params[:select_all] || params[:inverted]
+    #   if !params[:search].nil? && params[:search] != ''
+    #     result = do_search(params)
+    #   else
+    #     result = do_getproducts(params)
+    #   end
+    # else
+    #   result = params[:productArray]
+    # end
+    #
+    # result_rows = []
+    # if params[:inverted] && !params[:productArray].blank?
+    #   not_in = []
+    #   params[:productArray].each do |product|
+    #     not_in.push(product['id'])
+    #   end
+    #   result.each do |single_product|
+    #     unless not_in.include? single_product['id']
+    #       result_rows.push({'id' => single_product['id']})
+    #     end
+    #   end
+    # else
+    #   result.each do |single_product|
+    #     result_rows.push({'id' => single_product['id']})
+    #   end
+    # end
+    #
+    # return result_rows
   end
 
   def do_getproducts(params)
