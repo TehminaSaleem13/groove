@@ -1,5 +1,4 @@
 class ProductsController < ApplicationController
-  #before_filter :init_result_object, only: [:print_receiving_label, :generate_barcode, :search, :change_product_status, :delete_product, :duplicate_product, :scan_per_product, :import_products, :import_images]
   include ProductConcern
 
   def import_products
@@ -334,10 +333,7 @@ class ProductsController < ApplicationController
       end
     end
 
-    respond_to do |format|
-      format.html # show.html.erb
-      format.json { render json: @result }
-    end
+    render json: @result
   end
 
   def add_product_to_kit
@@ -378,38 +374,13 @@ class ProductsController < ApplicationController
 
     end
 
-    respond_to do |format|
-      format.html # show.html.erb
-      format.json { render json: @result }
-    end
+    render json: @result
   end
 
   def remove_products_from_kit
     @kit = Product.find_by_id(params[:id])
-
     if @kit.is_kit
-      if params[:kit_products].nil?
-        @result['messages'].push("No sku sent in the request")
-        @result['status'] &= false
-      else
-        params[:kit_products].reject! { |a| a=="" }
-        params[:kit_products].each do |kit_product|
-          product_kit_sku = ProductKitSkus.find_by_option_product_id_and_product_id(kit_product, @kit.id)
-
-          if product_kit_sku.nil?
-            @result['messages'].push("Product #{kit_product} not found in item")
-            @result['status'] &= false
-          else
-            product_kit_sku.qty = 0
-            product_kit_sku.save
-            unless product_kit_sku.destroy
-              @result['messages'].push("Product #{kit_product} could not be removed fronm kit")
-              @result['status'] &= false
-            end
-          end
-        end
-      end
-      @kit.update_product_status
+      @result = ProductKitSkus.remove_products_from_kit(@kit, params, @result)
     else
       @result['messages'].push("Product with id="+@kit.id+"is not a kit")
       @result['status'] &= false
@@ -474,8 +445,7 @@ class ProductsController < ApplicationController
   #not associated with the inventory warehouse, then it automatically associates it and
   #sets the value.
   def adjust_available_inventory
-    unless params[:id].nil? || params[:inv_wh_id].nil? ||
-      params[:method].nil?
+    unless params[:id].nil? || params[:inv_wh_id].nil? || params[:method].nil?
       product = Product.find(params[:id])
       unless product.nil?
         product_inv_whs = ProductInventoryWarehouses.where(:product_id => product.id).
@@ -518,14 +488,10 @@ class ProductsController < ApplicationController
       end
     else
       @result['status'] &= false
-      @result['error_messages'].push('Cannot recount inventory without product id and
-          inventory_warehouse_id')
+      @result['error_messages'].push('Cannot recount inventory without product id and inventory_warehouse_id')
     end
 
-    respond_to do |format|
-      format.html # show.html.erb
-      format.json { render json: @result }
-    end
+    render json: @result
   end
 
   def generate_products_csv
@@ -559,7 +525,7 @@ class ProductsController < ApplicationController
   private
   def execute_groove_bulk_action(activity)
     GrooveBulkActions.execute_groove_bulk_action(activity, params, current_user)
-    
+
     render json: @result
   end
 end
