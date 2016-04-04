@@ -14,8 +14,8 @@ class CreateTenant
     )
     subscription.update_progress("tenant_created")
     TransactionEmail.delay(run_at: 2.hours.from_now).send_email(subscription)
-    TransactionEmail.welcome_email(subscription).deliver
-    subscription.update_progress("email_sent")
+    #TransactionEmail.welcome_email(subscription).deliver
+    #subscription.update_progress("email_sent")
   end
 
   def create_groovelytics_tenant(tenant_name)
