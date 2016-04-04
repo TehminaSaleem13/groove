@@ -34,7 +34,10 @@ module ProductsService
         end
       end
 
-      result_rows
+      result_rows = result_rows.blank? ? [] : result_rows
+      p_ids = result_rows.map { |p| p['id'] }
+      products = Product.where('id IN (?)', p_ids)
+      products
     end
 
     def find_result_rows(result)
