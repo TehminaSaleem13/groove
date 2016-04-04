@@ -5,6 +5,7 @@ module ProductConcern
     prepend_before_filter :groovepacker_authorize!
     prepend_before_filter :init_result_object
     before_filter :check_permissions, only: [:generate_barcode, :scan_per_product, :add_product_to_kit, :remove_products_from_kit, :update_product_list, :add_image, :update_intangibleness, :change_product_status, :delete_product, :duplicate_product]
+    before_filter :find_kit_product, only: [:add_product_to_kit, :remove_products_from_kit]
     before_filter :init_products_service, only: [:import_images]
     include ProductsHelper
     include Groovepacker::Orders::ResponseMessage
@@ -33,6 +34,10 @@ module ProductConcern
 
     def product_aliasing
       Groovepacker::Products::Aliasing.new(result: @result, params_attrs: params, current_user: current_user)
+    end
+
+    def find_kit_product
+      @kit = Product.find_by_id(params[:id])
     end
 
     def init_result_object
@@ -180,5 +185,13 @@ module ProductConcern
                        }
 
       return "You do not have enough permissions #{error_messages[params["action"]]}" 
+    end
+
+    def check_if_not_a_kit
+      unless @kit.is_kit
+        @result['messages'].push("Product with id=#{@kit.id} is not a kit")
+        @result['status'] &= false
+      end
+      return @result['status']
     end
 end

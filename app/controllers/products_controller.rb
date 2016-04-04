@@ -338,26 +338,15 @@ class ProductsController < ApplicationController
   end
 
   def add_product_to_kit
-    @kit = Product.find_by_id(params[:id])
-
-    unless @kit.is_kit
-      @result['messages'].push("Product with id=#{@kit.id} is not a kit")
-      @result['status'] &= false
-    else
-      @result = ProductKitSkus.app_product_to_kit(@kit, params, @result)
-    end
+    #@kit is coming from find_kit_product method of products concern
+    @result = ProductKitSkus.app_product_to_kit(@kit, params, @result) if check_if_not_a_kit
 
     render json: @result
   end
 
   def remove_products_from_kit
-    @kit = Product.find_by_id(params[:id])
-    if @kit.is_kit
-      @result = ProductKitSkus.remove_products_from_kit(@kit, params, @result)
-    else
-      @result['messages'].push("Product with id=#{@kit.id} is not a kit")
-      @result['status'] &= false
-    end
+    #@kit is coming from find_kit_product method of products concern
+    @result = ProductKitSkus.remove_products_from_kit(@kit, params, @result) if check_if_not_a_kit
     
     render json: @result
   end
