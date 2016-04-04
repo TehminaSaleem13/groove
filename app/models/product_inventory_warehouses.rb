@@ -63,4 +63,49 @@ class ProductInventoryWarehouses < ActiveRecord::Base
     end
   end
 
+
+  def self.adjust_available_inventory(params, result)
+    product = Product.find_by_id(params[:id])
+    if product.nil?
+      result['status'] &= false
+      result['error_messages'].push('Cannot find product with id: ' +params[:id])
+      return result
+    end
+
+    product_inv_whs = ProductInventoryWarehouses.find_by_product_id_and_inventory_warehouse_id(product.id, params[:inv_wh_id])
+    unless product_inv_whs
+      product_inv_whs = product.product_inventory_warehousess.build(:inventory_warehouse_id => params[:inv_wh_id])
+    end
+
+    result = self.update_inventory_data(product_inv_whs, params, result)
+    return result
+  end
+
+  def self.update_inventory_data(product_inv_whs, params, result)
+    unless params[:inventory_count].blank?
+      product_inv_whs, result = self.update_inventory_count(product_inv_whs, params, result)
+    end
+    
+    [:location_primary, :location_secondary, :location_tertiary].each do |loc|
+      unless params[loc].blank?
+        product_inv_whs[loc] = params[loc]
+      end
+    end
+    product_inv_whs.save
+    return result
+  end
+
+  def self.update_inventory_count(product_inv_whs, params, result)
+    if params[:method] == 'recount'
+      product_inv_whs.quantity_on_hand = params[:inventory_count]
+    elsif params[:method] == 'receive'
+      product_inv_whs.available_inv =
+        product_inv_whs.available_inv + (params[:inventory_count].to_i)
+    else
+      result['status'] &= false
+      result['error_messages'].push("Invalid method passed in parameter. Only 'receive' and 'recount' are valid. Passed in parameter: #{params[:method]}")
+    end
+    return product_inv_whs, result
+  end
+
 end

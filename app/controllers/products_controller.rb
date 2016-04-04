@@ -408,51 +408,11 @@ class ProductsController < ApplicationController
   #sets the value.
   def adjust_available_inventory
     unless params[:id].nil? || params[:inv_wh_id].nil? || params[:method].nil?
-      product = Product.find(params[:id])
-      unless product.nil?
-        product_inv_whs = ProductInventoryWarehouses.where(:product_id => product.id).
-          where(:inventory_warehouse_id => params[:inv_wh_id])
-
-        unless product_inv_whs.length == 1
-          product_inv_wh = ProductInventoryWarehouses.new
-          product_inv_wh.inventory_warehouse_id = params[:inv_wh_id]
-          product.product_inventory_warehousess << product_inv_wh
-          product.save
-          product_inv_whs.reload
-        end
-
-        unless params[:inventory_count].blank?
-          if params[:method] == 'recount'
-            product_inv_whs.first.quantity_on_hand = params[:inventory_count]
-          elsif params[:method] == 'receive'
-            product_inv_whs.first.available_inv =
-              product_inv_whs.first.available_inv + (params[:inventory_count].to_i)
-          else
-            @result['status'] &= false
-            @result['error_messages'].push("Invalid method passed in parameter.
-          Only 'receive' and 'recount' are valid. Passed in parameter: "+params[:method])
-          end
-        end
-        unless params[:location_primary].blank?
-          product_inv_whs.first.location_primary = params[:location_primary]
-        end
-        unless params[:location_secondary].blank?
-          product_inv_whs.first.location_secondary = params[:location_secondary]
-        end
-        unless params[:location_tertiary].blank?
-          product_inv_whs.first.location_tertiary = params[:location_tertiary]
-        end
-        product_inv_whs.first.save
-
-      else
-        @result['status'] &= false
-        @result['error_messages'].push('Cannot find product with id: ' +params[:id])
-      end
+      result = ProductInventoryWarehouses.adjust_available_inventory(params, result)
     else
       @result['status'] &= false
       @result['error_messages'].push('Cannot recount inventory without product id and inventory_warehouse_id')
     end
-
     render json: @result
   end
 
