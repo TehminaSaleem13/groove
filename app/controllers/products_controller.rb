@@ -235,7 +235,7 @@ class ProductsController < ApplicationController
   def show
     @product = nil
     params[:id] = nil if params[:id]=="null"
-    if !params[:id].nil?
+    if params[:id].present?
       @product = Product.find_by_id(params[:id])
     else
       prod_barcodes = ProductBarcode.where(:barcode => params[:barcode])
@@ -243,7 +243,7 @@ class ProductsController < ApplicationController
         @product = prod_barcodes.first.product
       end
     end
-    if !@product.nil?
+    if @product.present?
       @product.reload
       store_id = @product.store_id
       stores = Store.where(:id => store_id)
@@ -253,7 +253,7 @@ class ProductsController < ApplicationController
       general_setting = GeneralSetting.all.first
       scan_pack_setting = ScanPackSetting.all.first
       amazon_products = AmazonCredentials.where(:store_id => store_id)
-      if !amazon_products.nil?
+      unless amazon_products.blank?
         @amazon_product = amazon_products.first
       end
 
@@ -340,39 +340,11 @@ class ProductsController < ApplicationController
   def add_product_to_kit
     @kit = Product.find_by_id(params[:id])
 
-    if !@kit.is_kit
-      @result['messages'].push("Product with id="+@kit.id+"is not a kit")
+    unless @kit.is_kit
+      @result['messages'].push("Product with id=#{@kit.id} is not a kit")
       @result['status'] &= false
     else
-      if params[:product_ids].nil?
-        @result['messages'].push("No item sent in the request")
-        @result['status'] &= false
-      else
-        items = Product.find(params[:product_ids])
-        items.each do |item|
-          if item.nil?
-            @result['messages'].push("Item does not exist")
-            @result['status'] &= false
-          else
-            product_kit_sku = ProductKitSkus.find_by_option_product_id_and_product_id(item.id, @kit.id)
-            if product_kit_sku.nil?
-              @productkitsku = ProductKitSkus.new
-              @productkitsku.option_product_id = item.id
-              @productkitsku.qty = 1
-              @kit.product_kit_skuss << @productkitsku
-              unless @kit.save
-                @result['messages'].push("Could not save kit with sku: "+@product_skus.first.sku)
-                @result['status'] &= false
-              end
-            else
-              @result['messages'].push("The product with id #{item.id} has already been added to the kit")
-              @result['status'] &= false
-            end
-            item.update_product_status
-          end
-        end
-      end
-
+      @result = ProductKitSkus.app_product_to_kit(@kit, params, @result)
     end
 
     render json: @result
@@ -383,7 +355,7 @@ class ProductsController < ApplicationController
     if @kit.is_kit
       @result = ProductKitSkus.remove_products_from_kit(@kit, params, @result)
     else
-      @result['messages'].push("Product with id="+@kit.id+"is not a kit")
+      @result['messages'].push("Product with id=#{@kit.id} is not a kit")
       @result['status'] &= false
     end
     
