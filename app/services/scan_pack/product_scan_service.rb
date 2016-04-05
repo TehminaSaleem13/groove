@@ -5,12 +5,12 @@ module ScanPack
     include ScanPack::Utilities::ProductScan::Barcode
     include ScanPack::Utilities::ProductScan::IndividualProductType
     include ScanPack::Utilities::ProductScan::SingleProductType
-    
+
     def initialize(args)
       @current_user, @session, @input, @state, @id, @typein_count = args
       @result = {
         "status"=>true, "matched"=>true, "error_messages"=>[],
-        "success_messages"=>[], "notice_messages"=>[], 
+        "success_messages"=>[], "notice_messages"=>[],
         "data"=>{
           "next_state"=>"scanpack.rfp.default", "serial"=>{"ask"=>false}}
         }
@@ -99,7 +99,7 @@ module ScanPack
     def do_if_single_order_present
       @single_order.packing_user_id = @current_user.id
       unless @single_order.save
-        set_error_messages('Could not save order with id: '+@single_order.id)
+        set_error_messages("Could not save order with id: #{@single_order.id}")
       end
       @result['data']['order'] = order_details_and_next_item
       @result['data']['scan_pack_settings'] = @scanpack_settings
@@ -138,6 +138,6 @@ module ScanPack
       end
       barcode_found
     end
-    
+
   end # class end
 end #module end
