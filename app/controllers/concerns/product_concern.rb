@@ -4,9 +4,19 @@ module ProductConcern
   included do
     prepend_before_filter :groovepacker_authorize!
     prepend_before_filter :init_result_object
+    before_filter :check_permissions, only: [:generate_barcode, :scan_per_product, :add_product_to_kit, :remove_products_from_kit, :update_product_list, :add_image, :update_intangibleness, :change_product_status, :delete_product, :duplicate_product]
+    before_filter :find_kit_product, only: [:add_product_to_kit, :remove_products_from_kit]
     before_filter :init_products_service, only: [:import_images]
     include ProductsHelper
     include Groovepacker::Orders::ResponseMessage
+  end
+
+  def check_permissions
+    unless current_user.can?('add_edit_products')
+      @result['status'] = false
+      @result['messages'] = add_error_message
+      render json: @result and return
+    end
   end
   
   private
@@ -22,13 +32,24 @@ module ProductConcern
       Groovepacker::Products::Import.new(result: @result, params: params, current_user: current_user, store: store)
     end
 
+    def product_aliasing
+      Groovepacker::Products::Aliasing.new(result: @result, params_attrs: params, current_user: current_user)
+    end
+
+    def find_kit_product
+      @kit = Product.find_by_id(params[:id])
+    end
+
     def init_result_object
       @result = { 'status' => true,
-        'messages' => [], 
-        'total_imported' => 0, 
-        'success_imported' => 0, 
-        'previous_imported' => 0
-      }
+                  'messages' => [], 
+                  'total_imported' => 0, 
+                  'success_imported' => 0, 
+                  'previous_imported' => 0,
+                  'error_messages' => [],
+                  'success_messages' => [],
+                  'notice_messages' => []
+                }
     end
 
     def generate_csv(result)
@@ -98,8 +119,7 @@ module ProductConcern
       product_kit_skus.each { |kitsku| @product_hash['productkitskus'].push(kitsku.id) }
     end
 
-    def add_new_image
-      product = Product.find(params[:id])
+    def add_new_image(product)
       unless product.blank? && params[:product_image].blank?
         return product.add_new_image(params)
         @result['status'] = false
@@ -135,14 +155,43 @@ module ProductConcern
       if params[:setting].present? && ['type_scan_enabled', 'click_scan_enabled'].include?(params[:setting])
         products = list_selected_products(params)
         products.each do |product|
-          product[params[:setting]] = params[:status]
-          next if product.save
-          @result['status'] &= false
-          @result['messages'].push('There was a problem updating '+product.name)
+          update_product_status(product)
         end
       else
         @result['status'] = false
         @result['messages'].push('No action specified for updating')
       end
+    end
+
+    def update_product_status(product)
+      product[params[:setting]] = params[:status]
+      return if product.save
+      @result['status'] &= false
+      @result['messages'].push('There was a problem updating '+product.name)
+    end
+
+    def add_error_message
+      error_messages = {
+                          "generate_barcode" => "to generate barcodes",
+                          "scan_per_product" => "to edit this product",
+                          "add_product_to_kit" => "to add a product to a kit",
+                          "remove_products_from_kit" => "to remove products from kits",
+                          "update_product_list" => "to edit product list",
+                          "add_image" => "to add image to a product",
+                          "update_intangibleness" => "to edit product status",
+                          "change_product_status" => "to edit product status", 
+                          "delete_product" => "to delete a product",
+                          "duplicate_product" => " to duplicate a product"
+                       }
+
+      return "You do not have enough permissions #{error_messages[params["action"]]}" 
+    end
+
+    def check_if_not_a_kit
+      unless @kit.is_kit
+        @result['messages'].push("Product with id=#{@kit.id} is not a kit")
+        @result['status'] &= false
+      end
+      return @result['status']
     end
 end
