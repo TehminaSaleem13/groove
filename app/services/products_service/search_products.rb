@@ -9,8 +9,8 @@ module ProductsService
     def call
       setup_query_params
       base_query = generate_base_query
-      result_rows = Product.find_by_sql(base_query + @query_add)
-      return result_rows if @results_only
+      result_rows = Product.find_by_sql("#{base_query} #{@query_add}")
+      return result_rows if @result_only
       generate_result(result_rows, base_query)
     end
 
