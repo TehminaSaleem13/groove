@@ -42,21 +42,46 @@ module ProductService
       end
 
       def get_product_basic_and_access_info
-        @result['product']['amazon_product'] = @amazon_product
-        @result['product']['store'] = @store
-        @result['product']['sync_option'] = @product.sync_option.attributes rescue nil
-        @result['product']['access_restrictions'] = AccessRestriction.last rescue nil
-        @result['product']['basicinfo'] = @product.attributes
+        @result['product'] = @result['product'].merge({ 'amazon_product' => @amazon_product,
+                                                        'store' => @store,
+                                                        'basicinfo' => @product.attributes,
+                                                        'product_weight_format' => get_product_weight_format,
+                                                        'weight' => @product.get_weight,
+                                                        'shipping_weight' => @product.get_shipping_weight,
+                                                        'skus' => get_product_skus,
+                                                        'cats' => @product.product_cats,
+                                                        'spl_instructions_4_packer' => @product.spl_instructions_4_packer,
+                                                        'images' => get_base_product_images,
+                                                        'barcodes' => get_product_barcodes,
+                                                        'sync_option' => sync_option_attrs,
+                                                        'access_restrictions' => get_access_restriction_info
+                                                     })
         @result['product']['basicinfo']['weight_format'] = @product.get_show_weight_format
         @result['product']['basicinfo']['contains_intangible_string'] = @product.contains_intangible_string
-        @result['product']['product_weight_format'] = GeneralSetting.get_product_weight_format
-        @result['product']['weight'] = @product.get_weight
-        @result['product']['shipping_weight'] = @product.get_shipping_weight
-        @result['product']['skus'] = @product.product_skus.order("product_skus.order ASC")
-        @result['product']['cats'] = @product.product_cats
-        @result['product']['spl_instructions_4_packer'] = @product.spl_instructions_4_packer
-        @result['product']['images'] = @product.base_product.product_images.order("product_images.order ASC")
-        @result['product']['barcodes'] = @product.product_barcodes.order("product_barcodes.order ASC")
+      end
+
+      def sync_option_attrs
+        @product.sync_option.attributes rescue nil
+      end
+
+      def get_access_restriction_info
+      	AccessRestriction.last rescue nil
+      end
+
+      def get_product_weight_format
+      	GeneralSetting.get_product_weight_format
+      end
+
+      def get_product_skus
+      	@product.product_skus.order("product_skus.order ASC")
+      end
+
+      def get_base_product_images
+      	@product.base_product.product_images.order("product_images.order ASC")
+      end
+
+      def get_product_barcodes
+      	@product.product_barcodes.order("product_barcodes.order ASC")
       end
 
       def get_product_inventory_info
