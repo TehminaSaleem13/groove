@@ -1,8 +1,6 @@
 module ProductsService
   class FindProducts < ProductsService::ServiceInit
-    attr_accessor :params, :sort_key, :sort_order, :status_filter, :limit,
-                  :offset, :query_add, :kit_query, :status_filter_text, :is_kit,
-                  :supported_kit_params
+    attr_accessor :params
 
     def initialize(*args)
       @params = args[0]
@@ -108,7 +106,7 @@ module ProductsService
     end
 
     def supported_kit_params_contains(kit_param)
-      supported_kit_params.include?(kit_param.to_s)
+      @supported_kit_params.include?(kit_param.to_s)
     end
 
     def set_kit_query
@@ -249,7 +247,7 @@ module ProductsService
 
     def filter_by_limit_offset
       return if select_all_and_inverted?
-      @products = @products.limit(limit).offset(@offset)
+      @products = @products.limit(@limit).offset(@offset)
     end
 
     def select_all_and_inverted?

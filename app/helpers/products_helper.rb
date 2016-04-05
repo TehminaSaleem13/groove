@@ -228,8 +228,10 @@ module ProductsHelper
     #     result_rows.push({'id' => single_product['id']})
     #   end
     # end
-    #
-    # return result_rows
+    # result_rows = result_rows.blank? ? [] : result_rows
+    # p_ids = result_rows.map { |p| p['id'] }
+    # products = Product.where('id IN (?)', p_ids)
+    # products
   end
 
   def do_getproducts(params)
@@ -354,77 +356,78 @@ module ProductsHelper
   end
 
   def do_search(params, results_only = true)
-    limit = 10
-    offset = 0
-    sort_key = 'updated_at'
-    sort_order = 'DESC'
-    supported_sort_keys = ['updated_at', 'name', 'sku',
-                           'status', 'barcode', 'location_primary', 'location_secondary', 'location_tertiary', 'location_name', 'cat', 'qty', 'store_type']
-    supported_order_keys = ['ASC', 'DESC'] #Caps letters only
-
-    sort_key = params[:sort] if !params[:sort].nil? &&
-      supported_sort_keys.include?(params[:sort].to_s)
-
-    sort_order = params[:order] if !params[:order].nil? &&
-      supported_order_keys.include?(params[:order].to_s)
-
-    # Get passed in parameter variables if they are valid.
-    limit = params[:limit].to_i if !params[:limit].nil? && params[:limit].to_i > 0
-
-    offset = params[:offset].to_i if !params[:offset].nil? && params[:offset].to_i >= 0
-    search = ActiveRecord::Base::sanitize('%'+params[:search]+'%')
-    is_kit = 0
-    supported_kit_params = ['0', '1', '-1']
-    kit_query = ''
-    query_add = ''
-
-    is_kit = params[:is_kit].to_i if !params[:is_kit].nil? &&
-      supported_kit_params.include?(params[:is_kit])
-    unless is_kit == -1
-      kit_query = 'AND products.is_kit='+is_kit.to_s+' '
-    end
-    unless params[:select_all] || params[:inverted]
-      query_add = ' LIMIT '+limit.to_s+' OFFSET '+offset.to_s
-    end
-
-    base_query = 'SELECT products.id as id, products.name as name, products.type_scan_enabled as type_scan_enabled, products.base_sku as base_sku, products.click_scan_enabled as click_scan_enabled, products.status as status, products.updated_at as updated_at, product_skus.sku as sku, product_barcodes.barcode as barcode, product_cats.category as cat, product_inventory_warehouses.location_primary, product_inventory_warehouses.location_secondary, product_inventory_warehouses.location_tertiary, product_inventory_warehouses.available_inv as qty, inventory_warehouses.name as location_name, stores.name as store_type, products.store_id as store_id
-      FROM products
-        LEFT JOIN product_skus ON (products.id = product_skus.product_id)
-        LEFT JOIN product_barcodes ON (product_barcodes.product_id = products.id)
-            LEFT JOIN product_cats ON (products.id = product_cats.product_id)
-            LEFT JOIN product_inventory_warehouses ON (product_inventory_warehouses.product_id = products.id)
-            LEFT JOIN inventory_warehouses ON (product_inventory_warehouses.inventory_warehouse_id =  inventory_warehouses.id)
-            LEFT JOIN stores ON (products.store_id = stores.id)
-        WHERE
-          (
-            products.name like '+search+' OR product_barcodes.barcode like '+search+'
-            OR product_skus.sku like '+search+' OR product_cats.category like '+search+'
-            OR (
-              product_inventory_warehouses.location_primary like '+search+'
-              OR product_inventory_warehouses.location_secondary like '+search+'
-              OR product_inventory_warehouses.location_tertiary like '+search+'
-            )
-          )
-          '+kit_query+'
-        GROUP BY products.id ORDER BY '+sort_key+' '+sort_order
-
-    result_rows = Product.find_by_sql(base_query+query_add)
-
-
-    if results_only
-      result = result_rows
-    else
-      result = Hash.new
-      result['products'] = result_rows
-      if params[:select_all] || params[:inverted]
-        result['count'] = result_rows.length
-      else
-        result['count'] = Product.count_by_sql('SELECT count(*) as count from('+base_query+') as tmp')
-      end
-    end
-
-
-    return result
+    ProductsService::SearchProducts.call(params, results_only)
+    # limit = 10
+    # offset = 0
+    # sort_key = 'updated_at'
+    # sort_order = 'DESC'
+    # supported_sort_keys = ['updated_at', 'name', 'sku',
+    #                        'status', 'barcode', 'location_primary', 'location_secondary', 'location_tertiary', 'location_name', 'cat', 'qty', 'store_type']
+    # supported_order_keys = ['ASC', 'DESC'] #Caps letters only
+    #
+    # sort_key = params[:sort] if !params[:sort].nil? &&
+    #   supported_sort_keys.include?(params[:sort].to_s)
+    #
+    # sort_order = params[:order] if !params[:order].nil? &&
+    #   supported_order_keys.include?(params[:order].to_s)
+    #
+    # # Get passed in parameter variables if they are valid.
+    # limit = params[:limit].to_i if !params[:limit].nil? && params[:limit].to_i > 0
+    #
+    # offset = params[:offset].to_i if !params[:offset].nil? && params[:offset].to_i >= 0
+    # search = ActiveRecord::Base::sanitize('%'+params[:search]+'%')
+    # is_kit = 0
+    # supported_kit_params = ['0', '1', '-1']
+    # kit_query = ''
+    # query_add = ''
+    #
+    # is_kit = params[:is_kit].to_i if !params[:is_kit].nil? &&
+    #   supported_kit_params.include?(params[:is_kit])
+    # unless is_kit == -1
+    #   kit_query = 'AND products.is_kit='+is_kit.to_s+' '
+    # end
+    # unless params[:select_all] || params[:inverted]
+    #   query_add = ' LIMIT '+limit.to_s+' OFFSET '+offset.to_s
+    # end
+    #
+    # base_query = 'SELECT products.id as id, products.name as name, products.type_scan_enabled as type_scan_enabled, products.base_sku as base_sku, products.click_scan_enabled as click_scan_enabled, products.status as status, products.updated_at as updated_at, product_skus.sku as sku, product_barcodes.barcode as barcode, product_cats.category as cat, product_inventory_warehouses.location_primary, product_inventory_warehouses.location_secondary, product_inventory_warehouses.location_tertiary, product_inventory_warehouses.available_inv as qty, inventory_warehouses.name as location_name, stores.name as store_type, products.store_id as store_id
+    #   FROM products
+    #     LEFT JOIN product_skus ON (products.id = product_skus.product_id)
+    #     LEFT JOIN product_barcodes ON (product_barcodes.product_id = products.id)
+    #         LEFT JOIN product_cats ON (products.id = product_cats.product_id)
+    #         LEFT JOIN product_inventory_warehouses ON (product_inventory_warehouses.product_id = products.id)
+    #         LEFT JOIN inventory_warehouses ON (product_inventory_warehouses.inventory_warehouse_id =  inventory_warehouses.id)
+    #         LEFT JOIN stores ON (products.store_id = stores.id)
+    #     WHERE
+    #       (
+    #         products.name like '+search+' OR product_barcodes.barcode like '+search+'
+    #         OR product_skus.sku like '+search+' OR product_cats.category like '+search+'
+    #         OR (
+    #           product_inventory_warehouses.location_primary like '+search+'
+    #           OR product_inventory_warehouses.location_secondary like '+search+'
+    #           OR product_inventory_warehouses.location_tertiary like '+search+'
+    #         )
+    #       )
+    #       '+kit_query+'
+    #     GROUP BY products.id ORDER BY '+sort_key+' '+sort_order
+    #
+    # result_rows = Product.find_by_sql(base_query+query_add)
+    #
+    #
+    # if results_only
+    #   result = result_rows
+    # else
+    #   result = Hash.new
+    #   result['products'] = result_rows
+    #   if params[:select_all] || params[:inverted]
+    #     result['count'] = result_rows.length
+    #   else
+    #     result['count'] = Product.count_by_sql('SELECT count(*) as count from('+base_query+') as tmp')
+    #   end
+    # end
+    #
+    #
+    # return result
   end
 
   def self.products_csv(products, csv, bulk_actions_id = nil)
